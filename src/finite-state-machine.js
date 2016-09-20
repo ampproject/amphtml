@@ -50,7 +50,7 @@ export class FiniteStateMachine {
    */
   addTransition(oldState, newState, callback) {
     const transition = this.statesToTransition_(oldState, newState);
-    dev.assert(
+    dev().assert(
       !this.transitions_[transition],
       'cannot define a duplicate transition callback'
     );

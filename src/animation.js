@@ -16,7 +16,6 @@
 
 import {getCurve} from './curve';
 import {dev} from './log';
-import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
 const TAG_ = 'Animation';
@@ -59,7 +58,7 @@ export class Animation {
     this.contextNode_ = contextNode;
 
     /** @private @const {!./service/vsync-impl.Vsync} */
-    this.vsync_ = opt_vsync || vsyncFor(window);
+    this.vsync_ = opt_vsync || vsyncFor(self);
 
     /** @private {?./curve.CurveDef} */
     this.curve_ = null;
@@ -74,11 +73,13 @@ export class Animation {
    * Sets the default curve for the animation. Each segment is allowed to have
    * its own curve, but this curve will be used if a segment doesn't specify
    * its own.
-   * @param {!./curve.CurveDef|string} curve
+   * @param {!./curve.CurveDef|string|undefined} curve
    * @return {!Animation}
    */
   setCurve(curve) {
-    this.curve_ = getCurve(curve);
+    if (curve) {
+      this.curve_ = getCurve(curve);
+    }
     return this;
   }
 
@@ -128,7 +129,8 @@ export class Animation {
  * semantics of a Promise and signal when the animation completed or failed.
  * Additionally, it exposes the method "halt" which allows to stop/reset the
  * animation.
- * @implements {IThenable}
+ * // TODO(@cramforce) Actually fully implement.
+ * implements {IThenable}
  */
 class AnimationPlayer {
 
@@ -239,12 +241,12 @@ class AnimationPlayer {
    * @private
    */
   start_() {
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
     this.running_ = true;
     if (this.vsync_.canAnimate(this.contextNode_)) {
       this.task_(this.state_);
     } else {
-      dev.warn(TAG_, 'cannot animate');
+      dev().warn(TAG_, 'cannot animate');
       this.complete_(/* success */ false, /* dir */ 0);
     }
   }
@@ -279,7 +281,7 @@ class AnimationPlayer {
           }
         }
       } catch (e) {
-        dev.error(TAG_, 'completion failed: ' + e, e);
+        dev().error(TAG_, 'completion failed: ' + e, e);
         success = false;
       }
     }
@@ -298,7 +300,7 @@ class AnimationPlayer {
     if (!this.running_) {
       return;
     }
-    const currentTime = timer.now();
+    const currentTime = Date.now();
     const normLinearTime = Math.min((currentTime - this.startTime_) /
         this.duration_, 1);
 
@@ -326,7 +328,7 @@ class AnimationPlayer {
       if (this.vsync_.canAnimate(this.contextNode_)) {
         this.task_(this.state_);
       } else {
-        dev.warn(TAG_, 'cancel animation');
+        dev().warn(TAG_, 'cancel animation');
         this.complete_(/* success */ false, /* dir */ 0);
       }
     }
@@ -347,7 +349,7 @@ class AnimationPlayer {
         try {
           normTime = segment.curve(normLinearTime);
         } catch (e) {
-          dev.error(TAG_, 'step curve failed: ' + e, e);
+          dev().error(TAG_, 'step curve failed: ' + e, e);
           this.complete_(/* success */ false, /* dir */ 0);
           return;
         }
@@ -362,7 +364,7 @@ class AnimationPlayer {
     try {
       segment.func(normTime, segment.completed);
     } catch (e) {
-      dev.error(TAG_, 'step mutate failed: ' + e, e);
+      dev().error(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;
     }

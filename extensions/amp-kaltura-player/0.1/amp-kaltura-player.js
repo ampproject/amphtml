@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
@@ -23,9 +22,20 @@ import {user} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
 
-  /** @override */
-  createdCallback() {
-    this.preconnect.url('https://cdnapisec.kaltura.com');
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://cdnapisec.kaltura.com', opt_onLayout);
   }
 
   /** @override */
@@ -42,9 +52,7 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const partnerid = user.assert(
+    const partnerid = user().assert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-kaltura-player> %s',
         this.element);
@@ -61,12 +69,9 @@ class AmpKaltura extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
-      /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @private */
@@ -79,7 +84,7 @@ class AmpKaltura extends AMP.BaseElement {
     });
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const partnerid = user.assert(
+    const partnerid = user().assert(
       this.element.getAttribute('data-partner'),
       'The data-partner attribute is required for <amp-kaltura-player> %s',
       this.element);
@@ -94,14 +99,12 @@ class AmpKaltura extends AMP.BaseElement {
 
     imgPlaceholder.src = src;
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
-    this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
 
-    loadPromise(imgPlaceholder).then(() => {
+    this.loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',
       });

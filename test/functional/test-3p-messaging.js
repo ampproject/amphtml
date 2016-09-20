@@ -17,12 +17,13 @@
 import {createIframePromise} from '../../testing/iframe';
 import {listenParent} from '../../3p/messaging';
 import {postMessage} from '../../src/iframe-helper';
-import {timer} from '../../src/timer';
+import {timerFor} from '../../src/timer';
 
 describe('3p messaging', () => {
 
   let testWin;
   let iframe;
+  const timer = timerFor(window);
 
   beforeEach(() => {
     return createIframePromise(true).then(i => {

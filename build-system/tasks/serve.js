@@ -20,6 +20,7 @@ var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../server').app;
 
+var host = argv.host || 'localhost';
 var port = argv.port || process.env.PORT || 8000;
 var useHttps = argv.https != undefined;
 
@@ -30,14 +31,14 @@ function serve() {
   var server = gulp.src(process.cwd())
       .pipe(webserver({
         port,
-        host: '0.0.0.0',
+        host,
         directoryListing: true,
         https: useHttps,
         middleware: [app]
       }));
 
   util.log(util.colors.yellow('Run `gulp build` then go to '
-      + getHost() + '/examples.build/article.amp.max.html'
+      + getHost() + '/examples/article.amp.max.html'
   ));
   return server;
 }
@@ -48,6 +49,7 @@ gulp.task(
     serve,
     {
       options: {
+        'host': '  Hostname or IP address to bind to (default: localhost)',
         'port': '  Specifies alternative port (default: 8000)',
         'https': '  Use HTTPS server (default: false)'
       }
@@ -55,5 +57,5 @@ gulp.task(
 );
 
 function getHost() {
-  return (useHttps ? 'https' : 'http') + '://localhost:' + port;
+  return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }

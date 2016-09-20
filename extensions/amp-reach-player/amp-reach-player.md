@@ -21,7 +21,7 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>
-    An <code>amp-reach-player</code> component displays the Reach Player configured in the <a href="https://platform.beachfrontreach.com">Beachfront Reach</a> platform.
+    An <code>amp-reach-player</code> component displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
     </td>
   </tr>
   <tr>
@@ -34,7 +34,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>

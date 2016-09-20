@@ -15,7 +15,8 @@
  */
 
 import {makeCorrelator} from './correlator';
-import {checkData, loadScript} from '../../3p/3p';
+import {validateData, loadScript} from '../../3p/3p';
+import {user} from '../../src/log';
 
 /**
  * @enum {number}
@@ -24,7 +25,8 @@ import {checkData, loadScript} from '../../3p/3p';
 const GladeExperiment = {
   NO_EXPERIMENT: 0,
   GLADE_CONTROL: 1,
-  GLADE_OPT_OUT: 2,
+  GLADE_EXPERIMENT: 2,
+  GLADE_OPT_OUT: 3,
 };
 
 /**
@@ -32,13 +34,15 @@ const GladeExperiment = {
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  const experimentFraction = 0.5;
+  const experimentFraction = 0.1;
 
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
+    'experimentId', 'multiSize', 'multiSizeValidation',
   ]);
 
   if (global.context.clientId) {
@@ -49,20 +53,67 @@ export function doubleclick(global, data) {
     };
   }
 
-  if (data.useSameDomainRenderingUntilDeprecated != undefined) {
+  if (data.useSameDomainRenderingUntilDeprecated != undefined ||
+      data.multiSize) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT);
   } else {
     const dice = Math.random();
     const href = global.context.location.href;
-    if ((href.indexOf('google_glade=1') > 0 || dice < experimentFraction)
-        && href.indexOf('google_glade=0') < 0) {
-      doubleClickWithGlade(global, data);
+    if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
+        && href.indexOf('google_glade=1') < 0) {
+      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL);
     } else {
       const exp = (dice < 2 * experimentFraction) ?
-        GladeExperiment.GLADE_CONTROL : GladeExperiment.NO_EXPERIMENT;
-      doubleClickWithGpt(global, data, exp);
+        GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
+      doubleClickWithGlade(global, data, exp);
     }
   }
+}
+
+/**
+ * A helper function for determining whether a given width or height violates
+ * some condition.
+ *
+ * Checks the width and height against their corresponding conditions. If
+ * either of the conditions fail, the errorBuilder function will be called with
+ * the appropriate arguments, its result will be logged to user().error, and
+ * validateDimensions will return false. Otherwise, validateDimensions will
+ * only return true.
+ *
+ * @param {(number|string)} width
+ * @param {(number|string)} height
+ * @param {!function((number|string)): boolean} widthCond
+ * @param {!function((number|string)): boolean} heightCond
+ * @param {!function(!{badDim: string, badVal: (string|number)}): string}
+ *    errorBuilder A function that will produce an informative error message.
+ * @return {boolean}
+ */
+function validateDimensions(width, height, widthCond, heightCond,
+    errorBuilder) {
+  let badParams = null;
+  if (widthCond(width) && heightCond(height)) {
+    badParams = {
+      badDim: 'width and height',
+      badVal: width + 'x' + height,
+    };
+  }
+  else if (widthCond(width)) {
+    badParams = {
+      badDim: 'width',
+      badVal: width,
+    };
+  }
+  else if (heightCond(height)) {
+    badParams = {
+      badDim: 'height',
+      badVal: height,
+    };
+  }
+  if (badParams) {
+    user().error('AMP-AD', errorBuilder(badParams));
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -76,6 +127,87 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     parseInt(data.overrideHeight || data.height, 10),
   ]];
 
+  // Center the ad in the container.
+  const container = global.document.querySelector('#c');
+  container.style.top = '50%';
+  container.style.left = '50%';
+  container.style.bottom = '';
+  container.style.right = '';
+  container.style.transform = 'translate(-50%, -50%)';
+
+  // Get multi-size ad request data, if any, and validate it in the following
+  // ways:
+  // 1) Ensure that the data string is a comma-separated list of sizes of the
+  //    form WxH;
+  // 2) that each secondary dimension is strictly less than its primary
+  //    dimension counterpart;
+  // 3) and, if data-mutli-size-validation is not set to false, that each
+  //    secondary dimension is at least 2/3rds of its primary dimension
+  //    counterpart.
+  const multiSizeDataStr = data.multiSize || null;
+  if (multiSizeDataStr) {
+    const sizesStr = multiSizeDataStr.split(',');
+    sizesStr.forEach(sizeStr => {
+
+      const size = sizeStr.split('x');
+
+      // Make sure that each size is specified in the form val1xval2.
+      if (size.length != 2) {
+        user().error('AMP-AD', `Invalid multi-size data format '${sizeStr}'.`);
+        return;
+      }
+
+      const widthStr = size[0];
+      const heightStr = size[1];
+
+      // Make sure that both dimensions given are numbers.
+      if (!validateDimensions(widthStr, heightStr,
+            w => isNaN(Number(w)),
+            h => isNaN(Number(h)),
+            ({badDim, badVal}) =>
+            `Invalid ${badDim} of ${badVal} given for secondary size.`)) {
+        return;
+      }
+
+      const width = Number(widthStr);
+      const height = Number(heightStr);
+      const primarySize = dimensions[0];
+      const primaryWidth = primarySize[0];
+      const primaryHeight = primarySize[1];
+
+      // Check that secondary size is not larger than primary size.
+      if (!validateDimensions(width, height,
+            w => w > primaryWidth,
+            h => h > primaryHeight,
+            ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
+              `can't be larger than the primary ${badDim}.`)) {
+        return;
+      }
+
+      // Check that if multi-size-validation is on, that the secondary sizes
+      // are at least minRatio of the primary size.
+      const validate = data.multiSizeValidation || 'true';
+      if (validate != 'false' && validate != false) {
+
+        // The minimum ratio of each secondary dimension to its corresponding
+        // primary dimension.
+        const minRatio = 2 / 3;
+        const minWidth = minRatio * primaryWidth;
+        const minHeight = minRatio * primaryHeight;
+        if (!validateDimensions(width, height,
+              w => w < minWidth,
+              h => h < minHeight,
+              ({badDim, badVal}) => `Secondary ${badDim} ${badVal} is ` +
+              `smaller than 2/3rds of the primary ${badDim}.`)) {
+          return;
+        }
+      }
+
+      // Passed all checks! Push additional size to dimensions.
+      dimensions.push([width, height]);
+    });
+  }
+
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(() => {
       const googletag = global.googletag;
@@ -87,6 +219,13 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
         pubads.markAsGladeControl();
       } else if (gladeExperiment === GladeExperiment.GLADE_OPT_OUT) {
         pubads.markAsGladeOptOut();
+      }
+
+      if (data['experimentId']) {
+        const experimentIdList = data['experimentId'].split(',');
+        pubads.forceExperiment = pubads.forceExperiment || function() {};
+        experimentIdList &&
+            experimentIdList.forEach(eid => pubads.forceExperiment(eid));
       }
 
       pubads.markAsAmp();
@@ -120,11 +259,26 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
       }
 
       pubads.addEventListener('slotRenderEnded', event => {
+        const primaryInvSize = dimensions[0];
+        const pWidth = primaryInvSize[0];
+        const pHeight = primaryInvSize[1];
+        const returnedSize = event.size;
+        const rWidth = returnedSize ? returnedSize[0] : null;
+        const rHeight = returnedSize ? returnedSize[1] : null;
+
         let creativeId = event.creativeId || '_backfill_';
-        global.context.renderStart();
-        if (event.isEmpty) {
+
+        // If the creative is empty, or either dimension of the returned size
+        // is larger than its counterpart in the primary size, then we don't
+        // want to render the creative.
+        if (event.isEmpty ||
+            returnedSize && (rWidth > pWidth || rHeight > pHeight)) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
+        } else {
+          // We don't want to call renderStart() on ads that failed to load, for
+          // whatever reasons, because then the fallback will not be shown.
+          global.context.renderStart({width: rWidth, height: rHeight});
         }
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
@@ -139,8 +293,9 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGlade(global, data) {
+function doubleClickWithGlade(global, data, gladeExperiment) {
   const requestHeight = parseInt(data.overrideHeight || data.height, 10);
   const requestWidth = parseInt(data.overrideWidth || data.width, 10);
 
@@ -158,6 +313,16 @@ function doubleClickWithGlade(global, data) {
   if (data.targeting) {
     jsonParameters.targeting = data.targeting;
   }
+  if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
+    jsonParameters.gladeExp = '1';
+    jsonParameters.gladeEids = '108809102';
+  }
+  const expIds = data['experimentId'];
+  if (expIds) {
+    jsonParameters.gladeEids = jsonParameters.gladeEids ?
+        jsonParameters.gladeEids + ',' + expIds : expIds;
+  }
+
 
   const slot = global.document.querySelector('#c');
   slot.setAttribute('data-glade', '');
@@ -168,21 +333,20 @@ function doubleClickWithGlade(global, data) {
   }
   slot.setAttribute('data-page-url', global.context.canonicalUrl);
 
-  // Size setup.
-  // The ad container should simply fill the amp-ad iframe, but we still
-  // need to request a specific size from the ad server.
-  // The ad container size will be relative to the amp-iframe, so if the
-  // latter changes the ad container will match it.
-  slot.setAttribute('width', 'fill');
-  slot.setAttribute('height', 'fill');
-  slot.setAttribute('data-request-height', requestHeight);
-  slot.setAttribute('data-request-width', requestWidth);
+  // Center the ad in the container.
+  slot.setAttribute('height', requestHeight);
+  slot.setAttribute('width', requestWidth);
+  slot.style.top = '50%';
+  slot.style.left = '50%';
+  slot.style.bottom = '';
+  slot.style.right = '';
+  slot.style.transform = 'translate(-50%, -50%)';
 
   slot.addEventListener('gladeAdFetched', event => {
-    global.context.renderStart();
     if (event.detail.empty) {
       global.context.noContentAvailable();
     }
+    global.context.renderStart();
   });
 
   window.glade = {correlator: getCorrelator(global)};

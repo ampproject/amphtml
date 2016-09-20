@@ -17,6 +17,22 @@
 amp-carousel {
 }
 
+/**
+ * `amp-carousel-slide` class is added to every item in the carousel to
+ * allow page authors to target items for user-defined styling.
+ * Every `<amp-carousel>'s` immediate child is considered a slide in
+ * the carousel.
+ */
+amp-carousel-slide {
+}
+
+.amp-carousel-slide > .-amp-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
+}
+
 .amp-carousel-button {
   position: absolute;
   box-sizing: border-box;
@@ -81,19 +97,30 @@ amp-carousel .amp-carousel-button.amp-disabled {
   display: flex !important;
   flex-wrap: nowrap;
   height: 100% !important;
+  left: 0;
   overflow-x: auto !important;
   overflow-y: hidden !important;
-  position: relative !important;
-  white-space: nowrap !important;
+  position: absolute !important;
+  top: 0;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
+  /**
+   * Hide the scrollbar by tucking it under some padding
+   * which gets cut off as it overflows the parent.
+   * The exact size of the padding does not matter as long as it is
+   * larger than the height of the scrollbar. 20px is large enough to cover
+   * both desktop and mobile scrolbar sizes in different browsers.
+   * This relies on content box-sizing, although that's the default
+   * we still ensure it does not get overwritten.
+   */
+  padding-bottom: 20px !important;
+  box-sizing: content-box !important;
   -webkit-overflow-scrolling: touch !important;
 }
 
 .-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
-
 
 .-amp-slide-item {
   align-items: center !important;
@@ -106,28 +133,13 @@ amp-carousel .amp-carousel-button.amp-disabled {
   width: 100% !important;
 }
 
+.-amp-slide-item > * {
+  height: 100%;
+  width: 100%;
+}
+
 .-amp-slide-item-show {
   display: flex !important;
-}
-
-.-amp-carousel-start-marker,
-.-amp-carousel-end-marker {
-  display: block !important;
-  height: 100% !important;
-  width: 1px !important;
-  background-color: transparent !important;
-  scroll-snap-coordinate: 0 0 !important;
-  flex: 0 0 1px !important;
-}
-
-.-amp-carousel-start-marker {
-  order: -1 !important;
-  margin-left: -1px !important;
-}
-
-.-amp-carousel-end-marker {
-  order: 100000000 !important;
-  margin-right: -1px !important;
 }
 
 .-amp-carousel-start-marker,

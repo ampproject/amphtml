@@ -117,7 +117,7 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.getViewport().leaveLightboxMode();
-    this.element.style.display = 'none';
+    this./*OK*/collapse();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }

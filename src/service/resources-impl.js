@@ -21,10 +21,9 @@ import {Resource, ResourceState} from './resource';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
-import {onDocumentReady} from '../document-ready';
+import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClass} from '../service';
+import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
@@ -32,8 +31,7 @@ import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
-import {timer} from '../timer';
-import {toggle} from '../style';
+import {filterSplice} from '../utils/array';
 
 
 const TAG_ = 'Resources';
@@ -56,21 +54,24 @@ const FOUR_FRAME_DELAY_ = 70;
  *   newHeight: (number|undefined),
  *   newWidth: (number|undefined),
  *   force: boolean,
- *   callback: (function()|undefined)
+ *   callback: (function(boolean)|undefined)
  * }}
  */
 let ChangeSizeRequestDef;
 
 export class Resources {
   /**
-   * @param {!Window} window
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = window;
+    this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerService(window);
+    this.viewer_ = installViewerService(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -164,26 +165,26 @@ export class Resources {
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
-      this.lastScrollTime_ = timer.now();
+      this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
-      this.lastScrollTime_ = timer.now();
+      this.lastScrollTime_ = Date.now();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
       if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
-        this.firstVisibleTime_ = timer.now();
+        this.firstVisibleTime_ = Date.now();
       }
       this.schedulePass();
     });
 
     this.viewer_.onRuntimeState(state => {
-      dev.fine(TAG_, 'Runtime state:', state);
+      dev().fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
     });
@@ -192,8 +193,10 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
+    this.schedulePass();
+
     // Ensure that we attempt to rebuild things when DOM is ready.
-    onDocumentReady(this.win.document, () => {
+    this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
@@ -210,8 +213,6 @@ export class Resources {
       this.schedulePass();
       this.monitorInput_();
     });
-
-    this.schedulePass();
   }
 
   /**
@@ -271,9 +272,9 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    waitForBody(this.win.document, () => {
+    this.ampdoc.whenBodyAvailable().then(body => {
       this.vsync_.mutate(() => {
-        this.win.document.body.classList.toggle(clazz, on);
+        body.classList.toggle(clazz, on);
       });
     });
   }
@@ -300,7 +301,6 @@ export class Resources {
    * Element. If no Resource is found, the exception is thrown.
    * @param {!AmpElement} element
    * @return {!Resource}
-   * @package
    */
   getResourceForElement(element) {
     return Resource.forElement(element);
@@ -329,7 +329,6 @@ export class Resources {
    * Signals that an element has been added to the DOM. Resources manager
    * will start tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   add(element) {
     const resource = new Resource((++this.resourceIdCounter_), element, this);
@@ -337,20 +336,31 @@ export class Resources {
       element.id = 'AMP_' + resource.getId();
     }
     this.resources_.push(resource);
+    this.buildOrScheduleBuildForResource_(resource);
+    dev().fine(TAG_, 'element added:', resource.debugid);
+  }
 
+  /**
+   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * @param {!Resource} resource
+   * @param {boolean=} checkForDupes
+   * @private
+   */
+  buildOrScheduleBuildForResource_(resource, checkForDupes = false) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else if (!element.isBuilt()) {
-        // Otherwise add to pending resources and try to build any ready ones.
-        this.pendingBuildResources_.push(resource);
-        this.buildReadyResources_();
+      } else if (!resource.element.isBuilt()) {
+        if (!checkForDupes ||
+            this.pendingBuildResources_.indexOf(resource) == -1) {
+          // Otherwise add to pending resources and try to build any ready ones.
+          this.pendingBuildResources_.push(resource);
+          this.buildReadyResources_();
+        }
       }
     }
-
-    dev.fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
@@ -373,6 +383,7 @@ export class Resources {
 
   /** @private */
   buildReadyResourcesUnsafe_() {
+    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -383,8 +394,13 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
+        builtElementsCount++;
         resource.build();
       }
+    }
+
+    if (builtElementsCount > 0) {
+      this.schedulePass();
     }
   }
 
@@ -392,37 +408,47 @@ export class Resources {
    * Signals that an element has been removed to the DOM. Resources manager
    * will stop tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   remove(element) {
     const resource = Resource.forElementOptional(element);
     if (!resource) {
       return;
     }
-    const index = resource ? this.resources_.indexOf(resource) : -1;
+    this.removeResource_(resource);
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  removeResource_(resource) {
+    const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
     resource.pauseOnRemove();
     this.cleanupTasks_(resource, /* opt_removePending */ true);
-    dev.fine(TAG_, 'element removed:', resource.debugid);
+    dev().fine(TAG_, 'element removed:', resource.debugid);
+  }
+
+  /**
+   * Removes all resources belonging to the specified child window.
+   * @param {!Window} childWin
+   */
+  removeForChildWindow(childWin) {
+    const toRemove = this.resources_.filter(r => r.hostWin == childWin);
+    toRemove.forEach(r => this.removeResource_(r));
   }
 
   /**
    * Signals that an element has been upgraded to the DOM. Resources manager
    * will perform build and enable layout/viewport signals for this element.
    * @param {!AmpElement} element
-   * @package
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    if (this.isRuntimeOn_) {
-      resource.build();
-      this.schedulePass();
-    } else if (resource.onUpgraded_) {
-      resource.onUpgraded_();
-    }
-    dev.fine(TAG_, 'element upgraded:', resource.debugid);
+    this.buildOrScheduleBuildForResource_(resource);
+    dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
   /**
@@ -645,13 +671,18 @@ export class Resources {
     });
   }
 
+  /**
+   * Collapses the element: ensures that it's `display:none`, notifies its
+   * owner and updates the layout box.
+   * @param {!Element} element
+   */
   collapseElement(element) {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
       this.setRelayoutTop_(box.top);
     }
-    toggle(element, false);
+    resource.completeCollapse();
 
     const owner = resource.getOwner();
     if (owner) {
@@ -686,7 +717,7 @@ export class Resources {
    */
   doPass_() {
     if (!this.isRuntimeOn_) {
-      dev.fine(TAG_, 'runtime is off');
+      dev().fine(TAG_, 'runtime is off');
       return;
     }
 
@@ -699,8 +730,8 @@ export class Resources {
     }
 
     const viewportSize = this.viewport_.getSize();
-    const now = timer.now();
-    dev.fine(TAG_, 'PASS: at ' + now +
+    const now = Date.now();
+    dev().fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
@@ -741,7 +772,7 @@ export class Resources {
     // scroll adjustment to avoid active viewport changing without user's
     // action. The elements in the active viewport are not resized and instead
     // the overflow callbacks are called.
-    const now = timer.now();
+    const now = Date.now();
     const viewportRect = this.viewport_.getRect();
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
@@ -752,7 +783,7 @@ export class Resources {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
 
     if (this.deferredMutates_.length > 0) {
-      dev.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
+      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
       const deferredMutates = this.deferredMutates_;
       this.deferredMutates_ = [];
       for (let i = 0; i < deferredMutates.length; i++) {
@@ -760,7 +791,7 @@ export class Resources {
       }
     }
     if (this.requestsChangeSize_.length > 0) {
-      dev.fine(TAG_, 'change size requests:',
+      dev().fine(TAG_, 'change size requests:',
           this.requestsChangeSize_.length);
       const requestsChangeSize = this.requestsChangeSize_;
       this.requestsChangeSize_ = [];
@@ -918,7 +949,7 @@ export class Resources {
 
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    const now = timer.now();
+    const now = Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
@@ -933,7 +964,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT) {
-        r.build();
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -1002,7 +1033,7 @@ export class Resources {
     // Phase 3: Trigger "viewport enter/exit" events.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.hasOwner()) {
+      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its
@@ -1043,7 +1074,7 @@ export class Resources {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
-          dev.fine(TAG_, 'idle layout:', r.debugid);
+          dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
           if (idleScheduledCount >= 4) {
@@ -1067,14 +1098,14 @@ export class Resources {
    * @private
    */
   work_() {
-    const now = timer.now();
+    const now = Date.now();
     const visibility = this.viewer_.getVisibilityState();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
-      dev.fine(TAG_, 'peek from queue:', task.id,
+      dev().fine(TAG_, 'peek from queue:', task.id,
           'sched at', task.scheduleTime,
           'score', this.boundTaskScorer_(task),
           'timeout', timeout);
@@ -1092,21 +1123,21 @@ export class Resources {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        task.promise = task.callback(visibility);
+        task.promise = task.callback(visibility == 'visible');
         task.startTime = now;
-        dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+        dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
         this.exec_.enqueue(task);
         task.promise.then(this.taskComplete_.bind(this, task, true),
             this.taskComplete_.bind(this, task, false))
-            .catch(reportError);
+            .catch(/** @type {function (*)} */ (reportError));
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
-    dev.fine(TAG_, 'queue size:', this.queue_.getSize());
-    dev.fine(TAG_, 'exec size:', this.exec_.getSize());
+    dev().fine(TAG_, 'queue size:', this.queue_.getSize());
+    dev().fine(TAG_, 'exec size:', this.exec_.getSize());
 
     if (timeout >= 0) {
       // Still tasks in the queue, but we took too much time.
@@ -1175,7 +1206,7 @@ export class Resources {
    * @private
    */
   calcTaskTimeout_(task) {
-    const now = timer.now();
+    const now = Date.now();
 
     if (this.exec_.getSize() == 0) {
       // If we've never been visible, return 0. This follows the previous
@@ -1225,7 +1256,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev.error(TAG_, 'task failed:',
+      dev().error(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1237,7 +1268,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
-   * @param {function()=} opt_callback A callback function
+   * @param {function(boolean)=} opt_callback A callback function
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
@@ -1247,7 +1278,7 @@ export class Resources {
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width)) {
       if (newHeight === undefined && newWidth === undefined) {
-        dev.error(
+        dev().error(
             TAG_, 'attempting to change size with undefined dimensions',
             resource.debugid);
       }
@@ -1301,7 +1332,7 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
-    dev.assert(resource.getState() != ResourceState.NOT_BUILT &&
+    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
@@ -1365,7 +1396,7 @@ export class Resources {
    * @param {string} localId
    * @param {number} priorityOffset
    * @param {number} parentPriority
-   * @param {function():!Promise} callback
+   * @param {function(boolean):!Promise} callback
    * @private
    */
   schedule_(resource, localId, priorityOffset, parentPriority, callback) {
@@ -1377,11 +1408,11 @@ export class Resources {
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
       callback,
-      scheduleTime: timer.now(),
+      scheduleTime: Date.now(),
       startTime: 0,
       promise: null,
     };
-    dev.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
+    dev().fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
     // Only schedule a new task if there's no one enqueued yet or if this task
     // has a higher priority.
@@ -1419,7 +1450,7 @@ export class Resources {
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
     elements.forEach(element => {
-      dev.assert(parentResource.element.contains(element));
+      dev().assert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
   }
@@ -1459,7 +1490,7 @@ export class Resources {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {function(!Resource, number)} iterator
+   * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
     const prerender = VisibilityState.PRERENDER;
@@ -1482,12 +1513,12 @@ export class Resources {
         }
         if (this.visible_) {
           if (this.schedulePass(delay)) {
-            dev.fine(TAG_, 'next pass:', delay);
+            dev().fine(TAG_, 'next pass:', delay);
           } else {
-            dev.fine(TAG_, 'pass already scheduled');
+            dev().fine(TAG_, 'pass already scheduled');
           }
         } else {
-          dev.fine(TAG_, 'document is not visible: no scheduling');
+          dev().fine(TAG_, 'document is not visible: no scheduling');
         }
       }
     };
@@ -1523,8 +1554,8 @@ export class Resources {
     vsm.addTransition(hidden, inactive, unload);
     vsm.addTransition(hidden, paused, pause);
 
-    vsm.addTransition(inactive, visible, doPass);
-    vsm.addTransition(inactive, hidden, doPass);
+    vsm.addTransition(inactive, visible, resume);
+    vsm.addTransition(inactive, hidden, resume);
     vsm.addTransition(inactive, inactive, noop);
     vsm.addTransition(inactive, paused, doPass);
 
@@ -1547,8 +1578,9 @@ export class Resources {
 
   /**
    * Cleanup task queues from tasks for elements that has been unloaded.
-   * @param resource
-   * @param opt_removePending Whether to remove from pending build resources.
+   * @param {Resource} resource
+   * @param {boolean=} opt_removePending Whether to remove from pending
+   *     build resources.
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
@@ -1564,8 +1596,9 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      this.requestsChangeSize_ = this.requestsChangeSize_.filter(
-          request => request.resource != resource);
+      filterSplice(this.requestsChangeSize_, request => {
+        return request.resource != resource;
+      });
     }
 
     if (resource.getState() == ResourceState.NOT_BUILT && opt_removePending &&
@@ -1584,7 +1617,8 @@ export class Resources {
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
-  return isArray(elements) ? elements : [elements];
+  return /** @type {!Array<!Element>} */ (
+      isArray(elements) ? elements : [elements]);
 }
 
 
@@ -1599,9 +1633,9 @@ function elements_(elements) {
 export let SizeDef;
 
 /**
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Resources}
  */
-export function installResourcesService(win) {
-  return fromClass(win, 'resources', Resources);
+export function installResourcesServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'resources', Resources);
 };

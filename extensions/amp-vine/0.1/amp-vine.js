@@ -16,7 +16,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
@@ -36,11 +35,9 @@ class AmpVine extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const vineid = user.assert(this.element.getAttribute('data-vineid'),
+    const vineid = user().assert(this.element.getAttribute('data-vineid'),
       'The data-vineid attribute is required for <amp-vine> %s',
       this.element);
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
@@ -48,15 +45,12 @@ class AmpVine extends AMP.BaseElement {
       encodeURIComponent(vineid) + '/embed/simple';
 
     this.applyFillContent(iframe);
-
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
 
     /** @private {?Element} */
     this.iframe_ = iframe;
 
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

@@ -15,13 +15,12 @@
  */
 
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {loadPromise} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {dev, user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {isObject} from '../../../src/types';
 
 /** @type {number} Value of YouTube player state when playing. */
@@ -29,13 +28,35 @@ const YT_PLAYER_STATE_PLAYING = 1;
 
 class AmpYoutube extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://www.youtube.com', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {number} */
+    this.playerState_ = 0;
+
+    /** @private {?string}  */
+    this.videoid_ = null;
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.preload(this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
-    this.preconnect.url('https://s.ytimg.com', onLayout);
+    this.preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
-    this.preconnect.url('https://i.ytimg.com', onLayout);
+    this.preconnect.url('https://i.ytimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -45,28 +66,17 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   renderOutsideViewport() {
-    return false;
+    // We are conservative about loading YT videos outside the viewport,
+    // because the player is pretty heavy.
+    // This will still start loading before they become visible, but it
+    // won't typically load a large number of embeds.
+    return 0.75;
   }
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
-
-    /** @private {number} */
-    this.playerState_ = 0;
-
-    // The video-id is supported only for backward compatibility.
-    /** @private @const {string} */
-    this.videoid_ = user.assert(
-        (this.element.getAttribute('data-videoid') ||
-        this.element.getAttribute('video-id')),
+    this.videoid_ = user().assert(
+        this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
 
@@ -75,18 +85,23 @@ class AmpYoutube extends AMP.BaseElement {
     }
   }
 
+  /** @return {string} */
+  getVideoIframeSrc_() {
+    dev().assert(this.videoid_);
+    return `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+  }
+
   /** @override */
   layoutCallback() {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
-
-    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_)}?enablejsapi=1`;
+    let src = this.getVideoIframeSrc_();
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
       delete params['autoplay'];
-      user.warn('Autoplay is currently not support with amp-youtube.');
+      user().warn('Autoplay is currently not support with amp-youtube.');
     }
     src = addParamsToUrl(src, params);
 
@@ -94,29 +109,24 @@ class AmpYoutube extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     this.element.appendChild(iframe);
 
-    /** @private {!Element} */
     this.iframe_ = iframe;
 
-    /** @private @const {!Promise} */
     this.playerReadyPromise_ = new Promise(resolve => {
-      /** @private @const {function()} */
       this.playerReadyResolver_ = resolve;
     });
 
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
 
-    return loadPromise(iframe)
+    return this.loadPromise(iframe)
         .then(() => {
           // Make sure the YT player is ready for this. For some reason YT player
           // would send couple of messages but then stop. Waiting for a bit before
           // sending the 'listening' event seems to fix that and allow YT
           // Player to send messages continuously.
-          return timer.promise(300);
+          return timerFor(this.win).promise(300);
         })
         .then(() => this.listenToFrame_())
         .then(() => this.playerReadyPromise_);
@@ -177,7 +187,8 @@ class AmpYoutube extends AMP.BaseElement {
   /** @private */
   buildImagePlaceholder_() {
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    const videoid = this.videoid_;
+    dev().assert(this.videoid_);
+    const videoid = this.videoid_ || '';
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
@@ -191,18 +202,16 @@ class AmpYoutube extends AMP.BaseElement {
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
     imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
-        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
+        encodeURIComponent(videoid) + '/sddefault.jpg#404_is_fine';
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
-    this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
-    loadPromise(imgPlaceholder).then(() => {
+    this.loadPromise(imgPlaceholder).then(() => {
       // A pretty ugly hack since onerror won't fire on YouTube image 404.
       // This might be due to the fact that YouTube returns data to the request
       // even when the status is 404. YouTube returns a placeholder image that
@@ -214,7 +223,7 @@ class AmpYoutube extends AMP.BaseElement {
     }).catch(() => {
       imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
           encodeURIComponent(videoid) + '/hqdefault.jpg';
-      return loadPromise(imgPlaceholder);
+      return this.loadPromise(imgPlaceholder);
     }).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',

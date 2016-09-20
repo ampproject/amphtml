@@ -37,8 +37,9 @@ export class AmpExperiment extends AMP.BaseElement {
   buildCallback() {
     this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
     if (!this.isExperimentOn_) {
-      dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
+      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
+      getService(this.win, 'variant', () => Promise.resolve());
       return;
     }
 
@@ -62,7 +63,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   getConfig_() {
     const children = this.element.children;
-    user.assert(
+    user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
                 == 'APPLICATION/JSON',

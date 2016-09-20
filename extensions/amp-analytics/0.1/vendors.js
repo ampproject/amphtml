@@ -71,6 +71,38 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'afsanalytics': {
+    'vars': {
+      'server': 'www',
+      'websiteid': 'xxxxxxxx',
+      'event': 'click',
+      'clicklabel': 'clicked from AMP page',
+    },
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'host': '//${server}.afsanalytics.com',
+      'base': '${host}/cgi_bin/',
+      'pageview': '${base}connect.cgi?usr=${websiteid}Pauto' +
+        '&js=1' +
+        '&amp=1' +
+        '&title=${title}' +
+        '&url=${canonicalUrl}' +
+        '&refer=${documentReferrer}' +
+        '&resolution=${screenWidth}x${screenHeight}' +
+        '&color=${screenColorDepth}' +
+        '&Tips=${random}',
+      'click': '${base}click.cgi?usr=${websiteid}' +
+        '&event=${event}' +
+        '&exit=${clicklabel}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'atinternet': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
@@ -130,7 +162,7 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 15,
-          'max-timer-length': 1200,
+          'maxTimerLength': 1200,
         },
         'request': 'pageping',
       },
@@ -239,7 +271,7 @@ export const ANALYTICS_CONFIG = {
     },
     'transport': {
       'beacon': false,
-      'xhrpost': true,
+      'xhrpost': false,
       'image': true,
     },
   },
@@ -310,7 +342,7 @@ export const ANALYTICS_CONFIG = {
           'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
           'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
           'bln=${browserLanguage}&chs=${documentCharset}&' +
-          'col=${screenColorDepth}&tzo=${timezone}',
+          'col=${screenColorDepth}&tzo=${timezone}&cp_cx_channel=amp',
     },
     'triggers': {
       'defaultPageview': {
@@ -692,7 +724,7 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 5,
-          'max-timer-length': 1200,
+          'maxTimerLength': 1200,
         },
         'request': 'timer',
       },

@@ -62,10 +62,6 @@ app.use('/pwa', function(req, res, next) {
   });
 });
 
-app.use('/examples', function(req, res) {
-  res.redirect('/examples.build');
-});
-
 app.use('/api/show', function(req, res) {
   res.json({
     showNotification: true
@@ -83,7 +79,27 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
+/**
+ * In practice this would be *.ampproject.org and the publishers
+ * origin. Please see AMP CORS docs for more details:
+ *    https://goo.gl/F6uCAY
+ * @type {RegExp}
+ */
+const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+    '^https?://.+\.herokuapp\.com:8000');
+
+/**
+ * In practice this would be the publishers origin.
+ * Please see AMP CORS docs for more details:
+ *    https://goo.gl/F6uCAY
+ * @type {RegExp}
+ */
+const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+    '^https?://.+\.herokuapp\.com:8000/');
+
 app.use('/form/html/post', function(req, res) {
+  assertCors(req, res, ['POST']);
+
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'text/html');
@@ -102,16 +118,88 @@ app.use('/form/html/post', function(req, res) {
   });
 });
 
+function assertCors(req, res, opt_validMethods) {
+  const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
+  const invalidMethod = req.method + ' method is not allowed. Use POST.';
+  const invalidOrigin = 'Origin header is invalid.';
+  const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
+  const unauthorized = 'Unauthorized Request';
+  var origin;
+
+  if (validMethods.indexOf(req.method) == -1) {
+    res.statusCode = 405;
+    res.end(JSON.stringify({message: invalidMethod}));
+    throw invalidMethod;
+  }
+
+  if (req.headers.origin) {
+    origin = req.headers.origin;
+    if (!ORIGIN_REGEX.test(req.headers.origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidOrigin}));
+      throw invalidOrigin;
+    }
+
+    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidSourceOrigin}));
+      throw invalidSourceOrigin;
+    }
+  } else if (req.headers['amp-same-origin'] == 'true') {
+    origin = getUrlPrefix(req);
+  } else {
+    res.statusCode = 401;
+    res.end(JSON.stringify({message: unauthorized}));
+    throw unauthorized;
+  }
+
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Expose-Headers',
+      'AMP-Access-Control-Allow-Source-Origin')
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      req.query.__amp_source_origin);
+}
+
 app.use('/form/echo-json/post', function(req, res) {
+  assertCors(req, res, ['POST']);
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'application/json');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
     }
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.protocol + '://' + req.headers.host);
     res.end(JSON.stringify(fields));
+  });
+});
+
+
+app.use('/form/search-html/get', function(req, res) {
+  res.setHeader('Content-Type', 'text/html');
+  res.end(`
+     <h1>Here's results for your search<h1>
+     <ul>
+      <li>Result 1</li>
+      <li>Result 2</li>
+      <li>Result 3</li>
+     </ul>
+  `);
+});
+
+
+app.use('/form/search-json/get', function(req, res) {
+  assertCors(req, res, ['GET']);
+  res.json({
+    results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}]
+  });
+});
+
+
+app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      req.protocol + '://' + req.headers.host);
+  res.json({
+    fragment: '54321'
   });
 });
 
@@ -140,22 +228,23 @@ function proxyToAmpProxy(req, res, minify) {
   });
 }
 
-// Match max/min/none (using \*)
-app.use('/examples.build/live-list.amp.\*html', function(req, res) {
-  res.setHeader('Content-Type', 'text/html');
-  res.statusCode = 200;
-  fs.readFileAsync(process.cwd() +
-      '/examples.build/live-list.amp.max.html').then((file) => {
-        res.end(file);
-  });
-});
-
-var liveListUpdateFile = '/examples.build/live-list-update.amp.max.html';
+var liveListUpdateFile = '/examples/live-list-update.amp.html';
 var liveListCtr = 0;
 var itemCtr = 2;
 var liveListDoc = null;
 var doctype = '<!doctype html>\n';
-app.use(liveListUpdateFile, function(req, res) {
+// Only handle min/max
+app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
+  var filePath = req.baseUrl;
+  var mode = getPathMode(filePath);
+  // When we already have state in memory and user refreshes page, we flush
+  // the dom we maintain on the server.
+  if (!('amp_latest_update_time' in req.query) && liveListDoc) {
+    var outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
+    outerHTML = replaceUrls(mode, outerHTML);
+    res.send(`${doctype}${outerHTML}`);
+    return;
+  }
   if (!liveListDoc) {
     var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
     var liveListFile = fs.readFileSync(liveListUpdateFullPath);
@@ -163,9 +252,10 @@ app.use(liveListUpdateFile, function(req, res) {
   }
   var action = Math.floor(Math.random() * 3);
   var liveList = liveListDoc.querySelector('#my-live-list');
+  var perPage = Number(liveList.getAttribute('data-max-items-per-page'));
+  var items = liveList.querySelector('[items]');
+  var pagination = liveListDoc.querySelector('#my-live-list [pagination]');
   var item1 = liveList.querySelector('#list-item-1');
-  res.setHeader('Content-Type', 'text/html');
-  res.statusCode = 200;
   if (liveListCtr != 0) {
     if (Math.random() < .8) {
       // Always run a replace on the first item
@@ -178,15 +268,27 @@ app.use(liveListUpdateFile, function(req, res) {
       if (Math.random() < .8) {
         liveListInsert(liveList, item1);
       }
+      pagination.textContent = '';
+      var liveChildren = [].slice.call(items.children)
+          .filter(x => !x.hasAttribute('data-tombstone'));
+
+      var pageCount = Math.ceil(liveChildren.length / perPage);
+      var pageListItems = Array.apply(null, Array(pageCount))
+          .map((_, i) => `<li>${i + 1}</li>`).join('');
+      var newPagination = '<nav aria-label="amp live list pagination">' +
+          `<ul class="pagination">${pageListItems}</ul>` +
+          '</nav>';
+      pagination./*OK*/innerHTML = newPagination;
     } else {
       // Sometimes we want an empty response to simulate no changes.
-      res.end(`${doctype}<html></html>`);
+      res.send(`${doctype}<html></html>`);
       return;
     }
   }
   var outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
-  res.end(`${doctype}${outerHTML}`);
+  outerHTML = replaceUrls(mode, outerHTML);
   liveListCtr++;
+  res.send(`${doctype}${outerHTML}`);
 });
 
 function liveListReplace(item) {
@@ -277,12 +379,26 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
-// Will match live-blog max/min/none
-app.use('/examples.build/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
+app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
       res.end(getLiveBlogItem());
+      return;
+    }
+    next();
+});
+
+app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
+    if ('amp-fresh' in req.query && req.query['amp-fresh'] == '1') {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(`<!doctype html>
+          <html ⚡>
+            <body>
+              <amp-fresh id="amp-fresh-1"><span>hello</span> world!</amp-fresh>
+              <amp-fresh id="amp-fresh-2">foo bar</amp-fresh>
+            </body>
+          </html>`);
       return;
     }
     next();
@@ -302,10 +418,73 @@ app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
-app.use('/examples.build/analytics.config.json', function (req, res, next) {
+app.use('/examples/analytics.config.json', function(req, res, next) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
   next();
 });
+
+app.use(['/examples/*', '/extensions/*'], function (req, res, next) {
+  var sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  next();
+});
+
+app.get('/examples/*', function(req, res, next) {
+  var filePath = req.path;
+  var mode = getPathMode(filePath);
+  if (!mode) {
+    return next();
+  }
+  filePath = filePath.substr(0, filePath.length - 9) + '.html';
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    file = replaceUrls(mode, file);
+    res.send(file);
+  }).catch(() => {
+    next();
+  });
+});
+
+/**
+ * @param {string} mode
+ * @param {string} file
+ */
+function replaceUrls(mode, file) {
+  if (mode) {
+    file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
+    file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
+    file = file.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '/dist/v0/');
+  }
+  if (mode == 'min') {
+    file = file.replace(/\.max\.js/g, '.js');
+    file = file.replace('/dist/amp.js', '/dist/v0.js');
+  }
+  return file;
+}
+
+/**
+ * @param {string} path
+ * @return {string}
+ */
+function extractFilePathSuffix(path) {
+  return path.substr(-9);
+}
+
+/**
+ * @param {string} path
+ * @return {?string}
+ */
+function getPathMode(path) {
+  var suffix = extractFilePathSuffix(path);
+  if (suffix == '.max.html') {
+    return 'max';
+  } else if (suffix == '.min.html') {
+    return 'min';
+  } else {
+    return null;
+  }
+}
 
 exports.app = app;
 

@@ -22,9 +22,10 @@
 
 import {fromClass} from './service';
 import {parseUrl} from './url';
-import {timer} from './timer';
+import {timerFor} from './timer';
 import {platformFor} from './platform';
 import {viewerFor} from './viewer';
+import {dev} from './log';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -39,7 +40,7 @@ export class Preconnect {
     this.document_ = win.document;
 
     /** @private @const {!Element} */
-    this.head_ = win.document.head;
+    this.head_ = dev().assertElement(win.document.head);
     /**
      * Origin we've preconnected to and when that connection
      * expires as a timestamp in MS.
@@ -51,7 +52,7 @@ export class Preconnect {
      * @private @const {!Object<string, boolean>}
      */
     this.urls_ = {};
-    /** @private @const {!./platform.Platform}  */
+    /** @private @const {!./service/platform-impl.Platform}  */
     this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
@@ -60,12 +61,18 @@ export class Preconnect {
      * Detect support for the given resource hints.
      * Unfortunately not all browsers support this, so this can only
      * be used as an affirmative signal.
-     * @private @const {{preload: boolean, preconnect: boolean}}
+     * @private @const {{
+     *   preload: (boolean|undefined),
+     *   preconnect: (boolean|undefined)
+     * }}
      */
     this.features_ = this.detectFeatures_();
 
     /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(win);
+
+    /** @private @const {!./service/timer-impl.Timer} */
+    this.timer_ = timerFor(win);
   }
 
   /**
@@ -85,7 +92,7 @@ export class Preconnect {
       return;
     }
     const origin = parseUrl(url).origin;
-    const now = timer.now();
+    const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
       if (opt_alsoConnecting) {
@@ -115,7 +122,7 @@ export class Preconnect {
     this.head_.appendChild(preconnect);
 
     // Remove the tags eventually to free up memory.
-    timer.delay(() => {
+    this.timer_.delay(() => {
       if (dns && dns.parentNode) {
         dns.parentNode.removeChild(dns);
       }
@@ -125,18 +132,6 @@ export class Preconnect {
     }, 10000);
 
     this.preconnectPolyfill_(origin);
-  }
-
-  /**
-   * Temporary to not break prod when versions are misaligned across binaries.
-   * DO NOT USE!
-   * This should be safe to remove 1 version after 1468017284333 hits prod.
-   * @param {string} url
-   * @param {string=} opt_preloadAs
-   * @deprecated
-   */
-  prefetch(url, opt_preloadAs) {
-    this.preload(url, opt_preloadAs);
   }
 
   /**
@@ -188,11 +183,14 @@ export class Preconnect {
   /**
    * Detect related features if feature detection is supported by the
    * browser. Even if this fails, the browser may support the feature.
-   * @return {{preload: boolean, preconnect: boolean}}
+   * @return {{
+   *   preload: (boolean|undefined),
+   *   preconnect: (boolean|undefined)
+   * }}
    * @private
    */
   detectFeatures_() {
-    const tokenList = this.document_.createElement('link').relList;
+    const tokenList = this.document_.createElement('link')['relList'];
     if (!tokenList || !tokenList.supports) {
       return {};
     }
@@ -230,7 +228,7 @@ export class Preconnect {
       // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
       // we effectively create an active connection.
       // TODO(@cramforce): Confirm actual http2 timeout in Safari.
-      this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
+      this.origins_[origin] = Date.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
       const url = origin +
           '/amp_preconnect_polyfill_404_or_other_error_expected.' +
           '_Do_not_worry_about_it?' + Math.random();

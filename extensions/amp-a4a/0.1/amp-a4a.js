@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   allowRenderOutsideViewport,
   decrementLoadingAds,
   incrementLoadingAds,
-  isPositionFixed} from '../../amp-ad/0.1/amp-ad-3p-impl';
-import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
-import {adPreconnect} from '../../../ads/_config';
+} from '../../amp-ad/0.1/concurrent-load';
+import {adConfig} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {createShadowEmbedRoot} from '../../../src/shadow-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
@@ -64,6 +64,28 @@ let publicKeyInfos = [importPublicKey({
   ext: true,
 })];
 
+// If we're in local dev mode then we may be talking to a dev validation
+// instance as well.  Dev validators use different keys than production ones
+// do, so we need to add the dev key to the known key list.
+//
+// Note: This is temporary.  It will not be necessary once A4A can fetch keys
+// directly from the server.
+if (getMode().localDev) {
+  const devModulus =
+      'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
+      'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +
+      'nvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEz' +
+      'fZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca' +
+      '8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2' +
+      'sQuM5KangAkjJRe-Ej6aaQ';
+  publicKeyInfos.push(importPublicKey({
+    kty: 'RSA',
+    'n': devModulus,
+    'e': pubExp,
+    alg: 'RS256',
+    ext: true,
+  }));
+}
 
 /**
  * @param {!Object} publicKeys An array of parsed JSON web keys.
@@ -104,7 +126,7 @@ function isValidOffsetArray(ary) {
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
-/** @typedef {{creative: ArrayBuffer, signature: ?ArrayBuffer}} */
+/** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
 let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
@@ -124,6 +146,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
+    dev().assert(AMP.AmpAdApiHandler);
 
     /** @private {?Promise<!boolean>} */
     this.adPromise_ = null;
@@ -214,7 +237,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const preconnect = adPreconnect[this.element.getAttribute('type')];
+    const preconnect = adConfig[this.element.getAttribute('type')].preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
@@ -242,7 +265,7 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     this.layoutMeasureExecuted_ = true;
-    user.assert(!isPositionFixed(this.element, this.win),
+    user().assert(isAdPositionAllowed(this.element, this.win),
         '<%s> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element.tagName, this.element);
     // OnLayoutMeasure can be called when page is in prerender so delay until
@@ -251,7 +274,7 @@ export class AmpA4A extends AMP.BaseElement {
     // its element ancestry.
     if (!this.isValidElement()) {
       // TODO(kjwright): collapse?
-      user.warn('Amp Ad', 'Amp ad element ignored as invalid', this.element);
+      user().warn('Amp Ad', 'Amp ad element ignored as invalid', this.element);
       return;
     }
 
@@ -347,30 +370,31 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Handles uncaught errors within promise flow.
    * @param {string|Error} error
-   * @return {!Promise<string>}
+   * @return {string|Error}
    * @private
    */
   promiseErrorHandler_(error) {
-    if (error && error.message && error.message.indexOf('amp-a4a: ') == 0) {
-      // caught previous call to promiseErrorHandler?  Infinite loop?
-      return Promise.reject(error);
-    }
-    if (error && error instanceof Error &&
-        error.message == cancellation().message) {
-      // Rethrow if cancellation
-      throw error;
+    if (error instanceof Error) {
+      if (error.message.indexOf('amp-a4a: ') == 0) {
+        // caught previous call to promiseErrorHandler?  Infinite loop?
+        return error;
+      }
+      if (error.message == cancellation().message) {
+        // Rethrow if cancellation
+        throw error;
+      }
     }
     // Returning promise reject should trigger unhandledrejection which will
     // trigger reporting via src/error.js
     const adQueryIdx = this.adUrl_ ? this.adUrl_.indexOf('?') : -1;
     const state = {
-      'm': error ? error.message : '',
+      'm': error instanceof Error ? error.message : error,
       'tag': this.element.tagName,
       'type': this.element.getAttribute('type'),
       'au': adQueryIdx < 0 ? '' :
             this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
     };
-    return Promise.reject(new Error('amp-a4a: ' + JSON.stringify(state)));
+    return new Error('amp-a4a: ' + JSON.stringify(state));
   }
 
   /** @override */
@@ -386,13 +410,21 @@ export class AmpA4A extends AMP.BaseElement {
     // valid AMP.
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
+      if (rendered instanceof Error) {
+        // If we got as far as getting a URL, then load the ad, but note the
+        // error.
+        if (this.adUrl_) {
+          this.renderViaIframe_(true);
+        }
+        throw rendered;
+      };
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
         this.renderViaIframe_(true);
       }
       this.rendered_ = true;
-    }).catch(error => this.promiseErrorHandler_(error));
+    }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
   }
 
   /** @override  */
@@ -446,6 +478,13 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Extracts creative and verification signature (if present) from
    * XHR response body and header.  To be implemented by network.
+   *
+   * In the returned value, the `creative` field should be an `ArrayBuffer`
+   * containing the utf-8 encoded bytes of the creative itself, while the
+   * `signature` field should be a `Uint8Array` containing the raw signature
+   * bytes.  The `signature` field may be null if no signature was available
+   * for this creative / the creative is not valid AMP.
+   *
    * @param {!ArrayBuffer} unusedResponseArrayBuffer content as array buffer
    * @param {!Headers} unusedResponseHeaders Fetch API Headers object (or polyfill
    *     for it) containing the response headers.
@@ -483,17 +522,15 @@ export class AmpA4A extends AMP.BaseElement {
       mode: 'cors',
       method: 'GET',
       credentials: 'include',
-      // TODO(kjwright):  Add requireAmpResponseSourceOrigin once supported
-      // server-side
+      requireAmpResponseSourceOrigin: true,
     };
     return xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(unusedReason => {
-          // Error so set rendered_ so iframe will not be written on
-          // layoutCallback.
-          // TODO: is this the appropriate action?  Perhaps we should just allow
-          // the ad to be rendered via iframe.
-          this.rendered_ = true;
+          // If an error occurs, let the ad be rendered via iframe after delay.
+          // TODO(taymonbeal): Figure out a more sophisticated test for deciding
+          // whether to retry with an iframe after an ad request failure or just
+          // give up and render the fallback content (or collapse the ad slot).
           return null;
         });
   }
@@ -553,8 +590,7 @@ export class AmpA4A extends AMP.BaseElement {
         // layoutCallback) as the the creative has been verified as AMP and
         // will run efficiently.
         this.renderViaIframe_();
-        this.rendered_ = true;
-        return Promise.resolve(true);
+        return true;
       } else {
         try {
           // Do extraction processing on CSS and body before creating the
@@ -603,12 +639,12 @@ export class AmpA4A extends AMP.BaseElement {
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
           });
-          return Promise.resolve(true);
+          return true;
         } catch (e) {
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
           // TODO: report!
-          return Promise.resolve(false);
+          return false;
         }
       }
     });
@@ -625,7 +661,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaIframe_(opt_isNonAmpCreative) {
-    user.assert(this.adUrl_, 'creative missing in renderViaIframe_?');
+    user().assert(this.adUrl_, 'adUrl missing in renderViaIframe_?');
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));
@@ -637,9 +673,13 @@ export class AmpA4A extends AMP.BaseElement {
       'src', xhrFor(this.win).getCorsUrl(this.win, this.adUrl_));
     this.vsync_.mutate(() => {
       // TODO(keithwrightbos): noContentCallback?
-      this.apiHandler_ = new AmpAdApiHandler(this, this.element);
+      this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
       // TODO(keithwrightbos): startup returns load event, do we need to wait?
-      this.apiHandler_.startUp(iframe, opt_isNonAmpCreative);
+      // Set opt_defaultVisible to true as 3p draw code never executed causing
+      // render-start event never to fire which will remove visiblity hidden.
+      this.apiHandler_.startUp(
+        iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
+      this.rendered_ = true;
     });
   }
 
@@ -658,14 +698,14 @@ export class AmpA4A extends AMP.BaseElement {
     const metadataStart = creative.lastIndexOf(METADATA_STRING);
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
-      dev.warn('A4A',
+      dev().warn('A4A',
         'Could not locate start index for amp meta data in: %s', creative);
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
-      dev.warn('A4A',
+      dev().warn('A4A',
         'Could not locate closing script tag for amp meta data in: %s',
         creative);
       return null;
@@ -674,7 +714,7 @@ export class AmpA4A extends AMP.BaseElement {
       return this.buildCreativeMetaData_(JSON.parse(
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd)));
     } catch (err) {
-      dev.warn('A4A', 'Invalid amp metadata: %s',
+      dev().warn('A4A', 'Invalid amp metadata: %s',
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }

@@ -4,6 +4,7 @@ Use the format `${varName}` in a request string for a page or platform-defined v
 
 Since the request that is constructed is sent over HTTP, the request needs to be encoded. To achieve this, the `var` values are url-encoded using [`encodeUrlComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) before being inserted into the request.
 
+##Variable definitions
 Vars can be defined by the platform, in the config at the top level, inside the triggers or in a remote config, as shown in this example.
 
 ```html
@@ -31,7 +32,23 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 </amp-analytics>
 ```
 
-When the same `var` is defined in multiple locations, the value is picked in the order remote config > triggers > top level > platform. Thus, if the remote config defined `clientId` as `12332312` in the example above, the values of various vars will be as follows:
+##Variables as data attribute
+For the following event types, variables can be passed as part of the element level data attribute
+
+* visible
+* click
+
+The variables passed as data attributes should follow the format `data-vars-*`.
+
+Example:
+
+`<span id="test1" class="box" data-vars-event-id="22">
+  Click here to generate an event
+</span>`
+
+And in the request url the token would be of the format `${eventId}` (follows camelcase).
+
+When the same `var` is defined in multiple locations, the value is picked in the order remote config > element level data attributes > triggers > top level > platform. Thus, if the remote config defined `clientId` as `12332312` in the example above, the values of various vars will be as follows:
 
 | var | Value | Defined by |
 |-------|-------|------------|
@@ -64,7 +81,7 @@ Example value: `example.com`
 
 Provides the AMP document's URL. The URL contains the scheme, domain, port and full path. It does not contain the fragment part of the URL.
 
-Example value: `http://example.com:8000/examples.build/analytics.amp.max.html`
+Example value: `http://example.com:8000/examples/analytics.amp.html`
 
 ### canonicalHost
 
@@ -305,6 +322,7 @@ Provides the vertical scroll boundary that triggered a scroll event. This var is
 only available in a `trigger` of type `scroll`. The value of the boundary may be
 rounded based on the precision supported by the extension. For example, a
 boundary with value `1` and precision of `5` will result in value of var to be 0.
+
 
 ## Miscellaneous
 

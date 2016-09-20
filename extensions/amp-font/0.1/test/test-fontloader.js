@@ -25,7 +25,7 @@ adopt(window);
 const FONT_FACE_ = `
   @font-face {
     font-family: 'Comic AMP';
-    src: url(/base/examples/fonts/ComicAMP.ttf) format('truetype');
+    src: url(/examples/fonts/ComicAMP.ttf) format('truetype');
   }
 `;
 

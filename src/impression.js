@@ -35,7 +35,7 @@ export function maybeTrackImpression(win) {
     return;
   }
   if (clickUrl.indexOf('https://') != 0) {
-    user.warn('Impression',
+    user().warn('Impression',
         'click fragment param should start with https://. Found ',
         clickUrl);
     return;

@@ -17,10 +17,12 @@
 import {createIframePromise} from '../../testing/iframe';
 import {preconnectFor, Preconnect} from '../../src/preconnect';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 describe('preconnect', () => {
 
   let sandbox;
+  let iframeClock;
   let clock;
   let preconnect;
   let preloadSupported;
@@ -35,6 +37,7 @@ describe('preconnect', () => {
 
   function getPreconnectIframe() {
     return createIframePromise().then(iframe => {
+      iframeClock = lolex.install(iframe.win);
       if (!detectFeatures) {
         sandbox.stub(Preconnect.prototype, 'detectFeatures_', () => {
           return {
@@ -160,12 +163,12 @@ describe('preconnect', () => {
           .to.have.length(1);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(9000);
+      iframeClock.tick(9000);
       expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
           .to.have.length(1);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(1000);
+      iframeClock.tick(1000);
       expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
           .to.have.length(0);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
@@ -194,14 +197,15 @@ describe('preconnect', () => {
       preconnect.url('https://x.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(9000);
+      iframeClock.tick(9000);
       preconnect.url('https://x.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(1000);
+      iframeClock.tick(1000);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(0);
       // After timeout preconnect creates a new tag.
+      clock.tick(10000);
       preconnect.url('https://x.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
@@ -214,9 +218,10 @@ describe('preconnect', () => {
           /* opt_alsoConnecting */ true);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(10000);
+      iframeClock.tick(10000);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(0);
+      clock.tick(10000);
       preconnect.url('https://y.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(0);

@@ -14,118 +14,22 @@
  * limitations under the License.
  */
 
+import {AmpAdApiHandler} from './amp-ad-api-handler';
+import {
+  allowRenderOutsideViewport,
+  incrementLoadingAds,
+} from './concurrent-load';
 import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
-import {adPrefetch, adPreconnect} from '../../../ads/_config';
-import {timer} from '../../../src/timer';
+import {isAdPositionAllowed, getAdContainer,}
+    from '../../../src/ad-helper';
+import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
-import {AmpAdApiHandler} from './amp-ad-api-handler';
 
-/** @const These tags are allowed to have fixed positioning */
-const POSITION_FIXED_TAG_WHITELIST = {
-  'AMP-FX-FLYING-CARPET': true,
-  'AMP-LIGHTBOX': true,
-  'AMP-STICKY-AD': true,
-};
-
-/**
- * Store loading ads info within window to ensure it can be properly stored
- * across separately compiled binaries that share load throttling.
- * @const ID of window variable used to track 3p ads waiting to load.
- */
-const LOADING_ADS_WIN_ID_ = '3pla';
-
-/**
- * @param {!Element} element
- * @param {!Window} win
- * @return {number|boolean}
- */
-export function allowRenderOutsideViewport(element, win) {
-  // Store in window Object that serves as a set of timers associated with
-  // waiting elements.
-  const loadingAds = win[LOADING_ADS_WIN_ID_] || {};
-  // If another ad is currently loading we only load ads that are currently
-  // in viewport.
-  for (const key in loadingAds) {
-    if (Object.prototype.hasOwnProperty.call(loadingAds, key)) {
-      return false;
-    }
-  }
-
-  // Ad opts into lazier loading strategy where we only load ads that are
-  // at closer than 1.25 viewports away.
-  if (element.getAttribute('data-loading-strategy') ==
-      'prefer-viewability-over-views') {
-    return 1.25;
-  }
-  return true;
-}
-
-/**
- * Decrements loading ads count used for throttling.
- * @param {number} timerId of timer returned from incrementLoadingAds
- * @param {!Window} win
- */
-export function decrementLoadingAds(timerId, win) {
-  timer.cancel(timerId);
-  const loadingAds = win[LOADING_ADS_WIN_ID_];
-  if (loadingAds) {
-    delete loadingAds[timerId];
-  }
-}
-
-/**
- * Increments loading ads count for throttling.
- * @param {!Window} win
- * @return {number} timer ID for testing
- */
-export function incrementLoadingAds(win) {
-  let loadingAds = win[LOADING_ADS_WIN_ID_];
-  if (!loadingAds) {
-    loadingAds = {};
-    win[LOADING_ADS_WIN_ID_] = loadingAds;
-  }
-
-  const timerId = timer.delay(() => {
-    // Unfortunately we don't really have a good way to measure how long it
-    // takes to load an ad, so we'll just pretend it takes 1 second for
-    // now.
-    decrementLoadingAds(timerId, win);
-  }, 1000);
-  loadingAds[timerId] = 1;
-  return timerId;
-}
-
-/**
- * @param {!Element} el
- * @param {!Window} win
- * @return {boolean} whether element or its ancestors have position
- * fixed (unless they are POSITION_FIXED_TAG_WHITELIST).
- * This should only be called when a layout on the page was just forced
- * anyway.
- */
-export function isPositionFixed(el, win) {
-  let hasFixedAncestor = false;
-  do {
-    if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
-      return false;
-    }
-    if (win/*because only called from onLayoutMeasure */
-            ./*OK*/getComputedStyle(el).position == 'fixed') {
-      // Because certain blessed elements may contain a position fixed
-      // container (which contain an ad), we continue to search the
-      // ancestry tree.
-      hasFixedAncestor = true;
-    }
-    el = el.parentNode;
-  } while (el && el.tagName != 'BODY');
-  return hasFixedAncestor;
-}
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -189,15 +93,18 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
+    const adType = this.element.getAttribute('type');
+    /** {!Object} */
+    this.config = adConfig[adType];
+    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+
     setupA2AListener(this.win);
 
-    /** @private @const {function()|null} */
-    this.renderStartResolve_ = null;
+    /** @private {?string|undefined} */
+    this.container_ = undefined;
 
-    /** @private @const {!Promise} */
-    this.renderStartPromise_ = new Promise(resolve => {
-      this.renderStartResolve_ = resolve;
-    });
+    /** @private {?Promise} */
+    this.layoutPromise_ = null;
   }
 
   /**
@@ -207,20 +114,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
-    const type = this.element.getAttribute('type');
-    const prefetch = adPrefetch[type];
-    const preconnect = adPreconnect[type];
-    if (typeof prefetch == 'string') {
-      this.preconnect.preload(prefetch, 'script');
-    } else if (prefetch) {
-      prefetch.forEach(p => {
+    if (typeof this.config.prefetch == 'string') {
+      this.preconnect.preload(this.config.prefetch, 'script');
+    } else if (this.config.prefetch) {
+      this.config.prefetch.forEach(p => {
         this.preconnect.preload(p, 'script');
       });
     }
-    if (typeof preconnect == 'string') {
-      this.preconnect.url(preconnect, onLayout);
-    } else if (preconnect) {
-      preconnect.forEach(p => {
+    if (typeof this.config.preconnect == 'string') {
+      this.preconnect.url(this.config.preconnect, onLayout);
+    } else if (this.config.preconnect) {
+      this.config.preconnect.forEach(p => {
         this.preconnect.url(p, onLayout);
       });
     }
@@ -237,7 +141,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.isInFixedContainer_ = isPositionFixed(this.element, this.win);
+    this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
+    /** detect ad containers, add the list to element as a new attribute */
+    if (this.container_ === undefined) {
+      this.container_ = getAdContainer(this.element);
+    }
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
@@ -271,23 +179,24 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.iframe_) {
-      user.assert(!this.isInFixedContainer_,
-          '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
-      incrementLoadingAds(this.win);
-      return getAdCid(this).then(cid => {
-        if (cid) {
-          this.element.setAttribute('ampcid', cid);
-        }
-        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element);
-        this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.boundNoContentHandler_);
-        return this.apiHandler_.startUp(this.iframe_, true);
-      });
+    if (this.layoutPromise_) {
+      return this.layoutPromise_;
     }
-    return loadPromise(this.iframe_);
+    user().assert(!this.isInFixedContainer_,
+        '<amp-ad> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element);
+    incrementLoadingAds(this.win);
+    return this.layoutPromise_ = getAdCid(this).then(cid => {
+      const opt_context = {
+        clientId: cid || null,
+        container: this.container_,
+      };
+      this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+          this.element, null, opt_context);
+      this.apiHandler_ = new AmpAdApiHandler(
+          this, this.element, this.boundNoContentHandler_);
+      return this.apiHandler_.startUp(this.iframe_, true);
+    });
   }
 
   /** @override  */
@@ -334,6 +243,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.layoutPromise_ = null;
     if (!this.iframe_) {
       return true;
     }

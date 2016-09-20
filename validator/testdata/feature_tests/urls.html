@@ -79,5 +79,16 @@
   <amp-pixel src="http://amp-pixel" layout="fixed" width="42"></amp-pixel>
   <amp-video src="http://amp-video" width="42" height="42"></amp-video>
   <a href=" j a v a s c r i p t :alert(1)">Invalid protocol</a>
+
+  <!-- __amp_source_origin is not an allowed value for URLs. -->
+  <a href="__amp_source_origin">uhm, no</a>
+  <amp-ad src="__amp_source_origin" width="42" height="42" type=""></amp-ad>
+  <amp-anim src="__amp_source_origin" width="42" height="42"></amp-anim>
+  <amp-audio src="__amp_source_origin" layout="fixed" width="42"></amp-audio>
+  <amp-iframe src="__amp_source_origin" width="42" height="42"></amp-iframe>
+  <amp-img src="__amp_source_origin" layout="responsive" width="42" height="42"></amp-img>
+  <amp-pixel src="__amp_source_origin" layout="fixed" width="42"></amp-pixel>
+  <amp-video src="__amp_source_origin" width="42" height="42"></amp-video>
+  <amp-video src="%5f_amp_source%5forigin" width="42" height="42"></amp-video>
 </body>
 </html>

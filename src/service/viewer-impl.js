@@ -20,11 +20,12 @@ import {getMode} from '../mode';
 import {fromClass} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
-import {platform} from '../platform';
-import {timer} from '../timer';
+import {platformFor} from '../platform';
+import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 import {urls} from '../config';
+import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -115,7 +116,7 @@ export class Viewer {
     /** @private {boolean} */
     this.overtakeHistory_ = false;
 
-    /** @private {string} */
+    /** @private {!VisibilityState} */
     this.visibilityState_ = VisibilityState.VISIBLE;
 
     /** @private {string} */
@@ -124,7 +125,7 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {string} */
+    /** @private {!ViewportType} */
     this.viewportType_ = ViewportType.NATURAL;
 
     /** @private {number} */
@@ -136,7 +137,7 @@ export class Viewer {
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {!Observable} */
+    /** @private {!Observable<!{paddingTop: number, duration: (number|undefined), curve: (string|undefined)}>} */
     this.viewportObservable_ = new Observable();
 
     /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
@@ -163,6 +164,15 @@ export class Viewer {
     /** @private {?time} */
     this.firstVisibleTime_ = null;
 
+    /** @private {?Function} */
+    this.messagingReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.viewerOriginResolver_ = null;
+
+    /** @private {?Function} */
+    this.trustedViewerResolver_ = null;
+
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
@@ -182,24 +192,25 @@ export class Viewer {
       parseParams_(this.win.location.hash, this.params_);
     }
 
-    dev.fine(TAG_, 'Viewer params:', this.params_);
+    dev().fine(TAG_, 'Viewer params:', this.params_);
 
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
-    dev.fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
+    dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
-    this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
-        this.overtakeHistory_;
-    dev.fine(TAG_, '- history:', this.overtakeHistory_);
+    this.overtakeHistory_ = !!(parseInt(this.params_['history'], 10) ||
+        this.overtakeHistory_);
+    dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.setVisibilityState_(this.params_['visibilityState']);
-    dev.fine(TAG_, '- visibilityState:', this.getVisibilityState());
+    dev().fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
-    dev.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
+    dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     // Configure scrolling parameters when AMP is iframed on iOS.
+    const platform = platformFor(this.win);
     if (this.viewportType_ == ViewportType.NATURAL && this.isIframed_ &&
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
@@ -211,15 +222,15 @@ export class Viewer {
             (getMode(win).localDev || getMode(win).development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
-    dev.fine(TAG_, '- viewportType:', this.viewportType_);
+    dev().fine(TAG_, '- viewportType:', this.viewportType_);
 
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
-    dev.fine(TAG_, '- padding-top:', this.paddingTop_);
+    dev().fine(TAG_, '- padding-top:', this.paddingTop_);
 
     /** @private @const {boolean} */
     this.performanceTracking_ = this.params_['csi'] === '1';
-    dev.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
+    dev().fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe or
@@ -243,13 +254,13 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-        timer.timeoutPromise(
+        timerFor(this.win).timeoutPromise(
             20000,
             new Promise(resolve => {
-              /** @private @const {function()|undefined} */
               this.messagingReadyResolver_ = resolve;
             })).catch(reason => {
-              throw getChannelError(reason);
+              throw getChannelError(/** @type {!Error|string|undefined} */ (
+                  reason));
             }) : null;
 
     /**
@@ -263,7 +274,8 @@ export class Viewer {
         this.messagingReadyPromise_
             .catch(reason => {
               // Don't fail promise, but still report.
-              reportError(getChannelError(reason));
+              reportError(getChannelError(
+                  /** @type {!Error|string|undefined} */ (reason)));
             }) : null;
 
     // Trusted viewer and referrer.
@@ -284,7 +296,6 @@ export class Viewer {
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
       trustedViewerPromise = new Promise(resolve => {
-        /** @const @private {!function(boolean)|undefined} */
         this.trustedViewerResolver_ = resolve;
       });
     }
@@ -302,8 +313,7 @@ export class Viewer {
         resolve(this.win.location.ancestorOrigins[0]);
       } else {
         // Race to resolve with a timer.
-        timer.delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
-        /** @private @const {!function(string)|undefined} */
+        timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
         this.viewerOriginResolver_ = resolve;
       }
     });
@@ -326,7 +336,7 @@ export class Viewer {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              dev.error(TAG_, 'Untrusted viewer referrer override: ' +
+              dev().error(TAG_, 'Untrusted viewer referrer override: ' +
                   this.unconfirmedReferrerUrl_ + ' at ' +
                   this.messagingOrigin_);
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
@@ -351,7 +361,7 @@ export class Viewer {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
-            dev.error(TAG_, 'Untrusted viewer url override: ' +
+            dev().error(TAG_, 'Untrusted viewer url override: ' +
                 viewerUrlOverride + ' at ' +
                 this.messagingOrigin_);
           }
@@ -371,7 +381,7 @@ export class Viewer {
         // This is currently used my mode.js to infer development mode.
         this.win.location.originalHash = this.win.location.hash;
         this.win.history.replaceState({}, '', newUrl);
-        dev.fine(TAG_, 'replace url:' + this.win.location.href);
+        dev().fine(TAG_, 'replace url:' + this.win.location.href);
       }
     }
 
@@ -388,7 +398,7 @@ export class Viewer {
   onVisibilityChange_() {
     if (this.isVisible()) {
       if (!this.firstVisibleTime_) {
-        this.firstVisibleTime_ = timer.now();
+        this.firstVisibleTime_ = Date.now();
       }
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
@@ -432,7 +442,7 @@ export class Viewer {
    *     requested the navigation.
    */
   navigateTo(url, requestedBy) {
-    dev.assert(url.indexOf(urls.cdn) == 0,
+    dev().assert(url.indexOf(urls.cdn) == 0,
         'Invalid A2A URL %s %s', url, requestedBy);
     if (this.hasCapability('a2a')) {
       this.sendMessage('a2a', {
@@ -484,7 +494,7 @@ export class Viewer {
    */
   toggleRuntime() {
     this.isRuntimeOn_ = !this.isRuntimeOn_;
-    dev.fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
+    dev().fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
     this.runtimeOnObservable_.fire(this.isRuntimeOn_);
   }
 
@@ -528,7 +538,7 @@ export class Viewer {
       return;
     }
     const oldState = this.visibilityState_;
-    state = dev.assertEnumValue(VisibilityState, state, 'VisibilityState');
+    state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the
@@ -550,7 +560,7 @@ export class Viewer {
 
     this.visibilityState_ = state;
 
-    dev.fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
+    dev().fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
 
     if (oldState !== state) {
       this.onVisibilityChange_();
@@ -716,7 +726,11 @@ export class Viewer {
 
   /**
    * Adds a "viewport" event listener for viewer events.
-   * @param {function()} handler
+   * @param {function({
+   *   paddingTop: number,
+   *   duration: (number|undefined),
+   *   curve: (string|undefined)
+   * })} handler
    * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
@@ -756,7 +770,8 @@ export class Viewer {
    * @return {!Promise}
    */
   requestFullOverlay() {
-    return this.sendMessageUnreliable_('requestFullOverlay', {}, true);
+    return /** @type {!Promise} */ (
+        this.sendMessageUnreliable_('requestFullOverlay', {}, true));
   }
 
   /**
@@ -765,7 +780,8 @@ export class Viewer {
    * @return {!Promise}
    */
   cancelFullOverlay() {
-    return this.sendMessageUnreliable_('cancelFullOverlay', {}, true);
+    return /** @type {!Promise} */ (
+        this.sendMessageUnreliable_('cancelFullOverlay', {}, true));
   }
 
   /**
@@ -774,8 +790,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return this.sendMessageUnreliable_(
-        'pushHistory', {stackIndex}, true);
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'pushHistory', {stackIndex}, true));
   }
 
   /**
@@ -784,26 +800,65 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return this.sendMessageUnreliable_(
-        'popHistory', {stackIndex}, true);
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'popHistory', {stackIndex}, true));
   }
 
   /**
-   * Retrieves the Base CID from the viewer
+   * Get/set the Base CID from/to the viewer.
+   * @param {string=} opt_data Stringified JSON object {cid, time}.
    * @return {!Promise<string|undefined>}
    */
-  getBaseCid() {
+  baseCid(opt_data) {
     return this.isTrustedViewer().then(trusted => {
       if (!trusted) {
         return undefined;
       }
-      return this.sendMessage('cid', undefined, true);
+      const cidPromise = this.sendMessage('cid', opt_data, true)
+          .then(data => {
+            // For backward compatibility: #4029
+            if (data && !tryParseJson(data)) {
+              return JSON.stringify({
+                time: Date.now(), // CID returned from old API is always fresh
+                cid: data,
+              });
+            }
+            return data;
+          });
+      // Getting the CID may take some time (waits for JS file to
+      // load, might hit GC), but we do not wait indefinitely. Typically
+      // it should resolve in milli seconds.
+      return timerFor(this.win).timeoutPromise(10000, cidPromise, 'base cid')
+          .catch(error => {
+            dev().error(TAG_, error);
+            return undefined;
+          });
     });
   }
 
   /**
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
+   * @return {!Promise<string>}
+   */
+  getFragment() {
+    if (!this.isEmbedded_) {
+      let hash = this.win.location.hash;
+      /* Strip leading '#' */
+      hash = hash.substr(1);
+      return Promise.resolve(hash);
+    }
+    if (!this.hasCapability('fragment')) {
+      return Promise.resolve('');
+    }
+    return this.sendMessageUnreliable_('fragment', undefined, true).then(
+      hash => hash || ''
+    );
+  }
+
+  /**
    * Triggers "tick" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   tick(message) {
     this.sendMessageUnreliable_('tick', message, false);
@@ -818,7 +873,7 @@ export class Viewer {
 
   /**
    * Triggers "setFlushParams" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   setFlushParams(message) {
     this.sendMessageUnreliable_('setFlushParams', message, false);
@@ -826,7 +881,7 @@ export class Viewer {
 
   /**
    * Triggers "prerenderComplete" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   prerenderComplete(message) {
     this.sendMessageUnreliable_('prerenderComplete', message, false);
@@ -835,7 +890,7 @@ export class Viewer {
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
-   * @param {*} data
+   * @param {!JSONType} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
    * @export
@@ -844,8 +899,12 @@ export class Viewer {
     if (eventType == 'viewport') {
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
+        this.viewportObservable_.fire({
+          paddingTop: this.paddingTop_,
+          duration: data['duration'],
+          curve: data['curve'],
+        });
       }
-      this.viewportObservable_.fire();
       return undefined;
     }
     if (eventType == 'historyPopped') {
@@ -857,16 +916,17 @@ export class Viewer {
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
-        dev.fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
+        dev().fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
       }
       this.setVisibilityState_(data['state']);
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {
-      this.broadcastObservable_.fire(data);
+      this.broadcastObservable_.fire(
+          /** @type {!JSONType|undefined} */ (data));
       return Promise.resolve();
     }
-    dev.fine(TAG_, 'unknown message:', eventType);
+    dev().fine(TAG_, 'unknown message:', eventType);
     return undefined;
   }
 
@@ -884,7 +944,7 @@ export class Viewer {
     if (!origin) {
       throw new Error('message channel must have an origin');
     }
-    dev.fine(TAG_, 'message channel established with origin: ', origin);
+    dev().fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
     this.messagingOrigin_ = origin;
     if (this.messagingReadyResolver_) {
@@ -956,7 +1016,7 @@ export class Viewer {
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
-   * @return {!Promise<*>|undefined}
+   * @return {?Promise<*>|undefined}
    * @private
    */
   sendMessageUnreliable_(eventType, data, awaitResponse) {
@@ -1032,7 +1092,7 @@ function parseParams_(str, allParams) {
 
 /**
  * Creates an error for the case where a channel cannot be established.
- * @param {!Error=} opt_reason
+ * @param {*=} opt_reason
  * @return {!Error}
  */
 function getChannelError(opt_reason) {
@@ -1042,7 +1102,6 @@ function getChannelError(opt_reason) {
   }
   return new Error('No messaging channel: ' + opt_reason);
 }
-
 
 /**
  * @typedef {{

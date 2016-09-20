@@ -20,6 +20,7 @@ import {
   HistoryBindingVirtual_,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -45,7 +46,7 @@ describe('History', () => {
     };
     bindingMock = sandbox.mock(binding);
 
-    history = new History(binding);
+    history = new History(window, binding);
   });
 
   afterEach(() => {
@@ -182,7 +183,10 @@ describe('HistoryBindingNatural', () => {
         length: 11,
       },
       addEventListener: () => {},
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
     };
+    installTimerService(windowStub);
     new HistoryBindingNatural_(windowStub);
     expect(replaceStateSpy.callCount).to.be.greaterThan(0);
     expect(replaceStateSpy.lastCall.args.length).to.equal(2);

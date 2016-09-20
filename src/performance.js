@@ -18,8 +18,9 @@ import {getExistingServiceForWindow} from './service';
 
 /**
  * @param {!Window} window
- * @return {!Performance}
+ * @return {!./service/performance-impl.Performance}
  */
 export function performanceFor(window) {
-  return getExistingServiceForWindow(window, 'performance');
+  return /** @type {!./service/performance-impl.Performance}*/ (
+      getExistingServiceForWindow(window, 'performance'));
 };

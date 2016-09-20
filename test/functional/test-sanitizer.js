@@ -133,6 +133,13 @@ describe('sanitizeHtml', () => {
 
 describe('resolveUrlAttr', () => {
 
+  it('should throw if __amp_source_origin is set', () => {
+    expect(() => resolveUrlAttr('a', 'href',
+        '/doc2?__amp_source_origin=https://google.com',
+        'http://acme.org/doc1'))
+            .to.throw(/Source origin is not allowed in/);
+  });
+
   it('should be called by sanitizer', () => {
     expect(sanitizeHtml('<a href="/path"></a>')).to.match(/http/);
     expect(sanitizeHtml('<amp-img src="/path"></amp-img>')).to.match(/http/);

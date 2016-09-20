@@ -40,7 +40,7 @@ function getFacebookSdk(global, cb) {
  */
 export function facebook(global, data) {
   const embedAs = data.embedAs || 'post';
-  user.assert(['post', 'video'].indexOf(embedAs) !== -1,
+  user().assert(['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
       ' "post" or "video" was: %s', embedAs);
   const fbPost = global.document.createElement('div');

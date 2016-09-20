@@ -18,7 +18,7 @@ import {
   AmpA4A,
   setPublicKeys,
 } from '../amp-a4a';
-import {base64UrlDecode} from '../crypto-verifier';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
@@ -41,7 +41,7 @@ class MockA4AImpl extends AmpA4A {
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
       creative: responseArrayBuffer,
-      signature: base64UrlDecode(responseHeaders.get('X-Google-header')),
+      signature: base64UrlDecodeToBytes(responseHeaders.get('X-Google-header')),
     });
   }
 
@@ -118,6 +118,7 @@ describe('amp-a4a', () => {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -305,6 +306,75 @@ describe('amp-a4a', () => {
         });
       });
     });
+    it('should run end-to-end in the presence of an XHR error', () => {
+      viewerForMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = doc.createElement('amp-a4a');
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImpl(a4aElement);
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.layoutCallback().then(() => {
+          a4a.vsync_.runScheduledTasks_();
+          expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
+              .to.be.true;
+          // Verify iframe presence and lack of visibility hidden
+          expect(a4aElement.children.length).to.equal(1);
+          const iframe = a4aElement.children[0];
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.src.indexOf('https://test.location.org')).to.equal(0);
+          expect(iframe.style.visibility).to.equal('');
+        });
+      });
+    });
+    it('should handle XHR error when resolves before layoutCallback', () => {
+      viewerForMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = doc.createElement('amp-a4a');
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.onLayoutMeasure();
+        return a4a.adPromise_.then(() => a4a.layoutCallback().then(() => {
+          a4a.vsync_.runScheduledTasks_();
+          // Verify iframe presence and lack of visibility hidden
+          expect(a4aElement.children.length).to.equal(1);
+          const iframe = a4aElement.children[0];
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.src.indexOf('https://test.location.org')).to.equal(0);
+          expect(iframe.style.visibility).to.equal('');
+        }));
+      });
+    });
+    it('should handle XHR error when resolves after layoutCallback', () => {
+      viewerForMock.onFirstCall().returns(Promise.resolve());
+      let rejectXhr;
+      xhrMock.onFirstCall().returns(new Promise((unusedResolve, reject) => {
+        rejectXhr = reject;
+      }));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = doc.createElement('amp-a4a');
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.onLayoutMeasure();
+        const layoutCallbackPromise = a4a.layoutCallback();
+        rejectXhr(new Error('XHR Error'));
+        return layoutCallbackPromise.then(() => {
+          a4a.vsync_.runScheduledTasks_();
+          // Verify iframe presence and lack of visibility hidden
+          expect(a4aElement.children.length).to.equal(1);
+          const iframe = a4aElement.children[0];
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.src.indexOf('https://test.location.org')).to.equal(0);
+          expect(iframe.style.visibility).to.equal('');
+        });
+      });
+    });
     // TODO(tdrl): Go through case analysis in amp-a4a.js#onLayoutMeasure and
     // add one test for each case / ensure that all cases are covered.
   });
@@ -398,6 +468,34 @@ describe('amp-a4a', () => {
           JSON.stringify(offsets) + '</script>' +
           baseTestDoc.slice(splicePoint));
     }
+    it('should not render AMP natively', () => {
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = doc.createElement('amp-a4a');
+        const a4a = new AmpA4A(a4aElement);
+        a4a.adUrl_ = 'http://foo.com';
+        a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
+        return a4a.maybeRenderAmpAd_().then(rendered => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          expect(rendered).to.be.false;
+          expect(a4aElement.shadowRoot).to.be.null;
+          expect(a4a.rendered_).to.be.false;
+          // Force layout callback which will cause iframe to be attached
+          a4a.adPromise_ = Promise.resolve(false);
+          return a4a.layoutCallback().then(() => {
+            a4a.vsync_.runScheduledTasks_();
+            // Verify iframe presence and lack of visibility hidden
+            expect(a4aElement.children.length).to.equal(1);
+            const iframe = a4aElement.children[0];
+            expect(iframe.tagName).to.equal('IFRAME');
+            expect(iframe.src.indexOf('http://foo.com')).to.equal(0);
+            expect(iframe.style.visibility).to.equal('');
+          });
+        });
+      });
+    });
     it('should render AMP natively', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -595,40 +693,6 @@ describe('amp-a4a', () => {
             expect(getAdUrlSpy.called, 'getAdUrl never called')
                 .to.be.false;
             expect(reason).to.deep.equal(cancellation());
-          });
-        });
-      });
-      it('verify unhandled error', () => {
-        return createAdTestingIframePromise().then(fixture => {
-          viewerForMock.returns(Promise.resolve());
-          let rejectResolve = null;
-          const sendXhrRequestMock =
-              sandbox.stub(MockA4AImpl.prototype, 'sendXhrRequest_');
-          sendXhrRequestMock.returns(new Promise((resolve, reject) => {
-            rejectResolve = reject;
-          }));
-          const doc = fixture.doc;
-          const a4aElement = doc.createElement('amp-a4a');
-          a4aElement.setAttribute('width', 200);
-          a4aElement.setAttribute('height', 50);
-          a4aElement.setAttribute('type', 'adsense');
-          const a4a = new MockA4AImpl(a4aElement);
-          const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-          a4a.onLayoutMeasure();
-          rejectResolve(new Error('some error'));
-          return a4a.adPromise_.then(() => {
-            assert.fail('should have thrown error');
-          }).catch(reason => {
-            expect(getAdUrlSpy.called, 'getAdUrl called once')
-                .to.be.true;
-            expect(reason).to.not.be.null;
-            expect(reason.message.indexOf('amp-a4a: ')).to.equal(0);
-            const state = JSON.parse(reason.message.substring(
-              reason.message.indexOf('{'),
-              reason.message.lastIndexOf('}') + 1));
-            expect(state).to.deep.equal({
-              m: 'some error', tag: 'AMP-A4A', type: 'adsense', au: 'args',
-            });
           });
         });
       });

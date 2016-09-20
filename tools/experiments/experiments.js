@@ -16,12 +16,16 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {dev} from '../../src/log';
+import {dev, initLogConstructor} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
+//TODO(@cramforce): For type. Replace with forward declaration.
+import '../../src/service/timer-impl';
+
+initLogConstructor();
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -78,14 +82,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
   },
   {
-    id: 'amp-live-list',
-    name: 'AMP Live List/Blog',
-    spec: 'https://github.com/ampproject/amphtml/issues/2762',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4001',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
+    id: 'amp-access-jwt',
+    name: 'AMP Access JWT prototype',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
@@ -143,12 +147,52 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
+  {
+    id: 'amp-apester-media',
+    name: 'AMP extension for Apester media',
+    spec: 'https://github.com/ampproject/amphtml/issues/3233',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
+  },
+  {
+    id: 'amp-app-banner',
+    name: 'Shows a native app install/open banner.',
+    spec: 'https://github.com/ampproject/amphtml/issues/800',
+  },
+  {
+    id: 'cache-service-worker',
+    name: 'AMP Cache Service Worker',
+    spec: 'https://github.com/ampproject/amphtml/issues/1199',
+  },
+  {
+    id: 'amp-lightbox-viewer',
+    name: 'Enables a new lightbox experience via the `lightbox` attribute',
+    spec: 'https://github.com/ampproject/amphtml/issues/4152',
+  },
+  {
+    id: 'amp-lightbox-viewer-auto',
+    name: 'Allows the new lightbox experience to automatically include some ' +
+        'elements without the need to manually add the `lightbox` attribute',
+    spec: 'https://github.com/ampproject/amphtml/issues/4152',
+  },
+  {
+    id: 'amp-fresh',
+    name: 'Guaranteed minimum freshness on sections of a page',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
+  },
+  {
+    id: 'pan-y',
+    name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
+        ' touch handlers',
+    spec: 'https://github.com/ampproject/amphtml/issues/4820',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
+  },
 ];
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
-    dev.assert(experiment.cleanupIssue, `experiment ${experiment.name} must ` +
-        'have a `cleanupIssue` field.');
+    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
+        ' have a `cleanupIssue` field.');
   });
 }
 
@@ -275,7 +319,7 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = new Date().getTime() +
+      const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
       setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
     } else {
@@ -292,10 +336,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev.assert(document.getElementById('popup-container'));
-  const messageElement = dev.assert(document.getElementById('popup-message'));
-  const confirmButton = dev.assert(document.getElementById('popup-button-ok'));
-  const cancelButton = dev.assert(
+  const container = dev().assert(document.getElementById('popup-container'));
+  const messageElement = dev().assert(document.getElementById('popup-message'));
+  const confirmButton = dev().assert(
+      document.getElementById('popup-button-ok'));
+  const cancelButton = dev().assert(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {

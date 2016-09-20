@@ -62,7 +62,7 @@ describe('validation-bubble', () => {
       bubble.show(targetEl, 'Hello World');
       expect(bubbleEl).to.not.be.null;
       expect(bubbleEl.textContent).to.equal('Hello World');
-      expect(bubbleEl.style.display).to.equal('');
+      expect(bubbleEl.style.display).to.equal('block');
       expect(bubbleEl.style.top).to.equal('290px');
       expect(bubbleEl.style.left).to.equal('500px');
 

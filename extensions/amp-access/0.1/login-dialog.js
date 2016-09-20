@@ -78,7 +78,7 @@ class ViewerLoginDialog {
     }
     return urlPromise.then(url => {
       const loginUrl = buildLoginUrl(url, 'RETURN_URL');
-      dev.fine(TAG, 'Open viewer dialog: ', loginUrl);
+      dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
       return this.viewer.sendMessage('openDialog', {
         'url': loginUrl,
       }, true);
@@ -128,7 +128,7 @@ class WebLoginDialog {
    * @return {!Promise<string>}
    */
   open() {
-    user.assert(!this.resolve_, 'Dialog already opened');
+    user().assert(!this.resolve_, 'Dialog already opened');
     return new Promise((resolve, reject) => {
       this.resolve_ = resolve;
       this.reject_ = reject;
@@ -182,18 +182,18 @@ class WebLoginDialog {
     let dialogReadyPromise = null;
     if (typeof this.urlOrPromise == 'string') {
       const loginUrl = buildLoginUrl(this.urlOrPromise, returnUrl);
-      dev.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
+      dev().fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
       this.dialog_ = openWindowDialog(this.win, loginUrl, '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = Promise.resolve();
       }
     } else {
-      dev.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
+      dev().fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
       this.dialog_ = openWindowDialog(this.win, '', '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = this.urlOrPromise.then(url => {
           const loginUrl = buildLoginUrl(url, returnUrl);
-          dev.fine(TAG, 'Set dialog url: ', loginUrl);
+          dev().fine(TAG, 'Set dialog url: ', loginUrl);
           this.dialog_.location.replace(loginUrl);
         }, error => {
           throw new Error('failed to resolve url: ' + error);
@@ -232,14 +232,14 @@ class WebLoginDialog {
     }, 500);
 
     this.messageUnlisten_ = listen(this.win, 'message', e => {
-      dev.fine(TAG, 'MESSAGE:', e);
+      dev().fine(TAG, 'MESSAGE:', e);
       if (e.origin != returnOrigin) {
         return;
       }
       if (!e.data || e.data.sentinel != 'amp') {
         return;
       }
-      dev.fine(TAG, 'Received message from dialog: ', e.data);
+      dev().fine(TAG, 'Received message from dialog: ', e.data);
       if (e.data.type == 'result') {
         if (this.dialog_) {
           this.dialog_./*OK*/postMessage({
@@ -261,7 +261,7 @@ class WebLoginDialog {
     if (!this.resolve_) {
       return;
     }
-    dev.fine(TAG, 'Login done: ', result, opt_error);
+    dev().fine(TAG, 'Login done: ', result, opt_error);
     if (opt_error) {
       this.reject_(opt_error);
     } else {

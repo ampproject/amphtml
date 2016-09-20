@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td><a href="https://cdn.ampproject.org/experiments.html">Experimental</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -44,7 +44,8 @@ Multiple experiments can be run on the same AMP document in parallel with their 
 
 ## Configuration
 The configuration of the experiments is specified in a JSON object. 
-```
+
+```html
 <amp-experiment>
   <script type=”application/json”>
     {
@@ -65,25 +66,30 @@ The configuration of the experiments is specified in a JSON object.
 
 At top level, the JSON is a map of experiment configurations keyed by experiment names. In each experiment, available settings are described in the table below:
 
-| Name                  | Is required field?           | Description |
-|-----------------------|------------------------------|-------------|
-|`sticky`               | No, default=`true`           | Whether the experiment assignment is sticky for a user or not. |
-|`consentNotificationId`| No, default=`undefined`      | The element ID of the `amp-user-notification` to be dismissed before a sticky experiment can be conducted. To not block the page rendering, an experiment with this field specified will be skipped if the consent is not provided prior to the current visit. That’s to say, only returning visits with user consent can trigger such an experiment. This setting is only relevant when `sticky=true`. |
-|`variants`             | Yes                          | A name-to-percentage map where percentage is a float number in range (0, 100) that indicates the amount of traffic will be allocated to the variant. Variants don’t have to sum up to 100%. In that case, there’ll be a portion of the traffic allocated to a variant named `none`, which is a reserved keyword that indicates no variant was allocated. |
-| **Advanced settings** |||
-|`cidScope`             | No, default=`amp-experiment` | The [CID scope]( https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#client_id) for user sticky experiment. Only useful when you want to reuse an existing CID. This setting is only relevant when `sticky=true`. |
-|`group`                | No, default=`{experimentName}` | Experiments with the same group name will share the same CID space. Only useful when multiple experiments want to have correlated user grouping. This setting is only relevant when `sticky=true`. |
+<table>
+<tr><th>Name                                                 </th><th>Is required field?                                          </th><th>Description </th></tr>
+<tr><td class="col-thirty"><code>sticky</code>               </td><td class="col-thirty">No, default=<code>true</code>            </td><td>Whether the experiment assignment is sticky for a user or not. </td></tr>
+<tr><td class="col-thirty"><code>consentNotificationId</code></td><td class="col-thirty">No, default=<code>undefined</code>       </td><td>The element ID of the <code>amp-user-notification</code> to be dismissed before a sticky experiment can be conducted. To not block the page rendering, an experiment with this field specified will be skipped if the consent is not provided prior to the current visit. That’s to say, only returning visits with user consent can trigger such an experiment. This setting is only relevant when <code>sticky=true</code>. </td></tr>
+<tr><td class="col-thirty"><code>variants</code>             </td><td class="col-thirty">Yes                                      </td><td>A name-to-percentage map where percentage is a float number in range (0, 100) that indicates the amount of traffic will be allocated to the variant. Variants don’t have to sum up to 100%. In that case, there’ll be a portion of the traffic allocated to a variant named <code>none</code>, which is a reserved keyword that indicates no variant was allocated. </td></tr>
+<tr><td colspan=3><strong>Advanced settings</strong></td></tr>
+<tr><td class="col-thirty"><code>cidScope</code>             </td><td class="col-thirty">No, default=<code>amp-experiment</code>  </td><td>The <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#client_id">CID scope</a> for user sticky experiment. Only useful when you want to reuse an existing CID. This setting is only relevant when <code>sticky=true</code>. </td></tr>
+<tr><td class="col-thirty"><code>group</code>                </td><td class="col-thirty">No, default=<code>{experimentName}</code></td><td>Experiments with the same group name will share the same CID space. Only useful when multiple experiments want to have correlated user grouping. This setting is only relevant when <code>sticky=true</code>. </td></tr>
+</table>
 
 Characters used in the experiment name and variant name are restricted to `[a-z,A-Z,0-9,-,_].`  `none` is a reserved keyword and cannot be used. 
 
 ## Style a variant
 For each experiment, the allocated variant is exposed as attribute of the body element of the document.
+
+```html
 <body amp-x-aExperiment=”treatment1” amp-x-bExperiment=”treatment3”>
-	
+```
+
 Notice that the experiment name is prefixed by `amp-x-` to avoid naming conflict. Experiments with no variant allocated are ignored.
 
 Use CSS attribute selector to style the document. For example, the code below hide a test banner for the `treatment1` group of experiment `aExperiment`:
-```
+
+```css
 body[amp-x-aExperiment=”treatment1”] .test-banner {
   display: none;
 }
@@ -91,26 +97,26 @@ body[amp-x-aExperiment=”treatment1”] .test-banner {
 
 ## Reporting
 Allocated variants are available as a [URL substitution variable](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md): `VARIANT(experiment)`
-```
+
+```html
 <amp-pixel src="https://example.com?xname=aExperiment&xvar=VARIANT(aExperiment)">
-``` 
+```
+
 For experiments with no variants allocated, this variable resolves to string literal `none`.
 
 Variable `VARIANTS` returns all variants serialized in the format of
-```
-{experiment1}.{variant}!{experiment2}.{variant}...
-```
+
+`{experiment1}.{variant}!{experiment2}.{variant}...`
 
 For example, the URL `https://example.com?variants=VARIANTS` expands to:
-```
-https://example.com?variants=aExperiment.treatmentA!bExperiment.treatmentB
-```
+
+`https://example.com?variants=aExperiment.treatmentA!bExperiment.treatmentB`
 
 ## Override variant allocation
 An experiment can be forced to a variant via URL fragment. This is useful in development.
-```
-https://example.com/amparticle#amp-x-experiment=treatment
-```
+
+`https://example.com/amparticle#amp-x-experiment=treatment`
+
 Notice the same `amp-x-` prefix used as in body attributes.
 
 ## Validation

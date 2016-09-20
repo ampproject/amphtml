@@ -42,6 +42,33 @@
       <input type="submit" value="Subscribe">
     </fieldset>
   </form>
+  <!-- More valid tags (datalist and optgroup) -->
+  <form method="post" action="https://example.com/subscribe" target="_blank">
+    <label>Choose a browser from this list:
+    <input list="browsers" name="myBrowser" /></label>
+    <datalist id="browsers">
+      <option value="Chrome">
+      <option value="Firefox">
+      <option value="Internet Explorer">
+      <option value="Opera">
+      <option value="Safari">
+      <option value="Microsoft Edge">
+    </datalist>
+    <select>
+      <optgroup label="Group 1">
+        <option>Option 1.1</option>
+      </optgroup>
+      <optgroup label="Group 2">
+        <option>Option 2.1</option>
+        <option>Option 2.2</option>
+      </optgroup>
+      <optgroup label="Group 3" disabled>
+        <option>Option 3.1</option>
+        <option>Option 3.2</option>
+        <option>Option 3.3</option>
+      </optgroup>
+    </select>
+  </form>
   <!-- Invalid form action must not be a relative url -->
   <form method="post" action="/subscribe" target="_blank">
     <input type="submit" value="Subscribe">

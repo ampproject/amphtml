@@ -15,8 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
-import {loadPromise} from '../src/event-helper';
+import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
 
@@ -26,8 +25,6 @@ export class AmpImg extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {function(!Element, number=): !Promise<!Element>} */
-    this.loadPromise_ = loadPromise;
 
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
@@ -37,6 +34,12 @@ export class AmpImg extends BaseElement {
 
     /** @private {?../src/srcset.Srcset} */
     this.srcset_ = null;
+  }
+
+  /** @override */
+  buildCallback() {
+    /** @private @const {boolean} */
+    this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
   }
 
   /** @override */
@@ -67,9 +70,6 @@ export class AmpImg extends BaseElement {
     this.propagateAttributes(['alt', 'referrerpolicy'], this.img_);
     this.applyFillContent(this.img_, true);
 
-    this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
-    this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
-
     this.element.appendChild(this.img_);
 
     this.srcset_ = srcsetFromElement(this.element);
@@ -77,7 +77,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.isPrerenderAllowed_;
   }
 
   /** @override */
@@ -117,7 +117,7 @@ export class AmpImg extends BaseElement {
 
     this.img_.setAttribute('src', src);
 
-    return this.loadPromise_(this.img_).then(() => {
+    return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.
       if (!this.allowImgLoadFallback_ &&
           this.img_.classList.contains('-amp-ghost')) {

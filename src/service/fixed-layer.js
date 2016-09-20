@@ -16,7 +16,7 @@
 
 import {documentContains} from '../dom';
 import {dev, user} from '../log';
-import {platform} from '../platform';
+import {platformFor} from '../platform';
 import {setStyle, setStyles} from '../style';
 
 const TAG = 'FixedLayer';
@@ -106,9 +106,10 @@ export class FixedLayer {
     // Sort in document order.
     this.sortInDomOrder_();
 
+    const platform = platformFor(this.doc.defaultView);
     if (this.fixedElements_.length > 0 && !this.transfer_ &&
             platform.isIos()) {
-      user.warn(TAG, 'Please test this page inside of an AMP Viewer such' +
+      user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
           ' as Google\'s because the fixed positioning might have slightly' +
           ' different layout.');
     }
@@ -127,6 +128,32 @@ export class FixedLayer {
   }
 
   /**
+   * Apply or reset transform style to fixed elements
+   * @param {?string} transform
+   */
+  transformMutate(transform) {
+    if (transform) {
+      // Apply transform style to all fixed elements
+      this.fixedElements_.forEach(e => {
+        if (e.fixedNow && e.top) {
+          if (e.transform && e.transform != 'none') {
+            setStyle(e.element, 'transform', e.transform + ' ' + transform);
+          } else {
+            setStyle(e.element, 'transform', transform);
+          }
+        }
+      });
+    } else {
+      // Reset transform style to all fixed elements
+      this.fixedElements_.forEach(e => {
+        if (e.fixedNow && e.top) {
+          setStyle(e.element, 'transform', '');
+        }
+      });
+    }
+  }
+
+  /**
    * Adds the element directly into the fixed layer, bypassing discovery.
    * @param {!Element} element
    */
@@ -141,10 +168,10 @@ export class FixedLayer {
    * @param {!Element} element
    */
   removeElement(element) {
-    this.removeFixedElement_(element);
-    if (this.fixedLayer_) {
+    const fe = this.removeFixedElement_(element);
+    if (fe && this.fixedLayer_) {
       this.vsync_.mutate(() => {
-        this.returnFromFixedLayer_(element);
+        this.returnFromFixedLayer_(/** @type {FixedElementDef} */ (fe));
       });
     }
   }
@@ -277,6 +304,7 @@ export class FixedLayer {
             transferrable: isTransferrable,
             top,
             zIndex: styles.getPropertyValue('z-index'),
+            transform: styles.getPropertyValue('transform'),
           };
         });
       },
@@ -296,7 +324,7 @@ export class FixedLayer {
       },
     }, {}).catch(error => {
       // Fail silently.
-      dev.error(TAG, 'Failed to mutate fixed elements:', error);
+      dev().error(TAG, 'Failed to mutate fixed elements:', error);
     });
   }
 
@@ -310,7 +338,7 @@ export class FixedLayer {
   }
 
   /**
-   * Calls `setupFixedSelectors` in a try-catch.
+   * Calls `setupFixedSelectors_` in a try-catch.
    * Fails quietly with a dev error if call fails.
    * This method should not be inlined to prevent TryCatch deoptimization.
    * NoInline keyword at the end of function name also prevents Closure compiler
@@ -320,10 +348,10 @@ export class FixedLayer {
    */
   trySetupFixedSelectorsNoInline(fixedSelectors) {
     try {
-      this.setupFixedSelectors(fixedSelectors);
+      this.setupFixedSelectors_(fixedSelectors);
     } catch (e) {
       // Fail quietly.
-      dev.error(TAG, 'Failed to setup fixed elements:', e);
+      dev().error(TAG, 'Failed to setup fixed elements:', e);
     }
   }
 
@@ -333,7 +361,7 @@ export class FixedLayer {
    * @param {!Array<string>} fixedSelectors
    * @private
    */
-  setupFixedSelectors(fixedSelectors) {
+  setupFixedSelectors_(fixedSelectors) {
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
       const elements = this.doc.querySelectorAll(fixedSelector);
@@ -385,6 +413,7 @@ export class FixedLayer {
    * Removes element from the fixed layer.
    *
    * @param {!Element} element
+   * @return {FixedElementDef|undefined} [description]
    * @private
    */
   removeFixedElement_(element) {
@@ -393,10 +422,12 @@ export class FixedLayer {
         this.vsync_.mutate(() => {
           element.style.top = '';
         });
+        const fe = this.fixedElements_[i];
         this.fixedElements_.splice(i, 1);
-        break;
+        return fe;
       }
     }
+    return undefined;
   }
 
   /** @private */
@@ -428,6 +459,8 @@ export class FixedLayer {
     const oldFixed = fe.fixedNow;
 
     fe.fixedNow = state.fixed;
+    fe.top = state.fixed ? state.top : '';
+    fe.transform = state.transform;
     if (state.fixed) {
       // Update `top`. This is necessary to adjust position to the viewer's
       // paddingTop.
@@ -466,8 +499,8 @@ export class FixedLayer {
       return;
     }
 
-    dev.fine(TAG, 'transfer to fixed:', fe.id, fe.element);
-    user.warn(TAG, 'In order to improve scrolling performance in Safari,' +
+    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
+    user().warn(TAG, 'In order to improve scrolling performance in Safari,' +
         ' we now move the element to a fixed positioning layer:', fe.element);
 
     if (!fe.placeholder) {
@@ -489,7 +522,7 @@ export class FixedLayer {
     const matches = fe.selectors.some(
         selector => this.matches_(element, selector));
     if (!matches) {
-      user.warn(TAG,
+      user().warn(TAG,
           'Failed to move the element to the fixed position layer.' +
           ' This is most likely due to the compound CSS selector:',
           fe.element);
@@ -514,7 +547,7 @@ export class FixedLayer {
       }
     } catch (e) {
       // Fail silently.
-      dev.error(TAG, 'Failed to test query match:', e);
+      dev().error(TAG, 'Failed to test query match:', e);
     }
     return false;
   }
@@ -527,7 +560,7 @@ export class FixedLayer {
     if (!fe.placeholder || !documentContains(this.doc, fe.placeholder)) {
       return;
     }
-    dev.fine(TAG, 'return from fixed:', fe.id, fe.element);
+    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
     if (documentContains(this.doc, fe.element)) {
       if (fe.element.style.zIndex) {
         fe.element.style.zIndex = '';
@@ -574,6 +607,14 @@ export class FixedLayer {
       visibility: 'visible',
     });
     this.doc.documentElement.appendChild(this.fixedLayer_);
+    // TODO(erwinm, #4097): Remove this when safari technology preview has merged
+    // the fix for https://github.com/ampproject/amphtml/issues/4047
+    // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
+    if (this.fixedLayer_.style['webkitAnimation'] !== undefined) {
+      this.fixedLayer_.style['webkitAnimation'] = 'none';
+    } else if (this.fixedLayer_.style['WebkitAnimation'] !== undefined) {
+      this.fixedLayer_.style['WebkitAnimation'] = 'none';
+    }
     return this.fixedLayer_;
   }
 
@@ -604,8 +645,10 @@ export class FixedLayer {
  *   id: string,
  *   selectors: !Array,
  *   element: !Element,
- *   placeholder: ?Element,
- *   fixedNow: boolean,
+ *   placeholder: (?Element|undefined),
+ *   fixedNow: (boolean|undefined),
+ *   top: (string|undefined),
+ *   transform: (string|undefined),
  * }}
  */
 let FixedElementDef;

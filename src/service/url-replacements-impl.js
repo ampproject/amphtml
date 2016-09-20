@@ -17,11 +17,13 @@
 import {accessServiceForOrNull} from '../access-service';
 import {cidFor} from '../cid';
 import {variantForOrNull} from '../variant-service';
+import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
-import {documentInfoFor} from '../document-info';
+import {documentInfoForDoc} from '../document-info';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
-import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from '../url';
+import {isFiniteNumber} from '../types';
+import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
 import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
@@ -48,14 +50,20 @@ export class UrlReplacements {
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
-    /** @private @const {!Object<string, function(*):*>} */
+    /** @private @const {!Object<string, function(*, *):*>} */
     this.replacements_ = this.win_.Object.create(null);
 
-    /** @private @const {function():!Promise<?AccessService>} */
+    /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, string>>} */
+    /** @private @const {!Promise<?Object<string>>} */
     this.variants_ = variantForOrNull(win);
+
+    /**
+     * @private @const {
+     *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
+     */
+    this.shareTrackingFragments_ = shareTrackingForOrNull(win);
 
     /** @private {boolean} */
     this.initialized_ = false;
@@ -72,27 +80,27 @@ export class UrlReplacements {
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set_('CANONICAL_URL', () => {
-      return documentInfoFor(this.win_).canonicalUrl;
-    });
+    this.set_('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
+      return info.canonicalUrl;
+    }));
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set_('CANONICAL_HOST', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_HOST', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.host;
-    });
+    }));
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set_('CANONICAL_HOSTNAME', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.hostname;
-    });
+    }));
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set_('CANONICAL_PATH', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_PATH', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.pathname;
-    });
+    }));
 
     // Returns the referrer URL.
     this.set_('DOCUMENT_REFERRER', () => {
@@ -122,34 +130,34 @@ export class UrlReplacements {
     });
 
     // Returns the Source URL for this AMP document.
-    this.set_('SOURCE_URL', () => {
-      return removeFragment(getSourceUrl(this.win_.location.href));
-    });
+    this.set_('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
+      return removeFragment(info.sourceUrl);
+    }));
 
     // Returns the host of the Source URL for this AMP document.
-    this.set_('SOURCE_HOST', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).host;
-    });
+    this.set_('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).host;
+    }));
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set_('SOURCE_HOSTNAME', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
-    });
+    this.set_('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).hostname;
+    }));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set_('SOURCE_PATH', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).pathname;
-    });
+    this.set_('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).pathname;
+    }));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set_('PAGE_VIEW_ID', () => {
-      return documentInfoFor(this.win_).pageViewId;
-    });
+    this.set_('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
+      return info.pageViewId;
+    }));
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      user.assert(param,
+      user().assert(param,
           'The first argument to QUERY_PARAM, the query string ' +
           'param is required');
       const url = parseUrl(this.win_.location.href);
@@ -161,7 +169,8 @@ export class UrlReplacements {
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
-      user.assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+      user().assertString(scope,
+          'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
@@ -174,7 +183,7 @@ export class UrlReplacements {
       }
       return cidFor(this.win_).then(cid => {
         return cid.get({
-          scope,
+          scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
         }, consent);
       });
@@ -183,9 +192,9 @@ export class UrlReplacements {
     // Returns assigned variant name for the given experiment.
     this.set_('VARIANT', experiment => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
-        user.assert(variants[experiment] !== undefined,
+        user().assert(variants[experiment] !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         const variant = variants[experiment];
@@ -197,7 +206,7 @@ export class UrlReplacements {
     // Returns all assigned experiment variants in a serialized form.
     this.set_('VARIANTS', () => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANTS, amp-experiment should be configured');
 
         const experiments = [];
@@ -211,9 +220,27 @@ export class UrlReplacements {
       });
     });
 
+    // Returns incoming share tracking fragment.
+    this.set_('SHARE_TRACKING_INCOMING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.incomingFragment;
+      });
+    });
+
+    // Returns outgoing share tracking fragment.
+    this.set_('SHARE_TRACKING_OUTGOING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.outgoingFragment;
+      });
+    });
+
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set_('TIMESTAMP', () => {
-      return new Date().getTime();
+      return Date.now();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
@@ -347,7 +374,7 @@ export class UrlReplacements {
 
     // Access: data from the authorization response.
     this.set_('AUTHDATA', field => {
-      user.assert(field,
+      user().assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
@@ -367,7 +394,7 @@ export class UrlReplacements {
     });
 
     this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
-      user.assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return this.getTimingData_(startAttribute, endAttribute);
     });
@@ -385,17 +412,28 @@ export class UrlReplacements {
   }
 
   /**
+   * Resolves the value via document info.
+   * @param {function(!../document-info.DocumentInfoDef):T} getter
+   * @return {T}
+   * @template T
+   */
+  getDocInfoValue_(getter) {
+    return getter(documentInfoForDoc(this.win_.document));
+  }
+
+  /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!AccessService):*} getter
+   * @param {function(!AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {*|null}
+   * @return {T|null}
+   * @template T
    */
   getAccessValue_(getter, expr) {
     return this.getAccessService_(this.win_).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
-        user.error(TAG, 'Access service is not installed to access: ', expr);
+        user().error(TAG, 'Access service is not installed to access: ', expr);
         return null;
       }
       return getter(accessService);
@@ -407,8 +445,8 @@ export class UrlReplacements {
    * The data for the timing events is retrieved from performance.timing API.
    * If start and end events are both given, the result is the difference between the two.
    * If only start event is given, the result is the timing value at start event.
-   * @param {string} startEvent
-   * @param {string=} endEvent
+   * @param {*} startEvent
+   * @param {*=} endEvent
    * @return {!Promise<string|undefined>}
    * @private
    */
@@ -424,7 +462,7 @@ export class UrlReplacements {
         ? timingInfo[startEvent]
         : timingInfo[endEvent] - timingInfo[startEvent];
 
-    if (isNaN(metric) || metric == Infinity) {
+    if (!isFiniteNumber(metric)) {
       // The metric is not supported.
       return Promise.resolve();
     } else if (metric < 0) {
@@ -433,19 +471,20 @@ export class UrlReplacements {
         metric = (endEvent === undefined)
             ? timingInfo[startEvent]
             : timingInfo[endEvent] - timingInfo[startEvent];
-        return (isNaN(metric) || metric == Infinity || metric < 0)
+        return (!isFiniteNumber(metric) || metric < 0)
             ? undefined
             : String(metric);
       });
     } else {
-      return Promise.resolve(String(metric));
+      return /** @type {!Promise<(string|undefined)>} */ (
+          Promise.resolve(String(metric)));
     }
   }
 
   /**
    * Returns navigation information from the current browsing context.
    * @param {string} attribute
-   * @return {!Promise<string|undefined>}
+   * @return {!Promise<undefined>|string}
    * @private
    */
   getNavigationData_(attribute) {
@@ -463,12 +502,12 @@ export class UrlReplacements {
    * Sets the value resolver for the variable with the specified name. The
    * value resolver may optionally take an extra parameter.
    * @param {string} varName
-   * @param {function(*):*} resolver
+   * @param {function(*, *):*} resolver
    * @return {!UrlReplacements}
    * @private
    */
   set_(varName, resolver) {
-    dev.assert(varName.indexOf('RETURN') == -1);
+    dev().assert(varName.indexOf('RETURN') == -1);
     this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;
@@ -570,7 +609,7 @@ export class UrlReplacements {
   /**
    * Method exists to assist stubbing in tests.
    * @param {string} name
-   * @return {function(*):*}
+   * @return {function(*, *):*}
    */
   getReplacement_(name) {
     return this.replacements_[name];
@@ -586,7 +625,7 @@ export class UrlReplacements {
     if (additionalKeys && additionalKeys.length > 0) {
       const allKeys = Object.keys(this.replacements_);
       additionalKeys.forEach(key => {
-        if (allKeys[key] === undefined) {
+        if (this.replacements_[key] === undefined) {
           allKeys.push(key);
         }
       });

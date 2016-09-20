@@ -32,11 +32,8 @@ export function dashToCamelCase(name) {
  * @return {boolean}
  */
 export function endsWith(string, suffix) {
-  if (suffix.length > string.length) {
-    return false;
-  }
   const index = string.length - suffix.length;
-  return string.indexOf(suffix, index) == index;
+  return index >= 0 && string.indexOf(suffix, index) == index;
 }
 
 /**

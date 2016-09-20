@@ -51,7 +51,6 @@ class AmpFitText extends AMP.BaseElement {
       position: 'absolute',
       top: 0,
       left: 0,
-      right: 0,
       zIndex: 1,
       visibility: 'hidden',
       lineHeight: `${LINE_HEIGHT_EM_}em`,
@@ -92,7 +91,8 @@ class AmpFitText extends AMP.BaseElement {
   /** @private */
   updateFontSize_() {
     const maxHeight = this.element./*OK*/offsetHeight;
-    const fontSize = calculateFontSize_(this.measurer_, maxHeight,
+    const maxWidth = this.element./*OK*/offsetWidth;
+    const fontSize = calculateFontSize_(this.measurer_, maxHeight, maxWidth,
         this.minFontSize_, this.maxFontSize_);
     this.contentWrapper_.style.fontSize = st.px(fontSize);
     updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
@@ -109,7 +109,7 @@ class AmpFitText extends AMP.BaseElement {
  * @return {number}
  * @private  Visible for testing only!
  */
-export function calculateFontSize_(measurer, expectedHeight,
+export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
     minFontSize, maxFontSize) {
   maxFontSize++;
   // Binomial search for the best font size.
@@ -117,7 +117,8 @@ export function calculateFontSize_(measurer, expectedHeight,
     const mid = Math.floor((minFontSize + maxFontSize) / 2);
     measurer.style.fontSize = st.px(mid);
     const height = measurer./*OK*/offsetHeight;
-    if (height > expectedHeight) {
+    const width = measurer./*OK*/offsetWidth;
+    if (height > expectedHeight || width > expectedWidth) {
       maxFontSize = mid;
     } else {
       minFontSize = mid;

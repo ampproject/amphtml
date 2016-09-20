@@ -22,9 +22,10 @@ import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListener} from './document-click';
-import {installStyles, makeBodyVisible} from './styles';
+import {installStyles, makeBodyVisible} from './style-installer';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
+import {installCacheServiceWorker} from './service-worker/install';
 import {stubElements} from './custom-element';
 import {
   installAmpdocServices,
@@ -41,38 +42,39 @@ import {maybeTrackImpression} from './impression';
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(window);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  const ampdocService = installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
+  const ampdocService = installDocService(self, /* isSingleDoc */ true);
+  const ampdoc = ampdocService.getAmpDoc(self.document);
 
-  const perf = installPerformanceService(window);
+  const perf = installPerformanceService(self);
   perf.tick('is');
-  installStyles(document, cssText, () => {
+  installStyles(self.document, cssText, () => {
     try {
       // Core services.
-      installRuntimeServices(window);
+      installRuntimeServices(self);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
-      maybeTrackImpression(window);
+      maybeTrackImpression(self);
 
       // Builtins.
-      installBuiltins(window);
+      installBuiltins(self);
 
       // Final configuration and stubbing.
-      adopt(window);
-      stubElements(window);
+      adopt(self);
+      stubElements(self);
 
-      installPullToRefreshBlocker(window);
-      installGlobalClickListener(window);
+      installPullToRefreshBlocker(self);
+      installGlobalClickListener(self);
 
-      maybeValidate(window);
-      makeBodyVisible(document, /* waitForExtensions */ true);
+      maybeValidate(self);
+      makeBodyVisible(self.document, /* waitForServices */ true);
+      installCacheServiceWorker(self);
     } catch (e) {
-      makeBodyVisible(document);
+      makeBodyVisible(self.document);
       throw e;
     } finally {
       perf.tick('e_is');
@@ -83,16 +85,16 @@ try {
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(document);
+  makeBodyVisible(self.document);
   throw e;
 }
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
-if (window.console) {
+if (self.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
-window.document.documentElement.setAttribute('amp-version',
+self.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');

@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-o2-player
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-o2-player extension .js script"
   mandatory_parent: "HEAD"
@@ -47,21 +49,15 @@ tags: {  # amp-o2-player
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
 }
 tags: {  # <amp-o2-player>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-O2-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-o2-player extension .js script"
-  attrs: { name: "data-pid" }
-  attrs: {
-    name: "data-vid"
-    mandatory_oneof: "data-vid or data-pid and data-bcid"
-  }
-  attrs: {
-    name: "data-bcid"
-    mandatory_oneof: "data-vid or data-pid and data-bcid"
-    trigger: {
-      also_requires_attr: "data-pid"
-    }
-  }
+  attrs: { name: "data-pid" mandatory: true }
+  attrs: { name: "data-bcid" mandatory: true }
+  attrs: { name: "data-bid" }
+  attrs: { name: "data-vid" }
   # If data-embed is missing, the default value is "default".
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"

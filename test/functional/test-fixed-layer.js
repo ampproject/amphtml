@@ -15,6 +15,7 @@
  */
 
 import {FixedLayer} from '../../src/service/fixed-layer';
+import {installPlatformService} from '../../src/service/platform-impl';
 import * as sinon from 'sinon';
 
 
@@ -125,6 +126,7 @@ describe('FixedLayer', () => {
             },
           };
         },
+        navigator: window.navigator,
       },
       createElement: name => {
         return createElement(name);
@@ -132,6 +134,7 @@ describe('FixedLayer', () => {
       documentElement: docElem,
       body: docBody,
     };
+    installPlatformService(documentApi.defaultView);
 
     vsyncTasks = [];
     vsyncApi = {

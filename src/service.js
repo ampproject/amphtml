@@ -39,7 +39,10 @@ let ServiceHolderDef;
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
-  return win.services[id].obj;
+  win = getTopWindow(win);
+  const exists = win.services && win.services[id] && win.services[id].obj;
+  return dev().assert(exists, `${id} service not found. Make sure it is ` +
+      `installed.`);
 }
 
 /**
@@ -50,7 +53,11 @@ export function getExistingServiceForWindow(win, id) {
  * @return {!Object} The service.
  */
 export function getExistingServiceForDoc(nodeOrDoc, id) {
-  return getAmpdocServiceHolder(nodeOrDoc).services[id].obj;
+  const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
+  const exists = serviceHolder && serviceHolder.services &&
+      serviceHolder.services[id] && serviceHolder.services[id].obj;
+  return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
+      `installed.`);
 }
 
 /**
@@ -62,12 +69,14 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):!Object=} opt_factory Should create the service
+ * @param {function(!Window):T} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
  *     if the service does not exist yet.
- * @return {*}
+ * @template T
+ * @return {T}
  */
 export function getService(win, id, opt_factory) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id,
       opt_factory ? opt_factory : undefined);
 }
@@ -82,6 +91,7 @@ export function getService(win, id, opt_factory) {
  * @template T
  */
 export function fromClass(win, id, constructor) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id, undefined, constructor);
 }
 
@@ -177,13 +187,60 @@ export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
 }
 
 /**
+ * Set the parent and top windows on a child window (friendly iframe).
+ * @param {!Window} win
+ * @param {!Window} parentWin
+ */
+export function setParentWindow(win, parentWin) {
+  win.__AMP_PARENT = parentWin;
+  win.__AMP_TOP = getTopWindow(parentWin);
+}
+
+/**
+ * Returns the parent window for a child window (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getParentWindow(win) {
+  return win.__AMP_PARENT || win;
+}
+
+/**
+ * Returns the top window where AMP Runtime is installed for a child window
+ * (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getTopWindow(win) {
+  return win.__AMP_TOP || win;
+}
+
+/**
+ * Returns the parent "friendly" iframe if the node belongs to a child window.
+ * @param {!Node} node
+ * @param {!Window} topWin
+ * @return {?HTMLIFrameElement}
+ */
+export function getParentWindowFrameElement(node, topWin) {
+  const childWin = (node.ownerDocument || node).defaultView;
+  if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
+    try {
+      return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
+    } catch (e) {
+      // Ignore the error.
+    }
+  }
+  return null;
+}
+
+/**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
 function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    return getAmpdocService(nodeOrDoc.ownerDocument.defaultView).getAmpDoc(
-        nodeOrDoc);
+    const win = (nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    return getAmpdocService(win).getAmpDoc(nodeOrDoc);
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }
@@ -232,7 +289,7 @@ function getServiceInternal(holder, context, id, opt_factory,
   }
 
   if (!s.obj) {
-    dev.assert(opt_factory || opt_constructor,
+    dev().assert(opt_factory || opt_constructor,
         'Factory or class not given and service missing %s', id);
     s.obj = opt_constructor
         ? new opt_constructor(context)
@@ -289,7 +346,7 @@ function getServicePromiseOrNullInternal(holder, id) {
     if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
     }
-    dev.assert(false, 'Expected object or promise to be present');
+    dev().assert(false, 'Expected object or promise to be present');
   }
   return null;
 }

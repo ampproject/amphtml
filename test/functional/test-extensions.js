@@ -30,8 +30,12 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
+import {
+  initLogConstructor,
+  resetLogConstructorForTesting,
+} from '../../src/log';
+import {loadPromise} from '../../src/event-helper';
 import * as cust from '../../src/custom-element';
-import {getMode} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
@@ -226,7 +230,7 @@ describe('Extensions', () => {
       }, {});
 
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(windowApi, shadowRoot);
+      const ampdoc = new AmpDocShadow(windowApi, 'https://a.org/', shadowRoot);
       const promise = installExtensionsInShadowDoc(
           extensions, ampdoc, ['amp-ext']);
       return promise.then(() => {
@@ -274,7 +278,7 @@ describe('Extensions', () => {
 
       // Install into shadow doc.
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(windowApi, shadowRoot);
+      const ampdoc = new AmpDocShadow(windowApi, 'https://a.org/', shadowRoot);
       const promise = installExtensionsInShadowDoc(
           extensions, ampdoc, ['amp-ext']);
       return promise.then(() => {
@@ -446,55 +450,168 @@ describe('Extensions', () => {
     });
   });
 
+  describe('installExtensionsInChildWindow', () => {
+
+    let parentWin;
+    let extensions;
+    let extensionsMock;
+    let iframe;
+    let iframeWin;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        parentWin = f.win;
+        extensions = installExtensionsService(parentWin);
+        extensionsMock = sandbox.mock(extensions);
+
+        iframe = parentWin.document.createElement('iframe');
+        const promise = loadPromise(iframe);
+        const html = '<div id="one"></div>';
+        if ('srcdoc' in iframe) {
+          iframe.srcdoc = html;
+        } else {
+          iframe.src = 'about:blank';
+          const childDoc = iframe.contentWindow.document;
+          childDoc.open();
+          childDoc.write(html);
+          childDoc.close();
+        }
+        parentWin.document.body.appendChild(iframe);
+        return promise.then(() => {
+          iframeWin = iframe.contentWindow;
+        });
+      });
+    });
+
+    afterEach(() => {
+      if (iframe.parentElement) {
+        iframe.parentElement.removeChild(iframe);
+      }
+      extensionsMock.verify();
+    });
+
+    it('should set window hierarchy', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.__AMP_PARENT).to.equal(parentWin);
+      expect(iframeWin.__AMP_TOP).to.equal(parentWin);
+    });
+
+    it('should install runtime styles', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.document.querySelector('style[amp-runtime]'))
+          .to.exist;
+    });
+
+    it('should install built-ins', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.ampExtendedElements).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-video']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-pixel']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-ad']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-embed']).to.be.true;
+    });
+
+    it('should install extensions', () => {
+      extensionsMock.expects('loadExtension')
+          .withExactArgs('amp-test')
+          .returns(Promise.resolve({
+            elements: {'amp-test': {css: 'a{}'}},
+          }))
+          .once();
+      const promise = extensions.installExtensionsInChildWindow(
+          iframeWin, ['amp-test']);
+      return promise.then(() => {
+        expect(parentWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(iframeWin.document
+            .querySelector('style[amp-extension=amp-test]')).to.exist;
+      });
+    });
+  });
+
   describe('get correct script source', () => {
+
+    beforeEach(() => {
+      // These functions must not rely on log for cases in SW.
+      resetLogConstructorForTesting();
+    });
+
+    afterEach(() => {
+      initLogConstructor();
+    });
+
     it('with local mode for testing with compiled js', () => {
-      window.AMP_MODE = {localDev: true};
-      expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
-          'amp-ad', true, true);
-      expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.html',
+        host: 'localhost:8000',
+        protocol: 'http:',
+      }, 'amp-ad', '123', true, true, true);
+      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
     });
 
     it('with local mode for testing without compiled js', () => {
-      window.AMP_MODE = {localDev: true};
-      expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
-        'amp-ad', true, false);
-      expect(script).to.equal('/base/dist/v0/amp-ad-0.1.max.js');
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.html',
+        host: 'localhost:80',
+        protocol: 'https:',
+      }, 'amp-ad', '123', true, true, false);
+      expect(script).to.equal('https://localhost:80/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with local mode normal pathname', () => {
-      window.AMP_MODE = {localDev: true};
-      expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
-          'amp-ad');
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.html',
+        host: 'localhost:8000',
+        protocol: 'https:',
+      }, 'amp-ad', '123', true);
       expect(script).to.equal('https://cdn.ampproject.org/v0/amp-ad-0.1.js');
     });
 
     it('with local mode min pathname', () => {
-      window.AMP_MODE = {localDev: true};
-      expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl(
-          'examples.build/ads.amp.min.html', 'amp-ad');
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.min.html',
+        host: 'localhost:8000',
+        protocol: 'http:',
+      }, 'amp-ad', '123', true);
       expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
     });
 
     it('with local mode max pathname', () => {
-      window.AMP_MODE = {localDev: true};
-      expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl(
-          'examples.build/ads.amp.max.html', 'amp-ad');
-      expect(script).to.equal(
-          'http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.max.html',
+        host: 'localhost:8000',
+        protocol: 'http:',
+      }, 'amp-ad', '123', true);
+      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with remote mode', () => {
-      window.AMP_MODE = {localDev: false, version: 123};
-      expect(getMode().localDev).to.be.false;
-      expect(getMode().version).to.equal(123);
-      const script = calculateExtensionScriptUrl('', 'amp-ad');
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.min.html',
+        host: 'localhost:8000',
+        protocol: 'http:',
+      }, 'amp-ad', '123', false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
+    });
+
+    it('with document proxy mode: max', () => {
+      const script = calculateExtensionScriptUrl({
+        pathname: '/max/output.jsbin.com/pegizoq/quiet',
+        host: 'localhost:80',
+        protocol: 'http:',
+      }, 'amp-ad', '123', true);
+      expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.max.js');
+    });
+
+    it('with document proxy mode: min', () => {
+      const script = calculateExtensionScriptUrl({
+        pathname: '/min/output.jsbin.com/pegizoq/quiet',
+        host: 'localhost:80',
+        protocol: 'http:',
+      }, 'amp-ad', '123', true);
+      expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.js');
     });
   });
 });

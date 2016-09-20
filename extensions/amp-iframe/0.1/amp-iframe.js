@@ -15,10 +15,10 @@
  */
 
 import {IntersectionObserver} from '../../../src/intersection-observer';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
@@ -48,21 +48,21 @@ export class AmpIframe extends AMP.BaseElement {
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
-    user.assert(
+    user().assert(
         url.protocol == 'https:' ||
         url.protocol == 'data:' ||
         url.origin.indexOf('http://iframe.localhost:') == 0,
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
-    user.assert(
+    user().assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)) ||
         (url.origin != containerUrl.origin && url.protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         this.element);
-    user.assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
+    user().assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(url.hostname, '.ampproject.org')),
         'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
@@ -72,7 +72,7 @@ export class AmpIframe extends AMP.BaseElement {
   assertPosition() {
     const pos = this.element.getLayoutBox();
     const minTop = Math.min(600, this.getViewport().getSize().height * .75);
-    user.assert(pos.top >= minTop,
+    user().assert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
         ' Current position %s. Min: %s' +
@@ -99,7 +99,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!srcdoc) {
       return;
     }
-    user.assert(
+    user().assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
@@ -146,6 +146,12 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isClickToPlay_ = !!this.placeholder_;
 
+    /** @private {boolean} */
+    this.isAdLike_ = false;
+
+    /** @private {boolean} */
+    this.isDisallowedAsAd_ = false;
+
     /**
      * Call to stop listening to viewport changes.
      * @private {?function()}
@@ -180,6 +186,11 @@ export class AmpIframe extends AMP.BaseElement {
     // We remeasured this tag, lets also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
+
+    this.isAdLike_ = isAdLike(this);
+    this.isDisallowedAsAd_ = this.isAdLike_ &&
+        !isAdPositionAllowed(this.element, this.win);
+
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This does nothing
     // if we aren't currently in view.
@@ -203,6 +214,9 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
+    if (!this.iframe_) {
+      return super.getIntersectionElementLayoutBox();
+    }
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
@@ -211,12 +225,15 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    user().assert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
+        'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.');
+
     if (!this.isClickToPlay_) {
       this.assertPosition();
     }
 
     if (this.isResizable_) {
-      user.assert(this.getOverflowElement(),
+      user().assert(this.getOverflowElement(),
           'Overflow element must be defined for resizable frames: %s',
           this.element);
     }
@@ -238,15 +255,11 @@ export class AmpIframe extends AMP.BaseElement {
       }
     }
 
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const iframe = this.element.ownerDocument.createElement('iframe');
 
     this.iframe_ = iframe;
 
     this.applyFillContent(iframe);
-    iframe.width = getLengthNumeral(width);
-    iframe.height = getLengthNumeral(height);
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
@@ -292,7 +305,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_.appendChild(iframe);
 
-    return loadPromise(iframe).then(() => {
+    return this.loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
@@ -344,7 +357,7 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override  */
   getPriority() {
-    if (isAdLike(this.element)) {
+    if (this.isAdLike_) {
       return 2; // See AmpAd3PImpl.
     }
     return super.getPriority();
@@ -381,20 +394,23 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateSize_(height, width) {
     if (!this.isResizable_) {
-      user.error(TAG_,
-          'ignoring embed-size request because this iframe is not resizable',
+      user().error(TAG_,
+          'Ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
 
     if (height < 100) {
-      user.error(TAG_,
-          'ignoring embed-size request because the resize height is ' +
-          'less than 100px',
+      user().error(TAG_,
+          'Ignoring embed-size request because the resize height is less ' +
+          'than 100px. If you are using amp-iframe to display ads, consider ' +
+          'using amp-ad instead.',
           this.element);
       return;
     }
 
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
     if (height !== undefined) {
       newHeight = Math.max(
@@ -419,8 +435,8 @@ export class AmpIframe extends AMP.BaseElement {
         }
       }, () => {});
     } else {
-      user.error(TAG_,
-          'ignoring embed-size request because'
+      user().error(TAG_,
+          'Ignoring embed-size request because'
           + 'no width or height value is provided',
           this.element);
     }
@@ -476,13 +492,14 @@ const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
 
 /**
  * Guess whether this element might be an ad.
- * @param {!Element} element An amp-iframe element.
+ * @param {!BaseElement} ampElement An amp-iframe element.
  * @return {boolean}
  * @visibleForTesting
  */
-export function isAdLike(element) {
-  const height = parseInt(element.getAttribute('height'), 10);
-  const width = parseInt(element.getAttribute('width'), 10);
+export function isAdLike(ampElement) {
+  const box = ampElement.getIntersectionElementLayoutBox();
+  const height = box.height;
+  const width = box.width;
   for (let i = 0; i < adSizes.length; i++) {
     const refWidth = adSizes[i][0];
     const refHeight = adSizes[i][1];

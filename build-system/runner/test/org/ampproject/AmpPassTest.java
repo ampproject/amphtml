@@ -2,6 +2,8 @@
 package org.ampproject;
 
 
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
@@ -16,8 +18,10 @@ import com.google.javascript.rhino.Node;
  */
 public class AmpPassTest extends Es6CompilerTestCase {
 
-  ImmutableSet<String> suffixTypes = ImmutableSet.of(
-      "dev.fine");
+  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
+      "module$src$log.dev",
+          ImmutableSet.of("assert", "fine", "assertElement", "assertString", "assertNumber"),
+      "module$src$log.user", ImmutableSet.of("fine"));
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
       "IS_DEV",
@@ -36,25 +40,26 @@ public class AmpPassTest extends Es6CompilerTestCase {
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
-             "  log.dev.fine('hello world');",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  module$src$log.dev().fine('hello world');",
              "  console.log('this is preserved');",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  'hello world';",
              "  console.log('this is preserved');",
             "})()"));
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
-             "  log.dev.fine();",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  module$src$log.dev().fine();",
              "  console.log('this is preserved');",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
              "  console.log('this is preserved');",
             "})()"));
   }
@@ -79,26 +84,26 @@ public class AmpPassTest extends Es6CompilerTestCase {
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  log.dev.assert('hello world');",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  module$src$log.dev().assert('hello world');",
              "  console.log('this is preserved');",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "\"hello world\";",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  \"hello world\";",
              "  console.log('this is preserved');",
             "})()"));
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert();",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert();",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  var someValue;",
              "  console.log('this is preserved', someValue);",
             "})()"));
@@ -108,13 +113,13 @@ public class AmpPassTest extends Es6CompilerTestCase {
     test(
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert(true, 'This is an error');",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert(true, 'This is an error');",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  var someValue = true;",
              "  console.log('this is preserved', someValue);",
             "})()"));
@@ -125,14 +130,14 @@ public class AmpPassTest extends Es6CompilerTestCase {
         // Does reliasing
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert;",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert;",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert;",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert;",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }

@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-social-share
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-social-share extension .js script"
   mandatory_parent: "HEAD"
@@ -47,8 +49,9 @@ tags: {  # amp-social-share
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
 }
 tags: {  # <amp-social-share>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-SOCIAL-SHARE"
-  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-social-share extension .js script"
   attrs: {
     name: "type"
@@ -72,6 +75,7 @@ tags: {  # <amp-social-share>
       allowed_protocol: "whatsapp"
       allow_relative: false
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"

@@ -44,7 +44,7 @@ describe('LiveListManager', () => {
     };
     viewer = installViewerService(window);
     manager = installLiveListManager(window);
-    liveList = getLiveList();
+    liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval', () => 5000);
   });
 
@@ -53,6 +53,40 @@ describe('LiveListManager', () => {
     resetServiceForTesting(window, 'liveListManager');
     sandbox.restore();
   });
+
+  /** @implements {!LiveListInterface} */
+  class AmpLiveListMock {
+
+    constructor(el) {
+      this.element = el;
+    }
+
+    buildCallback() {
+      this.manager_ = installLiveListManager(window);
+      this.updateTime_ = Number(this.element.getAttribute('data-sort-time'));
+      this.manager_.register(this.element.getAttribute('id'), this);
+    }
+    getInterval() {
+      return Number(this.element.getAttribute('data-poll-interval'));
+    }
+
+    update() {}
+
+    isEnabled() {
+      return !this.element.hasAttribute('disabled');
+    }
+
+    toggle(value) {
+      if (value) {
+        this.element.removeAttribute('disabled');
+      } else {
+        this.element.setAttribute('disabled', '');
+      }
+    }
+    getUpdateTime() {
+      return this.updateTime_;
+    }
+  }
 
   function getLiveList(attrs = {}, opt_id) {
     const el = document.createElement('amp-live-list');
@@ -68,37 +102,10 @@ describe('LiveListManager', () => {
       el.setAttribute(key, attrs[key]);
     }
 
-    /** @implements {!LiveListInterface} */
-    class AmpLiveListMock {
-
-      constructor(el) {
-        this.element = el;
-      }
-
-      buildCallback() {
-        this.manager_ = installLiveListManager(window);
-        this.manager_.register(this.element.getAttribute('id'), this);
-      }
-      getInterval() {
-        return Number(this.element.getAttribute('data-poll-interval'));
-      }
-
-      update() {}
-
-      isEnabled() {
-        return !this.element.hasAttribute('disabled');
-      }
-
-      toggle(value) {
-        if (value) {
-          this.element.removeAttribute('disabled');
-        } else {
-          this.element.setAttribute('disabled', '');
-        }
-      }
+    if (!('data-poll-interval' in attrs)) {
+      el.setAttribute('data-poll-interval', 8000);
     }
-    const impl = new AmpLiveListMock(el);
-    return impl;
+    return new AmpLiveListMock(el);
   }
 
   it('should register new amp-live-list', () => {
@@ -134,6 +141,21 @@ describe('LiveListManager', () => {
     ready();
     return manager.whenDocReady_().then(() => {
       expect(manager.interval_).to.equal(5000);
+    });
+  });
+
+  it('should get the amp_latest_update_time on doc ready', () => {
+    sandbox.stub(Math, 'random', () => 1);
+    ready();
+    const liveList2 = getLiveList({'data-sort-time': '2222'}, 'id-2');
+    liveList.buildCallback();
+    liveList2.buildCallback();
+    return manager.whenDocReady_().then(() => {
+      const interval = liveList.getInterval();
+      const tick = interval - jitterOffset;
+      expect(manager.poller_.isRunning()).to.be.true;
+      clock.tick(tick);
+      expect(requests[0].url).to.match(/amp_latest_update_time=2222/);
     });
   });
 
@@ -434,8 +456,10 @@ describe('LiveListManager', () => {
       expect(fetchSpy.callCount).to.equal(0);
       clock.tick(tick);
       expect(fetchSpy.callCount).to.equal(1);
-      expect(requests[0].url).to.match(/^www\.example\.com\/foo\/bar/);
-      expect(requests[0].url).to.not.match(/amp_latest_update_time/);
+      expect(requests[0].url)
+          .to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
+      expect(requests[0].url).to.match(/#dev=1/);
+      expect(requests[0].url).to.match(/amp_latest_update_time/);
     });
   });
 
@@ -459,7 +483,6 @@ describe('LiveListManager', () => {
     sandbox.stub(Math, 'random', () => 1);
     sandbox.stub(viewer, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
-    manager.latestUpdateTime_ = 2000;
     sandbox.stub(liveList, 'update').returns(2500);
     ready();
     liveList.buildCallback();
@@ -471,7 +494,7 @@ describe('LiveListManager', () => {
       expect(fetchSpy.callCount).to.equal(0);
       clock.tick(tick);
       expect(fetchSpy.callCount).to.equal(1);
-      expect(requests[0].url).to.match(/amp_latest_update_time=2000/);
+      expect(requests[0].url).to.match(/amp_latest_update_time=1111/);
       requests[0].respond(200, {
         'Content-Type': 'text/xml',
       }, '<html><amp-live-list id="id-1"></amp-live-list></html>');

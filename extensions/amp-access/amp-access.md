@@ -69,7 +69,7 @@ The solution also allows the Publisher to place in the AMP document  a Login Lin
 
 In its basic form, this solution sends the complete (though obscured) document to the Reader and simply shows/hides restricted sections based on the Authorization response. However, the solution also provides the “server” option, where the restricted sections can be excluded from the initial document delivery and downloaded only after the authorization has been confirmed.
 
-Supporting AMP Access requires Publisher to implement the components described above. Access Content Markup, Authorization endpoint, Pingback endpoint and Login Page are required.
+Supporting AMP Access requires Publisher to implement the components described above. Access Content Markup and Authorization endpoint are required. Pingback endpoint and Login Page are optional.
 
 ### AMP Reader ID
 
@@ -99,6 +99,8 @@ Authorization is an endpoint provided by the publisher and called by AMP Runtime
 
 Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
 
+Pingback optional. It can be disabled by setting `noPingback` configuration property to `true`.
+
 ### Login Page and Login Link
 
 Login Page is implemented and served by the Publisher and called by the AMP Runtime. It is normally shown as a browser dialog.
@@ -126,8 +128,10 @@ The following properties are defined in this configuration:
 --------------  | -------------------- | --------------------------------- |
 | authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint. |
 | pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint. |
+| noPingback    | true/false           | When true, disables pingback. |
 | login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages. |
 | authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails. |
+| authorizationTimeout          | &lt;number&gt;          | Timeout (in milliseconds) after which authorization request is considered as failed. Default is 3000. Values greater than 3000 are allowed only in dev environment. |
 | type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready. |
 
 *&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
@@ -305,11 +309,13 @@ In the *server* option, the call to Authorization endpoint is done by Google AMP
 
 Pingback is configured via ```pingback``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS POST endpoint. See [CORS Origin Security][9]” for how this request should be secured.
 
+Pingback URL is optional. It can be disabled with `"noPingback": true` configuration.
+
 Pingback URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. The inclusion of the `READER_ID` is required.
 
 Pingback does not produce a response - any response is ignored by AMP runtime.
 
-Pingback endpoint is called when the reader has started viewing the document and after the Rser has successfully completed the Login Flow.
+Pingback endpoint is called when the reader has started viewing the document and after the Reader has successfully completed the Login Flow.
 
 The publisher may choose to use the pingback as:
  - One of the main purposes for pingback is to count down meter when it is used.
@@ -347,7 +353,7 @@ The URL can take any parameters as defined in the [Access URL Variables][7] sect
 required and if the `RETURN_URL` substitution is not specified, it will be injected automatically with the default query parameter name of
 "return".
 
-Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the “Login Flow” section for more details.
+Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the [Login Flow][14] section for more details.
 
 The request format is:
 ```
@@ -409,6 +415,21 @@ To implement FCF, the Publisher must (1) be able to determine the referring serv
 
 Both steps are covered by the AMP Access spec. The referrer can be injected into the Authorization and Pingback URLs using `DOCUMENT_REFERRER` URL substitution as described in [Access URL Variables][7]. The view counting can be done using Pingback endpoint on the server-side. This is very similar to the metering implementation described in [Metering][12].
 
+## Login Flow
+AMP launches a Login Dialog as a 1st party window or a popup or a tab. Whenever possible, AMP Viewers should attempt to launch Login Dialog in the browser context so that it can take advantage of the top-level browser APIs.
+
+The login flow is started by the AMP Runtime when the Reader activates the Login Link and, descriptively, it follows the following steps:
+ 1. The Login Dialog (1st party window) is opened by AMP Runtime or Viewer for the specified Login URL. The URL contains an extra "Return URL" URL query parameter (`&return=RETURN_URL`). A number of other parameters can be also expanded into the URL, such as the Reader ID. For more details see [Login Page][15] section.
+ 2. Publisher displays a free-form Login page.
+ 3. The Reader follows login steps, such as entering username/password or using a social login.
+ 4. The Reader submits login. The publisher completes authentication, set cookies and finally redirects the Reader to the previously requested "Return URL". The redirect contains a URL hash parameter `success` that can be either `true` or `false`.
+ 5. The Login Dialog follows redirect to the "Return URL".
+ 6. AMP Runtime re-authorizes the document.
+
+Only steps 2-5 require handling by the Publisher: the Publisher only provides their own Login Page and ensures correct redirect once it completes. There are no special constraints imposed on the login page, other than it should function well as a dialog.
+
+As usual, the Reader ID should be included in the call to Login Page and can be used by the Publisher for identity mapping. As a 1st party window, the Publisher will also receive their cookies and will be able to set them. If it turns out that the Reader is already signed-in on the Publisher's side, it is recommended that the publisher immediately redirect back to the "Return URL" with the `success=true` response.
+
 ## AMP Glossary
  - **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by Google AMP Cache.
  - **AMP Validator** - the computer program that performs a static analysis of an HTML document and returns success or failure depending on whether the document conforms to the AMP format.
@@ -429,6 +450,7 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
 - Feb 19: Corrected samples to remove `{}` from URL var substitutions.
 - Mar 3: Resend pingback after login (v0.5).
+- Sept 2: "noPingback" configuration property and optional pingback.
 
 ## Appendix A: “amp-access” expression grammar
 
@@ -482,6 +504,8 @@ This section will cover a detailed explanation of the design underlying the amp-
 [11]: #amp-access-and-cookies
 [12]: #metering
 [13]: #first-click-free
+[14]: #login-flow
+[15]: #login-page
 
 ## Validation
 

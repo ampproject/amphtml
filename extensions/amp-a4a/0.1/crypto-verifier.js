@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  base64UrlDecodeToBytes,
+  stringToBytes,
+} from '../../../src/utils/base64';
 import {dev} from '../../../src/log';
 
 const TAG_ = 'CryptoVerifier';
@@ -41,8 +45,8 @@ let PublicKeyInfoDef;
  * @return {!Promise<!PublicKeyInfoDef>}
  */
 export function importPublicKey(publicKey) {
-  const lenMod = lenPrefix(base64UrlDecode(publicKey['n']));
-  const lenPubExp = lenPrefix(base64UrlDecode(publicKey['e']));
+  const lenMod = lenPrefix(base64UrlDecodeToBytes(publicKey['n']));
+  const lenPubExp = lenPrefix(base64UrlDecodeToBytes(publicKey['e']));
   const data = new Uint8Array(lenMod.length + lenPubExp.length);
   data.set(lenMod);
   data.set(lenPubExp, lenMod.length);
@@ -58,7 +62,7 @@ export function importPublicKey(publicKey) {
       // Now Get the CryptoKey.
       const jsonPublicKey = isWebkit ?
             // Webkit wants this as an ArrayBuffer.
-            stringToByteArray(JSON.stringify(publicKey)) :
+            stringToBytes(JSON.stringify(publicKey)) :
             publicKey;
       // Convert the key to internal CryptoKey format.
       return crossCrypto.importKey(
@@ -91,7 +95,7 @@ export function verifySignature(data, signature, publicKeyInfos) {
     .then(results => results.some(x => x))
     .catch(error => {
       // Note if anything goes wrong.
-      dev.error(TAG_, 'Error while verifying:', error);
+      dev().error(TAG_, 'Error while verifying:', error);
       throw error;
     });
 }
@@ -174,37 +178,4 @@ function hashesEqual(signature, keyHash) {
     }
   }
   return true;
-}
-
-/**
- * Converts a string which holds 8-bit code points, such as the result of atob,
- * into an ArrayBuffer with the corresponding bytes.
- * @param {string} str
- * @return {!ArrayBuffer}
- * @visibleForTesting
- */
-export function stringToByteArray(str) {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    bytes[i] = str.charCodeAt(i);
-  }
-  return bytes;
-};
-
-
-/**
- * Character mapping from base64url to base64.
- */
-const atobSubs = {'-': '+', '_': '/', '.': '='};
-
-/**
- * Converts a string which is in base64url encoding into an ArrayBuffer
- * with the decoded value.
- * @param {string} str
- * @return {!ArrayBuffer}
- * @visibleForTesting
- */
-export function base64UrlDecode(str) {
-  return stringToByteArray(atob(str.replace(/[-_.]/g,
-                                            ch => atobSubs[ch])));
 }
