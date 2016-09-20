@@ -39,16 +39,16 @@ function isDocumentComplete(doc) {
  * @param {function(!Document)} callback
  */
 export function onDocumentReady(doc, callback) {
-  onDocumentState(doc, callback, isDocumentReady);
+  onDocumentState(doc, isDocumentReady, callback);
 }
 
 /**
  * Calls the callback when document's state satisfies the stateFn.
  * @param {!Document} doc
- * @param {function(!Document)} callback
  * @param {function(!Document)} stateFn
+ * @param {function(!Document)} callback
  */
-function onDocumentState(doc, callback, stateFn) {
+function onDocumentState(doc, stateFn, callback) {
   let ready = stateFn(doc);
   if (ready) {
     callback(doc);
@@ -84,6 +84,6 @@ export function whenDocumentReady(doc) {
  */
 export function whenDocumentComplete(doc) {
   return new Promise(resolve => {
-    onDocumentState(doc, resolve, isDocumentComplete);
+    onDocumentState(doc, isDocumentComplete, resolve);
   });
 }
