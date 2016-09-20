@@ -72,12 +72,14 @@ const AMP_BODY_STRING = 'amp-ad-body';
 /** @typedef {{creative: !ArrayBuffer, signature: ?Uint8Array}} */
 let AdResponseDef;
 
-/** @typedef {{cssUtf16CharOffsets: Array<number>,
-  cssReplacementRanges: Array<number>,
-  bodyUtf16CharOffsets: !Array<number>,
-  bodyAttributes: ?string,
-  customElementExtensions: Array<string>,
-  customStylesheets: Array<string>}} */
+/** @typedef {{
+      cssUtf16CharOffsets: Array<number>,
+      cssReplacementRanges: Array<number>,
+      bodyUtf16CharOffsets: !Array<number>,
+      bodyAttributes: ?string,
+      customElementExtensions: Array<string>,
+      customStylesheets: Array<string>
+    }} */
 let CreativeMetaDataDef;
 
 export class AmpA4A extends AMP.BaseElement {
@@ -250,12 +252,12 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerFor(this.win).whenFirstVisible()
-        // This block returns the ad URL, if one is available.
-        /** @return {!Promise<?string>} */
-        .then(() => {
-          checkStillCurrent(promiseId);
-          return this.getAdUrl();
-        })
+    // This block returns the ad URL, if one is available.
+    /** @return {!Promise<?string>} */
+    .then(() => {
+      checkStillCurrent(promiseId);
+      return this.getAdUrl();
+    })
     // This block returns the (possibly empty) response to the XHR request.
     /** @return {!Promise<?Response>} */
     .then(adUrl => {
@@ -311,10 +313,13 @@ export class AmpA4A extends AMP.BaseElement {
         // @param {!function(?ArrayBuffer)} resolve
         resolveValidation = resolve;
       });
-      // Promise that will resolve to null after all keys have been checked.
-      // Will call resolveValidation if a successful validation does happen.
-      const allKeysCheckedPromise = Promise.all(
-          this.keyInfoSetPromises_.map(keyInfoSetPromise => {
+
+      // The following block defines an Array of Promises of ArrayBuffers, none
+      // of which will ever resolve. In the first instance of a successful
+      // creative verification, resolveValidation will be called with the
+      // creative as the argument.
+      const signatureVerificationPromises = this.keyInfoSetPromises_.map(
+          keyInfoSetPromise => {
             // @param {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>}
             // keyInfoSetPromise
             // @return {!Promise}
@@ -328,31 +333,34 @@ export class AmpA4A extends AMP.BaseElement {
                   // @param {?PublicKeyInfoDef} keyInfo
                   // @return {!Promise}
                   return !keyInfo ? Promise.resolve() :
-                      verifySignature(
-                          new Uint8Array(creativeParts.creative),
-                          creativeParts.signature,
-                          keyInfo).then(isValid => {
-                            // @param {boolean} isValid
-                            // @return {!Promise}
-                            if (isValid) {
-                              resolveValidation(creativeParts.creative);
-                            }
-                            return Promise.resolve();
-                          },
-                          err => {
-                            // @param {*} err
-                            // @return {!Promise}
-                            user().error('Amp Ad', err, this.element);
-                            return Promise.resolve();
-                          });
+                    verifySignature(
+                        new Uint8Array(creativeParts.creative),
+                        creativeParts.signature,
+                        keyInfo)
+                    .then(isValid => {
+                      // @param {boolean} isValid
+                      // @return {!Promise}
+                      if (isValid) {
+                        resolveValidation(creativeParts.creative);
+                      }
+                    },
+                    err => {
+                      // @param {*} err
+                      // @return {!Promise}
+                      user().error('Amp Ad', err, this.element);
+                    });
                 });
               }));
             });
-          })
-      ).then(() => {
-        // @return {!Promise<?ArrayBuffer>}
-        return Promise.resolve(null);
-      });
+          });
+
+      // Promise that will resolve to null after all keys have been checked.
+      // Will call resolveValidation if a successful validation does happen.
+      const allKeysCheckedPromise = Promise.all(signatureVerificationPromises)
+          // @return {!Promise<?ArrayBuffer>}
+          .then(() => Promise.resolve(null));
+
+
       // Race the two promises: Either validCreativePromise will resolve if a
       // successful validation occurs, or allKeysCheckedPromise will resolve to
       // null.
@@ -574,28 +582,28 @@ export class AmpA4A extends AMP.BaseElement {
             .then(jwkSetObj => {
               // @param {*} jwkSetObj
               // @return {!Promise<!Array<!Object>>}
-              if (isObject(jwkSetObj) && isArray(jwkSetObj.keys) &&
+              if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
                   jwkSetObj.keys.every(isObject)) {
-                return Promise.resolve(jwkSetObj.keys);
+                return jwkSetObj.keys;
               } else {
                 user().error(
                     'Amp Ad',
                     'Invalid response from signing server.',
                     this.element);
-                return Promise.resolve([]);
+                return [];
               }
             }).catch(err => {
               // @param {*} err
               // @return {!Promise<!Array<*>>}
               user().error('Amp Ad', err, this.element);
-              return Promise.resolve([]);
+              return [];
             });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
         const reason = `Signing service '${serviceName}' does not exist.`;
         user().error('Amp Ad', reason, this.element);
-        return Promise.resolve([]);
+        return [];
       }
     });
     if (getMode().localDev) {

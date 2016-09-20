@@ -23,18 +23,20 @@ import {dev} from '../log';
  * @return {!Promise<string>}
  */
 export function utf8Decode(bytes) {
-  return TextDecoder ?
-      Promise.resolve(new TextDecoder('utf-8').decode(bytes)) :
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => {
-          reject(reader.error);
-        };
-        reader.onloadend = () => {
-          resolve(reader.result);
-        };
-        reader.readAsText(new Blob([bytes]));
-      });
+  if (TextDecoder) {
+    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+  } else {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+      reader.readAsText(new Blob([bytes]));
+    });
+  }
 }
 
 /**
@@ -43,25 +45,27 @@ export function utf8Decode(bytes) {
  * @return {!Promise<!Uint8Array>}
  */
 export function utf8Encode(string) {
-  return TextEncoder ?
-      Promise.resolve(new TextEncoder('utf-8').encode(string)) :
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => {
-          reject(reader.error);
-        };
-        reader.onloadend = () => {
-          if (typeof reader.result == 'string') {
-            resolve(new Uint8Array(stringToArrayBuffer(reader.result)));
-          }
-          else if (typeof reader.result == 'object') {
-            // Reader.result must be of type ArrayBuffer if it's not a string.
-            const buffer = /** @type {ArrayBuffer} */ (reader.result);
-            resolve(new Uint8Array(buffer));
-          }
-        };
-        reader.readAsArrayBuffer(new Blob([string]));
-      });
+  if (TextEncoder) {
+    return Promise.resolve(new TextEncoder('utf-8').encode(string));
+  } else {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+      reader.onloadend = () => {
+        if (typeof reader.result == 'string') {
+          resolve(new Uint8Array(stringToArrayBuffer(reader.result)));
+        }
+        else if (typeof reader.result == 'object') {
+          // Reader.result must be of type ArrayBuffer if it's not a string.
+          const buffer = /** @type {ArrayBuffer} */ (reader.result);
+          resolve(new Uint8Array(buffer));
+        }
+      };
+      reader.readAsArrayBuffer(new Blob([string]));
+    });
+  }
 }
 
 /**
@@ -114,8 +118,8 @@ export function getCryptoRandomBytesArray(win, length) {
  * @return {!ArrayBuffer}
  */
 export function stringToArrayBuffer(string) {
-  const buffer = new ArrayBuffer(string.length * 2);
-  const bufferView = new Uint16Array(buffer);
+  const buffer = new ArrayBuffer(string.length);
+  const bufferView = new Uint8Array(buffer);
   for (let i = 0; i < string.length; i++) {
     bufferView[i] = string.charCodeAt(i);
   }
