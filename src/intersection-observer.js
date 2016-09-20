@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {layoutRectLtwh, rectIntersection} from './layout-rect';
+import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './timer';
 
@@ -81,20 +81,29 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
       'Negative dimensions in element.');
   // Building an IntersectionObserverEntry.
 
-  let intersectionRect = element;
+  // The element is relative to (0, 0), while the viewport moves. So, we must
+  // adjust.
+  const boundingClientRect = moveLayoutRect(element, -viewport.left,
+      -viewport.top);
+
+  let intersectionRect = boundingClientRect;
   if (owner) {
-    intersectionRect = rectIntersection(owner, intersectionRect) ||
+    const ownerRect = moveLayoutRect(owner, -viewport.left, -viewport.top);
+    intersectionRect = rectIntersection(ownerRect, boundingClientRect) ||
         // No intersection.
         layoutRectLtwh(0, 0, 0, 0);
   }
-  intersectionRect = rectIntersection(viewport, intersectionRect) ||
+
+  // Now, a normal IntersectionObserver reports the viewport as (x,y) (0, 0).
+  const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
+  intersectionRect = rectIntersection(rootBounds, intersectionRect) ||
       // No intersection.
       layoutRectLtwh(0, 0, 0, 0);
 
   return /** @type {!IntersectionObserverEntry} */ ({
     time: Date.now(),
-    rootBounds: DomRectFromLayoutRect(viewport),
-    boundingClientRect: DomRectFromLayoutRect(element),
+    rootBounds: DomRectFromLayoutRect(rootBounds),
+    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
     intersectionRect: DomRectFromLayoutRect(intersectionRect),
     intersectionRatio: intersectionRatio(intersectionRect, element),
   });
