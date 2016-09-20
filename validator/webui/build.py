@@ -131,7 +131,10 @@ def CreateWebuiAppengineDist(out_dir):
         else:
           shutil.copytree(entry, os.path.join(tempdir, entry))
     for entry in os.listdir('node_modules'):
-      if entry != '@polymer':
+      if entry == 'web-animations-js':
+        shutil.copytree(os.path.join('node_modules', entry),
+                        os.path.join(tempdir, '@polymer', entry))
+      elif entry != '@polymer':
         shutil.copytree(os.path.join('node_modules', entry),
                         os.path.join(tempdir, entry))
     for entry in os.listdir('node_modules/@polymer'):

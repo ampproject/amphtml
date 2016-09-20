@@ -15,7 +15,7 @@
  */
 
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {ampdocFor} from './ampdoc';
+import {ampdocServiceFor} from './ampdoc';
 import {dev} from './log';
 import {escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
@@ -31,13 +31,13 @@ const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let shadowDomSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setShadowDomSupportedForTesting(val) {
   shadowDomSupported = val;
@@ -122,7 +122,7 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
 
   const win = hostElement.ownerDocument.defaultView;
   const extensions = extensionsFor(win);
-  const ampdocService = ampdocFor(win);
+  const ampdocService = ampdocServiceFor(win);
   const ampdoc = ampdocService.getAmpDoc(hostElement);
 
   // Instal runtime CSS.

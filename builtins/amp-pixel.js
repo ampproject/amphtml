@@ -52,7 +52,7 @@ export function installPixel(win) {
       // resource consumption.
       toggle(this.element, false);
       const src = this.element.getAttribute('src');
-      return urlReplacementsFor(this.win).expandAsync(this.assertSource(src))
+      return urlReplacementsFor(this.win).expand(this.assertSource(src))
           .then(src => {
             const image = new Image();
             image.src = src;

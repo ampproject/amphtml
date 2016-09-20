@@ -68,6 +68,7 @@ import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
+import {inmobi} from '../ads/inmobi';
 import {kargo} from '../ads/kargo';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -116,6 +117,9 @@ const AMP_EMBED_ALLOWED = {
 // used for extracting fakead3p from production code.
 const IS_DEV = true;
 
+const data = parseFragment(location.hash);
+window.context = data._context;
+
 // Keep the list in alphabetic order
 register('a9', a9);
 register('accesstrade', accesstrade);
@@ -150,6 +154,7 @@ register('gmossp', gmossp);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
+register('inmobi', inmobi);
 register('kargo', kargo);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -278,8 +283,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
-    const data = parseFragment(location.hash);
-    window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
@@ -463,7 +466,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @param {!Window} window
  * @param {string} type 3p type
  * @param {!Array<string>|undefined} allowedTypes May be undefined.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
   const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
@@ -489,7 +492,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
  * Check that parent host name was whitelisted.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   if (!window.document.referrer) {
@@ -525,7 +528,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
 /**
  * Throws if this window is a top level window.
  * @param {!Window} window
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function ensureFramed(window) {
   if (window == window.parent) {

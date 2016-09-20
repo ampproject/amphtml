@@ -360,7 +360,7 @@ export class AccessService {
    */
   buildUrl_(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
-      return this.urlReplacements_.expandAsync(url, vars);
+      return this.urlReplacements_.expand(url, vars);
     });
   }
 

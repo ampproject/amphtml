@@ -300,7 +300,7 @@ export class AmpSlideScroll extends BaseSlides {
     } else if (currentScrollLeft < 0) {
       // Direction = -1.
       this.elasticScrollState_ = -1;
-    } else if ((currentScrollLeft + this.slideWidth_) >= scrollWidth) {
+    } else if ((currentScrollLeft + this.slideWidth_) > scrollWidth) {
       // Direction = +1.
       this.elasticScrollState_ = 1;
     } else {
