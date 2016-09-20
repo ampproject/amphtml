@@ -117,6 +117,9 @@ const AMP_EMBED_ALLOWED = {
 // used for extracting fakead3p from production code.
 const IS_DEV = true;
 
+const data = parseFragment(location.hash);
+window.context = data._context;
+
 // Keep the list in alphabetic order
 register('a9', a9);
 register('accesstrade', accesstrade);
@@ -280,8 +283,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
-    const data = parseFragment(location.hash);
-    window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
