@@ -25,8 +25,11 @@ limitations under the License.
     data-url="${COMPASS_EXT_URL}"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     data-referrer="${COMPASS_EXT_REF}">
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     data-referrer="${COMPASS_EXT_REF}"
@@ -34,6 +37,9 @@ limitations under the License.
     data-appid="${COMPASS_EXT_APPID}"
     data-geo="${COMPASS_EXT_GEO}">
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

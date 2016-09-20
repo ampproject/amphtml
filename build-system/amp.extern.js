@@ -24,6 +24,11 @@ window.context = {};
 window.context.amp3pSentinel;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+window.context.clientId;
+window.context.initialIntersection;
+>>>>>>> ampproject/master
 =======
 window.context.clientId;
 window.context.initialIntersection;
@@ -137,7 +142,10 @@ var FB;
 FB.init;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======

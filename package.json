@@ -43,7 +43,11 @@
     "eslint-plugin-google-camelcase": "0.0.2",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     "express": "4.13.4",
+=======
+    "express": "4.14.0",
+>>>>>>> ampproject/master
 =======
     "express": "4.14.0",
 >>>>>>> ampproject/master

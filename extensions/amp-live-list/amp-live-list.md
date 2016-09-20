@@ -319,7 +319,10 @@ the lowest one.
 <style amp-custom>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
   amp-live-list > [update] {
@@ -327,6 +330,9 @@ the lowest one.
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

@@ -104,7 +104,10 @@ const EXPERIMENTS = [
   },
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
   {
@@ -113,6 +116,9 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
   },
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

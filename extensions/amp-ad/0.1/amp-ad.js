@@ -68,6 +68,7 @@ export class AmpAd extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     const prefetch = adPrefetch[type];
     const preconnect = adPreconnect[type];
     if (typeof prefetch == 'string') {
@@ -330,6 +331,8 @@ export class AmpAd extends AMP.BaseElement {
 =======
 =======
 >>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
     if (!type) {
       // Unspecified or empty type.  Nothing to do here except bail out.
       return;
@@ -354,6 +357,9 @@ export class AmpAd extends AMP.BaseElement {
     copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

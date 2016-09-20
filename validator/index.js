@@ -21,6 +21,10 @@
 var Promise = require('promise');
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+var colors = require('colors');
+>>>>>>> ampproject/master
 =======
 var colors = require('colors');
 >>>>>>> ampproject/master
@@ -39,7 +43,10 @@ var vm = require('vm');
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 /**
@@ -49,6 +56,9 @@ var vm = require('vm');
  * @returns {!boolean}
  */
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -177,6 +187,7 @@ function ValidationResult() {
 function ValidationError() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /**
      * The severity of the error - possible values are 'UNKNOWN_SEVERITY',
      * 'ERROR', and 'WARNING'.
@@ -235,6 +246,8 @@ function ValidationError() {
 =======
 =======
 >>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
   /**
    * The severity of the error - possible values are 'UNKNOWN_SEVERITY',
    * 'ERROR', and 'WARNING'.
@@ -291,6 +304,9 @@ function ValidationError() {
    */
   this.params = [];
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -306,6 +322,7 @@ function ValidationError() {
  * @constructor
  */
 function Validator(scriptContents) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     // The 'sandbox' is a Javascript object (dictionary) which holds
@@ -327,6 +344,8 @@ function Validator(scriptContents) {
 =======
 =======
 >>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
   // The 'sandbox' is a Javascript object (dictionary) which holds
   // the results of evaluating the validatorJs / scriptContents, so
   // basically, it holds functions, prototypes, etc. As a
@@ -342,6 +361,7 @@ function Validator(scriptContents) {
     new vm.Script(scriptContents).runInContext(this.sandbox);
   } catch (error) {
     throw new Error('Could not instantiate validator.js - ' + error.message);
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> ampproject/master
   }
@@ -406,6 +426,37 @@ Validator.prototype.validateString =
 =======
   }
 }
+=======
+  }
+}
+
+/**
+ * @param {!string} inputString
+ * @returns {!ValidationResult}
+ * @export
+ */
+Validator.prototype.validateString =
+    function(inputString) {
+  var internalResult = this.sandbox.amp.validator.validateString(inputString);
+  var result = new ValidationResult();
+  result.status = internalResult.status;
+  for (var ii = 0; ii < internalResult.errors.length; ii++) {
+    var internalError = internalResult.errors[ii];
+    var error = new ValidationError();
+    error.severity = internalError.severity;
+    error.line = internalError.line;
+    error.col = internalError.col;
+    error.message =
+        this.sandbox.amp.validator.renderErrorMessage(internalError);
+    error.specUrl = internalError.specUrl;
+    error.code = internalError.code;
+    error.params = internalError.params;
+    error.category = this.sandbox.amp.validator.categorizeError(internalError);
+    result.errors.push(error);
+  }
+  return result;
+};
+>>>>>>> ampproject/master
 
 /**
  * @param {!string} inputString
@@ -473,6 +524,7 @@ function getInstance(opt_validatorJs) {
 exports.getInstance = getInstance;
 
 /**
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
  * Maps from file extension to a mime-type.
@@ -609,6 +661,8 @@ function serve(port, validatorScript) {
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
  * Logs a validation result to the console using console.log, console.warn,
  * and console.error as is appropriate.
  * @param {!string} filename
@@ -623,9 +677,12 @@ function logValidationResult(filename, validationResult, color) {
     var error = validationResult.errors[ii];
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     var msg =
         filename + ':' + error.line + ':' + error.col + ' ' + error.message;
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     var msg = filename + ':' + error.line + ':' + error.col + ' ';
@@ -636,6 +693,9 @@ function logValidationResult(filename, validationResult, color) {
       msg += error.message;
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -664,6 +724,7 @@ function main() {
               '  Latest published version by default, or\n' +
               '  dist/validator_minified.js (built with build.py)\n' +
               '  for development.',
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
           'https://cdn.ampproject.org/v0/validator.js');
@@ -728,6 +789,10 @@ function main() {
           'https://cdn.ampproject.org/v0/validator.js')
       .option(
 >>>>>>> ampproject/master
+=======
+          'https://cdn.ampproject.org/v0/validator.js')
+      .option(
+>>>>>>> ampproject/master
           '--format <color|text|json>', 'How to format the output.\n' +
               '  "color" displays errors/warnings/success in\n' +
               '          red/orange/green.\n' +
@@ -739,6 +804,9 @@ function main() {
       .parse(process.argv);
   if (program.args.length === 0) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

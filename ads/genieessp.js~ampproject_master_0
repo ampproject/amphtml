@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS-IS" BASIS,
@@ -14,28 +14,15 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../3p/3p';
-
-/* global MicroAd: false */
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-/* global MicroAd: false */
-=======
->>>>>>> ampproject/master
-=======
->>>>>>> ampproject/master
+import {validateDataExists, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function microad(global, data) {
-  const microadData = ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo'];
-  checkData(data, microadData);
+export function genieessp(global, data) {
+  validateDataExists(data, ['vid', 'zid']);
 
-  global.document.getElementById('c').setAttribute('id', data.spot);
-  loadScript(global, 'https://j.microad.net/js/camp.js', () => {
-    MicroAd.Compass.showAd(data);
-  });
+  global.data = data;
+  writeScript(global, 'https://js.gsspcln.jp/l/amp.js');
 }

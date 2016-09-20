@@ -343,7 +343,11 @@ function createBaseAmpElementProto(win) {
     /** @private @const {!./service/resources-impl.Resources}  */
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.resources_ = resourcesFor(win);
+=======
+    this.resources_ = resourcesFor(this.ownerDocument.defaultView);
+>>>>>>> ampproject/master
 =======
     this.resources_ = resourcesFor(this.ownerDocument.defaultView);
 >>>>>>> ampproject/master
@@ -543,6 +547,7 @@ function createBaseAmpElementProto(win) {
   /**
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
    * @return {!./service/vsync-impl.Vsync}
    * @private @this {!Element}
    */
@@ -551,6 +556,8 @@ function createBaseAmpElementProto(win) {
   };
 
   /**
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======

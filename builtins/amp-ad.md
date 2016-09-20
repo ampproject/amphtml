@@ -84,6 +84,10 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Ad Generation](../ads/adgeneration.md)
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+- [Nativo](../ads/nativo.md)
+>>>>>>> ampproject/master
 =======
 - [Nativo](../ads/nativo.md)
 >>>>>>> ampproject/master

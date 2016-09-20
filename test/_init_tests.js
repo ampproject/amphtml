@@ -51,6 +51,7 @@ class TestSkipper {
     return this;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   }
 
   skipChrome() {
@@ -112,6 +113,43 @@ class TestSkipper {
     }
     this.runner(desc, fn);
   }
+=======
+  }
+
+  skipChrome() {
+    this.skippedUserAgents.push('Chrome');
+    return this;
+  }
+
+  skipEdge() {
+    this.skippedUserAgents.push('Edge');
+    return this;
+  }
+
+  skipFirefox() {
+    this.skippedUserAgents.push('Firefox');
+    return this;
+  }
+
+  skipSafari() {
+    this.skippedUserAgents.push('Safari');
+    return this;
+  }
+
+  /**
+   * @param {string} desc
+   * @param {function()} fn
+   */
+  run(desc, fn) {
+    for (let i = 0; i < this.skippedUserAgents.length; i++) {
+      if (navigator.userAgent.indexOf(this.skippedUserAgents[i]) >= 0) {
+        this.runner.skip(desc, fn);
+        return;
+      }
+    }
+    this.runner(desc, fn);
+  }
+>>>>>>> ampproject/master
 }
 
 describe.skipper = function() {

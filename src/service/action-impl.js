@@ -99,7 +99,11 @@ export class ActionService {
     /** @private {!./vsync-impl.Vsync} */
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.vsync_ = vsyncFor(this.win);
+=======
+    this.vsync_ = vsyncFor(ampdoc.getWin());
+>>>>>>> ampproject/master
 =======
     this.vsync_ = vsyncFor(ampdoc.getWin());
 >>>>>>> ampproject/master
@@ -414,7 +418,11 @@ export function parseActionMap(s, context) {
         method,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         args: (args && window.AMP_TEST && Object.freeze) ?
+=======
+        args: (args && getMode().test && Object.freeze) ?
+>>>>>>> ampproject/master
 =======
         args: (args && getMode().test && Object.freeze) ?
 >>>>>>> ampproject/master

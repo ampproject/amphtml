@@ -53,6 +53,7 @@ describe('test-element-stub', () => {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   function getAnalyticsIframe() {
     return createIframePromise().then(f => {
       iframe = f;
@@ -61,6 +62,8 @@ describe('test-element-stub', () => {
     });
   }
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -93,6 +96,7 @@ describe('test-element-stub', () => {
   });
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   it('not insert script when element is not amp-ad amp-embed', () => {
     return getAnalyticsIframe().then(() => {
@@ -108,6 +112,8 @@ describe('test-element-stub', () => {
           '[custom-element="amp-analytics"]')).to.have.length(0);
     });
   });
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======

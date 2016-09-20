@@ -17,7 +17,12 @@ import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {getStyle} from '../../../src/style';
+=======
+import {getStyle, setStyle} from '../../../src/style';
+import {timer} from '../../../src/timer';
+>>>>>>> ampproject/master
 =======
 import {getStyle, setStyle} from '../../../src/style';
 import {timer} from '../../../src/timer';
@@ -42,6 +47,12 @@ export class AmpSlideScroll extends BaseCarousel {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
+
+>>>>>>> ampproject/master
 =======
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
@@ -62,7 +73,10 @@ export class AmpSlideScroll extends BaseCarousel {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     /** @private {number} */
@@ -73,6 +87,9 @@ export class AmpSlideScroll extends BaseCarousel {
         this.element.hasAttribute('loop') && this.noOfSlides_ > 1;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -107,9 +124,12 @@ export class AmpSlideScroll extends BaseCarousel {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /** @private {number} */
     this.noOfSlides_ = this.slides_.length;
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     /** @private @const {boolean} */
@@ -121,6 +141,9 @@ export class AmpSlideScroll extends BaseCarousel {
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -158,6 +181,7 @@ export class AmpSlideScroll extends BaseCarousel {
   /** @override */
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   hasPrev() {
     return this.slideIndex_ > 0;
   }
@@ -169,11 +193,14 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
 =======
+=======
+>>>>>>> ampproject/master
   hasNext() {
     return this.hasLooping_ || this.slideIndex_ < this.slides_.length - 1;
   }
 
   /** @override */
+<<<<<<< HEAD
 >>>>>>> ampproject/master
 =======
   hasNext() {
@@ -181,6 +208,8 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
   goCallback(dir, unusedAnimate) {
     if (this.slideIndex_ != null) {
@@ -188,10 +217,13 @@ export class AmpSlideScroll extends BaseCarousel {
           (dir == -1 && this.hasPrev())) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.showSlide_(this.slideIndex_ + dir);
       }
     }
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
         let newIndex = this.slideIndex_ + dir;
@@ -280,6 +312,9 @@ export class AmpSlideScroll extends BaseCarousel {
       });
     });
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -292,6 +327,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * @private
    */
   showSlide_(newIndex) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     const noOfSlides = this.noOfSlides_;
@@ -310,6 +346,8 @@ export class AmpSlideScroll extends BaseCarousel {
     } else {
       showIndexArr.push(newIndex - 1, newIndex, newIndex + 1);
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     const noOfSlides_ = this.noOfSlides_;
@@ -331,6 +369,9 @@ export class AmpSlideScroll extends BaseCarousel {
     if (nextIndex != null) {
       showIndexArr.push(nextIndex);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -341,8 +382,11 @@ export class AmpSlideScroll extends BaseCarousel {
     this.updateInViewport(this.slides_[newIndex], true);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     showIndexArr.forEach(showIndex => {
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     showIndexArr.forEach((showIndex, loopIndex) => {
@@ -350,6 +394,9 @@ export class AmpSlideScroll extends BaseCarousel {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -366,11 +413,14 @@ export class AmpSlideScroll extends BaseCarousel {
     // scrollLeft = slide's width).
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     const newScrollLeft = (newIndex == 0) ? 0 : this.slideWidth_;
     this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(newIndex);
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     let newScrollLeft = this.slideWidth_;
@@ -382,6 +432,9 @@ export class AmpSlideScroll extends BaseCarousel {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -390,6 +443,7 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /**
    * Given an index, hides rest of the slides that are not needed.
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
    * @param {number} index Index of the slide to be displayed.
@@ -404,6 +458,8 @@ export class AmpSlideScroll extends BaseCarousel {
           this.schedulePause(this.slides_[i]);
         }
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
    * @param {!Array<number>} indexArr Array of indices that
@@ -421,6 +477,9 @@ export class AmpSlideScroll extends BaseCarousel {
         this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
         this.schedulePause(this.slides_[i]);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

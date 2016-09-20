@@ -84,7 +84,11 @@ export class Pass {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     const nextTime = timer.now() + delay;
+=======
+    const nextTime = this.timer_.now() + delay;
+>>>>>>> ampproject/master
 =======
     const nextTime = this.timer_.now() + delay;
 >>>>>>> ampproject/master
@@ -98,7 +102,11 @@ export class Pass {
       this.nextTime_ = nextTime;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       this.scheduled_ = timer.delay(this.boundPass_, delay);
+=======
+      this.scheduled_ = this.timer_.delay(this.boundPass_, delay);
+>>>>>>> ampproject/master
 =======
       this.scheduled_ = this.timer_.delay(this.boundPass_, delay);
 >>>>>>> ampproject/master
@@ -127,7 +135,11 @@ export class Pass {
     if (this.isPending()) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       timer.cancel(this.scheduled_);
+=======
+      this.timer_.cancel(this.scheduled_);
+>>>>>>> ampproject/master
 =======
       this.timer_.cancel(this.scheduled_);
 >>>>>>> ampproject/master

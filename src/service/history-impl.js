@@ -645,7 +645,11 @@ function createHistory_(window) {
   let binding;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   if (viewer.isOvertakeHistory() || window.AMP_TEST) {
+=======
+  if (viewer.isOvertakeHistory() || getMode().test) {
+>>>>>>> ampproject/master
 =======
   if (viewer.isOvertakeHistory() || getMode().test) {
 >>>>>>> ampproject/master

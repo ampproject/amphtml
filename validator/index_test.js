@@ -24,6 +24,10 @@ global.path = require('path');
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+var execFile = require('child_process').execFile;
+>>>>>>> ampproject/master
 =======
 var execFile = require('child_process').execFile;
 >>>>>>> ampproject/master

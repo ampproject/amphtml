@@ -28,7 +28,10 @@ import {getService} from '../service';
 import {inputFor} from '../input';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {installFramerateService} from './framerate-impl';
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -130,9 +133,18 @@ export class Resources {
     this.exec_ = new TaskQueue();
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
+=======
+
+    /** @const {!TaskQueue} */
+    this.queue_ = new TaskQueue();
+
+    /** @const */
+    this.boundTaskScorer_ = task => this.calcTaskScore_(task);
+>>>>>>> ampproject/master
 =======
 
     /** @const {!TaskQueue} */
@@ -178,9 +190,12 @@ export class Resources {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /** @private @const {!./framerate-impl.Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -1108,8 +1123,11 @@ export class Resources {
    *
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
    * @param {!../layout-rect.LayoutRectDef} viewportRect
    * @param {number} dir
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======

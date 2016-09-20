@@ -85,7 +85,11 @@ describe('Viewport', () => {
     sandbox.stub(vsync, 'canAnimate').returns(true);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     sandbox.stub(vsync, 'createAnimTask', task => {
+=======
+    sandbox.stub(vsync, 'createAnimTask', (unusedContextNode, task) => {
+>>>>>>> ampproject/master
 =======
     sandbox.stub(vsync, 'createAnimTask', (unusedContextNode, task) => {
 >>>>>>> ampproject/master

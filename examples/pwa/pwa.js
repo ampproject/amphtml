@@ -191,6 +191,12 @@ class AmpViewer {
     this.viewer_ = null;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+    // Immediately install amp-shadow.js.
+    this.installScript_('/dist/amp-shadow.js');
+>>>>>>> ampproject/master
 =======
 
     // Immediately install amp-shadow.js.
@@ -329,6 +335,7 @@ class AmpViewer {
         log('- script already exists: ', customElement, customTemplate, src);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       } else {
         const el = doc.createElement('script');
         el.setAttribute('async', '');
@@ -344,12 +351,17 @@ class AmpViewer {
 =======
 =======
 >>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
       } else if (src.indexOf('/amp.js') != -1) {
         // Do not install runtime again. Already installed via amp-shadow.js.
         log('- runtime already installed: ', src);
       } else {
         this.installScript_(src, customElement, customTemplate);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -360,7 +372,10 @@ class AmpViewer {
   /**
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
    * @param {string} src
@@ -383,6 +398,9 @@ class AmpViewer {
 
   /**
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

@@ -250,7 +250,10 @@ describe('amp-sticky-ad', () => {
   });
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 
@@ -320,6 +323,9 @@ describe('amp-sticky-ad', () => {
     });
   });
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

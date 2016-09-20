@@ -331,7 +331,12 @@ export class Viewport {
     // are closer vs farther.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     return Animation.animate(pos => {
+=======
+    // TODO(dvoytenko, #3742): documentElement will be replaced by ampdoc.
+    return Animation.animate(this.win_.document.documentElement, pos => {
+>>>>>>> ampproject/master
 =======
     // TODO(dvoytenko, #3742): documentElement will be replaced by ampdoc.
     return Animation.animate(this.win_.document.documentElement, pos => {

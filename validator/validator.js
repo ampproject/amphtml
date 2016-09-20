@@ -36,6 +36,10 @@ goog.require('goog.asserts');
 goog.require('goog.string');
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+goog.require('goog.uri.utils');
+>>>>>>> ampproject/master
 =======
 goog.require('goog.uri.utils');
 >>>>>>> ampproject/master
@@ -944,7 +948,11 @@ class ParsedUrlSpec {
     /**
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
      * @type {!Object<string, ?>}
+=======
+     * @type {!Object<string, number>}
+>>>>>>> ampproject/master
 =======
      * @type {!Object<string, number>}
 >>>>>>> ampproject/master
@@ -959,7 +967,10 @@ class ParsedUrlSpec {
         this.allowedProtocols_[protocol] = 0;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       }
@@ -974,6 +985,9 @@ class ParsedUrlSpec {
       for (const domain of this.spec_.disallowedDomain) {
         this.disallowedDomains_[domain] = 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -1036,8 +1050,14 @@ class ParsedUrlSpec {
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (uri.hasScheme() &&
         !this.allowedProtocols_.hasOwnProperty(uri.getScheme().toLowerCase())) {
+=======
+    const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
+    if (scheme &&
+        !this.allowedProtocols_.hasOwnProperty(scheme.toLowerCase())) {
+>>>>>>> ampproject/master
 =======
     const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
     if (scheme &&
@@ -1133,7 +1153,10 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
    * @param {!Context} context
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
    * @param {string} domain
@@ -1152,6 +1175,9 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
   /**
    * @param {!Context} context
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -1231,7 +1257,10 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
    * @param {!Context} context
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
    * @param {string} domain
@@ -1249,6 +1278,9 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
   /**
    * @param {!Context} context
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -1995,7 +2027,11 @@ class ParsedTagSpec {
   /**
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
    * @param {string} templateSpecUrl
+=======
+   * @param {?string} templateSpecUrl
+>>>>>>> ampproject/master
 =======
    * @param {?string} templateSpecUrl
 >>>>>>> ampproject/master
@@ -2048,7 +2084,11 @@ class ParsedTagSpec {
     /**
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
      * @type {string}
+=======
+     * @type {?string}
+>>>>>>> ampproject/master
 =======
      * @type {?string}
 >>>>>>> ampproject/master

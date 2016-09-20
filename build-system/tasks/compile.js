@@ -169,7 +169,10 @@ function compile(entryModuleFilename, outputDir,
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     var externs = [
@@ -181,6 +184,9 @@ function compile(entryModuleFilename, outputDir,
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -201,10 +207,14 @@ function compile(entryModuleFilename, outputDir,
         language_out: 'ECMASCRIPT5',
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         externs: [
           'build-system/amp.extern.js',
           'third_party/closure-compiler/externs/intersection_observer.js',
         ],
+=======
+        externs: externs,
+>>>>>>> ampproject/master
 =======
         externs: externs,
 >>>>>>> ampproject/master
@@ -228,11 +238,14 @@ function compile(entryModuleFilename, outputDir,
         warning_level: 'DEFAULT',
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         hide_warnings_for: [
           'ads/',  // TODO(@cramforce): Remove when we are better at typing.
           'node_modules/',
           'build/patched-module/',
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
         define: [],
@@ -246,6 +259,9 @@ function compile(entryModuleFilename, outputDir,
           '3p/environment.js',
           'src/document-state.js'
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -259,10 +275,13 @@ function compile(entryModuleFilename, outputDir,
       // it won't do strict type checking if its whitespace only.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
     }
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
@@ -279,6 +298,9 @@ function compile(entryModuleFilename, outputDir,
       delete compilerOptions.compilerFlags.define;
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

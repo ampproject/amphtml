@@ -80,6 +80,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .-amp-slides-container {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   display: flex;
   height: 100% !important;
   overflow-x: auto !important;
@@ -95,6 +96,30 @@ amp-carousel .amp-carousel-button.amp-disabled {
   display: none;
   flex: 0 0 100% !important;
   height: 100% !important;
+=======
+  display: flex !important;
+  flex-wrap: nowrap;
+  height: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  position: relative !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+  scroll-snap-type: mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.-amp-slides-container.no-scroll {
+  overflow-x: hidden !important;
+}
+
+.-amp-slide-item {
+  align-items: center !important;
+  display: none !important;
+  flex: 0 0 100% !important;
+  height: 100% !important;
+  justify-content: center !important;
+>>>>>>> ampproject/master
   position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
@@ -102,8 +127,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
 
 .-amp-slide-item-show {
   display: flex !important;
+<<<<<<< HEAD
   align-items: center;
   justify-content: center;
+=======
+>>>>>>> ampproject/master
 }
 
 .-amp-carousel-start-marker,
@@ -114,6 +142,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   background-color: transparent !important;
   scroll-snap-coordinate: 0 0 !important;
   flex: 0 0 1px !important;
+<<<<<<< HEAD
 =======
   display: flex !important;
   flex-wrap: nowrap;
@@ -194,11 +223,23 @@ amp-carousel .amp-carousel-button.amp-disabled {
   margin-left: -1px !important;
 }
 
+=======
+}
+
+.-amp-carousel-start-marker {
+  order: -1 !important;
+  margin-left: -1px !important;
+}
+
+>>>>>>> ampproject/master
 .-amp-carousel-end-marker {
   order: 100000000 !important;
   margin-right: -1px !important;
 }
 
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 .-amp-carousel-start-marker,
 .-amp-carousel-end-marker {
@@ -210,6 +251,9 @@ amp-carousel .amp-carousel-button.amp-disabled {
   scroll-snap-coordinate: 0 0 !important;
   width: 1px !important;
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

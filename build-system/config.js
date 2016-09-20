@@ -93,6 +93,7 @@ var karma = {
     ],
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     singleRun: true,
     client: {
       mocha: {
@@ -105,6 +106,9 @@ var karma = {
     browserNoActivityTimeout: 4 * 60 * 1000,
     captureTimeout: 4 * 60 * 1000,
   }
+=======
+  })
+>>>>>>> ampproject/master
 =======
   })
 >>>>>>> ampproject/master

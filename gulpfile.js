@@ -126,6 +126,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    externs: ['ads/ads.extern.js',],
+>>>>>>> ampproject/master
 =======
     externs: ['ads/ads.extern.js',],
 >>>>>>> ampproject/master
@@ -161,7 +165,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   });
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
   // Entry point for shadow runtime.

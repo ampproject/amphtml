@@ -38,7 +38,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
   private boolean pseudo_names = false;
@@ -46,6 +49,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   private boolean is_production_env = true;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -85,6 +91,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setDisambiguatePrivateProperties(true);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    options.setGeneratePseudoNames(pseudo_names);
+>>>>>>> ampproject/master
 =======
     options.setGeneratePseudoNames(pseudo_names);
 >>>>>>> ampproject/master
@@ -111,10 +121,13 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   protected void setTypeCheckOnly(boolean value) {
     typecheck_only = value;
   }
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -126,10 +139,13 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     for (String arg : args) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.setTypeCheckOnly(true);
         break;
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       if (arg.contains("--define=TYPECHECK_ONLY=true")) {
@@ -139,6 +155,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
       } else if (arg.contains("--define=PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

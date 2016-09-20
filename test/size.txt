@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       max   |         min   |       gzip   |     brotli   |   file
       ---   |         ---   |        ---   |        ---   |   ---
  55.04 kB   |     5.58 kB   |    2.31 kB   |    1.99 kB   |   alp.js / alp.max.js
@@ -45,6 +46,8 @@
 114.22 kB   |     9.12 kB   |    3.57 kB   |     3.1 kB   |   v0/amp-youtube-0.1.js
 155.99 kB   |     34.3 kB   |    11.9 kB   |   10.67 kB   |   current-min/f.js / current/integration.js
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       max   |         min   |       gzip   |   file
@@ -95,6 +98,10 @@
  73.72 kB   |     6.02 kB   |    2.58 kB   |   v0/amp-vine-0.1.js
 115.27 kB   |     8.65 kB   |    3.59 kB   |   v0/amp-youtube-0.1.js
 <<<<<<< HEAD
+<<<<<<< HEAD
+160.75 kB   |    35.46 kB   |   12.36 kB   |   current-min/f.js / current/integration.js
+>>>>>>> ampproject/master
+=======
 160.75 kB   |    35.46 kB   |   12.36 kB   |   current-min/f.js / current/integration.js
 >>>>>>> ampproject/master
 =======

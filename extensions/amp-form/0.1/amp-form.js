@@ -24,8 +24,11 @@ import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 import {templatesFor} from '../../../src/template';
@@ -36,6 +39,9 @@ import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -52,6 +58,12 @@ const FormState_ = {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+/** @type {?./validation-bubble.ValidationBubble|undefined} */
+let validationBubble;
+
+>>>>>>> ampproject/master
 =======
 /** @type {?./validation-bubble.ValidationBubble|undefined} */
 let validationBubble;
@@ -74,6 +86,7 @@ export class AmpForm {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /** @const @private {!Element} */
     this.form_ = element;
 
@@ -81,6 +94,8 @@ export class AmpForm {
     this.xhr_ = xhrFor(this.win_);
 
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     /** @const @private {!HTMLFormElement} */
@@ -99,6 +114,9 @@ export class AmpForm {
     this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -134,11 +152,14 @@ export class AmpForm {
   installSubmitHandler_() {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.form_.addEventListener('submit', e => this.handleSubmit_(e));
   }
 
   /**
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
@@ -154,6 +175,9 @@ export class AmpForm {
    *
    *
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -163,6 +187,7 @@ export class AmpForm {
   handleSubmit_(e) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (e.defaultPrevented) {
       return;
     }
@@ -170,6 +195,8 @@ export class AmpForm {
     if (this.state_ == FormState_.SUBMITTING) {
       e.preventDefault();
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     if (this.state_ == FormState_.SUBMITTING) {
@@ -188,6 +215,9 @@ export class AmpForm {
         mutate: reportValidity,
       }, {form: this.form_});
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -198,6 +228,10 @@ export class AmpForm {
       e.preventDefault();
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+      this.cleanupRenderedTemplate_();
+>>>>>>> ampproject/master
 =======
       this.cleanupRenderedTemplate_();
 >>>>>>> ampproject/master
@@ -212,6 +246,7 @@ export class AmpForm {
         requireAmpResponseSourceOrigin: true,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       }).then(() => this.setState_(FormState_.SUBMIT_SUCCESS))
           .catch(error => {
             this.setState_(FormState_.SUBMIT_ERROR);
@@ -219,6 +254,8 @@ export class AmpForm {
           });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       }).then(response => {
@@ -234,6 +271,9 @@ export class AmpForm {
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
       this.cleanupRenderedTemplate_();
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -243,6 +283,7 @@ export class AmpForm {
 
   /**
    * Adds proper classes for the state passed.
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
    * @param {string} state
@@ -257,6 +298,8 @@ export class AmpForm {
 =======
 =======
 >>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
    * @param {string} newState
    * @private
    */
@@ -268,6 +311,9 @@ export class AmpForm {
     this.submitButtons_.forEach(button => {
       if (newState == FormState_.SUBMITTING) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -279,7 +325,10 @@ export class AmpForm {
   }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 
@@ -379,6 +428,9 @@ function reportInputValidity(input) {
   input.addEventListener('blur', onInvalidInputBlur_);
   validationBubble.show(input, input.validationMessage);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -398,6 +450,7 @@ function installSubmissionHandlers(win) {
 }
 
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 function installAmpForm(win) {
@@ -421,11 +474,23 @@ export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
 >>>>>>> ampproject/master
+=======
+/**
+ * @param {!Window} win
+ * @private visible for testing.
+ */
+export function installAmpForm(win) {
+  return getService(win, 'amp-form', () => {
+    if (isExperimentOn(win, TAG)) {
+>>>>>>> ampproject/master
       installStyles(win.document, CSS, () => {
         validationBubble = new ValidationBubble(win);
         installSubmissionHandlers(win);
       });
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

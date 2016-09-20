@@ -17,10 +17,13 @@
 import {createIframePromise} from '../../../../testing/iframe';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {AmpForm} from '../amp-form';
 import * as sinon from 'sinon';
 import {timer} from '../../../../src/timer';
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 import {AmpForm, installAmpForm} from '../amp-form';
@@ -34,6 +37,9 @@ import {installDocService,} from
 import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -46,7 +52,10 @@ describe('amp-form', () => {
     return createIframePromise().then(iframe => {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       const docService = installDocService(iframe.win, /* isSingleDoc */ true);
@@ -55,6 +64,9 @@ describe('amp-form', () => {
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -68,6 +80,10 @@ describe('amp-form', () => {
     const form = doc.createElement('form');
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    form.setAttribute('method', 'POST');
+>>>>>>> ampproject/master
 =======
     form.setAttribute('method', 'POST');
 >>>>>>> ampproject/master
@@ -97,8 +113,11 @@ describe('amp-form', () => {
   }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   beforeEach(() => {
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 
@@ -108,6 +127,9 @@ describe('amp-form', () => {
     installActionServiceForDoc(docService.getAmpDoc());
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -149,6 +171,7 @@ describe('amp-form', () => {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   it('should do nothing if defaultPrevented', () => {
     const form = getForm();
     form.setAttribute('action-xhr', 'https://example.com');
@@ -161,6 +184,8 @@ describe('amp-form', () => {
     ampForm.handleSubmit_(event);
     expect(event.preventDefault.called).to.be.false;
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
   it('should do nothing if already submitted', () => {
@@ -282,6 +307,9 @@ describe('amp-form', () => {
       expect(ampForm.xhr_.fetchJson.called).to.be.true;
     });
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -293,9 +321,15 @@ describe('amp-form', () => {
       const event = {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         target: ampForm.form_,
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
+=======
+        stopImmediatePropagation: sandbox.spy(),
+        target: ampForm.form_,
+        preventDefault: sandbox.spy(),
+>>>>>>> ampproject/master
 =======
         stopImmediatePropagation: sandbox.spy(),
         target: ampForm.form_,
@@ -317,7 +351,11 @@ describe('amp-form', () => {
       const config = xhrCall.args[1];
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(config.method).to.equal('GET');
+=======
+      expect(config.method).to.equal('POST');
+>>>>>>> ampproject/master
 =======
       expect(config.method).to.equal('POST');
 >>>>>>> ampproject/master
@@ -339,9 +377,15 @@ describe('amp-form', () => {
       const event = {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         target: form,
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
+=======
+        stopImmediatePropagation: sandbox.spy(),
+        target: form,
+        preventDefault: sandbox.spy(),
+>>>>>>> ampproject/master
 =======
         stopImmediatePropagation: sandbox.spy(),
         target: form,
@@ -367,7 +411,12 @@ describe('amp-form', () => {
       expect(event.preventDefault.called).to.be.true;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(event.preventDefault.callCount).to.equal(3);
+=======
+      expect(event.preventDefault.callCount).to.equal(1);
+      expect(event.stopImmediatePropagation.callCount).to.equal(2);
+>>>>>>> ampproject/master
 =======
       expect(event.preventDefault.callCount).to.equal(1);
       expect(event.stopImmediatePropagation.callCount).to.equal(2);
@@ -400,12 +449,15 @@ describe('amp-form', () => {
       }));
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       const form = ampForm.form_;
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       sandbox.spy(ampForm.actions_, 'trigger');
@@ -415,6 +467,9 @@ describe('amp-form', () => {
         target: form,
         preventDefault: sandbox.spy(),
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -433,6 +488,12 @@ describe('amp-form', () => {
         expect(form.className).to.contain('amp-form-submit-success');
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        expect(ampForm.actions_.trigger.called).to.be.true;
+        expect(ampForm.actions_.trigger.calledWith(
+            form, 'submit-success', null)).to.be.true;
+>>>>>>> ampproject/master
 =======
         expect(ampForm.actions_.trigger.called).to.be.true;
         expect(ampForm.actions_.trigger.calledWith(
@@ -456,12 +517,15 @@ describe('amp-form', () => {
           }));
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       const form = ampForm.form_;
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
       sandbox.spy(ampForm.actions_, 'trigger');
@@ -471,6 +535,9 @@ describe('amp-form', () => {
         target: form,
         preventDefault: sandbox.spy(),
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -490,7 +557,11 @@ describe('amp-form', () => {
       fetchJsonRejecter();
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       return timer.promise(20).then(() => {
+=======
+      return timer.promise(0).then(() => {
+>>>>>>> ampproject/master
 =======
       return timer.promise(0).then(() => {
 >>>>>>> ampproject/master
@@ -505,8 +576,11 @@ describe('amp-form', () => {
         expect(form.className).to.contain('amp-form-submit-error');
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       }).should.eventually.throw;
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
         expect(ampForm.actions_.trigger.called).to.be.true;
@@ -605,6 +679,9 @@ describe('amp-form', () => {
         expect(renderedTemplates[0]).to.equal(newRender);
       });
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

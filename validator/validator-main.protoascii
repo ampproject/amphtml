@@ -27,7 +27,11 @@ min_validator_revision_required: 143
 # change to this file (validator-main.js) requires updating this revision id.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 spec_file_revision: 231
+=======
+spec_file_revision: 235
+>>>>>>> ampproject/master
 =======
 spec_file_revision: 235
 >>>>>>> ampproject/master
@@ -1945,6 +1949,9 @@ tags {
 }
 # 4.10.4 The label element
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ampproject/master
 tags: {
   tag_name: "LABEL"
   mandatory_ancestor: "FORM"
@@ -2001,6 +2008,7 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
 }
 # 4.10.6 The button element
+<<<<<<< HEAD
 tags: {
 =======
 tags: {
@@ -2059,6 +2067,9 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
 }
 # 4.10.6 The button element
+tags: {
+>>>>>>> ampproject/master
+=======
 tags: {
 >>>>>>> ampproject/master
   tag_name: "BUTTON"
@@ -2288,6 +2299,7 @@ attr_lists: {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
 # so if you're changing amp-ad consider changing amp-embed as well.
 tags: {  # <amp-ad>
@@ -2340,6 +2352,8 @@ tags: {  # <amp-embed>
     supported_layouts: RESPONSIVE
   }
 }
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
