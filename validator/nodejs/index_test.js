@@ -68,8 +68,24 @@ it('accepts the minimum valid AMP file', function(done) {
       fs.readFileSync('../testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
-        var validationResult = instance.validateString('');
-        expect(validationResult.status).toBe('FAIL');
+        var validationResult = instance.validateString(mini);
+        expect(validationResult.status).toBe('PASS');
+        done();
+      })
+      .catch(function(error) {
+        fail(error);
+        done();
+      });
+});
+
+it('accepts the minimum valid AMP4ADS file', function(done) {
+  // Note: This will use the validator that was built with build.py.
+  var mini = fs.readFileSync(
+      '../testdata/amp4ads_feature_tests/min_valid_amp4ads.html', 'utf-8');
+  ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
+      .then(function(instance) {
+        var validationResult = instance.validateString(mini, 'AMP4ADS');
+        expect(validationResult.status).toBe('PASS');
         done();
       })
       .catch(function(error) {
@@ -148,7 +164,6 @@ it('emits text if --format=text is specified on command line', function(done) {
       });
 }, 5000);
 
-
 it('emits json if --format=json is specified on command line', function(done) {
   execFile(
       process.execPath,
@@ -174,6 +189,33 @@ it('emits json if --format=json is specified on command line', function(done) {
             .toBe('PASS');
         expect(parsedJson['feature_tests/several_errors.html'].status)
             .toBe('FAIL');
+        done();
+      });
+}, 5000);
+
+it('supports AMP4ADS with --html_format command line option', function(done) {
+  var severalErrorsOut =
+      fs.readFileSync(
+            '../testdata/amp4ads_feature_tests/style-amp-custom.out',
+            'utf-8')
+          .split('\n')
+          .splice(1)  // trim 1st line
+          .join('\n')
+          .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories
+  execFile(
+      process.execPath,
+      [
+        '../nodejs/index.js', '--format=text', '--html_format=AMP4ADS',
+        '--validator_js=../dist/validator_minified.js',
+        'amp4ads_feature_tests/style-amp-custom.html',
+        'amp4ads_feature_tests/min_valid_amp4ads.html'
+      ],
+      {'cwd': '../testdata'},  // Run inside the testdata dir to match paths.
+      function(error, stdout, stderr) {
+        expect(error).toBeDefined();  // At least one file had errors.
+        expect(stderr).toBe(severalErrorsOut);
+        expect(stdout).toBe(
+            'amp4ads_feature_tests/min_valid_amp4ads.html: PASS\n');
         done();
       });
 }, 5000);
