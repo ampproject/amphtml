@@ -43,3 +43,12 @@ form.amp-form-submit-error [submit-error] {
   border-right: 8px solid transparent;
   border-top: 8px solid #fff;
 }
+
+[visible-when-invalid] {
+  display: none;
+  color: red;
+}
+
+[visible-when-invalid].visible {
+  display: initial;
+}
