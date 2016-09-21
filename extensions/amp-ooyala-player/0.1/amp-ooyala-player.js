@@ -79,7 +79,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-      return true;
+    return true;
   }
 };
 
