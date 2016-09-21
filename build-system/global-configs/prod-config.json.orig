@@ -1,0 +1,12 @@
+{
+  "canary": false,
+<<<<<<< HEAD
+  "no-auth-in-prerender": 1
+=======
+  "no-auth-in-prerender": 1,
+  "amp-sticky-ad": 1,
+  "amp-live-list": 1,
+  "amp-ios-overflow-x": 1,
+  "amp-experiment": 1
+>>>>>>> ampproject/master
+}

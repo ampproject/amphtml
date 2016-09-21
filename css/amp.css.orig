@@ -1,0 +1,417 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Horizontal scrolling interferes with embedded scenarios and predominantly
+ * the result of the non-responsive design.
+ *
+ * Notice that it's critical that `overflow-x: hidden` is only set on `html`
+ * and not `body`. Otherwise, adding `overflow-x: hidden` forces `overflow-y`
+ * to be computed to `auto` on both the `body` and `html` elements so they both
+ * potentially get a scrolling box. See #3108 for more details.
+ */
+html {
+  overflow-x: hidden !important;
+}
+html, body {
+  height: auto !important;
+}
+
+/**
+ * Margin:0 is currently needed for iOS viewer embeds.
+ * See:
+ * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+ * and {@link ViewportBindingNaturalIosEmbed_} for more info.
+ */
+body {
+  margin: 0 !important;
+}
+
+/** These properties can be overriden by user stylesheets. */
+body {
+  /* Text adjust is set to 100% to avoid iOS Safari bugs where the font-size is
+     sometimes not restored during orientation. See #449. */
+  text-size-adjust: 100%;
+}
+
+.-amp-element {
+  display: inline-block;
+}
+
+.-amp-layout-nodisplay {
+  /* Display is set/reset in JS */
+}
+
+.-amp-layout-fixed {
+  display: inline-block;
+  position: relative;
+}
+
+.-amp-layout-responsive {
+  display: block;
+  position: relative;
+}
+
+.-amp-layout-fixed-height {
+  display: block;
+  position: relative;
+}
+
+.-amp-layout-container {
+  display: block;
+  position: relative;
+}
+
+.-amp-layout-fill {
+  display: block;
+  overflow: hidden !important;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.-amp-layout-flex-item {
+  display: block;
+  position: relative;
+  flex: 1 1 auto;
+}
+
+.-amp-layout-size-defined {
+  overflow: hidden !important;
+}
+
+i-amp-sizer {
+  display: block !important;
+}
+
+.-amp-fill-content {
+  display: block;
+  width: 1px;          /* These lines are a work around to this issue in iOS: */
+  min-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198      */
+  height: 100%;
+  margin: auto;
+}
+
+.-amp-layout-size-defined .-amp-fill-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.-amp-replaced-content {
+  padding: 0 !important;
+  border: none !important;
+  /* TODO(dvoytenko): explore adding here object-fit. */
+}
+
+/* For author styling. */
+.amp-unresolved {
+}
+
+.-amp-unresolved {
+  position: relative;
+  overflow: hidden !important;
+}
+
+/* "notbuild" classes are set as soon as an element is created and removed
+   as soon as the element is built. */
+
+.amp-notbuilt {
+  /* For author styling. */
+}
+
+.-amp-notbuilt {
+  position: relative;
+  overflow: hidden !important;
+  color: transparent !important;
+}
+
+.-amp-notbuilt > * {
+  display: none;
+}
+
+.-amp-ghost {
+  visibility: hidden !important;
+}
+
+.-amp-layout {
+  /* Just state. */
+}
+
+.-amp-error {
+  /* Just state. */
+}
+
+.-amp-element > [placeholder] {
+  display: block;
+}
+
+.-amp-element > [placeholder].hidden,
+.-amp-element > [placeholder].amp-hidden {
+  visibility: hidden;
+}
+
+.-amp-element:not(.amp-notsupported) > [fallback] {
+  display: none;
+}
+
+.-amp-layout-size-defined > [placeholder],
+.-amp-layout-size-defined > [fallback] {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1 !important;
+}
+
+.-amp-notbuilt > [placeholder] {
+  display: block !important;
+}
+
+.-amp-hidden-by-media-query {
+  display: none;
+}
+
+.-amp-element-error {
+  background: red !important;
+  color: white !important;
+  position: relative !important;
+}
+
+.-amp-element-error::before {
+  content: attr(error-message);
+}
+
+/**
+ * Wraps an element to make the contents scrollable. This is
+ * used to wrap iframes which in iOS always behave as if they had the
+ * seamless attribute.
+ */
+i-amp-scroll-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+}
+
+/**
+ * Overflow:auto will be set with delay due to iOS bug where iframe is not
+ * rendered.
+ */
+i-amp-scroll-container.amp-active {
+  overflow: auto;
+}
+
+.-amp-loading-container {
+  display: block !important;
+  z-index: 1;
+}
+
+.-amp-notbuilt > .-amp-loading-container {
+  display: block !important;
+}
+
+/**
+ * `-amp-loading-container`, `-amp-loader` and `-amp-loader-dot` all support
+ * a "loading indicator" usecase. `-amp-loading-container` is mostly responsible
+ * for alighning the loading indicator, while `-amp-loader` and
+ * `-amp-loader-dot` are an implementation for a default loading indicator. The
+ * default implementation includes the three-dot layout and animation.
+ */
+.-amp-loading-container.amp-hidden {
+  visibility: hidden;
+}
+
+.-amp-loader {
+  position: absolute;
+  display: block;
+  height: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  transform-origin: 50% 50%;
+  white-space: nowrap;
+}
+
+.-amp-loader.amp-active .-amp-loader-dot {
+  animation: -amp-loader-dots 2s infinite;
+}
+
+.-amp-loader-dot {
+  position: relative;
+  display: inline-block;
+
+  height: 10px;
+  width: 10px;
+  margin: 2px;
+  border-radius: 100%;
+  background-color: rgba(0, 0, 0, .3);
+
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
+  will-change: transform;
+}
+
+.-amp-loader .-amp-loader-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.-amp-loader .-amp-loader-dot:nth-child(2) {
+  animation-delay: .1s;
+}
+
+.-amp-loader .-amp-loader-dot:nth-child(3) {
+  animation-delay: .2s;
+}
+
+@keyframes -amp-loader-dots {
+  0%, 100% {
+    transform: scale(.7);
+    background-color: rgba(0, 0, 0, .3);
+  }
+
+  50% {
+    transform: scale(.8);
+    background-color: rgba(0, 0, 0, .5);
+  }
+}
+
+
+/**
+ * "overflow" element is an element shown when more content is available but
+ * not currently visible. Typically tapping on this element shows the full
+ * content.
+ */
+.-amp-element > [overflow] {
+  cursor: pointer;
+  z-index: 2;
+  visibility: hidden;
+}
+
+.-amp-element > [overflow].amp-visible {
+  visibility: visible;
+}
+
+
+/* Polyfill for IE and any other browser that don't understand templates . */
+template {
+  display: none !important;
+}
+
+/**
+ * Authors can set this class on their html tags to provide `border-box` box-sizing
+ * to every element in their document. Individual elements can override as necessary.
+ */
+.amp-border-box,
+.amp-border-box *,
+.amp-border-box *:before,
+.amp-border-box *:after {
+  box-sizing: border-box;
+}
+
+amp-pixel {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important; /* Only things with height are ever loaded. */
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+/**
+ * Force the layout box of the ad iframe to be exactly as big as the actual
+ * iframe. The `amp-ad` tag itself can be freely styled.
+ */
+amp-ad iframe {
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/**
+ * Instagram wraps the standard image into a fixed size container.
+ * With these offsets, users can simply specify the the size of the
+ * instagram images and things have the right size.
+ * In particular the effect of adding padding to this container is
+ * that with responsive layouts the responsiveness is based on the
+ * asset while the padding stays constant.
+ * This information is here instead of living with the CSS of the
+ * component, so that the runtime can reserve the correct space
+ * before the instagram implementation loads.
+ */
+amp-instagram {
+  padding: 48px 8px !important;
+  background-color: white;
+}
+
+
+/**
+ * Analytics tags should never be visible. keep them hidden.
+ */
+amp-analytics {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+
+/**
+ * Minimal AMP Access CSS. This part has to be here so that the correct UI
+ * can be provided before AMP Access JS has been loaded.
+ */
+[amp-access][amp-access-hide] {
+  display: none;
+}
+
+
+/**
+ * Forms error/success messaging containers should be hidden at first.
+ */
+form [submit-success],
+form [submit-error] {
+  display: none;
+}
+
+/**
+ * Hide the update reference point of amp-live-list by default. This is
+ * reset by the `amp-live-list > .amp-active[update]` selector.
+ */
+amp-live-list > [update] {
+  display: none;
+}
+<<<<<<< HEAD
+=======
+
+/**
+ * Display none elements
+ */
+amp-experiment, amp-share-tracking {
+  display: none;
+}
+
+amp-fresh {
+  visibility: hidden;
+}
+>>>>>>> ampproject/master

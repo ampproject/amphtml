@@ -1,0 +1,40 @@
+{
+  "name": "amp-validator",
+  "version": "0.1.0",
+  "description": "Validator for AMP HTML (www.ampproject.org)",
+  "engines": {
+    "node": "^0.10.25"
+  },
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml.git"
+  },
+<<<<<<< HEAD
+  "bin": {
+    "amp-validator": "index.sh"
+  },
+  "dependencies": {
+    "colors": "1.1.2",
+    "commander": "2.9.0",
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+    "webcomponents-lite": "0.6.0",
+=======
+>>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
+    "promise" : "7.1.1"
+  },
+=======
+>>>>>>> ampproject/master
+  "devDependencies": {
+    "google-closure-compiler": "20160517.1.0",
+    "google-closure-library": "20160517.0.0",
+    "jasmine": "2.3.2"
+  }
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Load AMP documents</title>
+  <style>
+  #frames {
+    position: relative;
+  }
+  iframe {
+    position: absolute;
+    background-color: white;
+  }
+  </style>
+</head>
+<body>
+
+<select id=version>
+  <option value=".max">Original (babel.js)
+  <option value=".min">Minified (closure)
+  <option value>prod (closure)
+</select>
+<button id=load>Load doc</button>
+<div id=frames></div>
+
+<script>
+(function() {
+  var load = document.getElementById('load');
+  var frames = document.getElementById('frames');
+  var count = 0;
+  load.onclick = function() {
+    var iframe = document.createElement('iframe');
+    iframe.src = './article.amp' + getVersion() + '.html#log=0';
+    iframe.width = 320;
+    iframe.height = window.innerHeight - 100;
+    iframe.style.top = (count * 20) + 'px';
+    iframe.style.left = (count * 20) + 'px';
+    frames.appendChild(iframe);
+    count++
+  };
+
+  function getVersion() {
+    var v = document.getElementById('version');
+    return v.options[v.selectedIndex].value;
+  }
+})();
+</script>
+</body>
+</html>

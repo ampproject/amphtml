@@ -1,0 +1,3425 @@
+#
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+# This revision id refers to the validator revision id, currently a Google
+# internal mechanism. When backwards incompatible changes to the validator
+# engine are made, this value must be incremented to prevent old binaries
+# in production from crashing. This id is not relevant to validator.js
+# because thus far, engine (validator.js) and spec file
+# (validator-main.protoascii) are always released together.
+<<<<<<< HEAD
+min_validator_revision_required: 143
+=======
+min_validator_revision_required: 178
+>>>>>>> ampproject/master
+# The spec file revision allows the validator engine to distinguish
+# newer versions of the spec file. This is currently a Google internal
+# mechanism, validator.js does not use this facility. However, any
+# change to this file (validator-main.js) requires updating this revision id.
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+spec_file_revision: 231
+=======
+spec_file_revision: 235
+>>>>>>> ampproject/master
+=======
+spec_file_revision: 235
+>>>>>>> ampproject/master
+=======
+spec_file_revision: 235
+>>>>>>> ampproject/master
+=======
+spec_file_revision: 287
+
+reference_points_can_define_reference_points: true
+>>>>>>> ampproject/master
+
+# Validator extensions.
+# =====================
+# In addition to the rules in this file, the Validator honors the rules
+# in the extensions/*/0.1/validator-*.protoascii files. This makes it
+# easy to organize the rules for extensions next to their Javascript
+# implementation.
+
+# Rules for AMP HTML
+# (https://www.ampproject.org/docs/reference/spec.html)
+
+tags: {
+  tag_name: "!DOCTYPE"
+  spec_name: "html doctype"
+  mandatory_parent: "$ROOT"
+  mandatory: true
+  unique: true
+  attrs: {
+    name: "html"
+    mandatory: true
+    value: ""
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+
+# Below, we list the allowed elements in the order in which they are appear
+# in the spec in section 4 "The Elements of HTML"
+# (http://www.w3.org/TR/html5/single-page.html#html-elements).
+
+# 4.1 The root element
+# 4.1.1 The html element
+<<<<<<< HEAD
+tags: {
+=======
+tags: {  # AMP
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "HTML"
+  spec_name: "html ⚡ for top-level html"
+  mandatory: true
+  mandatory_parent: "!DOCTYPE"
+  unique: true
+  attrs: {
+    name: "⚡"
+    alternative_names: "amp"
+    mandatory: true
+    value: ""
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+tags: {  # A4A
+  html_format: AMP4ADS
+  tag_name: "HTML"
+  spec_name: "html ⚡4ads for top-level html"
+  mandatory: true
+  mandatory_parent: "!DOCTYPE"
+  unique: true
+  attrs: {
+    name: "⚡4ads"
+    alternative_names: "amp4ads"
+    mandatory: true
+    value: ""
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#a4a-format-rules"
+}
+
+
+# 4.2 Document metadata
+# 4.2.1 The head element
+tags: {
+  tag_name: "HEAD"
+  mandatory: true
+  mandatory_parent: "HTML"
+  unique: true
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+# 4.2.2 The title element
+tags: {
+  tag_name: "TITLE"
+  spec_name: "title"
+}
+# 4.2.3 the base element
+tags: {
+  tag_name: "BASE"
+  # Currently the amp cache doesn't correctly rewrite URLs for documents
+  # with <base href>. When it does, we will add support for href attributes.
+  # attrs: {
+  #   name: "href"
+  #   value_url: {
+  #     allow_relative: false
+  #     allowed_protocol: "http"
+  #     allowed_protocol: "https"
+  #   }
+  #   blacklisted_value_regex: "__amp_source_origin"
+  # }
+  attrs: {
+    name: "target"
+    value_regex_casei: "(_blank|_self)"
+  }
+}
+# Disallowed.
+# 4.2.4 the link element
+attr_lists: {
+  name: "common-link-attrs"
+  attrs: { name: "media" }
+  attrs: { name: "sizes" }
+  attrs: { name: "target" }
+  attrs: { name: "type" }
+  attrs: { name: "hreflang" }
+  attrs: { name: "charset" value: "utf-8" }
+  attrs: { name: "color" }
+}
+tags: {
+  tag_name: "LINK"
+  spec_name: "link rel="
+  disallowed_ancestor: "TEMPLATE"
+  attrs: { name: "href" }
+  attr_lists: "common-link-attrs"
+  attrs: {
+    name: "rel"
+    mandatory: true
+    # There are a wide variety of link rel attribute values used in the wild as
+    # this attribute is used as meta-data for any html client such as search
+    # engines. Unfortunately, there are also a number of attribute values which
+    # have behavioral impacts in modern browsers. A few places where these are
+    # loosely documented include:
+    # - http://microformats.org/wiki/existing-rel-values
+    # - http://www.iana.org/assignments/link-relations/link-relations.xhtml
+    # - https://html.spec.whatwg.org/#linkTypes
+    # We blacklist a few specific values which have browser behavior that could
+    # negatively impact performance.
+    # TODO(gregable): This could be improved such that the error message would
+    # report which value in a list is the one causing problems.
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "canonical|"  # Handled separately below, has specific requirements.
+        "components|"
+        "dns-prefetch|"  # Handled separately below, has specific requirements.
+        "import|"
+        "manifest|"  # Handled separately below, has specific requirements.
+<<<<<<< HEAD
+        "preconnect|"
+=======
+        "preconnect|"  # Handled separately below, has specific requirements.
+>>>>>>> ampproject/master
+        "prefetch|"
+        "preload|"
+        "prerender|"
+        "serviceworker|"
+        "stylesheet|"  # Handled separately below, has specific requirements.
+        "subresource|"
+        ")(\\s|$)"
+  }
+  attrs: { name: "sizes" }
+  attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "LINK"
+  spec_name: "link rel=canonical"
+  mandatory_parent: "HEAD"
+  mandatory: true
+  unique: true
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: true
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "common-link-attrs"
+  attrs: {
+    name: "rel"
+    value: "canonical"
+    mandatory: true
+    dispatch_key: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+<<<<<<< HEAD
+=======
+# Specifically allow
+# <link href="https://fonts.gstatic.com" rel="dns-prefetch preconnect>
+# which is inserted by the AMP Cache if Google webfonts are included in the
+# document. This is an optimization to more quickly setup the necessary
+# connection..
+tags: {
+  tag_name: "LINK"
+  spec_name: "link rel=dns-prefetch preconnect for fonts"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "href"
+    value: "https://fonts.gstatic.com"
+    mandatory: true
+  }
+  attrs: {
+    name: "rel"
+    value: "dns-prefetch preconnect"
+    mandatory: true
+    dispatch_key: true
+  }
+}
+
+>>>>>>> ampproject/master
+# Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
+tags: {
+  tag_name: "LINK"
+  spec_name: "link rel=manifest"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: true
+    }
+<<<<<<< HEAD
+=======
+    blacklisted_value_regex: "__amp_source_origin"
+>>>>>>> ampproject/master
+  }
+  attr_lists: "common-link-attrs"
+  attrs: {
+    name: "rel"
+    value: "manifest"
+    mandatory: true
+    dispatch_key: true
+  }
+<<<<<<< HEAD
+=======
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+>>>>>>> ampproject/master
+}
+# Whitelisted font providers
+tags: {
+  tag_name: "LINK"
+  spec_name: "link rel=stylesheet for fonts"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|"
+                 "https://fonts\\.googleapis\\.com/icon\\?.*|"
+                 "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
+                 "https://fast\\.fonts\\.net/.*|"
+                 "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/.*|"
+                 "https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css"
+  }
+  attrs: {
+    name: "rel"
+    mandatory: true
+    value: "stylesheet"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/css"
+  }
+  attrs: { name: "media" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
+}
+# itemprop=sameAs is allowed per schema.org, needs not be in head
+tags: {
+  tag_name: "LINK"
+  spec_name: "link itemprop=sameAs"
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+  attrs: {
+    name: "itemprop"
+    mandatory: true
+    value: "sameAs"
+    dispatch_key: true
+  }
+  attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# rel= isn't mandatory when itemprop= is present.
+tags: {
+  tag_name: "LINK"
+  spec_name: "link itemprop="
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+  attrs: {
+    name: "itemprop"
+    mandatory: true
+  }
+  attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# 4.2.5 the meta element
+# Charset must be utf8, and a specific viewport is required.
+tags: {
+  tag_name: "META"
+  spec_name: "meta charset=utf-8"
+  mandatory: true
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    dispatch_key: true
+    name: "charset"
+    mandatory: true
+    value: "utf-8"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+tags: {
+  tag_name: "META"
+  spec_name: "meta name=viewport"
+  mandatory: true
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_properties: {
+      properties: { name: "width" mandatory: true value: "device-width" }
+      properties: { name: "height" }
+      properties: { name: "initial-scale" }
+      properties: { name: "minimum-scale" mandatory: true value_double: 1.0 }
+      properties: { name: "maximum-scale" }
+      properties: { name: "shrink-to-fit" }
+      properties: { name: "user-scalable" }
+    }
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value: "viewport"
+    dispatch_key: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+# This tag is a hack to tell IE 10 to use its modern rendering engine as opposed
+# to the IE8 engine. So it's explicitly allowed.
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=X-UA-Compatible"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "X-UA-Compatible"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_properties: {
+      properties: { name: "ie" value: "edge" }
+      properties: { name: "chrome" value: "1" }
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+tags: {
+  tag_name: "META"
+  spec_name: "meta name= and content="
+  # The validator accepts any name="..." attribute values except
+  # for a few specific name values which have more specific rules above or
+  # are altogether disallowed.
+  attrs: {
+    name: "name"
+    blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)(\\s|$)"
+  }
+  attrs: { name: "content" }
+  # property / content is non-standard, but commonly seen.
+  attrs: { name: "property" }
+  attrs: { name: "itemprop" }
+}
+# This is redundant with meta charset, but also harmless as long as it's
+# set to utf-8.
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=content-type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "content-type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/html; charset=utf-8"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# Identical to the above, but a common case variant of content-type.
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=Content-Type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "Content-Type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/html; charset=utf-8"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# http-equiv content-language tag
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=content-language"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "content-language"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# http-equiv pics-label tag
+# https://www.w3.org/PICS/
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=pics-label"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "pics-label"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# http-equiv imagetoolbar tag
+# https://msdn.microsoft.com/en-us/library/ms532986(v=vs.85).aspx
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=imagetoolbar"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "imagetoolbar"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# http-equiv content-style-type
+# https://www.w3.org/TR/REC-html40/present/styles.html#h-14.2.1
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=Content-Style-Type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "Content-Style-Type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/css"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# http-equiv content-script-type
+# https://www.w3.org/TR/html4/interact/scripts.html#h-18.2.2.1
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=Content-Script-Type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "Content-Script-Type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/javascript"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# http-equiv resource-type
+# http://www.metatags.info/meta_http_equiv_resource_type
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=resource-type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "RESOURCE-TYPE"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+
+# 4.2.6 The style
+# Text contents of the style tag will be validated seperately.
+<<<<<<< HEAD
+tags: {  # Special custom 'author' spreadsheet.
+=======
+tags: {  # Special custom 'author' spreadsheet for AMP
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "STYLE"
+  spec_name: "style amp-custom"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: true
+  }
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value: "text/css"
+  }
+  cdata: {
+    max_bytes: 50000
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec.html#maximum-size"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-moz-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-o-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-webkit-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allowed_protocol: "absolute"  # Temporary / will go away.
+        allow_relative: true
+        allow_empty: true
+      }
+      font_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allow_relative: true
+        allow_empty: true
+      }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "\\.i?-amp-"
+      error_message: "CSS -amp- class name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "!important"
+      error_message: "CSS !important"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
+}
+tags: {  # Special custom 'author' spreadsheet for A4A
+  html_format: AMP4ADS
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (AMP4ADS)"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: true
+  }
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value: "text/css"
+  }
+  cdata: {
+    max_bytes: 20000  # Smaller than AMP, which is 50,000.
+    max_bytes_spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#css"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-moz-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-o-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-webkit-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allowed_protocol: "absolute"  # Temporary / will go away.
+        allow_relative: true
+        allow_empty: true
+      }
+      font_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allow_relative: true
+        allow_empty: true
+      }
+      validate_amp4ads: true
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "\\.i?-amp-"
+      error_message: "CSS -amp- class name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "!important"
+      error_message: "CSS !important"
+    }
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#css"
+}
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-boilerplate] - old variant"
+  mandatory_alternatives: "head > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  deprecation: "head > style[amp-boilerplate]"
+  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+  cdata: {
+    cdata_regex: "body ?{opacity: ?0}"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "STYLE"
+  spec_name: "noscript > style[amp-boilerplate] - old variant"
+  mandatory_alternatives: "noscript > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  deprecation: "noscript > style[amp-boilerplate]"
+  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+  cdata {
+    cdata_regex: "body ?{opacity: ?1}"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-boilerplate]"
+  mandatory_alternatives: "head > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  also_requires_tag: "noscript > style[amp-boilerplate]"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: true
+  }
+  cdata: {
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}\\s*"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP4ADS
+  tag_name: "STYLE"
+  spec_name: "head > style[amp4ads-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp4ads-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: true
+  }
+  cdata: {
+    # This regex allows arbitrary whitespace around the body statement, but
+    # not inside it. This is a compromise to keep things simple, but allow
+    # pretty printing tools some latitude.
+    cdata_regex: "\\s*body{visibility:hidden}\\s*"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#boilerplate"
+}
+tags: {
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "STYLE"
+  spec_name: "noscript > style[amp-boilerplate]"
+  mandatory_alternatives: "noscript > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  also_requires_tag: "head > style[amp-boilerplate]"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: true
+  }
+  cdata {
+    cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+
+# 4.3 Sections
+# 4.3.1 The body element
+tags: {
+  tag_name: "BODY"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HTML"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+# 4.3.2 The article element
+tags: {
+  tag_name: "ARTICLE"
+}
+# 4.3.3 The section element
+tags: {
+  tag_name: "SECTION"
+  disallowed_ancestor: "AMP-ACCORDION"
+}
+# 4.3.4 The nav element
+tags: {
+  tag_name: "NAV"
+}
+# 4.3.5 The aside element
+tags: {
+  tag_name: "ASIDE"
+}
+# 4.3.6 The h1, h2, h3, h4, h5, and h6 elements
+tags: {
+  tag_name: "H1"
+  attrs: { name: "align" }
+}
+tags: {
+  tag_name: "H2"
+  attrs: { name: "align" }
+}
+tags: {
+  tag_name: "H3"
+  attrs: { name: "align" }
+}
+tags: {
+  tag_name: "H4"
+  attrs: { name: "align" }
+}
+tags: {
+  tag_name: "H5"
+  attrs: { name: "align" }
+}
+tags: {
+  tag_name: "H6"
+  attrs: { name: "align" }
+}
+# 4.3 7 The header element
+tags: {
+  tag_name: "HEADER"
+}
+# 4.3 7 The footer element
+tags: {
+  tag_name: "FOOTER"
+}
+# 4.3 7 The address element
+tags: {
+  tag_name: "ADDRESS"
+}
+
+# 4.4 Grouping Content
+# 4.4.1 The p element
+tags: {
+  tag_name: "P"
+  attrs: { name: "align" }
+}
+# 4.4.2 The hr element
+tags: {
+  tag_name: "HR"
+}
+# 4.4.3 The pre element
+tags: {
+  tag_name: "PRE"
+}
+# 4.4.4 The blockquote element
+attr_lists: {
+  name: "cite-attr"
+  attrs: {
+    name: "cite"
+    # It may be safe to allow all URLs here, but just in case javascript: or
+    # similar URLs are an issue, we add the same constraints as an anchor.
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allowed_protocol: "mailto"
+      allowed_protocol: "ftp"
+      # Whitelisting additional commonly observed third party
+      # protocols which should be safe
+      allowed_protocol: "fb-messenger"
+      allowed_protocol: "skype"
+      allowed_protocol: "sms"
+      allowed_protocol: "tel"
+      allowed_protocol: "threema"
+      allowed_protocol: "viber"
+      allowed_protocol: "whatsapp"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+}
+tags: {
+  tag_name: "BLOCKQUOTE"
+  attrs: { name: "align" }
+  attr_lists: "cite-attr"
+}
+# 4.4.5 The ol element
+tags: {
+  tag_name: "OL"
+  attrs: {
+    name: "reversed"
+    value: ""
+  }
+  attrs: {
+    name: "start"
+    value_regex: "[0-9]*"
+  }
+  attrs: {
+    name: "type"
+    value_regex: "[1AaIi]"
+  }
+}
+# 4.4.6 The ul element
+tags: {
+  tag_name: "UL"
+}
+# 4.4.7 The li element
+tags: {
+  tag_name: "LI"
+  attrs: {
+    name: "value"
+    value_regex: "[0-9]*"
+  }
+}
+# 4.4.8 The dl element
+tags: {
+  tag_name: "DL"
+}
+# 4.4.9 The dt element
+tags: {
+  tag_name: "DT"
+}
+# 4.4.10 The dd element
+tags: {
+  tag_name: "DD"
+}
+# 4.4.11 The figure element
+tags: {
+  tag_name: "FIGURE"
+}
+# 4.4.12 The figcaption element
+tags: {
+  tag_name: "FIGCAPTION"
+}
+# 4.4.13 The div element
+tags: {
+  tag_name: "DIV"
+  attrs: { name: "align" }
+}
+# 4.4.14 The main element
+tags: {
+  tag_name: "MAIN"
+}
+
+# 4.5 Text-level semantics
+# 4.5.1 The a element
+tags: {
+  tag_name: "A"
+  attrs: {
+    name: "href"
+    value_url: {
+      allowed_protocol: "ftp"
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allowed_protocol: "mailto"
+      # Whitelisting additional commonly observed third party
+      # protocols which should be safe
+      allowed_protocol: "fb-messenger"
+      allowed_protocol: "skype"
+      allowed_protocol: "sms"
+      allowed_protocol: "tel"
+      allowed_protocol: "threema"
+      allowed_protocol: "viber"
+      allowed_protocol: "whatsapp"
+      allow_relative: true
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "hreflang" }
+  attrs: {
+    name: "rel"
+    # There are a wide variety of link rel attribute values used in the wild as
+    # this attribute is used as meta-data for any html client such as search
+    # engines. Unfortunately, there are also a number of attribute values which
+    # have behavioral impacts in modern browsers. A few places where these are
+    # loosely documented include:
+    # - http://microformats.org/wiki/existing-rel-values
+    # - http://www.iana.org/assignments/link-relations/link-relations.xhtml
+    # - https://html.spec.whatwg.org/#linkTypes
+    # We blacklist a few specific values which have browser behavior that could
+    # negatively impact performance.
+    # TODO(gregable): This could be improved such that the error message would
+    # report which value in a list is the one causing problems.
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "components|"
+        "dns-prefetch|"
+        "import|"
+        "manifest|"
+        "preconnect|"
+        "prefetch|"
+        "preload|"
+        "prerender|"
+        "serviceworker|"
+        "stylesheet|"  # Only allowed for link tags, specific req's for AMP.
+        "subresource|"
+        ")(\\s|$)"
+  }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
+  }
+  attrs: {
+    name: "target"
+    value_regex: "(_blank|_self)"
+  }
+  attrs: { name: "download" }
+  attrs: { name: "media" }
+  attrs: { name: "type" value: "text/html" }
+  # These are not valid html5 but are commonly used and are supported in all
+  # major browsers.
+  attrs: { name: "border" }
+  attrs: { name: "name" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#links"
+}
+# 4.5.2 The em element
+tags: {
+  tag_name: "EM"
+}
+# 4.5.3 The strong element
+tags: {
+  tag_name: "STRONG"
+}
+# 4.5.4 The small element
+tags: {
+  tag_name: "SMALL"
+}
+# 4.5.5 The s element
+tags: {
+  tag_name: "S"
+}
+# 4.5.6 The cite element
+tags: {
+  tag_name: "CITE"
+}
+# 4.5.7 The q element
+tags: {
+  tag_name: "Q"
+  attr_lists: "cite-attr"
+}
+# 4.5.8 The dfn element
+tags: {
+  tag_name: "DFN"
+}
+# 4.5.9 The abbr element
+tags: {
+  tag_name: "ABBR"
+}
+# 4.5.10 The data element
+tags: {
+  tag_name: "DATA"
+}
+# 4.5.11 The time element
+tags: {
+  tag_name: "TIME"
+  attrs: {
+    name: "datetime"
+  }
+}
+# 4.5.12 The code element
+tags: {
+  tag_name: "CODE"
+}
+# 4.5.13 The var element
+tags: {
+  tag_name: "VAR"
+}
+# 4.5.14 The samp element
+tags: {
+  tag_name: "SAMP"
+}
+# 4.5.15 The kbd element
+tags: {
+  tag_name: "KBD"
+}
+# 4.5.16 The sub and sup elements
+tags: {
+  tag_name: "SUB"
+}
+tags: {
+  tag_name: "SUP"
+}
+# 4.5.17 The i element
+tags: {
+  tag_name: "I"
+}
+# 4.5.18 The b element
+tags: {
+  tag_name: "B"
+}
+# 4.5.19 The u element
+tags: {
+  tag_name: "U"
+}
+# 4.5.20 The mark element
+tags: {
+  tag_name: "MARK"
+}
+# 4.5.21 The ruby element
+tags: {
+  tag_name: "RUBY"
+}
+# 4.5.22 The rb element
+tags: {
+  tag_name: "RB"
+}
+# 4.5.23 The rt element
+tags: {
+  tag_name: "RT"
+}
+# 4.5.24 The rtc element
+tags: {
+  tag_name: "RTC"
+}
+# 4.5.25 The rp element
+tags: {
+  tag_name: "RP"
+}
+# 4.5.26 The bdi element
+tags: {
+  tag_name: "BDI"
+}
+# 4.5.27 The bdo element
+tags: {
+  tag_name: "BDO"
+  attrs: { name: "dir" }
+}
+# 4.5.28 The span element
+tags: {
+  tag_name: "SPAN"
+}
+# 4.5.29 The br element
+tags: {
+  tag_name: "BR"
+}
+# 4.5.30 The wbr element
+tags: {
+  tag_name: "WBR"
+}
+
+# 4.6 Edits
+# 4.6.1 The ins element
+tags: {
+  tag_name: "INS"
+  # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
+  # These attributes have specific formatting, but as they are metadata
+  # that can't hurt performance, rendering or security, we don't validate
+  # the values.
+  attrs { name: "datetime" }
+  attr_lists: "cite-attr"
+}
+# 4.6.2 The del element
+tags: {
+  tag_name: "DEL"
+  # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
+  # These attributes have specific formatting, but as they are metadata
+  # that can't hurt performance, rendering or security, we don't validate
+  # the values.
+  attrs { name: "datetime" }
+  attr_lists: "cite-attr"
+}
+
+# 4.7 Embedded Content
+# AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
+# the exception of tags inside of a <noscript> ancestor.
+# 4.7.1 The img element
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP  # Disallowed in A4A because <noscript> is disallowed.
+>>>>>>> ampproject/master
+  tag_name: "IMG"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-IMG"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
+  attrs: { name: "alt" }
+  attrs: { name: "ismap" }
+  attrs: {
+    name: "longdesc"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "src"
+    alternative_names: "srcset"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  # These are not supported in html5, but are widely supported by browsers
+  # and are commonly used. Since these are only used in noscript contexts,
+  # we allow them.
+  attrs: { name: "border" }
+  attrs: { name: "height" }
+  attrs: { name: "width" }
+}
+# 4.7.6 The video element
+# Only allowed in noscript tags. Otherwise use amp-video.
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP  # Disallowed in A4A because <noscript> is disallowed.
+>>>>>>> ampproject/master
+  tag_name: "VIDEO"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-VIDEO"
+  attrs: { name: "autoplay" }
+  attrs: { name: "controls" }
+  attrs: { name: "height" }
+  attrs: { name: "loop" }
+  attrs: {
+    name: "muted"
+    deprecation: "autoplay"
+    deprecation_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+  }
+  attrs: { name: "poster" }
+  attrs: { name: "preload" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "width" }
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+}
+# 4.7.7 The audio element
+# Only allowed in noscript tags. Otherwise use amp-audio.
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP  # Disallowed in A4A because <noscript> is disallowed.
+>>>>>>> ampproject/master
+  tag_name: "AUDIO"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-AUDIO"
+  attrs: { name: "autoplay" }
+  attrs: { name: "controls" }
+  attrs: { name: "loop" }
+  attrs: { name: "muted" }
+  attrs: { name: "preload" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
+}
+# 4.7.8 The source element
+tags: {
+  tag_name: "SOURCE"
+  spec_name: "amp-video > source"
+  mandatory_parent: "AMP-VIDEO"
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "media" }
+  attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+}
+tags: {
+  tag_name: "SOURCE"
+  spec_name: "amp-audio > source"
+  mandatory_parent: "AMP-AUDIO"
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "media" }
+  attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
+}
+tags: {
+  tag_name: "SOURCE"
+  spec_name: "audio > source"
+  mandatory_parent: "AUDIO"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+  }
+  attrs: { name: "media" }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
+}
+tags: {
+  tag_name: "SOURCE"
+  spec_name: "video > source"
+  mandatory_parent: "VIDEO"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+  }
+  attrs: { name: "media" }
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+}
+# 4.7.8 The track element
+# We have two attr_list variants to encode the requirement that if
+# the attribute kind has the value 'subtitles', then the tag must
+# also have a srclang attribute. The first attr_list does not allow
+# kind=subtitles, but srclang is optional. The second attr_list
+# mandates kind=subtitles and srclang attributes.
+attr_lists: {
+  name: "track-attrs-no-subtitles"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "default" value: "" }
+  attrs: {
+    name: "kind"
+    value_regex: "(captions|descriptions|chapters|metadata)"
+  }
+  attrs: { name: "label" }
+  attrs: { name: "srclang" }
+}
+attr_lists: {
+  name: "track-attrs-subtitles"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "default" value: "" }
+  attrs: {
+    name: "kind"
+    mandatory: true
+    value: "subtitles"
+  }
+  attrs: { name: "label" }
+  attrs: {
+    name: "srclang"
+    mandatory: true
+  }
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "audio > track"
+  mandatory_parent: "AUDIO"
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "audio > track[kind=subtitles]"
+  mandatory_parent: "AUDIO"
+  attr_lists: "track-attrs-subtitles"
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "video > track"
+  mandatory_parent: "VIDEO"
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "video > track[kind=subtitles]"
+  mandatory_parent: "VIDEO"
+  attr_lists: "track-attrs-subtitles"
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-audio > track"
+  mandatory_parent: "AMP-AUDIO"
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-audio > track[kind=subtitles]"
+  mandatory_parent: "AMP-AUDIO"
+  attr_lists: "track-attrs-subtitles"
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-video > track"
+  mandatory_parent: "AMP-VIDEO"
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-video > track[kind=subtitles]"
+  mandatory_parent: "AMP-VIDEO"
+  attr_lists: "track-attrs-subtitles"
+}
+
+# 4.7.15 SVG
+# We allow some limited embedded SVG tags. We do not allow inline styles
+# or embedding any external resources.
+# Attribute lists: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+attr_lists: {
+  name: "svg-conditional-processing-attributes"
+  attrs: { name: "requiredextensions" }
+  attrs: { name: "requiredfeatures" }
+  attrs: { name: "systemlanguage" }
+}
+attr_lists: {
+  name: "svg-core-attributes"
+  attrs: { name: "xml:base" }
+  attrs: { name: "xml:lang" }
+  attrs: { name: "xml:space" }
+  attrs: { name: "xmlns" }
+  attrs: { name: "xmlns:xlink" }
+}
+attr_lists: {
+  name: "svg-filter-primitive-attributes"
+  attrs: { name: "height" }
+  attrs: { name: "result" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+}
+attr_lists: {
+  name: "svg-presentation-attributes"
+  attrs: { name: "alignment-baseline" }
+  attrs: { name: "baseline-shift" }
+  attrs: { name: "clip" }
+  attrs: { name: "clip-path" }
+  attrs: { name: "clip-rule" }
+  attrs: { name: "color" }
+  attrs: { name: "color-interpolation" }
+  attrs: { name: "color-interpolation-filters" }
+  attrs: { name: "color-profile" }
+  attrs: { name: "color-rendering" }
+  attrs: { name: "cursor" }
+  attrs: { name: "direction" }
+  attrs: { name: "display" }
+  attrs: { name: "dominant-baseline" }
+  attrs: { name: "enable-background" }
+  attrs: { name: "fill" }
+  attrs: { name: "fill-opacity" }
+  attrs: { name: "fill-rule" }
+  attrs: { name: "filter" }
+  attrs: { name: "flood-color" }
+  attrs: { name: "flood-opacity" }
+  attrs: { name: "font-family" }
+  attrs: { name: "font-size" }
+  attrs: { name: "font-size-adjust" }
+  attrs: { name: "font-stretch" }
+  attrs: { name: "font-style" }
+  attrs: { name: "font-variant" }
+  attrs: { name: "font-weight" }
+  attrs: { name: "glyph-orientation-horizontal" }
+  attrs: { name: "glyph-orientation-vertical" }
+  attrs: { name: "image-rendering" }
+  attrs: { name: "kerning" }
+  attrs: { name: "letter-spacing" }
+  attrs: { name: "lighting-color" }
+  attrs: { name: "marker-end" }
+  attrs: { name: "marker-mid" }
+  attrs: { name: "marker-start" }
+  attrs: { name: "mask" }
+  attrs: { name: "opacity" }
+  attrs: { name: "overflow" }
+  attrs: { name: "pointer-events" }
+  attrs: { name: "shape-rendering" }
+  attrs: { name: "stop-color" }
+  attrs: { name: "stop-opacity" }
+  attrs: { name: "stroke" }
+  attrs: { name: "stroke-dasharray" }
+  attrs: { name: "stroke-dashoffset" }
+  attrs: { name: "stroke-linecap" }
+  attrs: { name: "stroke-linejoin" }
+  attrs: { name: "stroke-miterlimit" }
+  attrs: { name: "stroke-opacity" }
+  attrs: { name: "stroke-width" }
+  attrs: { name: "text-anchor" }
+  attrs: { name: "text-decoration" }
+  attrs: { name: "text-rendering" }
+  attrs: { name: "unicode-bidi" }
+  attrs: { name: "visibility" }
+  attrs: { name: "word-spacing" }
+  attrs: { name: "writing-mode" }
+}
+attr_lists: {
+  name: "svg-transfer-function-attributes"
+  attrs: { name: "amplitude" }
+  attrs: { name: "exponent" }
+  attrs: { name: "intercept" }
+  attrs: { name: "offset" }
+  attrs: { name: "slope" }
+  attrs: { name: "table" }
+  attrs: { name: "tablevalues" }
+}
+attr_lists: {
+  name: "svg-xlink-attributes"
+  attrs: { name: "xlink:actuate" }
+  attrs: { name: "xlink:arcrole" }
+  attrs: {
+    name: "xlink:href"
+    # Local (within document) URLs only for now.
+    value_regex: "#.*"
+  }
+  attrs: { name: "xlink:role" }
+  attrs: { name: "xlink:show" }
+  attrs: { name: "xlink:title" }
+  attrs: { name: "xlink:type" }
+}
+# Basics
+tags: {
+  tag_name: "G"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "GLYPH"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "arabic-form" }
+  attrs: { name: "class" }
+  attrs: { name: "d" }
+  attrs: { name: "glyph-name" }
+  attrs: { name: "horiz-adv-x" }
+  attrs: { name: "orientation" }
+  attrs: { name: "unicode" }
+  attrs: { name: "vert-origin-x" }
+  attrs: { name: "vert-origin-y" }
+  attrs: { name: "vert-adv-y" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "GLYPHREF"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "dx" }
+  attrs: { name: "dy" }
+  attrs: { name: "format" }
+  attrs: { name: "glyphref" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "MARKER"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "markerunits" }
+  attrs: { name: "markerwidth" }
+  attrs: { name: "markerheight" }
+  attrs: { name: "orient" }
+  attrs: { name: "preserveaspectratio" }
+  attrs: { name: "refx" }
+  attrs: { name: "refy" }
+  attrs: { name: "transform" }
+  attrs: { name: "viewbox" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "PATH"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "d" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "pathlength" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "SVG"
+<<<<<<< HEAD
+  disallowed_ancestor: "SVG"
+=======
+>>>>>>> ampproject/master
+  attrs: { name: "class" }
+  attrs: { name: "contentscripttype" }
+  attrs: { name: "contentstyletype" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "height" }
+  attrs: { name: "preserveaspectratio" }
+  attrs: { name: "version" value_regex: "(1.0|1.1)" }
+  attrs: { name: "viewbox" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attrs: { name: "zoomandpan" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "VIEW"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "preserveaspectratio" }
+  attrs: { name: "viewbox" }
+  attrs: { name: "viewtarget" }
+  attrs: { name: "zoomandpan" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+# Shapes
+tags: {
+  tag_name: "CIRCLE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "cx" }
+  attrs: { name: "cy" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "r" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "LINE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attrs: { name: "x1" }
+  attrs: { name: "x2" }
+  attrs: { name: "y1" }
+  attrs: { name: "y2" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "POLYGON"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "points" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "POLYLINE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "points" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "RECT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "height" }
+  attrs: { name: "rx" }
+  attrs: { name: "ry" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+# Text
+tags: {
+  tag_name: "TEXT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "dx" }
+  attrs: { name: "dy" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "lengthadjust" }
+  attrs: { name: "rotate" }
+  attrs: { name: "text-anchor" }
+  attrs: { name: "textlength" }
+  attrs: { name: "transform" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "TEXTPATH"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "method" }
+  attrs: { name: "spacing" }
+  attrs: { name: "startoffset" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "TREF"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "TSPAN"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "dx" }
+  attrs: { name: "dy" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "rotate" }
+  attrs: { name: "lengthadjust" }
+  attrs: { name: "textlength" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+# Rendering
+tags: {
+  tag_name: "CLIPPATH"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "clippathunits" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "FILTER"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "filterres" }
+  attrs: { name: "filterunits" }
+  attrs: { name: "height" }
+  attrs: { name: "primitiveunits" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "HKERN"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "g1" }
+  attrs: { name: "g2" }
+  attrs: { name: "k" }
+  attrs: { name: "u1" }
+  attrs: { name: "u2" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "LINEARGRADIENT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "gradientunits" }
+  attrs: { name: "gradientransform" }
+  attrs: { name: "spreadmethod" }
+  attrs: { name: "x1" }
+  attrs: { name: "y1" }
+  attrs: { name: "x2" }
+  attrs: { name: "y2" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "MASK"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "height" }
+  attrs: { name: "maskcontentunits" }
+  attrs: { name: "maskunits" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "PATTERN"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "height" }
+  attrs: { name: "patternunits" }
+  attrs: { name: "patterncontentunits" }
+  attrs: { name: "patterntransform" }
+  attrs: { name: "preserveaspectratio" }
+  attrs: { name: "viewbox" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "RADIALGRADIENT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "cx" }
+  attrs: { name: "cy" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "fx" }
+  attrs: { name: "fy" }
+  attrs: { name: "gradientunits" }
+  attrs: { name: "gradienttransform" }
+  attrs: { name: "r" }
+  attrs: { name: "spreadmethod" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "STOP"
+  spec_name: "lineargradient > stop"
+  mandatory_ancestor: "LINEARGRADIENT"
+  attrs: { name: "offset" }
+  attrs: { name: "stop-color" }
+  attrs: { name: "stop-opacity" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "STOP"
+  spec_name: "radialgradient > stop"
+  mandatory_ancestor: "RADIALGRADIENT"
+  attrs: { name: "offset" }
+  attrs: { name: "stop-color" }
+  attrs: { name: "stop-opacity" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "VKERN"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "g1" }
+  attrs: { name: "g2" }
+  attrs: { name: "k" }
+  attrs: { name: "u1" }
+  attrs: { name: "u2" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+# Special
+tags: {
+  tag_name: "DEFS"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "SYMBOL"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "preserveaspectratio" }
+  attrs: { name: "viewbox" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "USE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "height" }
+  attrs: { name: "transform" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+# HTML inside SVG, esp. to allow amp-img.
+# See https://github.com/ampproject/amphtml/issues/717
+tags: {
+  tag_name: "FOREIGNOBJECT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "height" }
+  attrs: { name: "transform" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+# ARIA
+tags: {
+  tag_name: "DESC"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "TITLE"
+  spec_name: "svg title"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+
+# 4.8 Links
+# Links are a concept, rather than a tag. See tagspecs for "LINK", "A", etc.
+
+# 4.9 Tabular data
+# 4.9.1 The table element
+tags: {
+  tag_name: "TABLE"
+  attrs: { name: "sortable" }
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
+  attrs: { name: "align" }
+  attrs: { name: "border" value_regex: "0|1" }
+  attrs: { name: "bgcolor" }
+  attrs: { name: "cellpadding" }
+  attrs: { name: "cellspacing" }
+  attrs: { name: "width" }
+}
+# 4.9.2 The caption element
+tags: {
+  tag_name: "CAPTION"
+}
+# 4.9.3 The colgroup element
+tags: {
+  tag_name: "COLGROUP"
+  attrs: { name: "span" }
+}
+# 4.9.4 The col element
+tags: {
+  tag_name: "COL"
+  attrs: { name: "span" }
+}
+# 4.9.5 The tbody element
+tags: {
+  tag_name: "TBODY"
+}
+# 4.9.6 The thead element
+tags: {
+  tag_name: "THEAD"
+}
+# 4.9.7 The tfoot element
+tags: {
+  tag_name: "TFOOT"
+}
+# 4.9.8 The tr element
+tags: {
+  tag_name: "TR"
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
+  attrs: { name: "align" }
+  attrs: { name: "bgcolor" }
+  attrs: { name: "height" }
+  attrs: { name: "valign" }
+}
+# 4.9.9 The td element
+tags: {
+  tag_name: "TD"
+  attrs: { name: "colspan" }
+  attrs: { name: "headers" }
+  attrs: { name: "rowspan" }
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
+  attrs: { name: "align" }
+  attrs: { name: "bgcolor" }
+  attrs: { name: "height" }
+  attrs: { name: "valign" }
+  attrs: { name: "width" }
+}
+# 4.9.10 The th element
+tags: {
+  tag_name: "TH"
+  attrs: { name: "abbr" }
+  attrs: { name: "colspan" }
+  attrs: { name: "headers" }
+  attrs: { name: "rowspan" }
+  attrs: { name: "scope" }
+  attrs: { name: "sorted" }
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
+  attrs: { name: "align" }
+  attrs: { name: "bgcolor" }
+  attrs: { name: "height" }
+  attrs: { name: "valign" }
+  attrs: { name: "width" }
+}
+
+# 4.10 Forms
+# Form elements are allowed only when amp-form extension script is included
+# with the exception of the button element which is always allowed.
+# 4.10.3 The form element
+tags {
+  tag_name: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "accept" }
+  attrs: { name: "accept-charset" }
+  attrs: {
+    name: "action"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+      disallowed_domain: "cdn.ampproject.org"
+    }
+<<<<<<< HEAD
+=======
+    blacklisted_value_regex: "__amp_source_origin"
+>>>>>>> ampproject/master
+  }
+  attrs: { name: "action-xhr" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "enctype" }
+  attrs: { name: "method" }
+  attrs: { name: "name" }
+  attrs: { name: "novalidate" }
+  attrs: {
+    name: "target"
+    mandatory: true
+    value_regex_casei: "(_blank|_top)"
+  }
+<<<<<<< HEAD
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.4 The label element
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ampproject/master
+=======
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.4 The label element
+>>>>>>> ampproject/master
+tags: {
+  tag_name: "LABEL"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "for" }
+  attrs: { name: "form" }
+<<<<<<< HEAD
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+=======
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+>>>>>>> ampproject/master
+}
+# 4.10.5 The input element
+tags: {
+  tag_name: "INPUT"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "accept" }
+  attrs: { name: "accesskey" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "checked" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "formmethod" }
+  attrs: { name: "formnovalidate" }
+  attrs: { name: "height" }
+  attrs: { name: "inputmode" }
+  attrs: { name: "list" }
+  attrs: { name: "max" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "min" }
+  attrs: { name: "minlength" }
+  attrs: { name: "multiple" }
+<<<<<<< HEAD
+  attrs: { name: "name" }
+  attrs: { name: "pattern" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "size" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "step" }
+  attrs: { name: "tabindex" }
+  attrs: {
+    name: "type"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "button|"
+        "file|"
+        "image|"
+        "password|"
+        ")(\\s|$)"
+  }
+  attrs: { name: "value" }
+  attrs: { name: "width" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.6 The button element
+<<<<<<< HEAD
+tags: {
+=======
+tags: {
+  tag_name: "LABEL"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "for" }
+  attrs: { name: "form" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.5 The input element
+tags: {
+  tag_name: "INPUT"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "accept" }
+  attrs: { name: "accesskey" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "checked" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "formmethod" }
+  attrs: { name: "formnovalidate" }
+  attrs: { name: "height" }
+  attrs: { name: "inputmode" }
+  attrs: { name: "list" }
+  attrs: { name: "max" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "min" }
+  attrs: { name: "minlength" }
+  attrs: { name: "multiple" }
+  attrs: { name: "name" }
+=======
+  attrs: {
+    name: "name"
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+>>>>>>> ampproject/master
+  attrs: { name: "pattern" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "size" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "step" }
+  attrs: { name: "tabindex" }
+  attrs: {
+    name: "type"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "button|"
+        "file|"
+        "image|"
+        "password|"
+        ")(\\s|$)"
+  }
+  attrs: { name: "value" }
+  attrs: { name: "width" }
+<<<<<<< HEAD
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.6 The button element
+tags: {
+>>>>>>> ampproject/master
+=======
+tags: {
+>>>>>>> ampproject/master
+=======
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.6 The button element
+tags: {
+>>>>>>> ampproject/master
+  tag_name: "BUTTON"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: { name: "name" }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
+  }
+  attrs: { name: "type" }
+  attrs: { name: "value" }
+  attrs: {
+    name: "formtarget"
+    value_regex_casei: "(_blank|_top)"
+  }
+}
+# 4.10.7 The select element
+tags: {
+  tag_name: "SELECT"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "autofocus" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "multiple" }
+  attrs: { name: "name" }
+  attrs: { name: "required" }
+  attrs: { name: "size" }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.8 The datalist element
+tags: {
+  tag_name: "DATALIST"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.9 The optgroup element
+tags: {
+  tag_name: "OPTGROUP"
+  mandatory_parent: "SELECT"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "disabled" }
+  attrs: { name: "label" }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.10 The option element
+tags: {
+  tag_name: "OPTION"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "disabled" }
+  attrs: { name: "label" }
+  attrs: { name: "selected" }
+  attrs: { name: "value" }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.11 The textarea element
+tags: {
+  tag_name: "TEXTAREA"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "cols" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "minlength" }
+  attrs: { name: "name" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "rows" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "selectionend" }
+  attrs: { name: "selectionstart" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "wrap"}
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.16 The fieldset element
+tags: {
+  tag_name: "FIELDSET"
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "name" }
+}
+# 4.10.17 The legend element
+tags: {
+  tag_name: "LEGEND"
+}
+# 4.10.7 The select element
+tags: {
+  tag_name: "SELECT"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "autofocus" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "multiple" }
+  attrs: { name: "name" }
+  attrs: { name: "required" }
+  attrs: { name: "size" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.10 The option element
+tags: {
+  tag_name: "OPTION"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "disabled" }
+  attrs: { name: "label" }
+  attrs: { name: "selected" }
+  attrs: { name: "value" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.11 The textarea element
+tags: {
+  tag_name: "TEXTAREA"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "cols" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "minlength" }
+  attrs: { name: "name" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "rows" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "selectionend" }
+  attrs: { name: "selectionstart" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "wrap"}
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.16 The fieldset element
+tags: {
+  tag_name: "FIELDSET"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "name" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+
+# 4.11 Scripting
+# 4.11.1 The script element
+# Only the amphtml script, custom extensions and the LD/JSON description are
+# allowed.
+tags: {
+  tag_name: "SCRIPT"
+  spec_name: "amphtml engine v0.js script"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.js"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+# JSON Linked Data
+tags: {
+  tag_name: "SCRIPT"
+  spec_name: "script type=application/ld+json"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/ld+json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+# Specific script tags for custom elements and runtime imports.
+# 4.11.2 The noscript element
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "NOSCRIPT"
+  spec_name: "noscript enclosure for boilerplate"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+}
+# We allow noscript in the body to contain tags otherwise disallowed by AMP.
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "NOSCRIPT"
+  # Noscript inside of noscript has strange parsing semantics in browsers and
+  # isn't really helping anyone anyway.
+  mandatory_ancestor: "BODY"
+  disallowed_ancestor: "NOSCRIPT"
+}
+# 4.11.3 The template element
+# See extensions/amp-mustache/0.1/validator-amp-mustache.protoascii.
+
+# 11 Obsolute features
+# 11.2 Non-conforming features
+tags: {
+<<<<<<< HEAD
+  tag_name: "ACRONYM"
+}
+tags: {
+  tag_name: "BIG"
+}
+tags: {
+  tag_name: "CENTER"
+}
+tags: {
+  tag_name: "DIR"
+}
+tags: {
+  tag_name: "HGROUP"
+}
+tags: {
+  tag_name: "LISTING"
+}
+tags: {
+  tag_name: "MULTICOL"
+}
+tags: {
+  tag_name: "NEXTID"
+}
+tags: {
+  tag_name: "NOBR"
+}
+tags: {
+  tag_name: "SPACER"
+}
+tags: {
+  tag_name: "STRIKE"
+}
+tags: {
+  tag_name: "TT"
+}
+tags: {
+=======
+  html_format: AMP
+  tag_name: "ACRONYM"
+}
+tags: {
+  html_format: AMP
+  tag_name: "BIG"
+}
+tags: {
+  html_format: AMP
+  tag_name: "CENTER"
+}
+tags: {
+  html_format: AMP
+  tag_name: "DIR"
+}
+tags: {
+  html_format: AMP
+  tag_name: "HGROUP"
+}
+tags: {
+  html_format: AMP
+  tag_name: "LISTING"
+}
+tags: {
+  html_format: AMP
+  tag_name: "MULTICOL"
+}
+tags: {
+  html_format: AMP
+  tag_name: "NEXTID"
+}
+tags: {
+  html_format: AMP
+  tag_name: "NOBR"
+}
+tags: {
+  html_format: AMP
+  tag_name: "SPACER"
+}
+tags: {
+  html_format: AMP
+  tag_name: "STRIKE"
+}
+tags: {
+  html_format: AMP
+  tag_name: "TT"
+}
+tags: {
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "XMP"
+}
+
+# Some additional tags, microformats, allowances.
+
+# This tag is a preserved indicator for documents created in microsoft word.
+# They do not render.
+tags: {
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
+  tag_name: "O:P"
+}
+
+# Tags and attributes specific to AMP HTML.
+# AMP Custom elements require a "src" or a "srcset" attribute,
+# having both is also allowed.
+attr_lists: {
+  name: "mandatory-src-or-srcset"
+  attrs: {
+    name: "src"
+    alternative_names: "srcset"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: true
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+}
+# Extended AMP globally optional tags.
+attr_lists: {
+  name: "extended-amp-global"
+  attrs: { name: "media" }
+  attrs: { name: "noloading" value: "" }
+}
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-ad consider changing amp-embed as well.
+tags: {  # <amp-ad>
+  tag_name: "AMP-AD"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: { name: "alt" }
+  attrs: { name: "json" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+  }
+  attrs: { name: "type" mandatory: true }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-ad.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-embed consider changing amp-ad as well.
+tags: {  # <amp-embed>
+  tag_name: "AMP-EMBED"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: { name: "alt" }
+  attrs: { name: "json" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+  }
+  attrs: { name: "type" mandatory: true }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-embed.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+=======
+>>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
+=======
+>>>>>>> ampproject/master
+tags: {  # <amp-img>
+=======
+tags: {  # <amp-img>
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
+  tag_name: "AMP-IMG"
+  # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
+  # disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "placeholder" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-pixel>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
+  tag_name: "AMP-PIXEL"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-pixel.html"
+  amp_layout {
+    defines_default_height: true
+    defines_default_width: true
+    supported_layouts: FIXED
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # <amp-video>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
+  tag_name: "AMP-VIDEO"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "autoplay" value: "" }
+  attrs: { name: "controls" value: "" }
+  attrs: { name: "loop"     value: "" }
+  attrs: { name: "muted"    value: "" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "poster" }
+  attrs: { name: "preload" value_regex: "(none|metadata|auto|)" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+# AMP Layout attributes: implied for TagSpecs with amp_layout field
+# set. Note that while these attributes are defined as optional here,
+# depending on amp layout the validator will examine these fields and
+# their values.
+attr_lists: {
+  name: "$AMP_LAYOUT_ATTRS"
+  attrs: { name: "height" }
+  attrs: { name: "heights" }
+  attrs: { name: "layout" }
+  attrs: { name: "sizes" }
+  attrs: { name: "width" }
+}
+
+# Global attributes: These can be used in all tags.
+attr_lists: {
+  name: "$GLOBAL_ATTRS"
+  # For schema.org annotations.
+  attrs: { name: "itemid" }
+  attrs: { name: "itemprop" }
+  attrs: { name: "itemref" }
+  attrs: { name: "itemscope" }
+  attrs: { name: "itemtype" }
+  # 3.2.5 HTML5 Global attributes.
+  attrs: { name: "accesskey" }
+  attrs: { name: "class" }
+  attrs: { name: "dir" }
+  attrs: { name: "draggable" }
+  attrs: { name: "id" }
+  attrs: { name: "lang" }
+  attrs: { name: "tabindex" }
+  attrs: { name: "title" }
+  attrs: { name: "translate" }
+  # Accessible Rich Internet Applications http://www.w3.org/TR/wai-aria/
+  attrs: { name: "aria-activedescendant" }
+  attrs: { name: "aria-atomic" }
+  attrs: { name: "aria-autocomplete" }
+  attrs: { name: "aria-busy" }
+  attrs: { name: "aria-checked" }
+  attrs: { name: "aria-controls" }
+  attrs: { name: "aria-describedby" }
+  attrs: { name: "aria-disabled" }
+  attrs: { name: "aria-dropeffect" }
+  attrs: { name: "aria-expanded" }
+  attrs: { name: "aria-flowto" }
+  attrs: { name: "aria-grabbed" }
+  attrs: { name: "aria-haspopup" }
+  attrs: { name: "aria-hidden" }
+  attrs: { name: "aria-invalid" }
+  attrs: { name: "aria-label" }
+  attrs: { name: "aria-labelledby" }
+  attrs: { name: "aria-level" }
+  attrs: { name: "aria-live" }
+  attrs: { name: "aria-multiline" }
+  attrs: { name: "aria-multiselectable" }
+  attrs: { name: "aria-orientation" }
+  attrs: { name: "aria-owns" }
+  attrs: { name: "aria-posinset" }
+  attrs: { name: "aria-pressed" }
+  attrs: { name: "aria-readonly" }
+  attrs: { name: "aria-relevant" }
+  attrs: { name: "aria-required" }
+  attrs: { name: "aria-selected" }
+  attrs: { name: "aria-setsize" }
+  attrs: { name: "aria-sort" }
+  attrs: { name: "aria-valuemax" }
+  attrs: { name: "aria-valuemin" }
+  attrs: { name: "aria-valuenow" }
+  attrs: { name: "aria-valuetext" }
+  attrs: {
+    name: "on"
+    trigger: {
+      if_value_regex: "tap:.*"
+      also_requires_attr: "role"
+      also_requires_attr: "tabindex"
+    }
+  }
+  attrs: { name: "role" }
+  # For placeholders inside amp-ad and other tags, we allow the
+  # placeholder empty attribute. See e.g.
+  # https://github.com/ampproject/amphtml/pull/284/commits
+  attrs: { name: "placeholder" value: "" }
+  # We allow the empty fallback attribute on any element
+  attrs: { name: "fallback" value: "" }
+  attrs: { name: "lightbox" }
+  attrs: { name: "overflow" }
+  # amp-access specific attributes, see
+  # https://www.ampproject.org/docs/reference/extended/amp-access-spec.html
+  # TODO(gregable): These should only be allowed on any tag inside BODY or HEAD.
+  attrs: { name: "amp-access" }
+  attrs: { name: "amp-access-behavior" }
+  attrs: { name: "amp-access-hide" }
+  attrs: { name: "amp-access-id" }
+  attrs: { name: "amp-access-loader" }
+  attrs: { name: "amp-access-loading" }
+  attrs: { name: "amp-access-off" }
+  attrs: { name: "amp-access-on" }
+  attrs: { name: "amp-access-show" }
+  attrs: { name: "amp-access-style" }
+  attrs: { name: "amp-access-template" }
+  attrs: { name: "i-amp-access-id" }
+}
+
+manufactured_body_tag_is_error: true
+manufactured_body_spec_url: ""  # TODO(gregable)
+
+# Error Specificity: Used in the verbose validator to select between multiple
+# generated error types for a failing error. A higher number means that the
+# error is more specific, ie: more helpful, preferred.
+error_specificity { code: UNKNOWN_CODE specificity: 0 }
+error_specificity { code: MANDATORY_CDATA_MISSING_OR_INCORRECT specificity: 1 }
+error_specificity { code: CDATA_VIOLATES_BLACKLIST specificity: 2 }
+error_specificity { code: WRONG_PARENT_TAG specificity: 3 }
+error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 4 }
+error_specificity { code: MANDATORY_TAG_ANCESTOR specificity: 5 }
+error_specificity { code: MANDATORY_TAG_ANCESTOR_WITH_HINT specificity: 6 }
+error_specificity { code: MANDATORY_TAG_MISSING specificity: 7 }
+error_specificity { code: TAG_REQUIRED_BY_MISSING specificity: 8 }
+error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 9 }
+error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 10 }
+error_specificity { code: DISALLOWED_TAG specificity: 11 }
+error_specificity { code: DISALLOWED_ATTR specificity: 12 }
+error_specificity { code: INVALID_ATTR_VALUE specificity: 13 }
+error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 14 }
+error_specificity { code: MANDATORY_ATTR_MISSING specificity: 15 }
+error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 16 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 17 }
+error_specificity { code: STYLESHEET_TOO_LONG_OLD_VARIANT specificity: 18 }
+error_specificity { code: STYLESHEET_TOO_LONG specificity: 19 }
+error_specificity { code: CSS_SYNTAX specificity: 20 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 21 }
+error_specificity {
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 22
+}
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 23 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 24 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 25 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 26 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 27 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 28 }
+error_specificity {
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 29
+}
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 30 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 31 }
+error_specificity { code: DEV_MODE_ENABLED specificity: 32 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 33 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 34 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 35 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 36 }
+error_specificity { code: MISSING_URL specificity: 37 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 38 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 39 }
+error_specificity { code: INVALID_URL specificity: 40 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 41 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 42 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 43 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 44 }
+error_specificity {
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 45
+}
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 46 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 47 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 48 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 49 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 50 }
+error_specificity {
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 51
+}
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 52 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 53 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 54 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 55 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 56 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 57 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 58 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 59 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 60 }
+error_specificity {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 61
+}
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 62 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 63 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 64 }
+error_specificity {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
+  specificity: 65
+}
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 66 }
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
+  specificity: 67
+}
+error_specificity {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
+  specificity: 68
+}
+error_specificity {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  specificity: 69
+}
+error_specificity {
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  specificity: 70
+}
+error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
+error_specificity { code: DEPRECATED_ATTR specificity: 101 }
+error_specificity { code: DEPRECATED_TAG specificity: 102 }
+error_specificity { code: DEPRECATED_MANUFACTURED_BODY specificity: 103 }
+error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
+
+
+# Error formats
+error_formats {
+  code: UNKNOWN_CODE
+  format: "Unknown error."
+}
+error_formats {
+  code: MANDATORY_TAG_MISSING
+  format: "The mandatory tag '%1' is missing or incorrect."
+}
+error_formats {
+  code: TAG_REQUIRED_BY_MISSING
+  format: "The tag '%1' is missing or incorrect, but required by '%2'."
+}
+error_formats {
+  code: WARNING_TAG_REQUIRED_BY_MISSING
+  format: "The tag '%1' is missing or incorrect, but required by '%2'. "
+          "This will soon be an error."
+}
+error_formats {
+  code: ATTR_REQUIRED_BUT_MISSING
+  format: "The attribute '%1' in tag '%2' is missing or incorrect, but "
+          "required by attribute '%3'."
+}
+error_formats {
+  code: DISALLOWED_TAG
+  format: "The tag '%1' is disallowed."
+}
+error_formats {
+  code: GENERAL_DISALLOWED_TAG
+  format: "The tag '%1' is disallowed except in specific forms."
+}
+error_formats {
+  code: DISALLOWED_ATTR
+  format: "The attribute '%1' may not appear in tag '%2'."
+}
+error_formats {
+  code: INVALID_ATTR_VALUE
+  format: "The attribute '%1' in tag '%2' is set "
+          "to the invalid value '%3'."
+}
+error_formats {
+  code: ATTR_VALUE_REQUIRED_BY_LAYOUT
+  format: "Invalid value '%1' for attribute '%2' in tag '%3' - "
+          "for layout '%4', set the attribute '%2' to value '%5'."
+}
+error_formats {
+  code: IMPLIED_LAYOUT_INVALID
+  format: "The implied layout '%1' is not supported by tag '%2'."
+}
+error_formats {
+  code: SPECIFIED_LAYOUT_INVALID
+  format: "The specified layout '%1' is not supported by tag '%2'."
+}
+error_formats {
+  code: MANDATORY_ATTR_MISSING
+  format: "The mandatory attribute '%1' is missing in tag '%2'."
+}
+error_formats {
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT
+  format: "Inconsistent units for width and height in tag '%1' - "
+          "width is specified in '%2' whereas height is specified in '%3'."
+}
+error_formats {
+  code: STYLESHEET_TOO_LONG_OLD_VARIANT
+  format: "The author stylesheet specified in tag 'style amp-custom' is too "
+          "long - we saw %1 bytes whereas the limit is %2 bytes."
+}
+error_formats {
+  code: STYLESHEET_TOO_LONG
+  format: "The author stylesheet specified in tag '%1' is too "
+          "long - we saw %2 bytes whereas the limit is %3 bytes."
+}
+error_formats {
+  code: MANDATORY_CDATA_MISSING_OR_INCORRECT
+  format: "The mandatory text (CDATA) inside tag '%1' is missing or incorrect."
+}
+error_formats {
+  code: CDATA_VIOLATES_BLACKLIST
+  format: "The text (CDATA) inside tag '%1' contains '%2', "
+          "which is disallowed."
+}
+error_formats {
+  code: DISALLOWED_PROPERTY_IN_ATTR_VALUE
+  format: "The property '%1' in attribute '%2' in tag '%3' is disallowed."
+}
+error_formats {
+  code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE
+  format: "The property '%1' in attribute '%2' in tag '%3' is set to "
+          "'%4', which is invalid."
+}
+error_formats {
+  code: DUPLICATE_DIMENSION
+  format: "Multiple image candidates with the same width or pixel density "
+          "found in attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: MISSING_URL
+  format: "Missing URL for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: INVALID_URL
+  format: "Malformed URL '%3' for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: INVALID_URL_PROTOCOL
+  format: "Invalid URL protocol '%3:' for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: DISALLOWED_DOMAIN
+  format: "The domain '%3' for attribute '%1' in tag '%2' is disallowed."
+}
+error_formats {
+  code: DISALLOWED_RELATIVE_URL
+  format: "The relative URL '%3' for attribute '%1' in tag '%2' is disallowed."
+}
+error_formats {
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE
+  format: "The property '%1' is missing from attribute '%2' in tag '%3'."
+}
+error_formats {
+  code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE
+  format: "The attribute '%1' in tag '%2' is set to '%3', which contains "
+          "unescaped Mustache template syntax."
+}
+error_formats {
+  code: TEMPLATE_PARTIAL_IN_ATTR_VALUE
+  format: "The attribute '%1' in tag '%2' is set to '%3', which contains "
+          "a Mustache template partial."
+}
+error_formats {
+  code: DEPRECATED_TAG
+  format: "The tag '%1' is deprecated - use '%2' instead."
+}
+error_formats {
+  code: DEPRECATED_ATTR
+  format: "The attribute '%1' in tag '%2' is deprecated - use '%3' instead."
+}
+error_formats {
+  code: DEV_MODE_ENABLED
+  format: "The attribute '%1' in tag '%2' enables the development mode. "
+          "Please remove, this feature is obsolete."
+}
+error_formats {
+  code: MUTUALLY_EXCLUSIVE_ATTRS
+  format: "Mutually exclusive attributes encountered in tag '%1' - "
+          "pick one of %2."
+}
+error_formats {
+  code: MANDATORY_ONEOF_ATTR_MISSING
+  format: "The tag '%1' is missing a mandatory attribute - pick one of %2."
+}
+error_formats {
+  code: WRONG_PARENT_TAG
+  format: "The parent tag of tag '%1' is '%2', but it can only be '%3'."
+}
+error_formats {
+  code: DISALLOWED_TAG_ANCESTOR
+  format: "The tag '%1' may not appear as a descendant of tag '%2'."
+}
+error_formats {
+  code: MANDATORY_TAG_ANCESTOR
+  format: "The tag '%1' may only appear as a descendant of tag '%2'."
+}
+error_formats {
+  code: MANDATORY_TAG_ANCESTOR_WITH_HINT
+  format: "The tag '%1' may only appear as a descendant of tag '%2'. "
+          "Did you mean '%3'?"
+}
+error_formats {
+  code: DUPLICATE_UNIQUE_TAG
+  format: "The tag '%1' appears more than once in the document."
+}
+error_formats {
+  code: TEMPLATE_IN_ATTR_NAME
+  format: "Mustache template syntax in attribute name '%1' in tag '%2'."
+}
+error_formats {
+  code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT
+  format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
+}
+error_formats {
+  code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
+  format: "The attribute '%1' in tag '%2' is disallowed by specified "
+          "layout '%3'."
+}
+error_formats {
+  code: INCORRECT_NUM_CHILD_TAGS
+  format: "Tag '%1' must have %2 child tags - saw %3 child tags."
+}
+error_formats {
+  code: DISALLOWED_CHILD_TAG_NAME
+  format: "Tag '%1' is disallowed as child of tag '%2'. "
+          "Child tag must be one of %3."
+}
+error_formats {
+  code: DISALLOWED_FIRST_CHILD_TAG_NAME
+  format: "Tag '%1' is disallowed as first child of tag '%2'. "
+          "First child tag must be one of %3."
+}
+error_formats {
+  code: DISALLOWED_MANUFACTURED_BODY
+  format: "Tag or text which is only allowed inside the body section found "
+          "outside of the body section."
+}
+error_formats {
+  code: DEPRECATED_MANUFACTURED_BODY
+  format: "Tag or text which is only allowed inside the body section found "
+          "outside of the body section. This will soon be an error."
+}
+error_formats {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
+  format: "The tag '%1', a child tag of '%2', does not satisfy one of "
+          "the acceptable reference points: %3."
+}
+error_formats {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
+  format: "The tag '%1', a child tag of '%2', does not satisfy "
+          "the reference point '%3'."
+}
+error_formats {
+  code: MANDATORY_REFERENCE_POINT_MISSING
+  format: "The mandatory reference point '%1' for '%2' is missing."
+}
+error_formats {
+  code: DUPLICATE_REFERENCE_POINT
+  format: "The reference point '%1' for '%2' must be unique "
+          "but a duplicate was encountered."
+}
+error_formats {
+  code: TAG_REFERENCE_POINT_CONFLICT
+  format: "The tag '%1' conflicts with reference point '%2' because "
+          "both define reference points."
+}
+
+# CSS Errors. All of these use %1 for the tag name (in practice 'style'
+# by default).
+error_formats {
+  code: CSS_SYNTAX
+  format: "CSS syntax error in tag '%1' - %2."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_AT_RULE
+  format: "CSS syntax error in tag '%1' - saw invalid at rule '@%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH
+  format: "CSS syntax error in tag '%1' - stray trailing backslash."
+}
+error_formats {
+  code: CSS_SYNTAX_UNTERMINATED_COMMENT
+  format: "CSS syntax error in tag '%1' - unterminated comment."
+}
+error_formats {
+  code: CSS_SYNTAX_UNTERMINATED_STRING
+  format: "CSS syntax error in tag '%1' - unterminated string."
+}
+error_formats {
+  code: CSS_SYNTAX_BAD_URL
+  format: "CSS syntax error in tag '%1' - bad url."
+}
+error_formats {
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE
+  format: "CSS syntax error in tag '%1' - end of stylesheet encountered "
+          "in prelude of a qualified rule."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_DECLARATION
+  format: "CSS syntax error in tag '%1' - invalid declaration."
+}
+error_formats {
+  code: CSS_SYNTAX_INCOMPLETE_DECLARATION
+  format: "CSS syntax error in tag '%1' - incomplete declaration."
+}
+error_formats {
+  code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR
+  format: "CSS syntax error in tag '%1' - invalid pseudo selector."
+}
+error_formats {
+  code: CSS_SYNTAX_MISSING_SELECTOR
+  format: "CSS syntax error in tag '%1' - missing selector."
+}
+error_formats {
+  code: CSS_SYNTAX_NOT_A_SELECTOR_START
+  format: "CSS syntax error in tag '%1' - not a selector start."
+}
+error_formats {
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR
+  format: "CSS syntax error in tag '%1' - unparsed input remains in selector."
+}
+error_formats {
+  code: CSS_SYNTAX_MISSING_URL
+  format: "CSS syntax error in tag '%1' - missing url."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_URL
+  format: "CSS syntax error in tag '%1' - invalid url '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_URL_PROTOCOL
+  format: "CSS syntax error in tag '%1' - invalid url protocol '%2:'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_DOMAIN
+  format: "CSS syntax error in tag '%1' - invalid domain '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL
+  format: "CSS syntax error in tag '%1' - disallowed relative url '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_ATTR_SELECTOR
+  format: "CSS syntax error in tag '%1' - invalid attribute selector."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE
+  format: "CSS syntax error in tag '%1' - the property '%2' is set "
+          "to the disallowed value '%3'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
+  format: "CSS syntax error in tag '%1' - the property '%2' is set "
+          "to the disallowed value '%3'. Allowed values: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
+  format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
+          "within @%3. Allowed properties: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
+          "together with '%3'. Allowed properties: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
+          "unless the enclosing rule is prefixed with the '%3' qualification."
+}
