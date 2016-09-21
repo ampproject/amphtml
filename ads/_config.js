@@ -26,7 +26,7 @@
  *   // List of hosts for preconnect
  *   preconnect: string|array
  *
- *   // The externalCidScope used to provide CIDs to ads 
+ *   // The externalCidScope used to provide CIDs to ads
  *   clientIdScope: string
  *
  *   // Whether render-start API has been implemented
