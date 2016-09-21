@@ -64,11 +64,7 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
-<<<<<<< HEAD
 import {f1e} from '../ads/f1e';
-import {fakead3p} from '../ads/fakead3p';
-=======
->>>>>>> ac966303b3b15e5de090a5c09f5ab33d3f72072e
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
