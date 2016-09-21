@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {openLoginDialog} from '../login-dialog';
+import {
+  WebLoginDialog,
+  openLoginDialog,
+} from '../login-dialog';
 import * as sinon from 'sinon';
 
 const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
@@ -391,22 +394,21 @@ describe('WebLoginDialog', () => {
     const urlPromise = new Promise(resolve => {
       urlResolver = resolve;
     });
-    const promise = openLoginDialog(windowApi, urlPromise);
-    return Promise.resolve()
-        .then(() => {
-          urlResolver('http://acme.com/login?a=1');
-          return urlPromise;
-        })
-        .then(() => {
-          expect(dialogUrl).to.be.equal(
-            'http://acme.com/login?a=1&return=' + RETURN_URL_ESC);
-          succeed();
-          return promise;
-        })
-        .then(result => {
-          expect(result).to.equal('#success=true');
-          expect(windowApi.messageListener).to.not.exist;
-        });
+    const dialogObj = new WebLoginDialog(windowApi, viewer, urlPromise);
+    const promise = dialogObj.open();
+    expect(dialogObj.dialogReadyPromise_).to.be.ok;
+    urlResolver('http://acme.com/login?a=1');
+    return urlPromise.then(() => {
+      return dialogObj.dialogReadyPromise_;
+    }).then(() => {
+      expect(dialogUrl).to.be.equal(
+        'http://acme.com/login?a=1&return=' + RETURN_URL_ESC);
+      succeed();
+      return promise;
+    }).then(result => {
+      expect(result).to.equal('#success=true');
+      expect(windowApi.messageListener).to.not.exist;
+    });
   });
 
   it('should fail when URL promise is rejected', () => {
