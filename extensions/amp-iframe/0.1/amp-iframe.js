@@ -177,6 +177,10 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {!IntersectionObserver} */
     this.intersectionObserver_ = null;
+
+    if (!this.element.hasAttribute('frameborder')) {
+      this.element.setAttribute('frameborder', '0');
+    }
   }
 
   /**
