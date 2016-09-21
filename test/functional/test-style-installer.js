@@ -83,9 +83,8 @@ describe('Styles', () => {
       }, 0);
     });
 
-    it('should skip for render delaying services', done => {
-      waitForServicesStub.withArgs(win)
-          .returns(Promise.resolve([]));
+    it('should skip schedulePass if no render delaying services', done => {
+      waitForServicesStub.withArgs(win).returns(Promise.resolve([]));
       styles.makeBodyVisible(doc, true);
       setTimeout(() => {
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
