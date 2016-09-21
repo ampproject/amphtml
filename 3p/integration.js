@@ -39,10 +39,7 @@ import {twitter} from './twitter';
 // 3P Ad Networks - please keep in alphabetic order
 import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
-<<<<<<< HEAD
 import {accesstrade} from '../ads/accesstrade';
-=======
->>>>>>> Neodata Changes
 import {adagio} from '../ads/adagio';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
@@ -131,10 +128,7 @@ if (getMode().test || getMode().localDev) {
 
 // Keep the list in alphabetic order
 register('a9', a9);
-<<<<<<< HEAD
 register('accesstrade', accesstrade);
-=======
->>>>>>> Neodata Changes
 register('adagio', adagio);
 register('adblade', adblade);
 register('adform', adform);
