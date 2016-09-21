@@ -93,6 +93,7 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 
   // The element is relative to (0, 0), while the viewport moves. So, we must
   // adjust.
+  // TODO(jridgewell, #5149): Fixed position elements must be recalculated.
   const boundingClientRect = moveLayoutRect(element, -viewport.left,
       -viewport.top);
   intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
