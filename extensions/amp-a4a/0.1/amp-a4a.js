@@ -255,14 +255,12 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad URL, if one is available.
         .then(() => {
           checkStillCurrent(promiseId);
-          /** @return {!Promise<?string>} */
           return this.getAdUrl();
         })
         // This block returns the (possibly empty) response to the XHR request.
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
-          /** @return {!Promise<?Response>} */
           return adUrl && this.sendXhrRequest_(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
@@ -278,7 +276,6 @@ export class AmpA4A extends AMP.BaseElement {
           // fetchResponse.arrayBuffer(), the next step in the chain will
           // resolve it to a concrete value, but we'll lose track of
           // fetchResponse.headers.
-          /** @return {!Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
           return fetchResponse.arrayBuffer().then(bytes => {
             return {
               bytes,
@@ -290,7 +287,6 @@ export class AmpA4A extends AMP.BaseElement {
         // otherwise.
         .then(responseParts => {
           checkStillCurrent(promiseId);
-          /** @return {!Promise<?AdResponseDef>} */
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
         })
@@ -360,7 +356,6 @@ export class AmpA4A extends AMP.BaseElement {
           // Race the two promises: Either validCreativePromise will resolve if
           // a successful validation occurs, or allKeysCheckedPromise will
           // resolve to null.
-          /** @return {!Promise<?ArrayBuffer>} */
           return Promise.race([validCreativePromise, allKeysCheckedPromise]);
         })
         // This block returns true iff the creative was rendered in the shadow
