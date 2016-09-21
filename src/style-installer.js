@@ -127,18 +127,20 @@ export function makeBodyVisible(doc, opt_waitForServices) {
         doc.body.style['WebkitAnimation'] = 'none';
       }
     }
-
-    resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
   };
   const win = doc.defaultView;
-  const docState = documentStateFor(win);
-  docState.onBodyAvailable(() => {
+  documentStateFor(win).onBodyAvailable(() => {
     if (win[bodyVisibleSentinel]) {
       return;
     }
     win[bodyVisibleSentinel] = true;
     if (opt_waitForServices) {
-      waitForServices(win).then(set, set).then(() => {
+      waitForServices(win).catch(() => []).then(services => {
+        set();
+        if (services.length > 0) {
+          resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+        }
+      }).then(() => {
         try {
           const perf = performanceFor(win);
           perf.tick('mbv');

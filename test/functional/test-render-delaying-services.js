@@ -79,7 +79,7 @@ describe('waitForServices', () => {
     dynamicCssResolve();
     variantResolve(); // this unblocks 'amp-experiment'
 
-    return expect(promise).to.eventually.be.fulfilled;
+    return expect(promise).to.eventually.have.lengthOf(3);
   });
 });
 
