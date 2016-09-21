@@ -77,6 +77,8 @@ The reasons for this policy are that:
 
 The attributes above should all behave like they do on standard iframes.
 
+If `frameborder` is not specified, it will be set to `0` by default.
+
 ### sandbox
 
 Iframes created by `amp-iframe` always have the `sandbox` attribute defined on them. By default the value is empty. That means that they are "maximum sandboxed" by default. By setting sandbox values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. E.g. setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
