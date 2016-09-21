@@ -95,6 +95,7 @@ describe('Styles', () => {
   });
 
   describe('installStyles', () => {
+
     it('should install runtime styles', () => {
       const cssText = '/*amp-runtime*/';
       return new Promise(resolve => {

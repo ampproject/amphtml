@@ -39,7 +39,7 @@ import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {extensionsFor} from './extensions';
-import {installHistoryService} from './service/history-impl';
+import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
@@ -88,7 +88,6 @@ export function installRuntimeServices(global) {
   installTimerService(global);
   installViewerService(global);
   installViewportService(global);
-  installHistoryService(global);
   installStorageService(global);
   installVsyncService(global);
   installUrlReplacementsService(global);
@@ -106,6 +105,7 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
