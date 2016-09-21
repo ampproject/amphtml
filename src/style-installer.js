@@ -20,6 +20,7 @@ import {performanceFor} from './performance';
 import {platformFor} from './platform';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
+import {resourcesForDoc} from './resources';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
@@ -126,6 +127,8 @@ export function makeBodyVisible(doc, opt_waitForServices) {
         doc.body.style['WebkitAnimation'] = 'none';
       }
     }
+
+    resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
   };
   const win = doc.defaultView;
   const docState = documentStateFor(win);
