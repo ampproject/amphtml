@@ -21,7 +21,18 @@ import {removeElement} from '../../../src/dom';
 
 class AmpOoyalaPlayer extends AMP.BaseElement {
 
-  /** @override */
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     this.preconnect.url('https://player.ooyala.com', onLayout);
   }
