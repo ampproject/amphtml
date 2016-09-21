@@ -81,24 +81,24 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
       'Negative dimensions in element.');
   // Building an IntersectionObserverEntry.
 
+  let intersectionRect = element;
+  if (owner) {
+    intersectionRect = rectIntersection(owner, element) ||
+        // No intersection.
+        layoutRectLtwh(0, 0, 0, 0);
+  }
+  intersectionRect = rectIntersection(viewport, intersectionRect) ||
+      // No intersection.
+      layoutRectLtwh(0, 0, 0, 0);
+
   // The element is relative to (0, 0), while the viewport moves. So, we must
   // adjust.
   const boundingClientRect = moveLayoutRect(element, -viewport.left,
       -viewport.top);
-
-  let intersectionRect = boundingClientRect;
-  if (owner) {
-    const ownerRect = moveLayoutRect(owner, -viewport.left, -viewport.top);
-    intersectionRect = rectIntersection(ownerRect, boundingClientRect) ||
-        // No intersection.
-        layoutRectLtwh(0, 0, 0, 0);
-  }
-
-  // Now, a normal IntersectionObserver reports the viewport as (x,y) (0, 0).
+  intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
+      -viewport.top);
+  // Now, move the viewport to (0, 0)
   const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
-  intersectionRect = rectIntersection(rootBounds, intersectionRect) ||
-      // No intersection.
-      layoutRectLtwh(0, 0, 0, 0);
 
   return /** @type {!IntersectionObserverEntry} */ ({
     time: Date.now(),
