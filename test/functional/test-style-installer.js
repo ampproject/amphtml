@@ -91,13 +91,13 @@ describe('Styles', () => {
     return waitForBodyPromise(document).then(() => {
       return waitForServices(document.defaultView).then(() => {
         expect(tickSpy.lastCall.args[0]).to.equal('mbv');
-        expect(tickSpy.callCount).to.equal(1);
+        expect(tickSpy.callCount).to.equal(2);
         expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
         styles.makeBodyVisible(document, true);
         return waitForBodyPromise(document).then(() => {
           return waitForServices(document.defaultView);
         }).then(() => {
-          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.callCount).to.equal(2);
           expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
         });
       });

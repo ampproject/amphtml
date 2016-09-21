@@ -167,7 +167,7 @@ describe('performance', () => {
 
         return promise.then(() => {
           expect(perf.isMessagingReady_).to.be.true;
-          expect(flushSpy.callCount).to.equal(3);
+          expect(flushSpy.callCount).to.equal(4);
           expect(perf.events_.length).to.equal(0);
         });
       });
@@ -195,9 +195,9 @@ describe('performance', () => {
         expect(perf.events_.length).to.equal(2);
 
         return perf.coreServicesAvailable().then(() => {
-          expect(flushSpy.callCount).to.equal(2);
+          expect(flushSpy.callCount).to.equal(3);
           expect(perf.isMessagingReady_).to.be.false;
-          expect(perf.events_.length).to.equal(3);
+          expect(perf.events_.length).to.equal(4);
         });
       });
     });
@@ -342,12 +342,12 @@ describe('performance', () => {
           perf.tick('start0');
           perf.tick('start1', 'start0', 300);
 
-          expect(tickSpy.getCall(1).args[0]).to.be.jsonEqual({
+          expect(tickSpy.getCall(2).args[0]).to.be.jsonEqual({
             label: 'start0',
             from: null,
             value: 100,
           });
-          expect(tickSpy.getCall(2).args[0]).to.be.jsonEqual({
+          expect(tickSpy.getCall(3).args[0]).to.be.jsonEqual({
             label: 'start1',
             from: 'start0',
             value: 300,
@@ -456,19 +456,20 @@ describe('performance', () => {
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
-        expect(tickSpy.callCount).to.equal(0);
+        expect(tickSpy.callCount).to.equal(1);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.callCount).to.equal(2);
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.callCount).to.equal(3);
-            expect(tickSpy.getCall(1).args[0]).to.equal('_pc');
-            expect(tickSpy.getCall(2).args[0]).to.equal('pc');
-            expect(tickSpy.getCall(2).args[1]).to.equal('_pc');
-            expect(Number(tickSpy.getCall(1).args[2])).to.equal(perf.initTime_);
-            expect(Number(tickSpy.getCall(2).args[2]))
+            expect(tickSpy.callCount).to.equal(4);
+            expect(tickSpy.getCall(1).args[0]).to.equal('ofv');
+            expect(tickSpy.getCall(2).args[0]).to.equal('_pc');
+            expect(tickSpy.getCall(3).args[0]).to.equal('pc');
+            expect(tickSpy.getCall(3).args[1]).to.equal('_pc');
+            expect(Number(tickSpy.getCall(2).args[2])).to.equal(perf.initTime_);
+            expect(Number(tickSpy.getCall(3).args[2]))
                 .to.equal(perf.initTime_ + 400);
           });
         });
@@ -480,12 +481,13 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(2);
-          expect(tickSpy.firstCall.args[0]).to.equal('_pc');
-          expect(tickSpy.secondCall.args[0]).to.equal('pc');
-          expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.firstCall.args[2])).to.equal(perf.initTime_);
-          expect(Number(tickSpy.secondCall.args[2])).to.equal(
+          expect(tickSpy.callCount).to.equal(3);
+          expect(tickSpy.firstCall.args[0]).to.equal('ol');
+          expect(tickSpy.secondCall.args[0]).to.equal('_pc');
+          expect(tickSpy.thirdCall.args[0]).to.equal('pc');
+          expect(tickSpy.thirdCall.args[1]).to.equal('_pc');
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(perf.initTime_);
+          expect(Number(tickSpy.thirdCall.args[2])).to.equal(
               perf.initTime_ + 1);
         });
       });
@@ -515,9 +517,10 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(1);
-          expect(tickSpy.firstCall.args[0]).to.equal('pc');
-          expect(tickSpy.firstCall.args[2]).to.be.undefined;
+          expect(tickSpy.callCount).to.equal(2);
+          expect(tickSpy.firstCall.args[0]).to.equal('ol');
+          expect(tickSpy.secondCall.args[0]).to.equal('pc');
+          expect(tickSpy.secondCall.args[2]).to.be.undefined;
         });
       });
     });
