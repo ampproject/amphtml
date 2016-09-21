@@ -87,7 +87,7 @@ declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
-declareExtension('amp-sticky-ad', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-sticky-ad', '0.1', true);
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
