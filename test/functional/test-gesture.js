@@ -39,6 +39,7 @@ describe('Gestures', () => {
   let recognizerMock;
   let gestures;
   let eventListeners;
+  let eventListenerOptions;
   let onGesture;
 
   beforeEach(() => {
@@ -46,9 +47,11 @@ describe('Gestures', () => {
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
+    eventListenerOptions = {};
     element = {
-      addEventListener: (eventType, handler) => {
+      addEventListener: (eventType, handler, options) => {
         eventListeners[eventType] = handler;
+        eventListenerOptions[eventType] = options;
       },
       ownerDocument: {
         defaultView: window,
@@ -299,6 +302,7 @@ describe('Gestures', () => {
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
+    expect(eventListenerOptions[event.type].passive).to.be.false;
   });
 
   it('should cancel event after eventing stopped', () => {
@@ -316,6 +320,7 @@ describe('Gestures', () => {
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
     expect(gestures.wasEventing_).to.equal(false);
+    expect(eventListenerOptions[event.type].passive).to.be.false;
   });
 
   it('should cancel event when anyone is ready', () => {
@@ -328,6 +333,7 @@ describe('Gestures', () => {
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
+    expect(eventListenerOptions[event.type].passive).to.be.false;
   });
 
   it('should cancel event when anyone is pending', () => {
@@ -340,6 +346,7 @@ describe('Gestures', () => {
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
+    expect(eventListenerOptions[event.type].passive).to.be.false;
 
     clock.tick(10);
     event = {
@@ -350,6 +357,7 @@ describe('Gestures', () => {
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(0);
     expect(event.stopPropagation.callCount).to.equal(0);
+    expect(eventListenerOptions[event.type].passive).to.be.false;
   });
 
   describe('Gestures - with shouldNotPreventdefault', () => {
@@ -360,6 +368,7 @@ describe('Gestures', () => {
     let recognizerMock;
     let gestures;
     let eventListeners;
+    let eventListenerOptions;
     let onGesture;
 
     beforeEach(() => {
@@ -367,9 +376,11 @@ describe('Gestures', () => {
       clock = sandbox.useFakeTimers();
 
       eventListeners = {};
+      eventListenerOptions = {};
       element = {
-        addEventListener: (eventType, handler) => {
+        addEventListener: (eventType, handler, options) => {
           eventListeners[eventType] = handler;
+          eventListenerOptions[eventType] = options;
         },
         ownerDocument: {
           defaultView: window,
@@ -400,6 +411,7 @@ describe('Gestures', () => {
       eventListeners[event.type](event);
       expect(event.preventDefault.callCount).to.equal(0);
       expect(event.stopPropagation.callCount).to.equal(1);
+      expect(eventListenerOptions[event.type].passive).to.be.true;
     });
 
     it('should cancel event after eventing stopped', () => {
@@ -417,6 +429,7 @@ describe('Gestures', () => {
       expect(event.preventDefault.callCount).to.equal(0);
       expect(event.stopPropagation.callCount).to.equal(1);
       expect(gestures.wasEventing_).to.equal(false);
+      expect(eventListenerOptions[event.type].passive).to.be.true;
     });
 
     it('should cancel event when anyone is ready', () => {
@@ -429,6 +442,7 @@ describe('Gestures', () => {
       eventListeners[event.type](event);
       expect(event.preventDefault.callCount).to.equal(0);
       expect(event.stopPropagation.callCount).to.equal(1);
+      expect(eventListenerOptions[event.type].passive).to.be.true;
     });
 
     it('should cancel event when anyone is pending', () => {
@@ -441,6 +455,7 @@ describe('Gestures', () => {
       eventListeners[event.type](event);
       expect(event.preventDefault.callCount).to.equal(0);
       expect(event.stopPropagation.callCount).to.equal(1);
+      expect(eventListenerOptions[event.type].passive).to.be.true;
 
       clock.tick(10);
       event = {
@@ -451,6 +466,7 @@ describe('Gestures', () => {
       eventListeners[event.type](event);
       expect(event.preventDefault.callCount).to.equal(0);
       expect(event.stopPropagation.callCount).to.equal(0);
+      expect(eventListenerOptions[event.type].passive).to.be.true;
     });
 
   });

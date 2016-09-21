@@ -267,8 +267,20 @@ export class AmpScrollableCarousel extends BaseCarousel {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    this.element.addEventListener('touchmove', event => {
-      event.stopPropagation();
-    });
+
+    // We don't preventDefault, tell the browser to optimize scrolling.
+    const options = {
+      passive: true,
+    };
+
+    /**
+     * TODO(aghassemi, #5105): Type check
+     * @suppress {checkTypes}
+     */
+    (() => {
+      this.element.addEventListener('touchmove', event => {
+        event.stopPropagation();
+      }, options);
+    })();
   }
 }
