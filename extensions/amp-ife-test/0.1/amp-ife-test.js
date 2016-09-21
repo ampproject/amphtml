@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ampdocFor} from '../../../src/ampdoc';
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
@@ -67,7 +67,7 @@ class AmpIfeTest extends AMP.BaseElement {
       this.embed_ = embed;
 
       // Run some tests.
-      const ampdocService = ampdocFor(this.win);
+      const ampdocService = ampdocServiceFor(this.win);
       const ampdoc = ampdocService.getAmpDoc(this.element);
 
       const img = iframe.contentWindow.document.querySelector('amp-img');
