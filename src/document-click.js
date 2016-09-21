@@ -188,7 +188,6 @@ export function onDocumentElementCapturedClick_(e, urlReplacements) {
  * @param {boolean} isIosSafari
  */
 export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
-  debugger;//XXX
   if (e.defaultPrevented) {
     return;
   }
