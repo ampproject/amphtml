@@ -303,7 +303,6 @@ export class AmpA4A extends AMP.BaseElement {
           let resolveValidation;
           // Promise that will resolve upon any successful validation.
           const validCreativePromise = new Promise(resolve => {
-            // @param {!function(?ArrayBuffer)} resolve
             resolveValidation = resolve;
           });
 
@@ -313,33 +312,20 @@ export class AmpA4A extends AMP.BaseElement {
           // called with the creative as the argument.
           const signatureVerificationPromises = this.keyInfoSetPromises_.map(
               keyInfoSetPromise => {
-                // @param {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>}
-                // keyInfoSetPromise
-                // @return {!Promise}
                 return keyInfoSetPromise.then(keyInfoSet => {
-                  // @param {!Array<!Promise<?PublicKeyInfoDef>>} keyInfoSet
-                  // @return {!Promise}
                   return Promise.all(keyInfoSet.map(keyInfoPromise => {
-                    // @param {!Promise<?PublicKeyInfoDef>} keyInfoPromise
-                    // @return {!Promise}
                     return keyInfoPromise.then(keyInfo => {
-                      // @param {?PublicKeyInfoDef} keyInfo
-                      // @return {!Promise}
                       if (keyInfo) {
                         return verifySignature(
                             new Uint8Array(creativeParts.creative),
                             creativeParts.signature,
                             keyInfo)
                         .then(isValid => {
-                          // @param {boolean} isValid
-                          // @return {!Promise}
                           if (isValid) {
                             resolveValidation(creativeParts.creative);
                           }
                         },
                         err => {
-                          // @param {*} err
-                          // @return {!Promise}
                           user().error('Amp Ad', err, this.element);
                         });
                       }
@@ -351,7 +337,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Promise that will resolve to null after all keys have been checked.
           // Will call resolveValidation if a successful validation does happen.
           const allKeysCheckedPromise = Promise.all(
-              signatureVerificationPromises).then(() => Promise.resolve(null));
+              signatureVerificationPromises).then(() => null);
 
           // Race the two promises: Either validCreativePromise will resolve if
           // a successful validation occurs, or allKeysCheckedPromise will
@@ -360,7 +346,6 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
-        /** @return {!Promise<!boolean>} */
         .then(creative => {
           checkStillCurrent(promiseId);
           // Note: It's critical that #maybeRenderAmpAd_ be called
