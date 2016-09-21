@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
@@ -27,13 +27,8 @@ class AmpStickyAd extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /**
-     * This variable must not be nullable to be scheduleLayout later.
-     * It is mutable and temporarily assigned to element during construction.
-     * Will always change it during buildCallback.
-     * @private {!Element}
-     */
-    this.ad_ = element;
+    /** @private {?Element} */
+    this.ad_ = null;
 
     /** @const @private {!../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = this.getViewport();
@@ -76,8 +71,8 @@ class AmpStickyAd extends AMP.BaseElement {
       toggle(this.element, true);
       const borderBottom = this.element./*OK*/offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
-      this.updateInViewport(this.ad_, true);
-      this.scheduleLayout(this.ad_);
+      this.updateInViewport(dev().assertElement(this.ad_), true);
+      this.scheduleLayout(dev().assertElement(this.ad_));
     }
     return Promise.resolve();
   }
@@ -134,8 +129,8 @@ class AmpStickyAd extends AMP.BaseElement {
         this.visible_ = true;
         this.element.classList.add('-amp-sticky-ad-visible');
         this.viewport_.addToFixedLayer(this.element);
-        this.updateInViewport(this.ad_, true);
-        this.scheduleLayout(this.ad_);
+        this.updateInViewport(dev().assertElement(this.ad_), true);
+        this.scheduleLayout(dev().assertElement(this.ad_));
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
@@ -174,7 +169,7 @@ class AmpStickyAd extends AMP.BaseElement {
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
       this.visible_ = false;
-      this./*OK*/scheduleUnlayout(this.ad_);
+      this./*OK*/scheduleUnlayout(dev().assertElement(this.ad_));
       this.viewport_.removeFromFixedLayer(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
