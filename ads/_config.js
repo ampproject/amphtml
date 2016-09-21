@@ -366,4 +366,13 @@ export const adConfig = {
   },
 
   zergnet: {},
+
+  zucks: {
+    preconnect: [
+      'https://j.zucks.net.zimg.jp',
+      'https://sh.zucks.net',
+      'https://k.zucks.net',
+      'https://static.zucks.net.zimg.jp',
+    ],
+  },
 };
