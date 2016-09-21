@@ -36,9 +36,7 @@
  * }
  */
 export const adConfig = {
-  _ping_: {},
-
-  fakead3p: {
+  _ping_: {
     renderStartImplemented: true,
   },
 
@@ -231,6 +229,10 @@ export const adConfig = {
 
   mediaimpact: {
     prefetch: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+  },
+
+  meg: {
+    renderStartImplemented: true,
   },
 
   microad: {
