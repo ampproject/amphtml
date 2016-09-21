@@ -26,7 +26,7 @@ import {
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {historyFor} from '../../../src/history';
+import {historyForDoc} from '../../../src/history';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -997,7 +997,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /** @private @return {!History} */
   getHistory_() {
-    return historyFor(this.element.ownerDocument.defaultView);
+    return historyForDoc(this.getAmpDoc());
   }
 }
 
