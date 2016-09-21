@@ -15,7 +15,7 @@
  */
 
 import {closestByTag} from './dom';
-import {fromClass} from './service';
+import {fromClassForDoc} from './service';
 import {dev} from './log';
 import {historyForDoc} from './history';
 import {openWindowDialog} from './dom';
@@ -28,33 +28,15 @@ import {urlReplacementsFor} from './url-replacements';
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
 
-/**
- * @param {!Window} window
- */
-export function installGlobalClickListener(window) {
-  clickHandlerFor(window);
-  captureClickHandlerFor(window);
-}
 
 /**
- * @param {!Window} window
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function uninstallGlobalClickListener(window) {
-  clickHandlerFor(window).cleanup();
-  captureClickHandlerFor(window).cleanup();
+export function installGlobalClickListenerForDoc(ampdoc) {
+  fromClassForDoc(ampdoc, 'clickhandler', ClickHandler);
+  fromClassForDoc(ampdoc, 'CaptureClickHandler', CaptureClickHandler);
 }
 
-/**
- * @param {!Window} window
- * @return {!ClickHandler} bubble document click handler.
- */
-function clickHandlerFor(window) {
-  return fromClass(window, 'clickhandler', ClickHandler);
-}
-
-function captureClickHandlerFor(window) {
-  return fromClass(window, 'CaptureClickHandler', CaptureClickHandler);
-}
 
 /**
  * Intercept any click on the current document and prevent any
@@ -63,22 +45,22 @@ function captureClickHandlerFor(window) {
  */
 export class ClickHandler {
   /**
-   * @param {!Window} window
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
-    /** @const {!Window} */
-    this.win = window;
+  constructor(ampdoc) {
+    /** @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!./service/viewport-impl.Viewport} */
-    this.viewport_ = viewportFor(this.win);
+    this.viewport_ = viewportFor(this.ampdoc.win);
 
     /** @private @const {!./service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerFor(this.ampdoc.win);
 
     /** @private @const {!./service/history-impl.History} */
-    this.history_ = historyForDoc(this.win.document);
+    this.history_ = historyForDoc(this.ampdoc);
 
-    const platform = platformFor(this.win);
+    const platform = platformFor(this.ampdoc.win);
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -86,8 +68,7 @@ export class ClickHandler {
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
       /** @private @const {!function(!Event)|undefined} */
       this.boundHandle_ = this.handle_.bind(this);
-      this.win.document.documentElement.addEventListener(
-          'click', this.boundHandle_);
+      this.ampdoc.getRootNode().addEventListener('click', this.boundHandle_);
     }
   }
 
@@ -96,8 +77,7 @@ export class ClickHandler {
    */
   cleanup() {
     if (this.boundHandle_) {
-      this.win.document.documentElement.removeEventListener(
-          'click', this.boundHandle_);
+      this.ampdoc.getRootNode().removeEventListener('click', this.boundHandle_);
     }
   }
 
@@ -113,6 +93,7 @@ export class ClickHandler {
   }
 }
 
+
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
@@ -120,19 +101,19 @@ export class ClickHandler {
  */
 export class CaptureClickHandler {
   /**
-   * @param {!Window} window
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
-    /** @const {!Window} */
-    this.win = window;
+  constructor(ampdoc) {
+    /** @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!./service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
+    this.urlReplacements_ = urlReplacementsFor(this.ampdoc.win);
 
     /** @private {!function(!Event)} */
     this.boundHandler_ = this.handle_.bind(this);
 
-    this.win.document.documentElement.addEventListener(
+    this.ampdoc.getRootNode().addEventListener(
         'click', this.boundHandler_, true);
   }
 
@@ -140,8 +121,8 @@ export class CaptureClickHandler {
    * Removes all event listeners.
    */
   cleanup() {
-    this.win.document.documentElement.removeEventListener(
-          'click', this.boundHandler_);
+    this.ampdoc.getRootNode().removeEventListener(
+        'click', this.boundHandler_, true);
   }
 
   /**
@@ -152,6 +133,7 @@ export class CaptureClickHandler {
     onDocumentElementCapturedClick_(e, this.urlReplacements_);
   }
 }
+
 
 /**
  * Locate first element with given tag name within event path from shadowRoot.
@@ -170,6 +152,7 @@ export function getElementByTagNameFromEventShadowDomPath_(e, tagName) {
   }
   return null;
 }
+
 
 /**
  * Expands target anchor href on capture click event.  If within shadow DOM,
@@ -191,6 +174,7 @@ export function onDocumentElementCapturedClick_(e, urlReplacements) {
   }
 }
 
+
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
@@ -204,6 +188,7 @@ export function onDocumentElementCapturedClick_(e, urlReplacements) {
  * @param {boolean} isIosSafari
  */
 export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
+  debugger;//XXX
   if (e.defaultPrevented) {
     return;
   }
@@ -213,8 +198,7 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
     return;
   }
 
-  const docElement = e.currentTarget;
-  const doc = docElement.ownerDocument;
+  const doc = target.ownerDocument;
   const win = doc.defaultView;
 
   const tgtLoc = parseUrl(target.href);
@@ -295,7 +279,8 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   history.push(() => {
     win.location.replace(`${curLoc.hash || '#'}`);
   });
-};
+}
+
 
 /**
  * Get offset location of click from event taking into account shadowRoot.
@@ -317,6 +302,7 @@ function getClickLocation_(e) {
           (e.path && e.target ? e.target./*OK*/offsetTop : 0))),
   };
 }
+
 
 /**
  * Expand click target href synchronously using UrlReplacements service
@@ -353,4 +339,4 @@ export function expandTargetHref_(e, target, urlReplacements) {
     target.setAttribute('href', newHref);
   }
   return newHref;
-};
+}
