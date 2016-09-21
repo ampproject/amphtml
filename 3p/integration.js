@@ -101,6 +101,7 @@ import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
+import {zucks} from '../ads/zucks';
 
 initLogConstructor();
 
@@ -191,6 +192,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
+register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
