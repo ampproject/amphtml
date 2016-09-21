@@ -17,7 +17,7 @@
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {historyFor} from '../../../src/history';
+import {historyForDoc} from '../../../src/history';
 import {vsyncFor} from '../../../src/vsync';
 import * as st from '../../../src/style';
 
@@ -129,7 +129,7 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   getHistory_() {
-    return historyFor(this.element.ownerDocument.defaultView);
+    return historyForDoc(this.getAmpDoc());
   }
 }
 

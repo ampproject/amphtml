@@ -17,7 +17,7 @@
 import {closestByTag} from './dom';
 import {fromClass} from './service';
 import {dev} from './log';
-import {historyFor} from './history';
+import {historyForDoc} from './history';
 import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
@@ -76,7 +76,7 @@ export class ClickHandler {
     this.viewer_ = viewerFor(this.win);
 
     /** @private @const {!./service/history-impl.History} */
-    this.history_ = historyFor(this.win);
+    this.history_ = historyForDoc(this.win.document);
 
     const platform = platformFor(this.win);
     /** @private @const {boolean} */
