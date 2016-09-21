@@ -33,16 +33,16 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 {
   "transport": {"beacon": false, "xhrpost": false},
   "requests": {
-    "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&_=${random}",
-    "pageview": "${base}&name=${eventName}&type=${eventId}&screenSize=${screenWidth}x${screenHeight}",
-    "event": "${base}&name=${eventName}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
-    "visibility": "https://example.com/visibility?a=${maxContinuousTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}"
+    "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
+    "base": "${endpoint}?${type}&path=${canonicalPath}",
+    "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
+    "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}"
   },
   "vars": {
     "title": "Example Request"
   },
   "extraUrlParams": {
-    "param1": "Interesting value",
+    "param1": "${random}",
     "platform": "AMP"
   },
   "extraUrlParamsReplaceMap": {
@@ -51,10 +51,9 @@ Container for analytics tags. Positioned far away from top to make sure that doe
   "triggers": {
     "defaultPageview": {
       "on": "visible",
-      "request": "pageview",
+      "request": "base",
       "vars": {
-        "eventName": "page-loaded",
-        "eventId": "42"
+        "type": "pageLoad"
       },
       "extraUrlParams": {
         "param1": "Another value"
@@ -69,6 +68,21 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "visiblePercentageMax": 80,
         "totalTimeMin": 5000,
         "continuousTimeMin": 2000
+      },
+      "vars": {
+        "type": "visibility"
+      }
+    },
+    "hidden": {
+      "on": "hidden",
+      "request": "visibility",
+      "visibilitySpec": {
+        "selector": "#anim-id",
+        "visiblePercentageMin": 20,
+        "continuousTimeMax": 5000
+      },
+      "vars": {
+        "type": "hidden"
       }
     },
     "scrollPings": {
@@ -79,6 +93,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "horizontalBoundaries": [100]
       },
       "vars": {
+<<<<<<< HEAD
         "eventName": "scroll"
       }
     }
@@ -211,17 +226,21 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "request": "pageview",
       "vars": {
         "title": "Example Pageview"
+=======
+        "type": "scroll"
+>>>>>>> ampproject/master
       }
     },
-    "clickOnTest1Trigger": {
+    "clickPings": {
       "on": "click",
-      "selector": "#test1",
-      "request": "event",
+      "selector": "${img}",
+      "request": ["endpoint", "base"],
       "vars": {
-        "eventCategory": "examples",
-        "eventAction": "clicked-test1"
+        "type": "click",
+        "img": "#anim-id, #container"
       }
     },
+<<<<<<< HEAD
     "clickOnTopTrigger": {
       "on": "click",
       "selector": "#top",
@@ -429,12 +448,15 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "account": "12345"
   },
   "triggers": {
+=======
+>>>>>>> ampproject/master
     "timer": {
       "on": "timer",
       "timerSpec": {
         "interval": 5,
-        "max-timer-length": 300
+        "maxTimerLength": 20
       },
+<<<<<<< HEAD
       "request": "test-ping"
     }
   }
@@ -618,8 +640,11 @@ For complete documentation and additional examples please see: https://marketing
       "on": "click",
       "selector": "#test1",
       "request": "myClick",
+=======
+      "request": "base",
+>>>>>>> ampproject/master
       "vars": {
-        "eVar1": "button clicked"
+        "type": "timer"
       }
     }
   }
@@ -627,44 +652,13 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 
-<!-- adobeanalytics_nativeConfig type -->
-<amp-analytics type="adobeanalytics_nativeConfig">
-<script type="application/json">
-{
-  "requests": {
-    "base": "https://${host}",
-    "iframeMessage": "${base}/stats.html?campaign=${queryParam(campaign)}&pageURL=${ampdocUrl}"
-  },
-  "vars": {
-    "host": "example.publishersite.com"
-  },
-  "extraUrlParams": {
-    "pageName": "Adobe Analytics using amp-analytics adobeanalytics_nativeConfig",
-    "v1": "eVar1 test value"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Adobe Analytics example -->
-
-<!-- Linkpulse example - please replace id with your Linkpulse id -->
-<amp-analytics type="linkpulse">
-<script type="application/json">
-{
-  "vars": {
-    "id": "aabbcceedd00000000000000"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Linkpulse example -->
-
+<amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
 </div>
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>
 
-<span id="test1" class="box">
+<span id="test1" class="box" data-vars-title="Example request with element level overrides">
   Click here to generate an event
 </span>
 <p>
@@ -719,9 +713,40 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
 <p></p>
-    <amp-anim src="https://goo.gl/FBCKQO" id="anim-id"
-        width="400" height="225" layout="responsive">
-      <amp-img placeholder src="https://goo.gl/GjcSkr" width="400" height="225" layout="responsive"></amp-img>
-    </amp-anim>
+<amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
+  <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
+  <amp-analytics id="nestedAnalytics">
+    <script type="application/json">
+    {
+      "transport": {"beacon": false, "xhrpost": false},
+      "requests": {
+        "visibility": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?${type}&RANDOM"
+      },
+      "triggers": {
+        "visibilityScope": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-img",
+            "selectionMethod": "scope",
+            "visiblePercentageMin": 10
+          },
+          "vars": { "type": "scope" }
+        },
+        "visibilityClosest": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-anim",
+            "selectionMethod": "closest",
+            "visiblePercentageMin": 20
+          },
+          "vars": { "type": "closest" }
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
+</amp-anim>
 </body>
 </html>

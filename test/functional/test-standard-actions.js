@@ -36,11 +36,27 @@ describe('StandardActions', () => {
     sandbox.restore();
   });
 
-  it('should handle "hide" action', () => {
-    const element = document.createElement('div');
-    actions.handleHide({target: element});
-    expect(mutateElementStub.callCount).to.equal(1);
-    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-    expect(element.style.display).to.equal('none');
+  describe('"hide" action', () => {
+    it('should handle normal element', () => {
+      const element = document.createElement('div');
+      actions.handleHide({target: element});
+      expect(mutateElementStub.callCount).to.equal(1);
+      expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+      expect(element.style.display).to.equal('none');
+    });
+
+    it('should handle AmpElement', () => {
+      const element = document.createElement('div');
+      let called = false;
+      element.classList.add('-amp-element');
+      element.collapse = function() {
+        called = true;
+      };
+
+      actions.handleHide({target: element});
+      expect(mutateElementStub.callCount).to.equal(1);
+      expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+      expect(called).to.equal(true);
+    });
   });
 });

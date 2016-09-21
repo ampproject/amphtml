@@ -41,7 +41,7 @@ describe('PullToRefreshBlocker', () => {
     };
 
     const viewportApi = {
-      getTop: () => 0,
+      getScrollTop: () => 0,
     };
     viewportMock = sandbox.mock(viewportApi);
 
@@ -93,7 +93,7 @@ describe('PullToRefreshBlocker', () => {
   });
 
   it('should NOT start tracking when scrolled', () => {
-    viewportMock.expects('getTop').returns(11).once();
+    viewportMock.expects('getScrollTop').returns(11).once();
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(false);
   });

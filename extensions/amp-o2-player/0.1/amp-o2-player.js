@@ -15,14 +15,22 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
+<<<<<<< HEAD
 import {loadPromise} from '../../../src/event-helper';
+=======
+>>>>>>> ampproject/master
 import {user} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
+<<<<<<< HEAD
   preconnectCallback() {
     this.preconnect.url(this.domain_);
+=======
+  preconnectCallback(onLayout) {
+    this.preconnect.url(this.domain_, onLayout);
+>>>>>>> ampproject/master
   }
 
   /** @override */
@@ -31,15 +39,32 @@ class AmpO2Player extends AMP.BaseElement {
   }
 
   /** @override */
+<<<<<<< HEAD
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     const pid = this.element.getAttribute('data-pid');
     const bcid = this.element.getAttribute('data-bcid');
+=======
+  buildCallback() {
+    /** @private @const {string} */
+    this.pid_ = user().assert(
+        this.element.getAttribute('data-pid'),
+        'Data-pid attribute is required for <amp-o2-player> %s',
+        this.element);
+
+    /** @private @const {string} */
+    this.bcid_ = user().assert(
+        this.element.getAttribute('data-bcid'),
+        'Data-bcid attribute is required for <amp-o2-player> %s',
+        this.element);
+
+>>>>>>> ampproject/master
     const bid = this.element.getAttribute('data-bid');
     const vid = this.element.getAttribute('data-vid');
     const macros = this.element.getAttribute('data-macros');
     const env = this.element.getAttribute('data-env');
+<<<<<<< HEAD
     user.assert(
         (pid && bcid) || vid,
         'Either data-pid and data-bcid or data-vid attribute is required ' +
@@ -61,6 +86,21 @@ class AmpO2Player extends AMP.BaseElement {
       }
     } else if (vid) {
       src += encodeURIComponent(vid) + '.html';
+=======
+
+    /** @private {string} */
+    this.domain_ = 'https://delivery.' +
+        (env != 'stage' ? '' : 'dev.') + 'vidible.tv';
+    let src = `${this.domain_}/htmlembed/`;
+    const queryParams = [];
+    src += 'pid=' + encodeURIComponent(this.pid_) + '/'
+        + encodeURIComponent(this.bcid_) + '.html';
+    if (bid) {
+      queryParams.push('bid=' + encodeURIComponent(bid));
+    }
+    if (vid) {
+      queryParams.push('vid=' + encodeURIComponent(vid));
+>>>>>>> ampproject/master
     }
     if (macros) {
       queryParams.push(macros);
@@ -68,6 +108,7 @@ class AmpO2Player extends AMP.BaseElement {
     if (queryParams.length > 0) {
       src += '?' + queryParams.join('&');
     }
+<<<<<<< HEAD
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
@@ -79,6 +120,33 @@ class AmpO2Player extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = iframe;
     return loadPromise(iframe);
+=======
+
+    /** @private {string} */
+    this.src_ = src;
+  }
+
+  /** @override */
+  layoutCallback() {
+    user().assert(
+        this.pid_,
+        'Data-pid attribute is required for <amp-o2-player> %s',
+        this.element);
+    user().assert(
+        this.bcid_,
+        'Data-bcid attribute is required for <amp-o2-player> %s',
+        this.element);
+
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = this.src_;
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    /** @private {?Element} */
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
+>>>>>>> ampproject/master
   }
 
   /** @override */

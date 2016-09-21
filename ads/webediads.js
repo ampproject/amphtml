@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /** Created by Webedia on 07/03/16 */
 export function webediads(global, data) {
-  checkData(data, ['site', 'page', 'position', 'query']);
-  validateDataExists(data, ['site', 'page', 'position']);
+  validateData(data, ['site', 'page', 'position'], ['query']);
   loadScript(global, 'https://eu1.wbdds.com/amp.min.js', () => {
     global.wads.init({
       'site': data.site,

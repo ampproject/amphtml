@@ -17,6 +17,7 @@
 import {AmpSlides} from './slides';
 import {AmpCarousel} from './carousel';
 import {AmpSlideScroll} from './slidescroll';
+import {AmpScrollableCarousel} from './scrollable-carousel';
 import {CSS} from '../../../build/amp-carousel-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
 
@@ -31,6 +32,11 @@ class CarouselSelector {
         return new AmpSlideScroll(element);
       }
       return new AmpSlides(element);
+    }
+    const scrollableCarouselExpt = isExperimentOn(
+        element.ownerDocument.defaultView, 'amp-scrollable-carousel');
+    if (scrollableCarouselExpt) {
+      return new AmpScrollableCarousel(element);
     }
     return new AmpCarousel(element);
   }

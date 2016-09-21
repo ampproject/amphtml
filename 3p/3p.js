@@ -45,7 +45,7 @@ let syncScriptLoads = 0;
  * @param {ThirdPartyFunctionDef} draw Function that draws the 3p integration.
  */
 export function register(id, draw) {
-  dev.assert(!registrations[id], 'Double registration %s', id);
+  dev().assert(!registrations[id], 'Double registration %s', id);
   registrations[id] = draw;
 }
 
@@ -57,7 +57,7 @@ export function register(id, draw) {
  */
 export function run(id, win, data) {
   const fn = registrations[id];
-  user.assert(fn, 'Unknown 3p: ' + id);
+  user().assert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
 
@@ -86,6 +86,7 @@ export function writeScript(win, url, opt_cb) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @param {function()} cb
 =======
  * @param {function()=} opt_cb
@@ -98,11 +99,23 @@ export function writeScript(win, url, opt_cb) {
 >>>>>>> ampproject/master
  */
 export function loadScript(win, url, opt_cb) {
+=======
+ * @param {function()=} opt_cb
+ * @param {function()=} opt_errorCb
+ */
+export function loadScript(win, url, opt_cb, opt_errorCb) {
+>>>>>>> ampproject/master
   const s = win.document.createElement('script');
   s.src = url;
   if (opt_cb) {
     s.onload = opt_cb;
   }
+<<<<<<< HEAD
+=======
+  if (opt_errorCb) {
+    s.onerror = opt_errorCb;
+  }
+>>>>>>> ampproject/master
   win.document.body.appendChild(s);
 }
 
@@ -166,23 +179,6 @@ export function validateSrcContains(string, src) {
 }
 
 /**
- * Throws a non-interrupting exception if data contains a field not supported
- * by this embed type.
- * @param {!Object} data
- * @param {!Array<string>} allowedFields
- */
-export function checkData(data, allowedFields) {
-  // Throw in a timeout, because we do not want to interrupt execution,
-  // because that would make each removal an instant backward incompatible
-  // change.
-  try {
-    validateData(data, allowedFields);
-  } catch (e) {
-    rethrowAsync(e);
-  }
-}
-
-/**
  * Utility function to perform a potentially asynchronous task
  * exactly once for all frames of a given type and the provide the respective
  * value to all frames.
@@ -223,15 +219,34 @@ export function computeInMasterFrame(global, taskId, work, cb) {
 }
 
 /**
- * Throws an exception if data does not contains a mandatory field.
+ * Validates given data. Throws an exception if the data does not
+ * contains a mandatory field. If called with the optional param
+ * opt_optionalFields, it also validates that the data contains no fields other
+ * than mandatory and optional fields.
+ *
+ * Mandatory fields also accept a string Array as an item. All items in that
+ * array are considered as alternatives to each other. So the validation checks
+ * that the data contains exactly one of those alternatives.
+ *
  * @param {!Object} data
- * @param {!Array<string>} mandatoryFields
+ * @param {!Array<string|!Array<string>>} mandatoryFields
+ * @param {Array<string>=} opt_optionalFields
  */
-export function validateDataExists(data, mandatoryFields) {
+export function validateData(data, mandatoryFields, opt_optionalFields) {
+  let allowedFields = opt_optionalFields || [];
   for (let i = 0; i < mandatoryFields.length; i++) {
     const field = mandatoryFields[i];
-    user.assert(data[field],
-        'Missing attribute for %s: %s.', data.type, field);
+    if (Array.isArray(field)) {
+      validateExactlyOne(data, field);
+      allowedFields = allowedFields.concat(field);
+    } else {
+      user().assert(data[field],
+          'Missing attribute for %s: %s.', data.type, field);
+      allowedFields.push(field);
+    }
+  }
+  if (opt_optionalFields) {
+    validateAllowedFields(data, allowedFields);
   }
 }
 
@@ -241,7 +256,7 @@ export function validateDataExists(data, mandatoryFields) {
  * @param {!Object} data
  * @param {!Array<string>} alternativeFields
  */
-export function validateExactlyOne(data, alternativeFields) {
+function validateExactlyOne(data, alternativeFields) {
   let countFileds = 0;
 
   for (let i = 0; i < alternativeFields.length; i++) {
@@ -251,19 +266,19 @@ export function validateExactlyOne(data, alternativeFields) {
     }
   }
 
-  user.assert(countFileds === 1,
+  user().assert(countFileds === 1,
       '%s must contain exactly one of attributes: %s.',
       data.type,
       alternativeFields.join(', '));
 }
 
 /**
- * Throws an exception if data contains a field not supported
+ * Throws a non-interrupting exception if data contains a field not supported
  * by this embed type.
  * @param {!Object} data
  * @param {!Array<string>} allowedFields
  */
-export function validateData(data, allowedFields) {
+function validateAllowedFields(data, allowedFields) {
   const defaultAvailableFields = {
     width: true,
     height: true,
@@ -274,13 +289,18 @@ export function validateData(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
+    container: true,
   };
+
   for (const field in data) {
-    if (!data.hasOwnProperty(field) ||
-        field in defaultAvailableFields) {
+    if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
       continue;
     }
-    user.assert(allowedFields.indexOf(field) != -1,
-        'Unknown attribute for %s: %s.', data.type, field);
+    if (allowedFields.indexOf(field) < 0) {
+      // Throw in a timeout, because we do not want to interrupt execution,
+      // because that would make each removal an instant backward incompatible
+      // change.
+      rethrowAsync(new Error(`Unknown attribute for ${data.type}: ${field}.`));
+    }
   }
 }

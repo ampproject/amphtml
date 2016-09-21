@@ -28,18 +28,18 @@ export function isDocumentReady(doc) {
 /**
  * Calls the callback when document is ready.
  * @param {!Document} doc
- * @param {!Function} callback
+ * @param {function(!Document)} callback
  */
 export function onDocumentReady(doc, callback) {
   let ready = isDocumentReady(doc);
   if (ready) {
-    callback();
+    callback(doc);
   } else {
     const readyListener = () => {
       if (isDocumentReady(doc)) {
         if (!ready) {
           ready = true;
-          callback();
+          callback(doc);
         }
         doc.removeEventListener('readystatechange', readyListener);
       }
@@ -51,7 +51,7 @@ export function onDocumentReady(doc, callback) {
 /**
  * Returns a promise that is resolved when document is ready.
  * @param {!Document} doc
- * @return {!Promise}
+ * @return {!Promise<!Document>}
  */
 export function whenDocumentReady(doc) {
   return new Promise(resolve => {

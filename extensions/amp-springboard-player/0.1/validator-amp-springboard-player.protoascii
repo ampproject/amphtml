@@ -15,6 +15,11 @@
 #
 
 tags: {  # amp-springboard-player
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-springboard-player extension .js script"
   mandatory_parent: "HEAD"
@@ -44,9 +49,14 @@ tags: {  # amp-springboard-player
       error_message: "contents"
     }
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/amp-springboard-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-springboard-player.html"
 }
 tags: {  # <amp-springboard-player>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "AMP-SPRINGBOARD-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-springboard-player extension .js script"
@@ -78,7 +88,7 @@ tags: {  # <amp-springboard-player>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/amp-springboard-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-springboard-player.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

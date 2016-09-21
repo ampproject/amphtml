@@ -19,7 +19,11 @@ import {
   Store,
   LocalStorageBinding,
   ViewerStorageBinding,
+<<<<<<< HEAD
 } from '../../extensions/amp-analytics/0.1/storage-impl';
+=======
+} from '../../src/service/storage-impl';
+>>>>>>> ampproject/master
 import {dev} from '../../src/log';
 import * as sinon from 'sinon';
 
@@ -443,7 +447,11 @@ describe('LocalStorageBinding', () => {
   });
 
   it('should throw if localStorage is not supported', () => {
+<<<<<<< HEAD
     const errorSpy = sandbox.spy(dev, 'error');
+=======
+    const errorSpy = sandbox.spy(dev(), 'error');
+>>>>>>> ampproject/master
 
     expect(errorSpy.callCount).to.equal(0);
     new LocalStorageBinding(windowApi);

@@ -15,6 +15,11 @@
 #
 
 tags: {  # amp-anim
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-anim extension .js script"
   mandatory_parent: "HEAD"
@@ -47,6 +52,11 @@ tags: {  # amp-anim
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
 }
 tags: {  # <amp-anim>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "AMP-ANIM"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-anim extension .js script"

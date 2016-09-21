@@ -18,7 +18,16 @@ import {
   AmpDocService,
   AmpDocSingle,
   AmpDocShadow,
+<<<<<<< HEAD
 } from '../../src/service/ampdoc-impl';
+=======
+  installShadowDoc,
+  shadowDocHasBody,
+  shadowDocReady,
+} from '../../src/service/ampdoc-impl';
+import * as dom from '../../src/dom';
+import * as docready from '../../src/document-ready';
+>>>>>>> ampproject/master
 import * as sinon from 'sinon';
 
 
@@ -77,7 +86,11 @@ describe('AmpDocService', () => {
 
     it('should yield custom-element shadow-doc when exists', () => {
       const ampDoc = {};
+<<<<<<< HEAD
       content.getAmpDoc = () => ampDoc;
+=======
+      content.ampdoc_ = ampDoc;
+>>>>>>> ampproject/master
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
@@ -92,6 +105,7 @@ describe('AmpDocService', () => {
 
       // Override via custom element.
       const ampDoc2 = {};
+<<<<<<< HEAD
       content.getAmpDoc = () => ampDoc2;
       expect(service.getAmpDoc(content)).to.equal(ampDoc2);
 
@@ -105,6 +119,27 @@ describe('AmpDocService', () => {
         return;
       }
       const ampDoc = service.getAmpDoc(content);
+=======
+      content.ampdoc_ = ampDoc2;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc2);
+
+      // Fallback to cached version when custom element returns null.
+      content.ampdoc_ = null;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('should create and cache shadow-doc', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      expect(() => {
+        service.getAmpDoc(content);
+      }).to.throw(/No ampdoc found/);
+
+      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
+      const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.equal(newAmpDoc);
+>>>>>>> ampproject/master
       expect(ampDoc).to.exist;
       expect(service.getAmpDoc(shadowRoot)).to.equal(ampDoc);
       expect(ampDoc).to.be.instanceOf(AmpDocShadow);
@@ -118,7 +153,45 @@ describe('AmpDocService', () => {
       }
       expect(() => {
         service.getAmpDoc(host);
+<<<<<<< HEAD
       }).to.throw(/No root found/);
+=======
+      }).to.throw(/No ampdoc found/);
+    });
+
+    it('should fail to install shadow doc twice', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      installShadowDoc(service, 'https://a.org/', shadowRoot);
+      expect(() => {
+        installShadowDoc(service, 'https://a.org/', shadowRoot);
+      }).to.throw(/The shadow root already contains ampdoc/);
+    });
+
+    it('should navigate via host', () => {
+      if (!shadowRoot) {
+        return;
+      }
+
+      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
+      const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.equal(newAmpDoc);
+
+      const content2 = document.createElement('span');
+      const host2 = document.createElement('div');
+      const shadowRoot2 = host2.createShadowRoot();
+      shadowRoot2.appendChild(content2);
+      shadowRoot.appendChild(host2);
+      expect(content2.parentNode).to.equal(shadowRoot2);
+      expect(shadowRoot2.host).to.equal(host2);
+      expect(host2.shadowRoot).to.equal(shadowRoot2);
+      expect(host2.parentNode).to.equal(shadowRoot);
+
+      expect(service.getAmpDoc(host2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(content2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
+>>>>>>> ampproject/master
     });
   });
 });
@@ -126,6 +199,7 @@ describe('AmpDocService', () => {
 
 describe('AmpDocSingle', () => {
 
+<<<<<<< HEAD
   let ampdoc;
 
   beforeEach(() => {
@@ -134,6 +208,23 @@ describe('AmpDocSingle', () => {
 
   it('should return window', () => {
     expect(ampdoc.getWin()).to.equal(window);
+=======
+  let sandbox;
+  let ampdoc;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    ampdoc = new AmpDocSingle(window);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should return window', () => {
+    expect(ampdoc.win).to.equal(window);
+    expect(ampdoc.getUrl()).to.equal(window.location.href);
+>>>>>>> ampproject/master
   });
 
   it('should return document as root', () => {
@@ -148,30 +239,116 @@ describe('AmpDocSingle', () => {
     document.body.appendChild(element);
     expect(ampdoc.getElementById(id)).to.equal(element);
   });
+<<<<<<< HEAD
+=======
+
+  it('should initialize ready state and body immediately', () => {
+    expect(ampdoc.getBody()).to.equal(window.document.body);
+    expect(ampdoc.isBodyAvailable()).to.be.true;
+    expect(ampdoc.isReady()).to.be.true;
+    return Promise.all([ampdoc.whenBodyAvailable(), ampdoc.whenReady()])
+        .then(results => {
+          expect(results[0]).to.equal(window.document.body);
+          expect(ampdoc.getBody()).to.equal(window.document.body);
+          expect(ampdoc.isBodyAvailable()).to.be.true;
+          expect(ampdoc.isReady()).to.be.true;
+        });
+  });
+
+  it('should wait for body and ready state', () => {
+    const doc = {body: null};
+    const win = {document: doc};
+
+    let bodyCallback;
+    sandbox.stub(dom, 'waitForBodyPromise', () => {
+      return new Promise(resolve => {
+        bodyCallback = resolve;
+      });
+    });
+    let ready = false;
+    sandbox.stub(docready, 'isDocumentReady', () => {
+      return ready;
+    });
+    let readyCallback;
+    sandbox.stub(docready, 'whenDocumentReady', () => {
+      return new Promise(resolve => {
+        readyCallback = resolve;
+      });
+    });
+
+    const ampdoc = new AmpDocSingle(win);
+
+    expect(ampdoc.isBodyAvailable()).to.be.false;
+    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    const bodyPromise = ampdoc.whenBodyAvailable();
+    const readyPromise = ampdoc.whenReady();
+
+    doc.body = {nodeType: 1};
+    bodyCallback();
+    ready = true;
+    readyCallback();
+    expect(ampdoc.isBodyAvailable()).to.be.true;
+    expect(ampdoc.getBody()).to.equal(doc.body);
+    expect(ampdoc.isReady()).to.be.true;
+    return Promise.all([bodyPromise, readyPromise]).then(results => {
+      expect(results[0]).to.equal(doc.body);
+      expect(ampdoc.isBodyAvailable()).to.be.true;
+      expect(ampdoc.getBody()).to.equal(doc.body);
+      expect(ampdoc.isReady()).to.be.true;
+    });
+  });
+>>>>>>> ampproject/master
 });
 
 
 describe('AmpDocShadow', () => {
 
+<<<<<<< HEAD
+=======
+  const URL = 'https://example.org/document';
+
+  let sandbox;
+>>>>>>> ampproject/master
   let content, host, shadowRoot;
   let ampdoc;
 
   beforeEach(() => {
+<<<<<<< HEAD
+=======
+    sandbox = sinon.sandbox.create();
+>>>>>>> ampproject/master
     content = document.createElement('div');
     host = document.createElement('div');
     if (host.createShadowRoot) {
       shadowRoot = host.createShadowRoot();
       shadowRoot.appendChild(content);
+<<<<<<< HEAD
       ampdoc = new AmpDocShadow(window, shadowRoot);
     }
   });
 
+=======
+      ampdoc = new AmpDocShadow(window, URL, shadowRoot);
+    }
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+>>>>>>> ampproject/master
   it('should return window', () => {
     if (!ampdoc) {
       return;
     }
+<<<<<<< HEAD
     expect(ampdoc.getWin()).to.equal(window);
     expect(ampdoc.isSingleDoc()).to.be.false;
+=======
+    expect(ampdoc.win).to.equal(window);
+    expect(ampdoc.isSingleDoc()).to.be.false;
+    expect(ampdoc.getUrl()).to.equal(URL);
+>>>>>>> ampproject/master
   });
 
   it('should return document as root', () => {
@@ -191,4 +368,58 @@ describe('AmpDocShadow', () => {
     content.appendChild(element);
     expect(ampdoc.getElementById(id)).to.equal(element);
   });
+<<<<<<< HEAD
+=======
+
+  it('should update when body is available', () => {
+    // Body is still expected.
+    expect(ampdoc.isBodyAvailable()).to.be.false;
+    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    expect(ampdoc.bodyResolver_).to.be.ok;
+
+    // Set body.
+    const bodyPromise = ampdoc.whenBodyAvailable();
+    const body = {nodeType: 1};
+    shadowDocHasBody(ampdoc, body);
+    expect(ampdoc.isBodyAvailable()).to.be.true;
+    expect(ampdoc.getBody()).to.equal(body);
+    expect(ampdoc.bodyResolver_).to.be.undefined;
+    expect(ampdoc.bodyPromise_).to.be.ok;
+    return bodyPromise.then(() => {
+      expect(ampdoc.isBodyAvailable()).to.be.true;
+      expect(ampdoc.getBody()).to.equal(body);
+    });
+  });
+
+  it('should only allow one body update', () => {
+    const body = {nodeType: 1};
+    shadowDocHasBody(ampdoc, body);
+    expect(() => {
+      shadowDocHasBody(ampdoc, body);
+    }).to.throw(/Duplicate body/);
+  });
+
+  it('should update when doc is ready', () => {
+    // "Ready" is still expected.
+    expect(ampdoc.isReady()).to.be.false;
+    expect(ampdoc.readyResolver_).to.be.ok;
+
+    // Set ready.
+    const readyPromise = ampdoc.whenReady();
+    shadowDocReady(ampdoc);
+    expect(ampdoc.isReady()).to.be.true;
+    expect(ampdoc.readyResolver_).to.be.undefined;
+    expect(ampdoc.readyPromise_).to.be.ok;
+    return readyPromise.then(() => {
+      expect(ampdoc.isReady()).to.be.true;
+    });
+  });
+
+  it('should only allow one ready update', () => {
+    shadowDocReady(ampdoc);
+    expect(() => {
+      shadowDocReady(ampdoc);
+    }).to.throw(/Duplicate ready state/);
+  });
+>>>>>>> ampproject/master
 });

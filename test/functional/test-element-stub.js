@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-import {ElementStub} from '../../src/element-stub';
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../testing/iframe';
-import {resetExtensionScriptInsertedOrPresentForTesting,}
-    from '../../src/insert-extension';
+import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
+import {createIframePromise} from '../../testing/iframe';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
+import {installPerformanceService,} from
+    '../../src/service/performance-impl';
+
 
 describe('test-element-stub', () => {
 
   let iframe;
 
+  beforeEach(() => {
+    installPerformanceService(window);
+  });
+
   afterEach(() => {
-    resetExtensionScriptInsertedOrPresentForTesting();
+    resetLoadingCheckForTests();
   });
 
   function getElementStubIframe(name) {
     return createIframePromise().then(f => {
-      doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
       const testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
       testElement.setAttribute('height', '250');
-      testElement.setAttribute('type', 'a9');
+      testElement.setAttribute('type', '_ping_');
       testElement.setAttribute('data-aax_size', '300*250');
       testElement.setAttribute('data-aax_pubname', 'abc123');
       testElement.setAttribute('data-aax_src', '302');
@@ -54,6 +55,7 @@ describe('test-element-stub', () => {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   function getAnalyticsIframe() {
     return createIframePromise().then(f => {
       iframe = f;
@@ -62,6 +64,8 @@ describe('test-element-stub', () => {
     });
   }
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -97,6 +101,7 @@ describe('test-element-stub', () => {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   it('not insert script when element is not amp-ad amp-embed', () => {
     return getAnalyticsIframe().then(() => {
@@ -112,6 +117,8 @@ describe('test-element-stub', () => {
           '[custom-element="amp-analytics"]')).to.have.length(0);
     });
   });
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======

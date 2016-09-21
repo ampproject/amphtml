@@ -15,6 +15,7 @@
  */
 
 import {getMode} from './mode';
+import {getModeObject} from './mode-object';
 
 
 /** @const Time when this JS loaded.  */
@@ -108,7 +109,11 @@ export class Log {
     }
 
     // Delegate to the specific resolver.
+<<<<<<< HEAD
     return this.levelFunc_(getMode());
+=======
+    return this.levelFunc_(getModeObject());
+>>>>>>> ampproject/master
   }
 
   /**
@@ -126,7 +131,7 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift(new Date().getTime() - start, '[' + tag + ']');
+      messages.unshift(Date.now() - start, '[' + tag + ']');
       fn.apply(this.win.console, messages);
     }
   }
@@ -248,7 +253,56 @@ export class Log {
     }
     return shouldBeTrueish;
   }
+
+  /**
+   * Throws an error if the first argument isn't an Element
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeElement
+   * @param {string=} opt_message The assertion message
+   * @return {!Element} The value of shouldBeTrueish.
+   * @template T
+   */
   /*eslint "google-camelcase/google-camelcase": 2*/
+  assertElement(shouldBeElement, opt_message) {
+    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
+    this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
+        shouldBeElement);
+    return /** @type {!Element} */ (shouldBeElement);
+  }
+
+  /**
+   * Throws an error if the first argument isn't a string.
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeString
+   * @param {string=} opt_message The assertion message
+   * @return {string} The value of shouldBeTrueish.
+   * @template T
+   */
+  /*eslint "google-camelcase/google-camelcase": 2*/
+  assertString(shouldBeString, opt_message) {
+    this.assert(typeof shouldBeString == 'string',
+        (opt_message || 'String expected') + ': %s', shouldBeString);
+    return /** @type {string} */ (shouldBeString);
+  }
+
+  /**
+   * Throws an error if the first argument isn't a number.
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeNumber
+   * @param {string=} opt_message The assertion message
+   * @return {number} The value of shouldBeTrueish.
+   */
+  assertNumber(shouldBeNumber, opt_message) {
+    this.assert(typeof shouldBeNumber == 'number',
+        (opt_message || 'Number expected') + ': %s', shouldBeNumber);
+    return /** @type {number} */ (shouldBeNumber);
+  }
 
   /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
@@ -260,6 +314,7 @@ export class Log {
    * @return T
    * @template T
    */
+  /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
     for (const k in enumObj) {
       if (enumObj[k] == s) {
@@ -350,6 +405,35 @@ export function rethrowAsync(var_args) {
 
 
 /**
+ * Cache for logs. We do not use a Service since the service module depends
+ * on Log and closure literally can't even.
+ * @type {{user: ?Log, dev: ?Log}}
+ */
+const logs = self.log = (self.log || {
+  user: null,
+  dev: null,
+});
+
+
+/**
+ * Eventually holds a constructor for Log objects. Lazily initialized, so we
+ * can avoid ever referencing the real constructor except in JS binaries
+ * that actually want to include the implementation.
+ * @typedef {?Function}
+ */
+let logConstructor = null;
+
+
+export function initLogConstructor() {
+  logConstructor = Log;
+}
+
+export function resetLogConstructorForTesting() {
+  logConstructor = null;
+}
+
+
+/**
  * Publisher level log.
  *
  * Enabled in the following conditions:
@@ -357,34 +441,55 @@ export function rethrowAsync(var_args) {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
- * @const {!Log}
+ * @return {!Log}
  */
-export const user = new Log(window, mode => {
-  const logNum = parseInt(mode.log, 10);
-  if (mode.development || logNum >= 1) {
-    return LogLevel.FINE;
+export function user() {
+  if (logs.user) {
+    return logs.user;
   }
-  return LogLevel.OFF;
-}, USER_ERROR_SENTINEL);
+  if (!logConstructor) {
+    throw new Error('failed to call initLogConstructor');
+  }
+  return logs.user = new logConstructor(self, mode => {
+    const logNum = parseInt(mode.log, 10);
+    if (mode.development || logNum >= 1) {
+      return LogLevel.FINE;
+    }
+    return LogLevel.OFF;
+  }, USER_ERROR_SENTINEL);
+}
 
 
 /**
+<<<<<<< HEAD
  * AMP development log. Calls to `dev.assert` and `dev.fine` are stripped in
  * the PROD binary. However, `dev.assert` result is preserved in either case.
+=======
+ * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
+ * the PROD binary. However, `devLog().assert` result is preserved in either case.
+>>>>>>> ampproject/master
  *
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.
  *  2. Logging is explicitly enabled via `#log=D`, where D >= 2.
  *
- * @const {!Log}
+ * @return {!Log}
  */
-export const dev = new Log(window, mode => {
-  const logNum = parseInt(mode.log, 10);
-  if (logNum >= 3) {
-    return LogLevel.FINE;
+export function dev() {
+  if (logs.dev) {
+    return logs.dev;
   }
-  if (logNum >= 2) {
-    return LogLevel.INFO;
+  if (!logConstructor) {
+    throw new Error('failed to call initLogConstructor');
   }
-  return LogLevel.OFF;
-});
+  return logs.dev = new logConstructor(self, mode => {
+    const logNum = parseInt(mode.log, 10);
+    if (logNum >= 3) {
+      return LogLevel.FINE;
+    }
+    if (logNum >= 2) {
+      return LogLevel.INFO;
+    }
+    return LogLevel.OFF;
+  });
+}

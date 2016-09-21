@@ -15,6 +15,7 @@
  */
 
 export const data = {
+<<<<<<< HEAD
   minimumDocBodyFormatted: `<amp-ad-body>
 Hello, world.
 
@@ -22,6 +23,11 @@ Hello, world.
 </amp-ad-body>`,
 
   regexpDocBodyFormatted: `<amp-ad-body>
+=======
+  minimumDocBodyFormatted: '\nHello, world.\n\n\n',
+
+  regexpDocBodyFormatted: `
+>>>>>>> ampproject/master
 
   <amp-audio src="https://example.com/audio" layout="fixed" autoplay="">
   <amp-audio src="https://example.com/audio" layout="fixed" autoplay="desktop">
@@ -29,9 +35,15 @@ Hello, world.
 
 
 
+<<<<<<< HEAD
 </amp-audio></amp-audio></amp-ad-body>`,
 
   validCssDocCssBlockFormatted: `<style amp-custom>
+=======
+</amp-audio></amp-audio>`,
+
+  validCssDocCssBlockFormatted: `
+>>>>>>> ampproject/master
     @supports (animation-name) {
     }
 
@@ -63,5 +75,9 @@ Hello, world.
       -o-animation: fadeIn ease-in 1s 1 forwards;
       animation: fadeIn ease-in 1s 1 forwards;
     }
+<<<<<<< HEAD
   </style>`,
+=======
+  `,
+>>>>>>> ampproject/master
 };

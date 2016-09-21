@@ -26,7 +26,11 @@ adopt(window);
 describe('amp-o2-player', () => {
 
   function getO2player(attributes, opt_responsive) {
+<<<<<<< HEAD
     return createIframePromise(true).then(iframe => {
+=======
+    return createIframePromise().then(iframe => {
+>>>>>>> ampproject/master
       doNotLoadExternalResourcesInTest(iframe.win);
       const o2 = iframe.doc.createElement('amp-o2-player');
       for (const key in attributes) {
@@ -53,8 +57,11 @@ describe('amp-o2-player', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://delivery.vidible.tv/htmlembed/pid=123/456.html');
+<<<<<<< HEAD
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+=======
+>>>>>>> ampproject/master
     });
   });
 
@@ -69,52 +76,101 @@ describe('amp-o2-player', () => {
     });
   });
 
+<<<<<<< HEAD
   it('requires data-pid && data-bcid or data-vid', () => {
     return getO2player({}).should.eventually.be.rejectedWith(
         /Either data-pid and data-bcid or data-vid attribute is required for/);
+=======
+  it('requires data-pid', () => {
+    return getO2player({
+      'data-bcid': '50d595ec0364e95588c77bd2',
+    }).should.eventually.be.rejectedWith(
+        /Data-pid attribute is required for/);
+  });
+
+  it('requires data-bcid', () => {
+    return getO2player({
+      'data-pid': '573acb47e4b0564ec2e10011',
+    }).should.eventually.be.rejectedWith(
+        /Data-bcid attribute is required for/);
+  });
+
+  it('requires data-pid && data-bcid', () => {
+    return getO2player({}).should.eventually.be.rejectedWith(
+        /Data-pid attribute is required for/);
+>>>>>>> ampproject/master
   });
 
   it('renders with data-vid passed', () => {
     return getO2player({
+<<<<<<< HEAD
       'data-vid': '123',
+=======
+      'data-pid': '123',
+      'data-bcid': '456',
+      'data-vid': '789',
+      'data-bid': '987',
+>>>>>>> ampproject/master
     }).then(o2 => {
       const iframe = o2.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
+<<<<<<< HEAD
           'https://delivery.vidible.tv/htmlembed/123.html');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+=======
+          'https://delivery.vidible.tv/htmlembed/pid=123/456.html?bid=987&vid=789');
+>>>>>>> ampproject/master
     });
   });
 
   it('renders with data-macros passed', () => {
     return getO2player({
+<<<<<<< HEAD
       'data-vid': '123',
+=======
+      'data-pid': '123',
+      'data-bcid': '456',
+>>>>>>> ampproject/master
       'data-macros': 'm.test=test',
     }).then(o2 => {
       const iframe = o2.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
+<<<<<<< HEAD
           'https://delivery.vidible.tv/htmlembed/123.html?m.test=test');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+=======
+          'https://delivery.vidible.tv/htmlembed/pid=123/456.html?m.test=test');
+>>>>>>> ampproject/master
     });
   });
 
   it('respects data-env parameter', () => {
     return getO2player({
+<<<<<<< HEAD
       'data-vid': '123',
+=======
+      'data-pid': '123',
+      'data-bcid': '456',
+>>>>>>> ampproject/master
       'data-env': 'stage',
     }).then(o2 => {
       const iframe = o2.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
+<<<<<<< HEAD
           'https://delivery.dev.vidible.tv/htmlembed/123.html');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+=======
+          'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html');
+>>>>>>> ampproject/master
     });
   });
 });

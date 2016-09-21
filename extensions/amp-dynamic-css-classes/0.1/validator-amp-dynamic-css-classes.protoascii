@@ -15,6 +15,10 @@
 #
 
 tags: {  # amp-dynamic-css-classes
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-dynamic-css-classes extension .js script"
   mandatory_parent: "HEAD"

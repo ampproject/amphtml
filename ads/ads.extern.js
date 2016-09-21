@@ -21,17 +21,29 @@ data.bn;
 data.mid;
 data.ws;
 data.s;
+<<<<<<< HEAD
 data.zid;
 data.pid;
 data.custom3
 window.uAd = {}
+=======
+data.sid;
+data.zid;
+data.pid;
+data.custom3;
+window.uAd = {};
+>>>>>>> ampproject/master
 window.uAd.embed;
 data.pageOpts;
 data.adUnits;
 data.clmb_slot;
 data.clmb_position;
 data.clmb_divid;
+<<<<<<< HEAD
 data.clmb_section
+=======
+data.clmb_section;
+>>>>>>> ampproject/master
 var Criteo;
 Criteo.DisplayAd;
 data.epl_si;
@@ -50,6 +62,16 @@ googletag.cmd.push;
 googletag.pubads;
 googletag.defineSlot
 data.slot;
+<<<<<<< HEAD
+=======
+
+var _inmobi;
+window._inmobi;
+_inmobi.getNewAd;
+data.siteid;
+data.slotid;
+
+>>>>>>> ampproject/master
 var pubads;
 pubads.addService;
 pubads.markAsGladeOptOut;
@@ -134,3 +156,30 @@ PostRelease.Start;
 PostRelease.checkIsAdVisible;
 var _prx;
 data.delayByTime;
+<<<<<<< HEAD
+=======
+window.PulsePointHeaderTag;
+data.tagid;
+data.tagtype;
+data.zergid;
+window.zergnetWidgetId;
+data.ankv;
+data.ancat;
+data.annid;
+data.anwid;
+data.antid;
+data.anapiid;
+window.MADSAdrequest = {};
+window.MADSAdrequest.adrequest;
+/**
+ * @constructor
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd.prototype.createAd;
+data.id;
+data.d;
+data.wid;
+data.url;
+>>>>>>> ampproject/master

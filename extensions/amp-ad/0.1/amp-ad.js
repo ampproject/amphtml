@@ -1,4 +1,4 @@
-/* Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+/* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,16 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
+<<<<<<< HEAD
 import {AmpAd3PImpl, TAG_3P_IMPL} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_config';
 import {insertAmpExtensionScript} from '../../../src/insert-extension';
+=======
+import {AmpAd3PImpl} from './amp-ad-3p-impl';
+import {a4aRegistry} from '../../../ads/_a4a-config';
+import {dev, user} from '../../../src/log';
+import {extensionsFor} from '../../../src/extensions';
+>>>>>>> ampproject/master
 
 
 /**
@@ -27,6 +34,7 @@ import {insertAmpExtensionScript} from '../../../src/insert-extension';
  * @param {!string} type
  * @return !string
  * @private
+<<<<<<< HEAD
  */
 function networkImplementationTag(type) {
   return `amp-ad-network-${type}-impl`;
@@ -56,6 +64,42 @@ function copyAttributes(sourceElement, targetElement) {
 export class AmpAd extends AMP.BaseElement {
   constructor(element) {
     super(element);
+=======
+ */
+function networkImplementationTag(type) {
+  return `amp-ad-network-${type}-impl`;
+}
+
+export class AmpAd extends AMP.BaseElement {
+
+  /** @override */
+  upgradeCallback() {
+    const type = this.element.getAttribute('type');
+    if (!type) {
+      // Unspecified or empty type.  Nothing to do here except bail out.
+      return null;
+    }
+    // TODO(tdrl): Check amp-ad registry to see if they have this already.
+    if (!a4aRegistry[type] ||
+        !a4aRegistry[type](this.win, this.element)) {
+      // Network either has not provided any A4A implementation or the
+      // implementation exists, but has explicitly chosen not to handle this
+      // tag as A4A.  Fall back to the 3p implementation.
+      return new AmpAd3PImpl(this.element);
+    }
+    const extensionTagName = networkImplementationTag(type);
+    this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
+    return extensionsFor(this.win).loadElementClass(extensionTagName)
+      .then(ctor => new ctor(this.element))
+      .catch(error => {
+        // Report error and fallback to 3p
+        user().error(
+          this.element.tagName,
+          'Unable to load ad implementation for type ', type,
+          ', falling back to 3p, error: ', error);
+        return new AmpAd3PImpl(this.element);
+      });
+>>>>>>> ampproject/master
   }
 
   /** @override */
@@ -65,6 +109,7 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+<<<<<<< HEAD
     const type = this.element.getAttribute('type');
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -362,6 +407,11 @@ export class AmpAd extends AMP.BaseElement {
 =======
 >>>>>>> ampproject/master
 =======
+>>>>>>> ampproject/master
+=======
+    // This is only called when no type was set on the element and thus
+    // upgrade element fell through.
+    dev().assert(this.element.getAttribute('type'), 'Required attribute type');
 >>>>>>> ampproject/master
   }
 }

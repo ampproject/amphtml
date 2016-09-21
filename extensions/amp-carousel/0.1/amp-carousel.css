@@ -17,6 +17,22 @@
 amp-carousel {
 }
 
+/**
+ * `amp-carousel-slide` class is added to every item in the carousel to
+ * allow page authors to target items for user-defined styling.
+ * Every `<amp-carousel>'s` immediate child is considered a slide in
+ * the carousel.
+ */
+amp-carousel-slide {
+}
+
+.amp-carousel-slide > .-amp-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
+}
+
 .amp-carousel-button {
   position: absolute;
   box-sizing: border-box;
@@ -81,6 +97,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   display: flex;
   height: 100% !important;
   overflow-x: auto !important;
@@ -114,17 +131,52 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slide-item {
+=======
+  display: flex !important;
+  flex-wrap: nowrap;
+  height: 100% !important;
+  left: 0;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  position: absolute !important;
+  top: 0;
+  width: 100% !important;
+  scroll-snap-type: mandatory !important;
+  /**
+   * Hide the scrollbar by tucking it under some padding
+   * which gets cut off as it overflows the parent.
+   * The exact size of the padding does not matter as long as it is
+   * larger than the height of the scrollbar. 20px is large enough to cover
+   * both desktop and mobile scrolbar sizes in different browsers.
+   * This relies on content box-sizing, although that's the default
+   * we still ensure it does not get overwritten.
+   */
+  padding-bottom: 20px !important;
+  box-sizing: content-box !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.-amp-slides-container.-amp-no-scroll {
+  overflow-x: hidden !important;
+}
+
+.-amp-slide-item {
+>>>>>>> ampproject/master
   align-items: center !important;
   display: none !important;
   flex: 0 0 100% !important;
   height: 100% !important;
   justify-content: center !important;
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
   position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
 }
 
+<<<<<<< HEAD
 .-amp-slide-item-show {
   display: flex !important;
 <<<<<<< HEAD
@@ -188,10 +240,16 @@ amp-carousel .amp-carousel-button.amp-disabled {
   position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
+=======
+.-amp-slide-item > * {
+  height: 100%;
+  width: 100%;
+>>>>>>> ampproject/master
 }
 
 .-amp-slide-item-show {
   display: flex !important;
+<<<<<<< HEAD
 }
 
 .-amp-carousel-start-marker,
@@ -264,6 +322,26 @@ amp-carousel .amp-carousel-button.amp-disabled {
   margin-left: -1px !important;
 }
 
+=======
+}
+
+.-amp-carousel-start-marker,
+.-amp-carousel-end-marker {
+  background-color: transparent !important;
+  display: block !important;
+  flex: 0 0 1px !important;
+  height: 100% !important;
+  position: relative !important;
+  scroll-snap-coordinate: 0 0 !important;
+  width: 1px !important;
+}
+
+.-amp-carousel-start-marker {
+  order: -1 !important;
+  margin-left: -1px !important;
+}
+
+>>>>>>> ampproject/master
 .-amp-carousel-end-marker {
   order: 100000000 !important;
   margin-right: -1px !important;

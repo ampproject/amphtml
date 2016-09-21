@@ -28,7 +28,8 @@ import {
  * @return {!Promise<!Cid>}
  */
 export function cidFor(window) {
-  return getElementService(window, 'cid', 'amp-analytics');
+  return /** @type {!Promise<!Cid>} */ (
+      getElementService(window, 'cid', 'amp-analytics'));
 };
 
 /**
@@ -38,5 +39,6 @@ export function cidFor(window) {
  * @return {!Promise<?Cid>}
  */
 export function cidForOrNull(window) {
-  return getElementServiceIfAvailable(window, 'cid', 'amp-analytics');
+  return /** @type {!Promise<?Cid>} */ (
+      getElementServiceIfAvailable(window, 'cid', 'amp-analytics'));
 };

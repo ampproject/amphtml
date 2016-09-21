@@ -19,7 +19,7 @@
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist",
-    "heroku-postbuild": "gulp clean && gulp build --fortesting && gulp dist --fortesting"
+    "heroku-postbuild": "gulp clean && gulp build && gulp dist --fortesting"
   },
   "dependencies": {
     "document-register-element": "0.5.4",
@@ -29,7 +29,7 @@
     "autoprefixer": "6.1.1",
     "ava": "0.15.2",
     "babel-core": "5.8.35",
-    "babel-eslint": "4.1.8",
+    "babel-eslint": "6.1.2",
     "babelify": "6.4.0",
     "baconipsum": "0.1.2",
     "bluebird": "3.0.5",
@@ -44,7 +44,11 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     "express": "4.13.4",
+=======
+    "express": "4.14.0",
+>>>>>>> ampproject/master
 =======
     "express": "4.14.0",
 >>>>>>> ampproject/master
@@ -99,7 +103,7 @@
     "postcss": "5.0.14",
     "postcss-import": "8.0.2",
     "pretty-bytes": "2.0.1",
-    "request": "2.69.0",
+    "request": "2.73.0",
     "rimraf": "2.5.1",
     "sinon": "1.17.3",
     "sinon-chai": "2.8.0",

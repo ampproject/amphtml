@@ -14,6 +14,11 @@
 # limitations under the license.
 #
 tags: {  # amp-form
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   # Accepted form elements can be found in validator-main.protoascii
   # under section "4.10 Forms"
   tag_name: "SCRIPT"
@@ -45,6 +50,10 @@ tags: {  # amp-form
       error_message: "contents"
     }
   }
+<<<<<<< HEAD
   # TODO: update with ampproject.org url when available
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+=======
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+>>>>>>> ampproject/master
 }

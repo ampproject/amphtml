@@ -85,10 +85,12 @@
       bottom: 0;
       overflow-x: hidden;
       visibility: hidden;
+      transform: translateX(-100%);
     }
 
     viewer[data-show-container="1"] #container1 {
       visibility: visible;
+      transform: none;
     }
 
     viewer[data-show-container="1"] #show-container1-anchor {
@@ -97,6 +99,7 @@
 
     viewer[data-show-container="2"] #container2 {
       visibility: visible;
+      transform: none;
     }
 
     viewer[data-show-container="2"] #show-container2-anchor {
@@ -105,6 +108,7 @@
 
     viewer[data-show-container="3"] #container3 {
       visibility: visible;
+      transform: none;
     }
 
     viewer[data-show-container="3"] #show-container3-anchor {
@@ -114,6 +118,7 @@
     viewer[data-show-container="4"] #container4 {
       visibility: visible;
 <<<<<<< HEAD
+<<<<<<< HEAD
     }
 
 <<<<<<< HEAD
@@ -122,16 +127,35 @@
     viewer[data-show-container="4"] #show-container4-anchor {
       text-decoration: underline;
 =======
+=======
+      transform: none;
+    }
+
+>>>>>>> ampproject/master
     viewer[data-show-container="4"] #show-container4-anchor {
       text-decoration: underline;
     }
 
+<<<<<<< HEAD
     viewer.natural container {
       overflow-y: hidden;
 >>>>>>> ampproject/master
     }
 
 =======
+=======
+    viewer[data-show-container="5"] #container5 {
+      visibility: visible;
+      transform: none;
+    }
+
+    viewer[data-show-container="5"] #show-container5-anchor {
+      text-decoration: underline;
+    }
+
+    viewer.natural container {
+      overflow-y: hidden;
+>>>>>>> ampproject/master
     }
 
     viewer[data-show-container="4"] #show-container4-anchor {
@@ -187,13 +211,12 @@
       //     ' allow-popups-to-escape-sandbox allow-same-origin');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
-      this.visibilityToggle_.onclick = function() {
-        this.toggleVisibility(this.visibilityState_ != 'visible');
-      }.bind(this);
-      if (visible) {
-        this.updateVisibilityToggle_();
-      }
-
+      this.visibilityToggle_.addEventListener('click', function() {
+        var activeId = this.viewer.getAttribute('data-show-container');
+        if (activeId == this.id) {
+          this.toggleVisibility(this.visibilityState_ != 'visible', true);
+        }
+      }.bind(this));
       this.viewer.classList.add(this.viewportType_);
 
       if (this.viewportType_ == 'natural' && !this.isIos_) {
@@ -223,6 +246,10 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        cap: 'foo,a2a',
+>>>>>>> ampproject/master
 =======
         cap: 'foo,a2a',
 >>>>>>> ampproject/master
@@ -286,14 +313,14 @@
     };
 
 
-    Viewer.prototype.toggleVisibility = function(visible) {
+    Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.sendRequest_('visibilitychange', {
         state: this.visibilityState_,
         prerenderSize: this.prerenderSize
       }, true);
-      if (visible) {
+      if (updateToggle) {
         this.updateVisibilityToggle_();
       }
     };
@@ -449,6 +476,10 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        return;
+>>>>>>> ampproject/master
 =======
         return;
 >>>>>>> ampproject/master
@@ -465,7 +496,10 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -476,6 +510,9 @@
       }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -544,7 +581,7 @@
       new Viewer(
           'container2',
           '2',
-          './article-access.amp.max.html',
+          './article.amp.max.html',
           false).start();
       addShowContainer('2');
 
@@ -558,10 +595,24 @@
       new Viewer(
           'container4',
           '4',
+<<<<<<< HEAD
           'http://localhost:8000/examples.build/alp.amp.max.html',
           false).start();
       addShowContainer('4');
 
+=======
+          './alp.amp.max.html',
+          false).start();
+      addShowContainer('4');
+
+      new Viewer(
+          'container5',
+          '5',
+          './article-fixed-header.amp.max.html',
+          false).start();
+      addShowContainer('5');
+
+>>>>>>> ampproject/master
       showContainer('1');
     }
 
@@ -577,7 +628,7 @@
       var viewerEl = document.querySelector('viewer');
       viewerEl.setAttribute('data-show-container', id);
       allViewers.forEach(function(viewer) {
-        viewer.toggleVisibility(viewer.id == id);
+        viewer.toggleVisibility(viewer.id == id, viewer.id == id);
       });
     }
 
@@ -592,6 +643,10 @@
       <a class="show-container-anchor" id="show-container2-anchor">Two</a>
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
+<<<<<<< HEAD
+=======
+      <a class="show-container-anchor" id="show-container5-anchor">Five</a>
+>>>>>>> ampproject/master
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -615,6 +670,14 @@
         Please wait, the AMP doc will appear here...
       </div>
     </container>
+<<<<<<< HEAD
+=======
+    <container id="container5">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+>>>>>>> ampproject/master
   </viewer>
 </body>
 </html>

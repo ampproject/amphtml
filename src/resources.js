@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForDoc} from './service';
+
 
 /**
+<<<<<<< HEAD
  * @param {!Window} window
  * @return {!./service/resources-impl.Resources}
  */
 export function resourcesFor(window) {
   return /** @type {!./service/resources-impl.Resources} */ (
       getService(window, 'resources'));
+=======
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/resources-impl.Resources}
+ */
+export function resourcesForDoc(nodeOrDoc) {
+  return /** @type {!./service/resources-impl.Resources} */ (
+      getExistingServiceForDoc(nodeOrDoc, 'resources'));
+>>>>>>> ampproject/master
 };

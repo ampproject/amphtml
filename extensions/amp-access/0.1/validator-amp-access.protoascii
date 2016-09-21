@@ -14,6 +14,10 @@
 # limitations under the license.
 #
 tags: {  # amp-access
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-access extension .js script"
   mandatory_parent: "HEAD"
@@ -46,6 +50,10 @@ tags: {  # amp-access
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access.html"
 }
 tags: {  # amp-access (json)
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-access extension .json script"
   mandatory_parent: "HEAD"

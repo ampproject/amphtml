@@ -150,7 +150,11 @@ message AtRuleSpec {
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
 }
 
+<<<<<<< HEAD
 // NEXT AVAILABLE TAG: 5
+=======
+// NEXT AVAILABLE TAG: 6
+>>>>>>> ampproject/master
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
@@ -158,6 +162,10 @@ message CssSpec {
   // urls within the CSS are checked against this spec.
   optional UrlSpec image_url_spec = 3;
   optional UrlSpec font_url_spec = 4;
+
+  // Enables checks specific to the draft A4A specification.
+  // TODO(powdercloud): Make this more generic.
+  optional bool validate_amp4ads = 5;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -235,14 +243,62 @@ message ChildTagSpec {
   repeated string child_tag_name_oneof = 3;
 }
 
+// TagSpecs and reference points.
+//
+// Any TagSpec may define a list of reference points via the
+// TagSpec::reference_points field. These reference points specify how
+// DOM elements that are children of this parent tag fulfill particular
+// functionality. For instance, a widget (implemented as an AMP tag) may
+// require a login reference point. Any valid AMP tag would be allowed,
+// whether it's a clickable DIV or an AMP-IMG or a BUTTON, so long as
+// it *also* conforms to the reference point specification. This
+// specification is a TagSpec which does not define a name (the
+// name is set to the special value '$REFERENCE_POINT'), but rather
+// identifies the reference point with AttrSpec requirements. For instance,
+// the login reference point may require that there be a login attribute,
+// or some end-point attribute with a URL, or similar.
+// Therefore, for any child tags of a tag that defines reference points,
+// they are first matched against these reference points, and only
+// then are they validated as regular tags against the TagSpecs that are
+// not reference points while their reference point attributes are skipped.
+// The complexity of this mechanism is unfortunate but reduces the markup
+// required and makes CSS styling more convenient. Please see
+// the amp-live-list specification for an example.
+message ReferencePoint {
+  // A tag spec identified by its TagSpec::spec_name which specifies how
+  // a specific functionality for the parent tag is assigned.
+  optional string tag_spec_name = 1;
+  // At least one of the child tags of the parent defining this
+  // reference point must match it.
+  optional bool mandatory = 2;
+  // At most one of the child tags of the parent defining this
+  // reference point must match it.
+  optional bool unique = 3;
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 20
+// NEXT AVAILABLE TAG: 23
 message TagSpec {
-  // Use lower-case tag names only. If adding the same tag twice, then they must
+  // The HtmlFormat field tells the validator which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
+  // If the repeated field is empty, this indicates that the TagSpec is allowed
+  // for all formats, rather than none.
+  enum HtmlFormat {
+    AMP = 1;
+    AMP4ADS = 2;
+  }
+  // Specifies which amp html document formats we allow this TagSpec to
+  // validate.
+  repeated HtmlFormat html_format = 21;
+
+  // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
+  // Note: "$REFERENCE_POINT" is a special tag_name value.
+  //       Reference points are partial tag specs which don't have a defined
+  //       tag_name.
   optional string tag_name = 1;
 
   // If provided, the spec_name must be unique within the validator
@@ -278,6 +334,9 @@ message TagSpec {
   // If set, other tags - identified by their detail string - must be
   // present as well.
   repeated string also_requires_tag = 14;
+  // Same as also_requires_tag, but rather than invalidating a document if not
+  // present, emits a deprecation warning.
+  repeated string also_requires_tag_warning = 22;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -301,6 +360,11 @@ message TagSpec {
   // of this tag in the document.
   optional ChildTagSpec child_tags = 19;
 
+  // The reference_points defined by this TagSpec instance determine how
+  // specific child tags are identified. Please see the comment for the
+  // ReferencePoint message.
+  repeated ReferencePoint reference_points = 20;
+
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string spec_url = 10;
@@ -311,7 +375,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 11
+// NEXT AVAILABLE TAG: 15
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -322,8 +386,22 @@ message ValidatorRules {
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
+  // If we encounter a manufactured body tag, this flag determines if
+  // it is treated as an error or a warning.
+  // TODO(gregable): Eventually change this to true and remove the code
+  // for it, making the error permanent.
+  optional bool manufactured_body_tag_is_error = 11 [default = false];
+  // Spec URL for information about manufactured body tags.
+  optional string manufactured_body_spec_url = 12;
+
+  // If enabled, reference points can define additinal reference points
+  // for child elements.
+  // TODO(powdercloud): Flip to true and remove this flag.
+  optional bool reference_points_can_define_reference_points = 14
+      [default = false];
 
   repeated ErrorFormat error_formats = 9;
+  repeated ErrorSpecificity error_specificity = 13;
 
   // Deprecated fields, do not reuse.
   extensions 5, 2;
@@ -380,21 +458,19 @@ message ValidationError {
     ERROR = 1;
     // A document may have warnings and still pass validation.
     WARNING = 4;
-    // No longer used.
-    // A prod warning is OK in prod mode (the overall status of a validation
-    // result is still PASS) but an error in dev mode.
-    PROD_WARNING = 2; // DEPRECATED DO NOT USE.
-    // No longer used.
-    // A dev warning is OK in dev mode (the overall status of a validation
-    // result is still PASS) but an error in prod mode.
-    DEV_WARNING = 3; // DEPRECATED DO NOT USE.
+    // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
+<<<<<<< HEAD
   // NEXT AVAILABLE TAG: 64
+=======
+  // NEXT AVAILABLE TAG: 77
+>>>>>>> ampproject/master
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
+    WARNING_TAG_REQUIRED_BY_MISSING = 76;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
@@ -436,6 +512,13 @@ message ValidationError {
     INCORRECT_NUM_CHILD_TAGS = 56;
     DISALLOWED_CHILD_TAG_NAME = 57;
     DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
+    DISALLOWED_MANUFACTURED_BODY = 64;
+    DEPRECATED_MANUFACTURED_BODY = 65;
+    CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
+    MANDATORY_REFERENCE_POINT_MISSING = 67;
+    DUPLICATE_REFERENCE_POINT = 68;
+    TAG_REFERENCE_POINT_CONFLICT = 69;
+    CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR = 70;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
@@ -456,6 +539,13 @@ message ValidationError {
     CSS_SYNTAX_DISALLOWED_DOMAIN = 63;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
     CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
+
+    // The following codes are currently used only by A4A CSS validation.
+    CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
+    CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT = 72;
+    CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE = 73;
+    CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH = 74;
+    CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION = 75;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
@@ -474,6 +564,14 @@ message ValidationError {
   // in tests to match specific errors to specific tags in the test cases. It
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
+}
+
+// Used in the verbose validator to select between multiple generated error
+// types for a failing error. A higher number means that the error is more
+// specific, ie: more helpful, preferred.
+message ErrorSpecificity {
+  optional ValidationError.Code code = 1;
+  optional int32 specificity = 2;
 }
 
 message ErrorFormat {

@@ -103,6 +103,13 @@ function normalizeRows(rows) {
   // normalize amp-shadow.js
   normalizeRow(rows, 'shadow-v0.js', 'amp-shadow.js', true);
 
+<<<<<<< HEAD
+=======
+  // normalize sw.js
+  normalizeRow(rows, 'sw.js', 'sw.max.js', true);
+  normalizeRow(rows, 'sw-kill.js', 'sw-kill.max.js', true);
+
+>>>>>>> ampproject/master
   // normalize extensions
   var curName = null;
   var i = rows.length;
@@ -207,6 +214,7 @@ function sizeTask() {
   gulp.src([
       'dist/**/*.js',
       '!dist/**/*-latest.js',
+      '!dist/**/check-types.js',
       'dist.3p/{current,current-min}/**/*.js',
     ])
     .pipe(sizer())

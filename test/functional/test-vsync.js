@@ -15,6 +15,7 @@
  */
 
 import {Vsync} from '../../src/service/vsync-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -380,25 +381,31 @@ describe('RAF polyfill', () => {
   let sandbox;
   let clock;
 
+  let viewer;
+  let vsync;
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+
+    viewer = {
+      isVisible: () => true,
+      onVisibilityChanged: unusedHandler => {},
+    };
+
+    const win = {
+      setTimeout: (fn, t) => {
+        window.setTimeout(fn, t);
+      },
+    };
+    installTimerService(win);
+    vsync = new Vsync(win, viewer);
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  const viewer = {
-    isVisible: () => true,
-    onVisibilityChanged: unusedHandler => {},
-  };
-
-  const vsync = new Vsync({
-    setTimeout: (fn, t) => {
-      window.setTimeout(fn, t);
-    },
-  }, viewer);
 
   it('should schedule frames using the polyfill', () => {
     let calls = 0;

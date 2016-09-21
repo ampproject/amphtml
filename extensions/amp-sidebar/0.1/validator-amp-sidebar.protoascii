@@ -15,6 +15,10 @@
 #
 
 tags: {  # amp-sidebar
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   mandatory_parent: "HEAD"
   spec_name: "amp-sidebar extension .js script"
@@ -47,6 +51,10 @@ tags: {  # amp-sidebar
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sidebar.html"
 }
 tags: {  # <amp-sidebar>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+>>>>>>> ampproject/master
   tag_name: "AMP-SIDEBAR"
   unique: true
   mandatory_parent: "BODY"
@@ -57,7 +65,7 @@ tags: {  # <amp-sidebar>
     value_regex: "(left|right)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/amp-sidebar.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sidebar.html"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

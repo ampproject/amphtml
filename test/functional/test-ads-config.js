@@ -18,6 +18,15 @@ import {adConfig} from '../../ads/_config';
 
 describe('test-ads-config', () => {
 
+<<<<<<< HEAD
+=======
+  it('should have all ad networks configured', () => {
+    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+      expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);
+    });
+  });
+
+>>>>>>> ampproject/master
   it('should sort adConfig in alphabetic order', () => {
     delete adConfig.fakead3p;
     const keys = Object.keys(adConfig);

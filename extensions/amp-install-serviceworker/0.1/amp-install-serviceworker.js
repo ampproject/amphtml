@@ -15,9 +15,9 @@
  */
 
 import {assertHttpsUrl, isProxyOrigin, parseUrl} from '../../../src/url';
-import {documentInfoFor} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/document-info';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 
@@ -30,27 +30,32 @@ const TAG = 'amp-install-serviceworker';
  * of the current page.
  */
 class AmpInstallServiceWorker extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?string}  */
+    this.iframeSrc_ = null;
+  }
   /** @override */
   buildCallback() {
-    const win = this.getWin();
+    const win = this.win;
     if (!('serviceWorker' in win.navigator)) {
       return;
     }
     const src = this.element.getAttribute('src');
     assertHttpsUrl(src, this.element);
 
-    /** @private {?string}  */
-    this.iframeSrc_ = null;
-
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
         const origin = parseUrl(iframeSrc).origin;
-        const docInfo = documentInfoFor(win);
+        const docInfo = documentInfoForDoc(this.element);
         const sourceUrl = parseUrl(docInfo.sourceUrl);
         const canonicalUrl = parseUrl(docInfo.canonicalUrl);
-        user.assert(
+        user().assert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
             'data-iframe-src (%s) should be a URL on the same origin as the ' +
@@ -63,9 +68,9 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      install(this.getWin(), src);
+      install(this.win, src);
     } else {
-      user.error(TAG,
+      user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
@@ -73,12 +78,12 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @private */
   scheduleIframeLoad_() {
-    viewerFor(this.getWin()).whenFirstVisible().then(() => {
+    viewerFor(this.win).whenFirstVisible().then(() => {
       // If the user is longer than 20 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
-      timer.delay(() => {
+      timerFor(this.win).delay(() => {
         this.deferMutate(this.insertIframe_.bind(this));
       }, 20000);
     });
@@ -88,10 +93,9 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
   insertIframe_() {
     // If we are no longer visible, we will not do a SW registration on this
     // page view.
-    if (!viewerFor(this.getWin()).isVisible()) {
+    if (!viewerFor(this.win).isVisible()) {
       return;
     }
-    this.insertedIframe_ = true;
     // The iframe will stil be loaded.
     this.element.style.display = 'none';
     const iframe = /*OK*/document.createElement('iframe');
@@ -109,11 +113,11 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
 function install(win, src) {
   win.navigator.serviceWorker.register(src).then(function(registration) {
     if (getMode().development) {
-      user.info(TAG, 'ServiceWorker registration successful with scope: ',
+      user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
   }).catch(function(e) {
-    user.error(TAG, 'ServiceWorker registration failed:', e);
+    user().error(TAG, 'ServiceWorker registration failed:', e);
   });
 }
 

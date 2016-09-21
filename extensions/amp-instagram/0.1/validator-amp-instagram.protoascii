@@ -15,6 +15,11 @@
 #
 
 tags: {  # amp-instagram
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-instagram extension .js script"
   mandatory_parent: "HEAD"
@@ -47,6 +52,11 @@ tags: {  # amp-instagram
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
 }
 tags: {  # <amp-instagram>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "AMP-INSTAGRAM"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-instagram extension .js script"
@@ -56,12 +66,6 @@ tags: {  # <amp-instagram>
     mandatory_oneof: "['data-shortcode', 'src']"
   }
   attrs: {
-    name: "shortcode"
-    mandatory_oneof: "['data-shortcode', 'src']"
-    deprecation: "data-shortcode"
-    deprecation_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
-  }
-  attrs: {
     name: "src"
     mandatory_oneof: "['data-shortcode', 'src']"
     value_url: {
@@ -69,6 +73,7 @@ tags: {  # <amp-instagram>
       allowed_protocol: "https"
       allow_relative: true
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"

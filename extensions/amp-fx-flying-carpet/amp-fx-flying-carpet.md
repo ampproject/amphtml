@@ -43,7 +43,7 @@ Example:
 
 ```html
 <amp-fx-flying-carpet height="300px">
-  <amp-img src="fullscreen.png" width="100vw" height="100vh"></amp-img>
+  <amp-img src="fullscreen.png" width="300" height="500" layout="responsive"></amp-img>
 </amp-fx-flying-carpet>
 ```
 

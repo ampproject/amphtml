@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {getService} from './service';
 
 
@@ -130,16 +131,16 @@ export class Platform {
     return parseInt(res[index], 10);
   }
 };
+=======
+import {getExistingServiceForWindow} from './service';
+>>>>>>> ampproject/master
 
 
 /**
  * @param {!Window} window
- * @return {!Platform}
+ * @return {!./service/platform-impl.Platform}
  */
 export function platformFor(window) {
-  return getService(window, 'platform', () => {
-    return new Platform(window);
-  });
+  return /** @type {!./service/platform-impl.Platform} */ (
+      getExistingServiceForWindow(window, 'platform'));
 };
-
-export const platform = platformFor(window);

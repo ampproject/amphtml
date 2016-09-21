@@ -20,7 +20,7 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe('error page', () => {
+describe.configure().retryOnSaucelabs().run('error page', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/errors.html', 500, win => {
@@ -43,13 +43,21 @@ describe('error page', () => {
     });
   });
 
+<<<<<<< HEAD
   it.skipper().skipFirefox().run('should show the body in error test', () => {
+=======
+  it.configure().skipFirefox().run('should show the body in error test', () => {
+>>>>>>> ampproject/master
     return expectBodyToBecomeVisible(fixture.win);
   });
 
   function shouldFail(id) {
     // Skip for issue #110
+<<<<<<< HEAD
     it.skipper().skipFirefox().run('should fail to load #' + id, () => {
+=======
+    it.configure().skipFirefox().run('should fail to load #' + id, () => {
+>>>>>>> ampproject/master
       const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));

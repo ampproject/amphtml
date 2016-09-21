@@ -32,6 +32,35 @@ import {dev} from './log';
 let ServiceHolderDef;
 
 /**
+ * Returns a service with the given id. Assumes that it has been constructed
+ * already.
+ * @param {!Window} win
+ * @param {string} id
+ * @return {!Object} The service.
+ */
+export function getExistingServiceForWindow(win, id) {
+  win = getTopWindow(win);
+  const exists = win.services && win.services[id] && win.services[id].obj;
+  return dev().assert(exists, `${id} service not found. Make sure it is ` +
+      `installed.`);
+}
+
+/**
+ * Returns a service with the given id. Assumes that it has been constructed
+ * already.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ * @return {!Object} The service.
+ */
+export function getExistingServiceForDoc(nodeOrDoc, id) {
+  const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
+  const exists = serviceHolder && serviceHolder.services &&
+      serviceHolder.services[id] && serviceHolder.services[id].obj;
+  return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
+      `installed.`);
+}
+
+/**
  * Returns a service for the given id and window (a per-window singleton).
  * If the service is not yet available the factory function is invoked and
  * expected to return the service.
@@ -40,14 +69,35 @@ let ServiceHolderDef;
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):!Object=} opt_factory Should create the service
+ * @param {function(!Window):T} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
  *     if the service does not exist yet.
- * @return {*}
+ * @template T
+ * @return {T}
  */
 export function getService(win, id, opt_factory) {
+<<<<<<< HEAD
   return getServiceInternal(win, id,
       opt_factory ? () => opt_factory(win) : undefined);
+=======
+  win = getTopWindow(win);
+  return getServiceInternal(win, win, id,
+      opt_factory ? opt_factory : undefined);
+}
+
+/**
+ * Returns a service and registers it given a class to be used as
+ * implementation.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {function(new:T, !Window)} constructor
+ * @return {T}
+ * @template T
+ */
+export function fromClass(win, id, constructor) {
+  win = getTopWindow(win);
+  return getServiceInternal(win, win, id, undefined, constructor);
+>>>>>>> ampproject/master
 }
 
 /**
@@ -89,9 +139,35 @@ export function getServicePromiseOrNull(win, id) {
 export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   return getServiceInternal(
+<<<<<<< HEAD
       ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
       id,
       opt_factory ? () => opt_factory(ampdoc) : undefined);
+=======
+      getAmpdocServiceHolder(ampdoc),
+      ampdoc,
+      id,
+      opt_factory);
+}
+
+/**
+ * Returns a service and registers it given a class to be used as
+ * implementation.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} win
+ * @param {string} id of the service.
+ * @param {function(new:T, !./service/ampdoc-impl.AmpDoc)} constructor
+ * @return {T}
+ * @template T
+ */
+export function fromClassForDoc(nodeOrDoc, id, constructor) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  return getServiceInternal(
+      getAmpdocServiceHolder(ampdoc),
+      ampdoc,
+      id,
+      undefined,
+      constructor);
+>>>>>>> ampproject/master
 }
 
 /**
@@ -103,9 +179,14 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
  * @return {!Promise<*>}
  */
 export function getServicePromiseForDoc(nodeOrDoc, id) {
+<<<<<<< HEAD
   const ampdoc = getAmpdoc(nodeOrDoc);
   return getServicePromiseInternal(
       ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+=======
+  return getServicePromiseInternal(
+      getAmpdocServiceHolder(nodeOrDoc),
+>>>>>>> ampproject/master
       id);
 }
 
@@ -117,25 +198,97 @@ export function getServicePromiseForDoc(nodeOrDoc, id) {
  * @return {?Promise<*>}
  */
 export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
+<<<<<<< HEAD
   const ampdoc = getAmpdoc(nodeOrDoc);
   return getServicePromiseOrNullInternal(
       ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+=======
+  return getServicePromiseOrNullInternal(
+      getAmpdocServiceHolder(nodeOrDoc),
+>>>>>>> ampproject/master
       id);
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * Set the parent and top windows on a child window (friendly iframe).
+ * @param {!Window} win
+ * @param {!Window} parentWin
+ */
+export function setParentWindow(win, parentWin) {
+  win.__AMP_PARENT = parentWin;
+  win.__AMP_TOP = getTopWindow(parentWin);
+}
+
+/**
+ * Returns the parent window for a child window (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getParentWindow(win) {
+  return win.__AMP_PARENT || win;
+}
+
+/**
+ * Returns the top window where AMP Runtime is installed for a child window
+ * (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getTopWindow(win) {
+  return win.__AMP_TOP || win;
+}
+
+/**
+ * Returns the parent "friendly" iframe if the node belongs to a child window.
+ * @param {!Node} node
+ * @param {!Window} topWin
+ * @return {?HTMLIFrameElement}
+ */
+export function getParentWindowFrameElement(node, topWin) {
+  const childWin = (node.ownerDocument || node).defaultView;
+  if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
+    try {
+      return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
+    } catch (e) {
+      // Ignore the error.
+    }
+  }
+  return null;
+}
+
+/**
+>>>>>>> ampproject/master
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
 function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
+<<<<<<< HEAD
     return getAmpdocService(nodeOrDoc.ownerDocument.defaultView).getAmpDoc(
         nodeOrDoc);
+=======
+    const win = (nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    return getAmpdocService(win).getAmpDoc(nodeOrDoc);
+>>>>>>> ampproject/master
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/ampdoc-impl.AmpDoc|!Window}
+ */
+function getAmpdocServiceHolder(nodeOrDoc) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  return ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
+}
+
+/**
+>>>>>>> ampproject/master
  * This is essentially a duplicate of `ampdoc.js`, but necessary to avoid
  * circular dependencies.
  * @param {!Window} win
@@ -147,6 +300,7 @@ function getAmpdocService(win) {
 }
 
 /**
+<<<<<<< HEAD
  * @param {!Object} holder
  * @param {string} id of the service.
  * @param {function():!Object=} opt_factory Should create the service
@@ -155,6 +309,20 @@ function getAmpdocService(win) {
  * @return {*}
  */
 function getServiceInternal(holder, id, opt_factory) {
+=======
+ * @param {!Object} holder Object holding the service instance.
+ * @param {!Object} context Win or AmpDoc.
+ * @param {string} id of the service.
+ * @param {!Function=} opt_factory Should create the service
+ *     if it does not exist yet. If the factory is not given, it is an error
+ *     if the service does not exist yet. Called with context.
+ * @param {!Function} opt_constructor Constructor function to new the service.
+ *     Called with context.
+ * @return {*}
+ */
+function getServiceInternal(holder, context, id, opt_factory,
+    opt_constructor) {
+>>>>>>> ampproject/master
   const services = getServices(holder);
   let s = services[id];
   if (!s) {
@@ -166,8 +334,16 @@ function getServiceInternal(holder, id, opt_factory) {
   }
 
   if (!s.obj) {
+<<<<<<< HEAD
     dev.assert(opt_factory, 'Factory not given and service missing %s', id);
     s.obj = opt_factory();
+=======
+    dev().assert(opt_factory || opt_constructor,
+        'Factory or class not given and service missing %s', id);
+    s.obj = opt_constructor
+        ? new opt_constructor(context)
+        : opt_factory(context);
+>>>>>>> ampproject/master
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
@@ -220,7 +396,11 @@ function getServicePromiseOrNullInternal(holder, id) {
     if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
     }
+<<<<<<< HEAD
     dev.assert(false, 'Expected object or promise to be present');
+=======
+    dev().assert(false, 'Expected object or promise to be present');
+>>>>>>> ampproject/master
   }
   return null;
 }

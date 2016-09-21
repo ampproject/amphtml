@@ -18,9 +18,19 @@
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
+<<<<<<< HEAD
 import {adopt} from '../src/runtime';
 import {platform} from '../src/platform';
 import {setModeForTesting} from '../src/mode';
+=======
+import {
+  adopt,
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/runtime';
+import {installDocService} from '../src/service/ampdoc-impl';
+import {platformFor} from '../src/platform';
+>>>>>>> ampproject/master
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 // Needs to be called before the custom elements are first made.
@@ -31,6 +41,7 @@ adopt(window);
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
 /**
+<<<<<<< HEAD
  * Helper class to skip tests under specific environment.
  * Should be instantiated via describe.skipper() or it.skipper().
  * Get permission before use!
@@ -92,10 +103,52 @@ class TestSkipper {
 >>>>>>> ampproject/master
   skipFirefox() {
     this.skippedUserAgents.push('Firefox');
+=======
+ * Helper class to skip or retry tests under specific environment.
+ * Should be instantiated via describe.configure() or it.configure().
+ * Get permission before use!
+ *
+ * Example usages:
+ * describe.configure().skipFirefox().skipSafari().run('Bla bla ...', ... );
+ * it.configure().skipEdge().run('Should ...', ...);
+*/
+class TestConfig {
+
+  constructor(runner) {
+    this.runner = runner;
+    /**
+     * List of predicate functions that are called before running each test
+     * suite to check whether the suite should be skipped or not.
+     * If any of the functions return 'true', the suite will be skipped.
+     * @type {!Array<function():boolean>}
+     */
+    this.skipMatchers = [];
+    /**
+     * Called for each test suite (things created by `describe`).
+     * @type {!Array<function(!TestSuite)>}
+     */
+    this.configTasks = [];
+    this.platform_ = platformFor(window);
+  }
+
+  skipChrome() {
+    this.skipMatchers.push(this.platform_.isChrome.bind(this.platform_));
+    return this;
+  }
+
+  skipEdge() {
+    this.skipMatchers.push(this.platform_.isEdge.bind(this.platform_));
+    return this;
+  }
+
+  skipFirefox() {
+    this.skipMatchers.push(this.platform_.isFirefox.bind(this.platform_));
+>>>>>>> ampproject/master
     return this;
   }
 
   skipSafari() {
+<<<<<<< HEAD
     this.skippedUserAgents.push('Safari');
     return this;
   }
@@ -133,6 +186,19 @@ class TestSkipper {
 
   skipSafari() {
     this.skippedUserAgents.push('Safari');
+=======
+    this.skipMatchers.push(this.platform_.isSafari.bind(this.platform_));
+    return this;
+  }
+
+  retryOnSaucelabs() {
+    if (!window.ampTestRuntimeConfig.saucelabs) {
+      return this;
+    }
+    this.configTasks.push(mocha => {
+      mocha.retries(4);
+    });
+>>>>>>> ampproject/master
     return this;
   }
 
@@ -141,12 +207,18 @@ class TestSkipper {
    * @param {function()} fn
    */
   run(desc, fn) {
+<<<<<<< HEAD
     for (let i = 0; i < this.skippedUserAgents.length; i++) {
       if (navigator.userAgent.indexOf(this.skippedUserAgents[i]) >= 0) {
+=======
+    for (let i = 0; i < this.skipMatchers.length; i++) {
+      if (this.skipMatchers[i]()) {
+>>>>>>> ampproject/master
         this.runner.skip(desc, fn);
         return;
       }
     }
+<<<<<<< HEAD
     this.runner(desc, fn);
   }
 >>>>>>> ampproject/master
@@ -158,6 +230,25 @@ describe.skipper = function() {
 
 it.skipper = function() {
   return new TestSkipper(it);
+=======
+
+    const tasks = this.configTasks;
+    this.runner(desc, function() {
+      tasks.forEach(task => {
+        task(this);
+      });
+      return fn.apply(this, arguments);
+    });
+  }
+}
+
+describe.configure = function() {
+  return new TestConfig(describe);
+};
+
+it.configure = function() {
+  return new TestConfig(it);
+>>>>>>> ampproject/master
 };
 
 // Used to check if an unrestored sandbox exists
@@ -181,15 +272,28 @@ sinon.sandbox.create = function(config) {
 beforeEach(beforeTest);
 
 function beforeTest() {
+<<<<<<< HEAD
   setModeForTesting(null);
   window.AMP_TEST = true;
+=======
+  window.AMP_MODE = null;
+  window.AMP_CONFIG = {
+    canary: 'testSentinel',
+  };
+  window.AMP_TEST = true;
+  window.ampExtendedElements = {};
+  const ampdocService = installDocService(window, true);
+  const ampdoc = ampdocService.getAmpDoc(window.document);
+  installRuntimeServices(window);
+  installAmpdocServices(ampdoc);
+>>>>>>> ampproject/master
 }
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
   const cleanupTagNames = ['link', 'meta'];
-  if (!platform.isSafari()) {
+  if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.
     cleanupTagNames.push('iframe');
   }

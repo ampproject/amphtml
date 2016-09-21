@@ -17,7 +17,7 @@
 import {Poller} from './poller';
 import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
@@ -34,10 +34,10 @@ export class LiveListManager {
   constructor(win) {
     this.win = win;
 
-    /** @private @const {!Object<string, !AmpLiveList>} */
+    /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
     this.liveLists_ = Object.create(null);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(this.win);
 
     /** @private {number} */
@@ -52,7 +52,7 @@ export class LiveListManager {
     /** @private @const {string} */
     this.url_ = this.win.location.href;
 
-    /** @private {number} */
+    /** @private {time} */
     this.latestUpdateTime_ = 0;
 
     /** @private @const {function(): Promise} */
@@ -64,12 +64,22 @@ export class LiveListManager {
       // then make sure to stop polling if viewer is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
 
+      const initialUpdateTimes = Object.keys(this.liveLists_)
+          .map(key => this.liveLists_[key].getUpdateTime());
+      this.latestUpdateTime_ = Math.max.apply(Math, initialUpdateTimes);
+
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
       if (getMode().localDev && (this.win.location.pathname == '/examples' +
+<<<<<<< HEAD
             '.build/live-list-update.amp.max.html' ||
             this.win.location.pathname == '/examples.build/live-blog.amp' +
             '.max.html' || this.win.location.pathname == '/examples.build/' +
+=======
+            '/live-list-update.amp.max.html' ||
+            this.win.location.pathname == '/examples/live-blog.amp' +
+            '.max.html' || this.win.location.pathname == '/examples/' +
+>>>>>>> ampproject/master
             'live-blog-non-floating-button.amp.max.html')) {
         this.interval_ = 5000;
       }
@@ -99,14 +109,13 @@ export class LiveListManager {
   /**
    * Makes a request to the given url for the latest document.
    *
-   * @param {string} url
    * @private
    */
   fetchDocument_() {
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
       url = addParamToUrl(url, 'amp_latest_update_time',
-          this.latestUpdateTime_);
+          String(this.latestUpdateTime_));
     }
     return xhrFor(this.win)
         // TODO(erwinm): add update time here when possible.
@@ -117,7 +126,7 @@ export class LiveListManager {
   /**
    * Queries the document for all `amp-live-list` tags.
    *
-   * @param {!HTMLDocument} doc
+   * @param {!Document} doc
    */
   getLiveLists_(doc) {
     const lists = Array.prototype.slice.call(
@@ -137,13 +146,13 @@ export class LiveListManager {
   /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
-   * @param {!HTMLElement} liveList
+   * @param {!Element} liveList
    * @return {number}
    */
   updateLiveList_(liveList) {
     const id = liveList.getAttribute('id');
-    user.assert(id, 'amp-live-list must have an id.');
-    user.assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
+    user().assert(id, 'amp-live-list must have an id.');
+    user().assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
         `not exist on original page load.`);
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
@@ -157,8 +166,8 @@ export class LiveListManager {
   /**
    * Register an `amp-live-list` instance for updates.
    *
-   * @param {number} id
-   * @param {!AmpLiveList} liveList
+   * @param {string} id
+   * @param {!./amp-live-list.AmpLiveList} liveList
    */
   register(id, liveList) {
     const isNotRegistered = !(id in this.liveLists_);
@@ -215,11 +224,9 @@ export class LiveListManager {
 }
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  * @return {!LiveListManager}
  */
 export function installLiveListManager(win) {
-  return getService(win, 'liveListManager', () => {
-    return new LiveListManager(win);
-  });
+  return fromClass(win, 'liveListManager', LiveListManager);
 }

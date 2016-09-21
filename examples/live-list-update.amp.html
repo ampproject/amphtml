@@ -70,6 +70,24 @@
       text-align: center;
       background: #3f51b5;
     }
+
+    .pagination {
+      display: inline-block;
+      padding: 0;
+    }
+
+    amp-live-list [pagination] nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pagination li {
+      display: inline;
+      border: 1px solid black;
+      padding: 10px;
+      list-style-type: none;
+    }
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
@@ -127,6 +145,13 @@
           </div>
         </div>
       </div>
+    </div>
+    <div pagination>
+      <nav aria-label="amp live list pagination">
+      <ul class="pagination">
+        <li>1</li>
+      </ul>
+      </nav>
     </div>
   </amp-live-list>
 </body>

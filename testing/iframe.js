@@ -16,7 +16,18 @@
 
 
 import {Timer} from '../src/timer';
+<<<<<<< HEAD
 import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
+=======
+import {installDocService} from '../src/service/ampdoc-impl';
+import {installExtensionsService} from '../src/service/extensions-impl';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+  registerForUnitTest,
+} from '../src/runtime';
+import {cssText} from '../build/css';
+>>>>>>> ampproject/master
 
 let iframeCount = 0;
 
@@ -187,6 +198,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
+        '<style>.-amp-element {display: block;}</style>' +
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
@@ -194,7 +206,15 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+<<<<<<< HEAD
       installRuntimeServices(iframe.contentWindow);
+=======
+      const ampdocService = installDocService(iframe.contentWindow, true);
+      const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
+      installExtensionsService(iframe.contentWindow);
+      installRuntimeServices(iframe.contentWindow);
+      installAmpdocServices(ampdoc);
+>>>>>>> ampproject/master
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
@@ -257,6 +277,91 @@ export function createServedIframe(src) {
   });
 }
 
+const IFRAME_STUB_URL =
+    '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
+
+/**
+ * Creates an iframe fixture in the given window that can be used for
+ * window.postMessage related tests.
+ *
+ * It provides functions like:
+ * - instruct the iframe to post a message to the parent window
+ * - verify the iframe has received a message from the parent window
+ *
+ * See /test/fixtures/served/iframe-stub.html for implementation.
+ *
+ * @param win {!Window}
+ * @param opt_beforeAttachToDom {function(!HTMLIFrameElement)=}
+ * @returns {!Promise<!HTMLIFrameElement>}
+ */
+export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
+  const element = win.document.createElement('iframe');
+  element.src = IFRAME_STUB_URL;
+  if (opt_beforeAttachToDom) {
+    opt_beforeAttachToDom(element);
+  }
+  win.document.body.appendChild(element);
+
+  /**
+   * Instructs the iframe to send a message to parent window.
+   */
+  element.postMessageToParent = msg => {
+    element.src = IFRAME_STUB_URL + encodeURIComponent(JSON.stringify(msg));
+  };
+
+  /**
+   * Returns a Promise that resolves when the iframe acknowledged the reception
+   * of the specified message.
+   */
+  element.expectMessageFromParent = msg => {
+    return new Promise(resolve => {
+      const listener = event => {
+        let expectMsg = msg;
+        let actualMsg = event.data.receivedMessage;
+        if (typeof expectMsg !== 'string') {
+          expectMsg = JSON.stringify(expectMsg);
+          actualMsg = JSON.stringify(actualMsg);
+        }
+        if (event.source == element.contentWindow
+            && event.data.testStubEcho
+            && expectMsg == actualMsg) {
+          win.removeEventListener('message', listener);
+          resolve(msg);
+        }
+      };
+      win.addEventListener('message', listener);
+    });
+  };
+
+  return new Promise(resolve => {
+    element.onload = () => {
+      resolve(element);
+    };
+  });
+}
+
+/**
+ * Returns a Promise that resolves when a post message is observed from the
+ * given source window to target window.
+ *
+ * @param sourceWin {!Window}
+ * @param targetwin {!Window}
+ * @param msg {!Object}
+ * @returns {!Promise<!Object>}
+ */
+export function expectPostMessage(sourceWin, targetwin, msg) {
+  return new Promise(resolve => {
+    const listener = event => {
+      if (event.source == sourceWin
+          && JSON.stringify(msg) == JSON.stringify(event.data)) {
+        targetwin.removeEventListener('message', listener);
+        resolve(event.data);
+      }
+    };
+    targetwin.addEventListener('message', listener);
+  });
+}
+
 /**
  * Returns a promise for when the condition becomes true.
  * @param {string} description
@@ -270,14 +375,14 @@ export function createServedIframe(src) {
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    let start = new Date().getTime();
+    let start = Date.now();
     function poll() {
       const ret = condition();
       if (ret) {
         clearInterval(interval);
         resolve(ret);
       } else {
-        if (new Date().getTime() - start > (opt_timeout || 1600)) {
+        if (Date.now() - start > (opt_timeout || 1600)) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());

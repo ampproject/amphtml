@@ -20,13 +20,15 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe('released components: ', function() {
-  runTest.call(this, false);
-});
+describe.configure().retryOnSaucelabs().run('released components: ',
+    function() {
+      runTest.call(this, false);
+    });
 
-describe('released components with polyfills: ', function() {
-  runTest.call(this, true);
-});
+describe.configure().retryOnSaucelabs().run(
+    'released components with polyfills: ', function() {
+      runTest.call(this, true);
+    });
 
 function runTest(shouldKillPolyfillableApis) {
   describe('Rendering of released components', function() {
@@ -48,7 +50,11 @@ function runTest(shouldKillPolyfillableApis) {
     // It never renders the ad, even though it appears to work when looking
     // at the rendering. The test passes when running locally in FF.
     // TODO(#3561): unmute the test.
+<<<<<<< HEAD
     it.skipper().skipFirefox().skipChrome()
+=======
+    it.configure().skipFirefox().skipChrome()
+>>>>>>> ampproject/master
     .run('all components should get loaded', function() {
       this.timeout(15000);
       return pollForLayout(fixture.win, 13, 10000).then(() => {

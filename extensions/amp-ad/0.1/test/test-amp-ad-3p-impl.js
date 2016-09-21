@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {createAdPromise} from '../../../../testing/ad-iframe';
 import * as sinon from 'sinon';
 
@@ -22,10 +23,63 @@ describe('amp-ad-3p-impl', tests('amp-ad-3p-impl'));
 function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,
       opt_beforeLayoutCallback) {
+=======
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {createAdPromise} from '../../../../testing/ad-iframe';
+import {createIframePromise} from '../../../../testing/iframe';
+import {createElementWithAttributes} from '../../../../src/dom';
+import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
+import * as sinon from 'sinon';
+import * as lolex from 'lolex';
+
+describe('amp-ad-3p-impl', tests('amp-ad'));
+
+function tests(name) {
+  // Please note undefined and null are differnt
+  function getAd(opt_attributes, opt_canonical, opt_handleElement,
+      opt_beforeLayoutCallback) {
+    const attributes = opt_attributes || {
+      width: 300,
+      height: 250,
+      type: '_ping_',
+      src: 'https://testsrc',
+    };
+    let canonical = opt_canonical;
+    if (opt_canonical === undefined) {
+      canonical = 'https://schema.org';
+    }
+>>>>>>> ampproject/master
     return createAdPromise(name, attributes, canonical,
         opt_handleElement, opt_beforeLayoutCallback);
   }
 
+<<<<<<< HEAD
+=======
+  function getAdInAdContainer() {
+    return createIframePromise().then(iframe => {
+      const adContainer = createElementWithAttributes(iframe.doc,
+          'amp-sticky-ad', {layout: 'nodisplay'});
+      const ampAd = createElementWithAttributes(iframe.doc, 'amp-ad', {
+        width: 300,
+        height: 50,
+        type: '_ping_',
+        src: 'testsrc',
+      });
+      const link = iframe.doc.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      link.setAttribute('href', 'blah');
+      iframe.doc.head.appendChild(link);
+      adContainer.appendChild(ampAd);
+      return iframe.addElement(adContainer).then(() => {
+        return Promise.resolve({
+          iframe,
+          ampAd,
+        });
+      });
+    });
+  }
+
+>>>>>>> ampproject/master
   return () => {
     let sandbox;
 
@@ -44,7 +98,13 @@ function tests(name) {
         src: 'https://testsrc',
         // Test precedence
         'data-width': '6666',
+<<<<<<< HEAD
       }, 'https://schema.org').then(ad => {
+=======
+      }).then(ad => {
+        expect(ad.implementation_).to.be.instanceof(AmpAd3PImpl);
+
+>>>>>>> ampproject/master
         const iframe = ad.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -71,11 +131,18 @@ function tests(name) {
               'link[rel=preload]');
         }
         expect(fetches).to.have.length(2);
+<<<<<<< HEAD
         expect(fetches[0].href).to.equal(
             'http://ads.localhost:' + location.port +
             '/base/dist.3p/current/frame.max.html');
         expect(fetches[1].href).to.equal(
             'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+=======
+        expect(fetches[0]).to.have.property('href',
+            'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+        expect(fetches[1]).to.have.property('href',
+            'http://ads.localhost:9876/dist.3p/current/integration.js');
+>>>>>>> ampproject/master
         const preconnects = doc.querySelectorAll(
             'link[rel=preconnect]');
         expect(preconnects[preconnects.length - 1].href).to.equal(
@@ -88,6 +155,7 @@ function tests(name) {
     });
 
     describe('ad resize', () => {
+<<<<<<< HEAD
       it('should listen for resize events', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
             '/base/test/fixtures/served/iframe.html';
@@ -160,6 +228,8 @@ function tests(name) {
         });
       });
 
+=======
+>>>>>>> ampproject/master
       it('should fallback for resize with overflow', () => {
         return getAd({
           width: 100,
@@ -167,6 +237,7 @@ function tests(name) {
           type: '_ping_',
           src: 'testsrc',
           resizable: '',
+<<<<<<< HEAD
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
@@ -174,6 +245,15 @@ function tests(name) {
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
           expect(impl.attemptChangeSize.firstCall.args[1]).to.equal(114);
+=======
+        }).then(element => {
+          const impl = element.implementation_;
+          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+          impl.apiHandler_.updateSize_(217, 114);
+          expect(attemptChangeSizeSpy.callCount).to.equal(1);
+          expect(attemptChangeSizeSpy.firstCall.args[0]).to.equal(217);
+          expect(attemptChangeSizeSpy.firstCall.args[1]).to.equal(114);
+>>>>>>> ampproject/master
         });
       });
 
@@ -184,12 +264,21 @@ function tests(name) {
           type: '_ping_',
           src: 'testsrc',
           resizable: '',
+<<<<<<< HEAD
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
           impl.apiHandler_.updateSize_(217);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
+=======
+        }).then(element => {
+          const impl = element.implementation_;
+          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+          impl.apiHandler_.updateSize_(217);
+          expect(attemptChangeSizeSpy.callCount).to.equal(1);
+          expect(attemptChangeSizeSpy.firstCall.args[0]).to.equal(217);
+>>>>>>> ampproject/master
         });
       });
     });
@@ -206,6 +295,7 @@ function tests(name) {
       return expect(getAd({
         width: 300,
         height: 250,
+<<<<<<< HEAD
       }, null)).to.be.rejectedWith(/type/);
     });
 
@@ -216,18 +306,37 @@ function tests(name) {
         type: '_ping_',
         src: 'testsrc',
       }, 'https://schema.org', function(ad) {
+=======
+      })).to.be.rejectedWith(/type/);
+    });
+
+    it('should reject unknown type', () => {
+      return expect(getAd({
+        width: 300,
+        height: 250,
+        type: 'unknownType',
+      })).to.be.rejectedWith(/unknownType/);
+    });
+
+    it('must not be position:fixed', () => {
+      return expect(getAd(undefined, undefined, function(ad) {
+>>>>>>> ampproject/master
         ad.style.position = 'fixed';
         return ad;
       })).to.be.rejectedWith(/fixed/);
     });
 
     it('parent must not be position:fixed', () => {
+<<<<<<< HEAD
       return expect(getAd({
         width: 300,
         height: 250,
         type: '_ping_',
         src: 'testsrc',
       }, 'https://schema.org', function(ad) {
+=======
+      return expect(getAd(undefined, undefined, function(ad) {
+>>>>>>> ampproject/master
         const s = document.createElement('style');
         s.textContent = '.fixed {position:fixed;}';
         ad.ownerDocument.body.appendChild(s);
@@ -238,12 +347,16 @@ function tests(name) {
     });
 
     it('amp-lightbox can be position:fixed', () => {
+<<<<<<< HEAD
       return expect(getAd({
         width: 300,
         height: 250,
         type: '_ping_',
         src: 'testsrc',
       }, 'https://schema.org', function(ad) {
+=======
+      return expect(getAd(undefined, undefined, function(ad) {
+>>>>>>> ampproject/master
         const lightbox = document.createElement('amp-lightbox');
         lightbox.style.position = 'fixed';
         const p = ad.ownerDocument.getElementById('parent');
@@ -254,6 +367,7 @@ function tests(name) {
       })).to.be.not.be.rejected;
     });
 
+<<<<<<< HEAD
     describe('has no-content', () => {
       it('should display fallback', () => {
         return getAd({
@@ -262,6 +376,25 @@ function tests(name) {
           type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
+=======
+    it('should only layout once', () => {
+      return getAd().then(ad => {
+        ad.implementation_.unlayoutCallback();
+
+        const firstLayout = ad.implementation_.layoutCallback();
+        const secondLayout = ad.implementation_.layoutCallback();
+        expect(firstLayout).to.equal(secondLayout);
+
+        ad.implementation_.unlayoutCallback();
+        const newLayout = ad.implementation_.layoutCallback();
+        expect(newLayout).to.not.equal(secondLayout);
+      });
+    });
+
+    describe('has no-content', () => {
+      it('should display fallback', () => {
+        return getAd(undefined, undefined, ad => {
+>>>>>>> ampproject/master
           const fallback = document.createElement('div');
           fallback.setAttribute('fallback', '');
           ad.appendChild(fallback);
@@ -277,6 +410,7 @@ function tests(name) {
         });
       });
 
+<<<<<<< HEAD
       it('should collapse when attemptChangeHeight succeeds', () => {
         return getAd({
           width: 300,
@@ -284,6 +418,28 @@ function tests(name) {
           type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
+=======
+      it('should attemptChangeHeight to 0 when there is no fallback', () => {
+        return getAd(undefined, undefined, ad => {
+          return ad;
+        }).then(ad => {
+          const attemptChangeHeight = sandbox.stub(ad.implementation_,
+              'attemptChangeHeight',
+              function() {
+                return Promise.resolve();
+              });
+          ad.style.position = 'absolute';
+          ad.style.top = '300px';
+          ad.style.left = '50px';
+          ad.implementation_.noContentHandler_();
+          expect(attemptChangeHeight).to.have.been.called;
+          expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
+        });
+      });
+
+      it('should collapse when attemptChangeHeight succeeds', () => {
+        return getAd(undefined, undefined, ad => {
+>>>>>>> ampproject/master
           return ad;
         }).then(ad => {
           sandbox.stub(
@@ -292,14 +448,22 @@ function tests(name) {
               });
           sandbox.stub(ad.implementation_,
               'attemptChangeHeight',
+<<<<<<< HEAD
               function(height, callback) {
                 ad.style.height = height;
                 callback();
               });
+=======
+              function() {
+                return Promise.resolve();
+              });
+          const collapse = sandbox.spy(ad.implementation_, 'collapse');
+>>>>>>> ampproject/master
           ad.style.position = 'absolute';
           ad.style.top = '300px';
           ad.style.left = '50px';
           expect(ad.style.display).to.not.equal('none');
+<<<<<<< HEAD
           ad.implementation_.noContentHandler_();
           expect(ad.style.display).to.equal('none');
         });
@@ -312,6 +476,18 @@ function tests(name) {
           type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
+=======
+          ad.implementation_.attemptChangeHeight(0).then(() => {
+            expect(ad.style.display).to.equal('none');
+            expect(collapse).to.have.been.called;
+          });
+        });
+      });
+
+
+      it('should hide placeholder when ad falls back', () => {
+        return getAd(undefined, undefined, ad => {
+>>>>>>> ampproject/master
           const placeholder = document.createElement('div');
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
@@ -333,12 +509,16 @@ function tests(name) {
       });
 
       it('should destroy non-master iframe', () => {
+<<<<<<< HEAD
         return getAd({
           width: 300,
           height: 750,
           type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
+=======
+        return getAd(undefined, undefined, ad => {
+>>>>>>> ampproject/master
           const placeholder = document.createElement('div');
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
@@ -361,12 +541,16 @@ function tests(name) {
       });
 
       it('should not destroy a master iframe', () => {
+<<<<<<< HEAD
         return getAd({
           width: 300,
           height: 750,
           type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
+=======
+        return getAd(undefined, undefined, ad => {
+>>>>>>> ampproject/master
           const placeholder = document.createElement('div');
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
@@ -390,7 +574,11 @@ function tests(name) {
     });
 
     describe('renderOutsideViewport', () => {
+<<<<<<< HEAD
       function getGoodAd(cb, layoutCb, opt_loadingStrategy) {
+=======
+      function getGoodAd(cb, opt_loadingStrategy) {
+>>>>>>> ampproject/master
         const attributes = {
           width: 300,
           height: 250,
@@ -402,18 +590,30 @@ function tests(name) {
         if (opt_loadingStrategy) {
           attributes['data-loading-strategy'] = opt_loadingStrategy;
         }
+<<<<<<< HEAD
         return getAd(attributes, 'https://schema.org', element => {
           cb(element.implementation_);
           return element;
         }, layoutCb);
+=======
+        return getAd(attributes, undefined, element => {
+          cb(element.implementation_);
+          return element;
+        });
+>>>>>>> ampproject/master
       }
 
       it('should not return false after scrolling, then false for 1s', () => {
         let clock;
         return getGoodAd(ad => {
+<<<<<<< HEAD
           expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();
+=======
+          clock = lolex.install(ad.win);
+          expect(ad.renderOutsideViewport()).not.to.be.false;
+>>>>>>> ampproject/master
         }).then(ad => {
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
@@ -427,9 +627,14 @@ function tests(name) {
       it('should prefer-viewability-over-views', () => {
         let clock;
         return getGoodAd(ad => {
+<<<<<<< HEAD
           expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();
+=======
+          clock = lolex.install(ad.win);
+          expect(ad.renderOutsideViewport()).not.to.be.false;
+>>>>>>> ampproject/master
         }, 'prefer-viewability-over-views').then(ad => {
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
@@ -440,5 +645,21 @@ function tests(name) {
         });
       });
     });
+<<<<<<< HEAD
+=======
+
+    it('should add container info when ad has a container', () => {
+      return getAdInAdContainer().then(obj => {
+        const ampAd = obj.ampAd;
+        const impl = ampAd.implementation_;
+        expect(ampAd.getAttribute('amp-container-element')).to.be.null;
+        impl.onLayoutMeasure();
+        return impl.layoutCallback().then(() => {
+          const src = ampAd.firstChild.getAttribute('src');
+          expect(src).to.contain('"container":"AMP-STICKY-AD"');
+        });
+      });
+    });
+>>>>>>> ampproject/master
   };
 }

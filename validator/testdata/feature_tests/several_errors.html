@@ -35,5 +35,9 @@
     <!-- <script>document.write(…)</script> -->
   </amp-ad>
   <amp-ad width="42" height="42" made_up_attribute="oh hi"></amp-ad>
+  <!-- When rendering errors for attribute values, we collapse whitespace -
+       even whitespace that is originally encoded.-->
+  <amp-ad width="42" height="foo&#13;&#10;bar  baz">
+  </amp-ad>
 </body>
 </html>

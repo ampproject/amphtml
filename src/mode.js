@@ -27,9 +27,12 @@
  * }}
  */
 export let ModeDef;
+<<<<<<< HEAD
 
 /** @typedef {?ModeDef} */
 let mode = null;
+=======
+>>>>>>> ampproject/master
 
 /** @typedef {string} */
 const version = '$internalRuntimeVersion$';
@@ -42,39 +45,48 @@ const version = '$internalRuntimeVersion$';
 let fullVersion = '';
 
 /**
- * Provides info about the current app.
- * @return {!ModeDef}
+ * A #querySelector query to see if we have any scripts with development paths.
+ * @type {string}
  */
-export function getMode() {
-  if (mode) {
-    return mode;
-  }
-  return mode = getMode_();
-}
-
-/**
- * Set mode in a test. Pass null in afterEach function to reset.
- * @param {?ModeDef} m
- */
-export function setModeForTesting(m) {
-  mode = m;
-}
+const developmentScriptQuery = 'script[src*="/dist/"],script[src*="/base/"]';
 
 /**
  * Provides info about the current app.
+ * @param {?Window=} opt_win
  * @return {!ModeDef}
  */
-function getMode_() {
-  if (window.context && window.context.mode) {
-    return window.context.mode;
+export function getMode(opt_win) {
+  const win = opt_win || self;
+  if (win.AMP_MODE) {
+    return win.AMP_MODE;
   }
+  return win.AMP_MODE = getMode_(win);
+}
+
+/**
+ * Provides info about the current app.
+ * @param {!Window} win
+ * @return {!ModeDef}
+ */
+function getMode_(win) {
+  // For 3p integration code
+  if (win.context && win.context.mode) {
+    return win.context.mode;
+  }
+<<<<<<< HEAD
   const isLocalDev = !!(location.hostname == 'localhost' ||
+=======
+
+  const IS_DEV = true;
+
+  const isLocalDev = IS_DEV && !!(location.hostname == 'localhost' ||
+>>>>>>> ampproject/master
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
-          location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
+        location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
       // occur during local dev.
-      !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
+      (!win.document || !!win.document.querySelector(developmentScriptQuery));
 
   const developmentQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
@@ -82,18 +94,27 @@ function getMode_() {
       location.originalHash || location.hash);
 
   if (!fullVersion) {
-    fullVersion = getFullVersion_(window, isLocalDev);
+    fullVersion = getFullVersion_(win, isLocalDev);
   }
 
+  // The `minified`, `test` and `localDev` properties are replaced
+  // as boolean literals when we run `gulp dist` without the `--fortesting`
+  // flags. This improved DCE on the production file we deploy as the code
+  // paths for localhost/testing/development are eliminated.
   return {
     localDev: isLocalDev,
     // Triggers validation
     development: !!(developmentQuery['development'] == '1' ||
+<<<<<<< HEAD
         window.AMP_DEV_MODE),
+=======
+        win.AMP_DEV_MODE),
+>>>>>>> ampproject/master
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: developmentQuery['filter'],
     /* global process: false */
+<<<<<<< HEAD
     minified: process.env.NODE_ENV == 'production',
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -107,6 +128,10 @@ function getMode_() {
 >>>>>>> ampproject/master
 =======
     test: !!(window.AMP_TEST || window.__karma__),
+>>>>>>> ampproject/master
+=======
+    minified: !IS_DEV || process.env.NODE_ENV == 'production',
+    test: IS_DEV && !!(win.AMP_TEST || win.__karma__),
 >>>>>>> ampproject/master
     log: developmentQuery['log'],
     version: fullVersion,

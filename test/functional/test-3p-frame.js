@@ -22,10 +22,9 @@ import {
   preloadBootstrap,
   resetCountForTesting,
 } from '../../src/3p-frame';
-import {documentInfoFor} from '../../src/document-info';
+import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {resetServiceForTesting} from '../../src/service';
-import {setModeForTesting} from '../../src/mode';
 import {validateData} from '../../3p/3p';
 import {viewerFor} from '../../src/viewer';
 import * as sinon from 'sinon';
@@ -44,7 +43,6 @@ describe('3p-frame', () => {
     sandbox.restore();
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     resetCountForTesting();
-    setModeForTesting(null);
     const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
     if (m) {
@@ -83,13 +81,21 @@ describe('3p-frame', () => {
   });
 
   it('should create an iframe', () => {
+<<<<<<< HEAD
     setModeForTesting({
+=======
+    window.AMP_MODE = {
+>>>>>>> ampproject/master
       localDev: true,
       development: false,
       minified: false,
       test: false,
       version: '$internalRuntimeVersion$',
+<<<<<<< HEAD
     });
+=======
+    };
+>>>>>>> ampproject/master
 
     clock.tick(1234567888);
     const link = document.createElement('link');
@@ -102,12 +108,36 @@ describe('3p-frame', () => {
     div.setAttribute('data-ping', 'pong');
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
-    div.setAttribute('ampcid', 'cidValue');
 
-    div.getLayoutBox = function() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    div.getIntersectionChangeEntry = function() {
       return {
-        width: 100,
-        height: 200,
+        time: 1234567888,
+        rootBounds: {
+          left: 0,
+          top: 0,
+          width,
+          height,
+          bottom: height,
+          right: width,
+          x: 0,
+          y: 0,
+        },
+        boundingClientRect: {
+          width: 100,
+          height: 200,
+        },
+        intersectionRect: {
+          left: 0,
+          top: 0,
+          width: 0,
+          height: 0,
+          bottom: 0,
+          right: 0,
+          x: 0,
+          y: 0,
+        },
       };
     };
 
@@ -117,14 +147,12 @@ describe('3p-frame', () => {
         .returns('http://acme.org/')
         .once();
 
-    const iframe = getIframe(window, div, '_ping_');
+    const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
-    const docInfo = documentInfoFor(window);
+    const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
     const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     const fragment =
         '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
@@ -135,6 +163,10 @@ describe('3p-frame', () => {
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false,' +
         '"test":false,"version":"$internalRuntimeVersion$"}' +
+<<<<<<< HEAD
+=======
+        ',"canary":true' +
+>>>>>>> ampproject/master
         ',"hidden":false' +
         ',"startTime":1234567888' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
@@ -151,7 +183,11 @@ describe('3p-frame', () => {
     expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
 
     // Switch to same origin for inner tests.
+<<<<<<< HEAD
     iframe.src = '/base/dist.3p/current/frame.max.html#' + fragment;
+=======
+    iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
+>>>>>>> ampproject/master
 
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
@@ -159,11 +195,6 @@ describe('3p-frame', () => {
       expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
       expect(win.context.location.href).to.equal(locationHref);
       expect(win.context.location.origin).to.equal('http://localhost:9876');
-      if (location.ancestorOrigins) {
-        expect(win.context.location.originValidated).to.be.true;
-      } else {
-        expect(win.context.location.originValidated).to.be.false;
-      }
       expect(win.context.pageViewId).to.equal(docInfo.pageViewId);
       expect(win.context.referrer).to.equal('http://acme.org/');
       expect(win.context.data.testAttr).to.equal('value');
@@ -180,19 +211,29 @@ describe('3p-frame', () => {
 
 
   it('should pick the right bootstrap url for local-dev mode', () => {
+<<<<<<< HEAD
     setModeForTesting({localDev: true});
+=======
+    window.AMP_MODE = {localDev: true};
+>>>>>>> ampproject/master
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap url for testing mode', () => {
+<<<<<<< HEAD
     setModeForTesting({test: true});
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
+=======
+    window.AMP_MODE = {test: true};
+    expect(getBootstrapBaseUrl(window)).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+>>>>>>> ampproject/master
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
-    setModeForTesting({});
+    window.AMP_MODE = {};
     expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
@@ -218,17 +259,28 @@ describe('3p-frame', () => {
   });
 
   it('should prefetch bootstrap frame and JS', () => {
+<<<<<<< HEAD
     setModeForTesting({localDev: true});
+=======
+    window.AMP_MODE = {localDev: true};
+>>>>>>> ampproject/master
     preloadBootstrap(window);
     // Wait for visible promise
     return Promise.resolve().then(() => {
       const fetches = document.querySelectorAll(
           'link[rel=prefetch],link[rel=preload]');
       expect(fetches).to.have.length(2);
+<<<<<<< HEAD
       expect(fetches[0].href).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html');
       expect(fetches[1].href).to.equal(
           'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+=======
+      expect(fetches[0]).to.have.property('href',
+          'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+      expect(fetches[1]).to.have.property('href',
+          'http://ads.localhost:9876/dist.3p/current/integration.js');
+>>>>>>> ampproject/master
     });
   });
 
@@ -272,7 +324,7 @@ describe('3p-frame', () => {
     viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/').twice();
 
-    setModeForTesting({});
+    window.AMP_MODE = {};
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
     link.setAttribute('href', 'https://foo.bar/baz');
@@ -280,10 +332,18 @@ describe('3p-frame', () => {
 
     const div = document.createElement('div');
     div.setAttribute('type', '_ping_');
-    div.getLayoutBox = function() {
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    div.getIntersectionChangeEntry = function() {
       return {
-        width: 100,
-        height: 200,
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+        bottom: 0,
+        right: 0,
+        x: 0,
+        y: 0,
       };
     };
 

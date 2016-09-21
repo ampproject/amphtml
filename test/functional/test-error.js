@@ -15,7 +15,6 @@
  */
 
 import {getErrorReportUrl, cancellation} from '../../src/error';
-import {setModeForTesting} from '../../src/mode';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
 import * as sinon from 'sinon';
@@ -35,7 +34,6 @@ describe('reportErrorToServer', () => {
   afterEach(() => {
     window.onerror = onError;
     sandbox.restore();
-    setModeForTesting(null);
     window.viewerState = undefined;
   });
 
@@ -75,7 +73,7 @@ describe('reportErrorToServer', () => {
   it('reportError mark asserts', () => {
     let e = '';
     try {
-      user.assert(false, 'XYZ');
+      user().assert(false, 'XYZ');
     } catch (error) {
       e = error;
     }
@@ -91,7 +89,7 @@ describe('reportErrorToServer', () => {
   it('reportError mark asserts without error object', () => {
     let e = '';
     try {
-      user.assert(false, 'XYZ');
+      user().assert(false, 'XYZ');
     } catch (error) {
       e = error;
     }

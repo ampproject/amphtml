@@ -20,7 +20,7 @@ import {
   setInViewportForTesting,
 } from '../../3p/environment';
 import {createIframePromise} from '../../testing/iframe';
-import {timer} from '../../src/timer';
+import {timerFor} from '../../src/timer';
 import {loadPromise} from '../../src/event-helper';
 import * as lolex from 'lolex';
 
@@ -28,6 +28,10 @@ describe('3p environment', () => {
 
   let testWin;
   let iframeCount;
+<<<<<<< HEAD
+=======
+  const timer = timerFor(window);
+>>>>>>> ampproject/master
 
   beforeEach(() => {
     iframeCount = 0;

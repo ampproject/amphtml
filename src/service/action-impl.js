@@ -15,9 +15,15 @@
  */
 
 import {dev, user} from '../log';
+<<<<<<< HEAD
 import {getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {timer} from '../timer';
+=======
+import {fromClassForDoc} from '../service';
+import {getMode} from '../mode';
+import {timerFor} from '../timer';
+>>>>>>> ampproject/master
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
 
@@ -100,6 +106,7 @@ export class ActionService {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     this.vsync_ = vsyncFor(this.win);
 =======
     this.vsync_ = vsyncFor(ampdoc.getWin());
@@ -109,6 +116,9 @@ export class ActionService {
 >>>>>>> ampproject/master
 =======
     this.vsync_ = vsyncFor(ampdoc.getWin());
+>>>>>>> ampproject/master
+=======
+    this.vsync_ = vsyncFor(ampdoc.win);
 >>>>>>> ampproject/master
 
     // Add core events.
@@ -127,12 +137,16 @@ export class ActionService {
       // fast-click.
       this.ampdoc.getRootNode().addEventListener('click', event => {
         if (!event.defaultPrevented) {
-          this.trigger(event.target, 'tap', event);
+          this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
     } else if (name == 'submit') {
       this.ampdoc.getRootNode().addEventListener('submit', event => {
+<<<<<<< HEAD
         this.trigger(event.target, 'submit', event);
+=======
+        this.trigger(dev().assertElement(event.target), 'submit', event);
+>>>>>>> ampproject/master
       });
     }
   }
@@ -175,12 +189,12 @@ export class ActionService {
    */
   installActionHandler(target, handler) {
     const debugid = target.tagName + '#' + target.id;
-    user.assert(target.id && target.id.substring(0, 4) == 'amp-',
+    user().assert(target.id && target.id.substring(0, 4) == 'amp-',
         'AMP element is expected: %s', debugid);
 
     const currentQueue = target[ACTION_QUEUE_];
     if (currentQueue) {
-      dev.assert(
+      dev().assert(
         isArray(currentQueue),
         'Expected queue to be an array: %s',
         debugid
@@ -192,13 +206,13 @@ export class ActionService {
 
     // Dequeue the current queue.
     if (currentQueue) {
-      timer.delay(() => {
+      timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
             handler(invocation);
           } catch (e) {
-            dev.error(TAG_, 'Action execution failed:', invocation, e);
+            dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
         });
       }, 1);
@@ -208,7 +222,7 @@ export class ActionService {
   /**
    * @param {!Element} source
    * @param {string} actionEventType
-   * @param {!Event} event
+   * @param {?Event} event
    * @private
    */
   action_(source, actionEventType, event) {
@@ -237,7 +251,7 @@ export class ActionService {
    */
   actionInfoError_(s, actionInfo, target) {
     // Method not found "activate" on ' + target
-    user.assert(false, 'Action Error: ' + s +
+    user().assert(false, 'Action Error: ' + s +
         (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
         (target ? ' on [' + target + ']' : ''));
   }
@@ -419,7 +433,11 @@ export function parseActionMap(s, context) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         args: (args && window.AMP_TEST && Object.freeze) ?
+=======
+        args: (args && getMode().test && Object.freeze) ?
+>>>>>>> ampproject/master
 =======
         args: (args && getMode().test && Object.freeze) ?
 >>>>>>> ampproject/master
@@ -456,17 +474,22 @@ export function parseActionMap(s, context) {
  * @private
  */
 function assertActionForParser(s, context, condition, opt_message) {
-  return user.assert(condition, 'Invalid action definition in %s: [%s] %s',
+  return user().assert(condition, 'Invalid action definition in %s: [%s] %s',
       context, s, opt_message || '');
 }
 
 /**
  * @param {string} s
  * @param {!Element} context
+<<<<<<< HEAD
  * @param {!{type: string, value: *}} tok
  * @param {string} type
+=======
+ * @param {!{type: TokenType, value: *}} tok
+ * @param {TokenType} type
+>>>>>>> ampproject/master
  * @param {*=} opt_value
- * @return {!{type: string, value: *}}
+ * @return {!{type: TokenType, value: *}}
  * @private
  */
 function assertTokenForParser(s, context, tok, type, opt_value) {
@@ -637,7 +660,11 @@ function isNum(c) {
  * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
+<<<<<<< HEAD
   return getServiceForDoc(ampdoc, 'action', ampdoc => {
     return new ActionService(ampdoc);
   });
+=======
+  return fromClassForDoc(ampdoc, 'action', ActionService);
+>>>>>>> ampproject/master
 };

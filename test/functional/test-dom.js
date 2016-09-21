@@ -205,6 +205,33 @@ describe('DOM', () => {
     testChildElementByTag();
   });
 
+  function testChildElementsByTag() {
+    const parent = document.createElement('parent');
+
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('element23');
+    parent.appendChild(element2);
+
+    const element3 = document.createElement('element23');
+    parent.appendChild(element3);
+
+    expect(dom.childElementsByTag(parent, 'element1'))
+        .to.deep.equal([element1]);
+    expect(dom.childElementsByTag(parent, 'element23'))
+        .to.deep.equal([element2, element3]);
+    expect(dom.childElementsByTag(parent, 'element3'))
+        .to.deep.equal([]);
+  }
+
+  it('childElementsByTag should find first match', testChildElementsByTag);
+
+  it('childElementsByTag should find first match (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testChildElementsByTag();
+  });
+
   function testChildElementByAttr() {
     const parent = document.createElement('parent');
 
@@ -289,6 +316,35 @@ describe('DOM', () => {
     expect(dom.lastChildElementByAttr(parent, 'attr12')).to.equal(element2);
     expect(dom.lastChildElementByAttr(parent, 'attr3')).to.be.null;
     expect(dom.lastChildElementByAttr(parent, 'on-child')).to.be.null;
+  });
+
+  it('ancestorElements should find all matches', () => {
+    const parent = document.createElement('parent');
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+    const element2 = document.createElement('element2');
+    element1.appendChild(element2);
+    expect(dom.ancestorElements(element2, () => true).length).to.equal(2);
+    expect(dom.ancestorElements(element2, e => e.tagName == 'ELEMENT1').length)
+        .to.equal(1);
+    expect(dom.ancestorElements(element1, e => e.tagName == 'PARENT').length)
+        .to.equal(1);
+    expect(dom.ancestorElements(parent, e => e.tagName == 'ELEMENT3').length)
+        .to.be.equal(0);
+  });
+
+  it('ancestorElementsByTag should find all matches', () => {
+    const parent = document.createElement('parent');
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+    const element2 = document.createElement('element2');
+    element1.appendChild(element2);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT1').length)
+        .to.equal(1);
+    expect(dom.ancestorElementsByTag(element1, 'PARENT').length)
+        .to.equal(1);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT3').length)
+        .to.be.equal(0);
   });
 
   describe('contains', () => {
@@ -475,6 +531,14 @@ describe('DOM', () => {
       expect(params.fromTheOtherSide).to.be.equal('3');
       expect(params.attr1).to.be.undefined;
     });
+
+    it('should return key-value for custom data attributes', () => {
+      const element = document.createElement('element');
+      element.setAttribute('data-vars-event-name', 'click');
+      const params = dom.getDataParamsFromAttributes(element, null,
+        /^vars(.+)/);
+      expect(params.eventName).to.be.equal('click');
+    });
   });
 
   describe('hasNextNodeInDocumentOrder', () => {
@@ -610,6 +674,58 @@ describe('DOM', () => {
       const res = dom.openWindowDialog(windowApi, 'https://example.com/',
           '_top', 'width=1');
       expect(res).to.be.null;
+    });
+  });
+
+  describe('isJsonScriptTag', () => {
+    it('should return true for <script type="application/json">', () => {
+      const element = document.createElement('script');
+      element.setAttribute('type', 'application/json');
+      expect(dom.isJsonScriptTag(element)).to.be.true;
+    });
+
+    it('should return true for <script type="aPPLication/jSon">', () => {
+      const element = document.createElement('script');
+      element.setAttribute('type', 'aPPLication/jSon');
+      expect(dom.isJsonScriptTag(element)).to.be.true;
+    });
+
+    it('should return false for <script type="text/javascript">', () => {
+      const element = document.createElement('script');
+      element.setAttribute('type', 'text/javascript');
+      expect(dom.isJsonScriptTag(element)).to.be.false;
+    });
+
+    it('should return false for <div type="application/json">', () => {
+      const element = document.createElement('div');
+      element.setAttribute('type', 'application/json');
+      expect(dom.isJsonScriptTag(element)).to.be.false;
+    });
+  });
+
+  describe('escapeCssSelectorIdent', () => {
+
+    it('should escape natively', () => {
+      expect(dom.escapeCssSelectorIdent(window, 'a b')).to.equal('a\\ b');
+    });
+
+    it('should polyfill escape', () => {
+      expect(dom.escapeCssSelectorIdent({}, 'a b')).to.equal('a\\ b');
+    });
+  });
+
+  describe('escapeHtml', () => {
+    it('should tolerate empty string', () => {
+      expect(dom.escapeHtml('')).to.equal('');
+    });
+
+    it('should ignore non-escapes', () => {
+      expect(dom.escapeHtml('abc')).to.equal('abc');
+    });
+
+    it('should subsctitute escapes', () => {
+      expect(dom.escapeHtml('a<b>&c"d\'e\`f')).to.equal(
+          'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f');
     });
   });
 });

@@ -16,6 +16,10 @@
 
 import {layoutRectLtwh, layoutRectsOverlap} from '../layout-rect';
 import {dev} from '../log';
+<<<<<<< HEAD
+=======
+import {toggle} from '../style';
+>>>>>>> ampproject/master
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -73,8 +77,14 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
+<<<<<<< HEAD
     return dev.assert(Resource.forElementOptional(element),
         'Missing resource prop on %s', element);
+=======
+    return /** @type {!Resource} */ (
+        dev().assert(Resource.forElementOptional(element),
+            'Missing resource prop on %s', element));
+>>>>>>> ampproject/master
   }
 
   /**
@@ -92,14 +102,22 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
+<<<<<<< HEAD
     dev.assert(owner.contains(element), 'Owner must contain the element');
+=======
+    dev().assert(owner.contains(element), 'Owner must contain the element');
+>>>>>>> ampproject/master
     element[OWNER_PROP_] = owner;
   }
 
   /**
    * @param {number} id
    * @param {!AmpElement} element
+<<<<<<< HEAD
    * @param {!Resources} resources
+=======
+   * @param {!./resources-impl.Resources} resources
+>>>>>>> ampproject/master
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -113,13 +131,24 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+<<<<<<< HEAD
     /** @private {!Resources} */
+=======
+    /** @const {!Window} */
+    this.hostWin = element.ownerDocument.defaultView;
+
+    /** @private {!./resources-impl.Resources} */
+>>>>>>> ampproject/master
     this.resources_ = resources;
 
     /** @private {boolean} */
     this.blacklisted_ = false;
 
+<<<<<<< HEAD
     /** @const {!AmpElement|undefined|null} */
+=======
+    /** @private {!AmpElement|undefined|null} */
+>>>>>>> ampproject/master
     this.owner_ = undefined;
 
     /** @private {!ResourceState} */
@@ -147,6 +176,7 @@ export class Resource {
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
+<<<<<<< HEAD
     /**
      * Only used in the "runtime off" case when the monitoring code needs to
      * known when the element is upgraded.
@@ -164,6 +194,25 @@ export class Resource {
     this.loadPromise_ = new Promise(resolve => {
       /** @const  */
       this.loadPromiseResolve_ = resolve;
+=======
+   /**
+    * Pending change size that was requested but could not be satisfied.
+    * @private {!./resources-impl.SizeDef|undefined}
+    */
+    this.pendingChangeSize_ = undefined;
+
+    /** @private {boolean} */
+    this.loadedOnce_ = false;
+
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = null;
+
+    /** @private @const {!Promise} */
+    this.loadPromise_ = new Promise(resolve => {
+      this.loadPromiseResolve_ = resolve;
+    }).then(() => {
+      this.loadedOnce_ = true;
+>>>>>>> ampproject/master
     });
 
     /** @private {boolean} */
@@ -232,7 +281,11 @@ export class Resource {
     try {
       this.element.build();
     } catch (e) {
+<<<<<<< HEAD
       dev.error(TAG, 'failed to build:', this.debugid, e);
+=======
+      dev().error(TAG, 'failed to build:', this.debugid, e);
+>>>>>>> ampproject/master
       this.blacklisted_ = true;
       return;
     }
@@ -256,17 +309,25 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+<<<<<<< HEAD
    * @param {function()=} opt_callback A callback function.
    */
   changeSize(newHeight, newWidth, opt_callback) {
+=======
+   */
+  changeSize(newHeight, newWidth) {
+>>>>>>> ampproject/master
     this.element./*OK*/changeSize(newHeight, newWidth);
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+<<<<<<< HEAD
     if (opt_callback) {
       opt_callback();
     }
+=======
+>>>>>>> ampproject/master
   }
 
   /**
@@ -285,13 +346,20 @@ export class Resource {
     this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
   }
 
+<<<<<<< HEAD
   /** @private */
+=======
+>>>>>>> ampproject/master
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }
 
   /**
+<<<<<<< HEAD
    * @return {!SizeDef|undefined}
+=======
+   * @return {!./resources-impl.SizeDef|undefined}
+>>>>>>> ampproject/master
    */
   getPendingChangeSize() {
     return this.pendingChangeSize_;
@@ -345,6 +413,23 @@ export class Resource {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Completes collapse: ensures that the element is `display:none` and
+   * updates layout box.
+   */
+  completeCollapse() {
+    toggle(this.element, false);
+    this.layoutBox_ = layoutRectLtwh(
+        this.layoutBox_.left,
+        this.layoutBox_.top,
+        0, 0);
+    this.isFixed_ = false;
+    this.element.updateLayoutBox(this.layoutBox_);
+  }
+
+  /**
+>>>>>>> ampproject/master
    * @return {boolean}
    */
   isMeasureRequested() {
@@ -439,6 +524,14 @@ export class Resource {
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
     let distance;
+<<<<<<< HEAD
+=======
+    // If outside of viewport's x-axis, element is not in viewport.
+    if (viewportBox.right < layoutBox.left ||
+        viewportBox.left > layoutBox.right) {
+      return false;
+    }
+>>>>>>> ampproject/master
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
       distance = layoutBox.top - viewportBox.bottom;
@@ -487,18 +580,30 @@ export class Resource {
       return Promise.reject('already failed');
     }
 
+<<<<<<< HEAD
     dev.assert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
       dev.fine(TAG, 'layout canceled due to non pre-renderable element:',
+=======
+    dev().assert(this.state_ != ResourceState.NOT_BUILT,
+        'Not ready to start layout: %s (%s)', this.debugid, this.state_);
+
+    if (!isDocumentVisible && !this.prerenderAllowed()) {
+      dev().fine(TAG, 'layout canceled due to non pre-renderable element:',
+>>>>>>> ampproject/master
           this.debugid, this.state_);
       this.state_ = ResourceState.READY_FOR_LAYOUT;
       return Promise.resolve();
     }
 
     if (!this.isInViewport() && !this.renderOutsideViewport()) {
+<<<<<<< HEAD
       dev.fine(TAG, 'layout canceled due to element not being in viewport:',
+=======
+      dev().fine(TAG, 'layout canceled due to element not being in viewport:',
+>>>>>>> ampproject/master
           this.debugid, this.state_);
       this.state_ = ResourceState.READY_FOR_LAYOUT;
       return Promise.resolve();
@@ -507,20 +612,32 @@ export class Resource {
     // Double check that the element has not disappeared since scheduling
     this.measure();
     if (!this.isDisplayed()) {
+<<<<<<< HEAD
       dev.fine(TAG, 'layout canceled due to element loosing display:',
+=======
+      dev().fine(TAG, 'layout canceled due to element loosing display:',
+>>>>>>> ampproject/master
           this.debugid, this.state_);
       return Promise.resolve();
     }
 
     // Not-wanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
+<<<<<<< HEAD
       dev.fine(TAG, 'layout canceled since it wasn\'t requested:',
+=======
+      dev().fine(TAG, 'layout canceled since it wasn\'t requested:',
+>>>>>>> ampproject/master
           this.debugid, this.state_);
       this.state_ = ResourceState.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
+<<<<<<< HEAD
     dev.fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
+=======
+    dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
+>>>>>>> ampproject/master
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
 
@@ -547,9 +664,15 @@ export class Resource {
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {
+<<<<<<< HEAD
       dev.fine(TAG, 'layout complete:', this.debugid);
     } else {
       dev.fine(TAG, 'loading failed:', this.debugid, opt_reason);
+=======
+      dev().fine(TAG, 'layout complete:', this.debugid);
+    } else {
+      dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
+>>>>>>> ampproject/master
       return Promise.reject(opt_reason);
     }
   }
@@ -565,14 +688,33 @@ export class Resource {
 
   /**
    * Returns a promise that is resolved when this resource is laid out
+<<<<<<< HEAD
    * for the first time and the resource was loaded.
    * @return {!Promise}
    */
   loaded() {
+=======
+   * for the first time and the resource was loaded. Note that the resource
+   * could be unloaded subsequently. This method returns resolved promise for
+   * sunch unloaded elements.
+   * @return {!Promise}
+   */
+  loadedOnce() {
+>>>>>>> ampproject/master
     return this.loadPromise_;
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * @return {boolean} true if the resource has been loaded at least once.
+   */
+  hasLoadedOnce() {
+    return this.loadedOnce_;
+  }
+
+  /**
+>>>>>>> ampproject/master
    * Whether the resource is currently visible in the viewport.
    * @return {boolean}
    */
@@ -588,7 +730,11 @@ export class Resource {
     if (inViewport == this.isInViewport_) {
       return;
     }
+<<<<<<< HEAD
     dev.fine(TAG, 'inViewport:', this.debugid, inViewport);
+=======
+    dev().fine(TAG, 'inViewport:', this.debugid, inViewport);
+>>>>>>> ampproject/master
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
   }
@@ -636,6 +782,24 @@ export class Resource {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Calls element's pauseCallback callback.
+   */
+  pauseOnRemove() {
+    if (this.state_ == ResourceState.NOT_BUILT) {
+      return;
+    }
+    this.setInViewport(false);
+    if (this.paused_) {
+      return;
+    }
+    this.paused_ = true;
+    this.element.pauseCallback();
+  }
+
+  /**
+>>>>>>> ampproject/master
    * Calls element's resumeCallback callback.
    */
   resume() {
@@ -653,6 +817,7 @@ export class Resource {
     this.pause();
     this.unlayout();
   }
+<<<<<<< HEAD
 
   /**
    * Only allowed in dev mode when runtime is turned off. Performs all steps
@@ -694,4 +859,6 @@ export class Resource {
       return this.element.layoutCallback();
     });
   }
+=======
+>>>>>>> ampproject/master
 }

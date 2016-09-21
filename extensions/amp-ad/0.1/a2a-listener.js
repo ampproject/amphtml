@@ -17,6 +17,10 @@ import {closestByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
+<<<<<<< HEAD
+=======
+import {urls} from '../../../src/config';
+>>>>>>> ampproject/master
 
 
 /**
@@ -54,7 +58,11 @@ export function handleMessageEvent(win, event) {
   const source = event.source;
   const activeElement = win.document.activeElement;
   // Check that the active element is an iframe.
+<<<<<<< HEAD
   user.assert(activeElement.tagName == 'IFRAME',
+=======
+  user().assert(activeElement.tagName == 'IFRAME',
+>>>>>>> ampproject/master
       'A2A request with invalid active element %s %s %s',
       activeElement, nav.url, origin);
   let found = false;
@@ -69,6 +77,7 @@ export function handleMessageEvent(win, event) {
   }
   // Check that the active iframe contains the iframe that sent us
   // the message.
+<<<<<<< HEAD
   user.assert(found,
       'A2A request from invalid source win %s %s', nav.url, origin);
   // Check that the iframe is contained in an ad.
@@ -76,6 +85,15 @@ export function handleMessageEvent(win, event) {
       'A2A request from non-ad frame %s %s', nav.url, origin);
   // We only allow AMP shaped URLs.
   user.assert(nav.url.indexOf('https://cdn.ampproject.org/') == 0,
+=======
+  user().assert(found,
+      'A2A request from invalid source win %s %s', nav.url, origin);
+  // Check that the iframe is contained in an ad.
+  user().assert(closestByTag(activeElement, 'amp-ad'),
+      'A2A request from non-ad frame %s %s', nav.url, origin);
+  // We only allow AMP shaped URLs.
+  user().assert(nav.url.indexOf(urls.cdn) == 0,
+>>>>>>> ampproject/master
       'Invalid ad A2A URL %s %s', nav.url, origin);
   viewerFor(win).navigateTo(nav.url, 'ad-' + origin);
 }

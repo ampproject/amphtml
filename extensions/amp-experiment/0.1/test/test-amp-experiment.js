@@ -17,6 +17,10 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';
+<<<<<<< HEAD
+=======
+import {variantForOrNull} from '../../../../src/variant-service';
+>>>>>>> ampproject/master
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -35,6 +39,14 @@ describe('amp-experiment', () => {
         'variant-d': 50,
       },
     },
+<<<<<<< HEAD
+=======
+    'experiment-3': {
+      variants: {
+        'variant-e': 1,
+      },
+    },
+>>>>>>> ampproject/master
   };
 
   let sandbox;
@@ -52,7 +64,11 @@ describe('amp-experiment', () => {
   });
 
   afterEach(() => {
+<<<<<<< HEAD
     toggleExperiment(window, 'amp-experiment', false);
+=======
+    toggleExperiment(win, 'amp-experiment', false);
+>>>>>>> ampproject/master
     sandbox.restore();
   });
 
@@ -117,6 +133,7 @@ describe('amp-experiment', () => {
   it('should add attributes to body element for the allocated variants', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
+<<<<<<< HEAD
     stub.withArgs(
         win, config['experiment-1']).returns(Promise.resolve('variant-a'));
     stub.withArgs(
@@ -124,10 +141,31 @@ describe('amp-experiment', () => {
 
     experiment.buildCallback();
     return experiment.experimentVariants.then(() => {
+=======
+    stub.withArgs(win, 'experiment-1', config['experiment-1'])
+        .returns(Promise.resolve('variant-a'));
+    stub.withArgs(win, 'experiment-2', config['experiment-2'])
+        .returns(Promise.resolve('variant-d'));
+    stub.withArgs(win, 'experiment-3', config['experiment-3'])
+        .returns(Promise.resolve(null));
+
+    experiment.buildCallback();
+    return variantForOrNull(win).then(variants => {
+      expect(variants).to.jsonEqual({
+        'experiment-1': 'variant-a',
+        'experiment-2': 'variant-d',
+        'experiment-3': null,
+      });
+>>>>>>> ampproject/master
       expectBodyHasAttributes({
         'amp-x-experiment-1': 'variant-a',
         'amp-x-experiment-2': 'variant-d',
       });
+<<<<<<< HEAD
+=======
+      expect(win.document.body.getAttribute('amp-x-experiment-3'))
+          .to.equal(null);
+>>>>>>> ampproject/master
     });
   });
 });

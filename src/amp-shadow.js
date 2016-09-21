@@ -23,14 +23,21 @@ import './polyfills';
 
 import {installDocService} from './service/ampdoc-impl';
 import {
+<<<<<<< HEAD
   installBuiltins,
   installRuntimeServices,
   adopt,
+=======
+  adoptShadowMode,
+  installBuiltins,
+  installRuntimeServices,
+>>>>>>> ampproject/master
 } from './runtime';
 import {stubElements} from './custom-element';
 
 
 // Declare that this runtime will support multiple shadow-root docs.
+<<<<<<< HEAD
 installDocService(window, /* isSingleDoc */ false);
 
 // Core services.
@@ -42,13 +49,34 @@ installBuiltins(window);
 // Final configuration and stubbing.
 adopt(window);
 stubElements(window);
+=======
+installDocService(self, /* isSingleDoc */ false);
+
+// Core services.
+installRuntimeServices(self);
+
+// Builtins.
+installBuiltins(self);
+
+// Final configuration and stubbing.
+adoptShadowMode(self);
+stubElements(self);
+>>>>>>> ampproject/master
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
+<<<<<<< HEAD
 if (window.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML shadows – Version $internalRuntimeVersion$');
 }
 window.document.documentElement.setAttribute('amp-version',
+=======
+if (self.console) {
+  (console.info || console.log).call(console,
+      'Powered by AMP ⚡ HTML shadows – Version $internalRuntimeVersion$');
+}
+self.document.documentElement.setAttribute('amp-version',
+>>>>>>> ampproject/master
       '$internalRuntimeVersion$');

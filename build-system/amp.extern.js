@@ -25,6 +25,11 @@ window.context.amp3pSentinel;
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+window.context.clientId;
+window.context.initialIntersection;
+>>>>>>> ampproject/master
 =======
 window.context.clientId;
 window.context.initialIntersection;
@@ -46,9 +51,10 @@ window.draw3p;
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
-window.AMP_CONFIG;
+window.AMP_CONFIG = {};
 window.AMP = {};
 
+<<<<<<< HEAD
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
@@ -87,6 +93,29 @@ window.AMP.BaseElement.prototype.actionMap_;
 window.AMP.BaseElement.prototype.resources_;
 
 window.AMP.BaseTemplate;
+=======
+window.AMP_CONFIG.thirdPartyUrl;
+window.AMP_CONFIG.thirdPartyFrameHost;
+window.AMP_CONFIG.thirdPartyFrameRegex;
+window.AMP_CONFIG.cdnUrl;
+window.AMP_CONFIG.errorReportingUrl;
+
+// amp-viz-vega related externs.
+/**
+ * @typedef {{spec: function(!JSONType, function())}}
+ */
+let VegaParser;
+/**
+ * @typedef {{parse: VegaParser}}
+ */
+let VegaObject;
+/* @type {VegaObject} */
+window.vg;
+
+// Should have been defined in the closure compiler's extern file for
+// IntersectionObserverEntry, but appears to have been omitted.
+IntersectionObserverEntry.prototype.rootBounds;
+>>>>>>> ampproject/master
 
 // Externed explicitly because this private property is read across
 // binaries.
@@ -113,6 +142,10 @@ var AmpElement;
 var AccessService = function() {};
 /** @constructor */
 var UserNotificationManager = function() {};
+<<<<<<< HEAD
+=======
+UserNotificationManager.prototype.get;
+>>>>>>> ampproject/master
 /** @constructor */
 var Cid = function() {};
 /** @constructor */
@@ -143,10 +176,63 @@ FB.init;
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
+>>>>>>> ampproject/master
+=======
+
+// Validator
+var amp;
+amp.validator;
+amp.validator.validateUrlAndLog = function(string, doc, filter) {}
+
+// Temporary Access types (delete when amp-access is compiled
+// for type checking).
+var Activity;
+Activity.prototype.getTotalEngagedTime = function() {};
+var AccessService;
+AccessService.prototype.getAccessReaderId = function() {};
+AccessService.prototype.getAuthdataField = function(field) {};
+// Same for amp-analytics
+/**
+ * The "get CID" parameters.
+ * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
+ *   Default value is `false`.
+ * @typedef {{
+ *   scope: string,
+ *   createCookieIfNotPresent: (boolean|undefined),
+ * }}
+ */
+var GetCidDef;
+var Cid;
+/**
+ * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
+ *     for the case where this doc is not served by an AMP proxy. GetCidDef
+ *     structure can also instruct CID to create a cookie if one doesn't yet
+ *     exist in a non-proxy case.
+ * @param {!Promise} consent Promise for when the user has given consent
+ *     (if deemed necessary by the publisher) for use of the client
+ *     identifier.
+ * @param {!Promise=} opt_persistenceConsent Dedicated promise for when
+ *     it is OK to persist a new tracking identifier. This could be
+ *     supplied ONLY by the code that supplies the actual consent
+ *     cookie.
+ *     If this is given, the consent param should be a resolved promise
+ *     because this call should be only made in order to get consent.
+ *     The consent promise passed to other calls should then itself
+ *     depend on the opt_persistenceConsent promise (and the actual
+ *     consent, of course).
+ * @return {!Promise<?string>} A client identifier that should be used
+ *      within the current source origin and externalCidScope. Might be
+ *      null if no identifier was found or could be made.
+ *      This promise may take a long time to resolve if consent isn't
+ *      given.
+ */
+Cid.prototype.get = function(
+    externalCidScope, consent, opt_persistenceConsent) {}
 >>>>>>> ampproject/master

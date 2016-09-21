@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FIXED_HEIGHT</td>
+    <td>fixed-height</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -39,7 +39,7 @@ limitations under the License.
   </tr>
 </table>
 
-## Examples 
+## Examples
 
 Visual Mode:
 ```html
@@ -64,6 +64,10 @@ Classic Mode:
 The ID of the track, an integer.
 
 ## Optional attributes
+
+**data-secret-token**
+
+The secret token of the track, if it is private.
 
 **data-visual**
 

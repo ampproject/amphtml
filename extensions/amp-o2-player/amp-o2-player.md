@@ -31,7 +31,11 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
+<<<<<<< HEAD
     <td><a href="https://ampbyexample.com/components/amp-o2-player">amp-o2-player.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/o2-player.amp.html">o2-player.amp.html</a></td>
+=======
+    <td><a href="https://ampbyexample.com/components/amp-o2-player">amp-o2-player.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/o2player.amp.html">o2-player.amp.html</a></td>
+>>>>>>> ampproject/master
   </tr>
 </table>
 

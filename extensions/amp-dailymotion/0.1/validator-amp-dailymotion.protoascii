@@ -14,6 +14,11 @@
 # limitations under the license.
 #
 tags: {  # amp-dailymotion
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-dailymotion extension .js script"
   mandatory_parent: "HEAD"
@@ -46,6 +51,11 @@ tags: {  # amp-dailymotion
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html"
 }
 tags: {  # <amp-dailymotion>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "AMP-DAILYMOTION"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-dailymotion extension .js script"

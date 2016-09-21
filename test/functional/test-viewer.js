@@ -16,8 +16,12 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
-import {platform} from '../../src/platform';
-import {setModeForTesting} from '../../src/mode';
+import {platformFor} from '../../src/platform';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {installPerformanceService} from '../../src/service/performance-impl';
+import {resetServiceForTesting} from '../../src/service';
+import {timerFor} from '../../src/timer';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -27,10 +31,10 @@ describe('Viewer', () => {
   let windowMock;
   let viewer;
   let windowApi;
-  let timeouts;
   let clock;
   let events;
   let errorStub;
+  let platform;
 
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
@@ -48,12 +52,12 @@ describe('Viewer', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    timeouts = [];
     const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function(handler) {
-      timeouts.push(handler);
-    };
     windowApi = new WindowApi();
+    installPerformanceService(windowApi);
+    installPerformanceService(window);
+    windowApi.setTimeout = window.setTimeout;
+    windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
       hash: '',
       href: '/test/viewer',
@@ -70,16 +74,22 @@ describe('Viewer', () => {
       documentElement: {style: {}},
       title: 'Awesome doc',
     };
+    windowApi.navigator = window.navigator;
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
+    installPlatformService(windowApi);
+    installTimerService(windowApi);
     events = {};
-    errorStub = sandbox.stub(dev, 'error');
+    errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
+    platform = platformFor(windowApi);
     viewer = new Viewer(windowApi);
   });
 
   afterEach(() => {
+    resetServiceForTesting(windowApi, 'performance');
+    resetServiceForTesting(window, 'performance');
     windowMock.verify();
     sandbox.restore();
   });
@@ -205,6 +215,57 @@ describe('Viewer', () => {
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
+  it('should get fragment from the url in non-embedded mode', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.be.equal('foo');
+    });
+  });
+
+  it('should get fragment from the viewer in embedded mode' +
+      'if the viewer has capability of getting fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo&cap=fragment';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.be.equal('from-viewer');
+    });
+  });
+
+  it('should NOT get fragment from the viewer in embedded mode' +
+      'if the viewer does NOT have capability of getting fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.equal('');
+    });
+  });
+
+  it('should NOT get fragment from the viewer in embedded mode' +
+      'if the viewer does NOT return a fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve();
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.equal('');
+    });
+  });
+
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
@@ -218,12 +279,11 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
     sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
-    setModeForTesting({
+    windowApi.AMP_MODE = {
       localDev: false,
       development: false,
-    });
+    };
     const viewportType = new Viewer(windowApi).getViewportType();
-    setModeForTesting(null);
     expect(viewportType).to.equal('natural');
   });
 
@@ -449,6 +509,80 @@ describe('Viewer', () => {
     viewer.postDocumentReady();
     expect(viewer.messageQueue_.length).to.equal(1);
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
+<<<<<<< HEAD
+=======
+  });
+
+  describe('baseCid', () => {
+    const cidData = JSON.stringify({
+      time: 100,
+      cid: 'cid-123',
+    });
+    let trustedViewer;
+    let persistedCidData;
+    let shouldTimeout;
+
+    beforeEach(() => {
+      shouldTimeout = false;
+      clock.tick(100);
+      trustedViewer = true;
+      persistedCidData = cidData;
+      sandbox.stub(viewer, 'isTrustedViewer',
+          () => Promise.resolve(trustedViewer));
+      sandbox.stub(viewer, 'sendMessage', (message, payload) => {
+        if (message != 'cid') {
+          return Promise.reject();
+        }
+        if (shouldTimeout) {
+          return timerFor(window).promise(15000);
+        }
+        if (payload) {
+          persistedCidData = payload;
+        }
+        return Promise.resolve(persistedCidData);
+      });
+    });
+
+    it('should return CID', () => {
+      const p = expect(viewer.baseCid()).to.eventually.equal(cidData);
+      p.then(() => {
+        // This should not trigger a timeout.
+        clock.tick(100000);
+      });
+      return p;
+    });
+
+    it('should not request cid for untrusted viewer', () => {
+      trustedViewer = false;
+      return expect(viewer.baseCid()).to.eventually.be.undefined;
+    });
+
+    it('should convert CID returned by legacy API to new format', () => {
+      persistedCidData = 'cid-123';
+      return expect(viewer.baseCid()).to.eventually.equal(cidData);
+    });
+
+    it('should send message to store cid', () => {
+      const newCidData = JSON.stringify({time: 101, cid: 'cid-456'});
+      return expect(viewer.baseCid(newCidData))
+          .to.eventually.equal(newCidData);
+    });
+
+    it('should time out', () => {
+      shouldTimeout = true;
+      const p = expect(viewer.baseCid()).to.eventually.be.undefined;
+      Promise.resolve().then(() => {
+        clock.tick(9999);
+        Promise.resolve().then(() => {
+          clock.tick(1);
+        });
+      });
+      return p.then(() => {
+        // Ticked 100 at start.
+        expect(Date.now()).to.equal(10100);
+      });
+    });
+>>>>>>> ampproject/master
   });
 
   it('should dequeue events when deliverer set', () => {

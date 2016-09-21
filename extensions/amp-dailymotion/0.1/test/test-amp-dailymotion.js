@@ -51,8 +51,6 @@ describe('amp-dailymotion', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 

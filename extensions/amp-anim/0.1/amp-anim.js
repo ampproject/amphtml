@@ -14,37 +14,45 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {srcsetFromElement} from '../../../src/srcset';
 import * as st from '../../../src/style';
 
 class AmpAnim extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {!Element} */
+    this.img_ = new Image();
+
+    /** @private {?../../../src/srcset.Srcset} */
+    this.srcset_ = null;
+
+    /** @private {?Promise} */
+    this.loadPromise_ = null;
+  }
+
   /** @override */
+<<<<<<< HEAD
+=======
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
   /** @override */
+>>>>>>> ampproject/master
   buildCallback() {
-    /** @private @const {!Element} */
-    this.img_ = new Image();
     this.propagateAttributes(['alt'], this.img_);
     this.applyFillContent(this.img_, true);
-    this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
-    this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 
     // The image is initially hidden if a placeholder is available.
     st.toggle(this.img_, !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
 
-    /** @private @const {!Srcset} */
     this.srcset_ = srcsetFromElement(this.element);
-
-    /** @private {?Promise} */
-    this.loadPromise_ = null;
   }
 
   /** @override */
@@ -99,7 +107,7 @@ class AmpAnim extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.img_.setAttribute('src', src);
-    this.loadPromise_ = loadPromise(this.img_)
+    this.loadPromise_ = this.loadPromise(this.img_)
         .catch(error => {
           if (!this.img_.getAttribute('src')) {
             return;

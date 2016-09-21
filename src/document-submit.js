@@ -16,7 +16,12 @@
 
 import {startsWith} from './string';
 import {user} from './log';
+<<<<<<< HEAD
 import {assertHttpsUrl} from './url';
+=======
+import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
+import {urls} from './config';
+>>>>>>> ampproject/master
 
 
 /** @const {string} */
@@ -51,17 +56,51 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
+  const inputs = form.elements;
+  for (let i = 0; i < inputs.length; i++) {
+    user().assert(!inputs[i].name ||
+        inputs[i].name != SOURCE_ORIGIN_PARAM,
+        'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+  }
+
   const action = form.getAttribute('action');
-  user.assert(action, 'form action attribute is required: %s', form);
-  assertHttpsUrl(action, form, 'action');
-  user.assert(!startsWith(action, 'https://cdn.ampproject.org'),
-      'form action should not be on cdn.ampproject.org: %s', form);
+  const actionXhr = form.getAttribute('action-xhr');
+  const method = (form.getAttribute('method') || 'GET').toUpperCase();
+  if (method == 'GET') {
+    user().assert(action,
+        'form action attribute is required for method=GET: %s', form);
+    assertHttpsUrl(action, /** @type {!Element} */ (form), 'action');
+    user().assert(!startsWith(action, urls.cdn),
+        'form action should not be on AMP CDN: %s', form);
+    checkCorsUrl(action);
+  } else if (action) {
+    e.preventDefault();
+    user().assert(false,
+        'form action attribute is invalid for method=POST: %s', form);
+  } else if (!actionXhr) {
+    e.preventDefault();
+    user().assert(false,
+        'Only XHR based (via action-xhr attribute) submissions are support ' +
+        'for POST requests. %s',
+        form);
+  }
+  checkCorsUrl(actionXhr);
 
   const target = form.getAttribute('target');
-  user.assert(target, 'form target attribute is required: %s', form);
-  user.assert(target == '_blank' || target == '_top',
+  user().assert(target, 'form target attribute is required: %s', form);
+  user().assert(target == '_blank' || target == '_top',
       'form target=%s is invalid can only be _blank or _top: %s', target, form);
   const shouldValidate = !form.hasAttribute('novalidate');
+
+  // amp-form extension will add novalidate to all forms to manually trigger
+  // validation. In that case `novalidate` doesn't have the same meaning.
+  const isAmpFormMarked = form.classList.contains('-amp-form');
+  let shouldValidate;
+  if (isAmpFormMarked) {
+    shouldValidate = !form.hasAttribute('amp-novalidate');
+  } else {
+    shouldValidate = !form.hasAttribute('novalidate');
+  }
 
   // Safari does not trigger validation check on submission, hence we
   // trigger it manually. In other browsers this would never execute since

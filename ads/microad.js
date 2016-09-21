@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {loadScript, checkData} from '../3p/3p';
 
 /* global MicroAd: false */
@@ -25,14 +26,24 @@ import {loadScript, checkData} from '../3p/3p';
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
+=======
+import {loadScript, validateData} from '../3p/3p';
+
+/* global MicroAd: false */
+>>>>>>> ampproject/master
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function microad(global, data) {
+<<<<<<< HEAD
   const microadData = ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo'];
   checkData(data, microadData);
+=======
+  // TODO: check mandatory fields
+  validateData(data, [], ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo']);
+>>>>>>> ampproject/master
 
   global.document.getElementById('c').setAttribute('id', data.spot);
   loadScript(global, 'https://j.microad.net/js/camp.js', () => {

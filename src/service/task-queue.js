@@ -15,22 +15,36 @@
  */
 
 import {dev} from '../log';
+<<<<<<< HEAD
 import {timer} from '../timer';
+=======
+>>>>>>> ampproject/master
 
 
 /**
  * The internal structure for the task.
  * @typedef {{
  *   id: string,
+<<<<<<< HEAD
  *   resource: !Resource,
+=======
+ *   resource: !./resource.Resource,
+>>>>>>> ampproject/master
  *   priority: number,
  *   callback: function(boolean),
  *   scheduleTime: time,
  *   startTime: time,
+<<<<<<< HEAD
  *   promise: (!Promise|undefined)
  * }}
  */
 let TaskDef;
+=======
+ *   promise: (?Promise|undefined)
+ * }}
+ */
+export let TaskDef;
+>>>>>>> ampproject/master
 
 
 /**
@@ -93,10 +107,18 @@ export class TaskQueue {
    * @param {!TaskDef} task
    */
   enqueue(task) {
+<<<<<<< HEAD
     dev.assert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;
     this.lastEnqueueTime_ = timer.now();
+=======
+    dev().assert(
+        !this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
+    this.tasks_.push(task);
+    this.taskIdMap_[task.id] = task;
+    this.lastEnqueueTime_ = Date.now();
+>>>>>>> ampproject/master
   }
 
   /**
@@ -111,7 +133,11 @@ export class TaskQueue {
     if (!dequeued) {
       return false;
     }
+<<<<<<< HEAD
     this.lastDequeueTime_ = timer.now();
+=======
+    this.lastDequeueTime_ = Date.now();
+>>>>>>> ampproject/master
     return true;
   }
 

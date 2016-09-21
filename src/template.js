@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {getService} from './service';
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -349,6 +350,9 @@ export function registerExtendedTemplate(win, type, templateClass) {
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
+=======
+import {getExistingServiceForWindow} from './service';
+>>>>>>> ampproject/master
 
 
 /**
@@ -357,5 +361,9 @@ export function registerExtendedTemplate(win, type, templateClass) {
  */
 export function templatesFor(window) {
   return /** @type {!./service/template-impl.Templates} */ (
+<<<<<<< HEAD
       getService(window, 'templates'));
+=======
+      getExistingServiceForWindow(window, 'templates'));
+>>>>>>> ampproject/master
 };

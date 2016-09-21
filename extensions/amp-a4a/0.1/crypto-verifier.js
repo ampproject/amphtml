@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
+=======
+import {
+  base64UrlDecodeToBytes,
+  stringToBytes,
+} from '../../../src/utils/base64';
+>>>>>>> ampproject/master
 import {dev} from '../../../src/log';
 
 const TAG_ = 'CryptoVerifier';
@@ -41,8 +48,13 @@ let PublicKeyInfoDef;
  * @return {!Promise<!PublicKeyInfoDef>}
  */
 export function importPublicKey(publicKey) {
+<<<<<<< HEAD
   const lenMod = lenPrefix(base64UrlDecode(publicKey['n']));
   const lenPubExp = lenPrefix(base64UrlDecode(publicKey['e']));
+=======
+  const lenMod = lenPrefix(base64UrlDecodeToBytes(publicKey['n']));
+  const lenPubExp = lenPrefix(base64UrlDecodeToBytes(publicKey['e']));
+>>>>>>> ampproject/master
   const data = new Uint8Array(lenMod.length + lenPubExp.length);
   data.set(lenMod);
   data.set(lenPubExp, lenMod.length);
@@ -58,7 +70,11 @@ export function importPublicKey(publicKey) {
       // Now Get the CryptoKey.
       const jsonPublicKey = isWebkit ?
             // Webkit wants this as an ArrayBuffer.
+<<<<<<< HEAD
             stringToByteArray(JSON.stringify(publicKey)) :
+=======
+            stringToBytes(JSON.stringify(publicKey)) :
+>>>>>>> ampproject/master
             publicKey;
       // Convert the key to internal CryptoKey format.
       return crossCrypto.importKey(
@@ -91,7 +107,11 @@ export function verifySignature(data, signature, publicKeyInfos) {
     .then(results => results.some(x => x))
     .catch(error => {
       // Note if anything goes wrong.
+<<<<<<< HEAD
       dev.error(TAG_, 'Error while verifying:', error);
+=======
+      dev().error(TAG_, 'Error while verifying:', error);
+>>>>>>> ampproject/master
       throw error;
     });
 }
@@ -175,6 +195,7 @@ function hashesEqual(signature, keyHash) {
   }
   return true;
 }
+<<<<<<< HEAD
 
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
@@ -208,3 +229,5 @@ export function base64UrlDecode(str) {
   return stringToByteArray(atob(str.replace(/[-_.]/g,
                                             ch => atobSubs[ch])));
 }
+=======
+>>>>>>> ampproject/master

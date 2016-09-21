@@ -36,8 +36,12 @@
       layout="responsive" width="480" height="270">
   </amp-o2-player>
 
+<<<<<<< HEAD
   <!-- Valid: data-video-id, data-player-id are optional;
        leaving them out results in the default config. -->
+=======
+  <!-- Valid: data-vid is optional -->
+>>>>>>> ampproject/master
   <amp-o2-player
       data-pid="573d9bf1e4b02a3388f42c36"
       data-bcid="50d595ec0364e95588c77bd2"
@@ -46,9 +50,23 @@
       layout="responsive" width="480" height="270">
   </amp-o2-player>
 
+<<<<<<< HEAD
   <!-- Invalid: at least vid or pid & bcid are needed;
        leaving them out results in an error. -->
   <amp-o2-player
+=======
+  <!-- Invalid: bcid is needed;
+       leaving it out results in an error. -->
+  <amp-o2-player
+      data-pid="573d9bf1e4b02a3388f42c36"
+      layout="responsive" width="480" height="270">
+  </amp-o2-player>
+
+  <!-- Invalid: pid is needed;
+         leaving it out results in an error. -->
+  <amp-o2-player
+      data-bcid="50d595ec0364e95588c77bd2"
+>>>>>>> ampproject/master
       layout="responsive" width="480" height="270">
   </amp-o2-player>
 </body>

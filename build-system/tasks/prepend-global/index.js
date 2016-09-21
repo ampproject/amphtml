@@ -24,6 +24,22 @@ var util = require('gulp-util');
 
 
 /**
+<<<<<<< HEAD
+=======
+ * Checks that only 1 AMP_CONFIG should exist after append.
+ *
+ * @param {string} str
+ * @return {boolean}
+ */
+function sanityCheck(str) {
+  var re = /\/\*AMP_CONFIG\*\//g;
+  // There must be one and exactly 1 match.
+  var matches = str.match(re)
+  return matches != null && matches.length == 1;
+}
+
+/**
+>>>>>>> ampproject/master
  * @param {string} filename
  * @param {string=} opt_branch
  * @return {!Promise}
@@ -122,13 +138,38 @@ function main() {
         return prependConfig(configFile, targetFile);
       })
       .then(fileString => {
+<<<<<<< HEAD
+=======
+        if (!sanityCheck(fileString)) {
+          throw new Error('Found 0 or > 1 AMP_CONFIG(s) before write. ' +
+              'aborting');
+        }
+>>>>>>> ampproject/master
         return writeTarget(target, fileString, argv.dryrun);
       });
 }
 
+<<<<<<< HEAD
 gulp.task('prepend-global', 'test', main);
+=======
+gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
+  options: {
+    'target': '  The file to prepend the json config to.',
+    'canary': '  Prepend the default canary config. ' +
+        'Takes in an optional value for a custom canary config source.',
+    'prod': '  Prepend the default prod config. ' +
+        'Takes in an optional value for a custom prod config source.',
+    'branch': '  Switch to a git branch to get config source from. ' +
+        'Uses master by default.',
+  }
+});
+>>>>>>> ampproject/master
 
 exports.checkoutBranchConfigs = checkoutBranchConfigs;
 exports.prependConfig = prependConfig;
 exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
+<<<<<<< HEAD
+=======
+exports.sanityCheck = sanityCheck;
+>>>>>>> ampproject/master

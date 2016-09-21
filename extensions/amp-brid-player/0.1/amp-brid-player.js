@@ -14,17 +14,33 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 class AmpBridPlayer extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://services.brid.tv', onLayout);
-    this.preconnect.url('https://cdn.brid.tv', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.partnerID_ = '';
+
+    /** @private {string} */
+    this.feedID_ = '';
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://services.brid.tv', opt_onLayout);
+    this.preconnect.url('https://cdn.brid.tv', opt_onLayout);
   }
 
   /** @override */
@@ -34,23 +50,12 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
-
-    /** @private @const {string} */
-    this.partnerID_ = user.assert(
+    this.partnerID_ = user().assert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);
 
-    /** @private @const {string} */
-    this.feedID_ = user.assert(
+    this.feedID_ = user().assert(
         (this.element.getAttribute('data-video') ||
         this.element.getAttribute('data-playlist')),
         'Either the data-video or the data-playlist ' +
@@ -64,16 +69,16 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const playerID = user.assert(this.element.getAttribute('data-player'),
+    const playerID = user().assert(this.element.getAttribute('data-player'),
         'The data-player attribute is required for <amp-brid-player> %s',
         this.element);
 
-    const partnerID = user.assert(
+    const partnerID = user().assert(
         this.partnerID_,
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);
 
-    let feedType;
+    let feedType = '';
 
     if (this.element.getAttribute('data-video')) {
       feedType = 'video';
@@ -92,12 +97,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -125,15 +127,14 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     imgPlaceholder.src = 'https://cdn.brid.tv/live/partners/' + encodeURIComponent(partnerID) + '/snapshot/' + encodeURIComponent(feedID) + '.jpg';
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
+    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
-    this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
 
-    loadPromise(imgPlaceholder).catch(() => {
-      imgPlaceholder.src = 'https://services.brid.tv/ugc/default/defaultSnapshot.png';
-      return loadPromise(imgPlaceholder);
+    this.loadPromise(imgPlaceholder).catch(() => {
+      imgPlaceholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
+      return this.loadPromise(imgPlaceholder);
     }).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',

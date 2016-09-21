@@ -15,6 +15,11 @@
 #
 
 tags: {  # amp-facebook
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-facebook extension .js script"
   mandatory_parent: "HEAD"
@@ -47,6 +52,11 @@ tags: {  # amp-facebook
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-facebook.html"
 }
 tags: {  # <amp-facebook>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "AMP-FACEBOOK"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-facebook extension .js script"

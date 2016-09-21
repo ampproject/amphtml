@@ -15,21 +15,25 @@
  */
 
 import {closestByTag} from './dom';
-import {getService} from './service';
+import {fromClass} from './service';
 import {dev} from './log';
 import {historyFor} from './history';
 import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
-import {platform} from './platform';
+import {platformFor} from './platform';
+import {urlReplacementsFor} from './url-replacements';
 
+/** @private @const {string} */
+const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
 
 /**
  * @param {!Window} window
  */
 export function installGlobalClickListener(window) {
   clickHandlerFor(window);
+  captureClickHandlerFor(window);
 }
 
 /**
@@ -37,28 +41,32 @@ export function installGlobalClickListener(window) {
  */
 export function uninstallGlobalClickListener(window) {
   clickHandlerFor(window).cleanup();
+  captureClickHandlerFor(window).cleanup();
 }
 
 /**
  * @param {!Window} window
+ * @return {!ClickHandler} bubble document click handler.
  */
 function clickHandlerFor(window) {
-  return getService(window, 'clickhandler', () => {
-    return new ClickHandler(window);
-  });
+  return fromClass(window, 'clickhandler', ClickHandler);
+}
+
+function captureClickHandlerFor(window) {
+  return fromClass(window, 'CaptureClickHandler', CaptureClickHandler);
 }
 
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * visibleForTesting
+ * @visibleForTesting
  */
 export class ClickHandler {
   /**
    * @param {!Window} window
    */
   constructor(window) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = window;
 
     /** @private @const {!./service/viewport-impl.Viewport} */
@@ -69,6 +77,10 @@ export class ClickHandler {
 
     /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
+
+    const platform = platformFor(this.win);
+    /** @private @const {boolean} */
+    this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
     // Only intercept clicks when iframed.
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
@@ -90,15 +102,94 @@ export class ClickHandler {
   }
 
   /**
-   * Intercept any click on the current document and prevent any
-   * linking to an identifier from pushing into the history stack.
+   * Click event handler which on bubble propagation intercepts any click on the
+   * current document and prevent any linking to an identifier from pushing into
+   * the history stack.
    * @param {!Event} e
    */
   handle_(e) {
-    onDocumentElementClick_(e, this.viewport_, this.history_);
+    onDocumentElementClick_(
+          e, this.viewport_, this.history_, this.isIosSafari_);
   }
 }
 
+/**
+ * Intercept any click on the current document and prevent any
+ * linking to an identifier from pushing into the history stack.
+ * @visibleForTesting
+ */
+export class CaptureClickHandler {
+  /**
+   * @param {!Window} window
+   */
+  constructor(window) {
+    /** @const {!Window} */
+    this.win = window;
+
+    /** @private @const {!./service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsFor(this.win);
+
+    /** @private {!function(!Event)} */
+    this.boundHandler_ = this.handle_.bind(this);
+
+    this.win.document.documentElement.addEventListener(
+        'click', this.boundHandler_, true);
+  }
+
+  /**
+   * Removes all event listeners.
+   */
+  cleanup() {
+    this.win.document.documentElement.removeEventListener(
+          'click', this.boundHandler_);
+  }
+
+  /**
+   * Register clicks listener.
+   * @param {!Event} e
+   */
+  handle_(e) {
+    onDocumentElementCapturedClick_(e, this.urlReplacements_);
+  }
+}
+
+/**
+ * Locate first element with given tag name within event path from shadowRoot.
+ * @param {!Event} e
+ * @param {!string} tagName
+ * @return {?Element}
+ * @visibleForTesting
+ */
+export function getElementByTagNameFromEventShadowDomPath_(e, tagName) {
+  for (let i = 0; i < (e.path ? e.path.length : 0); i++) {
+    const element = e.path[i];
+    if (element && element.tagName &&
+        element.tagName.toUpperCase() == tagName) {
+      return element;
+    }
+  }
+  return null;
+}
+
+/**
+ * Expands target anchor href on capture click event.  If within shadow DOM,
+ * will offset from host element.
+ * @param {!Event} e
+ * @param {!./service/url-replacements-impl.UrlReplacements} urlReplacements
+ */
+export function onDocumentElementCapturedClick_(e, urlReplacements) {
+  // If within a shadowRoot, the event target will be the host element due to
+  // event target rewrite.  Given that it is possible a shadowRoot could be
+  // within an anchor tag, we need to check the event path prior to looking
+  // at the host element's closest tags.
+  const target = getElementByTagNameFromEventShadowDomPath_(e, 'A') ||
+      closestByTag(dev().assertElement(e.target), 'A');
+
+  // Expand URL where valid.
+  if (target && target.href) {
+    target.href = expandTargetHref_(e, target, urlReplacements);
+  }
+}
 
 /**
  * Intercept any click on the current document and prevent any
@@ -110,13 +201,17 @@ export class ClickHandler {
  * @param {!Event} e
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
+<<<<<<< HEAD
+=======
+ * @param {boolean} isIosSafari
+>>>>>>> ampproject/master
  */
-export function onDocumentElementClick_(e, viewport, history) {
+export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   if (e.defaultPrevented) {
     return;
   }
 
-  const target = closestByTag(e.target, 'A');
+  const target = closestByTag(dev().assertElement(e.target), 'A');
   if (!target) {
     return;
   }
@@ -130,7 +225,6 @@ export function onDocumentElementClick_(e, viewport, history) {
   // On Safari iOS, custom protocol links will fail to open apps when the
   // document is iframed - in order to go around this, we set the top.location
   // to the custom protocol href.
-  const isSafariIOS = platform.isIos() && platform.isSafari();
   const isFTP = tgtLoc.protocol == 'ftp:';
 
   // In case of FTP Links in embedded documents always open then in _blank.
@@ -140,7 +234,7 @@ export function onDocumentElementClick_(e, viewport, history) {
   }
 
   const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
-  if (isSafariIOS && !isNormalProtocol) {
+  if (isIosSafari && !isNormalProtocol) {
     openWindowDialog(win, target.href, '_top');
     // Without preventing default the page would should an alert error twice
     // in the case where there's no app to handle the custom protocol.
@@ -196,7 +290,7 @@ export function onDocumentElementClick_(e, viewport, history) {
   if (elem) {
     viewport./*OK*/scrollIntoView(elem);
   } else {
-    dev.warn('documentElement',
+    dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 
@@ -204,4 +298,62 @@ export function onDocumentElementClick_(e, viewport, history) {
   history.push(() => {
     win.location.replace(`${curLoc.hash || '#'}`);
   });
+};
+
+/**
+ * Get offset location of click from event taking into account shadowRoot.
+ * @param {!Event} e
+ * @return {!{left: string, top: string}}
+ */
+function getClickLocation_(e) {
+  // Use existence of event path as indicator that event was rewritten
+  // due to shadowDom in which case the event target is the host element.
+  // NOTE(keithwrightbos) - this assumes that there is only one level
+  // of shadowRoot, not sure how this would behave otherwise (likely only
+  // offset to closest shadowRoot).
+  return {
+    left: (e.clientX === undefined ? '' :
+        String(e.clientX -
+          (e.path && e.target ? e.target./*OK*/offsetLeft : 0))),
+    top: (e.clientY === undefined ? '' :
+        String(e.clientY -
+          (e.path && e.target ? e.target./*OK*/offsetTop : 0))),
+  };
+}
+
+/**
+ * Expand click target href synchronously using UrlReplacements service
+ * including CLICK_X/CLICK_Y page offsets (if within shadowRoot will reference
+ * from host).
+ *
+ * @param {!Event} e click event.
+ * @param {!Element} target nearest anchor to event target.
+ * @param {!./service/url-replacements-impl.UrlReplacements} urlReplacements
+ * @return {string|undefined} expanded href
+ * @visibleForTesting
+ */
+export function expandTargetHref_(e, target, urlReplacements) {
+  const hrefToExpand =
+    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute('href');
+  if (!hrefToExpand) {
+    return;
+  }
+  const vars = {
+    'CLICK_X': () => {
+      return getClickLocation_(e).left;
+    },
+    'CLICK_Y': () => {
+      return getClickLocation_(e).top;
+    },
+  };
+  const newHref = urlReplacements.expandSync(hrefToExpand, vars);
+  if (newHref != hrefToExpand) {
+    // Store original value so that later clicks can be processed with
+    // freshest values.
+    if (!target.getAttribute(ORIGINAL_HREF_ATTRIBUTE)) {
+      target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, hrefToExpand);
+    }
+    target.setAttribute('href', newHref);
+  }
+  return newHref;
 };

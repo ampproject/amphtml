@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {getServiceForDoc} from './service';
+=======
+import {getExistingServiceForDoc} from './service';
+>>>>>>> ampproject/master
 
 
 /**
@@ -22,5 +26,9 @@ import {getServiceForDoc} from './service';
  * @return {!Action}
  */
 export function actionServiceForDoc(nodeOrDoc) {
+<<<<<<< HEAD
   return getServiceForDoc(nodeOrDoc, 'action');
+=======
+  return getExistingServiceForDoc(nodeOrDoc, 'action');
+>>>>>>> ampproject/master
 }

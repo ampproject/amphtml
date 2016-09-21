@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 /**
  * @param {!Window} window
@@ -22,5 +22,9 @@ import {getService} from './service';
  */
 export function viewportFor(window) {
   return /** @type {!./service/viewport-impl.Viewport} */ (
+<<<<<<< HEAD
       getService(window, 'viewport'));
+=======
+      getExistingServiceForWindow(window, 'viewport'));
+>>>>>>> ampproject/master
 };

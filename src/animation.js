@@ -16,13 +16,11 @@
 
 import {getCurve} from './curve';
 import {dev} from './log';
-import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
 const TAG_ = 'Animation';
 
 const NOOP_CALLBACK = function() {};
-
 
 /**
  * The animation class allows construction of arbitrary animation processes.
@@ -38,9 +36,15 @@ export class Animation {
    * object that can be used to monitor or control animation.
    *
    * @param {!Node} contextNode The context node.
+<<<<<<< HEAD
    * @param {!Transition<?>} transition Transition to animate.
    * @param {timeDef} duration Duration in milliseconds.
    * @param {(!Curve|string)=} opt_curve Optional curve to use for animation.
+=======
+   * @param {!./transition.TransitionDef<?>} transition Transition to animate.
+   * @param {./time.timeDef} duration Duration in milliseconds.
+   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for animation.
+>>>>>>> ampproject/master
    *   Default is the linear animation.
    * @return {!AnimationPlayer}
    */
@@ -53,16 +57,25 @@ export class Animation {
 
   /**
    * @param {!Node} contextNode
+<<<<<<< HEAD
    * @param {!Vsync=} opt_vsync
+=======
+   * @param {!./service/vsync-impl.Vsync=} opt_vsync
+>>>>>>> ampproject/master
    */
   constructor(contextNode, opt_vsync) {
     /** @private @const {!Node} */
     this.contextNode_ = contextNode;
 
+<<<<<<< HEAD
     /** @private @const */
     this.vsync_ = opt_vsync || vsyncFor(window);
+=======
+    /** @private @const {!./service/vsync-impl.Vsync} */
+    this.vsync_ = opt_vsync || vsyncFor(self);
+>>>>>>> ampproject/master
 
-    /** @private {?Curve} */
+    /** @private {?./curve.CurveDef} */
     this.curve_ = null;
 
     /**
@@ -75,11 +88,13 @@ export class Animation {
    * Sets the default curve for the animation. Each segment is allowed to have
    * its own curve, but this curve will be used if a segment doesn't specify
    * its own.
-   * @param {!Curve|string} curve
+   * @param {!./curve.CurveDef|string|undefined} curve
    * @return {!Animation}
    */
   setCurve(curve) {
-    this.curve_ = getCurve(curve);
+    if (curve) {
+      this.curve_ = getCurve(curve);
+    }
     return this;
   }
 
@@ -91,10 +106,10 @@ export class Animation {
    * the default animation curve will be used. The specified transition is
    * animated over the specified duration from 0 to 1.
    *
-   * @param {normtimeDef} delay
-   * @param {!Transition<?>} transition
-   * @param {normtimeDef} duration
-   * @param {(!Curve|string)=} opt_curve
+   * @param {./time.normtimeDef} delay
+   * @param {!./transition.TransitionDef<?>} transition
+   * @param {./time.normtimeDef} duration
+   * @param {(!./curve.CurveDef|string)=} opt_curve
    * @return {!Animation}
    */
   add(delay, transition, duration, opt_curve) {
@@ -111,7 +126,7 @@ export class Animation {
    * Starts the animation and returns the AnimationPlayer object that can be
    * used to monitor and control the animation.
    *
-   * @param {timeDef} duration Absolute time in milliseconds.
+   * @param {./time.timeDef} duration Absolute time in milliseconds.
    * @return {!AnimationPlayer}
    */
   start(duration) {
@@ -129,20 +144,25 @@ export class Animation {
  * semantics of a Promise and signal when the animation completed or failed.
  * Additionally, it exposes the method "halt" which allows to stop/reset the
  * animation.
- * @implements {IThenable}
+ * // TODO(@cramforce) Actually fully implement.
+ * implements {IThenable}
  */
 class AnimationPlayer {
 
   /**
+<<<<<<< HEAD
    * @param {!Vsync} vsync
+=======
+   * @param {!./service/vsync-impl.Vsync} vsync
+>>>>>>> ampproject/master
    * @param {!Node} contextNode
    * @param {!Array<!SegmentDef>} segments
-   * @param {?Curve} defaultCurve
-   * @param {timeDef} duration
+   * @param {?./curve.CurveDef} defaultCurve
+   * @param {./time.timeDef} duration
    */
   constructor(vsync, contextNode, segments, defaultCurve, duration) {
 
-    /** @private @const {!Vsync} */
+    /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
     /** @private @const {!Node} */
@@ -165,13 +185,13 @@ class AnimationPlayer {
     /** @private @const */
     this.duration_ = duration;
 
-    /** @private {timeDef} */
+    /** @private {./time.timeDef} */
     this.startTime_ = 0;
 
-    /** @private {normtimeDef} */
+    /** @private {./time.normtimeDef} */
     this.normLinearTime_ = 0;
 
-    /** @private {normtimeDef} */
+    /** @private {./time.normtimeDef} */
     this.normTime_ = 0;
 
     /** @private {boolean} */
@@ -240,12 +260,12 @@ class AnimationPlayer {
    * @private
    */
   start_() {
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
     this.running_ = true;
     if (this.vsync_.canAnimate(this.contextNode_)) {
       this.task_(this.state_);
     } else {
-      dev.warn(TAG_, 'cannot animate');
+      dev().warn(TAG_, 'cannot animate');
       this.complete_(/* success */ false, /* dir */ 0);
     }
   }
@@ -280,7 +300,7 @@ class AnimationPlayer {
           }
         }
       } catch (e) {
-        dev.error(TAG_, 'completion failed: ' + e, e);
+        dev().error(TAG_, 'completion failed: ' + e, e);
         success = false;
       }
     }
@@ -299,7 +319,7 @@ class AnimationPlayer {
     if (!this.running_) {
       return;
     }
-    const currentTime = timer.now();
+    const currentTime = Date.now();
     const normLinearTime = Math.min((currentTime - this.startTime_) /
         this.duration_, 1);
 
@@ -327,7 +347,7 @@ class AnimationPlayer {
       if (this.vsync_.canAnimate(this.contextNode_)) {
         this.task_(this.state_);
       } else {
-        dev.warn(TAG_, 'cancel animation');
+        dev().warn(TAG_, 'cancel animation');
         this.complete_(/* success */ false, /* dir */ 0);
       }
     }
@@ -348,7 +368,7 @@ class AnimationPlayer {
         try {
           normTime = segment.curve(normLinearTime);
         } catch (e) {
-          dev.error(TAG_, 'step curve failed: ' + e, e);
+          dev().error(TAG_, 'step curve failed: ' + e, e);
           this.complete_(/* success */ false, /* dir */ 0);
           return;
         }
@@ -363,7 +383,7 @@ class AnimationPlayer {
     try {
       segment.func(normTime, segment.completed);
     } catch (e) {
-      dev.error(TAG_, 'step mutate failed: ' + e, e);
+      dev().error(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;
     }
@@ -373,10 +393,10 @@ class AnimationPlayer {
 
 /**
  * @typedef {{
- *   delay: normtimeDef,
- *   func: !Transition,
- *   duration: normtimeDef,
- *   curve: ?Curve
+ *   delay: ./time.normtimeDef,
+ *   func: !./transition.TransitionDef,
+ *   duration: ./time.normtimeDef,
+ *   curve: ?./curve.CurveDef
  * }}
  */
 let SegmentDef;
@@ -384,10 +404,10 @@ let SegmentDef;
 
 /**
  * @typedef {{
- *   delay: normtimeDef,
- *   func: !Transition,
- *   duration: normtimeDef,
- *   curve: ?Curve,
+ *   delay: ./time.normtimeDef,
+ *   func: !./transition.TransitionDef,
+ *   duration: ./time.normtimeDef,
+ *   curve: ?./curve.CurveDef,
  *   started: boolean,
  *   completed: boolean
  * }}

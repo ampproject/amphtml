@@ -181,6 +181,7 @@ class AmpViewer {
     this.baseUrl_ = null;
     /** @private @const {?Element} */
     this.host_ = null;
+<<<<<<< HEAD
     /** @private @const {?ShadowRoot} */
     this.shadowRoot_ = null;
     /** @private @const {!Array<string>} */
@@ -203,6 +204,13 @@ class AmpViewer {
     this.installScript_('/dist/amp-shadow.js');
 >>>>>>> ampproject/master
 =======
+
+    // Immediately install amp-shadow.js.
+    this.installScript_('/dist/amp-shadow.js');
+>>>>>>> ampproject/master
+=======
+    /** @private @const {...} */
+    this.viewer_ = null;
 
     // Immediately install amp-shadow.js.
     this.installScript_('/dist/amp-shadow.js');
@@ -235,6 +243,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
+<<<<<<< HEAD
     this.shadowRoot_ = this.host_.createShadowRoot();
     log('Shadow root:', this.shadowRoot_);
 
@@ -366,6 +375,16 @@ class AmpViewer {
 =======
 >>>>>>> ampproject/master
       }
+=======
+    this.ampReadyPromise_.then(AMP => {
+      const amp = AMP.attachShadowDoc(this.host_, doc, url);
+      this.win.document.title = amp.title || '';
+      this.viewer_ = amp.viewer;
+      /* TODO(dvoytenko): enable message deliverer as soon as viewer is provided
+      this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
+          this.getOrigin_(this.win.location.href));
+      */
+>>>>>>> ampproject/master
     });
   }
 
@@ -373,7 +392,10 @@ class AmpViewer {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -399,6 +421,9 @@ class AmpViewer {
   /**
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -446,7 +471,10 @@ function fetchDocument(url) {
     xhr.open('GET', url, true);
     xhr.responseType = 'document';
     xhr.setRequestHeader('Accept', 'text/html');
+<<<<<<< HEAD
     xhr.setRequestHeader('AMP-Direct-Fetch', '1');
+=======
+>>>>>>> ampproject/master
     xhr.onreadystatechange = () => {
       if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
         return;

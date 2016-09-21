@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {getServiceForDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installResourcesService} from './resources-impl';
+=======
+import {fromClassForDoc} from '../service';
+import {installActionServiceForDoc} from './action-impl';
+import {installResourcesServiceForDoc} from './resources-impl';
+import {toggle} from '../style';
+>>>>>>> ampproject/master
 
 
 /**
@@ -28,6 +35,7 @@ export class StandardActions {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -61,6 +69,14 @@ export class StandardActions {
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = installResourcesService(ampdoc.getWin());
 >>>>>>> ampproject/master
+=======
+  constructor(ampdoc) {
+    /** @const @private {!./action-impl.ActionService} */
+    this.actions_ = installActionServiceForDoc(ampdoc);
+
+    /** @const @private {!./resources-impl.Resources} */
+    this.resources_ = installResourcesServiceForDoc(ampdoc);
+>>>>>>> ampproject/master
 
     this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
   }
@@ -71,14 +87,20 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    this.resources_.mutateElement(invocation.target, () => {
-      invocation.target.style.display = 'none';
+    const target = invocation.target;
+    this.resources_.mutateElement(target, () => {
+      if (target.classList.contains('-amp-element')) {
+        target./*OK*/collapse();
+      } else {
+        toggle(target, false);
+      }
     });
   }
 }
 
 
 /**
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -115,4 +137,12 @@ export function installStandardActionsForDoc(ampdoc) {
 =======
 >>>>>>> ampproject/master
       }));
+=======
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!StandardActions}
+ */
+export function installStandardActionsForDoc(ampdoc) {
+  return fromClassForDoc(
+      ampdoc, 'standard-actions', StandardActions);
+>>>>>>> ampproject/master
 };

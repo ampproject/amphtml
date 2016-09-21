@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -36,7 +36,7 @@ const TAG = 'amp-user-notification';
  *   showNotification: boolean
  * }}
  */
-let PostResponseMetadataDef;
+let GetResponseMetadataDef;
 
 /**
  * @typedef {{
@@ -88,18 +88,14 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   createdCallback() {
-
-    /** @private @const {!Window} */
-    this.win_ = this.getWin();
-
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win_);
+    this.urlReplacements_ = urlReplacementsFor(this.win);
 
     /** @private @const {!UserNotificationManager} */
-    this.userNotificationManager_ = getUserNotificationManager_(this.win_);
+    this.userNotificationManager_ = getUserNotificationManager_(this.win);
 
     /** @const @private {!Promise<!Storage>} */
-    this.storagePromise_ = storageFor(this.win_);
+    this.storagePromise_ = storageFor(this.win);
   }
 
   /** @override */
@@ -115,7 +111,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       this.dialogResolve_ = resolve;
     });
 
-    this.elementId_ = user.assert(this.element.id,
+    this.elementId_ = user().assert(this.element.id,
         'amp-user-notification should have an id.');
 
     /** @private @const {string} */
@@ -153,8 +149,8 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   buildGetHref_(ampUserId) {
-    const showIfHref = dev.assert(this.showIfHref_);
-    return this.urlReplacements_.expand(showIfHref).then(href => {
+    const showIfHref = dev().assert(this.showIfHref_);
+    return this.urlReplacements_.expandAsync(showIfHref).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
         ampUserId,
@@ -163,10 +159,10 @@ export class AmpUserNotification extends AMP.BaseElement {
   }
 
   /**
-   * Executes a `POST` request to the url given on the `data-show-if-href`
+   * Executes a `GET` request to the url given on the `data-show-if-href`
    * attribute.
    * @param {string} ampUserId
-   * @return {!Promise<!PostResponseMetadataDef>}
+   * @return {!Promise<!GetResponseMetadataDef>}
    * @private
    */
   getShowEndpoint_(ampUserId) {
@@ -175,7 +171,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       const getReq = {
         credentials: 'include',
       };
-      return xhrFor(this.win_).fetchJson(href, getReq);
+      return xhrFor(this.win).fetchJson(href, getReq);
     });
   }
 
@@ -185,7 +181,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return xhrFor(this.win_).fetchJson(dev.assert(this.dismissHref_), {
+    return xhrFor(this.win).fetchJson(dev().assert(this.dismissHref_), {
       method: 'POST',
       credentials: 'include',
       body: {
@@ -197,12 +193,16 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /**
    * Success handler for `getShowEndpoint_`.
+<<<<<<< HEAD
    * @param {!PostResponseMetadataDef} data
+=======
+   * @param {!GetResponseMetadataDef} data
+>>>>>>> ampproject/master
    * @return {!Promise<boolean>}
    * @private
    */
   onGetShowEndpointSuccess_(data) {
-    user.assert(typeof data['showNotification'] == 'boolean',
+    user().assert(typeof data['showNotification'] == 'boolean',
         '`showNotification` ' +
         'should be a boolean. Got "%s" which is of type %s.',
         data['showNotification'], typeof data['showNotification']);
@@ -221,7 +221,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getAsyncCid_() {
-    return cidFor(this.win_).then(cid => {
+    return cidFor(this.win).then(cid => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting
@@ -279,7 +279,11 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.storagePromise_
         .then(storage => storage.get(this.storageKey_))
         .then(persistedValue => !!persistedValue, reason => {
+<<<<<<< HEAD
           dev.error(TAG, 'Failed to read storage', reason);
+=======
+          dev().error(TAG, 'Failed to read storage', reason);
+>>>>>>> ampproject/master
           return false;
         });
   }
@@ -314,19 +318,29 @@ export class AmpUserNotification extends AMP.BaseElement {
  */
 export class UserNotificationManager {
 
+  /**
+   * @param {!Window} window
+   */
   constructor(window) {
-    this.win_ = window;
+    /** @const {!Window} */
+    this.win = window;
 
-    /** @private @const {!Object<!UserNotificationDeferDef>} */
+    /** @private @const {!Object<string,!NotificationInterface>} */
+    this.registry_ = Object.create(null);
+
+    /** @private @const {!Object<string,!UserNotificationDeferDef>} */
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win_);
+    this.viewer_ = viewerFor(this.win);
 
-    /** @private {!Promise} */
+    /** @private @const {!Promise} */
+    this.documentReadyPromise_ = whenDocumentReady(this.win.document);
+
+    /** @private @const {!Promise} */
     this.managerReadyPromise_ = Promise.all([
       this.viewer_.whenFirstVisible(),
-      whenDocumentReady(this.win_.document),
+      this.documentReadyPromise_,
     ]);
 
     /** @private {!Promise} */
@@ -341,11 +355,24 @@ export class UserNotificationManager {
    */
   get(id) {
     this.managerReadyPromise_.then(() => {
-      if (this.win_.document.getElementById(id) == null) {
-        user.warn(TAG, `Did not find amp-user-notification element ${id}.`);
+      if (this.win.document.getElementById(id) == null) {
+        user().warn(TAG, `Did not find amp-user-notification element ${id}.`);
       }
     });
     return this.getOrCreateDeferById_(id).promise;
+<<<<<<< HEAD
+=======
+  }
+
+  /**
+   * Retrieves a registered user notification by ID. Returns undefined if it
+   * is not registered yet.
+   * @param {string} id
+   * @return {!Promise<?NotificationInterface>}
+   */
+  getNotification(id) {
+    return this.documentReadyPromise_.then(() => this.registry_[id]);
+>>>>>>> ampproject/master
   }
 
   /**
@@ -356,6 +383,10 @@ export class UserNotificationManager {
    * @package
    */
   registerUserNotification(id, userNotification) {
+<<<<<<< HEAD
+=======
+    this.registry_[id] = userNotification;
+>>>>>>> ampproject/master
     const deferred = this.getOrCreateDeferById_(id);
     // Compose the registered notifications into a promise queue
     // that blocks until one notification is dismissed.
@@ -399,9 +430,8 @@ export class UserNotificationManager {
  * @private
  */
 function getUserNotificationManager_(window) {
-  return getService(window, 'userNotificationManager', () => {
-    return new UserNotificationManager(window);
-  });
+  return fromClass(window, 'userNotificationManager',
+      UserNotificationManager);
 }
 
 /**

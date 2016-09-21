@@ -17,10 +17,22 @@
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {ampdocServiceFor} from './ampdoc';
 import {dev} from './log';
+<<<<<<< HEAD
 import {escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
 import {insertStyleElement} from './style-installer';
 
+=======
+import {closestNode, escapeCssSelectorIdent} from './dom';
+import {extensionsFor} from './extensions';
+import {insertStyleElement} from './style-installer';
+
+/**
+ * Used for non-composed root-node search. See `getRootNode`.
+ * @const {!GetRootNodeOptions}
+ */
+const UNCOMPOSED_SEARCH = {composed: false};
+>>>>>>> ampproject/master
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
@@ -111,6 +123,42 @@ function createShadowRootPolyfill(hostElement) {
 
 
 /**
+<<<<<<< HEAD
+=======
+ * Determines if value is actually a `ShadowRoot` node.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isShadowRoot(value) {
+  if (!value) {
+    return false;
+  }
+  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
+  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
+  if (value.tagName == 'I-AMP-SHADOW-ROOT') {
+    return true;
+  }
+  return (value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
+      Object.prototype.toString.call(value) === '[object ShadowRoot]');
+}
+
+
+/**
+ * Return shadow root for the specified node.
+ * @param {!Node} node
+ * @return {?ShadowRoot}
+ */
+export function getShadowRootNode(node) {
+  if (isShadowDomSupported() && Node.prototype.getRootNode) {
+    return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
+  }
+  // Polyfill shadow root lookup.
+  return /** @type {?ShadowRoot} */ (closestNode(node, n => isShadowRoot(n)));
+}
+
+
+/**
+>>>>>>> ampproject/master
  * Creates a shadow root for an shadow embed.
  * @param {!Element} hostElement
  * @param {!Array<string>} extensionIds

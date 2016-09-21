@@ -15,7 +15,11 @@
  */
 
 import {childElementByTag} from '../dom';
+<<<<<<< HEAD
 import {getService} from '../service';
+=======
+import {fromClass} from '../service';
+>>>>>>> ampproject/master
 import {user} from '../log';
 
 
@@ -48,12 +52,19 @@ export class BaseTemplate {
     /** @public @const */
     this.element = element;
 
+<<<<<<< HEAD
     this.compileCallback();
   }
 
   /** @protected @return {!Window} */
   getWin() {
     return this.element.ownerDocument.defaultView;
+=======
+    /** @public @const */
+    this.win = element.ownerDocument.defaultView;
+
+    this.compileCallback();
+>>>>>>> ampproject/master
   }
 
   /**
@@ -207,8 +218,13 @@ export class Templates {
     } else {
       templateElement = childElementByTag(parent, 'template');
     }
+<<<<<<< HEAD
     user.assert(templateElement, 'Template not found for %s', parent);
     user.assert(templateElement.tagName == 'TEMPLATE',
+=======
+    user().assert(templateElement, 'Template not found for %s', parent);
+    user().assert(templateElement.tagName == 'TEMPLATE',
+>>>>>>> ampproject/master
         'Template element must be a "template" tag %s', templateElement);
     return templateElement;
   }
@@ -226,7 +242,11 @@ export class Templates {
       return Promise.resolve(impl);
     }
 
+<<<<<<< HEAD
     const type = user.assert(element.getAttribute('type'),
+=======
+    const type = user().assert(element.getAttribute('type'),
+>>>>>>> ampproject/master
         'Type must be specified: %s', element);
 
     let promise = element[PROP_PROMISE_];
@@ -284,7 +304,11 @@ export class Templates {
             'custom-template')] = true;
       }
     }
+<<<<<<< HEAD
     user.assert(this.declaredTemplates_[type],
+=======
+    user().assert(this.declaredTemplates_[type],
+>>>>>>> ampproject/master
         'Template must be declared for %s as <script custom-template=%s>',
         element, type);
   }
@@ -301,7 +325,11 @@ export class Templates {
       this.templateClassMap_[type] = Promise.resolve(templateClass);
     } else {
       const resolver = this.templateClassResolvers_[type];
+<<<<<<< HEAD
       user.assert(resolver, 'Duplicate template type: %s', type);
+=======
+      user().assert(resolver, 'Duplicate template type: %s', type);
+>>>>>>> ampproject/master
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }
@@ -349,7 +377,11 @@ export function registerExtendedTemplate(win, type, templateClass) {
  * @return {!Templates}
  */
 export function installTemplatesService(window) {
+<<<<<<< HEAD
   return getService(window, 'templates', () => {
     return new Templates(window);
   });
+=======
+  return fromClass(window, 'templates', Templates);
+>>>>>>> ampproject/master
 };

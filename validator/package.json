@@ -11,6 +11,7 @@
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git"
   },
+<<<<<<< HEAD
   "bin": {
     "amp-validator": "index.sh"
   },
@@ -29,6 +30,8 @@
 >>>>>>> ampproject/master
     "promise" : "7.1.1"
   },
+=======
+>>>>>>> ampproject/master
   "devDependencies": {
     "google-closure-compiler": "20160517.1.0",
     "google-closure-library": "20160517.0.0",

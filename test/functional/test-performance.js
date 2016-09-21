@@ -15,11 +15,7 @@
  */
 
 import * as sinon from 'sinon';
-import {
-  ENSURE_NON_ZERO,
-  Performance,
-  installPerformanceService,
-} from '../../src/service/performance-impl';
+import {installPerformanceService} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {viewerFor} from '../../src/viewer';
 
@@ -32,10 +28,11 @@ describe('performance', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    perf = new Performance(window);
+    perf = installPerformanceService(window);
   });
 
   afterEach(() => {
+    resetServiceForTesting(window, 'performance');
     sandbox.restore();
   });
 
@@ -60,12 +57,12 @@ describe('performance', () => {
           .to.be.jsonEqual({
             label: '_test',
             from: null,
-            value: ENSURE_NON_ZERO,
+            value: perf.initTime_,
           });
       expect(perf.events_[1]).to.be.jsonEqual({
         label: 'test',
         from: '_test',
-        value: ENSURE_NON_ZERO + 99,
+        value: perf.initTime_ + 99,
       });
     });
 
@@ -170,7 +167,11 @@ describe('performance', () => {
 
         return promise.then(() => {
           expect(perf.isMessagingReady_).to.be.true;
+<<<<<<< HEAD
           expect(flushSpy.callCount).to.equal(2);
+=======
+          expect(flushSpy.callCount).to.equal(3);
+>>>>>>> ampproject/master
           expect(perf.events_.length).to.equal(0);
         });
       });
@@ -198,9 +199,15 @@ describe('performance', () => {
         expect(perf.events_.length).to.equal(2);
 
         return perf.coreServicesAvailable().then(() => {
+<<<<<<< HEAD
           expect(flushSpy.callCount).to.equal(1);
           expect(perf.isMessagingReady_).to.be.false;
           expect(perf.events_.length).to.equal(2);
+=======
+          expect(flushSpy.callCount).to.equal(2);
+          expect(perf.isMessagingReady_).to.be.false;
+          expect(perf.events_.length).to.equal(3);
+>>>>>>> ampproject/master
         });
       });
     });
@@ -345,12 +352,20 @@ describe('performance', () => {
           perf.tick('start0');
           perf.tick('start1', 'start0', 300);
 
+<<<<<<< HEAD
           expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
+=======
+          expect(tickSpy.getCall(1).args[0]).to.be.jsonEqual({
+>>>>>>> ampproject/master
             label: 'start0',
             from: null,
             value: 100,
           });
+<<<<<<< HEAD
           expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
+=======
+          expect(tickSpy.getCall(2).args[0]).to.be.jsonEqual({
+>>>>>>> ampproject/master
             label: 'start1',
             from: 'start0',
             value: 300,
@@ -459,18 +474,20 @@ describe('performance', () => {
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
+        expect(tickSpy.callCount).to.equal(0);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
+          expect(tickSpy.callCount).to.equal(1);
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.callCount).to.equal(2);
-            expect(tickSpy.firstCall.args[0]).to.equal('_pc');
-            expect(tickSpy.secondCall.args[0]).to.equal('pc');
-            expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-            expect(Number(tickSpy.firstCall.args[2])).to.equal(ENSURE_NON_ZERO);
-            expect(Number(tickSpy.secondCall.args[2]))
-                .to.equal(ENSURE_NON_ZERO + 400);
+            expect(tickSpy.callCount).to.equal(3);
+            expect(tickSpy.getCall(1).args[0]).to.equal('_pc');
+            expect(tickSpy.getCall(2).args[0]).to.equal('pc');
+            expect(tickSpy.getCall(2).args[1]).to.equal('_pc');
+            expect(Number(tickSpy.getCall(1).args[2])).to.equal(perf.initTime_);
+            expect(Number(tickSpy.getCall(2).args[2]))
+                .to.equal(perf.initTime_ + 400);
           });
         });
       });
@@ -485,9 +502,9 @@ describe('performance', () => {
           expect(tickSpy.firstCall.args[0]).to.equal('_pc');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
           expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.firstCall.args[2])).to.equal(ENSURE_NON_ZERO);
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(perf.initTime_);
           expect(Number(tickSpy.secondCall.args[2])).to.equal(
-              ENSURE_NON_ZERO + 1);
+              perf.initTime_ + 1);
         });
       });
     });
@@ -525,7 +542,6 @@ describe('performance', () => {
   });
 
   it('should setFlushParams', () => {
-    const perf = installPerformanceService(window);
     const viewer = viewerFor(window);
     sandbox.stub(perf, 'whenViewportLayoutComplete_')
         .returns(Promise.resolve());

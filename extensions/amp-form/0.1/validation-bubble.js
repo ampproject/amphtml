@@ -17,6 +17,10 @@
 import {vsyncFor} from '../../../src/vsync';
 import {viewportFor} from '../../../src/viewport';
 import {setStyles} from '../../../src/style';
+<<<<<<< HEAD
+=======
+import {removeChildren} from '../../../src/dom';
+>>>>>>> ampproject/master
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';
@@ -26,8 +30,16 @@ export class ValidationBubble {
   /**
    * Creates a bubble component to display messages in.
    * @param {!Window} win
+<<<<<<< HEAD
    */
   constructor(win) {
+=======
+   * @param {string} id
+   */
+  constructor(win, id) {
+    /** @private @const {string} */
+    this.id_ = id;
+>>>>>>> ampproject/master
 
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(win);
@@ -35,6 +47,18 @@ export class ValidationBubble {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
 
+<<<<<<< HEAD
+=======
+    /** @private {?Element} */
+    this.currentTargetElement_ = null;
+
+    /** @private {string} */
+    this.currentMessage_ = '';
+
+    /** @private {boolean} */
+    this.isVisible_ = false;
+
+>>>>>>> ampproject/master
     /** @private @const {!HTMLDivElement} */
     this.bubbleElement_ = win.document.createElement('div');
     this.bubbleElement_.classList.add('-amp-validation-bubble');
@@ -43,9 +67,30 @@ export class ValidationBubble {
   }
 
   /**
+<<<<<<< HEAD
    * Hides the bubble off screen.
    */
   hide() {
+=======
+   * @return {boolean}
+   */
+  isActiveOn(element) {
+    return this.isVisible_ && element == this.currentTargetElement_;
+  }
+
+  /**
+   * Hides the bubble off screen.
+   */
+  hide() {
+    if (!this.isVisible_) {
+      return;
+    }
+
+    this.isVisible_ = false;
+    this.currentTargetElement_ = null;
+    this.currentMessage_ = '';
+
+>>>>>>> ampproject/master
     // TODO(#3776): Use .mutate method when it supports passing state.
     this.vsync_.run({
       measure: undefined,
@@ -61,11 +106,25 @@ export class ValidationBubble {
    * @param {string} message
    */
   show(targetElement, message) {
+<<<<<<< HEAD
+=======
+    if (this.isActiveOn(targetElement) && message == this.currentMessage_) {
+      return;
+    }
+
+    this.isVisible_ = true;
+    this.currentTargetElement_ = targetElement;
+    this.currentMessage_ = message;
+>>>>>>> ampproject/master
     const state = {
       message,
       targetElement,
       bubbleElement: this.bubbleElement_,
       viewport: this.viewport_,
+<<<<<<< HEAD
+=======
+      id: this.id_,
+>>>>>>> ampproject/master
     };
     this.vsync_.run({
       measure: measureTargetElement,
@@ -81,6 +140,12 @@ export class ValidationBubble {
  * @private
  */
 function hideBubble(state) {
+<<<<<<< HEAD
+=======
+  state.bubbleElement.removeAttribute('aria-alert');
+  state.bubbleElement.removeAttribute('role');
+  removeChildren(state.bubbleElement);
+>>>>>>> ampproject/master
   setStyles(state.bubbleElement, {
     display: 'none',
   });
@@ -103,9 +168,22 @@ function measureTargetElement(state) {
  * @private
  */
 function showBubbleElement(state) {
+<<<<<<< HEAD
   state.bubbleElement.textContent = state.message;
   setStyles(state.bubbleElement, {
     display: '',
+=======
+  removeChildren(state.bubbleElement);
+  const messageDiv = state.bubbleElement.ownerDocument.createElement('div');
+  messageDiv.id = `bubble-message-${state.id}`;
+  messageDiv.textContent = state.message;
+  state.bubbleElement.setAttribute('aria-labeledby', messageDiv.id);
+  state.bubbleElement.setAttribute('role', 'alert');
+  state.bubbleElement.setAttribute('aria-live', 'assertive');
+  state.bubbleElement.appendChild(messageDiv);
+  setStyles(state.bubbleElement, {
+    display: 'block',
+>>>>>>> ampproject/master
     top: `${state.targetRect.top - 10}px`,
     left: `${state.targetRect.left + state.targetRect.width / 2}px`,
   });

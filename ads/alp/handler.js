@@ -19,13 +19,18 @@ import {
   parseQueryString,
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
+import {urls} from '../../src/config';
 
 
 /**
  * Origins that are trusted to serve valid AMP documents.
  */
 const ampOrigins = {
+<<<<<<< HEAD
   'https://cdn.ampproject.org': true,
+=======
+  [urls.cdn]: true,
+>>>>>>> ampproject/master
   'http://localhost:8000': true,
 };
 
@@ -86,7 +91,7 @@ export function handleClick(e) {
   const win = link.a.ownerDocument.defaultView;
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
-    destination = destination.replace('https://cdn.ampproject.org/c/',
+    destination = destination.replace(`${urls.cdn}/c/`,
         'http://localhost:8000/max/');
   }
 
@@ -129,7 +134,7 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf('https://cdn.ampproject.org/c/') == 0) {
+  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
     return;
   }
   return eventualUrl;
@@ -163,13 +168,13 @@ export function warmupStatic(win) {
   // Preconnect using an image, because that works on all browsers.
   // The image has a 1 minute cache time to avoid duplicate
   // preconnects.
-  new win.Image().src = 'https://cdn.ampproject.org/preconnect.gif';
+  new win.Image().src = `${urls.cdn}/preconnect.gif`;
   // Preload the primary AMP JS that is render blocking.
   const linkRel = /*OK*/document.createElement('link');
   linkRel.rel = 'preload';
   linkRel.setAttribute('as', 'script');
   linkRel.href =
-      'https://cdn.ampproject.org/rtv/01$internalRuntimeVersion$/v0.js';
+      `${urls.cdn}/rtv/01$internalRuntimeVersion$/v0.js`;
   getHeadOrFallback(win.document).appendChild(linkRel);
 }
 

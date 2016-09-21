@@ -17,10 +17,10 @@
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
 import {historyFor} from '../../../src/history';
-import {platform} from '../../../src/platform';
-import {setStyles} from '../../../src/style';
+import {platformFor} from '../../../src/platform';
+import {setStyles, toggle} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -36,11 +36,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {!Window} */
-    this.win_ = this.getWin();
-
     /** @private @const {!Document} */
-    this.document_ = this.win_.document;
+    this.document_ = this.win.document;
 
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
@@ -55,8 +52,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.maskElement_ = false;
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win_);
+    this.vsync_ = vsyncFor(this.win);
 
+    const platform = platformFor(this.win);
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -129,11 +127,12 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_() {
+    if (this.isOpen_()) {
+      return;
+    }
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
-      setStyles(this.element, {
-        'display': 'block',
-      });
+      toggle(this.element, /* display */true);
       this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
       if (this.isIosSafari_) {
@@ -144,8 +143,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
-        timer.delay(() => {
-          this.scheduleLayout(this.getRealChildren());
+        timerFor(this.win).delay(() => {
+          const children = this.getRealChildren();
+          this.scheduleLayout(children);
+          this.scheduleResume(children);
         }, ANIMATION_TIMEOUT);
       });
     });
@@ -159,18 +160,19 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
+    if (!this.isOpen_()) {
+      return;
+    }
     this.viewport_.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      timer.delay(() => {
+      timerFor(this.win).delay(() => {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
-            setStyles(this.element, {
-              'display': 'none',
-            });
+            toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());
           });
         }
@@ -198,9 +200,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.maskElement_ = mask;
     }
-    setStyles(this.maskElement_, {
-      'display': 'block',
-    });
+    toggle(this.maskElement_, /* display */true);
   }
 
   /**
@@ -208,9 +208,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   closeMask_() {
     if (this.maskElement_) {
-      setStyles(this.maskElement_, {
-        'display': 'none',
-      });
+      toggle(this.maskElement_, /* display */false);
     }
   }
 
@@ -255,7 +253,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!History}
    */
   getHistory_() {
-    return historyFor(this.win_);
+    return historyFor(this.win);
   }
 }
 

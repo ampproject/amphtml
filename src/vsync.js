@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 
 /**
@@ -23,5 +23,9 @@ import {getService} from './service';
  */
 export function vsyncFor(window) {
   return /** @type {!./service/vsync-impl.Vsync} */ (
+<<<<<<< HEAD
       getService(window, 'vsync'));
+=======
+      getExistingServiceForWindow(window, 'vsync'));
+>>>>>>> ampproject/master
 };

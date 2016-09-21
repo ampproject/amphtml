@@ -15,6 +15,11 @@
 #
 
 tags: {  # amp-brid-player
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "SCRIPT"
   spec_name: "amp-brid-player extension .js script"
   mandatory_parent: "HEAD"
@@ -44,10 +49,14 @@ tags: {  # amp-brid-player
       error_message: "contents"
     }
   }
-  # TODO(gregable): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brid-player.html"
 }
 tags: {  # <amp-brid-player>
+<<<<<<< HEAD
+=======
+  html_format: AMP
+  html_format: AMP4ADS
+>>>>>>> ampproject/master
   tag_name: "AMP-BRID-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-brid-player extension .js script"
@@ -72,8 +81,7 @@ tags: {  # <amp-brid-player>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  # TODO(gregable): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brid-player.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-import {checkData, validateDataExists} from '../3p/3p';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adman(global, data) {
+  validateData(data, ['ws', 'host', 's'], []);
+
   const script = global.document.createElement('script');
-  const fields = ['ws', 'host', 's'];
-
-  checkData(data, fields);
-  validateDataExists(data, fields);
-
   script.setAttribute('data-ws', data.ws);
   script.setAttribute('data-h', data.host);
   script.setAttribute('data-s', data.s);

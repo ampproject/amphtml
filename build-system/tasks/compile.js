@@ -16,7 +16,6 @@
 
 var fs = require('fs-extra');
 var argv = require('minimist')(process.argv.slice(2));
-var windowConfig = require('../window-config');
 var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
@@ -73,13 +72,23 @@ function cleanupBuildDir() {
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-function compile(entryModuleFilename, outputDir,
+function compile(entryModuleFilenames, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
+<<<<<<< HEAD
+=======
+    var entryModuleFilename;
+    if (entryModuleFilenames instanceof Array) {
+      entryModuleFilename = entryModuleFilenames[0];
+    } else {
+      entryModuleFilename = entryModuleFilenames;
+      entryModuleFilenames = [entryModuleFilename];
+    }
+>>>>>>> ampproject/master
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for', entryModuleFilename);
+    console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
 
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -89,9 +98,7 @@ function compile(entryModuleFilename, outputDir,
     var unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
-    var wrapper = (options.includeWindowConfig ?
-        windowConfig.getTemplate() : '') +
-        '(function(){var process={env:{NODE_ENV:"production"}};' +
+    var wrapper = '(function(){var process={env:{NODE_ENV:"production"}};' +
         '%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>',
@@ -114,13 +121,23 @@ function compile(entryModuleFilename, outputDir,
             internalRuntimeVersion + '/';
     }
     const srcs = [
-      '3p/**/*.js',
-      'ads/**/*.js',
-      'extensions/**/*.js',
-      'build/**/*.js',
-      '!build/cc/**',
-      '!build/polyfills.js',
-      '!build/polyfills/**/*.js',
+      '3p/3p.js',
+      // Ads config files.
+      'ads/_*.js',
+      'ads/alp/**/*.js',
+      'ads/google/**/*.js',
+      // Files under build/. Should be sparse.
+      'build/css.js',
+      'build/*.css.js',
+      'build/fake-module/**/*.js',
+      'build/patched-module/**/*.js',
+      'build/experiments/**/*.js',
+      // Strange access/login related files.
+      'build/all/v0/*.js',
+      // A4A has these cross extension deps.
+      'extensions/**/*-config.js',
+      'extensions/amp-ad/**/*.js',
+      'extensions/amp-a4a/**/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
@@ -128,11 +145,15 @@ function compile(entryModuleFilename, outputDir,
       'builtins/**.js',
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
+      'third_party/css-escape/css-escape.js',
       'third_party/mustache/**/*.js',
+      'third_party/vega/**/*.js',
+      'third_party/d3/**/*.js',
+      'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.max.js',
-      'node_modules/core-js/modules/**.js',
+      //'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
@@ -141,6 +162,21 @@ function compile(entryModuleFilename, outputDir,
       '!**/test-*.js',
       '!**/*.extern.js',
     ];
+    // Add needed path for extensions.
+    // Instead of globbing all extensions, this will only add the actual
+    // extension path for much quicker build times.
+    entryModuleFilenames.forEach(function(filename) {
+      if (filename.indexOf('extensions/') == -1) {
+        return;
+      }
+      var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
+      srcs.push(path);
+    });
+    if (options.include3pDirectories) {
+      srcs.push(
+        '3p/**/*.js',
+        'ads/**/*.js')
+    }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
@@ -170,6 +206,7 @@ function compile(entryModuleFilename, outputDir,
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> ampproject/master
@@ -178,6 +215,12 @@ function compile(entryModuleFilename, outputDir,
     var externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
+=======
+    var externs = [
+      'build-system/amp.extern.js',
+      'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/shadow_dom.js',
+>>>>>>> ampproject/master
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
@@ -185,6 +228,9 @@ function compile(entryModuleFilename, outputDir,
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -196,7 +242,7 @@ function compile(entryModuleFilename, outputDir,
       // applied
       compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
-      continueWithWarnings: true,
+      continueWithWarnings: false,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
         compilation_level: 'SIMPLE_OPTIMIZATIONS',
@@ -205,6 +251,7 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -221,12 +268,17 @@ function compile(entryModuleFilename, outputDir,
 =======
         externs: externs,
 >>>>>>> ampproject/master
+=======
+        rewrite_polyfills: !!(
+            options.includePolyfills || options.includeBasicPolyfills),
+        externs: externs,
+>>>>>>> ampproject/master
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
           'build/fake-module/',
         ],
-        entry_point: entryModuleFilename,
+        entry_point: entryModuleFilenames,
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
@@ -236,6 +288,7 @@ function compile(entryModuleFilename, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -250,6 +303,16 @@ function compile(entryModuleFilename, outputDir,
 >>>>>>> ampproject/master
         define: [],
         hide_warnings_for: [
+=======
+        // Turn off warning for "Unknown @define" since we use define to pass
+        // args such as FORTESTING to our runner.
+        jscomp_off: 'unknownDefines',
+        define: [],
+        hide_warnings_for: [
+          'third_party/d3/',
+          'third_party/vega/',
+          'third_party/webcomponentsjs/',
+>>>>>>> ampproject/master
           'node_modules/',
           'build/patched-module/',
           // TODO: The following three are whitelisted only because they're
@@ -257,6 +320,7 @@ function compile(entryModuleFilename, outputDir,
           // errors and should be fixed at some point.
           'src/service.js',
           '3p/environment.js',
+<<<<<<< HEAD
           'src/document-state.js'
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -266,6 +330,11 @@ function compile(entryModuleFilename, outputDir,
 =======
 >>>>>>> ampproject/master
         ],
+=======
+          'src/document-state.js',
+        ],
+        jscomp_error: [],
+>>>>>>> ampproject/master
       }
     };
 
@@ -273,6 +342,7 @@ function compile(entryModuleFilename, outputDir,
     if (argv.typecheck_only || checkTypes) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -286,6 +356,11 @@ function compile(entryModuleFilename, outputDir,
 >>>>>>> ampproject/master
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
+=======
+      compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
+      compilerOptions.compilerFlags.jscomp_error.push(
+          'checkTypes', 'accessControls', 'const', 'constantProperty');
+>>>>>>> ampproject/master
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
@@ -299,6 +374,9 @@ function compile(entryModuleFilename, outputDir,
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
@@ -308,6 +386,10 @@ function compile(entryModuleFilename, outputDir,
     var stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
+<<<<<<< HEAD
+=======
+          console./*OK*/error('Error compiling', entryModuleFilenames);
+>>>>>>> ampproject/master
           console./*OK*/error(err.message);
           process.exit(1);
         });

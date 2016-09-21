@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
+<<<<<<< HEAD
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 <<<<<<< HEAD
@@ -31,10 +32,13 @@ import {removeElement} from '../../../src/dom';
 import {removeElement} from '../../../src/dom';
 >>>>>>> ampproject/master
 import {timer} from '../../../src/timer';
+=======
+import {user} from '../../../src/log';
+import {removeElement} from '../../../src/dom';
+import {timerFor} from '../../../src/timer';
+>>>>>>> ampproject/master
 import {toggle} from '../../../src/style';
 
-/** @const */
-const TAG = 'amp-sticky-ad';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @override */
@@ -44,16 +48,19 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+<<<<<<< HEAD
     /** @const @private {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
+=======
+>>>>>>> ampproject/master
     toggle(this.element, true);
     this.element.classList.add('-amp-sticky-ad-layout');
     const children = this.getRealChildren();
-    user.assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
+    user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
         'amp-sticky-ad must have a single amp-ad child');
 
     /** @const @private {!Element} */
@@ -69,6 +76,12 @@ class AmpStickyAd extends AMP.BaseElement {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    /** @const @private {boolean} */
+    this.visible_ = false;
+
+>>>>>>> ampproject/master
 =======
     /** @const @private {boolean} */
     this.visible_ = false;
@@ -94,10 +107,13 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return Promise.resolve();
+    // Reschedule layout for ad if layout sticky-ad again.
+    if (this.visible_) {
+      toggle(this.element, true);
+      const borderBottom = this.element./*OK*/offsetHeight;
+      this.viewport_.updatePaddingBottom(borderBottom);
+      this.updateInViewport(this.ad_, true);
+      this.scheduleLayout(this.ad_);
     }
     // Reschedule layout for ad if layout sticky-ad again.
     if (this.visible_) {
@@ -109,12 +125,24 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+<<<<<<< HEAD
+=======
+    this.viewport_.updatePaddingBottom(0);
+>>>>>>> ampproject/master
     return true;
   }
 
   /** @override */
   detachedCallback() {
     this.removeOnScrollListener_();
+  }
+
+  /** @override */
+  collapsedCallback() {
+    toggle(this.element, false);
+    this.vsync_.mutate(() => {
+      this.viewport_.updatePaddingBottom(0);
+    });
   }
 
   /**
@@ -159,6 +187,7 @@ class AmpStickyAd extends AMP.BaseElement {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
 =======
         this.addCloseButton_();
@@ -170,6 +199,10 @@ class AmpStickyAd extends AMP.BaseElement {
         this.addCloseButton_();
 >>>>>>> ampproject/master
         timer.delay(() => {
+=======
+        this.addCloseButton_();
+        timerFor(this.win).delay(() => {
+>>>>>>> ampproject/master
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
           // now.
@@ -186,7 +219,11 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   addCloseButton_() {
+<<<<<<< HEAD
     const closeButton = this.getWin().document.createElement('button');
+=======
+    const closeButton = this.win.document.createElement('button');
+>>>>>>> ampproject/master
     closeButton.classList.add('amp-sticky-ad-close-button');
     closeButton.setAttribute('aria-label',
         this.element.getAttribute('data-close-button-aria-label') || 'Close');
@@ -201,6 +238,12 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
+<<<<<<< HEAD
+=======
+      this.visible_ = false;
+      this./*OK*/scheduleUnlayout(this.ad_);
+      this.viewport_.removeFromFixedLayer(this.element);
+>>>>>>> ampproject/master
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });

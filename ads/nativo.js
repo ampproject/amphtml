@@ -91,7 +91,11 @@ export function nativo(global, data) {
     // Configuration setup is based on the parameters/attributes associated with the amp-ad node
     ntvAd.setupAd = function() {
       global._prx = [['cfg.Amp']];
+<<<<<<< HEAD
       global._prx.push(['cfg.RequestUrl', data['requestUrl'] || loc.origin]);
+=======
+      global._prx.push(['cfg.RequestUrl', data['requestUrl'] || loc.href]);
+>>>>>>> ampproject/master
       for (const key in data) {
         switch (key) {
           case 'premium': global._prx.push(['cfg.SetUserPremium']); break;

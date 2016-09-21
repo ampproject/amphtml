@@ -15,7 +15,7 @@
  */
 
 import {getMode} from './mode';
-
+import {urls} from './config';
 
 /**
  * Triggers validation for the current document if there is a script in the
@@ -35,7 +35,7 @@ export function maybeValidate(win) {
   const s = win.document.createElement('script');
   // TODO(@cramforce): Introduce a switch to locally built version for local
   // development.
-  s.src = 'https://cdn.ampproject.org/v0/validator.js';
+  s.src = `${urls.cdn}/v0/validator.js`;
   s.onload = () => {
     win.document.head.removeChild(s);
     /* global amp: false */

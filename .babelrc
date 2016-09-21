@@ -9,6 +9,7 @@
     "es6.blockScoping",
     "es6.classes",
     "es6.constants",
+    "es6.destructuring",
     "es6.tailCall",
     "es6.modules",
     "es6.parameters",

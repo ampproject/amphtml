@@ -22,9 +22,16 @@ import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListener} from './document-click';
+<<<<<<< HEAD
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
+=======
+import {installStyles, makeBodyVisible} from './style-installer';
+import {installErrorReporting} from './error';
+import {installDocService} from './service/ampdoc-impl';
+import {installCacheServiceWorker} from './service-worker/install';
+>>>>>>> ampproject/master
 import {stubElements} from './custom-element';
 import {
   installAmpdocServices,
@@ -41,6 +48,7 @@ import {maybeTrackImpression} from './impression';
 // a completely blank page.
 try {
   // Should happen first.
+<<<<<<< HEAD
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
@@ -49,10 +57,21 @@ try {
   const ampdoc = ampdocService.getAmpDoc(window.document);
 
   const perf = installPerformanceService(window);
+=======
+  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+
+  // Declare that this runtime will support a single root doc. Should happen
+  // as early as possible.
+  const ampdocService = installDocService(self, /* isSingleDoc */ true);
+  const ampdoc = ampdocService.getAmpDoc(self.document);
+
+  const perf = installPerformanceService(self);
+>>>>>>> ampproject/master
   perf.tick('is');
-  installStyles(document, cssText, () => {
+  installStyles(self.document, cssText, () => {
     try {
       // Core services.
+<<<<<<< HEAD
       installRuntimeServices(window);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
@@ -68,11 +87,29 @@ try {
 
       installPullToRefreshBlocker(window);
       installGlobalClickListener(window);
+=======
+      installRuntimeServices(self);
+      installAmpdocServices(ampdoc);
+      // We need the core services (viewer/resources) to start instrumenting
+      perf.coreServicesAvailable();
+      maybeTrackImpression(self);
 
-      maybeValidate(window);
-      makeBodyVisible(document, /* waitForExtensions */ true);
+      // Builtins.
+      installBuiltins(self);
+
+      // Final configuration and stubbing.
+      adopt(self);
+      stubElements(self);
+
+      installPullToRefreshBlocker(self);
+      installGlobalClickListener(self);
+>>>>>>> ampproject/master
+
+      maybeValidate(self);
+      makeBodyVisible(self.document, /* waitForServices */ true);
+      installCacheServiceWorker(self);
     } catch (e) {
-      makeBodyVisible(document);
+      makeBodyVisible(self.document);
       throw e;
     } finally {
       perf.tick('e_is');
@@ -83,16 +120,16 @@ try {
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(document);
+  makeBodyVisible(self.document);
   throw e;
 }
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
-if (window.console) {
+if (self.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
-window.document.documentElement.setAttribute('amp-version',
+self.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');

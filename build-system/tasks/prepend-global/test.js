@@ -35,6 +35,7 @@ test('sync - valueOrDefault', t => {
   t.is(res, 'hello');
   res = m.valueOrDefault('world', 'hello');
   t.is(res, 'world');
+<<<<<<< HEAD
 })
 
 test.before('setup', t => {
@@ -43,4 +44,22 @@ test.before('setup', t => {
 
 test.after.always('cleanup', t => {
   return fs.unlinkAsync(targetFile);
+=======
+});
+
+test('sync - sanityCheck', t => {
+  t.plan(3);
+  var badStr = 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+      '/*AMP_CONFIG*/' +
+      'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+      '/*AMP_CONFIG*/' +
+      'var x = 1 + 1;';
+  var badStr2 = 'var x = 1 + 1;';
+  var goodStr = 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+      '/*AMP_CONFIG*/' +
+      'var x = 1 + 1;';
+  t.false(m.sanityCheck(badStr));
+  t.true(m.sanityCheck(goodStr));
+  t.false(m.sanityCheck(badStr2));
+>>>>>>> ampproject/master
 });

@@ -17,8 +17,8 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {platform} from '../../../../src/platform';
-import {timer} from '../../../../src/timer';
+import {platformFor} from '../../../../src/platform';
+import {timerFor} from '../../../../src/timer';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
 
@@ -26,6 +26,8 @@ adopt(window);
 
 describe('amp-sidebar', () => {
   let sandbox;
+  let platform;
+  let timer;
 
   function getAmpSidebar(options) {
     options = options || {};
@@ -41,16 +43,25 @@ describe('amp-sidebar', () => {
       if (options.side) {
         ampSidebar.setAttribute('side', options.side);
       }
+      if (options.open) {
+        ampSidebar.setAttribute('open', '');
+      }
       ampSidebar.setAttribute('id', 'sidebar1');
       ampSidebar.setAttribute('layout', 'nodisplay');
       return iframe.addElement(ampSidebar).then(() => {
+<<<<<<< HEAD
         return Promise.resolve({iframe, ampSidebar});
+=======
+        timer = timerFor(iframe.win);
+        return {iframe, ampSidebar};
+>>>>>>> ampproject/master
       });
     });
   }
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    platform = platformFor(window);
   });
 
   afterEach(() => {
@@ -120,16 +131,23 @@ describe('amp-sidebar', () => {
       impl.open_();
       expect(sidebarElement.hasAttribute('open')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-      expect(sidebarElement.style.display).to.equal('block');
+      expect(sidebarElement.style.display).to.equal('');
       expect(impl.scheduleLayout.callCount).to.equal(1);
       expect(historyPushSpy.callCount).to.equal(1);
       expect(historyPopSpy.callCount).to.equal(0);
       expect(impl.historyId_).to.not.equal('-1');
+
+      // second call to open_() should be a no-op and not increase call counts.
+      impl.open_();
+      expect(impl.scheduleLayout.callCount).to.equal(1);
+      expect(historyPushSpy.callCount).to.equal(1);
+      expect(historyPopSpy.callCount).to.equal(0);
+
     });
   });
 
   it('should close sidebar on button click', () => {
-    return getAmpSidebar().then(obj => {
+    return getAmpSidebar({'open': true}).then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
       impl.schedulePause = sandbox.spy();
@@ -162,9 +180,13 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
       expect(sidebarElement.style.display).to.equal('none');
       expect(impl.schedulePause.callCount).to.equal(1);
-      expect(historyPushSpy.callCount).to.equal(0);
       expect(historyPopSpy.callCount).to.equal(1);
       expect(impl.historyId_).to.equal(-1);
+
+      // second call to close_() should be a no-op and not increase call counts.
+      impl.close_();
+      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(historyPopSpy.callCount).to.equal(1);
     });
   });
 
@@ -187,7 +209,7 @@ describe('amp-sidebar', () => {
       impl.toggle_();
       expect(sidebarElement.hasAttribute('open')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-      expect(sidebarElement.style.display).to.equal('block');
+      expect(sidebarElement.style.display).to.equal('');
       expect(impl.scheduleLayout.callCount).to.equal(1);
       impl.toggle_();
       expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -236,6 +258,8 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.scheduleResume = sandbox.spy();
       impl.vsync_ = {
         mutate: function(callback) {
           callback();
@@ -245,14 +269,28 @@ describe('amp-sidebar', () => {
         callback();
       });
       expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause.callCount).to.equal(0);
+      expect(impl.scheduleResume.callCount).to.equal(0);
       impl.toggle_();
       expect(impl.isOpen_()).to.be.true;
+      expect(impl.schedulePause.callCount).to.equal(0);
+      expect(impl.scheduleResume.callCount).to.equal(1);
       impl.toggle_();
       expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(impl.scheduleResume.callCount).to.equal(1);
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.true;
+      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(impl.scheduleResume.callCount).to.equal(2);
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause.callCount).to.equal(2);
+      expect(impl.scheduleResume.callCount).to.equal(2);
     });
   });
 
-  it('should fix scroll leaks on ios safari', () => {
+  it.skip('should fix scroll leaks on ios safari', () => {
     sandbox.stub(platform, 'isIos').returns(true);
     sandbox.stub(platform, 'isSafari').returns(true);
     return getAmpSidebar().then(obj => {
@@ -272,7 +310,7 @@ describe('amp-sidebar', () => {
     });
   });
 
-  it('should adjust for IOS safari bottom bar', () => {
+  it.skip('should adjust for IOS safari bottom bar', () => {
     sandbox.stub(platform, 'isIos').returns(true);
     sandbox.stub(platform, 'isSafari').returns(true);
     return getAmpSidebar().then(obj => {

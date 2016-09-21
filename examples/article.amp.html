@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Lorem Ipsum | PublisherName</title>
-  <link rel="canonical" href="amps.html" >
+  <link rel="canonical" href="https://medium.com/p/cb7f223fad86" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <style amp-custom>
@@ -28,6 +28,11 @@
     header,
     .article-body {
       padding: 15px;
+    }
+
+    /* In the shadow-doc mode, the parent shell already has header and nav. */
+    .amp-shadow header {
+      display: none;
     }
 
     .lightbox {
@@ -140,6 +145,16 @@
       margin: 0;
     }
 
+    amp-app-banner {
+      background: #f4f4f4;
+      padding: 10px;
+      box-shadow: 0 2px 5px 0 #000;
+    }
+
+    amp-app-banner .content {
+      display: flex;
+    }
+
     amp-img {
       background-color: #f4f4f4;
     }
@@ -148,16 +163,95 @@
       padding: 16px;
       background: yellow;
     }
+<<<<<<< HEAD
+=======
+
+    amp-app-banner amp-img {
+      margin-right: 15px
+    }
+
+    amp-app-banner h3 {
+      margin: 0;
+    }
+
+    amp-app-banner p {
+      font-size: 14px;
+      margin: 3px 0;
+    }
+
+    amp-app-banner a {
+      padding: 8px;
+      margin-right: 10px;
+    }
+    amp-app-banner .actions {
+      text-align: right;
+      font-size: 14px;
+    }
+
+    amp-sidebar {
+      width: 150px;
+    }
+
+    nav li {
+      list-style: none;
+      margin-bottom: 10px;
+    }
+
+    nav li a {
+      text-decoration: none;
+      color: #666666;
+    }
+
+>>>>>>> ampproject/master
   </style>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-app-banner" src="https://cdn.ampproject.org/v0/amp-app-banner-0.1.js" data-amp-report-test="amp-app-banner.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/cb7f223fad86">
+  <link rel="amp-manifest" href="medium-manifest.json">
+  <script async src="./viewer-integr.js" data-amp-report-test="viewer-integr.js"></script>
 </head>
 <body>
-  <header>
-    <div class="brand-logo">
-      PublisherLogo
+  <amp-sidebar id="sidebar" layout="nodisplay">
+    <nav>
+      <ul>
+        <li>
+          <a href="#">
+            Home
+            <amp-img src="img/ampicon.png" width="15" height="15"></amp-img>
+          </a>
+        </li>
+        <li><a href="#">Link 1</a></li>
+        <li><a href="#">Link 2</a></li>
+        <li><a href="#">Link 3</a></li>
+        <li><a href="#">Link 4</a></li>
+      </ul>
+    </nav>
+  </amp-sidebar>
+  <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
+    <div class="content">
+      <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
+               width="60" height="51"></amp-img>
+      <div class="description">
+        <h3>Medium App</h3>
+        <p>Experience a richer experience on our mobile app!</p>
+      </div>
     </div>
+    <div class="actions">
+      <a open-link>Open in app</a>
+    </div>
+  </amp-app-banner>
+
+  <header>
+    <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
+      ☰
+    </button>
+    <span class="brand-logo">
+      PublisherLogo
+    </span>
   </header>
 
   <!--

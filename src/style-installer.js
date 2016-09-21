@@ -15,14 +15,15 @@
  */
 
 import {dev} from './log';
+import {documentStateFor} from './document-state';
 import {performanceFor} from './performance';
 import {platformFor} from './platform';
-import {setStyles} from './style';
-import {waitForBody} from './dom';
 <<<<<<< HEAD:src/styles.js
+import {waitForBody} from './dom';
 import {waitForExtensions} from './render-delaying-extensions';
 import {dev} from './log';
 =======
+import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
 >>>>>>> ampproject/master:src/style-installer.js
 
@@ -154,15 +155,17 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       }
     }
   };
-  waitForBody(doc, () => {
-    if (doc.defaultView[bodyVisibleSentinel]) {
+  const win = doc.defaultView;
+  const docState = documentStateFor(win);
+  docState.onBodyAvailable(() => {
+    if (win[bodyVisibleSentinel]) {
       return;
     }
-    doc.defaultView[bodyVisibleSentinel] = true;
+    win[bodyVisibleSentinel] = true;
     if (opt_waitForServices) {
-      waitForServices(doc.defaultView).then(set, set).then(() => {
+      waitForServices(win).then(set, set).then(() => {
         try {
-          const perf = performanceFor(doc.defaultView);
+          const perf = performanceFor(win);
           perf.tick('mbv');
           perf.flush();
         } catch (e) {}

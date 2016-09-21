@@ -1,6 +1,6 @@
 # Integrating ad networks into AMP
 
-See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads integration guidelines](./integration-guide.md)
+See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads integration guidelines](./_integration-guide.md)
 
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information.
@@ -39,13 +39,15 @@ We will provide the following information to the ad:
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 - `window.context.startTime` contains the time at which processing of the amp-ad element started.
+- `window.context.container` contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: `amp-sticky-ad`, `amp-fx-flying-carpet`, `amp-lightbox`. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
 ### Methods available to the ad.
 
-- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
-- `window.context.reportRenderedEntityIdentifier` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
+- `window.context.renderStart(opt_data)` is a function that the ad system should call if the ad start rendering. The ad would then set the visibility of the iframe to visible. The ad type needs to be included in `waitForRenderStart` list in [_config.js](./_config.js) for this function to be available. Ad system can use `opt_data` object of form `{width, height}` to send the returned ad size to request a resize. Please check [Ad resizing](#ad-resizing) for more information.
+- `window.context.noContentAvailable()` is a function that the ad system should call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
+- `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
 ### Exceptions to iframe sandbox methods and information
 Depending on the ad server / provider some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. We are working on a creative level API that will enable this information to be accessible in such iframed cases and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
@@ -128,6 +130,20 @@ Here are some factors that affect whether the resize will be executed:
 - Whether the resize is triggered by the user action;
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
+
+
+### Support for multi-size ad requests
+Allowing more than a single ad size to fill a slot improves ad server competition. Increased competition gives the publisher better monetization for the same slot, therefore increasing overall revenue earned by the publisher.
+In order to support multi-size ad requests, AMP accepts an optional `data` param to `window.context.renderStart` (details in [Methods available to the ad](#methods-available-to-the-ad) section) which will automatically invoke request resize with the width and height passed.
+In case the resize is not successful, AMP will horizontally and vertically center align the creative within the space initially reserved for the creative.
+
+#### Example
+```
+// Use the optional param to specify the width and height to request resize.
+window.context.renderStart({width: 200, height: 100});
+```
+
+Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height)` API. Details in [Ad Resizing](#ad-resizing).
 
 ### Optimizing ad performance
 

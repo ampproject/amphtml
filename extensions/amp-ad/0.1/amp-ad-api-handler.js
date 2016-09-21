@@ -17,6 +17,7 @@
 import {removeElement} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
 import {
+<<<<<<< HEAD
   listenFor,
   listenForOnce,
   postMessage,
@@ -25,6 +26,19 @@ import {parseUrl} from '../../../src/url';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
+=======
+  SubscriptionApi,
+  listenFor,
+  listenForOncePromise,
+  postMessageToWindows,
+} from '../../../src/iframe-helper';
+import {IntersectionObserver} from '../../../src/intersection-observer';
+import {viewerFor} from '../../../src/viewer';
+import {user} from '../../../src/log';
+import {timerFor} from '../../../src/timer';
+
+const TIMEOUT_VALUE = 10000;
+>>>>>>> ampproject/master
 
 export class AmpAdApiHandler {
 
@@ -37,7 +51,11 @@ export class AmpAdApiHandler {
     /** @private {!BaseElement} */
     this.baseInstance_ = baseInstance;
 
+<<<<<<< HEAD
     /** @privat {!Element} */
+=======
+    /** @private {!Element} */
+>>>>>>> ampproject/master
     this.element_ = element;
 
     /** @private {?Element} iframe instance */
@@ -46,6 +64,12 @@ export class AmpAdApiHandler {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+<<<<<<< HEAD
+=======
+    /** @private {SubscriptionApi} */
+    this.embedStateApi_ = null;
+
+>>>>>>> ampproject/master
     /** @private {boolean} */
     this.is3p_ = false;
 
@@ -56,6 +80,7 @@ export class AmpAdApiHandler {
     this.unlisteners_ = [];
 
     /** @private @const */
+<<<<<<< HEAD
     this.viewer_ = viewerFor(this.baseInstance_.getWin());
   }
 
@@ -66,11 +91,30 @@ export class AmpAdApiHandler {
    */
   startUp(iframe, is3p) {
     user.assert(
+=======
+    this.viewer_ = viewerFor(this.baseInstance_.win);
+
+    /** @private {?Promise} */
+    this.adResponsePromise_ = null;
+  }
+
+  /**
+   * Sets up listeners and iframe state for iframe containing ad creative.
+   * @param {!Element} iframe
+   * @param {boolean} is3p whether iframe was loaded via 3p.
+   * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
+   *    set on the iframe element (remains visible
+   * @return {!Promise} awaiting load event for ad frame
+   */
+  startUp(iframe, is3p, opt_defaultVisible) {
+    user().assert(
+>>>>>>> ampproject/master
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe_);
+<<<<<<< HEAD
     this.intersectionObserver_ =
         new IntersectionObserver(this.baseInstance_, this.iframe_, is3p);
     // Triggered by context.noContentAvailable() inside the ad iframe.
@@ -105,10 +149,56 @@ export class AmpAdApiHandler {
       }
     }, this.is3p_));
     if (this.is3p_) {
+=======
+    this.intersectionObserver_ = new IntersectionObserver(
+        this.baseInstance_, this.iframe_, is3p);
+    this.embedStateApi_ = new SubscriptionApi(
+        this.iframe_, 'send-embed-state', is3p,
+        () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
+    // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
+    // iframe.
+    listenForOncePromise(this.iframe_, 'entity-id', this.is3p_)
+        .then(info => {
+          this.element_.creativeId = info.data.id;
+        });
+
+    // Install iframe resize API.
+    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size',
+        (data, source, origin) => {
+          this.updateSize_(data.height, data.width, source, origin);
+        }, this.is3p_, this.is3p_));
+
+    // Install API that listen to ad response
+    if (this.baseInstance_.config
+        && this.baseInstance_.config.renderStartImplemented) {
+      // If support render-start, create a race between render-start no-content
+      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
+        ['render-start', 'no-content'], this.is3p_).then(info => {
+          const data = info.data;
+          if (data.type == 'render-start') {
+            this.updateSize_(data.height, data.width,
+                info.source, info.origin);
+            //report performance
+          } else {
+            this.noContent_();
+          }
+        });
+    } else {
+      // If NOT support render-start, listen to bootstrap-loaded no-content
+      // respectively
+      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
+        'bootstrap-loaded', this.is3p_);
+      listenForOncePromise(this.iframe_, 'no-content', this.is3p_)
+          .then(() => this.noContent_());
+    }
+
+    if (!opt_defaultVisible) {
+>>>>>>> ampproject/master
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
     }
+<<<<<<< HEAD
     listenForOnce(this.iframe_, 'render-start', () => {
       if (!this.iframe_) {
         return;
@@ -121,23 +211,85 @@ export class AmpAdApiHandler {
     });
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_);
+=======
+
+    this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
+      this.sendEmbedInfo_(this.baseInstance_.isInViewport());
+    }));
+
+    this.element_.appendChild(this.iframe_);
+    return loadPromise(this.iframe_).then(() => {
+      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+          this.adResponsePromise_,
+          'timeout waiting for ad response').catch(e => {
+            this.noContent_();
+            user().warn(e);
+          }).then(() => {
+            //TODO: add performance reporting;
+            if (this.iframe_) {
+              this.iframe_.style.visibility = '';
+            }
+          });
+    });
+>>>>>>> ampproject/master
   }
 
   /** @override  */
   unlayoutCallback() {
+<<<<<<< HEAD
     this.unlisteners_.forEach(unlistener => unlistener());
     this.unlisteners_ = [];
+=======
+    this.cleanup_();
+>>>>>>> ampproject/master
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+<<<<<<< HEAD
     // IntersectionObserver's listeners were cleaned up by
     // setInViewport(false) before #unlayoutCallback
     this.intersectionObserver_ = null;
+=======
+  }
+
+  /**
+   * Cleans up listeners on the ad, and calls the no content callback, if one
+   * was provided.
+   * @private
+   */
+  noContent_() {
+    //TODO: make noContentCallback_ default
+    if (this.noContentCallback_) {
+      this.noContentCallback_();
+    } else {
+      user().info('no content callback was specified');
+    }
+    this.cleanup_();
+  }
+
+  /**
+   * Cleans up listeners on the ad iframe.
+   * @private
+   */
+  cleanup_() {
+    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.length = 0;
+    if (this.embedStateApi_) {
+      this.embedStateApi_.destroy();
+      this.embedStateApi_ = null;
+    }
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.destroy();
+      this.intersectionObserver_ = null;
+    }
+    this.noContentCallback_ = null;
+>>>>>>> ampproject/master
   }
 
   /**
    * Updates the element's dimensions to accommodate the iframe's
+<<<<<<< HEAD
    *    requested dimensions.
    * @param {number|undefined} height
    * @param {number|undefined} width
@@ -154,6 +306,58 @@ export class AmpAdApiHandler {
           targetOrigin,
           this.is3p);
     });
+=======
+   * requested dimensions. Notifies the window that request the resize
+   * of success or failure.
+   * @param {number|undefined} height
+   * @param {number|undefined} width
+   * @param {!Window} source
+   * @param {string} origin
+   * @private
+   */
+  updateSize_(height, width, source, origin) {
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
+    let newHeight, newWidth;
+    if (height !== undefined) {
+      newHeight = Math.max(this.element_./*OK*/offsetHeight +
+          height - this.iframe_./*OK*/offsetHeight, height);
+    }
+    if (width !== undefined) {
+      newWidth = Math.max(this.element_./*OK*/offsetWidth +
+          width - this.iframe_./*OK*/offsetWidth, width);
+    }
+    if (newHeight !== undefined || newWidth !== undefined) {
+      this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(() => {
+        this.sendEmbedSizeResponse_(
+          true /* success */, newWidth, newHeight, source, origin);
+      }, () => this.sendEmbedSizeResponse_(
+          false /* success */, newWidth, newHeight, source, origin));
+    }
+  }
+
+  /**
+   * Sends a response to the window which requested a resize.
+   * @param {boolean} success
+   * @param {number} requestedWidth
+   * @param {number} requestedHeight
+   * @param {!Window} source
+   * @param {string} origin
+   * @private
+   */
+  sendEmbedSizeResponse_(success, requestedWidth, requestedHeight, source,
+      origin) {
+    // The iframe may have been removed by the time we resize.
+    if (!this.iframe_) {
+      return;
+    }
+    postMessageToWindows(
+        this.iframe_,
+        [{win: source, origin}],
+        success ? 'embed-size-changed' : 'embed-size-denied',
+        {requestedWidth, requestedHeight},
+        this.is3p_);
+>>>>>>> ampproject/master
   }
 
   /**
@@ -161,6 +365,7 @@ export class AmpAdApiHandler {
    * @private
    */
   sendEmbedInfo_(inViewport) {
+<<<<<<< HEAD
     if (this.iframe_) {
       const targetOrigin =
           this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
@@ -169,6 +374,15 @@ export class AmpAdApiHandler {
         pageHidden: !this.viewer_.isVisible(),
       }, targetOrigin, this.is3p_);
     }
+=======
+    if (!this.embedStateApi_) {
+      return;
+    }
+    this.embedStateApi_.send('embed-state', {
+      inViewport,
+      pageHidden: !this.viewer_.isVisible(),
+    });
+>>>>>>> ampproject/master
   }
 
   /** @override  */
@@ -189,6 +403,7 @@ export class AmpAdApiHandler {
       this.intersectionObserver_.fire();
     }
   }
+<<<<<<< HEAD
 
   /** @override  */
   overflowCallback(overflown, requestedHeight, requestedWidth) {
@@ -203,3 +418,10 @@ export class AmpAdApiHandler {
     }
   }
 }
+=======
+}
+
+// Make the class available to other late loaded amp-ad implementations
+// without them having to depend on it directly.
+AMP.AmpAdApiHandler = AmpAdApiHandler;
+>>>>>>> ampproject/master

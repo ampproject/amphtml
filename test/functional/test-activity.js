@@ -17,6 +17,7 @@
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityFor} from '../../src/activity';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {viewerFor} from '../../src/viewer';
 import {installViewportService} from '../../src/service/viewport-impl';
@@ -71,10 +72,14 @@ describe('Activity getTotalEngagedTime', () => {
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
+      navigator: window.navigator,
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
       // required to instantiate Viewport service
       addEventListener: () => {},
     };
 
+    installPlatformService(fakeWin);
     installViewerService(fakeWin);
     viewer = viewerFor(fakeWin);
 

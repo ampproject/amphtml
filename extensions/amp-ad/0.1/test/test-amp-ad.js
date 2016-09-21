@@ -15,12 +15,20 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
+<<<<<<< HEAD
 import {a4aRegistry} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
 import {childElement} from '../../../../src/dom';
 import {
   resetExtensionScriptInsertedOrPresentForTesting,
 } from '../../../../src/insert-extension';
+=======
+import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {AmpAd} from '../amp-ad';
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {childElement} from '../../../../src/dom';
+import {extensionsFor} from '../../../../src/extensions';
+>>>>>>> ampproject/master
 import * as sinon from 'sinon';
 
 describe('A4A loader', () => {
@@ -36,6 +44,7 @@ describe('A4A loader', () => {
       delete a4aRegistry[k];
     });
   });
+<<<<<<< HEAD
   afterEach(() => {
     resetExtensionScriptInsertedOrPresentForTesting();
     Object.keys(registryBackup).forEach(k => {
@@ -81,6 +90,13 @@ describe('A4A loader', () => {
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
+=======
+
+  afterEach(() => {
+    Object.keys(registryBackup).forEach(k => {
+      a4aRegistry[k] = registryBackup[k];
+    });
+>>>>>>> ampproject/master
     registryBackup = null;
     sandbox.restore();
   });
@@ -88,6 +104,7 @@ describe('A4A loader', () => {
   tagNames.forEach(tag => {
 
     describe(tag, () => {
+<<<<<<< HEAD
 
       describe('#buildCallback', () => {
         it('falls back to 3p for unregistered type', () => {
@@ -113,8 +130,25 @@ describe('A4A loader', () => {
 <<<<<<< HEAD
 >>>>>>> ampproject/master
           });
+=======
+      let iframePromise;
+      let ampAdElement;
+      let ampAd;
+
+      beforeEach(() => {
+        iframePromise = createIframePromise().then(fixture => {
+          const doc = fixture.doc;
+          ampAdElement = doc.createElement(tag);
+          ampAdElement.setAttribute('type', 'nonexistent-tag-type');
+          ampAdElement.setAttribute('width', '300');
+          ampAdElement.setAttribute('height', '200');
+          doc.body.appendChild(ampAdElement);
+          ampAd = new AmpAd(ampAdElement);
+          return fixture;
+>>>>>>> ampproject/master
         });
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       it('should resize height only', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
@@ -337,9 +371,16 @@ describe('A4A loader', () => {
           expect(ad.style.display).to.not.equal('none');
           ad.implementation_.noContentHandler_();
           expect(ad.style.display).to.equal('none');
+=======
+      describe('#upgradeCallback', () => {
+        it('falls back to 3p for unregistered type', () => {
+          return iframePromise.then(() => {
+            expect(ampAd.upgradeCallback()).to.be.instanceof(AmpAd3PImpl);
+          });
+>>>>>>> ampproject/master
         });
-      });
 
+<<<<<<< HEAD
       it('should hide placeholder when ad falls back', () => {
         return getAd({
           width: 300,
@@ -427,10 +468,68 @@ describe('A4A loader', () => {
           expect(expectedChild.getAttribute('type')).to.equal('zort');
           expect(expectedChild.getAttribute('width')).to.equal('300');
           expect(expectedChild.getAttribute('height')).to.equal('200');
+=======
+        it('falls back to 3p for registered, non-A4A type', () => {
+          return iframePromise.then(() => {
+            a4aRegistry['zort'] = function() {
+              return false;
+            };
+            ampAdElement.setAttribute('type', 'zort');
+            ampAd = new AmpAd(ampAdElement);
+            expect(ampAd.upgradeCallback()).to.be.instanceof(AmpAd3PImpl);
+          });
+        });
+      });
+
+      it('upgrades to registered, A4A type network-specific element', () => {
+        return iframePromise.then(fixture => {
+          const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const zortInstance = {};
+          const zortConstructor = function() { return zortInstance; };
+          extensionsMock.expects('loadElementClass')
+              .withExactArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(zortConstructor)).once();
+          ampAd = new AmpAd(ampAdElement);
+          const upgradedElementPromise = ampAd.upgradeCallback();
+          extensionsMock.verify();
+          expect(upgradedElementPromise).not.to.be.null;
+          expect(ampAdElement.getAttribute(
+              'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+          return upgradedElementPromise.then(baseElement => {
+            expect(baseElement).to.equal(zortInstance);
+          });
+        });
+      });
+
+      it('falls back to 3p impl on upgrade with loadElementClass error', () => {
+        return iframePromise.then(fixture => {
+          const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          extensionsMock.expects('loadElementClass')
+              .withExactArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(new Error('I failed!')))
+              .once();
+          ampAd = new AmpAd(ampAdElement);
+          const upgradedElementPromise = ampAd.upgradeCallback();
+          extensionsMock.verify();
+          expect(ampAdElement.getAttribute(
+              'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+          return upgradedElementPromise.then(baseElement => {
+            expect(baseElement instanceof AmpAd3PImpl).to.be.true;
+          });
+>>>>>>> ampproject/master
         });
       });
 
       it('adds script to header for registered, A4A type', () => {
+<<<<<<< HEAD
         return createIframePromise().then(fixture => {
           const doc = fixture.doc;
           a4aRegistry['zort'] = function() {
@@ -444,6 +543,16 @@ describe('A4A loader', () => {
           const handler = new AmpAd(element);
           handler.buildCallback();
           expect(childElement(doc.head,
+=======
+        return iframePromise.then(fixture => {
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          ampAd = new AmpAd(ampAdElement);
+          expect(ampAd.upgradeCallback()).to.not.be.null;
+          expect(childElement(fixture.doc.head,
+>>>>>>> ampproject/master
               c => {
                 return c.tagName == 'SCRIPT' &&
                     c.getAttribute('custom-element') ===

@@ -15,11 +15,21 @@
  */
 
 import * as lib from '../../../third_party/closure-library/sha384-generated';
+<<<<<<< HEAD
 import {getService} from '../../../src/service';
 import {dev} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'Crypto';
+=======
+import {fromClass} from '../../../src/service';
+import {dev} from '../../../src/log';
+import {stringToBytes} from '../../../src/utils/bytes';
+
+/** @const {string} */
+const TAG = 'Crypto';
+const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
+>>>>>>> ampproject/master
 
 export class Crypto {
 
@@ -31,6 +41,7 @@ export class Crypto {
   /**
    * Returns the SHA-384 hash of the input string in a number array.
    * Input string cannot contain chars out of range [0,255].
+<<<<<<< HEAD
    * @param {string} str
    * @returns {!Promise<!Array<number>>}
    * @throws {!Error} when input string contains chars out of range [0,255]
@@ -51,18 +62,54 @@ export class Crypto {
       }
     }
     return Promise.resolve(lib.sha384(str));
+=======
+   * @param {string|!Uint8Array} input
+   * @returns {!Promise<!Array<number>>}
+   * @throws {!Error} when input string contains chars out of range [0,255]
+   */
+  sha384(input) {
+    if (this.subtle_) {
+      try {
+        return this.subtle_.digest({name: 'SHA-384'},
+                input instanceof Uint8Array ? input : stringToBytes(input))
+            // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
+            .then(buffer => [].slice.call(new Uint8Array(buffer)),
+                e => {
+                  // Chrome doesn't allow the usage of Crypto API under
+                  // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
+                  if (e.message && e.message.indexOf('secure origin') < 0) {
+                    // Log unexpected fallback.
+                    dev().error(TAG, FALLBACK_MSG, e);
+                  }
+                  return lib.sha384(input);
+                });
+      } catch (e) {
+        dev().error(TAG, FALLBACK_MSG, e);
+      }
+    }
+    return Promise.resolve(lib.sha384(input));
+>>>>>>> ampproject/master
   }
 
   /**
    * Returns the SHA-384 hash of the input string in the format of web safe
    * base64 (using -_. instead of +/=).
    * Input string cannot contain chars out of range [0,255].
+<<<<<<< HEAD
    * @param {string} str
    * @returns {!Promise<string>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384Base64(str) {
     return this.sha384(str).then(buffer => {
+=======
+   * @param {string|!Uint8Array} input
+   * @returns {!Promise<string>}
+   * @throws {!Error} when input string contains chars out of range [0,255]
+   */
+  sha384Base64(input) {
+    return this.sha384(input).then(buffer => {
+>>>>>>> ampproject/master
       return lib.base64(buffer);
     });
   }
@@ -71,11 +118,19 @@ export class Crypto {
    * Returns a uniform hash of the input string as a float number in the range
    * of [0, 1).
    * Input string cannot contain chars out of range [0,255].
+<<<<<<< HEAD
    * @param {string} str
    * @returns {!Promise<number>}
    */
   uniform(str) {
     return this.sha384(str).then(buffer => {
+=======
+   * @param {string|!Uint8Array} input
+   * @returns {!Promise<number>}
+   */
+  uniform(input) {
+    return this.sha384(input).then(buffer => {
+>>>>>>> ampproject/master
       // Consider the Uint8 array as a base256 fraction number,
       // then convert it to the decimal form.
       let result = 0;
@@ -94,6 +149,7 @@ function getSubtle(win) {
   return win.crypto.subtle || win.crypto.webkitSubtle || null;
 }
 
+<<<<<<< HEAD
 /**
  * Convert a string to Unit8Array. A shim for TextEncoder.
  * @param {string} str
@@ -116,4 +172,8 @@ export function installCryptoService(win) {
   return getService(win, 'crypto', () => {
     return new Crypto(win);
   });
+=======
+export function installCryptoService(win) {
+  return fromClass(win, 'crypto', Crypto);
+>>>>>>> ampproject/master
 }

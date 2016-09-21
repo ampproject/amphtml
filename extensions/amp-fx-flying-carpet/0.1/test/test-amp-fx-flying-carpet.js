@@ -19,12 +19,25 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
 import {viewportFor} from '../../../../src/viewport';
 import {toggleExperiment} from '../../../../src/experiments';
+<<<<<<< HEAD
+=======
+import * as sinon from 'sinon';
+>>>>>>> ampproject/master
 import '../amp-fx-flying-carpet';
 
 adopt(window);
 
 describe('amp-fx-flying-carpet', () => {
   let iframe;
+
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   function getAmpFlyingCarpet(opt_childrenCallback, opt_top) {
     let viewport;
@@ -66,7 +79,7 @@ describe('amp-fx-flying-carpet', () => {
     return getAmpFlyingCarpet(iframe => {
       installImg(iframe.win);
       img = iframe.doc.createElement('amp-img');
-      img.setAttribute('src', '/base/examples/img/sample.jpg');
+      img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       return [img];
@@ -140,6 +153,41 @@ describe('amp-fx-flying-carpet', () => {
         'elements must be positioned before the last viewport'
       );
       expect(ref.flyingCarpet).to.not.display;
+<<<<<<< HEAD
+=======
+    });
+  });
+
+  it('should attempt to change height to 0 when its children collapse', () => {
+    let img;
+    return getAmpFlyingCarpet(iframe => {
+      installImg(iframe.win);
+      // Usually, the children appear on a new line with indentation
+      const pretext = iframe.doc.createTextNode('\n  ');
+      img = iframe.doc.createElement('amp-img');
+      img.setAttribute('src', '/examples/img/sample.jpg');
+      img.setAttribute('width', 300);
+      img.setAttribute('height', 200);
+      // Usually, the closing node appears on a new line
+      const posttext = iframe.doc.createTextNode('\n');
+      return [pretext, img, posttext];
+    }).then(flyingCarpet => {
+      const attemptChangeHeight = sandbox.stub(flyingCarpet.implementation_,
+          'attemptChangeHeight', height => {
+            flyingCarpet.style.height = height;
+            return Promise.resolve();
+          });
+      const collapse = sandbox.spy(flyingCarpet.implementation_, 'collapse');
+      expect(flyingCarpet.getBoundingClientRect().height).to.be.gt(0);
+      img.collapse();
+      expect(attemptChangeHeight).to.have.been.called;
+      expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
+      return attemptChangeHeight().then(() => {
+        expect(flyingCarpet.getBoundingClientRect().height).to.equal(0);
+        expect(collapse).to.have.been.called;
+        expect(flyingCarpet.style.display).to.equal('none');
+      });
+>>>>>>> ampproject/master
     });
   });
 });

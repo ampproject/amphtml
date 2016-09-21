@@ -16,11 +16,18 @@
 
 import {
   writeScript,
+<<<<<<< HEAD
   checkData,
   validateSrcPrefix,
   validateSrcContains,
   validateDataExists,
   } from '../3p/3p';
+=======
+  validateData,
+  validateSrcPrefix,
+  validateSrcContains,
+} from '../3p/3p';
+>>>>>>> ampproject/master
 
 
 export function adtech(global, data) {
@@ -30,12 +37,20 @@ export function adtech(global, data) {
     validateSrcContains('/addyn/', adsrc);
     writeScript(global, adsrc);
   } else {
+<<<<<<< HEAD
     checkData(data, [
       'atwco', 'atwdiv', 'atwheight', 'atwhtnmat',
       'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
       'atwpolar', 'atwsizes', 'atwwidth',
     ]);
     validateDataExists(data,['atwmn', 'atwdiv']);
+=======
+    validateData(data, ['atwmn', 'atwdiv'], [
+      'atwco', 'atwheight', 'atwhtnmat',
+      'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
+      'atwpolar', 'atwsizes', 'atwwidth',
+    ]);
+>>>>>>> ampproject/master
     global.atwco = data.atwco;
     global.atwdiv = data.atwdiv;
     global.atwheight = data.atwheight;
@@ -50,5 +65,8 @@ export function adtech(global, data) {
     global.atwwidth = data.atwwidth;
     writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
   }
+<<<<<<< HEAD
 
+=======
+>>>>>>> ampproject/master
 }

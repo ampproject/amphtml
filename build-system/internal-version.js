@@ -20,7 +20,11 @@ var crypto = require('crypto');
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
 exports.VERSION = argv.version ?
+<<<<<<< HEAD
     String(argv.version) : String(new Date().getTime());
+=======
+    String(argv.version) : String(Date.now());
+>>>>>>> ampproject/master
 
 // A token that changes its value each time we release AMP. This is intended
 // to verify that two iframes of AMP have the same version of AMP. It is

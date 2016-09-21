@@ -20,9 +20,11 @@ import {
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
+  checkCorsUrl,
 } from './url';
 import {parseSrcset} from './srcset';
 import {user} from './log';
+import {urls} from './config';
 
 
 /** @private @const {string} */
@@ -265,7 +267,7 @@ export function isValidAttr(attrName, attrValue) {
  */
 function resolveAttrValue(tagName, attrName, attrValue) {
   if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
-    return resolveUrlAttr(tagName, attrName, attrValue, window.location);
+    return resolveUrlAttr(tagName, attrName, attrValue, self.location);
   }
   return attrValue;
 }
@@ -285,6 +287,7 @@ function resolveAttrValue(tagName, attrName, attrValue) {
  * @private Visible for testing.
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 
@@ -306,7 +309,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
     } catch (e) {
       // Do not fail the whole template just because one srcset is broken.
       // An AMP element will pick it up and report properly.
-      user.error(TAG, 'Failed to parse srcset: ', e);
+      user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
     const sources = srcset.getSources();
@@ -337,7 +340,7 @@ function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
   }
 
   // Rewrite as a proxy URL.
-  return 'https://cdn.ampproject.org/i/' +
+  return `${urls.cdn}/i/` +
       (src.protocol == 'https:' ? 's/' : '') +
       encodeURIComponent(src.host) +
       src.pathname + (src.search || '') + (src.hash || '');

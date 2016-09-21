@@ -127,7 +127,8 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">img</td>
-    <td>Replaced with amp-img.</td>
+    <td>Replaced with amp-img.<br>
+        Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
   <tr>
     <td width="30%">video</td>
@@ -292,10 +293,12 @@ Example:
 
 Font providers can be whitelisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
-- https://fast.fonts.net
-- https://fonts.googleapis.com
+- Typography.com: https://cloud.typography.com
+- Fonts.com: https://fast.fonts.net
+- Google Fonts: https://fonts.googleapis.com
+- Font Awesome: https://maxcdn.bootstrapcdn.com
 
-IMPLEMENTERS NOTE: Adding to this list requires a change to the Google AMP Cache CSP rule.
+IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP rule.
 
 Authors are free to include all custom fonts via an `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
 

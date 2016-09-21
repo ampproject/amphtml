@@ -161,6 +161,7 @@
       position: fixed;
       top: 0;
       right: 0;
+      z-index: 1;
     }
     .hamburger:before {
       display: block;
@@ -181,6 +182,8 @@
   <script async custom-element="amp-sidebar" src="../../dist/v0/amp-sidebar-0.1.max.js"></script>
   <script async custom-element="amp-youtube" src="../../dist/v0/amp-youtube-0.1.max.js"></script>
   <script async custom-element="amp-social-share" src="../../dist/v0/amp-social-share-0.1.max.js"></script>
+  <script async custom-element="amp-list" src="../../dist/v0/amp-list-0.1.max.js"></script>
+  <script async custom-template="amp-mustache" src="../../dist/v0/amp-mustache-0.1.max.js"></script>
   <script src="../../dist/v0/amp-lightbox-0.1.js"></script>
 
 </head>
@@ -237,6 +240,21 @@
         </ul>
       </section>
     </amp-accordion>
+    <amp-youtube layout="responsive" data-videoid="lBTCB7yLs8Y"
+      width="480" height="270">
+    </amp-youtube>
+    <amp-list width="396" height="80" layout=fixed
+      src="/test/manual/amp-list-data.json?RANDOM">
+      <template type="amp-mustache">
+        <div class="story-entry">
+          <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+          {{title}}
+        </div>
+      </template>
+      <div overflow>
+        See more
+      </div>
+    </amp-list>
   </amp-sidebar>
   <h1>AMP #0</h1>
   <div class="hamburger" on='tap:sidebar1.toggle'></div>

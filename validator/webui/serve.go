@@ -52,7 +52,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := appengine.NewContext(r)
 	client := urlfetch.Client(ctx)
-	resp, err := client.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Bad gateway (%v)", err.Error()),
+			http.StatusBadGateway)
+		return
+	}
+	req.Header.Add("User-Agent",
+		"Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MTC19V) "+
+			"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.81 Mobile "+
+			"Safari/537.36 (compatible; validator.ampproject.org)")
+	resp, err := client.Do(req)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Bad gateway (%v)", err.Error()),
 			http.StatusBadGateway)

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 // Requires polyfills in immediate side effect.
 import './polyfills';
 
 import {user} from './log';
 import {getService} from './service';
+=======
+import {getExistingServiceForWindow} from './service';
+>>>>>>> ampproject/master
 
 /**
- * Helper with all things Timer.
+ * @param {!Window} window
+ * @return {!./service/timer-impl.Timer}
  */
+<<<<<<< HEAD
 export class Timer {
 
   /**
@@ -172,3 +178,9 @@ export function timerFor(window) {
 
 
 export const timer = timerFor(window);
+=======
+export function timerFor(window) {
+  return /** @type {!./service/timer-impl.Timer} */ (
+      getExistingServiceForWindow(window, 'timer'));
+};
+>>>>>>> ampproject/master

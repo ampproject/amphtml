@@ -23,7 +23,6 @@ import {
   rethrowAsync,
   user,
 } from '../../src/log';
-import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 describe('Logging', () => {
@@ -44,7 +43,7 @@ describe('Logging', () => {
     sandbox = sinon.sandbox.create();
 
     mode = {};
-    setModeForTesting(mode);
+    window.AMP_MODE = mode;
 
     logSpy = sandbox.spy();
     timeoutSpy = sandbox.spy();
@@ -57,7 +56,6 @@ describe('Logging', () => {
   });
 
   afterEach(() => {
-    setModeForTesting(null);
     sandbox.restore();
     sandbox = null;
   });
@@ -236,63 +234,63 @@ describe('Logging', () => {
   describe('UserLog', () => {
 
     it('should be disabled by default', () => {
-      expect(user.levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled in development mode', () => {
       mode.development = true;
-      expect(user.levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log=1', () => {
       mode.log = '1';
-      expect(user.levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log>1', () => {
       mode.log = '2';
-      expect(user.levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
 
       mode.log = '3';
-      expect(user.levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
 
       mode.log = '4';
-      expect(user.levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with USER suffix', () => {
-      expect(user.suffix_).to.equal(USER_ERROR_SENTINEL);
+      expect(user().suffix_).to.equal(USER_ERROR_SENTINEL);
     });
   });
 
   describe('DevLog', () => {
 
     it('should be disabled by default', () => {
-      expect(dev.levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled in development mode', () => {
       mode.development = true;
-      expect(dev.levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled with log=1', () => {
       mode.log = '1';
-      expect(dev.levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
       mode.log = '2';
-      expect(dev.levelFunc_(mode)).to.equal(LogLevel.INFO);
+      expect(dev().levelFunc_(mode)).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
       mode.log = '3';
-      expect(dev.levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(dev().levelFunc_(mode)).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with no suffix', () => {
-      expect(dev.suffix_).to.equal('');
+      expect(dev().suffix_).to.equal('');
     });
   });
 
@@ -416,8 +414,51 @@ describe('Logging', () => {
       expect(isUserErrorMessage(error.message)).to.be.false;
       expect(error.message).to.contain('test-other');
     });
+
+    it('should pass for elements', () => {
+      log.assertElement(document.documentElement);
+      const element = document.createElement('element');
+      const ret = log.assertElement(element);
+      expect(ret).to.equal(element);
+    });
+
+    it('should should identify non-elements', () => {
+      expect(() => {
+        log.assertElement(document);
+      }).to.throw(/Element expected: /);
+      expect(() => {
+        log.assertElement(null);
+      }).to.throw(/Element expected: null/);
+      expect(() => {
+        log.assertElement(null, 'custom error');
+      }).to.throw(/custom error: null/);
+    });
   });
 
+  describe('assertNumber', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should return the number value', () => {
+      expect(log.assertNumber(3)).to.equal(3);
+      const nan = log.assertNumber(NaN);
+      expect(nan).to.not.equal(nan);
+    });
+
+    it('should fail with on non number', () => {
+      expect(() => log.assertNumber({}))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber(null))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber(undefined))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber([]))
+          .to.throw('Number expected: ');
+    });
+  });
 
   describe('assertEnumValue', () => {
 
@@ -501,7 +542,7 @@ describe('Logging', () => {
     });
 
     it('should preserve error suffix', () => {
-      const orig = user.createError('intended');
+      const orig = user().createError('intended');
       expect(isUserErrorMessage(orig.message)).to.be.true;
       rethrowAsync('first', orig, 'second');
       let error;

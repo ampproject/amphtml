@@ -21,6 +21,7 @@ import {Resource, ResourceState} from './resource';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
+<<<<<<< HEAD
 import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
@@ -36,13 +37,23 @@ import {installFramerateService} from './framerate-impl';
 >>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
+=======
+import {closest, hasNextNodeInDocumentOrder} from '../dom';
+import {expandLayoutRect} from '../layout-rect';
+import {fromClassForDoc} from '../service';
+import {inputFor} from '../input';
+>>>>>>> ampproject/master
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
+<<<<<<< HEAD
 import {timer} from '../timer';
+=======
+import {filterSplice} from '../utils/array';
+>>>>>>> ampproject/master
 
 
 const TAG_ = 'Resources';
@@ -57,6 +68,10 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ampproject/master
 /**
  * The internal structure of a ChangeHeightRequest.
  * @typedef {{
@@ -64,13 +79,18 @@ const FOUR_FRAME_DELAY_ = 70;
  *   newHeight: (number|undefined),
  *   newWidth: (number|undefined),
  *   force: boolean,
+<<<<<<< HEAD
  *   callback: (function()|undefined)
+=======
+ *   callback: (function(boolean)|undefined)
+>>>>>>> ampproject/master
  * }}
  */
 let ChangeSizeRequestDef;
 
 export class Resources {
   /**
+<<<<<<< HEAD
    * @param {!Window} window
    */
   constructor(window) {
@@ -80,6 +100,20 @@ export class Resources {
     /** @const @private {!./viewer-impl.Viewer} */
     this.viewer_ = installViewerService(window);
 
+=======
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
+    /** @const {!Window} */
+    this.win = ampdoc.win;
+
+    /** @const @private {!./viewer-impl.Viewer} */
+    this.viewer_ = installViewerService(this.win);
+
+>>>>>>> ampproject/master
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
 
@@ -134,9 +168,18 @@ export class Resources {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
+=======
+
+    /** @const {!TaskQueue} */
+    this.queue_ = new TaskQueue();
+
+    /** @const */
+    this.boundTaskScorer_ = task => this.calcTaskScore_(task);
+>>>>>>> ampproject/master
 =======
 
     /** @const {!TaskQueue} */
@@ -191,9 +234,12 @@ export class Resources {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /** @private @const {!./framerate-impl.Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======
@@ -208,26 +254,30 @@ export class Resources {
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
-      this.lastScrollTime_ = timer.now();
+      this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
+<<<<<<< HEAD
       this.lastScrollTime_ = timer.now();
+=======
+      this.lastScrollTime_ = Date.now();
+>>>>>>> ampproject/master
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
       if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
-        this.firstVisibleTime_ = timer.now();
+        this.firstVisibleTime_ = Date.now();
       }
       this.schedulePass();
     });
 
     this.viewer_.onRuntimeState(state => {
-      dev.fine(TAG_, 'Runtime state:', state);
+      dev().fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
     });
@@ -236,8 +286,10 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
+    this.schedulePass();
+
     // Ensure that we attempt to rebuild things when DOM is ready.
-    onDocumentReady(this.win.document, () => {
+    this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
@@ -254,8 +306,11 @@ export class Resources {
       this.schedulePass();
       this.monitorInput_();
     });
+<<<<<<< HEAD
 
     this.schedulePass();
+=======
+>>>>>>> ampproject/master
   }
 
   /**
@@ -315,9 +370,15 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
+<<<<<<< HEAD
     waitForBody(this.win.document, () => {
       this.vsync_.mutate(() => {
         this.win.document.body.classList.toggle(clazz, on);
+=======
+    this.ampdoc.whenBodyAvailable().then(body => {
+      this.vsync_.mutate(() => {
+        body.classList.toggle(clazz, on);
+>>>>>>> ampproject/master
       });
     });
   }
@@ -344,7 +405,10 @@ export class Resources {
    * Element. If no Resource is found, the exception is thrown.
    * @param {!AmpElement} element
    * @return {!Resource}
+<<<<<<< HEAD
    * @package
+=======
+>>>>>>> ampproject/master
    */
   getResourceForElement(element) {
     return Resource.forElement(element);
@@ -373,7 +437,6 @@ export class Resources {
    * Signals that an element has been added to the DOM. Resources manager
    * will start tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   add(element) {
     const resource = new Resource((++this.resourceIdCounter_), element, this);
@@ -381,20 +444,31 @@ export class Resources {
       element.id = 'AMP_' + resource.getId();
     }
     this.resources_.push(resource);
+    this.buildOrScheduleBuildForResource_(resource);
+    dev().fine(TAG_, 'element added:', resource.debugid);
+  }
 
+  /**
+   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * @param {!Resource} resource
+   * @param {boolean=} checkForDupes
+   * @private
+   */
+  buildOrScheduleBuildForResource_(resource, checkForDupes = false) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else if (!element.isBuilt()) {
-        // Otherwise add to pending resources and try to build any ready ones.
-        this.pendingBuildResources_.push(resource);
-        this.buildReadyResources_();
+      } else if (!resource.element.isBuilt()) {
+        if (!checkForDupes ||
+            this.pendingBuildResources_.indexOf(resource) == -1) {
+          // Otherwise add to pending resources and try to build any ready ones.
+          this.pendingBuildResources_.push(resource);
+          this.buildReadyResources_();
+        }
       }
     }
-
-    dev.fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
@@ -417,6 +491,7 @@ export class Resources {
 
   /** @private */
   buildReadyResourcesUnsafe_() {
+    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -427,8 +502,13 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
+        builtElementsCount++;
         resource.build();
       }
+    }
+
+    if (builtElementsCount > 0) {
+      this.schedulePass();
     }
   }
 
@@ -436,29 +516,50 @@ export class Resources {
    * Signals that an element has been removed to the DOM. Resources manager
    * will stop tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   remove(element) {
     const resource = Resource.forElementOptional(element);
     if (!resource) {
       return;
     }
+<<<<<<< HEAD
     const index = resource ? this.resources_.indexOf(resource) : -1;
+=======
+    this.removeResource_(resource);
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  removeResource_(resource) {
+    const index = this.resources_.indexOf(resource);
+>>>>>>> ampproject/master
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    resource.pauseOnRemove();
     this.cleanupTasks_(resource, /* opt_removePending */ true);
-    dev.fine(TAG_, 'element removed:', resource.debugid);
+    dev().fine(TAG_, 'element removed:', resource.debugid);
+  }
+
+  /**
+   * Removes all resources belonging to the specified child window.
+   * @param {!Window} childWin
+   */
+  removeForChildWindow(childWin) {
+    const toRemove = this.resources_.filter(r => r.hostWin == childWin);
+    toRemove.forEach(r => this.removeResource_(r));
   }
 
   /**
    * Signals that an element has been upgraded to the DOM. Resources manager
    * will perform build and enable layout/viewport signals for this element.
    * @param {!AmpElement} element
-   * @package
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
+<<<<<<< HEAD
     if (this.isRuntimeOn_) {
       resource.build();
       this.schedulePass();
@@ -466,6 +567,10 @@ export class Resources {
       resource.onUpgraded_();
     }
     dev.fine(TAG_, 'element upgraded:', resource.debugid);
+=======
+    this.buildOrScheduleBuildForResource_(resource);
+    dev().fine(TAG_, 'element upgraded:', resource.debugid);
+>>>>>>> ampproject/master
   }
 
   /**
@@ -498,6 +603,7 @@ export class Resources {
   /**
    * Invokes `unload` on the elements' resource which in turn will invoke
    * the `documentBecameInactive` callback on the custom element.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
@@ -507,6 +613,38 @@ export class Resources {
 
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       resource.pause();
+    });
+  }
+
+  /**
+   * Invokes `resume` on the elements' resource which in turn will invoke
+   * `resumeCallback` only on paused custom elements.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleResume(parentElement, subElements) {
+    const parentResource = Resource.forElement(parentElement);
+    subElements = elements_(subElements);
+
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+      resource.resume();
+    });
+  }
+
+  /**
+   * Schedules unlayout for specified sub-elements that are children of the
+   * parent element. The parent element can choose to send this signal when
+   * it want to unload resources for its children.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleUnlayout(parentElement, subElements) {
+    const parentResource = Resource.forElement(parentElement);
+    subElements = elements_(subElements);
+
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+      resource.unlayout();
     });
   }
 
@@ -556,19 +694,21 @@ export class Resources {
   }
 
   /**
-   * Requests the runtime to update the size of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
+   * Return a promise that requests the runtime to update the size of
+   * this element to the specified value.
+   * The runtime will schedule this request and attempt to process it
    * as soon as possible. However, unlike in {@link changeSize}, the runtime
-   * may refuse to make a change in which case it will call the
+   * may refuse to make a change in which case it will reject promise, call the
    * `overflowCallback` method on the target resource with the height value.
    * Overflow callback is expected to provide the reader with the user action
    * to update the height manually.
    * Note that the runtime does not call the `overflowCallback` method if the
    * requested height is 0 or negative.
-   * If the height is successfully updated then the opt_callback is called.
+   * If the height is successfully updated then the promise is resolved.
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+<<<<<<< HEAD
    * @param {function()=} opt_callback A callback function to be called if the
    *    height is updated.
    * @protected
@@ -576,6 +716,23 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth, opt_callback) {
     this.scheduleChangeSize_(Resource.forElement(element), newHeight,
         newWidth, /* force */ false, opt_callback);
+=======
+   * @return {!Promise}
+   * @protected
+   */
+
+  attemptChangeSize(element, newHeight, newWidth) {
+    return new Promise((resolve, reject) => {
+      this.scheduleChangeSize_(Resource.forElement(element), newHeight,
+        newWidth, /* force */ false, hasSizeChanged => {
+          if (hasSizeChanged) {
+            resolve();
+          } else {
+            reject(new Error('changeSize attempt denied'));
+          }
+        });
+    });
+>>>>>>> ampproject/master
   }
 
   /**
@@ -647,11 +804,33 @@ export class Resources {
   }
 
   /**
+   * Collapses the element: ensures that it's `display:none`, notifies its
+   * owner and updates the layout box.
+   * @param {!Element} element
+   */
+  collapseElement(element) {
+    const box = this.viewport_.getLayoutRect(element);
+    const resource = Resource.forElement(element);
+    if (box.width != 0 && box.height != 0) {
+      this.setRelayoutTop_(box.top);
+    }
+    resource.completeCollapse();
+
+    const owner = resource.getOwner();
+    if (owner) {
+      owner.collapsedCallback(element);
+    }
+
+    this.schedulePass(FOUR_FRAME_DELAY_);
+  }
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
+   * @return {boolean}
    */
   schedulePass(opt_delay) {
-    this.pass_.schedule(opt_delay);
+    return this.pass_.schedule(opt_delay);
   }
 
   /**
@@ -670,7 +849,7 @@ export class Resources {
    */
   doPass_() {
     if (!this.isRuntimeOn_) {
-      dev.fine(TAG_, 'runtime is off');
+      dev().fine(TAG_, 'runtime is off');
       return;
     }
 
@@ -683,8 +862,8 @@ export class Resources {
     }
 
     const viewportSize = this.viewport_.getSize();
-    const now = timer.now();
-    dev.fine(TAG_, 'PASS: at ' + now +
+    const now = Date.now();
+    dev().fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
@@ -725,7 +904,7 @@ export class Resources {
     // scroll adjustment to avoid active viewport changing without user's
     // action. The elements in the active viewport are not resized and instead
     // the overflow callbacks are called.
-    const now = timer.now();
+    const now = Date.now();
     const viewportRect = this.viewport_.getRect();
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
@@ -736,16 +915,15 @@ export class Resources {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
 
     if (this.deferredMutates_.length > 0) {
-      dev.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
+      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
       const deferredMutates = this.deferredMutates_;
       this.deferredMutates_ = [];
       for (let i = 0; i < deferredMutates.length; i++) {
         deferredMutates[i]();
       }
     }
-
     if (this.requestsChangeSize_.length > 0) {
-      dev.fine(TAG_, 'change size requests:',
+      dev().fine(TAG_, 'change size requests:',
           this.requestsChangeSize_.length);
       const requestsChangeSize = this.requestsChangeSize_;
       this.requestsChangeSize_ = [];
@@ -759,49 +937,46 @@ export class Resources {
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
         const diff = request.newHeight - box.height;
-        if (diff == 0) {
-          // Nothing to do.
-          continue;
-        }
 
         // Check resize rules. It will either resize element immediately, or
         // wait until scrolling stops or will call the overflow callback.
         let resize = false;
-        if (request.force || !this.visible_) {
-          // 1. An immediate execution requested or the document is hidden.
+        if (diff == 0) {
+          // 1. Nothing to resize.
+        } else if (request.force || !this.visible_) {
+          // 2. An immediate execution requested or the document is hidden.
           resize = true;
         } else if (this.activeHistory_.hasDescendantsOf(resource.element)) {
-          // 2. Active elements are immediately resized. The assumption is that
+          // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
         } else if (box.bottom + Math.min(diff, 0) >=
-                      viewportRect.bottom - bottomOffset) {
-          // 3. Elements under viewport are resized immediately, but only if
+              viewportRect.bottom - bottomOffset) {
+          // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.
           resize = true;
         } else if (box.bottom <= viewportRect.top + topOffset) {
-          // 4. Elements above the viewport can only be resized when scrolling
+          // 5. Elements above the viewport can only be resized when scrolling
           // has stopped, otherwise defer util next cycle.
           if (isScrollingStopped) {
             // These requests will be executed in the next animation cycle and
             // adjust the scroll position.
-            resize = false;
             scrollAdjSet.push(request);
           } else {
             // Defer till next cycle.
             this.requestsChangeSize_.push(request);
           }
+          continue;
         } else if (iniBox.bottom >= docBottomOffset ||
                       box.bottom >= docBottomOffset) {
-          // 5. Elements close to the bottom of the document (not viewport)
+          // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
         } else if (diff < 0) {
-          // 6. The new height is smaller than the current one.
-          resize = false;
+          // 7. The new height is smaller than the current one.
         } else {
-          // 7. Element is in viewport don't resize and try overflow callback
+          // 8. Element is in viewport don't resize and try overflow callback
           // instead.
           request.resource.overflowCallback(/* overflown */ true,
               request.newHeight, request.newWidth);
@@ -812,9 +987,13 @@ export class Resources {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeSize(
-              request.newHeight, request.newWidth, request.callback);
+              request.newHeight, request.newWidth);
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
+        }
+
+        if (request.callback) {
+          request.callback(/* hasSizeChanged */resize);
         }
       }
 
@@ -836,6 +1015,9 @@ export class Resources {
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
                   request.newHeight, request.newWidth);
+              if (request.callback) {
+                request.callback(/* hasSizeChanged */true);
+              }
             });
             if (minTop != -1) {
               this.setRelayoutTop_(minTop);
@@ -899,7 +1081,7 @@ export class Resources {
 
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    const now = timer.now();
+    const now = Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
@@ -914,7 +1096,11 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT) {
+<<<<<<< HEAD
         r.build();
+=======
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
+>>>>>>> ampproject/master
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -927,7 +1113,7 @@ export class Resources {
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    const toUnload = [];
+    let toUnload;
     if (relayoutCount > 0 || remeasureCount > 0 ||
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -942,6 +1128,9 @@ export class Resources {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
+            if (!toUnload) {
+              toUnload = [];
+            }
             toUnload.push(r);
           }
         }
@@ -949,7 +1138,7 @@ export class Resources {
     }
 
     // Unload all in one cycle.
-    if (toUnload.length > 0) {
+    if (toUnload) {
       this.vsync_.mutate(() => {
         toUnload.forEach(r => {
           r.unload();
@@ -977,7 +1166,23 @@ export class Resources {
       ? expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Schedule elements for layout within a reasonable distance from
+    // Phase 3: Trigger "viewport enter/exit" events.
+    for (let i = 0; i < this.resources_.length; i++) {
+      const r = this.resources_[i];
+      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+        continue;
+      }
+      // Note that when the document is not visible, neither are any of its
+      // elements to reduce CPU cycles.
+      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+      // layers. This is currently a short-term fix to the problem that
+      // the fixed elements get incorrect top coord.
+      const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
+          (r.isFixed() || r.overlaps(visibleRect)));
+      r.setInViewport(shouldBeInViewport);
+    }
+
+    // Phase 4: Schedule elements for layout within a reasonable distance from
     // current viewport.
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -994,22 +1199,6 @@ export class Resources {
       }
     }
 
-    // Phase 4: Trigger "viewport enter/exit" events.
-    for (let i = 0; i < this.resources_.length; i++) {
-      const r = this.resources_[i];
-      if (r.hasOwner()) {
-        continue;
-      }
-      // Note that when the document is not visible, neither are any of its
-      // elements to reduce CPU cycles.
-      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-      // layers. This is currently a short-term fix to the problem that
-      // the fixed elements get incorrect top coord.
-      const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          (r.isFixed() || r.overlaps(visibleRect)));
-      r.setInViewport(shouldBeInViewport);
-    }
-
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
     // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
     if (this.visible_ &&
@@ -1021,7 +1210,7 @@ export class Resources {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
-          dev.fine(TAG_, 'idle layout:', r.debugid);
+          dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
           if (idleScheduledCount >= 4) {
@@ -1045,14 +1234,14 @@ export class Resources {
    * @private
    */
   work_() {
-    const now = timer.now();
+    const now = Date.now();
     const visibility = this.viewer_.getVisibilityState();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
-      dev.fine(TAG_, 'peek from queue:', task.id,
+      dev().fine(TAG_, 'peek from queue:', task.id,
           'sched at', task.scheduleTime,
           'score', this.boundTaskScorer_(task),
           'timeout', timeout);
@@ -1070,24 +1259,28 @@ export class Resources {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        task.promise = task.callback(visibility);
+        task.promise = task.callback(visibility == 'visible');
         task.startTime = now;
-        dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+        dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
         this.exec_.enqueue(task);
         task.promise.then(this.taskComplete_.bind(this, task, true),
             this.taskComplete_.bind(this, task, false))
+<<<<<<< HEAD
             .catch(reportError);
         if (task.resource.getState() == ResourceState.LAYOUT_SCHEDULED) {
           this.framerate_.collect(task.resource.element);
         }
+=======
+            .catch(/** @type {function (*)} */ (reportError));
+>>>>>>> ampproject/master
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
-    dev.fine(TAG_, 'queue size:', this.queue_.getSize());
-    dev.fine(TAG_, 'exec size:', this.exec_.getSize());
+    dev().fine(TAG_, 'queue size:', this.queue_.getSize());
+    dev().fine(TAG_, 'exec size:', this.exec_.getSize());
 
     if (timeout >= 0) {
       // Still tasks in the queue, but we took too much time.
@@ -1124,6 +1317,7 @@ export class Resources {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
    * @param {!../layout-rect.LayoutRectDef} viewportRect
    * @param {number} dir
 =======
@@ -1133,6 +1327,9 @@ export class Resources {
 =======
 >>>>>>> ampproject/master
    * @param {!TaskDef} task
+=======
+   * @param {!./task-queue.TaskDef} task
+>>>>>>> ampproject/master
    * @private
    */
   calcTaskScore_(task) {
@@ -1163,11 +1360,11 @@ export class Resources {
    * against the age of the executing task. If it has been in executing for
    * some time, the penalty is reduced.
    *
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   calcTaskTimeout_(task) {
-    const now = timer.now();
+    const now = Date.now();
 
     if (this.exec_.getSize() == 0) {
       // If we've never been visible, return 0. This follows the previous
@@ -1197,7 +1394,7 @@ export class Resources {
   }
 
   /**
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   reschedule_(task) {
@@ -1207,7 +1404,7 @@ export class Resources {
   }
 
   /**
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @param {boolean} success
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
@@ -1217,7 +1414,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev.error(TAG_, 'task failed:',
+      dev().error(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1229,20 +1426,28 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
+<<<<<<< HEAD
    * @param {function()=} opt_callback A callback function.
+=======
+   * @param {function(boolean)=} opt_callback A callback function
+>>>>>>> ampproject/master
    * @private
    */
-  scheduleChangeSize_(resource, newHeight, newWidth, force, opt_callback) {
+  scheduleChangeSize_(resource, newHeight, newWidth, force,
+      opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width)) {
       if (newHeight === undefined && newWidth === undefined) {
-        dev.error(
+        dev().error(
             TAG_, 'attempting to change size with undefined dimensions',
             resource.debugid);
       }
       // Nothing to do.
+      if (opt_callback) {
+        opt_callback(/* hasSizeChanged */false);
+      }
       return;
     }
 
@@ -1289,7 +1494,11 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
+<<<<<<< HEAD
     dev.assert(resource.getState() != ResourceState.NOT_BUILT &&
+=======
+    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
+>>>>>>> ampproject/master
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
@@ -1353,7 +1562,7 @@ export class Resources {
    * @param {string} localId
    * @param {number} priorityOffset
    * @param {number} parentPriority
-   * @param {function():!Promise} callback
+   * @param {function(boolean):!Promise} callback
    * @private
    */
   schedule_(resource, localId, priorityOffset, parentPriority, callback) {
@@ -1365,11 +1574,15 @@ export class Resources {
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
       callback,
+<<<<<<< HEAD
       scheduleTime: timer.now(),
+=======
+      scheduleTime: Date.now(),
+>>>>>>> ampproject/master
       startTime: 0,
       promise: null,
     };
-    dev.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
+    dev().fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
     // Only schedule a new task if there's no one enqueued yet or if this task
     // has a higher priority.
@@ -1407,7 +1620,7 @@ export class Resources {
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
     elements.forEach(element => {
-      dev.assert(parentResource.element.contains(element));
+      dev().assert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
   }
@@ -1447,7 +1660,7 @@ export class Resources {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {function(!Resource, number)} iterator
+   * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
     const prerender = VisibilityState.PRERENDER;
@@ -1455,7 +1668,6 @@ export class Resources {
     const hidden = VisibilityState.HIDDEN;
     const paused = VisibilityState.PAUSED;
     const inactive = VisibilityState.INACTIVE;
-
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
@@ -1470,10 +1682,18 @@ export class Resources {
           delay = Math.min(delay, MUTATE_DEFER_DELAY_);
         }
         if (this.visible_) {
+<<<<<<< HEAD
           dev.fine(TAG_, 'next pass:', delay);
           this.schedulePass(delay);
+=======
+          if (this.schedulePass(delay)) {
+            dev().fine(TAG_, 'next pass:', delay);
+          } else {
+            dev().fine(TAG_, 'pass already scheduled');
+          }
+>>>>>>> ampproject/master
         } else {
-          dev.fine(TAG_, 'document is not visible: no scheduling');
+          dev().fine(TAG_, 'document is not visible: no scheduling');
         }
       }
     };
@@ -1509,8 +1729,8 @@ export class Resources {
     vsm.addTransition(hidden, inactive, unload);
     vsm.addTransition(hidden, paused, pause);
 
-    vsm.addTransition(inactive, visible, doPass);
-    vsm.addTransition(inactive, hidden, doPass);
+    vsm.addTransition(inactive, visible, resume);
+    vsm.addTransition(inactive, hidden, resume);
     vsm.addTransition(inactive, inactive, noop);
     vsm.addTransition(inactive, paused, doPass);
 
@@ -1533,8 +1753,9 @@ export class Resources {
 
   /**
    * Cleanup task queues from tasks for elements that has been unloaded.
-   * @param resource
-   * @param opt_removePending Whether to remove from pending build resources.
+   * @param {Resource} resource
+   * @param {boolean=} opt_removePending Whether to remove from pending
+   *     build resources.
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
@@ -1550,8 +1771,9 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      this.requestsChangeSize_ = this.requestsChangeSize_.filter(
-          request => request.resource != resource);
+      filterSplice(this.requestsChangeSize_, request => {
+        return request.resource != resource;
+      });
     }
 
     if (resource.getState() == ResourceState.NOT_BUILT && opt_removePending &&
@@ -1570,7 +1792,12 @@ export class Resources {
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
+<<<<<<< HEAD
   return isArray(elements) ? elements : [elements];
+=======
+  return /** @type {!Array<!Element>} */ (
+      isArray(elements) ? elements : [elements]);
+>>>>>>> ampproject/master
 }
 
 
@@ -1581,16 +1808,13 @@ function elements_(elements) {
  *   height: (number|undefined),
  *   width: (number|undefined)
  * }}
- * @private
  */
-let SizeDef;
+export let SizeDef;
 
 /**
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Resources}
  */
-export function installResourcesService(win) {
-  return getService(win, 'resources', () => {
-    return new Resources(win);
-  });
+export function installResourcesServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'resources', Resources);
 };

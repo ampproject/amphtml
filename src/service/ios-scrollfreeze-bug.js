@@ -31,7 +31,11 @@ import {vsyncFor} from '../vsync';
  * See #3481 for more details.
  *
  * @param {!Window} win
+<<<<<<< HEAD
  * @param {!../platform.Platform=} opt_platform
+=======
+ * @param {!../service/platform-impl.Platform=} opt_platform
+>>>>>>> ampproject/master
  * @param {!./viewer-impl.Viewer=} opt_viewer
  * @param {!./vsync-impl.Vsync=} opt_vsync
  * @return {?Promise}

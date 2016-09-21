@@ -17,8 +17,15 @@
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
+<<<<<<< HEAD
 import {waitForBody} from '../../../src/dom';
 import {allocateVariant} from './variant';
+=======
+import {Layout} from '../../../src/layout';
+import {waitForBodyPromise} from '../../../src/dom';
+import {allocateVariant} from './variant';
+import {getService} from '../../../src/service';
+>>>>>>> ampproject/master
 
 /** @const */
 const EXPERIMENT = 'amp-experiment';
@@ -27,21 +34,35 @@ const ATTR_PREFIX = 'amp-x-';
 export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
+<<<<<<< HEAD
   isLayoutSupported(unusedLayout) {
     return true;
+=======
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+>>>>>>> ampproject/master
   }
 
   /** @override */
   buildCallback() {
+<<<<<<< HEAD
     this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
     if (!this.isExperimentOn_) {
       dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
+=======
+    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
+    if (!this.isExperimentOn_) {
+      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
+      toggle(this.element, false);
+      getService(this.win, 'variant', () => Promise.resolve());
+>>>>>>> ampproject/master
       return;
     }
 
     const config = this.getConfig_();
     const results = Object.create(null);
+<<<<<<< HEAD
     this.experimentVariants = Promise.all(
         Object.keys(config).map(experimentName => {
           return allocateVariant(this.getWin(), config[experimentName])
@@ -52,11 +73,31 @@ export class AmpExperiment extends AMP.BaseElement {
               });
         })).then(() => results);
     this.experimentVariants.then(this.addToBody_.bind(this));
+=======
+    const variants = Object.keys(config).map(experimentName => {
+      return allocateVariant(
+          this.win, experimentName, config[experimentName])
+              .then(variantName => {
+                results[experimentName] = variantName;
+              });
+    });
+
+    /** @private @const {!Promise<!Object<string, ?string>>} */
+    this.experimentVariants_ = Promise.all(variants)
+        .then(() => results)
+        .then(this.addToBody_.bind(this));
+
+    getService(this.win, 'variant', () => this.experimentVariants_);
+>>>>>>> ampproject/master
   }
 
   getConfig_() {
     const children = this.element.children;
+<<<<<<< HEAD
     user.assert(
+=======
+    user().assert(
+>>>>>>> ampproject/master
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
                 == 'APPLICATION/JSON',
@@ -68,6 +109,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /**
    * Adds the given experiment and variant pairs to body element as attributes
+<<<<<<< HEAD
    * and values.
    * @param {!Object<string, string>} experiments
    * @private
@@ -78,6 +120,23 @@ export class AmpExperiment extends AMP.BaseElement {
       for (const name in experiments) {
         doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
       }
+=======
+   * and values. Experiment with no variant assigned (null) will be skipped.
+   * @param {!Object<string, ?string>} experiments
+   * @return {!Promise<!Object<string, ?string>>} a promise of the original
+   *     param passed in
+   * @private
+   */
+  addToBody_(experiments) {
+    const doc = this.win.document;
+    return waitForBodyPromise(doc).then(() => {
+      for (const name in experiments) {
+        if (experiments[name]) {
+          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+        }
+      }
+      return experiments;
+>>>>>>> ampproject/master
     });
   }
 }

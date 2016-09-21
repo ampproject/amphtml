@@ -15,8 +15,10 @@
  */
 
 import {cidForOrNull} from './cid';
-import {clientIdScope} from '../ads/_config';
+import {adConfig} from '../ads/_config';
 import {userNotificationManagerFor} from './user-notification';
+import {dev} from '../src/log';
+import {timerFor} from '../src/timer';
 
 
 /**
@@ -26,25 +28,38 @@ import {userNotificationManagerFor} from './user-notification';
  *     - `amp-analytics` which provides the CID service was not installed.
  */
 export function getAdCid(adElement) {
-  const scope = clientIdScope[adElement.element.getAttribute('type')];
+  const config = adConfig[adElement.element.getAttribute('type')];
+  const scope = config ? config.clientIdScope : null;
   const consentId = adElement.element.getAttribute(
     'data-consent-notification-id');
   if (!(scope || consentId)) {
     return Promise.resolve();
   }
-  return cidForOrNull(adElement.getWin()).then(cidService => {
+  const cidPromise = cidForOrNull(adElement.win).then(cidService => {
     if (!cidService) {
       return;
     }
     let consent = Promise.resolve();
     if (consentId) {
-      consent = userNotificationManagerFor(adElement.getWin()).then(service => {
+      consent = userNotificationManagerFor(adElement.win).then(service => {
         return service.get(consentId);
       });
       if (!scope && consentId) {
         return consent;
       }
     }
-    return cidService.get(scope, consent);
+    return cidService.get(scope, consent).catch(error => {
+      // Not getting a CID is not fatal.
+      dev().error('ad-cid', error);
+      return undefined;
+    });
   });
+  // The CID should never be crucial for an ad. If it does not come within
+  // 1 second, assume it will never arrive.
+  return timerFor(adElement.win)
+      .timeoutPromise(1000, cidPromise, 'cid timeout').catch(error => {
+        // Timeout is not fatal.
+        dev().warn(error);
+        return undefined;
+      });
 }

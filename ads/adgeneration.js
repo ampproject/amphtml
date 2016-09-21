@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {loadScript, writeScript, checkData, validateDataExists} from '../3p/3p';
+=======
+import {loadScript, writeScript, validateData} from '../3p/3p';
+>>>>>>> ampproject/master
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adgeneration(global, data) {
+<<<<<<< HEAD
   // Allow fields
   checkData(data, ['id', 'targetid', 'displayid', 'adtype', 'async', 'option']);
 
   // Validate empty fields
   validateDataExists(data, ['id']);
+=======
+  validateData(data, ['id'],
+      ['targetid', 'displayid', 'adtype', 'async', 'option']);
+>>>>>>> ampproject/master
 
   // URL encoding
   const option = data.option ? encodeQueryValue(data.option) : null;

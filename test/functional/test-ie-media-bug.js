@@ -34,7 +34,11 @@ describe('ie-media-bug', () => {
       isIe: () => false,
     };
     platformMock = sandbox.mock(platform);
+<<<<<<< HEAD
     devErrorStub = sandbox.stub(dev, 'error');
+=======
+    devErrorStub = sandbox.stub(dev(), 'error');
+>>>>>>> ampproject/master
 
     windowApi = {
       innerWidth: 320,

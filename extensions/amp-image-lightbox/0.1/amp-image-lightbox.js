@@ -27,14 +27,14 @@ import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {historyFor} from '../../../src/history';
-import {isLoaded, loadPromise} from '../../../src/event-helper';
+import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
@@ -66,10 +66,14 @@ const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
+   * @param {!Window} win
    */
-  constructor(lightbox) {
+  constructor(lightbox, win) {
     /** @private {!AmpImageLightbox} */
     this.lightbox_ = lightbox;
+
+    /** @const {!Window} */
+    this.win = win;
 
     /** @private {!Element} */
     this.viewer_ = lightbox.element.ownerDocument.createElement('div');
@@ -283,9 +287,9 @@ export class ImageViewer {
     // Notice that we will wait until the next event cycle to set the "src".
     // This ensures that the already available image will show immediately
     // and then naturally upgrade to a higher quality image.
-    return timer.promise(1).then(() => {
+    return timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
-      return loadPromise(this.image_);
+      return this.loadPromise(this.image_);
     });
   }
 
@@ -675,7 +679,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.element.appendChild(this.container_);
 
     /** @private {!ImageViewer} */
-    this.imageViewer_ = new ImageViewer(this);
+    this.imageViewer_ = new ImageViewer(this, this.win);
     this.container_.appendChild(this.imageViewer_.getElement());
 
     /** @private {!Element} */
@@ -708,7 +712,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
 
     const source = invocation.source;
-    user.assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+    user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
     this.active_ = true;
@@ -717,7 +721,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     /**  @private {function(this:AmpImageLightbox, Event)}*/
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
-    this.getWin().document.documentElement.addEventListener(
+    this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
 
     // Prepare to enter in lightbox
@@ -768,7 +772,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
-    this.getWin().document.documentElement.removeEventListener(
+    this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
   }
@@ -979,8 +983,8 @@ class AmpImageLightbox extends AMP.BaseElement {
       if (this.sourceImage_) {
         this.sourceImage_.classList.remove('-amp-ghost');
       }
+      this./*OK*/collapse();
       st.setStyles(this.element, {
-        display: 'none',
         opacity: '',
       });
       st.setStyles(this.container_, {opacity: ''});

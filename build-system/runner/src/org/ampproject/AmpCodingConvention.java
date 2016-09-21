@@ -17,6 +17,10 @@
 package org.ampproject;
 
 import com.google.common.collect.ImmutableList;
+<<<<<<< HEAD
+=======
+import com.google.javascript.jscomp.ClosureCodingConvention.AssertFunctionByTypeName;
+>>>>>>> ampproject/master
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
@@ -45,8 +49,15 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     return ImmutableList.of(
         new AssertionFunctionSpec("user.assert", JSType.TRUTHY),
         new AssertionFunctionSpec("dev.assert", JSType.TRUTHY),
+<<<<<<< HEAD
         new AssertionFunctionSpec("module$src$log.user.assert", JSType.TRUTHY),
         new AssertionFunctionSpec("module$src$log.dev.assert", JSType.TRUTHY)
+=======
+        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSType.TRUTHY),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")
+>>>>>>> ampproject/master
     );
   }
 
@@ -58,6 +69,13 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
+    // This stops compiler from inlining functions (local or not) that end with
+    // NoInline in their name. Mostly used for externing try-catch to avoid v8
+    // de-optimization (https://goo.gl/gvzlDp)
+    if (name.endsWith("NoInline")) {
+      return true;
+    }
+
     if (local) {
       return false;
     }
@@ -70,7 +88,10 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 =======

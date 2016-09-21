@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
+=======
+import {AmpAdApiHandler} from './amp-ad-api-handler';
+import {
+  allowRenderOutsideViewport,
+  incrementLoadingAds,
+} from './concurrent-load';
+>>>>>>> ampproject/master
 import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+<<<<<<< HEAD
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timer} from '../../../src/timer';
@@ -126,6 +135,15 @@ export function isPositionFixed(el, win) {
   } while (el && el.tagName != 'BODY');
   return hasFixedAncestor;
 }
+=======
+import {isAdPositionAllowed, getAdContainer,}
+    from '../../../src/ad-helper';
+import {adConfig} from '../../../ads/_config';
+import {user} from '../../../src/log';
+import {getIframe} from '../../../src/3p-frame';
+import {setupA2AListener} from './a2a-listener';
+
+>>>>>>> ampproject/master
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -139,7 +157,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   renderOutsideViewport() {
+<<<<<<< HEAD
     const allowRender = allowRenderOutsideViewport(this.element, this.getWin());
+=======
+    const allowRender = allowRenderOutsideViewport(this.element, this.win);
+>>>>>>> ampproject/master
     if (allowRender !== true) {
       return allowRender;
     }
@@ -189,7 +211,22 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
+<<<<<<< HEAD
     setupA2AListener(this.getWin());
+=======
+    const adType = this.element.getAttribute('type');
+    /** {!Object} */
+    this.config = adConfig[adType];
+    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+
+    setupA2AListener(this.win);
+
+    /** @private {?string|undefined} */
+    this.container_ = undefined;
+
+    /** @private {?Promise} */
+    this.layoutPromise_ = null;
+>>>>>>> ampproject/master
   }
 
   /**
@@ -198,6 +235,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
+<<<<<<< HEAD
     preloadBootstrap(this.getWin());
     const type = this.element.getAttribute('type');
     const prefetch = adPrefetch[type];
@@ -213,6 +251,20 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.preconnect.url(preconnect, onLayout);
     } else if (preconnect) {
       preconnect.forEach(p => {
+=======
+    preloadBootstrap(this.win);
+    if (typeof this.config.prefetch == 'string') {
+      this.preconnect.preload(this.config.prefetch, 'script');
+    } else if (this.config.prefetch) {
+      this.config.prefetch.forEach(p => {
+        this.preconnect.preload(p, 'script');
+      });
+    }
+    if (typeof this.config.preconnect == 'string') {
+      this.preconnect.url(this.config.preconnect, onLayout);
+    } else if (this.config.preconnect) {
+      this.config.preconnect.forEach(p => {
+>>>>>>> ampproject/master
         this.preconnect.url(p, onLayout);
       });
     }
@@ -229,7 +281,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
+<<<<<<< HEAD
     this.isInFixedContainer_ = isPositionFixed(this.element, this.getWin());
+=======
+    this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
+    /** detect ad containers, add the list to element as a new attribute */
+    if (this.container_ === undefined) {
+      this.container_ = getAdContainer(this.element);
+    }
+>>>>>>> ampproject/master
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
@@ -263,6 +323,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+<<<<<<< HEAD
     if (!this.iframe_) {
       user.assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
@@ -280,6 +341,26 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       });
     }
     return loadPromise(this.iframe_);
+=======
+    if (this.layoutPromise_) {
+      return this.layoutPromise_;
+    }
+    user().assert(!this.isInFixedContainer_,
+        '<amp-ad> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element);
+    incrementLoadingAds(this.win);
+    return this.layoutPromise_ = getAdCid(this).then(cid => {
+      const opt_context = {
+        clientId: cid || null,
+        container: this.container_,
+      };
+      this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+          this.element, null, opt_context);
+      this.apiHandler_ = new AmpAdApiHandler(
+          this, this.element, this.boundNoContentHandler_);
+      return this.apiHandler_.startUp(this.iframe_, true);
+    });
+>>>>>>> ampproject/master
   }
 
   /** @override  */
@@ -301,9 +382,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
+<<<<<<< HEAD
       this.attemptChangeHeight(0, () => {
         this.element.style.display = 'none';
       });
+=======
+      this.attemptChangeHeight(0).then(() => {
+        this./*OK*/collapse();
+      }, () => {});
+>>>>>>> ampproject/master
     }
     this.deferMutate(() => {
       if (!this.iframe_) {
@@ -326,6 +413,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+<<<<<<< HEAD
+=======
+    this.layoutPromise_ = null;
+>>>>>>> ampproject/master
     if (!this.iframe_) {
       return true;
     }
@@ -344,6 +435,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     return true;
   }
+<<<<<<< HEAD
 
   /** @override  */
   overflowCallback(overflown, requestedHeight, requestedWidth) {
@@ -352,4 +444,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         overflown, requestedHeight, requestedWidth);
     }
   }
+=======
+>>>>>>> ampproject/master
 }
