@@ -15,7 +15,7 @@
  */
 
 import {Pass} from '../pass';
-import {getServiceForDoc} from '../service';
+import {fromClass, getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {timerFor} from '../timer';
@@ -647,16 +647,19 @@ export class HistoryBindingVirtual_ {
  * @return {!History}
  * @private
  */
-function createHistory_(ampdoc) {
+function createHistory(ampdoc) {
   const viewer = installViewerService(ampdoc.win);
   let binding;
-  if (viewer.isOvertakeHistory() || getMode().test) {
+  if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test) {
     binding = new HistoryBindingVirtual_(viewer);
   } else {
-    binding = new HistoryBindingNatural_(ampdoc.win);
+    // Only one global "natural" binding is allowed since it works with the
+    // global history stack.
+    binding = fromClass(ampdoc.win, 'global-history-binding',
+        HistoryBindingNatural_);
   }
   return new History(ampdoc, binding);
-};
+}
 
 
 /**
@@ -665,7 +668,5 @@ function createHistory_(ampdoc) {
  */
 export function installHistoryServiceForDoc(ampdoc) {
   return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
-      ampdoc => {
-        return createHistory_(ampdoc);
-      }));
+      ampdoc => createHistory(ampdoc)));
 }
