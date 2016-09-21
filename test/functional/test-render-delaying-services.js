@@ -51,7 +51,7 @@ describe('waitForServices', () => {
   it('should resolve if no blocking services is presented', () => {
     // <script custom-element="amp-experiment"> should not block
     addExtensionScript(win, 'amp-experiment');
-    return expect(waitForServices(win)).to.eventually.be.fulfilled;
+    return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
   it('should timeout if some blocking services are missing', () => {
