@@ -381,7 +381,7 @@ amp-analytics {
  * or otherwise the iframe will oevrflow its parent when there is a border.
  */
 amp-iframe iframe {
-  box-sizing: border-box;
+  box-sizing: border-box !important;
 }
 
 /**
