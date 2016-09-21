@@ -20,8 +20,8 @@ import {variantForOrNull} from '../variant-service';
 import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
+import {whenDocumentComplete} from '../document-ready';
 import {fromClass} from '../service';
-import {loadPromise} from '../event-helper';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
@@ -466,7 +466,7 @@ export class UrlReplacements {
     const metric = this.getTimingDataSync_(startEvent, endEvent);
     if (metric === '') {
       // Metric is not yet available. Retry after a delay.
-      return loadPromise(this.win_).then(() => {
+      return whenDocumentComplete(this.win_.document).then(() => {
         return this.getTimingDataSync_(startEvent, endEvent);
       });
     }

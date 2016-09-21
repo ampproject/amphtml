@@ -103,7 +103,6 @@ describe('UrlReplacements', () => {
       addEventListener: function(type, callback) {
         loadObservable.add(callback);
       },
-      complete: false,
       Object,
       performance: {
         timing: {
@@ -318,26 +317,41 @@ describe('UrlReplacements', () => {
     });
   });
 
-  it('should replace PAGE_LOAD_TIME if timing info is not available', () => {
-    const win = getFakeWindow();
-    win.complete = true;
-    return installUrlReplacementsService(win)
-        .expandAsync('?sh=PAGE_LOAD_TIME&s')
-        .then(res => {
-          expect(res).to.match(/sh=&s/);
-        });
-  });
+  describe('PAGE_LOAD_TIME', () => {
+    let win;
+    let eventListeners;
+    beforeEach(() => {
+      win = getFakeWindow();
+      eventListeners = {};
+      win.document.readyState = 'loading';
+      win.document.addEventListener = function(eventType, handler) {
+        eventListeners[eventType] = handler;
+      };
+      win.document.removeEventListener = function(eventType, handler) {
+        if (eventListeners[eventType] == handler) {
+          delete eventListeners[eventType];
+        }
+      };
+    });
 
-  it('should replace PAGE_LOAD_TIME if available within a delay', () => {
-    const win = getFakeWindow();
-    const urlReplacements = installUrlReplacementsService(win);
-    const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
-    urlReplacements.win_.performance.timing.loadEventStart = 109;
-    loadObservable.fire({
-      target: win,
-    }); // Mimics load event.
-    return validMetric.then(res => {
-      expect(res).to.match(/sh=9&s/);
+    it('is replaced if timing info is not available', () => {
+      win.document.readyState = 'complete';
+      return installUrlReplacementsService(win)
+          .expandAsync('?sh=PAGE_LOAD_TIME&s')
+          .then(res => {
+            expect(res).to.match(/sh=&s/);
+          });
+    });
+
+    it('is replaced if PAGE_LOAD_TIME is available within a delay', () => {
+      const urlReplacements = installUrlReplacementsService(win);
+      const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
+      urlReplacements.win_.performance.timing.loadEventStart = 109;
+      win.document.readyState = 'complete';
+      eventListeners['readystatechange']();
+      return validMetric.then(res => {
+        expect(res).to.match(/sh=9&s/);
+      });
     });
   });
 
