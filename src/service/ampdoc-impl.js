@@ -102,7 +102,7 @@ export class AmpDocService {
    * instance is always returned. Otherwise, this method locates the `AmpDoc`
    * that contains the specified node and, if necessary, initializes it.
    *
-   * @param {!Node|!AmpDoc=} opt_node
+   * @param {!Node=} opt_node
    * @return {!AmpDoc}
    */
   getAmpDoc(opt_node) {

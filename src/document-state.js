@@ -67,7 +67,7 @@ export class DocumentState {
           this.boundOnVisibilityChanged_);
     }
 
-    /** @private @const {?Observable} */
+    /** @private {?Observable} */
     this.bodyAvailableObservable_ = null;
   }
 
