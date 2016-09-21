@@ -112,6 +112,9 @@ export class Motion {
     /** @private @const {!Node} */
     this.contextNode_ = contextNode;
 
+    /** @private @const {!Node} */
+    this.contextNode_ = contextNode;
+
     /** @private @const */
     this.callback_ = callback;
 
