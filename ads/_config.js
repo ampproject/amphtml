@@ -242,6 +242,14 @@ export const adConfig = {
     ],
   },
 
+  mixpo: {
+    prefetch: 'https://cdn.mixpo.com/js/loader.js',
+    preconnect: [
+      'https://player1.mixpo.com',
+      'https://player2.mixpo.com',
+    ],
+  },
+
   nativo: {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
