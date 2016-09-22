@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const BBPromise = require('bluebird');
 const child_process = require('child_process');
-const exec = BBPromise.promisify(child_process.exec);
-const fs = BBPromise.promisifyAll(require('fs'));
 const path = require('path');
 
 /**
@@ -38,12 +35,23 @@ function hasSuffix(str, suffix) {
 }
 
 /**
+ * Executes the provided command, returning its stdout as an array of lines.
+ * This will throw an exception if something goes wrong.
+ * @param {string} cmd
+ * @return {!Array<string>}
+ */
+function exec(cmd) {
+  return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
+}
+
+/**
+ * For a provided commit range identifiying a pull request (PR),
+ * yields the list of files.
  * @param {string} travisCommitRange
- * @return {Promise<!Array<string>>}
+ * @return {!Array<string>}
  */
 function filesInPr(travisCommitRange) {
-  return exec(`git diff --name-only ${travisCommitRange}`)
-      .then(output => output.trim().split('\n'));
+  return exec(`git diff --name-only ${travisCommitRange}`);
 }
 
 /**
@@ -70,6 +78,8 @@ function isValidatorFile(filePath) {
 }
 
 /**
+ * Determines the targets that will be executed by the main method of
+ * this script.
  * @param {!Array<string>} filePaths
  * @returns {!Set<string>}
  */
@@ -87,45 +97,48 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
-if (process.argv.length <= 2) {
-  console.log(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
-  process.exit(-1);
-}
-const travisCommitRange = process.argv[2];
-filesInPr(travisCommitRange).then(determineBuildTargets).then(buildTargets => {
-  for (const target of buildTargets) {
-    console.log('target detected: ' + target);
+/**
+ * @param {!Array<string>} argv
+ * @returns {number}
+ */
+function main(argv) {
+  if (argv.length <= 2) {
+    console.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
+    return -1;
   }
-  const steps = [];
-  console.log('scheduling COMMON steps');
-  steps.push(exec('npm run ava'));
-  steps.push(exec('gulp lint'));
-  steps.push(exec('gulp build --css-only'));
-  steps.push(exec('gulp check-types'));
-  steps.push(exec('gulp dist --fortesting'));
-  steps.push(exec('gulp presubmit'));
+  const travisCommitRange = argv[2];
+  const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
+
+  console.log('\npr-check.js: Executing COMMON steps.\n');
+  exec('npm run ava');
+  exec('gulp lint');
+  exec('gulp build --css-only');
+  exec('gulp check-types');
+  exec('gulp dist --fortesting');
+  exec('gulp presubmit');
   if (buildTargets.has('RUNTIME')) {
-    console.log('scheduling RUNTIME steps');
+    console.log('\npr-check.js: Executing RUNTIME steps.\n');
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
-    steps.push(exec('gulp dep-check'));
+    exec('gulp dep-check');
     // Unit tests with Travis' default chromium
-    steps.push(exec('gulp test --nobuild --compiled'));
+    exec('gulp test --nobuild --compiled');
     // Integration tests with all saucelabs browsers
-    steps.push(
-        exec('gulp test --nobuild --saucelabs --integration --compiled'));
+    exec('gulp test --nobuild --saucelabs --integration --compiled');
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    steps.push(exec('gulp test --saucelabs --oldchrome'));
+    exec('gulp test --saucelabs --oldchrome');
   }
   if (buildTargets.has('VALIDATOR_WEBUI')) {
-    console.log('scheduling VALIDATOR_WEBUI steps');
-    steps.push(exec('cd validator/webui && python build.py'));
+    console.log('\npr-check.js: Executing VALIDATOR_WEBUI steps.\n');
+    exec('cd validator/webui && python build.py');
   }
   if (buildTargets.has('VALIDATOR')) {
-    console.log('scheduling VALIDATOR steps');
-    steps.push(exec('cd validator && python build.py'));
+    console.log('\npr-check.js: Executing VALIDATOR steps.\n');
+    exec('cd validator && python build.py');
   }
-  return Promise.all(steps);
-});
+  return 0;
+}
+
+process.exit(main(process.argv));
