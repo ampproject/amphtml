@@ -276,15 +276,18 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
         } else {
-          // We only want to call renderStart with a specific size if this is a
-          // multi-size request, and the creative size actually differs from the
-          // primary size.
+          // We only want to call renderStart with a specific size if the
+          // returned creative size matches one of the multi-size sizes.
           let newSize;
-          if (multiSizeDataStr && (pWidth != rWidth || pHeight != pWidth)) {
-            newSize = {
-              width: rWidth,
-              height: rHeight,
-            };
+          for (let i = 1; i < dimensions.length; i++) {
+            // dimensions[0] is the primary or overridden size.
+            if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
+              newSize = {
+                width: rWidth,
+                height: rHeight,
+              };
+              break;
+            }
           }
           global.context.renderStart(newSize);
         }
