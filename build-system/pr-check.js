@@ -23,7 +23,6 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
-const child_process = require('child_process');
 const path = require('path');
 
 /**
