@@ -21,7 +21,7 @@
  * @return {boolean}
  */
 export function isDocumentReady(doc) {
-  return doc.readyState != 'loading';
+  return doc.readyState != 'loading' && doc.readyState != 'uninitialized';
 }
 
 /**
