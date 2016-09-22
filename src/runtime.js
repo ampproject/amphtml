@@ -27,7 +27,7 @@ import {
 } from './service/extensions-impl';
 import {ampdocServiceFor} from './ampdoc';
 import {cssText} from '../build/css';
-import {dev, user} from './log';
+import {dev, user, initLogConstructor} from './log';
 import {fromClassForDoc, getService, getServiceForDoc} from './service';
 import {childElementsByTag} from './dom';
 import {
@@ -59,7 +59,6 @@ import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {initLogConstructor} from './log';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
