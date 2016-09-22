@@ -59,11 +59,11 @@ function exec(cmd) {
  * @param {string} cmd
  */
 function execOrDie(cmd) {
-  console/*OK*/.log(`\npr-check.js: ${cmd}\n`);
-  try {
-    child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  } catch (e) {
-    process.exit(e.status);
+  console /*OK*/.log(`\npr-check.js: ${cmd}\n`);
+  const p =
+      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  if (p.status != 0) {
+    process.exit(p.status)
   }
 }
 
