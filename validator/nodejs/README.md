@@ -47,3 +47,6 @@ As expected, this emits errors because the provided string in the example, `<htm
 ## Release Notes
 ### 1.0.10
 * Fixed [#4246: amphtml-validator CLI fails on Mac OS X](https://github.com/ampproject/amphtml/issues/4246).
+### 1.0.11
+* Added support for AMP4ADS (via --html_format command line flag) and
+  argument for validateString function in the API.
