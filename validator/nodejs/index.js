@@ -31,7 +31,7 @@ var util = require('util');
 var vm = require('vm');
 
 var VERSION = '0.1.0';
-var DEFAULT_USER_AGENT = 'amphtml-validator/' + VERSION;
+var DEFAULT_USER_AGENT = 'amphtml-validator';
 
 /**
  * Determines if str begins with prefix.
