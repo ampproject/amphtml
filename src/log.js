@@ -422,6 +422,9 @@ let logConstructor = null;
 
 export function initLogConstructor() {
   logConstructor = Log;
+  // Initialize instances for use
+  dev();
+  user();
 }
 
 export function resetLogConstructorForTesting() {
