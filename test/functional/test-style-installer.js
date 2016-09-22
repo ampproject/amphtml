@@ -88,7 +88,7 @@ describe('Styles', () => {
       styles.makeBodyVisible(doc, true);
       setTimeout(() => {
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
-        expect(schedulePassSpy).to.not.be.called;
+        expect(schedulePassSpy).to.not.be.calledWith(sinon.match.number, true);
         done();
       }, 0);
     });
