@@ -28,24 +28,25 @@ export function mixpo(global, data) {
 
   const g = global,
     cdnSubdomain = (data.subdomain == 'www') ? 'cdn' : data.subdomain + '-cdn',
-    url = data.loader ? data.loader : 'https://' + cdnSubdomain + '.mixpo.com/js/loader.js';
+    url = data.loader || `https://${cdnSubdomain}.mixpo.com/js/loader.js`;
 
-  g.mixpoAd = g.mixpoAd || {};
-  g.mixpoAd.amp = true;
-  g.mixpoAd.noflash = true;
-  g.mixpoAd.width = data.width;
-  g.mixpoAd.height = data.height;
-  g.mixpoAd.guid = data.guid;
-  g.mixpoAd.subdomain = data.subdomain;
-  g.mixpoAd.embedv = data.embedv;
-  g.mixpoAd.clicktag = data.clicktag;
-  g.mixpoAd.customTarget = data.customtarget;
-  g.mixpoAd.dynClickthrough = data.dynclickthrough;
-  g.mixpoAd.viewTracking = data.viewtracking;
-  g.mixpoAd.customCSS = data.customcss;
-  g.mixpoAd.local = data.local;
-  g.mixpoAd.enableMRAID = data.enablemraid;
-  g.mixpoAd.jsPlayer = data.jsplayer;
+  g.mixpoAd = {
+    amp: true,
+    noflash: true,
+    width: data.width,
+    height: data.height,
+    guid: data.guid,
+    subdomain: data.subdomain,
+    embedv: data.embedv,
+    clicktag: data.clicktag,
+    customTarget: data.customtarget,
+    dynClickthrough: data.dynclickthrough,
+    viewTracking: data.viewtracking,
+    customCSS: data.customcss,
+    local: data.local,
+    enableMRAID: data.enablemraid,
+    jsPlayer: data.jsplayer,
+  };
 
   writeScript(g, url);
 }

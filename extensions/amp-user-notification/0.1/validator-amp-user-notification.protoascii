@@ -58,4 +58,23 @@ tags: {  # <amp-user-notification>
   amp_layout: {
     supported_layouts: NODISPLAY
   }
+  # These attributes are allowed implicitly as data-* attributes,
+  # but we make additional constraints on validating URLs.
+  attrs: {
+    name: "data-show-if-href"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+  attrs: {
+    name: "data-dismiss-href"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+
 }

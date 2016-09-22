@@ -188,7 +188,11 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   onLayoutMeasure() {
     this.slideWidth_ = this.getLayoutWidth();
-
+    if (this.slideIndex_ !== null) {
+      // Reset scrollLeft on orientationChange.
+      this.slidesContainer_./*OK*/scrollLeft =
+          this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
+    }
     this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
@@ -300,7 +304,7 @@ export class AmpSlideScroll extends BaseSlides {
     } else if (currentScrollLeft < 0) {
       // Direction = -1.
       this.elasticScrollState_ = -1;
-    } else if ((currentScrollLeft + this.slideWidth_) >= scrollWidth) {
+    } else if ((currentScrollLeft + this.slideWidth_) > scrollWidth) {
       // Direction = +1.
       this.elasticScrollState_ = 1;
     } else {
@@ -445,19 +449,30 @@ export class AmpSlideScroll extends BaseSlides {
         this.schedulePreload(this.slides_[showIndex]);
       }
     });
+
+    this.slidesContainer_./*OK*/scrollLeft =
+        this.getScrollLeftForIndex_(newIndex);
+    this.slideIndex_ = newIndex;
+    this.hideRestOfTheSlides_(showIndexArr);
+    this.setControlsState();
+  }
+
+  /**
+   * Returns the scrollLeft position for a given slide index.
+   * @param {number} index Index of the slide to be displayed.
+   * @return {number}
+   * @private
+   */
+  getScrollLeftForIndex_(index) {
     // A max of 3 slides are displayed at a time - we show the first slide
     // (which is at scrollLeft 0) when slide 0 is requested - for all other
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if (!this.shouldLoop && newIndex == 0) {
+    if (!this.shouldLoop && index == 0) {
       newScrollLeft = 0;
     }
-
-    this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
-    this.slideIndex_ = newIndex;
-    this.hideRestOfTheSlides_(showIndexArr);
-    this.setControlsState();
+    return newScrollLeft;
   }
 
   /**
@@ -491,6 +506,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @param {number} fromScrollLeft.
    * @param {number} toScrollLeft.
    * @return {!Promise}
+   * @private
    */
   animateScrollLeft_(fromScrollLeft, toScrollLeft) {
     if (fromScrollLeft == toScrollLeft) {

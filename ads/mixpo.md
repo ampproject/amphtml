@@ -23,8 +23,6 @@ limitations under the License.
     type = "mixpo"
     data-guid = "b0caf856-fd92-4adb-aaec-e91948c9ffc8"
     data-subdomain = "www">
-  <div placeholder></div>
-  <div fallback></div>
 </amp-ad>
 ```
 

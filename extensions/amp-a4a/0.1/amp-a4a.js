@@ -18,7 +18,7 @@ import {
   decrementLoadingAds,
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
-import {adPreconnect} from '../../../ads/_config';
+import {adConfig} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {createShadowEmbedRoot} from '../../../src/shadow-embed';
@@ -237,7 +237,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const preconnect = adPreconnect[this.element.getAttribute('type')];
+    const preconnect = adConfig[this.element.getAttribute('type')].preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which

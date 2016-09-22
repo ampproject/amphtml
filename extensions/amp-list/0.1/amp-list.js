@@ -49,7 +49,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.urlReplacements_.expand(assertHttpsUrl(
+    return this.urlReplacements_.expandAsync(assertHttpsUrl(
         this.element.getAttribute('src'), this.element)).then(src => {
           const opts = {};
           if (this.element.hasAttribute('credentials')) {
