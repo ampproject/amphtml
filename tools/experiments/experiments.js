@@ -76,12 +76,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
   },
   {
-    id: 'amp-sticky-ad',
-    name: 'AMP Sticky Ad',
-    spec: 'https://github.com/ampproject/amphtml/issues/2472',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
