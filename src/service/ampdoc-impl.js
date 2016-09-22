@@ -272,6 +272,15 @@ export class AmpDoc {
   getElementById(id) {
     return this.getRootNode().getElementById(id);
   }
+
+  /**
+   * Whether the node is currently contained in the DOM of the root.
+   * @param {?Node} node
+   * @return {boolean}
+   */
+  contains(node) {
+    return this.getRootNode().contains(node);
+  }
 }
 
 

@@ -12,6 +12,16 @@
       font-family: 'Georgia', Serif;
     }
 
+    #top-logo {
+      width: 40px;
+      height: 40px;
+      background: green;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+    }
+
     .brand-logo {
       font-family: 'Open Sans';
     }
@@ -241,6 +251,8 @@
       <a open-link>Open in app</a>
     </div>
   </amp-app-banner>
+
+  <div id="top-logo"></div>
 
   <header>
     <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
