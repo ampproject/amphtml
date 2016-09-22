@@ -422,6 +422,17 @@ let logConstructor = null;
 
 export function initLogConstructor() {
   logConstructor = Log;
+  // Initialize instances for use. If a binary (an extension for example) that
+  // does not call `initLogConstructor` invokes `dev()` or `user()` earlier
+  // than the binary that does call `initLogConstructor` (amp.js), the extension
+  // will throw an error as that extension will never be able to initialize
+  // the log instances and we also don't want it to call `initLogConstructor`
+  // either (since that will cause the Log implementation to be bundled into that
+  // binary). So we must initialize the instances eagerly so that they are
+  // ready for use (stored globally) after the main binary calls
+  // `initLogConstructor`.
+  dev();
+  user();
 }
 
 export function resetLogConstructorForTesting() {
