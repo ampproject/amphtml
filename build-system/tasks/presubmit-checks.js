@@ -424,6 +424,12 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
+  '\\.schedulePass\\(': {
+    message: 'schedulePass is heavy, thinking twice before using it',
+    whitelist: [
+      'src/service/resources-impl.js',
+    ],
+  },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
     whitelist: [
