@@ -156,13 +156,21 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
 
 
 /**
+ * Returns `true` when iframe is ready.
  * @param {!HTMLIFrameElement} iframe
  * @return {boolean}
  */
 function isIframeReady(iframe) {
+  // This is complicated due to crbug.com/649201 on Chrome and a similar issue
+  // on Safari where newly created document's `readyState` immediately equals
+  // `complete`, even though the document itself is not yet available. There's
+  // no other reliable signal for `readyState` in a child window and thus
+  // the best way to check is to see the contents of the body.
   const childDoc = iframe.contentWindow && iframe.contentWindow.document;
-  return (childDoc && isDocumentReady(childDoc) &&
-      childDoc.body && childDoc.body.firstChild);
+  return (childDoc &&
+      isDocumentReady(childDoc) &&
+      childDoc.body &&
+      childDoc.body.firstChild);
 }
 
 
