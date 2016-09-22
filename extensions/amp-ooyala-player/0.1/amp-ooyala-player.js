@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 
@@ -76,7 +75,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.applyFillContent(iframe);
 
     this.element.appendChild(iframe);
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
