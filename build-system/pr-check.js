@@ -139,15 +139,27 @@ function main(argv) {
   const travisCommitRange = argv[2];
   const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
 
-  console/*OK*/.log('\npr-check.js: Executing COMMON steps.\n');
+  const sortedBuildTargets = [];
+  for (const t of buildTargets) {
+    sortedBuildTargets.push(t);
+  }
+  sortedBuildTargets.sort();
+
+  console/*OK*/.log('\npr-check.js: detected build targets: ' +
+      sortedBuildTargets.join(' ') + '\n');
+
   execOrDie('npm run ava');
   execOrDie('gulp lint');
   execOrDie('gulp build --css-only');
   execOrDie('gulp check-types');
-  execOrDie('gulp dist --fortesting');
-  execOrDie('gulp presubmit');
+
   if (buildTargets.has('RUNTIME')) {
-    console/*OK*/.log('\npr-check.js: Executing RUNTIME steps.\n');
+    execOrDie('gulp dist --fortesting');
+  }
+
+  execOrDie('gulp presubmit');
+
+  if (buildTargets.has('RUNTIME')) {
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
     execOrDie('gulp dep-check');
@@ -160,14 +172,15 @@ function main(argv) {
     // Disabled because it regressed. Better to run the other saucelabs tests.
     execOrDie('gulp test --saucelabs --oldchrome');
   }
+
   if (buildTargets.has('VALIDATOR_WEBUI')) {
-    console/*OK*/.log('\npr-check.js: Executing VALIDATOR_WEBUI steps.\n');
     execOrDie('cd validator/webui && python build.py');
   }
+
   if (buildTargets.has('VALIDATOR')) {
-    console/*OK*/.log('\npr-check.js: Executing VALIDATOR steps.\n');
     execOrDie('cd validator && python build.py');
   }
+
   return 0;
 }
 
