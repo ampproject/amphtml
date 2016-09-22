@@ -55,6 +55,14 @@ function exec(cmd) {
 }
 
 /**
+ * Executes the provided command, printing its output to stdout.
+ * @param {string} cmd
+ */
+function execAndPrint(cmd) {
+  console.log(child_process.execSync(cmd, {'encoding': 'utf-8'}));
+}
+
+/**
  * For a provided commit range identifiying a pull request (PR),
  * yields the list of files.
  * @param {string} travisCommitRange
@@ -127,33 +135,33 @@ function main(argv) {
   const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
 
   console.log('\npr-check.js: Executing COMMON steps.\n');
-  exec('npm run ava');
-  exec('gulp lint');
-  exec('gulp build --css-only');
-  exec('gulp check-types');
-  exec('gulp dist --fortesting');
-  exec('gulp presubmit');
+  execAndPrint('npm run ava');
+  execAndPrint('gulp lint');
+  execAndPrint('gulp build --css-only');
+  execAndPrint('gulp check-types');
+  execAndPrint('gulp dist --fortesting');
+  execAndPrint('gulp presubmit');
   if (buildTargets.has('RUNTIME')) {
     console.log('\npr-check.js: Executing RUNTIME steps.\n');
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
-    exec('gulp dep-check');
+    execAndPrint('gulp dep-check');
     // Unit tests with Travis' default chromium
-    exec('gulp test --nobuild --compiled');
+    execAndPrint('gulp test --nobuild --compiled');
     // Integration tests with all saucelabs browsers
-    exec('gulp test --nobuild --saucelabs --integration --compiled');
+    execAndPrint('gulp test --nobuild --saucelabs --integration --compiled');
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    exec('gulp test --saucelabs --oldchrome');
+    execAndPrint('gulp test --saucelabs --oldchrome');
   }
   if (buildTargets.has('VALIDATOR_WEBUI')) {
     console.log('\npr-check.js: Executing VALIDATOR_WEBUI steps.\n');
-    exec('cd validator/webui && python build.py');
+    execAndPrint('cd validator/webui && python build.py');
   }
   if (buildTargets.has('VALIDATOR')) {
     console.log('\npr-check.js: Executing VALIDATOR steps.\n');
-    exec('cd validator && python build.py');
+    execAndPrint('cd validator && python build.py');
   }
   return 0;
 }
