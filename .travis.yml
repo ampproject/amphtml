@@ -29,7 +29,7 @@ before_install:
 before_script:
   - npm install -g gulp
   - pip install --user protobuf
-script: node build-system/pr-check.js
+script: node build-system/pr-check.js $TRAVIS_COMMIT_RANGE
 branches:
   only:
     - master
