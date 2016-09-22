@@ -55,11 +55,16 @@ function exec(cmd) {
 }
 
 /**
- * Executes the provided command, printing its output to stdout.
+ * Executes the provided command; terminates this program in case of failure.
  * @param {string} cmd
  */
-function execAndPrint(cmd) {
-  console.log(child_process.execSync(cmd, {'encoding': 'utf-8'}));
+function execOrDie(cmd) {
+  console.log(`pr-check.js running command: ${cmd}`);
+  try {
+    child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  } catch (e) {
+    process.exit(e.status);
+  }
 }
 
 /**
@@ -135,33 +140,33 @@ function main(argv) {
   const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
 
   console.log('\npr-check.js: Executing COMMON steps.\n');
-  execAndPrint('npm run ava');
-  execAndPrint('gulp lint');
-  execAndPrint('gulp build --css-only');
-  execAndPrint('gulp check-types');
-  execAndPrint('gulp dist --fortesting');
-  execAndPrint('gulp presubmit');
+  execOrDie('npm run ava');
+  execOrDie('gulp lint');
+  execOrDie('gulp build --css-only');
+  execOrDie('gulp check-types');
+  execOrDie('gulp dist --fortesting');
+  execOrDie('gulp presubmit');
   if (buildTargets.has('RUNTIME')) {
     console.log('\npr-check.js: Executing RUNTIME steps.\n');
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
-    execAndPrint('gulp dep-check');
+    execOrDie('gulp dep-check');
     // Unit tests with Travis' default chromium
-    execAndPrint('gulp test --nobuild --compiled');
+    execOrDie('gulp test --nobuild --compiled');
     // Integration tests with all saucelabs browsers
-    execAndPrint('gulp test --nobuild --saucelabs --integration --compiled');
+    execOrDie('gulp test --nobuild --saucelabs --integration --compiled');
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    execAndPrint('gulp test --saucelabs --oldchrome');
+    execOrDie('gulp test --saucelabs --oldchrome');
   }
   if (buildTargets.has('VALIDATOR_WEBUI')) {
     console.log('\npr-check.js: Executing VALIDATOR_WEBUI steps.\n');
-    execAndPrint('cd validator/webui && python build.py');
+    execOrDie('cd validator/webui && python build.py');
   }
   if (buildTargets.has('VALIDATOR')) {
     console.log('\npr-check.js: Executing VALIDATOR steps.\n');
-    execAndPrint('cd validator && python build.py');
+    execOrDie('cd validator && python build.py');
   }
   return 0;
 }
