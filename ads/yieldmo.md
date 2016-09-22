@@ -31,4 +31,24 @@ For semantics of configuration, please [contact Yieldmo](https://yieldmo.com/#co
 
 Supported parameters:
 
-- data-ymid
+- `data-ymid`
+
+## Multi-size Ad
+
+Yieldmo implicitly handles rendering different sized ads that are bid to the same placement. No additional configuration is required for the tag.
+
+---
+
+Above the fold ads do not resize, so as not to not disrupt the user experience:
+
+![](http://test.yieldmo.com.s3.amazonaws.com/amp-demo/big-notResized.gif)
+![](http://test.yieldmo.com.s3.amazonaws.com/amp-demo/small-notResized.gif)
+
+---
+
+Below the fold, ads resize:
+
+![](http://test.yieldmo.com.s3.amazonaws.com/amp-demo/big-resized.gif)
+![](http://test.yieldmo.com.s3.amazonaws.com/amp-demo/small-resized.gif)
+
+---
