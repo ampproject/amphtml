@@ -104,8 +104,6 @@ import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
-initLogConstructor();
-
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -120,6 +118,9 @@ const AMP_EMBED_ALLOWED = {
 
 const data = parseFragment(location.hash);
 window.context = data._context;
+
+// This should only be invoked after window.context is set
+initLogConstructor();
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
