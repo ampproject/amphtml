@@ -140,7 +140,6 @@ export function makeBodyVisible(doc, opt_waitForServices) {
         if (services.length > 0) {
           resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
         }
-      }).then(() => {
         try {
           const perf = performanceFor(win);
           perf.tick('mbv');
