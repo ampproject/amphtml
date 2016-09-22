@@ -48,10 +48,12 @@ describe('documentReady', () => {
 
   afterEach(() => {
     sandbox.restore();
-
   });
 
   it('should interpret readyState correctly', () => {
+    expect(isDocumentReady(testDoc)).to.equal(false);
+
+    testDoc.readyState = 'uninitialized';
     expect(isDocumentReady(testDoc)).to.equal(false);
 
     testDoc.readyState = 'interactive';
