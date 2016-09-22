@@ -118,6 +118,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [MediaImpact](../../ads/mediaimpact.md)
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
+- [Mixpo](../../ads/mixpo.md)
 - [Nativo](../../ads/nativo.md)
 - [Nend](../../ads/nend.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
