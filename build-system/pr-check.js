@@ -59,7 +59,7 @@ function exec(cmd) {
  * @param {string} cmd
  */
 function execOrDie(cmd) {
-  console.log(`pr-check.js running command: ${cmd}`);
+  console/*OK*/.log(`\npr-check.js: ${cmd}\n`);
   try {
     child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   } catch (e) {
@@ -133,13 +133,13 @@ function determineBuildTargets(filePaths) {
  */
 function main(argv) {
   if (argv.length <= 2) {
-    console.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
+    console/*OK*/.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
     return -1;
   }
   const travisCommitRange = argv[2];
   const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
 
-  console.log('\npr-check.js: Executing COMMON steps.\n');
+  console/*OK*/.log('\npr-check.js: Executing COMMON steps.\n');
   execOrDie('npm run ava');
   execOrDie('gulp lint');
   execOrDie('gulp build --css-only');
@@ -147,7 +147,7 @@ function main(argv) {
   execOrDie('gulp dist --fortesting');
   execOrDie('gulp presubmit');
   if (buildTargets.has('RUNTIME')) {
-    console.log('\npr-check.js: Executing RUNTIME steps.\n');
+    console/*OK*/.log('\npr-check.js: Executing RUNTIME steps.\n');
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
     execOrDie('gulp dep-check');
@@ -161,11 +161,11 @@ function main(argv) {
     execOrDie('gulp test --saucelabs --oldchrome');
   }
   if (buildTargets.has('VALIDATOR_WEBUI')) {
-    console.log('\npr-check.js: Executing VALIDATOR_WEBUI steps.\n');
+    console/*OK*/.log('\npr-check.js: Executing VALIDATOR_WEBUI steps.\n');
     execOrDie('cd validator/webui && python build.py');
   }
   if (buildTargets.has('VALIDATOR')) {
-    console.log('\npr-check.js: Executing VALIDATOR steps.\n');
+    console/*OK*/.log('\npr-check.js: Executing VALIDATOR steps.\n');
     execOrDie('cd validator && python build.py');
   }
   return 0;
