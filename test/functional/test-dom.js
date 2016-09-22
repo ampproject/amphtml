@@ -347,6 +347,28 @@ describe('DOM', () => {
         .to.be.equal(0);
   });
 
+  describe('removeElement', () => {
+    it('should re-focus on body if active element is removed', () => {
+      const button = document.createElement('button');
+      document.body.appendChild(button);
+      button.focus();
+      expect(document.activeElement).to.equal(button);
+      dom.removeElement(button);
+      expect(document.activeElement).to.equal(document.body);
+    });
+
+    it('should re-focus on body if active element is decedent', () => {
+      const div = document.createElement('div');
+      const button = document.createElement('button');
+      div.appendChild(button);
+      document.body.appendChild(div);
+      button.focus();
+      expect(document.activeElement).to.equal(button);
+      dom.removeElement(div);
+      expect(document.activeElement).to.equal(document.body);
+    });
+  });
+
   describe('contains', () => {
     let connectedElement;
     let connectedChild;

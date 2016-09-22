@@ -357,6 +357,7 @@ describe('amp-app-banner', () => {
         expect(element.parentElement).to.be.null;
         return banner.isDismissed().then(value => {
           expect(value).to.be.true;
+          expect(document.activeElement).to.equal(document.body);
         });
       });
     });
