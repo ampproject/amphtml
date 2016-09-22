@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {onDocumentElementClick_, onDocumentElementCapturedClick_,
     getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
 import {createIframePromise} from '../../testing/iframe';
@@ -57,7 +56,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       },
     };
     ampdoc = {
-      win: win,
+      win,
       getRootNode: () => {
         return {
           getElementById: getElementByIdSpy,
