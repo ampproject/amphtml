@@ -20,6 +20,7 @@ import {performanceFor} from './performance';
 import {platformFor} from './platform';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
+import {resourcesForDoc} from './resources';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
@@ -128,14 +129,17 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     }
   };
   const win = doc.defaultView;
-  const docState = documentStateFor(win);
-  docState.onBodyAvailable(() => {
+  documentStateFor(win).onBodyAvailable(() => {
     if (win[bodyVisibleSentinel]) {
       return;
     }
     win[bodyVisibleSentinel] = true;
     if (opt_waitForServices) {
-      waitForServices(win).then(set, set).then(() => {
+      waitForServices(win).catch(() => []).then(services => {
+        set();
+        if (services.length > 0) {
+          resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+        }
         try {
           const perf = performanceFor(win);
           perf.tick('mbv');

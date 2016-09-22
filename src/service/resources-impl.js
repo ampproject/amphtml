@@ -695,9 +695,13 @@ export class Resources {
   /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
+   * @param {boolean=} opt_relayoutAll
    * @return {boolean}
    */
-  schedulePass(opt_delay) {
+  schedulePass(opt_delay, opt_relayoutAll) {
+    if (opt_relayoutAll) {
+      this.relayoutAll_ = true;
+    }
     return this.pass_.schedule(opt_delay);
   }
 
