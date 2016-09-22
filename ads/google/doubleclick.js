@@ -276,9 +276,17 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
         } else {
-          // We don't want to call renderStart() on ads that failed to load, for
-          // whatever reasons, because then the fallback will not be shown.
-          global.context.renderStart({width: rWidth, height: rHeight});
+          // We only want to call renderStart with a specific size if this is a
+          // multi-size request, and the creative size actually differs from the
+          // primary size.
+          let newSize;
+          if (multiSizeDataStr && (pWidth != rWidth || pHeight != pWidth)) {
+            newSize = {
+              width: rWidth,
+              height: rHeight,
+            };
+          }
+          global.context.renderStart(newSize);
         }
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
