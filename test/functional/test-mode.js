@@ -17,7 +17,6 @@
 
 import {getFullVersion_, getMode} from '../../src/mode';
 import {parseUrl} from '../../src/url';
-import * as sinon from 'sinon';
 
 describe('getMode', () => {
   function getWin(url) {
@@ -29,29 +28,26 @@ describe('getMode', () => {
 
   it('CDN - lite mode on', () => {
     const url = 'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5&amp_lite#origin=https://www.google.com';
-    const win = getWin(url);
-    const mode = getMode(win);
+    const mode = getMode(getWin(url));
     expect(mode.lite).to.be.true;
   });
 
   it('CDN - lite mode off', () => {
     const url = 'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5#origin=https://www.google.com';
-    const win = getWin(url);
-    const mode = getMode(win);
+    const mode = getMode(getWin(url));
     expect(mode.lite).to.be.false;
   });
 
   it('Origin - lite mode on', () => {
     const url = 'https://www.example.com/amp.html?amp_lite';
     const win = getWin(url);
-    const mode = getMode(win);
+    const mode = getMode(getWin(url));
     expect(mode.lite).to.be.true;
   });
 
   it('Origin - lite mode off', () => {
     const url = 'https://www.example.com/amp.html';
-    const win = getWin(url);
-    const mode = getMode(win);
+    const mode = getMode(getWin(url));
     expect(mode.lite).to.be.false;
   });
 });
