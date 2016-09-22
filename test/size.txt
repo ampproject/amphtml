@@ -1,17 +1,17 @@
       max   |         min   |        gzip   |   file
       ---   |         ---   |         ---   |   ---
  71.84 kB   |     5.87 kB   |     2.53 kB   |   alp.js / alp.max.js
-844.82 kB   |   163.26 kB   |     51.7 kB   |   shadow-v0.js / amp-shadow.js
+845.35 kB   |   163.44 kB   |    51.78 kB   |   shadow-v0.js / amp-shadow.js
    5.8 kB   |       428 B   |       278 B   |   sw-kill.js / sw-kill.max.js
-   366 kB   |       681 B   |       450 B   |   sw.js / sw.max.js
-884.61 kB   |   165.68 kB   |    52.54 kB   |   v0.js / amp.js
+366.52 kB   |       681 B   |       450 B   |   sw.js / sw.max.js
+885.14 kB   |   165.85 kB   |     52.6 kB   |   v0.js / amp.js
 320.04 kB   |    37.39 kB   |    12.62 kB   |   v0/amp-access-0.1.js
  55.52 kB   |     3.45 kB   |     1.41 kB   |   v0/amp-accordion-0.1.js
-305.21 kB   |    30.07 kB   |       11 kB   |   v0/amp-ad-0.1.js
+305.74 kB   |    30.07 kB   |       11 kB   |   v0/amp-ad-0.1.js
 312.94 kB   |    28.89 kB   |    10.79 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
 312.62 kB   |    26.99 kB   |    10.18 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
 242.53 kB   |    19.96 kB   |     7.48 kB   |   v0/amp-ad-network-fake-impl-0.1.js
- 294.1 kB   |    54.97 kB   |    20.12 kB   |   v0/amp-analytics-0.1.js
+294.13 kB   |    54.97 kB   |    20.12 kB   |   v0/amp-analytics-0.1.js
  49.65 kB   |     3.74 kB   |     1.72 kB   |   v0/amp-anim-0.1.js
 136.74 kB   |     4.84 kB   |     2.09 kB   |   v0/amp-apester-media-0.1.js
 174.41 kB   |    10.91 kB   |     4.37 kB   |   v0/amp-app-banner-0.1.js
@@ -30,8 +30,8 @@
  52.56 kB   |     4.22 kB   |     1.81 kB   |   v0/amp-fx-flying-carpet-0.1.js
  33.42 kB   |     1.55 kB   |       790 B   |   v0/amp-gfycat-0.1.js
  62.25 kB   |     3.78 kB   |     1.73 kB   |   v0/amp-google-vrview-image-0.1.js
-185.98 kB   |    10.79 kB   |     4.47 kB   |   v0/amp-iframe-0.1.js
-263.73 kB   |    27.57 kB   |     9.01 kB   |   v0/amp-image-lightbox-0.1.js
+186.51 kB   |    10.79 kB   |     4.47 kB   |   v0/amp-iframe-0.1.js
+263.77 kB   |    27.59 kB   |     9.02 kB   |   v0/amp-image-lightbox-0.1.js
  60.76 kB   |     2.75 kB   |     1.29 kB   |   v0/amp-instagram-0.1.js
 118.11 kB   |     5.29 kB   |     2.49 kB   |   v0/amp-install-serviceworker-0.1.js
   40.6 kB   |     2.58 kB   |     1.21 kB   |   v0/amp-jwplayer-0.1.js
