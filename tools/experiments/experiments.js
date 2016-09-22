@@ -140,6 +140,7 @@ const EXPERIMENTS = [
     id: 'amp-share-tracking',
     name: 'AMP Share Tracking',
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
   },
   {
     id: 'amp-viz-vega',
@@ -157,6 +158,7 @@ const EXPERIMENTS = [
     id: 'amp-app-banner',
     name: 'Shows a native app install/open banner.',
     spec: 'https://github.com/ampproject/amphtml/issues/800',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5166',
   },
   {
     id: 'cache-service-worker',
