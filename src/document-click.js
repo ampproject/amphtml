@@ -89,7 +89,7 @@ export class ClickHandler {
    */
   handle_(e) {
     onDocumentElementClick_(
-          e, this.viewport_, this.history_, this.isIosSafari_);
+        e, this.ampdoc, this.viewport_, this.history_, this.isIosSafari_);
   }
 }
 
@@ -183,11 +183,13 @@ export function onDocumentElementCapturedClick_(e, urlReplacements) {
  * on iOS Safari.
  *
  * @param {!Event} e
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
  * @param {boolean} isIosSafari
  */
-export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
+export function onDocumentElementClick_(
+    e, ampdoc, viewport, history, isIosSafari) {
   if (e.defaultPrevented) {
     return;
   }
@@ -197,9 +199,7 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
     return;
   }
 
-  const doc = target.ownerDocument;
-  const win = doc.defaultView;
-
+  const win = ampdoc.win;
   const tgtLoc = parseUrl(target.href);
 
   // On Safari iOS, custom protocol links will fail to open apps when the
@@ -250,11 +250,11 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   const hash = tgtLoc.hash.slice(1);
   let elem = null;
   if (hash) {
-    elem = doc.getElementById(hash);
+    elem = ampdoc.getRootNode().getElementById(hash);
     if (!elem) {
       // Fallback to anchor[name] if element with id is not found.
       // Linking to an anchor element with name is obsolete in html5.
-      elem = doc.querySelector(`a[name=${hash}]`);
+      elem = ampdoc.getRootNode().querySelector(`a[name=${hash}]`);
     }
   }
 
