@@ -376,6 +376,13 @@ amp-analytics {
   visibility: hidden;
 }
 
+/**
+ * Iframe allows setting frameborder, so we need to set box-sizing to border-box
+ * or otherwise the iframe will oevrflow its parent when there is a border.
+ */
+amp-iframe iframe {
+  box-sizing: border-box !important;
+}
 
 /**
  * Minimal AMP Access CSS. This part has to be here so that the correct UI

@@ -52,6 +52,13 @@ export class Observable {
   }
 
   /**
+   * Removes all observers.
+   */
+  removeAll() {
+    this.handlers_.length = 0;
+  }
+
+  /**
    * Fires an event. All observers are called.
    * @param {TYPE=} opt_event
    */

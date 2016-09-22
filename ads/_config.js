@@ -36,9 +36,7 @@
  * }
  */
 export const adConfig = {
-  _ping_: {},
-
-  fakead3p: {
+  _ping_: {
     renderStartImplemented: true,
   },
 
@@ -229,6 +227,10 @@ export const adConfig = {
     prefetch: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   },
 
+  meg: {
+    renderStartImplemented: true,
+  },
+
   microad: {
     prefetch: 'https://j.microad.net/js/camp.js',
     preconnect: [
@@ -237,6 +239,14 @@ export const adConfig = {
       'https://cache.send.microad.jp',
       'https://cache.send.microadinc.com',
       'https://deb.send.microad.jp',
+    ],
+  },
+
+  mixpo: {
+    prefetch: 'https://cdn.mixpo.com/js/loader.js',
+    preconnect: [
+      'https://player1.mixpo.com',
+      'https://player2.mixpo.com',
     ],
   },
 
@@ -364,4 +374,13 @@ export const adConfig = {
   },
 
   zergnet: {},
+
+  zucks: {
+    preconnect: [
+      'https://j.zucks.net.zimg.jp',
+      'https://sh.zucks.net',
+      'https://k.zucks.net',
+      'https://static.zucks.net.zimg.jp',
+    ],
+  },
 };

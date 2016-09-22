@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-// Importing the document-register-element module has the side effect
-// of installing the custom elements polyfill if necessary.
-import 'document-register-element/build/document-register-element.node';
-import {install as installMathSign} from './polyfills/math-sign';
-import {install as installObjectAssign} from './polyfills/object-assign';
-import {install as installPromise} from './polyfills/promise';
+import {validateData, writeScript} from '../3p/3p';
 
-installMathSign(self);
-installObjectAssign(self);
-installPromise(self);
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function zucks(global, data) {
+  validateData(data, ['frameId']);
+  writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
+}

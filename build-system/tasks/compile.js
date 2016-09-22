@@ -149,7 +149,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
-          'document-register-element.max.js',
+          'document-register-element.node.js',
       //'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
@@ -203,6 +203,7 @@ function compile(entryModuleFilenames, outputDir,
     var externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/shadow_dom.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
@@ -310,18 +311,28 @@ function compile(entryModuleFilenames, outputDir,
 };
 
 function patchRegisterElement() {
+  var file;
   // Copies document-register-element into a new file that has an export.
   // This works around a bug in closure compiler, where without the
   // export this module does not generate a goog.provide which fails
   // compilation.
   // Details https://github.com/google/closure-compiler/issues/1831
   const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.max.js';
+      '/build/document-register-element.node.js';
   if (!fs.existsSync(patchedName)) {
-      fs.writeFileSync(patchedName,
-          fs.readFileSync(
-              'node_modules/document-register-element/build/' +
-              'document-register-element.max.js') +
-          '\n\nexport function deadCode() {}\n');
-    }
+    file = fs.readFileSync(
+        'node_modules/document-register-element/build/' +
+        'document-register-element.node.js').toString();
+    // CommonJS support for closure does not wrap the module
+    // and inject `global` like browserify and other node module loaders
+    // so we nee to change this to `self` or `window`.
+    file = file.replace('installCustomElements(global);',
+        'installCustomElements(self);');
+    // Closure Compiler does not generate a `default` property even though
+    // to interop CommonJS and ES6 modules. This is the same issue typescript
+    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+    file = file.replace('module.exports = installCustomElements;',
+        'exports.default = installCustomElements;');
+    fs.writeFileSync(patchedName, file);
+  }
 }
