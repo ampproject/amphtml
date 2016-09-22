@@ -13,6 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @fileoverview This file is executed by Travis (configured via
+ * .travis.yml in the root directory) and is the main driver script
+ * for running tests.  Execution herein is entirely synchronous, that
+ * is, commands are executed on after the other (see the exec
+ * function). Should a command fail, this script will then also fail.
+ * This script attempts to introduce some granularity for our
+ * presubmit checking, via the determineBuildTargets method.
+ */
 const child_process = require('child_process');
 const path = require('path');
 
@@ -55,6 +65,8 @@ function filesInPr(travisCommitRange) {
 }
 
 /**
+ * Determines whether the given file belongs to the Validator webui,
+ * that is, the 'VALIDATOR_WEBUI' target.
  * @param {string} filePath
  * @return {boolean}
  */
@@ -63,6 +75,9 @@ function isValidatorWebuiFile(filePath) {
 }
 
 /**
+ * Determines whether the given file belongs to the validator,
+ * that is, the 'VALIDATOR' target. This assumes (but does not
+ * check) that the file is not part of 'VALIDATOR_WEBUI'.
  * @param {string} filePath
  * @return {boolean}
  */
@@ -79,7 +94,7 @@ function isValidatorFile(filePath) {
 
 /**
  * Determines the targets that will be executed by the main method of
- * this script.
+ * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
  * @returns {!Set<string>}
  */
@@ -98,6 +113,8 @@ function determineBuildTargets(filePaths) {
 }
 
 /**
+ * The main method for the script execution which much like a C main function
+ * receives the command line arguments and returns an exit status.
  * @param {!Array<string>} argv
  * @returns {number}
  */
