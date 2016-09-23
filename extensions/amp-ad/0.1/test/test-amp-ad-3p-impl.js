@@ -58,10 +58,10 @@ describe('amp-ad-3p-impl', () => {
       const fragment = url.substr(url.indexOf('#') + 1);
       const data = JSON.parse(fragment);
 
-      expect(data.type).to.equal('_ping_');
-      expect(data.src).to.equal('https://testsrc');
-      expect(data.width).to.equal(300);
-      expect(data.height).to.equal(250);
+      expect(data).to.have.property('type', '_ping_');
+      expect(data).to.have.property('src', 'https://testsrc');
+      expect(data).to.have.property('width', 300);
+      expect(data).to.have.property('height', 250);
       expect(data._context.canonicalUrl).to.equal('https://schema.org/');
 
       const doc = iframe.ownerDocument;
@@ -78,12 +78,26 @@ describe('amp-ad-3p-impl', () => {
           'http://ads.localhost:9876/dist.3p/current/integration.js');
       const preconnects = doc.querySelectorAll(
           'link[rel=preconnect]');
-      expect(preconnects[preconnects.length - 1].href).to.equal(
+      expect(preconnects[preconnects.length - 1]).to.have.property('href',
           'https://testsrc/');
       // Make sure we run tests without CID available by default.
       const win = ad.ownerDocument.defaultView;
       expect(win.services.cid).to.be.undefined;
       expect(win.a2alistener).to.be.true;
+    });
+  });
+
+  it('should only layout once', () => {
+    return getAd().then(ad => {
+      ad.implementation_.unlayoutCallback();
+
+      const firstLayout = ad.implementation_.layoutCallback();
+      const secondLayout = ad.implementation_.layoutCallback();
+      expect(firstLayout).to.equal(secondLayout);
+
+      ad.implementation_.unlayoutCallback();
+      const newLayout = ad.implementation_.layoutCallback();
+      expect(newLayout).to.not.equal(secondLayout);
     });
   });
 
@@ -139,20 +153,6 @@ describe('amp-ad-3p-impl', () => {
         lightbox.appendChild(p);
         return ad;
       })).to.be.not.be.rejected;
-    });
-  });
-
-  it('should only layout once', () => {
-    return getAd().then(ad => {
-      ad.implementation_.unlayoutCallback();
-
-      const firstLayout = ad.implementation_.layoutCallback();
-      const secondLayout = ad.implementation_.layoutCallback();
-      expect(firstLayout).to.equal(secondLayout);
-
-      ad.implementation_.unlayoutCallback();
-      const newLayout = ad.implementation_.layoutCallback();
-      expect(newLayout).to.not.equal(secondLayout);
     });
   });
 
