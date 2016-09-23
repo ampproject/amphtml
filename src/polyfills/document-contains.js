@@ -19,9 +19,9 @@
  * Polyfill for `document.contains()` method. Notice that according to spec
  * `document.contains` is inclusionary.
  * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Node} node
+ * @param {?Node} node
  * @return {boolean}
- * @this {!HTMLDocument}
+ * @this {Node}
  */
 function documentContainsPolyfill(node) {
   // Per spec, "contains" method is inclusionary

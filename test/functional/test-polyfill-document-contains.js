@@ -82,6 +82,11 @@ describe('HTMLDocument.contains', () => {
     expect(polyfillContains.call(document, disconnectedChild)).to.be.false;
   });
 
+  it('should allow a null arg', () => {
+    expect(document.contains(null)).to.be.false;
+    expect(polyfillContains.call(document, null)).to.be.false;
+  });
+
   it('should be inclusionary for documentElement', () => {
     expect(document.contains(document.documentElement)).to.be.true;
     expect(polyfillContains.call(document, document.documentElement))
