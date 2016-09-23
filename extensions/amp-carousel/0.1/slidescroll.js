@@ -136,12 +136,12 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
 
+    this.slidesContainer_.addEventListener(
+          'touchmove', this.touchMoveHandler_.bind(this));
+
     if (this.hasNativeSnapPoints_) {
       this.slidesContainer_.addEventListener(
           'touchend', this.touchEndHandler_.bind(this));
-
-      this.slidesContainer_.addEventListener(
-          'touchmove', this.touchMoveHandler_.bind(this));
     }
   }
 
@@ -156,6 +156,9 @@ export class AmpSlideScroll extends BaseSlides {
    */
   touchMoveHandler_() {
     this.clearAutoplay();
+    if (!this.hasNativeSnapPoints_) {
+      return;
+    }
     this.hasTouchMoved_ = true;
     if (this.touchEndTimeout_) {
       timerFor(this.win).cancel(this.touchEndTimeout_);
