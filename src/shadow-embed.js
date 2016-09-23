@@ -291,7 +291,7 @@ export function scopeShadowCss(shadowRoot, css) {
   }
 
   // Patch selectors.
-  return ShadowCSS.scopeRules(rules, `#${id}`, transformRootSelectors);
+  return ShadowCSS.scopeRules.call(ShadowCSS, rules, `#${id}`, transformRootSelectors);
 }
 
 
