@@ -21,6 +21,7 @@ import {activityFor} from '../../src/activity';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {viewerFor} from '../../src/viewer';
+import {installTimerService} from '../../src/service/timer-impl';
 import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
 import {viewportForDoc} from '../../src/viewport';
 import {Observable} from '../../src/observable';
@@ -53,6 +54,7 @@ describe('Activity getTotalEngagedTime', () => {
     scrollObservable = new Observable();
 
     fakeDoc = {
+      nodeType: /* DOCUMENT */ 9,
       addEventListener: function(eventName, callback) {
         if (eventName === 'mousedown') {
           mousedownObservable.add(callback);
@@ -64,9 +66,13 @@ describe('Activity getTotalEngagedTime', () => {
           paddingTop: 0,
         },
       },
+      body: {
+        style: {},
+      },
     };
 
     fakeWin = {
+      services: {},
       document: fakeDoc,
       ampExtendedElements: {
         'amp-analytics': true,
@@ -80,8 +86,15 @@ describe('Activity getTotalEngagedTime', () => {
       // required to instantiate Viewport service
       addEventListener: () => {},
     };
-    ampdoc = new AmpDocSingle(fakeWin);
+    fakeDoc.defaultView = fakeWin;
 
+    ampdoc = new AmpDocSingle(fakeWin);
+    fakeWin.services['ampdoc'] = {obj: {
+      getAmpDoc: () => ampdoc,
+      isSingleDoc: () => true,
+    }};
+
+    installTimerService(fakeWin);
     installPlatformService(fakeWin);
     installViewerService(fakeWin);
     viewer = viewerFor(fakeWin);
