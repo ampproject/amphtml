@@ -386,6 +386,7 @@ function checkTypes() {
   }).sort();
   closureCompile(compileSrcs.concat(extensionSrcs),  './dist',
       'check-types.js', {
+        includePolyfills: true,
         checkTypes: true,
         externs: ['build-system/amp.extension.extern.js',],
       });

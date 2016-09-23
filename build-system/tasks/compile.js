@@ -189,6 +189,7 @@ function compile(entryModuleFilenames, outputDir,
       );
       unneededFiles.push(
           'build/fake-module/src/polyfills.js',
+          'build/fake-module/src/polyfills/document-contains.js',
           'build/fake-module/src/polyfills/promise.js',
           'build/fake-module/src/polyfills/math-sign.js');
     }

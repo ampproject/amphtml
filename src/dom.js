@@ -86,39 +86,6 @@ export function waitForBodyPromise(doc) {
 
 
 /**
- * Whether the element is currently contained in the DOM. Polyfills
- * `document.contains()` method when necessary. Notice that according to spec
- * `document.contains` is inclusionary.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- */
-export function documentContains(doc, element) {
-  if (!doc.contains) {
-    return documentContainsPolyfillInternal_(doc, element);
-  }
-  return doc.contains(element);
-}
-
-
-/**
- * Polyfill for `document.contains()` method.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- * @private Visible for testing only.
- */
-export function documentContainsPolyfillInternal_(doc, element) {
-  // Per spec, "contains" method is inclusionary
-  // i.e. `node.contains(node) == true`. However, we still need to test
-  // equality to the document itself.
-  return element == doc || doc.documentElement.contains(element);
-}
-
-
-/**
  * Removes the element.
  * @param {!Element} element
  */
