@@ -854,13 +854,29 @@ describe('Resources discoverWork', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
+    resource1.element.isBuilt = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
     resources.discoverWork_();
 
-    expect(resource1.build.callCount).to.equal(1);
-    expect(schedulePassStub.callCount).to.equal(0);
+    expect(resource1.build).to.be.calledOnce;
+    expect(schedulePassStub).to.not.be.called;
+  });
+
+  it('should build resource when not built and before doc ready', () => {
+    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = false;
+    resource1.element.nextSibling = {};
+    resource1.element.isBuilt = () => false;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+
+    resources.discoverWork_();
+
+    expect(resource1.build).to.be.calledOnce;
+    expect(schedulePassStub).to.not.be.called;
   });
 
   it('should not build a blacklisted resource', () => {
@@ -868,13 +884,29 @@ describe('Resources discoverWork', () => {
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.element.isBuilt = () => false;
     resource1.blacklisted_ = true;
     resource1.build = sandbox.spy();
 
     resources.discoverWork_();
 
-    expect(resource1.build.callCount).to.equal(0);
-    expect(schedulePassStub.callCount).to.equal(0);
+    expect(resource1.build).to.not.be.called;
+    expect(schedulePassStub).to.not.be.called;
+  });
+
+  it('should not build a blacklisted resource before doc ready', () => {
+    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    sandbox.stub(resources, 'schedule_');
+    resource1.nextSibling = {};
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.element.isBuilt = () => false;
+    resource1.blacklisted_ = true;
+    resource1.build = sandbox.spy();
+
+    resources.discoverWork_();
+
+    expect(resource1.build).to.not.be.called;
+    expect(schedulePassStub).to.not.be.called;
   });
 });
 
@@ -1493,7 +1525,7 @@ describe('Resources.add', () => {
     resources.documentReady_ = true;
     resources.add(child2);
     expect(child2.build.calledOnce).to.be.true;
-    expect(schedulePassStub.callCount).to.equal(1);
+    expect(schedulePassStub).to.be.calledOnce;
   });
 
   it('should not schedule pass when immediate build fails', () => {
@@ -1508,7 +1540,7 @@ describe('Resources.add', () => {
     resources.documentReady_ = true;
     resources.add(child1);
     expect(child1BuildSpy.calledOnce).to.be.true;
-    expect(schedulePassStub.callCount).to.equal(0);
+    expect(schedulePassStub).to.not.be.called;
   });
 
   it('should add element to pending build when document is not ready', () => {
@@ -1605,7 +1637,7 @@ describe('Resources.add', () => {
       expect(child2.build.called).to.be.true;
       expect(parent.build.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
-      expect(schedulePassStub.callCount).to.equal(1);
+      expect(schedulePassStub).to.be.calledOnce;
     });
 
     it('should not schedule pass if all builds failed', () => {
@@ -1621,7 +1653,7 @@ describe('Resources.add', () => {
       resources.buildReadyResources_();
       expect(child1BuildSpy.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
-      expect(schedulePassStub.callCount).to.equal(0);
+      expect(schedulePassStub).to.not.be.called;
     });
   });
 });

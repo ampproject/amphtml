@@ -382,7 +382,7 @@ export class Resources {
     }
     try {
       this.isCurrentlyBuildingPendingResources_ = true;
-      this.buildReadyResourcesUnsafe_();
+      this.buildReadyResourcesUnsafe_(scheduleWhenBuilt);
     } finally {
       this.isCurrentlyBuildingPendingResources_ = false;
     }
