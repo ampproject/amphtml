@@ -297,11 +297,11 @@ describe('amp-ad-3p-impl', () => {
         return ad;
       }).then(ad => {
         const impl = ad.implementation_;
-        expect(ad.renderOutsideViewport()).to.be.false;
+        expect(impl.renderOutsideViewport()).to.be.false;
         clock.tick(900);
-        expect(ad.renderOutsideViewport()).to.be.false;
+        expect(impl.renderOutsideViewport()).to.be.false;
         clock.tick(100);
-        expect(ad.renderOutsideViewport()).to.equal(1.25);
+        expect(impl.renderOutsideViewport()).to.equal(1.25);
       });
     });
   });
