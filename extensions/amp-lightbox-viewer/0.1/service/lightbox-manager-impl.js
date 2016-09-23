@@ -161,6 +161,24 @@ export class LightboxManager {
   }
 
   /**
+   * The function is simplified for testing now.
+   * Get the description for single lightboxed item.
+   * @param {!Element} element
+   * @return {?string}
+   */
+  getDescription(element) {
+    const aria = element.getAttribute('aria-describedby');
+    if (aria) {
+      return aria;
+    }
+    const alt = element.getAttribute('alt');
+    if (alt) {
+      return alt;
+    }
+    return null;
+  }
+
+  /**
    * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view

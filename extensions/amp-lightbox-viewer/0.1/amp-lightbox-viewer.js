@@ -22,7 +22,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
-import {toggle} from '../../../src/style';
+import {toggle, setStyles} from '../../../src/style';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
 /** @const */
@@ -76,6 +76,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.container_.classList.add('-amp-lbv');
 
+    /** @private {?Element} */
+    this.descriptionBox_ = null;
+
+    /** @private {?Element} */
+    this.clickArea_ = null;
+
     /** @private  {?Element} */
     this.gallery_ = null;
 
@@ -83,6 +89,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.thumbnails_ = null;
 
     this.buildMask_();
+    this.buildDescriptionBox_();
     this.buildControls_();
     this.element.appendChild(this.container_);
   }
@@ -105,6 +112,30 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const mask = this.win.document.createElement('div');
     mask.classList.add('-amp-lbv-mask');
     this.container_.appendChild(mask);
+  }
+
+  /**
+   * Build description box and append it to the container.
+   * @private
+   */
+  buildDescriptionBox_() {
+    dev().assert(this.container_);
+    this.descriptionBox_ = this.win.document.createElement('div');
+    this.descriptionBox_.classList.add('amp-lbv-desc-box');
+    this.clickArea_ = this.win.document.createElement('div');
+    this.clickArea_.classList.add('-amp-lbv-click-area');
+    this.clickArea_.addEventListener('click', () => {
+
+      if (!this.descriptionBox_.hasAttribute('lbv-hide')) {
+        this.descriptionBox_.setAttribute('lbv-hide', '');
+        this.setDescriptionBoxOpacity_(0);
+      } else {
+        this.descriptionBox_.removeAttribute('lbv-hide');
+        this.setDescriptionBoxOpacity_(1);
+      }
+    });
+    this.container_.appendChild(this.clickArea_);
+    this.container_.appendChild(this.descriptionBox_);
   }
 
   /**
@@ -184,6 +215,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const updateViewerPromise = this.updateViewer_(element);
     this.getViewport().enterLightboxMode();
 
+    this.setDescriptionBoxOpacity_(1);
     toggle(this.element, true);
     this.active_ = true;
 
@@ -271,6 +303,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // update active element to be the new element
     this.activeElement_ = newElement;
 
+    // update description box
+    this.updateDescriptionBox_();
+
     // update the controls
     const updateControlsPromise = this.updateControls_();
 
@@ -305,6 +340,37 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   tearDownElement_(element) {
     this.updateStackingContext_(element, /* reset */ true);
     element.classList.remove('amp-lightboxed');
+  }
+
+  /**
+   * Updates the description box based on the current active element.
+   * @private
+   */
+  updateDescriptionBox_() {
+    dev().assert(this.activeElement_);
+
+    const descText = this.manager_.getDescription(this.activeElement_);
+    if (!descText) {
+      setStyles(this.descriptionBox_, {visibility: 'hidden'});
+    } else {
+      setStyles(this.descriptionBox_, {visibility: 'visible'});
+      this.descriptionBox_.textContent = descText;
+    }
+  }
+
+  /**
+   * Set the descriptionBox to given opacity in given time.
+   * @param {number} opacity
+   * @param {number=} opt_duration Please note the unit is sec
+   * @private
+   */
+  setDescriptionBoxOpacity_(opacity, opt_duration) {
+    dev().assert(this.descriptionBox_);
+    const duration = opt_duration || 0;
+    setStyles(this.descriptionBox_, {
+      opacity,
+      transition: 'opacity ' + duration + 's',
+    });
   }
 
   /**

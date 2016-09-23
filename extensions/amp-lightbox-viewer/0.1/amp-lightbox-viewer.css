@@ -31,7 +31,7 @@
  */
 .amp-lightboxed {
   position: fixed !important;
-  z-index: 2147483644 !important;
+  z-index: 2147483643 !important;
   width: 100%;
   box-sizing: border-box;
   margin: 0;
@@ -70,6 +70,7 @@
 
 /* Page Mask, Gallery Viewer */
 .-amp-lbv-mask,
+.-amp-lbv-click-area,
 .-amp-lbv-gallery {
   position: fixed !important;
   top:0 !important;
@@ -86,7 +87,12 @@
 }
 
 .-amp-lbv-mask {
-  z-index: 2147483643 !important;
+  z-index: 2147483642 !important;
+}
+
+.-amp-lbv-click-area {
+  opacity: 0 !important;
+  z-index: 2147483644
 }
 
 .-amp-lbv-gallery {
@@ -185,4 +191,16 @@
 
 .-amp-lbv[gallery-view] .amp-lbv-button-back {
   display: block;
+}
+
+.amp-lbv-desc-box {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2147483644 !important;
+  max-height: 30vh;
+  overflow: scroll;
+  color: white;
+  padding: 10px;
 }
