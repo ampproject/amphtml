@@ -49,6 +49,28 @@ let AsyncResolverDef;
 let ReplacementDef;
 
 /**
+ * Returns a encoded URI Component, or an empty string if the value is nullish.
+ * @param {string|null|undefined}
+ * @return {string}
+ */
+function encodeValue(val) {
+  if (val == null) {
+    return '';
+  }
+  return encodeURIComponent(val);
+};
+
+/**
+ * Detects the protocol of the url, if there is one.
+ * @param {string} url
+ * @return {string}
+ */
+function protocolOfUrl(url) {
+  const match = /^.*:/.exec(url);
+  return match ? match[0] : '';
+}
+
+/**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
  * @package For export.
@@ -621,13 +643,7 @@ export class UrlReplacements {
     }
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
-    const encodeValue = val => {
-      if (val == null) {
-        val = '';
-      }
-      return encodeURIComponent(val);
-    };
-    url = url.replace(expr, (match, name, opt_strargs) => {
+    let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
@@ -670,7 +686,7 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          url = url.replace(match, encodeValue(v));
+          replacement = replacement.replace(match, encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -689,10 +705,25 @@ export class UrlReplacements {
     });
 
     if (replacementPromise) {
-      replacementPromise = replacementPromise.then(() => url);
+      replacementPromise = replacementPromise.then(() => replacement);
     }
 
-    return opt_sync ? url : (replacementPromise || Promise.resolve(url));
+    const protocol = protocolOfUrl(url);
+    if (opt_sync) {
+      if (protocolOfUrl(replacement) !== protocol) {
+        user().error(TAG, 'Illegal replacement of the protocol: ', url);
+        return url;
+      }
+      return replacement;
+    }
+    return (replacementPromise || Promise.resolve(replacement))
+        .then((replacement) => {
+          if (protocolOfUrl(replacement) !== protocol) {
+            user().error(TAG, 'Illegal replacement of the protocol: ', url);
+            return url;
+          }
+          return replacement;
+        });
   }
 
   /**

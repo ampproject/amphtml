@@ -317,6 +317,19 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should reject protocol changes', () => {
+    const win = getFakeWindow();
+    const urlReplacements = installUrlReplacementsService(win);
+    return urlReplacements.expandAsync(
+        'PROTOCOL://example.com/?r=RANDOM',
+        {
+          'PROTOCOL': Promise.resolve('abc'),
+        })
+        .then(expanded => {
+          expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
+        })
+  });
+
   describe('PAGE_LOAD_TIME', () => {
     let win;
     let eventListeners;
@@ -730,6 +743,21 @@ describe('UrlReplacements', () => {
       'FUNCT(hello,world)': 'helloworld',
       'PAGE_LOAD_TIME': 9,
     });
+  });
+
+  it('should reject protocol changes', () => {
+    const win = getFakeWindow();
+    const urlReplacements = installUrlReplacementsService(win);
+    let expanded = urlReplacements.expandSync(
+        'PROTOCOL://example.com/?r=RANDOM',
+        {'PROTOCOL': 'abc'});
+    expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
+    expanded = urlReplacements.expandSync(
+        'FUNCT()://example.com/?r=RANDOM',
+        {
+          'FUNCT': function() { return 'abc'; },
+        });
+    expect(expanded).to.equal('FUNCT()://example.com/?r=RANDOM');
   });
 
   describe('access values', () => {
