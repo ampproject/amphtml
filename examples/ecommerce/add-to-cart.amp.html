@@ -1,0 +1,157 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>Forms Examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <style amp-custom>
+        form.amp-form-submit-success .init-add-cart {
+            display: none;
+        }
+
+        .product-details,
+        .product-controls,
+        [submit-success] > div {
+            display: flex;
+            align-items: center;
+            flex-grow: 2;
+        }
+
+        h2 {
+            margin: 20px;
+        }
+
+        .shopping-btn,
+        input[type=number] {
+            border: none;
+            padding: 10px;
+        }
+
+        input[type=number] {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #eeeeee;
+        }
+
+        .add-to-cart {
+            background: darkseagreen;
+        }
+
+        .remove-from-cart {
+            background: indianred;
+        }
+
+        .update-cart {
+            background: darkseagreen;
+        }
+    </style>
+</head>
+<body>
+<h2>Hot Products!</h2>
+<form method="post"
+      action-xhr="/form/update-cart"
+      target="_blank">
+    <amp-img src="https://images.unsplash.com/photo-1473108307572-fdd14a7439a9?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&s=e37f7f0548ee020b6573fea0855b4145"
+             layout="responsive" width="412" height="274"></amp-img>
+
+    <div class="product-details">
+        <h2>Blue Jeans</h2>
+        <div class="product-controls">
+            <input type="hidden" name="itemId" value="jeans1">
+            <input type="submit" name="add" value="Add to Cart" class="add-to-cart shopping-btn init-add-cart">
+
+            <div submit-success>
+                <template type="amp-mustache">
+                    {{#quantityInCart}}
+                        <input type="number" name="quantity" value="{{quantityInCart}}">
+                        <input type="submit" name="update" value="Update" class="shopping-btn update-cart">
+                        <input type="submit" name="remove" value="Remove" class="shopping-btn remove-from-cart">
+                    {{/quantityInCart}}
+                    {{^quantityInCart}}
+                        <input type="submit" name="add" value="Add to Cart" class="add-to-cart shopping-btn">
+                    {{/quantityInCart}}
+                </template>
+            </div>
+        </div>
+        <div submit-error class="error-message">
+            <template type="amp-mustache">
+                {{message}}
+            </template>
+        </div>
+    </div>
+
+</form>
+
+<form method="post"
+      action-xhr="/form/update-cart"
+      target="_blank">
+    <amp-img src="https://images.unsplash.com/photo-1473010350295-2c82192ebd8e?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&s=da8b4dbcff60fdc91c27546a262d1711"
+             layout="responsive" width="412" height="274"></amp-img>
+
+    <div class="product-details">
+        <h2>Black/Gray Sneakers</h2>
+        <div class="product-controls">
+            <input type="hidden" name="itemId" value="sneakers1">
+            <input type="submit" name="add" value="Add to Cart" class="add-to-cart shopping-btn init-add-cart">
+
+            <div submit-success>
+                <template type="amp-mustache">
+                    {{#quantityInCart}}
+                    <input type="number" name="quantity" value="{{quantityInCart}}">
+                    <input type="submit" name="update" value="Update" class="shopping-btn update-cart">
+                    <input type="submit" name="remove" value="Remove" class="shopping-btn remove-from-cart">
+                    {{/quantityInCart}}
+                    {{^quantityInCart}}
+                    <input type="submit" name="add" value="Add to Cart" class="add-to-cart shopping-btn">
+                    {{/quantityInCart}}
+                </template>
+            </div>
+        </div>
+        <div submit-error class="error-message">
+            <template type="amp-mustache">
+                {{message}}
+            </template>
+        </div>
+    </div>
+</form>
+
+<form method="post"
+      action-xhr="/form/update-cart"
+      target="_blank">
+    <amp-img src="https://hd.unsplash.com/photo-1455637696518-1bb72679c100"
+        layout="responsive" width="412" height="274"></amp-img>
+
+    <div class="product-details">
+        <h2>White Dress</h2>
+        <div class="product-controls">
+            <input type="hidden" name="itemId" value="whitedress1">
+            <input type="submit" name="add" value="Add to Cart" class="add-to-cart shopping-btn init-add-cart">
+
+            <div submit-success>
+                <template type="amp-mustache">
+                    {{#quantityInCart}}
+                    <input type="number" name="quantity" value="{{quantityInCart}}">
+                    <input type="submit" name="update" value="Update" class="shopping-btn update-cart">
+                    <input type="submit" name="remove" value="Remove" class="shopping-btn remove-from-cart">
+                    {{/quantityInCart}}
+                    {{^quantityInCart}}
+                    <input type="submit" name="add" value="Add to Cart" class="add-to-cart shopping-btn">
+                    {{/quantityInCart}}
+                </template>
+            </div>
+        </div>
+        <div submit-error class="error-message">
+            <template type="amp-mustache">
+                {{message}}
+            </template>
+        </div>
+    </div>
+</form>
+
+</body>
+</html>
