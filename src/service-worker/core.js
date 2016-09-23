@@ -67,7 +67,7 @@ export function setVersionForTesting(version) {
  * @return {RtvVersion}
  * @visibleForTesting
  */
-export function ampVersion(url) {
+export function rtvVersion(url) {
   // RTVs are 2 digit prefixes followed by the timestamp of the release.
   const matches = /rtv\/(\d{2}\d{13,})/.exec(url);
   return matches ?
@@ -82,9 +82,8 @@ export function ampVersion(url) {
  *
  * @param {string} url
  * @return {string}
- * @visibleForTesting
  */
-export function basename(url) {
+function basename(url) {
   const match = /(?!.*?\/)[\w.]+/.exec(url);
   // Yes, I know there'll always be a match. But Closure!
   return match ? match[0] : '';
@@ -96,9 +95,8 @@ export function basename(url) {
  * @param {string} url
  * @param {RtvVersion} version
  * @return {string}
- * @visibleForTesting
  */
-export function urlWithVersion(url, version) {
+function urlWithVersion(url, version) {
   const location = new URL(url);
   location.pathname = `/rtv/${version}/${basename(url)}`;
   return location.href;
@@ -112,9 +110,8 @@ export function urlWithVersion(url, version) {
  * @param {!Request} request
  * @param {RtvVersion} version
  * @return {!Request}
- * @visibleForTesting
  */
-export function normalizedRequest(request, version) {
+function normalizedRequest(request, version) {
   const url = request.url;
   if (url.indexOf(`rtv/${version}`) > -1) {
     return request;
@@ -153,9 +150,8 @@ export function isBlacklisted(version) {
  * release version we are serving it.
  *
  * @type {!Object<string, RtvVersion>}
- * @visibleForTesting
  */
-export const clientsMap = Object.create(null);
+const clientsMap = Object.create(null);
 
 /**
  * Our cache of CDN JS files.
@@ -205,7 +201,7 @@ export function fetchAndCache(cache, request, requestFile, requestVersion) {
           if (requestFile !== basename(url)) {
             continue;
           }
-          if (requestVersion === ampVersion(url)) {
+          if (requestVersion === rtvVersion(url)) {
             continue;
           }
 
@@ -237,24 +233,13 @@ export function getCachedVersion(cache, requestFile) {
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
       if (requestFile === basename(url)) {
-        return ampVersion(url);
+        return rtvVersion(url);
       }
     }
 
     return '';
   });
 }
-
-self.addEventListener('install', install => {
-  install.waitUntil(cachePromise);
-  if (install.registerForeignFetch) {
-    install.registerForeignFetch({
-      scopes: [/** @type {!ServiceWorkerGlobalScope} */(
-          self).registration.scope],
-      origins: ['*'],
-    });
-  }
-});
 
 /**
  * Handles fetching the request from Cache, or fetching and caching from the
@@ -281,7 +266,7 @@ export function handleFetch(request, maybeClientId) {
   const clientId = /** @type {string} */(maybeClientId);
 
   const requestFile = basename(url);
-  const requestVersion = ampVersion(url);
+  const requestVersion = rtvVersion(url);
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
   request = normalizedRequest(request, requestVersion);
@@ -336,6 +321,17 @@ export function handleFetch(request, maybeClientId) {
     });
   });
 }
+
+self.addEventListener('install', install => {
+  install.waitUntil(cachePromise);
+  if (install.registerForeignFetch) {
+    install.registerForeignFetch({
+      scopes: [/** @type {!ServiceWorkerGlobalScope} */(
+          self).registration.scope],
+      origins: ['*'],
+    });
+  }
+});
 
 // Setup the Fetch listener, for when the client is on the CDN origin.
 self.addEventListener('fetch', event => {
