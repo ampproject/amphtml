@@ -189,7 +189,7 @@ describe('amp-ad-3p-impl', () => {
         });
         ad.appendChild(fallback);
         ad.appendChild(placeholder);
-        expect(placeholder.classList.contains('amp-hidden')).to.be.false;
+        expect(placeholder).to.not.have.class('amp-hidden');
         return ad;
       }).then(ad => {
         sandbox.stub(
@@ -201,7 +201,7 @@ describe('amp-ad-3p-impl', () => {
 
         ad.implementation_.noContentHandler_();
         expect(ad).to.have.class('amp-notsupported');
-        expect(placeholderEl.classList.contains('amp-hidden')).to.be.true;
+        expect(placeholderEl).to.have.class('amp-hidden');
       });
     });
 
