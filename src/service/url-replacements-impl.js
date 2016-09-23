@@ -783,6 +783,8 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
+    user.assert(newProtocol !== 'javascript:', 'Illegal javascript link ' +
+        'protocol: ', url);
 
     return replacement;
   }
