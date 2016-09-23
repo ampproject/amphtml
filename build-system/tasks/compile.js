@@ -323,11 +323,9 @@ function patchRegisterElement() {
     file = fs.readFileSync(
         'node_modules/document-register-element/build/' +
         'document-register-element.node.js').toString();
-    // CommonJS support for closure does not wrap the module
-    // and inject `global` like browserify and other node module loaders
-    // so we nee to change this to `self` or `window`.
-    file = file.replace('installCustomElements(global);',
-        'installCustomElements(self);');
+    // Let's get rid of the side effect the module has so we can tree shake it
+    // better and control installation
+    file = file.replace('installCustomElements(global);', '');
     // Closure Compiler does not generate a `default` property even though
     // to interop CommonJS and ES6 modules. This is the same issue typescript
     // ran into here https://github.com/Microsoft/TypeScript/issues/2719
