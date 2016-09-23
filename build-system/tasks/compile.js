@@ -253,12 +253,8 @@ function compile(entryModuleFilenames, outputDir,
           'third_party/webcomponentsjs/',
           'node_modules/',
           'build/patched-module/',
-          // TODO: The following three are whitelisted only because they're
-          // blocking an unrelated PR.  But they appear to contain real type
-          // errors and should be fixed at some point.
-          'src/service.js',
+          // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
-          'src/document-state.js',
         ],
         jscomp_error: [],
       }

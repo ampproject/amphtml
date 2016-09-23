@@ -49,12 +49,12 @@ export function getElementService(win, id, providedByElement) {
  * @param {string} id of the service.
  * @param {string} providedByElement Name of the custom element that provides
  *     the implementation of this service.
- * @return {!Promise<*>}
+ * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailable(win, id, providedByElement) {
   const s = getServicePromiseOrNull(win, id);
   if (s) {
-    return s;
+    return /** @type {!Promise<?Object>} */ (s);
   }
   // Microtask is necessary to ensure that window.ampExtendedElements has been
   // initialized.
