@@ -777,8 +777,8 @@ export class UrlReplacements {
    * @return {string}
    */
   ensureProtocolMatches_(url, replacement) {
-    const newProtocol = parseUrl(replacement, /* opt_nocache */false).protocol;
-    const oldProtocol = parseUrl(url, /* opt_nocache */false).protocol;
+    const newProtocol = parseUrl(replacement, /* opt_nocache */ true).protocol;
+    const oldProtocol = parseUrl(url, /* opt_nocache */ true).protocol;
     if (newProtocol != oldProtocol) {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
