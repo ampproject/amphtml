@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {documentContains} from '../dom';
 import {dev, user} from '../log';
 import {platformFor} from '../platform';
 import {setStyle, setStyles} from '../style';
@@ -201,7 +200,7 @@ export class FixedLayer {
     // Some of the elements may no longer be in DOM.
     /** @type {!Array<!FixedElementDef>} */
     const toRemove = this.fixedElements_.filter(
-        fe => !documentContains(this.doc, fe.element));
+        fe => !this.doc.contains(fe.element));
     toRemove.forEach(fe => this.removeFixedElement_(fe.element));
 
     // Next, the positioning-related properties will be measured. If a
@@ -557,11 +556,11 @@ export class FixedLayer {
    * @private
    */
   returnFromFixedLayer_(fe) {
-    if (!fe.placeholder || !documentContains(this.doc, fe.placeholder)) {
+    if (!fe.placeholder || !this.doc.contains(fe.placeholder)) {
       return;
     }
     dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
-    if (documentContains(this.doc, fe.element)) {
+    if (this.doc.contains(fe.element)) {
       if (fe.element.style.zIndex) {
         fe.element.style.zIndex = '';
       }
