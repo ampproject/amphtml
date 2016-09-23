@@ -264,8 +264,25 @@ describe('amp-ad-3p-impl', () => {
   });
 
   describe('renderOutsideViewport', () => {
-    function getGoodAd(cb, opt_loadingStrategy) {
-      const attributes = {
+    it('should not return false after scrolling, then false for 1s', () => {
+      let clock;
+      return getAd(undefined, undefined, ad => {
+        clock = lolex.install(ad.implementation_.win);
+        expect(ad.implementation_.renderOutsideViewport()).not.to.be.false;
+        return ad;
+      }).then(ad => {
+        const impl = ad.implementation_;
+        expect(impl.renderOutsideViewport()).to.be.false;
+        clock.tick(900);
+        expect(impl.renderOutsideViewport()).to.be.false;
+        clock.tick(100);
+        expect(impl.renderOutsideViewport()).not.to.be.false;
+      });
+    });
+
+    it('should prefer-viewability-over-views', () => {
+      let clock;
+      return getAd({
         width: 300,
         height: 250,
         type: '_ping_',
@@ -273,38 +290,13 @@ describe('amp-ad-3p-impl', () => {
         'data-valid': 'true',
         // Test precedence
         'data-width': '6666',
-      };
-      if (opt_loadingStrategy) {
-        attributes['data-loading-strategy'] = opt_loadingStrategy;
-      }
-      return getAd(attributes, undefined, element => {
-        cb(element.implementation_);
-        return element;
-      });
-    }
-
-    it('should not return false after scrolling, then false for 1s', () => {
-      let clock;
-      return getGoodAd(ad => {
-        clock = lolex.install(ad.win);
-        expect(ad.renderOutsideViewport()).not.to.be.false;
+        'data-loading-strategy': 'prefer-viewability-over-views',
+      }, undefined, ad => {
+        clock = lolex.install(ad.implementation_.win);
+        expect(ad.implementation_.renderOutsideViewport()).not.to.be.false;
+        return ad;
       }).then(ad => {
-        // False because we just rendered one.
-        expect(ad.renderOutsideViewport()).to.be.false;
-        clock.tick(900);
-        expect(ad.renderOutsideViewport()).to.be.false;
-        clock.tick(100);
-        expect(ad.renderOutsideViewport()).not.to.be.false;
-      });
-    });
-
-    it('should prefer-viewability-over-views', () => {
-      let clock;
-      return getGoodAd(ad => {
-        clock = lolex.install(ad.win);
-        expect(ad.renderOutsideViewport()).not.to.be.false;
-      }, 'prefer-viewability-over-views').then(ad => {
-        // False because we just rendered one.
+        const impl = ad.implementation_;
         expect(ad.renderOutsideViewport()).to.be.false;
         clock.tick(900);
         expect(ad.renderOutsideViewport()).to.be.false;
