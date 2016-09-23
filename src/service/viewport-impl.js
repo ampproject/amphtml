@@ -69,6 +69,12 @@ export class Viewport {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    /**
+     * Some viewport operations require the global document.
+     * @private @const {!Document}
+     */
+    this.globalDoc_ = this.ampdoc.win.document;
+
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
 
@@ -160,8 +166,7 @@ export class Viewport {
     if (this.ampdoc.isSingleDoc() &&
             viewer.isEmbedded() &&
             isExperimentOn(this.ampdoc.win, 'pan-y')) {
-      setStyle(this.ampdoc.win.document.documentElement,
-          'touch-action', 'pan-y');
+      setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
     }
   }
 
@@ -408,8 +413,7 @@ export class Viewport {
    */
   resetTouchZoom() {
     const windowHeight = this.ampdoc.win./*OK*/innerHeight;
-    const documentHeight = this.ampdoc.win.document
-        .documentElement./*OK*/clientHeight;
+    const documentHeight = this.globalDoc_.documentElement./*OK*/clientHeight;
     if (windowHeight && documentHeight && windowHeight === documentHeight) {
       // This code only works when scrollbar overlay content and take no space,
       // which is fine on mobile. For non-mobile devices this code is
@@ -526,7 +530,7 @@ export class Viewport {
     }
     if (this.viewportMeta_ === undefined) {
       this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
-          this.ampdoc.win.document.querySelector('meta[name=viewport]'));
+          this.globalDoc_.querySelector('meta[name=viewport]'));
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
