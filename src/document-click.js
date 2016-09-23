@@ -34,7 +34,6 @@ const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
   fromClassForDoc(ampdoc, 'clickhandler', ClickHandler);
-  fromClassForDoc(ampdoc, 'CaptureClickHandler', CaptureClickHandler);
 }
 
 
