@@ -160,7 +160,8 @@ export class Viewport {
     if (this.ampdoc.isSingleDoc() &&
             viewer.isEmbedded() &&
             isExperimentOn(this.ampdoc.win, 'pan-y')) {
-      setStyle(this.ampdoc.win.document.documentElement, 'touch-action', 'pan-y');
+      setStyle(this.ampdoc.win.document.documentElement,
+          'touch-action', 'pan-y');
     }
   }
 

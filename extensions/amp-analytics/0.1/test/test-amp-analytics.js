@@ -28,8 +28,8 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
-import {installViewportServiceForDoc} from
-    '../../../../src/service/viewport-impl';
+//XXX import {installViewportServiceForDoc,} from
+//     '../../../../src/service/viewport-impl';
 import {
   installUrlReplacementsService,
 } from '../../../../src/service/url-replacements-impl';

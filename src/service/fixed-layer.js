@@ -42,7 +42,7 @@ export class FixedLayer {
    * @param {boolean} transfer
    */
   constructor(ampdoc, vsync, paddingTop, transfer) {
-    /** @const {!Document} */
+    /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const */
