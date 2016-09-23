@@ -708,22 +708,11 @@ export class UrlReplacements {
       replacementPromise = replacementPromise.then(() => replacement);
     }
 
-    const protocol = protocolOfUrl(url);
     if (opt_sync) {
-      if (protocolOfUrl(replacement) !== protocol) {
-        user().error(TAG, 'Illegal replacement of the protocol: ', url);
-        return url;
-      }
-      return replacement;
+      return this.ensureProtocolMatches_(url, replacement);
     }
     return (replacementPromise || Promise.resolve(replacement))
-        .then((replacement) => {
-          if (protocolOfUrl(replacement) !== protocol) {
-            user().error(TAG, 'Illegal replacement of the protocol: ', url);
-            return url;
-          }
-          return replacement;
-        });
+        .then((replacement) => this.ensureProtocolMatches_(url, replacement));
   }
 
   /**
@@ -787,6 +776,23 @@ export class UrlReplacements {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
+  }
+
+  /**
+   * Ensures that the protocol of the original url matches the protocol of the
+   * replacement url. Returns the replacement if they do, the original if they
+   * do not.
+   * @param {string} url
+   * @param {string} replacement
+   * @return {string}
+   */
+  ensureProtocolMatches_(url, replacement) {
+    if (protocolOfUrl(replacement) !== protocolOfUrl(url)) {
+      user().error(TAG, 'Illegal replacement of the protocol: ', url);
+      return url;
+    }
+
+    return replacement;
   }
 }
 
