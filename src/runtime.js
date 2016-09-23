@@ -65,7 +65,7 @@ import {registerExtendedElement} from './extended-element';
 import {resourcesForDoc} from './resources';
 import {setStyle} from './style';
 import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {viewportForDoc} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
 
@@ -291,7 +291,7 @@ export function adopt(global) {
       global.AMP.resources = resourcesForDoc(global.document);
     }
 
-    const viewport = viewportFor(global);
+    const viewport = viewportForDoc(global.document);
 
     /** @const */
     global.AMP.viewport = {};

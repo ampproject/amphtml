@@ -15,7 +15,7 @@
  */
 
 import {vsyncFor} from '../../../src/vsync';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {setStyles} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
 
@@ -34,7 +34,7 @@ export class ValidationBubble {
     this.id_ = id;
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(win);
+    this.viewport_ = viewportForDoc(win.document);//XXX: why viewport needed at all?
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);

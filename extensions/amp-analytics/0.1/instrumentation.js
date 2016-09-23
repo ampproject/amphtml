@@ -21,7 +21,7 @@ import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 
@@ -99,7 +99,7 @@ export class InstrumentationService {
     this.viewer_ = viewerFor(window);
 
     /** @const {!Viewport} */
-    this.viewport_ = viewportFor(window);
+    this.viewport_ = viewportForDoc(window.document);
 
     /** @private {boolean} */
     this.clickHandlerRegistered_ = false;

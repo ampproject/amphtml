@@ -107,6 +107,9 @@ export class Viewport {
     /** @private {number} */
     this.scrollMeasureTime_ = 0;
 
+    /** @private {!./timer-impl.Timer} */
+    this.timer_ = timerFor(this.ampdoc.win);
+
     /** @private {!./vsync-impl.Vsync} */
     this.vsync_ = installVsyncService(this.ampdoc.win);
 
@@ -413,7 +416,7 @@ export class Viewport {
       return;
     }
     if (this.disableTouchZoom()) {
-      timerFor(this.ampdoc.win).delay(() => {
+      this.timer_.delay(() => {
         this.restoreOriginalTouchZoom();
       }, 50);
     }
@@ -599,7 +602,7 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = Date.now();
       // Wait 2 frames and then request an animation frame.
-      timerFor(this.ampdoc.win).delay(() => {//XXXX
+      this.timer_.delay(() => {
         this.vsync_.measure(() => {
           this.throttledScroll_(now, newScrollTop);
         });
@@ -631,7 +634,7 @@ export class Viewport {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      timerFor(this.ampdoc.win).delay(() => this.vsync_.measure(
+      this.timer_.delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
@@ -1354,7 +1357,7 @@ function createViewport(ampdoc) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Viewport}
  */
-export function installViewportServiceForDoc(ampdoc) {//XXX
+export function installViewportServiceForDoc(ampdoc) {
   return /** @type !Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
       ampdoc => createViewport(ampdoc)));
 };

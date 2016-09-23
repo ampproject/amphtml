@@ -20,7 +20,7 @@ import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {VideoEvents, VideoAttributes} from '../video-interface';
 import {viewerFor} from '../viewer';
-import {viewportFor} from '../viewport';
+import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
 
 /**
@@ -103,7 +103,7 @@ export class VideoManager {
           this.entries_[i].updateVisibility();
         }
       };
-      const viewport = viewportFor(this.win_);
+      const viewport = viewportForDoc(this.win_.document);//XXX: reach into ampdoc?
       viewport.onScroll(scrollListener);
       viewport.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;
