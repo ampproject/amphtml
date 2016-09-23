@@ -203,29 +203,26 @@ describe('Viewport', () => {
     });
   });
 
-  it('should update padding when changed only', () => {
-    // Shouldn't call updatePaddingTop since it hasn't changed.
-    let bindingMock = sandbox.mock(binding);
+  it('should not do anything if padding is not changed', () => {
+    const bindingMock = sandbox.mock(binding);
     viewerViewportHandler({paddingTop: 19});
-    bindingMock.verify();
-
-    // Should call updatePaddingTop.
-    bindingMock = sandbox.mock(binding);
-    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
-    viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
   });
 
-  it('should update padding for fixed layer', () => {
-    // Should call updatePaddingTop.
+  it('should update padding when viewer wants to hide header', () => {
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
+    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    bindingMock.expects('hideViewerHeader').withArgs(19).once();
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in'});
+    bindingMock.verify();
+  });
+
+  it('should update padding for fixed layer when viewer wants to ' +
+      'hide header', () => {
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
-    viewerViewportHandler({paddingTop: 0});
-    bindingMock.verify();
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in'});
     fixedLayerMock.verify();
   });
 

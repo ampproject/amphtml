@@ -111,6 +111,9 @@ export class Viewport {
     this.paddingTop_ = viewer.getPaddingTop();
 
     /** @private {number} */
+    this.lastPaddingTop_ = 0;
+
+    /** @private {number} */
     this.scrollMeasureTime_ = 0;
 
     /** @private {!./timer-impl.Timer} */
@@ -546,30 +549,47 @@ export class Viewport {
   }
 
   /**
-   * @param {{paddingTop: number, duration: (number|undefined), curve: (string|undefined)}} event
+   * @param {!JSONType} event
    * @private
    */
   updateOnViewportEvent_(event) {
     this.binding_.updateViewerViewport(this.viewer_);
-    const paddingTop = event.paddingTop;
+    const paddingTop = event['paddingTop'];
+    const duration = event['duration'];
+    const curve = event['curve'];
     if (paddingTop != this.paddingTop_) {
-      const lastPaddingTop = this.paddingTop_;
+      this.lastPaddingTop_ = this.paddingTop_;
       this.paddingTop_ = paddingTop;
-      this.binding_.updatePaddingTop(this.paddingTop_, /* adjustScroll */true,
-          lastPaddingTop);
-      this.fixedLayer_.updatePaddingTop(this.paddingTop_);
-
-      if (event.duration > 0) {
-        // Add transit effect on position fixed element
-        const tr = numeric(lastPaddingTop - this.paddingTop_, 0);
-        Animation.animate(this.ampdoc.getRootNode(), time => {
-          const p = tr(time);
-          this.fixedLayer_.transformMutate(`translateY(${p}px)`);
-        }, event.duration, event.curve).thenAlways(() => {
-          this.fixedLayer_.transformMutate(null);
+      if (this.paddingTop_ == 0) {
+        this.binding_.hideViewerHeader(this.lastPaddingTop_);
+        this.animateFixedElements_(duration, curve);
+      } else {
+        this.animateFixedElements_(duration, curve).then(() => {
+          this.binding_.showViewerHeader(this.paddingTop_);
         });
       }
     }
+  }
+
+  /**
+   * @param {number} duration
+   * @param {string} curve
+   * @return {!Promise}
+   * @private
+   */
+  animateFixedElements_(duration, curve) {
+    this.fixedLayer_.updatePaddingTop(this.paddingTop_);
+    if (duration > 0) {
+      // Add transit effect on position fixed element
+      const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
+      return Animation.animate(this.ampdoc.getRootNode(), time => {
+        const p = tr(time);
+        this.fixedLayer_.transformMutate(`translateY(${p}px)`);
+      }, duration, curve).thenAlways(() => {
+        this.fixedLayer_.transformMutate(null);
+      });
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -664,6 +684,7 @@ export class Viewport {
       });
     }
   }
+
   /** @private */
   resize_() {
     this.rect_ = null;
@@ -713,12 +734,20 @@ export class ViewportBindingDef {
   /**
    * Updates binding with the new padding.
    * @param {number} unusedPaddingTop
-   * @param {(boolean|undefined)=} unusedOptUpdateScrollPos
-   * @param {(number|undefined)=} unusedOptLastPaddingTop
    */
-  updatePaddingTop(unusedPaddingTop, unusedOptUpdateScrollPos,
-      unusedOptLastPaddingTop) {}
+  updatePaddingTop(unusedPaddingTop) {}
 
+  /**
+   * Updates binding with the new padding when hiding viewer header.
+   * @param {number} unusedLastPaddingTop
+   */
+  hideViewerHeader(unusedLastPaddingTop) {}
+
+  /**
+   * Updates binding with the new padding when showing viewer header.
+   * @param {number} unusedPaddingTop
+   */
+  showViewerHeader(unusedPaddingTop) {}
   /**
    * Updates the viewport whether it's currently in the lightbox or a normal
    * mode.
@@ -857,12 +886,16 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop, opt_updateScrollPos, opt_lastPaddingTop) {
+  updatePaddingTop(paddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
-    if (opt_updateScrollPos) {
-      const oldScrollTop = this.getScrollTop();
-      this.setScrollTop(oldScrollTop + paddingTop - opt_lastPaddingTop);
-    }
+  }
+
+  /** @override */
+  hideViewerHeader(unusedLastPaddingTop) {
+  }
+
+  /** @override */
+  showViewerHeader(unusedPaddingTop) {
   }
 
   /** @override */
@@ -990,6 +1023,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
+    /** @private {number} */
+    this.lastPaddingTop_ = 0;
+
     // Microtask is necessary here to let Safari to recalculate scrollWidth
     // post DocumentReady signal.
     whenDocumentReady(this.win.document).then(() => this.setup_());
@@ -1093,22 +1129,43 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop, opt_updateScrollPos, opt_lastPaddingTop) {
+  hideViewerHeader(lastPaddingTop) {
+    this.removePaddingTop_(true, lastPaddingTop);
+  }
+
+  /** @override */
+  showViewerHeader(paddingTop) {
+    this.addPaddingTop_(true, paddingTop);
+  }
+
+  removePaddingTop_(transient, opt_lastPaddingTop) {
+    onDocumentReady(this.win.document, doc => {
+      if (!transient) {
+        this.paddingTop_ = 0;
+      }
+      const existingPaddingTop =
+          this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
+      doc.body.style.paddingTop =
+          `calc(${existingPaddingTop} + ${opt_lastPaddingTop}px)`;
+      doc.body.style.borderTop = '';
+    });
+  }
+
+  addPaddingTop_(transient, opt_paddingTop) {
+    onDocumentReady(this.win.document, doc => {
+      if (!transient) {
+        this.paddingTop_ = opt_paddingTop;
+      }
+      doc.body.style.borderTop = `${opt_paddingTop}px solid transparent`;
+      doc.body.style.paddingTop = '';
+    });
+  }
+
+  /** @override */
+  updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
-      // Also tried `paddingTop` but it didn't work for `position:absolute`
-      // on iOS.
       doc.body.style.borderTop = `${paddingTop}px solid transparent`;
-      if (opt_updateScrollPos) {
-        // TODO(yuxichen): This is a partially working formula for calculating
-        // adjusted scroll top. Add two more paddingTop to compensate the
-        // paddingTop being removed by the setScrollTop function and the removal
-        // of border top. This formula only works when either paddingTop or
-        // lastPaddingTop is 0.
-        const adjScrollTop = this.getScrollTop() + 3 * paddingTop
-            - opt_lastPaddingTop;
-        this.setScrollTop(adjScrollTop);
-      }
     });
   }
 
@@ -1239,7 +1296,6 @@ export class ViewportBindingNaturalIosEmbed_ {
     if (!this.scrollPosEl_ || !this.scrollMoveEl_) {
       return;
     }
-
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.

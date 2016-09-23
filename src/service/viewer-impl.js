@@ -137,7 +137,7 @@ export class Viewer {
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {!Observable<!{paddingTop: number, duration: (number|undefined), curve: (string|undefined)}>} */
+    /** @private {!Observable<!JSONType>} */
     this.viewportObservable_ = new Observable();
 
     /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
@@ -726,11 +726,7 @@ export class Viewer {
 
   /**
    * Adds a "viewport" event listener for viewer events.
-   * @param {function({
-   *   paddingTop: number,
-   *   duration: (number|undefined),
-   *   curve: (string|undefined)
-   * })} handler
+   * @param {function(!JSONType)} handler
    * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
@@ -899,13 +895,10 @@ export class Viewer {
     if (eventType == 'viewport') {
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
-        this.viewportObservable_.fire({
-          paddingTop: this.paddingTop_,
-          duration: data['duration'],
-          curve: data['curve'],
-        });
+        this.viewportObservable_.fire(
+          /** @type {!JSONType|undefined} */ (data));
       }
-      return undefined;
+      return Promise.resolve();
     }
     if (eventType == 'historyPopped') {
       this.historyPoppedObservable_.fire({
