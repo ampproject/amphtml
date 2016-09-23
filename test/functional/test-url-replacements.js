@@ -723,41 +723,43 @@ describe('UrlReplacements', () => {
         });
   });
 
-  it('should expand sync w/ collect vars (skip async macro)', () => {
-    const win = getFakeWindow();
-    const urlReplacements = installUrlReplacementsService(win);
-    urlReplacements.win_.performance.timing.loadEventStart = 109;
-    const collectVars = {};
-    const expanded = urlReplacements.expandSync(
-      'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
-      {
+  describe('sync expansion', () => {
+    it('should expand w/ collect vars (skip async macro)', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsService(win);
+      urlReplacements.win_.performance.timing.loadEventStart = 109;
+      const collectVars = {};
+      const expanded = urlReplacements.expandSync(
+        'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
+        {
+          'CONST': 'ABC',
+          'FUNCT': function(a, b) { return a + b; },
+          // Will ignore promise based result and instead insert empty string.
+          'PROM': function() { return Promise.resolve('boo'); },
+        }, collectVars);
+      expect(expanded).to.match(/^r=\d(\.\d+)?&c=ABC&f=helloworld&a=b&d=&e=9$/);
+      expect(collectVars).to.deep.equal({
+        'RANDOM': parseFloat(/^r=(\d+(\.\d+)?)/.exec(expanded)[1]),
         'CONST': 'ABC',
-        'FUNCT': function(a, b) { return a + b; },
-        // Will ignore promise based result and instead insert empty string.
-        'PROM': function() { return Promise.resolve('boo'); },
-      }, collectVars);
-    expect(expanded).to.match(/^r=\d(\.\d+)?&c=ABC&f=helloworld&a=b&d=&e=9$/);
-    expect(collectVars).to.deep.equal({
-      'RANDOM': parseFloat(/^r=(\d+(\.\d+)?)/.exec(expanded)[1]),
-      'CONST': 'ABC',
-      'FUNCT(hello,world)': 'helloworld',
-      'PAGE_LOAD_TIME': 9,
+        'FUNCT(hello,world)': 'helloworld',
+        'PAGE_LOAD_TIME': 9,
+      });
     });
-  });
 
-  it('should reject protocol changes', () => {
-    const win = getFakeWindow();
-    const urlReplacements = installUrlReplacementsService(win);
-    let expanded = urlReplacements.expandSync(
+    it('should reject protocol changes', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsService(win);
+      let expanded = urlReplacements.expandSync(
         'PROTOCOL://example.com/?r=RANDOM',
         {'PROTOCOL': 'abc'});
-    expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
-    expanded = urlReplacements.expandSync(
+      expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
+      expanded = urlReplacements.expandSync(
         'FUNCT()://example.com/?r=RANDOM',
         {
           'FUNCT': function() { return 'abc'; },
         });
-    expect(expanded).to.equal('FUNCT()://example.com/?r=RANDOM');
+      expect(expanded).to.equal('FUNCT()://example.com/?r=RANDOM');
+    });
   });
 
   describe('access values', () => {
