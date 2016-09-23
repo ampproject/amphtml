@@ -293,9 +293,8 @@ export function scopeShadowCss(shadowRoot, css) {
   // Patch selectors.
   // Invoke `ShadowCSS.scopeRules` via `call` because the way it uses `this`
   // internally conflicts with Closure compiler's advanced optimizations.
-  // eslint-disable-next-line no-useless-call
-  return ShadowCSS.scopeRules.call(ShadowCSS, rules, `#${id}`, 
-      transformRootSelectors);
+  const scopeRules = ShadowCSS.scopeRules;
+  return scopeRules.call(ShadowCSS, rules, `#${id}`, transformRootSelectors);
 }
 
 
