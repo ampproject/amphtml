@@ -61,16 +61,6 @@ function encodeValue(val) {
 };
 
 /**
- * Detects the protocol of the url, if there is one.
- * @param {string} url
- * @return {string}
- */
-function protocolOfUrl(url) {
-  const match = /^.*:/.exec(url);
-  return match ? match[0] : '';
-}
-
-/**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
  * @package For export.
@@ -787,7 +777,9 @@ export class UrlReplacements {
    * @return {string}
    */
   ensureProtocolMatches_(url, replacement) {
-    if (protocolOfUrl(replacement) !== protocolOfUrl(url)) {
+    const newProtocol = parseUrl(replacement, /* opt_nocache */false).protocol;
+    const oldProtocol = parseUrl(url, /* opt_nocache */false).protocol;
+    if (newProtocol != oldProtocol) {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }

@@ -63,7 +63,7 @@ export let Location;
  * @param {string} url
  * @return {!Location}
  */
-export function parseUrl(url) {
+export function parseUrl(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = self.UrlCache || (self.UrlCache = Object.create(null));
@@ -118,8 +118,12 @@ export function parseUrl(url) {
     info.origin = info.protocol + '//' + info.host;
   }
   // Freeze during testing to avoid accidental mutation.
-  cache[url] = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-  return info;
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_nocache) {
+    return frozen;
+  }
+  return cache[url] = frozen;
 }
 
 /**
