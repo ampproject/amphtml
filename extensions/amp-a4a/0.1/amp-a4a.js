@@ -22,7 +22,7 @@ import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {createShadowEmbedRoot} from '../../../src/shadow-embed';
+import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
@@ -75,7 +75,6 @@ export let AdResponseDef;
 
 /** @typedef {{
       cssUtf16CharOffsets: Array<number>,
-      cssReplacementRanges: Array<number>,
       bodyUtf16CharOffsets: !Array<number>,
       bodyAttributes: ?string,
       customElementExtensions: Array<string>,
@@ -397,18 +396,19 @@ export class AmpA4A extends AMP.BaseElement {
     // valid AMP.
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
+      console.log('layoutCallback promise result', rendered, this.rendered_);
       if (rendered instanceof Error) {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
         if (this.adUrl_) {
-          this.renderViaIframe_(true);
+          this.renderViaCrossDomainIframe_(true);
         }
         throw rendered;
       };
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
-        this.renderViaIframe_(true);
+        this.renderViaCrossDomainIframe_(true);
       }
       this.rendered_ = true;
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
@@ -493,10 +493,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Callback executed when AMP creative has successfully rendered within the
-   * publisher page via shadow DOM.  To be overridden by network implementations
-   * as needed.
+   * publisher page.  To be overridden by network implementations as needed.
    */
-  onAmpCreativeShadowDomRender() {}
+  onAmpCreativeRender() {}
 
   /**
    * Send ad request, extract the creative and signature from the response.
@@ -600,21 +599,15 @@ export class AmpA4A extends AMP.BaseElement {
     return utf8Decode(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
       const creativeMetaData = this.getAmpAdMetadata_(creative);
-      if (!creativeMetaData || !this.supportsShadowDom()) {
-        // Shadow DOM is not supported or could not find appropriate markers
-        // within the creative therefore load within cross domain iframe.
-        // Iframe is created immediately (as opposed to waiting for
-        // layoutCallback) as the the creative has been verified as AMP and
-        // will run efficiently.
-        this.renderViaIframe_();
+      if (!creativeMetaData) {
+        // Could not find appropriate markers within the creative therefore
+        // load within cross domain iframe. Iframe is created immediately
+        // (as opposed to waiting for layoutCallback) as the the creative has
+        // been verified as AMP and will run efficiently.
+        this.renderViaCrossDomainIframe_();
         return true;
       } else {
         try {
-          // Do extraction processing on CSS and body before creating the
-          // shadow root so that if they error out, we don't actually edit
-          // the doc.
-          const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
-          const bodyBlock = this.formatBody_(creative, creativeMetaData);
           // Note: We schedule DOM mutations via the Vsync handler system to
           // avoid user-visible rewrites.  However, that means that rendering
           // is being handled outside this promise chain.  There are two
@@ -632,32 +625,47 @@ export class AmpA4A extends AMP.BaseElement {
           //    render-in-DOM failed, and no ad would be displayed.  However,
           //    all of the enclosed mutations are fairly simple and unlikely
           //    to fail.
-          this.vsync_.mutate(() => {
-            const doc = this.element.ownerDocument;
-            // Copy fonts to host document head.
-            this.relocateFonts_(/** @type {!CreativeMetaDataDef} */ (
-                creativeMetaData));
-            // Create and setup shadow root.
-            const shadowRoot = createShadowEmbedRoot(this.element,
-                creativeMetaData.customElementExtensions || []);
-            // Add custom CSS.
-            const customStyle = doc.createElement('style');
-            customStyle.setAttribute('amp-custom', '');
-            customStyle.textContent = cssBlock;
-            shadowRoot.appendChild(customStyle);
-            // Add body.
-            const bodyAttrString = creativeMetaData.bodyAttributes ?
-                ' ' + creativeMetaData.bodyAttributes : '';
-            const temp = doc.createElement('div');
-            temp./*OK*/innerHTML =
-                `<${AMP_BODY_STRING}${bodyAttrString}></${AMP_BODY_STRING}>`;
-            const bodyElement = temp.firstElementChild;
-            shadowRoot.appendChild(bodyElement);
-            bodyElement./*OK*/innerHTML = bodyBlock;
-            this.rendered_ = true;
-            this.onAmpCreativeShadowDomRender();
+          return this.vsync_.mutatePromise().then(() => {
+            // Create and setup friendly iframe.
+            const iframe = this.element.ownerDocument.createElement('iframe');
+            this.applyFillContent(iframe);
+
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.setAttribute('allowtransparency', '');
+            iframe.setAttribute('scrolling', 'no');
+
+            // HTML is all but the extensions which must be removed from the
+            // creative.
+            // TODO(keithwrightbos): remove this monstrousity in favor of
+            // validation providing offsets to extension & AMP runtime
+            // locations.
+            const extensions =
+              creativeMetaData.customElementExtensions || [];
+            for (let i = 0; i <= extensions.length; i++) {
+              // Remove AMP runtime as well.
+              const extensionName =
+                (i == extensions.length) ? 'v0\.js' : extensions[i];
+              creative = creative.replace(
+                new RegExp(`<script[^>]+${extensionName}[^>]+>\s*</script\s*>\n?`),
+                '');
+            }
+            // TODO(keithwrightbos): remove this when we know all creatives
+            // have moved to AMP AD document format validation, ensure it does
+            // not match amp4ads-boilerplate.
+            creative = creative.replace(
+              /<style\s+([^>]*\s+)?amp-boilerplate[^>]*>[^>]+<\/style\s*>/, '');
+            return installFriendlyIframeEmbed(
+              iframe, this.element, {
+                url: this.adUrl_,
+                html: creative,
+                extensionIds: creativeMetaData.customElementExtensions,
+              }).then(() => {
+                this.rendered_ = true;
+                this.onAmpCreativeRender();
+                return true;
+              });
           });
-          return true;
         } catch (e) {
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
@@ -678,8 +686,8 @@ export class AmpA4A extends AMP.BaseElement {
    *    nested frames).
    * @private
    */
-  renderViaIframe_(opt_isNonAmpCreative) {
-    user().assert(this.adUrl_, 'adUrl missing in renderViaIframe_?');
+  renderViaCrossDomainIframe_(opt_isNonAmpCreative) {
+    user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));
@@ -746,60 +754,15 @@ export class AmpA4A extends AMP.BaseElement {
    */
   buildCreativeMetaData_(metaDataObj) {
     const metaData = {};
-
-    metaData.bodyUtf16CharOffsets = metaDataObj['bodyUtf16CharOffsets'];
-    if (!isValidOffsetArray(metaData.bodyUtf16CharOffsets)) {
-      // Invalid/Missing body offsets array.
-      throw new Error('Invalid/missing body offsets');
-    }
-    if (metaDataObj['cssUtf16CharOffsets']) {
-      metaData.cssUtf16CharOffsets = metaDataObj['cssUtf16CharOffsets'];
-      if (!isValidOffsetArray(metaData.cssUtf16CharOffsets)) {
-        throw new Error('Invalid CSS offsets');
-      }
-    }
-    // Validate array of two member number arrays
-    if (metaDataObj['cssReplacementRanges']) {
-      metaData.cssReplacementRanges = metaDataObj['cssReplacementRanges'];
-      if (!isArray(metaData.cssReplacementRanges)) {
-        throw new Error('Invalid CSS replacement ranges');
-      }
-      for (let i = 0; i < metaData.cssReplacementRanges.length; i++) {
-        if (!isValidOffsetArray(metaData.cssReplacementRanges[i])) {
-          throw new Error('Invalid CSS replacement ranges');
-        }
-      }
-    }
-    if (metaDataObj['bodyAttributes']) {
-      metaData.bodyAttributes = metaDataObj['bodyAttributes'];
-      if (typeof metaData.bodyAttributes !== 'string') {
-        throw new Error('Invalid body attributes');
-      }
-    }
     if (metaDataObj['customElementExtensions']) {
       metaData.customElementExtensions = metaDataObj['customElementExtensions'];
       if (!isArray(metaData.customElementExtensions)) {
         throw new Error('Invalid extensions');
       }
     }
-    if (metaDataObj['customStylesheets']) {
-      // Expect array of objects with at least one key being 'href' whose value
-      // is URL.
-      metaData.customStylesheets = metaDataObj['customStylesheets'];
-      if (!isArray(metaData.customStylesheets)) {
-        throw new Error('Invalid custom stylesheets');
-      }
-      for (let i = 0; i < metaData.customStylesheets.length; i++) {
-        const stylesheet = metaData.customStylesheets[i];
-        if (!isObject(stylesheet) || !stylesheet['href'] ||
-            typeof stylesheet['href'] !== 'string' ||
-            !/^https:\/\//i.test(stylesheet['href'])) {
-          throw new Error('Invalid custom stylesheets');
-        }
-      }
-    }
     return metaData;
   }
+<<<<<<< a3957ab005a2c140a3fdca53c9b3948069813410
 
   /**
    * Extracts the body portion of the creative, according to directions in the
@@ -841,29 +804,4 @@ export class AmpA4A extends AMP.BaseElement {
     }
     return css;
   }
-
-  /**
-   * Add fonts from the ad metaData block to the host document head (if
-   * they're not already present there).
-   * @param {!CreativeMetaDataDef} metaData Reserialization metadata object.
-   * @private
-   */
-  relocateFonts_(metaData) {
-    if (!metaData.customStylesheets) {
-      return;
-    }
-    metaData.customStylesheets.forEach(s => {
-      // TODO(tdrl): How to test for existence already?
-      const doc = this.element.ownerDocument;
-      const linkElem = doc.createElement('link');
-      for (const attr in s) {
-        if (s.hasOwnProperty(attr)) {
-          linkElem.setAttribute(attr, s[attr]);
-        }
-      }
-      doc.head.appendChild(linkElem);
-      this.stylesheets_.push(linkElem);
-    });
-  }
 }
-
