@@ -50,7 +50,7 @@ let ReplacementDef;
 
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
- * @param {string|null|undefined}
+ * @param {ResolverReturnDef} val
  * @return {string}
  */
 function encodeValue(val) {
