@@ -104,7 +104,8 @@ function getMode_(win) {
     filter: hashQuery['filter'],
     /* global process: false */
     minified: !IS_DEV || process.env.NODE_ENV == 'production',
-    // Whether document is in an amp-lite viewer.
+    // Whether document is in an amp-lite viewer. It signal that the user
+    // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: IS_DEV && !!(win.AMP_TEST || win.__karma__),
     log: hashQuery['log'],
