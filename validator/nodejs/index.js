@@ -393,6 +393,15 @@ function main() {
     program.outputHelp();
     process.exit(1);
   }
+  if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS') {
+    console.error('--html_format must be set to "AMP" or "AMP4ADS".');
+    process.exit(1);
+  }
+  if (program.format !== 'color' && program.format !== 'text' &&
+      program.format !== 'json') {
+    console.error('--format must be set to "color", "text", or "json".');
+    process.exit(1);
+  }
   var inputs = [];
   for (var ii = 0; ii < program.args.length; ii++) {
     var item = program.args[ii];
