@@ -15,6 +15,7 @@
  */
 
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
@@ -30,7 +31,9 @@ describe('amp-live-list', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    ampdoc = new AmpDocSingle(window);
     elem = document.createElement('amp-live-list');
+    elem.getAmpDoc = () => ampdoc;
     const updateSlot = document.createElement('button');
     itemsSlot = document.createElement('div');
     updateSlot.setAttribute('update', '');
