@@ -24,6 +24,7 @@ adopt(window);
 
 describe('amp-live-list', () => {
   let sandbox;
+  let ampdoc;
   let liveList;
   let elem;
   let dftAttrs;
