@@ -79,9 +79,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.descriptionBox_ = null;
 
-    /** @private {?Element} */
-    this.clickArea_ = null;
-
     /** @private  {?Element} */
     this.gallery_ = null;
 
@@ -122,9 +119,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     dev().assert(this.container_);
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('amp-lbv-desc-box');
-    this.clickArea_ = this.win.document.createElement('div');
-    this.clickArea_.classList.add('-amp-lbv-click-area');
-    this.clickArea_.addEventListener('click', () => {
+
+    // clickArea is needed above lightboxed item to get click event on top
+    const clickArea_ = this.win.document.createElement('div');
+    clickArea_.classList.add('-amp-lbv-click-area');
+    clickArea_.addEventListener('click', () => {
 
       if (!this.descriptionBox_.hasAttribute('lbv-hide')) {
         this.descriptionBox_.setAttribute('lbv-hide', '');
@@ -134,7 +133,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         this.setDescriptionBoxOpacity_(1);
       }
     });
-    this.container_.appendChild(this.clickArea_);
+    this.container_.appendChild(clickArea_);
     this.container_.appendChild(this.descriptionBox_);
   }
 
@@ -351,6 +350,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     const descText = this.manager_.getDescription(this.activeElement_);
     if (!descText) {
+      this.descriptionBox_.textContent = null;
       setStyles(this.descriptionBox_, {visibility: 'hidden'});
     } else {
       setStyles(this.descriptionBox_, {visibility: 'visible'});
