@@ -15,20 +15,43 @@
  */
 
 
-import {getFullVersion_} from '../../src/mode';
-import * as sinon from 'sinon';
+import {getFullVersion_, getMode} from '../../src/mode';
+import {parseUrl} from '../../src/url';
 
-describe('mode module', () => {
+describe('getMode', () => {
+  function getWin(url) {
+    const win = {
+      location: parseUrl(url),
+    };
+    return win;
+  }
 
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+  it('CDN - lite mode on', () => {
+    const url = 'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5&amp_lite#origin=https://www.google.com';
+    const mode = getMode(getWin(url));
+    expect(mode.lite).to.be.true;
   });
 
-  afterEach(() => {
-    sandbox.restore();
+  it('CDN - lite mode off', () => {
+    const url = 'https://cdn.ampproject.org/v/www.example.com/amp.html?amp_js_v=5#origin=https://www.google.com';
+    const mode = getMode(getWin(url));
+    expect(mode.lite).to.be.false;
   });
+
+  it('Origin - lite mode on', () => {
+    const url = 'https://www.example.com/amp.html?amp_lite';
+    const mode = getMode(getWin(url));
+    expect(mode.lite).to.be.true;
+  });
+
+  it('Origin - lite mode off', () => {
+    const url = 'https://www.example.com/amp.html';
+    const mode = getMode(getWin(url));
+    expect(mode.lite).to.be.false;
+  });
+});
+
+describe('getFullVersion_', () => {
 
   it('should default to version', () => {
     // $internalRuntimeVersion$ doesn't get replaced during test

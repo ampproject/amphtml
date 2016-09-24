@@ -16,6 +16,7 @@
 
 import {listen, listenOnce, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
+import {getMode} from '../mode';
 import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {VideoEvents, VideoAttributes} from '../video-interface';
@@ -63,7 +64,7 @@ export class VideoManager {
     // TODO(aghassemi): Remove this later. For now, VideoManager only matters
     // for autoplay videos so no point in registering arbitrary videos yet.
     if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY) ||
-        !platformSupportsAutoplay(platformFor(this.win_))) {
+        !platformSupportsAutoplay(this.win_)) {
       return;
     }
 
@@ -141,7 +142,7 @@ class VideoEntry {
 
     /** @private {boolean} */
     this.canAutoplay_ = video.element.hasAttribute(VideoAttributes.AUTOPLAY) &&
-        platformSupportsAutoplay(platformFor(win));
+        platformSupportsAutoplay(win);
 
     const element = dev().assert(video.element);
 
@@ -283,10 +284,16 @@ class VideoEntry {
 
 /**
  * Detects whether the platform even supports autoplay videos.
- * @param {!../service/platform-impl.Platform} platform
+ * @param {!Window} win
  * @return {boolean}
  */
-function platformSupportsAutoplay(platform) {
+function platformSupportsAutoplay(win) {
+  // Do not support autoplay in amp-lite viewer
+  if (getMode(win).lite) {
+    return false;
+  }
+
+  const platform = platformFor(win);
   // non-mobile platforms always supported autoplay
   if (!platform.isAndroid() && !platform.isIos()) {
     return true;
