@@ -29,7 +29,7 @@ export function installPullToRefreshBlocker(win) {
   // Only do when requested and don't even try it on Safari!
   if (viewerFor(win).getParam('p2r') == '0' &&
           platformFor(win).isChrome()) {
-    new PullToRefreshBlocker(win.document, viewportForDoc(win.document));//XXXX: why viewport is needed?
+    new PullToRefreshBlocker(win.document, viewportForDoc(win.document));
   }
 }
 

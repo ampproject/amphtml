@@ -20,7 +20,7 @@ import {getExistingServiceForDoc} from './service';
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/viewport-impl.Viewport}
  */
-export function viewportForDoc(nodeOrDoc) {//XXX
+export function viewportForDoc(nodeOrDoc) {
   return /** @type {!./service/viewport-impl.Viewport} */ (
       getExistingServiceForDoc(nodeOrDoc, 'viewport'));
 }

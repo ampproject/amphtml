@@ -33,8 +33,10 @@ export class ValidationBubble {
     /** @private @const {string} */
     this.id_ = id;
 
+    // TODO(dvoytenko): Switch away from viewport for this class. Or migrate
+    // to ampdoc.
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportForDoc(win.document);//XXX: why viewport needed at all?
+    this.viewport_ = viewportForDoc(win.document);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
