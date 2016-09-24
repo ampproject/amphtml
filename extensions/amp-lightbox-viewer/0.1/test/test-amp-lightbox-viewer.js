@@ -158,6 +158,36 @@ describe('amp-lightbox-viewer', () => {
       });
     });
 
+    it('should show detailed description correctly', () => {
+      return getAmpLightboxViewer(autoLightbox).then(viewer => {
+        const impl = viewer.implementation_;
+        return impl.activate({source: item1}).then(() => {
+          assertLightboxed(item1, impl, true, /*closed*/ false);
+          const clickArea = viewer.querySelector('.-amp-lbv-click-area');
+          const descriptionBox = viewer.querySelector('.amp-lbv-desc-box');
+          const button = viewer.querySelector('.amp-lbv-button-next');
+          expect(clickArea).to.not.be.null;
+          expect(descriptionBox).to.not.be.null;
+          expect(descriptionBox.style.opacity).to.equal('1');
+          expect(descriptionBox.textContent).to.equal('test-text');
+          // test click button won't toggle description box
+          button.dispatchEvent(new Event('click'));
+          expect(descriptionBox.style.opacity).to.equal('1');
+          // test click on screen will hide description
+          clickArea.dispatchEvent(new Event('click'));
+          expect(descriptionBox.style.opacity).to.equal('0');
+          // test no content will set description box visibility
+          impl.updateViewer_(item2);
+          expect(descriptionBox.style.visibility).to.equal('hidden');
+          // test switching items
+          impl.updateViewer_(item4);
+          expect(descriptionBox.style.visibility).to.equal('visible');
+          expect(descriptionBox.textContent).to.equal('test-text2');
+          expect(descriptionBox.style.opacity).to.equal('0');
+        });
+      });
+    });
+
     it('should create gallery with thumbnails', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
@@ -217,6 +247,7 @@ describe('amp-lightbox-viewer', () => {
     if (!autoLightbox) {
       item1.setAttribute('lightbox', '');
     }
+    item1.setAttribute('aria-describedby', 'test-text');
 
     item2 = doc.createElement('blockquote');
     item2.setAttribute('lightbox', '');
@@ -227,6 +258,7 @@ describe('amp-lightbox-viewer', () => {
     }
 
     item4 = createImage();
+    item4.setAttribute('alt', 'test-text2');
     if (!autoLightbox) {
       item4.setAttribute('lightbox', '');
     }
