@@ -189,6 +189,7 @@ function compile(entryModuleFilenames, outputDir,
       );
       unneededFiles.push(
           'build/fake-module/src/polyfills.js',
+          'build/fake-module/src/polyfills/document-contains.js',
           'build/fake-module/src/polyfills/promise.js',
           'build/fake-module/src/polyfills/math-sign.js');
     }
@@ -252,12 +253,8 @@ function compile(entryModuleFilenames, outputDir,
           'third_party/webcomponentsjs/',
           'node_modules/',
           'build/patched-module/',
-          // TODO: The following three are whitelisted only because they're
-          // blocking an unrelated PR.  But they appear to contain real type
-          // errors and should be fixed at some point.
-          'src/service.js',
+          // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
-          'src/document-state.js',
         ],
         jscomp_error: [],
       }
@@ -323,11 +320,17 @@ function patchRegisterElement() {
     file = fs.readFileSync(
         'node_modules/document-register-element/build/' +
         'document-register-element.node.js').toString();
-    // CommonJS support for closure does not wrap the module
-    // and inject `global` like browserify and other node module loaders
-    // so we nee to change this to `self` or `window`.
-    file = file.replace('installCustomElements(global);',
-        'installCustomElements(self);');
+    if (argv.fortesting) {
+      // Need to switch global to self since closure doesn't wrap the module
+      // like CommonJS
+      file = file.replace('installCustomElements(global);',
+          'installCustomElements(self);');
+    } else {
+      // Get rid of the side effect the module has so we can tree shake it
+      // better and control installation, unless --fortesting flag
+      // is passed since we also treat `--fortesting` mode as "dev".
+      file = file.replace('installCustomElements(global);', '');
+    }
     // Closure Compiler does not generate a `default` property even though
     // to interop CommonJS and ES6 modules. This is the same issue typescript
     // ran into here https://github.com/Microsoft/TypeScript/issues/2719
