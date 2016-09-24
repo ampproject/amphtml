@@ -40,7 +40,6 @@ describe('getMode', () => {
 
   it('Origin - lite mode on', () => {
     const url = 'https://www.example.com/amp.html?amp_lite';
-    const win = getWin(url);
     const mode = getMode(getWin(url));
     expect(mode.lite).to.be.true;
   });
