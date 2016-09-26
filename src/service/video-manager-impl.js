@@ -145,7 +145,7 @@ class VideoEntry {
 
     const element = dev().assert(video.element);
 
-    listenOncePromise(element, VideoEvents.CANPLAY)
+    listenOncePromise(element, VideoEvents.LOAD)
       .then(() => this.videoLoaded_());
 
     // Currently we only register after video player is build.
