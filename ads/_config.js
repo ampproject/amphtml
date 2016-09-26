@@ -33,6 +33,7 @@ export const adPrefetch = {
   adstir: 'https://js.ad-stir.com/js/adstir_async.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   aduptech: 'https://s.d.adup-tech.com/jsapi',
+  affiliateb: 'https://track.affiliate-b.com/amp/a.js',
   amoad: [
     'https://j.amoad.com/js/a.js',
     'https://j.amoad.com/js/n.js',
