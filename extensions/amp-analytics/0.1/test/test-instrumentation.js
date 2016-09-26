@@ -283,17 +283,35 @@ describe('amp-analytics.instrumentation', function() {
     ins.addListener({'on': 'timer', 'timerSpec': {'interval': 15}}, fn2);
     expect(fn2.callCount).to.equal(1);
 
+    const fn3 = sandbox.stub();
+    ins.addListener({
+      'on': 'timer', 'timerSpec': {'interval': 10, 'immediate': false},
+    }, fn3);
+    expect(fn3.callCount).to.equal(0);
+
+    const fn4 = sandbox.stub();
+    ins.addListener({
+      'on': 'timer', 'timerSpec': {'interval': 15, 'immediate': false},
+    }, fn4);
+    expect(fn4.callCount).to.equal(0);
+
     clock.tick(10 * 1000); // 10 seconds
     expect(fn1.callCount).to.equal(2);
     expect(fn2.callCount).to.equal(1);
+    expect(fn3.callCount).to.equal(1);
+    expect(fn4.callCount).to.equal(0);
 
     clock.tick(10 * 1000); // 20 seconds
     expect(fn1.callCount).to.equal(3);
     expect(fn2.callCount).to.equal(2);
+    expect(fn3.callCount).to.equal(2);
+    expect(fn4.callCount).to.equal(1);
 
     clock.tick(10 * 1000); // 30 seconds
     expect(fn1.callCount).to.equal(4);
     expect(fn2.callCount).to.equal(3);
+    expect(fn3.callCount).to.equal(3);
+    expect(fn4.callCount).to.equal(2);
   });
 
   it('stops firing after the maxTimerLength is exceeded', () => {
