@@ -360,7 +360,7 @@ export class AccessService {
    */
   buildUrl_(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
-      return this.urlReplacements_.expand(url, vars);
+      return this.urlReplacements_.expandAsync(url, vars);
     });
   }
 
@@ -416,9 +416,7 @@ export class AccessService {
     }
 
     this.toggleTopClass_('amp-access-loading', true);
-    const startPromise = isExperimentOn(this.win, 'no-auth-in-prerender')
-        ? this.viewer_.whenFirstVisible()
-        : Promise.resolve();
+    const startPromise = this.viewer_.whenFirstVisible();
     const responsePromise = startPromise.then(() => {
       return this.adapter_.authorize();
     }).catch(error => {

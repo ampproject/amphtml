@@ -47,6 +47,7 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
+  'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
@@ -93,7 +94,6 @@ var forbiddenTerms = {
         'dist.3p/current/integration.js',
     whitelist: [
       'src/mode.js',
-      '3p/integration.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -404,12 +404,6 @@ var forbiddenTerms = {
       'src/error.js',
     ],
   },
-  '(doc[^.]*)\\.contains': {
-    message: 'Use dom.documentContains API.',
-    whitelist: [
-      'src/dom.js',
-    ],
-  },
   'getUnconfirmedReferrerUrl': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
@@ -422,6 +416,12 @@ var forbiddenTerms = {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
       'src/log.js',
+    ],
+  },
+  '\\.schedulePass\\(': {
+    message: 'schedulePass is heavy, thinking twice before using it',
+    whitelist: [
+      'src/service/resources-impl.js',
     ],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
@@ -517,6 +517,7 @@ var forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     whitelist: [
       'src/element-stub.js',
+      'src/friendly-iframe-embed.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -546,6 +547,7 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'src/base-element.js',
       'src/event-helper.js',
+      'src/friendly-iframe-embed.js',
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-ad/0.1/amp-ad-api-handler.js',

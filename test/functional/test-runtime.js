@@ -24,6 +24,7 @@ import {
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
@@ -52,7 +53,7 @@ describe('runtime', () => {
     win = {
       localStorage: {},
       AMP: [],
-      location: 'https://acme.com/',
+      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
       addEventListener: () => {},
       document: window.document,
       history: {},
@@ -321,6 +322,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       expect(installStylesStub.callCount).to.equal(1);
       expect(installStylesStub.calledWithExactly(
@@ -464,6 +466,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       // Register is called immediately as well.
       expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))

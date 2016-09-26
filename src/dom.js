@@ -18,6 +18,16 @@ import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
 
+const HTML_ESCAPE_CHARS = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '`': '&#x60;',
+};
+const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -53,6 +63,8 @@ export function waitForChild(parent, checkFunc, callback) {
 
 /**
  * Waits for document's body to be available.
+ * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
+ * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
@@ -70,39 +82,6 @@ export function waitForBodyPromise(doc) {
   return new Promise(resolve => {
     waitForBody(doc, resolve);
   });
-}
-
-
-/**
- * Whether the element is currently contained in the DOM. Polyfills
- * `document.contains()` method when necessary. Notice that according to spec
- * `document.contains` is inclusionary.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- */
-export function documentContains(doc, element) {
-  if (!doc.contains) {
-    return documentContainsPolyfillInternal_(doc, element);
-  }
-  return doc.contains(element);
-}
-
-
-/**
- * Polyfill for `document.contains()` method.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- * @private Visible for testing only.
- */
-export function documentContainsPolyfillInternal_(doc, element) {
-  // Per spec, "contains" method is inclusionary
-  // i.e. `node.contains(node) == true`. However, we still need to test
-  // equality to the document itself.
-  return element == doc || doc.documentElement.contains(element);
 }
 
 
@@ -294,13 +273,13 @@ export function childNodes(parent, callback) {
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let scopeSelectorSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setScopeSelectorSupportedForTesting(val) {
   scopeSelectorSupported = val;
@@ -543,4 +522,25 @@ export function escapeCssSelectorIdent(win, ident) {
   }
   // Polyfill.
   return cssEscape(ident);
+}
+
+
+/**
+ * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
+ * @param {string} text
+ * @return {string}
+ */
+export function escapeHtml(text) {
+  if (!text) {
+    return text;
+  }
+  return text.replace(HTML_ESCAPE_REGEX, escapeHtmlChar);
+}
+
+/**
+ * @param {string} c
+ * @return string
+ */
+function escapeHtmlChar(c) {
+  return HTML_ESCAPE_CHARS[c];
 }

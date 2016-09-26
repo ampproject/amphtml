@@ -190,7 +190,7 @@ describe('amp-analytics', function() {
                 analytics.win);
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
-              return '_' + name.toLowerCase() + '_';
+              return {sync: '_' + name.toLowerCase() + '_'};
             });
             const encodeVars = analytics.encodeVars_;
             sandbox.stub(analytics, 'encodeVars_', function(val, name) {

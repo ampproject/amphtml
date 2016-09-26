@@ -25,7 +25,7 @@ import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
-import {adPrefetch, adPreconnect} from '../../../ads/_config';
+import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -93,13 +93,18 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
-    /** {!string} */
-    this.adType = this.element.getAttribute('type');
+    const adType = this.element.getAttribute('type');
+    /** {!Object} */
+    this.config = adConfig[adType];
+    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
 
     setupA2AListener(this.win);
 
-    /** @private {?Element|undefined} */
+    /** @private {?string|undefined} */
     this.container_ = undefined;
+
+    /** @private {?Promise} */
+    this.layoutPromise_ = null;
   }
 
   /**
@@ -109,19 +114,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
-    const prefetch = adPrefetch[this.adType];
-    const preconnect = adPreconnect[this.adType];
-    if (typeof prefetch == 'string') {
-      this.preconnect.preload(prefetch, 'script');
-    } else if (prefetch) {
-      prefetch.forEach(p => {
+    if (typeof this.config.prefetch == 'string') {
+      this.preconnect.preload(this.config.prefetch, 'script');
+    } else if (this.config.prefetch) {
+      this.config.prefetch.forEach(p => {
         this.preconnect.preload(p, 'script');
       });
     }
-    if (typeof preconnect == 'string') {
-      this.preconnect.url(preconnect, onLayout);
-    } else if (preconnect) {
-      preconnect.forEach(p => {
+    if (typeof this.config.preconnect == 'string') {
+      this.preconnect.url(this.config.preconnect, onLayout);
+    } else if (this.config.preconnect) {
+      this.config.preconnect.forEach(p => {
         this.preconnect.url(p, onLayout);
       });
     }
@@ -176,24 +179,24 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.iframe_) {
-      user().assert(!this.isInFixedContainer_,
-          '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
-      incrementLoadingAds(this.win);
-      return getAdCid(this).then(cid => {
-        const opt_context = {
-          clientId: cid || null,
-          container: this.container_ ? this.container_.tagName : null,
-        };
-        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element, null, opt_context);
-        this.apiHandler_ = new AmpAdApiHandler(
-            this, this.element, this.boundNoContentHandler_);
-        return this.apiHandler_.startUp(this.iframe_, true);
-      });
+    if (this.layoutPromise_) {
+      return this.layoutPromise_;
     }
-    return this.loadPromise(this.iframe_);
+    user().assert(!this.isInFixedContainer_,
+        '<amp-ad> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element);
+    incrementLoadingAds(this.win);
+    return this.layoutPromise_ = getAdCid(this).then(cid => {
+      const opt_context = {
+        clientId: cid || null,
+        container: this.container_,
+      };
+      this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+          this.element, null, opt_context);
+      this.apiHandler_ = new AmpAdApiHandler(
+          this, this.element, this.boundNoContentHandler_);
+      return this.apiHandler_.startUp(this.iframe_, true);
+    });
   }
 
   /** @override  */
@@ -240,6 +243,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.layoutPromise_ = null;
     if (!this.iframe_) {
       return true;
     }

@@ -15,14 +15,16 @@
  */
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
-import {ampdocFor} from '../../src/ampdoc';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {
   copyRuntimeStylesToShadowRoot,
   createShadowEmbedRoot,
   createShadowRoot,
+  getShadowRootNode,
   importShadowBody,
   installStylesForShadowRoot,
   isShadowDomSupported,
+  isShadowRoot,
   scopeShadowCss,
   setShadowDomSupportedForTesting,
 } from '../../src/shadow-embed';
@@ -38,6 +40,7 @@ describe('shadow-embed', () => {
   });
 
   afterEach(() => {
+    setShadowDomSupportedForTesting(undefined);
     sandbox.restore();
   });
 
@@ -71,10 +74,6 @@ describe('shadow-embed', () => {
         if (scenario == 'polyfill') {
           setShadowDomSupportedForTesting(false);
         }
-      });
-
-      afterEach(() => {
-        setShadowDomSupportedForTesting(undefined);
       });
 
       it('should transform CSS installStylesForShadowRoot', () => {
@@ -153,6 +152,63 @@ describe('shadow-embed', () => {
     });
   });
 
+  describe('isShadowRoot', () => {
+
+    it('should yield false for non-nodes', () => {
+      expect(isShadowRoot(null)).to.be.false;
+      expect(isShadowRoot(undefined)).to.be.false;
+      expect(isShadowRoot('')).to.be.false;
+      expect(isShadowRoot(11)).to.be.false;
+    });
+
+    it('should yield false for other types of nodes', () => {
+      expect(isShadowRoot(document.createElement('div'))).to.be.false;
+      expect(isShadowRoot(document.createTextNode('abc'))).to.be.false;
+    });
+
+    it('should yield true for natively-supported createShadowRoot API', () => {
+      const element = document.createElement('div');
+      if (element.createShadowRoot) {
+        const shadowRoot = element.createShadowRoot();
+        expect(isShadowRoot(shadowRoot)).to.be.true;
+      }
+    });
+
+    it('should yield false for document-fragment non-shadow-root node', () => {
+      const fragment = document.createDocumentFragment();
+      expect(isShadowRoot(fragment)).to.be.false;
+    });
+
+    it('should yield true for polyfill', () => {
+      expect(isShadowRoot(document.createElement(
+          'i-amp-shadow-root'))).to.be.true;
+    });
+  });
+
+  describe('getShadowRootNode', () => {
+    let content, host, shadowRoot;
+
+    beforeEach(() => {
+      host = document.createElement('div');
+      shadowRoot = createShadowRoot(host);
+      content = document.createElement('span');
+      shadowRoot.appendChild(content);
+    });
+
+    it('should find itself as the root node', () => {
+      expect(getShadowRootNode(shadowRoot)).to.equal(shadowRoot);
+    });
+
+    it('should find the root node from ancestors', () => {
+      expect(getShadowRootNode(content)).to.equal(shadowRoot);
+    });
+
+    it('should find the root node via polyfill', () => {
+      setShadowDomSupportedForTesting(false);
+      expect(getShadowRootNode(content)).to.equal(shadowRoot);
+    });
+  });
+
   describe('createShadowEmbedRoot', () => {
     let extensionsMock;
     let hostElement;
@@ -176,7 +232,7 @@ describe('shadow-embed', () => {
       style.setAttribute('amp-runtime', '');
       root.appendChild(style);
       const ampdoc = new AmpDocShadow(window, 'https://a.org/', root);
-      const ampdocService = ampdocFor(window);
+      const ampdocService = ampdocServiceFor(window);
       sandbox.stub(ampdocService, 'getAmpDoc', () => ampdoc);
     });
 

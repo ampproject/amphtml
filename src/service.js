@@ -39,6 +39,7 @@ let ServiceHolderDef;
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
+  win = getTopWindow(win);
   const exists = win.services && win.services[id] && win.services[id].obj;
   return dev().assert(exists, `${id} service not found. Make sure it is ` +
       `installed.`);
@@ -68,13 +69,14 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):T} opt_factory Should create the service
+ * @param {function(!Window):T=} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
  *     if the service does not exist yet.
  * @template T
  * @return {T}
  */
 export function getService(win, id, opt_factory) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id,
       opt_factory ? opt_factory : undefined);
 }
@@ -89,6 +91,7 @@ export function getService(win, id, opt_factory) {
  * @template T
  */
 export function fromClass(win, id, constructor) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id, undefined, constructor);
 }
 
@@ -101,7 +104,7 @@ export function fromClass(win, id, constructor) {
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @return {!Promise<*>}
+ * @return {!Promise<!Object>}
  */
 export function getServicePromise(win, id) {
   return getServicePromiseInternal(win, id);
@@ -111,7 +114,7 @@ export function getServicePromise(win, id) {
  * Like getServicePromise but returns null if the service was never registered.
  * @param {!Window} win
  * @param {string} id of the service.
- * @return {?Promise<*>}
+ * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNull(win, id) {
   return getServicePromiseOrNullInternal(win, id);
@@ -123,10 +126,11 @@ export function getServicePromiseOrNull(win, id) {
  * expected to return the service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(!AmpDoc):!Object=} opt_factory Should create the service
- *     if it does not exist yet. If the factory is not given, it is an error
- *     if the service does not exist yet.
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!T=} opt_factory
+ *     Should create the service if it does not exist yet. If the factory is
+ *     not given, it is an error if the service does not exist yet.
  * @return {*}
+ * @template T
  */
 export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
   const ampdoc = getAmpdoc(nodeOrDoc);
@@ -140,7 +144,7 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
 /**
  * Returns a service and registers it given a class to be used as
  * implementation.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {function(new:T, !./service/ampdoc-impl.AmpDoc)} constructor
  * @return {T}
@@ -162,7 +166,7 @@ export function fromClassForDoc(nodeOrDoc, id, constructor) {
  * the implementation loaded.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @return {!Promise<*>}
+ * @return {!Promise<!Object>}
  */
 export function getServicePromiseForDoc(nodeOrDoc, id) {
   return getServicePromiseInternal(
@@ -175,7 +179,7 @@ export function getServicePromiseForDoc(nodeOrDoc, id) {
  * registered for this ampdoc.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @return {?Promise<*>}
+ * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
   return getServicePromiseOrNullInternal(
@@ -184,13 +188,61 @@ export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
 }
 
 /**
+ * Set the parent and top windows on a child window (friendly iframe).
+ * @param {!Window} win
+ * @param {!Window} parentWin
+ */
+export function setParentWindow(win, parentWin) {
+  win.__AMP_PARENT = parentWin;
+  win.__AMP_TOP = getTopWindow(parentWin);
+}
+
+/**
+ * Returns the parent window for a child window (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getParentWindow(win) {
+  return win.__AMP_PARENT || win;
+}
+
+/**
+ * Returns the top window where AMP Runtime is installed for a child window
+ * (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getTopWindow(win) {
+  return win.__AMP_TOP || win;
+}
+
+/**
+ * Returns the parent "friendly" iframe if the node belongs to a child window.
+ * @param {!Node} node
+ * @param {!Window} topWin
+ * @return {?HTMLIFrameElement}
+ */
+export function getParentWindowFrameElement(node, topWin) {
+  const childWin = (node.ownerDocument || node).defaultView;
+  if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
+    try {
+      return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
+    } catch (e) {
+      // Ignore the error.
+    }
+  }
+  return null;
+}
+
+/**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
 function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    const win = (nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
-    return getAmpdocService(win).getAmpDoc(nodeOrDoc);
+    const win = /** @type {!Document} */ (
+        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }
@@ -217,14 +269,16 @@ function getAmpdocService(win) {
 
 /**
  * @param {!Object} holder Object holding the service instance.
- * @param {!Object} context Win or AmpDoc.
+ * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {!Function=} opt_factory Should create the service
- *     if it does not exist yet. If the factory is not given, it is an error
- *     if the service does not exist yet. Called with context.
- * @param {!Function} opt_constructor Constructor function to new the service.
+ * @param {function(!Window):T|function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
+ *     Should create the service if it does not exist yet. If the factory
+ *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
+ * @param {function(new:T, !Window)|function(new:T, !./service/ampdoc-impl.AmpDoc)=} opt_constructor
+ *     Constructor function to new the service. Called with context.
  * @return {*}
+ * @template T
  */
 function getServiceInternal(holder, context, id, opt_factory,
     opt_constructor) {
@@ -256,7 +310,7 @@ function getServiceInternal(holder, context, id, opt_factory,
 /**
  * @param {!Object} holder
  * @param {string} id of the service.
- * @return {!Promise<*>}
+ * @return {!Promise<!Object>}
  */
 function getServicePromiseInternal(holder, id) {
   const cached = getServicePromiseOrNullInternal(holder, id);
@@ -283,7 +337,7 @@ function getServicePromiseInternal(holder, id) {
 /**
  * @param {!Object} holder
  * @param {string} id of the service.
- * @return {?Promise<*>}
+ * @return {?Promise<!Object>}
  */
 function getServicePromiseOrNullInternal(holder, id) {
   const services = getServices(holder);
