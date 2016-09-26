@@ -36,13 +36,13 @@
  * }
  */
 export const adConfig = {
-  _ping_: {
-    renderStartImplemented: true,
-  },
-
   '4w': {},
 
   '4wppn': {},
+
+  _ping_: {
+    renderStartImplemented: true,
+  },
 
   a9: {
     prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
