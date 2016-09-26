@@ -108,6 +108,7 @@ export function installVideo(win) {
         this.video_.appendChild(child);
       });
 
+      // loadPromise for media elements listens to `loadstart`
       return this.loadPromise(this.video_).then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
       });
