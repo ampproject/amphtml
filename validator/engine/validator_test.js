@@ -337,10 +337,4 @@ describe('CssLengthAndUnit', () => {
             new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ true);
         expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(true);}
   });
-
-  // Introduce an additional test which doesn't fail. So, we should
-  // see that the validator tests execute and pass.
-  it('passes', () => {
-    expect(true).toBe(true);
-  });
 });

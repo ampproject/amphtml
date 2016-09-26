@@ -328,8 +328,4 @@ describe('HistoryBindingVirtual', () => {
       expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(0);
     });
   });
-
-  it('should fail', () => {
-    expect(false).toBe(false);
-  });
 });
