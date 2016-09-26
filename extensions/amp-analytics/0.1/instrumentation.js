@@ -490,10 +490,15 @@ export class InstrumentationService {
    * @private
    */
   createTimerListener_(listener, timerSpec) {
-    const intervalId = this.win_.setInterval(
-        listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
-        timerSpec['interval'] * 1000);
-    listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
+    const viewer = this.viewer_;
+    const intervalId = this.win_.setInterval(() => {
+      const vars = {};
+      vars['backgrounded'] = viewer.isVisible() ? '0' : '1';
+      listener(new AnalyticsEvent(AnalyticsEventType.TIMER, vars));
+    }, timerSpec['interval'] * 1000);
+    const vars = {};
+    vars['backgrounded'] = viewer.isVisible() ? '0' : '1';
+    listener(new AnalyticsEvent(AnalyticsEventType.TIMER, vars));
 
     const maxTimerLength = timerSpec['maxTimerLength'] ||
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
@@ -510,3 +515,4 @@ export function instrumentationServiceFor(window) {
   return fromClass(window, 'amp-analytics-instrumentation',
       InstrumentationService);
 }
+
