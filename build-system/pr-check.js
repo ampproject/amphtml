@@ -63,6 +63,8 @@ function execOrDie(cmd) {
   const p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
+    console /*OK*/.error(
+        `\npr-check.js - exiting due to failing command: ${cmd}\n`);
     process.exit(p.status)
   }
 }
@@ -133,7 +135,7 @@ function determineBuildTargets(filePaths) {
  */
 function main(argv) {
   if (argv.length <= 2) {
-    console/*OK*/.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
+    console /*OK*/.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
     return -1;
   }
   const travisCommitRange = argv[2];
@@ -145,8 +147,9 @@ function main(argv) {
   }
   sortedBuildTargets.sort();
 
-  console/*OK*/.log('\npr-check.js: detected build targets: ' +
-      sortedBuildTargets.join(' ') + '\n');
+  console /*OK*/.log(
+      '\npr-check.js: detected build targets: ' +
+      sortedBuildTargets.join(', ') + '\n');
 
   execOrDie('npm run ava');
   execOrDie('gulp lint');
