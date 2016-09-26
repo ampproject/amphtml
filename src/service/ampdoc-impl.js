@@ -106,6 +106,12 @@ export class AmpDocService {
    * @return {!AmpDoc}
    */
   getAmpDoc(opt_node) {
+    // Ensure that node is attached if specified.
+    if (opt_node) {
+      dev().assert(opt_node.ownerDocument.contains(opt_node),
+          'The node must be attached to request ampdoc.');
+    }
+
     // Single document: return it immediately.
     if (this.singleDoc_) {
       return this.singleDoc_;
