@@ -1,1 +1,2 @@
 PASS
+feature_tests/spec_example.html:59:7 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/amp-ad.html) [DEPRECATION]

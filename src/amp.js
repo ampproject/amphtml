@@ -21,7 +21,7 @@
 import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {installGlobalClickListener} from './document-click';
+import {installGlobalClickListenerForDoc} from './document-click';
 import {installStyles, makeBodyVisible} from './style-installer';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
@@ -68,10 +68,10 @@ try {
       stubElements(self);
 
       installPullToRefreshBlocker(self);
-      installGlobalClickListener(self);
+      installGlobalClickListenerForDoc(ampdoc);
 
       maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForExtensions */ true);
+      makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);
     } catch (e) {
       makeBodyVisible(self.document);

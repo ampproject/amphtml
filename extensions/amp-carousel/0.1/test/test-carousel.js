@@ -15,6 +15,7 @@
  */
 
 import {AmpCarousel} from '../carousel';
+import {resourcesForDoc} from '../../../../src/resources';
 import * as sinon from 'sinon';
 
 
@@ -176,6 +177,7 @@ describe('Carousel layout scheduling and viewport updates', () => {
     element.style.width = '320px';
     element.style.height = '200px';
     document.body.appendChild(element);
+    element.getResources = () => resourcesForDoc(element);
 
     element.appendChild(cell0 = document.createElement('div'));
     element.appendChild(cell1 = document.createElement('div'));

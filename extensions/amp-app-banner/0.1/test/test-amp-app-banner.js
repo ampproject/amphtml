@@ -27,7 +27,7 @@ import {
 } from '../amp-app-banner';
 
 import {xhrFor} from '../../../../src/xhr';
-import {installStorageService} from '../../../amp-analytics/0.1/storage-impl';
+import {installStorageService} from '../../../../src/service/storage-impl';
 import '../../../amp-analytics/0.1/amp-analytics';
 import {timerFor} from '../../../../src/timer';
 
@@ -346,6 +346,7 @@ describe('amp-app-banner', () => {
         sandbox.stub(vsync, 'run', runTask);
         const element = doc.createElement('div');
         element.id = 'banner1';
+        element.getAmpDoc = () => iframe.ampdoc;
         doc.body.appendChild(element);
         const banner = new AbstractAppBanner(element);
         banner.addDismissButton_();

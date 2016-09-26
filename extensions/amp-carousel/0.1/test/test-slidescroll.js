@@ -32,7 +32,7 @@ describe('SlideScroll', () => {
     sandbox.restore();
   });
 
-  function getAmpSlideScroll(opt_hasLooping) {
+  function getAmpSlideScroll(opt_hasLooping, opt_slideCount = 5) {
     return createIframePromise().then(iframe => {
       toggleExperiment(iframe.win, 'amp-slidescroll', true);
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -48,7 +48,7 @@ describe('SlideScroll', () => {
         ampSlideScroll.setAttribute('loop', '');
       }
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < opt_slideCount; i++) {
         const img = document.createElement('amp-img');
         ampSlideScroll.setAttribute('src', imgUrl);
         ampSlideScroll.setAttribute('width', '400');
@@ -66,7 +66,7 @@ describe('SlideScroll', () => {
     });
   }
 
-  it('should create container and wrappers and show intial slides', () => {
+  it('should create container and wrappers and show initial slides', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
       expect(
@@ -75,6 +75,9 @@ describe('SlideScroll', () => {
       expect(
           ampSlideScroll.querySelectorAll(
             '.-amp-slides-container > .-amp-slide-item').length).to.equal(5);
+      expect(
+          ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)
+              .to.equal(5);
       const impl = ampSlideScroll.implementation_;
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -465,6 +468,23 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should custom snap to the correct slide - special case', () => {
+    return getAmpSlideScroll(null, 2).then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const animateScrollLeftSpy = sandbox.spy(impl, 'animateScrollLeft_');
+      impl.slideWidth_ = 400;
+
+      impl.customSnap_(0, 1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 400);
+
+      impl.showSlide_(1);
+
+      impl.customSnap_(400, -1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 0);
+    });
+  });
+
   it('should handle custom elastic scroll', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
@@ -491,6 +511,27 @@ describe('SlideScroll', () => {
       impl.previousScrollLeft_ = 410;
       impl.handleCustomElasticScroll_(405);
       expect(customSnapSpy).to.have.been.calledWith(405);
+    });
+  });
+
+  it('should handle layout measures (orientation changes)', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const getLayoutWidthSpy = sandbox.stub(impl, 'getLayoutWidth', () => {
+        return impl.slideWidth_ == 400 ? 200 : 400;
+      });
+      impl.slideIndex_ = null;
+      impl.onLayoutMeasure();
+      expect(getLayoutWidthSpy).to.have.been.called;
+      expect(impl.slideWidth_).to.equal(400);
+
+      impl.showSlide_(1);
+      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(400);
+      impl.onLayoutMeasure();
+      expect(getLayoutWidthSpy.callCount).to.equal(2);
+      expect(impl.slideWidth_).to.equal200;
+      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
     });
   });
 

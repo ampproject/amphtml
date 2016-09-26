@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -76,6 +76,8 @@ The reasons for this policy are that:
 ### src, srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy
 
 The attributes above should all behave like they do on standard iframes.
+
+If `frameborder` is not specified, it will be set to `0` by default.
 
 ### sandbox
 

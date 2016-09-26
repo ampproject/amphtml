@@ -37,12 +37,12 @@ import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
 import {performanceFor} from '../../../src/performance';
-import {resourcesFor} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timerFor} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 
 
@@ -131,13 +131,13 @@ export class AccessService {
     this.viewer_ = viewerFor(win);
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(win);
+    this.viewport_ = viewportForDoc(win.document);
 
     /** @private @const {!Templates} */
     this.templates_ = templatesFor(win);
 
     /** @private @const {!Resources} */
-    this.resources_ = resourcesFor(win);
+    this.resources_ = resourcesForDoc(win.document);
 
     /** @private @const {!Performance} */
     this.performance_ = performanceFor(win);
@@ -360,7 +360,7 @@ export class AccessService {
    */
   buildUrl_(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
-      return this.urlReplacements_.expand(url, vars);
+      return this.urlReplacements_.expandAsync(url, vars);
     });
   }
 
@@ -416,9 +416,7 @@ export class AccessService {
     }
 
     this.toggleTopClass_('amp-access-loading', true);
-    const startPromise = isExperimentOn(this.win, 'no-auth-in-prerender')
-        ? this.viewer_.whenFirstVisible()
-        : Promise.resolve();
+    const startPromise = this.viewer_.whenFirstVisible();
     const responsePromise = startPromise.then(() => {
       return this.adapter_.authorize();
     }).catch(error => {
@@ -622,6 +620,9 @@ export class AccessService {
    * @private
    */
   scheduleView_(timeToView) {
+    if (!this.adapter_.isPingbackEnabled()) {
+      return;
+    }
     this.reportViewPromise_ = null;
     onDocumentReady(this.win.document, () => {
       if (this.viewer_.isVisible()) {
@@ -885,6 +886,11 @@ class AccessTypeAdapterDef {
    * @return {!Promise<!JSONType>}
    */
   authorize() {}
+
+  /**
+   * @return {boolean}
+   */
+  isPingbackEnabled() {}
 
   /**
    * @return {!Promise}

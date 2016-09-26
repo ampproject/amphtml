@@ -15,7 +15,7 @@
  */
 
 import {vsyncFor} from '../../../src/vsync';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {setStyles} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
 
@@ -33,8 +33,10 @@ export class ValidationBubble {
     /** @private @const {string} */
     this.id_ = id;
 
+    // TODO(dvoytenko): Switch away from viewport for this class. Or migrate
+    // to ampdoc.
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(win);
+    this.viewport_ = viewportForDoc(win.document);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
@@ -53,6 +55,13 @@ export class ValidationBubble {
     this.bubbleElement_.classList.add('-amp-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
     win.document.body.appendChild(this.bubbleElement_);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isActiveOn(element) {
+    return this.isVisible_ && element == this.currentTargetElement_;
   }
 
   /**
@@ -82,8 +91,7 @@ export class ValidationBubble {
    * @param {string} message
    */
   show(targetElement, message) {
-    if (this.isVisible_ && targetElement == this.currentTargetElement_ &&
-        message == this.currentMessage_) {
+    if (this.isActiveOn(targetElement) && message == this.currentMessage_) {
       return;
     }
 

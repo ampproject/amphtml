@@ -23,10 +23,13 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
+import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
@@ -48,8 +51,9 @@ describe('runtime', () => {
     };
     ampdocServiceMock = sandbox.mock(ampdocService);
     win = {
+      localStorage: {},
       AMP: [],
-      location: {},
+      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
       addEventListener: () => {},
       document: window.document,
       history: {},
@@ -61,6 +65,7 @@ describe('runtime', () => {
         ampdoc: {obj: ampdocService},
       },
     };
+    installPlatformService(win);
     errorStub = sandbox.stub(dev(), 'error');
   });
 
@@ -236,11 +241,11 @@ describe('runtime', () => {
     expect(progress).to.equal('13');
 
     expect(errorStub.callCount).to.equal(1);
-    expect(errorStub.calledWith('runtime',
+    expect(errorStub).to.be.calledWith('runtime',
         sinon.match(() => true),
         sinon.match(arg => {
           return !!arg.message.match(/extension error/);
-        }))).to.be.true;
+        }));
   });
 
   describe('single-mode', () => {
@@ -317,6 +322,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       expect(installStylesStub.callCount).to.equal(1);
       expect(installStylesStub.calledWithExactly(
@@ -410,7 +416,7 @@ describe('runtime', () => {
 
     it('should register element without CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({
@@ -444,7 +450,7 @@ describe('runtime', () => {
 
     it('should register element with CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({
@@ -460,6 +466,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       // Register is called immediately as well.
       expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))
@@ -613,6 +620,10 @@ describe('runtime', () => {
       // After timeout, it becomes visible again.
       clock.tick(3000);
       expect(hostElement.style.visibility).to.equal('visible');
+
+      return ampdoc.whenReady().then(() => {
+        expect(ampdoc.isReady()).to.be.true;
+      });
     });
 
     it('should import body', () => {
@@ -626,6 +637,7 @@ describe('runtime', () => {
       expect(body).to.have.class('amp-shadow');
       expect(body.style.position).to.equal('relative');
       expect(body.querySelector('child')).to.exist;
+      expect(ampdoc.getBody()).to.exist;
     });
 
     it('should read title element', () => {

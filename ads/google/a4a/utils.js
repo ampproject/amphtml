@@ -22,7 +22,6 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
@@ -44,18 +43,20 @@ const AmpAdImplementation = {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
+ * @param {!Element} element The AMP tag element.
  * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
-export function isGoogleAdsA4AValidEnvironment(win) {
+export function isGoogleAdsA4AValidEnvironment(win, element) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
+  const multiSizeRequest = element.dataset && element.dataset.multiSize;
   // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
   // will be kept up to date with known proxies.  However, it doesn't seem to
   // be compatible with loading the example files from localhost.  To hack
   // around that, just say that we're A4A eligible if we're in local dev
   // mode, regardless of origin path.
-  return supportsNativeCrypto &&
+  return supportsNativeCrypto && !multiSizeRequest &&
       (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
 }
 
@@ -120,7 +121,7 @@ function buildAdUrl(
     };
   }
   const slotRect = a4a.getIntersectionElementLayoutBox();
-  const viewportRect = viewportFor(global).getRect();
+  const viewportRect = a4a.getViewport().getRect();
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const allQueryParams = queryParams.concat(

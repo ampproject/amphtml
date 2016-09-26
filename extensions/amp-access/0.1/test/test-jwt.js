@@ -103,16 +103,11 @@ describe('JwtHelper', () => {
         + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D\n'
         + 'o2kQ+X5xK9cipRgEKwIDAQAB\n'
         + '-----END PUBLIC KEY-----';
-    const PEM_URL = 'https://pub.com/key.pem';
-
-    let xhrMock;
 
     beforeEach(() => {
-      xhrMock = sandbox.mock(helper.xhr_);
     });
 
     afterEach(() => {
-      xhrMock.verify();
     });
 
     it('should decode and verify token correctly', () => {
@@ -120,13 +115,7 @@ describe('JwtHelper', () => {
       if (!helper.isVerificationSupported()) {
         return;
       }
-
-      xhrMock.expects('fetchText')
-          .withExactArgs(PEM_URL)
-          .returns(Promise.resolve(PEM))
-          .once();
-
-      return helper.decodeAndVerify(TOKEN, PEM_URL).then(tok => {
+      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
         expect(tok['name']).to.equal('John Do');
       });
     });
@@ -141,12 +130,7 @@ describe('JwtHelper', () => {
           + '.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG8iLCJhZG1pbiI6MH0'
           + '.' + SIG;
 
-      xhrMock.expects('fetchText')
-          .withExactArgs(PEM_URL)
-          .returns(Promise.resolve(PEM))
-          .once();
-
-      return helper.decodeAndVerify(token, PEM_URL).then(() => {
+      return helper.decodeAndVerify(token, Promise.resolve(PEM)).then(() => {
         throw new Error('must have failed');
       }, error => {
         // Expected.
@@ -162,7 +146,6 @@ describe('JwtHelper', () => {
     const TOKEN = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9'
         + '.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG8iLCJhZG1pbiI6dHJ1ZX0'
         + '.' + SIG;
-    const PEM_URL = 'https://pub.com/key.pem';
     const PEM = '-----BEGIN PUBLIC KEY-----\n'
         + 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd\n'
         + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs\n'
@@ -172,7 +155,6 @@ describe('JwtHelper', () => {
 
     let windowApi;
     let subtleMock;
-    let xhrMock;
     let helper;
 
     beforeEach(() => {
@@ -182,27 +164,19 @@ describe('JwtHelper', () => {
       };
       subtleMock = sandbox.mock(subtle);
 
-      const xhr = {
-        fetchText: () => {},
-      };
-      xhrMock = sandbox.mock(xhr);
-
       windowApi = {
         crypto: {subtle},
-        services: {
-          'xhr': {obj: xhr},
-        },
+        services: {},
       };
       helper = new JwtHelper(windowApi);
     });
 
     afterEach(() => {
-      xhrMock.verify();
       subtleMock.verify();
     });
 
     it('should fail invalid token', () => {
-      return helper.decodeAndVerify('a.b', PEM_URL).then(() => {
+      return helper.decodeAndVerify('a.b', Promise.resolve(PEM)).then(() => {
         throw new Error('Must have failed');
       }, error => {
         expect(error.message).to.match(/Invalid token/);
@@ -211,7 +185,7 @@ describe('JwtHelper', () => {
 
     it('should fail without alg', () => {
       const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiIifQ.e30.X';
-      return helper.decodeAndVerify(token, PEM_URL).then(() => {
+      return helper.decodeAndVerify(token, Promise.resolve(PEM)).then(() => {
         throw new Error('Must have failed');
       }, error => {
         expect(error.message).to.match(/Only alg=RS256 is supported/);
@@ -221,7 +195,7 @@ describe('JwtHelper', () => {
     it('should fail with wrong alg', () => {
       // HS256 used instead of RS256.
       const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.X';
-      return helper.decodeAndVerify(token, PEM_URL).then(() => {
+      return helper.decodeAndVerify(token, Promise.resolve(PEM)).then(() => {
         throw new Error('Must have failed');
       }, error => {
         expect(error.message).to.match(/Only alg=RS256 is supported/);
@@ -229,10 +203,6 @@ describe('JwtHelper', () => {
     });
 
     it('should fetch they key and verify', () => {
-      xhrMock.expects('fetchText')
-          .withExactArgs(PEM_URL)
-          .returns(Promise.resolve(PEM))
-          .once();
       const key = 'KEY';
       subtleMock.expects('importKey')
         .withExactArgs(
@@ -253,7 +223,7 @@ describe('JwtHelper', () => {
         )
         .returns(Promise.resolve(true))
         .once();
-      return helper.decodeAndVerify(TOKEN, PEM_URL).then(tok => {
+      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
         expect(tok['name']).to.equal('John Do');
       });
     });

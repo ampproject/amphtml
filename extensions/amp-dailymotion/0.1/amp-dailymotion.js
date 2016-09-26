@@ -15,17 +15,27 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 
 class AmpDailymotion extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://www.dailymotion.com', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://www.dailymotion.com', opt_onLayout);
     // Host that Dailymotion uses to serve JS needed by player.
-    this.preconnect.url('https://static1.dmcdn.net', onLayout);
+    this.preconnect.url('https://static1.dmcdn.net', opt_onLayout);
   }
 
   /** @override */
@@ -35,8 +45,6 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const videoid = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-dailymotion> %s',
@@ -48,12 +56,9 @@ class AmpDailymotion extends AMP.BaseElement {
         videoid) + '?' + this.getQuery_();
 
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @private */

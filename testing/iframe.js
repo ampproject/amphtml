@@ -18,7 +18,11 @@
 import {Timer} from '../src/timer';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
-import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+  registerForUnitTest,
+} from '../src/runtime';
 import {cssText} from '../build/css';
 
 let iframeCount = 0;
@@ -181,6 +185,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
+ *   ampdoc: !../src/service/ampdoc-impl.AmpDoc,
  *   iframe: !Element,
  *   addElement: function(!Element):!Promise
  * }>}
@@ -198,15 +203,18 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
-      installDocService(iframe.contentWindow, true);
+      const ampdocService = installDocService(iframe.contentWindow, true);
+      const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
+      installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
       resolve({
         win: iframe.contentWindow,
         doc: iframe.contentWindow.document,
+        ampdoc: ampdoc,
         iframe: iframe,
         addElement: function(element) {
           const iWin = iframe.contentWindow;

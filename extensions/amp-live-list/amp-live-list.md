@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>CONTAINER, FIXED_HEIGHT</td>
+    <td>container, fixed-height</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -194,9 +194,9 @@ should be applied to all `amp-live-list` components since the component
 will still try to insert new items if it identifies any and has no notion
 that is not on the first page.
 
-## How Server Side filtering works
+## Server Side filtering
 
-Work in Progress
+See the documentation for [Server side filtering](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
 
 ## Attributes
 

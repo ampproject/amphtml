@@ -29,6 +29,7 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {viewerFor} from '../../../src/viewer';
 import {cryptoFor} from '../../../src/crypto';
 import {user} from '../../../src/log';
@@ -238,30 +239,31 @@ function getBaseCid(cid, persistenceConsent) {
   }
   const win = cid.win;
 
-  return read(win).then(stored => {
+  return cid.baseCid_ = read(win).then(stored => {
     let needsToStore = false;
+    let baseCid;
 
     // See if we have a stored base cid and whether it is still valid
     // in terms of expiration.
     if (stored && !isExpired(stored)) {
-      cid.baseCid_ = Promise.resolve(stored.cid);
+      baseCid = Promise.resolve(stored.cid);
       if (shouldUpdateStoredTime(stored)) {
         needsToStore = true;
       }
     } else {
       // We need to make a new one.
-      cid.baseCid_ = cryptoFor(win)
+      baseCid = cryptoFor(win)
           .then(crypto => crypto.sha384Base64(getEntropy(win)));
       needsToStore = true;
     }
 
     if (needsToStore) {
-      cid.baseCid_.then(baseCid => {
+      baseCid.then(baseCid => {
         store(win, persistenceConsent, baseCid);
       });
     }
 
-    return cid.baseCid_;
+    return baseCid;
   });
 }
 
@@ -372,13 +374,12 @@ function shouldUpdateStoredTime(storedCidInfo) {
  * @return {!Uint8Array|string} Entropy.
  */
 function getEntropy(win) {
-  // Widely available in browsers we support:
-  // http://caniuse.com/#search=getRandomValues
-  if (win.crypto && win.crypto.getRandomValues) {
-    const uint8array = new Uint8Array(16);  // 128 bit
-    win.crypto.getRandomValues(uint8array);
+  // Use win.crypto.getRandomValues to get 128 bits of random value
+  const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
+  if (uint8array) {
     return uint8array;
   }
+
   // Support for legacy browsers.
   return String(win.location.href + Date.now() +
       win.Math.random() + win.screen.width + win.screen.height);

@@ -54,8 +54,6 @@ describe('amp-brightcove', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://players.brightcove.net/906043040001/default_default/index.html?videoId=ref:ampdemo');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 

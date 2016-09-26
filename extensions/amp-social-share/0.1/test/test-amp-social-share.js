@@ -105,6 +105,17 @@ describe('amp-social-share', () => {
     });
   });
 
+  it('errors if type has space characters', () => {
+    return createIframePromise().then(iframe => {
+      const share = iframe.doc.createElement('amp-social-share');
+      share.setAttribute('type', 'hello world');
+      expect(() => {
+        share.tryUpgrade_();
+        share.build(true);
+      }).to.throw('Space characters are not allowed in type attribute value');
+    });
+  });
+
   it('renders unconfigured providers if share endpoint provided', () => {
     return getCustomShare(iframe => {
       const share = iframe.doc.createElement('amp-social-share');

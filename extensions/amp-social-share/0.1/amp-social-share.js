@@ -38,6 +38,9 @@ class AmpSocialShare extends AMP.BaseElement {
   buildCallback() {
     const typeAttr = user().assert(this.element.getAttribute('type'),
         'The type attribute is required. %s', this.element);
+    user().assert(!/\s/.test(typeAttr),
+        'Space characters are not allowed in type attribute value. %s',
+        this.element);
     const typeConfig = getSocialConfig(typeAttr) || {};
 
     /** @private @const {string} */
@@ -50,7 +53,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.params_ = Object.assign({}, typeConfig.defaultParams,
         getDataParamsFromAttributes(this.element));
 
-    /** @private @const {!../../../src/platform.Platform} */
+    /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = platformFor(this.win);
 
     /** @private {string} */
@@ -61,7 +64,7 @@ class AmpSocialShare extends AMP.BaseElement {
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
     const urlReplacements = urlReplacementsFor(this.win);
-    urlReplacements.expand(hrefWithVars).then(href => {
+    urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
       // mailto: protocol breaks when opened in _blank on iOS Safari.
       const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);

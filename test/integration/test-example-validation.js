@@ -53,6 +53,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'analytics-notification.amp.html',
     'everything.amp.html',
     'facebook.amp.html',
+    'gfycat.amp.html',
     'instagram.amp.html',
     'released.amp.html',
     'soundcloud.amp.html',

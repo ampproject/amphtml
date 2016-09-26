@@ -22,7 +22,6 @@ import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
-import {installStorageService} from './storage-impl';
 import {installActivityService} from './activity-impl';
 import {installVisibilityService} from './visibility-impl';
 import {isArray, isObject} from '../../../src/types';
@@ -36,7 +35,6 @@ import {toggle} from '../../../src/style';
 installActivityService(AMP.win);
 installCidService(AMP.win);
 installCryptoService(AMP.win);
-installStorageService(AMP.win);
 installVisibilityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
@@ -242,7 +240,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
     const win = this.win;
-    return urlReplacementsFor(win).expand(remoteConfigUrl)
+    return urlReplacementsFor(win).expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
           return xhrFor(win).fetchJson(remoteConfigUrl, fetchConfig);
@@ -404,7 +402,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       Object.assign(params, this.config_['extraUrlParams'],
           trigger['extraUrlParams']);
       for (const k in params) {
-        params[k] = this.expandTemplate_(params[k], trigger, event);
+        if (typeof params[k] == 'string') {
+          params[k] = this.expandTemplate_(params[k], trigger, event);
+        }
       }
       if (request.indexOf('${extraUrlParams}') >= 0) {
         const extraUrlParams = addParamsToUrl('', params).substr(1);
@@ -418,7 +418,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     request = this.expandTemplate_(request, trigger, event);
 
     // For consistency with amp-pixel we also expand any url replacements.
-    return urlReplacementsFor(this.win).expand(request).then(request => {
+    return urlReplacementsFor(this.win).expandAsync(request).then(request => {
       this.sendRequest_(request, trigger);
       return request;
     });
@@ -443,7 +443,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
       const key = this.expandTemplate_(spec['sampleOn'], trigger);
-      const keyPromise = urlReplacementsFor(this.win).expand(key);
+      const keyPromise = urlReplacementsFor(this.win).expandAsync(key);
       const cryptoPromise = cryptoFor(this.win);
       return Promise.all([keyPromise, cryptoPromise])
           .then(results => results[1].uniform(results[0]))

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {installVsyncService} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesService} from '../amp-dynamic-css-classes';
@@ -52,9 +53,11 @@ describe('dynamic classes are inserted at runtime', () => {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
     };
+    mockWin.document.defaultView = mockWin;
   });
 
   function setup(embeded, userAgent, referrer) {
+    installPlatformService(mockWin);
     viewer = installViewerService(mockWin);
     const vsync = installVsyncService(mockWin);
 

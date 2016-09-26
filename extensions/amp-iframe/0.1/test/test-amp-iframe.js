@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import {
   AmpIframe,
   isAdLike,
@@ -25,7 +25,7 @@ import {
   createIframePromise,
   poll,
 } from '../../../../testing/iframe';
-import {viewportFor} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/viewport';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -37,7 +37,7 @@ describe('amp-iframe', () => {
   const clickableIframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-clicktoplay.html';
 
-  const timer = new Timer(window);
+  const timer = timerFor(window);
   let ranJs = 0;
   let sandbox;
 
@@ -72,7 +72,7 @@ describe('amp-iframe', () => {
         iframe.iframe.style.height = opt_height;
       }
       const top = opt_top || '600px';
-      const viewport = viewportFor(iframe.win);
+      const viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
       i.style.position = 'absolute';
       if (attributes.position) {
@@ -171,6 +171,16 @@ describe('amp-iframe', () => {
       // unsupproted attributes
       expect(amp.iframe.getAttribute('longdesc')).to.be.null;
       expect(amp.iframe.getAttribute('marginwidth')).to.be.null;
+    });
+  });
+
+  it('should default frameborder to 0 if not set', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      width: 100,
+      height: 100,
+    }).then(amp => {
+      expect(amp.iframe.getAttribute('frameborder')).to.equal('0');
     });
   });
 
@@ -539,10 +549,11 @@ describe('amp-iframe', () => {
 
   it('should correctly classify ads', () => {
     function e(width, height) {
-      const element = document.createElement('test');
-      element.setAttribute('width', width);
-      element.setAttribute('height', height);
-      return element;
+      return {
+        getIntersectionElementLayoutBox() {
+          return {width, height};
+        },
+      };
     }
     expect(isAdLike(e(300, 250))).to.be.true;
     expect(isAdLike(e(320, 270))).to.be.true;

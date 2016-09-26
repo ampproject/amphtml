@@ -21,6 +21,7 @@ import {
   getServiceForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {installTimerService} from '../../../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -157,6 +158,7 @@ describe('amp-install-serviceworker', () => {
         clearTimeout: window.clearTimeout,
         document: {nodeType: /* document */ 9},
       };
+      installTimerService(win);
       win.document.defaultView = win;
       implementation.win = win;
       documentInfo = {

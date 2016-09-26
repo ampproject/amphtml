@@ -240,7 +240,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
  * @param {string} queryString
- * @return {!Object<string, string>}
+ * @return {!Object<string>}
  */
 export function parseQueryString(queryString) {
   const params = Object.create(null);
@@ -426,10 +426,19 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
  * @return {string}
  */
 export function getCorsUrl(win, url) {
+  checkCorsUrl(url);
   const sourceOrigin = getSourceOrigin(win.location.href);
+  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+}
+
+
+/**
+ * Checks if the url have __amp_source_origin and throws if it does.
+ * @param {string} url
+ */
+export function checkCorsUrl(url) {
   const parsedUrl = parseUrl(url);
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
-  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }

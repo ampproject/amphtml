@@ -16,10 +16,13 @@
 
 import {BaseElement} from '../src/base-element';
 import {assertHttpsUrl} from '../src/url';
-import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
-import {loadPromise} from '../src/event-helper';
+import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
+import {dev} from '../src/log';
+import {platformFor} from '../src/platform';
+import {VideoEvents} from '../src/video-interface';
+import {videoManagerForDoc} from '../src/video-manager';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -27,6 +30,10 @@ import {getMode} from '../src/mode';
  * @return {undefined}
  */
 export function installVideo(win) {
+
+  /**
+   * @implements {../src/video-interface.VideoInterface}
+   */
   class AmpVideo extends BaseElement {
 
     /** @override */
@@ -36,13 +43,11 @@ export function installVideo(win) {
 
     /** @override */
     buildCallback() {
-      /** @private @const {!HTMLVideoElement} */
+      /** @private @const {!Element} */
       this.video_ = this.element.ownerDocument.createElement('video');
-      const width = this.element.getAttribute('width');
-      const height = this.element.getAttribute('height');
 
-      this.video_.width = getLengthNumeral(width);
-      this.video_.height = getLengthNumeral(height);
+      /** @private @const {!../src/service/platform-impl.Platform} */
+      this.platform_ = platformFor(this.win);
 
       const posterAttr = this.element.getAttribute('poster');
       if (!posterAttr && getMode().development) {
@@ -50,11 +55,21 @@ export function installVideo(win) {
             'No "poster" attribute has been provided for amp-video.');
       }
 
+      // Enable inline play for iOS.
+      this.video_.setAttribute('playsinline', '');
+      this.video_.setAttribute('webkit-playsinline', '');
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
+
+      videoManagerForDoc(this.win.document).register(this);
+    }
+
+    /** @override */
+    viewportCallback(visible) {
+      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
     }
 
     /** @override */
@@ -67,8 +82,11 @@ export function installVideo(win) {
       if (this.element.getAttribute('src')) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
+
+      // Do not propagate `autoplay`. Autoplay behaviour is managed by
+      // video manager since amp-video implements the VideoInterface
       this.propagateAttributes(
-          ['src', 'autoplay', 'muted', 'loop'],
+          ['src', 'loop'],
           this.video_);
 
       if (this.element.hasAttribute('preload')) {
@@ -84,12 +102,16 @@ export function installVideo(win) {
           return;
         }
         if (child.getAttribute && child.getAttribute('src')) {
-          assertHttpsUrl(child.getAttribute('src'), child);
+          assertHttpsUrl(child.getAttribute('src'),
+              dev().assertElement(child));
         }
         this.video_.appendChild(child);
       });
 
-      return loadPromise(this.video_);
+      // loadPromise for media elements listens to `loadstart`
+      return this.loadPromise(this.video_).then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
     }
 
     /** @override */
@@ -102,6 +124,57 @@ export function installVideo(win) {
     /** @private */
     isVideoSupported_() {
       return !!this.video_.play;
+    }
+
+    // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
+    /**
+     * @override
+     */
+    supportsPlatform() {
+      return this.isVideoSupported_();
+    }
+
+    /**
+     * @override
+     */
+    play(unusedIsAutoplay) {
+      this.video_.play();
+    }
+
+    /**
+     * @override
+     */
+    pause() {
+      this.video_.pause();
+    }
+
+    /**
+     * @override
+     */
+    mute() {
+      this.video_.muted = true;
+    }
+
+    /**
+     * @override
+     */
+    unmute() {
+      this.video_.muted = false;
+    }
+
+    /**
+     * @override
+     */
+    showControls() {
+      this.video_.controls = true;
+    }
+
+    /**
+     * @override
+     */
+    hideControls() {
+      this.video_.controls = false;
     }
   }
 

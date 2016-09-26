@@ -16,6 +16,7 @@
 
 import {Observable} from './observable';
 import {timerFor} from './timer';
+import {dev} from './log';
 
 
 /**
@@ -43,7 +44,7 @@ export class FocusHistory {
     /** @private @const {function(!Event)} */
     this.captureFocus_ = e => {
       if (e.target) {
-        this.pushFocus_(e.target);
+        this.pushFocus_(dev().assertElement(e.target));
       }
     };
     /** @private @const {function(!Event)} */
@@ -92,7 +93,7 @@ export class FocusHistory {
 
   /**
    * Returns the element that was focused last.
-   * @return {!Element}
+   * @return {?Element}
    */
   getLast() {
     if (this.history_.length == 0) {

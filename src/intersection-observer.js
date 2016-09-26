@@ -14,11 +14,54 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './timer';
+
+/**
+ * The structure that defines the rectangle used in intersection observers.
+ *
+ * @typedef {{
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
+ *   width: number,
+ *   height: number,
+ *   x: number,
+ *   y: number,
+ * }}
+ */
+export let DOMRect;
+
+/**
+ * Transforms a LayoutRect into a DOMRect for use in intersection observers.
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!DOMRect}
+ */
+function DomRectFromLayoutRect(rect) {
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    bottom: rect.bottom,
+    right: rect.right,
+    x: rect.left,
+    y: rect.top,
+  };
+}
+
+/**
+ * Returns the ratio of the smaller box's area to the larger box's area.
+ * @param {!./layout-rect.LayoutRectDef} smaller
+ * @param {!./layout-rect.LayoutRectDef} larger
+ * @return {number}
+ */
+function intersectionRatio(smaller, larger) {
+  return (smaller.width * smaller.height) / (larger.width * larger.height);
+}
 
 /**
  * Produces a change entry for that should be compatible with
@@ -26,42 +69,45 @@ import {timerFor} from './timer';
  *
  * Mutates passed in rootBounds to have x and y according to spec.
  *
- * @param {number} time Time when values below were measured.
- * @param {!./layout-rect.LayoutRectDef} rootBounds Equivalent to viewport.getRect()
- * @param {!./layout-rect.LayoutRectDef} elementLayoutBox Layout box of the element
- *     that may intersect with the rootBounds.
+ * @param {!./layout-rect.LayoutRectDef} element The element's layout rectangle
+ * @param {?./layout-rect.LayoutRectDef} owner The owner's layout rect, if
+ *     there is an owner.
+ * @param {!./layout-rect.LayoutRectDef} viewport The viewport's layout rect.
  * @return {!IntersectionObserverEntry} A change entry.
  * @private
  */
-export function getIntersectionChangeEntry(
-    measureTime, rootBounds, elementLayoutBox) {
+export function getIntersectionChangeEntry(element, owner, viewport) {
+  dev().assert(element.width >= 0 && element.height >= 0,
+      'Negative dimensions in element.');
   // Building an IntersectionObserverEntry.
-  // http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry
-  // These should always be equal assuming rootBounds cannot have negative
-  // dimension.
-  rootBounds.x = rootBounds.left;
-  rootBounds.y = rootBounds.top;
 
-  const boundingClientRect =
-      moveLayoutRect(elementLayoutBox, -1 * rootBounds.x, -1 * rootBounds.y);
-  dev().assert(boundingClientRect.width >= 0 &&
-      boundingClientRect.height >= 0, 'Negative dimensions in ad.');
-  boundingClientRect.x = boundingClientRect.left;
-  boundingClientRect.y = boundingClientRect.top;
-
-  const intersectionRect =
-      rectIntersection(rootBounds, elementLayoutBox) ||
+  let intersectionRect = element;
+  if (owner) {
+    intersectionRect = rectIntersection(owner, element) ||
+        // No intersection.
+        layoutRectLtwh(0, 0, 0, 0);
+  }
+  intersectionRect = rectIntersection(viewport, intersectionRect) ||
       // No intersection.
       layoutRectLtwh(0, 0, 0, 0);
-  intersectionRect.x = intersectionRect.left;
-  intersectionRect.y = intersectionRect.top;
 
-  return {
-    time: measureTime,
-    rootBounds,
-    boundingClientRect,
-    intersectionRect,
-  };
+  // The element is relative to (0, 0), while the viewport moves. So, we must
+  // adjust.
+  // TODO(jridgewell, #5149): Fixed position elements must be recalculated.
+  const boundingClientRect = moveLayoutRect(element, -viewport.left,
+      -viewport.top);
+  intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
+      -viewport.top);
+  // Now, move the viewport to (0, 0)
+  const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
+
+  return /** @type {!IntersectionObserverEntry} */ ({
+    time: Date.now(),
+    rootBounds: DomRectFromLayoutRect(rootBounds),
+    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
+    intersectionRect: DomRectFromLayoutRect(intersectionRect),
+    intersectionRatio: intersectionRatio(intersectionRect, element),
+  });
 }
 
 /**
@@ -84,18 +130,17 @@ export function getIntersectionChangeEntry(
  * Note: The IntersectionObserver would not send any data over to the iframe if
  * it had not requested the intersection data already via a postMessage.
  */
-export class IntersectionObserver extends Observable {
+export class IntersectionObserver {
   /**
    * @param {!BaseElement} element.
-   * @param {!Element} iframe Iframe element which requested the intersection
-   *    data.
+   * @param {!HTMLIFrameElement} iframe Iframe element which requested the
+   *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    */
   constructor(baseElement, iframe, opt_is3p) {
-    super();
     /** @private @const */
     this.baseElement_ = baseElement;
-    /** @private @const {!Timer} */
+    /** @private @const {!./service/timer-impl.Timer} */
     this.timer_ = timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
@@ -105,7 +150,7 @@ export class IntersectionObserver extends Observable {
     /** @private {!Array<!IntersectionObserverEntry>} */
     this.pendingChanges_ = [];
 
-    /** @private {number} */
+    /** @private {number|string} */
     this.flushTimeout_ = 0;
 
     /** @private @const {function()} */
@@ -124,13 +169,12 @@ export class IntersectionObserver extends Observable {
         // get an update.
         () => this.startSendingIntersectionChanges_());
 
-    this.init_();
+    /** @private {?Function} */
+    this.unlistenViewportChanges_ = null;
   }
 
-  init_() {
-    this.add(() => {
-      this.sendElementIntersection_();
-    });
+  fire() {
+    this.sendElementIntersection_();
   }
 
   /**
@@ -236,7 +280,7 @@ export class IntersectionObserver extends Observable {
    */
   destroy() {
     this.timer_.cancel(this.flushTimeout_);
-    this.flushTimeout_ = 0;
     this.unlistenOnOutViewport_();
+    this.postMessageApi_.destroy();
   }
 }

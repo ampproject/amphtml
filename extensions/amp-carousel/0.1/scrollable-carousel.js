@@ -16,9 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {timerFor} from '../../../src/timer';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
@@ -29,6 +27,26 @@ const TAG = 'amp-scrollable-carousel';
 
 export class AmpScrollableCarousel extends BaseCarousel {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {number} */
+    this.pos_ = 0;
+
+    /** @private {number} */
+    this.oldPos_ = 0;
+
+    /** @private {?Array<!Element>} */
+    this.cells_ = null;
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    /** @private {?number} */
+    this.scrollTimerId_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
@@ -36,15 +54,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    /** @private {number} */
-    this.pos_ = 0;
-
-    this.oldPos_ = 0;
-
-    /** @private {!Array<!Element>} */
     this.cells_ = this.getRealChildren();
 
-    /** @private {!Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
       'white-space': 'nowrap',
@@ -56,6 +67,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.cells_.forEach(cell => {
       this.setAsOwner(cell);
+      cell.classList.add('amp-carousel-slide');
       cell.style.display = 'inline-block';
       if (cell != this.cells_[0]) {
         // TODO(dvoytenko): this has to be customizable
@@ -64,12 +76,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
       this.container_.appendChild(cell);
     });
 
-    /** @private {?number} */
-    this.scrollTimerId_ = null;
-
-    const gestures =
-        Gestures.get(this.element, /* shouldNotPreventDefault */true);
-    gestures.onGesture(SwipeXRecognizer, () => {});
+    this.cancelTouchEvents_();
 
     this.container_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
@@ -120,7 +127,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const currentScrollLeft = this.container_./*OK*/scrollLeft;
     this.pos_ = currentScrollLeft;
 
-    if (this.scrollTimerId_ == null) {
+    if (this.scrollTimerId_ === null) {
       this.waitForScroll_(currentScrollLeft);
     }
   }
@@ -180,7 +187,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /**
    * @param {number} pos
-   * @param {function()} callback
+   * @param {function(!Element)} callback
    * @private
    */
   withinWindow_(pos, callback) {
@@ -250,5 +257,18 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const scrollWidth = this.container_./*OK*/scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
+  }
+
+  /**
+   * Cancels the touchmove events for the element so that viewer does not
+   * consider the swipes in the carousel as swipes for changing AMP documents.
+   * @private
+   */
+  cancelTouchEvents_() {
+    // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
+    // touchmove events.
+    this.element.addEventListener('touchmove', event => {
+      event.stopPropagation();
+    });
   }
 }

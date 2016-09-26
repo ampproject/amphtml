@@ -35,7 +35,7 @@ export class Poller {
     /** @private {function(): !Promise} */
     this.work_ = work;
 
-    /** @private {?number} */
+    /** @private {number|string|null} */
     this.lastTimeoutId_ = null;
 
     /** @private {boolean} */
@@ -45,8 +45,8 @@ export class Poller {
     this.backoffClock_ = null;
 
     /**
-     * Mostly for testing purposes.
-     * @private {!Promise}
+     * For testing purposes.
+     * @private {?Promise}
      */
     this.lastWorkPromise_ = null;
   }

@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {setStyles} from './style';
-import {waitForBody} from './dom';
+import {dev} from './log';
+import {documentStateFor} from './document-state';
 import {performanceFor} from './performance';
 import {platformFor} from './platform';
-import {waitForExtensions} from './render-delaying-extensions';
-import {dev} from './log';
+import {setStyles} from './style';
+import {waitForServices} from './render-delaying-services';
+import {resourcesForDoc} from './resources';
 
+
+const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
 
 /**
  * Adds the given css text to the given document.
@@ -38,11 +41,12 @@ import {dev} from './log';
  *     as the first element in head and all style elements will be positioned
  *     after.
  * @param {string=} opt_ext
+ * @return {!Element}
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
       doc,
-      dev().assert(doc.head),
+      dev().assertElement(doc.head),
       cssText,
       opt_isRuntimeCss || false,
       opt_ext || null);
@@ -54,7 +58,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   // Sync case.
   if (styleLoaded(doc, style)) {
     cb();
-    return;
+    return style;
   }
   // Poll until styles are available.
   const interval = setInterval(() => {
@@ -63,44 +67,20 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
       cb();
     }
   }, 4);
-}
-
-
-/**
- * Adds the given css text to the given shadow root.
- *
- * The style tags will be at the beginning of the shadow root before all author
- * styles. One element can be the main runtime CSS. This is guaranteed
- * to always be the first stylesheet in the doc.
- *
- * @param {!ShadowRoot} shadowRoot
- * @param {string} cssText
- * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
- *     as the first element in head and all style elements will be positioned
- *     after.
- * @param {string=} opt_ext
- */
-export function installStylesForShadowRoot(shadowRoot, cssText,
-    opt_isRuntimeCss, opt_ext) {
-  insertStyleElement(
-      shadowRoot.ownerDocument,
-      shadowRoot,
-      cssText,
-      opt_isRuntimeCss || false,
-      opt_ext || null);
+  return style;
 }
 
 
 /**
  * Creates the properly configured style element.
- * @param {!Document} doc
+ * @param {?Document} doc
  * @param {!Element|!ShadowRoot} cssRoot
  * @param {string} cssText
  * @param {boolean} isRuntimeCss
  * @param {?string} ext
  * @return {!Element}
  */
-function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
+export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   const style = doc.createElement('style');
   style.textContent = cssText;
   let afterElement = null;
@@ -109,6 +89,9 @@ function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   if (isRuntimeCss) {
     style.setAttribute('amp-runtime', '');
     cssRoot.runtimeStyleElement = style;
+  } else if (ext == 'amp-custom') {
+    style.setAttribute('amp-custom', '');
+    afterElement = cssRoot.lastChild;
   } else {
     style.setAttribute('amp-extension', ext || '');
     afterElement = cssRoot.runtimeStyleElement;
@@ -119,30 +102,16 @@ function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
 
 
 /**
- * Copies runtime styles from the ampdoc context into a shadow root.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!ShadowRoot} shadowRoot
- */
-export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
-  const style = dev().assert(
-      ampdoc.getRootNode().querySelector('style[amp-runtime]'),
-      'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
-  const cssText = style.textContent;
-  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
-}
-
-
-/**
  * Sets the document's body opacity to 1.
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
  * @param {!Document} doc The document who's body we should make visible.
- * @param {boolean=} opt_waitForExtensions Whether the body visibility should
- *     be blocked on key extensions being loaded.
+ * @param {boolean=} opt_waitForServices Whether the body visibility should
+ *     be blocked on key services being loaded.
  */
-export function makeBodyVisible(doc, opt_waitForExtensions) {
+export function makeBodyVisible(doc, opt_waitForServices) {
   const set = () => {
-    setStyles(dev().assert(doc.body), {
+    setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',
@@ -159,14 +128,24 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
       }
     }
   };
-  waitForBody(doc, () => {
-    const perf = performanceFor(doc.defaultView);
-    perf.tick('mvb');
-    perf.flush();
-    const extensionsPromise = opt_waitForExtensions ?
-        waitForExtensions(doc.defaultView) : null;
-    if (extensionsPromise) {
-      extensionsPromise.then(set, set);
+  const win = doc.defaultView;
+  documentStateFor(win).onBodyAvailable(() => {
+    if (win[bodyVisibleSentinel]) {
+      return;
+    }
+    win[bodyVisibleSentinel] = true;
+    if (opt_waitForServices) {
+      waitForServices(win).catch(() => []).then(services => {
+        set();
+        if (services.length > 0) {
+          resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+        }
+        try {
+          const perf = performanceFor(win);
+          perf.tick('mbv');
+          perf.flush();
+        } catch (e) {}
+      });
     } else {
       set();
     }

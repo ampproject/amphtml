@@ -15,7 +15,19 @@
  */
 
 import {dev} from './log';
+import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
+
+const HTML_ESCAPE_CHARS = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '`': '&#x60;',
+};
+const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -51,6 +63,8 @@ export function waitForChild(parent, checkFunc, callback) {
 
 /**
  * Waits for document's body to be available.
+ * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
+ * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
@@ -68,39 +82,6 @@ export function waitForBodyPromise(doc) {
   return new Promise(resolve => {
     waitForBody(doc, resolve);
   });
-}
-
-
-/**
- * Whether the element is currently contained in the DOM. Polyfills
- * `document.contains()` method when necessary. Notice that according to spec
- * `document.contains` is inclusionary.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- */
-export function documentContains(doc, element) {
-  if (!doc.contains) {
-    return documentContainsPolyfillInternal_(doc, element);
-  }
-  return doc.contains(element);
-}
-
-
-/**
- * Polyfill for `document.contains()` method.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- * @private Visible for testing only.
- */
-export function documentContainsPolyfillInternal_(doc, element) {
-  // Per spec, "contains" method is inclusionary
-  // i.e. `node.contains(node) == true`. However, we still need to test
-  // equality to the document itself.
-  return element == doc || doc.documentElement.contains(element);
 }
 
 
@@ -149,9 +130,6 @@ export function copyChildren(from, to) {
  * @return {!Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
-  if (!doc) {
-    return;
-  }
   const element = doc.createElement(tagName);
   for (const attr in attributes) {
     element.setAttribute(attr, attributes[attr]);
@@ -242,7 +220,7 @@ export function childElement(parent, callback) {
 
 
 /**
- * Finds all child elements that satisfies the callback.
+ * Finds all child elements that satisfy the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
  * @return {!Array<!Element>}
@@ -276,7 +254,7 @@ export function lastChildElement(parent, callback) {
 }
 
 /**
- * Finds all child nodes that satisfies the callback.
+ * Finds all child nodes that satisfy the callback.
  * These nodes can include Text, Comment and other child nodes.
  * @param {!Node} parent
  * @param {function(!Node):boolean} callback
@@ -295,13 +273,13 @@ export function childNodes(parent, callback) {
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let scopeSelectorSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setScopeSelectorSupportedForTesting(val) {
   scopeSelectorSupported = val;
@@ -415,7 +393,7 @@ export function childElementsByTag(parent, tagName) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
  * @param {string=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
@@ -425,9 +403,9 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
   const params = Object.create(null);
-  opt_paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
+  const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
   for (const key in dataset) {
-    const matches = key.match(opt_paramPattern);
+    const matches = key.match(paramPattern);
     if (matches) {
       const param = matches[1][0].toLowerCase() + matches[1].substr(1);
       params[computeParamNameFunc(param)] = dataset[key];
@@ -456,7 +434,7 @@ export function hasNextNodeInDocumentOrder(element) {
 
 
 /**
- * Finds all ancestor elements that satisfies predicate.
+ * Finds all ancestor elements that satisfy predicate.
  * @param {!Element} child
  * @param {function(!Element):boolean} predicate
  * @return {!Array<!Element>}
@@ -476,7 +454,7 @@ export function ancestorElements(child, predicate) {
 /**
  * Finds all ancestor elements that has the specified tag name.
  * @param {!Element} child
- * @param {string} attr
+ * @param {string} tagName
  * @return {!Array<!Element>}
  */
 export function ancestorElementsByTag(child, tagName) {
@@ -526,4 +504,43 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+}
+
+
+/**
+ * Escapes an ident (ID or a class name) to be used as a CSS selector.
+ *
+ * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
+ *
+ * @param {!Window} win
+ * @param {string} ident
+ * @return {string}
+ */
+export function escapeCssSelectorIdent(win, ident) {
+  if (win.CSS && win.CSS.escape) {
+    return win.CSS.escape(ident);
+  }
+  // Polyfill.
+  return cssEscape(ident);
+}
+
+
+/**
+ * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
+ * @param {string} text
+ * @return {string}
+ */
+export function escapeHtml(text) {
+  if (!text) {
+    return text;
+  }
+  return text.replace(HTML_ESCAPE_REGEX, escapeHtmlChar);
+}
+
+/**
+ * @param {string} c
+ * @return string
+ */
+function escapeHtmlChar(c) {
+  return HTML_ESCAPE_CHARS[c];
 }

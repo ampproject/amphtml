@@ -20,43 +20,56 @@ import {
   addDocFactoryToExtension,
   addElementToExtension,
   addShadowRootFactoryToExtension,
+  installBuiltinElements,
   installExtensionsInShadowDoc,
   installExtensionsService,
   registerExtension,
 } from './service/extensions-impl';
-import {ampdocFor} from './ampdoc';
+import {ampdocServiceFor} from './ampdoc';
 import {cssText} from '../build/css';
-import {dev, user} from './log';
+import {dev, user, initLogConstructor} from './log';
 import {fromClassForDoc, getService, getServiceForDoc} from './service';
 import {childElementsByTag} from './dom';
+import {
+  createShadowRoot,
+  importShadowBody,
+  installStylesForShadowRoot,
+} from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
-import {installHistoryService} from './service/history-impl';
-import {installImg} from '../builtins/amp-img';
-import {installPixel} from '../builtins/amp-pixel';
-import {installResourcesService} from './service/resources-impl';
-import {installShadowDoc} from './service/ampdoc-impl';
+import {extensionsFor} from './extensions';
+import {installHistoryServiceForDoc} from './service/history-impl';
+import {installPlatformService} from './service/platform-impl';
+import {installResourcesServiceForDoc} from './service/resources-impl';
+import {
+  installShadowDoc,
+  shadowDocHasBody,
+  shadowDocReady,
+} from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStyles, installStylesForShadowRoot} from './style-installer';
+import {installStorageService} from './service/storage-impl';
+import {installStyles} from './style-installer';
+import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
-import {installVideo} from '../builtins/amp-video';
+import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
-import {installViewportService} from './service/viewport-impl';
+import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
-import {resourcesFor} from './resources';
+import {resourcesForDoc} from './resources';
 import {setStyle} from './style';
 import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {viewportForDoc} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
 
+initLogConstructor();
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -70,11 +83,11 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installPlatformService(global);
+  installTimerService(global);
   installViewerService(global);
-  installViewportService(global);
-  installHistoryService(global);
+  installStorageService(global);
   installVsyncService(global);
-  installResourcesService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
   installTemplatesService(global);
@@ -90,8 +103,12 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installViewportServiceForDoc(ampdoc);
+  installHistoryServiceForDoc(ampdoc);
+  installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installVideoManagerForDoc(ampdoc);
 }
 
 
@@ -100,9 +117,7 @@ export function installAmpdocServices(ampdoc) {
  * @param {!Window} global Global scope to adopt.
  */
 export function installBuiltins(global) {
-  installImg(global);
-  installPixel(global);
-  installVideo(global);
+  installBuiltinElements(global);
 }
 
 
@@ -153,10 +168,7 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers an extended element and installs its styles.
-   * @param {string} name
-   * @param {!Function} implementationClass
-   * @param {string=} opt_css Optional CSS to install with the component.
-   *     Typically imported from generated CSS-in-JS file for each component.
+   * @const
    */
   global.AMP.registerElement = opts.registerElement.bind(null,
       global, extensions);
@@ -172,9 +184,7 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers an ampdoc service.
-   * @param {string} name
-   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
-   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+   * @const
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
@@ -209,6 +219,16 @@ function adoptShared(global, opts, callback) {
   }
 
   /**
+   * Certain extensions can be auto-loaded by runtime based on experiments or
+   * other configurations.
+   */
+  function installAutoLoadExtensions() {
+    if (!getMode().test && isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
+      extensionsFor(global).loadExtension('amp-lightbox-viewer');
+    }
+  }
+
+  /**
    * Registers a new custom element.
    * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
    */
@@ -232,6 +252,9 @@ function adoptShared(global, opts, callback) {
         dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
       }
     }
+
+    installAutoLoadExtensions();
+
     // Make sure we empty the array of preregistered extensions.
     // Technically this is only needed for testing, as everything should
     // go out of scope here, but just making sure.
@@ -265,10 +288,10 @@ export function adopt(global) {
       /** @const */
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
       /** @const */
-      global.AMP.resources = resourcesFor(global);
+      global.AMP.resources = resourcesForDoc(global.document);
     }
 
-    const viewport = viewportFor(global);
+    const viewport = viewportForDoc(global.document);
 
     /** @const */
     global.AMP.viewport = {};
@@ -310,7 +333,7 @@ export function adoptShadowMode(global) {
  */
 function prepareAndRegisterElement(global, extensions,
     name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass);
+  addElementToExtension(extensions, name, implementationClass, opt_css);
   if (opt_css) {
     installStyles(global.document, opt_css, () => {
       registerElementClass(global, name, implementationClass, opt_css);
@@ -331,11 +354,11 @@ function prepareAndRegisterElement(global, extensions,
  */
 function prepareAndRegisterElementShadowMode(global, extensions,
     name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass);
+  addElementToExtension(extensions, name, implementationClass, opt_css);
   registerElementClass(global, name, implementationClass, opt_css);
   if (opt_css) {
     addShadowRootFactoryToExtension(extensions, shadowRoot => {
-      installStylesForShadowRoot(shadowRoot, opt_css,
+      installStylesForShadowRoot(shadowRoot, dev().assertString(opt_css),
           /* isRuntimeCss */ false, name);
     });
   }
@@ -374,7 +397,7 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  */
 function prepareAndRegisterServiceForDoc(global, extensions,
     name, opt_ctor, opt_factory) {
-  const ampdocService = ampdocFor(global);
+  const ampdocService = ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
   registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
 }
@@ -425,10 +448,11 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
  */
 function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   dev().fine(TAG, 'Attach shadow doc:', doc);
-  const ampdocService = ampdocFor(global);
+  const ampdocService = ampdocServiceFor(global);
 
   hostElement.style.visibility = 'hidden';
-  const shadowRoot = hostElement.createShadowRoot();
+  const shadowRoot = createShadowRoot(hostElement);
+
   shadowRoot.AMP = {};
   shadowRoot.AMP.url = url;
 
@@ -449,11 +473,14 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
 
   // Append body.
   if (doc.body) {
-    const body = global.document.importNode(doc.body, true);
+    const body = importShadowBody(shadowRoot, doc.body);
     body.classList.add('amp-shadow');
-    body.style.position = 'relative';
     shadowRoot.appendChild(body);
+    shadowDocHasBody(ampdoc, body);
   }
+
+  // Document is ready.
+  shadowDocReady(ampdoc);
 
   // TODO(dvoytenko): find a better and more stable way to make content visible.
   // E.g. integrate with dynamic classes. In shadow case specifically, we have
@@ -479,12 +506,13 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
   const extensionIds = [];
   if (doc.head) {
     const parentLinks = {};
-    childElementsByTag(global.document.head, 'link').forEach(link => {
-      const href = link.getAttribute('href');
-      if (href) {
-        parentLinks[href] = true;
-      }
-    });
+    childElementsByTag(dev().assertElement(global.document.head), 'link')
+        .forEach(link => {
+          const href = link.getAttribute('href');
+          if (href) {
+            parentLinks[href] = true;
+          }
+        });
 
     for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
       const tagName = n.tagName;
@@ -522,7 +550,8 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
           // Ignore.
           dev().fine(TAG, '- ignore boilerplate style: ', n);
         } else {
-          shadowRoot.appendChild(global.document.importNode(n, true));
+          installStylesForShadowRoot(shadowRoot, n.textContent,
+              /* isRuntimeCss */ false, 'amp-custom');
           dev().fine(TAG, '- import style: ', n);
         }
       } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
@@ -542,7 +571,7 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
           if (customElement) {
             extensionIds.push(customElement);
           }
-        } else {
+        } else if (!n.hasAttribute('data-amp-report-test')) {
           user().error(TAG, '- unknown script: ', n, src);
         }
       } else if (n.tagName == 'SCRIPT') {

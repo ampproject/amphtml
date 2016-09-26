@@ -104,19 +104,23 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// Fill query params into JSON struct.
 	line, _ := strconv.Atoi(r.URL.Query().Get("l"))
 	errorType := "default"
+	isUserError := false;
 	if r.URL.Query().Get("a") == "1" {
 		errorType = "assert"
+		isUserError = true
 	}
 	// By default we log as "INFO" severity, because reports are very spammy
 	severity := "INFO"
 	level := logging.Info
 	// But if the request comes from the cache (and thus only from valid AMP
 	// docs) we log as "ERROR".
+	isCdn := false
 	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") ||
 			strings.Contains(r.Referer(), ".ampproject.net/") {
 		severity = "ERROR"
 		level = logging.Error
 		errorType += "-cdn"
+		isCdn = true
 	} else {
 		errorType += "-origin"
 	}
@@ -132,7 +136,22 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		errorType += "-canary"
 		isCanary = true;
 	}
-	if !isCanary && !is3p && level != logging.Error && rand.Float32() > 0.01 {
+	sample := rand.Float64()
+	throttleRate := 0.01
+
+	if isCanary {
+		throttleRate = 1.0  // Explicitly log all canary errors.
+	} else if is3p {
+		throttleRate = 0.1
+	} else if isCdn {
+		throttleRate = 0.1
+	}
+
+	if isUserError {
+		throttleRate = throttleRate / 10;
+	}
+
+	if !(sample <= throttleRate) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "THROTTLED\n")

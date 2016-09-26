@@ -16,7 +16,7 @@
 
 tags: {  # amp-instagram
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-instagram extension .js script"
   mandatory_parent: "HEAD"
@@ -50,29 +50,14 @@ tags: {  # amp-instagram
 }
 tags: {  # <amp-instagram>
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "AMP-INSTAGRAM"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-instagram extension .js script"
   attrs: { name: "alt" }
   attrs: {
     name: "data-shortcode"
-    mandatory_oneof: "['data-shortcode', 'src']"
-  }
-  attrs: {
-    name: "shortcode"
-    mandatory_oneof: "['data-shortcode', 'src']"
-    deprecation: "data-shortcode"
-    deprecation_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
-  }
-  attrs: {
-    name: "src"
-    mandatory_oneof: "['data-shortcode', 'src']"
-    value_url: {
-      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
-      allowed_protocol: "https"
-      allow_relative: true
-    }
+    mandatory: true
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
