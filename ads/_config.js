@@ -39,7 +39,7 @@ export const adConfig = {
   _ping_: {
     renderStartImplemented: true,
   },
- 
+
   '4w': {},
 
   '4wppn': {},
