@@ -1363,6 +1363,6 @@ function createViewport(ampdoc) {
  * @return {!Viewport}
  */
 export function installViewportServiceForDoc(ampdoc) {
-  return /** @type !Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
+  return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
       ampdoc => createViewport(ampdoc)));
 };
