@@ -16,14 +16,12 @@
 
 import {loadScript, validateData} from '../3p/3p';
 
-const lokaFields = ['unitParams'];
-
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function loka(global, data) {
-  validateData(data, lokaFields, []);
+  validateData(data, ['unitParams'], []);
 
   global.lokaParams = data;
 
