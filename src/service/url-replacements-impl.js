@@ -50,14 +50,14 @@ let ReplacementDef;
 
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
- * @param {ResolverReturnDef} val
+ * @param {*} val
  * @return {string}
  */
 function encodeValue(val) {
   if (val == null) {
     return '';
   }
-  return encodeURIComponent(val);
+  return encodeURIComponent(/** @type {string} */(val));
 };
 
 /**
@@ -783,7 +783,7 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
-    user.assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
+    user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
         'protocol: ', url);
 
     return replacement;

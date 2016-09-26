@@ -61,6 +61,7 @@ export let Location;
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
  * @param {string} url
+ * @param {boolean=} opt_nocache
  * @return {!Location}
  */
 export function parseUrl(url, opt_nocache) {
