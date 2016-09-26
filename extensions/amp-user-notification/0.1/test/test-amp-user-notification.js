@@ -21,7 +21,7 @@ import {
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
-  installUrlReplacementsService,
+  installUrlReplacementsServiceForDoc,
 } from '../../../../src/service/url-replacements-impl';
 
 
@@ -56,7 +56,6 @@ describe('amp-user-notification', () => {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
       iframe.win.ampExtendedElements = {};
-      installUrlReplacementsService(iframe.win);
       return buildElement(iframe.doc, iframe.ampdoc, attrs);
     });
   }

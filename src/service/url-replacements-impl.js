@@ -21,7 +21,7 @@ import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
 import {whenDocumentComplete} from '../document-ready';
-import {fromClass} from '../service';
+import {fromClassForDoc} from '../service';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
@@ -66,28 +66,28 @@ function encodeValue(val) {
  * @package For export.
  */
 export class UrlReplacements {
-  /** @param {!Window} win */
-  constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
     /** @private @const {!Object<string, !ReplacementDef>} */
-    this.replacements_ = this.win_.Object.create(null);
+    this.replacements_ = this.ampdoc.win.Object.create(null);
 
     /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
     /** @private @const {!Promise<?Object<string, string>>} */
-    this.variants_ = variantForOrNull(win);
+    this.variants_ = variantForOrNull(this.ampdoc.win);
 
     /**
      * @private @const {
      *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
      */
-    this.shareTrackingFragments_ = shareTrackingForOrNull(win);
+    this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
 
     /** @private {boolean} */
     this.initialized_ = false;
@@ -98,6 +98,9 @@ export class UrlReplacements {
    */
   initialize_() {
     this.initialized_ = true;
+
+    const viewport = viewportForDoc(this.ampdoc);
+
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
       return Math.random();
@@ -128,28 +131,28 @@ export class UrlReplacements {
 
     // Returns the referrer URL.
     this.setAsync_('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
-      return viewerFor(this.win_).getReferrerUrl();
+      return viewerFor(this.ampdoc.win).getReferrerUrl();
     }));
 
     // Returns the title of this AMP document.
     this.set_('TITLE', () => {
-      return this.win_.document.title;
+      return this.ampdoc.win.document.title;
     });
 
     // Returns the URL for this AMP document.
     this.set_('AMPDOC_URL', () => {
-      return removeFragment(this.win_.location.href);
+      return removeFragment(this.ampdoc.win.location.href);
     });
 
     // Returns the host of the URL for this AMP document.
     this.set_('AMPDOC_HOST', () => {
-      const url = parseUrl(this.win_.location.href);
+      const url = parseUrl(this.ampdoc.win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set_('AMPDOC_HOSTNAME', () => {
-      const url = parseUrl(this.win_.location.href);
+      const url = parseUrl(this.ampdoc.win.location.href);
       return url && url.hostname;
     });
 
@@ -184,7 +187,7 @@ export class UrlReplacements {
       user().assert(param,
           'The first argument to QUERY_PARAM, the query string ' +
           'param is required');
-      const url = parseUrl(this.win_.location.href);
+      const url = parseUrl(this.ampdoc.win.location.href);
       const params = parseQueryString(url.search);
 
       return (typeof params[param] !== 'undefined') ?
@@ -201,11 +204,11 @@ export class UrlReplacements {
       // If no `opt_userNotificationId` argument is provided then
       // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = userNotificationManagerFor(this.win_).then(service => {
+        consent = userNotificationManagerFor(this.ampdoc.win).then(service => {
           return service.get(opt_userNotificationId);
         });
       }
-      return cidFor(this.win_).then(cid => {
+      return cidFor(this.ampdoc.win).then(cid => {
         return cid.get({
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
@@ -273,75 +276,50 @@ export class UrlReplacements {
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.setAsync_('SCROLL_TOP', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportForDoc(this.win_.document).getScrollTop());
-    });
+    this.set_('SCROLL_TOP', () => viewport.getScrollTop());
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.setAsync_('SCROLL_LEFT', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportForDoc(this.win_.document).getScrollLeft());
-    });
+    this.set_('SCROLL_LEFT', () => viewport.getScrollLeft());
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.setAsync_('SCROLL_HEIGHT', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportForDoc(this.win_.document).getScrollHeight());
-    });
+    this.set_('SCROLL_HEIGHT', () => viewport.getScrollHeight());
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.setAsync_('SCROLL_WIDTH', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportForDoc(this.win_.document).getScrollWidth());
-    });
-
-    // Returns screen.width.
-    this.set_('SCREEN_WIDTH', () => {
-      return this.win_.screen.width;
-    });
-
-    // Returns screen.height.
-    this.set_('SCREEN_HEIGHT', () => {
-      return this.win_.screen.height;
-    });
-
-    // Returns screen.availHeight.
-    this.set_('AVAILABLE_SCREEN_HEIGHT', () => {
-      return this.win_.screen.availHeight;
-    });
-
-    // Returns screen.availWidth.
-    this.set_('AVAILABLE_SCREEN_WIDTH', () => {
-      return this.win_.screen.availWidth;
-    });
-
-    // Returns screen.ColorDepth.
-    this.set_('SCREEN_COLOR_DEPTH', () => {
-      return this.win_.screen.colorDepth;
-    });
+    this.set_('SCROLL_WIDTH', () => viewport.getScrollWidth());
 
     // Returns the viewport height.
-    this.setAsync_('VIEWPORT_HEIGHT', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportForDoc(this.win_.document).getSize().height);
-    });
+    this.set_('VIEWPORT_HEIGHT', () => viewport.getSize().height);
 
     // Returns the viewport width.
-    this.setAsync_('VIEWPORT_WIDTH', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportForDoc(this.win_.document).getSize().width);
-    });
+    this.set_('VIEWPORT_WIDTH', () => viewport.getSize().width);
+
+    // Returns screen.width.
+    this.set_('SCREEN_WIDTH', () => this.ampdoc.win.screen.width);
+
+    // Returns screen.height.
+    this.set_('SCREEN_HEIGHT', () => this.ampdoc.win.screen.height);
+
+    // Returns screen.availHeight.
+    this.set_('AVAILABLE_SCREEN_HEIGHT',
+        () => this.ampdoc.win.screen.availHeight);
+
+    // Returns screen.availWidth.
+    this.set_('AVAILABLE_SCREEN_WIDTH',
+        () => this.ampdoc.win.screen.availWidth);
+
+    // Returns screen.ColorDepth.
+    this.set_('SCREEN_COLOR_DEPTH',
+        () => this.ampdoc.win.screen.colorDepth);
 
     // Returns document characterset.
     this.set_('DOCUMENT_CHARSET', () => {
-      const doc = this.win_.document;
+      const doc = this.ampdoc.win.document;
       return doc.characterSet || doc.charset;
     });
 
     // Returns the browser language.
     this.set_('BROWSER_LANGUAGE', () => {
-      const nav = this.win_.navigator;
+      const nav = this.ampdoc.win.navigator;
       return (nav.language || nav.userLanguage || nav.browserLanguage || '')
           .toLowerCase();
     });
@@ -398,14 +376,14 @@ export class UrlReplacements {
 
     // Returns an identifier for the viewer.
     this.setAsync_('VIEWER', () => {
-      return viewerFor(this.win_).getViewerOrigin().then(viewer => {
+      return viewerFor(this.ampdoc.win).getViewerOrigin().then(viewer => {
         return viewer == undefined ? '' : viewer;
       });
     });
 
     // Returns the total engaged time since the content became viewable.
     this.setAsync_('TOTAL_ENGAGED_TIME', () => {
-      return activityFor(this.win_).then(activity => {
+      return activityFor(this.ampdoc.win).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
@@ -442,7 +420,7 @@ export class UrlReplacements {
    * @template T
    */
   getDocInfoValue_(getter) {
-    return getter(documentInfoForDoc(this.win_.document));
+    return getter(documentInfoForDoc(this.ampdoc));
   }
 
   /**
@@ -454,7 +432,7 @@ export class UrlReplacements {
    * @template T
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_(this.win_).then(accessService => {
+    return this.getAccessService_(this.ampdoc.win).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
         user().error(TAG, 'Access service is not installed to access: ', expr);
@@ -478,7 +456,7 @@ export class UrlReplacements {
     const metric = this.getTimingDataSync_(startEvent, endEvent);
     if (metric === '') {
       // Metric is not yet available. Retry after a delay.
-      return whenDocumentComplete(this.win_.document).then(() => {
+      return whenDocumentComplete(this.ampdoc.win.document).then(() => {
         return this.getTimingDataSync_(startEvent, endEvent);
       });
     }
@@ -497,8 +475,8 @@ export class UrlReplacements {
    *    if it is not yet available, or value as string
    */
   getTimingDataSync_(startEvent, endEvent) {
-    const timingInfo = this.win_['performance'] &&
-        this.win_['performance']['timing'];
+    const win = this.ampdoc.win;
+    const timingInfo = win['performance'] && win['performance']['timing'];
     if (!timingInfo || timingInfo['navigationStart'] == 0) {
       // Navigation timing API is not supported.
       return;
@@ -525,8 +503,9 @@ export class UrlReplacements {
    * @private
    */
   getNavigationData_(attribute) {
-    const navigationInfo = this.win_['performance']
-        && this.win_['performance']['navigation'];
+    const win = this.ampdoc.win;
+    const navigationInfo = win['performance']
+        && win['performance']['navigation'];
     if (!navigationInfo || navigationInfo[attribute] === undefined) {
       // PerformanceNavigation interface is not supported or attribute is not implemented.
       return;
@@ -791,9 +770,9 @@ export class UrlReplacements {
 }
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!UrlReplacements}
  */
-export function installUrlReplacementsService(window) {
-  return fromClass(window, 'url-replace', UrlReplacements);
-};
+export function installUrlReplacementsServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'url-replace', UrlReplacements);
+}

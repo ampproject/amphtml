@@ -17,8 +17,8 @@
 import {onDocumentElementClick_, onDocumentElementCapturedClick_,
     getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
 import {createIframePromise} from '../../testing/iframe';
-import {urlReplacementsFor} from '../../src/url-replacements';
-import {installUrlReplacementsService,} from
+import {urlReplacementsForDoc} from '../../src/url-replacements';
+import {installUrlReplacementsServiceForDoc,} from
     '../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 
@@ -346,8 +346,7 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
 
     it('should expand click_x/click_y', () => {
       return createIframePromise().then(iframe => {
-        installUrlReplacementsService(iframe.win);
-        const replacements = urlReplacementsFor(iframe.win);
+        const replacements = urlReplacementsForDoc(iframe.ampdoc);
         const evt = {
           clientX: 123,
           clientY: 456,
@@ -369,8 +368,7 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
 
     it('should expand click_x/click_y relative to shadow root', () => {
       return createIframePromise().then(iframe => {
-        installUrlReplacementsService(iframe.win);
-        const replacements = urlReplacementsFor(iframe.win);
+        const replacements = urlReplacementsForDoc(iframe.ampdoc);
         const evt = {
           clientX: 123,
           clientY: 456,
