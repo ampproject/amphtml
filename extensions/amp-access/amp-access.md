@@ -168,7 +168,7 @@ When configuring the URLs for various endpoints, the Publisher can use substitut
 | RANDOM            | A random number. Helpful to avoid browser cache. |
 
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
-```
+```none
 https://pub.com/access?
    rid=READER_ID
   &url=CANONICAL_URL
@@ -250,7 +250,7 @@ Authorization can take any parameters as defined in the [Access URL Variables][7
 This endpoint produces the authorization response that can be used in the content markup expressions to show/hide different parts of content.
 
 The request format is:
-```
+```none
 https://publisher.com/amp-access.json?
    rid=READER_ID
   &url=SOURCE_URL
@@ -322,7 +322,7 @@ The publisher may choose to use the pingback as:
  - As a credentialed CORS endpoint it may contain publisher cookies. Thus it can be used to map AMP Reader ID to the Publisher’s identity.
 
 The request format is:
-```
+```none
 https://publisher.com/amp-pingback?
    rid=READER_ID
   &url=SOURCE_URL
@@ -333,14 +333,14 @@ https://publisher.com/amp-pingback?
 The URL of the Login Page(s) is configured via the `login` property in the [AMP Access Configuration][8] section.
 
 The configuration can specify either a single Login URL or a map of Login URL indexed by the type of login. An example of a single Login URL:
-```
+```json
 {
   "login": "https://publisher.com/amp-login.html?rid={READER_ID}"
 }
 ```
 
 An example of multiple Login URLs:
-```
+```json
 {
   "login": {
     "signin": "https://publisher.com/signin.html?rid={READER_ID}",
@@ -356,7 +356,7 @@ required and if the `RETURN_URL` substitution is not specified, it will be injec
 Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the [Login Flow][14] section for more details.
 
 The request format is:
-```
+```none
 https://publisher.com/amp-login.html?
    rid=READER_ID
   &url=SOURCE_URL
@@ -364,7 +364,7 @@ https://publisher.com/amp-login.html?
 ```
 Notice that the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not
 specified. Once Login Page completes its work, it must redirect back to the specified “Return URL” with the following format:
-```
+```none
 RETURN_URL#success=true|false
 ```
 Notice the use of a URL hash parameter “success”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
@@ -457,7 +457,7 @@ As usual, the Reader ID should be included in the call to Login Page and can be 
 The most recent BNF grammar is available in [access-expr-impl.jison](./0.1/access-expr-impl.jison) file.
 
 The key excerpt of this grammar is as following:
-```
+```javascript
 search_condition:
     search_condition OR search_condition
   | search_condition AND search_condition

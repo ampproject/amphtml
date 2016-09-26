@@ -98,7 +98,7 @@ AMP HTML documents MUST
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommend to include `initial-scale=1` (1). [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
-- <a name="boilerplate"></a>contain the [AMP boilerplate code ('head > style[amp-boilerplate]' and 'noscript > style[amp-boilerplate]')](amp-boilerplate.md) in their head tag. [🔗](#boilerplate)
+- <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) (`head > style[amp-boilerplate]` and `noscript > style[amp-boilerplate]`) in their head tag. [🔗](#boilerplate)
 
 (1) `width=device-width,minimum-scale=1` is required to ensure [GPU rasterization](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization) is enabled.
 
@@ -389,7 +389,7 @@ The script URL must start with "https://cdn.ampproject.org" and must follow a ve
 
 The URL for extended components is of the form:
 
-```
+```html
 https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 ```
 
@@ -438,7 +438,7 @@ See the documentation for a specific extended template on the syntax and restric
 
 The URL for extended components is of the form:
 
-```
+```html
 https://cdn.ampproject.org/$RUNTIME_VERSION/$TEMPLATE_TYPE-$TEMPLATE_VERSION.js
 ```
 
