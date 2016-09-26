@@ -784,7 +784,7 @@ export class UrlReplacements {
       return url;
     }
     user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
-        'protocol: ', url);
+        'protocol: %s', url);
 
     return replacement;
   }

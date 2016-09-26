@@ -765,10 +765,10 @@ describe('UrlReplacements', () => {
           });
       expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
       expanded = urlReplacements.expandSync(
-          'FUNCT()://example.com/?r=RANDOM', {
+          'FUNCT://example.com/?r=RANDOM', {
             'FUNCT': function() { return 'abc'; },
           });
-      expect(expanded).to.equal('FUNCT()://example.com/?r=RANDOM');
+      expect(expanded).to.equal('FUNCT://example.com/?r=RANDOM');
     });
 
     it('should reject javascript protocol', () => {
