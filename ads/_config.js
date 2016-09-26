@@ -39,11 +39,7 @@ export const adConfig = {
   _ping_: {
     renderStartImplemented: true,
   },
-
-  4w: {},
-
-  4wppn: {},
-
+  
   a9: {
     prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   },
@@ -259,6 +255,10 @@ export const adConfig = {
       'https://img1.nend.net',
     ],
   },
+
+  neo4w: {},
+
+  neo4wPPN: {},
 
   openadstream: {},
 
