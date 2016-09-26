@@ -17,7 +17,7 @@
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
-import {viewportFor} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/viewport';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
@@ -46,7 +46,7 @@ describe('amp-fx-flying-carpet', () => {
 
       iframe.doc.body.style.height = '400vh';
       iframe.doc.body.style.position = 'relative';
-      viewport = viewportFor(iframe.win);
+      viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
 
       const parent = iframe.doc.querySelector('#parent');

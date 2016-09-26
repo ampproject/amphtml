@@ -257,6 +257,12 @@ Type attribute value: `webtrekk`
 
 Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
 
+### Yandex Metrica
+
+Type attribute value: `metrika`
+
+Adds support for Yandex Metrica.
+
 ## <a name="attributes"></a>Attributes
 
   - `type` See [Analytics vendors](#analytics-vendors)
@@ -452,9 +458,10 @@ Use this configuration to fire a request under certain conditions when the page 
 
 #### Timer trigger (`"on": "timer"`)
 Use this configuration to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
+    - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
     ```javascript
     "triggers": {
