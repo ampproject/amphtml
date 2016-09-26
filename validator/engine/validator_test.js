@@ -337,4 +337,10 @@ describe('CssLengthAndUnit', () => {
             new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ true);
         expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(true);}
   });
+
+  // Introduce an intentional test failure here. The pr-check.js script
+  // that's driving Travis test execution should fail.
+  it('fails', () => {
+    expect(true).toBe(false);
+  }
 });
