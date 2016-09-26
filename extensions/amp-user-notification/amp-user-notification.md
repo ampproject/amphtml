@@ -186,7 +186,7 @@ This notification should ALWAYS show on every page visit.
 ```
 
 
---------
+---
 
 ## JSON Fields
 
