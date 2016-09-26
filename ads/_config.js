@@ -202,6 +202,15 @@ export const adConfig = {
 
   kargo: {},
 
+  loka: {
+    prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
+    preconnect: [
+      'https://scene-front.lokaplatform.com',
+      'https://loka-materials.akamaized.net',
+    ],
+    renderStartImplemented: true,
+  },
+
   mads: {
     prefetch: 'https://eu2.madsone.com/js/tags.js',
   },
