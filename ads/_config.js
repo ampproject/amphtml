@@ -40,6 +40,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  4w: {},
+
+  4wppn: {},
+
   a9: {
     prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   },
@@ -47,6 +51,8 @@ export const adConfig = {
   accesstrade: {
     prefetch: 'https://h.accesstrade.net/js/amp/amp.js',
   },
+
+  adagio: {},
 
   adblade: {
     prefetch: 'https://web.adblade.com/js/ads/async/show.js',
