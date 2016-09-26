@@ -21,7 +21,7 @@ import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {VideoEvents, VideoAttributes} from '../video-interface';
 import {viewerFor} from '../viewer';
-import {viewportFor} from '../viewport';
+import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
 
 /**
@@ -43,6 +43,8 @@ export class VideoManager {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!Window} */
     this.win_ = ampdoc.win;
@@ -104,7 +106,7 @@ export class VideoManager {
           this.entries_[i].updateVisibility();
         }
       };
-      const viewport = viewportFor(this.win_);
+      const viewport = viewportForDoc(this.ampdoc);
       viewport.onScroll(scrollListener);
       viewport.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;

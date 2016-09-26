@@ -19,7 +19,7 @@ import {loadPromise} from './event-helper';
 import {preconnectFor} from './preconnect';
 import {isArray} from './types';
 import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {viewportForDoc} from './viewport';
 import {vsyncFor} from './vsync';
 
 
@@ -616,7 +616,7 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportFor(this.win);
+    return viewportForDoc(this.getAmpDoc());
   }
 
  /**

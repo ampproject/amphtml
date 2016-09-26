@@ -23,7 +23,7 @@ import * as dom from './dom';
  * an element that has the actual implementation. The promise resolves when
  * the implementation loaded.
  * Users should typically wrap this as a special purpose function (e.g.
- * viewportFor(win)) for type safety and because the factory should not be
+ * viewportForDoc(...)) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.

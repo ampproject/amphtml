@@ -22,7 +22,6 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
@@ -122,7 +121,7 @@ function buildAdUrl(
     };
   }
   const slotRect = a4a.getIntersectionElementLayoutBox();
-  const viewportRect = viewportFor(global).getRect();
+  const viewportRect = a4a.getViewport().getRect();
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const allQueryParams = queryParams.concat(
