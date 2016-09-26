@@ -28,9 +28,6 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
-import {
-  installUrlReplacementsServiceForDoc,
-} from '../../../../src/service/url-replacements-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
 import {installStorageService} from '../../../../src/service/storage-impl';

@@ -26,7 +26,6 @@ import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
 import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
 

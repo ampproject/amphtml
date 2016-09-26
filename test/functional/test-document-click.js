@@ -18,8 +18,6 @@ import {onDocumentElementClick_, onDocumentElementCapturedClick_,
     getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
 import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsForDoc} from '../../src/url-replacements';
-import {installUrlReplacementsServiceForDoc,} from
-    '../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 
 describe('test-document-click onDocumentElementClick_', () => {

@@ -119,7 +119,7 @@ describe('UrlReplacements', () => {
       Math: window.Math,
       services: {
         'viewport': {obj: {}},
-      }
+      },
     };
     win.document.defaultView = win;
     const ampdocService = installDocService(win, true);

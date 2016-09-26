@@ -20,9 +20,6 @@ import {
   UserNotificationManager,
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
-import {
-  installUrlReplacementsServiceForDoc,
-} from '../../../../src/service/url-replacements-impl';
 
 
 describe('amp-user-notification', () => {
