@@ -723,6 +723,18 @@ describe('UrlReplacements', () => {
         });
   });
 
+  it('should reject javascript protocol', () => {
+    const win = getFakeWindow();
+    const urlReplacements = installUrlReplacementsService(win);
+    return urlReplacements.expandAsync('javascript://example.com/?r=RANDOM')
+        .then(
+          () => { throw new Error('never here'); },
+          (err) => {
+            expect(error.message).to.match(/Illegal javascript/);
+          }
+        );
+  });
+
   describe('sync expansion', () => {
     it('should expand w/ collect vars (skip async macro)', () => {
       const win = getFakeWindow();
@@ -759,6 +771,14 @@ describe('UrlReplacements', () => {
           'FUNCT': function() { return 'abc'; },
         });
       expect(expanded).to.equal('FUNCT()://example.com/?r=RANDOM');
+    });
+
+    it('should reject javascript protocol', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsService(win);
+      expect(() => {
+        urlReplacements.expandSync('javascript://example.com/?r=RANDOM');
+      }).to.throw('Illegal javascript');
     });
   });
 
