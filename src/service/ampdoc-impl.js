@@ -107,7 +107,7 @@ export class AmpDocService {
    */
   getAmpDoc(opt_node) {
     // Ensure that node is attached if specified.
-    if (opt_node) {
+    if (opt_node && opt_node.ownerDocument) {
       dev().assert(opt_node.ownerDocument.contains(opt_node),
           'The node must be attached to request ampdoc.');
     }
