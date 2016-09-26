@@ -321,13 +321,11 @@ describe('UrlReplacements', () => {
     const win = getFakeWindow();
     const urlReplacements = installUrlReplacementsService(win);
     return urlReplacements.expandAsync(
-        'PROTOCOL://example.com/?r=RANDOM',
-        {
+        'PROTOCOL://example.com/?r=RANDOM', {
           'PROTOCOL': Promise.resolve('abc'),
-        })
-        .then(expanded => {
+        }).then(expanded => {
           expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
-        })
+        });
   });
 
   describe('PAGE_LOAD_TIME', () => {
@@ -726,11 +724,11 @@ describe('UrlReplacements', () => {
   it('should reject javascript protocol', () => {
     const win = getFakeWindow();
     const urlReplacements = installUrlReplacementsService(win);
-    return urlReplacements.expandAsync('javascript://example.com/?r=RANDOM')
+    return urlReplacements.expandAsync(`javascript://example.com/?r=RANDOM`)
         .then(
           () => { throw new Error('never here'); },
-          (err) => {
-            expect(error.message).to.match(/Illegal javascript/);
+          err => {
+            expect(err.message).to.match(/Illegal javascript/);
           }
         );
   });
@@ -762,14 +760,14 @@ describe('UrlReplacements', () => {
       const win = getFakeWindow();
       const urlReplacements = installUrlReplacementsService(win);
       let expanded = urlReplacements.expandSync(
-        'PROTOCOL://example.com/?r=RANDOM',
-        {'PROTOCOL': 'abc'});
+          'PROTOCOL://example.com/?r=RANDOM', {
+            'PROTOCOL': 'abc',
+          });
       expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
       expanded = urlReplacements.expandSync(
-        'FUNCT()://example.com/?r=RANDOM',
-        {
-          'FUNCT': function() { return 'abc'; },
-        });
+          'FUNCT()://example.com/?r=RANDOM', {
+            'FUNCT': function() { return 'abc'; },
+          });
       expect(expanded).to.equal('FUNCT()://example.com/?r=RANDOM');
     });
 
@@ -777,7 +775,7 @@ describe('UrlReplacements', () => {
       const win = getFakeWindow();
       const urlReplacements = installUrlReplacementsService(win);
       expect(() => {
-        urlReplacements.expandSync('javascript://example.com/?r=RANDOM');
+        urlReplacements.expandSync(`javascript://example.com/?r=RANDOM`);
       }).to.throw('Illegal javascript');
     });
   });

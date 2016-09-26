@@ -702,7 +702,7 @@ export class UrlReplacements {
       return this.ensureProtocolMatches_(url, replacement);
     }
     return (replacementPromise || Promise.resolve(replacement))
-        .then((replacement) => this.ensureProtocolMatches_(url, replacement));
+        .then(replacement => this.ensureProtocolMatches_(url, replacement));
   }
 
   /**
@@ -783,7 +783,7 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
-    user.assert(newProtocol !== 'javascript:', 'Illegal javascript link ' +
+    user.assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
         'protocol: ', url);
 
     return replacement;
