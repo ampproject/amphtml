@@ -367,6 +367,7 @@ export const adConfig = {
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',
     ],
+    renderStartImplemented: true,
   },
 
   yieldone: {

@@ -23,7 +23,7 @@ import * as dom from './dom';
  * an element that has the actual implementation. The promise resolves when
  * the implementation loaded.
  * Users should typically wrap this as a special purpose function (e.g.
- * viewportFor(win)) for type safety and because the factory should not be
+ * viewportForDoc(...)) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
@@ -49,12 +49,12 @@ export function getElementService(win, id, providedByElement) {
  * @param {string} id of the service.
  * @param {string} providedByElement Name of the custom element that provides
  *     the implementation of this service.
- * @return {!Promise<*>}
+ * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailable(win, id, providedByElement) {
   const s = getServicePromiseOrNull(win, id);
   if (s) {
-    return s;
+    return /** @type {!Promise<?Object>} */ (s);
   }
   // Microtask is necessary to ensure that window.ampExtendedElements has been
   // initialized.

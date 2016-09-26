@@ -25,6 +25,9 @@ window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
 
+// Service Holder
+window.services;
+
 // Exposed to custom ad iframes.
 /* @type {!Function} */
 window.draw3p;

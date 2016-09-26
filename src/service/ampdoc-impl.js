@@ -102,17 +102,17 @@ export class AmpDocService {
    * instance is always returned. Otherwise, this method locates the `AmpDoc`
    * that contains the specified node and, if necessary, initializes it.
    *
-   * @param {!Node=} node
+   * @param {!Node=} opt_node
    * @return {!AmpDoc}
    */
-  getAmpDoc(node) {
+  getAmpDoc(opt_node) {
     // Single document: return it immediately.
     if (this.singleDoc_) {
       return this.singleDoc_;
     }
-    dev().assert(node);
+    dev().assert(opt_node);
     // Otherwise discover and possibly create the ampdoc.
-    let n = node;
+    let n = opt_node;
     while (n) {
       // A custom element may already have the reference to the ampdoc.
       if (n.ampdoc_) {
@@ -139,7 +139,7 @@ export class AmpDocService {
       n = shadowRoot.host;
     }
 
-    throw dev().createError('No ampdoc found for', node);
+    throw dev().createError('No ampdoc found for', opt_node);
   }
 
   /**
@@ -271,6 +271,15 @@ export class AmpDoc {
    */
   getElementById(id) {
     return this.getRootNode().getElementById(id);
+  }
+
+  /**
+   * Whether the node is currently contained in the DOM of the root.
+   * @param {?Node} node
+   * @return {boolean}
+   */
+  contains(node) {
+    return this.getRootNode().contains(node);
   }
 }
 

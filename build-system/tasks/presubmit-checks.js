@@ -193,7 +193,7 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installViewportService': {
+  'installViewportServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -402,12 +402,6 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
-    ],
-  },
-  '(doc[^.]*)\\.contains': {
-    message: 'Use dom.documentContains API.',
-    whitelist: [
-      'src/dom.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {

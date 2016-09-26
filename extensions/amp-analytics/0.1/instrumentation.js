@@ -21,7 +21,7 @@ import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 
@@ -72,11 +72,11 @@ class AnalyticsEvent {
 
   /**
    * @param {!AnalyticsEventType} type The type of event.
-   * @param {!Object<string, string>} A map of vars and their values.
+   * @param {!Object<string, string>} opt_vars A map of vars and their values.
    */
-  constructor(type, vars) {
+  constructor(type, opt_vars) {
     this.type = type;
-    this.vars = vars || Object.create(null);
+    this.vars = opt_vars || Object.create(null);
   }
 }
 
@@ -99,7 +99,7 @@ export class InstrumentationService {
     this.viewer_ = viewerFor(window);
 
     /** @const {!Viewport} */
-    this.viewport_ = viewportFor(window);
+    this.viewport_ = viewportForDoc(window.document);
 
     /** @private {boolean} */
     this.clickHandlerRegistered_ = false;
@@ -132,7 +132,7 @@ export class InstrumentationService {
 
   /**
    * @param {!JSONType} config Configuration for instrumentation.
-   * @param {!AnalyticsEventListenerDef} The callback to call when the event
+   * @param {!AnalyticsEventListenerDef} listener The callback to call when the event
    *  occurs.
    * @param {!Element} analyticsElement The element associated with the
    *  config.
@@ -490,10 +490,16 @@ export class InstrumentationService {
    * @private
    */
   createTimerListener_(listener, timerSpec) {
+    const hasImmediate = timerSpec.hasOwnProperty('immediate');
+    const callImmediate = hasImmediate ? Boolean(timerSpec.immediate) : true;
     const intervalId = this.win_.setInterval(
-        listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
-        timerSpec['interval'] * 1000);
-    listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
+      listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
+      timerSpec['interval'] * 1000
+    );
+
+    if (callImmediate) {
+      listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
+    }
 
     const maxTimerLength = timerSpec['maxTimerLength'] ||
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
