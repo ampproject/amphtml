@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   Viewport,
   ViewportBindingDef,
@@ -25,6 +26,7 @@ import {
 } from '../../src/service/viewport-impl';
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
@@ -40,6 +42,7 @@ describe('Viewport', () => {
   let viewer;
   let viewerMock;
   let windowApi;
+  let ampdoc;
   let viewerViewportHandler;
   let updatedPaddingTop;
   let viewportSize;
@@ -70,6 +73,8 @@ describe('Viewport', () => {
       clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
+    ampdoc = new AmpDocSingle(windowApi);
+    installTimerService(windowApi);
     installPlatformService(windowApi);
     installViewerService(windowApi);
     binding = new ViewportBindingDef();
@@ -81,7 +86,7 @@ describe('Viewport', () => {
     binding.getScrollLeft = () => 0;
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     viewport.fixedLayer_ = {update: () => {
       return {then: callback => callback()};
     }};
@@ -449,7 +454,7 @@ describe('Viewport', () => {
     // TODO(dvoytenko, #4894): Cleanup the experiment.
     viewer.isEmbedded = () => true;
     toggleExperiment(windowApi, 'pan-y', false);
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     expect(windowApi.document.documentElement.style['touch-action'])
         .to.not.exist;
   });
@@ -458,7 +463,7 @@ describe('Viewport', () => {
     // TODO(dvoytenko, #4894): Cleanup the experiment.
     viewer.isEmbedded = () => false;
     toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     expect(windowApi.document.documentElement.style['touch-action'])
         .to.not.exist;
   });
@@ -467,7 +472,7 @@ describe('Viewport', () => {
     // TODO(dvoytenko, #4894): Cleanup the experiment.
     viewer.isEmbedded = () => true;
     toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     expect(windowApi.document.documentElement.style['touch-action'])
         .to.equal('pan-y');
   });
@@ -477,9 +482,11 @@ describe('Viewport', () => {
     let bindingMock;
     let iframe;
     let iframeWin;
+    let ampdoc;
 
     beforeEach(() => {
-      viewport = new Viewport(window, binding, viewer);
+      ampdoc = new AmpDocSingle(window);
+      viewport = new Viewport(ampdoc, binding, viewer);
       bindingMock = sandbox.mock(binding);
       iframe = document.createElement('iframe');
       const html = '<div id="one"></div>';
@@ -693,6 +700,7 @@ describe('Viewport META', () => {
     let viewer;
     let viewerMock;
     let windowApi;
+    let ampdoc;
     let originalViewportMetaString, viewportMetaString;
     let viewportMeta;
     let viewportMetaSetter;
@@ -734,10 +742,12 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
+      ampdoc = new AmpDocSingle(windowApi);
+      installTimerService(windowApi);
       installPlatformService(windowApi);
       installViewerService(windowApi);
       binding = new ViewportBindingDef();
-      viewport = new Viewport(windowApi, binding, viewer);
+      viewport = new Viewport(ampdoc, binding, viewer);
     });
 
     afterEach(() => {

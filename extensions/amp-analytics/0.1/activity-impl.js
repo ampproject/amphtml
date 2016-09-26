@@ -21,7 +21,7 @@
 
 import {fromClass} from '../../../src/service';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
 
 
@@ -173,7 +173,7 @@ export class Activity {
     this.viewer_ = viewerFor(this.win_);
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(this.win_);
+    this.viewport_ = viewportForDoc(this.win_.document);
 
     this.viewer_.whenFirstVisible().then(this.start_.bind(this));
   }

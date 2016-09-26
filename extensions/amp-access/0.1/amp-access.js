@@ -42,7 +42,7 @@ import {templatesFor} from '../../../src/template';
 import {timerFor} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 
 
@@ -131,7 +131,7 @@ export class AccessService {
     this.viewer_ = viewerFor(win);
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(win);
+    this.viewport_ = viewportForDoc(win.document);
 
     /** @private @const {!Templates} */
     this.templates_ = templatesFor(win);
