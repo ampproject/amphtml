@@ -28,7 +28,7 @@ const path = require('path');
 
 /**
  * @param {string} str
- * @param {string? prefix
+ * @param {string} prefix
  * @return {boolean}
  */
 function hasPrefix(str, prefix) {
@@ -37,7 +37,7 @@ function hasPrefix(str, prefix) {
 
 /**
  * @param {string} str
- * @param {string? prefix
+ * @param {string} prefix
  * @return {boolean}
  */
 function hasSuffix(str, suffix) {
