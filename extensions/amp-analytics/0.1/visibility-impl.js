@@ -21,7 +21,7 @@ import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {viewportFor} from '../../../src/viewport';
+import {viewportForDoc} from '../../../src/viewport';
 import {viewerFor} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
 
@@ -251,7 +251,7 @@ export class Visibility {
   /** @private */
   registerForViewportEvents_() {
     if (!this.scrollListenerRegistered_) {
-      const viewport = viewportFor(this.win_);
+      const viewport = viewportForDoc(this.win_.document);
 
       // Currently unlistens are not being used. In the event that no resources
       // are actively being monitored, the scrollListener should be very cheap.

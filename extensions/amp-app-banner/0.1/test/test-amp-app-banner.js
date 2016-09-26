@@ -346,6 +346,7 @@ describe('amp-app-banner', () => {
         sandbox.stub(vsync, 'run', runTask);
         const element = doc.createElement('div');
         element.id = 'banner1';
+        element.getAmpDoc = () => iframe.ampdoc;
         doc.body.appendChild(element);
         const banner = new AbstractAppBanner(element);
         banner.addDismissButton_();

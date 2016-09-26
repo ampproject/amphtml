@@ -26,7 +26,7 @@ import {expandLayoutRect} from '../layout-rect';
 import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
 import {installViewerService} from './viewer-impl';
-import {installViewportService} from './viewport-impl';
+import {installViewportServiceForDoc} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
@@ -146,7 +146,7 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = installViewportService(this.win);
+    this.viewport_ = installViewportServiceForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = installVsyncService(this.win);

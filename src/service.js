@@ -65,7 +65,7 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
  * If the service is not yet available the factory function is invoked and
  * expected to return the service.
  * Users should typically wrap this as a special purpose function (e.g.
- * `viewportFor(win)`) for type safety and because the factory should not be
+ * `vsyncFor(win)`) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
@@ -100,7 +100,7 @@ export function fromClass(win, id, constructor) {
  * an element that has the actual implementation. The promise resolves when
  * the implementation loaded.
  * Users should typically wrap this as a special purpose function (e.g.
- * `viewportFor(win)`) for type safety and because the factory should not be
+ * `vsyncFor(win)`) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.

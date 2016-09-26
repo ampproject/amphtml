@@ -185,6 +185,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
+ *   ampdoc: !../src/service/ampdoc-impl.AmpDoc,
  *   iframe: !Element,
  *   addElement: function(!Element):!Promise
  * }>}
@@ -213,6 +214,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       resolve({
         win: iframe.contentWindow,
         doc: iframe.contentWindow.document,
+        ampdoc: ampdoc,
         iframe: iframe,
         addElement: function(element) {
           const iWin = iframe.contentWindow;

@@ -28,7 +28,6 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
-import {installViewportService} from '../../../../src/service/viewport-impl';
 import {
   installUrlReplacementsService,
 } from '../../../../src/service/url-replacements-impl';
@@ -69,7 +68,6 @@ describe('amp-analytics', function() {
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
       installStorageService(iframe.win);
       installViewerService(iframe.win);
-      installViewportService(iframe.win);
       installCidService(iframe.win);
       installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);

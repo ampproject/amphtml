@@ -27,14 +27,14 @@ class AmpStickyAd extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = this.getVsync();
+
     /** @private {?Element} */
     this.ad_ = null;
 
-    /** @const @private {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = this.getViewport();
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = this.getVsync();
+    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = null;
 
     /** @private {boolean} */
     this.visible_ = false;
@@ -50,6 +50,8 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewport_ = this.getViewport();
+
     toggle(this.element, true);
     this.element.classList.add('-amp-sticky-ad-layout');
     const children = this.getRealChildren();
