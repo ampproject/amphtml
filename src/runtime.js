@@ -55,7 +55,7 @@ import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
-import {installViewportService} from './service/viewport-impl';
+import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
@@ -65,7 +65,7 @@ import {registerExtendedElement} from './extended-element';
 import {resourcesForDoc} from './resources';
 import {setStyle} from './style';
 import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {viewportForDoc} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
 
@@ -86,7 +86,6 @@ export function installRuntimeServices(global) {
   installPlatformService(global);
   installTimerService(global);
   installViewerService(global);
-  installViewportService(global);
   installStorageService(global);
   installVsyncService(global);
   installUrlReplacementsService(global);
@@ -104,6 +103,7 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
@@ -291,7 +291,7 @@ export function adopt(global) {
       global.AMP.resources = resourcesForDoc(global.document);
     }
 
-    const viewport = viewportFor(global);
+    const viewport = viewportForDoc(global.document);
 
     /** @const */
     global.AMP.viewport = {};

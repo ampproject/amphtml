@@ -25,7 +25,7 @@ import {
   createIframePromise,
   poll,
 } from '../../../../testing/iframe';
-import {viewportFor} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/viewport';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -72,7 +72,7 @@ describe('amp-iframe', () => {
         iframe.iframe.style.height = opt_height;
       }
       const top = opt_top || '600px';
-      const viewport = viewportFor(iframe.win);
+      const viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
       i.style.position = 'absolute';
       if (attributes.position) {

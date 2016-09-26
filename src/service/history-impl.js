@@ -650,7 +650,8 @@ export class HistoryBindingVirtual_ {
 function createHistory(ampdoc) {
   const viewer = installViewerService(ampdoc.win);
   let binding;
-  if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test) {
+  if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
+          ampdoc.win.AMP_TEST_IFRAME) {
     binding = new HistoryBindingVirtual_(viewer);
   } else {
     // Only one global "natural" binding is allowed since it works with the
