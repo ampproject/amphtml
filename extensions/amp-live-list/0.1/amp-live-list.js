@@ -20,7 +20,6 @@ import {childElementByAttr} from '../../../src/dom';
 import {installLiveListManager, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {viewportFor} from '../../../src/viewport';
 
 
 /**
@@ -179,7 +178,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.viewport_ = viewportFor(this.win);
+    this.viewport_ = this.getViewport();
 
     this.manager_ = installLiveListManager(this.win);
 

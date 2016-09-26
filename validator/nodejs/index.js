@@ -30,6 +30,9 @@ var url = require('url');
 var util = require('util');
 var vm = require('vm');
 
+var VERSION = '0.1.0';
+var DEFAULT_USER_AGENT = 'amphtml-validator';
+
 /**
  * Determines if str begins with prefix.
  * @param {!string} str
@@ -107,9 +110,10 @@ function readFromStdin() {
  * the contents located at the URL by using the 'http' or 'https' module.
  * Any HTTP status other than 200 is interpreted as an error.
  * @param {!string} url
+ * @param {!string} userAgent
  * @returns {!Promise<!string>}
  */
-function readFromUrl(url) {
+function readFromUrl(url, userAgent) {
   return new Promise(function(resolve, reject) {
            var clientModule = hasPrefix(url, 'http://') ? http : https;
            var req = clientModule.request(url, function(response) {
@@ -128,6 +132,7 @@ function readFromUrl(url) {
                resolve(response);
              }
            });
+           req.setHeader('User-Agent', userAgent);
            req.on('error', function(error) {  // E.g., DNS resolution errors.
              reject(
                  new Error('Unable to fetch ' + url + ' - ' + error.message));
@@ -287,17 +292,21 @@ var instanceByValidatorJs = {};
 
 /**
  * @param {string=} opt_validatorJs
+ * @param {string=} opt_userAgent
  * @returns {!Promise<Validator>}
  * @export
  */
-function getInstance(opt_validatorJs) {
+function getInstance(opt_validatorJs, opt_userAgent) {
   var validatorJs =
       opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
+  var userAgent =
+      opt_userAgent || DEFAULT_USER_AGENT;
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return Promise.resolve(instanceByValidatorJs[validatorJs]);
   }
-  var validatorJsPromise =
-      (isHttpOrHttpsUrl(validatorJs) ? readFromUrl : readFromFile)(validatorJs);
+  var validatorJsPromise = isHttpOrHttpsUrl(validatorJs) ?
+      readFromUrl(validatorJs, userAgent) :
+      readFromFile(validatorJs);
   return validatorJsPromise.then(function(scriptContents) {
     var instance;
     try {
@@ -350,7 +359,7 @@ function logValidationResult(filename, validationResult, color) {
  * Main entry point into the command line tool.
  */
 function main() {
-  program.version('0.1.0')
+  program.version(VERSION)
       .usage(
           '[options] <fileOrUrlOrMinus...>\n\n' +
           '  Validates the files or urls provided as arguments. If "-" is ' +
@@ -361,6 +370,9 @@ function main() {
               '  dist/validator_minified.js (built with build.py)\n' +
               '  for development.',
           'https://cdn.ampproject.org/v0/validator.js')
+      .option(
+          '--user-agent <userAgent>', 'User agent string to use in requests.',
+          DEFAULT_USER_AGENT)
       .option(
           '--html_format <AMP|AMP4ADS>', 'The input format to be validated.\n' +
               '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
@@ -381,18 +393,27 @@ function main() {
     program.outputHelp();
     process.exit(1);
   }
+  if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS') {
+    console.error('--html_format must be set to "AMP" or "AMP4ADS".');
+    process.exit(1);
+  }
+  if (program.format !== 'color' && program.format !== 'text' &&
+      program.format !== 'json') {
+    console.error('--format must be set to "color", "text", or "json".');
+    process.exit(1);
+  }
   var inputs = [];
   for (var ii = 0; ii < program.args.length; ii++) {
     var item = program.args[ii];
     if (item === '-') {
       inputs.push(readFromStdin());
     } else if (isHttpOrHttpsUrl(item)) {
-      inputs.push(readFromUrl(item));
+      inputs.push(readFromUrl(item, program.userAgent));
     } else {
       inputs.push(readFromFile(item));
     }
   }
-  getInstance(program.validator_js)
+  getInstance(program.validator_js, program.userAgent)
       .then(function(validator) {
         Promise.all(inputs)
             .then(function(resolvedInputs) {

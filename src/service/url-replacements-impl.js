@@ -25,7 +25,7 @@ import {fromClass} from '../service';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
-import {viewportFor} from '../viewport';
+import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
@@ -263,25 +263,25 @@ export class UrlReplacements {
     // Returns a promise resolving to viewport.getScrollTop.
     this.setAsync_('SCROLL_TOP', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollTop());
+        () => viewportForDoc(this.win_.document).getScrollTop());
     });
 
     // Returns a promise resolving to viewport.getScrollLeft.
     this.setAsync_('SCROLL_LEFT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollLeft());
+        () => viewportForDoc(this.win_.document).getScrollLeft());
     });
 
     // Returns a promise resolving to viewport.getScrollHeight.
     this.setAsync_('SCROLL_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollHeight());
+        () => viewportForDoc(this.win_.document).getScrollHeight());
     });
 
     // Returns a promise resolving to viewport.getScrollWidth.
     this.setAsync_('SCROLL_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollWidth());
+        () => viewportForDoc(this.win_.document).getScrollWidth());
     });
 
     // Returns screen.width.
@@ -312,13 +312,13 @@ export class UrlReplacements {
     // Returns the viewport height.
     this.setAsync_('VIEWPORT_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().height);
+        () => viewportForDoc(this.win_.document).getSize().height);
     });
 
     // Returns the viewport width.
     this.setAsync_('VIEWPORT_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().width);
+        () => viewportForDoc(this.win_.document).getSize().width);
     });
 
     // Returns document characterset.
