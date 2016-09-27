@@ -379,11 +379,6 @@ function createBaseAmpElementProto(win) {
     return win.BaseCustomElementProto;
   }
 
-  /**
-   * The interface that is implemented by all custom elements in the AMP
-   * namespace.
-   * @interface
-   */
   class BaseCustomElement extends win.HTMLElement {
     /**
      * Called when elements is created. Sets instance vars since there is no
