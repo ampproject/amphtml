@@ -108,6 +108,7 @@ export class AmpDocService {
   getAmpDoc(opt_node) {
     // Ensure that node is attached if specified. This check uses a new and
     // fast `isConnected` API and thus only checked on platforms that have it.
+    // See https://www.chromestatus.com/feature/5676110549352448.
     if (opt_node) {
       dev().assert(
           opt_node['isConnected'] === undefined ||
