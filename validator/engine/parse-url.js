@@ -50,6 +50,49 @@ function hostCharIsEnd(code) {
 }
 
 /**
+ * Determines if a character code is valid when found in a hostname.
+ * Note that the hostname should first be percent-unescaped to get
+ * correct results.
+ * @param {number} code
+ * @return {boolean}
+ */
+function hostCharIsValid(code) {
+  return (!isNaN(code) &&
+          code > /* unprintable */ 0x1F &&
+          code !== /* ' ' */ 0x20  &&
+          code !== /* '!' */ 0x21  &&
+          code !== /* '"' */ 0x22  &&
+          code !== /* '#' */ 0x23  &&
+          code !== /* '$' */ 0x24  &&
+          code !== /* '%' */ 0x25  &&
+          code !== /* '&' */ 0x26  &&
+          code !== /* ''' */ 0x27  &&
+          code !== /* '(' */ 0x28  &&
+          code !== /* ')' */ 0x29  &&
+          code !== /* '*' */ 0x2A  &&
+          code !== /* '+' */ 0x2B  &&
+          code !== /* ',' */ 0x2C  &&
+          code !== /* '/' */ 0x2F  &&
+          code !== /* ':' */ 0x3A  &&
+          code !== /* ';' */ 0x3B  &&
+          code !== /* '<' */ 0x3C  &&
+          code !== /* '=' */ 0x3D  &&
+          code !== /* '>' */ 0x3E  &&
+          code !== /* '?' */ 0x3F  &&
+          code !== /* '@' */ 0x3A  &&
+          code !== /* '[' */ 0x5B  &&
+          code !== /* '\' */ 0x5C  &&
+          code !== /* ']' */ 0x5D  &&
+          code !== /* '^' */ 0x5E  &&
+          code !== /* '`' */ 0x60  &&
+          code !== /* '{' */ 0x7B  &&
+          code !== /* '|' */ 0x7C  &&
+          code !== /* '}' */ 0x7D  &&
+          code !== /* '~' */ 0x7E  &&
+          code !== /*     */ 0x7B);
+}
+
+/**
  * Check if a host might be an IPv6 literal, i.e. all characters
  * match [0-9A-Fa-f:.], and at least 2 colons exist.
  * @param {string} host
@@ -66,6 +109,9 @@ parse_url.URL = class {
    * @param {string} url
    */
   constructor(url) {
+    // If isValid === false, no guarantees are made regarding the other
+    // fields in this URL object. Some may be 'correct', depending on the
+    // point in the parsing that a validity issue was discovered.
     /** @type {boolean} */
     this.isValid = true;
     /** @type {boolean} */
@@ -78,6 +124,14 @@ parse_url.URL = class {
     this.schemeSpecificPart = '';
     /** @type {boolean} */
     this.startsWithDoubleSlash = false;
+    // The hostname will be hex-unescaped and isValid will be set to false if
+    // the resulting string is not UTF-8 valid, but the hostname will not be
+    // encoded to punycode for non-ascii hostnames. Browsers can do this for
+    // us and implementing the encoding in javascript would be slow. Similarly,
+    // we do not normalize unusual (hex, octal, etc) IPv4 address formats,
+    // though we do accept them.
+    /** @type {string} */
+    this.host = '';
     /** @type {number} */
     this.port = -1;
 
@@ -104,16 +158,16 @@ parse_url.URL = class {
 
     unparsed = this.parseProtocol_(unparsed);
 
-    // Strip prefix '//' if present.
+    // If '//' is present as a prefix (after parsing protocol if any), then
+    // we need to parse the authority section (username:password@hostname:port)
     if (goog.string./*OK*/ startsWith(unparsed, '//')) {
       if (this.protocol == '') {
         this.startsWithDoubleSlash = true;
       }
-      unparsed = unparsed.substr(2);  // skip over the '//'
+      unparsed = unparsed.substr(2);
+      if (unparsed.length !== 0)
+        this.parseAuthority_(unparsed);
     }
-
-    if (unparsed.length !== 0)
-      this.parseAuthority_(unparsed);
   }
 
   /**
@@ -163,6 +217,46 @@ parse_url.URL = class {
       unparsed = '';
     }
     return unparsed;
+  }
+
+  /**
+   * @param {string} host
+   * @return {string}
+   * @private
+   */
+  unescapeAndCheckHost_(host) {
+    let unescapedHost = '';
+    try {
+      unescapedHost = decodeURIComponent(host);
+    } catch (e) {
+      // Indicates that host had escaped multibyte characters which
+      // when unescaped were not UTF-8 valid.
+      this.isValid = false;
+      return host;
+    }
+
+    for (let ii = 0; ii < unescapedHost.length; ++ii) {
+      const charCode = unescapedHost.charCodeAt(ii);
+      if (!hostCharIsValid(charCode)) {
+        this.isValid = false;
+      }
+    }
+    return unescapedHost;
+  }
+
+  /**
+   * @param {string} host
+   * @return {string}
+   * @private
+   */
+  processHostDots_(host) {
+    if (goog.string./*OK*/ startsWith(host, '.') ||
+        host.indexOf('..') !== -1) {
+      this.isValid = false;
+    } else if (host.substr(-1) === '.') {  // strip trailing '.'.
+      host = host.substr(0, host.length - 1);
+    }
+    return host;
   }
 
   /**
@@ -235,16 +329,19 @@ parse_url.URL = class {
       unparsed = unparsed.substr(atIdx + 1);
     }
 
+    // Extract the hostname.
     let hostBeginIdx = (atIdx !== -1 ? atIdx + 1 : 0);
     let hostEndIdx = (portIdx !== -1 ? portIdx - 1 : idx);
 
     // Special case: If the host is something that looks like a valid IPv6
     // address, with a [] at both ends, remove the [].
+    let isIPv6Literal = false;
     if (unparsed.charCodeAt(hostBeginIdx) === /* '[' */ 0x5B &&
         unparsed.charCodeAt(hostEndIdx - 1) === /* ']' */ 0x5D &&
         hostBeginIdx != hostEndIdx) {
-      if (hostIsIPv6Literal(unparsed.substr(hostBeginIdx + 1,
-                                            hostEndIdx - hostBeginIdx - 2))) {
+      isIPv6Literal = hostIsIPv6Literal(unparsed.substr(hostBeginIdx + 1,
+                                        hostEndIdx - hostBeginIdx - 2));
+      if (isIPv6Literal) {
         ++hostBeginIdx;
         --hostEndIdx;
       } else {
@@ -252,9 +349,17 @@ parse_url.URL = class {
         return '';
       }
     }
+    let host = unparsed.substr(hostBeginIdx, hostEndIdx - hostBeginIdx);
+    if (!isIPv6Literal) {
+      host = this.unescapeAndCheckHost_(host);
+    }
+    host = this.processHostDots_(host);
+    if (host.length === 0) {
+      this.isValid = false;
+    }
+    this.host = host;
 
-    // TODO: Finish parsing/validating the host string.
-
+    // Extract the port, if present.
     if (portIdx !== -1) {
       const portStr = unparsed.substr(portIdx, idx - portIdx);
       if (portStr === '') {

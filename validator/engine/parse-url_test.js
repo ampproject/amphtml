@@ -59,11 +59,13 @@ describe('parse_url', () => {
     assertStrictEqual('https', url.protocol);
   });
 
-  it ('parses with no explicit protocol',  () => {
-    let urlString = 'foo';
+  it ('parses with missing protocol', () => {
+    let urlString = 'example.com';
     let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.isValid);
     assertStrictEqual(false, url.hasProtocol);
-    assertStrictEqual('https', url.protocol);
+    assertStrictEqual(url.defaultProtocol, url.protocol);
+    assertStrictEqual('', url.host);  // example.com is a relative path
   });
 
   it ('parses with invalid protocol characters',  () => {
@@ -130,9 +132,9 @@ describe('parse_url', () => {
   });
 
   it ('fails on invalid IPv6 hostname', () => {
-    let urlString = 'https://[2001:0db8:85a7]/';  // 7 not valid hex character
+    let urlString = 'https://[2001:0db8:85ag]/';  // 'g' not valid hex character
     let url = new parse_url.URL(urlString);
-    assertStrictEqual(true, url.isValid);
+    assertStrictEqual(false, url.isValid);
 
     urlString = 'https://[2001:0db8]/';
     url = new parse_url.URL(urlString);
@@ -182,6 +184,74 @@ describe('parse_url', () => {
     let url = new parse_url.URL(urlString);
     assertStrictEqual(true, url.isValid);
     assertStrictEqual(80, url.port);
+  });
+
+  it ('fails on invalid character ! in hostname', () => {
+    let urlString = 'http://example!.com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('fails on invalid character 0x10 in hostname', () => {
+    let urlString = 'http://example\x10.com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('fails on invalid character & in hostname', () => {
+    let urlString = 'http://example.com&/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('fails on invalid characters in hostname', () => {
+    let urlString = 'http://example!.com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('fails on invalid utf8 percent-escape in hostname', () => {
+    let urlString = 'http://example-%FF.com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('fails on empty host', () => {
+    let urlString = 'http:///';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('fails on dot host', () => {
+    let urlString = 'http://./';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('fails on host with consecutive dots', () => {
+    let urlString = 'http://example..com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
+  });
+
+  it ('strips trailing . from host', () => {
+    let urlString = 'http://example.com./';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.isValid);
+    assertStrictEqual('example.com', url.host);
+  });
+
+  it ('accepts relative urls', () => {
+    let urlString = '/foo';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.isValid);
+  });
+
+  it ('accepts utf8 characters in hostname', () => {
+    let urlString = 'http://⚡.com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.isValid);
+    assertStrictEqual('⚡.com', url.host);
   });
 });
 
