@@ -268,9 +268,8 @@ Adds support for Yandex Metrica.
   - `type` See [Analytics vendors](#analytics-vendors)
   - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md).
 
-    ```
-    <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
-    ```
+    `<amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>`
+
     The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
   - `data-credentials` Optional attribute. If set to `include` turns on the ability to read and write cookies on the request specified via `config` above.
   - `data-consent-notification-id` Optional attribute. If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
@@ -353,7 +352,7 @@ The `triggers` attribute describes when an analytics request should be sent. It 
     - `threshold` This configuration is used to filter out requests that do not meet particular criteria: For a request to go through to the analytics vendor, the following logic should be true `HASH(sampleOn) < threshold`.
 
   As an example, following configuration can be used to sample 50% of the requests based on random input or at 1% based on client id.
-  ```
+  ```javascript
   'triggers': {
     'sampledOnRandom': {
       'on': 'visible',
