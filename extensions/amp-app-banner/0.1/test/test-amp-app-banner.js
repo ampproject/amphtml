@@ -29,8 +29,9 @@ import {
 import {xhrFor} from '../../../../src/xhr';
 import {installStorageService} from '../../../../src/service/storage-impl';
 import '../../../amp-analytics/0.1/amp-analytics';
-import {installPerformanceService} from
-    '../../../../src/service/performance-impl';
+import {
+    installPerformanceService,
+} from '../../../../src/service/performance-impl';
 import {timerFor} from '../../../../src/timer';
 
 describe('amp-app-banner', () => {
@@ -116,9 +117,9 @@ describe('amp-app-banner', () => {
 
       const banner = iframe.doc.createElement('amp-app-banner');
       banner.setAttribute('layout', 'nodisplay');
-      if (!config.noOpenLink) {
+      if (!config.noOpenButton) {
         const openButton = iframe.doc.createElement('button');
-        openButton.setAttribute('open-link', '');
+        openButton.setAttribute('open-button', '');
         banner.appendChild(openButton);
       }
 
@@ -126,12 +127,12 @@ describe('amp-app-banner', () => {
     });
   }
 
-  function testLinkMissing() {
+  function testButtonMissing() {
     return getAppBanner({
       meta,
       manifest,
-      noOpenLink: true,
-    }).should.eventually.be.rejectedWith(/<button open-link> is required/);
+      noOpenButton: true,
+    }).should.eventually.be.rejectedWith(/<button open-button> is required/);
   }
 
   function testAddDismissButton() {
@@ -231,7 +232,7 @@ describe('amp-app-banner', () => {
       });
     });
 
-    it('should throw if open link is missing', testLinkMissing);
+    it('should throw if open button is missing', testButtonMissing);
 
     it('should remove banner if meta is not provided', () => {
       return getAppBanner({meta: null}).then(banner => {
@@ -254,7 +255,7 @@ describe('amp-app-banner', () => {
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
       return getAppBanner({meta}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_.calledWith(
-            el.querySelector('button[open-link]'),
+            el.querySelector('button[open-button]'),
             'medium://p/cb7f223fad86',
             'https://itunes.apple.com/us/app/id828256236'
         )).to.be.true;
@@ -285,7 +286,7 @@ describe('amp-app-banner', () => {
       });
     });
 
-    it('should throw if open link is missing', testLinkMissing);
+    it('should throw if open button is missing', testButtonMissing);
     it('should add dismiss button and update padding', testAddDismissButton);
     it('should remove banner if already dismissed', testRemoveIfDismissed);
 
@@ -306,7 +307,7 @@ describe('amp-app-banner', () => {
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
       return getAppBanner({manifest}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_.calledWith(
-            el.querySelector('button[open-link]'),
+            el.querySelector('button[open-button]'),
             'android-app://com.medium.reader/https/example.com/amps.html',
             'https://play.google.com/store/apps/details?id=com.medium.reader'
         )).to.be.true;
@@ -323,15 +324,15 @@ describe('amp-app-banner', () => {
         doc.body.appendChild(element);
         const openButton = doc.createElement('button');
         element.appendChild(openButton);
-        openButton.setAttribute('open-link', '');
+        openButton.setAttribute('open-button', '');
         openButton.addEventListener = sandbox.spy();
         const banner = new AbstractAppBanner(element);
-        banner.setupOpenButton_(openButton, 'open-link', 'install-link');
+        banner.setupOpenButton_(openButton, 'open-button', 'install-link');
         expect(openButton.addEventListener.calledWith('click')).to.be.true;
         win.open = sandbox.spy();
         sandbox.stub(banner, 'redirectTopLocation_', () => {});
-        banner.openButtonClicked_('open-link', 'install-link');
-        expect(win.open.calledWith('open-link', '_top')).to.be.true;
+        banner.openButtonClicked_('open-button', 'install-link');
+        expect(win.open.calledWith('open-button', '_top')).to.be.true;
         return timerFor(iframe.win).delay(() => {
           expect(banner.redirectTopLocation_.called)
               .to.be.true;

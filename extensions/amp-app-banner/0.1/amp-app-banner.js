@@ -236,8 +236,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     /** @private @const {!Element} */
     this.openButton_ = user().assert(
-        this.element.querySelector('button[open-link]'),
-        '<button open-link> is required inside %s: %s', TAG, this.element);
+        this.element.querySelector('button[open-button]'),
+        '<button open-button> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
   }
@@ -331,8 +331,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     /** @private @const {!Element} */
     this.openButton_ = user().assert(
-        this.element.querySelector('button[open-link]'),
-        '<button open-link> is required inside %s: %s', TAG, this.element);
+        this.element.querySelector('button[open-button]'),
+        '<button open-button> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
   }
