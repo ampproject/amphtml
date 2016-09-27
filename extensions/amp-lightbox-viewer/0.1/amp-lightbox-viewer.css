@@ -68,16 +68,20 @@
   overflow: hidden !important;
 }
 
-/* Page Mask, Gallery Viewer */
+/* Page Mask, Gallery Viewer, Description Box */
 .-amp-lbv-mask,
-.-amp-lbv-click-area,
-.-amp-lbv-gallery {
+.-amp-lbv-gallery,
+.amp-lbv-desc-box {
   position: fixed !important;
-  top:0 !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
   background-image: none !important;
+}
+
+.-amp-lbv-mask,
+.-amp-lbv-gallery {
+  top:0 !important;
   /*
    * For now we force a non-transparent shim until we find a good solution
    * for the background page shifting when items get lightboxed.
@@ -90,16 +94,26 @@
   z-index: 2147483642 !important;
 }
 
-.-amp-lbv-click-area {
-  opacity: 0 !important;
-  z-index: 2147483644
-}
-
 .-amp-lbv-gallery {
   display: none;
   z-index: 2147483645 !important;
   top: 50px !important;
   overflow: auto !important;
+}
+
+.amp-lbv-desc-box {
+  z-index: 2147483644 !important;
+  max-height: 30vh !important;
+  padding: 10px;
+  overflow: scroll;
+  color: #ffffff;
+  background-color: rgba(0,0,0,0.7);
+  opacity: 1;
+  transition: opacity 1s;
+}
+
+.amp-lbv-desc-box.hide {
+  opacity: 0;
 }
 
 .-amp-lbv[gallery-view] .-amp-lbv-gallery {
@@ -191,16 +205,4 @@
 
 .-amp-lbv[gallery-view] .amp-lbv-button-back {
   display: block;
-}
-
-.amp-lbv-desc-box {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 2147483644 !important;
-  max-height: 30vh;
-  overflow: scroll;
-  color: white;
-  padding: 10px;
 }

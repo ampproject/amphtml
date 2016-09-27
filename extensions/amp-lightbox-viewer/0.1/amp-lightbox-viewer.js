@@ -22,7 +22,8 @@ import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
-import {toggle, setStyles} from '../../../src/style';
+import {toggle} from '../../../src/style';
+import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
 /** @const */
@@ -85,6 +86,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Array<{string, Element}>} */
     this.thumbnails_ = null;
 
+    /** @private {?UnlistenDef} */
+    this.elementUnlisten_ = null;
+
     this.buildMask_();
     this.buildDescriptionBox_();
     this.buildControls_();
@@ -120,22 +124,25 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('amp-lbv-desc-box');
 
-    // clickArea is needed above lightboxed item to get click event on top
-    const clickArea_ = this.win.document.createElement('div');
-    clickArea_.classList.add('-amp-lbv-click-area');
-    clickArea_.addEventListener('click', () => {
-
-      if (!this.descriptionBox_.hasAttribute('lbv-hide')) {
-        this.descriptionBox_.setAttribute('lbv-hide', '');
-        this.setDescriptionBoxOpacity_(0);
-      } else {
-        this.descriptionBox_.removeAttribute('lbv-hide');
-        this.setDescriptionBoxOpacity_(1);
-      }
-    });
-    this.container_.appendChild(clickArea_);
+    const toggleDescription = this.toggleDescriptionBox_.bind(this);
+    listen(this.container_, 'click', toggleDescription);
     this.container_.appendChild(this.descriptionBox_);
   }
+
+  /**
+   * Toggle description box if it has text content
+   * @private
+   */
+  toggleDescriptionBox_() {
+    if (!this.descriptionBox_.textContent) {
+      return;
+    }
+    this.descriptionBox_.classList.toggle('hide');
+  }
+
+  /**
+   * Enable/Disable description box.
+   */
 
   /**
    * Builds the controls (i.e. Next, Previous and Close buttons) and appends
@@ -172,7 +179,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     button.setAttribute('role', 'button');
     button.setAttribute('aria-label', label);
     button.classList.add(className);
-    button.addEventListener('click', action);
+    button.addEventListener('click', event => {
+      action();
+      event.stopPropagation();
+    });
 
     this.container_.appendChild(button);
   }
@@ -214,7 +224,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const updateViewerPromise = this.updateViewer_(element);
     this.getViewport().enterLightboxMode();
 
-    this.setDescriptionBoxOpacity_(1);
     toggle(this.element, true);
     this.active_ = true;
 
@@ -302,9 +311,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // update active element to be the new element
     this.activeElement_ = newElement;
 
-    // update description box
-    this.updateDescriptionBox_();
-
     // update the controls
     const updateControlsPromise = this.updateControls_();
 
@@ -329,6 +335,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   setupElement_(element) {
     this.updateStackingContext_(element, /* reset */ false);
     element.classList.add('amp-lightboxed');
+    // update description box
+    const descText = this.manager_.getDescription(element);
+    this.descriptionBox_.textContent = descText;
+    // add click event to current element to trigger discription box
+    const toggleDescription = this.toggleDescriptionBox_.bind(this);
+    this.elementUnlisten_ =
+        listen(element, 'click', toggleDescription);
   }
 
   /**
@@ -339,38 +352,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   tearDownElement_(element) {
     this.updateStackingContext_(element, /* reset */ true);
     element.classList.remove('amp-lightboxed');
-  }
-
-  /**
-   * Updates the description box based on the current active element.
-   * @private
-   */
-  updateDescriptionBox_() {
-    dev().assert(this.activeElement_);
-
-    const descText = this.manager_.getDescription(this.activeElement_);
-    if (!descText) {
-      this.descriptionBox_.textContent = null;
-      setStyles(this.descriptionBox_, {visibility: 'hidden'});
-    } else {
-      setStyles(this.descriptionBox_, {visibility: 'visible'});
-      this.descriptionBox_.textContent = descText;
+    if (this.elementUnlisten_) {
+      this.elementUnlisten_();
     }
-  }
 
-  /**
-   * Set the descriptionBox to given opacity in given time.
-   * @param {number} opacity
-   * @param {number=} opt_duration Please note the unit is sec
-   * @private
-   */
-  setDescriptionBoxOpacity_(opacity, opt_duration) {
-    dev().assert(this.descriptionBox_);
-    const duration = opt_duration || 0;
-    setStyles(this.descriptionBox_, {
-      opacity,
-      transition: 'opacity ' + duration + 's',
-    });
   }
 
   /**
@@ -534,9 +519,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgElement.classList.add('-amp-lbv-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
-    const redirect = () => {
+    const redirect = event => {
       this.updateViewer_(thumbnailObj.element);
       this.closeGallery_();
+      event.stopPropagation();
     };
     element.addEventListener('click', redirect);
     return element;

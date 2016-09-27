@@ -163,27 +163,29 @@ describe('amp-lightbox-viewer', () => {
         const impl = viewer.implementation_;
         return impl.activate({source: item1}).then(() => {
           assertLightboxed(item1, impl, true, /*closed*/ false);
-          const clickArea = viewer.querySelector('.-amp-lbv-click-area');
+          const container = viewer.querySelector('.-amp-lbv');
           const descriptionBox = viewer.querySelector('.amp-lbv-desc-box');
           const button = viewer.querySelector('.amp-lbv-button-next');
-          expect(clickArea).to.not.be.null;
+          expect(container).to.not.be.null;
           expect(descriptionBox).to.not.be.null;
-          expect(descriptionBox.style.opacity).to.equal('1');
           expect(descriptionBox.textContent).to.equal('test-text');
+          expect(descriptionBox.classList.contains('hide')).to.be.false;
           // test click button won't toggle description box
           button.dispatchEvent(new Event('click'));
-          expect(descriptionBox.style.opacity).to.equal('1');
+          expect(descriptionBox.classList.contains('hide')).to.be.false;
           // test click on screen will hide description
-          clickArea.dispatchEvent(new Event('click'));
-          expect(descriptionBox.style.opacity).to.equal('0');
-          // test no content will set description box visibility
+          container.dispatchEvent(new Event('click'));
+          expect(descriptionBox.classList.contains('hide')).to.be.true;
+          // test no content will disable toggling
           impl.updateViewer_(item2);
-          expect(descriptionBox.style.visibility).to.equal('hidden');
+          container.dispatchEvent(new Event('click'));
+          expect(descriptionBox.classList.contains('hide')).to.be.true;
           // test switching items
           impl.updateViewer_(item4);
-          expect(descriptionBox.style.visibility).to.equal('visible');
           expect(descriptionBox.textContent).to.equal('test-text2');
-          expect(descriptionBox.style.opacity).to.equal('0');
+          expect(descriptionBox.classList.contains('hide')).to.be.true;
+          container.dispatchEvent(new Event('click'));
+          expect(descriptionBox.classList.contains('hide')).to.be.false;
         });
       });
     });
