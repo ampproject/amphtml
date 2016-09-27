@@ -25,7 +25,7 @@ min_validator_revision_required: 178
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 287
+spec_file_revision: 288
 
 reference_points_can_define_reference_points: true
 
@@ -360,26 +360,6 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value: "X-UA-Compatible"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_properties: {
-      properties: { name: "ie" value: "edge" }
-      properties: { name: "chrome" value: "1" }
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
-}
-# Identical to the above, but a common case variant of x-ua-compatible.
-tags: {
-  tag_name: "META"
-  spec_name: "meta http-equiv=x-ua-compatible"
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "x-ua-compatible"
     dispatch_key: true
   }
   attrs: {
@@ -1620,6 +1600,39 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-xlink-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "IMAGE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "class" }
+  attrs: { name: "height" }
+  attrs: { name: "preserveaspectratio" }
+  attrs: { name: "transform" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  # XLink Attributes:
+  attrs: { name: "xlink:actuate" }
+  attrs: { name: "xlink:arcrole" }
+  attrs: {
+    name: "xlink:href"
+    value_url: {
+      allowed_protocol: "data"
+      allow_relative: false
+      allow_empty: false
+    }
+    blacklisted_value_regex: "(^|\\s)data:image\\/svg\\+xml"
+  }
+  attrs: { name: "xlink:role" }
+  attrs: { name: "xlink:show" }
+  attrs: { name: "xlink:title" }
+  attrs: { name: "xlink:type" }
+
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
