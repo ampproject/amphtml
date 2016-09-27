@@ -494,14 +494,12 @@ export class InstrumentationService {
     const callImmediate = hasImmediate ? Boolean(timerSpec.immediate) : true;
     const viewer = this.viewer_;
     const intervalId = this.win_.setInterval(() => {
-      const vars = {};
-      vars['backgrounded'] = viewer.isVisible() ? '0' : '1';
+      const vars = {backgrounded: viewer.isVisible() ? '0' : '1'};
       listener(new AnalyticsEvent(AnalyticsEventType.TIMER, vars));
     }, timerSpec['interval'] * 1000);
 
     if (callImmediate) {
-      const vars = {};
-      vars['backgrounded'] = viewer.isVisible() ? '0' : '1';
+      const vars = {backgrounded: viewer.isVisible() ? '0' : '1'};
       listener(new AnalyticsEvent(AnalyticsEventType.TIMER, vars));
     }
 
