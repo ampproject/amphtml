@@ -32,9 +32,12 @@ before_script:
 script:
   - npm run ava
   - gulp lint
-  - gulp build --css-only
+  - gulp build
   - gulp check-types
   - gulp dist --fortesting
+  # Output size change.
+  - gulp size
+  - git --no-pager diff
   - gulp presubmit
   # dep-check needs to occur after build since we rely on build to generate
   # the css files into js files.
