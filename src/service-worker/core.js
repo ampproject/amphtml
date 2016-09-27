@@ -84,9 +84,7 @@ export function rtvVersion(url) {
  * @return {string}
  */
 function basename(url) {
-  const match = /(?!.*?\/)[\w.]+/.exec(url);
-  // Yes, I know there'll always be a match. But Closure!
-  return match ? match[0] : '';
+  return url.substr(url.lastIndexOf('/') + 1);
 }
 
 /**

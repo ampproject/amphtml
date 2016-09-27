@@ -199,9 +199,7 @@ describe.only('Cache SW', () => {
       });
 
       it('prunes previous cached responses for file', () => {
-        const deleter = sandbox.stub(cache, 'delete', (r) => {
-          console.log(r);
-        });
+        const deleter = sandbox.stub(cache, 'delete');
         return sw.fetchAndCache(cache, request, file, rtv).then(() => {
           expect(deleter).to.have.been.calledWith(cache.cached[0][0]);
           expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
@@ -258,11 +256,25 @@ describe.only('Cache SW', () => {
 
   describe('handleFetch', () => {
     const prod = url.replace('00', '01');
+    const blacklisted = url.replace(version, '1313131313131');
     const request = new Request(url);
     const compRequest = new Request(url.replace('v0.js', 'amp-comp.js'));
-    const otherVersion = new Request(prod.replace('v0.js', 'amp-comp.js'));
+    const otherVersion = new Request(prod.replace(/(\d+)\/v0.js/, (match, v) => {
+      return `00${parseInt(v, 10) - 1}/amp-comp.js`;
+    }));
+    const blacklistedRequest = new Request(blacklisted.replace('v0.js', 'amp-comp.js'));
     let clientId = 0;
     let fetch;
+
+    function responseFromRequest(request) {
+      return {
+        ok: true,
+        url: request.url,
+        clone() {
+          return this;
+        },
+      };
+    }
 
     beforeEach(() => {
       clientId++;
@@ -327,7 +339,7 @@ describe.only('Cache SW', () => {
         it('forces uniform RTV version of winner', () => {
           const timer = timerFor(window);
           // First call will resolve after the first.
-          const keys = sinon.stub(cache, 'keys');
+          const keys = sandbox.stub(cache, 'keys');
           keys.returns(Promise.resolve([]))
           keys.onCall(0).returns(timer.promise(100, []));
           return Promise.all([
@@ -338,6 +350,69 @@ describe.only('Cache SW', () => {
                 otherVersion.url));
             expect(sw.rtvVersion(responses[1].url)).to.equal(sw.rtvVersion(
                 otherVersion.url));
+          });
+        });
+      });
+
+      describe('with cached files', () => {
+        beforeEach(() => {
+          cache.cached.push([request, responseFromRequest(request)]);
+          cache.cached.push([otherVersion, responseFromRequest(otherVersion)]);
+        });
+
+        it('fulfills with cached version', () => {
+          return sw.handleFetch(compRequest, clientId).then(resp => {
+            expect(resp.url).to.equal(otherVersion.url);
+          });
+        });
+
+        it('forces later fetches to use same RTV', () => {
+          return sw.handleFetch(compRequest, clientId).then(() => {
+            return sw.handleFetch(request, clientId);
+          }).then((resp) => {
+            expect(sw.rtvVersion(resp.url)).to.equal(sw.rtvVersion(
+                otherVersion.url));
+          });
+        });
+
+        describe('with blacklisted file', () => {
+          beforeEach(() => {
+            cache.cached.splice(1, 1, [blacklistedRequest, responseFromRequest(blacklistedRequest)]);
+          });
+
+          it('will cache the blacklisted file', () => {
+            return sw.handleFetch(blacklistedRequest, clientId).then(resp => {
+              expect(fetch).to.not.have.been.called;
+            });
+          });
+
+          it('will not stale-serve blacklisted cache version', () => {
+            return sw.handleFetch(compRequest, clientId).then(resp => {
+              expect(resp.url).to.equal(compRequest.url);
+            });
+          });
+        });
+
+        it('will update cached file if new one is the latest RTV', () => {
+          return sw.handleFetch(compRequest, clientId).then(resp => {
+            return new Promise((resolve) => {
+              // Update is out of band with response.
+              setTimeout(resolve, 50);
+            });
+          }).then(() => {
+            expect(cache.cached[1][0]).to.equal(compRequest);
+          });
+        });
+
+        it('will not update cached file if new one is not the latest RTV', () => {
+          cache.cached.splice(1, 1, [compRequest, responseFromRequest(compRequest)]);
+          return sw.handleFetch(otherVersion, clientId).then(resp => {
+            return new Promise((resolve) => {
+              // Update is out of band with response.
+              setTimeout(resolve, 50);
+            });
+          }).then(() => {
+            expect(cache.cached[1][0]).to.equal(compRequest);
           });
         });
       });
