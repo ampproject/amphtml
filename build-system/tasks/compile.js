@@ -149,7 +149,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
-          'document-register-element.max.js',
+          'document-register-element.node.js',
       //'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
@@ -189,6 +189,7 @@ function compile(entryModuleFilenames, outputDir,
       );
       unneededFiles.push(
           'build/fake-module/src/polyfills.js',
+          'build/fake-module/src/polyfills/document-contains.js',
           'build/fake-module/src/polyfills/promise.js',
           'build/fake-module/src/polyfills/math-sign.js');
     }
@@ -203,6 +204,7 @@ function compile(entryModuleFilenames, outputDir,
     var externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/shadow_dom.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
@@ -251,12 +253,8 @@ function compile(entryModuleFilenames, outputDir,
           'third_party/webcomponentsjs/',
           'node_modules/',
           'build/patched-module/',
-          // TODO: The following three are whitelisted only because they're
-          // blocking an unrelated PR.  But they appear to contain real type
-          // errors and should be fixed at some point.
-          'src/service.js',
+          // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
-          'src/document-state.js',
         ],
         jscomp_error: [],
       }
@@ -310,18 +308,34 @@ function compile(entryModuleFilenames, outputDir,
 };
 
 function patchRegisterElement() {
+  var file;
   // Copies document-register-element into a new file that has an export.
   // This works around a bug in closure compiler, where without the
   // export this module does not generate a goog.provide which fails
   // compilation.
   // Details https://github.com/google/closure-compiler/issues/1831
   const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.max.js';
+      '/build/document-register-element.node.js';
   if (!fs.existsSync(patchedName)) {
-      fs.writeFileSync(patchedName,
-          fs.readFileSync(
-              'node_modules/document-register-element/build/' +
-              'document-register-element.max.js') +
-          '\n\nexport function deadCode() {}\n');
+    file = fs.readFileSync(
+        'node_modules/document-register-element/build/' +
+        'document-register-element.node.js').toString();
+    if (argv.fortesting) {
+      // Need to switch global to self since closure doesn't wrap the module
+      // like CommonJS
+      file = file.replace('installCustomElements(global);',
+          'installCustomElements(self);');
+    } else {
+      // Get rid of the side effect the module has so we can tree shake it
+      // better and control installation, unless --fortesting flag
+      // is passed since we also treat `--fortesting` mode as "dev".
+      file = file.replace('installCustomElements(global);', '');
     }
+    // Closure Compiler does not generate a `default` property even though
+    // to interop CommonJS and ES6 modules. This is the same issue typescript
+    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+    file = file.replace('module.exports = installCustomElements;',
+        'exports.default = installCustomElements;');
+    fs.writeFileSync(patchedName, file);
+  }
 }

@@ -57,12 +57,13 @@ describe('amp-user-notification', () => {
       iframe = iframe_;
       iframe.win.ampExtendedElements = {};
       installUrlReplacementsService(iframe.win);
-      return buildElement(iframe.doc, attrs);
+      return buildElement(iframe.doc, iframe.ampdoc, attrs);
     });
   }
 
-  function buildElement(doc, attrs = {}) {
+  function buildElement(doc, ampdoc, attrs = {}) {
     const elem = doc.createElement('amp-user-notification');
+    elem.getAmpDoc = () => ampdoc;
 
     for (const attr in attrs) {
       elem.setAttribute(attr, attrs[attr]);

@@ -342,7 +342,7 @@ export const ANALYTICS_CONFIG = {
           'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
           'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
           'bln=${browserLanguage}&chs=${documentCharset}&' +
-          'col=${screenColorDepth}&tzo=${timezone}',
+          'col=${screenColorDepth}&tzo=${timezone}&cp_cx_channel=amp',
     },
     'triggers': {
       'defaultPageview': {
@@ -485,6 +485,50 @@ export const ANALYTICS_CONFIG = {
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'metrika': {
+    'transport': {'beacon': true, 'xhrpost': true, 'image': false},
+    'requests': {
+      'pageview': '${_watch}?browser-info=${_brInfo}&${_siteInfo}&${_suffix}',
+      'notBounce': '${_watch}?browser-info=ar%3A1%3Anb%3A1%3A${_brInfo}' +
+        '&${_suffix}',
+      'externalLink': '${_watch}?browser-info=ln%3A1%3A${_brInfo}&${_suffix}',
+      'reachGoal': '${_watch}?browser-info=ar%3A1%3A${_brInfo}&${_siteInfo}' +
+        '&${_goalSuffix}',
+      '_domain': 'https://mc.yandex.ru',
+      '_watch': '${_domain}/watch/${counterId}',
+      '_suffix': 'page-url=${canonicalUrl}&page-ref=${documentReferrer}',
+      '_goalSuffix': 'page-url=goal%3A%2F%2F${canonicalHost}/${goalId}' +
+        '&page-ref=${canonicalUrl}',
+      '_techInfo': [
+        'amp%3A1%3Az%3A${timezone}%3Ai%3A${timestamp}%3Arn%3A${random}',
+        'la%3A${browserLanguage}%3Aen%3A${documentCharset}',
+        'rqn%3A${requestCount}',
+        's%3A${screenWidth}x${screenHeight}x${screenColorDepth}',
+        'w%3A${availableScreenWidth}x${availableScreenHeight}',
+        'ds%3A${_timings}%3Auid%3A${clientId(_ym_uid)}%3Apvid%3A${pageViewId}',
+      ].join('%3A'),
+      '_timings': [
+        '${domainLookupTime}%2C${tcpConnectTime}',
+        '${serverResponseTime}%2C${pageDownloadTime}',
+        '${redirectTime}%2C${navTiming(redirectStart,redirectEnd)}',
+        '${navRedirectCount}%2C${navTiming(domLoading,domInteractive)}',
+        '${navTiming(domContentLoadedEventStart,domContentLoadedEventEnd)}',
+        '${navTiming(navigationStart,domComplete)}',
+        '${pageLoadTime}%2C${navTiming(loadEventStart,loadEventEnd)}',
+        '${contentLoadTime}',
+      ].join('%2C'),
+      '_brInfo': '${_techInfo}%3A${_title}',
+      '_title': 't%3A${title}',
+      '_siteInfo': 'site-info=${yaParams}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
   },
 

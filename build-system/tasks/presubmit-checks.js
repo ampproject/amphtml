@@ -47,6 +47,7 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
+  'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
@@ -93,7 +94,6 @@ var forbiddenTerms = {
         'dist.3p/current/integration.js',
     whitelist: [
       'src/mode.js',
-      '3p/integration.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -193,7 +193,7 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installViewportService': {
+  'installViewportServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -404,12 +404,6 @@ var forbiddenTerms = {
       'src/error.js',
     ],
   },
-  '(doc[^.]*)\\.contains': {
-    message: 'Use dom.documentContains API.',
-    whitelist: [
-      'src/dom.js',
-    ],
-  },
   'getUnconfirmedReferrerUrl': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
@@ -422,6 +416,12 @@ var forbiddenTerms = {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
       'src/log.js',
+    ],
+  },
+  '\\.schedulePass\\(': {
+    message: 'schedulePass is heavy, thinking twice before using it',
+    whitelist: [
+      'src/service/resources-impl.js',
     ],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
