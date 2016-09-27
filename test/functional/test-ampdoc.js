@@ -55,8 +55,10 @@ describe('AmpDocService', () => {
 
     it('should always yield the single document', () => {
       expect(service.getAmpDoc(null)).to.equal(service.singleDoc_);
-      expect(service.getAmpDoc(document.createElement('div')))
-          .to.equal(service.singleDoc_);
+      expect(service.getAmpDoc(document)).to.equal(service.singleDoc_);
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
     });
   });
 
@@ -73,6 +75,13 @@ describe('AmpDocService', () => {
         shadowRoot = host.createShadowRoot();
         shadowRoot.appendChild(content);
       }
+      document.body.appendChild(host);
+    });
+
+    afterEach(() => {
+      if (host.parentNode) {
+        host.parentNode.removeChild(host);
+      }
     });
 
     it('should initialize as single-doc', () => {
@@ -83,6 +92,7 @@ describe('AmpDocService', () => {
     it('should yield custom-element shadow-doc when exists', () => {
       const ampDoc = {};
       content.ampdoc_ = ampDoc;
+      host.appendChild(content);
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
