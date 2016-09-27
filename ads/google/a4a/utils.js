@@ -20,6 +20,7 @@ import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {performanceFor} from '../../../src/performance';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
@@ -305,3 +306,24 @@ function elapsedTimeWithCeiling(time, start) {
   }
   return '-M';
 }
+
+class AmpAdLifecycleReporter {
+  /**
+   *
+   * @param {!Window} win  Parent Element window object.
+   */
+  constructor (win) {
+    this.win_ = win;
+    this.performance_ = performanceFor(this.win_);
+    this.win_.ampAdSlotId = this.win_.ampAdSlotId || 0;
+    this.win_.ampAdPageCorrelator = this.win_.ampAdPageCorrelator ||
+        Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+    this.slotId_ = this.win_.ampAdSlotId++;
+    this.qqid_ = null;
+  }
+
+  setQQId(qqid) {
+    this.qqid_ = qqid;
+  }
+
+};

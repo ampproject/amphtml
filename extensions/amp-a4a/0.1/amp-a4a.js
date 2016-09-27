@@ -23,6 +23,7 @@ import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeChildren, createElementWithAttributes} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
+import {performanceFor} from '../../../src/performance';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
@@ -113,11 +114,14 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {number} ID of timer used as part of 3p throttling. */
     this.timerId_ = 0;
 
-    /** @private {null|boolean} where layoutMeasure has been executed. */
+    /** @private {boolean} whether layoutMeasure has been executed. */
     this.layoutMeasureExecuted_ = false;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
+
+    this.performance_ = performanceFor(element.win);
+    this.performance_.tick('a4a_constructor');
 
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
@@ -153,9 +157,10 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * To be overridden by network specific implementation indicating if element
-   * (and environment generally) are valid for sending XHR rqueries.
-   * @return {boolean} where element is valid and ad request should be sent.  If
-   *    false, no ad request is sent and slot will be collapsed if possible.
+   * (and environment generally) are valid for sending XHR queries.
+   * @return {boolean} whether element is valid and ad request should be
+   *    sent.  If false, no ad request is sent and slot will be collapsed if
+   *    possible.
    */
   isValidElement() {
     return true;
@@ -199,6 +204,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
+    this.performance_.tick('a4a_onLayoutMeasure');
     if (this.apiHandler_) {
       this.apiHandler_.onLayoutMeasure();
     }
@@ -378,6 +384,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.performance_.tick('a4a_layoutCallback');
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_ || this.rendered_) {
       return Promise.resolve();
