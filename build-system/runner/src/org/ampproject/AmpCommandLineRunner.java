@@ -18,7 +18,6 @@ package org.ampproject;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.javascript.jscomp.CheckLevel;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
@@ -69,8 +68,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
-    // Warn on improper uses of `this` that `collapseProperties` assumes.
-    options.setCheckGlobalThisLevel(CheckLevel.WARNING);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes, assignmentReplacements);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
