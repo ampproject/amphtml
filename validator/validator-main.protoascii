@@ -25,7 +25,7 @@ min_validator_revision_required: 178
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 289
+spec_file_revision: 290
 
 reference_points_can_define_reference_points: true
 
@@ -160,13 +160,8 @@ tags: {
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "canonical|"  # Handled separately below, has specific requirements.
         "components|"
-        "dns-prefetch|"  # Handled separately below, has specific requirements.
         "import|"
         "manifest|"  # Handled separately below, has specific requirements.
-        "preconnect|"  # Handled separately below, has specific requirements.
-        "prefetch|"
-        "preload|"
-        "prerender|"
         "serviceworker|"
         "stylesheet|"  # Handled separately below, has specific requirements.
         "subresource|"
@@ -202,28 +197,6 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
-# Specifically allow
-# <link href="https://fonts.gstatic.com" rel="dns-prefetch preconnect>
-# which is inserted by the AMP Cache if Google webfonts are included in the
-# document. This is an optimization to more quickly setup the necessary
-# connection..
-tags: {
-  tag_name: "LINK"
-  spec_name: "link rel=dns-prefetch preconnect for fonts"
-  mandatory_parent: "HEAD"
-  attrs: {
-    name: "href"
-    value: "https://fonts.gstatic.com"
-    mandatory: true
-  }
-  attrs: {
-    name: "rel"
-    value: "dns-prefetch preconnect"
-    mandatory: true
-    dispatch_key: true
-  }
-}
-
 # Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
 tags: {
   tag_name: "LINK"
