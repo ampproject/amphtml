@@ -133,7 +133,7 @@ parse_url.URL = class {
     /** @type {string} */
     this.schemeSpecificPart = '';
     /** @type {boolean} */
-    this.startsWithDoubleSlash = false;
+    this./*OK*/ startsWithDoubleSlash = false;
     // The hostname will be hex-unescaped and isValid will be set to false if
     // the resulting string is not UTF-8 valid, but the hostname will not be
     // encoded to punycode for non-ascii hostnames. Browsers can do this for
@@ -178,7 +178,7 @@ parse_url.URL = class {
     // we need to parse the authority section (username:password@hostname:port)
     if (goog.string./*OK*/ startsWith(unparsed, '//')) {
       if (this.protocol === '') {
-        this.startsWithDoubleSlash = true;
+        this./*OK*/ startsWithDoubleSlash = true;
       }
       unparsed = unparsed.substr(2);
       if (unparsed.length !== 0)
