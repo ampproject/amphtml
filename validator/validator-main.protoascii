@@ -372,6 +372,26 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
+# Identical to the above, but a common case variant of x-ua-compatible.
+tags: {
+  tag_name: "META"
+  spec_name: "meta http-equiv=x-ua-compatible"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "x-ua-compatible"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_properties: {
+      properties: { name: "ie" value: "edge" }
+      properties: { name: "chrome" value: "1" }
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
 tags: {
   tag_name: "META"
   spec_name: "meta name= and content="
