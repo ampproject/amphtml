@@ -104,7 +104,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
-      parentElement.isConnected === undefined || parentElement.isConnected,
+      parentElement['isConnected'] === undefined ||
+      parentElement['isConnected'] === true,
       'Parent element must be in DOM');
   const attributes =
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);

@@ -110,7 +110,8 @@ export class AmpDocService {
     // fast `isConnected` API and thus only checked on platforms that have it.
     if (opt_node) {
       dev().assert(
-          opt_node.isConnected === undefined || opt_node.isConnected === true,
+          opt_node['isConnected'] === undefined ||
+          opt_node['isConnected'] === true,
           'The node must be attached to request ampdoc.');
     }
 
