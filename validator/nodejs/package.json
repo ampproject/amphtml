@@ -1,6 +1,6 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Validator for AMP HTML (www.ampproject.org)",
   "engines": {
     "node": ">=0.10.25"
