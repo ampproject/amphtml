@@ -106,9 +106,11 @@ export class AmpDocService {
    * @return {!AmpDoc}
    */
   getAmpDoc(opt_node) {
-    // Ensure that node is attached if specified.
-    if (opt_node && opt_node.ownerDocument) {
-      dev().assert(opt_node.ownerDocument.contains(opt_node),
+    // Ensure that node is attached if specified. This check uses a new and
+    // fast `isConnected` API and thus only checked on platforms that have it.
+    if (opt_node) {
+      dev().assert(
+          opt_node.isConnected === undefined || opt_node.isConnected === true,
           'The node must be attached to request ampdoc.');
     }
 
