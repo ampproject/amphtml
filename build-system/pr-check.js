@@ -27,24 +27,6 @@ const child_process = require('child_process');
 const path = require('path');
 
 /**
- * @param {string} str
- * @param {string} prefix
- * @return {boolean}
- */
-function hasPrefix(str, prefix) {
-  return str.indexOf(prefix) == 0;
-}
-
-/**
- * @param {string} str
- * @param {string} prefix
- * @return {boolean}
- */
-function hasSuffix(str, suffix) {
-  return str.lastIndexOf(suffix) == str.length - suffix.length;
-}
-
-/**
  * Executes the provided command, returning its stdout as an array of lines.
  * This will throw an exception if something goes wrong.
  * @param {string} cmd
@@ -59,12 +41,11 @@ function exec(cmd) {
  * @param {string} cmd
  */
 function execOrDie(cmd) {
-  console /*OK*/.log(`\npr-check.js: ${cmd}\n`);
+  console.log(`\npr-check.js: ${cmd}\n`);
   const p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
-    console /*OK*/.error(
-        `\npr-check.js - exiting due to failing command: ${cmd}\n`);
+    console.error(`\npr-check.js - exiting due to failing command: ${cmd}\n`);
     process.exit(p.status)
   }
 }
@@ -86,7 +67,7 @@ function filesInPr(travisCommitRange) {
  * @return {boolean}
  */
 function isValidatorWebuiFile(filePath) {
-  return hasPrefix(filePath, 'validator/webui');
+  return filePath.startsWith('validator/webui');
 }
 
 /**
@@ -97,14 +78,14 @@ function isValidatorWebuiFile(filePath) {
  * @return {boolean}
  */
 function isValidatorFile(filePath) {
-  if (hasPrefix(filePath, 'validator/')) return true;
-  if (!hasSuffix(path.dirname(filePath), '0.1') &&
-      !hasSuffix(path.dirname(filePath), 'test'))
+  if (filePath.startsWith('validator/')) return true;
+  if (!path.dirname(filePath).endsWith('0.1') &&
+      !path.dirname(filePath).endsWith('test'))
     return false;
   const name = path.basename(filePath);
-  return hasPrefix(name, 'validator-') &&
-      (hasSuffix(name, '.out') || hasSuffix(name, '.html') ||
-       hasSuffix('.protoascii'));
+  return name.startsWith('validator-') &&
+      (name.endsWith('.out') || name.endsWith('.html') ||
+       name.endsWith('.protoascii'));
 }
 
 /**
@@ -114,6 +95,9 @@ function isValidatorFile(filePath) {
  * @returns {!Set<string>}
  */
 function determineBuildTargets(filePaths) {
+  if (filePaths.length == 0) {
+    return new Set(['VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME']);
+  }
   const targetSet = new Set();
   for (p of filePaths) {
     if (isValidatorWebuiFile(p)) {
@@ -135,7 +119,7 @@ function determineBuildTargets(filePaths) {
  */
 function main(argv) {
   if (argv.length <= 2) {
-    console /*OK*/.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
+    console.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
     return -1;
   }
   const travisCommitRange = argv[2];
@@ -147,16 +131,15 @@ function main(argv) {
   }
   sortedBuildTargets.sort();
 
-  console /*OK*/.log(
+  console.log(
       '\npr-check.js: detected build targets: ' +
       sortedBuildTargets.join(', ') + '\n');
 
-  execOrDie('npm run ava');
-  execOrDie('gulp lint');
-  execOrDie('gulp build --css-only');
-  execOrDie('gulp check-types');
-
   if (buildTargets.has('RUNTIME')) {
+    execOrDie('npm run ava');
+    execOrDie('gulp lint');
+    execOrDie('gulp build --css-only');
+    execOrDie('gulp check-types');
     execOrDie('gulp dist --fortesting');
   }
 
