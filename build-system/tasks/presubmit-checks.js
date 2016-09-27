@@ -61,6 +61,7 @@ var forbiddenTerms = {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
     whitelist: [
+      'build-system/pr-check.js',
       'build-system/server.js',
       'validator/nodejs/index.js',  // NodeJs only.
       'validator/engine/parse-css.js',
@@ -375,6 +376,7 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/pr-check.js',
       'validator/engine/tokenize-css.js',
       'validator/engine/validator.js',
       // Service workers are only available in ES6 environments
@@ -386,6 +388,7 @@ var forbiddenTerms = {
   '\\.endsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/pr-check.js',
       'build-system/tasks/csvify-size/index.js',
       // Service workers are only available in ES6 environments
       'src/service-worker/core.js',
