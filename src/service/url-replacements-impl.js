@@ -49,6 +49,18 @@ let AsyncResolverDef;
 let ReplacementDef;
 
 /**
+ * Returns a encoded URI Component, or an empty string if the value is nullish.
+ * @param {*} val
+ * @return {string}
+ */
+function encodeValue(val) {
+  if (val == null) {
+    return '';
+  }
+  return encodeURIComponent(/** @type {string} */(val));
+};
+
+/**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
  * @package For export.
@@ -621,13 +633,7 @@ export class UrlReplacements {
     }
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
-    const encodeValue = val => {
-      if (val == null) {
-        val = '';
-      }
-      return encodeURIComponent(val);
-    };
-    url = url.replace(expr, (match, name, opt_strargs) => {
+    let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
@@ -670,7 +676,7 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          url = url.replace(match, encodeValue(v));
+          replacement = replacement.replace(match, encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -689,10 +695,14 @@ export class UrlReplacements {
     });
 
     if (replacementPromise) {
-      replacementPromise = replacementPromise.then(() => url);
+      replacementPromise = replacementPromise.then(() => replacement);
     }
 
-    return opt_sync ? url : (replacementPromise || Promise.resolve(url));
+    if (opt_sync) {
+      return this.ensureProtocolMatches_(url, replacement);
+    }
+    return (replacementPromise || Promise.resolve(replacement))
+        .then(replacement => this.ensureProtocolMatches_(url, replacement));
   }
 
   /**
@@ -756,6 +766,27 @@ export class UrlReplacements {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
+  }
+
+  /**
+   * Ensures that the protocol of the original url matches the protocol of the
+   * replacement url. Returns the replacement if they do, the original if they
+   * do not.
+   * @param {string} url
+   * @param {string} replacement
+   * @return {string}
+   */
+  ensureProtocolMatches_(url, replacement) {
+    const newProtocol = parseUrl(replacement, /* opt_nocache */ true).protocol;
+    const oldProtocol = parseUrl(url, /* opt_nocache */ true).protocol;
+    if (newProtocol != oldProtocol) {
+      user().error(TAG, 'Illegal replacement of the protocol: ', url);
+      return url;
+    }
+    user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
+        'protocol: %s', url);
+
+    return replacement;
   }
 }
 
