@@ -19,6 +19,7 @@
     - [Verify your examples](#verify-your-examples)
     - [Tests](#tests)
     - [Other tips](#other-tips)
+- [Serving Video Ads](#serving-video-ads)
     
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information. If you are an ad technology provider looking to integrate with AMP HTML, please also check the [general 3P inclusion guidelines](../3p/README.md#ads) and [ad service integration guidelines](./_integration-guide.md).
@@ -248,3 +249,13 @@ If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/
 
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread. 
+
+## Serving video ads 
+AMP natively supports [a number of](https://www.ampproject.org/who/#video) video players like BrightCove, DailyMotion etc who can monetize ads.
+
+If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+
+When using amp-iframe approach:
+
+- Make sure there is a poster if loading the player in the first viewport. [Details](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md#iframe-with-placeholder).
+- video and poster have to be served over HTTPS.
