@@ -44,15 +44,15 @@ export class AbstractAppBanner extends AMP.BaseElement {
   }
 
   /** @protected */
-  setupOpenLink_(openLink, openInAppUrl, installAppUrl) {
-    openLink.addEventListener('click', () => {
-      this.openLinkClicked_(openInAppUrl, installAppUrl);
+  setupOpenButton_(openButton, openInAppUrl, installAppUrl) {
+    openButton.addEventListener('click', () => {
+      this.openButtonClicked_(openInAppUrl, installAppUrl);
     });
   }
 
 
   /** @private */
-  openLinkClicked_(openInAppUrl, installAppUrl) {
+  openButtonClicked_(openInAppUrl, installAppUrl) {
     // This redirect-after-timeout workaround will trigger if the user has not
     // been already navigated away to the app itself. This will only trigger
     // if the user doesn't have the app installed and will redirect the user
@@ -235,8 +235,9 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     }
 
     /** @private @const {!Element} */
-    this.openLink_ = user().assert(this.element.querySelector('a[open-link]'),
-        '<a open-link> is required inside %s: %s', TAG, this.element);
+    this.openButton_ = user().assert(
+        this.element.querySelector('button[open-link]'),
+        '<button open-link> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
   }
@@ -271,7 +272,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const openUrl = config['app-argument'];
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenLink_(this.openLink_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
   }
 }
 
@@ -329,8 +330,9 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
 
     /** @private @const {!Element} */
-    this.openLink_ = user().assert(this.element.querySelector('a[open-link]'),
-        '<a open-link> is required inside %s: %s', TAG, this.element);
+    this.openButton_ = user().assert(
+        this.element.querySelector('button[open-link]'),
+        '<button open-link> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
   }
@@ -376,7 +378,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     const installAppUrl = (
         `https://play.google.com/store/apps/details?id=${app['id']}`);
     const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-    this.setupOpenLink_(this.openLink_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
   }
 
   /** @private */
