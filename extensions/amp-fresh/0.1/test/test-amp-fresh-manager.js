@@ -25,6 +25,7 @@ import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 describe('amp-fresh-manager', () => {
   let sandbox;
   let requests;
+  let container;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -35,6 +36,8 @@ describe('amp-fresh-manager', () => {
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
     };
+    container = document.createElement('div');
+    document.body.appendChild(container);
   });
 
   afterEach(() => {
@@ -42,6 +45,9 @@ describe('amp-fresh-manager', () => {
     resetServiceForTesting(window, 'ampFreshManager');
     resetServiceForTesting(window, 'xhr');
     sandbox.restore();
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
   });
 
   it('should fetch document on install', () => {
@@ -73,8 +79,10 @@ describe('amp-fresh-manager', () => {
      'on failure', () => {
     const elem = document.createElement('div');
     elem.setAttribute('id', 'amp-fresh-1');
+    container.appendChild(elem);
     const elem2 = document.createElement('div');
     elem2.setAttribute('id', 'amp-fresh-2');
+    container.appendChild(elem2);
     const fresh = new AmpFresh(elem);
     const fresh2 = new AmpFresh(elem2);
     const setFreshReadySpy = sandbox.spy(fresh, 'setFreshReady');
@@ -96,8 +104,10 @@ describe('amp-fresh-manager', () => {
   it('throws on duplicate ids', () => {
     const elem = document.createElement('div');
     elem.setAttribute('id', 'amp-fresh-1');
+    container.appendChild(elem);
     const elem2 = document.createElement('div');
     elem2.setAttribute('id', 'amp-fresh-1');
+    container.appendChild(elem2);
     const fresh = new AmpFresh(elem);
     const fresh2 = new AmpFresh(elem2);
     getOrInsallAmpFreshManager(window.document);

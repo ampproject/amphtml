@@ -29,7 +29,7 @@ const TAG = 'amp-install-serviceworker';
  * for installation of ServiceWorkers owned by the publisher
  * of the current page.
  */
-class AmpInstallServiceWorker extends AMP.BaseElement {
+export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
