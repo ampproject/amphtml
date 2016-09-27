@@ -32,6 +32,7 @@ import {
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
+import {adConfig} from '../../../../ads/_config';
 import * as sinon from 'sinon';
 
 class MockA4AImpl extends AmpA4A {
@@ -393,6 +394,19 @@ describe('amp-a4a', () => {
         expect(preconnects.length).to.not.equal(0);
         expect(preconnects[0].getAttribute('href')).to
             .equal('https://googleads.g.doubleclick.net');
+      });
+    });
+
+    it('should handle when type has no config', () => {
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = doc.createElement('amp-a4a');
+        expect(adConfig['fake']).to.be.undefined;
+        a4aElement.setAttribute('type', 'fake');
+        const a4a = new AmpA4A(a4aElement);
+        a4a.preconnectCallback(false);
+        const preconnects = doc.querySelectorAll('link[rel=preconnect]');
+        expect(preconnects.length).to.equal(0);
       });
     });
   });

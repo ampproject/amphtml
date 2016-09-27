@@ -237,7 +237,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const preconnect = adConfig[this.element.getAttribute('type')].preconnect;
+    const configType = adConfig[this.element.getAttribute('type')];
+    const preconnect = configType ? configType.preconnect : null;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
