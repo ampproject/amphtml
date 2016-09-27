@@ -251,7 +251,7 @@ If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/
 - [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread. 
 
 ## Serving video ads 
-AMP natively supports [a number of](https://www.ampproject.org/who/#video) video players like BrightCove, DailyMotion etc who can monetize ads.
+AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, go [here] (https://www.ampproject.org/docs/reference/extended.html) and look under the 'Audio/Video' section.
 
 If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 
