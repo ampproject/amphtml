@@ -103,7 +103,7 @@ describe('amp-img', () => {
       el.setAttribute('src', 'test.jpg');
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
-      el.getResources = () => resourcesForDoc(el);
+      el.getResources = () => resourcesForDoc(document);
       impl = new AmpImg(el);
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);

@@ -33,10 +33,13 @@ describe('3p-frame', () => {
 
   let clock;
   let sandbox;
+  let container;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    container = document.createElement('div');
+    document.body.appendChild(container);
   });
 
   afterEach(() => {
@@ -48,6 +51,7 @@ describe('3p-frame', () => {
     if (m) {
       m.parentElement.removeChild(m);
     }
+    document.body.removeChild(container);
   });
 
   function addCustomBootstrap(url) {
@@ -139,6 +143,7 @@ describe('3p-frame', () => {
         .returns('http://acme.org/')
         .once();
 
+    container.appendChild(div);
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
     const locationHref = location.href;
@@ -311,6 +316,7 @@ describe('3p-frame', () => {
       };
     };
 
+    container.appendChild(div);
     const name = getIframe(window, div).name;
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     resetCountForTesting();
