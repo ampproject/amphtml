@@ -29,6 +29,16 @@ function alphaNum(code) {
 }
 
 /**
+ * @param {number} code
+ * @return {boolean}
+ */
+function protocolCharIsValid(code) {
+  return (alphaNum(code) ||
+          code === /* '+' */ 0x2B ||
+          code === /* '-' */ 0x2D);
+}
+
+/**
  * @param {string} maybeInt
  * @return {boolean}
  */
@@ -117,9 +127,9 @@ parse_url.URL = class {
     /** @type {boolean} */
     this.hasProtocol = false;
     /** @type {string} */
-    this.protocol = '';
+    this.protocol = '';  // Guaranteed to be lower case.
     /** @type {string} */
-    this.defaultProtocol = 'https';
+    this.defaultProtocol = 'https';  // Must be set to a lower case value.
     /** @type {string} */
     this.schemeSpecificPart = '';
     /** @type {boolean} */
@@ -134,6 +144,12 @@ parse_url.URL = class {
     this.host = '';
     /** @type {number} */
     this.port = -1;
+
+    // This parser doesn't bother with parsing anything after the authority
+    // section of the URL string. IE, it doesn't parse path, query, or fragment.
+    // This is because the AMP validator has no need for parsing these and they
+    // cannot make an URL invalid in any way.
+    this.unparsed_url = '';
 
     // Note that we don't parse out username/password from this string, nor
     // are we bothering with correctly unescaping everything we find in here.
@@ -161,13 +177,15 @@ parse_url.URL = class {
     // If '//' is present as a prefix (after parsing protocol if any), then
     // we need to parse the authority section (username:password@hostname:port)
     if (goog.string./*OK*/ startsWith(unparsed, '//')) {
-      if (this.protocol == '') {
+      if (this.protocol === '') {
         this.startsWithDoubleSlash = true;
       }
       unparsed = unparsed.substr(2);
       if (unparsed.length !== 0)
-        this.parseAuthority_(unparsed);
+        unparsed = this.parseAuthority_(unparsed);
     }
+
+    this.unparsed_url = unparsed;
   }
 
   /**
@@ -198,7 +216,7 @@ parse_url.URL = class {
 
     for (let ii = 0; ii < colon; ++ii) {
       const charCode = unparsed.charCodeAt(ii);
-      if (!alphaNum(charCode)) {
+      if (!protocolCharIsValid(charCode)) {
         this.hasProtocol = false;
         this.protocol = this.defaultProtocol;
         return unparsed;
@@ -206,7 +224,7 @@ parse_url.URL = class {
     }
     // ex: split 'foo:bar' into 'foo' and 'bar'.
     this.hasProtocol = true;
-    this.protocol = unparsed.substr(0, colon);
+    this.protocol = unparsed.substr(0, colon).toLowerCase();
     unparsed = unparsed.substr(colon + 1);
 
     if (this.protocol != "http" && this.protocol != "https" &&
@@ -326,7 +344,6 @@ parse_url.URL = class {
         loginLength--;
       }
       this.login = unparsed.substr(0, loginLength);
-      unparsed = unparsed.substr(atIdx + 1);
     }
 
     // Extract the hostname.
@@ -353,11 +370,7 @@ parse_url.URL = class {
     if (!isIPv6Literal) {
       host = this.unescapeAndCheckHost_(host);
     }
-    host = this.processHostDots_(host);
-    if (host.length === 0) {
-      this.isValid = false;
-    }
-    this.host = host;
+    this.host = this.processHostDots_(host);
 
     // Extract the port, if present.
     if (portIdx !== -1) {
@@ -386,6 +399,7 @@ parse_url.URL = class {
       }
     }
 
+    unparsed = unparsed.substr(idx + 1);
     return unparsed;
   }
 };

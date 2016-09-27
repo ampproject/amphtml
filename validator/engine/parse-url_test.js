@@ -73,11 +73,20 @@ describe('parse_url', () => {
     let url = new parse_url.URL(urlString);
     assertStrictEqual(false, url.hasProtocol);
     assertStrictEqual('https', url.protocol);
+  });
 
-    urlString = '⚡:amp';
-    url = new parse_url.URL(urlString);
+  it ('parses with utf8 protocol characters',  () => {
+    let urlString = '⚡:amp';
+    let url = new parse_url.URL(urlString);
     assertStrictEqual(false, url.hasProtocol);
     assertStrictEqual('https', url.protocol);
+  });
+
+  it ('parses protocol with non-alpha protocol characters', () => {
+    let urlString = 'foo+bar-baz:baz';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.hasProtocol);
+    assertStrictEqual('foo+bar-baz', url.protocol);
   });
 
   it ('parses uncommon protocols, but not URLs', () => {
@@ -216,12 +225,6 @@ describe('parse_url', () => {
     assertStrictEqual(false, url.isValid);
   });
 
-  it ('fails on empty host', () => {
-    let urlString = 'http:///';
-    let url = new parse_url.URL(urlString);
-    assertStrictEqual(false, url.isValid);
-  });
-
   it ('fails on dot host', () => {
     let urlString = 'http://./';
     let url = new parse_url.URL(urlString);
@@ -247,11 +250,25 @@ describe('parse_url', () => {
     assertStrictEqual(true, url.isValid);
   });
 
+  it ('parses relative URL with : character', () => {
+    let urlString = '/image:foo.jpg-bar';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.isValid);
+    assertStrictEqual(false, url.hasProtocol);
+  });
+
   it ('accepts utf8 characters in hostname', () => {
     let urlString = 'http://⚡.com/';
     let url = new parse_url.URL(urlString);
     assertStrictEqual(true, url.isValid);
     assertStrictEqual('⚡.com', url.host);
+  });
+
+  it ('accepts http:/// (empty host)', () => {
+    let urlString = 'http:///example.com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.isValid);
+    assertStrictEqual('', url.host);
   });
 });
 
