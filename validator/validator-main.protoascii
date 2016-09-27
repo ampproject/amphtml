@@ -25,7 +25,7 @@ min_validator_revision_required: 178
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 290
+spec_file_revision: 291
 
 reference_points_can_define_reference_points: true
 
@@ -2128,7 +2128,7 @@ tags {
     name: "action"
     mandatory: true
     value_url: {
-      allow_relative: false
+      allow_relative: true
       allowed_protocol: "https"
       disallowed_domain: "cdn.ampproject.org"
     }
