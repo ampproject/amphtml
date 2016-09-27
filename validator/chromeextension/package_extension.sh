@@ -24,9 +24,9 @@ echo "Packaging chrome extension"
 
 VERSION=$(egrep "\"version\":" manifest.json | cut -d\" -f4)
 zip -r extension-"$VERSION".zip ./ -x amp-validator.html bower.json \
-  build_extension.sh package_extension.sh polymer.html promotional-440.png \
-  README.md screenshot-chrome-1.png screenshot-chrome-2.png \
-  screenshot-opera-1.png screenshot-opera-2.png
+  build_extension.sh icon-64.png package_extension.sh polymer.html \
+  promotional-440.png README.md screenshot-chrome-1.png \
+  screenshot-chrome-2.png screenshot-opera-1.png screenshot-opera-2.png
 
 echo "Removing generated files"
 

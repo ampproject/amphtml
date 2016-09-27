@@ -53,6 +53,7 @@ goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
 goog.require('parse_srcset.SrcsetParsingResult');
 goog.require('parse_srcset.parseSrcset');
+goog.require('parse_url.URL');
 
 /**
  * Determines if |n| is an integer.
@@ -1319,12 +1320,12 @@ class ParsedUrlSpec {
    * {ParsedUrlSpec.AttrErrorAdapter_|ParsedUrlSpec.StylesheetErrorAdapter_}
    * adapter
    * @param {!Context} context
-   * @param {string} url
+   * @param {string} urlStr
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
-  validateUrlAndProtocol(adapter, context, url, tagSpec, result) {
-    if (url === '' &&
+  validateUrlAndProtocol(adapter, context, urlStr, tagSpec, result) {
+    if (urlStr === '' &&
         (this.spec_.allowEmpty === null || this.spec_.allowEmpty === false)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.missingUrl(context, tagSpec, result);
@@ -1333,41 +1334,54 @@ class ParsedUrlSpec {
       }
       return;
     }
-    const urlComponents = goog.uri.utils.split(url);
-    if (urlComponents === null) {
+    const url = new parse_url.URL(urlStr);
+    if (!url.isValid) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.invalidUrl(context, url, tagSpec, result);
+        adapter.invalidUrl(context, urlStr, tagSpec, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       }
       return;
     }
-    const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
-    if (scheme !== undefined && scheme.length > 0 &&
-        !this.allowedProtocols_.hasOwnProperty(scheme.toLowerCase())) {
+    // Technically, an URL such as "script :alert('foo')" is considered a
+    // relative URL, similar to "./script%20:alert(%27foo%27)" since space is
+    // not a legal character in a URL protocol. This is what parse_url.URL will
+    // determine. However, some very old browsers will ignore whitespace in URL
+    // protocols and will treat this as javascript execution. We must be safe
+    // regardless of the client. This RE is much more aggressive at extracting
+    // a protcol than parse_url.URL for this reason.
+    const re = /^([^:\/?#.]+):.*$/;
+    const match = re.exec(urlStr);
+    let protocol = '';
+    if (match !== null) {
+      protocol = match[1];
+      protocol = protocol.toLowerCase().trimLeft();
+    } else {
+      protocol = url.protocol;
+    }
+    if (protocol.length > 0 &&
+        !this.allowedProtocols_.hasOwnProperty(protocol)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.invalidUrlProtocol(
-            context, scheme.toLowerCase(), tagSpec, result);
+        adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       }
       return;
     }
     if (!this.spec_.allowRelative &&
-        (scheme === undefined || scheme.length == 0)) {
+        (!url.hasProtocol || url.protocol.length == 0)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.disallowedRelativeUrl(context, url, tagSpec, result);
+        adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       }
       return;
     }
-    const domain = urlComponents[goog.uri.utils.ComponentIndex.DOMAIN];
-    if (domain !== undefined && domain.length > 0 &&
-        this.disallowedDomains_.hasOwnProperty(domain.toLowerCase())) {
+    const domain = url.host.toLowerCase();
+    if (domain.length > 0 &&
+        this.disallowedDomains_.hasOwnProperty(domain)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.disallowedDomain(
-            context, domain.toLowerCase(), tagSpec, result);
+        adapter.disallowedDomain(context, domain, tagSpec, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       }
