@@ -163,6 +163,9 @@ describe('amp-lightbox-viewer', () => {
         const impl = viewer.implementation_;
         return impl.activate({source: item1}).then(() => {
           assertLightboxed(item1, impl, true, /*closed*/ false);
+          impl.vsync_.mutate = function(callback) {
+            callback();
+          };
           const container = viewer.querySelector('.-amp-lbv');
           const descriptionBox = viewer.querySelector('.amp-lbv-desc-box');
           const button = viewer.querySelector('.amp-lbv-button-next');

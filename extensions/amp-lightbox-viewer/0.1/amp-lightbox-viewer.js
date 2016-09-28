@@ -340,7 +340,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     element.classList.add('amp-lightboxed');
     // update description box
     const descText = this.manager_.getDescription(element);
-    this.descriptionBox_.textContent = descText;
+    this.vsync_.mutate(() => {
+      this.descriptionBox_.textContent = descText;
+    });
     // add click event to current element to trigger discription box
     const toggleDescription = this.toggleDescriptionBox_.bind(this);
     this.elementUnlisten_ =
