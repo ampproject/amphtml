@@ -40,7 +40,7 @@ import {performanceFor} from '../../../src/performance';
 import {resourcesForDoc} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timerFor} from '../../../src/timer';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
@@ -122,7 +122,7 @@ export class AccessService {
     this.vsync_ = vsyncFor(win);
 
     /** @const @private {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(win);
+    this.urlReplacements_ = urlReplacementsForDoc(win.document);
 
     /** @private @const {!Cid} */
     this.cid_ = cidFor(win);
