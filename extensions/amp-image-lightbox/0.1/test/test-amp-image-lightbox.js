@@ -183,6 +183,7 @@ describe('amp-image-lightbox image viewer', () => {
   let lightbox;
   let lightboxMock;
   let imageViewer;
+  let loadPromiseStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -195,8 +196,10 @@ describe('amp-image-lightbox image viewer', () => {
       },
     };
     lightboxMock = sandbox.mock(lightbox);
+    loadPromiseStub = sandbox.stub().returns(Promise.resolve());
 
-    imageViewer = new ImageViewer(lightbox, window);
+    sandbox.stub(timerFor(window), 'promise').returns(Promise.resolve());
+    imageViewer = new ImageViewer(lightbox, window, loadPromiseStub);
     document.body.appendChild(imageViewer.getElement());
   });
 
@@ -349,6 +352,18 @@ describe('amp-image-lightbox image viewer', () => {
     expect(imageViewer.imageBox_.height).to.equal(200);
     expect(imageViewer.imageBox_.left).to.be.closeTo(10, 1);
     expect(imageViewer.imageBox_.top).to.equal(0);
+  });
+
+  it('should use the load function passed in when switching images', () => {
+    expect(loadPromiseStub.callCount).to.equal(0);
+    imageViewer.getElement().style.width = '100px';
+    imageViewer.getElement().style.height = '200px';
+    imageViewer.srcset_ = parseSrcset('image1');
+    imageViewer.sourceWidth_ = 80;
+    imageViewer.sourceHeight_ = 60;
+    return imageViewer.measure().then(() => {
+      expect(loadPromiseStub.callCount).to.equal(1);
+    });
   });
 });
 
