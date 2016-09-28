@@ -241,4 +241,205 @@ describe('friendly-iframe-embed', () => {
           + 'content');
     });
   });
+
+  describe('child document ready and loaded states', () => {
+
+    it('should wait until ready', () => {
+      const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(() => {
+        expect(iframe.contentDocument.getElementById('a1')).to.be.ok;
+      });
+    });
+
+    it('should wait until ready for doc.write case', () => {
+      setSrcdocSupportedForTesting(false);
+      const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(() => {
+        expect(iframe.contentDocument.getElementById('a1')).to.be.ok;
+      });
+    });
+
+    it('should wait for loaded state', () => {
+      const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(embed => {
+        return embed.whenLoaded();
+      });
+    });
+
+    it('should wait for loaded state for doc.write case', () => {
+      setSrcdocSupportedForTesting(false);
+      const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(embed => {
+        return embed.whenLoaded();
+      });
+    });
+  });
+
+  describe('child document ready polling', () => {
+    let clock;
+    let win;
+    let iframe;
+    let contentWindow;
+    let contentDocument;
+    let contentBody;
+    let container;
+    let loadListener, errorListener;
+    let polls;
+
+    beforeEach(() => {
+      setSrcdocSupportedForTesting(true);
+
+      clock = sandbox.useFakeTimers();
+
+      polls = [];
+      win = {
+        services: {
+          'extensions': {obj: {
+            installExtensionsInChildWindow: () => {},
+            loadExtension: () => {},
+          }},
+        },
+        setInterval: function() {
+          const interval = window.setInterval.apply(window, arguments);
+          polls.push(interval);
+          return interval;
+        },
+        clearInterval: function(interval) {
+          window.clearInterval.apply(window, arguments);
+          const index = polls.indexOf(interval);
+          if (index != -1) {
+            polls.splice(index, 1);
+          }
+        },
+      };
+
+      loadListener = undefined;
+      iframe = {
+        ownerDocument: {defaultView: win},
+        style: {},
+        setAttribute: () => {},
+        addEventListener: (eventType, listener) => {
+          if (eventType == 'load') {
+            loadListener = listener;
+          } else if (eventType == 'error') {
+            errorListener = listener;
+          }
+        },
+        removeEventListener: () => {},
+      };
+      contentWindow = {};
+      contentDocument = {};
+      contentBody = {};
+      container = {
+        appendChild: () => {},
+      };
+    });
+
+    afterEach(() => {
+      expect(polls).to.have.length(0);
+    });
+
+    it('should not poll if body is already ready', () => {
+      contentBody.firstChild = {};
+      contentDocument.body = contentBody;
+      contentWindow.document = contentDocument;
+      iframe.contentWindow = contentWindow;
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      });
+      expect(polls).to.have.length(0);
+      let ready = false;
+      embedPromise.then(() => {
+        ready = true;
+      });
+      return Promise.race([Promise.resolve(), embedPromise]).then(() => {
+        expect(ready).to.be.true;
+      });
+    });
+
+    it('should poll until ready', () => {
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      });
+      let ready = false;
+      embedPromise.then(() => {
+        ready = true;
+      });
+      expect(polls).to.have.length(1);
+      return Promise.race([Promise.resolve(), embedPromise]).then(() => {
+        expect(ready).to.be.false;
+        expect(polls).to.have.length(1);
+
+        // Window is now available.
+        iframe.contentWindow = contentWindow;
+        clock.tick(5);
+        return Promise.race([Promise.resolve(), embedPromise]);
+      }).then(() => {
+        expect(ready).to.be.false;
+        expect(polls).to.have.length(1);
+
+        // Document is now available.
+        contentWindow.document = contentDocument;
+        clock.tick(5);
+        return Promise.race([Promise.resolve(), embedPromise]);
+      }).then(() => {
+        expect(ready).to.be.false;
+        expect(polls).to.have.length(1);
+
+        // Body is now available.
+        contentDocument.body = contentBody;
+        clock.tick(5);
+        return Promise.race([Promise.resolve(), embedPromise]);
+      }).then(() => {
+        expect(ready).to.be.false;
+        expect(polls).to.have.length(1);
+
+        // Body is now not empty.
+        contentBody.firstChild = {};
+        clock.tick(5);
+        return Promise.race([Promise.resolve(), embedPromise]);
+      }).then(() => {
+        expect(ready).to.equal(true, 'Finally ready');
+        expect(polls).to.have.length(0);
+      });
+    });
+
+    it('should stop polling when loaded', () => {
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      });
+      expect(polls).to.have.length(1);
+      loadListener();
+      return embedPromise.then(() => {
+        expect(polls).to.have.length(0);
+      });
+    });
+
+    it('should stop polling when loading failed', () => {
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      });
+      expect(polls).to.have.length(1);
+      errorListener();
+      return embedPromise.then(() => {
+        expect(polls).to.have.length(0);
+      });
+    });
+  });
 });

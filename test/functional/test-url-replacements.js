@@ -103,7 +103,6 @@ describe('UrlReplacements', () => {
       addEventListener: function(type, callback) {
         loadObservable.add(callback);
       },
-      complete: false,
       Object,
       performance: {
         timing: {
@@ -318,26 +317,52 @@ describe('UrlReplacements', () => {
     });
   });
 
-  it('should replace PAGE_LOAD_TIME if timing info is not available', () => {
+  it('should reject protocol changes', () => {
     const win = getFakeWindow();
-    win.complete = true;
-    return installUrlReplacementsService(win)
-        .expandAsync('?sh=PAGE_LOAD_TIME&s')
-        .then(res => {
-          expect(res).to.match(/sh=&s/);
+    const urlReplacements = installUrlReplacementsService(win);
+    return urlReplacements.expandAsync(
+        'PROTOCOL://example.com/?r=RANDOM', {
+          'PROTOCOL': Promise.resolve('abc'),
+        }).then(expanded => {
+          expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
         });
   });
 
-  it('should replace PAGE_LOAD_TIME if available within a delay', () => {
-    const win = getFakeWindow();
-    const urlReplacements = installUrlReplacementsService(win);
-    const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
-    urlReplacements.win_.performance.timing.loadEventStart = 109;
-    loadObservable.fire({
-      target: win,
-    }); // Mimics load event.
-    return validMetric.then(res => {
-      expect(res).to.match(/sh=9&s/);
+  describe('PAGE_LOAD_TIME', () => {
+    let win;
+    let eventListeners;
+    beforeEach(() => {
+      win = getFakeWindow();
+      eventListeners = {};
+      win.document.readyState = 'loading';
+      win.document.addEventListener = function(eventType, handler) {
+        eventListeners[eventType] = handler;
+      };
+      win.document.removeEventListener = function(eventType, handler) {
+        if (eventListeners[eventType] == handler) {
+          delete eventListeners[eventType];
+        }
+      };
+    });
+
+    it('is replaced if timing info is not available', () => {
+      win.document.readyState = 'complete';
+      return installUrlReplacementsService(win)
+          .expandAsync('?sh=PAGE_LOAD_TIME&s')
+          .then(res => {
+            expect(res).to.match(/sh=&s/);
+          });
+    });
+
+    it('is replaced if PAGE_LOAD_TIME is available within a delay', () => {
+      const urlReplacements = installUrlReplacementsService(win);
+      const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
+      urlReplacements.win_.performance.timing.loadEventStart = 109;
+      win.document.readyState = 'complete';
+      eventListeners['readystatechange']();
+      return validMetric.then(res => {
+        expect(res).to.match(/sh=9&s/);
+      });
     });
   });
 
@@ -696,25 +721,62 @@ describe('UrlReplacements', () => {
         });
   });
 
-  it('should expand sync w/ collect vars (skip async macro)', () => {
+  it('should reject javascript protocol', () => {
     const win = getFakeWindow();
     const urlReplacements = installUrlReplacementsService(win);
-    urlReplacements.win_.performance.timing.loadEventStart = 109;
-    const collectVars = {};
-    const expanded = urlReplacements.expandSync(
-      'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
-      {
+    return urlReplacements.expandAsync(`javascript://example.com/?r=RANDOM`)
+        .then(
+          () => { throw new Error('never here'); },
+          err => {
+            expect(err.message).to.match(/Illegal javascript/);
+          }
+        );
+  });
+
+  describe('sync expansion', () => {
+    it('should expand w/ collect vars (skip async macro)', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsService(win);
+      urlReplacements.win_.performance.timing.loadEventStart = 109;
+      const collectVars = {};
+      const expanded = urlReplacements.expandSync(
+        'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
+        {
+          'CONST': 'ABC',
+          'FUNCT': function(a, b) { return a + b; },
+          // Will ignore promise based result and instead insert empty string.
+          'PROM': function() { return Promise.resolve('boo'); },
+        }, collectVars);
+      expect(expanded).to.match(/^r=\d(\.\d+)?&c=ABC&f=helloworld&a=b&d=&e=9$/);
+      expect(collectVars).to.deep.equal({
+        'RANDOM': parseFloat(/^r=(\d+(\.\d+)?)/.exec(expanded)[1]),
         'CONST': 'ABC',
-        'FUNCT': function(a, b) { return a + b; },
-        // Will ignore promise based result and instead insert empty string.
-        'PROM': function() { return Promise.resolve('boo'); },
-      }, collectVars);
-    expect(expanded).to.match(/^r=\d(\.\d+)?&c=ABC&f=helloworld&a=b&d=&e=9$/);
-    expect(collectVars).to.deep.equal({
-      'RANDOM': parseFloat(/^r=(\d+(\.\d+)?)/.exec(expanded)[1]),
-      'CONST': 'ABC',
-      'FUNCT(hello,world)': 'helloworld',
-      'PAGE_LOAD_TIME': 9,
+        'FUNCT(hello,world)': 'helloworld',
+        'PAGE_LOAD_TIME': 9,
+      });
+    });
+
+    it('should reject protocol changes', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsService(win);
+      let expanded = urlReplacements.expandSync(
+          'PROTOCOL://example.com/?r=RANDOM', {
+            'PROTOCOL': 'abc',
+          });
+      expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
+      expanded = urlReplacements.expandSync(
+          'FUNCT://example.com/?r=RANDOM', {
+            'FUNCT': function() { return 'abc'; },
+          });
+      expect(expanded).to.equal('FUNCT://example.com/?r=RANDOM');
+    });
+
+    it('should reject javascript protocol', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsService(win);
+      expect(() => {
+        urlReplacements.expandSync(`javascript://example.com/?r=RANDOM`);
+      }).to.throw('Illegal javascript');
     });
   });
 

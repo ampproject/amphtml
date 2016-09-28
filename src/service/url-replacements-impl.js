@@ -20,12 +20,12 @@ import {variantForOrNull} from '../variant-service';
 import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
+import {whenDocumentComplete} from '../document-ready';
 import {fromClass} from '../service';
-import {loadPromise} from '../event-helper';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
-import {viewportFor} from '../viewport';
+import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
@@ -47,6 +47,18 @@ let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
+
+/**
+ * Returns a encoded URI Component, or an empty string if the value is nullish.
+ * @param {*} val
+ * @return {string}
+ */
+function encodeValue(val) {
+  if (val == null) {
+    return '';
+  }
+  return encodeURIComponent(/** @type {string} */(val));
+};
 
 /**
  * This class replaces substitution variables with their values.
@@ -263,25 +275,25 @@ export class UrlReplacements {
     // Returns a promise resolving to viewport.getScrollTop.
     this.setAsync_('SCROLL_TOP', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollTop());
+        () => viewportForDoc(this.win_.document).getScrollTop());
     });
 
     // Returns a promise resolving to viewport.getScrollLeft.
     this.setAsync_('SCROLL_LEFT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollLeft());
+        () => viewportForDoc(this.win_.document).getScrollLeft());
     });
 
     // Returns a promise resolving to viewport.getScrollHeight.
     this.setAsync_('SCROLL_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollHeight());
+        () => viewportForDoc(this.win_.document).getScrollHeight());
     });
 
     // Returns a promise resolving to viewport.getScrollWidth.
     this.setAsync_('SCROLL_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollWidth());
+        () => viewportForDoc(this.win_.document).getScrollWidth());
     });
 
     // Returns screen.width.
@@ -312,13 +324,13 @@ export class UrlReplacements {
     // Returns the viewport height.
     this.setAsync_('VIEWPORT_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().height);
+        () => viewportForDoc(this.win_.document).getSize().height);
     });
 
     // Returns the viewport width.
     this.setAsync_('VIEWPORT_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().width);
+        () => viewportForDoc(this.win_.document).getSize().width);
     });
 
     // Returns document characterset.
@@ -466,7 +478,7 @@ export class UrlReplacements {
     const metric = this.getTimingDataSync_(startEvent, endEvent);
     if (metric === '') {
       // Metric is not yet available. Retry after a delay.
-      return loadPromise(this.win_).then(() => {
+      return whenDocumentComplete(this.win_.document).then(() => {
         return this.getTimingDataSync_(startEvent, endEvent);
       });
     }
@@ -621,13 +633,7 @@ export class UrlReplacements {
     }
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
-    const encodeValue = val => {
-      if (val == null) {
-        val = '';
-      }
-      return encodeURIComponent(val);
-    };
-    url = url.replace(expr, (match, name, opt_strargs) => {
+    let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
@@ -670,7 +676,7 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          url = url.replace(match, encodeValue(v));
+          replacement = replacement.replace(match, encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -689,10 +695,14 @@ export class UrlReplacements {
     });
 
     if (replacementPromise) {
-      replacementPromise = replacementPromise.then(() => url);
+      replacementPromise = replacementPromise.then(() => replacement);
     }
 
-    return opt_sync ? url : (replacementPromise || Promise.resolve(url));
+    if (opt_sync) {
+      return this.ensureProtocolMatches_(url, replacement);
+    }
+    return (replacementPromise || Promise.resolve(replacement))
+        .then(replacement => this.ensureProtocolMatches_(url, replacement));
   }
 
   /**
@@ -756,6 +766,27 @@ export class UrlReplacements {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
+  }
+
+  /**
+   * Ensures that the protocol of the original url matches the protocol of the
+   * replacement url. Returns the replacement if they do, the original if they
+   * do not.
+   * @param {string} url
+   * @param {string} replacement
+   * @return {string}
+   */
+  ensureProtocolMatches_(url, replacement) {
+    const newProtocol = parseUrl(replacement, /* opt_nocache */ true).protocol;
+    const oldProtocol = parseUrl(url, /* opt_nocache */ true).protocol;
+    if (newProtocol != oldProtocol) {
+      user().error(TAG, 'Illegal replacement of the protocol: ', url);
+      return url;
+    }
+    user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
+        'protocol: %s', url);
+
+    return replacement;
   }
 }
 

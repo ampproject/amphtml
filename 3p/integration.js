@@ -72,11 +72,13 @@ import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {kargo} from '../ads/kargo';
+import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {mixpo} from '../ads/mixpo';
 import {nativo} from '../ads/nativo';
 import {nend} from '../ads/nend';
 import {openadstream} from '../ads/openadstream';
@@ -104,8 +106,6 @@ import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
-initLogConstructor();
-
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -120,6 +120,9 @@ const AMP_EMBED_ALLOWED = {
 
 const data = parseFragment(location.hash);
 window.context = data._context;
+
+// This should only be invoked after window.context is set
+initLogConstructor();
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
@@ -161,12 +164,14 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('kargo', kargo);
+register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
 register('meg', meg);
 register('microad', microad);
+register('mixpo', mixpo);
 register('nativo', nativo);
 register('nend', nend);
 register('openadstream', openadstream);

@@ -202,6 +202,15 @@ export const adConfig = {
 
   kargo: {},
 
+  loka: {
+    prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
+    preconnect: [
+      'https://scene-front.lokaplatform.com',
+      'https://loka-materials.akamaized.net',
+    ],
+    renderStartImplemented: true,
+  },
+
   mads: {
     prefetch: 'https://eu2.madsone.com/js/tags.js',
   },
@@ -239,6 +248,14 @@ export const adConfig = {
       'https://cache.send.microad.jp',
       'https://cache.send.microadinc.com',
       'https://deb.send.microad.jp',
+    ],
+  },
+
+  mixpo: {
+    prefetch: 'https://cdn.mixpo.com/js/loader.js',
+    preconnect: [
+      'https://player1.mixpo.com',
+      'https://player2.mixpo.com',
     ],
   },
 
@@ -359,6 +376,7 @@ export const adConfig = {
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',
     ],
+    renderStartImplemented: true,
   },
 
   yieldone: {

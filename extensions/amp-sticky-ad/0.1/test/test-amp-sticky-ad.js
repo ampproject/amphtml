@@ -15,7 +15,6 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
@@ -33,10 +32,8 @@ describe('amp-sticky-ad', () => {
 
   function getAmpStickyAd() {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-sticky-ad', true);
       const ampStickyAd = iframe.doc.createElement('amp-sticky-ad');
       ampStickyAd.setAttribute('layout', 'nodisplay');
-      ampStickyAd.isExperimentOn_ = true;
       const ampAd = iframe.doc.createElement('amp-ad');
       ampAd.setAttribute('width', '300');
       ampAd.setAttribute('height', '50');
@@ -191,12 +188,14 @@ describe('amp-sticky-ad', () => {
       expect(borderStyle).to.equal('none');
 
       impl.viewport_.updatePaddingBottom(50);
-      borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
-          .getPropertyValue('border-bottom-width');
-      borderStyle = iframe.win.getComputedStyle(iframe.doc.body, null)
-          .getPropertyValue('border-bottom-style');
-      expect(borderWidth).to.equal('50px');
-      expect(borderStyle).to.equal('solid');
+      return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+        borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+            .getPropertyValue('border-bottom-width');
+        borderStyle = iframe.win.getComputedStyle(iframe.doc.body, null)
+            .getPropertyValue('border-bottom-style');
+        expect(borderWidth).to.equal('50px');
+        expect(borderStyle).to.equal('solid');
+      });
     });
   });
 
@@ -304,14 +303,18 @@ describe('amp-sticky-ad', () => {
       };
 
       impl.displayAfterScroll_();
-      let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
-          .getPropertyValue('border-bottom-width');
-      expect(borderWidth).to.equal('50px');
-      expect(impl.element.children[1]).to.be.not.null;
-      impl.element.children[1].dispatchEvent(new Event('click'));
-      borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
-          .getPropertyValue('border-bottom-width');
-      expect(borderWidth).to.equal('0px');
+      return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+        let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+            .getPropertyValue('border-bottom-width');
+        expect(borderWidth).to.equal('50px');
+        expect(impl.element.children[1]).to.be.not.null;
+        impl.element.children[1].dispatchEvent(new Event('click'));
+        return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+          borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+              .getPropertyValue('border-bottom-width');
+          expect(borderWidth).to.equal('0px');
+        });
+      });
     });
   });
 
@@ -341,14 +344,18 @@ describe('amp-sticky-ad', () => {
       };
 
       impl.displayAfterScroll_();
-      let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
-          .getPropertyValue('border-bottom-width');
-      expect(borderWidth).to.equal('50px');
-      impl.collapsedCallback();
-      borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
-          .getPropertyValue('border-bottom-width');
-      expect(borderWidth).to.equal('0px');
-      expect(stickyAdElement.style.display).to.equal('none');
+      return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+        let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+            .getPropertyValue('border-bottom-width');
+        expect(borderWidth).to.equal('50px');
+        impl.collapsedCallback();
+        return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+          borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+              .getPropertyValue('border-bottom-width');
+          expect(borderWidth).to.equal('0px');
+          expect(stickyAdElement.style.display).to.equal('none');
+        });
+      });
     });
   });
 });

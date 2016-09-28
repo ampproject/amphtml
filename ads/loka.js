@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
- * Provides info about the current app. This return value may be cached and
- * passed around as it will always be DCE'd.
- * @param {?Window=} opt_win
- * @return {!./mode.ModeDef}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export function getModeObject(opt_win) {
-  return {
-    localDev: getMode(opt_win).localDev,
-    development: getMode(opt_win).development,
-    filter: getMode(opt_win).filter,
-    minified: getMode(opt_win).minified,
-    lite: getMode(opt_win).lite,
-    test: getMode(opt_win).test,
-    log: getMode(opt_win).log,
-    version: getMode(opt_win).version,
-  };
+export function loka(global, data) {
+  validateData(data, ['unitParams'], []);
+
+  global.lokaParams = data;
+
+  const container = global.document.querySelector('#c');
+  container.addEventListener('lokaUnitLoaded', e => {
+    if (e.detail.isReady) {
+      global.context.renderStart();
+    } else {
+      global.context.noContentAvailable();
+    }
+  });
+
+  loadScript(global, 'https://loka-cdn.akamaized.net/scene/amp.js');
 }

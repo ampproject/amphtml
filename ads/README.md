@@ -63,8 +63,8 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 ### Available APIs
 
-- `window.context.renderStart(opt_data)` is a function that the ad system should call if the ad start rendering. The ad would then set the visibility of the iframe to visible. The ad type needs to be included in `waitForRenderStart` list in [_config.js](./_config.js) for this function to be available. Ad system can use `opt_data` object of form `{width, height}` to send the returned ad size to request a resize. Please check [Ad resizing](#ad-resizing) for more information.
-- `window.context.noContentAvailable()` is a function that the ad system should call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
+- `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
+- `window.context.noContentAvailable()` is a method to inform AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise try to collapse.
 - `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
 ### Exceptions to available APIs and information
