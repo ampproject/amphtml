@@ -4,11 +4,11 @@
 851.59 kB   |   166.28 kB   |     52.7 kB   |   shadow-v0.js / amp-shadow.js
    5.8 kB   |       428 B   |       278 B   |   sw-kill.js / sw-kill.max.js
 368.76 kB   |       681 B   |       450 B   |   sw.js / sw.max.js
-890.99 kB   |   165.94 kB   |     52.6 kB   |   v0.js / amp.js
+890.99 kB   |   165.94 kB   |    52.61 kB   |   v0.js / amp.js
 322.94 kB   |    37.49 kB   |    12.64 kB   |   v0/amp-access-0.1.js
  56.57 kB   |     3.45 kB   |     1.41 kB   |   v0/amp-accordion-0.1.js
 307.73 kB   |    30.41 kB   |    11.09 kB   |   v0/amp-ad-0.1.js
-316.27 kB   |    30.84 kB   |    11.47 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
+316.27 kB   |    30.84 kB   |    11.48 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
 315.95 kB   |    28.94 kB   |    10.86 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
 246.83 kB   |     21.9 kB   |     8.16 kB   |   v0/amp-ad-network-fake-impl-0.1.js
 298.77 kB   |    56.58 kB   |    20.58 kB   |   v0/amp-analytics-0.1.js
@@ -33,7 +33,7 @@
 189.03 kB   |    10.81 kB   |     4.48 kB   |   v0/amp-iframe-0.1.js
 266.21 kB   |    27.59 kB   |     9.02 kB   |   v0/amp-image-lightbox-0.1.js
  60.57 kB   |     2.75 kB   |     1.29 kB   |   v0/amp-instagram-0.1.js
-121.87 kB   |      5.4 kB   |     2.51 kB   |   v0/amp-install-serviceworker-0.1.js
+121.87 kB   |      5.4 kB   |     2.52 kB   |   v0/amp-install-serviceworker-0.1.js
  41.57 kB   |     2.58 kB   |     1.21 kB   |   v0/amp-jwplayer-0.1.js
  78.22 kB   |     3.67 kB   |     1.62 kB   |   v0/amp-kaltura-player-0.1.js
 173.39 kB   |     8.21 kB   |     3.13 kB   |   v0/amp-lightbox-0.1.js
@@ -57,5 +57,5 @@
  34.01 kB   |     1.43 kB   |       759 B   |   v0/amp-vine-0.1.js
 667.43 kB   |   511.38 kB   |   167.49 kB   |   v0/amp-viz-vega-0.1.js
 156.69 kB   |     4.29 kB   |     1.97 kB   |   v0/amp-youtube-0.1.js
- 15.89 kB   |     1.55 kB   |       800 B   |   v0/cache-service-worker-0.1.js
+ 15.89 kB   |     1.55 kB   |       801 B   |   v0/cache-service-worker-0.1.js
 215.53 kB   |    47.28 kB   |    16.48 kB   |   current-min/f.js / current/integration.js
