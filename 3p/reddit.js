@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +27,24 @@ function getContainerScript(global, scriptSource) {
 
 /**
  * Embedly looks for a blockquote with a '-card' suffixed class.
+ * @param {!Window} global
  * @return {!Element} blockquote
  */
-function getPostContainer() {
+function getPostContainer(global) {
   const blockquote = global.document.createElement('blockquote');
-  blockquote.className += 'reddit-card';
+  blockquote.classList.add('reddit-card');
   blockquote.setAttribute('data-card-created', Math.floor(Date.now() / 1000));
   return blockquote;
 }
 
 /**
+ * @param {!Window} global
  * @param {!Object} data The element data
  * @return {!Element} div
  */
-function getCommentContainer(data) {
+function getCommentContainer(global, data) {
   const div = global.document.createElement('div');
-  div.className = 'reddit-embed';
+  div.classList.add('reddit-embed');
   div.setAttribute('data-embed-media', 'www.redditmedia.com');
   // 'uuid' and 'created' are provided by the embed script, but don't seem
   // to actually be needed. Account for them, but let them default to undefined.
@@ -64,10 +66,10 @@ export function reddit(global, data) {
 
   // Post and comment embeds are handled totally differently.
   if (data.embedtype === 'post') {
-    container = getPostContainer();
+    container = getPostContainer(global);
     scriptSource = 'https://embed.redditmedia.com/widgets/platform.js';
   } else if (data.embedtype === 'comment') {
-    container = getCommentContainer(data);
+    container = getCommentContainer(global, data);
     scriptSource = 'https://www.redditstatic.com/comment-embed.js';
   }
 
