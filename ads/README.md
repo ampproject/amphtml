@@ -255,7 +255,7 @@ AMP natively supports a number video players like BrightCove, DailyMotion etc th
 
 If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 
-When using amp-iframe approach:
+When using `amp-iframe` approach:
 
 - Make sure there is a poster if loading the player in the first viewport. [Details](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md#iframe-with-placeholder).
 - video and poster have to be served over HTTPS.
