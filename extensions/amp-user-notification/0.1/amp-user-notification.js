@@ -105,7 +105,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
     this.storagePromise_ = storageForDoc(ampdoc);
-    this.userNotificationManager_ = getUserNotificationManager_(this.win);
+    if (!this.userNotificationManager_) {
+      this.userNotificationManager_ = getUserNotificationManager_(this.win);
+    }
 
     /** @private {?string} */
     this.ampUserId_ = null;
