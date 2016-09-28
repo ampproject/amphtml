@@ -16,7 +16,6 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/platform';
-import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
 import {vsyncFor} from '../../../../src/vsync';
 import {
@@ -25,14 +24,14 @@ import {
     AmpIosAppBanner,
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
-
 import {xhrFor} from '../../../../src/xhr';
-import {installStorageService} from '../../../../src/service/storage-impl';
-import '../../../amp-analytics/0.1/amp-analytics';
 import {
     installPerformanceService,
 } from '../../../../src/service/performance-impl';
 import {timerFor} from '../../../../src/timer';
+import '../../../amp-analytics/0.1/amp-analytics';
+import * as sinon from 'sinon';
+
 
 describe('amp-app-banner', () => {
 
@@ -73,7 +72,6 @@ describe('amp-app-banner', () => {
 
   function getTestFrame() {
     return createIframePromise(true).then(iframe => {
-      installStorageService(iframe.win);
       installPerformanceService(iframe.win);
       platform = platformFor(iframe.win);
       sandbox.stub(platform, 'isIos', () => isIos);
@@ -346,7 +344,6 @@ describe('amp-app-banner', () => {
       return createIframePromise(true).then(iframe => {
         const win = iframe.win;
         const doc = iframe.doc;
-        installStorageService(win);
         vsync = vsyncFor(win);
         sandbox.stub(vsync, 'run', runTask);
         const element = doc.createElement('div');

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from '../service';
+import {getServiceForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {recreateNonProtoObject} from '../json';
@@ -40,13 +40,13 @@ const MAX_VALUES_PER_ORIGIN = 8;
 export class Storage {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!../service/viewer-impl.Viewer} viewer
    * @param {!StorageBindingDef} binding
    */
-  constructor(win, viewer, binding) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, viewer, binding) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!../service/viewer-impl.Viewer} */
     this.viewer_ = viewer;
@@ -55,7 +55,7 @@ export class Storage {
     this.binding_ = binding;
 
     /** @const @private {string} */
-    this.origin_ = getSourceOrigin(this.win.location);
+    this.origin_ = getSourceOrigin(this.ampdoc.win.location);
 
     /** @private {?Promise<!Store>} */
     this.storePromise_ = null;
@@ -358,16 +358,16 @@ export class ViewerStorageBinding {
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Storage}
  */
-export function installStorageService(window) {
-  return /** @type {!Storage} */ (getService(window, 'storage', () => {
-    const viewer = viewerFor(window);
+export function installStorageServiceForDoc(ampdoc) {
+  return /** @type {!Storage} */ (getServiceForDoc(ampdoc, 'storage', () => {
+    const viewer = viewerFor(ampdoc.win);
     const overrideStorage = parseInt(viewer.getParam('storage'), 10);
     const binding = overrideStorage ?
         new ViewerStorageBinding(viewer) :
-        new LocalStorageBinding(window);
-    return new Storage(window, viewer, binding).start_();
+        new LocalStorageBinding(ampdoc.win);
+    return new Storage(ampdoc, viewer, binding).start_();
   }));
-};
+}
