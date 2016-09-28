@@ -23,7 +23,7 @@ import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportForDoc} from './viewport';
 import {platformFor} from './platform';
-import {urlReplacementsFor} from './url-replacements';
+import {urlReplacementsForDoc} from './url-replacements';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
@@ -107,7 +107,7 @@ export class CaptureClickHandler {
     this.ampdoc = ampdoc;
 
     /** @private @const {!./service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.ampdoc.win);
+    this.urlReplacements_ = urlReplacementsForDoc(this.ampdoc);
 
     /** @private {!function(!Event)} */
     this.boundHandler_ = this.handle_.bind(this);

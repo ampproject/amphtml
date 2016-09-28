@@ -26,7 +26,7 @@ import {installActivityService} from './activity-impl';
 import {installVisibilityService} from './visibility-impl';
 import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
@@ -240,7 +240,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
     const win = this.win;
-    return urlReplacementsFor(win).expandAsync(remoteConfigUrl)
+    return urlReplacementsForDoc(win.document).expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
           return xhrFor(win).fetchJson(remoteConfigUrl, fetchConfig);
@@ -418,10 +418,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     request = this.expandTemplate_(request, trigger, event);
 
     // For consistency with amp-pixel we also expand any url replacements.
-    return urlReplacementsFor(this.win).expandAsync(request).then(request => {
-      this.sendRequest_(request, trigger);
-      return request;
-    });
+    return urlReplacementsForDoc(this.win.document).expandAsync(request)
+        .then(request => {
+          this.sendRequest_(request, trigger);
+          return request;
+        });
   }
 
   /**
@@ -443,7 +444,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
       const key = this.expandTemplate_(spec['sampleOn'], trigger);
-      const keyPromise = urlReplacementsFor(this.win).expandAsync(key);
+      const keyPromise = urlReplacementsForDoc(this.win.document)
+          .expandAsync(key);
       const cryptoPromise = cryptoFor(this.win);
       return Promise.all([keyPromise, cryptoPromise])
           .then(results => results[1].uniform(results[0]))

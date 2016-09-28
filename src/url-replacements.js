@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getExistingServiceForDoc} from './service';
 
 
 /**
- * @param {!Window} window
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/url-replacements-impl.UrlReplacements}
  */
-export function urlReplacementsFor(window) {
+export function urlReplacementsForDoc(nodeOrDoc) {
   return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForWindow(window, 'url-replace'));
-};
+      getExistingServiceForDoc(nodeOrDoc, 'url-replace'));
+}
