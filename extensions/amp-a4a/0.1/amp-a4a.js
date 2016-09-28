@@ -19,11 +19,11 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
+import {AmpAdLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeChildren, createElementWithAttributes} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
-import {performanceFor} from '../../../src/performance';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
@@ -66,7 +66,7 @@ function isValidOffsetArray(ary) {
   return isArray(ary) && ary.length == 2 &&
       typeof ary[0] === 'number' &&
       typeof ary[1] === 'number';
-};
+}
 
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 
@@ -120,11 +120,11 @@ export class AmpA4A extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    this.performance_ = performanceFor(element.win);
-    this.performance_.tick('a4a_constructor');
-
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
+
+    this.lifecycleReporter_ = new AmpAdLifecycleReporter(this.win, 'a4a');
+    this.lifecycleReporter_.sendPing(this.element, 'constructor', 0);
   }
 
   /** @override */
@@ -204,7 +204,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.performance_.tick('a4a_onLayoutMeasure');
+    this.lifecycleReporter_.sendPing(this.element, 'onLayoutMeasure', 1);
     if (this.apiHandler_) {
       this.apiHandler_.onLayoutMeasure();
     }
@@ -253,6 +253,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad URL, if one is available.
         .then(() => {
           checkStillCurrent(promiseId);
+          this.lifecycleReporter_.sendPing(this.element, 'build_url', 2);
           return this.getAdUrl();
         })
         // This block returns the (possibly empty) response to the XHR request.
