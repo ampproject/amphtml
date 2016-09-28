@@ -1446,14 +1446,14 @@ export function registerElement(win, name, implementationClass) {
     // into the second arg. However, Babel transpilation for native extend
     // fails for HTMLElement, so we need to use old prototype syntax.
     // @see https://github.com/babel/babel/issues/4480
-    let cls = () => {
+    const cls = (function() {
       function constructor() {
         // `createdCallback` is replaced by the constructor in V1.
         this.createdCallback();
       }
       function BaseCustomElement() {
         // HTMLElement requires the 'new' operator.
-        let self = win.Reflect.construct(
+        const self = win.Reflect.construct(
             win.HTMLElement, arguments, this.constructor);
         constructor.apply(self, arguments);
         return self;
@@ -1464,12 +1464,12 @@ export function registerElement(win, name, implementationClass) {
           constructor: {
             configurable: true,
             writable: true,
-            value: BaseCustomElement
-          }
+            value: BaseCustomElement,
+          },
         }
       );
       return BaseCustomElement;
-    }();
+    })();
     win.customElements.define(name, cls);
   } else {
     // Fall back to Custom Elements V0 or polyfill.
