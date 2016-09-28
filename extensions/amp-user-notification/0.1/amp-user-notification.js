@@ -20,7 +20,7 @@ import {cidFor} from '../../../src/cid';
 import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
@@ -89,7 +89,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   createdCallback() {
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
+    this.urlReplacements_ = urlReplacementsForDoc(this.getAmpDoc());
 
     /** @private @const {!UserNotificationManager} */
     this.userNotificationManager_ = getUserNotificationManager_(this.win);

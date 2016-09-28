@@ -20,7 +20,7 @@ import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {platformFor} from '../../../src/platform';
 
@@ -63,7 +63,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.target_ = null;
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = urlReplacementsFor(this.win);
+    const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
     urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
       // mailto: protocol breaks when opened in _blank on iOS Safari.
