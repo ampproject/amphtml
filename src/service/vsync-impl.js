@@ -18,7 +18,7 @@ import {Pass} from '../pass';
 import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
 import {documentStateFor} from '../document-state';
-import {getService} from '../service';
+import {getService, getServicePromiseForDoc} from '../service';
 import {dev} from '../log';
 import {installTimerService} from './timer-impl';
 
@@ -119,6 +119,11 @@ export class Vsync {
     if (this.ampdocService_.isSingleDoc()) {
       this.ampdocService_.getAmpDoc().onVisibilityChanged(
           boundOnVisibilityChanged);
+      // QQQQ
+      getServicePromiseForDoc(this.ampdocService_.getAmpDoc(), 'viewer')
+          .then(viewer => {
+            console.error('QQQ: viewer here: ', viewer);
+          });
     } else {
       this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
     }
