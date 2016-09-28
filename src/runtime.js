@@ -48,7 +48,7 @@ import {
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStorageService} from './service/storage-impl';
+import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
@@ -87,7 +87,6 @@ export function installRuntimeServices(global) {
   installPlatformService(global);
   installTimerService(global);
   installViewerService(global);
-  installStorageService(global);
   installVsyncService(global);
   installXhrService(global);
   installTemplatesService(global);
@@ -109,6 +108,7 @@ export function installAmpdocServices(ampdoc) {
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installStorageServiceForDoc(ampdoc);
   installVideoManagerForDoc(ampdoc);
 }
 
