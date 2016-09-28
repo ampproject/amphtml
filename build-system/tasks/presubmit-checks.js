@@ -162,7 +162,7 @@ var forbiddenTerms = {
       'src/service/performance-impl.js',
     ],
   },
-  'installStorageService': {
+  'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -319,7 +319,7 @@ var forbiddenTerms = {
     ]
   },
   'eval\\(': '',
-  'storageFor': {
+  'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/storage.js',
