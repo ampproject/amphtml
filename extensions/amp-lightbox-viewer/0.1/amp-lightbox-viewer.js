@@ -249,6 +249,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.activeElement_ = null;
     this.active_ = false;
 
+    // Reset the state of the description box
+    this.descriptionBox_.classList.remove('hide');
+
     // If there's gallery, set gallery to display none
     this.container_.removeAttribute('gallery-view');
 
