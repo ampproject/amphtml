@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ describe('amp-reddit', () => {
       const ampReddit = iframe.doc.createElement('amp-reddit');
       ampReddit.setAttribute('height', 400);
       ampReddit.setAttribute('width', 400);
-      ampReddit.setAttribute('data-src', src)
+      ampReddit.setAttribute('data-src', src);
       ampReddit.setAttribute('data-embedtype', type);
       ampReddit.setAttribute('layout', 'responsive');
 
@@ -47,58 +47,58 @@ describe('amp-reddit', () => {
   it('renders post iframe', () => {
     return getReddit('https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed', 'post')
         .then(ampReddit => {
-            const iframe = ampReddit.querySelector('iframe');
-            expect(iframe).to.not.be.null;
-            expect(iframe.tagName).to.equal('IFRAME');
-            expect(iframe.getAttribute('width')).to.equal('400');
-            expect(iframe.getAttribute('height')).to.equal('400');
+          const iframe = ampReddit.querySelector('iframe');
+          expect(iframe).to.not.be.null;
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.getAttribute('width')).to.equal('400');
+          expect(iframe.getAttribute('height')).to.equal('400');
         });
   });
 
   it('adds post embed', () => {
     return createIframePromise().then(iframe => {
-        const div = document.createElement('div');
-        div.setAttribute('id', 'c');
-        iframe.doc.body.appendChild(div);
+      const div = document.createElement('div');
+      div.setAttribute('id', 'c');
+      iframe.doc.body.appendChild(div);
 
-        reddit(iframe.win, {
-          src: 'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
-          embedtype: 'post',
-          width: 400,
-          height: 400,
-        });
+      reddit(iframe.win, {
+        src: 'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
+        embedtype: 'post',
+        width: 400,
+        height: 400,
+      });
 
-        const embedlyEmbed = iframe.doc.body.querySelector('.embedly-card');
-        expect(embedlyEmbed).not.to.be.undefined;
+      const embedlyEmbed = iframe.doc.body.querySelector('.embedly-card');
+      expect(embedlyEmbed).not.to.be.undefined;
     });
   });
 
   it('renders comment iframe', () => {
     return getReddit('https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw', 'comment')
         .then(ampReddit => {
-            const iframe = ampReddit.querySelector('iframe');
-            expect(iframe).to.not.be.null;
-            expect(iframe.tagName).to.equal('IFRAME');
-            expect(iframe.getAttribute('width')).to.equal('400');
-            expect(iframe.getAttribute('height')).to.equal('400');
+          const iframe = ampReddit.querySelector('iframe');
+          expect(iframe).to.not.be.null;
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.getAttribute('width')).to.equal('400');
+          expect(iframe.getAttribute('height')).to.equal('400');
         });
   });
 
   it('adds comment embed', () => {
     return createIframePromise().then(iframe => {
-        const div = document.createElement('div');
-        div.setAttribute('id', 'c');
-        iframe.doc.body.appendChild(div);
+      const div = document.createElement('div');
+      div.setAttribute('id', 'c');
+      iframe.doc.body.appendChild(div);
 
-        reddit(iframe.win, {
-          src: 'https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw',
-          embedtype: 'comment',
-          width: 400,
-          height: 400,
-        });
+      reddit(iframe.win, {
+        src: 'https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw',
+        embedtype: 'comment',
+        width: 400,
+        height: 400,
+      });
 
-        const redditEmbed = iframe.doc.body.querySelector('.reddit-embed');
-        expect(redditEmbed).not.to.be.undefined;
+      const redditEmbed = iframe.doc.body.querySelector('.reddit-embed');
+      expect(redditEmbed).not.to.be.undefined;
     });
   });
 
