@@ -176,7 +176,7 @@ var forbiddenTerms = {
       'src/service/template-impl.js',
     ],
   },
-  'installUrlReplacementsService': {
+  'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
