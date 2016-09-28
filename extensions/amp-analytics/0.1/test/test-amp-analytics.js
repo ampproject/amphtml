@@ -557,8 +557,8 @@ describe('amp-analytics', function() {
 
   it('expands url-replacements vars', () => {
     const analytics = getAnalyticsTag({
-      'requests': {'pageview':
-        'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
+      'requests': {
+        'pageview': 'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
@@ -573,6 +573,31 @@ describe('amp-analytics', function() {
           'https://example.com/test1=x&' +
           'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
           '&title=Test%20Title');
+    });
+  });
+
+  it('expands complex vars', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'pageview': 'https://example.com/test1=${qp_foo}'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'qp_foo': '${queryParam(foo)}',
+        },
+      }]});
+    const urlReplacements = urlReplacementsForDoc(analytics.win.document);
+    sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
+      return {sync: param => {
+        return '_' + name.toLowerCase() + '_' + param + '_';
+      }};
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/test1=_query_param_foo_');
     });
   });
 
@@ -911,9 +936,15 @@ describe('amp-analytics', function() {
       expect(actual).to.equal('123412%252525252524%25252525257B3%25252525257D');
     });
 
-    it('works with params', () => {
+    it('works with complex params (1)', () => {
       const vars = {'vars': {'fooParam': 'QUERY_PARAM(foo,bar)'}};
       const actual = analytics.expandTemplate_('${fooParam}', vars);
+      expect(actual).to.equal('QUERY_PARAM(foo,bar)');
+    });
+
+    it('works with complex params (2)', () => {
+      const vars = {'vars': {'fooParam': 'QUERY_PARAM'}};
+      const actual = analytics.expandTemplate_('${fooParam(foo,bar)}', vars);
       expect(actual).to.equal('QUERY_PARAM(foo,bar)');
     });
   });

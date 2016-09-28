@@ -499,14 +499,18 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Returns an array containing two values: name and args parsed from the key.
    *
    * @param {string} key The key to be parsed.
-   * @return {Object<string>}
+   * @return {!Object<string>}
    * @private
    */
   getNameArgs_(key) {
     if (!key) {
-      return ['', ''];
+      return {name: '', argList: ''};
     }
     const match = key.match(/([^(]*)(\([^)]*\))?/);
+    if (!match) {
+      user().error(this.getName_(),
+          'Variable with invalid format found: ' + key);
+    }
     return {name: match[1], argList: match[2] || ''};
   }
 
@@ -544,7 +548,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (v == null) {
         continue;
       } else {
-        const sv = /** @type {string} */ this.encodeVars_(v);
+        const sv = /** @type {string} */ (this.encodeVars_(v));
         s.push(`${encodeURIComponent(k)}=${sv}`);
       }
     }
