@@ -1453,8 +1453,9 @@ export function registerElement(win, name, implementationClass) {
       }
       function BaseCustomElement() {
         // HTMLElement requires the 'new' operator.
+        const args = Array.from(arguments);
         const self = win.Reflect.construct(
-            win.HTMLElement, arguments, this.constructor);
+            win.HTMLElement, args, this.constructor);
         constructor.apply(self, arguments);
         return self;
       }
@@ -1470,7 +1471,7 @@ export function registerElement(win, name, implementationClass) {
       );
       return BaseCustomElement;
     })();
-    win.customElements.define(name, cls);
+    win['customElements'].define(name, cls);
   } else {
     // Fall back to Custom Elements V0 or polyfill.
     win.document.registerElement(name, {
