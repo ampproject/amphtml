@@ -684,7 +684,8 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.element.appendChild(this.container_);
 
     /** @private {!ImageViewer} */
-    this.imageViewer_ = new ImageViewer(this, this.win, this.loadPromise);
+    this.imageViewer_ = new ImageViewer(this, this.win,
+        this.loadPromise.bind(this));
     this.container_.appendChild(this.imageViewer_.getElement());
 
     /** @private {!Element} */
