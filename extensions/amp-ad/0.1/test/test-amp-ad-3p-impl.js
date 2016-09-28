@@ -140,7 +140,6 @@ describe('amp-ad-3p-impl', () => {
       win.document.body.appendChild(adContainerElement);
       const ad3p = createAmpAd(win);
       adContainerElement.appendChild(ad3p.element);
-
       ad3p.onLayoutMeasure();
       expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
     });

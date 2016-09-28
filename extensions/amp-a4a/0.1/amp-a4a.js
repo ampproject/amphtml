@@ -755,7 +755,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   iframeRenderHelper_(iframe, is3p) {
     // TODO(keithwrightbos): noContentCallback?
-    this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
+    this.apiHandler_ = new AMP.AmpAdApiHandler(this);
     // TODO(keithwrightbos): startup returns load event, do we need to wait?
     // Set opt_defaultVisible to true as 3p draw code never executed causing
     // render-start event never to fire which will remove visiblity hidden.

@@ -26,6 +26,7 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
+import {displayNoContentUI} from './amp-ad-ui';
 
 const TIMEOUT_VALUE = 10000;
 
@@ -33,16 +34,14 @@ export class AmpAdApiHandler {
 
   /**
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
-   * @param {!Element} element
-   * @param {function()=} opt_noContentCallback
    */
-  constructor(baseInstance, element, opt_noContentCallback) {
+  constructor(baseInstance) {
 
     /** @private */
     this.baseInstance_ = baseInstance;
 
     /** @private {!Element} */
-    this.element_ = element;
+    this.element_ = baseInstance.element;
 
     /** @private {?Element} iframe instance */
     this.iframe_ = null;
@@ -56,8 +55,8 @@ export class AmpAdApiHandler {
     /** @private {boolean} */
     this.is3p_ = false;
 
-    /** @private {?function()|undefined} opt_noContentHandler */
-    this.noContentCallback_ = opt_noContentCallback;
+    /** @private {boolean} */
+    this.timeout_ = false;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
@@ -112,6 +111,9 @@ export class AmpAdApiHandler {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
+          if (this.timeout_) {
+            return;
+          }
           const data = info.data;
           if (data.type == 'render-start') {
             this.renderStart_(info);
@@ -125,8 +127,12 @@ export class AmpAdApiHandler {
       // respectively
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         'bootstrap-loaded', this.is3p_);
-      listenForOncePromise(this.iframe_, 'no-content', this.is3p_)
-          .then(() => this.noContent_());
+      listenForOncePromise(this.iframe_, 'no-content', this.is3p_).then(() => {
+        if (this.timeout_) {
+          return;
+        }
+        this.noContent_();
+      });
     }
 
     if (!opt_defaultVisible) {
@@ -144,6 +150,7 @@ export class AmpAdApiHandler {
       return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
           this.adResponsePromise_,
           'timeout waiting for ad response').catch(e => {
+            this.timeout_ = true;
             this.noContent_();
             user().warn('AMP-AD', e);
           }).then(() => {
@@ -170,28 +177,32 @@ export class AmpAdApiHandler {
     }
   }
 
-  /** See BaseElement.  */
-  unlayoutCallback() {
+  /**
+   * Cleans up the listeners on the cross domain ad iframe.
+   * And free the iframe resource
+   * @param {boolean=} opt_force
+   */
+  freeIframe(opt_force) {
     this.cleanup_();
     if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
+      if (opt_force || this.iframe_.name.indexOf('_master') == -1) {
+        removeElement(this.iframe_);
+        this.iframe_ = null;
+      }
     }
   }
 
   /**
-   * Cleans up listeners on the ad, and calls the no content callback, if one
-   * was provided.
+   * Cleans up listeners on the ad, and apply the default UI for ad.
    * @private
    */
   noContent_() {
-    //TODO: make noContentCallback_ default
-    if (this.noContentCallback_) {
-      this.noContentCallback_();
-    } else {
-      user().info('AMP-AD', 'no content callback was specified');
+    if (!this.iframe_) {
+      // unlayout already called
+      return;
     }
-    this.cleanup_();
+    this.freeIframe();
+    displayNoContentUI(this.baseInstance_);
   }
 
   /**
@@ -209,7 +220,6 @@ export class AmpAdApiHandler {
       this.intersectionObserver_.destroy();
       this.intersectionObserver_ = null;
     }
-    this.noContentCallback_ = null;
   }
 
   /**

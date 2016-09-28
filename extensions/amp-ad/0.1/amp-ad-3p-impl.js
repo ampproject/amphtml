@@ -19,7 +19,6 @@ import {
   allowRenderOutsideViewport,
   incrementLoadingAds,
 } from './concurrent-load';
-import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -31,6 +30,12 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {removeElement} from '../../../src/dom';
+import {
+  AdDisplayState,
+  displayNoContentUI,
+  displayUnlayoutUI,
+} from './amp-ad-ui';
 
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -175,8 +180,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   measureIframeLayoutBox_() {
-    if (this.iframe_) {
-      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
+    if (this.apiHandler_ && this.apiHandler_.getIframe()) {
+      const iframeBox =
+          this.getViewport().getLayoutRect(this.apiHandler_.getIframe());
       const box = this.getLayoutBox();
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
@@ -186,7 +192,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
-    if (!this.iframe_) {
+    if (!this.apiHandler_ || !this.apiHandler_.getIframe()) {
       return super.getIntersectionElementLayoutBox();
     }
     const box = this.getLayoutBox();
@@ -207,6 +213,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
+    this.state = AdDisplayState.LOADING;
     incrementLoadingAds(this.win);
     return this.layoutPromise_ = getAdCid(this).then(cid => {
       const opt_context = {
@@ -221,8 +228,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.boundNoContentHandler_);
-      return this.apiHandler_.startUp(this.iframe_, true);
+          this);
+      return this.apiHandler_.startUp(this.iframe, true);
     });
   }
 
@@ -233,58 +240,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
   }
 
-  /**
-   * Activates the fallback if the ad reports that the ad slot cannot
-   * be filled.
-   * @private
-   */
-  noContentHandler_() {
-    // If iframe is null nothing to do.
-    if (!this.iframe_) {
-      return;
-    }
-    // If a fallback does not exist attempt to collapse the ad.
-    if (!this.fallback_) {
-      this.attemptChangeHeight(0).then(() => {
-        this./*OK*/collapse();
-      }, () => {});
-    }
-    this.deferMutate(() => {
-      if (!this.iframe_) {
-        return;
-      }
-      if (this.fallback_) {
-        // Hide placeholder when falling back.
-        if (this.placeholder_) {
-          this.togglePlaceholder(false);
-        }
-        this.toggleFallback(true);
-      }
-      // Remove the iframe only if it is not the master.
-      if (this.iframe_.name.indexOf('_master') == -1) {
-        removeElement(this.iframe_);
-        this.iframe_ = null;
-      }
-    });
-  }
-
   /** @override  */
   unlayoutCallback() {
     this.layoutPromise_ = null;
-    if (!this.iframe_) {
-      return true;
-    }
-
-    if (this.placeholder_) {
-      this.togglePlaceholder(true);
-    }
-    if (this.fallback_) {
-      this.toggleFallback(false);
-    }
-
-    this.iframe_ = null;
+    displayUnlayoutUI(this);
     if (this.apiHandler_) {
-      this.apiHandler_.unlayoutCallback();
+      this.apiHandler_.freeIframe(true /* force */);
       this.apiHandler_ = null;
     }
     this.lifecycleReporter.sendPing('adSlotCleared');
