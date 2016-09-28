@@ -810,6 +810,24 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should expand sync and respect white list', () => {
+    const win = getFakeWindow();
+    const urlReplacements = installUrlReplacementsService(win);
+    urlReplacements.win_.performance.timing.loadEventStart = 109;
+    const expanded = urlReplacements.expandSync(
+      'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
+      {
+        'CONST': 'ABC',
+        'FUNCT': () => {
+          throw Error('Should not be called');
+        },
+      }, undefined, {
+        'CONST': true,
+      });
+    expect(expanded).to.equal('r=RANDOM&c=ABC&f=FUNCT(hello,world)' +
+        '&a=b&d=PROM&e=PAGE_LOAD_TIME');
+  });
+
   describe('access values', () => {
 
     let accessService;
