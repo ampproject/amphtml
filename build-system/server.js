@@ -86,7 +86,7 @@ app.use('/api/echo/post', function(req, res) {
  * @type {RegExp}
  */
 const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
-    '^https?://.+\.herokuapp\.com:8000');
+    '^https?://.+\.herokuapp\.com');
 
 /**
  * In practice this would be the publishers origin.
@@ -95,7 +95,7 @@ const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
  * @type {RegExp}
  */
 const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
-    '^https?://.+\.herokuapp\.com:8000/');
+    '^https?://.+\.herokuapp\.com');
 
 app.use('/form/html/post', function(req, res) {
   assertCors(req, res, ['POST']);
@@ -390,7 +390,7 @@ app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
 });
 
 app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
-    if ('amp-fresh' in req.query && req.query['amp-fresh'] == '1') {
+    if ('amp-fresh' in req.query && req.query['amp-fresh']) {
       res.setHeader('Content-Type', 'text/html');
       res.end(`<!doctype html>
           <html ⚡>

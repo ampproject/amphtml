@@ -115,6 +115,9 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+    /** @const {!Window} */
+    this.hostWin = element.ownerDocument.defaultView;
+
     /** @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
@@ -221,6 +224,14 @@ export class Resource {
    */
   getState() {
     return this.state_;
+  }
+
+  /**
+   * Returns whether the resource has been blacklisted.
+   * @return {boolean}
+   */
+  isBlacklisted() {
+    return this.blacklisted_;
   }
 
   /**

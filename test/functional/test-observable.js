@@ -60,6 +60,13 @@ describe('Observable', () => {
     observable.fire('C');
     expect(observer1Called).to.equal(1);
     expect(observer2Called).to.equal(2);
+
+    observable.add(observer1);
+    observable.add(observer2);
+    observable.removeAll();
+    observable.fire('D');
+    expect(observer1Called).to.equal(1);
+    expect(observer2Called).to.equal(2);
   });
 
 });

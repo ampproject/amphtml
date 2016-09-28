@@ -19,7 +19,10 @@ import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
-import {getService} from '../service';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
@@ -29,8 +32,8 @@ import {px, setStyle, setStyles} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
-import {waitForBody} from '../dom';
 import {isExperimentOn} from '../experiments';
+import {waitForBody} from '../dom';
 
 
 const TAG_ = 'Viewport';
@@ -58,13 +61,19 @@ let ViewportChangedEventDef;
 export class Viewport {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!ViewportBindingDef} binding
    * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, binding, viewer) {
-    /** @const {!Window} */
-    this.win_ = win;
+  constructor(ampdoc, binding, viewer) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
+    /**
+     * Some viewport operations require the global document.
+     * @private @const {!Document}
+     */
+    this.globalDoc_ = this.ampdoc.win.document;
 
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
@@ -104,8 +113,11 @@ export class Viewport {
     /** @private {number} */
     this.scrollMeasureTime_ = 0;
 
+    /** @private {!./timer-impl.Timer} */
+    this.timer_ = timerFor(this.ampdoc.win);
+
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(win);
+    this.vsync_ = installVsyncService(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -127,11 +139,11 @@ export class Viewport {
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
-        this.win_.document,
+        this.ampdoc,
         this.vsync_,
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
-    onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
+    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
@@ -151,8 +163,10 @@ export class Viewport {
     // no will longer need to try to cancel vertical scrolls during swipes.
     // This is only done in the embedded mode because (a) the document swipe
     // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
-    if (viewer.isEmbedded() && isExperimentOn(this.win_, 'pan-y')) {
-      setStyle(this.win_.document.documentElement, 'touch-action', 'pan-y');
+    if (this.ampdoc.isSingleDoc() &&
+            viewer.isEmbedded() &&
+            isExperimentOn(this.ampdoc.win, 'pan-y')) {
+      setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
     }
   }
 
@@ -215,8 +229,8 @@ export class Viewport {
    * @param {number} paddingBottom
    */
   updatePaddingBottom(paddingBottom) {
-    onDocumentReady(this.win_.document, doc => {
-      doc.body.style.borderBottom = `${paddingBottom}px solid transparent`;
+    this.ampdoc.whenBodyAvailable().then(body => {
+      body.style.borderBottom = `${paddingBottom}px solid transparent`;
     });
   }
 
@@ -286,8 +300,22 @@ export class Viewport {
    * @return {!../layout-rect.LayoutRectDef}}
    */
   getLayoutRect(el) {
-    return this.binding_.getLayoutRect(el,
-        this.getScrollLeft(), this.getScrollTop());
+    const scrollLeft = this.getScrollLeft();
+    const scrollTop = this.getScrollTop();
+
+    // Go up the window hierarchy through friendly iframes.
+    const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
+    if (frameElement) {
+      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const c = this.binding_.getLayoutRect(
+          frameElement, scrollLeft, scrollTop);
+      return layoutRectLtwh(Math.round(b.left + c.left),
+          Math.round(b.top + c.top),
+          Math.round(b.width),
+          Math.round(b.height));
+    }
+
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /**
@@ -333,7 +361,7 @@ export class Viewport {
     // be done in steps for better transition experience when things
     // are closer vs farther.
     // TODO(dvoytenko, #3742): documentElement will be replaced by ampdoc.
-    return Animation.animate(this.win_.document.documentElement, pos => {
+    return Animation.animate(this.ampdoc.getRootNode(), pos => {
       this.binding_.setScrollTop(interpolate(pos));
     }, duration, curve).then();
   }
@@ -384,9 +412,8 @@ export class Viewport {
    * Resets touch zoom to initial scale of 1.
    */
   resetTouchZoom() {
-    const windowHeight = this.win_./*OK*/innerHeight;
-    const documentHeight = this.win_.document
-        .documentElement./*OK*/clientHeight;
+    const windowHeight = this.ampdoc.win./*OK*/innerHeight;
+    const documentHeight = this.globalDoc_.documentElement./*OK*/clientHeight;
     if (windowHeight && documentHeight && windowHeight === documentHeight) {
       // This code only works when scrollbar overlay content and take no space,
       // which is fine on mobile. For non-mobile devices this code is
@@ -394,7 +421,7 @@ export class Viewport {
       return;
     }
     if (this.disableTouchZoom()) {
-      timerFor(this.win_).delay(() => {
+      this.timer_.delay(() => {
         this.restoreOriginalTouchZoom();
       }, 50);
     }
@@ -503,7 +530,7 @@ export class Viewport {
     }
     if (this.viewportMeta_ === undefined) {
       this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
-          this.win_.document.querySelector('meta[name=viewport]'));
+          this.globalDoc_.querySelector('meta[name=viewport]'));
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
@@ -528,7 +555,7 @@ export class Viewport {
       if (event.duration > 0) {
         // Add transit effect on position fixed element
         const tr = numeric(lastPaddingTop - this.paddingTop_, 0);
-        Animation.animate(this.win_.document.documentElement, time => {
+        Animation.animate(this.ampdoc.getRootNode(), time => {
           const p = tr(time);
           this.fixedLayer_.transformMutate(`translateY(${p}px)`);
         }, event.duration, event.curve).thenAlways(() => {
@@ -580,7 +607,7 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = Date.now();
       // Wait 2 frames and then request an animation frame.
-      timerFor(this.win_).delay(() => {
+      this.timer_.delay(() => {
         this.vsync_.measure(() => {
           this.throttledScroll_(now, newScrollTop);
         });
@@ -612,7 +639,7 @@ export class Viewport {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      timerFor(this.win_).delay(() => this.vsync_.measure(
+      this.timer_.delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
@@ -1314,28 +1341,28 @@ export function updateViewportMetaString(currentValue, updateParams) {
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Viewport}
  * @private
  */
-function createViewport_(window) {
-  const viewer = installViewerService(window);
+function createViewport(ampdoc) {
+  const viewer = installViewerService(ampdoc.win);
   let binding;
-  if (viewer.getViewportType() == 'natural-ios-embed') {
-    binding = new ViewportBindingNaturalIosEmbed_(window);
+  if (ampdoc.isSingleDoc() &&
+          viewer.getViewportType() == 'natural-ios-embed') {
+    binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win);
   } else {
-    binding = new ViewportBindingNatural_(window, viewer);
+    binding = new ViewportBindingNatural_(ampdoc.win, viewer);
   }
-  return new Viewport(window, binding, viewer);
+  return new Viewport(ampdoc, binding, viewer);
 }
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Viewport}
  */
-export function installViewportService(window) {
-  return /** @type !Viewport} */ (getService(window, 'viewport', () => {
-    return createViewport_(window);
-  }));
+export function installViewportServiceForDoc(ampdoc) {
+  return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
+      ampdoc => createViewport(ampdoc)));
 };

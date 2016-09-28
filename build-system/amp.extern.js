@@ -25,6 +25,9 @@ window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
 
+// Service Holder
+window.services;
+
 // Exposed to custom ad iframes.
 /* @type {!Function} */
 window.draw3p;
@@ -41,6 +44,18 @@ window.AMP_CONFIG.thirdPartyFrameHost;
 window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
+
+// amp-viz-vega related externs.
+/**
+ * @typedef {{spec: function(!JSONType, function())}}
+ */
+let VegaParser;
+/**
+ * @typedef {{parse: VegaParser}}
+ */
+let VegaObject;
+/* @type {VegaObject} */
+window.vg;
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
