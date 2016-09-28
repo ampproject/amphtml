@@ -15,7 +15,6 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
@@ -33,10 +32,8 @@ describe('amp-sticky-ad', () => {
 
   function getAmpStickyAd() {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-sticky-ad', true);
       const ampStickyAd = iframe.doc.createElement('amp-sticky-ad');
       ampStickyAd.setAttribute('layout', 'nodisplay');
-      ampStickyAd.isExperimentOn_ = true;
       const ampAd = iframe.doc.createElement('amp-ad');
       ampAd.setAttribute('width', '300');
       ampAd.setAttribute('height', '50');
