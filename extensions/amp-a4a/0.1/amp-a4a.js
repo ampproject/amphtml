@@ -29,6 +29,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {
   importPublicKey,
   verifySignature,
@@ -430,13 +431,7 @@ export class AmpA4A extends AMP.BaseElement {
       return true;
     }
     this.vsync_.mutate(() => {
-      // Iframe or shadow root attached as children.  Cannot delete shadowRoot
-      // but creating new one clears.
-      if (this.element.shadowRoot) {
-        this.element.shadowRoot./*OK*/innerHTML = '';
-      } else {
-        removeChildren(this.element);
-      }
+      removeChildren(this.element);
 
       this.stylesheets_.forEach(removeElement);
       this.stylesheets_ = [];
@@ -604,47 +599,45 @@ export class AmpA4A extends AMP.BaseElement {
           //    render-in-DOM failed, and no ad would be displayed.  However,
           //    all of the enclosed mutations are fairly simple and unlikely
           //    to fail.
-          return this.vsync_.mutatePromise().then(() => {
-            // Create and setup friendly iframe.
-            const iframe = this.element.ownerDocument.createElement('iframe');
-            this.applyFillContent(iframe);
+          // Create and setup friendly iframe.
+          const iframe = createElementWithAttributes(
+            this.element.ownerDocument, 'iframe', {
+              'frameborder': '0', 'allowfullscreen': '',
+              'allowtransparency': '', 'scrolling': 'no'});
+          this.applyFillContent(iframe);
 
-            iframe.setAttribute('frameborder', '0');
-            iframe.setAttribute('allowfullscreen', '');
-            iframe.setAttribute('allowtransparency', '');
-            iframe.setAttribute('scrolling', 'no');
-
-            // HTML is all but the extensions which must be removed from the
-            // creative.
-            // TODO(keithwrightbos): remove this monstrousity in favor of
-            // validation providing offsets to extension & AMP runtime
-            // locations.
-            const extensions =
-              creativeMetaData.customElementExtensions || [];
-            for (let i = 0; i <= extensions.length; i++) {
-              // Remove AMP runtime as well.
-              const extensionName =
-                (i == extensions.length) ? 'v0\.js' : extensions[i];
-              creative = creative.replace(
-                new RegExp(`<script[^>]+${extensionName}[^>]+>\s*</script\s*>\n?`),
-                '');
-            }
-            // TODO(keithwrightbos): remove this when we know all creatives
-            // have moved to AMP AD document format validation, ensure it does
-            // not match amp4ads-boilerplate.
-            creative = creative.replace(
-              /<style\s+([^>]*\s+)?amp-boilerplate[^>]*>[^>]+<\/style\s*>/, '');
-            return installFriendlyIframeEmbed(
-              iframe, this.element, {
-                url: this.adUrl_,
-                html: creative,
-                extensionIds: creativeMetaData.customElementExtensions,
-              }).then(() => {
-                this.rendered_ = true;
-                this.onAmpCreativeRender();
-                return true;
-              });
+          // HTML is all but the extensions which must be removed from the
+          // creative.
+          // TODO(keithwrightbos): remove this monstrousity in favor of
+          // validation providing offsets to extension & AMP runtime
+          // locations.
+          const extensions =
+            creativeMetaData.customElementExtensions || [];
+          // Include v0.js for removal.
+          extensions.push('v0\.js');
+          extensions.forEach(extension => {
+            creative = creative.replace(new RegExp(
+              `<script[^>]+${extensionName}[^>]+>\s*</script\s*>\n?`),
+              '');
           });
+          // Remove v0.js so that it is not passed to
+          // installFriendlyIframeEmbed.
+          extensions.pop();
+          // TODO(keithwrightbos): remove this when we know all creatives
+          // have moved to AMP AD document format validation, ensure it does
+          // not match amp4ads-boilerplate.
+          creative = creative.replace(
+            /<style\s+([^>]*\s+)?amp-boilerplate[^>]*>[^>]+<\/style\s*>/, '');
+          return installFriendlyIframeEmbed(
+            iframe, this.element, {
+              url: this.adUrl_,
+              html: creative,
+              extensionIds: extensions,
+            }).then(() => {
+              this.rendered_ = true;
+              this.onAmpCreativeRender();
+              return true;
+            });
         } catch (e) {
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
