@@ -30,7 +30,6 @@ import {installCidService,} from
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
-import {installStorageService} from '../../../../src/service/storage-impl';
 
 
 /* global require: false */
@@ -64,7 +63,6 @@ describe('amp-analytics', function() {
       iframe.doc.title = 'Test Title';
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-      installStorageService(iframe.win);
       installViewerService(iframe.win);
       installCidService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);

@@ -24,7 +24,7 @@ import {xhrFor} from '../../../src/xhr';
 import {assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement, openWindowDialog} from '../../../src/dom';
-import {storageFor} from '../../../src/storage';
+import {storageForDoc} from '../../../src/storage';
 import {timerFor} from '../../../src/timer';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
@@ -99,7 +99,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
     }, {
       element: this.element,
       viewport: this.getViewport(),
-      storagePromise: storageFor(this.win),
+      storagePromise: storageForDoc(this.getAmpDoc()),
       storageKey: this.getStorageKey_(),
     });
   }
@@ -113,7 +113,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @protected */
   isDismissed() {
-    return storageFor(this.win)
+    return storageForDoc(this.getAmpDoc())
         .then(storage => storage.get(this.getStorageKey_()))
         .then(persistedValue => !!persistedValue, reason => {
           dev().error(TAG, 'Failed to read storage', reason);
