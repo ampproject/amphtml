@@ -832,6 +832,12 @@ function createBaseAmpElementProto(win) {
     this.getResources().add(this);
   };
 
+ /**
+  * Replaces `attachedCallback` in Custom Elements V1.
+  * @final @this {!Element}
+  */
+  ElementProto.connectedCallback = ElementProto.attachedCallback;
+
   /**
    * Try to upgrade the element with the provided implementation.
    * @param {!./base-element.BaseElement=} opt_impl
@@ -877,6 +883,11 @@ function createBaseAmpElementProto(win) {
     this.implementation_.detachedCallback();
   };
 
+  /**
+   * Replaces `detachedCallback` in Custom Elements V1.
+   * @final @this {!Element}
+   */
+  ElementProto.disconnectedCallback = ElementProto.detachedCallback;
 
   /**
    * Dispatches a custom event.
@@ -1429,9 +1440,43 @@ function createBaseAmpElementProto(win) {
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
 
-  win.document.registerElement(name, {
-    prototype: createAmpElementProto(win, name),
-  });
+  const supportsCustomElementsV1 = 'customElements' in win;
+  if (supportsCustomElementsV1) {
+    // `customElements.define` requires a function or ES2015 class to be passed
+    // into the second arg. However, Babel transpilation for native extend
+    // fails for HTMLElement, so we need to use old prototype syntax.
+    // @see https://github.com/babel/babel/issues/4480
+    let cls = () => {
+      function constructor() {
+        // `createdCallback` is replaced by the constructor in V1.
+        this.createdCallback();
+      }
+      function BaseCustomElement() {
+        // HTMLElement requires the 'new' operator.
+        let self = win.Reflect.construct(
+            win.HTMLElement, arguments, this.constructor);
+        constructor.apply(self, arguments);
+        return self;
+      }
+      BaseCustomElement.prototype = Object.create(
+        createAmpElementProto(win, name),
+        {
+          constructor: {
+            configurable: true,
+            writable: true,
+            value: BaseCustomElement
+          }
+        }
+      );
+      return BaseCustomElement;
+    }();
+    win.customElements.define(name, cls);
+  } else {
+    // Fall back to Custom Elements V0 or polyfill.
+    win.document.registerElement(name, {
+      prototype: createAmpElementProto(win, name),
+    });
+  }
 }
 
 /**
