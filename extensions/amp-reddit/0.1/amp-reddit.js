@@ -15,6 +15,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 
 class AmpReddit extends AMP.BaseElement {
@@ -46,6 +47,14 @@ class AmpReddit extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const userLog = user();
+    userLog.assert(this.element.getAttribute('data-src'),
+      'The data-src attribute is required for <amp-reddit> %s',
+      this.element);
+    userLog.assert(this.element.getAttribute('data-embedtype'),
+      'The data-embedtype attribute is required for <amp-reddit> %s',
+      this.element);
+
     const iframe = getIframe(this.win, this.element, 'reddit');
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
