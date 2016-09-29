@@ -39,7 +39,7 @@ const PRECONNECT_TIMEOUT_MS = 10 * 1000;
  */
 let PreconnectFeaturesDef;
 
-/** @private {!PreconnectFeaturesDef} */
+/** @private {?PreconnectFeaturesDef} */
 let preconnectFeatures = null;
 
 /**
