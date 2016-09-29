@@ -27,7 +27,7 @@ import {getService, resetServiceForTesting} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {installViewerService} from '../../../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
 
@@ -63,7 +63,6 @@ describe('amp-analytics', function() {
       iframe.doc.title = 'Test Title';
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-      installViewerService(iframe.win);
       installCidService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
 

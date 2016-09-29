@@ -20,7 +20,7 @@ import {
 } from '../../testing/iframe.js';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
-import {viewerFor} from '../../src/viewer';
+import {viewerForDoc} from '../../src/viewer';
 import {resourcesForDoc} from '../../src/resources';
 import {VisibilityState} from '../../src/visibility-state';
 import * as sinon from 'sinon';
@@ -124,7 +124,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         fixture.win.name = '__AMP__visibilityState=prerender';
         return expectBodyToBecomeVisible(fixture.win);
       }).then(() => {
-        viewer = viewerFor(fixture.win);
+        viewer = viewerForDoc(fixture.win);
         docHidden = sandbox.stub(viewer.docState_, 'isHidden').returns(false);
 
         protoElement = createAmpElementProto(

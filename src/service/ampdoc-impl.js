@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Observable} from '../observable';
+import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
 import {
   getParentWindowFrameElement,
@@ -58,6 +60,17 @@ export function shadowDocReady(ampdoc) {
  */
 export function shadowDocHasBody(ampdoc, body) {
   ampdoc.setBody_(body);
+}
+
+
+/**
+ * Sets visiblity of the document.
+ * @param {!AmpDocShadow} ampdoc
+ * @param {!VisibilityState} state
+ * @restricted
+ */
+export function setDocVisibility(ampdoc, state) {
+  ampdoc.setVisibility_(state);
 }
 
 
@@ -183,6 +196,24 @@ export class AmpDoc {
   constructor(win) {
     /** @public @const {!Window} */
     this.win = win;
+
+    /** @private {!VisibilityState} */
+    this.visibilityState_ = VisibilityState.HIDDEN;
+
+    /** @private {boolean} */
+    this.hasBeenVisible_ = false;
+
+    /** @private {?time} */
+    this.firstVisibleTime_ = null;
+
+    /** @private @const {!Promise} */
+    this.whenFirstVisiblePromise_ = new Promise(resolve => {
+      /** @private {?function()} */
+      this.whenFirstVisibleResolve_ = resolve;
+    });
+
+    /** @private @const {!Observable<!VisibilityState>} */
+    this.visibilityObservable_ = new Observable();
   }
 
   /**
@@ -290,6 +321,82 @@ export class AmpDoc {
    */
   contains(node) {
     return this.getRootNode().contains(node);
+  }
+
+  /**
+   * Returns visibility state configured by the viewer.
+   * See {@link isVisible}.
+   * @return {!VisibilityState}
+   */
+  getVisibilityState() {
+    return this.visibilityState_;
+  }
+
+  /**
+   * Returns the current visibility state for the ampdoc.
+   * @return {boolean}
+   */
+  isVisible() {
+    return this.visibilityState_ == VisibilityState.VISIBLE;
+  }
+
+  /**
+   * Whether the AMP document has been ever visible before. Since the visiblity
+   * state of a document can be flipped back and forth we sometimes want to know
+   * if a document has ever been visible.
+   * @return {boolean}
+   */
+  hasBeenVisible() {
+    return this.hasBeenVisible_;
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document becomes visible.
+   * @return {!Promise}
+   */
+  whenFirstVisible() {
+    return this.whenFirstVisiblePromise_;
+  }
+
+  /**
+   * Returns the time when the document has become visible for the first time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getFirstVisibleTime() {
+    return this.firstVisibleTime_;
+  }
+
+  /**
+   * Updates the document's visibility.
+   * @param {!VisibilityState} state
+   * @private
+   * @restricted
+   */
+  setVisibility_(state) {
+    if (this.visibilityState_ != state) {
+      this.visibilityState_ = state;
+      if (state == VisibilityState.VISIBLE && !this.hasBeenVisible_) {
+        // First-time visible state.
+        this.hasBeenVisible_ = true;
+        this.firstVisibleTime_ = Date.now();
+        if (this.whenFirstVisibleResolve_) {
+          this.whenFirstVisibleResolve_();
+          this.whenFirstVisibleResolve_ = null;
+        }
+      }
+      this.visibilityObservable_.fire(state);
+    }
+  }
+
+  /**
+   * Adds handle for the visibility state.
+   * @param {function()} handler
+   * @return {!UnlistenDef}
+   */
+  onVisibilityChanged(handler) {
+    return this.visibilityObservable_.add(handler);
   }
 }
 

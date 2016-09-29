@@ -15,7 +15,7 @@
  */
 
 import {platformFor} from '../platform';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 import {vsyncFor} from '../vsync';
 
 
@@ -39,7 +39,7 @@ import {vsyncFor} from '../vsync';
  */
 export function checkAndFix(win, opt_platform, opt_viewer, opt_vsync) {
   const platform = opt_platform || platformFor(win);
-  const viewer = opt_viewer || viewerFor(win);
+  const viewer = opt_viewer || viewerForDoc(win.document);//QQQ: where is it called from?
   const vsync = opt_vsync || vsyncFor(win);
   if (!platform.isIos() || !platform.isSafari() ||
           platform.getMajorVersion() > 8 ||

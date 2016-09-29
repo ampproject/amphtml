@@ -22,7 +22,7 @@ import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewportForDoc} from '../../../src/viewport';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
 
 /** @const {number} */
@@ -230,7 +230,7 @@ export class Visibility {
     this.scheduledLoadedPromises_ = false;
 
     /** @private {Viewer} */
-    this.viewer_ = viewerFor(this.win_);
+    this.viewer_ = viewerForDoc(this.win_.document);
 
     /** @private {boolean} */
     this.backgroundedAtStart_ = !this.viewer_.isVisible();

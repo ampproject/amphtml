@@ -17,12 +17,13 @@
 import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
-import {fromClass} from '../service';
+import {fromClassForDoc} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platformFor} from '../platform';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
+import {setDocVisibility} from './ampdoc-impl';
 import {VisibilityState} from '../visibility-state';
 import {urls} from '../config';
 import {tryParseJson} from '../json';
@@ -98,11 +99,14 @@ export const TRUSTED_VIEWER_HOSTS = [
 export class Viewer {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = win;
+    this.win = ampdoc.win;
 
     /** @private @const {boolean} */
     this.isIframed_ = (this.win.parent && this.win.parent != this.win);
@@ -219,7 +223,7 @@ export class Viewer {
     // realistic iOS environment.
     if (platform.isIos() &&
             this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
-            (getMode(win).localDev || getMode(win).development)) {
+            (getMode(this.win).localDev || getMode(this.win).development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     dev().fine(TAG_, '- viewportType:', this.viewportType_);
@@ -404,6 +408,7 @@ export class Viewer {
       this.whenFirstVisibleResolve_();
     }
     this.visibilityObservable_.fire();
+    setDocVisibility(this.ampdoc, this.getVisibilityState());
   }
 
   /**
@@ -520,11 +525,14 @@ export class Viewer {
    * Returns visibility state configured by the viewer.
    * See {@link isVisible}.
    * @return {!VisibilityState}
+   * @deprecated Use `AmpDoc.getVisibilityState()`.
+   * TODO(dvoytenko, #5285): Move public API to AmpDoc.
    */
   getVisibilityState() {
     return this.visibilityState_;
   }
 
+  /** @private */
   recheckVisibilityState_() {
     this.setVisibilityState_(this.viewerVisibilityState_);
   }
@@ -573,6 +581,8 @@ export class Viewer {
    * document in the prerender mode or viewer running the document in the
    * prerender mode.
    * @return {boolean}
+   * @deprecated Use `AmpDoc.isVisible()`.
+   * TODO(dvoytenko, #5285): Move public API to AmpDoc.
    */
   isVisible() {
     return this.getVisibilityState() == VisibilityState.VISIBLE;
@@ -583,16 +593,20 @@ export class Viewer {
    * state of a document can be flipped back and forth we sometimes want to know
    * if a document has ever been visible.
    * @return {boolean}
+   * @deprecated Use `AmpDoc.hasBeenVisible()`.
+   * TODO(dvoytenko, #5285): Move public API to AmpDoc.
    */
   hasBeenVisible() {
     return this.hasBeenVisible_;
   }
 
- /**
-  * Returns a Promise that only ever resolved when the current
-  * AMP document becomes visible.
-  * @return {!Promise}
-  */
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document becomes visible.
+   * @return {!Promise}
+   * @deprecated Use `AmpDoc.whenFirstVisible()`.
+   * TODO(dvoytenko, #5285): Move public API to AmpDoc.
+   */
   whenFirstVisible() {
     return this.whenFirstVisiblePromise_;
   }
@@ -601,6 +615,8 @@ export class Viewer {
    * Returns the time when the document has become visible for the first time.
    * If document has not yet become visible, the returned value is `null`.
    * @return {?time}
+   * @deprecated Use `AmpDoc.getFirstVisibleTime()`.
+   * TODO(dvoytenko, #5285): Move public API to AmpDoc.
    */
   getFirstVisibleTime() {
     return this.firstVisibleTime_;
@@ -719,6 +735,8 @@ export class Viewer {
    * methods for more info.
    * @param {function()} handler
    * @return {!UnlistenDef}
+   * @deprecated Use `AmpDoc.onVisibilityChanged()`.
+   * TODO(dvoytenko, #5285): Move public API to AmpDoc.
    */
   onVisibilityChanged(handler) {
     return this.visibilityObservable_.add(handler);
@@ -1112,9 +1130,9 @@ export let ViewerHistoryPoppedEventDef;
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Viewer}
  */
-export function installViewerService(window) {
-  return fromClass(window, 'viewer', Viewer);
+export function installViewerServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'viewer', Viewer);
 };

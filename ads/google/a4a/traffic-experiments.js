@@ -26,7 +26,7 @@ import {isGoogleAdsA4AValidEnvironment} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{string: {branches: !Branches}}} */
@@ -122,7 +122,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  */
 function maybeSetExperimentFromUrl(win, experimentName,
     controlBranchId, treatmentBranchId, manualId) {
-  const expParam = viewerFor(win).getParam('exp') ||
+  const expParam = viewerForDoc(win.document).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return;

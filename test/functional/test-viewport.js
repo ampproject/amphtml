@@ -27,7 +27,7 @@ import {
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
@@ -76,7 +76,7 @@ describe('Viewport', () => {
     ampdoc = new AmpDocSingle(windowApi);
     installTimerService(windowApi);
     installPlatformService(windowApi);
-    installViewerService(windowApi);
+    installViewerServiceForDoc(ampdoc);
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
     binding.getSize = () => {
@@ -745,7 +745,7 @@ describe('Viewport META', () => {
       ampdoc = new AmpDocSingle(windowApi);
       installTimerService(windowApi);
       installPlatformService(windowApi);
-      installViewerService(windowApi);
+      installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new Viewport(ampdoc, binding, viewer);
     });

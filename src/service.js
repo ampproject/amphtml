@@ -57,7 +57,7 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
   const exists = serviceHolder && serviceHolder.services &&
       serviceHolder.services[id] && serviceHolder.services[id].obj;
   return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
-      `installed.`);
+      `installed. ` + new Error().stack);
 }
 
 /**

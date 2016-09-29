@@ -17,7 +17,7 @@
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 import {cidFor} from '../../../src/cid';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 
@@ -37,7 +37,8 @@ export function allocateVariant(win, experimentName, config) {
   validateConfig(config);
 
   // Variant can be overridden from URL fragment.
-  const override = viewerFor(win).getParam(ATTR_PREFIX + experimentName);
+  const viewer = viewerForDoc(win.document);//QQQ: get element here?
+  const override = viewer.getParam(ATTR_PREFIX + experimentName);
   if (override && config.variants.hasOwnProperty(override)) {
     return Promise.resolve(override);
   }

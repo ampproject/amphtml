@@ -20,7 +20,6 @@ import {getMode} from '../mode';
 import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {VideoEvents, VideoAttributes} from '../video-interface';
-import {viewerFor} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
 
@@ -234,7 +233,8 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteracted_ || !viewerFor(this.win_).isVisible()) {
+    //QQQ: propagate ampdoc
+    if (this.userInteracted_ || !this.ampdoc.isVisible()) {
       return;
     }
 

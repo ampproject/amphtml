@@ -23,7 +23,7 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {IntersectionObserver} from '../../../src/intersection-observer';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 
@@ -62,7 +62,7 @@ export class AmpAdApiHandler {
     this.unlisteners_ = [];
 
     /** @private @const */
-    this.viewer_ = viewerFor(this.baseInstance_.win);
+    this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {?Promise} */
     this.adResponsePromise_ = null;
