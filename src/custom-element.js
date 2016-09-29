@@ -400,16 +400,15 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.createdCallback = function() {
-    this.classList.add('-amp-element');
-
     // Flag "notbuilt" is removed by Resource manager when the resource is
     // considered to be built. See "setBuilt" method.
     /** @private {boolean} */
     this.built_ = false;
-    this.classList.add('-amp-notbuilt');
-    this.classList.add('amp-notbuilt');
 
+    /** @type {string} */
     this.readyState = 'loading';
+
+    /** @type {boolean} */
     this.everAttached = false;
 
     /**
@@ -783,6 +782,10 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.attachedCallback = function() {
+    this.classList.add('-amp-element');
+    this.classList.add('-amp-notbuilt');
+    this.classList.add('amp-notbuilt');
+
     if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
       this.isInTemplate_ = !!dom.closestByTag(this, 'template');
     }

@@ -255,10 +255,10 @@ describe('CustomElement', () => {
 
   it('Element - createdCallback', () => {
     const element = new ElementClass();
-    expect(element).to.have.class('-amp-element');
+    const build = sandbox.stub(element, 'build');
+
     expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
+    expect(element.hasAttributes()).to.equal(false);
     expect(element.isUpgraded()).to.equal(false);
     expect(element.upgradeState_).to.equal(/* NOT_UPGRADED */ 1);
     expect(element.readyState).to.equal('loading');
@@ -268,17 +268,21 @@ describe('CustomElement', () => {
 
     container.appendChild(element);
     element.attachedCallback();
+    expect(element).to.have.class('-amp-element');
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
     expect(testElementCreatedCallback.callCount).to.equal(1);
     expect(element.isUpgraded()).to.equal(true);
+    expect(build.calledOnce);
   });
 
   it('StubElement - createdCallback', () => {
     const element = new StubElementClass();
-    expect(element).to.have.class('-amp-element');
+    const build = sandbox.stub(element, 'build');
+
     expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
+    expect(element.hasAttributes()).to.equal(false);
     expect(element.isUpgraded()).to.equal(false);
     expect(element.readyState).to.equal('loading');
     expect(element.everAttached).to.equal(false);
@@ -287,9 +291,13 @@ describe('CustomElement', () => {
 
     container.appendChild(element);
     element.attachedCallback();
+    expect(element).to.have.class('-amp-element');
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
     expect(testElementCreatedCallback.callCount).to.equal(0);
     expect(element.isUpgraded()).to.equal(false);
+    expect(build.calledOnce);
   });
 
   it('Element - getIntersectionChangeEntry', () => {
@@ -476,10 +484,7 @@ describe('CustomElement', () => {
     const element = new ElementClass();
     element.tryUpgrade_();
 
-    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     element.build();
@@ -534,10 +539,7 @@ describe('CustomElement', () => {
 
   it('Element - build NOT allowed when in template', () => {
     const element = new ElementClass();
-    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     element.isInTemplate_ = true;
@@ -551,10 +553,7 @@ describe('CustomElement', () => {
 
   it('StubElement - build never allowed', () => {
     const element = new StubElementClass();
-    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     expect(() => {
