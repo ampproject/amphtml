@@ -49,7 +49,7 @@ tags: {  # amp-ooyala-player
 tags: {  # <amp-ooyala-player>
   tag_name: "AMP-OOYALA-PLAYER"
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   also_requires_tag: "amp-ooyala-player extension .js script"
   attrs: {
     name: "data-embedcode"
