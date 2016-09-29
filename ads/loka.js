@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-import {getServicePromiseForDoc} from './service';
-
+import {loadScript, validateData} from '../3p/3p';
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!Storage>}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export function storageForDoc(nodeOrDoc) {
-  return getServicePromiseForDoc(nodeOrDoc, 'storage');
+export function loka(global, data) {
+  validateData(data, ['unitParams'], []);
+
+  global.lokaParams = data;
+
+  const container = global.document.querySelector('#c');
+  container.addEventListener('lokaUnitLoaded', e => {
+    if (e.detail.isReady) {
+      global.context.renderStart();
+    } else {
+      global.context.noContentAvailable();
+    }
+  });
+
+  loadScript(global, 'https://loka-cdn.akamaized.net/scene/amp.js');
 }
