@@ -1110,7 +1110,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
     onDocumentReady(this.win.document, doc => {
-      doc.body.style.borderStyle = lightboxMode ? 'none' : 'solid';
+      doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
     });
   }
 
