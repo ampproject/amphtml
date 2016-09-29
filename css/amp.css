@@ -48,7 +48,7 @@ body {
 }
 
 /** make-body-block experiment */
-.make-body-block body {
+.-amp-make-body-block body {
   display: block !important;
 }
 

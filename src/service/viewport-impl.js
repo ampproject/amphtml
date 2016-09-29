@@ -173,10 +173,8 @@ export class Viewport {
     // on CSS permanent and removing the code block below.
     if (this.ampdoc.isSingleDoc() &&
             isExperimentOn(this.ampdoc.win, 'make-body-block')) {
-      this.globalDoc_.documentElement.classList.add('make-body-block');
+      this.globalDoc_.documentElement.classList.add('-amp-make-body-block');
     }
-
-
   }
 
   /** For testing. */
