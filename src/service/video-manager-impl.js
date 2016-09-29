@@ -142,6 +142,10 @@ class VideoEntry {
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(this.win_);
 
+    /** @private @const {function(): !Promise<boolean>} */
+    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc,
+        platformFor(ampdoc.win), timerFor(ampdoc.win), getMode(ampdoc.win));
+
     const element = dev().assert(video.element);
 
     /** @private {boolean} */
@@ -209,7 +213,7 @@ class VideoEntry {
     // common case where autoplay is supported.
     this.video.hideControls();
 
-    supportsAutoplay(this.ampdoc_).then(supportsAutoplay => {
+    this.boundSupportsAutoplay_().then(supportsAutoplay => {
       if (!supportsAutoplay) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
@@ -245,7 +249,7 @@ class VideoEntry {
       return;
     }
 
-    supportsAutoplay(this.ampdoc_).then(supportsAutoplay => {
+    this.boundSupportsAutoplay_().then(supportsAutoplay => {
       if (!supportsAutoplay) {
         return;
       }
@@ -298,38 +302,44 @@ class VideoEntry {
   }
 }
 
+/* @type {Promise<boolean>} */
+let supportsAutoplayCache_ = null;
+
 /**
  * Detects whether autoplay is supported.
  * Note that even if platfrom supports autoplay, users or browsers can disable
  * autoplay to save data / battery. This function detects both platfrom support
  * and when autoplay is disabled.
  *
+ * Service dependencies are taken explicitly for testability.
+ *
+ * @private visible for testing.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./platform-impl.Platform} platform
+ * @param {!./timer-impl.Timer} timer
+ * @param {!../mode.ModeDef} mode
  * @return {!Promise<boolean>}
  */
-let supportsAutoplayPromise_ = null;
-function supportsAutoplay(ampdoc) {
+export function supportsAutoplay(ampdoc, platform, timer, mode) {
 
   // Use cached result if available
-  if (supportsAutoplayPromise_) {
-    return supportsAutoplayPromise_;
+  if (supportsAutoplayCache_) {
+    return supportsAutoplayCache_;
   }
 
   // We do not support autoplay in amp-lite viewer regardless of platfrom
-  if (getMode(ampdoc.win).lite) {
-    return supportsAutoplayPromise_ = Promise.resolve(false);
+  if (mode.lite) {
+    return supportsAutoplayCache_ = Promise.resolve(false);
   }
-
-  const platform = platformFor(ampdoc.win);
 
   // Short-circuit for known unsupported versions on mobile
   const version = platform.getMajorVersion();
   if (platform.isChrome() && version < 53) {
-    return supportsAutoplayPromise_ = Promise.resolve(false);
+    return supportsAutoplayCache_ = Promise.resolve(false);
   }
 
   if (platform.isSafari() && version < 10) {
-    return supportsAutoplayPromise_ = Promise.resolve(false);
+    return supportsAutoplayCache_ = Promise.resolve(false);
   }
 
   // To detect autoplay, we create a video element with a inline data URI
@@ -359,39 +369,44 @@ function supportsAutoplay(ampdoc) {
   detectionElement.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAFttZGF0AAAAMmWIhD///8PAnFAAFPf3333331111111111111111111111111111111111111111114AAAABUGaOeDKAAAABkGaVHgygAAAAAZBmnZ4MoAAAAMKbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAB9AAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAjt0cmFrAAAAXHRraGQAAAAPAAAAAAAAAAAAAAABAAAAAAAAB9AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAGQAAABkAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAfQAAAAAAABAAAAAAGzbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAAAgAAAARVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAABXm1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAR5zdGJsAAAAlnN0c2QAAAAAAAAAAQAAAIZhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAGQAZABIAAAASAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGP//AAAAMGF2Y0MBQsAK/+EAGGdCwArZhz+efARAAAADAEAAAAMBA8SJmgEABWjJYPLIAAAAGHN0dHMAAAAAAAAAAQAAAAQAAAABAAAAFHN0c3MAAAAAAAAAAQAAAAEAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAQAAAABAAAAJHN0c3oAAAAAAAAAAAAAAAQAAAA2AAAACQAAAAoAAAAKAAAAFHN0Y28AAAAAAAAAAQAAADAAAABbdWR0YQAAAFNtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAACZpbHN0AAAAHql0b28AAAAWZGF0YQAAAAEAAAAAR29vZ2xl';
   /*eslint-enable */
 
-  supportsAutoplayPromise_ = ampdoc.whenBodyAvailable().then(body => {
+  const loadedPromise = ampdoc.whenBodyAvailable().then(body => {
     body.appendChild(detectionElement);
-
-    return listenOncePromise(detectionElement, 'loadstart').then(() => {
-      const playResult = detectionElement.play();
-
-      // New browsers return a promise for play call.
-      let playingPromise;
-      if (playResult && playResult.then) {
-        playingPromise = playResult;
-      } else {
-        // No play promise, wait for `playing` event
-        playingPromise = listenOncePromise(detectionElement, 'playing');
-      }
-
-      // If promise is rejected, no autoplay, otherwise autoplay supported
-      playingPromise = playingPromise.then(() => true).catch(() => false);
-
-      // Allow enough time for decoding on busy/low-end processors
-      const TIMEOUT = 1000;
-      const timer = timerFor(ampdoc.win);
-      const timeoutPromise = timer.promise(TIMEOUT, false);
-
-      return Promise.race([playingPromise, timeoutPromise]);
-    });
+    return listenOncePromise(detectionElement, 'loadstart');
   });
 
+  const playingPromise = loadedPromise.then(() => {
+    const playResult = detectionElement.play();
+
+    // New browsers return a promise for play call
+    if (playResult && playResult.then) {
+      return playResult;
+    } else {
+      // No play promise, wait for `playing` event
+      return listenOncePromise(detectionElement, 'playing');
+    }
+  });
+
+  const TIMEOUT = 1000; // Allow enough time for decoding on busy/low-end cpus
+  const timeoutPromise = timer.timeoutPromise(TIMEOUT, playingPromise);
+
+  // If promise is rejected, no autoplay, otherwise autoplay supported
+  const resultPromise = timeoutPromise.then(() => true, () => false);
+
   // Remove the detection element when we know the result
-  supportsAutoplayPromise_.then(() => {
+  resultPromise.then(() => {
     detectionElement.remove();
   });
 
-  return supportsAutoplayPromise_;
+  return supportsAutoplayCache_ = resultPromise;
+}
+
+/**
+ * Clears the cache used by supportsAutoplay.
+ *
+ * @private visible for testing.
+ */
+export function clearSupportsAutoplayCache() {
+  supportsAutoplayCache_ = null;
 }
 
 /**
@@ -401,4 +416,3 @@ function supportsAutoplay(ampdoc) {
 export function installVideoManagerForDoc(ampdoc) {
   return fromClassForDoc(ampdoc, 'video-manager', VideoManager);
 };
-
