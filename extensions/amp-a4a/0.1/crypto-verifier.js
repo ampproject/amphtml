@@ -56,29 +56,29 @@ export function importPublicKey(jwk) {
           {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
           true,
           ['verify']))
-              .then(cryptoKey => {
-                // We do the importKey first to allow the browser to check for
-                // an invalid key.  This last check is in case the key is valid
-                // but a different kind.
-                if (typeof jwk.n != 'string' || typeof jwk.e != 'string') {
-                  throw new Error('missing fields in JSON Web Key');
-                }
-                const mod = base64UrlDecodeToBytes(jwk.n);
-                const pubExp = base64UrlDecodeToBytes(jwk.e);
-                const lenMod = lenPrefix(mod);
-                const lenPubExp = lenPrefix(pubExp);
-                const data = new Uint8Array(lenMod.length + lenPubExp.length);
-                data.set(lenMod);
-                data.set(lenPubExp, lenMod.length);
-                // The list of RSA public keys are not under attacker's
-                // control, so a collision would not help.
-                return crossCrypto.digest({name: 'SHA-1'}, data)
-                    .then(digest => ({
-                      cryptoKey,
-                      // Hash is the first 4 bytes of the SHA-1 digest.
-                      hash: new Uint8Array(digest, 0, 4),
-                    }));
-              });
+      .then(cryptoKey => {
+        // We do the importKey first to allow the browser to check for
+        // an invalid key.  This last check is in case the key is valid
+        // but a different kind.
+        if (typeof jwk.n != 'string' || typeof jwk.e != 'string') {
+          return Promise.reject('missing fields in JSON Web Key');
+        }
+        const mod = base64UrlDecodeToBytes(jwk.n);
+        const pubExp = base64UrlDecodeToBytes(jwk.e);
+        const lenMod = lenPrefix(mod);
+        const lenPubExp = lenPrefix(pubExp);
+        const data = new Uint8Array(lenMod.length + lenPubExp.length);
+        data.set(lenMod);
+        data.set(lenPubExp, lenMod.length);
+        // The list of RSA public keys are not under attacker's
+        // control, so a collision would not help.
+        return crossCrypto.digest({name: 'SHA-1'}, data)
+            .then(digest => ({
+              cryptoKey,
+              // Hash is the first 4 bytes of the SHA-1 digest.
+              hash: new Uint8Array(digest, 0, 4),
+            }));
+      });
 }
 
 /**
