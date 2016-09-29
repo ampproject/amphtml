@@ -28,14 +28,14 @@ export function contentad(global, data) {
   global.url = data.url;
 
   /* Create div for ad to target */
-  const cad_div = window.document.createElement('div');
-  cad_div.id = 'contentad' + global.wid;
-  window.document.body.appendChild(cad_div);
+  const cadDiv = window.document.createElement('div');
+    cadDiv.id = 'contentad' + global.wid;
+  window.document.body.appendChild(cadDiv);
 
   /* Capture or pass URL */
-  let ad_url = window.context.location.href;
-  if(data.url){
-	ad_url = ad_url.replace(window.context.location.host, data.url);
+  let adUrl = window.context.location.href;
+  if (data.url) {
+	adUrl = adUrl.replace(window.context.location.host, data.url);
   }
 
   /* Build API URL */
@@ -43,7 +43,7 @@ export function contentad(global, data) {
     + '?id=' + encodeURIComponent(global.id)
     + '&d=' + encodeURIComponent(global.d)
     + '&wid=' + global.wid
-    + '&url=' + encodeURIComponent(ad_url)
+    + '&url=' + encodeURIComponent(adUrl)
     + '&cb=' + Date.now();
 
   /* Call Content.ad Widget */
