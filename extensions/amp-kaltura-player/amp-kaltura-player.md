@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp-by-example.appspot.com/amp-kaltura-player.html">amp-kaltura-player.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/kaltura.amp.html">kaltura.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-kaltura-player/">Annotated code example for amp-kaltura-player</a></td>
   </tr>
 </table>
 

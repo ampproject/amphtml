@@ -39,7 +39,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-apester-media/">amp-apester-media.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/apester.amp.html">apester.amp.html</a></td>
+    <td>None</td>
   </tr>
 </table>
 
