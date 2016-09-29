@@ -177,6 +177,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
   {
+    id: 'make-body-block',
+    name: 'Sets the body to display:block.',
+    spec: 'https://github.com/ampproject/amphtml/issues/5310',
+  },
+  {
     id: 'pan-y',
     name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
         ' touch handlers',

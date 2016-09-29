@@ -19,6 +19,7 @@ import * as rds from '../../src/render-delaying-services';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {toggleExperiment} from '../../src/experiments';
 import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 
@@ -37,6 +38,7 @@ describe('Styles', () => {
       sandbox = sinon.sandbox.create();
       win = iframe.win;
       doc = win.document;
+      toggleExperiment(win, 'make-body-block', true);
       const perf = installPerformanceService(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
 
@@ -62,6 +64,7 @@ describe('Styles', () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('1');
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
       expect(getStyle(doc.body, 'animation')).to.equal('none');
+      expect(getStyle(doc.body, 'display')).to.equal('block');
     });
 
     it('should wait for render delaying services', done => {
@@ -77,6 +80,7 @@ describe('Styles', () => {
         expect(getStyle(doc.body, 'opacity')).to.equal('1');
         expect(getStyle(doc.body, 'visibility')).to.equal('visible');
         expect(getStyle(doc.body, 'animation')).to.equal('none');
+        expect(getStyle(doc.body, 'display')).to.equal('block');
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
         done();
