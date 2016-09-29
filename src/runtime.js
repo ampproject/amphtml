@@ -623,3 +623,12 @@ export function registerForUnitTest(win) {
     }
   }
 }
+
+
+/**
+ */
+export function iterateElementsForTesting(callback) {
+  for (const key in elementsForTesting) {
+    callback(elementsForTesting[key]);
+  }
+}
