@@ -21,22 +21,22 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function contentad(global, data) {
-  // TODO: check mandatory fields
   validateData(data, [], ['id', 'd', 'wid', 'url']);
-  /*eslint "google-camelcase/google-camelcase": 0*/
   global.id = data.id;
   global.d = data.d;
   global.wid = data.wid;
   global.url = data.url;
 
-  /* Match current href to requested domain */
-  let ad_url = window.context.location.href;
-  ad_url = ad_url.replace(window.context.location.host, data.url);
-
   /* Create div for ad to target */
   const cad_div = window.document.createElement('div');
   cad_div.id = 'contentad' + global.wid;
   window.document.body.appendChild(cad_div);
+
+  /* Capture or pass URL */
+  let ad_url = window.context.location.href;
+  if(data.url){
+	ad_url = ad_url.replace(window.context.location.host, data.url);
+  }
 
   /* Build API URL */
   const cad_api = 'https://api.content.ad/Scripts/widget2.aspx'
