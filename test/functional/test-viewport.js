@@ -743,7 +743,12 @@ describe('Viewport META', () => {
       });
       windowApi = {
         document: {
-          documentElement: {style: {}},
+          documentElement: {
+            style: {},
+            classList: {
+              add: function() {},
+            },
+          },
           querySelector: selector => {
             if (selector == 'meta[name=viewport]') {
               return viewportMeta;
