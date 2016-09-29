@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-img">amp-img.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/responsive.amp.html">responsive.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-img/">Annotated code example for amp-img</a></td>
   </tr>
 </table>
 
