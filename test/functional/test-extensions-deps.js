@@ -28,7 +28,8 @@ import '../../extensions/amp-accordion/0.1/amp-accordion';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl';
 import '../../extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
-//QQQ: doesn't work: import '../../extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl';
+// TODO(dvoytenko): Fix this element.
+// import '../../extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
 import '../../extensions/amp-anim/0.1/amp-anim';
 import '../../extensions/amp-apester-media/0.1/amp-apester-media';
@@ -93,7 +94,6 @@ describe('extension deps', () => {
     resetServiceForTesting(window, 'ampdoc');
     installDocService(window, /* isSingleDoc */ false);
     function testConstructors(ext) {
-      console.error('QQQ: element: ', ext.name);
       const element = window.document.createElement('div');
       const impl = new ext.implementationClass(element);
       impl.createdCallback();

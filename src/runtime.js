@@ -626,6 +626,8 @@ export function registerForUnitTest(win) {
 
 
 /**
+ * @param {function(!Object)} callback
+ * @visibleForTesting
  */
 export function iterateElementsForTesting(callback) {
   for (const key in elementsForTesting) {
