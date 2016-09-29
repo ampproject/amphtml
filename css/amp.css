@@ -47,6 +47,11 @@ body {
   text-size-adjust: 100%;
 }
 
+/** make-body-block experiment */
+.make-body-block body {
+  display: block !important;
+}
+
 .-amp-element {
   display: inline-block;
 }

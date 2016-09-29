@@ -168,6 +168,15 @@ export class Viewport {
             isExperimentOn(this.ampdoc.win, 'pan-y')) {
       setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
     }
+
+    // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
+    // on CSS permanent and removing the code block below.
+    if (this.ampdoc.isSingleDoc() &&
+            isExperimentOn(this.ampdoc.win, 'make-body-block')) {
+      this.globalDoc_.documentElement.classList.add('make-body-block');
+    }
+
+
   }
 
   /** For testing. */
