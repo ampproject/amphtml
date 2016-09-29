@@ -1133,7 +1133,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(windowApi.document.body.style.borderBottomStyle).to.not.equal(
         'solid');
     expect(windowApi.document.body.style.borderLeftStyle).to.not.equal('solid');
-    expect(windowApi.document.body.style.borderRightStyle).to.not.equal('solid');
+    expect(windowApi.document.body.style.borderRightStyle).to.not.equal(
+        'solid');
   });
 
   it('should calculate size', () => {
