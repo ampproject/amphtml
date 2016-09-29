@@ -86,27 +86,28 @@
   <h1>Lightbox Viewer (Opt-in)</h1>
 
   <h2>Image - Lightboxable with Tap</h2>
-  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/F50057?text=1" layout="responsive" width="8" height="6"></amp-img>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/F50057?text=1" aria-describedby="This is the first image, description from aria" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Image - Lightboxable no Tap</h2>
-  <amp-img lightbox src="http://placehold.it/800x600/651FFF?text=2" layout="responsive" width="8" height="6"></amp-img>
+  <amp-img lightbox src="http://placehold.it/800x600/651FFF?text=2" aria-describedby="lightbox2" alt="If you see this, order is wrong" layout="responsive" width="8" height="6"></amp-img>
+  <div id='lightbox2' style="display:none">Lightbox 2 description</div>
 
   <h2>Image - Not Lightboxable</h2>
   <amp-img src="http://placehold.it/800x600/FFC400?text=Not Lightboxable" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Image Fixed Size - Lightboxable with Tap</h2>
-  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/200x200/FF3D00?text=3" layout="fixed" width="200" height="200"></amp-img>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" alt="This is to test a super long description have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something" src="http://placehold.it/200x200/FF3D00?text=3" layout="fixed" width="200" height="200"></amp-img>
 
   <h2>Youtube - Lightboxable</h3>
   <button on="tap:myLightboxViewer.activate(id='yt')">Open video in Lightbox</button>
-  <amp-youtube id='yt' lightbox data-videoid="mGENRKrdoGY" width="480" height="270" layout="responsive"></amp-youtube>
+  <amp-youtube id='yt' lightbox data-videoid="mGENRKrdoGY" alt="test" width="480" height="270" layout="responsive"></amp-youtube>
 
   <h2>Youtube - Not Lightboxable</h3>
   <amp-youtube data-videoid="rddtw6uMNoo" width="480" height="270" layout="responsive"></amp-youtube>
 
   <h2>Twitter Lightboxable</h2>
   <button on="tap:myLightboxViewer.activate(id='twit')">Open Twitter in Lightbox</button>
-  <amp-twitter lightbox id='twit' data-tweetID="585110598171631616" width=486 height=256 layout="responsive"></amp-twitter>
+  <amp-twitter lightbox id='twit' alt="This is a super long text see if cover lightbox image. super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text " data-tweetID="585110598171631616" width=486 height=256 layout="responsive"></amp-twitter>
 
   <h2>UL/LI - Lightboxable with Tap</h2>
   <ul lightbox on="tap:myLightboxViewer.activate">
