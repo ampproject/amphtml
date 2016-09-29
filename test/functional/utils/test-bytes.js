@@ -79,14 +79,14 @@ describe('utf8', function() {
   // -correct-encoding-e-g-utf-8
 
   const strings = [
-      'ユーザー別サイト',
-      '简体中文',
-      '크로스플랫폼으로',
-      'מדוריםמבוקשים',
-      'أفضلالبحوث',
-      'Σὲγνωρίζωἀπὸ',
-      'ДесятуюМеждународную',
-      'แผ่นดินฮั่นเสื่อมโทรมแสนสังเวช'
+    'ユーザー別サイト',
+    '简体中文',
+    '크로스플랫폼으로',
+    'מדוריםמבוקשים',
+    'أفضلالبحوث',
+    'Σὲγνωρίζωἀπὸ',
+    'ДесятуюМеждународную',
+    'แผ่นดินฮั่นเสื่อมโทรมแสนสังเวช',
   ];
 
   const bytes = [
@@ -108,9 +108,10 @@ describe('utf8', function() {
      '\u0E2E', '\u0E31', '\u0E48', '\u0E19', '\u0E40', '\u0E2A', '\u0E37',
      '\u0E48', '\u0E2D', '\u0E21', '\u0E42', '\u0E17', '\u0E23', '\u0E21',
      '\u0E41', '\u0E2A', '\u0E19', '\u0E2A', '\u0E31', '\u0E07', '\u0E40',
-     '\u0E27', '\u0E0A']
+     '\u0E27', '\u0E0A'],
   ];
 
+  // This is used to convert byte array to the type that utf8Decode expects.
   function str2ab(str) {
     const buf = new ArrayBuffer(str.length);
     const bufView = new Uint8Array(buf);
@@ -131,7 +132,8 @@ describe('utf8', function() {
   it('should decode given utf-8 bytes into string', () => {
     for (let i = 0; i < bytes.length; i++) {
       const arrayBuffer = str2ab(bytes[i].join(''));
-      utf8Decode(arrayBuffer).then(string => expect(string).to.equal(strings[i]));
+      utf8Decode(arrayBuffer).then(string => expect(string).to.equal(
+          strings[i]));
     }
   });
 });
