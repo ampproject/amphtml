@@ -65,7 +65,12 @@ describe('Viewport', () => {
     viewerMock = sandbox.mock(viewer);
     windowApi = {
       document: {
-        documentElement: {style: {}},
+        documentElement: {
+          style: {},
+          classList: {
+            add: function(className) {},
+          }
+        },
       },
       location: {},
       navigator: window.navigator,
@@ -478,12 +483,12 @@ describe('Viewport', () => {
   });
 
   it('should add class to HTML element with make-body-block experiment', () => {
-    // TODO(dvoytenko, #4894): Cleanup the experiment.
     viewer.isEmbedded = () => true;
     toggleExperiment(windowApi, 'make-body-block', true);
-    viewport = new Viewport(ampdoc, binding, viewer);
     const docElement = windowApi.document.documentElement;
-    expect(docElement.classList.contains('make-body-block')).to.be.true;
+    const addStub = sandbox.stub(docElement.classList, 'add');
+    viewport = new Viewport(ampdoc, binding, viewer);
+    expect(addStub).to.be.calledWith('-amp-make-body-block');
   });
 
   describe('for child window', () => {
