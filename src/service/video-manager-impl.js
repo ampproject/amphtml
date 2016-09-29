@@ -350,8 +350,8 @@ export function supportsAutoplay(ampdoc, platform, timer, isLiteViewer) {
   setStyles(detectionElement, {
     position: 'fixed',
     top: '0',
-    width: '0px',
-    height: '0px',
+    width: '0',
+    height: '0',
     opacity: '0',
   });
 

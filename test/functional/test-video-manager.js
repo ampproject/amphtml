@@ -115,8 +115,8 @@ describe('Supports Autoplay', () => {
     .then(() => {
       expect(video.style.position).to.equal('fixed');
       expect(video.style.top).to.equal('0');
-      expect(video.style.width).to.equal('0px');
-      expect(video.style.height).to.equal('0px');
+      expect(video.style.width).to.equal('0');
+      expect(video.style.height).to.equal('0');
       expect(video.style.opacity).to.equal('0');
 
       expect(setAttributeSpy.calledWith('muted', '')).to.be.true;
