@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/font.amp.html">font.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-font/">Annotated code example for amp-font</a></td>
   </tr>
 </table>
 

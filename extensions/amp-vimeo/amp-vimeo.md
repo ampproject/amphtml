@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-vimeo/">amp-vimeo.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/vimeo.amp.html">vimeo.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-vimeo/">Annotated code example for amp-vimeo</a></td>
   </tr>
 </table>
 

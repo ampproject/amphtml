@@ -39,19 +39,10 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li>
-          <a
-          href="https://github.com/ampproject/amphtml/blob/master/examples/live-blog.amp.html">live-blog.amp.html</a>
-        </li>
-        <li>
-          <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list.amp.html">live-list.amp.html</a>
-        </li>
-        <li>
-          <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list-update.amp.html">live-list-update.amp.html</a> (this requires a server, run `gulp` on the project repo)
-        </li>
-      </ul>
+    <td><ul>
+    <li><a href="https://ampbyexample.com/components/amp-live-list/">Annotated code example for amp-live-list</a></li>
+    <li><a href="https://ampbyexample.com/samples_templates/live_blog/">Annotated code example with amp-live-list for a live blog</a></li>
+    </ul>
     </td>
   </tr>
 </table>

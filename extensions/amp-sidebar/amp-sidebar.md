@@ -36,9 +36,7 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <a href="https://ampbyexample.com/components/amp-sidebar/">
-        amp-sidebar.html
-      </a>
+      <a href="https://ampbyexample.com/components/amp-sidebar/">Annotated code example for amp-sidebar</a>
     </td>
   </tr>
 </table>
