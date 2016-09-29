@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-vine/">amp-vine.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/vine.amp.html">vine.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-vine/">Annotated code example for amp-vine</a></td>
   </tr>
 </table>
 

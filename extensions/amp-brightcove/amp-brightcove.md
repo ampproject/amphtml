@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-brightcove">amp-brightcove.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/brightcove.amp.html">brightcove.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-brightcove/">Annotated code example for amp-brightcove</a></td>
   </tr>
 </table>
 

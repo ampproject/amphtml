@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-facebook">amp-facebook.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/facebook.amp.html">facebook.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-facebook/">Annotated code example for amp-facebook</a></td>
   </tr>
 </table>
 

@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-iframe">amp-iframe.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-iframe/">Annotated code example for amp-iframe</a></td>
   </tr>
 </table>
 
