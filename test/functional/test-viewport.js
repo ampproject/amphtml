@@ -68,8 +68,8 @@ describe('Viewport', () => {
         documentElement: {
           style: {},
           classList: {
-            add: function(className) {},
-          }
+            add: function() {},
+          },
         },
       },
       location: {},
