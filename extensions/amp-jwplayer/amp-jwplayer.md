@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/jwplayer.amp.html">jwplayer.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-jwplayer/">Annotated code example for amp-jwplayer</a></td>
   </tr>
 </table>
 

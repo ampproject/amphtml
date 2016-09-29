@@ -36,7 +36,7 @@ using a supplied template.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-list/">Annotated code example for amp-list</a></td>
   </tr>
 </table>
 
