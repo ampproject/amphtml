@@ -45,7 +45,7 @@ const BLACKLISTED_TAGS = {
   'frameset': true,
   'iframe': true,
   'img': true,
-  'input': true,
+  //'input': true,
   'link': true,
   'meta': true,
   'object': true,

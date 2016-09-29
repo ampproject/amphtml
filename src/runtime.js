@@ -90,9 +90,9 @@ export function installRuntimeServices(global) {
   installVsyncService(global);
   installXhrService(global);
   installTemplatesService(global);
-  if (isExperimentOn(global, 'form-submit')) {
+  //if (isExperimentOn(global, 'form-submit')) {
     installGlobalSubmitListener(global);
-  }
+  //}
 }
 
 

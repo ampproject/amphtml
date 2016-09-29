@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
+//import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
   assertHttpsUrl,
+  addParamToUrl,
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
 } from '../../../src/url';
@@ -134,11 +135,15 @@ export class AmpForm {
     /** @const @private {!FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
+    /** @private {?Element} */
+    this.submitter_ = null;
+
     this.installSubmitHandler_();
   }
 
   /** @private */
   installSubmitHandler_() {
+    this.form_.addEventListener('click', e => this.handleClick_(e), true);
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
     this.form_.addEventListener('blur', e => {
       onInputInteraction_(e);
@@ -148,6 +153,14 @@ export class AmpForm {
       onInputInteraction_(e);
       this.validator_.onInput(e);
     });
+  }
+
+  handleClick_(e) {
+    const type = (e.target.getAttribute('type') || '').toLowerCase();
+    const tagName = e.target.tagName.toLowerCase();
+    if (tagName == 'input' && type == 'submit') {
+      this.submitter_ = e.target;
+    }
   }
 
   /**
@@ -163,6 +176,11 @@ export class AmpForm {
    * @private
    */
   handleSubmit_(e) {
+    if (!this.submitter_) {
+      // TODO: NEED TO GET THE FIRST ENABLED VISIBLE SUBMIT.
+      this.submitter_ = this.form_.querySelector('input[type=submit]');
+    }
+
     if (this.state_ == FormState_.SUBMITTING) {
       e.stopImmediatePropagation();
       return;
@@ -185,15 +203,25 @@ export class AmpForm {
 
     if (this.xhrAction_) {
       e.preventDefault();
-      this.cleanupRenderedTemplate_();
-      this.setState_(FormState_.SUBMITTING);
       const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
       let xhrUrl = this.xhrAction_;
+      let body = null;
       if (isHeadOrGet) {
         xhrUrl = addParamsToUrl(this.xhrAction_, this.getFormAsObject_());
+        if (this.submitter_ && this.submitter_.name) {
+          xhrUrl = addParamToUrl(xhrUrl, this.submitter_.name,
+              this.submitter_.value || '');
+        }
+      } else {
+        body = new FormData(this.form_);
+        if (this.submitter_ && this.submitter_.name) {
+          body.append(this.submitter_.name, this.submitter_.value || '');
+        }
       }
+      this.cleanupRenderedTemplate_();
+      this.setState_(FormState_.SUBMITTING);
       this.xhr_.fetchJson(xhrUrl, {
-        body: isHeadOrGet ? null : new FormData(this.form_),
+        body: body,
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
@@ -460,11 +488,11 @@ function installSubmissionHandlers(win) {
  */
 export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
-    if (isExperimentOn(win, TAG)) {
+    //if (isExperimentOn(win, TAG)) {
       installStyles(win.document, CSS, () => {
         installSubmissionHandlers(win);
       });
-    }
+    //}
     return {};
   });
 }

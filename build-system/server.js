@@ -22,6 +22,7 @@ var BBPromise = require('bluebird');
 var app = require('express')();
 var bacon = require('baconipsum');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var morgan = require('morgan');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
@@ -31,6 +32,7 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(morgan('dev'));
 
 app.use('/pwa', function(req, res, next) {
@@ -173,6 +175,30 @@ app.use('/form/echo-json/post', function(req, res) {
   });
 });
 
+app.use('/form/update-cart', function(req, res) {
+  assertCors(req, res, ['POST']);
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'application/json');
+    const itemId = fields['itemId'];
+    const cookies = req.cookies || {};
+    const cart = JSON.parse(cookies.cart || '{}');
+    const currentCount = parseInt(cart[itemId], 10) || 0;
+    if (fields['add']) {
+      cart[itemId] = currentCount + 1;
+      res.cookie('cart', JSON.stringify(cart));
+      res.end(JSON.stringify({quantityInCart: currentCount + 1}));
+    } else if (fields['update']) {
+      cart[itemId] = fields['quantity'];
+      res.cookie('cart', JSON.stringify(cart));
+      res.end(JSON.stringify({quantityInCart: fields['quantity']}));
+    } else if (fields['remove']) {
+      cart[itemId] = 0;
+      res.cookie('cart', JSON.stringify(cart));
+      res.end(JSON.stringify({quantityInCart: 0}));
+    }
+  });
+});
 
 app.use('/form/search-html/get', function(req, res) {
   res.setHeader('Content-Type', 'text/html');
