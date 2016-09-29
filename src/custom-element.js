@@ -366,16 +366,18 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 }
 
 class BaseCustomElement extends HTMLElement {
-  constructor() {
-    super();
+  constructor(self) {
+    self = super(self);
 
     // Flag "notbuilt" is removed by Resource manager when the resource is
     // considered to be built. See "setBuilt" method.
     /** @private {boolean} */
     this.built_ = false;
 
+    /** @type {string} */
     this.readyState = 'loading';
 
+    /** @type {boolean} */
     this.everAttached = false;
 
     /**
@@ -436,14 +438,8 @@ class BaseCustomElement extends HTMLElement {
     /** @private {?Element|undefined} */
     this.overflowElement_ = undefined;
 
-    // `opt_implementationClass` is only used for tests.
-    let Ctor = this.implementationClass();
-    if (getMode().test && this.implementationClassForTesting) {
-      Ctor = this.implementationClassForTesting;
-    }
-
-    /** @private {!./base-element.BaseElement} */
-    this.implementation_ = new Ctor(this);
+    /** @private {?./base-element.BaseElement} */
+    this.implementation_ = null;
 
     /**
      * An element always starts in a unupgraded state until it's added to DOM
@@ -465,6 +461,8 @@ class BaseCustomElement extends HTMLElement {
      * @private {boolean|undefined}
      */
     this.isInTemplate_ = undefined;
+
+    return self;
   }
 
   /**
@@ -751,6 +749,13 @@ class BaseCustomElement extends HTMLElement {
    * @final @this {!Element}
    */
   connectedCallback() {
+    // `opt_implementationClass` is only used for tests.
+    let Ctor = this.implementationClass();
+    if (getMode().test && this.implementationClassForTesting) {
+      Ctor = this.implementationClassForTesting;
+    }
+    this.implementation_ = new Ctor(this);
+
     this.classList.add('-amp-element');
     this.classList.add('-amp-notbuilt');
     this.classList.add('amp-notbuilt');
@@ -1418,7 +1423,15 @@ export function registerElement(win, name, implementationClass) {
 
   const supportsCustomElementsV1 = 'customElements' in window;
   if (supportsCustomElementsV1) {
-    win.customElements.define(name, BaseCustomElement);
+    win.customElements.define(name, class extends BaseCustomElement {
+      constructor(self) {
+        self = super(self);
+        return self;
+      }
+      implementationClass() {
+        return implementationClass;
+      }
+    });
   } else {
     win.document.registerElement(name, {
       prototype: createAmpElementProto(win, name),
