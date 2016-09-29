@@ -141,7 +141,7 @@ class VideoEntry {
 
     /** @private @const {function(): !Promise<boolean>} */
     this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc,
-        platformFor(ampdoc.win), timerFor(ampdoc.win), getMode(ampdoc.win));
+      platformFor(ampdoc.win), timerFor(ampdoc.win), getMode(ampdoc.win).lite);
 
     const element = dev().assert(video.element);
 
@@ -222,7 +222,7 @@ class VideoEntry {
       this.video.mute();
 
       // If autoplay video has controls, hide them and only show them on
-      // user-ineraction.
+      // user interaction.
       if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
         this.video.hideControls();
 
@@ -268,14 +268,14 @@ class VideoEntry {
   updateVisibility() {
     const wasVisible = this.isVisible_;
 
-    // Measure if video is now in viewport and what percentage of it is visible
+    // Measure if video is now in viewport and what percentage of it is visible.
     const measure = () => {
       if (!this.video.isInViewport()) {
         this.isVisible_ = false;
         return;
       }
 
-      // Calculate what percentage of the video is in viewport
+      // Calculate what percentage of the video is in viewport.
       const change = this.video.element.getIntersectionChangeEntry();
       const ir = change.intersectionRect;
       const br = change.boundingClientRect;
@@ -299,7 +299,7 @@ class VideoEntry {
   }
 }
 
-/* @type {Promise<boolean>} */
+/* @type {?Promise<boolean>} */
 let supportsAutoplayCache_ = null;
 
 /**
@@ -314,28 +314,28 @@ let supportsAutoplayCache_ = null;
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!./platform-impl.Platform} platform
  * @param {!./timer-impl.Timer} timer
- * @param {!../mode.ModeDef} mode
+ * @param {boolean} isLiteViewer
  * @return {!Promise<boolean>}
  */
-export function supportsAutoplay(ampdoc, platform, timer, mode) {
+export function supportsAutoplay(ampdoc, platform, timer, isLiteViewer) {
 
-  // Use cached result if available
+  // Use cached result if available.
   if (supportsAutoplayCache_) {
     return supportsAutoplayCache_;
   }
 
-  // We do not support autoplay in amp-lite viewer regardless of platfrom
-  if (mode.lite) {
+  // We do not support autoplay in amp-lite viewer regardless of platform.
+  if (isLiteViewer) {
     return supportsAutoplayCache_ = Promise.resolve(false);
   }
 
-  // Short-circuit for known unsupported versions on mobile
+  // Short-circuit for known unsupported versions on mobile.
   const version = platform.getMajorVersion();
-  if (platform.isChrome() && version < 53) {
+  if (platform.isAndroid() && platform.isChrome() && version < 53) {
     return supportsAutoplayCache_ = Promise.resolve(false);
   }
 
-  if (platform.isSafari() && version < 10) {
+  if (platform.isIos() && platform.isSafari() && version < 10) {
     return supportsAutoplayCache_ = Promise.resolve(false);
   }
 
@@ -348,7 +348,7 @@ export function supportsAutoplay(ampdoc, platform, timer, mode) {
   detectionElement.setAttribute('height', '0');
   detectionElement.setAttribute('width', '0');
   setStyles(detectionElement, {
-    position: 'absolute',
+    position: 'fixed',
     top: '0',
     width: '0px',
     height: '0px',
@@ -374,22 +374,22 @@ export function supportsAutoplay(ampdoc, platform, timer, mode) {
   const playingPromise = loadedPromise.then(() => {
     const playResult = detectionElement.play();
 
-    // New browsers return a promise for play call
+    // New browsers return a promise for play call.
     if (playResult && playResult.then) {
       return playResult;
     } else {
-      // No play promise, wait for the `playing` event
+      // No play promise, wait for the `playing` event.
       return listenOncePromise(detectionElement, 'playing');
     }
   });
 
-  const TIMEOUT = 1000; // Allow enough time for decoding on busy/low-end CPUs
+  const TIMEOUT = 1000; // Allow enough time for decoding on busy/low-end CPUs.
   const timeoutPromise = timer.timeoutPromise(TIMEOUT, playingPromise);
 
-  // Unles playing promise is rejected or times out, autoplay is supported
+  // Unles playing promise is rejected or times out, autoplay is supported.
   const resultPromise = timeoutPromise.then(() => true, () => false);
 
-  // Remove the detection element when we know the result
+  // Remove the detection element when we know the result.
   resultPromise.then(() => {
     detectionElement.remove();
   });
@@ -402,7 +402,7 @@ export function supportsAutoplay(ampdoc, platform, timer, mode) {
  *
  * @private visible for testing.
  */
-export function clearSupportsAutoplayCache() {
+export function clearSupportsAutoplayCacheForTesting() {
   supportsAutoplayCache_ = null;
 }
 

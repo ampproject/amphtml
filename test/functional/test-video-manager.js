@@ -16,7 +16,7 @@
 
 import {
   supportsAutoplay,
-  clearSupportsAutoplayCache,
+  clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {timerFor} from '../../src/timer';
@@ -27,9 +27,9 @@ describe('Supports Autoplay', () => {
   let clock;
 
   let ampdoc;
-  let mode;
   let platform;
   let timer;
+  let isLite;
   let video;
 
   let playResult;
@@ -39,52 +39,81 @@ describe('Supports Autoplay', () => {
   let removeSpy;
 
   it('should be false when in amp-lite mode', () => {
-    mode.lite = true;
-    return supportsAutoplay(ampdoc, platform, timer, mode)
+    isLite = true;
+    return supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
     });
   });
 
   it('should cache the result', () => {
-    const firstResultRef = supportsAutoplay(ampdoc, platform, timer, mode);
-    const secondResultRef = supportsAutoplay(ampdoc, platform, timer, mode);
+    const firstResultRef = supportsAutoplay(ampdoc, platform, timer, isLite);
+    const secondResultRef = supportsAutoplay(ampdoc, platform, timer, isLite);
     expect(firstResultRef).to.equal(secondResultRef);
 
-    clearSupportsAutoplayCache();
+    clearSupportsAutoplayCacheForTesting();
 
-    const thirdResultRef = supportsAutoplay(ampdoc, platform, timer, mode);
+    const thirdResultRef = supportsAutoplay(ampdoc, platform, timer, isLite);
     expect(thirdResultRef).to.not.equal(firstResultRef);
     expect(thirdResultRef).to.not.equal(secondResultRef);
   });
 
   it('should short-circuit for known unsupported Chrome versions', () => {
+    platform.isAndroid = () => true;
     platform.isChrome = () => true;
     platform.getMajorVersion = () => 52;
 
-    return supportsAutoplay(ampdoc, platform, timer, mode)
+    const p = supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
+      // Should short-circuit for Android and Chrome < 52
       expect(supportsAutoplay).to.be.false;
       expect(createElementSpy.called).to.be.false;
+    });
+
+    return p.then(() => {
+      // Should not short-circuit for desktop though, regardless of version
+      clearSupportsAutoplayCacheForTesting();
+
+      platform.isAndroid = () => false;
+      return supportsAutoplay(ampdoc, platform, timer, isLite)
+      .then(supportsAutoplay => {
+        expect(supportsAutoplay).to.be.true;
+        expect(createElementSpy.called).to.be.true;
+      });
     });
   });
 
   it('should short-circuit for known unsupported Safari versions', () => {
+    platform.isAndroid = () => false;
+    platform.isIos = () => true;
     platform.isChrome = () => false;
     platform.isSafari = () => true;
     platform.getMajorVersion = () => 9;
 
-    return supportsAutoplay(ampdoc, platform, timer, mode)
+    const p = supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
+      // Should short-circuit for iOS and Safari < 10
       expect(supportsAutoplay).to.be.false;
       expect(createElementSpy.called).to.be.false;
+    });
+
+    return p.then(() => {
+      // Should not short-circuit for desktop though, regardless of version
+      clearSupportsAutoplayCacheForTesting();
+
+      platform.isIos = () => false;
+      return supportsAutoplay(ampdoc, platform, timer, isLite)
+      .then(supportsAutoplay => {
+        expect(supportsAutoplay).to.be.true;
+        expect(createElementSpy.called).to.be.true;
+      });
     });
   });
 
   it('should create an invisible test video element', () => {
-    return supportsAutoplay(ampdoc, platform, timer, mode)
+    return supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(() => {
-      expect(video.style.position).to.equal('absolute');
+      expect(video.style.position).to.equal('fixed');
       expect(video.style.top).to.equal('0');
       expect(video.style.width).to.equal('0px');
       expect(video.style.height).to.equal('0px');
@@ -110,7 +139,7 @@ describe('Supports Autoplay', () => {
 
   it('should return false if `loadstart` event never fires', () => {
     video.addEventListener = function() {};
-    const p = supportsAutoplay(ampdoc, platform, timer, mode)
+    const p = supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
       expect(playSpy.called).to.be.false;
@@ -125,7 +154,7 @@ describe('Supports Autoplay', () => {
   });
 
   it('should return true if play() returns a promise that succeeds', () => {
-    return supportsAutoplay(ampdoc, platform, timer, mode)
+    return supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.true;
       expect(playSpy.called).to.be.true;
@@ -136,7 +165,7 @@ describe('Supports Autoplay', () => {
 
   it('should return false if play() returns a promise that is rejected', () => {
     playResult = Promise.reject('play must be initiated by user action');
-    return supportsAutoplay(ampdoc, platform, timer, mode)
+    return supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
       expect(playSpy.called).to.be.true;
@@ -153,7 +182,7 @@ describe('Supports Autoplay', () => {
       }
     };
     playResult = null;
-    return supportsAutoplay(ampdoc, platform, timer, mode)
+    return supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.true;
       expect(playSpy.called).to.be.true;
@@ -165,7 +194,7 @@ describe('Supports Autoplay', () => {
   it('should return false if play() does not returns a promise and ' +
     '`playing` event is not received within 1000ms', () => {
     playResult = null;
-    const p = supportsAutoplay(ampdoc, platform, timer, mode)
+    const p = supportsAutoplay(ampdoc, platform, timer, isLite)
     .then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
       expect(playSpy.called).to.be.true;
@@ -180,7 +209,7 @@ describe('Supports Autoplay', () => {
   });
 
   beforeEach(() => {
-    clearSupportsAutoplayCache();
+    clearSupportsAutoplayCacheForTesting();
 
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
@@ -229,10 +258,6 @@ describe('Supports Autoplay', () => {
       },
     };
 
-    mode = {
-      lite: false,
-    };
-
     platform = {
       isChrome() {
         return true;
@@ -243,10 +268,17 @@ describe('Supports Autoplay', () => {
       getMajorVersion() {
         return 53;
       },
+      isAndroid() {
+        return true;
+      },
+      isIos() {
+        return false;
+      },
     };
 
     installTimerService(win);
     timer = timerFor(win);
+    isLite = false;
 
     createElementSpy = sandbox.spy(doc, 'createElement');
     setAttributeSpy = sandbox.spy(video, 'setAttribute');
