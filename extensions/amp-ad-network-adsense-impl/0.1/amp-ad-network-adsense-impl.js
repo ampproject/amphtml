@@ -28,7 +28,6 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  getCorrelator,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -100,10 +99,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const startTime = Date.now();
     const global = this.win;
     const adClientId = this.element.getAttribute('data-ad-client');
-    const slotId = this.element.getAttribute('data-amp-slot-index');
-    const slotIdNumber = Number(slotId);
-    const correlator = getCorrelator(this.win, slotId);
-    const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = viewerForDoc(this.getAmpDoc())
         .getVisibilityState();
@@ -120,7 +115,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'format', value: format},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
-      {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
       {name: 'adk', value: adk},
       {
@@ -130,16 +124,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       },
       {name: 'ctypes', value: this.getCtypes_()},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'ifi', value: slotIdNumber},
-      {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
       {name: 'pv', value: sharedStateParams.pv},
-      {name: 'u_ah', value: screen ? screen.availHeight : null},
-      {name: 'u_aw', value: screen ? screen.availWidth : null},
-      {name: 'u_cd', value: screen ? screen.colorDepth : null},
-      {name: 'u_h', value: screen ? screen.height : null},
-      {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-      {name: 'u_w', value: screen ? screen.width : null},
+      {name: 'channel', value: this.element.getAttribute('data-ad-channel')},
       {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
     ];
@@ -149,7 +136,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
 
     return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, slotIdNumber, paramList, []);
+        this, ADSENSE_BASE_URL, startTime, paramList, []);
   }
 
   /** @override */

@@ -57,6 +57,7 @@ describe('amp-ad-network-adsense-impl', () => {
       'height': '50',
       'data-experiment-id': '8675309',
     });
+    document.body.appendChild(adsenseImplElem);
     adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
   });
 
@@ -279,6 +280,30 @@ describe('amp-ad-network-adsense-impl', () => {
               {creative,
                signature: base64UrlDecodeToBytes('AQAB'),
                size: null});
+      });
+    });
+  });
+
+  describe('#getAdUrl', () => {
+    it('returns the right URL', () => {
+      adsenseImpl.onLayoutMeasure();
+      return adsenseImpl.getAdUrl().then(url => {
+        expect(url).to.match(new RegExp(
+          'https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
+          '\\?client=adsense&format=0x0&w=0&h=0&adtest=false' +
+          '&adk=4075575999&bc=1&vis=1&wgl=1' +
+          '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
+          // Depending on how the test is run, it can get different results.
+          '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=1597394791' +
+          '&c=[0-9]+&output=html&nhd=1&biw=1050&bih=755' +
+          '&adx=-10000&ady=-10000&u_ah=873&u_aw=1440&u_cd=24' +
+          '&u_w=1440&u_h=900&u_tz=-[0-9]+&u_his=[0-9]+' +
+          '&brdim=22%2C45%2C22%2C45%2C1440%2C23%2C1050%2C829%2C1050%2C755' +
+          '&isw=1050&ish=755&dtd=[0-9]+' +
+          '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
+          '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
+          '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
+          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+'));
       });
     });
   });
