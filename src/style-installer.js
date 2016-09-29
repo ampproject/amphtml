@@ -16,7 +16,6 @@
 
 import {dev} from './log';
 import {documentStateFor} from './document-state';
-import {isExperimentOn} from './experiments';
 import {performanceFor} from './performance';
 import {platformFor} from './platform';
 import {setStyles} from './style';
@@ -111,20 +110,12 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  *     be blocked on key services being loaded.
  */
 export function makeBodyVisible(doc, opt_waitForServices) {
-  const win = doc.defaultView;
-  const shouldMakeBodyBlock = isExperimentOn(win, 'make-body-block');
-  const bodyStyles = {
-    opacity: 1,
-    visibility: 'visible',
-    animation: 'none',
-  };
-
-  if (shouldMakeBodyBlock) {
-    bodyStyles['display'] = 'block';
-  }
-
   const set = () => {
-    setStyles(dev().assertElement(doc.body), bodyStyles);
+    setStyles(dev().assertElement(doc.body), {
+      opacity: 1,
+      visibility: 'visible',
+      animation: 'none',
+    });
 
     // TODO(erwinm, #4097): Remove this when safari technology preview has merged
     // the fix for https://github.com/ampproject/amphtml/issues/4047
@@ -137,6 +128,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       }
     }
   };
+  const win = doc.defaultView;
   documentStateFor(win).onBodyAvailable(() => {
     if (win[bodyVisibleSentinel]) {
       return;

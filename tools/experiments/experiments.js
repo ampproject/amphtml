@@ -180,6 +180,7 @@ const EXPERIMENTS = [
     id: 'make-body-block',
     name: 'Sets the body to display:block.',
     spec: 'https://github.com/ampproject/amphtml/issues/5310',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
   },
   {
     id: 'pan-y',
