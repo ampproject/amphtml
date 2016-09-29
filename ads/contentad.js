@@ -29,17 +29,17 @@ export function contentad(global, data) {
 
   /* Create div for ad to target */
   const cadDiv = window.document.createElement('div');
-    cadDiv.id = 'contentad' + global.wid;
+  cadDiv.id = 'contentad' + global.wid;
   window.document.body.appendChild(cadDiv);
 
   /* Capture or pass URL */
   let adUrl = window.context.location.href;
   if (data.url) {
-	adUrl = adUrl.replace(window.context.location.host, data.url);
+    adUrl = adUrl.replace(window.context.location.host, data.url);
   }
 
   /* Build API URL */
-  const cad_api = 'https://api.content.ad/Scripts/widget2.aspx'
+  const cadApi = 'https://api.content.ad/Scripts/widget2.aspx'
     + '?id=' + encodeURIComponent(global.id)
     + '&d=' + encodeURIComponent(global.d)
     + '&wid=' + global.wid
@@ -47,5 +47,5 @@ export function contentad(global, data) {
     + '&cb=' + Date.now();
 
   /* Call Content.ad Widget */
-  writeScript(global, cad_api);
+  writeScript(global, cadApi);
 }
