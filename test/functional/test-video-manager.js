@@ -148,7 +148,7 @@ describe('Supports Autoplay', () => {
     });
 
     return Promise.resolve().then(() => {
-      clock.tick(1000);
+      clock.tick(3000);
       return p;
     });
   });
@@ -203,7 +203,7 @@ describe('Supports Autoplay', () => {
     });
 
     return Promise.resolve().then(() => {
-      clock.tick(1000);
+      clock.tick(3000);
       return p;
     });
   });

@@ -383,7 +383,7 @@ export function supportsAutoplay(ampdoc, platform, timer, isLiteViewer) {
     }
   });
 
-  const TIMEOUT = 1000; // Allow enough time for decoding on busy/low-end CPUs.
+  const TIMEOUT = 3000; // Allow enough time for decoding on busy/low-end CPUs.
   const timeoutPromise = timer.timeoutPromise(TIMEOUT, playingPromise);
 
   // Unles playing promise is rejected or times out, autoplay is supported.
