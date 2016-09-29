@@ -105,7 +105,8 @@
   z-index: 2147483644 !important;
   max-height: 30vh !important;
   padding: 10px;
-  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: auto;
   color: #ffffff;
   background-color: rgba(0,0,0,0.7);
   opacity: 1;

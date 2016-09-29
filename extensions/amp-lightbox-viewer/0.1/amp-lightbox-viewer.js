@@ -141,10 +141,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Enable/Disable description box.
-   */
-
-  /**
    * Builds the controls (i.e. Next, Previous and Close buttons) and appends
    * them to the container.
    * @private
@@ -336,11 +332,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   setupElement_(element) {
-    this.updateStackingContext_(element, /* reset */ false);
-    element.classList.add('amp-lightboxed');
-    // update description box
     const descText = this.manager_.getDescription(element);
     this.vsync_.mutate(() => {
+      this.updateStackingContext_(element, /* reset */ false);
+      element.classList.add('amp-lightboxed');
+      // update description box
       this.descriptionBox_.textContent = descText;
     });
     // add click event to current element to trigger discription box
@@ -355,8 +351,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   tearDownElement_(element) {
-    this.updateStackingContext_(element, /* reset */ true);
-    element.classList.remove('amp-lightboxed');
+    this.vsync_.mutate(() => {
+      this.updateStackingContext_(element, /* reset */ true);
+      element.classList.remove('amp-lightboxed');
+    });
     if (this.elementUnlisten_) {
       this.elementUnlisten_();
     }

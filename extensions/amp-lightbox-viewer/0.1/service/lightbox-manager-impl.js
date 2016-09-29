@@ -169,7 +169,10 @@ export class LightboxManager {
   getDescription(element) {
     const aria = element.getAttribute('aria-describedby');
     if (aria) {
-      return aria;
+      const descriptionElement = element.ownerDocument.getElementById(aria);
+      if (descriptionElement) {
+        return descriptionElement.textContent;
+      }
     }
     const alt = element.getAttribute('alt');
     if (alt) {
