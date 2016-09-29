@@ -19,20 +19,22 @@ limitations under the License.
 ## Example
 
 ```html
-  <amp-ad width=300 height=250
+  <amp-ad 
+      width=[Width of Ad Widget]
+      height=[Height of Ad Widget]
       type="contentad"
-      data-id="c06b3b0f-e837-46ec-ad39-6b279c91b585"
-      data-d="d2ViYnlqdWFuLmNvbQ=="
-      data-wid="112377">
+      data-id="[Ad Widget GUID]"
+      data-d="[Ad Widget Domain ID]"
+      data-wid="[Ad Widget ID]">
   </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see [Content.ad AMP Widget](http://help.content.ad/how-can-i-make-widget-amp-mobile-site/) documentation.
 
 Supported parameters:
 
-- data-id
-- data-d
-- data-wid
+- data-id : Ad Widget GUID
+- data-d : Ad Widget Domain ID
+- data-wid : Ad Widget ID
