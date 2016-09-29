@@ -366,6 +366,9 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 }
 
 class BaseCustomElement extends HTMLElement {
+  /**
+   * @see https://github.com/WebReflection/document-register-element#v1-caveat
+   */
   constructor(self) {
     self = super(self);
 
@@ -438,7 +441,11 @@ class BaseCustomElement extends HTMLElement {
     /** @private {?Element|undefined} */
     this.overflowElement_ = undefined;
 
-    /** @private {?./base-element.BaseElement} */
+    /**
+     * Accessing DOM APIs within constructor yields 'illegal invocation' error
+     * in current polyfill. Delay instantation to `connectedCallback` instead.
+     * @private {?./base-element.BaseElement}
+     */
     this.implementation_ = null;
 
     /**
@@ -744,7 +751,7 @@ class BaseCustomElement extends HTMLElement {
   }
 
   /**
-   * Called when the element is first attached to the DOM. Calls
+   * Called when the element is first connected to the DOM. Calls
    * {@link firstAttachedCallback} if this is the first attachment.
    * @final @this {!Element}
    */
@@ -843,7 +850,7 @@ class BaseCustomElement extends HTMLElement {
   }
 
   /**
-   * Called when the element is detached from the DOM.
+   * Called when the element is disconnected from the DOM.
    * @final @this {!Element}
    */
   disconnectedCallback() {
