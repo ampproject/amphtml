@@ -37,10 +37,6 @@ limitations under the License.
     fill, fixed, fixed-height, flex-item, nodisplay, responsive
     </td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
-  </tr>
 </table>
 
 ## Examples 
