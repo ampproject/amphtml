@@ -477,6 +477,15 @@ describe('Viewport', () => {
         .to.equal('pan-y');
   });
 
+  it('should add class to HTML element with make-body-block experiment', () => {
+    // TODO(dvoytenko, #4894): Cleanup the experiment.
+    viewer.isEmbedded = () => true;
+    toggleExperiment(windowApi, 'make-body-block', true);
+    viewport = new Viewport(ampdoc, binding, viewer);
+    const docElement = windowApi.document.documentElement;
+    expect(docElement.classList.contains('make-body-block')).to.be.true;
+  });
+
   describe('for child window', () => {
     let viewport;
     let bindingMock;
