@@ -146,7 +146,7 @@ describe('Supports Autoplay', () => {
   });
 
   it('should return true if play() does not returns a promise but ' +
-    '`playing` event is received', () => {
+    '`playing` event is received within 1000ms', () => {
     video.addEventListener = function(type, cb) {
       if (type == 'loadstart' || type == 'playing') {
         cb();
@@ -163,7 +163,7 @@ describe('Supports Autoplay', () => {
   });
 
   it('should return false if play() does not returns a promise and ' +
-    '`playing` event times out', () => {
+    '`playing` event is not received within 1000ms', () => {
     playResult = null;
     const p = supportsAutoplay(ampdoc, platform, timer, mode)
     .then(supportsAutoplay => {
@@ -237,11 +237,9 @@ describe('Supports Autoplay', () => {
       isChrome() {
         return true;
       },
-
       isSafari() {
         return false;
       },
-
       getMajorVersion() {
         return 53;
       },
