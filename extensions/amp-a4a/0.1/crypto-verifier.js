@@ -98,7 +98,7 @@ export function verifySignature(data, signature, publicKeyInfos) {
               dev().error(TAG_, 'Error while verifying:', error);
               throw error;
             }));
-        }
+}
 
 
 /**

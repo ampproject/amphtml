@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dev} from './log';
+
 /**
  * Tags that are allowed to have fixed positioning
  * @const {!Object<string, boolean>}

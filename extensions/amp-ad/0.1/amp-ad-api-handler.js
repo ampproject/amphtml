@@ -24,7 +24,7 @@ import {
 } from '../../../src/iframe-helper';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 
 const TIMEOUT_VALUE = 10000;
