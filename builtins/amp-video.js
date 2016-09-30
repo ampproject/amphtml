@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {listen} from '../src/event-helper';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
@@ -111,6 +112,10 @@ export function installVideo(win) {
       // loadPromise for media elements listens to `loadstart`
       return this.loadPromise(this.video_).then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        // Dispatch a user tap event on click of the player.
+        listen(this.video_, 'click', () => {
+          this.element.dispatchCustomEvent(VideoEvents.USER_TAP);
+        });
       });
     }
 
