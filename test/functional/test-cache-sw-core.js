@@ -21,6 +21,7 @@ import {timerFor} from '../../src/timer';
  * Cache SW has some side-effects, so we've got to do a little jig to test.
  */
 const old = window.self;
+const version = '1234567891234';
 const cache = {
   cached: [],
   put(req, resp) {
@@ -52,6 +53,7 @@ const cache = {
 const self = window.self = {
   AMP_CONFIG: {
     'cache-service-worker-blacklist': ['1313131313131'],
+    'v': `01${version}`,
   },
   events: {},
   addEventListener(event, handler) {
@@ -72,15 +74,12 @@ const sw = require('../../src/service-worker/core');
 window.self = old;
 
 describe.only('Cache SW', () => {
-  const version = '1234567891234';
   const rtv = `00${version}`;
   const file = 'v0.js';
   const url = `https://cdn.ampproject.org/rtv/${rtv}/${file}`;
   let sandbox;
 
   beforeEach(() => {
-    // The version is a 13+ char number, the millisecond timestamp of the date.
-    sw.setVersionForTesting(version);
     sandbox = sinon.sandbox.create();
   });
 
@@ -259,7 +258,7 @@ describe.only('Cache SW', () => {
     const blacklisted = url.replace(version, '1313131313131');
     const request = new Request(url);
     const compRequest = new Request(url.replace('v0.js', 'amp-comp.js'));
-    const otherVersion = new Request(prod.replace(/(\d+)\/v0.js/, (match, v) => {
+    const otherVersion = new Request(url.replace(/(\d+)\/v0.js/, (match, v) => {
       return `00${parseInt(v, 10) - 1}/amp-comp.js`;
     }));
     const blacklistedRequest = new Request(blacklisted.replace('v0.js', 'amp-comp.js'));
@@ -394,13 +393,14 @@ describe.only('Cache SW', () => {
         });
 
         it('will update cached file if new one is the latest RTV', () => {
-          return sw.handleFetch(compRequest, clientId).then(resp => {
+          const prodRequest = new Request(prod.replace('v0.js', 'amp-comp.js'));
+          return sw.handleFetch(prodRequest, clientId).then(resp => {
             return new Promise((resolve) => {
               // Update is out of band with response.
               setTimeout(resolve, 50);
             });
           }).then(() => {
-            expect(cache.cached[1][0]).to.equal(compRequest);
+            expect(cache.cached[1][0]).to.equal(prodRequest);
           });
         });
 

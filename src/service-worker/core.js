@@ -30,13 +30,6 @@ let AmpVersion
  */
 let RtvVersion
 
-/**
- * The SW's current version.
- * @const
- * @type {AmpVersion}
- */
-let VERSION = '$internalRuntimeVersion$';
-
 /** @const */
 const TAG = 'cache-service-worker';
 
@@ -46,19 +39,14 @@ const TAG = 'cache-service-worker';
  * implementation bug.
  * @type {!Array<AmpVersion>}
  */
-const BLACKLIST = (self.AMP_CONFIG &&
-    self.AMP_CONFIG[`${TAG}-blacklist`]) || [];
-
+const BLACKLIST = self.AMP_CONFIG[`${TAG}-blacklist`] || [];
 
 /**
- * Sets the default version for tests.
- *
- * @param {string} version
- * @visibleForTesting
+ * The SW's current version.
+ * @const
+ * @type {RtvVersion}
  */
-export function setVersionForTesting(version) {
-  VERSION = version;
-}
+const VERSION = self.AMP_CONFIG.v;
 
 /**
  * Returns the version of a given versioned JS file.
@@ -70,10 +58,7 @@ export function setVersionForTesting(version) {
 export function rtvVersion(url) {
   // RTVs are 2 digit prefixes followed by the timestamp of the release.
   const matches = /rtv\/(\d{2}\d{13,})/.exec(url);
-  return matches ?
-      matches[1] :
-      // 01 is the prod prefix.
-      `01${VERSION}`;
+  return matches ? matches[1] : VERSION;
 }
 
 /**
@@ -307,7 +292,7 @@ export function handleFetch(request, maybeClientId) {
         // Now, was it because we served an old cached version or because
         // they requested this exact version; If we served an old version,
         // let's get the new one.
-        if (version !== requestVersion && endsWith(requestVersion, VERSION)) {
+        if (version !== requestVersion && requestVersion == VERSION) {
           fetchAndCache(cache, request, requestFile, requestVersion);
         }
 
