@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpAdApiHandler} from './amp-ad-api-handler';
+import {AmpAdCrossDomainIframeHandler,}
+    from './amp-ad-cross-domain-iframe-handler';
 import {
   allowRenderOutsideViewport,
   incrementLoadingAds,
@@ -30,10 +31,8 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {removeElement} from '../../../src/dom';
 import {
   AdDisplayState,
-  displayNoContentUI,
   displayUnlayoutUI,
 } from './amp-ad-ui';
 
@@ -53,8 +52,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** {?Object} */
     this.config = null;
 
-    /** @private {?AmpAdApiHandler} */
-    this.apiHandler_ = null;
+    /** @private {?AmpAdCrossDomainIframeHandler} */
+    this.iframeHandler_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = null;
@@ -170,8 +169,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
-    if (this.apiHandler_) {
-      this.apiHandler_.onLayoutMeasure();
+    if (this.iframeHandler_) {
+      this.iframeHandler_.onLayoutMeasure();
     }
   }
 
@@ -180,9 +179,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   measureIframeLayoutBox_() {
-    if (this.apiHandler_ && this.apiHandler_.getIframe()) {
+    if (this.iframeHandler_ && this.iframeHandler_.getIframe()) {
       const iframeBox =
-          this.getViewport().getLayoutRect(this.apiHandler_.getIframe());
+          this.getViewport().getLayoutRect(this.iframeHandler_.getIframe());
       const box = this.getLayoutBox();
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
@@ -192,7 +191,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
-    if (!this.apiHandler_ || !this.apiHandler_.getIframe()) {
+    if (!this.iframeHandler_ || !this.iframeHandler_.getIframe()) {
       return super.getIntersectionElementLayoutBox();
     }
     const box = this.getLayoutBox();
@@ -225,18 +224,18 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
       this.lifecycleReporter.sendPing('adRequestStart');
-      this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+      const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
-      this.apiHandler_ = new AmpAdApiHandler(
+      this.iframeHandler_ = new AmpAdCrossDomainIframeHandler(
           this);
-      return this.apiHandler_.startUp(this.iframe, true);
+      return this.iframeHandler_.startUp(iframe, true);
     });
   }
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.apiHandler_) {
-      this.apiHandler_.viewportCallback(inViewport);
+    if (this.iframeHandler_) {
+      this.iframeHandler_.viewportCallback(inViewport);
     }
   }
 
@@ -244,9 +243,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   unlayoutCallback() {
     this.layoutPromise_ = null;
     displayUnlayoutUI(this);
-    if (this.apiHandler_) {
-      this.apiHandler_.freeIframe(true /* force */);
-      this.apiHandler_ = null;
+    if (this.iframeHandler_) {
+      this.iframeHandler_.freeIframe(true /* force */);
+      this.iframeHandler_ = null;
     }
     this.lifecycleReporter.sendPing('adSlotCleared');
     return true;

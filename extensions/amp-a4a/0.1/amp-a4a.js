@@ -121,7 +121,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    dev().assert(AMP.AmpAdApiHandler);
+    dev().assert(AMP.AmpAdCrossDomainIframeHandler);
 
     /** @private {?Promise<!boolean>} */
     this.adPromise_ = null;
@@ -138,8 +138,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AMP.AmpAdApiHandler} */
-    this.apiHandler_ = null;
+    /** @private {?AmpAdCrossDomainIframeHandler} */
+    this.crossDomainIframeHandler_ = null;
 
     /** @private {boolean} */
     this.rendered_ = false;
@@ -258,8 +258,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    if (this.apiHandler_) {
-      this.apiHandler_.onLayoutMeasure();
+    if (this.crossDomainIframeHandler_) {
+      this.crossDomainIframeHandler_.onLayoutMeasure();
     }
     if (this.layoutMeasureExecuted_ || !isCryptoAvailable()) {
       // onLayoutMeasure gets called multiple times.
@@ -520,9 +520,9 @@ export class AmpA4A extends AMP.BaseElement {
       this.experimentalNonAmpCreativeRenderMethod_ = null;
       this.rendered_ = false;
       this.timerId_ = 0;
-      if (this.apiHandler_) {
-        this.apiHandler_.unlayoutCallback();
-        this.apiHandler_ = null;
+      if (this.crossDomainIframeHandler_) {
+        this.crossDomainIframeHandler_.freeIframe(true /* force */);
+        this.crossDomainIframeHandler_ = null;
       }
       this.layoutMeasureExecuted_ = false;
     });
@@ -533,8 +533,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.apiHandler_) {
-      this.apiHandler_.viewportCallback(inViewport);
+    if (this.crossDomainIframeHandler_) {
+      this.crossDomainIframeHandler_.viewportCallback(inViewport);
     }
   }
 
@@ -755,12 +755,12 @@ export class AmpA4A extends AMP.BaseElement {
    */
   iframeRenderHelper_(iframe, is3p) {
     // TODO(keithwrightbos): noContentCallback?
-    this.apiHandler_ = new AMP.AmpAdApiHandler(this);
+    this.crossDomainIframeHandler_ = new AMP.AmpAdCrossDomainIframeHandler(this);
     // TODO(keithwrightbos): startup returns load event, do we need to wait?
     // Set opt_defaultVisible to true as 3p draw code never executed causing
     // render-start event never to fire which will remove visiblity hidden.
-    this.apiHandler_.startUp(iframe, is3p, /* opt_defaultVisible */ true,
-        /* opt_isA4A */ true);
+    this.crossDomainIframeHandler_.startUp(iframe, is3p,
+        /* opt_defaultVisible */ true, /* opt_isA4A */ true);
     this.rendered_ = true;
   }
 

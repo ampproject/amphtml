@@ -30,7 +30,7 @@ import {displayNoContentUI} from './amp-ad-ui';
 
 const TIMEOUT_VALUE = 10000;
 
-export class AmpAdApiHandler {
+export class AmpAdCrossDomainIframeHandler {
 
   /**
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
@@ -317,4 +317,4 @@ export class AmpAdApiHandler {
 
 // Make the class available to other late loaded amp-ad implementations
 // without them having to depend on it directly.
-AMP.AmpAdApiHandler = AmpAdApiHandler;
+AMP.AmpAdCrossDomainIframeHandler = AmpAdCrossDomainIframeHandler;
