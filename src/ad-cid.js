@@ -59,7 +59,7 @@ export function getAdCid(adElement) {
   return timerFor(adElement.win)
       .timeoutPromise(1000, cidPromise, 'cid timeout').catch(error => {
         // Timeout is not fatal.
-        dev().warn(error);
+        dev().warn('ad-cid', error);
         return undefined;
       });
 }

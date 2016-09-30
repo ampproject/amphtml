@@ -36,28 +36,10 @@ export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
 export class AmpAd3PImpl extends AMP.BaseElement {
 
-  /** @override */
-  getPriority() {
-    // Loads ads after other content.
-    return 2;
-  }
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  renderOutsideViewport() {
-    const allowRender = allowRenderOutsideViewport(this.element, this.win);
-    if (allowRender !== true) {
-      return allowRender;
-    }
-    // Otherwise the ad is good to go.
-    return super.renderOutsideViewport();
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  buildCallback() {
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -65,10 +47,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.apiHandler_ = null;
 
     /** @private {?Element} */
-    this.placeholder_ = this.getPlaceholder();
+    this.placeholder_ = null;
 
     /** @private {?Element} */
-    this.fallback_ = this.getFallback();
+    this.fallback_ = null;
 
     /** @private {boolean} */
     this.isInFixedContainer_ = false;
@@ -93,13 +75,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
-    const adType = this.element.getAttribute('type');
-    /** {!Object} */
-    this.config = adConfig[adType];
-    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
-
-    setupA2AListener(this.win);
-
     /** @private {?string|undefined} */
     this.container_ = undefined;
 
@@ -107,11 +82,45 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.layoutPromise_ = null;
   }
 
+  /** @override */
+  getPriority() {
+    // Loads ads after other content.
+    return 2;
+  }
+
+  renderOutsideViewport() {
+    const allowRender = allowRenderOutsideViewport(this.element, this.win);
+    if (allowRender !== true) {
+      return allowRender;
+    }
+    // Otherwise the ad is good to go.
+    return super.renderOutsideViewport();
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    this.placeholder_ = this.getPlaceholder();
+    this.fallback_ = this.getFallback();
+
+    const adType = this.element.getAttribute('type');
+    /** {!Object} */
+    this.config = adConfig[adType];
+    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+
+    setupA2AListener(this.win);
+  }
+
   /**
    * Prefetches and preconnects URLs related to the ad.
+   * @param {boolean=} opt_onLayout
    * @override
    */
-  preconnectCallback(onLayout) {
+  preconnectCallback(opt_onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(this.win, this.preconnect);
     if (typeof this.config.prefetch == 'string') {
@@ -122,10 +131,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       });
     }
     if (typeof this.config.preconnect == 'string') {
-      this.preconnect.url(this.config.preconnect, onLayout);
+      this.preconnect.url(this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
       this.config.preconnect.forEach(p => {
-        this.preconnect.url(p, onLayout);
+        this.preconnect.url(p, opt_onLayout);
       });
     }
     // If fully qualified src for ad script is specified we preconnect to it.
@@ -192,7 +201,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         container: this.container_,
       };
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-          this.element, null, opt_context);
+          this.element, undefined, opt_context);
       this.apiHandler_ = new AmpAdApiHandler(
           this, this.element, this.boundNoContentHandler_);
       return this.apiHandler_.startUp(this.iframe_, true);

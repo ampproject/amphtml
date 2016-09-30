@@ -90,10 +90,13 @@ export function extractGoogleAdCreativeAndSignature(
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
       signature =
-        base64UrlDecodeToBytes(responseHeaders.get(AMP_SIGNATURE_HEADER));
+        base64UrlDecodeToBytes(dev().assertString(
+            responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
   } finally {
-    return Promise.resolve({creative, signature});
+    return Promise.resolve(/** @type {
+          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
+          {creative, signature}));
   }
 }
 

@@ -55,7 +55,7 @@ export class AmpAdApiHandler {
     /** @private {boolean} */
     this.is3p_ = false;
 
-    /** @param {?function()} opt_noContentHandler */
+    /** @private {?function()|undefined} opt_noContentHandler */
     this.noContentCallback_ = opt_noContentCallback;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
@@ -72,13 +72,13 @@ export class AmpAdApiHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean} is3p whether iframe was loaded via 3p.
-   * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
+   * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
    */
   startUp(iframe, is3p, opt_defaultVisible) {
-    user().assert(
-      !this.iframe, 'multiple invocations of startup without destroy!');
+    dev().assert(
+        !this.iframe_, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
@@ -141,7 +141,7 @@ export class AmpAdApiHandler {
           this.adResponsePromise_,
           'timeout waiting for ad response').catch(e => {
             this.noContent_();
-            user().warn(e);
+            user().warn('amp-ad', e);
           }).then(() => {
             //TODO: add performance reporting;
             if (this.iframe_) {
@@ -151,7 +151,7 @@ export class AmpAdApiHandler {
     });
   }
 
-  /** @override  */
+  /** See BaseElement.  */
   unlayoutCallback() {
     this.cleanup_();
     if (this.iframe_) {
@@ -261,7 +261,10 @@ export class AmpAdApiHandler {
     });
   }
 
-  /** @override  */
+  /**
+   * See BaseElement method.
+   * @param {boolean} inViewport
+   */
   viewportCallback(inViewport) {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.onViewportCallback(inViewport);
@@ -270,7 +273,9 @@ export class AmpAdApiHandler {
   }
 
 
-  /**  @override */
+  /**
+   * See BaseElement method.
+   */
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This does nothing

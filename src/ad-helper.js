@@ -36,7 +36,7 @@ function isPositionFixed(el, win) {
 }
 
 /**
- * @param {!Element} el
+ * @param {!Element} element
  * @param {!Window} win
  * @return {boolean} whether the element position is allowed. If the element
  * belongs to CONTAINERS, it is allowed to be position fixed.
@@ -44,22 +44,24 @@ function isPositionFixed(el, win) {
  * This should only be called when a layout on the page was just forced
  * anyway.
  */
-export function isAdPositionAllowed(el, win) {
+export function isAdPositionAllowed(element, win) {
   let hasFixedAncestor = false;
   let containers = 0;
+  /** @typedef {?Element}  */
+  let el = element;
   do {
     if (CONTAINERS[el.tagName]) {
       // The containers must not themselves be contained in a fixed-position
       // element. Continue the search.
       containers++;
       hasFixedAncestor = false;
-    } else if (isPositionFixed(el, win)) {
+    } else if (isPositionFixed(dev().assertElement(el), win)) {
       // Because certain blessed elements may contain a position fixed
       // container (which contain an ad), we continue to search the
       // ancestry tree.
       hasFixedAncestor = true;
     }
-    el = el.parentNode;
+    el = el.parentElement;
   } while (el && el.tagName != 'BODY');
   return !hasFixedAncestor && containers <= 1;
 }
@@ -67,12 +69,14 @@ export function isAdPositionAllowed(el, win) {
 /**
  * Returns the blessed container element tagName if the ad is contained by one.
  * This is called during layout measure.
- * @param {!Element} el
+ * @param {!Element} element
  * @return {?string}
  */
-export function getAdContainer(el) {
+export function getAdContainer(element) {
+  /** @typedef {?Element}  */
+  let el = element;
   do {
-    el = el.parentNode;
+    el = el.parentElement;
     if (CONTAINERS[el.tagName]) {
       return el.tagName;
     }
