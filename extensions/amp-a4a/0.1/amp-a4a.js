@@ -312,23 +312,24 @@ export class AmpA4A extends AMP.BaseElement {
               return some(keyInfoSet.map(keyInfoPromise => {
                 // Resolve Promise into signing key.
                 return keyInfoPromise.then(keyInfo => {
-                  if (keyInfo) {
-                    // If the key exists, try verifying with it.
-                    return verifySignature(
-                        new Uint8Array(creativeParts.creative),
-                        creativeParts.signature,
-                        keyInfo)
-                    .then(isValid => {
-                      if (isValid) {
-                        return creativeParts.creative;
-                      }
-                      return Promise.reject();
-                    },
-                    err => {
-                      user().error('Amp Ad', err, this.element);
-                    });
+                  if (!keyInfo) {
+                    return Promise.reject('Promise resolved to null key.');
                   }
-                  return Promise.reject();
+                  // If the key exists, try verifying with it.
+                  return verifySignature(
+                      new Uint8Array(creativeParts.creative),
+                      creativeParts.signature,
+                      keyInfo)
+                      .then(isValid => {
+                        if (isValid) {
+                          return creativeParts.creative;
+                        }
+                        return Promise.reject(
+                            'Key failed to validate creative\'s signature.');
+                      },
+                      err => {
+                        user().error('Amp Ad', err, this.element);
+                      });
                 });
               }))
               // some() returns an array of which we only need a single value.
