@@ -43,7 +43,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-user-notification/">amp-user-notification_with_local_storage.html</a><br /><a href="https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/">amp-user-notification_with_server_endpoint.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/user-notification.amp.html">user-notification.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-user-notification/">Annotated code example for amp-user-notification (with local storage)</a><br /><a href="https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/">Annotated code example for amp-user-notification (with Server Endpoint)</a></td>
   </tr>
 </table>
 
@@ -110,7 +110,7 @@ You can add it as a query string field. (ex.
     - `ampUserId`
 
   Example:
-  ```none
+  ```html
   https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
   ```
 
