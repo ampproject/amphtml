@@ -19,7 +19,7 @@ import {loadScript} from './3p';
 /**
  * Get the correct script for the container.
  * @param {!Window} global
- * @param {!String} scriptSource The source of the script, different for post and comment embeds.
+ * @param {string} scriptSource The source of the script, different for post and comment embeds.
  */
 function getContainerScript(global, scriptSource) {
   loadScript(global, scriptSource, () => {});

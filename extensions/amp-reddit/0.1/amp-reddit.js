@@ -20,7 +20,10 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 
 class AmpReddit extends AMP.BaseElement {
 
-  /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // Required urls and scripts are different for comments and posts.
     if (this.element.getAttribute('data-embedtype') === 'comment') {
@@ -37,7 +40,7 @@ class AmpReddit extends AMP.BaseElement {
       this.preconnect.preload('https://embed.redditmedia.com/widgets/platform.js', 'script');
     }
 
-    preloadBootstrap(this.win);
+    preloadBootstrap(this.win, this.preconnect);
   }
 
   /** @override */
