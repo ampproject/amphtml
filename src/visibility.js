@@ -18,8 +18,10 @@ import {getElementService} from './element-service';
 
 /**
  * @param {!Window} win
- * @return {!Promise<!Visibility>}
+ * @return {!Promise<!../extensions/amp-analytics/0.1/visibility-impl.Visibility>}
  */
 export function visibilityFor(win) {
-  return getElementService(win, 'visibility', 'amp-analytics');
+  return (/** @type {!Promise<
+      !../extensions/amp-analytics/0.1/visibility-impl.Visibility>}} */ (
+      getElementService(win, 'visibility', 'amp-analytics')));
 };

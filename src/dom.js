@@ -395,7 +395,7 @@ export function childElementsByTag(parent, tagName) {
  * @param {!Element} element
  * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
- * @param {string=} opt_paramPattern Regex pattern to match data attributes.
+ * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,

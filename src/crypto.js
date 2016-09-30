@@ -18,8 +18,10 @@ import {getElementService} from './element-service';
 
 /**
  * @param {!Window} window
- * @return {!Promise<!Crypto>}
+ * @return {!Promise<!../extensions/amp-analytics/0.1/crypto-impl.Crypto>}
  */
 export function cryptoFor(window) {
-  return getElementService(window, 'crypto', 'amp-analytics');
+  return (/** @type {!Promise<
+      !../extensions/amp-analytics/0.1/crypto-impl.Crypto>} */ (
+      getElementService(window, 'crypto', 'amp-analytics')));
 }

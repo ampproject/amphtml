@@ -17,7 +17,7 @@
 /**
  * @const {!JSONType}
  */
-export const ANALYTICS_CONFIG = {
+export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
@@ -995,7 +995,7 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
-};
+});
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
