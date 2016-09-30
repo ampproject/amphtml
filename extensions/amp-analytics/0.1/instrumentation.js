@@ -498,14 +498,15 @@ export class InstrumentationService {
     const hasImmediate = timerSpec.hasOwnProperty('immediate');
     const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
     const viewer = this.viewer_;
-    const intervalId = this.win_.setInterval(() => {
+    const timerEventFunction = function() {
       const vars = {backgrounded: viewer.isVisible() ? '0' : '1'};
       listener(new AnalyticsEvent(AnalyticsEventType.TIMER, vars));
-    }, timerSpec['interval'] * 1000);
+    };
+    const intervalId = this.win_.setInterval(timerEventFunction,
+      timerSpec['interval'] * 1000);
 
     if (callImmediate) {
-      const vars = {backgrounded: viewer.isVisible() ? '0' : '1'};
-      listener(new AnalyticsEvent(AnalyticsEventType.TIMER, vars));
+      timerEventFunction();
     }
 
     const maxTimerLength = timerSpec['maxTimerLength'] ||
