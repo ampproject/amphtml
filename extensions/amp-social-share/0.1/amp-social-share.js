@@ -69,7 +69,7 @@ class AmpSocialShare extends AMP.BaseElement {
       // mailto: protocol breaks when opened in _blank on iOS Safari.
       const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && isMailTo) ? '_self' : '_blank';
+      this.target_ = (isIosSafari && isMailTo) ? '_top' : '_blank';
     });
 
     this.element.setAttribute('role', 'link');
