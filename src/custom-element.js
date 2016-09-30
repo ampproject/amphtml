@@ -1000,6 +1000,7 @@ function createBaseAmpElementProto(win) {
       if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
         this.isFirstLayoutCompleted_ = false;
+        this.dispatchCustomEvent('amp:load:end');
       }
     }, reason => {
       // add layoutCount_ by 1 despite load fails or not

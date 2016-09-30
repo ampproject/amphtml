@@ -54,6 +54,7 @@ describe('Resource', () => {
       viewportCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 2,
+      dispatchCustomEvent: () => {},
     };
     elementMock = sandbox.mock(element);
 

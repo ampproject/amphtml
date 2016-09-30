@@ -358,4 +358,24 @@ describe('amp-sticky-ad', () => {
       });
     });
   });
+
+  it('should listen to amp:built, amp:load:end', () => {
+    return getAmpStickyAd().then(obj => {
+      const stickyAdElement = obj.ampStickyAd;
+      const impl = stickyAdElement.implementation_;
+      impl.ad_.isBuilt = () => {
+        return false;
+      };
+      const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
+      const displayAfterAdLoadSpy = sandbox.spy(impl, 'displayAfterAdLoad_');
+      impl.scheduleLayoutForAd_();
+      expect(layoutAdSpy).to.not.been.called;
+      impl.ad_.dispatchEvent(new Event('amp:built'));
+      expect(layoutAdSpy).to.be.called;
+      expect(displayAfterAdLoadSpy).to.not.been.called;
+      impl.ad_.setAttribute('type', 'doubleclick');
+      impl.ad_.dispatchEvent(new Event('amp:load:end'));
+      expect(displayAfterAdLoadSpy).to.be.called;
+    });
+  });
 });

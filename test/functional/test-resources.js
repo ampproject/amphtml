@@ -1486,6 +1486,9 @@ describe('Resources.add', () => {
       isUpgraded() {
         return true;
       },
+      dispatchCustomEvent() {
+        return;
+      },
     };
     element.build = sandbox.spy();
     return element;
