@@ -50,7 +50,7 @@ export function allowRenderOutsideViewport(element, win) {
 
 /**
  * Decrements loading ads count used for throttling.
- * @param {number} timerId of timer returned from incrementLoadingAds
+ * @param {number|string} timerId of timer returned from incrementLoadingAds
  * @param {!Window} win
  */
 export function decrementLoadingAds(timerId, win) {
@@ -64,7 +64,7 @@ export function decrementLoadingAds(timerId, win) {
 /**
  * Increments loading ads count for throttling.
  * @param {!Window} win
- * @return {number} timer ID for testing
+ * @return {number|string} timer ID for testing
  */
 export function incrementLoadingAds(win) {
   let loadingAds = win[LOADING_ADS_WIN_ID_];

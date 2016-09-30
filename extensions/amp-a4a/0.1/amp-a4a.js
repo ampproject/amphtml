@@ -52,7 +52,7 @@ const pubExp = 'AQAB';
 /**
  * The current set of public keys.
  *
- * @type {Array<!Promise<!PublicKeyInfoDef>>}
+ * @type {Array<!Promise<!./crypto-verifier.PublicKeyInfoDef>>}
  */
 // TODO(bobcassels): When the signing server is finished, get the public keys
 // from there. For now, hard-wire the current signer public key.
@@ -127,7 +127,7 @@ const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
-let AdResponseDef;
+export let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
                cssReplacementRanges: Array<number>,
@@ -160,7 +160,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AmpAdApiHandler} */
+    /** @private {?AMP.AmpAdApiHandler} */
     this.apiHandler_ = null;
 
     /** @private {boolean} */
@@ -178,7 +178,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.stylesheets_ = [];
 
-    /** @const @private {!Vsync} */
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
   }
 
@@ -234,6 +234,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Prefetches and preconnects URLs related to the ad using adPreconnect
    * registration which assumes ad request domain used for 3p is applicable.
+   * @param {boolean=} unusedOnLayout
    * @override
    */
   preconnectCallback(unusedOnLayout) {
@@ -305,7 +306,7 @@ export class AmpA4A extends AMP.BaseElement {
       /** @return {!Promise<?string>} */
       .then(() => {
         checkStillCurrent(promiseId);
-        return this.getAdUrl();
+        return /** @type {!Promise<?string>} */ (this.getAdUrl());
       })
       // This block returns the (possibly empty) response to the XHR request.
       /** @return {!Promise<?Response>} */
@@ -316,7 +317,7 @@ export class AmpA4A extends AMP.BaseElement {
       })
       // The following block returns either the response (as a {bytes, headers}
       // object), or null if no response is available / response is empty.
-      /** @return {!Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
+      /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
       .then(fetchResponse => {
         checkStillCurrent(promiseId);
         if (!fetchResponse || !fetchResponse.arrayBuffer) {
@@ -369,12 +370,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Handles uncaught errors within promise flow.
-   * @param {string|Error} error
-   * @return {string|Error}
+   * @param {*} error
+   * @return {*}
    * @private
    */
   promiseErrorHandler_(error) {
-    if (error instanceof Error) {
+    if (error && error.message) {
       if (error.message.indexOf('amp-a4a: ') == 0) {
         // caught previous call to promiseErrorHandler?  Infinite loop?
         return error;
@@ -469,7 +470,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @return {!Promise<string>}
+   * @return {!Promise<string>|string}
    */
   getAdUrl() {
     throw new Error('getAdUrl not implemented!');
@@ -514,7 +515,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
-   * @return {!Promise<?FetchResponse>}
+   * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
   sendXhrRequest_(adUrl) {
@@ -538,9 +539,9 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Try to validate creative is AMP through crypto signature.
    * @param {!ArrayBuffer} creative  Bytes of the entire signed creative.
-   * @param {?ArrayBuffer} signature  Bytes for creative signature (decoded from
+   * @param {?Uint8Array} signature  Bytes for creative signature (decoded from
    *   base64, if necessary.)
-   * @return {!Promise<ArrayBuffer>}  Promise to a guaranteed-valid AMP creative
+   * @return {!Promise<?ArrayBuffer>}  Promise to a guaranteed-valid AMP creative
    *   or null if the creative is unsigned or invalid.
    * @private
    */
@@ -548,7 +549,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Validate when we have a signature and we have native crypto.
     if (!signature) {
       // Guaranteed not a AMP creative.
-      return Promise.resolve(null);
+      return /** @type {!Promise<?ArrayBuffer>} */ (Promise.resolve(null));
     }
     if (verifySignatureIsAvailable()) {
       // Among other things, the signature might not be proper base64.
@@ -618,7 +619,8 @@ export class AmpA4A extends AMP.BaseElement {
           this.vsync_.mutate(() => {
             const doc = this.element.ownerDocument;
             // Copy fonts to host document head.
-            this.relocateFonts_(creativeMetaData);
+            this.relocateFonts_(/** @type {!CreativeMetaDataDef} */ (
+                creativeMetaData));
             // Create and setup shadow root.
             const shadowRoot = createShadowEmbedRoot(this.element,
                 creativeMetaData.customElementExtensions || []);
@@ -678,7 +680,8 @@ export class AmpA4A extends AMP.BaseElement {
       // Set opt_defaultVisible to true as 3p draw code never executed causing
       // render-start event never to fire which will remove visiblity hidden.
       this.apiHandler_.startUp(
-        iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
+        iframe, /* is3p */ !!opt_isNonAmpCreative,
+        /* opt_defaultVisible */ true);
       this.rendered_ = true;
     });
   }
@@ -711,8 +714,8 @@ export class AmpA4A extends AMP.BaseElement {
       return null;
     }
     try {
-      return this.buildCreativeMetaData_(JSON.parse(
-        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd)));
+      return this.buildCreativeMetaData_(/** @type {!Object} */ (JSON.parse(
+        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd))));
     } catch (err) {
       dev().warn('A4A', 'Invalid amp metadata: %s',
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
@@ -721,7 +724,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object} JSON extraced from creative
+   * @param {!Object} metaDataObj JSON extraced from creative
    * @return {!CreativeMetaDataDef} if valid, null otherwise
    * @private
    */
@@ -800,7 +803,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Note: destructively reverses the {@code offsets} list as a side effect.
    * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} meta data from creative.
+   * @param {!CreativeMetaDataDef} metaData meta data from creative.
    * @returns {string} CSS to be added to page.
    */
   formatCSSBlock_(creative, metaData) {

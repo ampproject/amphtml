@@ -133,7 +133,7 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 export class IntersectionObserver {
   /**
    * @param {!BaseElement} element.
-   * @param {!HTMLIFrameElement} iframe Iframe element which requested the
+   * @param {!Element} iframe Iframe element which requested the
    *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    */

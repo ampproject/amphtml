@@ -147,6 +147,9 @@ export class BaseElement {
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
+
+    /** @public {?Object} For use by sub classes */
+    this.config = null;
   }
 
   /**
