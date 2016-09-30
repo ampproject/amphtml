@@ -24,6 +24,7 @@ import {
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
+import {preconnectForElement} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
 import {validateData} from '../../3p/3p';
 import {viewerFor} from '../../src/viewer';
@@ -34,12 +35,14 @@ describe('3p-frame', () => {
   let clock;
   let sandbox;
   let container;
+  let preconnect;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     container = document.createElement('div');
     document.body.appendChild(container);
+    preconnect = preconnectForElement(container);
   });
 
   afterEach(() => {
@@ -240,7 +243,7 @@ describe('3p-frame', () => {
 
   it('should prefetch bootstrap frame and JS', () => {
     window.AMP_MODE = {localDev: true};
-    preloadBootstrap(window);
+    preloadBootstrap(window, preconnect);
     // Wait for visible promise
     return Promise.resolve().then(() => {
       const fetches = document.querySelectorAll(

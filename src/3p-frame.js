@@ -22,7 +22,6 @@ import {getService} from './service';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
 import {viewerFor} from './viewer';
@@ -171,10 +170,10 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
+ * @param {!./preconnect.Preconnect} preconnect
  */
-export function preloadBootstrap(window) {
+export function preloadBootstrap(window, preconnect) {
   const url = getBootstrapBaseUrl(window);
-  const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
