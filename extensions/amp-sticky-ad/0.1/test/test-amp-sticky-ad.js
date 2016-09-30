@@ -363,7 +363,7 @@ describe('amp-sticky-ad', () => {
     return getAmpStickyAd().then(obj => {
       const stickyAdElement = obj.ampStickyAd;
       const impl = stickyAdElement.implementation_;
-      impl.ad_.isBuilt = function() {
+      impl.ad_.isBuilt = () => {
         return false;
       };
       const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');

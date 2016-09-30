@@ -163,23 +163,16 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
-   * Layout ad, and change sticky-ad container style
-   * @private
-   */
-  layoutAd_() {
-    this.updateInViewport(dev().assertElement(this.ad_), true);
-    this.scheduleLayout(dev().assertElement(this.ad_));
-    this.delayAdLoad_();
-  }
-
-  /**
-   * Change sticky-ad container style to ad-loaded-style after certain delay.
+   * Layout ad, and change sticky-ad container style to ad-loaded style after
+   * certain delay.
    * For ad type that support return render-start wait until ad layoutCallback
    * resolve and receive amp:load:end.
    * For ad type that don't support render-start, wait for 1 sec.
    * @private
    */
-  delayAdLoad_() {
+  layoutAd_() {
+    this.updateInViewport(dev().assertElement(this.ad_), true);
+    this.scheduleLayout(dev().assertElement(this.ad_));
     listenOnce(this.ad_, 'amp:load:end', () => {
       const adType = this.ad_.getAttribute('type');
       if (adConfig[adType].renderStartImplemented) {
