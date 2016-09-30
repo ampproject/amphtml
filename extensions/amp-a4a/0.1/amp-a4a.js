@@ -28,7 +28,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {any} from '../../../src/utils/promise';
+import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
@@ -303,13 +303,13 @@ export class AmpA4A extends AMP.BaseElement {
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
           // So long as any one of these signing services can verify the
           // signature, then the creative is valid AMP.
-          return any(this.keyInfoSetPromises_.map(keyInfoSetPromise => {
+          return some(this.keyInfoSetPromises_.map(keyInfoSetPromise => {
             // Resolve Promise into Array of Promises of signing keys.
             return keyInfoSetPromise.then(keyInfoSet => {
               // As long as any one individual key of a particular signing
               // service, keyInfoPromise, can verify the signature, then the
               // creative is valid AMP.
-              return any(keyInfoSet.map(keyInfoPromise => {
+              return some(keyInfoSet.map(keyInfoPromise => {
                 // Resolve Promise into signing key.
                 return keyInfoPromise.then(keyInfo => {
                   if (keyInfo) {
@@ -330,9 +330,12 @@ export class AmpA4A extends AMP.BaseElement {
                   }
                   return Promise.reject();
                 });
-              }));
+              }))
+              // some() returns an array of which we only need a single value.
+              .then(returnedArray => returnedArray[0]);
             });
-          }));
+          }))
+          .then(returnedArray => returnedArray[0]);
         })
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
