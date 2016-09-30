@@ -61,7 +61,7 @@ export function importPublicKey(jwk) {
         // an invalid key.  This last check is in case the key is valid
         // but a different kind.
         if (typeof jwk.n != 'string' || typeof jwk.e != 'string') {
-          return Promise.reject('missing fields in JSON Web Key');
+          throw new Error('missing fields in JSON Web Key');
         }
         const mod = base64UrlDecodeToBytes(jwk.n);
         const pubExp = base64UrlDecodeToBytes(jwk.e);

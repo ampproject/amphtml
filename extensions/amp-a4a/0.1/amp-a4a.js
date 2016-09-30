@@ -28,6 +28,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
+import {any} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
@@ -298,51 +299,40 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           }
 
-          // Alias for validCreativePromise's resolve function. This will be called
-          // if any of the fetched keys successfully validate the creative.
-          let resolveValidation;
-          // Promise that will resolve upon any successful validation.
-          const validCreativePromise = new Promise(resolve => {
-            resolveValidation = resolve;
-          });
-
-          // The following block defines an Array of Promises of ArrayBuffers,
-          // none of which will ever resolve. In the first instance of a
-          // successful creative verification, resolveValidation will be
-          // called with the creative as the argument.
-          const signatureVerificationPromises = this.keyInfoSetPromises_.map(
-              keyInfoSetPromise => {
-                return keyInfoSetPromise.then(keyInfoSet => {
-                  return Promise.all(keyInfoSet.map(keyInfoPromise => {
-                    return keyInfoPromise.then(keyInfo => {
-                      if (keyInfo) {
-                        return verifySignature(
-                            new Uint8Array(creativeParts.creative),
-                            creativeParts.signature,
-                            keyInfo)
-                        .then(isValid => {
-                          if (isValid) {
-                            resolveValidation(creativeParts.creative);
-                          }
-                        },
-                        err => {
-                          user().error('Amp Ad', err, this.element);
-                        });
+          // For each signing service, we have exactly one Promise,
+          // keyInfoSetPromise, that holds an Array of Promises of signing keys.
+          // So long as any one of these signing services can verify the
+          // signature, then the creative is valid AMP.
+          return any(this.keyInfoSetPromises_.map(keyInfoSetPromise => {
+            // Resolve Promise into Array of Promises of signing keys.
+            return keyInfoSetPromise.then(keyInfoSet => {
+              // As long as any one individual key of a particular signing
+              // service, keyInfoPromise, can verify the signature, then the
+              // creative is valid AMP.
+              return any(keyInfoSet.map(keyInfoPromise => {
+                // Resolve Promise into signing key.
+                return keyInfoPromise.then(keyInfo => {
+                  if (keyInfo) {
+                    // If the key exists, try verifying with it.
+                    return verifySignature(
+                        new Uint8Array(creativeParts.creative),
+                        creativeParts.signature,
+                        keyInfo)
+                    .then(isValid => {
+                      if (isValid) {
+                        return creativeParts.creative;
                       }
+                      return Promise.reject();
+                    },
+                    err => {
+                      user().error('Amp Ad', err, this.element);
                     });
-                  }));
+                  }
+                  return Promise.reject();
                 });
-              });
-
-          // Promise that will resolve to null after all keys have been checked.
-          // Will call resolveValidation if a successful validation does happen.
-          const allKeysCheckedPromise = Promise.all(
-              signatureVerificationPromises).then(() => null);
-
-          // Race the two promises: Either validCreativePromise will resolve if
-          // a successful validation occurs, or allKeysCheckedPromise will
-          // resolve to null.
-          return Promise.race([validCreativePromise, allKeysCheckedPromise]);
+              }));
+            });
+          }));
         })
         // This block returns true iff the creative was rendered in the shadow
         // DOM.

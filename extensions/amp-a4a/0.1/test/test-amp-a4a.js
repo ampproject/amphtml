@@ -299,13 +299,8 @@ describe('amp-a4a', () => {
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
             Promise.resolve({
               creative: stringToArrayBuffer(validCSSAmp.reserialized),
-              signature: new Uint8Array([]),
+              signature: base64UrlDecodeToBytes(validCSSAmp.signature),
             }));
-        // Since we can't (easily) stub imported functions, which, if we could,
-        // we would just stub verifySignature here, we'll just rig the outcome
-        // of the promise race.
-        sandbox.stub(Promise, 'race').returns(
-            Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized)));
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
