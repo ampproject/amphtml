@@ -17,6 +17,7 @@
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
+import {user} from '../src/log';
 import {srcsetFromElement} from '../src/srcset';
 
 
@@ -112,7 +113,9 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
+    const src = user().assert(this.srcset_,
+        'Either non-empty "srcset" or "src" attribute must be specified: %s',
+        this.element).select(this.getLayoutWidth(), this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
