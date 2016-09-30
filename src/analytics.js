@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {
+  getElementService,
+  getElementServiceIfAvailable,
+} from './element-service';
 
 
 /**
@@ -22,6 +25,17 @@ import {getElementService} from './element-service';
  * @return {!Promise<!InstrumentationService>}
  */
 export function analyticsFor(window) {
-  return getElementService(window, 'amp-analytics-instrumentation',
-      'amp-analytics');
+  return /** @type {!Promise<!InstrumentationService>} */ (
+      getElementService(
+          window, 'amp-analytics-instrumentation','amp-analytics'));
+};
+
+/**
+ * @param {!Window} window
+ * @return {!Promise<?InstrumentationService>}
+ */
+export function analyticsForOrNull(window) {
+  return /** @type {!Promise<!InstrumentationService>} */ (
+      getElementServiceIfAvailable(
+          window, 'amp-analytics-instrumentation','amp-analytics'));
 };

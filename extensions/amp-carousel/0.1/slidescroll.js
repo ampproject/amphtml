@@ -16,6 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {analyticsForOrNull} from '../../../src/analytics';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -87,6 +88,9 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {number} */
     this.previousScrollLeft_ = 0;
+
+    /** @private {!Promise<?InstrumentationService>} */
+    this.analyticsPromise_ = analyticsForOrNull(this.win);
   }
 
   /** @override */
@@ -455,6 +459,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.slidesContainer_./*OK*/scrollLeft =
         this.getScrollLeftForIndex_(newIndex);
+    this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
@@ -534,6 +539,37 @@ export class AmpSlideScroll extends BaseSlides {
     // touchmove events.
     this.element.addEventListener('touchmove', event => {
       event.stopPropagation();
+    });
+  }
+
+  /**
+   * @param {number} newSlideIndex
+   * @private
+   */
+  triggerAnalyticsEvent_(newSlideIndex) {
+    let direction = newSlideIndex - this.slideIndex_;
+    if (direction === 0 ) {
+      return;
+    } else if (Math.abs(direction) !== 1) {
+      direction = direction < 0 ? 1 : -1;
+    }
+    if (direction === 1) {
+      this.analyticsEvent_('amp-carousel-next');
+    } else if (direction === -1) {
+      this.analyticsEvent_('amp-carousel-prev');
+    }
+  }
+
+  /**
+   * @param {string} eventType
+   * @private
+   */
+  analyticsEvent_(eventType) {
+    this.analyticsPromise_.then(analytics => {
+      if (!analytics) {
+        return;
+      }
+      analytics.triggerEvent(eventType);
     });
   }
 }
