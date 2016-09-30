@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-/** typedef {{name: string, value: ?(string|number)}} */
-let QueryParameterDef;
+/** @typedef {{name: string, value: (string|number|null)}} */
+export let QueryParameterDef;
 
 /**
  * Builds a URL from query parameters, truncating to a maximum length if
@@ -35,7 +35,7 @@ export function buildUrl(
       !(opt_truncationQueryParam.value == null ||
       opt_truncationQueryParam.value === '') ?
       encodeURIComponent(opt_truncationQueryParam.name) + '=' +
-      encodeURIComponent(opt_truncationQueryParam.value) :
+      encodeURIComponent(String(opt_truncationQueryParam.value)) :
       null;
   let capacity = maxLength - baseUrl.length;
   if (encodedTruncationParam) {
@@ -47,7 +47,7 @@ export function buildUrl(
       continue;
     }
     const encodedNameAndSep = encodeURIComponent(param.name) + '=';
-    const encodedValue = encodeURIComponent(param.value);
+    const encodedValue = encodeURIComponent(String(param.value));
     const fullLength = encodedNameAndSep.length + encodedValue.length + 1;
     if (fullLength > capacity) {
       const truncatedValue = encodedValue

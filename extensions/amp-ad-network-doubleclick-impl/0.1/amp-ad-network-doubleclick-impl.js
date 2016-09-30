@@ -94,7 +94,7 @@ AMP.registerElement(
 
 /**
  * @param {?Object<string, (!Array<string>|string)>} targeting
- * @param {?(!Array<string>|string)} value
+ * @param {?(!Array<string>|string)} categoryExclusions
  * @return {?string}
  */
 function serializeTargeting(targeting, categoryExclusions) {

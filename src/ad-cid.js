@@ -22,7 +22,7 @@ import {timerFor} from '../src/timer';
 
 
 /**
- * @param {BaseElement} adElement
+ * @param {AMP.BaseElement} adElement
  * @return {!Promise<string|undefined>} A promise for a CID or undefined if
  *     - the ad network does not request one or
  *     - `amp-analytics` which provides the CID service was not installed.
@@ -59,7 +59,7 @@ export function getAdCid(adElement) {
   return timerFor(adElement.win)
       .timeoutPromise(1000, cidPromise, 'cid timeout').catch(error => {
         // Timeout is not fatal.
-        dev().warn(error);
+        dev().warn('ad-cid', error);
         return undefined;
       });
 }
