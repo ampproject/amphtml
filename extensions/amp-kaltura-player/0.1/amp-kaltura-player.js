@@ -17,7 +17,6 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {addParamsToUrl} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
@@ -26,11 +25,17 @@ class AmpKaltura extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {string} */
+    this.partnerId_ = '';
+
+    /** @private {string} */
+    this.entryId_ = '';
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -45,23 +50,20 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!this.getPlaceholder()) {
-      this.buildImagePlaceholder_();
-    }
+    this.partnerId_ = user().assert(
+        this.element.getAttribute('data-partner'),
+        'The data-partner attribute is required for <amp-kaltura-player> %s',
+        this.element);
+
+    this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
   }
 
   /** @override */
   layoutCallback() {
-    const partnerid = user().assert(
-        this.element.getAttribute('data-partner'),
-        'The data-partner attribute is required for <amp-kaltura-player> %s',
-        this.element);
-    const uiconfid = this.element.getAttribute('data-uiconf') ||
-    this.element.getAttribute('data-uiconf-id') ||
-      'default';
-    const entryid = this.element.getAttribute('data-entryid') || 'default';
+    const uiconfId = this.element.getAttribute('data-uiconf') ||
+        this.element.getAttribute('data-uiconf-id') || 'default';
     const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(partnerid)}/sp/${encodeURIComponent(partnerid)}00/embedIframeJs/uiconf_id/${encodeURIComponent(uiconfid)}/partner_id/${encodeURIComponent(partnerid)}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(entryid)}`;
+    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(this.partnerId_)}/sp/${encodeURIComponent(this.partnerId_)}00/embedIframeJs/uiconf_id/${encodeURIComponent(uiconfId)}/partner_id/${encodeURIComponent(this.partnerId_)}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(this.entryId_)}`;
     const params = getDataParamsFromAttributes(
         this.element, key => `flashvars[${key}]`);
     src = addParamsToUrl(src, params);
@@ -74,41 +76,24 @@ class AmpKaltura extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
-
-    setStyles(imgPlaceholder, {
-      'object-fit': 'cover',
-      'visibility': 'hidden',
-    });
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.win.document.createElement('amp-img');
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const partnerid = user().assert(
-      this.element.getAttribute('data-partner'),
-      'The data-partner attribute is required for <amp-kaltura-player> %s',
-      this.element);
-    const entryid = this.element.getAttribute('data-entryid') || 'default';
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(partnerid)}/thumbnail/entry_id/${encodeURIComponent(entryid)}`;
+    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(this.partnerId_)}/thumbnail/entry_id/${encodeURIComponent(this.entryId_)}`;
     if (width) {
       src += `/width/${width}`;
     }
     if (height) {
       src += `/height/${height}`;
     }
-
-    imgPlaceholder.src = src;
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
-
-    this.applyFillContent(imgPlaceholder);
-    this.element.appendChild(imgPlaceholder);
-
-    this.loadPromise(imgPlaceholder).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
-      });
-    });
+    placeholder.setAttribute('noprerender', '');
+    placeholder.setAttribute('src', src);
+    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    return placeholder;
   }
 
   /** @override */
