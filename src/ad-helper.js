@@ -68,7 +68,6 @@ export function isAdPositionAllowed(el, win) {
  * Returns the blessed container element tagName if the ad is contained by one.
  * This is called during layout measure.
  * @param {!Element} el
- * @param {!Window} win
  * @return {?string}
  */
 export function getAdContainer(el) {

@@ -77,7 +77,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * The layout box of the ad iframe (as opposed to the amp-ad tag).
      * In practice it often has padding to create a grey or similar box
      * around ads.
-     * @private {!LayoutRect}
+     * @private {?../../../src/layout-rect.LayoutRectDef}
      */
     this.iframeLayoutBox_ = null;
 

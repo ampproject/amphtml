@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-/** typedef {{name: string, value: ?(string|number)}} */
-let QueryParameterDef;
+/** @typedef {{name: string, value: (string|number|null)}} */
+export let QueryParameterDef;
 
 /**
  * Builds a URL from query parameters, truncating to a maximum length if

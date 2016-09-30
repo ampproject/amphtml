@@ -42,13 +42,13 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 // out whether a given ad request is in the overall experiment and, if so,
 // which branch it's on.
 
-/** const {!Branches} @private */
+/** const {!../../../ads/google/a4a/traffic-experiments.Branches} @private */
 const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152650',
   experiment: '117152651',
 };
 
-/** @const {!Branches} @private */
+/** @const {!../../../ads/google/a4a/traffic-experiments.Branches} @private */
 const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152670',
   experiment: '117152671',

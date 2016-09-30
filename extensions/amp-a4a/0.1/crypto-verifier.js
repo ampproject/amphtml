@@ -34,10 +34,10 @@ const VERSION = 0x00;
  * @typedef {{
  *   publicKey: !Object,
  *   hash: Uint8Array,
- *   cryptoKey: CryptoKey
+ *   cryptoKey: webCrypto.CryptoKey
  * }}
  */
-let PublicKeyInfoDef;
+export let PublicKeyInfoDef;
 
 /**
  * Compute and cache hash and CryptoKey of public key
@@ -143,7 +143,7 @@ export function verifySignatureIsAvailable() {
 
 /**
  * Appends 4-byte endian data's length to the data itself.
- * @param {!Uint8Array} the data.
+ * @param {!Uint8Array} data
  * @return {!Uint8Array} the prepended 4-byte endian data's length together with
  *     the data itself.
  */

@@ -32,12 +32,12 @@ const TIMEOUT_VALUE = 10000;
 export class AmpAdApiHandler {
 
   /**
-   * @param {!BaseElement} baseInstance
+   * @param {!AMP.BaseElement} baseInstance
    * @param {!Element} element
    * @param {function()=} opt_noContentCallback
    */
   constructor(baseInstance, element, opt_noContentCallback) {
-    /** @private {!BaseElement} */
+    /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
     /** @private {!Element} */

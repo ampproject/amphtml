@@ -47,10 +47,10 @@ var extensions = {};
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-ad', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-ad', '0.1', false);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false, 'NO_TYPE_CHECK');
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false, 'NO_TYPE_CHECK');
-declareExtension('amp-ad-network-fake-impl', 0.1, false, 'NO_TYPE_CHECK');
+declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');

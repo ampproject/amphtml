@@ -52,7 +52,7 @@ const pubExp = 'AQAB';
 /**
  * The current set of public keys.
  *
- * @type {Array<!Promise<!PublicKeyInfoDef>>}
+ * @type {Array<!Promise<!./crypto-verifier.PublicKeyInfoDef>>}
  */
 // TODO(bobcassels): When the signing server is finished, get the public keys
 // from there. For now, hard-wire the current signer public key.
@@ -127,7 +127,7 @@ const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
-let AdResponseDef;
+export let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
                cssReplacementRanges: Array<number>,
@@ -160,7 +160,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AmpAdApiHandler} */
+    /** @private {?AMP.AmpAdApiHandler} */
     this.apiHandler_ = null;
 
     /** @private {boolean} */
@@ -178,7 +178,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.stylesheets_ = [];
 
-    /** @const @private {!Vsync} */
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
   }
 
@@ -514,7 +514,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
-   * @return {!Promise<?FetchResponse>}
+   * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
   sendXhrRequest_(adUrl) {
@@ -721,7 +721,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object} JSON extraced from creative
+   * @param {!Object} metaDataObj JSON extraced from creative
    * @return {!CreativeMetaDataDef} if valid, null otherwise
    * @private
    */
@@ -800,7 +800,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Note: destructively reverses the {@code offsets} list as a side effect.
    * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} meta data from creative.
+   * @param {!CreativeMetaDataDef} metaData meta data from creative.
    * @returns {string} CSS to be added to page.
    */
   formatCSSBlock_(creative, metaData) {
