@@ -98,6 +98,8 @@ export const adConfig = {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
   },
 
+  advertserve: {},
+
   amoad: {
     prefetch: [
       'https://j.amoad.com/js/a.js',
