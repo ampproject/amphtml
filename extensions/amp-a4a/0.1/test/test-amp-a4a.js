@@ -300,7 +300,7 @@ describe('amp-a4a', () => {
             Promise.resolve({
               creative: stringToArrayBuffer(validCSSAmp.reserialized),
               signature: base64UrlDecodeToBytes(validCSSAmp.signature),
-            })); debugger;
+            }));
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {

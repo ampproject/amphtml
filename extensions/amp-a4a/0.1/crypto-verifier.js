@@ -49,8 +49,7 @@ let PublicKeyInfoDef;
 export function importPublicKey(jwk) {
   // WebKit wants this as an ArrayBufferView.
   return (isWebkit ? utf8Encode(JSON.stringify(jwk)) : Promise.resolve(jwk))
-      .then(encodedJwk =>
-      crossCrypto.importKey(
+      .then(encodedJwk => crossCrypto.importKey(
           'jwk',
           encodedJwk,
           {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
