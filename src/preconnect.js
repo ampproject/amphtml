@@ -30,7 +30,48 @@ import {dev} from './log';
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
 
-export class Preconnect {
+
+/**
+ * @typedef {{
+ *   preload: (boolean|undefined),
+ *   preconnect: (boolean|undefined)
+ * }}
+ */
+let PreconnectFeaturesDef;
+
+/** @private {?PreconnectFeaturesDef} */
+let preconnectFeatures = null;
+
+/**
+ * Detect related features if feature detection is supported by the
+ * browser. Even if this fails, the browser may support the feature.
+ * @param {!Window} win
+ * @return {!PreconnectFeaturesDef}
+ */
+function getPreconnectFeatures(win) {
+  if (!preconnectFeatures) {
+    const tokenList = win.document.createElement('link')['relList'];
+    if (!tokenList || !tokenList.supports) {
+      return {};
+    }
+    preconnectFeatures = {
+      preconnect: tokenList.supports('preconnect'),
+      preload: tokenList.supports('preload'),
+    };
+  }
+  return preconnectFeatures;
+}
+
+
+/**
+ * @param {?PreconnectFeaturesDef} features
+ */
+export function setPreconnectFeaturesForTesting(features) {
+  preconnectFeatures = features;
+}
+
+
+class PreconnectService {
 
   /**
    * @param {!Window} win
@@ -61,15 +102,9 @@ export class Preconnect {
      * Detect support for the given resource hints.
      * Unfortunately not all browsers support this, so this can only
      * be used as an affirmative signal.
-     * @private @const {{
-     *   preload: (boolean|undefined),
-     *   preconnect: (boolean|undefined)
-     * }}
+     * @private @const {!PreconnectFeaturesDef}
      */
-    this.features_ = this.detectFeatures_();
-
-    /** @private @const {!./service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(win);
+    this.features_ = getPreconnectFeatures(win);
 
     /** @private @const {!./service/timer-impl.Timer} */
     this.timer_ = timerFor(win);
@@ -78,6 +113,7 @@ export class Preconnect {
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
+   * @param {!./service/viewer-impl.Viewer} viewer
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
    *    did or are about to connect to this host. This is for the case
@@ -87,7 +123,7 @@ export class Preconnect {
    *    when it is more fully rendered, you already know that the connection
    *    will be used very soon.
    */
-  url(url, opt_alsoConnecting) {
+  url(viewer, url, opt_alsoConnecting) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
@@ -131,17 +167,18 @@ export class Preconnect {
       }
     }, 10000);
 
-    this.preconnectPolyfill_(origin);
+    this.preconnectPolyfill_(viewer, origin);
   }
 
   /**
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
+   * @param {!./service/viewer-impl.Viewer} viewer
    * @param {string} url
    * @param {string=} opt_preloadAs
    */
-  preload(url, opt_preloadAs) {
+  preload(viewer, url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
@@ -150,8 +187,8 @@ export class Preconnect {
     }
     const command = this.features_.preload ? 'preload' : 'prefetch';
     this.urls_[url] = true;
-    this.url(url, /* opt_alsoConnecting */ true);
-    this.viewer_.whenFirstVisible().then(() => {
+    this.url(viewer, url, /* opt_alsoConnecting */ true);
+    viewer.whenFirstVisible().then(() => {
       const preload = this.document_.createElement('link');
       preload.setAttribute('rel', command);
       preload.setAttribute('href', url);
@@ -181,26 +218,6 @@ export class Preconnect {
   }
 
   /**
-   * Detect related features if feature detection is supported by the
-   * browser. Even if this fails, the browser may support the feature.
-   * @return {{
-   *   preload: (boolean|undefined),
-   *   preconnect: (boolean|undefined)
-   * }}
-   * @private
-   */
-  detectFeatures_() {
-    const tokenList = this.document_.createElement('link')['relList'];
-    if (!tokenList || !tokenList.supports) {
-      return {};
-    }
-    return {
-      preconnect: tokenList.supports('preconnect'),
-      preload: tokenList.supports('preload'),
-    };
-  }
-
-  /**
    * Safari does not support preconnecting, but due to its significant
    * performance benefits we implement this crude polyfill.
    *
@@ -215,8 +232,12 @@ export class Preconnect {
    * amp_preconnect_polyfill in your DevTools console or server log:
    * This is expected and fine to leave as is. Its fine to send a non 404
    * response, but please make it small :)
+   *
+   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {string} origin
+   * @private
    */
-  preconnectPolyfill_(origin) {
+  preconnectPolyfill_(viewer, origin) {
     // Unfortunately there is no reliable way to feature detect whether
     // preconnect is supported, so we do this only in Safari, which is
     // the most important browser without support for it.
@@ -224,7 +245,7 @@ export class Preconnect {
       return;
     }
 
-    this.viewer_.whenFirstVisible().then(() => {
+    viewer.whenFirstVisible().then(() => {
       // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
       // we effectively create an active connection.
       // TODO(@cramforce): Confirm actual http2 timeout in Safari.
@@ -242,10 +263,78 @@ export class Preconnect {
   }
 }
 
+
+export class Preconnect {
+  /**
+   * @param {!PreconnectService} preconnectService
+   * @param {!Element} element
+   */
+  constructor(preconnectService, element) {
+    /** @const @private {!PreconnectService} */
+    this.preconnectService_ = preconnectService;
+
+    /** @const @private {!Element} */
+    this.element_ = element;
+
+    /** @private {?./service/viewer-impl.Viewer} */
+    this.viewer_ = null;
+  }
+
+  /**
+   * @return {!./service/viewer-impl.Viewer}
+   * @private
+   */
+  getViewer_() {
+    if (!this.viewer_) {
+      // TODO(dvoytenko): switch to viewerForDoc.
+      this.viewer_ = viewerFor(this.element_.ownerDocument.defaultView);
+    }
+    return this.viewer_;
+  }
+
+  /**
+   * Preconnects to a URL. Always also does a dns-prefetch because
+   * browser support for that is better.
+   * @param {string} url
+   * @param {boolean=} opt_alsoConnecting Set this flag if you also just
+   *    did or are about to connect to this host. This is for the case
+   *    where preconnect is issued immediate before or after actual connect
+   *    and preconnect is used to flatten a deep HTTP request chain.
+   *    E.g. when you preconnect to a host that an embed will connect to
+   *    when it is more fully rendered, you already know that the connection
+   *    will be used very soon.
+   */
+  url(url, opt_alsoConnecting) {
+    this.preconnectService_.url(this.getViewer_(), url, opt_alsoConnecting);
+  }
+
+  /**
+   * Asks the browser to preload a URL. Always also does a preconnect
+   * because browser support for that is better.
+   *
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   */
+  preload(url, opt_preloadAs) {
+    this.preconnectService_.preload(this.getViewer_(), url, opt_preloadAs);
+  }
+}
+
+
 /**
  * @param {!Window} window
+ * @return {!PreconnectService}
+ */
+function preconnectFor(window) {
+  return fromClass(window, 'preconnect', PreconnectService);
+}
+
+
+/**
+ * @param {!Element} element
  * @return {!Preconnect}
  */
-export function preconnectFor(window) {
-  return fromClass(window, 'preconnect', Preconnect);
-};
+export function preconnectForElement(element) {
+  const preconnectService = preconnectFor(element.ownerDocument.defaultView);
+  return new Preconnect(preconnectService, element);
+}

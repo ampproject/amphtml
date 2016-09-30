@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/pinterest.amp.html">pinterest.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-pinterest/">Annotated code example for amp-pinterest</a></td>
   </tr>
 </table>
 
