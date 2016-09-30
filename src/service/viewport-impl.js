@@ -49,7 +49,7 @@ const TAG_ = 'Viewport';
  *   velocity: number
  * }}
  */
-let ViewportChangedEventDef;
+export let ViewportChangedEventDef;
 
 
 /**
