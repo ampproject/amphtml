@@ -26,7 +26,7 @@ const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 export class Crypto {
 
   constructor(win) {
-    /** @private @const {?SubtleCrypto} */
+    /** @private @const {?webCrypto.SubtleCrypto} */
     this.subtle_ = getSubtle(win);
   }
 
@@ -43,6 +43,7 @@ export class Crypto {
         return this.subtle_.digest({name: 'SHA-384'},
                 input instanceof Uint8Array ? input : stringToBytes(input))
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
+            /** @param {?} buffer */
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
                 e => {
                   // Chrome doesn't allow the usage of Crypto API under

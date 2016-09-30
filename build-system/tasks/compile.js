@@ -135,6 +135,9 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/**/*-config.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
+      // Currently needed for crypto.js and visibility.js.
+      // Should consider refactoring.
+      'extensions/amp-analytics/**/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
@@ -248,6 +251,7 @@ function compile(entryModuleFilenames, outputDir,
         jscomp_off: 'unknownDefines',
         define: [],
         hide_warnings_for: [
+          'third_party/closure-library/sha384-generated.js',
           'third_party/d3/',
           'third_party/vega/',
           'third_party/webcomponentsjs/',
