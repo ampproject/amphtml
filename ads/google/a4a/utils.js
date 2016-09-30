@@ -61,12 +61,12 @@ export function isGoogleAdsA4AValidEnvironment(win, element) {
 }
 
 /**
- * @param {!AmpA4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {number} slotNumber
- * @param {!Array<!QueryParameter>} queryParams
- * @param {!Array<!QueryParameter>} unboundedQueryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
@@ -82,7 +82,7 @@ export function googleAdUrl(
 /**
  * @param {!ArrayBuffer} creative
  * @param {!Headers} responseHeaders
- * @return {!Promise<!AdResponseDef>}
+ * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
  */
 export function extractGoogleAdCreativeAndSignature(
     creative, responseHeaders) {
@@ -90,20 +90,23 @@ export function extractGoogleAdCreativeAndSignature(
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
       signature =
-        base64UrlDecodeToBytes(responseHeaders.get(AMP_SIGNATURE_HEADER));
+        base64UrlDecodeToBytes(dev().assertString(
+            responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
   } finally {
-    return Promise.resolve({creative, signature});
+    return Promise.resolve(/** @type {
+          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
+          {creative, signature}));
   }
 }
 
 /**
- * @param {!AmpA4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {number} slotNumber
- * @param {!Array<!QueryParameter>} queryParams
- * @param {!Array<!QueryParameter>} unboundedQueryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
  * @param {(string|undefined)} clientId
  * @param {string} referrer
  * @return {string}
@@ -207,8 +210,8 @@ function iframeNestingDepth(global) {
 
 /**
  * @param {number} slotNumber
- * @param {!LayoutRectDef} slotRect
- * @param {!LayoutRectDef} viewportRect
+ * @param {!../../../src/layout-rect.LayoutRectDef} slotRect
+ * @param {!../../../src/layout-rect.LayoutRectDef} viewportRect
  * @return {string}
  */
 function adKey(slotNumber, slotRect, viewportRect) {
