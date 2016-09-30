@@ -175,11 +175,11 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   const existingCookie = getCookie(win, scope);
 
   if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
-    return /** @type {!Promise<(?string)>} */ (Promise.resolve(null));
+    return /** @type {!Promise<?string>} */ (Promise.resolve(null));
   }
 
   if (cid.externalCidCache_[scope]) {
-    return /** @type {!Promise<(?string)>} */ (cid.externalCidCache_[scope]);
+    return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
   }
 
   if (existingCookie) {
@@ -187,7 +187,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     if (/^amp-/.test(existingCookie)) {
       setCidCookie(win, scope, existingCookie);
     }
-    return /** @type {!Promise<(?string)>} */ (
+    return /** @type {!Promise<?string>} */ (
         Promise.resolve(existingCookie));
   }
 
