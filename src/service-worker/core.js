@@ -307,6 +307,7 @@ export function handleFetch(request, maybeClientId) {
 
 self.addEventListener('install', install => {
   install.waitUntil(cachePromise);
+  // Registers the SW for Foreign Fetch events, if they are supported.
   if (install.registerForeignFetch) {
     install.registerForeignFetch({
       scopes: [/** @type {!ServiceWorkerGlobalScope} */(
