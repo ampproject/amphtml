@@ -782,9 +782,11 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.attachedCallback = function() {
-    this.classList.add('-amp-element');
-    this.classList.add('-amp-notbuilt');
-    this.classList.add('amp-notbuilt');
+    if (!this.everAttached) {
+      this.classList.add('-amp-element');
+      this.classList.add('-amp-notbuilt');
+      this.classList.add('amp-notbuilt');
+    }
 
     if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
       this.isInTemplate_ = !!dom.closestByTag(this, 'template');
