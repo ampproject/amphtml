@@ -557,15 +557,17 @@ export class Viewport {
     const paddingTop = event['paddingTop'];
     const duration = event['duration'];
     const curve = event['curve'];
+    const transient = event['transient'];
+
     if (paddingTop != this.paddingTop_) {
       this.lastPaddingTop_ = this.paddingTop_;
       this.paddingTop_ = paddingTop;
       if (this.paddingTop_ == 0) {
-        this.binding_.hideViewerHeader(this.lastPaddingTop_);
+        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
         this.animateFixedElements_(duration, curve);
       } else {
         this.animateFixedElements_(duration, curve).then(() => {
-          this.binding_.showViewerHeader(this.paddingTop_);
+          this.binding_.showViewerHeader(transient, this.paddingTop_);
         });
       }
     }
@@ -739,15 +741,18 @@ export class ViewportBindingDef {
 
   /**
    * Updates binding with the new padding when hiding viewer header.
+   * @param {boolean} unusedTransient
    * @param {number} unusedLastPaddingTop
    */
-  hideViewerHeader(unusedLastPaddingTop) {}
+  hideViewerHeader(unusedTransient, unusedLastPaddingTop) {}
 
   /**
    * Updates binding with the new padding when showing viewer header.
+   * @param {boolean} unusedTransient
    * @param {number} unusedPaddingTop
    */
-  showViewerHeader(unusedPaddingTop) {}
+  showViewerHeader(unusedTransient, unusedPaddingTop) {}
+
   /**
    * Updates the viewport whether it's currently in the lightbox or a normal
    * mode.
@@ -891,11 +896,17 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  hideViewerHeader(unusedLastPaddingTop) {
+  hideViewerHeader(transient, unusedLastPaddingTop) {
+    if (!transient) {
+      this.win.document.documentElement.style.paddingTop = px(0);
+    }
   }
 
   /** @override */
-  showViewerHeader(unusedPaddingTop) {
+  showViewerHeader(transient, paddingTop) {
+    if (!transient) {
+      this.win.document.documentElement.style.paddingTop = px(paddingTop);
+    }
   }
 
   /** @override */
@@ -1023,8 +1034,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    /** @private {number} */
-    this.lastPaddingTop_ = 0;
+    // /** @private {number} */
+    // this.lastPaddingTop_ = 0;
 
     // Microtask is necessary here to let Safari to recalculate scrollWidth
     // post DocumentReady signal.
@@ -1129,34 +1140,31 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  hideViewerHeader(lastPaddingTop) {
-    this.removePaddingTop_(true, lastPaddingTop);
-  }
-
-  /** @override */
-  showViewerHeader(paddingTop) {
-    this.addPaddingTop_(true, paddingTop);
-  }
-
-  removePaddingTop_(transient, opt_lastPaddingTop) {
+  hideViewerHeader(transient, lastPaddingTop) {
     onDocumentReady(this.win.document, doc => {
       if (!transient) {
         this.paddingTop_ = 0;
+        doc.body.style.paddingTop = '';
+        doc.body.style.borderTop = '';
+      } else {
+        // Add extra paddingTop to make the content stay at the same position
+        // when the hiding header operation is transient
+        const existingPaddingTop =
+            this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
+        doc.body.style.paddingTop =
+            `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
+        doc.body.style.borderTop = '';
       }
-      const existingPaddingTop =
-          this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-      doc.body.style.paddingTop =
-          `calc(${existingPaddingTop} + ${opt_lastPaddingTop}px)`;
-      doc.body.style.borderTop = '';
     });
   }
 
-  addPaddingTop_(transient, opt_paddingTop) {
+  /** @override */
+  showViewerHeader(transient, paddingTop) {
     onDocumentReady(this.win.document, doc => {
       if (!transient) {
-        this.paddingTop_ = opt_paddingTop;
+        this.paddingTop_ = paddingTop;
       }
-      doc.body.style.borderTop = `${opt_paddingTop}px solid transparent`;
+      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
       doc.body.style.paddingTop = '';
     });
   }
@@ -1166,6 +1174,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
       doc.body.style.borderTop = `${paddingTop}px solid transparent`;
+      doc.body.style.paddingTop = '';
     });
   }
 

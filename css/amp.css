@@ -37,7 +37,7 @@ html, body {
  * and {@link ViewportBindingNaturalIosEmbed_} for more info.
  */
 body {
-  margin: 0;
+  margin: 0 !important;
 }
 
 /** These properties can be overriden by user stylesheets. */

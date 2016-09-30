@@ -212,8 +212,9 @@ describe('Viewport', () => {
   it('should update padding when viewer wants to hide header', () => {
     const bindingMock = sandbox.mock(binding);
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-    bindingMock.expects('hideViewerHeader').withArgs(19).once();
-    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in'});
+    bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
+        transient: true});
     bindingMock.verify();
   });
 
@@ -222,7 +223,8 @@ describe('Viewport', () => {
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
-    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in'});
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
+        transient: 'true'});
     fixedLayerMock.verify();
   });
 

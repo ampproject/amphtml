@@ -896,9 +896,10 @@ export class Viewer {
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
         this.viewportObservable_.fire(
-          /** @type {!JSONType|undefined} */ (data));
+          /** @type {!JSONType} */ (data));
+        return Promise.resolve();
       }
-      return Promise.resolve();
+      return undefined;
     }
     if (eventType == 'historyPopped') {
       this.historyPoppedObservable_.fire({
