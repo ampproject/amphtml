@@ -74,8 +74,8 @@ describe('A4A loader', () => {
       });
 
       describe('with consent-notification-id, upgradeCallback', () => {
-        it('should be blocked for notification dismissal', done => {
-          return iframePromise.then(() => {
+        it('should block for notification dismissal', done => {
+          iframePromise.then(() => {
             ampAdElement.setAttribute('data-consent-notification-id', 'notif');
 
             ampAd.upgradeCallback().then(() => {
@@ -87,7 +87,7 @@ describe('A4A loader', () => {
         });
 
         it('should resolve once notification is dismissed', done => {
-          return iframePromise.then(() => {
+          iframePromise.then(() => {
             ampAdElement.setAttribute('data-consent-notification-id', 'notif');
 
             ampAd.upgradeCallback().then(() => {
