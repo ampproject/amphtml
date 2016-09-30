@@ -20,7 +20,6 @@ import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
 import {dev} from '../src/log';
-import {platformFor} from '../src/platform';
 import {VideoEvents} from '../src/video-interface';
 import {videoManagerForDoc} from '../src/video-manager';
 
@@ -36,6 +35,14 @@ export function installVideo(win) {
    */
   class AmpVideo extends BaseElement {
 
+    /** @param {!AmpElement} element */
+    constructor(element) {
+      super(element);
+
+      /** @private {?Element} */
+      this.video_ = null;
+    }
+
     /** @override */
     isLayoutSupported(layout) {
       return isLayoutSizeDefined(layout);
@@ -43,11 +50,7 @@ export function installVideo(win) {
 
     /** @override */
     buildCallback() {
-      /** @private @const {!Element} */
       this.video_ = this.element.ownerDocument.createElement('video');
-
-      /** @private @const {!../src/service/platform-impl.Platform} */
-      this.platform_ = platformFor(this.win);
 
       const posterAttr = this.element.getAttribute('poster');
       if (!posterAttr && getMode().development) {
@@ -74,6 +77,8 @@ export function installVideo(win) {
 
     /** @override */
     layoutCallback() {
+      this.video_ = dev().assertElement(this.video_);
+
       if (!this.isVideoSupported_()) {
         this.toggleFallback(true);
         return Promise.resolve();
