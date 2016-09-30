@@ -60,20 +60,21 @@ const self = window.self = {
     this.events[event] = handler;
   },
   registration: {
-    scope: '/'
+    scope: '/',
   },
   caches: {
     open() {
       return Promise.resolve(cache);
-    }
-  }
+    },
+  },
 };
 // Yes, a require. `import` gets hoisted before user code, and we need to
 // setup our mock self before that.
-const sw = require('../../src/service-worker/core');
+const sw =
+    require('../../src/service-worker/core'); // eslint-disable-line no-undef
 window.self = old;
 
-describe.only('Cache SW', () => {
+describe('Cache SW', () => {
   const rtv = `00${version}`;
   const file = 'v0.js';
   const url = `https://cdn.ampproject.org/rtv/${rtv}/${file}`;
@@ -153,14 +154,11 @@ describe.only('Cache SW', () => {
   });
 
   describe('fetchAndCache', () => {
-    const request = {
-      url: url,
-    };
+    const request = {url};
     const response = {
       ok: true,
       clone() {},
     };
-    let cached;
     let fetch;
     let put;
 
@@ -171,7 +169,7 @@ describe.only('Cache SW', () => {
         // A different file
         [{url: url.replace('v0.js', 'v0/amp-comp.js')}, null]
       );
-      fetch = sandbox.stub(window, 'fetch', req => {
+      fetch = sandbox.stub(window, 'fetch', () => {
         return Promise.resolve(response);
       });
       put = sandbox.spy(cache, 'put');
@@ -235,9 +233,7 @@ describe.only('Cache SW', () => {
   describe('getCachedVersion', () => {
     beforeEach(() => {
       sandbox.stub(cache, 'keys', () => {
-        return Promise.resolve([
-          {url: url},
-        ]);
+        return Promise.resolve([{url}]);
       });
     });
     it('returns cached rtv version, if file is cached', () => {
@@ -261,7 +257,8 @@ describe.only('Cache SW', () => {
     const otherVersion = new Request(url.replace(/(\d+)\/v0.js/, (match, v) => {
       return `00${parseInt(v, 10) - 1}/amp-comp.js`;
     }));
-    const blacklistedRequest = new Request(blacklisted.replace('v0.js', 'amp-comp.js'));
+    const blacklistedRequest = new Request(
+        blacklisted.replace('v0.js', 'amp-comp.js'));
     let clientId = 0;
     let fetch;
 
@@ -339,7 +336,7 @@ describe.only('Cache SW', () => {
           const timer = timerFor(window);
           // First call will resolve after the first.
           const keys = sandbox.stub(cache, 'keys');
-          keys.returns(Promise.resolve([]))
+          keys.returns(Promise.resolve([]));
           keys.onCall(0).returns(timer.promise(100, []));
           return Promise.all([
             sw.handleFetch(request, clientId),
@@ -368,7 +365,7 @@ describe.only('Cache SW', () => {
         it('forces later fetches to use same RTV', () => {
           return sw.handleFetch(compRequest, clientId).then(() => {
             return sw.handleFetch(request, clientId);
-          }).then((resp) => {
+          }).then(resp => {
             expect(sw.rtvVersion(resp.url)).to.equal(sw.rtvVersion(
                 otherVersion.url));
           });
@@ -376,11 +373,12 @@ describe.only('Cache SW', () => {
 
         describe('with blacklisted file', () => {
           beforeEach(() => {
-            cache.cached.splice(1, 1, [blacklistedRequest, responseFromRequest(blacklistedRequest)]);
+            cache.cached.splice(1, 1,
+                [blacklistedRequest, responseFromRequest(blacklistedRequest)]);
           });
 
           it('will cache the blacklisted file', () => {
-            return sw.handleFetch(blacklistedRequest, clientId).then(resp => {
+            return sw.handleFetch(blacklistedRequest, clientId).then(() => {
               expect(fetch).to.not.have.been.called;
             });
           });
@@ -392,10 +390,10 @@ describe.only('Cache SW', () => {
           });
         });
 
-        it('will update cached file if new one is the latest RTV', () => {
+        it('updates cached file if new one is the latest RTV', () => {
           const prodRequest = new Request(prod.replace('v0.js', 'amp-comp.js'));
-          return sw.handleFetch(prodRequest, clientId).then(resp => {
-            return new Promise((resolve) => {
+          return sw.handleFetch(prodRequest, clientId).then(() => {
+            return new Promise(resolve => {
               // Update is out of band with response.
               setTimeout(resolve, 50);
             });
@@ -404,10 +402,11 @@ describe.only('Cache SW', () => {
           });
         });
 
-        it('will not update cached file if new one is not the latest RTV', () => {
-          cache.cached.splice(1, 1, [compRequest, responseFromRequest(compRequest)]);
-          return sw.handleFetch(otherVersion, clientId).then(resp => {
-            return new Promise((resolve) => {
+        it('leaves cached file if new one is not the latest RTV', () => {
+          cache.cached.splice(1, 1,
+              [compRequest, responseFromRequest(compRequest)]);
+          return sw.handleFetch(otherVersion, clientId).then(() => {
+            return new Promise(resolve => {
               // Update is out of band with response.
               setTimeout(resolve, 50);
             });

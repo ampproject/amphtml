@@ -22,13 +22,13 @@ import {endsWith, startsWith} from '../string';
  * An AMP Release version, not to be confused with an RTV version
  * @typedef {string}
  */
-let AmpVersion
+export let AmpVersion;
 
 /**
  * An RTV version, not to be confused with an AMP Release version.
  * @typedef {string}
  */
-let RtvVersion
+export let RtvVersion;
 
 /** @const */
 const TAG = 'cache-service-worker';
