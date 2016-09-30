@@ -42,57 +42,25 @@ const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsRep
 
 export class AmpAnalytics extends AMP.BaseElement {
 
-  /** @override */
-  getPriority() {
-    // Loads after other content.
-    return 1;
-  }
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  /** @override */
-  isAlwaysFixed() {
-    return true;
-  }
-
-  /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
-  }
-
-  /**
-   * @override
-   */
-  createdCallback() {
     /**
      * @const {!JSONType} Copied here for tests.
      * @private
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
-  }
 
-  /** @override */
-  buildCallback() {
-    this.element.setAttribute('aria-hidden', 'true');
-    /**
-     * The html id of the `amp-user-notification` element.
-     * @private @const {?string}
-     */
-    this.consentNotificationId_ = this.element
-        .getAttribute('data-consent-notification-id');
 
     /** @private {!Promise} */
     this.consentPromise_ = Promise.resolve();
 
-    if (this.consentNotificationId_ != null) {
-      this.consentPromise_ = userNotificationManagerFor(this.win)
-          .then(service => service.get(this.consentNotificationId_));
-    }
-  }
-
-  /** @override */
-  layoutCallback() {
-    // Now that we are rendered, stop rendering the element to reduce
-    // resource consumption.
-    toggle(this.element, false);
+    /**
+     * The html id of the `amp-user-notification` element.
+     * @private {?string}
+     */
+    this.consentNotificationId_ = null;
 
     /**
      * @private {?string} Predefinedtype associated with the tag. If specified,
@@ -109,7 +77,48 @@ export class AmpAnalytics extends AMP.BaseElement {
     /**
      * @private {JSONType}
      */
-    this.remoteConfig_ = {};
+    this.config_ = /** @type {JSONType} */ ({});
+
+    /**
+     * @private {JSONType}
+     */
+    this.remoteConfig_ = /** @type {JSONType} */ ({});
+  }
+
+  /** @override */
+  getPriority() {
+    // Loads after other content.
+    return 1;
+  }
+
+  /** @override */
+  isAlwaysFixed() {
+    return true;
+  }
+
+  /** @override */
+  isLayoutSupported(unusedLayout) {
+    return true;
+  }
+
+  /** @override */
+  buildCallback() {
+    this.element.setAttribute('aria-hidden', 'true');
+
+    this.consentNotificationId_ = this.element
+        .getAttribute('data-consent-notification-id');
+
+    if (this.consentNotificationId_ != null) {
+      this.consentPromise_ = userNotificationManagerFor(this.win)
+          .then(service => service.get(this.consentNotificationId_));
+    }
+  }
+
+  /** @override */
+  layoutCallback() {
+    // Now that we are rendered, stop rendering the element to reduce
+    // resource consumption.
+    toggle(this.element, false);
 
     return this.consentPromise_
         .then(this.fetchRemoteConfig_.bind(this))
@@ -122,9 +131,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   onFetchRemoteConfigSuccess_() {
-    /**
-     * @private {!JSONType} The analytics config associated with the tag
-     */
     this.config_ = this.mergeConfigs_();
 
     if (this.hasOptedOut_()) {
@@ -224,14 +230,14 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
-   * @return {!Promise<undefined|JSONType>}
+   * @return {!Promise<undefined>}
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
     if (!remoteConfigUrl) {
       return Promise.resolve();
     }
-    assertHttpsUrl(remoteConfigUrl);
+    assertHttpsUrl(remoteConfigUrl, this.element);
     dev().fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
     const fetchConfig = {
       requireAmpResponseSourceOrigin: true,
@@ -269,11 +275,11 @@ export class AmpAnalytics extends AMP.BaseElement {
   mergeConfigs_() {
     const inlineConfig = this.getInlineConfigNoInline();
     // Initialize config with analytics related vars.
-    const config = {
+    const config = /** @type {!JSONType} */ ({
       'vars': {
         'requestCount': 0,
       },
-    };
+    });
     const defaultConfig = this.predefinedConfig_['default'] || {};
     const typeConfig = this.predefinedConfig_[
       this.element.getAttribute('type')] || {};
@@ -365,7 +371,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @return {!Promise} The request that was sent out.
    * @private
    */
   handleEvent_(trigger, event) {
@@ -457,9 +463,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {string} template The template to expand.
-   * @param {!JSONType} The object to use for variable value lookups.
-   * @param {!Object} event Object with details about the event.
-   * @param {number} opt_iterations Number of recursive expansions to perform.
+   * @param {!JSONType} trigger The object to use for variable value lookups.
+   * @param {!Object=} event Object with details about the event.
+   * @param {number=} opt_iterations Number of recursive expansions to perform.
    *    Defaults to 2 substitutions.
    * @param {boolean=} opt_encode Used to determine if the vars should be
    *    encoded or not. Defaults to true.
@@ -495,7 +501,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} raw The values to URI encode.
+   * @param {string|!Array<string>} raw The values to URI encode.
    * @param {string} unusedName Name of the variable.
    * @private
    */
@@ -503,7 +509,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (isArray(raw)) {
       return raw.map(encodeURIComponent).join(',');
     }
-    return encodeURIComponent(raw);
+    return encodeURIComponent(/** @type {string} */ (raw));
   }
 
   /**

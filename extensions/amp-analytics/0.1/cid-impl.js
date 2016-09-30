@@ -175,11 +175,11 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   const existingCookie = getCookie(win, scope);
 
   if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
-    return Promise.resolve(null);
+    return /** @type {!Promise<(?string)>} */ (Promise.resolve(null));
   }
 
   if (cid.externalCidCache_[scope]) {
-    return cid.externalCidCache_[scope];
+    return /** @type {!Promise<(?string)>} */ (cid.externalCidCache_[scope]);
   }
 
   if (existingCookie) {
@@ -187,7 +187,8 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     if (/^amp-/.test(existingCookie)) {
       setCidCookie(win, scope, existingCookie);
     }
-    return Promise.resolve(existingCookie);
+    return /** @type {!Promise<(?string)>} */ (
+        Promise.resolve(existingCookie));
   }
 
   const newCookiePromise = cryptoFor(win)
@@ -300,7 +301,7 @@ function store(win, persistenceConsent, cidString) {
  * Creates a JSON object that contains the given CID and the current time as
  * a timestamp.
  * @param {string} cidString
- * @return {!{time: number, cid: string}}
+ * @return {string}
  */
 function createCidData(cidString) {
   return JSON.stringify({
