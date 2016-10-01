@@ -19,7 +19,10 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {AmpAdLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {
+    AmpAdLifecycleReporter,
+    NullLifecycleReporter,
+} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeChildren, createElementWithAttributes} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
@@ -123,8 +126,14 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
 
-    this.lifecycleReporter_ = new AmpAdLifecycleReporter(this.win, 'a4a');
-    this.lifecycleReporter_.sendPing(this.element, 'constructor', 0);
+    const type = element.getAttribute('type');
+    if (type == 'doubleclick' || type == 'adsense') {
+      this.lifecycleReporter_ =
+          new AmpAdLifecycleReporter(this.win, this.element, 'a4a');
+    } else {
+      this.lifecycleReporter_ = new NullLifecycleReporter();
+    }
+    this.lifecycleReporter_.sendPing('constructor');
   }
 
   /** @override */
@@ -204,7 +213,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.lifecycleReporter_.sendPing(this.element, 'onLayoutMeasure', 1);
+    this.lifecycleReporter_.sendPing('onLayoutMeasure');
     if (this.apiHandler_) {
       this.apiHandler_.onLayoutMeasure();
     }
@@ -253,12 +262,13 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad URL, if one is available.
         .then(() => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing(this.element, 'build_url', 2);
+          this.lifecycleReporter_.sendPing('build_url');
           return this.getAdUrl();
         })
         // This block returns the (possibly empty) response to the XHR request.
         .then(adUrl => {
           checkStillCurrent(promiseId);
+          this.lifecycleReporter_.sendPing('sendXhrRequest');
           this.adUrl_ = adUrl;
           return adUrl && this.sendXhrRequest_(adUrl);
         })
@@ -286,6 +296,7 @@ export class AmpA4A extends AMP.BaseElement {
         // otherwise.
         .then(responseParts => {
           checkStillCurrent(promiseId);
+          this.lifecycleReporter_.sendPing('extractCreativeAndSignature');
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
         })
@@ -296,6 +307,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts || !creativeParts.signature) {
             return null;
           }
+          this.lifecycleReporter_.sendPing('validateAdResponse');
 
           // For each signing service, we have exactly one Promise,
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
@@ -345,6 +357,7 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
 
+          this.lifecycleReporter_.sendPing('maybeRenderAmpAd');
           // TODO(levitzky) If creative comes back null, we should consider re-
           // fetching the signing server public keys and try the verification
           // step again.
@@ -385,7 +398,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.performance_.tick('a4a_layoutCallback');
+    this.lifecycleReporter_.sendPing('layoutCallback');
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_ || this.rendered_) {
       return Promise.resolve();
@@ -401,13 +414,15 @@ export class AmpA4A extends AMP.BaseElement {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
         if (this.adUrl_) {
+          this.lifecycleReporter_.sendPing('renderViaIframe');
           this.renderViaCrossDomainIframe_(true);
         }
         throw rendered;
-      };
+      }
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
+        this.lifecycleReporter_.sendPing('renderViaIframe');
         this.renderViaCrossDomainIframe_(true);
       }
       this.rendered_ = true;
@@ -416,6 +431,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.lifecycleReporter_.sendPing('unlayoutCallback');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;

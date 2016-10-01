@@ -15,67 +15,109 @@
  */
 
 import {EXPERIMENT_ATTRIBUTE} from './traffic-experiments';
-import {user} from '../../../src/log';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {dev} from '../../../src/log';
+
+/**
+ * Header name for per-ad-slot QQid.
+ * @type {!string}
+ */
+export const QQID_HEADER = 'X-QQID';
 
 /** @private */
-const PINGBACK_ADDRESS = 'https://csi.gstatic.com';
+const PINGBACK_ADDRESS = 'https://csi.gstatic.com/csi';
+
+/** @private */
+const LIFECYCLE_STAGES = {
+  // Note: Use strings as values here, rather than numbers, so that "0" does
+  // not test as `false` later.
+  constructor: '0',
+  onLayoutMeasure: '1',
+  buildUrl: '2',
+  sendXhrRequest: '3',
+  extractCreativeAndSignature: '4',
+  validateAdResponse: '5',
+  maybeRenderAmpAd: '6',
+  renderViaIframe: '7',
+  layoutCallback: '10',
+  unlayoutCallback: '20',
+};
 
 export class AmpAdLifecycleReporter {
 
   /**
-   * @param {!Window} win  Parent Element window object.
+   * @param {!Window} win  Parent window object.
+   * @param {!Element} element  Parent element object.
    * @param {!string} namespace  Namespace for page-level info.  (E.g.,
    *   'amp' vs 'a4a'.)
    */
-  constructor (win, namespace) {
+  constructor(win, element, namespace) {
     this.win_ = win;
+    this.element_ = element;
     this.namespace_ = namespace;
     this.win_.ampAdSlotId = this.win_.ampAdSlotId || 0;
     this.win_.ampAdPageCorrelator = this.win_.ampAdPageCorrelator ||
-        Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+        Math.floor(Math.pow(2, 52) * Math.random());
     this.slotId_ = this.win_.ampAdSlotId++;
+    this.slotName_ = this.namespace_ + '.' + this.slotId_;
     this.qqid_ = null;
     this.initTime_ = Date.now();
+    this.pingbackAddress_ = PINGBACK_ADDRESS;
+    this.urlReplacer = urlReplacementsForDoc(element.ownerDocument);
   }
 
   /**
    * @param {!string} qqid
    */
-  setQQId(qqid) {
+  setQqid(qqid) {
     this.qqid_ = qqid;
+  }
+
+  /**
+   * Sets the address to which pings will be sent, overriding
+   * `PINGBACK_ADDRESS`.  Intended for testing.
+   * @param {!string} address
+   * @visibleForTesting
+   */
+  setPingAddress(address) {
+    this.pingbackAddress_ = address;
   }
 
   /**
    * @param {!Element} element
    * @param {!string} name
-   * @param {!string} stageId
    */
-  sendPing(element, name, stageId) {
-    this.emitPing_(element, this.buildPingAddress_(name, stageId));
+  sendPing(name) {
+    this.emitPing_(this.buildPingAddress_(name));
   }
 
   /**
-   *
    * @param {!string} name  Metric name to send.
-   * @param {!number} stageId  Index of lifecycle stage at which ping is sent.
    * @returns {!string}  URL to send metrics to.
    * @private
    */
-  buildPingAddress_(name, stageId) {
-    const slotName = this.namespace_ + '.' + this.slotId_;
+  buildPingAddress_(name) {
+    const stageId = LIFECYCLE_STAGES[name] || 9999;
     const delta = Date.now() - this.initTime_;
-    const qqidParam = this.qqid_ ?
-        `&qqid.${slotName}=${this.qqid_}` : '';
-    const eid = element.getAttribute(EXPERIMENT_ATTRIBUTE);
-    const eidParam = eid ? `&e=${eid}` : '';
-    const pingUrl = `${PINGBACK_ADDRESS}?s=a4a&v=2&it=name.${delta}` +
+    // Note: QQid comes from a network header and eid could, potentially, be
+    // injected by a publisher.  Treat both of them as unverified user content
+    // and encode before inserting them into URI.
+    const encodedQqid = this.qqid_ ?
+        encodeURIComponent(this.qqid_) : false;
+    const qqidParam = encodedQqid ?
+        `&qqid.${this.slotId_}=${encodedQqid}` : '';
+    const eid = this.element_.getAttribute(EXPERIMENT_ATTRIBUTE);
+    const eidParam = eid ? `&e=${encodeURIComponent(eid)}` : '';
+    const pingUrl = `${this.pingbackAddress_}?` +
+        `s=${this.namespace_}` +
+        `&v=2&it=${name}.${delta},${name}_${this.slotId_}.${delta}` +
         `&rt=stage.${stageId}` +
         `&c=${this.win_.ampAdPageCorrelator}` +
-        '&rls=$internalRuntimeVersion$' +
+        this.urlReplacer.expandSync('&rls=AMP_VERSION') +
         `${eidParam}${qqidParam}` +
-        `&it.${slotName}=name.${delta}` +
-        `&rt.${slotName}=stage.${stageId}` +
-        `&met.${slotName}=stage_${stageId}.${delta}`;
+        `&it.${this.slotName_}=${name}.${delta}` +
+        `&rt.${this.slotName_}=stage.${stageId}` +
+        `&met.${this.slotName_}=stage_${stageId}.${delta}`;
     return pingUrl;
   }
 
@@ -83,17 +125,23 @@ export class AmpAdLifecycleReporter {
    * Send ping by creating an img element and attaching to the DOM.
    * Separate function so that it can be stubbed out for testing.
    *
-   * @param {!Element} element  Location to insert ping img in DOM.
-   *   (Inserted before this element.)
    * @param {!string} url Address to ping.
-   * @private
    */
-  emitPing_(element, url) {
-    // const pingElement = element.ownerDocument.createElement('img');
-    // pingElement.setAttribute('src', pingUrl);
-    // pingElement.setAttribute('aria-hidden', 'true');
-    // element.parentNode.insertBefore(pingElement, element);
-    user().info('PING', url);
-    console.log('PING! ' + url);
+  emitPing_(url) {
+    const pingElement = this.element_.ownerDocument.createElement('img');
+    pingElement.setAttribute('src', url);
+    pingElement.setAttribute('aria-hidden', 'true');
+    this.element_.parentNode.insertBefore(pingElement, this.element_);
+    dev().info('PING', url);
   }
+}
+
+/**
+ * A fake version of AmpAdLifecycleReporter that simply discards all pings.
+ * This is used for non-Google ad types, to avoid gathering data about their
+ * ads.
+ */
+export class NullLifecycleReporter {
+  setQQId(unusedQqid) {}
+  sendPing(unusedName, unusedStageId) {}
 }

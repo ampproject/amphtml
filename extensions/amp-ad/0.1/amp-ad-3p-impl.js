@@ -26,6 +26,10 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
+import {
+  AmpAdLifecycleReporter,
+  NullLifecycleReporter,
+} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -80,6 +84,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.layoutPromise_ = null;
+
+    const type = element.getAttribute('type');
+    if (type == 'doubleclick' || type == 'adsense') {
+      this.lifecycleReporter_ =
+          new AmpAdLifecycleReporter(this.win, this.element, 'amp');
+    } else {
+      this.lifecycleReporter_ = new NullLifecycleReporter();
+    }
+    this.lifecycleReporter_.sendPing('constructor');
   }
 
   /** @override */
@@ -150,6 +163,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
+    this.lifecycleReporter_.sendPing('onLayoutMeasure');
     this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
     /** detect ad containers, add the list to element as a new attribute */
     if (this.container_ === undefined) {
@@ -188,6 +202,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.lifecycleReporter_.sendPing('layoutCallback');
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
