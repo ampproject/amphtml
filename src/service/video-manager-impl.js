@@ -226,9 +226,7 @@ class VideoEntry {
       if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
         this.video.hideControls();
 
-        // TODO(aghassemi): This won't work for iframe players, we need a proper
-        // 'userInteracted' event.
-        listenOnce(this.video.element, 'click', () => {
+        listenOnce(this.video.element, VideoEvents.USER_TAP, () => {
           this.userInteracted_ = true;
           this.video.showControls();
           this.video.unmute();
