@@ -548,7 +548,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   triggerAnalyticsEvent_(newSlideIndex) {
     let direction = newSlideIndex - this.slideIndex_;
-    if (direction === 0 ) {
+    if (direction === 0) {
       return;
     } else if (Math.abs(direction) !== 1) {
       direction = direction < 0 ? 1 : -1;
