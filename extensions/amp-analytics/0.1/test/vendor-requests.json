@@ -21,7 +21,7 @@
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
     "base": "https://ase.clmbtech.com/message",
-    "pageview": "https://ase.clmbtech.com/message?cid=$id&val_101=$id&val_101=_canonical_path_&ch=_canonical_host_&uuid=$uid&au=$authors&zo=$zone&sn=$sponsorName&ct=$contentType&st=_scroll_top_&sh=_scroll_height_&dct=$decayTime&tet=_total_engaged_time_&dr=_document_referrer_&plt=_page_load_time_&val_108=_title_&val_120=3"
+    "pageview": "https://ase.clmbtech.com/message?cid=$id&val_101=$id&val_101=_canonical_url_ &ch=_canonical_host_&uuid=$uid&au=$authors&zo=$zone&sn=$sponsorName&ct=$contentType&st=_scroll_top_&sh=_scroll_height_&dct=$decayTime&tet=_total_engaged_time_&dr=_document_referrer_&plt=_page_load_time_&val_108=_title_&val_120=3"
   },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",

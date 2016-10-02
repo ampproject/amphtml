@@ -204,7 +204,7 @@ export const ANALYTICS_CONFIG = {
       'base': '${host}/message',
       'pageview': '${base}?cid=${id}' +
         '&val_101=${id}' +
-        '&val_101=${canonicalPath}' +
+        '&val_101=${canonicalUrl}' +
         '&ch=${canonicalHost}' +
         '&uuid=${uid}' +
         '&au=${authors}' +
