@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {closestByTag} from './dom';
+import {
+    closestByTag,
+    openWindowDialog,
+    escapeCssSelectorIdent,
+} from './dom';
 import {fromClassForDoc} from './service';
 import {dev} from './log';
 import {historyForDoc} from './history';
-import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportForDoc} from './viewport';
@@ -254,10 +257,11 @@ export function onDocumentElementClick_(
   // See https://github.com/ampproject/amphtml/issues/5334 for more details.
   let restoreElementsAttrs = [];
   if (hash) {
+    const escapedHash = escapeCssSelectorIdent(hash);
     elem = (ampdoc.getRootNode().getElementById(hash) ||
         // Fallback to anchor[name] if element with id is not found.
         // Linking to an anchor element with name is obsolete in html5.
-        ampdoc.getRootNode().querySelector(`a[name=${hash}]`));
+        ampdoc.getRootNode().querySelector(`a[name=${escapedHash}]`));
     restoreElementsAttrs = removeAttrsWithMatchingHash_(ampdoc, hash);
   }
 
@@ -362,9 +366,10 @@ let RestoreElementAttributesDef;
  * @private
  */
 function removeAttrsWithMatchingHash_(ampdoc, hash) {
+  const escapedHash = escapeCssSelectorIdent(hash);
   const restoreElementsAttrs = [];
   const targetElements = ampdoc.getRootNode().querySelectorAll(
-      `#${hash},a[name="${hash}"]`) || [];
+      `#${escapedHash},a[name="${escapedHash}"]`) || [];
   for (let i = 0; i < targetElements.length; i++) {
     const element = targetElements[i];
     const attributes = {};
