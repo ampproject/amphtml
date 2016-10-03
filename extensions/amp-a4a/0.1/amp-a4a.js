@@ -260,12 +260,14 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         // This block returns the ad URL, if one is available.
+        /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
           this.lifecycleReporter_.sendPing('build_url');
           return this.getAdUrl();
         })
         // This block returns the (possibly empty) response to the XHR request.
+        /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.lifecycleReporter_.sendPing('sendXhrRequest');
@@ -274,6 +276,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
+        /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
@@ -294,6 +297,9 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns the ad creative and signature, if available; null
         // otherwise.
+        /**
+         * @return {!Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>}
+         */
         .then(responseParts => {
           checkStillCurrent(promiseId);
           this.lifecycleReporter_.sendPing('extractCreativeAndSignature');
@@ -302,6 +308,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
+        /** @return {!Promise<?string>} */
         .then(creativeParts => {
           checkStillCurrent(promiseId);
           if (!creativeParts || !creativeParts.signature) {
@@ -350,6 +357,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
+        /** @return {!Promise<!boolean>} */
         .then(creative => {
           checkStillCurrent(promiseId);
           // Note: It's critical that #maybeRenderAmpAd_ be called

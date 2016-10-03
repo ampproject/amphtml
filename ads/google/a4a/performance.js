@@ -63,7 +63,7 @@ export class AmpAdLifecycleReporter {
     this.qqid_ = null;
     this.initTime_ = Date.now();
     this.pingbackAddress_ = PINGBACK_ADDRESS;
-    this.urlReplacer = urlReplacementsForDoc(element.ownerDocument);
+    this.urlReplacer = urlReplacementsForDoc(element);
   }
 
   /**
@@ -84,8 +84,9 @@ export class AmpAdLifecycleReporter {
   }
 
   /**
-   * @param {!Element} element
-   * @param {!string} name
+   * @param {!string} name  Stage name to ping out.  Should be one of the ones
+   * from `LIFECYCLE_STAGES`.  If it's an unknown name, it will still be pinged,
+   * but the stage ID will be set to `9999`.
    */
   sendPing(name) {
     this.emitPing_(this.buildPingAddress_(name));
