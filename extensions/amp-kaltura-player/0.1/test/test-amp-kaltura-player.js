@@ -100,7 +100,6 @@ describe('amp-kaltura-player', () => {
             'https://cdnapisec.kaltura.com/p/1281471/thumbnail/entry_id/' +
             '1_3ts1ms9c/width/111/height/222');
         expect(img.getAttribute('layout')).to.equal('fill');
-        expect(img.hasAttribute('noprerender')).to.be.true;
         expect(img.hasAttribute('placeholder')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
       });

@@ -88,7 +88,6 @@ class AmpKaltura extends AMP.BaseElement {
     if (height) {
       src += `/height/${height}`;
     }
-    placeholder.setAttribute('noprerender', '');
     placeholder.setAttribute('src', src);
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');

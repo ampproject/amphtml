@@ -97,7 +97,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('src', 'https://content.jwplatform.com/thumbs/' +
         encodeURIComponent(this.contentid_) + '-720.jpg');
-    placeholder.setAttribute('noprerender', '');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');

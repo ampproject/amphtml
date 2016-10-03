@@ -107,7 +107,6 @@ describe('amp-jwplayer', () => {
             'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg');
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
-        expect(img.hasAttribute('noprerender')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
       });
     });
