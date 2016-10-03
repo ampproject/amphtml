@@ -364,7 +364,7 @@ let RestoreElementAttributesDef;
 function removeAttrsWithMatchingHash_(ampdoc, hash) {
   const restoreElementsAttrs = [];
   const targetElements = ampdoc.getRootNode().querySelectorAll(
-      `#${hash},a[name=${hash}]`) || [];
+      `#${hash},a[name="${hash}"]`) || [];
   for (let i = 0; i < targetElements.length; i++) {
     const element = targetElements[i];
     const attributes = {};
