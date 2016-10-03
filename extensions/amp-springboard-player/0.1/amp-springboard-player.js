@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
@@ -33,7 +32,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.domain_ = '';
 
-    /** @private {?Element} */
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
   }
 
@@ -66,10 +65,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         this.element.getAttribute('data-domain'),
         'The data-domain attribute is required for <amp-springboard-player> %s',
         this.element);
-
-    if (!this.getPlaceholder()) {
-      this.buildImagePlaceholder_();
-    }
   }
 
   /** @override */
@@ -110,38 +105,26 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.win.document.createElement('amp-img');
 
-    setStyles(imgPlaceholder, {
-      // Cover matches Springboard Player size.
-      'object-fit': 'cover',
-      // Hiding the placeholder initially to give the browser time to fix
-      // the object-fit: cover.
-      'visibility': 'hidden',
-    });
-
-    imgPlaceholder.src = 'https://www.springboardplatform.com/storage/' +
+    // TODO(#5327): Investigate a better poster image for a better match with first
+    // frame when the player loaded to avoid big visual jump.
+    placeholder.setAttribute('src',
+        'https://www.springboardplatform.com/storage/' +
         encodeURIComponent(this.domain_) + '/snapshots/' +
-        encodeURIComponent(this.contentId_) + '.jpg';
+        encodeURIComponent(this.contentId_) + '.jpg');
     /** Show default image for playlist */
     if (this.mode_ == 'playlist') {
-      imgPlaceholder.src =
+      placeholder.setAttribute('src',
         'https://www.springboardplatform.com/storage/default/' +
-        'snapshots/default_snapshot.png';
+        'snapshots/default_snapshot.png');
     }
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
-
-    this.applyFillContent(imgPlaceholder);
-    this.element.appendChild(imgPlaceholder);
-
-    this.loadPromise(imgPlaceholder).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
-      });
-    });
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    placeholder.setAttribute('layout', 'fill');
+    return placeholder;
   }
 }
 

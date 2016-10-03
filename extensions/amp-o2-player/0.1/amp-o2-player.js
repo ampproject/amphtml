@@ -19,7 +19,27 @@ import {user} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
 
-  /** @override */
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+
+    /** @private {string} */
+    this.pid_ = '';
+
+    /** @private {string} */
+    this.bcid_ = '';
+
+    /** @private {string} */
+    this.domain_ = '';
+
+    /** @private {string} */
+    this.src_ = '';
+  }
+
+    /** @override */
   preconnectCallback(onLayout) {
     this.preconnect.url(this.domain_, onLayout);
   }
@@ -31,13 +51,11 @@ class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {string} */
     this.pid_ = user().assert(
         this.element.getAttribute('data-pid'),
         'Data-pid attribute is required for <amp-o2-player> %s',
         this.element);
 
-    /** @private @const {string} */
     this.bcid_ = user().assert(
         this.element.getAttribute('data-bcid'),
         'Data-bcid attribute is required for <amp-o2-player> %s',
@@ -48,7 +66,6 @@ class AmpO2Player extends AMP.BaseElement {
     const macros = this.element.getAttribute('data-macros');
     const env = this.element.getAttribute('data-env');
 
-    /** @private {string} */
     this.domain_ = 'https://delivery.' +
         (env != 'stage' ? '' : 'dev.') + 'vidible.tv';
     let src = `${this.domain_}/htmlembed/`;
@@ -67,8 +84,6 @@ class AmpO2Player extends AMP.BaseElement {
     if (queryParams.length > 0) {
       src += '?' + queryParams.join('&');
     }
-
-    /** @private {string} */
     this.src_ = src;
   }
 
@@ -87,10 +102,9 @@ class AmpO2Player extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.src_;
+    this.iframe_ = iframe;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    /** @private {?Element} */
-    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
