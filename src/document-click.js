@@ -257,7 +257,7 @@ export function onDocumentElementClick_(
   // See https://github.com/ampproject/amphtml/issues/5334 for more details.
   let restoreElementsAttrs = [];
   if (hash) {
-    const escapedHash = escapeCssSelectorIdent(hash);
+    const escapedHash = escapeCssSelectorIdent(ampdoc.win, hash);
     elem = (ampdoc.getRootNode().getElementById(hash) ||
         // Fallback to anchor[name] if element with id is not found.
         // Linking to an anchor element with name is obsolete in html5.
@@ -366,7 +366,7 @@ let RestoreElementAttributesDef;
  * @private
  */
 function removeAttrsWithMatchingHash_(ampdoc, hash) {
-  const escapedHash = escapeCssSelectorIdent(hash);
+  const escapedHash = escapeCssSelectorIdent(ampdoc.win, hash);
   const restoreElementsAttrs = [];
   const targetElements = ampdoc.getRootNode().querySelectorAll(
       `#${escapedHash},a[name="${escapedHash}"]`) || [];
