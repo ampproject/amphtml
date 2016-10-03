@@ -29,9 +29,11 @@ import {adConfig} from '../../../ads/_config';
 import {
   AmpAdLifecycleReporter,
   NullLifecycleReporter,
+  PROFILING_RATE,
 } from '../../../ads/google/a4a/performance';
 import {
   EXPERIMENT_ATTRIBUTE,
+  randomlySelectUnsetPageExperiments,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
@@ -41,6 +43,7 @@ import {
   DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
   DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -96,6 +99,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
+    // Carve-outs: We only want to enable profiling pingbacks when:
+    //   - The ad is from one of the Google networks (AdSense or Doubleclick).
+    //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
+    //     internal, client-side selection or via external, Google Search
+    //     selection).
+    //   - We haven't turned off profiling via the rate controls in
+    //     build-system/global-config/{canary,prod}-config.json
+    // If any of those fail, we use the `NullLifecycleReporter`, which is a
+    // a no-op (sends no pings).
     const type = element.getAttribute('type');
     const eid = element.getAttribute(EXPERIMENT_ATTRIBUTE);
     const isGoogleControlBranch =
@@ -103,8 +115,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control) ||
         (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control) ||
         (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control);
+    randomlySelectUnsetPageExperiments(this.win, PROFILING_RATE);
     if ((type == 'doubleclick' || type == 'adsense') &&
-        isGoogleControlBranch) {
+        isGoogleControlBranch &&
+        isExperimentOn(this.win, "a4aProfilingRate")) {
       this.lifecycleReporter_ =
           new AmpAdLifecycleReporter(this.win, this.element, 'amp');
     } else {

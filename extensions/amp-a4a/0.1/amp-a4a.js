@@ -22,6 +22,7 @@ import {adConfig} from '../../../ads/_config';
 import {
     AmpAdLifecycleReporter,
     NullLifecycleReporter,
+    PROFILING_RATE,
 } from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeChildren, createElementWithAttributes} from '../../../src/dom';
@@ -138,6 +139,15 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
 
+    // Carve-outs: We only want to enable profiling pingbacks when:
+    //   - The ad is from one of the Google networks (AdSense or Doubleclick).
+    //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
+    //     internal, client-side selection or via external, Google Search
+    //     selection).
+    //   - We haven't turned off profiling via the rate controls in
+    //     build-system/global-config/{canary,prod}-config.json
+    // If any of those fail, we use the `NullLifecycleReporter`, which is a
+    // a no-op (sends no pings).
     const type = element.getAttribute('type');
     const eid = element.getAttribute(EXPERIMENT_ATTRIBUTE);
     const isGoogleExperimentBranch =
@@ -146,8 +156,10 @@ export class AmpA4A extends AMP.BaseElement {
         (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
         (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
         isInManualExperiment(element);
+    randomlySelectUnsetPageExperiments(this.win, PROFILING_RATE);
     if ((type == 'doubleclick' || type == 'adsense') &&
-        isGoogleExperimentBranch) {
+        isGoogleExperimentBranch &&
+        isExperimentOn(this.win, "a4aProfilingRate")) {
       this.lifecycleReporter_ =
           new AmpAdLifecycleReporter(this.win, this.element, 'a4a');
     } else {

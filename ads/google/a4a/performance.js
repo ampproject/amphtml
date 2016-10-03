@@ -18,6 +18,21 @@ import {EXPERIMENT_ATTRIBUTE} from './traffic-experiments';
 import {dev} from '../../../src/log';
 
 /**
+ * This module provides a fairly crude form of performance monitoring (or
+ * profiling) for A4A code.  It generates individual pings back to Google
+ * servers at key points in the A4A lifecycle and at a few points in the 3p
+ * amp-ad lifecycle, for baseline.
+ *
+ * This is intended to be a short-term solution, for a rough-and-ready form
+ * of profiling.  In particular, it doesn't use high-resolution timers (when
+ * they're available) and it doesn't queue pings for network efficiency.  A
+ * better long-term solution is to integrate `src/performance.js` with
+ * `amp-analytics`.  However, we need a short-term solution quickly.  This
+ * module should go away once we have verified that A4A is performing as
+ * desired.
+ */
+
+/**
  * Header name for per-ad-slot QQid.
  * @type {string}
  */
@@ -40,6 +55,10 @@ const LIFECYCLE_STAGES = {
   renderViaIframe: '7',
   layoutCallback: '10',
   unlayoutCallback: '20',
+};
+
+export const PROFILING_RATE = {
+  a4aProfilingRate: { on: 1 },
 };
 
 export class AmpAdLifecycleReporter {
