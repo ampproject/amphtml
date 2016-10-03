@@ -15,7 +15,8 @@
  */
 
 import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {AmpA4A, utf8FromArrayBuffer} from '../../amp-a4a/0.1/amp-a4a';
+import {utf8Decode} from '../../../src/utils/bytes';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, user} from '../../../src/log';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
@@ -47,7 +48,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   extractCreativeAndSignature(responseText, unusedResponseHeaders) {
-    return utf8FromArrayBuffer(responseText).then(deserialized => {
+    return utf8Decode(responseText).then(deserialized => {
       const decoded = JSON.parse(deserialized);
       dev().info('Fake', 'Decoded response text =', decoded['creative']);
       dev().info('Fake', 'Decoded signature =', decoded['signature']);
