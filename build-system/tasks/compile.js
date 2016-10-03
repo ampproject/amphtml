@@ -273,7 +273,7 @@ function compile(entryModuleFilenames, outputDir,
           'checkTypes', 'accessControls', 'const', 'constantProperty');
 
       // TODO(aghassemi): Remove when NTI is the default.
-      if (argv.useNTI) {
+      if (argv.nti) {
         compilerOptions.compilerFlags.new_type_inf = true;
         compilerOptions.compilerFlags.jscomp_off.push(
           'newCheckTypesExtraChecks');
