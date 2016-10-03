@@ -17,7 +17,7 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
-import {assertHttpsUrl, appendParamStringToUrl} from '../../../src/url';
+import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
@@ -557,7 +557,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (request.indexOf('${extraUrlParams}') >= 0) {
       return request.replace('${extraUrlParams}', paramString);
     } else {
-      return appendParamStringToUrl(request, paramString);
+      return appendEncodedParamStringToUrl(request, paramString);
     }
   }
 
