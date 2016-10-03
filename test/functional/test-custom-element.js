@@ -300,7 +300,7 @@ describe('CustomElement', () => {
     expect(build.calledOnce);
   });
 
-  it.only('Element - should only add classes on first attachedCallback', () => {
+  it('Element - should only add classes on first attachedCallback', () => {
     const element = new ElementClass();
     expect(element).to.not.have.class('-amp-element');
     expect(element).to.not.have.class('-amp-notbuilt');
