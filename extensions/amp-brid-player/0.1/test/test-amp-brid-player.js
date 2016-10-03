@@ -84,4 +84,39 @@ describe('amp-brid-player', () => {
     }).should.eventually.be.rejectedWith(
         /The data-player attribute is required for/);
   });
+
+  describe('createPlaceholderCallback', () => {
+    it('should create a placeholder image', () => {
+      return getBridPlayer({
+        'data-partner': '264',
+        'data-player': '979',
+        'data-video': '13663',
+      }).then(brid => {
+        const img = brid.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('src')).to.equal(
+            'https://cdn.brid.tv/live/partners/264/snapshot/13663.jpg');
+        expect(img.getAttribute('layout')).to.equal('fill');
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      });
+    });
+
+    it('should create a fallback for default snapshot', () => {
+      return getBridPlayer({
+        'data-partner': '264',
+        'data-player': '979',
+        'data-video': '13663',
+      }).then(brid => {
+        const img = brid.querySelector('amp-img');
+        const fallbackImg = img.querySelector('amp-img');
+        expect(fallbackImg).to.not.be.null;
+        expect(fallbackImg.getAttribute('src')).to.equal(
+            'https://cdn.brid.tv/live/default/defaultSnapshot.png');
+        expect(fallbackImg.getAttribute('layout')).to.equal('fill');
+        expect(fallbackImg.hasAttribute('fallback')).to.be.true;
+        expect(fallbackImg.getAttribute('referrerpolicy')).to.equal('origin');
+      });
+    });
+  });
 });

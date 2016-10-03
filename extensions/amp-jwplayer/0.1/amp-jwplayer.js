@@ -15,12 +15,25 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 class AmpJWPlayer extends AMP.BaseElement {
 
-  /** @override */
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.contentid_ = '';
+
+    /** @private {string} */
+    this.playerid_ = '';
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+  }
+
+    /** @override */
   preconnectCallback(onLayout) {
     // Host that serves player configuration and content redirects
     this.preconnect.url('https://content.jwplatform.com', onLayout);
@@ -35,7 +48,6 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {string} */
     this.contentid_ = user().assert(
       (this.element.getAttribute('data-playlist-id') ||
       this.element.getAttribute('data-media-id')),
@@ -43,15 +55,10 @@ class AmpJWPlayer extends AMP.BaseElement {
       'attributes must be specified for <amp-jwplayer> %s',
       this.element);
 
-    /** @private @const {string} */
     this.playerid_ = user().assert(
       this.element.getAttribute('data-player-id'),
       'The data-player-id attribute is required for <amp-jwplayer> %s',
       this.element);
-
-    if (!this.getPlaceholder()) {
-      this.buildImagePlaceholder_();
-    }
   }
 
 
@@ -61,13 +68,11 @@ class AmpJWPlayer extends AMP.BaseElement {
     const src = 'https://content.jwplatform.com/players/' +
       encodeURIComponent(this.contentid_) + '-' +
       encodeURIComponent(this.playerid_) + '.html';
-
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
@@ -82,29 +87,20 @@ class AmpJWPlayer extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
-
-    setStyles(imgPlaceholder, {
-      'object-fit': 'cover',
-    });
-
-    imgPlaceholder.src = 'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) + '-720.jpg';
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
-
-    this.applyFillContent(imgPlaceholder);
-
-    // Not every media item has a thumbnail image.  If no image is found,
-    // don't add the placeholder to the DOM.
-    this.loadPromise(imgPlaceholder).then(() => {
-      this.element.appendChild(imgPlaceholder);
-    }).catch(() => {
-      // If the thumbnail image isn't available, we can safely ignore this
-      // error, and no image placeholder will be inserted.
-    });
+  /** @override */
+  createPlaceholderCallback() {
+    // TODO(#5328): Investigate if there's a calculable poster image for playlists or
+    // a default playlist placeholder image.
+    if (!this.element.hasAttribute('data-media-id')) {
+      return;
+    }
+    const placeholder = this.win.document.createElement('amp-img');
+    placeholder.setAttribute('src', 'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) + '-720.jpg');
+    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    return placeholder;
   }
 
 };

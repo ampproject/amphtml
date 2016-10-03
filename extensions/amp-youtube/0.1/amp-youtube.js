@@ -80,6 +80,10 @@ class AmpYoutube extends AMP.BaseElement {
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
 
+    // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
+    // hence the following hacky-solution.
+    // Please don't follow this behavior in other extensions, instead
+    // see BaseElement.createPlaceholderCallback.
     if (!this.getPlaceholder()) {
       this.buildImagePlaceholder_();
     }

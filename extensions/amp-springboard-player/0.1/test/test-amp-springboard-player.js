@@ -78,4 +78,45 @@ describe('amp-springboard-player', () => {
         .rejectedWith(/The data-site-id attribute is required for/);
   });
 
+  describe('createPlaceholderCallback', () => {
+    it('should create a placeholder image', () => {
+      return getSpringboardPlayer({
+        'data-site-id': '261',
+        'data-mode': 'video',
+        'data-content-id': '1578473',
+        'data-player-id': 'test401',
+        'data-domain': 'test.com',
+        'data-items': '10',
+      }).then(kp => {
+        const img = kp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('src')).to.equal(
+            'https://www.springboardplatform.com/storage/test.com' +
+            '/snapshots/1578473.jpg');
+        expect(img.getAttribute('layout')).to.equal('fill');
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      });
+    });
+
+    it('should use default snapshot for playlist image', () => {
+      return getSpringboardPlayer({
+        'data-site-id': '261',
+        'data-mode': 'playlist',
+        'data-content-id': '1578473',
+        'data-player-id': 'test401',
+        'data-domain': 'test.com',
+        'data-items': '10',
+      }).then(kp => {
+        const img = kp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('src')).to.equal(
+            'https://www.springboardplatform.com/storage/default/' +
+            'snapshots/default_snapshot.png');
+        expect(img.getAttribute('layout')).to.equal('fill');
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      });
+    });
+  });
 });
