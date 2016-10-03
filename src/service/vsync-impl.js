@@ -62,7 +62,7 @@ export class Vsync {
     /** @private @const {!./ampdoc-impl.AmpDocService} */
     this.ampdocService_ = ampdocServiceFor(this.win);
 
-    /** @const {!../document-state.DocumentState} */
+    /** @private @const {!../document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
 
     /** @private @const {function(function())}  */

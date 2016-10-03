@@ -42,7 +42,6 @@ const INTERNAL_BRANCHES = {
 describe('a4a_config', () => {
   let sandbox;
   let win;
-  let ampdoc;
   let rand;
   let events;
   let element;
@@ -77,7 +76,7 @@ describe('a4a_config', () => {
     };
     win.document.defaultView = win;
     const ampdocService = installDocService(win, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = ampdocService.getAmpDoc();
     events = {};
     documentStateFor(win);
     installPlatformService(win);
