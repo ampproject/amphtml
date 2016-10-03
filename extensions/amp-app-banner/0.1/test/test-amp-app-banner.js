@@ -220,6 +220,8 @@ describe('amp-app-banner', () => {
 
     it('should preconnect to app store', () => {
       return getAppBanner().then(banner => {
+        // Re-add to DOM so that we can call `preconnectCallback`.
+        banner.ownerDocument.body.appendChild(banner);
         const impl = banner.implementation_;
         sandbox.stub(impl.preconnect, 'url');
         impl.preconnectCallback(true);

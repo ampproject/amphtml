@@ -16,7 +16,7 @@
 
 import {maybeTrackImpression} from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
-import {viewerFor} from '../../src/viewer';
+import {viewerForDoc} from '../../src/viewer';
 import {xhrFor} from '../../src/xhr';
 import * as sinon from 'sinon';
 
@@ -28,7 +28,7 @@ describe('impression', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    viewer = viewerFor(window);
+    viewer = viewerForDoc(window.document);
     sandbox.stub(viewer, 'getParam');
     xhr = xhrFor(window);
     expect(xhr.fetchJson).to.be.defined;

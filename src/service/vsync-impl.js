@@ -15,11 +15,13 @@
  */
 
 import {Pass} from '../pass';
+import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
-import {getService} from '../service';
 import {dev} from '../log';
-import {installViewerService} from './viewer-impl';
+import {documentStateFor} from '../document-state';
+import {getService} from '../service';
 import {installTimerService} from './timer-impl';
+import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
 
 
 /** @const {time} */
@@ -52,14 +54,16 @@ export class Vsync {
 
   /**
    * @param {!Window} win
-   * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, viewer) {
+  constructor(win) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!./viewer-impl.Viewer} */
-    this.viewer_ = viewer;
+    /** @private @const {!./ampdoc-impl.AmpDocService} */
+    this.ampdocService_ = ampdocServiceFor(this.win);
+
+    /** @private @const {!../document-state.DocumentState} */
+    this.docState_ = documentStateFor(this.win);
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -94,14 +98,10 @@ export class Vsync {
      */
     this.scheduled_ = false;
 
-    /**
-     * @private {?Promise}
-     */
+    /** @private {?Promise} */
     this.nextFramePromise_ = null;
 
-    /**
-     * @private {?function()}
-     */
+    /** @private {?function()} */
     this.nextFrameResolver_ = null;
 
     /** @const {!Function} */
@@ -110,13 +110,31 @@ export class Vsync {
     /** @const {!Pass} */
     this.pass_ = new Pass(this.win, this.boundRunScheduledTasks_, FRAME_TIME);
 
+    /** @private {?./viewer-impl.Viewer} */
+    this.singleDocViewer_ = null;
+
     // When the document changes visibility, vsync has to reschedule the queue
     // processing.
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.scheduled_) {
-        this.forceSchedule_();
-      }
-    });
+    const boundOnVisibilityChanged = this.onVisibilityChanged_.bind(this);
+    if (this.ampdocService_.isSingleDoc()) {
+      // In a single-doc mode, the visibility of the doc == global visibility.
+      // Thus, it's more efficient to only listen to it once.
+      viewerPromiseForDoc(this.ampdocService_.getAmpDoc()).then(viewer => {
+        this.singleDocViewer_ = viewer;
+        viewer.onVisibilityChanged(boundOnVisibilityChanged);
+      });
+    } else {
+      // In multi-doc mode, we track separately the global visibility and
+      // per-doc visibility when necessary.
+      this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
+    }
+  }
+
+  /** @private */
+  onVisibilityChanged_() {
+    if (this.scheduled_) {
+      this.forceSchedule_();
+    }
   }
 
   /**
@@ -224,13 +242,28 @@ export class Vsync {
   }
 
   /**
-   * @param {!Node=} unusedOptContextNode
+   * @param {!Node=} opt_contextNode
    * @return {boolean}
    * @private
    */
-  canAnimate_(unusedOptContextNode) {
-    // TODO(dvoytenko, #3742): Use opt_node -> ampdoc.
-    return this.viewer_.isVisible();
+  canAnimate_(opt_contextNode) {
+    // Window level: animations allowed only when global window is visible.
+    if (this.docState_.isHidden()) {
+      return false;
+    }
+
+    // Single doc: animations allowed when single doc is visible.
+    if (this.singleDocViewer_) {
+      return this.singleDocViewer_.isVisible();
+    }
+
+    // Multi-doc: animations depend on the state of the relevant doc.
+    if (opt_contextNode) {
+      const ampdoc = this.ampdocService_.getAmpDoc(opt_contextNode);
+      return viewerForDoc(ampdoc).isVisible();
+    }
+
+    return true;
   }
 
   /**
@@ -389,6 +422,6 @@ export class Vsync {
 export function installVsyncService(window) {
   return /** @type {!Vsync} */ (getService(window, 'vsync', () => {
     installTimerService(window);
-    return new Vsync(window, installViewerService(window));
+    return new Vsync(window);
   }));
 };

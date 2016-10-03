@@ -19,7 +19,7 @@ import {listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -38,7 +38,7 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  * @return {!Promise<string>}
  */
 export function openLoginDialog(win, urlOrPromise) {
-  const viewer = viewerFor(win);
+  const viewer = viewerForDoc(win.document);
   const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise).open();

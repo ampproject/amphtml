@@ -25,7 +25,7 @@ import {
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {viewerFor} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -59,7 +59,7 @@ describe('amp-analytics.visibility', () => {
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
 
-    viewerFor(window).setVisibilityState_(VisibilityState.VISIBLE);
+    viewerForDoc(window.document).setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new Visibility(window);
     sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
         .returns({

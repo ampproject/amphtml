@@ -24,7 +24,7 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {urls} from './config';
 
 
@@ -59,7 +59,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
   const docInfo = documentInfoForDoc(element);
-  const viewer = viewerFor(parentWindow);
+  const viewer = viewerForDoc(element);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc

@@ -22,7 +22,7 @@ import {fromClassForDoc} from '../service';
 import {setStyles} from '../style';
 import {timerFor} from '../timer';
 import {VideoEvents, VideoAttributes} from '../video-interface';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
 
@@ -75,9 +75,7 @@ export class VideoManager {
 
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this.ampdoc_, video);
-
     this.maybeInstallVisibilityObserver_(entry);
-
     this.entries_.push(entry);
   }
 
@@ -240,7 +238,7 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteracted_ || !viewerFor(this.ampdoc_.win).isVisible()) {
+    if (this.userInteracted_ || !viewerForDoc(this.ampdoc_).isVisible()) {
       return;
     }
 
