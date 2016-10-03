@@ -350,14 +350,14 @@ function isInternalOrServiceNode(node) {
  *
  * Visible for testing only.
  *
- * @param {!Window} win The window in which to register the elements.
- * @param {string} name Name of the custom element
+ * @param {!Window} win The window in which to register the custom element.
+ * @param {string} name The name of the custom element.
  * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
  *     testing only.
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProto(win, name, opt_implementationClass) {
-  const ElementProto = createBaseCustomElementClass(name).prototype;
+  const ElementProto = createBaseCustomElementClass(win, name, null).prototype;
   if (getMode().test && opt_implementationClass) {
     ElementProto.implementationClassForTesting = opt_implementationClass;
   }
@@ -365,101 +365,113 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 }
 
 /**
- * Create a new custom element class.
+ * Creates a new custom element class.
  *
- * @param {string} name
- * @param {function} implementationClass
- * @return {function}
+ * @param {!Window} win The window in which to register the custom element.
+ * @param {string} The name of the custom element.
+ * @param {function(new:./base-element.BaseElement, !Element)=}
+ *     implementationClass The class that implements the custom element.
+ * @return {function} The custom element class.
  */
-function createBaseCustomElementClass(name, implementationClass) {
-  return class BaseCustomElement extends HTMLElement {
+function createBaseCustomElementClass(win, name, implementationClass) {
+  return class BaseCustomElement extends win.HTMLElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      */
     constructor(self) {
       self = super(self);
+      self.init();
+      return self;
+    }
 
+    /** @constructor */
+    init() {
       /** @type {?string} */
-      self.name = name;
+      this.name = name;
 
       /** @private @type {function} */
-      self.implementationClass_ = implementationClass;
+      this.implementationClass_ = implementationClass;
 
       // Flag "notbuilt" is removed by Resource manager when the resource is
       // considered to be built. See "setBuilt" method.
       /** @private {boolean} */
-      self.built_ = false;
+      this.built_ = false;
 
       /** @type {string} */
-      self.readyState = 'loading';
+      this.readyState = 'loading';
 
       /** @type {boolean} */
-      self.everAttached = false;
+      this.everAttached = false;
 
       /**
        * Ampdoc can only be looked up when an element is attached.
        * @private {?./service/ampdoc-impl.AmpDoc}
        */
-      self.ampdoc_ = null;
+      this.ampdoc_ = null;
 
       /**
        * Resources can only be looked up when an element is attached.
        * @private {?./service/resources-impl.Resources}
        */
-      self.resources_ = null;
+      this.resources_ = null;
 
       /** @private {!Layout} */
-      self.layout_ = Layout.NODISPLAY;
+      this.layout_ = Layout.NODISPLAY;
 
       /** @private {number} */
-      self.layoutWidth_ = -1;
+      this.layoutWidth_ = -1;
 
       /** @private {number} */
-      self.layoutCount_ = 0;
+      this.layoutCount_ = 0;
 
       /** @private {boolean} */
-      self.isFirstLayoutCompleted_ = true;
+      this.isFirstLayoutCompleted_ = true;
 
       /** @private {boolean} */
-      self.isInViewport_ = false;
+      this.isInViewport_ = false;
 
       /** @private {string|null|undefined} */
-      self.mediaQuery_ = undefined;
+      this.mediaQuery_ = undefined;
 
       /** @private {!./size-list.SizeList|null|undefined} */
-      self.sizeList_ = undefined;
+      this.sizeList_ = undefined;
 
       /** @private {!./size-list.SizeList|null|undefined} */
-      self.heightsList_ = undefined;
+      this.heightsList_ = undefined;
 
       /**
        * This element can be assigned by the {@link applyLayout_} to a child
        * element that will be used to size this element.
        * @private {?Element}
        */
-      self.sizerElement_ = null;
+      this.sizerElement_ = null;
 
       /** @private {boolean|undefined} */
-      self.loadingDisabled_ = undefined;
+      this.loadingDisabled_ = undefined;
 
       /** @private {boolean|undefined} */
-      self.loadingState_ = undefined;
+      this.loadingState_ = undefined;
 
       /** @private {?Element} */
-      self.loadingContainer_ = null;
+      this.loadingContainer_ = null;
 
       /** @private {?Element} */
-      self.loadingElement_ = null;
+      this.loadingElement_ = null;
 
       /** @private {?Element|undefined} */
-      self.overflowElement_ = undefined;
+      this.overflowElement_ = undefined;
 
       /**
        * Accessing DOM APIs within constructor yields 'illegal invocation' error
        * in current polyfill. Delay instantation to `connectedCallback` instead.
        * @private {?./base-element.BaseElement}
        */
-      self.implementation_ = null;
+      // `opt_implementationClass` is only used for tests.
+      let Ctor = this.implementationClass_;
+      if (getMode().test && this.implementationClassForTesting) {
+        Ctor = this.implementationClassForTesting;
+      }
+      this.implementation_ = new Ctor(this);
 
       /**
        * An element always starts in a unupgraded state until it's added to DOM
@@ -467,22 +479,25 @@ function createBaseCustomElementClass(name, implementationClass) {
        * for script download or `upgradeCallback`.
        * @private {!UpgradeState}
        */
-      self.upgradeState_ = UpgradeState.NOT_UPGRADED;
+      this.upgradeState_ = UpgradeState.NOT_UPGRADED;
 
       /**
        * Action queue is initially created and kept around until the element
        * is ready to send actions directly to the implementation.
        * @private {?Array<!./service/action-impl.ActionInvocation>}
        */
-      self.actionQueue_ = [];
+      this.actionQueue_ = [];
 
       /**
        * Whether the element is in the template.
        * @private {boolean|undefined}
        */
-      self.isInTemplate_ = undefined;
+      this.isInTemplate_ = undefined;
+    }
 
-      return self;
+    /** The Custom Elements V0 version of the constructor. */
+    createdCallback() {
+      this.init();
     }
 
     /**
@@ -769,16 +784,11 @@ function createBaseCustomElementClass(name, implementationClass) {
      * @final @this {!Element}
      */
     connectedCallback() {
-      // `opt_implementationClass` is only used for tests.
-      let Ctor = this.implementationClass_;
-      if (getMode().test && this.implementationClassForTesting) {
-        Ctor = this.implementationClassForTesting;
+      if (!this.everAttached) {
+        this.classList.add('-amp-element');
+        this.classList.add('-amp-notbuilt');
+        this.classList.add('amp-notbuilt');
       }
-      this.implementation_ = new Ctor(this);
-
-      this.classList.add('-amp-element');
-      this.classList.add('-amp-notbuilt');
-      this.classList.add('amp-notbuilt');
 
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
         this.isInTemplate_ = !!dom.closestByTag(this, 'template');
@@ -1434,14 +1444,14 @@ function createBaseCustomElementClass(name, implementationClass) {
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
-  const klass = createBaseCustomElementClass(name, implementationClass);
+  const klass = createBaseCustomElementClass(win, name, implementationClass);
 
-  const supportsCustomElementsV1 = 'customElements' in window;
+  const supportsCustomElementsV1 = 'customElements' in win;
   if (supportsCustomElementsV1) {
     win.customElements.define(name, klass);
   } else {
     win.document.registerElement(name, {
-      prototype: klass.prototype,
+      prototype: klass.prototype
     });
   }
 }
@@ -1456,12 +1466,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
   if (implementationClass) {
     // Update on the knownElements to prevent register again.
-    knownElements[aliasName] = implementationClass;
-
-    const klass = createBaseCustomElementClass(aliasName, implementationClass);
-    win.document.registerElement(aliasName, {
-      prototype: klass.prototype,
-    });
+    registerElement(win, aliasName, implementationClass);
   } else {
     throw new Error(`Element name is unknown: ${sourceName}.` +
                      `Alias ${aliasName} was not registered.`);
