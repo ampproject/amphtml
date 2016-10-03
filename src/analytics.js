@@ -25,9 +25,10 @@ import {
  * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
 export function analyticsFor(window) {
-  return /** @type {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
-      getElementService(
-          window, 'amp-analytics-instrumentation', 'amp-analytics'));
+  return (/** @type {!Promise<
+            !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+          >} */ (getElementService(
+                window, 'amp-analytics-instrumentation', 'amp-analytics')));
 };
 
 /**
@@ -35,7 +36,8 @@ export function analyticsFor(window) {
  * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
 export function analyticsForOrNull(window) {
-  return /** @type {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
-      getElementServiceIfAvailable(
-          window, 'amp-analytics-instrumentation', 'amp-analytics'));
+  return (/** @type {!Promise<
+            ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+          >} */ (getElementServiceIfAvailable(
+                window, 'amp-analytics-instrumentation', 'amp-analytics')));
 };
