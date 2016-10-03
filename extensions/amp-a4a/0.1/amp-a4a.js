@@ -295,7 +295,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing('build_url');
+          this.lifecycleReporter_.sendPing('buildUrl');
           return this.getAdUrl();
         })
         // This block returns the (possibly empty) response to the XHR request.
