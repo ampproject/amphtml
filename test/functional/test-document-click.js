@@ -198,6 +198,49 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
 
+    it('should remove/reset attributes to avoid browser default jump', () => {
+      getElementByIdSpy.returns(elem);
+      elem.id = 'test';
+      const nameEl = {
+        name: 'test',
+        removeAttribute: sandbox.stub(),
+        setAttribute: sandbox.stub(),
+      };
+      const nameAndIdEl = {
+        name: 'test',
+        id: 'test',
+        removeAttribute: sandbox.stub(),
+        setAttribute: sandbox.stub(),
+      };
+      querySelectorAllSpy.returns([elem, nameEl, nameAndIdEl]);
+      expect(replaceLocSpy.callCount).to.equal(0);
+      expect(scrollIntoViewSpy.callCount).to.equal(0);
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(querySelectorAllSpy).to.be.calledWith('#test,a[name="test"]');
+      expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(elem.removeAttribute).to.be.calledOnce;
+      expect(elem.removeAttribute).to.be.calledWith('id');
+      expect(elem.setAttribute).to.be.calledOnce;
+      expect(elem.setAttribute).to.be.calledWith('id', 'test');
+      expect(nameEl.removeAttribute).to.be.calledOnce;
+      expect(nameEl.removeAttribute).to.be.calledWith('name');
+      expect(nameEl.setAttribute).to.be.calledOnce;
+      expect(nameEl.setAttribute).to.be.calledWith('name', 'test');
+      expect(nameAndIdEl.removeAttribute).to.be.calledTwice;
+      expect(nameAndIdEl.removeAttribute).to.be.calledWith('name');
+      expect(nameAndIdEl.removeAttribute).to.be.calledWith('id');
+      expect(nameAndIdEl.setAttribute).to.be.calledTwice;
+      expect(nameAndIdEl.setAttribute).to.be.calledWith('name', 'test');
+      expect(nameAndIdEl.setAttribute).to.be.calledWith('id', 'test');
+      expect(replaceLocSpy.callCount).to.equal(1);
+      expect(replaceLocSpy.args[0][0]).to.equal('#test');
+
+      // Make sure attributes are removed before replacing location.
+      expect(elem.removeAttribute).to.be.calledBefore(replaceLocSpy);
+      // And reset to their value after replacing location.
+      expect(elem.setAttribute).to.be.calledAfter(replaceLocSpy);
+    });
+
     it('should call scrollIntoView if element with name is found', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(elem);
