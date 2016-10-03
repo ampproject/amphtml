@@ -36,6 +36,7 @@ import {
   importPublicKey,
   isCryptoAvailable,
   verifySignature,
+  PublicKeyInfoDef,
 } from './crypto-verifier';
 
 /**
@@ -695,7 +696,7 @@ export class AmpA4A extends AMP.BaseElement {
       // Set opt_defaultVisible to true as 3p draw code never executed causing
       // render-start event never to fire which will remove visiblity hidden.
       this.apiHandler_.startUp(
-          iframe, /* is3p */opt_isNonAmpCreative,
+          iframe, /* is3p */ !!opt_isNonAmpCreative,
           /* opt_defaultVisible */ true);
       this.rendered_ = true;
     });
