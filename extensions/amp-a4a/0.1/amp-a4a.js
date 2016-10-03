@@ -30,7 +30,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {
   importPublicKey,
@@ -251,7 +251,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = viewerFor(this.win).whenFirstVisible()
+    this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         // This block returns the ad URL, if one is available.
         .then(() => {
           checkStillCurrent(promiseId);

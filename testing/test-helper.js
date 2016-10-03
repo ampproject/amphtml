@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-import {getService} from '../src/service';
+import {getService, getServiceForDoc} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
   const stub = sandbox.stub();
   getService(win, serviceId, () => {
+    const service = {};
+    service[method] = stub;
+    return service;
+  });
+  return stub;
+}
+
+export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
+  const stub = sandbox.stub();
+  getServiceForDoc(ampdoc, serviceId, () => {
     const service = {};
     service[method] = stub;
     return service;

@@ -16,7 +16,7 @@
 import {closestByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {urls} from '../../../src/config';
 
 
@@ -78,5 +78,5 @@ export function handleMessageEvent(win, event) {
   // We only allow AMP shaped URLs.
   user().assert(nav.url.indexOf(urls.cdn) == 0,
       'Invalid ad A2A URL %s %s', nav.url, origin);
-  viewerFor(win).navigateTo(nav.url, 'ad-' + origin);
+  viewerForDoc(win.document).navigateTo(nav.url, 'ad-' + origin);
 }

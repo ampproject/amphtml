@@ -18,7 +18,7 @@ import {getServiceForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {recreateNonProtoObject} from '../json';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 
 /** @const */
 const TAG = 'Storage';
@@ -363,7 +363,7 @@ export class ViewerStorageBinding {
  */
 export function installStorageServiceForDoc(ampdoc) {
   return /** @type {!Storage} */ (getServiceForDoc(ampdoc, 'storage', () => {
-    const viewer = viewerFor(ampdoc.win);
+    const viewer = viewerForDoc(ampdoc);
     const overrideStorage = parseInt(viewer.getParam('storage'), 10);
     const binding = overrideStorage ?
         new ViewerStorageBinding(viewer) :

@@ -19,7 +19,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
@@ -74,7 +74,7 @@ export class AccessServerAdapter {
     this.clientAdapter_ = new AccessClientAdapter(win, configJson, context);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(win);
+    this.viewer_ = viewerForDoc(win.document);
 
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(win);

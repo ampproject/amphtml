@@ -16,6 +16,7 @@
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {adopt} from '../../../../src/runtime';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   getService,
   getServiceForDoc,
@@ -31,10 +32,12 @@ describe('amp-install-serviceworker', () => {
   let clock;
   let sandbox;
   let container;
+  let ampdoc;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    ampdoc = ampdocServiceFor(window).getAmpDoc();
     container = document.createElement('div');
     document.body.appendChild(container);
   });
@@ -144,6 +147,7 @@ describe('amp-install-serviceworker', () => {
     beforeEach(() => {
       install = document.createElement('div');
       container.appendChild(install);
+      install.getAmpDoc = () => ampdoc;
       implementation = new AmpInstallServiceWorker(install);
       install.setAttribute('src', 'https://www.example.com/sw.js');
       calledSrc = undefined;

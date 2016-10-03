@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installViewerService} from '../../../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {installVsyncService} from '../../../../src/service/vsync-impl';
 import {installDynamicClassesService} from '../amp-dynamic-css-classes';
 
@@ -41,6 +42,7 @@ describe('dynamic classes are inserted at runtime', () => {
     };
     mockWin = {
       document: {
+        nodeType: /* DOCUMENT */ 9,
         referrer: 'http://localhost/',
         body,
       },
@@ -57,14 +59,16 @@ describe('dynamic classes are inserted at runtime', () => {
   });
 
   function setup(embeded, userAgent, referrer) {
+    const ampdocService = installDocService(mockWin, /* isSingleDoc */ true);
+    const ampdoc = ampdocService.getAmpDoc();
     installPlatformService(mockWin);
-    viewer = installViewerService(mockWin);
-    const vsync = installVsyncService(mockWin);
 
+    const vsync = installVsyncService(mockWin);
     vsync.schedule_ = () => {
       vsync.runScheduledTasks_();
     };
 
+    viewer = installViewerServiceForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
 
     if (userAgent !== undefined) {

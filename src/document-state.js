@@ -152,4 +152,4 @@ export class DocumentState {
  */
 export function documentStateFor(window) {
   return fromClass(window, 'documentState', DocumentState);
-};
+}

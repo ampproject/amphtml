@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {
   Viewport,
   ViewportBindingDef,
@@ -27,7 +27,7 @@ import {
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
@@ -78,10 +78,11 @@ describe('Viewport', () => {
       clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
-    ampdoc = new AmpDocSingle(windowApi);
+    const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
+    ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
     installPlatformService(windowApi);
-    installViewerService(windowApi);
+    installViewerServiceForDoc(ampdoc);
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
     binding.getSize = () => {
@@ -761,10 +762,12 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
-      ampdoc = new AmpDocSingle(windowApi);
+      const ampdocService = installDocService(windowApi,
+          /* isSingleDoc */ true);
+      ampdoc = ampdocService.getAmpDoc();
       installTimerService(windowApi);
       installPlatformService(windowApi);
-      installViewerService(windowApi);
+      installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new Viewport(ampdoc, binding, viewer);
     });
@@ -1040,6 +1043,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     windowApi = new WindowApi();
     windowApi.innerWidth = 555;
     windowApi.document = {
+      nodeType: /* DOCUMENT */ 9,
       readyState: 'complete',
       documentElement: {style: {}},
       body: {
@@ -1062,8 +1066,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
         };
       },
     };
+    windowApi.document.defaultView = windowApi;
     windowMock = sandbox.mock(windowApi);
-    binding = new ViewportBindingNaturalIosEmbed_(windowApi);
+    binding = new ViewportBindingNaturalIosEmbed_(windowApi,
+        new AmpDocSingle(windowApi));
     return Promise.resolve();
   });
 

@@ -20,7 +20,7 @@ import {dev} from './log';
 import {historyForDoc} from './history';
 import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {viewportForDoc} from './viewport';
 import {platformFor} from './platform';
 import {urlReplacementsForDoc} from './url-replacements';
@@ -54,7 +54,7 @@ export class ClickHandler {
     this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private @const {!./service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(this.ampdoc.win);
+    this.viewer_ = viewerForDoc(this.ampdoc);
 
     /** @private @const {!./service/history-impl.History} */
     this.history_ = historyForDoc(this.ampdoc);

@@ -24,7 +24,7 @@ import {whenDocumentComplete} from '../document-ready';
 import {fromClassForDoc} from '../service';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
@@ -130,7 +130,7 @@ export class UrlReplacements {
 
     // Returns the referrer URL.
     this.setAsync_('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
-      return viewerFor(this.ampdoc.win).getReferrerUrl();
+      return viewerForDoc(this.ampdoc).getReferrerUrl();
     }));
 
     // Returns the title of this AMP document.
@@ -375,7 +375,7 @@ export class UrlReplacements {
 
     // Returns an identifier for the viewer.
     this.setAsync_('VIEWER', () => {
-      return viewerFor(this.ampdoc.win).getViewerOrigin().then(viewer => {
+      return viewerForDoc(this.ampdoc).getViewerOrigin().then(viewer => {
         return viewer == undefined ? '' : viewer;
       });
     });

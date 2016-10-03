@@ -26,7 +26,7 @@ import {isGoogleAdsA4AValidEnvironment} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{string: {branches: !Branches}}} */
@@ -66,7 +66,8 @@ const MANUAL_EXPERIMENT_ID = '117152632';
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
   if (isGoogleAdsA4AValidEnvironment(win, element)) {
-    maybeSetExperimentFromUrl(win, experimentName, externalBranches.control,
+    maybeSetExperimentFromUrl(win, element,
+        experimentName, externalBranches.control,
         externalBranches.experiment, MANUAL_EXPERIMENT_ID);
     const experimentInfo = {};
     experimentInfo[experimentName] = internalBranches;
@@ -113,6 +114,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *     request and (possibly) early rendering in shadow DOM or iframe.
  *
  * @param {!Window} win  Window.
+ * @param {!Element} element Ad tag Element.
  * @param {!string} experimentName  Name of the overall experiment.
  * @param {!string} controlBranchId  Experiment ID string for control branch of
  *   the overall experiment.
@@ -120,9 +122,9 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   (i.e., a4a) branch of the overall experiment.
  * @param {!string} manualId  ID of the manual experiment.
  */
-function maybeSetExperimentFromUrl(win, experimentName,
+function maybeSetExperimentFromUrl(win, element, experimentName,
     controlBranchId, treatmentBranchId, manualId) {
-  const expParam = viewerFor(win).getParam('exp') ||
+  const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return;

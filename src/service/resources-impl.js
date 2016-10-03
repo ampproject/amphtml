@@ -25,7 +25,7 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
-import {installViewerService} from './viewer-impl';
+import {installViewerServiceForDoc} from './viewer-impl';
 import {installViewportServiceForDoc} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
@@ -71,7 +71,7 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerService(this.win);
+    this.viewer_ = installViewerServiceForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();

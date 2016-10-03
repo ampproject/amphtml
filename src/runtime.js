@@ -55,7 +55,7 @@ import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc,} from
     './service/url-replacements-impl';
 import {installVideoManagerForDoc} from './service/video-manager-impl';
-import {installViewerService} from './service/viewer-impl';
+import {installViewerServiceForDoc} from './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
@@ -65,7 +65,7 @@ import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesForDoc} from './resources';
 import {setStyle} from './style';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {viewportForDoc} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
@@ -86,7 +86,6 @@ export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
   installPlatformService(global);
   installTimerService(global);
-  installViewerService(global);
   installVsyncService(global);
   installXhrService(global);
   installTemplatesService(global);
@@ -102,6 +101,7 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installViewerServiceForDoc(ampdoc);
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
@@ -280,7 +280,7 @@ export function adopt(global) {
     registerElement: prepareAndRegisterElement,
     registerServiceForDoc: prepareAndRegisterServiceForDoc,
   }, global => {
-    const viewer = viewerFor(global);
+    const viewer = viewerForDoc(global.document);
 
     /** @const */
     global.AMP.viewer = viewer;
@@ -465,6 +465,18 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
 
   // Instal doc services.
   installAmpdocServices(ampdoc);
+
+  const viewer = viewerForDoc(ampdoc);
+
+  /** @const */
+  shadowRoot.AMP.viewer = viewer;
+
+  if (getMode().development) {
+    /** @const */
+    global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+    /** @const */
+    global.AMP.resources = resourcesForDoc(ampdoc);
+  }
 
   // Install extensions.
   const extensionIds = mergeShadowHead(global, extensions, shadowRoot, doc);
