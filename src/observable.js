@@ -69,7 +69,11 @@ export class Observable {
     const handlers = this.handlers_;
     for (let i = 0; i < handlers.length; i++) {
       const handler = handlers[i];
-      handler.apply(null, arguments);
+      if (var_args) {
+        handler.apply(null, arguments);
+      } else {
+        handler(opt_event);
+      }
     }
   }
 
