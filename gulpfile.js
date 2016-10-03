@@ -433,6 +433,7 @@ function checkTypes() {
     './src/amp-shadow.js',
     './ads/alp/install-alp.js',
     './src/service-worker/shell.js',
+    './src/service-worker/core.js',
     './src/service-worker/kill.js',
   ];
   var extensionSrcs = Object.values(extensions).filter(function(extension) {
