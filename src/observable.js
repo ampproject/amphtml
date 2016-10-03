@@ -60,13 +60,16 @@ export class Observable {
 
   /**
    * Fires an event. All observers are called.
+   * @param {...*} var_args Arguments that are applied to each subscription
+   *     function.
    * @param {TYPE=} opt_event
+   *
    */
-  fire(opt_event) {
+  fire(opt_event, var_args) {
     const handlers = this.handlers_;
     for (let i = 0; i < handlers.length; i++) {
       const handler = handlers[i];
-      handler(opt_event);
+      handler.apply(null, arguments);
     }
   }
 

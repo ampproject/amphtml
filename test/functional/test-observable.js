@@ -17,7 +17,7 @@
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
-describe('Observable', () => {
+describe.only('Observable', () => {
 
   let sandbox;
   let observable;
@@ -67,6 +67,12 @@ describe('Observable', () => {
     observable.fire('D');
     expect(observer1Called).to.equal(1);
     expect(observer2Called).to.equal(2);
+
+    const observer3 = sandbox.spy();
+    observable.add(observer3);
+    observable.fire('E', 'arg1', 'arg2');
+    expect(observer3.callCount).to.equal(1);
+    expect(observer3).to.have.been.calledWith('E', 'arg1', 'arg2');
   });
 
 });
