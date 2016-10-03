@@ -42,6 +42,18 @@ import {
   verifySignature,
   PublicKeyInfoDef,
 } from './crypto-verifier';
+import {
+    EXPERIMENT_ATTRIBUTE,
+    isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {
+    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+} from '../../amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
 
 /**
  * Dev public key set. This will go away once the dev signing service goes live.
@@ -127,7 +139,15 @@ export class AmpA4A extends AMP.BaseElement {
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
 
     const type = element.getAttribute('type');
-    if (type == 'doubleclick' || type == 'adsense') {
+    const eid = element.getAttribute(EXPERIMENT_ATTRIBUTE);
+    const isGoogleExperimentBranch =
+        (eid == ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+        (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+        (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+        (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+        isInManualExperiment(element);
+    if ((type == 'doubleclick' || type == 'adsense') &&
+        isGoogleExperimentBranch) {
       this.lifecycleReporter_ =
           new AmpAdLifecycleReporter(this.win, this.element, 'a4a');
     } else {

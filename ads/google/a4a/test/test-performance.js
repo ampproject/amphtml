@@ -97,15 +97,13 @@ describe('AmpAdLifecycleReporter', () => {
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
-          /s=test_foo/,
-          // In unit tests, substition of AMP_VERSION apparently returns this
-          // string, instead of an expanded, numeric form.  See
-          // testing/functional/test-url-replacements.js.
-          /rls=%24internalRuntimeVersion%24+/,
-          /c=[0-9]+/,
-          /it=onLayoutMeasure\.[0-9]+/,
-          /onLayoutMeasure_0\.[0-9]+/,
-          /rt=stage\.1+/,
+          /[&?]s=test_foo/,
+          // In unit tests, internalRuntimeVersion is not substituted.
+          /[&?]rls=\$internalRuntimeVersion\$/,
+          /[&?]c=[0-9]+/,
+          /[&?]it=[^&?]*onLayoutMeasure\.[0-9]+/,
+          /[&?]it=[^&?]*onLayoutMeasure_0\.[0-9]+/,
+          /[&?]rt=stage\.1+/,
         ];
         expectMatchesAll(arg, expectations);
         expectHasSiblingImgMatchingAll(elem, expectations);
@@ -142,15 +140,13 @@ describe('AmpAdLifecycleReporter', () => {
         count = 0;
         for (const k in stages) {
           const expectations = [
-            /s=test_foo/,
-            // In unit tests, substition of AMP_VERSION apparently returns this
-            // string, instead of an expanded, numeric form.  See
-            // testing/functional/test-url-replacements.js.
-            /rls=%24internalRuntimeVersion%24+/,
-            /c=[0-9]+/,
-            new RegExp(`it=${k}\.[0-9]+`),
-            new RegExp(`${k}_0\.[0-9]+`),
-            new RegExp(`rt=stage\.${stages[k]}`),
+            /[&?]s=test_foo/,
+            // In unit tests, internalRuntimeVersion is not substituted.
+            /[&?]rls=\$internalRuntimeVersion\$/,
+            /[&?]c=[0-9]+/,
+            new RegExp(`[&?]it=[^&?]*${k}\.[0-9]+`),
+            new RegExp(`[&?]it=[^&?]*${k}_0\.[0-9]+`),
+            new RegExp(`[&?]rt=stage\.${stages[k]}`),
           ];
           const arg = emitPingSpy.getCall(count++).args[0];
           expectMatchesAll(arg, expectations);

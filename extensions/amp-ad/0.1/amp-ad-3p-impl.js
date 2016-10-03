@@ -30,6 +30,17 @@ import {
   AmpAdLifecycleReporter,
   NullLifecycleReporter,
 } from '../../../ads/google/a4a/performance';
+import {
+  EXPERIMENT_ATTRIBUTE,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {
+  ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+  ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+} from '../../amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -86,7 +97,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.layoutPromise_ = null;
 
     const type = element.getAttribute('type');
-    if (type == 'doubleclick' || type == 'adsense') {
+    const eid = element.getAttribute(EXPERIMENT_ATTRIBUTE);
+    const isGoogleControlBranch =
+        (eid == ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control) ||
+        (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control) ||
+        (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control) ||
+        (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control);
+    if ((type == 'doubleclick' || type == 'adsense') &&
+        isGoogleControlBranch) {
       this.lifecycleReporter_ =
           new AmpAdLifecycleReporter(this.win, this.element, 'amp');
     } else {

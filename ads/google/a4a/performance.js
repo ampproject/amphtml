@@ -15,12 +15,11 @@
  */
 
 import {EXPERIMENT_ATTRIBUTE} from './traffic-experiments';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {dev} from '../../../src/log';
 
 /**
  * Header name for per-ad-slot QQid.
- * @type {!string}
+ * @type {string}
  */
 export const QQID_HEADER = 'X-QQID';
 
@@ -48,7 +47,7 @@ export class AmpAdLifecycleReporter {
   /**
    * @param {!Window} win  Parent window object.
    * @param {!Element} element  Parent element object.
-   * @param {!string} namespace  Namespace for page-level info.  (E.g.,
+   * @param {string} namespace  Namespace for page-level info.  (E.g.,
    *   'amp' vs 'a4a'.)
    */
   constructor(win, element, namespace) {
@@ -63,11 +62,10 @@ export class AmpAdLifecycleReporter {
     this.qqid_ = null;
     this.initTime_ = Date.now();
     this.pingbackAddress_ = PINGBACK_ADDRESS;
-    this.urlReplacer = urlReplacementsForDoc(element);
   }
 
   /**
-   * @param {!string} qqid
+   * @param {string} qqid
    */
   setQqid(qqid) {
     this.qqid_ = qqid;
@@ -76,7 +74,7 @@ export class AmpAdLifecycleReporter {
   /**
    * Sets the address to which pings will be sent, overriding
    * `PINGBACK_ADDRESS`.  Intended for testing.
-   * @param {!string} address
+   * @param {string} address
    * @visibleForTesting
    */
   setPingAddress(address) {
@@ -84,7 +82,7 @@ export class AmpAdLifecycleReporter {
   }
 
   /**
-   * @param {!string} name  Stage name to ping out.  Should be one of the ones
+   * @param {string} name  Stage name to ping out.  Should be one of the ones
    * from `LIFECYCLE_STAGES`.  If it's an unknown name, it will still be pinged,
    * but the stage ID will be set to `9999`.
    */
@@ -93,8 +91,8 @@ export class AmpAdLifecycleReporter {
   }
 
   /**
-   * @param {!string} name  Metric name to send.
-   * @returns {!string}  URL to send metrics to.
+   * @param {string} name  Metric name to send.
+   * @returns {string}  URL to send metrics to.
    * @private
    */
   buildPingAddress_(name) {
@@ -114,7 +112,7 @@ export class AmpAdLifecycleReporter {
         `&v=2&it=${name}.${delta},${name}_${this.slotId_}.${delta}` +
         `&rt=stage.${stageId},slotId.${this.slotId_}` +
         `&c=${this.win_.ampAdPageCorrelator}` +
-        this.urlReplacer.expandSync('&rls=AMP_VERSION') +
+        '&rls=$internalRuntimeVersion$' +
         `${eidParam}${qqidParam}` +
         `&it.${this.slotName_}=${name}.${delta}` +
         `&rt.${this.slotName_}=stage.${stageId}` +
@@ -126,7 +124,7 @@ export class AmpAdLifecycleReporter {
    * Send ping by creating an img element and attaching to the DOM.
    * Separate function so that it can be stubbed out for testing.
    *
-   * @param {!string} url Address to ping.
+   * @param {string} url Address to ping.
    */
   emitPing_(url) {
     const pingElement = this.element_.ownerDocument.createElement('img');
