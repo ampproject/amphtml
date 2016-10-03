@@ -89,8 +89,8 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {number} */
     this.previousScrollLeft_ = 0;
 
-    /** @private {!Promise<?InstrumentationService>} */
-    this.analyticsPromise_ = analyticsForOrNull(this.win);
+    /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
+    this.analyticsPromise_ = null;
   }
 
   /** @override */
@@ -99,6 +99,8 @@ export class AmpSlideScroll extends BaseSlides {
   }
   /** @override */
   buildSlides() {
+    this.analyticsPromise_ = analyticsForOrNull(this.win);
+
     this.vsync_ = this.getVsync();
 
     this.hasNativeSnapPoints_ = (
@@ -548,15 +550,17 @@ export class AmpSlideScroll extends BaseSlides {
    */
   triggerAnalyticsEvent_(newSlideIndex) {
     let direction = newSlideIndex - this.slideIndex_;
-    if (direction === 0) {
+    if (direction == 0) {
       return;
     } else if (Math.abs(direction) !== 1) {
       direction = direction < 0 ? 1 : -1;
     }
-    if (direction === 1) {
+    if (direction == 1) {
       this.analyticsEvent_('amp-carousel-next');
-    } else if (direction === -1) {
+      this.analyticsEvent_('amp-carousel-change');
+    } else if (direction == -1) {
       this.analyticsEvent_('amp-carousel-prev');
+      this.analyticsEvent_('amp-carousel-change');
     }
   }
 
@@ -565,11 +569,13 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   analyticsEvent_(eventType) {
-    this.analyticsPromise_.then(analytics => {
-      if (!analytics) {
-        return;
-      }
-      analytics.triggerEvent(eventType);
-    });
+    if (this.analyticsPromise_) {
+      this.analyticsPromise_.then(analytics => {
+        if (!analytics) {
+          return;
+        }
+        analytics.triggerEvent(eventType);
+      });
+    }
   }
 }

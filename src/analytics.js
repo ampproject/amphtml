@@ -22,20 +22,20 @@ import {
 
 /**
  * @param {!Window} window
- * @return {!Promise<!InstrumentationService>}
+ * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
 export function analyticsFor(window) {
-  return /** @type {!Promise<!InstrumentationService>} */ (
+  return /** @type {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
       getElementService(
-          window, 'amp-analytics-instrumentation','amp-analytics'));
+          window, 'amp-analytics-instrumentation', 'amp-analytics'));
 };
 
 /**
  * @param {!Window} window
- * @return {!Promise<?InstrumentationService>}
+ * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
 export function analyticsForOrNull(window) {
-  return /** @type {!Promise<!InstrumentationService>} */ (
+  return /** @type {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>} */ (
       getElementServiceIfAvailable(
-          window, 'amp-analytics-instrumentation','amp-analytics'));
+          window, 'amp-analytics-instrumentation', 'amp-analytics'));
 };
