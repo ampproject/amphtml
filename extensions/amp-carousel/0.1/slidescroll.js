@@ -553,14 +553,16 @@ export class AmpSlideScroll extends BaseSlides {
     if (direction == 0) {
       return;
     } else if (Math.abs(direction) !== 1) {
+      // When the direction is not +1 or -1 (happens with loops)
+      // Set the correct direction.
       direction = direction < 0 ? 1 : -1;
     }
+    this.analyticsEvent_('amp-carousel-change');
+    // At this point direction can be only +1 or -1.
     if (direction == 1) {
       this.analyticsEvent_('amp-carousel-next');
-      this.analyticsEvent_('amp-carousel-change');
-    } else if (direction == -1) {
+    } else {
       this.analyticsEvent_('amp-carousel-prev');
-      this.analyticsEvent_('amp-carousel-change');
     }
   }
 
