@@ -562,7 +562,7 @@ export class Viewport {
     if (paddingTop != this.paddingTop_) {
       this.lastPaddingTop_ = this.paddingTop_;
       this.paddingTop_ = paddingTop;
-      if (this.paddingTop_ == 0) {
+      if (this.paddingTop_ < this.lastPaddingTop_) {
         this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
         this.animateFixedElements_(duration, curve);
       } else {
@@ -898,14 +898,14 @@ export class ViewportBindingNatural_ {
   /** @override */
   hideViewerHeader(transient, unusedLastPaddingTop) {
     if (!transient) {
-      this.win.document.documentElement.style.paddingTop = px(0);
+      this.updatePaddingTop(0);
     }
   }
 
   /** @override */
   showViewerHeader(transient, paddingTop) {
     if (!transient) {
-      this.win.document.documentElement.style.paddingTop = px(paddingTop);
+      this.updatePaddingTop(paddingTop);
     }
   }
 
@@ -1034,9 +1034,6 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    // /** @private {number} */
-    // this.lastPaddingTop_ = 0;
-
     // Microtask is necessary here to let Safari to recalculate scrollWidth
     // post DocumentReady signal.
     whenDocumentReady(this.win.document).then(() => this.setup_());
@@ -1141,32 +1138,28 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   hideViewerHeader(transient, lastPaddingTop) {
-    onDocumentReady(this.win.document, doc => {
-      if (!transient) {
-        this.paddingTop_ = 0;
-        doc.body.style.paddingTop = '';
-        doc.body.style.borderTop = '';
-      } else {
-        // Add extra paddingTop to make the content stay at the same position
-        // when the hiding header operation is transient
+    if (!transient) {
+      this.updatePaddingTop(0);
+    } else {
+      // Add extra paddingTop to make the content stay at the same position
+      // when the hiding header operation is transient
+      onDocumentReady(this.win.document, doc => {
         const existingPaddingTop =
             this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
         doc.body.style.paddingTop =
             `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
         doc.body.style.borderTop = '';
-      }
-    });
+      });
+    }
   }
 
   /** @override */
   showViewerHeader(transient, paddingTop) {
-    onDocumentReady(this.win.document, doc => {
-      if (!transient) {
-        this.paddingTop_ = paddingTop;
-      }
-      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
-      doc.body.style.paddingTop = '';
-    });
+    if (!transient) {
+      this.updatePaddingTop(paddingTop);
+    }
+    // No need to adjust borderTop and paddingTop when the showing header
+    // operation is transient
   }
 
   /** @override */
