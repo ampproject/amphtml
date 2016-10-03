@@ -65,7 +65,12 @@ describe('Viewport', () => {
     viewerMock = sandbox.mock(viewer);
     windowApi = {
       document: {
-        documentElement: {style: {}},
+        documentElement: {
+          style: {},
+          classList: {
+            add: function() {},
+          },
+        },
       },
       location: {},
       navigator: window.navigator,
@@ -477,6 +482,15 @@ describe('Viewport', () => {
         .to.equal('pan-y');
   });
 
+  it('should add class to HTML element with make-body-block experiment', () => {
+    viewer.isEmbedded = () => true;
+    toggleExperiment(windowApi, 'make-body-block', true);
+    const docElement = windowApi.document.documentElement;
+    const addStub = sandbox.stub(docElement.classList, 'add');
+    viewport = new Viewport(ampdoc, binding, viewer);
+    expect(addStub).to.be.calledWith('-amp-make-body-block');
+  });
+
   describe('for child window', () => {
     let viewport;
     let bindingMock;
@@ -729,7 +743,12 @@ describe('Viewport META', () => {
       });
       windowApi = {
         document: {
-          documentElement: {style: {}},
+          documentElement: {
+            style: {},
+            classList: {
+              add: function() {},
+            },
+          },
           querySelector: selector => {
             if (selector == 'meta[name=viewport]') {
               return viewportMeta;
@@ -1126,10 +1145,15 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(windowApi.document.body.style.borderTopStyle).to.be.undefined;
 
     binding.updateLightboxMode(true);
-    expect(windowApi.document.body.style.borderStyle).to.equal('none');
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('none');
 
     binding.updateLightboxMode(false);
-    expect(windowApi.document.body.style.borderStyle).to.equal('solid');
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('solid');
+    expect(windowApi.document.body.style.borderBottomStyle).to.not.equal(
+        'solid');
+    expect(windowApi.document.body.style.borderLeftStyle).to.not.equal('solid');
+    expect(windowApi.document.body.style.borderRightStyle).to.not.equal(
+        'solid');
   });
 
   it('should calculate size', () => {

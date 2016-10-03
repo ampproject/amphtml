@@ -16,7 +16,7 @@
 
 import {Layout} from './layout';
 import {loadPromise} from './event-helper';
-import {preconnectFor} from './preconnect';
+import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
 import {viewerFor} from './viewer';
 import {viewportForDoc} from './viewport';
@@ -146,7 +146,10 @@ export class BaseElement {
     this.actionMap_ = this.win.Object.create(null);
 
     /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectFor(this.win);
+    this.preconnect = preconnectForElement(this.element);
+
+    /** @public {?Object} For use by sub classes */
+    this.config = null;
   }
 
   /**

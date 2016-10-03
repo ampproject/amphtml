@@ -49,7 +49,7 @@ const TAG_ = 'Viewport';
  *   velocity: number
  * }}
  */
-let ViewportChangedEventDef;
+export let ViewportChangedEventDef;
 
 
 /**
@@ -167,6 +167,13 @@ export class Viewport {
             viewer.isEmbedded() &&
             isExperimentOn(this.ampdoc.win, 'pan-y')) {
       setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
+    }
+
+    // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
+    // on CSS permanent and removing the code block below.
+    if (this.ampdoc.isSingleDoc() &&
+            isExperimentOn(this.ampdoc.win, 'make-body-block')) {
+      this.globalDoc_.documentElement.classList.add('-amp-make-body-block');
     }
   }
 
@@ -1110,7 +1117,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
     onDocumentReady(this.win.document, doc => {
-      doc.body.style.borderStyle = lightboxMode ? 'none' : 'solid';
+      doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
     });
   }
 

@@ -48,11 +48,12 @@ import {
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStorageService} from './service/storage-impl';
+import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
-import {installUrlReplacementsService} from './service/url-replacements-impl';
+import {installUrlReplacementsServiceForDoc,} from
+    './service/url-replacements-impl';
 import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
@@ -86,9 +87,7 @@ export function installRuntimeServices(global) {
   installPlatformService(global);
   installTimerService(global);
   installViewerService(global);
-  installStorageService(global);
   installVsyncService(global);
-  installUrlReplacementsService(global);
   installXhrService(global);
   installTemplatesService(global);
   if (isExperimentOn(global, 'form-submit')) {
@@ -106,8 +105,10 @@ export function installAmpdocServices(ampdoc) {
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
+  installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installStorageServiceForDoc(ampdoc);
   installVideoManagerForDoc(ampdoc);
 }
 

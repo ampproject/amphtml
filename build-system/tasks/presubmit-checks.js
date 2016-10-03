@@ -162,7 +162,7 @@ var forbiddenTerms = {
       'src/service/performance-impl.js',
     ],
   },
-  'installStorageService': {
+  'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -176,7 +176,7 @@ var forbiddenTerms = {
       'src/service/template-impl.js',
     ],
   },
-  'installUrlReplacementsService': {
+  'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -319,7 +319,7 @@ var forbiddenTerms = {
     ]
   },
   'eval\\(': '',
-  'storageFor': {
+  'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/storage.js',
@@ -554,6 +554,7 @@ var forbiddenTermsSrcInclusive = {
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
     ]
   },

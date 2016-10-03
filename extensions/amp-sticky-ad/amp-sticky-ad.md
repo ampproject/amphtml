@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-sticky-ad/">amp-sticky-ad.html</a><br /></td>
+    <td><a href="https://ampbyexample.com/components/amp-sticky-ad/">Annotated code example for amp-sticky-ad</a></td>
   </tr>
 </table>
 

@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {
-  base64UrlDecodeToBytes,
-  stringToBytes,
-} from '../../../src/utils/base64';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
+import {stringToBytes} from '../../../src/utils/bytes';
 import {dev} from '../../../src/log';
 
 const TAG_ = 'CryptoVerifier';
 
 const isWebkit = window.crypto && 'webkitSubtle' in window.crypto;
-const crossCrypto = isWebkit ? window.crypto.webkitSubtle :
+const crossCrypto = isWebkit ? window.crypto['webkitSubtle'] :
                                window.crypto.subtle;
 
 const VERSION = 0x00;
@@ -34,10 +32,10 @@ const VERSION = 0x00;
  * @typedef {{
  *   publicKey: !Object,
  *   hash: Uint8Array,
- *   cryptoKey: CryptoKey
+ *   cryptoKey: webCrypto.CryptoKey
  * }}
  */
-let PublicKeyInfoDef;
+export let PublicKeyInfoDef;
 
 /**
  * Compute and cache hash and CryptoKey of public key
@@ -89,15 +87,17 @@ export function importPublicKey(publicKey) {
  */
 export function verifySignature(data, signature, publicKeyInfos) {
   // Try all the public keys.
-  return Promise.all(publicKeyInfos.map(promise => promise.then(
-    publicKeyInfo => verifyWithOnePublicKey(data, signature, publicKeyInfo))))
-    // If any public key verifies, then the signature verifies.
-    .then(results => results.some(x => x))
-    .catch(error => {
-      // Note if anything goes wrong.
-      dev().error(TAG_, 'Error while verifying:', error);
-      throw error;
-    });
+  return /** @type {!Promise<!boolean>} */ (Promise.all(publicKeyInfos
+        .map(promise => promise.then(
+            publicKeyInfo => verifyWithOnePublicKey(data, signature,
+                publicKeyInfo))))
+            // If any public key verifies, then the signature verifies.
+            .then(results => results.some(x => x))
+            .catch(error => {
+              // Note if anything goes wrong.
+              dev().error(TAG_, 'Error while verifying:', error);
+              throw error;
+            }));
 }
 
 
@@ -105,8 +105,7 @@ export function verifySignature(data, signature, publicKeyInfos) {
  * Verifies RSA signature corresponds to the data, given a public key.
  * @param {!Uint8Array} data the data that was signed.
  * @param {!Uint8Array} signature the RSA signature.
- * @param {{e: !Uint8Array, n:!Uint8Array, keyHash: !Uint8Array}}
- *     publicKeyInfo the RSA public key.
+ * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
  * @return {!Promise<!boolean>} whether the signature is valid for
  *     the public key.
  */
@@ -117,7 +116,7 @@ function verifyWithOnePublicKey(data, signature, publicKeyInfo) {
   // If the hash doesn't match, don't bother checking this key.
   if (!(signature.length > 5 && signature[0] == VERSION &&
           hashesEqual(signature, publicKeyInfo.hash))) {
-    return false;
+    return Promise.resolve(false);
   }
   // Verify that the data matches the raw RSA signature, using the
   // public key.
@@ -143,7 +142,7 @@ export function verifySignatureIsAvailable() {
 
 /**
  * Appends 4-byte endian data's length to the data itself.
- * @param {!Uint8Array} the data.
+ * @param {!Uint8Array} data
  * @return {!Uint8Array} the prepended 4-byte endian data's length together with
  *     the data itself.
  */
@@ -167,11 +166,14 @@ function lenPrefix(data) {
 /**
  * Compare the hash field of the signature to keyHash.
  * Note that signature has a one-byte version, followed by 4-byte hash.
- * @param {!Uint8Array} signature
- * @param {!Uint8Array} keyHash
+ * @param {?Uint8Array} signature
+ * @param {?Uint8Array} keyHash
  * @return {boolean} signature[1..5] == keyHash
  */
 function hashesEqual(signature, keyHash) {
+  if (!signature || !keyHash) {
+    return false;
+  }
   for (let i = 0; i < 4; i++) {
     if (signature[i + 1] !== keyHash[i]) {
       return false;
