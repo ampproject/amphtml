@@ -252,21 +252,13 @@ export function onDocumentElementClick_(
   // the scrollbar jumping the user back to the top for failing to calculate
   // the new jumped offset.
   // See https://github.com/ampproject/amphtml/issues/5334 for more details.
-  let oldAttribute = {};
+  let restoreElementsAttrs = [];
   if (hash) {
-    elem = ampdoc.getRootNode().getElementById(hash);
-    if (!elem) {
-      // Fallback to anchor[name] if element with id is not found.
-      // Linking to an anchor element with name is obsolete in html5.
-      elem = ampdoc.getRootNode().querySelector(`a[name=${hash}]`);
-      if (elem) {
-        oldAttribute = {key: 'name', value: elem.name};
-        elem.removeAttribute('name');
-      }
-    } else {
-      oldAttribute = {key: 'id', value: elem.id};
-      elem.removeAttribute('id');
-    }
+    elem = (ampdoc.getRootNode().getElementById(hash) ||
+        // Fallback to anchor[name] if element with id is not found.
+        // Linking to an anchor element with name is obsolete in html5.
+        ampdoc.getRootNode().querySelector(`a[name=${hash}]`));
+    restoreElementsAttrs = removeAttrsWithMatchingHash_(ampdoc, hash);
   }
 
   // If possible do update the URL with the hash. As explained above
@@ -282,21 +274,18 @@ export function onDocumentElementClick_(
   // Scroll to the element if found.
   if (elem) {
     viewport./*OK*/scrollIntoView(elem);
-    elem.setAttribute(oldAttribute.key, oldAttribute.value);
+    restoreElementsAttributes_(restoreElementsAttrs);
   } else {
     dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 
-  // Has fragment really changed?
+  // Push/pop history only if fragment really changed.
   if (tgtLoc.hash != curLoc.hash) {
-    return;
+    history.push(() => {
+      win.location.replace(`${curLoc.hash || '#'}`);
+    });
   }
-
-  // Push/pop history.
-  history.push(() => {
-    win.location.replace(`${curLoc.hash || '#'}`);
-  });
 }
 
 
@@ -357,4 +346,53 @@ export function expandTargetHref_(e, target, urlReplacements) {
     target.setAttribute('href', newHref);
   }
   return newHref;
+}
+
+
+/** @typedef {{element: !Element, attributes: Object<string, string>}} */
+let RestoreElementAttributesDef;
+
+
+/**
+ * Removes attributes from elements with matching hash target. This includes:
+ *   *[id=hash] and a[name=hash].
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} hash
+ * @return {!Array<!RestoreElementAttributesDef>}}
+ * @private
+ */
+function removeAttrsWithMatchingHash_(ampdoc, hash) {
+  const restoreElementsAttrs = [];
+  const targetElements = ampdoc.getRootNode().querySelectorAll(
+      `#${hash},a[name=${hash}]`) || [];
+  for (let i = 0; i < targetElements.length; i++) {
+    const element = targetElements[i];
+    const attributes = {};
+    if (element.name == hash) {
+      attributes.name = element.name;
+      element.removeAttribute('name');
+    }
+    if (element.id == hash) {
+      attributes.id = element.id;
+      element.removeAttribute('id');
+    }
+    restoreElementsAttrs.push({element, attributes});
+  }
+  return restoreElementsAttrs;
+}
+
+
+/**
+ * Restore elements attributes.
+ * @param {!Array<!RestoreElementAttributesDef>} elementsAttrs
+ * @private
+ */
+function restoreElementsAttributes_(elementsAttrs) {
+  for (let i = 0; i < elementsAttrs.length; i++) {
+    const element = elementsAttrs[i].element;
+    const attrs = elementsAttrs[i].attributes;
+    for (const key in attrs) {
+      element.setAttribute(key, attrs[key]);
+    }
+  }
 }

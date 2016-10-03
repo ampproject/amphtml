@@ -34,6 +34,7 @@ describe('test-document-click onDocumentElementClick_', () => {
   let preventDefaultSpy;
   let scrollIntoViewSpy;
   let querySelectorSpy;
+  let querySelectorAllSpy;
   let replaceLocSpy;
   let viewport;
 
@@ -43,8 +44,11 @@ describe('test-document-click onDocumentElementClick_', () => {
     scrollIntoViewSpy = sandbox.spy();
     replaceLocSpy = sandbox.spy();
     elem = {};
+    elem.removeAttribute = sandbox.stub();
+    elem.setAttribute = sandbox.stub();
     getElementByIdSpy = sandbox.stub();
     querySelectorSpy = sandbox.stub();
+    querySelectorAllSpy = sandbox.stub();
     tgt = document.createElement('a');
     tgt.href = 'https://www.google.com';
     win = {
@@ -59,6 +63,7 @@ describe('test-document-click onDocumentElementClick_', () => {
         return {
           getElementById: getElementByIdSpy,
           querySelector: querySelectorSpy,
+          querySelectorAll: querySelectorAllSpy,
         };
       },
     };
