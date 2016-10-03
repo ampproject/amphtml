@@ -181,8 +181,9 @@ describe('SlideScroll', () => {
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(1);
       expect(setControlsStateSpy.callCount).to.equal(1);
-      expect(analyticsEventSpy.callCount).to.equal(1);
+      expect(analyticsEventSpy.callCount).to.equal(2);
       expect(analyticsEventSpy).to.have.been.calledWith('amp-carousel-next');
+      expect(analyticsEventSpy).to.have.been.calledWith('amp-carousel-change');
 
       impl.showSlide_(0);
 
@@ -206,8 +207,9 @@ describe('SlideScroll', () => {
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(2);
       expect(setControlsStateSpy.callCount).to.equal(2);
-      expect(analyticsEventSpy.callCount).to.equal(2);
+      expect(analyticsEventSpy.callCount).to.equal(4);
       expect(analyticsEventSpy).to.have.been.calledWith('amp-carousel-prev');
+      expect(analyticsEventSpy).to.have.been.calledWith('amp-carousel-change');
 
       impl.showSlide_(4);
 
@@ -229,8 +231,9 @@ describe('SlideScroll', () => {
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4]);
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(3);
       expect(setControlsStateSpy.callCount).to.equal(3);
-      expect(analyticsEventSpy.callCount).to.equal(3);
+      expect(analyticsEventSpy.callCount).to.equal(6);
       expect(analyticsEventSpy).to.have.been.calledWith('amp-carousel-prev');
+      expect(analyticsEventSpy).to.have.been.calledWith('amp-carousel-change');
     });
   });
 
