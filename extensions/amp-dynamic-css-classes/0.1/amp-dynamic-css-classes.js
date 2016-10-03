@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {documentStateFor} from '../../../src/document-state';
-import {getService} from '../../../src/service';
 import {parseUrl} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
+
 
 /**
  * Strips everything but the domain from referrer string.
