@@ -123,9 +123,12 @@ export function isCdnJsFile(url) {
  * @visibleForTesting
  */
 export function isBlacklisted(version) {
-  // Trim the RTV perfix.
-  version = version.substr(2);
-  return BLACKLIST.indexOf(version) > -1;
+  /**
+   * Trim the RTV perfix.
+   * @type {AmpVersion}
+   */
+  const ampVersion = version.substr(2);
+  return BLACKLIST.indexOf(ampVersion) > -1;
 }
 
 /**
