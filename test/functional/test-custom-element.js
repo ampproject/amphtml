@@ -302,6 +302,8 @@ describe('CustomElement', () => {
 
   it('Element - should only add classes on first attachedCallback', () => {
     const element = new ElementClass();
+    sandbox.stub(element, 'build');
+
     expect(element).to.not.have.class('-amp-element');
     expect(element).to.not.have.class('-amp-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
