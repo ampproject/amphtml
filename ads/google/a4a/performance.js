@@ -111,7 +111,7 @@ export class AmpAdLifecycleReporter {
     const pingUrl = `${this.pingbackAddress_}?` +
         `s=${this.namespace_}` +
         `&v=2&it=${name}.${delta},${name}_${this.slotId_}.${delta}` +
-        `&rt=stage.${stageId}` +
+        `&rt=stage.${stageId},slotId.${this.slotId_}` +
         `&c=${this.win_.ampAdPageCorrelator}` +
         this.urlReplacer.expandSync('&rls=AMP_VERSION') +
         `${eidParam}${qqidParam}` +

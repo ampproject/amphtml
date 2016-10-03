@@ -15,6 +15,7 @@
  */
 
 import {AmpAdLifecycleReporter} from '../performance';
+import {EXPERIMENT_ATTRIBUTE} from '../traffic-experiments';
 import {childElements} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
@@ -57,6 +58,18 @@ function expectHasSiblingImgMatchingAll(element, matchList) {
   });
   expect(result, 'No element sibling of ' + element + ' matched all patterns')
       .to.be.true;
+}
+
+// From
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions?redirectlocale=en-US&redirectslug=JavaScript%2FGuide%2FRegular_Expressions
+/**
+ * Escape a string for use as a literal inside a regular expression.
+ * @param {!string} string
+ * @returns {!string}
+ * @private
+ */
+function escapeRegExp_(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
 describe('AmpAdLifecycleReporter', () => {
@@ -155,9 +168,10 @@ describe('AmpAdLifecycleReporter', () => {
           validateAdResponse: '5',
           layoutCallback: '10',
         };
+        const nStages = 3;
         const allReporters = [];
-        const nDomElements = 20;
-        for (let i = 0; i < nDomElements; ++i) {
+        const nSlots = 20;
+        for (let i = 0; i < nSlots; ++i) {
           const elem = doc.createElement('div');
           elem.setAttribute('id', i);
           doc.body.appendChild(elem);
@@ -170,8 +184,75 @@ describe('AmpAdLifecycleReporter', () => {
             r.sendPing(k);
           }
         });
-        expect(emitPingSpy.callCount).to.equal(nDomElements * 3);
+        expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
         const allImgNodes = childElements(doc.body, x => isImgNode(x));
+        expect(allImgNodes.length).to.equal(nSlots * nStages);
+        let commonCorrelator = null;
+        const slotCounts = {};
+        allImgNodes.forEach(n => {
+          const src = n.getAttribute('src');
+          expect(src).to.match(/[?&]s=test_foo/);
+          const corr = /[?&]c=([0-9]+)/.exec(src)[1];
+          const slotId = /[?&]rt=[^&?]*slotId\.([0-9]+)[&?,]/.exec(src)[1];
+          commonCorrelator = commonCorrelator || corr;
+          expect(corr).to.equal(commonCorrelator);
+          slotCounts[slotId] = slotCounts[slotId] || 0;
+          ++slotCounts[slotId];
+        });
+        for (let s = 0; s < nSlots; ++s) {
+          expect(slotCounts[s], 'slotCounts[' + s + ']').to.equal(nStages);
+        }
+      });
+    });
+
+    it('should capture eid', () => {
+      return createIframePromise(false).then(fixture => {
+        const win = fixture.win;
+        const doc = fixture.doc;
+        const elem = doc.createElement('div');
+        doc.body.appendChild(elem);
+        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
+        reporter.setPingAddress('/');
+        expect(emitPingSpy).to.not.be.called;
+        reporter.sendPing('onLayoutMeasure');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        // No e= param when no EID is present on element.
+        expect(arg).to.not.match(/[&?]e=/);
+        const elem2 = doc.createElement('div');
+        elem2.setAttribute(EXPERIMENT_ATTRIBUTE, '123456');
+        doc.body.appendChild(elem2);
+        const reporter2 = new AmpAdLifecycleReporter(win, elem2, 'test_foo');
+        reporter2.setPingAddress('/');
+        reporter2.sendPing('onLayoutMeasure');
+        expect(emitPingSpy).to.be.calledTwice;
+        const arg2 = emitPingSpy.getCall(1).args[0];
+        // Now there should be an e= param.
+        expect(arg2).to.match(/[&?]e=123456/);
+      });
+    });
+
+    it('eid should be URL encoded', () => {
+      return createIframePromise(false).then(fixture => {
+        const win = fixture.win;
+        const doc = fixture.doc;
+        const elem = doc.createElement('div');
+        // The following string is deliberately a script URL to test that
+        // the ping system correctly URL encodes such strings.
+        /* eslint-disable no-script-url */
+        const rawEid =
+            'javascript:{doSomethingHeinous("https://malware.central.com");}';
+        /* eslint-enable no-script-url */
+        elem.setAttribute(EXPERIMENT_ATTRIBUTE, rawEid);
+        doc.body.appendChild(elem);
+        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
+        reporter.setPingAddress('/');
+        expect(emitPingSpy).to.not.be.called;
+        reporter.sendPing('onLayoutMeasure');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const encodedEid = encodeURIComponent(rawEid);
+        expect(arg).to.match(new RegExp(`[&?]e=${escapeRegExp_(encodedEid)}`));
       });
     });
   });
@@ -195,6 +276,31 @@ describe('AmpAdLifecycleReporter', () => {
         expect(emitPingSpy).to.be.calledTwice;
         arg = emitPingSpy.getCall(1).args[0];
         expect(arg).to.match(/&qqid\.0=zort/);
+      });
+    });
+
+    it('qqid should be url encoded', () => {
+      return createIframePromise(false).then(fixture => {
+        const win = fixture.win;
+        const doc = fixture.doc;
+        const elem = doc.createElement('div');
+        doc.body.appendChild(elem);
+        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
+        reporter.setPingAddress('/');
+        expect(emitPingSpy).to.not.be.called;
+        // The following string is deliberately a script URL to test that
+        // the ping system correctly URL encodes such strings.
+        /* eslint-disable no-script-url */
+        const rawQqid =
+            'javascript:{doSomethingHeinous("https://malware.central.com");}';
+        /* eslint-enable no-script-url */
+        const encodedQqid = encodeURIComponent(rawQqid);
+        reporter.setQqid(rawQqid);
+        reporter.sendPing('renderViaIframe');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        expect(arg).to.match(
+            new RegExp(`[&?]qqid\.0=${escapeRegExp_(encodedQqid)}`));
       });
     });
   });
