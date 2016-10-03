@@ -16,10 +16,10 @@
 
 import {Layout} from './layout';
 import {loadPromise} from './event-helper';
-import {preconnectFor} from './preconnect';
+import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
 import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {viewportForDoc} from './viewport';
 import {vsyncFor} from './vsync';
 
 
@@ -146,7 +146,10 @@ export class BaseElement {
     this.actionMap_ = this.win.Object.create(null);
 
     /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectFor(this.win);
+    this.preconnect = preconnectForElement(this.element);
+
+    /** @public {?Object} For use by sub classes */
+    this.config = null;
   }
 
   /**
@@ -170,6 +173,15 @@ export class BaseElement {
    */
   getWin() {
     return this.win;
+  }
+
+  /**
+   * Returns the associated ampdoc. Only available when `buildCallback` and
+   * going forward. It throws an exception before `buildCallback`.
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   */
+  getAmpDoc() {
+    return this.element.getAmpDoc();
   }
 
   /** @public @return {!./service/vsync-impl.Vsync} */
@@ -607,7 +619,7 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportFor(this.win);
+    return viewportForDoc(this.getAmpDoc());
   }
 
  /**

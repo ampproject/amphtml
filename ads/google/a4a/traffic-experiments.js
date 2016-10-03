@@ -54,10 +54,10 @@ const MANUAL_EXPERIMENT_ID = '117152632';
  * @param {!Window} win  Host window for the ad.
  * @param {!Element} element Ad tag Element.
  * @param {string} experimentName Overall name for the experiment.
- * @param {!Branches} externalBranches experiment and control branch IDs to use
+ * @param {!ExperimentInfo} externalBranches experiment and control branch IDs to use
  *   when experiment is triggered externally (e.g., via Google Search
  *   results page).
- * @param {!Branches} internalBranches experiment and control branch IDs to
+ * @param {!ExperimentInfo} internalBranches experiment and control branch IDs to
  *   use when experiment is triggered internally (i.e., via client-side
  *   selection).
  * @return {boolean}  Whether Google Ads should attempt to render via the A4A
@@ -203,9 +203,9 @@ function selectRandomProperty(obj) {
  * win.pageExperimentBranches[experimentName].
  *
  * @param {!Window} win Window context on which to save experiment
- * selection state.
- * @param {ExperimentInfo} experiments  Set of experiments to
- * configure for this page load.
+ *     selection state.
+ * @param {!Object<string,!ExperimentInfo>} experiments  Set of experiments to
+ *     configure for this page load.
  * @visibleForTesting
  */
 export function randomlySelectUnsetPageExperiments(win, experiments) {

@@ -47,11 +47,11 @@ var extensions = {};
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-ad', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-ad-network-adsense-impl', 0.1, false, 'NO_TYPE_CHECK');
-declareExtension('amp-ad-network-doubleclick-impl', 0.1, false, 'NO_TYPE_CHECK');
-declareExtension('amp-ad-network-fake-impl', 0.1, false, 'NO_TYPE_CHECK');
-declareExtension('amp-analytics', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-ad', '0.1', false);
+declareExtension('amp-ad-network-adsense-impl', 0.1, false);
+declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
+declareExtension('amp-ad-network-fake-impl', 0.1, false);
+declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-app-banner', '0.1', true, 'NO_TYPE_CHECK');
@@ -71,7 +71,7 @@ declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-image-lightbox', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
@@ -87,7 +87,7 @@ declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
-declareExtension('amp-sticky-ad', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-sticky-ad', '0.1', true);
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -386,6 +386,7 @@ function checkTypes() {
   }).sort();
   closureCompile(compileSrcs.concat(extensionSrcs),  './dist',
       'check-types.js', {
+        includePolyfills: true,
         checkTypes: true,
         externs: ['build-system/amp.extension.extern.js',],
       });

@@ -36,6 +36,52 @@ export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
 export class AmpAd3PImpl extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+
+    /** @private {?AmpAdApiHandler} */
+    this.apiHandler_ = null;
+
+    /** @private {?Element} */
+    this.placeholder_ = null;
+
+    /** @private {?Element} */
+    this.fallback_ = null;
+
+    /** @private {boolean} */
+    this.isInFixedContainer_ = false;
+
+    /**
+     * The layout box of the ad iframe (as opposed to the amp-ad tag).
+     * In practice it often has padding to create a grey or similar box
+     * around ads.
+     * @private {?../../../src/layout-rect.LayoutRectDef}
+     */
+    this.iframeLayoutBox_ = null;
+
+    /**
+     * Call to stop listening to viewport changes.
+     * @private {?function()}
+     */
+    this.unlistenViewportChanges_ = null;
+
+    /** @private {IntersectionObserver} */
+    this.intersectionObserver_ = null;
+
+    /** @private @const {function()} */
+    this.boundNoContentHandler_ = () => this.noContentHandler_();
+
+    /** @private {?string|undefined} */
+    this.container_ = undefined;
+
+    /** @private {?Promise} */
+    this.layoutPromise_ = null;
+  }
+
   /** @override */
   getPriority() {
     // Loads ads after other content.
@@ -58,73 +104,37 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {?Element} */
-    this.iframe_ = null;
-
-    /** @private {?AmpAdApiHandler} */
-    this.apiHandler_ = null;
-
-    /** @private {?Element} */
     this.placeholder_ = this.getPlaceholder();
-
-    /** @private {?Element} */
     this.fallback_ = this.getFallback();
 
-    /** @private {boolean} */
-    this.isInFixedContainer_ = false;
-
-    /**
-     * The layout box of the ad iframe (as opposed to the amp-ad tag).
-     * In practice it often has padding to create a grey or similar box
-     * around ads.
-     * @private {!LayoutRect}
-     */
-    this.iframeLayoutBox_ = null;
-
-    /**
-     * Call to stop listening to viewport changes.
-     * @private {?function()}
-     */
-    this.unlistenViewportChanges_ = null;
-
-    /** @private {IntersectionObserver} */
-    this.intersectionObserver_ = null;
-
-    /** @private @const {function()} */
-    this.boundNoContentHandler_ = () => this.noContentHandler_();
-
     const adType = this.element.getAttribute('type');
-    // TODO(lannka): this should be never null in real.
-    /** {?Object} */
+    /** {!Object} */
     this.config = adConfig[adType];
+    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
 
     setupA2AListener(this.win);
-
-    /** @private {?Element|undefined} */
-    this.container_ = undefined;
   }
 
   /**
    * Prefetches and preconnects URLs related to the ad.
+   * @param {boolean=} opt_onLayout
    * @override
    */
-  preconnectCallback(onLayout) {
+  preconnectCallback(opt_onLayout) {
     // We always need the bootstrap.
-    preloadBootstrap(this.win);
-    const prefetch = this.config ? this.config.prefetch : null;
-    const preconnect = this.config ? this.config.preconnect : null;
-    if (typeof prefetch == 'string') {
-      this.preconnect.preload(prefetch, 'script');
-    } else if (prefetch) {
-      prefetch.forEach(p => {
+    preloadBootstrap(this.win, this.preconnect);
+    if (typeof this.config.prefetch == 'string') {
+      this.preconnect.preload(this.config.prefetch, 'script');
+    } else if (this.config.prefetch) {
+      this.config.prefetch.forEach(p => {
         this.preconnect.preload(p, 'script');
       });
     }
-    if (typeof preconnect == 'string') {
-      this.preconnect.url(preconnect, onLayout);
-    } else if (preconnect) {
-      preconnect.forEach(p => {
-        this.preconnect.url(p, onLayout);
+    if (typeof this.config.preconnect == 'string') {
+      this.preconnect.url(this.config.preconnect, opt_onLayout);
+    } else if (this.config.preconnect) {
+      this.config.preconnect.forEach(p => {
+        this.preconnect.url(p, opt_onLayout);
       });
     }
     // If fully qualified src for ad script is specified we preconnect to it.
@@ -178,24 +188,24 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.iframe_) {
-      user().assert(!this.isInFixedContainer_,
-          '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
-      incrementLoadingAds(this.win);
-      return getAdCid(this).then(cid => {
-        const opt_context = {
-          clientId: cid || null,
-          container: this.container_ ? this.container_.tagName : null,
-        };
-        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element, null, opt_context);
-        this.apiHandler_ = new AmpAdApiHandler(
-            this, this.element, this.boundNoContentHandler_);
-        return this.apiHandler_.startUp(this.iframe_, true);
-      });
+    if (this.layoutPromise_) {
+      return this.layoutPromise_;
     }
-    return this.loadPromise(this.iframe_);
+    user().assert(!this.isInFixedContainer_,
+        '<amp-ad> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element);
+    incrementLoadingAds(this.win);
+    return this.layoutPromise_ = getAdCid(this).then(cid => {
+      const opt_context = {
+        clientId: cid || null,
+        container: this.container_,
+      };
+      this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+          this.element, undefined, opt_context);
+      this.apiHandler_ = new AmpAdApiHandler(
+          this, this.element, this.boundNoContentHandler_);
+      return this.apiHandler_.startUp(this.iframe_, true);
+    });
   }
 
   /** @override  */
@@ -242,6 +252,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.layoutPromise_ = null;
     if (!this.iframe_) {
       return true;
     }

@@ -37,7 +37,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-ad">amp-ad.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-ad/">Annotated code example for amp-ad</a></td>
   </tr>
 </table>
 
@@ -116,7 +116,9 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
 - [MediaImpact](../../ads/mediaimpact.md)
+- [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
+- [Mixpo](../../ads/mixpo.md)
 - [Nativo](../../ads/nativo.md)
 - [Nend](../../ads/nend.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
@@ -140,6 +142,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Zucks](../../ads/zucks.md)
 
 ## Supported embed types
 

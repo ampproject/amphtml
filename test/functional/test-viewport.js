@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   Viewport,
   ViewportBindingDef,
@@ -25,6 +26,7 @@ import {
 } from '../../src/service/viewport-impl';
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
@@ -40,6 +42,7 @@ describe('Viewport', () => {
   let viewer;
   let viewerMock;
   let windowApi;
+  let ampdoc;
   let viewerViewportHandler;
   let updatedPaddingTop;
   let viewportSize;
@@ -62,7 +65,12 @@ describe('Viewport', () => {
     viewerMock = sandbox.mock(viewer);
     windowApi = {
       document: {
-        documentElement: {style: {}},
+        documentElement: {
+          style: {},
+          classList: {
+            add: function() {},
+          },
+        },
       },
       location: {},
       navigator: window.navigator,
@@ -70,6 +78,8 @@ describe('Viewport', () => {
       clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
+    ampdoc = new AmpDocSingle(windowApi);
+    installTimerService(windowApi);
     installPlatformService(windowApi);
     installViewerService(windowApi);
     binding = new ViewportBindingDef();
@@ -81,7 +91,7 @@ describe('Viewport', () => {
     binding.getScrollLeft = () => 0;
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     viewport.fixedLayer_ = {update: () => {
       return {then: callback => callback()};
     }};
@@ -449,7 +459,7 @@ describe('Viewport', () => {
     // TODO(dvoytenko, #4894): Cleanup the experiment.
     viewer.isEmbedded = () => true;
     toggleExperiment(windowApi, 'pan-y', false);
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     expect(windowApi.document.documentElement.style['touch-action'])
         .to.not.exist;
   });
@@ -458,7 +468,7 @@ describe('Viewport', () => {
     // TODO(dvoytenko, #4894): Cleanup the experiment.
     viewer.isEmbedded = () => false;
     toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     expect(windowApi.document.documentElement.style['touch-action'])
         .to.not.exist;
   });
@@ -467,9 +477,18 @@ describe('Viewport', () => {
     // TODO(dvoytenko, #4894): Cleanup the experiment.
     viewer.isEmbedded = () => true;
     toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(windowApi, binding, viewer);
+    viewport = new Viewport(ampdoc, binding, viewer);
     expect(windowApi.document.documentElement.style['touch-action'])
         .to.equal('pan-y');
+  });
+
+  it('should add class to HTML element with make-body-block experiment', () => {
+    viewer.isEmbedded = () => true;
+    toggleExperiment(windowApi, 'make-body-block', true);
+    const docElement = windowApi.document.documentElement;
+    const addStub = sandbox.stub(docElement.classList, 'add');
+    viewport = new Viewport(ampdoc, binding, viewer);
+    expect(addStub).to.be.calledWith('-amp-make-body-block');
   });
 
   describe('for child window', () => {
@@ -477,9 +496,11 @@ describe('Viewport', () => {
     let bindingMock;
     let iframe;
     let iframeWin;
+    let ampdoc;
 
     beforeEach(() => {
-      viewport = new Viewport(window, binding, viewer);
+      ampdoc = new AmpDocSingle(window);
+      viewport = new Viewport(ampdoc, binding, viewer);
       bindingMock = sandbox.mock(binding);
       iframe = document.createElement('iframe');
       const html = '<div id="one"></div>';
@@ -693,6 +714,7 @@ describe('Viewport META', () => {
     let viewer;
     let viewerMock;
     let windowApi;
+    let ampdoc;
     let originalViewportMetaString, viewportMetaString;
     let viewportMeta;
     let viewportMetaSetter;
@@ -721,7 +743,12 @@ describe('Viewport META', () => {
       });
       windowApi = {
         document: {
-          documentElement: {style: {}},
+          documentElement: {
+            style: {},
+            classList: {
+              add: function() {},
+            },
+          },
           querySelector: selector => {
             if (selector == 'meta[name=viewport]') {
               return viewportMeta;
@@ -734,10 +761,12 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
+      ampdoc = new AmpDocSingle(windowApi);
+      installTimerService(windowApi);
       installPlatformService(windowApi);
       installViewerService(windowApi);
       binding = new ViewportBindingDef();
-      viewport = new Viewport(windowApi, binding, viewer);
+      viewport = new Viewport(ampdoc, binding, viewer);
     });
 
     afterEach(() => {
@@ -1116,10 +1145,15 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(windowApi.document.body.style.borderTopStyle).to.be.undefined;
 
     binding.updateLightboxMode(true);
-    expect(windowApi.document.body.style.borderStyle).to.equal('none');
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('none');
 
     binding.updateLightboxMode(false);
-    expect(windowApi.document.body.style.borderStyle).to.equal('solid');
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('solid');
+    expect(windowApi.document.body.style.borderBottomStyle).to.not.equal(
+        'solid');
+    expect(windowApi.document.body.style.borderLeftStyle).to.not.equal('solid');
+    expect(windowApi.document.body.style.borderRightStyle).to.not.equal(
+        'solid');
   });
 
   it('should calculate size', () => {

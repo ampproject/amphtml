@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/forms.amp.html">forms.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-form/">Annotated code example for amp-form</a></td>
   </tr>
 </table>
 
@@ -88,6 +88,12 @@ This attribute can be the same or a different endpoint than `action` and has the
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
+**custom-validation-reporting**
+__(optional)__
+Enables and selects a custom validation reporting strategy, valid values are one of `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
+
+See [Custom Validation](#custom-validations) section for more details on this.
+
 ## Inputs
 Currently, `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>` are not allowed. (This might be reconsidered in the future - please let us know if you require these and use cases).
 
@@ -103,7 +109,7 @@ Emitted whenever the form submission is done and response is a success.
 * **submit-error**
 Emitted whenever the form submission is done and response is an error.
 
-These events can be used through the [`on` attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on).
+These events can be used through the [`on` attribute](../../spec/amp-html-format.md#on).
 For example, the following listens to both `submit-success` and `submit-error` and shows different lightboxes depending on the event.
 
 ```html
@@ -111,10 +117,10 @@ For example, the following listens to both `submit-success` and `submit-error` a
 </form>
 ```
 
-See the [full example here](https://github.com/ampproject/amphtml/blob/master/examples/forms.amp.html).
+See the [full example here](../../examples/forms.amp.html).
 
 ## Success/Error Response Rendering
-`amp-form` allows publishers to render the responses using [Extended Templates](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#extended-templates).
+`amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
 
 Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **child element of form** and include a `<template></template>` tag inside it to render the response in it.
 
@@ -158,7 +164,7 @@ Publishers can render these in a template inside their forms as follows.
 </form>
 ```
 
-See the [full example here](https://github.com/ampproject/amphtml/blob/master/examples/forms.amp.html).
+See the [full example here](../../examples/forms.amp.html).
 
 ## Polyfills
 `amp-form` provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
@@ -183,14 +189,57 @@ One of the main differences between `:invalid` and `:user-invalid` is when are t
 
 `.user-valid` and `.user-invalid` classes are a polyfill for the pseudo classes as described above. Publishers can use these to style their inputs and fieldsets to be responsive to user actions (e.g. highlighting an invalid input with a red border after user blurs from it).
 
-See the [full example here](https://github.com/ampproject/amphtml/blob/master/examples/forms.amp.html) on using these.
+See the [full example here](../../examples/forms.amp.html) on using these.
 
+## Custom Validations
+`amp-form` provides a way for you to build your own custom validation UI with few validation reporting strategies available to choose from `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
+
+The general usage of this is you first set `custom-validation-reporting` attribute on your `form` to one of the validation reporting strategies and then provide your own validation UI marked up with special attributes, AMP will discover these and report them at the right time depending on the strategy selected.
+
+Here's an example (for more examples please check [examples/forms.amp.html](../../examples/forms.amp.html)):
+```html
+<h4>Show All Invalid Messages On Submit</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-all-on-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name5" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name5"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name5">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email5" required>
+            <span visible-when-invalid="valueMissing" validation-for="email5"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email5"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+```
+
+For validation messages, if your element contains no text content inside, AMP will fill it out with the browser's default validation message. In the example above, when `name5` input is empty and validation kicked off (i.e. user tried to submit the form) AMP will fill `<span visible-when-invalid="valueMissing" validation-for="name5"></span>` with the browser validation message and show that `span` to the user.
+
+### Reporting Strategies
+#### Show First on Submit
+This mimics the browser default behavior when default validation kicks in. It shows the first validation error it finds and stops there.
+
+#### Show All on Submit
+This shows all validation errors on all invalid inputs when the form is submitted. This is useful if you'd like to show a summary of validations for example.
+
+#### As You Go
+This allows your user to see validation messages as they're interacting with the input, if the email they typed is invalid they'll see the error right away and once fixed the error goes away.
 
 ## Security Considerations
-Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md). 
+Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
 
 ### Protecting against XSRF
-In addition to following AMP CORS spec, please pay extra attention to [state changing requests note](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#note-on-state-changing-requests).
+In addition to following AMP CORS spec, please pay extra attention to [state changing requests note](../../spec/amp-cors-requests.md#note-on-state-changing-requests).
 
 In general, keep in mind the following points when accepting input from the user:
 

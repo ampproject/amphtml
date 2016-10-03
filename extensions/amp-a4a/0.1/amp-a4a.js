@@ -40,8 +40,7 @@ import {
 
 /**
  * Dev public key set. This will go away once the dev signing service goes live.
- *
- * @const {!Array<!Object>}
+ * @type {Array<!Promise<!./crypto-verifier.PublicKeyInfoDef>>}
  */
 const devJwkSet = [{
   kty: 'RSA',
@@ -70,8 +69,8 @@ function isValidOffsetArray(ary) {
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
-/** @typedef {{creative: !ArrayBuffer, signature: ?Uint8Array}} */
-let AdResponseDef;
+/** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
+export let AdResponseDef;
 
 /** @typedef {{
       cssUtf16CharOffsets: Array<number>,
@@ -106,7 +105,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AmpAdApiHandler} */
+    /** @private {?AMP.AmpAdApiHandler} */
     this.apiHandler_ = null;
 
     /** @private {boolean} */
@@ -124,7 +123,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.stylesheets_ = [];
 
-    /** @const @private {!Vsync} */
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
@@ -183,12 +182,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Prefetches and preconnects URLs related to the ad using adPreconnect
    * registration which assumes ad request domain used for 3p is applicable.
+   * @param {boolean=} unusedOnLayout
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const config = adConfig[this.element.getAttribute('type')];
-    // TODO(lannka): config should be never null in real.
-    const preconnect = config ? config.preconnect : null;
+    const preconnect = adConfig[this.element.getAttribute('type')].preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
@@ -357,12 +355,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Handles uncaught errors within promise flow.
-   * @param {string|Error} error
-   * @return {string|Error}
+   * @param {*} error
+   * @return {*}
    * @private
    */
   promiseErrorHandler_(error) {
-    if (error instanceof Error) {
+    if (error && error.message) {
       if (error.message.indexOf('amp-a4a: ') == 0) {
         // caught previous call to promiseErrorHandler?  Infinite loop?
         return error;
@@ -457,7 +455,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @return {!Promise<string>}
+   * @return {!Promise<string>|string}
    */
   getAdUrl() {
     throw new Error('getAdUrl not implemented!');
@@ -502,7 +500,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
-   * @return {!Promise<?FetchResponse>}
+   * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
   sendXhrRequest_(adUrl) {
@@ -636,7 +634,8 @@ export class AmpA4A extends AMP.BaseElement {
           this.vsync_.mutate(() => {
             const doc = this.element.ownerDocument;
             // Copy fonts to host document head.
-            this.relocateFonts_(creativeMetaData);
+            this.relocateFonts_(/** @type {!CreativeMetaDataDef} */ (
+                creativeMetaData));
             // Create and setup shadow root.
             const shadowRoot = createShadowEmbedRoot(this.element,
                 creativeMetaData.customElementExtensions || []);
@@ -696,7 +695,8 @@ export class AmpA4A extends AMP.BaseElement {
       // Set opt_defaultVisible to true as 3p draw code never executed causing
       // render-start event never to fire which will remove visiblity hidden.
       this.apiHandler_.startUp(
-          iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
+          iframe, /* is3p */opt_isNonAmpCreative,
+          /* opt_defaultVisible */ true);
       this.rendered_ = true;
     });
   }
@@ -729,8 +729,8 @@ export class AmpA4A extends AMP.BaseElement {
       return null;
     }
     try {
-      return this.buildCreativeMetaData_(JSON.parse(
-          creative.slice(metadataStart + METADATA_STRING.length, metadataEnd)));
+      return this.buildCreativeMetaData_(/** @type {!Object} */ (JSON.parse(
+        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd))));
     } catch (err) {
       dev().warn('A4A', 'Invalid amp metadata: %s',
           creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
@@ -739,7 +739,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object} JSON extraced from creative
+   * @param {!Object} metaDataObj JSON extraced from creative
    * @return {!CreativeMetaDataDef} if valid, null otherwise
    * @private
    */
@@ -818,7 +818,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Note: destructively reverses the {@code offsets} list as a side effect.
    * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} meta data from creative.
+   * @param {!CreativeMetaDataDef} metaData meta data from creative.
    * @returns {string} CSS to be added to page.
    */
   formatCSSBlock_(creative, metaData) {
@@ -865,3 +865,4 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 }
+

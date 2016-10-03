@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {utf8Encode} from '../../../src/utils/bytes';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {boolean} */
 const isWebkit = window.crypto && 'webkitSubtle' in window.crypto;
 
-/** @const {?SubtleCrypto} */
-const crossCrypto = window.crypto ?
-    (isWebkit ? window.crypto.webkitSubtle : window.crypto.subtle) : null;
+const crossCrypto = isWebkit ? window.crypto['webkitSubtle'] :
+                               window.crypto.subtle;
 
 /** @const {number} */
 const VERSION = 0x00;
@@ -31,11 +30,12 @@ const VERSION = 0x00;
  * An object holding the public key and its hash.
  *
  * @typedef {{
- *   hash: !Uint8Array,
- *   cryptoKey: !CryptoKey
+ *   publicKey: !Object,
+ *   hash: Uint8Array,
+ *   cryptoKey: webCrypto.CryptoKey
  * }}
  */
-let PublicKeyInfoDef;
+export let PublicKeyInfoDef;
 
 /**
  * Convert a JSON Web Key object to a browser-native cryptographic key and
@@ -85,7 +85,7 @@ export function importPublicKey(jwk) {
  * @param {!Uint8Array} data the data that was signed.
  * @param {!Uint8Array} signature the RSA signature.
  * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
- * @return {!Promise<boolean>} whether the signature is valid for
+ * @return {!Promise<!boolean>} whether the signature is valid for
  *     the public key.
  */
 export function verifySignature(data, signature, publicKeyInfo) {
@@ -122,7 +122,7 @@ export function isCryptoAvailable() {
 
 /**
  * Appends 4-byte endian data's length to the data itself.
- * @param {!Uint8Array} the data.
+ * @param {!Uint8Array} data
  * @return {!Uint8Array} the prepended 4-byte endian data's length together with
  *     the data itself.
  */
@@ -139,11 +139,14 @@ function lenPrefix(data) {
 /**
  * Compare the hash field of the signature to keyHash.
  * Note that signature has a one-byte version, followed by 4-byte hash.
- * @param {!Uint8Array} signature
- * @param {!Uint8Array} keyHash
+ * @param {?Uint8Array} signature
+ * @param {?Uint8Array} keyHash
  * @return {boolean} signature[1..5] == keyHash
  */
 function hashesEqual(signature, keyHash) {
+  if (!signature || !keyHash) {
+    return false;
+  }
   for (let i = 0; i < 4; i++) {
     if (signature[i + 1] !== keyHash[i]) {
       return false;
@@ -151,4 +154,3 @@ function hashesEqual(signature, keyHash) {
   }
   return true;
 }
-

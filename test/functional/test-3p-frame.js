@@ -24,6 +24,7 @@ import {
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
+import {preconnectForElement} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
 import {validateData} from '../../3p/3p';
 import {viewerFor} from '../../src/viewer';
@@ -33,10 +34,15 @@ describe('3p-frame', () => {
 
   let clock;
   let sandbox;
+  let container;
+  let preconnect;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    preconnect = preconnectForElement(container);
   });
 
   afterEach(() => {
@@ -48,6 +54,7 @@ describe('3p-frame', () => {
     if (m) {
       m.parentElement.removeChild(m);
     }
+    document.body.removeChild(container);
   });
 
   function addCustomBootstrap(url) {
@@ -139,6 +146,7 @@ describe('3p-frame', () => {
         .returns('http://acme.org/')
         .once();
 
+    container.appendChild(div);
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
     const locationHref = location.href;
@@ -235,7 +243,7 @@ describe('3p-frame', () => {
 
   it('should prefetch bootstrap frame and JS', () => {
     window.AMP_MODE = {localDev: true};
-    preloadBootstrap(window);
+    preloadBootstrap(window, preconnect);
     // Wait for visible promise
     return Promise.resolve().then(() => {
       const fetches = document.querySelectorAll(
@@ -311,6 +319,7 @@ describe('3p-frame', () => {
       };
     };
 
+    container.appendChild(div);
     const name = getIframe(window, div).name;
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     resetCountForTesting();

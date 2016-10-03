@@ -148,14 +148,23 @@ export const VideoAttributes = {
  */
 export const VideoEvents = {
   /**
-   * canplay
+   * load
    *
-   * Fired when the video player can start playing the video.
-   * Normally fired from `layoutCallback`.
+   * Fired when the video player is loaded and calls to methods such as `play()`
+   * are allowed.
    *
-   * @event canplay
+   * @event load
    */
-  CANPLAY: 'canplay',
+  LOAD: 'load',
+
+  /**
+   * amp:video:usertap
+   *
+   * Fired when user taps any part of the video player.
+   *
+   * @event amp:video:usertap
+   */
+  USER_TAP: 'amp:video:usertap',
 
   /**
    * amp:video:visibility

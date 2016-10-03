@@ -15,16 +15,15 @@
  */
 
 
+import {dev, user} from './log';
+import {documentInfoForDoc} from './document-info';
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
-import {documentInfoForDoc} from './document-info';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {user} from './log';
 import {viewerFor} from './viewer';
 import {urls} from './config';
 
@@ -95,14 +94,20 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!Element} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
  * @return {!Element} The iframe.
  */
-export function getIframe(parentWindow, element, opt_type, opt_context) {
+export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
+  // Check that the parentElement is already in DOM. This code uses a new and
+  // fast `isConnected` API and thus only used when it's available.
+  dev().assert(
+      parentElement['isConnected'] === undefined ||
+      parentElement['isConnected'] === true,
+      'Parent element must be in DOM');
   const attributes =
-      getFrameAttributes(parentWindow, element, opt_type, opt_context);
+      getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
@@ -165,10 +170,10 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
+ * @param {!./preconnect.Preconnect} preconnect
  */
-export function preloadBootstrap(window) {
+export function preloadBootstrap(window, preconnect) {
   const url = getBootstrapBaseUrl(window);
-  const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be

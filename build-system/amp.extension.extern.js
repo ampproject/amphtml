@@ -30,8 +30,21 @@ AMP.BaseElement = class {
   constructor(element) {}
 };
 
-// TODO(@cramforce): Properly type.
-AMP.AmpAdApiHandler;
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor
+ * @extends {AmpAdApiHandler$$module$extensions$amp_ad$0_1$amp_ad_api_handler}
+ */
+AMP.AmpAdApiHandler = class {
+  /**
+   * @param {!AMP.BaseElement} baseInstance
+   * @param {!Element} element
+   * @param {function()=} opt_noContentCallback
+   */
+  constructor(baseInstance, element, opt_noContentCallback) {}
+}
 
 /*
      \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|

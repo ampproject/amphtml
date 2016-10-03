@@ -18,7 +18,7 @@
  * Returns a promise which resolves if a threshold amount of the given promises
  * resolve, and rejects otherwise.
  * @param {!Array<!Promise>} promises The array of promises to test.
- * @param {Number} count The number of promises that must resolve for the
+ * @param {number} count The number of promises that must resolve for the
  *     returned promise to resolve.
  * @return {!Promise} A promise that resolves if any of the given promises
  *     resolve, and which rejects otherwise.

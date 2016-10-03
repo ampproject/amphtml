@@ -28,6 +28,7 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
+import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
 import * as sinon from 'sinon';
 
 class MockA4AImpl extends AmpA4A {
@@ -272,6 +273,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
+        doc.body.appendChild(a4aElement);
         const a4a = new MockA4AImpl(a4aElement);
         const fullResponse = `<html amp>
             <body>
@@ -511,6 +513,7 @@ describe('amp-a4a', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
+        doc.body.appendChild(a4aElement);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         const bytes = buildCreativeArrayBuffer();
@@ -652,6 +655,7 @@ describe('amp-a4a', () => {
           a4aElement.setAttribute('width', 200);
           a4aElement.setAttribute('height', 50);
           a4aElement.setAttribute('type', 'adsense');
+          doc.body.appendChild(a4aElement);
           const a4a = new MockA4AImpl(a4aElement);
           viewerForMock.returns(Promise.resolve());
           xhrMock.withArgs('https://test.location.org/ad/012345?args', {

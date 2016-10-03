@@ -20,7 +20,9 @@ import {dev} from '../src/log';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function fakead3p(global, data) {
+export function _ping_(global, data) {
+  global.document.getElementById('c').textContent = data.ping;
+
   if (data.ad_container) {
     dev().assert(
         global.context.container == data.ad_container, 'wrong container');

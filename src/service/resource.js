@@ -227,6 +227,14 @@ export class Resource {
   }
 
   /**
+   * Returns whether the resource has been blacklisted.
+   * @return {boolean}
+   */
+  isBlacklisted() {
+    return this.blacklisted_;
+  }
+
+  /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
    */
@@ -247,6 +255,7 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**

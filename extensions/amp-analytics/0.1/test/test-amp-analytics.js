@@ -28,12 +28,8 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
-import {installViewportService} from '../../../../src/service/viewport-impl';
-import {
-  installUrlReplacementsService,
-} from '../../../../src/service/url-replacements-impl';
+import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
-import {installStorageService} from '../../../../src/service/storage-impl';
 
 
 /* global require: false */
@@ -67,11 +63,8 @@ describe('amp-analytics', function() {
       iframe.doc.title = 'Test Title';
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-      installStorageService(iframe.win);
       installViewerService(iframe.win);
-      installViewportService(iframe.win);
       installCidService(iframe.win);
-      installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
 
       resetServiceForTesting(iframe.win, 'xhr');
@@ -186,11 +179,11 @@ describe('amp-analytics', function() {
             const analytics = getAnalyticsTag(clearIframePing(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = installUrlReplacementsService(
-                analytics.win);
+            const urlReplacements = urlReplacementsForDoc(
+                analytics.win.document);
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
-              return '_' + name.toLowerCase() + '_';
+              return {sync: '_' + name.toLowerCase() + '_'};
             });
             const encodeVars = analytics.encodeVars_;
             sandbox.stub(analytics, 'encodeVars_', function(val, name) {
@@ -819,8 +812,7 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = installUrlReplacementsService(
-                analytics.win);
+      const urlReplacements = urlReplacementsForDoc(analytics.win.document);
       sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {assertHttpsUrl} from '../../../src/url';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {templatesFor} from '../../../src/template';
@@ -44,12 +44,12 @@ export class AmpList extends AMP.BaseElement {
     }
 
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
+    this.urlReplacements_ = urlReplacementsForDoc(this.getAmpDoc());
   }
 
   /** @override */
   layoutCallback() {
-    return this.urlReplacements_.expand(assertHttpsUrl(
+    return this.urlReplacements_.expandAsync(assertHttpsUrl(
         this.element.getAttribute('src'), this.element)).then(src => {
           const opts = {};
           if (this.element.hasAttribute('credentials')) {
