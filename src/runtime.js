@@ -158,6 +158,13 @@ function adoptShared(global, opts, callback) {
     win: global,
   };
 
+  /**
+   * @const {function(name, function(!Object))}
+   */
+  global.AMP.extension = function(name, installer) {
+    installer.call(null, global.AMP);
+  };
+
   /** @const */
   global.AMP.config = config;
 
@@ -492,6 +499,20 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
 
   dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
   return shadowRoot.AMP;
+}
+
+
+/**
+ * Attaches the shadow doc and configures ampdoc for it.
+ * @param {!Window} global
+ * @param {!./service/extensions-impl.Extensions} extensions
+ * @param {!Element} hostElement
+ * @param {!Document} doc
+ * @param {string} url
+ */
+export function attachShadowDocForTesting(global, hostElement, doc, url) {
+  const extensions = extensionsFor(global);
+  return prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url);
 }
 
 

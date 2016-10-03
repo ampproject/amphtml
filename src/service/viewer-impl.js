@@ -238,7 +238,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = (this.isIframed_ || this.params_['webview'] === '1') &&
-        !this.win.AMP_TEST_IFRAME;
+        (!this.win.AMP_TEST_IFRAME || this.win.AMP_TEST_EMBEDDED);
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();

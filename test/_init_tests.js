@@ -27,9 +27,24 @@ import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
+/**
+ * @const {!Object<string, function(!Object)>}
+ */
+const extensionsSet = {};
+
 // Needs to be called before the custom elements are first made.
 beforeTest();
 adopt(window);
+
+// Intercept all extensions
+global.AMP.extension = function(name, installer) {
+  extensionsSet[name] = installer;
+};
+
+export function installExtension(AMP, name) {
+  extensionsSet[name].call(null, AMP);
+}
+
 
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};

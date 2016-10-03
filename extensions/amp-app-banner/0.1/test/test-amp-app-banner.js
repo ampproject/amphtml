@@ -25,15 +25,16 @@ import {
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
 import {xhrFor} from '../../../../src/xhr';
-import {
-    installPerformanceService,
-} from '../../../../src/service/performance-impl';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-analytics/0.1/amp-analytics';
 import * as sinon from 'sinon';
 
+import {describeEnv} from '../../../../testing/describe';
 
-describe('amp-app-banner', () => {
+
+describeEnv('amp-app-banner', {
+  extensions: ['amp-app-banner'],
+}, test => {
 
   let sandbox;
   let vsync;
@@ -68,61 +69,6 @@ describe('amp-app-banner', () => {
     if (task.mutate) {
       task.mutate(state);
     }
-  }
-
-  function getTestFrame() {
-    return createIframePromise(true).then(iframe => {
-      installPerformanceService(iframe.win);
-      platform = platformFor(iframe.win);
-      sandbox.stub(platform, 'isIos', () => isIos);
-      sandbox.stub(platform, 'isAndroid', () => isAndroid);
-      sandbox.stub(platform, 'isChrome', () => isChrome);
-      sandbox.stub(platform, 'isSafari', () => isSafari);
-
-      vsync = vsyncFor(iframe.win);
-      sandbox.stub(vsync, 'runPromise', (task, state) => {
-        runTask(task, state);
-        return Promise.resolve();
-      });
-      sandbox.stub(vsync, 'run', runTask);
-      toggleExperiment(iframe.win, 'amp-app-banner', true);
-      return iframe;
-    });
-  }
-
-  function getAppBanner(config = {}) {
-    return getTestFrame().then(iframe => {
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'https://example.com/amps.html');
-      iframe.doc.head.appendChild(link);
-
-      if (config.meta) {
-        const meta = iframe.doc.createElement('meta');
-        meta.setAttribute('name', 'apple-itunes-app');
-        meta.setAttribute('content', config.meta.content);
-        iframe.doc.head.appendChild(meta);
-      }
-
-      if (config.manifest) {
-        const manifest = iframe.doc.createElement('link');
-        manifest.setAttribute('rel', 'amp-manifest');
-        manifest.setAttribute('href', config.manifest.href);
-        iframe.doc.head.appendChild(manifest);
-        sandbox.mock(xhrFor(iframe.win)).expects('fetchJson')
-            .returns(Promise.resolve(config.manifest.content));
-      }
-
-      const banner = iframe.doc.createElement('amp-app-banner');
-      banner.setAttribute('layout', 'nodisplay');
-      if (!config.noOpenButton) {
-        const openButton = iframe.doc.createElement('button');
-        openButton.setAttribute('open-button', '');
-        banner.appendChild(openButton);
-      }
-
-      return iframe.addElement(banner);
-    });
   }
 
   function testButtonMissing() {
@@ -161,9 +107,8 @@ describe('amp-app-banner', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    installPerformanceService(window);
-    platform = platformFor(window);
+    sandbox = test.sandbox;
+    platform = platformFor(test.win);
     sandbox.stub(platform, 'isIos', () => isIos);
     sandbox.stub(platform, 'isAndroid', () => isAndroid);
     sandbox.stub(platform, 'isChrome', () => isChrome);
@@ -181,20 +126,16 @@ describe('amp-app-banner', () => {
   describe('Choosing platform', () => {
     it('should upgrade to AmpIosAppBanner on iOS', () => {
       isIos = true;
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        const newInstance = banner.upgradeCallback();
-        expect(newInstance instanceof AmpIosAppBanner).to.be.true;
-      });
+      const banner = new AmpAppBanner(test.win.document.createElement('div'));
+      const newInstance = banner.upgradeCallback();
+      expect(newInstance instanceof AmpIosAppBanner).to.be.true;
     });
 
     it('should upgrade to AmpAndroidAppBanner on Android', () => {
       isAndroid = true;
-      return getTestFrame().then(() => {
-        const banner = new AmpAppBanner(document.createElement('div'));
-        const newInstance = banner.upgradeCallback();
-        expect(newInstance instanceof AmpAndroidAppBanner).to.be.true;
-      });
+      const banner = new AmpAppBanner(test.win.document.createElement('div'));
+      const newInstance = banner.upgradeCallback();
+      expect(newInstance instanceof AmpAndroidAppBanner).to.be.true;
     });
 
     it('should not upgrade if platform not supported', () => {

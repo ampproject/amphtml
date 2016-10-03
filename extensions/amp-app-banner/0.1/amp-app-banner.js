@@ -435,4 +435,6 @@ function updateViewportPadding(state) {
 }
 
 
-AMP.registerElement('amp-app-banner', AmpAppBanner, CSS);
+AMP.extension('amp-app-banner', function(AMP) {
+  AMP.registerElement('amp-app-banner', AmpAppBanner, CSS);
+});
