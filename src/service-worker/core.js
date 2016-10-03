@@ -46,7 +46,7 @@ const BLACKLIST = self.AMP_CONFIG[`${TAG}-blacklist`] || [];
  * @const
  * @type {RtvVersion}
  */
-const VERSION = self.AMP_CONFIG.v;
+const BASE_RTV_VERSION = self.AMP_CONFIG.v;
 
 /**
  * Returns the version of a given versioned JS file.
@@ -58,7 +58,7 @@ const VERSION = self.AMP_CONFIG.v;
 export function rtvVersion(url) {
   // RTVs are 2 digit prefixes followed by the timestamp of the release.
   const matches = /rtv\/(\d{2}\d{13,})/.exec(url);
-  return matches ? matches[1] : VERSION;
+  return matches ? matches[1] : BASE_RTV_VERSION;
 }
 
 /**
@@ -295,7 +295,7 @@ export function handleFetch(request, maybeClientId) {
         // Now, was it because we served an old cached version or because
         // they requested this exact version; If we served an old version,
         // let's get the new one.
-        if (version !== requestVersion && requestVersion == VERSION) {
+        if (version !== requestVersion && requestVersion == BASE_RTV_VERSION) {
           fetchAndCache(cache, request, requestFile, requestVersion);
         }
 
