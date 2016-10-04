@@ -515,7 +515,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} raw The values to URI encode.
+   * @param {string|!Array<string>} raw The values to URI encode.
    * @param {string} unusedName Name of the variable.
    * @return {string} The encoded value.
    * @private
@@ -548,7 +548,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (v == null) {
         continue;
       } else {
-        const sv = /** @type {string} */ (this.encodeVars_(v));
+        const sv = this.encodeVars_(v, k);
         s.push(`${encodeURIComponent(k)}=${sv}`);
       }
     }
