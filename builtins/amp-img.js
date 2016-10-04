@@ -17,7 +17,6 @@
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
-import {user} from '../src/log';
 import {srcsetFromElement} from '../src/srcset';
 
 
@@ -43,6 +42,8 @@ export class AmpImg extends BaseElement {
   /** @override */
   buildCallback() {
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
+
+    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -74,8 +75,6 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -113,9 +112,7 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = user().assert(this.srcset_,
-        'Either non-empty "srcset" or "src" attribute must be specified: %s',
-        this.element).select(this.getLayoutWidth(), this.getDpr()).url;
+    const src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
