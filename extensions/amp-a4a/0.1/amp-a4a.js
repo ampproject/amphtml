@@ -30,6 +30,7 @@ import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
@@ -46,6 +47,7 @@ import {
 import {
     EXPERIMENT_ATTRIBUTE,
     isInManualExperiment,
+    randomlySelectUnsetPageExperiments,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
     ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
@@ -156,10 +158,17 @@ export class AmpA4A extends AMP.BaseElement {
         (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
         (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
         isInManualExperiment(element);
+    // In local dev mode, neither the canary nor prod config files is available,
+    // so manually set the profiling rate, for testing/dev.
+    if (getMode().localDev &&
+        (!this.win.AMP_CONFIG || !this.win.AMP_CONFIG['a4aProfilingRate'])) {
+      this.win.AMP_CONFIG = this.win.AMP_CONFIG || {};
+      this.win.AMP_CONFIG['a4aProfilingRate'] = 1.0;
+    }
     randomlySelectUnsetPageExperiments(this.win, PROFILING_RATE);
     if ((type == 'doubleclick' || type == 'adsense') &&
         isGoogleExperimentBranch &&
-        isExperimentOn(this.win, "a4aProfilingRate")) {
+        isExperimentOn(this.win, 'a4aProfilingRate')) {
       this.lifecycleReporter_ =
           new AmpAdLifecycleReporter(this.win, this.element, 'a4a');
     } else {
