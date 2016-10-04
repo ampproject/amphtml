@@ -253,7 +253,7 @@ export function onDocumentElementClick_(
     elem = (ampdoc.getRootNode().getElementById(hash) ||
         // Fallback to anchor[name] if element with id is not found.
         // Linking to an anchor element with name is obsolete in html5.
-        ampdoc.getRootNode().querySelector(`a[name=${escapedHash}]`));
+        ampdoc.getRootNode().querySelector(`a[name="${escapedHash}]"`));
   }
 
   // If possible do update the URL with the hash. As explained above
