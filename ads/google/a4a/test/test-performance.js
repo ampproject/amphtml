@@ -117,12 +117,12 @@ describe('AmpAdLifecycleReporter', () => {
     it('should request multiple pings and write all to the DOM', () => {
       return iframePromise.then(({win, doc, elem, reporter}) => {
         const stages = {
-          constructor: '0',
+          adSlotBuilt: '0',
           adRequestStart: '1',
           buildUrl: '2',
           sendAdRequest: '3',
           extractCreativeAndSignature: '4',
-          validateAdResponse: '5',
+          adResponseValidateStart: '5',
           maybeRenderAmpAd: '6',
           renderViaIframe: '7',
           renderStart: '10',
@@ -156,9 +156,9 @@ describe('AmpAdLifecycleReporter', () => {
     it('should use diff slot IDs, but the same correlator', () => {
       return iframePromise.then(({win, doc, unusedElem, unusedReporter}) => {
         const stages = {
-          constructor: '0',
-          validateAdResponse: '5',
-          layoutCallback: '10',
+          adSlotBuilt: '0',
+          adResponseValidateStart: '5',
+          renderStart: '10',
         };
         const nStages = 3;
         const allReporters = [];

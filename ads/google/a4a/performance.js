@@ -45,12 +45,12 @@ const PINGBACK_ADDRESS = 'https://csi.gstatic.com/csi';
 const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
   // not test as `false` later.
-  constructor: '0',
+  adSlotBuilt: '0',
   adRequestStart: '1',
   buildUrl: '2',
   sendAdRequest: '3',
   extractCreativeAndSignature: '4',
-  validateAdResponse: '5',
+  adResponseValidateStart: '5',
   maybeRenderAmpAd: '6',
   renderViaIframe: '7',
   renderStart: '10',

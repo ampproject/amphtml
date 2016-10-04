@@ -124,7 +124,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     } else {
       this.lifecycleReporter_ = new NullLifecycleReporter();
     }
-    this.lifecycleReporter_.sendPing('constructor');
+    this.lifecycleReporter_.sendPing('adSlotBuilt');
   }
 
   /** @override */

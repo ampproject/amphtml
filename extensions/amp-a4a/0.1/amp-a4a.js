@@ -174,7 +174,7 @@ export class AmpA4A extends AMP.BaseElement {
     } else {
       this.lifecycleReporter_ = new NullLifecycleReporter();
     }
-    this.lifecycleReporter_.sendPing('constructor');
+    this.lifecycleReporter_.sendPing('adSlotBuilt');
   }
 
   /** @override */
@@ -355,7 +355,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts || !creativeParts.signature) {
             return null;
           }
-          this.lifecycleReporter_.sendPing('validateAdResponse');
+          this.lifecycleReporter_.sendPing('adResponseValidateStart');
 
           // For each signing service, we have exactly one Promise,
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
