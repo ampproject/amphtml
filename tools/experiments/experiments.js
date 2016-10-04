@@ -94,12 +94,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
-    id: 'amp-slidescroll',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
-  },
-  {
     id: 'amp-scrollable-carousel',
     name: 'AMP carousel using horizontal scroll',
     spec: '',

@@ -16,6 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {analyticsForOrNull} from '../../../src/analytics';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -87,6 +88,9 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {number} */
     this.previousScrollLeft_ = 0;
+
+    /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
+    this.analyticsPromise_ = null;
   }
 
   /** @override */
@@ -95,6 +99,8 @@ export class AmpSlideScroll extends BaseSlides {
   }
   /** @override */
   buildSlides() {
+    this.analyticsPromise_ = analyticsForOrNull(this.win);
+
     this.vsync_ = this.getVsync();
 
     this.hasNativeSnapPoints_ = (
@@ -455,6 +461,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.slidesContainer_./*OK*/scrollLeft =
         this.getScrollLeftForIndex_(newIndex);
+    this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
@@ -535,5 +542,42 @@ export class AmpSlideScroll extends BaseSlides {
     this.element.addEventListener('touchmove', event => {
       event.stopPropagation();
     });
+  }
+
+  /**
+   * @param {number} newSlideIndex
+   * @private
+   */
+  triggerAnalyticsEvent_(newSlideIndex) {
+    let direction = newSlideIndex - this.slideIndex_;
+    if (direction == 0) {
+      return;
+    } else if (Math.abs(direction) !== 1) {
+      // When the direction is not +1 or -1 (happens with loops)
+      // Set the correct direction.
+      direction = direction < 0 ? 1 : -1;
+    }
+    this.analyticsEvent_('amp-carousel-change');
+    // At this point direction can be only +1 or -1.
+    if (direction == 1) {
+      this.analyticsEvent_('amp-carousel-next');
+    } else {
+      this.analyticsEvent_('amp-carousel-prev');
+    }
+  }
+
+  /**
+   * @param {string} eventType
+   * @private
+   */
+  analyticsEvent_(eventType) {
+    if (this.analyticsPromise_) {
+      this.analyticsPromise_.then(analytics => {
+        if (!analytics) {
+          return;
+        }
+        analytics.triggerEvent(eventType);
+      });
+    }
   }
 }
