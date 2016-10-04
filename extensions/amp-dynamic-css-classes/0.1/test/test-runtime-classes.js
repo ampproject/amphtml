@@ -18,7 +18,7 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {installVsyncService} from '../../../../src/service/vsync-impl';
-import {installDynamicClassesService} from '../amp-dynamic-css-classes';
+import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
 const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
@@ -37,6 +37,7 @@ describe('dynamic classes are inserted at runtime', () => {
       return this.indexOf(c) > -1;
     };
     body = {
+      nodeType: /* ELEMENT */ 1,
       tagName: 'BODY',
       classList,
     };
@@ -77,7 +78,7 @@ describe('dynamic classes are inserted at runtime', () => {
     if (referrer !== undefined) {
       viewer.getUnconfirmedReferrerUrl = () => referrer;
     }
-    installDynamicClassesService(mockWin);
+    installDynamicClassesForTesting(ampdoc);
   }
 
   describe('when embedded', () => {
