@@ -376,17 +376,16 @@ function createBaseCustomElementClass(win, name) {
   return class BaseCustomElement extends superclass {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
+     * @suppress {checkTypes}
      */
     constructor(self) {
-      /** @suppress {checkTypes} */
       self = super(self);
       self.init();
       return self;
     }
 
     /**
-     * @constructor
-     * @suppress {misplacedTypeAnnotation}
+     * @suppress {checkTypes}
      */
     init() {
       /** @type {?string}  */
@@ -491,9 +490,11 @@ function createBaseCustomElementClass(win, name) {
       this.isInTemplate_ = undefined;
     }
 
-    /** The Custom Elements V0 version of the constructor. */
+    /**
+     * The Custom Elements V0 version of the constructor.
+     * @suppress {checkTypes}
+     */
     createdCallback() {
-      /** @suppress {checkTypes} */
       this.init();
     }
 
@@ -1128,18 +1129,18 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Collapses the element, and notifies its owner (if there is one) that the
      * element is no longer present.
+     * @suppress {missingProperties}
      */
     collapse() {
-      /** @suppress {missingProperties} */
       this.implementation_.collapse();
     }
 
     /**
      * Called every time an owned AmpElement collapses itself.
      * @param {!AmpElement} element
+     * @suppress {missingProperties}
      */
     collapsedCallback(element) {
-      /** @suppress {missingProperties} */
       this.implementation_.collapsedCallback(element);
     }
 
