@@ -19,8 +19,7 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {signingServerURLs} from '../../../ads/_a4a-config';
-import {removeElement, removeChildren} from '../../../src/dom';
+import {removeChildren, createElementWithAttributes} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -32,7 +31,6 @@ import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
-import {createElementWithAttributes} from '../../../../src/dom';
 import {
   importPublicKey,
   isCryptoAvailable,
@@ -47,15 +45,46 @@ import {
 const devJwkSet = [{
   kty: 'RSA',
   n: 'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
-      'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +
-      'nvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEz' +
-      'fZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca' +
-      '8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2' +
-      'sQuM5KangAkjJRe-Ej6aaQ',
-  e: 'AQAB',
+  'n': modulus,
+  'e': pubExp,
   alg: 'RS256',
   ext: true,
-}];
+})];
+
+// If we're in local dev/test mode then we may be talking to a dev validation
+// instance as well.  Dev validators use different keys than production ones
+// do, so we need to add the dev key to the known key list.
+//
+// Note: This is temporary.  It will not be necessary once A4A can fetch keys
+// directly from the server.
+if (getMode().localDev || getMode().test) {
+  publicKeyInfos.push(importPublicKey({
+    kty: 'RSA',
+    'n': devModulus,
+    'e': pubExp,
+    alg: 'RS256',
+    ext: true,
+  }));
+}
+
+/**
+ * @param {!ArrayBuffer} bytes
+ * @return {!Promise<string>}
+ */
+// TODO(taymonbeal): move this somewhere more sensible
+export function utf8FromArrayBuffer(bytes) {
+  if (window.TextDecoder) {
+    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+  }
+  return new Promise(function(resolve, unusedReject) {
+    const reader = new FileReader();
+    reader.onloadend = function(unusedEvent) {
+      resolve(reader.result);
+    };
+    reader.readAsText(new Blob([bytes]));
+  });
+}
+>>>>>>> Change to stitching creative instead of removing portions
 
 /**
  * @param {*} ary
@@ -69,7 +98,6 @@ function isValidOffsetArray(ary) {
 };
 
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
-const AMP_BODY_STRING = 'amp-ad-body';
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
 export let AdResponseDef;
@@ -118,13 +146,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {null|boolean} where layoutMeasure has been executed. */
     this.layoutMeasureExecuted_ = false;
 
-    /**
-     * @private {!Array<!Element>} stylesheets added as part of shadow DOM
-     *    based creative injection.
-     */
-    this.stylesheets_ = [];
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
 
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
@@ -397,7 +419,6 @@ export class AmpA4A extends AMP.BaseElement {
     // valid AMP.
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
-      console.log('layoutCallback promise result', rendered, this.rendered_);
       if (rendered instanceof Error) {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
@@ -421,11 +442,13 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.layoutMeasureExecuted_) {
       return true;
     }
+    // TODO(keithwrightbos): is mutate necessary?  Could this lead to a race
+    // condition where unlayoutCallback fires and during/after subsequent
+    // layoutCallback execution, the mutate operation executes causing our
+    // state to be destroyed?
     this.vsync_.mutate(() => {
       removeChildren(this.element);
 
-      this.stylesheets_.forEach(removeElement);
-      this.stylesheets_ = [];
       this.adPromise_ = null;
       this.adUrl_ = null;
       this.rendered_ = false;
@@ -475,15 +498,6 @@ export class AmpA4A extends AMP.BaseElement {
   extractCreativeAndSignature(unusedResponseArrayBuffer,
       unusedResponseHeaders) {
     throw new Error('extractCreativeAndSignature not implemented!');
-  }
-
-  /**
-   * @return {boolean} whether environment supports rendering of AMP creatives
-   *    within publisher page via shadow DOM (otherwise will be rendered within)
-   *    cross domain iframe.  If valid AMP creative, will be rendered early.
-   */
-  supportsShadowDom() {
-    return !!window.Element.prototype.createShadowRoot;
   }
 
   /**
@@ -627,33 +641,33 @@ export class AmpA4A extends AMP.BaseElement {
               'allowtransparency': '', 'scrolling': 'no'});
           this.applyFillContent(iframe);
 
-          // HTML is all but the extensions which must be removed from the
-          // creative.
-          // TODO(keithwrightbos): remove this monstrousity in favor of
-          // validation providing offsets to extension & AMP runtime
-          // locations.
-          const extensions =
-            creativeMetaData.customElementExtensions || [];
-          // Include v0.js for removal.
-          extensions.push('v0\.js');
-          extensions.forEach(extension => {
-            creative = creative.replace(new RegExp(
-              `<script[^>]+${extensionName}[^>]+>\s*</script\s*>\n?`),
-              '');
-          });
-          // Remove v0.js so that it is not passed to
-          // installFriendlyIframeEmbed.
-          extensions.pop();
-          // TODO(keithwrightbos): remove this when we know all creatives
-          // have moved to AMP AD document format validation, ensure it does
-          // not match amp4ads-boilerplate.
-          creative = creative.replace(
-            /<style\s+([^>]*\s+)?amp-boilerplate[^>]*>[^>]+<\/style\s*>/, '');
+          const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
+          const bodyBlock = this.formatBody_(creative, creativeMetaData);
+          const bodyAttrString = creativeMetaData.bodyAttributes ?
+                  ' ' + creativeMetaData.bodyAttributes : '';
+          const fonts = [];
+          if (creativeMetaData.customStylesheets) {
+            creativeMetaData.customStylesheets.forEach(s => {
+              const href = s['href'];
+              if (href) {
+                fonts.push(href);
+              }
+            });
+          }
+          const modifiedCreative =
+            `<!doctype html><html ⚡4ads>
+            <head>
+              <style amp4ads-boilerplate>body{visibility:hidden}</style>
+              <style amp-custom>${cssBlock}</style>
+              </head>
+            <body ${bodyAttrString}>${bodyBlock}</body>
+            </html>`;
           return installFriendlyIframeEmbed(
             iframe, this.element, {
               url: this.adUrl_,
-              html: creative,
-              extensionIds: extensions,
+              html: modifiedCreative,
+              extensionIds: creativeMetaData.customElementExtensions || [],
+              fonts: fonts
             }).then(() => {
               this.rendered_ = true;
               this.onAmpCreativeRender();
@@ -735,7 +749,7 @@ export class AmpA4A extends AMP.BaseElement {
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd))));
     } catch (err) {
       dev().warn('A4A', 'Invalid amp metadata: %s',
-          creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
+        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }
   }
@@ -747,14 +761,48 @@ export class AmpA4A extends AMP.BaseElement {
    */
   buildCreativeMetaData_(metaDataObj) {
     const metaData = {};
+    metaData.bodyUtf16CharOffsets = metaDataObj['bodyUtf16CharOffsets'];
+    if (!isValidOffsetArray(metaData.bodyUtf16CharOffsets)) {
+      // Invalid/Missing body offsets array.
+      throw new Error('Invalid/missing body offsets');
+    }
+    if (metaDataObj['cssUtf16CharOffsets']) {
+      metaData.cssUtf16CharOffsets = metaDataObj['cssUtf16CharOffsets'];
+      if (!isValidOffsetArray(metaData.cssUtf16CharOffsets)) {
+        throw new Error('Invalid CSS offsets');
+      }
+    }
+    if (metaDataObj['bodyAttributes']) {
+      metaData.bodyAttributes = metaDataObj['bodyAttributes'];
+      if (typeof metaData.bodyAttributes !== 'string') {
+        throw new Error('Invalid body attributes');
+      }
+    }
     if (metaDataObj['customElementExtensions']) {
       metaData.customElementExtensions = metaDataObj['customElementExtensions'];
       if (!isArray(metaData.customElementExtensions)) {
         throw new Error('Invalid extensions');
       }
     }
+    if (metaDataObj['customStylesheets']) {
+      // Expect array of objects with at least one key being 'href' whose value
+      // is URL.
+      metaData.customStylesheets = metaDataObj['customStylesheets'];
+      const errorMsg = 'Invalid custom stylesheets';
+      if (!isArray(metaData.customStylesheets)) {
+        throw new Error(errorMsg);
+      }
+      metaData.customStylesheets.forEach(stylesheet => {
+        if (!isObject(stylesheet) || !stylesheet['href'] ||
+            typeof stylesheet['href'] !== 'string' ||
+            !/^https:\/\//i.test(stylesheet['href'])) {
+              throw new Error(errorMsg);
+        }
+      });
+    }
     return metaData;
   }
+<<<<<<< d6bcaba47a8009f4075c821999fd6ff249d86a29
 <<<<<<< a3957ab005a2c140a3fdca53c9b3948069813410
 
   /**
@@ -797,4 +845,35 @@ export class AmpA4A extends AMP.BaseElement {
     }
     return css;
   }
+
+ /**
+  * Extracts the body portion of the creative, according to directions in the
+  * metaData, and formats it for insertion into Shadow DOM.
+  * @param {string} creative from which CSS is extracted
+  * @param {!CreativeMetaDataDef} metaData Metadata object extracted from the
+  *    reserialized creative.
+  * @returns {string}  Body of AMP creative, surrounded by {@code
+  *     <amp-ad-body>} tags, and suitable for injection into Shadow DOM.
+  * @private
+  */
+ formatBody_(creative, metaData) {
+   return creative.substring(metaData.bodyUtf16CharOffsets[0],
+       metaData.bodyUtf16CharOffsets[1]);
+ }
+
+ /**
+  * Note: destructively reverses the {@code offsets} list as a side effect.
+  * @param {string} creative from which CSS is extracted
+  * @param {!CreativeMetaDataDef} meta data from creative.
+  * @returns {string} CSS to be added to page.
+  */
+ formatCSSBlock_(creative, metaData) {
+   if (!metaData.cssUtf16CharOffsets) {
+     return '';
+   }
+   let css = creative.substring(
+       metaData.cssUtf16CharOffsets[0],
+       metaData.cssUtf16CharOffsets[1]);
+   return css;
+ }
 }
