@@ -15,9 +15,9 @@
  */
 
 import {
-    closestByTag,
-    openWindowDialog,
-    escapeCssSelectorIdent,
+  closestByTag,
+  openWindowDialog,
+  escapeCssSelectorIdent,
 } from './dom';
 import {fromClassForDoc} from './service';
 import {dev} from './log';
