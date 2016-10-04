@@ -382,16 +382,17 @@ function createBaseCustomElementClass(win, name) {
      */
     constructor(self) {
       self = super(self);
-      self.init();
+      self.init_();
       return self;
     }
 
     /**
      * Sets up properties for this class.
+     * @private
      * @note Suppresses type check for Custom Elements V0 compatibility.
      * @suppress {checkTypes}
      */
-    init() {
+    init_() {
       /** @type {?string}  */
       this.name = name;
 
@@ -499,7 +500,7 @@ function createBaseCustomElementClass(win, name) {
      * @suppress {checkTypes}
      */
     createdCallback() {
-      this.init();
+      this.init_();
     }
 
     /**
