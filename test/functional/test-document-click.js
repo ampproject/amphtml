@@ -215,6 +215,20 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
 
+    it('should use escaped css selectors', () => {
+      tgt.href = 'https://www.google.com/some-path?hello=world#test%20hello';
+      getElementByIdSpy.returns(null);
+      querySelectorSpy.returns(elem);
+
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(querySelectorSpy).to.be.calledWith('a[name="test\\%20hello"]');
+
+      querySelectorSpy.reset();
+      tgt.href = 'https://www.google.com/some-path?hello=world#test"hello';
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(querySelectorSpy).to.be.calledWith('a[name="test\\"hello"]');
+    });
+
     it('should call location.replace before scrollIntoView', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(elem);
