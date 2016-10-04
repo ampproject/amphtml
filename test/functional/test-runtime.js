@@ -365,6 +365,9 @@ describe('runtime', () => {
 
       // Already installed.
       expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
+
+      // The main top-level service is also pinged to unblock render.
+      return getServicePromise(win, 'service1');
     });
 
     it('should register doc-service factory and install it immediately', () => {
