@@ -493,7 +493,7 @@ function prepareAndAttachShadowDoc(
   installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
 
   // Instal doc services.
-  installAmpdocServices(ampdoc, opt_initParams || {});
+  installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
 
   const viewer = viewerForDoc(ampdoc);
 
