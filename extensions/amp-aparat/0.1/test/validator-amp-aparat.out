@@ -1,0 +1,4 @@
+FAIL
+amp-aparat/0.1/test/validator-amp-aparat.html:46:2 The tag 'amp-aparat' is missing a mandatory attribute - pick one of data-media-id or data-playlist-id. (see https://www.ampproject.org/docs/reference/extended/amp-aparat.html) [AMP_TAG_PROBLEM]
+amp-aparat/0.1/test/validator-amp-aparat.html:46:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-aparat'. (see https://www.ampproject.org/docs/reference/extended/amp-aparat.html) [AMP_TAG_PROBLEM]
+amp-aparat/0.1/test/validator-amp-aparat.html:50:2 The tag 'amp-aparat' is missing a mandatory attribute - pick one of data-media-id or data-playlist-id. (see https://www.ampproject.org/docs/reference/extended/amp-aparat.html) [AMP_TAG_PROBLEM]
