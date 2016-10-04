@@ -29,32 +29,30 @@ const ANIMATION_TIMEOUT = 550;
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
 
 export class AmpSidebar extends AMP.BaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NOLAYOUT;
-  }
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  /** @override */
-  buildCallback() {
+    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(this.win);
+
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private @const {!Document} */
     this.document_ = this.win.document;
 
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
 
-    /** @private @const {string} */
-    this.side_ = this.element.getAttribute('side');
-
-    /** @private @const {!Viewport} */
-    this.viewport_ = this.getViewport();
-
-    /** @private @const {!Element} */
-    this.maskElement_ = false;
-
-    /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    /** @private {?string} */
+    this.side_ = null;
 
     const platform = platformFor(this.win);
+
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -63,6 +61,18 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+  buildCallback() {
+    this.side_ = this.element.getAttribute('side');
+
+    this.viewport_ = this.getViewport();
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -250,7 +260,7 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * @private @return {!History}
+   * @private @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
     return historyForDoc(this.getAmpDoc());
