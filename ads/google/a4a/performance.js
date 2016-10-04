@@ -46,19 +46,19 @@ const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
   // not test as `false` later.
   constructor: '0',
-  onLayoutMeasure: '1',
+  adRequestStart: '1',
   buildUrl: '2',
-  sendXhrRequest: '3',
+  sendAdRequest: '3',
   extractCreativeAndSignature: '4',
   validateAdResponse: '5',
   maybeRenderAmpAd: '6',
   renderViaIframe: '7',
-  layoutCallback: '10',
-  unlayoutCallback: '20',
+  renderStart: '10',
+  unlayoutAdSlot: '20',
 };
 
 export const PROFILING_RATE = {
-  a4aProfilingRate: { on: 1 },
+  a4aProfilingRate: {on: 1},
 };
 
 export class AmpAdLifecycleReporter {

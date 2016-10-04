@@ -254,7 +254,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.lifecycleReporter_.sendPing('onLayoutMeasure');
+    this.lifecycleReporter_.sendPing('adRequestStart');
     if (this.apiHandler_) {
       this.apiHandler_.onLayoutMeasure();
     }
@@ -311,7 +311,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing('sendXhrRequest');
+          this.lifecycleReporter_.sendPing('sendAdRequest');
           this.adUrl_ = adUrl;
           return adUrl && this.sendXhrRequest_(adUrl);
         })
@@ -447,7 +447,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.lifecycleReporter_.sendPing('layoutCallback');
+    this.lifecycleReporter_.sendPing('renderStart');
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_ || this.rendered_) {
       return Promise.resolve();
@@ -480,7 +480,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    this.lifecycleReporter_.sendPing('unlayoutCallback');
+    this.lifecycleReporter_.sendPing('unlayoutAdSlot');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;

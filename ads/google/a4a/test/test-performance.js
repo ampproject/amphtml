@@ -93,7 +93,7 @@ describe('AmpAdLifecycleReporter', () => {
         const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
         reporter.setPingAddress('/');
         expect(emitPingSpy).to.not.be.called;
-        reporter.sendPing('onLayoutMeasure');
+        reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
@@ -101,8 +101,8 @@ describe('AmpAdLifecycleReporter', () => {
           // In unit tests, internalRuntimeVersion is not substituted.
           /[&?]rls=\$internalRuntimeVersion\$/,
           /[&?]c=[0-9]+/,
-          /[&?]it=[^&?]*onLayoutMeasure\.[0-9]+/,
-          /[&?]it=[^&?]*onLayoutMeasure_0\.[0-9]+/,
+          /[&?]it=[^&?]*adRequestStart\.[0-9]+/,
+          /[&?]it=[^&?]*adRequestStart_0\.[0-9]+/,
           /[&?]rt=stage\.1+/,
         ];
         expectMatchesAll(arg, expectations);
@@ -114,15 +114,15 @@ describe('AmpAdLifecycleReporter', () => {
       return createIframePromise().then(fixture => {
         const stages = {
           constructor: '0',
-          onLayoutMeasure: '1',
+          adRequestStart: '1',
           buildUrl: '2',
-          sendXhrRequest: '3',
+          sendAdRequest: '3',
           extractCreativeAndSignature: '4',
           validateAdResponse: '5',
           maybeRenderAmpAd: '6',
           renderViaIframe: '7',
-          layoutCallback: '10',
-          unlayoutCallback: '20',
+          renderStart: '10',
+          unlayoutAdSlot: '20',
         };
         const win = fixture.win;
         const doc = fixture.doc;

@@ -118,7 +118,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     randomlySelectUnsetPageExperiments(this.win, PROFILING_RATE);
     if ((type == 'doubleclick' || type == 'adsense') &&
         isGoogleControlBranch &&
-        isExperimentOn(this.win, "a4aProfilingRate")) {
+        isExperimentOn(this.win, 'a4aProfilingRate')) {
       this.lifecycleReporter_ =
           new AmpAdLifecycleReporter(this.win, this.element, 'amp');
     } else {
@@ -195,7 +195,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.lifecycleReporter_.sendPing('onLayoutMeasure');
+    this.lifecycleReporter_.sendPing('adRequestStart');
     this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
     /** detect ad containers, add the list to element as a new attribute */
     if (this.container_ === undefined) {
@@ -234,7 +234,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.lifecycleReporter_.sendPing('layoutCallback');
+    this.lifecycleReporter_.sendPing('renderStart');
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
