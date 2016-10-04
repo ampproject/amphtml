@@ -126,7 +126,7 @@ describe('amp-a4a', () => {
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in friendly iframe', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -236,7 +236,8 @@ describe('amp-a4a', () => {
             // Force vsync system to run all queued tasks, so that DOM mutations
             // are actually completed before testing.
             a4a.vsync_.runScheduledTasks_();
-            expect(a4aElement.getElementsByTagName('iframe').length).to.equal(1);
+            expect(a4aElement.getElementsByTagName('iframe').length)
+                .to.equal(1);
             const iframe = a4aElement.getElementsByTagName('iframe')[0];
             expect(iframe.getAttribute('srcdoc')).to.be.null;
             expect(iframe.src, 'verify iframe src w/ origin').to
@@ -563,20 +564,6 @@ describe('amp-a4a', () => {
     });
   });
 
-<<<<<<< d99ae8c22f5f34a9c42f6ae68f6e1d8003cc06e9
-  describe('#relocateFonts_', () => {
-    it('should be a no-op when there are no style sheets', () => {
-      return createAdTestingIframePromise().then(fixture => {
-        const doc = fixture.doc;
-        const metaData = {};
-        const a4a = new AmpA4A(createA4aElement(doc));
-        a4a.relocateFonts_(metaData);
-        const hc = doc.head.children;
-        for (let i = 0; i < hc.length; i++) {
-          const child = hc[i];
-          expect(child.tagName).to.not.equal('LINK');
-        }
-      });
   describe('#getPriority', () => {
     it('validate priority', () => {
       expect(AmpA4A.prototype.getPriority()).to.equal(2);
@@ -587,80 +574,34 @@ describe('amp-a4a', () => {
     it('verify state reset', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const metaData = {
-          customStylesheets: [
-            {
-              href: 'https://fonts.googleapis.com/css?family=Foo',
-            },
-            {
-              href: 'https://fonts.googleapis.com/css?family=Bar',
-              media: 'print',
-            },
-          ],
-        };
-        const a4a = new AmpA4A(createA4aElement(doc));
-        a4a.relocateFonts_(metaData);
-        const hc = doc.head.children;
-        const foundStyles = [false, false];
-        for (let i = 0; i < hc.length; i++) {
-          const child = hc[i];
-          if (child.tagName === 'LINK' && child.hasAttribute('href') &&
-              child.getAttribute('href') ===
-              'https://fonts.googleapis.com/css?family=Foo') {
-            foundStyles[0] = true;
-          }
-          if (child.tagName === 'LINK' && child.hasAttribute('href') &&
-              child.getAttribute('href') ===
-              'https://fonts.googleapis.com/css?family=Bar' &&
-              child.hasAttribute('media') &&
-              child.getAttribute('media') === 'print') {
-            foundStyles[1] = true;
-          }
-        }
-        expect(foundStyles[0], 'Doc has font Foo').to.be.true;
-        expect(foundStyles[1], 'Doc has font Bar with media: print').to.be.true;
-      });
-    });
-
-    describe('#getPriority', () => {
-      it('validate priority', () => {
-        expect(AmpA4A.prototype.getPriority()).to.equal(2);
-      });
-    });
-
-    describe('#unlayoutCallback', () => {
-      it('verify state reset', () => {
-        return createAdTestingIframePromise().then(fixture => {
-          const doc = fixture.doc;
-          const a4aElement = createA4aElement(doc);
-          a4aElement.setAttribute('width', 200);
-          a4aElement.setAttribute('height', 50);
-          a4aElement.setAttribute('type', 'adsense');
-          doc.body.appendChild(a4aElement);
-          const a4a = new MockA4AImpl(a4aElement);
-          viewerWhenVisibleMock.returns(Promise.resolve());
-          xhrMock.withArgs('https://test.location.org/ad/012345?args', {
-            mode: 'cors',
-            method: 'GET',
-            credentials: 'include',
-            requireAmpResponseSourceOrigin: true,
-          }).returns(Promise.resolve(mockResponse));
-          a4a.onLayoutMeasure();
-          expect(a4a.adPromise_).to.not.be.null;
-          return a4a.adPromise_.then(() => {
-            expect(a4a.element.children.length).to.equal(1);
-          });
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        doc.body.appendChild(a4aElement);
+        const a4a = new MockA4AImpl(a4aElement);
+        viewerWhenVisibleMock.returns(Promise.resolve());
+        xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+          mode: 'cors',
+          method: 'GET',
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true,
+        }).returns(Promise.resolve(mockResponse));
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.null;
+        return a4a.adPromise_.then(() => {
+          expect(a4a.element.children.length).to.equal(1);
         });
       });
     });
     it('verify cancelled promise', () => {
       return createAdTestingIframePromise().then(fixture => {
         let whenFirstVisibleResolve = null;
-        viewerForMock.returns(new Promise(resolve => {
+        viewerWhenVisibleMock.returns(new Promise(resolve => {
           whenFirstVisibleResolve = resolve;
         }));
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');

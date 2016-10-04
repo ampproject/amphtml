@@ -19,6 +19,7 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
+import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeChildren, createElementWithAttributes} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
@@ -45,46 +46,15 @@ import {
 const devJwkSet = [{
   kty: 'RSA',
   n: 'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
-  'n': modulus,
-  'e': pubExp,
+      'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +
+      'nvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEz' +
+      'fZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca' +
+      '8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2' +
+      'sQuM5KangAkjJRe-Ej6aaQ',
+  e: 'AQAB',
   alg: 'RS256',
   ext: true,
-})];
-
-// If we're in local dev/test mode then we may be talking to a dev validation
-// instance as well.  Dev validators use different keys than production ones
-// do, so we need to add the dev key to the known key list.
-//
-// Note: This is temporary.  It will not be necessary once A4A can fetch keys
-// directly from the server.
-if (getMode().localDev || getMode().test) {
-  publicKeyInfos.push(importPublicKey({
-    kty: 'RSA',
-    'n': devModulus,
-    'e': pubExp,
-    alg: 'RS256',
-    ext: true,
-  }));
-}
-
-/**
- * @param {!ArrayBuffer} bytes
- * @return {!Promise<string>}
- */
-// TODO(taymonbeal): move this somewhere more sensible
-export function utf8FromArrayBuffer(bytes) {
-  if (window.TextDecoder) {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-  }
-  return new Promise(function(resolve, unusedReject) {
-    const reader = new FileReader();
-    reader.onloadend = function(unusedEvent) {
-      resolve(reader.result);
-    };
-    reader.readAsText(new Blob([bytes]));
-  });
-}
->>>>>>> Change to stitching creative instead of removing portions
+}];
 
 /**
  * @param {*} ary
@@ -146,7 +116,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {null|boolean} where layoutMeasure has been executed. */
     this.layoutMeasureExecuted_ = false;
 
-    /** @const @private {!Vsync} */
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
@@ -635,22 +605,24 @@ export class AmpA4A extends AMP.BaseElement {
           //    all of the enclosed mutations are fairly simple and unlikely
           //    to fail.
           // Create and setup friendly iframe.
-          const iframe = createElementWithAttributes(
-            this.element.ownerDocument, 'iframe', {
+          dev().assert(!!this.element.ownerDocument);
+          const iframe = /** @type {!HTMLIFrameElement} */(
+            createElementWithAttributes(
+              /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
               'frameborder': '0', 'allowfullscreen': '',
-              'allowtransparency': '', 'scrolling': 'no'});
+              'allowtransparency': '', 'scrolling': 'no'}));
           this.applyFillContent(iframe);
 
           const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
           const bodyBlock = this.formatBody_(creative, creativeMetaData);
           const bodyAttrString = creativeMetaData.bodyAttributes ?
                   ' ' + creativeMetaData.bodyAttributes : '';
-          const fonts = [];
+          const fontsArray = [];
           if (creativeMetaData.customStylesheets) {
             creativeMetaData.customStylesheets.forEach(s => {
               const href = s['href'];
               if (href) {
-                fonts.push(href);
+                fontsArray.push(href);
               }
             });
           }
@@ -667,7 +639,7 @@ export class AmpA4A extends AMP.BaseElement {
               url: this.adUrl_,
               html: modifiedCreative,
               extensionIds: creativeMetaData.customElementExtensions || [],
-              fonts: fonts
+              fonts: fontsArray,
             }).then(() => {
               this.rendered_ = true;
               this.onAmpCreativeRender();
@@ -796,54 +768,11 @@ export class AmpA4A extends AMP.BaseElement {
         if (!isObject(stylesheet) || !stylesheet['href'] ||
             typeof stylesheet['href'] !== 'string' ||
             !/^https:\/\//i.test(stylesheet['href'])) {
-              throw new Error(errorMsg);
+          throw new Error(errorMsg);
         }
       });
     }
     return metaData;
-  }
-<<<<<<< d6bcaba47a8009f4075c821999fd6ff249d86a29
-<<<<<<< a3957ab005a2c140a3fdca53c9b3948069813410
-
-  /**
-   * Extracts the body portion of the creative, according to directions in the
-   * metaData, and formats it for insertion into Shadow DOM.
-   * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} metaData Metadata object extracted from the
-   *    reserialized creative.
-   * @returns {string}  Body of AMP creative, surrounded by {@code
-   *     <amp-ad-body>} tags, and suitable for injection into Shadow DOM.
-   * @private
-   */
-  formatBody_(creative, metaData) {
-    return creative.substring(metaData.bodyUtf16CharOffsets[0],
-        metaData.bodyUtf16CharOffsets[1]);
-  }
-
-  /**
-   * Note: destructively reverses the {@code offsets} list as a side effect.
-   * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} metaData meta data from creative.
-   * @returns {string} CSS to be added to page.
-   */
-  formatCSSBlock_(creative, metaData) {
-    if (!metaData.cssUtf16CharOffsets) {
-      return '';
-    }
-    let css = creative.substring(
-        metaData.cssUtf16CharOffsets[0],
-        metaData.cssUtf16CharOffsets[1]);
-    if (metaData.cssReplacementRanges) {
-      const rangesToKeep = [];
-      let startIndex = 0;
-      metaData.cssReplacementRanges.forEach(replRange => {
-        rangesToKeep.push(css.substring(startIndex, replRange[0]));
-        startIndex = replRange[1];
-      });
-      rangesToKeep.push(css.substring(startIndex, css.length));
-      css = rangesToKeep.join(AMP_BODY_STRING);
-    }
-    return css;
   }
 
  /**
@@ -864,16 +793,15 @@ export class AmpA4A extends AMP.BaseElement {
  /**
   * Note: destructively reverses the {@code offsets} list as a side effect.
   * @param {string} creative from which CSS is extracted
-  * @param {!CreativeMetaDataDef} meta data from creative.
+  * @param {!CreativeMetaDataDef} metaData from creative.
   * @returns {string} CSS to be added to page.
   */
  formatCSSBlock_(creative, metaData) {
    if (!metaData.cssUtf16CharOffsets) {
      return '';
    }
-   let css = creative.substring(
+   return creative.substring(
        metaData.cssUtf16CharOffsets[0],
        metaData.cssUtf16CharOffsets[1]);
-   return css;
  }
 }
