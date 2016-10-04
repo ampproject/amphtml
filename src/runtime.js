@@ -532,9 +532,8 @@ function prepareAndAttachShadowDoc(
   installExtensionsInShadowDoc(extensions, ampdoc, extensionIds);
 
   // Append body.
-  let body;
   if (doc.body) {
-    body = importShadowBody(shadowRoot, doc.body);
+    const body = importShadowBody(shadowRoot, doc.body);
     body.classList.add('amp-shadow');
     shadowRoot.appendChild(body);
     shadowDocHasBody(ampdoc, body);

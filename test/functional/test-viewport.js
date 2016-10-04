@@ -61,6 +61,8 @@ describe('Viewport', () => {
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
       postScroll: sandbox.spy(),
+      isVisible: () => true,
+      onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
@@ -90,6 +92,8 @@ describe('Viewport', () => {
     };
     binding.getScrollTop = () => 17;
     binding.getScrollLeft = () => 0;
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
     viewport = new Viewport(ampdoc, binding, viewer);
@@ -126,6 +130,46 @@ describe('Viewport', () => {
       task.mutate(state);
     });
   }
+
+  it('should connect binding right away when visible', () => {
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+  });
+
+  it('should disconnect binding on dispose', () => {
+    viewport.dispose();
+    expect(binding.disconnect).to.be.calledOnce;
+  });
+
+  it('should connect binding later when visibility changes', () => {
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
+    viewer.isVisible = () => false;
+    let onVisibilityHandler;
+    viewer.onVisibilityChanged = handler => onVisibilityHandler = handler;
+    viewport = new Viewport(ampdoc, binding, viewer);
+
+    // Hasn't been called at first.
+    expect(binding.connect).to.not.be.called;
+    expect(binding.disconnect).to.not.be.called;
+
+    // When becomes visible - it gets called.
+    viewer.isVisible = () => true;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+
+    // Repeat visibility calls do not affect anything.
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+
+    // When becomes invisible - it gets disconnected.
+    viewer.isVisible = () => false;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.be.calledOnce;
+  });
 
   it('should pass through size and scroll', () => {
     expect(viewport.getPaddingTop()).to.equal(19);
@@ -727,6 +771,8 @@ describe('Viewport META', () => {
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
         isIframed: () => false,
+        isVisible: () => true,
+        onVisibilityChanged: () => {},
       };
       viewerMock = sandbox.mock(viewer);
 
@@ -864,6 +910,9 @@ describe('ViewportBindingNatural', () => {
     WindowApi.prototype.addEventListener = function(eventType, handler) {
       windowEventHandlers[eventType] = handler;
     };
+    WindowApi.prototype.removeEventListener = function(eventType, handler) {
+      delete windowEventHandlers[eventType];
+    };
     windowApi = new WindowApi();
 
     documentElement = {
@@ -890,6 +939,7 @@ describe('ViewportBindingNatural', () => {
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewportBindingNatural_(windowApi, viewer);
+    binding.connect();
   });
 
   afterEach(() => {
@@ -909,6 +959,20 @@ describe('ViewportBindingNatural', () => {
   it('should subscribe to scroll and resize events', () => {
     expect(windowEventHandlers['scroll']).to.not.equal(undefined);
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
+  });
+
+  it('should connect/disconnect events', () => {
+    windowEventHandlers = {};
+    binding = new ViewportBindingNatural_(windowApi, viewer);
+    expect(Object.keys(windowEventHandlers)).to.have.length(0);
+
+    binding.connect();
+    expect(windowEventHandlers['scroll']).to.not.equal(undefined);
+    expect(windowEventHandlers['resize']).to.not.equal(undefined);
+
+    // After disconnect, there are no more listeners on window.
+    binding.disconnect();
+    expect(Object.keys(windowEventHandlers)).to.have.length(0);
   });
 
   it('should update padding', () => {

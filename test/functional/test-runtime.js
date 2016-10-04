@@ -532,6 +532,8 @@ describe('runtime', () => {
       clock = sandbox.useFakeTimers();
       adoptShadowMode(win);
       win.setTimeout = window.setTimeout;
+      win.addEventListener = function () {};
+      win.removeEventListener = function () {};
       extensions = ext.installExtensionsService(win);
       extensionsMock = sandbox.mock(extensions);
       hostElement = document.createElement('div');
@@ -610,7 +612,20 @@ describe('runtime', () => {
       });
     });
 
-    it('should update visibility', () => {
+    it('should pass init parameters to viewer', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'test1': '12',
+      });
+
+      expect(amp.viewer).to.equal(getServiceForDoc(ampdoc, 'viewer'));
+      expect(amp.viewer.getParam('test1')).to.equal('12');
+    });
+
+    it('should update host visibility', () => {
       if (!window.Element.prototype.createShadowRoot) {
         return;
       }
@@ -825,6 +840,50 @@ describe('runtime', () => {
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       expect(hostElement.shadowRoot.querySelector('script[data-id="test1"]'))
           .to.not.exist;
+    });
+
+    it('should start as visible by default', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+    });
+
+    it('should start as prerender when requested', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'visibilityState': 'prerender',
+      });
+      expect(amp.viewer.getVisibilityState()).to.equal('prerender');
+    });
+
+    it('should expose visibility method', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.setVisibilityState).to.be.function;
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+
+      amp.setVisibilityState('inactive');
+      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
+    });
+
+    it('should expose close method and dispose services', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.close).to.be.function;
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+
+      amp.viewer.dispose = sandbox.spy();
+      amp.close();
+      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
+      expect(amp.viewer.dispose).to.be.calledOnce;
     });
   });
 });
