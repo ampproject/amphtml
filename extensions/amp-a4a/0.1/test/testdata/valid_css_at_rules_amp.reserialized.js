@@ -41,14 +41,12 @@ export const data = {
       }
     </style>
   </head>
-  <body>
-    Hello, world.
-  
+  <body>Hello, world.
 
 <script type="application/json" amp-ad-metadata>
 {
    "bodyAttributes" : "",
-   "bodyUtf16CharOffsets" : [ 2046, 2069 ],
+   "bodyUtf16CharOffsets" : [ 2046, 2061 ],
    "cssUtf16CharOffsets" : [ 1259, 2019 ],
    "customElementExtensions" : [ "amp-font" ],
    "customStylesheets" : [
@@ -119,12 +117,10 @@ export const data = {
       }
     </style>
   </head>
-  <body>
-    Hello, world.
-  </body>
+  <body>Hello, world.</body>
 </html>`,
 
-  signature: `ACWMjZEP2y7piT4KvrmRLjPkv0uRzWpOQXOHjFZCwN18u31nx24xduyQxwVCLFDEkcDvIdRXfqrdcjZOgQimBOOreEOunTThnNuNxG1OnebOBt4J/xmHyZFd8fAvCWqE8Ki5NzvFc84Uv6v7itSAfCsoFDwIfLJ9RdqoirA/X7+a+SDyTkgwGvP9/uMPz5TcHfhBxMc+OJnP2DxDIsnlU2fGR4ltJ6gMEQo1vt+QH3uilLaCsu9QdN9rYJCGBgz3w2LIuC5v6Hvzeyg6L2HZv9CkBQ8sbpLoG9I+5k5TmRBNzYPCMhRzStv0trrxk59WDmUC1cDiZaYor3zSOC1RvfR6g2Qj`,
+  signature: `ACWMjZEg39lgefFZCH44VnGGg89GdmHW7Ifg+beevGjaFqoAs7VD2l1j0nUlIfpCOr38zbAdKkQu5Ho1Wbk62J1QJrt60YlHENIZMu116ahEpbAju9srszMvgW5QIssnvsDyWTEANj3mFdHTPzCxbRiR6N5YvwGkyneA2FoNvRQ1PX6QnKcSonGdwfOg1Hl5mRf0bKqVMIN5YkUF1W3nzQiutIrZRdyZ9tbNuuHfLvXvSgQknhw58Lf8xnn15inPcNzLhYTmPZxGvSbT0AVtWdNwbNAaMHvs9sKoeVoUI3sxQwPx0GJeqgb7w74tGopXKu63pCn/JULlT41N4oVirZPgZFWO`,
 
   publicKey: `{
       "kty": "RSA",

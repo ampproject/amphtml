@@ -610,8 +610,8 @@ export class AmpA4A extends AMP.BaseElement {
           const iframe = /** @type {!HTMLIFrameElement} */(
             createElementWithAttributes(
               /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
-              'frameborder': '0', 'allowfullscreen': '',
-              'allowtransparency': '', 'scrolling': 'no'}));
+                'frameborder': '0', 'allowfullscreen': '',
+                'allowtransparency': '', 'scrolling': 'no'}));
           this.applyFillContent(iframe);
 
           const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
