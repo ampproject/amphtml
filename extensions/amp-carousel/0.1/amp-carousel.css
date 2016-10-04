@@ -102,6 +102,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   overflow-y: hidden !important;
   position: absolute !important;
   top: 0;
+  touch-action: pan-x;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
   /**
