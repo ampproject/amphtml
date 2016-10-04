@@ -368,25 +368,28 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
  * Creates a new custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {string} The name of the custom element.
- * @param {function(new:./base-element.BaseElement, !Element)=}
- *     implementationClass The class that implements the custom element.
- * @return {function} The custom element class.
+ * @param {string} name The name of the custom element.
+ * @return {Function} The custom element class.
  */
 function createBaseCustomElementClass(win, name) {
-  return class BaseCustomElement extends win.HTMLElement {
+  const superclass = /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
+  return class BaseCustomElement extends superclass {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      */
     constructor(self) {
+      /** @suppress {checkTypes} */
       self = super(self);
       self.init();
       return self;
     }
 
-    /** @constructor */
+    /**
+     * @constructor
+     * @suppress {misplacedTypeAnnotation}
+     */
     init() {
-      /** @type {?string} */
+      /** @type {?string}  */
       this.name = name;
 
       // Flag "notbuilt" is removed by Resource manager when the resource is
@@ -463,6 +466,7 @@ function createBaseCustomElementClass(win, name) {
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
+      /** @private {./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
       /**
@@ -489,6 +493,7 @@ function createBaseCustomElementClass(win, name) {
 
     /** The Custom Elements V0 version of the constructor. */
     createdCallback() {
+      /** @suppress {checkTypes} */
       this.init();
     }
 
@@ -1125,7 +1130,8 @@ function createBaseCustomElementClass(win, name) {
      * element is no longer present.
      */
     collapse() {
-      this.implementation_. /*OK*/ collapse();
+      /** @suppress {missingProperties} */
+      this.implementation_.collapse();
     }
 
     /**
@@ -1133,6 +1139,7 @@ function createBaseCustomElementClass(win, name) {
      * @param {!AmpElement} element
      */
     collapsedCallback(element) {
+      /** @suppress {missingProperties} */
       this.implementation_.collapsedCallback(element);
     }
 
@@ -1425,7 +1432,7 @@ function createBaseCustomElementClass(win, name) {
         }
       }
     }
-  }
+  };
 }
 
 /**
@@ -1440,10 +1447,10 @@ export function registerElement(win, name, implementationClass) {
 
   const supportsCustomElementsV1 = 'customElements' in win;
   if (supportsCustomElementsV1) {
-    win.customElements.define(name, klass);
+    win['customElements'].define(name, klass);
   } else {
     win.document.registerElement(name, {
-      prototype: klass.prototype
+      prototype: klass.prototype,
     });
   }
 }
