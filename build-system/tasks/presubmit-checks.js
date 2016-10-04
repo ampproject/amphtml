@@ -198,6 +198,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
+      'src/service/viewer-impl.js',
     ],
   },
   'installViewportServiceForDoc': {

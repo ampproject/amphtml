@@ -911,7 +911,9 @@ describe('ViewportBindingNatural', () => {
       windowEventHandlers[eventType] = handler;
     };
     WindowApi.prototype.removeEventListener = function(eventType, handler) {
-      delete windowEventHandlers[eventType];
+      if (windowEventHandlers[eventType] == handler) {
+        delete windowEventHandlers[eventType];
+      }
     };
     windowApi = new WindowApi();
 

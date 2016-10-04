@@ -532,8 +532,8 @@ describe('runtime', () => {
       clock = sandbox.useFakeTimers();
       adoptShadowMode(win);
       win.setTimeout = window.setTimeout;
-      win.addEventListener = function () {};
-      win.removeEventListener = function () {};
+      win.addEventListener = function() {};
+      win.removeEventListener = function() {};
       extensions = ext.installExtensionsService(win);
       extensionsMock = sandbox.mock(extensions);
       hostElement = document.createElement('div');
