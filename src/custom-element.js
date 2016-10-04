@@ -375,6 +375,8 @@ function createBaseCustomElementClass(win, name) {
   const superclass = /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
   return class BaseCustomElement extends superclass {
     /**
+     * Constructor uses atypical pattern as part of a workaround for ES6
+     * transpilation issue when extending HTMLElement.
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
      */
@@ -385,6 +387,8 @@ function createBaseCustomElementClass(win, name) {
     }
 
     /**
+     * Sets up properties for this class.
+     * @note Suppresses type check for Custom Elements V0 compatibility.
      * @suppress {checkTypes}
      */
     init() {
@@ -491,7 +495,7 @@ function createBaseCustomElementClass(win, name) {
     }
 
     /**
-     * The Custom Elements V0 version of the constructor.
+     * The Custom Elements V0 equivalent to the constructor.
      * @suppress {checkTypes}
      */
     createdCallback() {
