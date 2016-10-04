@@ -278,7 +278,8 @@ export function onDocumentElementClick_(
     // Without the first call there will be a visual jump due to browser scroll.
     // See https://github.com/ampproject/amphtml/issues/5334 for more details.
     viewport./*OK*/scrollIntoView(elem);
-    timerFor(win).delay(() => viewport./*OK*/scrollIntoView(elem), 1);
+    timerFor(win).delay(() => viewport./*OK*/scrollIntoView(
+        /** @type {!Element} */ (elem)), 1);
   } else {
     dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
