@@ -41,7 +41,6 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {?Element} */
     this.iframe_ = null;
   }
 

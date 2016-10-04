@@ -37,6 +37,7 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
+    /** @const {string} */
     const type = this.element.getAttribute('type');
     if (!type) {
       // Unspecified or empty type.  Nothing to do here except bail out.

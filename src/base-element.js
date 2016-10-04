@@ -114,7 +114,7 @@ import {vsyncFor} from './vsync';
 export class BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-    /** @public @const */
+    /** @public @const {!Element} */
     this.element = element;
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|

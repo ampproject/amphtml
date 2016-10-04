@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-var AMP;
+var AMP = {};
+
 window.AMP;
 // Externed explicitly because we do not export Class shaped names
 // by default.

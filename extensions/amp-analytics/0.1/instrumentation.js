@@ -188,6 +188,7 @@ export class InstrumentationService {
 
       // Push recent events if any.
       if (this.customEventBuffer_) {
+        /** @const {!Array<!AnalyticsEvent>} */
         const buffer = this.customEventBuffer_[eventType];
         if (buffer) {
           this.timer_.delay(() => {
@@ -241,6 +242,7 @@ export class InstrumentationService {
         'createVisibilityListener should be called with visible or hidden ' +
         'eventType');
     const shouldBeVisible = eventType == AnalyticsEventType.VISIBLE;
+    /** @const {!JSONType} */
     const spec = config['visibilitySpec'];
     if (spec) {
       if (!isVisibilitySpecValid(config)) {

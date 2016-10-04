@@ -20,6 +20,7 @@ import {utf8Encode} from '../../../src/utils/bytes';
 /** @const {boolean} */
 const isWebkit = window.crypto && 'webkitSubtle' in window.crypto;
 
+/** @const {webCrypto.SubtleCrypto} */
 const crossCrypto = isWebkit ? window.crypto['webkitSubtle'] :
                                window.crypto.subtle;
 
