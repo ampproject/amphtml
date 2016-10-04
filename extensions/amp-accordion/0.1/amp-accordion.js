@@ -31,7 +31,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?string} */
     this.id_ = null;
 
-    /** @private {?Object|undefined} */
+    /** @private {?Object} */
     this.currentState_ = null;
   }
 
