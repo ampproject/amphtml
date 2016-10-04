@@ -389,7 +389,6 @@ export class AmpA4A extends AMP.BaseElement {
     // valid AMP.
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
-      console.log('layoutCallback promise result', rendered, this.rendered_);
       if (rendered instanceof Error) {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
