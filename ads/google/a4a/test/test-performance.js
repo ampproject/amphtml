@@ -75,9 +75,19 @@ function escapeRegExp_(string) {
 describe('AmpAdLifecycleReporter', () => {
   let sandbox;
   let emitPingSpy;
+  let iframePromise;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     emitPingSpy = sandbox.spy(AmpAdLifecycleReporter.prototype, 'emitPing_');
+    iframePromise = createIframePromise(false).then(iframeFixture => {
+      const win = iframeFixture.win;
+      const doc = iframeFixture.doc;
+      const elem = doc.createElement('div');
+      doc.body.appendChild(elem);
+      const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
+      reporter.setPingAddress('/');
+      return {win, doc, elem, reporter};
+    });
   });
   afterEach(() => {
     sandbox.restore();
@@ -85,13 +95,7 @@ describe('AmpAdLifecycleReporter', () => {
 
   describe('#sendPing', () => {
     it('should request a single ping and insert into DOM', () => {
-      return createIframePromise(false).then(fixture => {
-        const win = fixture.win;
-        const doc = fixture.doc;
-        const elem = doc.createElement('div');
-        doc.body.appendChild(elem);
-        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
-        reporter.setPingAddress('/');
+      return iframePromise.then(({win, doc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
@@ -111,7 +115,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('should request multiple pings and write all to the DOM', () => {
-      return createIframePromise().then(fixture => {
+      return iframePromise.then(({win, doc, elem, reporter}) => {
         const stages = {
           constructor: '0',
           adRequestStart: '1',
@@ -124,12 +128,6 @@ describe('AmpAdLifecycleReporter', () => {
           renderStart: '10',
           unlayoutAdSlot: '20',
         };
-        const win = fixture.win;
-        const doc = fixture.doc;
-        const elem = doc.createElement('div');
-        doc.body.appendChild(elem);
-        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
-        reporter.setPingAddress('/');
         expect(emitPingSpy).to.not.be.called;
         let count = 0;
         for (const k in stages) {
@@ -156,9 +154,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('should use diff slot IDs, but the same correlator', () => {
-      return createIframePromise(false).then(fixture => {
-        const win = fixture.win;
-        const doc = fixture.doc;
+      return iframePromise.then(({win, doc, unusedElem, unusedReporter}) => {
         const stages = {
           constructor: '0',
           validateAdResponse: '5',
@@ -195,22 +191,17 @@ describe('AmpAdLifecycleReporter', () => {
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
         });
-        for (let s = 0; s < nSlots; ++s) {
+        // SlotId 0 corresponds to unusedReporter, so ignore it.
+        for (let s = 1; s <= nSlots; ++s) {
           expect(slotCounts[s], 'slotCounts[' + s + ']').to.equal(nStages);
         }
       });
     });
 
     it('should capture eid', () => {
-      return createIframePromise(false).then(fixture => {
-        const win = fixture.win;
-        const doc = fixture.doc;
-        const elem = doc.createElement('div');
-        doc.body.appendChild(elem);
-        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
-        reporter.setPingAddress('/');
+      return iframePromise.then(({win, doc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
-        reporter.sendPing('onLayoutMeasure');
+        reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         // No e= param when no EID is present on element.
@@ -220,7 +211,7 @@ describe('AmpAdLifecycleReporter', () => {
         doc.body.appendChild(elem2);
         const reporter2 = new AmpAdLifecycleReporter(win, elem2, 'test_foo');
         reporter2.setPingAddress('/');
-        reporter2.sendPing('onLayoutMeasure');
+        reporter2.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledTwice;
         const arg2 = emitPingSpy.getCall(1).args[0];
         // Now there should be an e= param.
@@ -229,10 +220,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('eid should be URL encoded', () => {
-      return createIframePromise(false).then(fixture => {
-        const win = fixture.win;
-        const doc = fixture.doc;
-        const elem = doc.createElement('div');
+      return iframePromise.then(({win, doc, elem, reporter}) => {
         // The following string is deliberately a script URL to test that
         // the ping system correctly URL encodes such strings.
         /* eslint-disable no-script-url */
@@ -240,9 +228,6 @@ describe('AmpAdLifecycleReporter', () => {
             'javascript:{doSomethingHeinous("https://malware.central.com");}';
         /* eslint-enable no-script-url */
         elem.setAttribute(EXPERIMENT_ATTRIBUTE, rawEid);
-        doc.body.appendChild(elem);
-        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
-        reporter.setPingAddress('/');
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('onLayoutMeasure');
         expect(emitPingSpy).to.be.calledOnce;
@@ -255,13 +240,7 @@ describe('AmpAdLifecycleReporter', () => {
 
   describe('#setQqid', () => {
     it('should populate qqid after set', () => {
-      return createIframePromise(false).then(fixture => {
-        const win = fixture.win;
-        const doc = fixture.doc;
-        const elem = doc.createElement('div');
-        doc.body.appendChild(elem);
-        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
-        reporter.setPingAddress('/');
+      return iframePromise.then(({win, doc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('buildUrl');
         expect(emitPingSpy).to.be.calledOnce;
@@ -276,13 +255,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('qqid should be url encoded', () => {
-      return createIframePromise(false).then(fixture => {
-        const win = fixture.win;
-        const doc = fixture.doc;
-        const elem = doc.createElement('div');
-        doc.body.appendChild(elem);
-        const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
-        reporter.setPingAddress('/');
+      return iframePromise.then(({win, doc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         // The following string is deliberately a script URL to test that
         // the ping system correctly URL encodes such strings.
