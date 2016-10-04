@@ -17,6 +17,7 @@
 import {onDocumentElementClick_, onDocumentElementCapturedClick_,
     getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
 import {createIframePromise} from '../../testing/iframe';
+import {installTimerService} from '../../src/service/timer-impl';
 import {urlReplacementsForDoc} from '../../src/url-replacements';
 import * as sinon from 'sinon';
 
@@ -34,27 +35,29 @@ describe('test-document-click onDocumentElementClick_', () => {
   let preventDefaultSpy;
   let scrollIntoViewSpy;
   let querySelectorSpy;
-  let querySelectorAllSpy;
   let replaceLocSpy;
   let viewport;
+  let timerFuncSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     preventDefaultSpy = sandbox.spy();
     scrollIntoViewSpy = sandbox.spy();
+    timerFuncSpy = sandbox.spy();
     replaceLocSpy = sandbox.spy();
     elem = {};
-    elem.removeAttribute = sandbox.stub();
-    elem.setAttribute = sandbox.stub();
     getElementByIdSpy = sandbox.stub();
     querySelectorSpy = sandbox.stub();
-    querySelectorAllSpy = sandbox.stub();
     tgt = document.createElement('a');
     tgt.href = 'https://www.google.com';
     win = {
       location: {
         href: 'https://www.google.com/some-path?hello=world#link',
         replace: replaceLocSpy,
+      },
+      setTimeout: fn => {
+        timerFuncSpy();
+        fn();
       },
     };
     ampdoc = {
@@ -63,7 +66,6 @@ describe('test-document-click onDocumentElementClick_', () => {
         return {
           getElementById: getElementByIdSpy,
           querySelector: querySelectorSpy,
-          querySelectorAll: querySelectorAllSpy,
         };
       },
     };
@@ -82,6 +84,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     history = {
       push: () => {},
     };
+    installTimerService(win);
   });
 
   afterEach(() => {
@@ -193,52 +196,10 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(scrollIntoViewSpy.callCount).to.equal(2);
+      expect(timerFuncSpy).to.be.calledOnce;
       expect(replaceLocSpy.callCount).to.equal(1);
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
-    });
-
-    it('should remove/reset attributes to avoid browser default jump', () => {
-      getElementByIdSpy.returns(elem);
-      elem.id = 'test';
-      const nameEl = {
-        name: 'test',
-        removeAttribute: sandbox.stub(),
-        setAttribute: sandbox.stub(),
-      };
-      const nameAndIdEl = {
-        name: 'test',
-        id: 'test',
-        removeAttribute: sandbox.stub(),
-        setAttribute: sandbox.stub(),
-      };
-      querySelectorAllSpy.returns([elem, nameEl, nameAndIdEl]);
-      expect(replaceLocSpy.callCount).to.equal(0);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
-      onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(querySelectorAllSpy).to.be.calledWith('#test,a[name="test"]');
-      expect(scrollIntoViewSpy.callCount).to.equal(1);
-      expect(elem.removeAttribute).to.be.calledOnce;
-      expect(elem.removeAttribute).to.be.calledWith('id');
-      expect(elem.setAttribute).to.be.calledOnce;
-      expect(elem.setAttribute).to.be.calledWith('id', 'test');
-      expect(nameEl.removeAttribute).to.be.calledOnce;
-      expect(nameEl.removeAttribute).to.be.calledWith('name');
-      expect(nameEl.setAttribute).to.be.calledOnce;
-      expect(nameEl.setAttribute).to.be.calledWith('name', 'test');
-      expect(nameAndIdEl.removeAttribute).to.be.calledTwice;
-      expect(nameAndIdEl.removeAttribute).to.be.calledWith('name');
-      expect(nameAndIdEl.removeAttribute).to.be.calledWith('id');
-      expect(nameAndIdEl.setAttribute).to.be.calledTwice;
-      expect(nameAndIdEl.setAttribute).to.be.calledWith('name', 'test');
-      expect(nameAndIdEl.setAttribute).to.be.calledWith('id', 'test');
-      expect(replaceLocSpy.callCount).to.equal(1);
-      expect(replaceLocSpy.args[0][0]).to.equal('#test');
-
-      // Make sure attributes are removed before replacing location.
-      expect(elem.removeAttribute).to.be.calledBefore(replaceLocSpy);
-      // And reset to their value after replacing location.
-      expect(elem.setAttribute).to.be.calledAfter(replaceLocSpy);
     });
 
     it('should call scrollIntoView if element with name is found', () => {
@@ -248,7 +209,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(scrollIntoViewSpy.callCount).to.equal(2);
+      expect(timerFuncSpy).to.be.calledOnce;
       expect(replaceLocSpy.callCount).to.equal(1);
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
@@ -266,7 +228,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       };
       onDocumentElementClick_(evt, ampdoc, viewport, history);
 
-      expect(ops).to.have.length(2);
+      expect(timerFuncSpy).to.be.calledOnce;
+      expect(ops).to.have.length(3);
       expect(ops[0]).to.equal('location.replace');
       expect(ops[1]).to.equal('scrollIntoView');
     });

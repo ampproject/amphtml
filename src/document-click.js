@@ -26,6 +26,7 @@ import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportForDoc} from './viewport';
 import {platformFor} from './platform';
+import {timerFor} from './timer';
 import {urlReplacementsForDoc} from './url-replacements';
 
 /** @private @const {string} */
@@ -277,10 +278,17 @@ export function onDocumentElementClick_(
     // Without the first call there will be a visual jump due to browser scroll.
     // See https://github.com/ampproject/amphtml/issues/5334 for more details.
     viewport./*OK*/scrollIntoView(elem);
-    setTimeout(() => viewport./*OK*/scrollIntoView(elem), 0);
+    timerFor(win).delay(() => viewport./*OK*/scrollIntoView(elem), 1);
   } else {
     dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
+  }
+
+  if (tgtLoc.hash != curLoc.hash) {
+    // Push/pop history.
+    history.push(() => {
+      win.location.replace(`${curLoc.hash || '#'}`);
+    });
   }
 }
 
