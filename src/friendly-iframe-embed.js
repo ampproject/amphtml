@@ -147,7 +147,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
   return readyPromise.then(() => {
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        iframe.contentWindow, spec.extensionIds || []);
+        /** @type {!Window} */(iframe.contentWindow), spec.extensionIds || []);
     // Ready to be shown.
     iframe.style.visibility = '';
     return new FriendlyIframeEmbed(iframe, spec, loadedPromise);
@@ -167,7 +167,7 @@ function isIframeReady(iframe) {
   // no other reliable signal for `readyState` in a child window and thus
   // the best way to check is to see the contents of the body.
   const childDoc = iframe.contentWindow && iframe.contentWindow.document;
-  return (childDoc &&
+  return !!(childDoc &&
       isDocumentReady(childDoc) &&
       childDoc.body &&
       childDoc.body.firstChild);
@@ -258,7 +258,7 @@ export class FriendlyIframeEmbed {
     this.iframe = iframe;
 
     /** @const {!Window} */
-    this.win = iframe.contentWindow;
+    this.win = /** @type{!Window} */(iframe.contentWindow);
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
