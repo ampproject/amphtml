@@ -357,7 +357,7 @@ function isInternalOrServiceNode(node) {
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProto(win, name, opt_implementationClass) {
-  const ElementProto = createBaseCustomElementClass(win, name, null).prototype;
+  const ElementProto = createBaseCustomElementClass(win, name).prototype;
   if (getMode().test && opt_implementationClass) {
     ElementProto.implementationClassForTesting = opt_implementationClass;
   }
@@ -373,7 +373,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
  *     implementationClass The class that implements the custom element.
  * @return {function} The custom element class.
  */
-function createBaseCustomElementClass(win, name, implementationClass) {
+function createBaseCustomElementClass(win, name) {
   return class BaseCustomElement extends win.HTMLElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
@@ -388,9 +388,6 @@ function createBaseCustomElementClass(win, name, implementationClass) {
     init() {
       /** @type {?string} */
       this.name = name;
-
-      /** @private @type {function} */
-      this.implementationClass_ = implementationClass;
 
       // Flag "notbuilt" is removed by Resource manager when the resource is
       // considered to be built. See "setBuilt" method.
@@ -461,13 +458,8 @@ function createBaseCustomElementClass(win, name, implementationClass) {
       /** @private {?Element|undefined} */
       this.overflowElement_ = undefined;
 
-      /**
-       * Accessing DOM APIs within constructor yields 'illegal invocation' error
-       * in current polyfill. Delay instantation to `connectedCallback` instead.
-       * @private {?./base-element.BaseElement}
-       */
       // `opt_implementationClass` is only used for tests.
-      let Ctor = this.implementationClass_;
+      let Ctor = knownElements[this.name];
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
@@ -1444,7 +1436,7 @@ function createBaseCustomElementClass(win, name, implementationClass) {
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
-  const klass = createBaseCustomElementClass(win, name, implementationClass);
+  const klass = createBaseCustomElementClass(win, name);
 
   const supportsCustomElementsV1 = 'customElements' in win;
   if (supportsCustomElementsV1) {
