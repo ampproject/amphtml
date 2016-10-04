@@ -1136,7 +1136,7 @@ function createBaseCustomElementClass(win, name) {
      * @suppress {missingProperties}
      */
     collapse() {
-      this.implementation_.collapse();
+      this.implementation_./*OK*/collapse();
     }
 
     /**
