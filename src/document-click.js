@@ -247,22 +247,12 @@ export function onDocumentElementClick_(
   const hash = tgtLoc.hash.slice(1);
   let elem = null;
 
-  // Removal of the targeted attribute here to disable browsers' default
-  // scrolling behavior and rely on viewport./*OK*/scrollIntoView(elem)
-  // call to scroll to it.
-  // Without doing this, the viewport will not catch the updated scroll
-  // position on iOS Safari and hence calculate the wrong scrollTop for
-  // the scrollbar jumping the user back to the top for failing to calculate
-  // the new jumped offset.
-  // See https://github.com/ampproject/amphtml/issues/5334 for more details.
-  let restoreElementsAttrs = [];
   if (hash) {
     const escapedHash = escapeCssSelectorIdent(ampdoc.win, hash);
     elem = (ampdoc.getRootNode().getElementById(hash) ||
         // Fallback to anchor[name] if element with id is not found.
         // Linking to an anchor element with name is obsolete in html5.
         ampdoc.getRootNode().querySelector(`a[name=${escapedHash}]`));
-    restoreElementsAttrs = removeAttrsWithMatchingHash_(ampdoc, hash);
   }
 
   // If possible do update the URL with the hash. As explained above
@@ -277,18 +267,20 @@ export function onDocumentElementClick_(
 
   // Scroll to the element if found.
   if (elem) {
+    // The first call to scrollIntoView overrides browsers' default
+    // scrolling behavior. The second call insides setTimeout allows us to
+    // scroll to that element properly.
+    // Without doing this, the viewport will not catch the updated scroll
+    // position on iOS Safari and hence calculate the wrong scrollTop for
+    // the scrollbar jumping the user back to the top for failing to calculate
+    // the new jumped offset.
+    // Without the first call there will be a visual jump due to browser scroll.
+    // See https://github.com/ampproject/amphtml/issues/5334 for more details.
     viewport./*OK*/scrollIntoView(elem);
-    restoreElementsAttributes_(restoreElementsAttrs);
+    setTimeout(() => viewport./*OK*/scrollIntoView(elem), 0);
   } else {
     dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
-  }
-
-  // Push/pop history only if fragment really changed.
-  if (tgtLoc.hash != curLoc.hash) {
-    history.push(() => {
-      win.location.replace(`${curLoc.hash || '#'}`);
-    });
   }
 }
 
@@ -350,54 +342,4 @@ export function expandTargetHref_(e, target, urlReplacements) {
     target.setAttribute('href', newHref);
   }
   return newHref;
-}
-
-
-/** @typedef {{element: !Element, attributes: Object<string, string>}} */
-let RestoreElementAttributesDef;
-
-
-/**
- * Removes attributes from elements with matching hash target. This includes:
- *   *[id=hash] and a[name=hash].
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} hash
- * @return {!Array<!RestoreElementAttributesDef>}}
- * @private
- */
-function removeAttrsWithMatchingHash_(ampdoc, hash) {
-  const escapedHash = escapeCssSelectorIdent(ampdoc.win, hash);
-  const restoreElementsAttrs = [];
-  const targetElements = ampdoc.getRootNode().querySelectorAll(
-      `#${escapedHash},a[name="${escapedHash}"]`) || [];
-  for (let i = 0; i < targetElements.length; i++) {
-    const element = targetElements[i];
-    const attributes = {};
-    if (element.name == hash) {
-      attributes.name = element.name;
-      element.removeAttribute('name');
-    }
-    if (element.id == hash) {
-      attributes.id = element.id;
-      element.removeAttribute('id');
-    }
-    restoreElementsAttrs.push({element, attributes});
-  }
-  return restoreElementsAttrs;
-}
-
-
-/**
- * Restore elements attributes.
- * @param {!Array<!RestoreElementAttributesDef>} elementsAttrs
- * @private
- */
-function restoreElementsAttributes_(elementsAttrs) {
-  for (let i = 0; i < elementsAttrs.length; i++) {
-    const element = elementsAttrs[i].element;
-    const attrs = elementsAttrs[i].attributes;
-    for (const key in attrs) {
-      element.setAttribute(key, attrs[key]);
-    }
-  }
 }
