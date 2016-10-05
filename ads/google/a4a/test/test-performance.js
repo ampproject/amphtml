@@ -75,11 +75,11 @@ function escapeRegExp_(string) {
 describe('AmpAdLifecycleReporter', () => {
   let sandbox;
   let emitPingSpy;
-  let iframePromise;
+  let iframe;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     emitPingSpy = sandbox.spy(AmpAdLifecycleReporter.prototype, 'emitPing_');
-    iframePromise = createIframePromise(false).then(iframeFixture => {
+    iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;
       const doc = iframeFixture.doc;
       const elem = doc.createElement('div');
@@ -95,7 +95,7 @@ describe('AmpAdLifecycleReporter', () => {
 
   describe('#sendPing', () => {
     it('should request a single ping and insert into DOM', () => {
-      return iframePromise.then(({win, doc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
@@ -115,7 +115,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('should request multiple pings and write all to the DOM', () => {
-      return iframePromise.then(({win, doc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         const stages = {
           adSlotBuilt: '0',
           adRequestStart: '1',
@@ -154,7 +154,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('should use diff slot IDs, but the same correlator', () => {
-      return iframePromise.then(({win, doc, unusedElem, unusedReporter}) => {
+      return iframe.then(({win, doc, unusedElem, unusedReporter}) => {
         const stages = {
           adSlotBuilt: '0',
           adResponseValidateStart: '5',
@@ -199,7 +199,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('should capture eid', () => {
-      return iframePromise.then(({win, doc, elem, reporter}) => {
+      return iframe.then(({win, doc, unusedElem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
@@ -220,7 +220,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('eid should be URL encoded', () => {
-      return iframePromise.then(({win, doc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         // The following string is deliberately a script URL to test that
         // the ping system correctly URL encodes such strings.
         /* eslint-disable no-script-url */
@@ -240,7 +240,7 @@ describe('AmpAdLifecycleReporter', () => {
 
   describe('#setQqid', () => {
     it('should populate qqid after set', () => {
-      return iframePromise.then(({win, doc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('buildUrl');
         expect(emitPingSpy).to.be.calledOnce;
@@ -255,7 +255,7 @@ describe('AmpAdLifecycleReporter', () => {
     });
 
     it('qqid should be url encoded', () => {
-      return iframePromise.then(({win, doc, elem, reporter}) => {
+      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         // The following string is deliberately a script URL to test that
         // the ping system correctly URL encodes such strings.
