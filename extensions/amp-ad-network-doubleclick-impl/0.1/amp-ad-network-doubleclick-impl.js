@@ -30,6 +30,7 @@ import {
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
+import {getMode} from '../../../src/mode';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -88,6 +89,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
+  /** @override */
+  getSigningServiceNames_() {
+    // TODO(levitzky) Add dev key name once it goes live.
+    return getMode().localDev ? ['google'] : ['google'];
+  }
 }
 
 AMP.registerElement(
