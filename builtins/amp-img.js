@@ -42,6 +42,8 @@ export class AmpImg extends BaseElement {
   /** @override */
   buildCallback() {
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
+
+    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -72,8 +74,6 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
