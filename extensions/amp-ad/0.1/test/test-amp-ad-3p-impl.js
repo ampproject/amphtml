@@ -18,8 +18,8 @@ import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import {stubService} from '../../../../testing/test-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {registerElement} from '../../../../src/custom-element';
 import * as adCid from '../../../../src/ad-cid';
+import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
@@ -46,9 +46,6 @@ describe('amp-ad-3p-impl', () => {
     sandbox = sinon.sandbox.create();
     return createIframePromise(true).then(iframe => {
       win = iframe.win;
-      // Register amp-ad element to install all the ElementProto functions
-      registerElement(win, 'amp-ad', AmpAd3PImpl);
-
       win.document.head.appendChild(
           createElementWithAttributes(win.document, 'link', {
             rel: 'canonical',
