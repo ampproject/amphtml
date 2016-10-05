@@ -21,6 +21,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {registerElement} from '../../../../src/custom-element';
 import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
+import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
 function createAmpAd(win) {
@@ -206,6 +207,22 @@ describe('amp-ad-3p-impl', () => {
       ad3p.element.setAttribute(
           'data-loading-strategy', 'prefer-viewability-over-views');
       expect(ad3p.renderOutsideViewport()).to.equal(1.25);
+    });
+
+    it('should only allow rendering one ad a time', () => {
+      const clock = lolex.install(win);
+      const ad3p2 = createAmpAd(win);
+      expect(ad3p.renderOutsideViewport()).to.equal(3);
+      expect(ad3p2.renderOutsideViewport()).to.equal(3);
+
+      ad3p.layoutCallback();
+      expect(ad3p2.renderOutsideViewport()).to.equal(false);
+
+      // Ad loading should only block 1s.
+      clock.tick(999);
+      expect(ad3p2.renderOutsideViewport()).to.equal(false);
+      clock.tick(1);
+      expect(ad3p2.renderOutsideViewport()).to.equal(3);
     });
   });
 });
