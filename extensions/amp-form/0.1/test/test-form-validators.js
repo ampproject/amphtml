@@ -26,6 +26,7 @@ import {
   ShowFirstOnSubmitValidator,
 } from '../form-validators';
 import {ValidationBubble} from '../validation-bubble';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 describe('form-validators', () => {
@@ -42,6 +43,13 @@ describe('form-validators', () => {
       set: function(value) {
         this.fakeValidationMessage_ = value;
       },
+    });
+  }
+
+  function getTestingIframe() {
+    return createIframePromise().then(iframe => {
+      toggleExperiment(iframe.win, 'amp-form-custom-validations', true);
+      return iframe;
     });
   }
 
@@ -100,7 +108,7 @@ describe('form-validators', () => {
 
   describe('getFormValidator', () => {
     it('should return default or polyfill instance', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
         setReportValiditySupported(true);
@@ -112,7 +120,7 @@ describe('form-validators', () => {
     });
 
     it('should return custom validator instances', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
         form.setAttribute('custom-validation-reporting', 'as-you-go');
@@ -131,7 +139,7 @@ describe('form-validators', () => {
 
   describe('DefaultValidator', () => {
     it('should reports form validity', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
         const validator = new DefaultValidator(form);
@@ -144,7 +152,7 @@ describe('form-validators', () => {
 
   describe('PolyfillDefaultValidator', () => {
     it('should reports form validity', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
         const validator = new PolyfillDefaultValidator(form);
@@ -159,7 +167,7 @@ describe('form-validators', () => {
     });
 
     it('should hide validation bubble onblur', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
         const validator = new PolyfillDefaultValidator(form);
@@ -170,7 +178,7 @@ describe('form-validators', () => {
     });
 
     it('should re-validate on input if is is actively reported', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
         const validator = new PolyfillDefaultValidator(form);
@@ -200,7 +208,7 @@ describe('form-validators', () => {
 
   describe('ShowFirstOnSubmitValidator', () => {
     it('should show first validation message', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc, true);
         const validations = doc.querySelectorAll('[visible-when-invalid]');
@@ -214,7 +222,7 @@ describe('form-validators', () => {
     });
 
     it('should not report on interaction for non-active inputs', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc, true);
         const validations = doc.querySelectorAll('[visible-when-invalid]');
@@ -233,7 +241,7 @@ describe('form-validators', () => {
     });
 
     it('should not report on interaction for non-active inputs', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc, true);
         const validations = doc.querySelectorAll('[visible-when-invalid]');
@@ -275,7 +283,7 @@ describe('form-validators', () => {
 
   describe('ShowAllOnSubmitValidator', () => {
     it('should show validation messages for all inputs', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc, true);
         const validations = doc.querySelectorAll('[visible-when-invalid]');
@@ -289,7 +297,7 @@ describe('form-validators', () => {
     });
 
     it('should not report on interaction for non-active inputs', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc, true);
         const validations = doc.querySelectorAll('[visible-when-invalid]');
@@ -308,7 +316,7 @@ describe('form-validators', () => {
     });
 
     it('should re-validate and report on interaction for active inputs', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc, true);
         const validations = doc.querySelectorAll('[visible-when-invalid]');
@@ -357,7 +365,7 @@ describe('form-validators', () => {
 
   describe('AsYouGoValidator', () => {
     it('should report validation for input on interaction', () => {
-      return createIframePromise().then(iframe => {
+      return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc, true);
         const validations = doc.querySelectorAll('[visible-when-invalid]');
