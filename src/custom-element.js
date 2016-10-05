@@ -119,6 +119,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     const element = stub.element;
     if (element.tagName.toLowerCase() == name) {
       tryUpgradeElementNoInline(element, toClass);
+      // Remove element from array.
+      stubbedElements.splice(i--, 1);
     }
   }
 }

@@ -167,8 +167,6 @@ export class Resource {
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
-    }).then(() => {
-      this.loadedOnce_ = true;
     });
 
     /** @private {boolean} */
@@ -571,7 +569,9 @@ export class Resource {
    */
   layoutComplete_(success, opt_reason) {
     this.loadPromiseResolve_();
+    this.loadPromiseResolve_ = null;
     this.layoutPromise_ = null;
+    this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {
