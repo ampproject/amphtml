@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-import {EXPERIMENT_ATTRIBUTE} from './traffic-experiments';
+import {
+    EXPERIMENT_ATTRIBUTE,
+    isInManualExperiment,
+    randomlySelectUnsetPageExperiments,
+} from './traffic-experiments';
+import {
+    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+} from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
+import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -55,12 +69,70 @@ const LIFECYCLE_STAGES = {
   renderCrossDomainStart: '7',
   renderFriendlyEnd: '8',
   renderCrossDomainEnd: '9',
+  preAdThrottle: '10',
   adSlotCleared: '20',
 };
 
 export const PROFILING_RATE = {
   a4aProfilingRate: {on: 1},
 };
+
+/**
+ * Check whether the element is in an experiment branch that is eligible for
+ * monitoring.
+ *
+ * @param {!AMP.BaseElement} ampElement
+ * @param {!string} namespace
+ * @returns {boolean}
+ */
+function isInReportableBranch(ampElement, namespace) {
+  const eid = ampElement.element.getAttribute(EXPERIMENT_ATTRIBUTE);
+  if (namespace == 'a4a' &&
+      ((eid == ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+       (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+       (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+       (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+       isInManualExperiment(ampElement.element))) {
+    return true;
+  } else if (namespace == 'amp' &&
+             ((eid == ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control) ||
+              (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control) ||
+              (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control) ||
+              (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control))) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export function getLifecycleReporter(ampElement, namespace) {
+  // Carve-outs: We only want to enable profiling pingbacks when:
+  //   - The ad is from one of the Google networks (AdSense or Doubleclick).
+  //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
+  //     internal, client-side selection or via external, Google Search
+  //     selection).
+  //   - We haven't turned off profiling via the rate controls in
+  //     build-system/global-config/{canary,prod}-config.json
+  // If any of those fail, we use the `NullLifecycleReporter`, which is a
+  // a no-op (sends no pings).
+  const type = ampElement.element.getAttribute('type');
+  const win = ampElement.win;
+  // In local dev mode, neither the canary nor prod config files is available,
+  // so manually set the profiling rate, for testing/dev.
+  if (getMode().localDev &&
+      (!win.AMP_CONFIG || !win.AMP_CONFIG['a4aProfilingRate'])) {
+    win.AMP_CONFIG = win.AMP_CONFIG || {};
+    win.AMP_CONFIG['a4aProfilingRate'] = 1.0;
+  }
+  randomlySelectUnsetPageExperiments(win, PROFILING_RATE);
+  if ((type == 'doubleclick' || type == 'adsense') &&
+      isInReportableBranch(ampElement, namespace) &&
+      isExperimentOn(win, 'a4aProfilingRate')) {
+    return new AmpAdLifecycleReporter(win, ampElement.element, 'a4a');
+  } else {
+    return new NullLifecycleReporter();
+  }
+}
 
 export class AmpAdLifecycleReporter {
 

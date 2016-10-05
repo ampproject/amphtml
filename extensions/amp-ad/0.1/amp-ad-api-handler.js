@@ -75,6 +75,7 @@ export class AmpAdApiHandler {
    * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
+   * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
   startUp(iframe, is3p, opt_defaultVisible) {
     dev().assert(

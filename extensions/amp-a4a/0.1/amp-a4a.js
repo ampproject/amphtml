@@ -19,18 +19,13 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {
-    AmpAdLifecycleReporter,
-    NullLifecycleReporter,
-    PROFILING_RATE,
-} from '../../../ads/google/a4a/performance';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeChildren, createElementWithAttributes} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
@@ -44,19 +39,6 @@ import {
   verifySignature,
   PublicKeyInfoDef,
 } from './crypto-verifier';
-import {
-    EXPERIMENT_ATTRIBUTE,
-    isInManualExperiment,
-    randomlySelectUnsetPageExperiments,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
-import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
 
 /**
  * Dev public key set. This will go away once the dev signing service goes live.
@@ -141,39 +123,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
 
-    // Carve-outs: We only want to enable profiling pingbacks when:
-    //   - The ad is from one of the Google networks (AdSense or Doubleclick).
-    //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
-    //     internal, client-side selection or via external, Google Search
-    //     selection).
-    //   - We haven't turned off profiling via the rate controls in
-    //     build-system/global-config/{canary,prod}-config.json
-    // If any of those fail, we use the `NullLifecycleReporter`, which is a
-    // a no-op (sends no pings).
-    const type = element.getAttribute('type');
-    const eid = element.getAttribute(EXPERIMENT_ATTRIBUTE);
-    const isGoogleExperimentBranch =
-        (eid == ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
-        (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
-        (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
-        (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
-        isInManualExperiment(element);
-    // In local dev mode, neither the canary nor prod config files is available,
-    // so manually set the profiling rate, for testing/dev.
-    if (getMode().localDev &&
-        (!this.win.AMP_CONFIG || !this.win.AMP_CONFIG['a4aProfilingRate'])) {
-      this.win.AMP_CONFIG = this.win.AMP_CONFIG || {};
-      this.win.AMP_CONFIG['a4aProfilingRate'] = 1.0;
-    }
-    randomlySelectUnsetPageExperiments(this.win, PROFILING_RATE);
-    if ((type == 'doubleclick' || type == 'adsense') &&
-        isGoogleExperimentBranch &&
-        isExperimentOn(this.win, 'a4aProfilingRate')) {
-      this.lifecycleReporter_ =
-          new AmpAdLifecycleReporter(this.win, this.element, 'a4a');
-    } else {
-      this.lifecycleReporter_ = new NullLifecycleReporter();
-    }
+    this.lifecycleReporter_ = getLifecycleReporter(this, 'a4a');
     this.lifecycleReporter_.sendPing('adSlotBuilt');
   }
 
@@ -304,7 +254,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(() => {
           checkStillCurrent(promiseId);
           this.lifecycleReporter_.sendPing('urlBuilt');
-          return this.getAdUrl();
+          return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -354,7 +304,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(creativeParts => {
           checkStillCurrent(promiseId);
           if (!creativeParts || !creativeParts.signature) {
-            return null;
+            return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
           this.lifecycleReporter_.sendPing('adResponseValidateStart');
 
@@ -456,6 +406,7 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
+    this.lifecycleReporter_.sendPing('preAdThrottle');
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error) {
