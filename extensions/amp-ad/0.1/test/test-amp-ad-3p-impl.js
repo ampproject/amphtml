@@ -18,6 +18,7 @@ import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import {stubService} from '../../../../testing/test-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {registerElement} from '../../../../src/custom-element';
 import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as sinon from 'sinon';
@@ -31,9 +32,7 @@ function createAmpAd(win) {
     'data-valid': 'true',
     'data-width': '6666',
   });
-  ampAdElement.getIntersectionChangeEntry = () => {};
-  ampAdElement.getPlaceholder = () => {};
-  ampAdElement.getFallback = () => {};
+
   return new AmpAd3PImpl(ampAdElement);
 }
 
@@ -44,8 +43,11 @@ describe('amp-ad-3p-impl', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    return createIframePromise().then(iframe => {
+    return createIframePromise(true).then(iframe => {
       win = iframe.win;
+      // Register amp-ad element to install all the ElementProto functions
+      registerElement(win, 'amp-ad', AmpAd3PImpl);
+
       win.document.head.appendChild(
           createElementWithAttributes(win.document, 'link', {
             rel: 'canonical',
@@ -53,6 +55,8 @@ describe('amp-ad-3p-impl', () => {
           }));
       ad3p = createAmpAd(win);
       win.document.body.appendChild(ad3p.element);
+
+      // Turn the doc to visible so prefetch will be proceeded.
       stubService(sandbox, win, 'viewer', 'whenFirstVisible')
           .returns(Promise.resolve());
     });
@@ -65,10 +69,6 @@ describe('amp-ad-3p-impl', () => {
   describe('layoutCallback', () => {
 
     it('should create iframe and pass data via URL fragment', () => {
-      sandbox.stub(adCid, 'getAdCid', () => {
-        return Promise.resolve('sentinel123');
-      });
-
       return ad3p.layoutCallback().then(() => {
         const iframe = ad3p.element.firstChild;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -83,7 +83,6 @@ describe('amp-ad-3p-impl', () => {
         expect(data).to.have.property('width', 300);
         expect(data).to.have.property('height', 250);
         expect(data._context.canonicalUrl).to.equal('https://canonical.url/');
-        expect(url).to.contain('"clientId":"sentinel123"');
       });
     });
 
@@ -158,9 +157,8 @@ describe('amp-ad-3p-impl', () => {
       return ad3p.layoutCallback();
     });
 
-    it('should allow position:fixed with whitelisted ad container', () => {
+    it('should pass ad container info to child iframe via URL', () => {
       const adContainerElement = win.document.createElement('amp-sticky-ad');
-      adContainerElement.style.position = 'fixed';
       win.document.body.appendChild(adContainerElement);
       const ad3p = createAmpAd(win);
       adContainerElement.appendChild(ad3p.element);
@@ -173,7 +171,7 @@ describe('amp-ad-3p-impl', () => {
   });
 
   describe('preconnectCallback', () => {
-    it('should add prefeches', done => {
+    it('should add preconnect and prefech to DOM header', done => {
       ad3p.buildCallback();
       ad3p.preconnectCallback();
       setTimeout(() => {
@@ -203,7 +201,8 @@ describe('amp-ad-3p-impl', () => {
       expect(ad3p.renderOutsideViewport()).to.equal(3);
     });
 
-    it('should prefer-viewability-over-views', () => {
+    it('should reduce render range when prefer-viewability-over-views ' +
+        'is set', () => {
       ad3p.element.setAttribute(
           'data-loading-strategy', 'prefer-viewability-over-views');
       expect(ad3p.renderOutsideViewport()).to.equal(1.25);
