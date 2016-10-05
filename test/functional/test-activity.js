@@ -84,6 +84,7 @@ describe('Activity getTotalEngagedTime', () => {
       clearTimeout: window.clearTimeout,
       // required to instantiate Viewport service
       addEventListener: () => {},
+      removeEventListener: () => {},
     };
     fakeDoc.defaultView = fakeWin;
 

@@ -17,7 +17,7 @@
 import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
-import {fromClassForDoc} from '../service';
+import {getServiceForDoc} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platformFor} from '../platform';
@@ -99,8 +99,9 @@ export class Viewer {
 
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Object<string, string>=} opt_initParams
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_initParams) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -186,13 +187,17 @@ export class Viewer {
       this.whenFirstVisibleResolve_ = resolve;
     });
 
-    // Params can be passed either via iframe name or via hash. Hash currently
-    // has precedence.
-    if (this.win.name && this.win.name.indexOf(SENTINEL_) == 0) {
-      parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
-    }
-    if (this.win.location.hash) {
-      parseParams_(this.win.location.hash, this.params_);
+    // Params can be passed either directly in multi-doc environment or via
+    // iframe hash/name with hash taking precedence.
+    if (opt_initParams) {
+      Object.assign(this.params_, opt_initParams);
+    } else {
+      if (this.win.name && this.win.name.indexOf(SENTINEL_) == 0) {
+        parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
+      }
+      if (this.win.location.hash) {
+        parseParams_(this.win.location.hash, this.params_);
+      }
     }
 
     dev().fine(TAG_, 'Viewer params:', this.params_);
@@ -537,6 +542,7 @@ export class Viewer {
   /**
    * Sets the viewer defined visibility state.
    * @param {string|undefined} state
+   * @private
    */
   setVisibilityState_(state) {
     if (!state) {
@@ -1111,9 +1117,21 @@ export let ViewerHistoryPoppedEventDef;
 
 
 /**
+ * Sets the viewer visibility state. This calls is restricted to runtime only.
+ * @param {!VisibilityState} state
+ * @restricted
+ */
+export function setViewerVisibilityState(viewer, state) {
+  viewer.setVisibilityState_(state);
+}
+
+
+/**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Object<string, string>=} opt_initParams
  * @return {!Viewer}
  */
-export function installViewerServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'viewer', Viewer);
-};
+export function installViewerServiceForDoc(ampdoc, opt_initParams) {
+  return getServiceForDoc(ampdoc, 'viewer',
+      () => new Viewer(ampdoc, opt_initParams));
+}

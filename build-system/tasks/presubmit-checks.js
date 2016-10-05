@@ -194,6 +194,13 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
+  'setViewerVisibilityState': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
   'installViewportServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
