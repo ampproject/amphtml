@@ -152,6 +152,7 @@ var forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/describes.js',
       'testing/iframe.js',
     ],
   },

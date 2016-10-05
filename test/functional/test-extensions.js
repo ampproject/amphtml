@@ -25,52 +25,31 @@ import {
   installExtensionsService,
   registerExtension,
 } from '../../src/service/extensions-impl';
-import {adopt} from '../../src/runtime';
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../testing/iframe';
 import {
   initLogConstructor,
   resetLogConstructorForTesting,
 } from '../../src/log';
 import {loadPromise} from '../../src/event-helper';
-import * as cust from '../../src/custom-element';
-import * as sinon from 'sinon';
+import * as describes from '../../testing/describes';
 
 
-describe('Extensions', () => {
-
+describes.sandboxed('Extensions', {}, test => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = test.sandbox;
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  describe('registerExtension', () => {
+  describes.fakeWin('registerExtension', {}, test => {
     let windowApi;
     let extensions;
 
     beforeEach(() => {
-      const documentElement = document.createElement('div');
-      const body = document.createElement('div');
-      const head = document.createElement('head');
-
-      const doc = {
-        documentElement,
-        body,
-        head,
-      };
-
-      windowApi = {
-        document: doc,
-      };
-      doc.defaultView = windowApi;
-
+      windowApi = test.win;
       extensions = new Extensions(windowApi);
     });
 
@@ -326,132 +305,99 @@ describe('Extensions', () => {
     });
   });
 
-  describe('loadExtension', () => {
+  describes.realWin('loadExtension', {
+    amp: true,
+    fakeRegisterElement: true,
+  }, test => {
+    let win, doc, extensions;
+
+    beforeEach(() => {
+      win = test.win;
+      doc = win.document;
+      extensions = test.extensions;
+    });
 
     it('should insert extension script correctly', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
-        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
+          .to.be.undefined;
 
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(0);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.undefined;
-
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.true;
-        expect(stub.callCount).to.equal(1);
-      });
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(1);
+      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
+          .to.be.true;
+      expect(win.customElements.elements['amp-test']).to.exist;
     });
 
     it('should only insert script once', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
+          .to.be.undefined;
 
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(0);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.undefined;
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(1);
+      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
+          .to.be.true;
 
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.true;
-
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(1);
-      });
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(1);
     });
 
     it('should not insert when script exists in head', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
-        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
+      const ampTestScript = doc.createElement('script');
+      ampTestScript.setAttribute('custom-element', 'amp-test');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      doc.head.appendChild(ampTestScript);
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(1);
+      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
+          .to.be.undefined;
 
-        const ampTestScript = doc.createElement('script');
-        ampTestScript.setAttribute('custom-element', 'amp-analytics');
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(0);
-        doc.head.appendChild(ampTestScript);
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.undefined;
-
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.true;
-        expect(stub.callCount).to.equal(0);
-      });
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(1);
+      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
+          .to.be.true;
+      expect(win.customElements.elements['amp-test']).to.not.exist;
     });
 
     it('should give script correct attributes', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(0);
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(1);
 
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(0);
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(1);
-
-        const script = doc.head.querySelector(
-            '[custom-element="amp-analytics"]');
-        expect(script.getAttribute('data-script')).to.equal('amp-analytics');
-        expect(script.getAttribute('async')).to.equal('');
-      });
+      const script = doc.head.querySelector(
+          '[custom-element="amp-test"]');
+      expect(script.getAttribute('data-script')).to.equal('amp-test');
+      expect(script.getAttribute('async')).to.equal('');
     });
 
     it('should insert special-case for amp-embed script', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
+      expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+          .to.have.length(0);
 
-        expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
-            .to.have.length(0);
+      extensions.loadExtension('amp-embed');
+      expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+          .to.have.length(1);
+      expect(extensions.getExtensionHolder_('amp-ad').scriptPresent)
+          .to.be.true;
 
-        extensions.loadExtension('amp-embed');
-        expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-            .to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-ad').scriptPresent)
-            .to.be.true;
-
-        // The amp-embed module has never been created.
-        expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
-            .to.have.length(0);
-        expect(extensions.extensions_['amp-embed']).to.be.undefined;
-      });
+      // The amp-embed module has never been created.
+      expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+          .to.have.length(0);
+      expect(extensions.extensions_['amp-embed']).to.be.undefined;
     });
   });
 
-  describe('installExtensionsInChildWindow', () => {
-
+  describes.realWin('installExtensionsInChildWindow', {amp: true}, test => {
     let parentWin;
     let extensions;
     let extensionsMock;
@@ -459,27 +405,25 @@ describe('Extensions', () => {
     let iframeWin;
 
     beforeEach(() => {
-      return createIframePromise().then(f => {
-        parentWin = f.win;
-        extensions = installExtensionsService(parentWin);
-        extensionsMock = sandbox.mock(extensions);
+      parentWin = test.win;
+      extensions = installExtensionsService(parentWin);
+      extensionsMock = sandbox.mock(extensions);
 
-        iframe = parentWin.document.createElement('iframe');
-        const promise = loadPromise(iframe);
-        const html = '<div id="one"></div>';
-        if ('srcdoc' in iframe) {
-          iframe.srcdoc = html;
-        } else {
-          iframe.src = 'about:blank';
-          const childDoc = iframe.contentWindow.document;
-          childDoc.open();
-          childDoc.write(html);
-          childDoc.close();
-        }
-        parentWin.document.body.appendChild(iframe);
-        return promise.then(() => {
-          iframeWin = iframe.contentWindow;
-        });
+      iframe = parentWin.document.createElement('iframe');
+      const promise = loadPromise(iframe);
+      const html = '<div id="one"></div>';
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = html;
+      } else {
+        iframe.src = 'about:blank';
+        const childDoc = iframe.contentWindow.document;
+        childDoc.open();
+        childDoc.write(html);
+        childDoc.close();
+      }
+      parentWin.document.body.appendChild(iframe);
+      return promise.then(() => {
+        iframeWin = iframe.contentWindow;
       });
     });
 
