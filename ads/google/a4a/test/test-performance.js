@@ -107,7 +107,7 @@ describe('AmpAdLifecycleReporter', () => {
           /[&?]c=[0-9]+/,
           /[&?]it=[^&?]*adRequestStart\.[0-9]+/,
           /[&?]it=[^&?]*adRequestStart_0\.[0-9]+/,
-          /[&?]rt=stage\.1+/,
+          /[&?]rt=stage\.2+/,
         ];
         expectMatchesAll(arg, expectations);
         expectHasSiblingImgMatchingAll(elem, expectations);
