@@ -195,7 +195,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.lifecycleReporter_.sendPing('adRequestStart');
     this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
     /** detect ad containers, add the list to element as a new attribute */
     if (this.container_ === undefined) {
@@ -234,10 +233,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.lifecycleReporter_.sendPing('renderStart');
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
+    this.lifecycleReporter_.sendPing('adRequestStart');
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
@@ -247,6 +246,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         clientId: cid || null,
         container: this.container_,
       };
+      // In this path, the request and render start events are entangled,
+      // because both happen inside a cross-domain iframe.  Separating them
+      // here, though, allows us to measure the impact of ad throttling via
+      // incrementLoadingAds().
+      this.lifecycleReporter_.sendPing('renderCrossDomainStart');
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.apiHandler_ = new AmpAdApiHandler(
@@ -316,6 +320,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_.unlayoutCallback();
       this.apiHandler_ = null;
     }
+    this.lifecycleReporter_.sendPing('adSlotCleared');
     return true;
   }
 }

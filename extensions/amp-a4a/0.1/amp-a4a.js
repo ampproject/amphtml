@@ -254,7 +254,6 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.lifecycleReporter_.sendPing('adRequestStart');
     if (this.apiHandler_) {
       this.apiHandler_.onLayoutMeasure();
     }
@@ -304,14 +303,13 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing('buildUrl');
+          this.lifecycleReporter_.sendPing('urlBuilt');
           return this.getAdUrl();
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing('sendAdRequest');
           this.adUrl_ = adUrl;
           return adUrl && this.sendXhrRequest_(adUrl);
         })
@@ -323,6 +321,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
+          this.lifecycleReporter_.sendPing('adRequestEnd');
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -343,7 +342,9 @@ export class AmpA4A extends AMP.BaseElement {
          */
         .then(responseParts => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing('extractCreativeAndSignature');
+          if (responseParts) {
+            this.lifecycleReporter_.sendPing('extractCreativeAndSignature');
+          }
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
         })
@@ -406,7 +407,6 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
 
-          this.lifecycleReporter_.sendPing('maybeRenderAmpAd');
           // TODO(levitzky) If creative comes back null, we should consider re-
           // fetching the signing server public keys and try the verification
           // step again.
@@ -447,7 +447,6 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.lifecycleReporter_.sendPing('renderStart');
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_ || this.rendered_) {
       return Promise.resolve();
@@ -463,7 +462,6 @@ export class AmpA4A extends AMP.BaseElement {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
         if (this.adUrl_) {
-          this.lifecycleReporter_.sendPing('renderViaIframe');
           this.renderViaCrossDomainIframe_(true);
         }
         throw rendered;
@@ -471,7 +469,6 @@ export class AmpA4A extends AMP.BaseElement {
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
-        this.lifecycleReporter_.sendPing('renderViaIframe');
         this.renderViaCrossDomainIframe_(true);
       }
       this.rendered_ = true;
@@ -480,7 +477,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    this.lifecycleReporter_.sendPing('unlayoutAdSlot');
+    this.lifecycleReporter_.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
@@ -547,7 +544,9 @@ export class AmpA4A extends AMP.BaseElement {
    * Callback executed when AMP creative has successfully rendered within the
    * publisher page.  To be overridden by network implementations as needed.
    */
-  onAmpCreativeRender() {}
+  onAmpCreativeRender() {
+    this.lifecycleReporter_.sendPing('renderFriendlyEnd');
+  }
 
   /**
    * Send ad request, extract the creative and signature from the response.
@@ -556,6 +555,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   sendXhrRequest_(adUrl) {
+    this.lifecycleReporter_.sendPing('adRequestStart');
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
@@ -641,6 +641,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeRenderAmpAd_(bytes) {
+    this.lifecycleReporter_.sendPing('renderFriendlyStart');
     // Timer id will be set if we have entered layoutCallback at which point
     // 3p throttling count was incremented.  We want to "release" the throttle
     // immediately since we now know we are not a 3p ad.
@@ -740,6 +741,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaCrossDomainIframe_(opt_isNonAmpCreative) {
     user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
+    this.lifecycleReporter_.sendPing('renderCrossDomainStart');
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));

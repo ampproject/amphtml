@@ -111,6 +111,18 @@ export class AmpAdApiHandler {
           if (data.type == 'render-start') {
             this.updateSize_(data.height, data.width,
                 info.source, info.origin);
+            if (this.baseInstance_.lifecyleReporter_) {
+              // This doesn't technically denote the end of rendering, but
+              // we don't have a guaranteed way to get render end for
+              // creatives in cross-domain iframes.  This really tells us,
+              // 'the creative (or the AMP framework) reported a "render-start"
+              // event'.  That's distinct from renderCrossDomainStart because
+              // it's not guaranteed that all creatives will actually send this
+              // event (or that it's not getting dropped somewhere even if it
+              // is sent).
+              this.baseInstance_.lifecycleReporter_.sendPing(
+                  'renderCrossDomainEnd');
+            }
             //report performance
           } else {
             this.noContent_();

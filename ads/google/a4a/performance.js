@@ -46,15 +46,16 @@ const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
   // not test as `false` later.
   adSlotBuilt: '0',
-  adRequestStart: '1',
-  buildUrl: '2',
-  sendAdRequest: '3',
+  urlBuilt: '1',
+  adRequestStart: '2',
+  adRequestEnd: '3',
   extractCreativeAndSignature: '4',
   adResponseValidateStart: '5',
-  maybeRenderAmpAd: '6',
-  renderViaIframe: '7',
-  renderStart: '10',
-  unlayoutAdSlot: '20',
+  renderFriendlyStart: '6',
+  renderCrossDomainStart: '7',
+  renderFriendlyEnd: '8',
+  renderCrossDomainEnd: '9',
+  adSlotCleared: '20',
 };
 
 export const PROFILING_RATE = {
