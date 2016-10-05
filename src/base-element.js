@@ -18,7 +18,6 @@ import {Layout} from './layout';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewerFor} from './viewer';
 import {viewportForDoc} from './viewport';
 import {vsyncFor} from './vsync';
 
@@ -118,7 +117,7 @@ export class BaseElement {
     /** @public @const */
     this.element = element;
     /*
-         \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
@@ -147,6 +146,9 @@ export class BaseElement {
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
+
+    /** @public {?Object} For use by sub classes */
+    this.config = null;
   }
 
   /**
@@ -619,10 +621,10 @@ export class BaseElement {
     return viewportForDoc(this.getAmpDoc());
   }
 
- /**
-  * Returns a previously measured layout box of the element.
-  * @return {!./layout-rect.LayoutRectDef}
-  */
+  /**
+   * Returns a previously measured layout box of the element.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
   getIntersectionElementLayoutBox() {
     return this.element.getResources().getResourceForElement(
         this.element).getLayoutBox();
@@ -764,26 +766,6 @@ export class BaseElement {
    */
   deferMutate(callback) {
     this.element.getResources().deferMutate(this.element, callback);
-  }
-
-  /**
-   * Requests full overlay mode from the viewer.
-   * @public
-   * @deprecated Use `Viewport.enterLightboxMode`.
-   * TODO(dvoytenko, #3406): Remove as deprecated.
-   */
-  requestFullOverlay() {
-    viewerFor(this.win).requestFullOverlay();
-  }
-
-  /**
-   * Requests to cancel full overlay mode from the viewer.
-   * @public
-   * @deprecated Use `Viewport.leaveLightboxMode`.
-   * TODO(dvoytenko, #3406): Remove as deprecated.
-   */
-  cancelFullOverlay() {
-    viewerFor(this.win).cancelFullOverlay();
   }
 
   /**

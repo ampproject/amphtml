@@ -19,98 +19,42 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {removeElement, removeChildren} from '../../../src/dom';
+import {signingServerURLs} from '../../../ads/_a4a-config';
+import {removeChildren, createElementWithAttributes} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {createShadowEmbedRoot} from '../../../src/shadow-embed';
+import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {viewerFor} from '../../../src/viewer';
+import {some} from '../../../src/utils/promise';
+import {utf8Decode} from '../../../src/utils/bytes';
+import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {
   importPublicKey,
+  isCryptoAvailable,
   verifySignature,
-  verifySignatureIsAvailable,
+  PublicKeyInfoDef,
 } from './crypto-verifier';
 
-
-// This is the public key currently used by our test signing server.
-// It will be replaced with code which queries the server to get the
-// current set of active keys. (See further comments below.)
-const modulus =
-      'z43rjaJ9PLk1FHMEL31_ILXGtUTN03rxJ9amD9y3BRDpbTA-GkUKiQM07xAd8OXP' +
-      'UZRqcjvXQfc7b1RCEtwrcfx9oBRdF78QMA4tLLCqSHP0tSuqYF0fA7-GyTFWDcYz' +
-      'ey90jRFNNWxjzKrvSazacE0TvJ8S_AVP4EV67VdbByCC1tpBzLhhy7RFHp2cXGTp' +
-      'WYUqZUAVUdJoeBuCho_zQz2au7c6sDaLiF-uYL9Td9MrZ6tSLo3MeMIZia4WgWqj' +
-      'TDICR0h-zlbHUd0K9CoXbGTt5nvkebXHmbKd99ma6zRYVlYNJTuSqsRCBNYtCTFV' +
-      'HIZeBlkjHKsQ46HTZPexZw';
-
-const pubExp = 'AQAB';
-
 /**
- * The current set of public keys.
- *
- * @type {Array<!Promise<!PublicKeyInfoDef>>}
+ * Dev public key set. This will go away once the dev signing service goes live.
+ * @type {Array<!Promise<!./crypto-verifier.PublicKeyInfoDef>>}
  */
-// TODO(bobcassels): When the signing server is finished, get the public keys
-// from there. For now, hard-wire the current signer public key.
-let publicKeyInfos = [importPublicKey({
+const devJwkSet = [{
   kty: 'RSA',
-  'n': modulus,
-  'e': pubExp,
-  alg: 'RS256',
-  ext: true,
-})];
-
-// If we're in local dev mode then we may be talking to a dev validation
-// instance as well.  Dev validators use different keys than production ones
-// do, so we need to add the dev key to the known key list.
-//
-// Note: This is temporary.  It will not be necessary once A4A can fetch keys
-// directly from the server.
-if (getMode().localDev) {
-  const devModulus =
-      'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
+  n: 'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
       'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +
       'nvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEz' +
       'fZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca' +
       '8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2' +
-      'sQuM5KangAkjJRe-Ej6aaQ';
-  publicKeyInfos.push(importPublicKey({
-    kty: 'RSA',
-    'n': devModulus,
-    'e': pubExp,
-    alg: 'RS256',
-    ext: true,
-  }));
-}
-
-/**
- * @param {!Object} publicKeys An array of parsed JSON web keys.
- */
-export function setPublicKeys(publicKeys) {
-  publicKeyInfos = publicKeys.map(importPublicKey);
-}
-
-/**
- * @param {!ArrayBuffer} bytes
- * @return {!Promise<string>}
- */
-// TODO(taymonbeal): move this somewhere more sensible
-export function utf8FromArrayBuffer(bytes) {
-  if (window.TextDecoder) {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-  }
-  return new Promise(function(resolve, unusedReject) {
-    const reader = new FileReader();
-    reader.onloadend = function(unusedEvent) {
-      resolve(reader.result);
-    };
-    reader.readAsText(new Blob([bytes]));
-  });
-}
+      'sQuM5KangAkjJRe-Ej6aaQ',
+  e: 'AQAB',
+  alg: 'RS256',
+  ext: true,
+}];
 
 /**
  * @param {*} ary
@@ -124,17 +68,17 @@ function isValidOffsetArray(ary) {
 };
 
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
-const AMP_BODY_STRING = 'amp-ad-body';
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
-let AdResponseDef;
+export let AdResponseDef;
 
-/** @typedef {{cssUtf16CharOffsets: Array<number>,
-               cssReplacementRanges: Array<number>,
-               bodyUtf16CharOffsets: !Array<number>,
-               bodyAttributes: ?string,
-               customElementExtensions: Array<string>,
-               customStylesheets: Array<string>}} */
+/** @typedef {{
+      cssUtf16CharOffsets: Array<number>,
+      bodyUtf16CharOffsets: !Array<number>,
+      bodyAttributes: ?string,
+      customElementExtensions: Array<string>,
+      customStylesheets: Array<string>
+    }} */
 let CreativeMetaDataDef;
 
 export class AmpA4A extends AMP.BaseElement {
@@ -160,7 +104,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AmpAdApiHandler} */
+    /** @private {?AMP.AmpAdApiHandler} */
     this.apiHandler_ = null;
 
     /** @private {boolean} */
@@ -172,14 +116,11 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {null|boolean} where layoutMeasure has been executed. */
     this.layoutMeasureExecuted_ = false;
 
-    /**
-     * @private {!Array<!Element>} stylesheets added as part of shadow DOM
-     *    based creative injection.
-     */
-    this.stylesheets_ = [];
-
-    /** @const @private {!Vsync} */
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
+
+    /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
+    this.keyInfoSetPromises_ = this.getKeyInfoSets_();
   }
 
   /** @override */
@@ -234,6 +175,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Prefetches and preconnects URLs related to the ad using adPreconnect
    * registration which assumes ad request domain used for 3p is applicable.
+   * @param {boolean=} unusedOnLayout
    * @override
    */
   preconnectCallback(unusedOnLayout) {
@@ -260,7 +202,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.apiHandler_) {
       this.apiHandler_.onLayoutMeasure();
     }
-    if (this.layoutMeasureExecuted_ || !verifySignatureIsAvailable()) {
+    if (this.layoutMeasureExecuted_ || !isCryptoAvailable()) {
       // onLayoutMeasure gets called multiple times.
       return;
     }
@@ -288,6 +230,7 @@ export class AmpA4A extends AMP.BaseElement {
         throw cancellation();
       }
     };
+
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
     // try to render later in iframe.
@@ -300,81 +243,117 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = viewerFor(this.win).whenFirstVisible()
-      // This block returns the ad URL, if one is available.
-      /** @return {!Promise<?string>} */
-      .then(() => {
-        checkStillCurrent(promiseId);
-        return this.getAdUrl();
-      })
-      // This block returns the (possibly empty) response to the XHR request.
-      /** @return {!Promise<?Response>} */
-      .then(adUrl => {
-        checkStillCurrent(promiseId);
-        this.adUrl_ = adUrl;
-        return adUrl && this.sendXhrRequest_(adUrl);
-      })
-      // The following block returns either the response (as a {bytes, headers}
-      // object), or null if no response is available / response is empty.
-      /** @return {!Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
-      .then(fetchResponse => {
-        checkStillCurrent(promiseId);
-        if (!fetchResponse || !fetchResponse.arrayBuffer) {
-          return null;
-        }
-        // Note: Resolving a .then inside a .then because we need to capture
-        // two fields of fetchResponse, one of which is, itself, a promise,
-        // and one of which isn't.  If we just return
-        // fetchResponse.arrayBuffer(), the next step in the chain will
-        // resolve it to a concrete value, but we'll lose track of
-        // fetchResponse.headers.
-        return fetchResponse.arrayBuffer().then(bytes => {
-          return {
-            bytes,
-            headers: fetchResponse.headers,
-          };
-        });
-      })
-      // This block returns the ad creative and signature, if available; null
-      // otherwise.
-      /**
-       * @return {!Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>}
-       */
-      .then(responseParts => {
-        checkStillCurrent(promiseId);
-        return responseParts && this.extractCreativeAndSignature(
-                responseParts.bytes, responseParts.headers);
-      })
-      // This block returns the ad creative if it exists and validates as AMP;
-      // null otherwise.
-      /** @return {!Promise<?string>} */
-      .then(creativeParts => {
-        checkStillCurrent(promiseId);
-        return creativeParts && this.validateAdResponse_(
-            creativeParts.creative, creativeParts.signature);
-      })
-      // This block returns true iff the creative was rendered in the shadow
-      // DOM.
-      /** @return {!Promise<!boolean>} */
-      .then(creative => {
-        checkStillCurrent(promiseId);
-        // Note: It's critical that #maybeRenderAmpAd_ be called
-        // on precisely the same creative that was validated
-        // via #validateAdResponse_.  See GitHub issue
-        // https://github.com/ampproject/amphtml/issues/4187
-        return creative && this.maybeRenderAmpAd_(creative);
-      })
-      .catch(error => this.promiseErrorHandler_(error));
+    this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        // This block returns the ad URL, if one is available.
+        .then(() => {
+          checkStillCurrent(promiseId);
+          return this.getAdUrl();
+        })
+        // This block returns the (possibly empty) response to the XHR request.
+        .then(adUrl => {
+          checkStillCurrent(promiseId);
+          this.adUrl_ = adUrl;
+          return adUrl && this.sendXhrRequest_(adUrl);
+        })
+        // The following block returns either the response (as a {bytes, headers}
+        // object), or null if no response is available / response is empty.
+        .then(fetchResponse => {
+          checkStillCurrent(promiseId);
+          if (!fetchResponse || !fetchResponse.arrayBuffer) {
+            return null;
+          }
+          // Note: Resolving a .then inside a .then because we need to capture
+          // two fields of fetchResponse, one of which is, itself, a promise,
+          // and one of which isn't.  If we just return
+          // fetchResponse.arrayBuffer(), the next step in the chain will
+          // resolve it to a concrete value, but we'll lose track of
+          // fetchResponse.headers.
+          return fetchResponse.arrayBuffer().then(bytes => {
+            return {
+              bytes,
+              headers: fetchResponse.headers,
+            };
+          });
+        })
+        // This block returns the ad creative and signature, if available; null
+        // otherwise.
+        .then(responseParts => {
+          checkStillCurrent(promiseId);
+          return responseParts && this.extractCreativeAndSignature(
+              responseParts.bytes, responseParts.headers);
+        })
+        // This block returns the ad creative if it exists and validates as AMP;
+        // null otherwise.
+        .then(creativeParts => {
+          checkStillCurrent(promiseId);
+          if (!creativeParts || !creativeParts.signature) {
+            return null;
+          }
+
+          // For each signing service, we have exactly one Promise,
+          // keyInfoSetPromise, that holds an Array of Promises of signing keys.
+          // So long as any one of these signing services can verify the
+          // signature, then the creative is valid AMP.
+          return some(this.keyInfoSetPromises_.map(keyInfoSetPromise => {
+            // Resolve Promise into Array of Promises of signing keys.
+            return keyInfoSetPromise.then(keyInfoSet => {
+              // As long as any one individual key of a particular signing
+              // service, keyInfoPromise, can verify the signature, then the
+              // creative is valid AMP.
+              return some(keyInfoSet.map(keyInfoPromise => {
+                // Resolve Promise into signing key.
+                return keyInfoPromise.then(keyInfo => {
+                  if (!keyInfo) {
+                    return Promise.reject('Promise resolved to null key.');
+                  }
+                  // If the key exists, try verifying with it.
+                  return verifySignature(
+                      new Uint8Array(creativeParts.creative),
+                      creativeParts.signature,
+                      keyInfo)
+                      .then(isValid => {
+                        if (isValid) {
+                          return creativeParts.creative;
+                        }
+                        return Promise.reject(
+                            'Key failed to validate creative\'s signature.');
+                      },
+                      err => {
+                        user().error('Amp Ad', err, this.element);
+                      });
+                });
+              }))
+              // some() returns an array of which we only need a single value.
+              .then(returnedArray => returnedArray[0]);
+            });
+          }))
+          .then(returnedArray => returnedArray[0]);
+        })
+        // This block returns true iff the creative was rendered in the shadow
+        // DOM.
+        .then(creative => {
+          checkStillCurrent(promiseId);
+          // Note: It's critical that #maybeRenderAmpAd_ be called
+          // on precisely the same creative that was validated
+          // via #validateAdResponse_.  See GitHub issue
+          // https://github.com/ampproject/amphtml/issues/4187
+
+          // TODO(levitzky) If creative comes back null, we should consider re-
+          // fetching the signing server public keys and try the verification
+          // step again.
+          return creative && this.maybeRenderAmpAd_(creative);
+        })
+        .catch(error => this.promiseErrorHandler_(error));
   }
 
   /**
    * Handles uncaught errors within promise flow.
-   * @param {string|Error} error
-   * @return {string|Error}
+   * @param {*} error
+   * @return {*}
    * @private
    */
   promiseErrorHandler_(error) {
-    if (error instanceof Error) {
+    if (error && error.message) {
       if (error.message.indexOf('amp-a4a: ') == 0) {
         // caught previous call to promiseErrorHandler?  Infinite loop?
         return error;
@@ -392,7 +371,7 @@ export class AmpA4A extends AMP.BaseElement {
       'tag': this.element.tagName,
       'type': this.element.getAttribute('type'),
       'au': adQueryIdx < 0 ? '' :
-            this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
+          this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
     };
     return new Error('amp-a4a: ' + JSON.stringify(state));
   }
@@ -414,14 +393,14 @@ export class AmpA4A extends AMP.BaseElement {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
         if (this.adUrl_) {
-          this.renderViaIframe_(true);
+          this.renderViaCrossDomainIframe_(true);
         }
         throw rendered;
       };
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
-        this.renderViaIframe_(true);
+        this.renderViaCrossDomainIframe_(true);
       }
       this.rendered_ = true;
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
@@ -433,17 +412,13 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.layoutMeasureExecuted_) {
       return true;
     }
+    // TODO(keithwrightbos): is mutate necessary?  Could this lead to a race
+    // condition where unlayoutCallback fires and during/after subsequent
+    // layoutCallback execution, the mutate operation executes causing our
+    // state to be destroyed?
     this.vsync_.mutate(() => {
-      // Iframe or shadow root attached as children.  Cannot delete shadowRoot
-      // but creating new one clears.
-      if (this.element.shadowRoot) {
-        this.element.shadowRoot./*OK*/innerHTML = '';
-      } else {
-        removeChildren(this.element);
-      }
+      removeChildren(this.element);
 
-      this.stylesheets_.forEach(removeElement);
-      this.stylesheets_ = [];
       this.adPromise_ = null;
       this.adUrl_ = null;
       this.rendered_ = false;
@@ -469,7 +444,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @return {!Promise<string>}
+   * @return {!Promise<string>|string}
    */
   getAdUrl() {
     throw new Error('getAdUrl not implemented!');
@@ -491,30 +466,20 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<!AdResponseDef>}
    */
   extractCreativeAndSignature(unusedResponseArrayBuffer,
-                              unusedResponseHeaders) {
+      unusedResponseHeaders) {
     throw new Error('extractCreativeAndSignature not implemented!');
   }
 
   /**
-   * @return {boolean} whether environment supports rendering of AMP creatives
-   *    within publisher page via shadow DOM (otherwise will be rendered within)
-   *    cross domain iframe.  If valid AMP creative, will be rendered early.
-   */
-  supportsShadowDom() {
-    return !!window.Element.prototype.createShadowRoot;
-  }
-
-  /**
    * Callback executed when AMP creative has successfully rendered within the
-   * publisher page via shadow DOM.  To be overridden by network implementations
-   * as needed.
+   * publisher page.  To be overridden by network implementations as needed.
    */
-  onAmpCreativeShadowDomRender() {}
+  onAmpCreativeRender() {}
 
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
-   * @return {!Promise<?FetchResponse>}
+   * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
   sendXhrRequest_(adUrl) {
@@ -536,33 +501,63 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Try to validate creative is AMP through crypto signature.
-   * @param {!ArrayBuffer} creative  Bytes of the entire signed creative.
-   * @param {?ArrayBuffer} signature  Bytes for creative signature (decoded from
-   *   base64, if necessary.)
-   * @return {!Promise<ArrayBuffer>}  Promise to a guaranteed-valid AMP creative
-   *   or null if the creative is unsigned or invalid.
+   * To be overridden by network specific implementation indicating which
+   * signing service(s) is to be used.
+   * @return {!Array<string>} A list of signing services.
+   */
+  getSigningServiceNames() {
+    // TODO(levitzky) Add dev key name once it goes live.
+    return getMode().localDev ? ['google'] : ['google'];
+  }
+
+  /**
+   * Retrieves all public keys, as specified in _a4a-config.js.
+   * None of the (inner or outer) promises returned by this function can reject.
+   *
+   * @return {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>}
    * @private
    */
-  validateAdResponse_(creative, signature) {
-    // Validate when we have a signature and we have native crypto.
-    if (!signature) {
-      // Guaranteed not a AMP creative.
-      return Promise.resolve(null);
+  getKeyInfoSets_() {
+    if (!isCryptoAvailable()) {
+      return [];
     }
-    if (verifySignatureIsAvailable()) {
-      // Among other things, the signature might not be proper base64.
-      // TODO(a4a-cam): This call used to be missing the conversion
-      // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
-      // any unit tests to fail, either locally or on Travis.  That
-      // indicates that the tests are too weak or aren't reporting
-      // correctly.  Check out and fix the tests.
-      return verifySignature(
-          new Uint8Array(creative), signature, publicKeyInfos).then(isValid => {
-            return isValid ? creative : null;
-          });
+    const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
+      const url = signingServerURLs[serviceName];
+      if (url) {
+        return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
+            .then(jwkSetObj => {
+              if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
+                  jwkSetObj.keys.every(isObject)) {
+                return jwkSetObj.keys;
+              } else {
+                user().error(
+                    'Amp Ad',
+                    'Invalid response from signing server.',
+                    this.element);
+                return [];
+              }
+            }).catch(err => {
+              user().error('Amp Ad', err, this.element);
+              return [];
+            });
+      } else {
+        // The given serviceName does not have a corresponding URL in
+        // _a4a-config.js.
+        const reason = `Signing service '${serviceName}' does not exist.`;
+        user().error('Amp Ad', reason, this.element);
+        return [];
+      }
+    });
+    if (getMode().localDev) {
+      jwkSetPromises.push(Promise.resolve(devJwkSet));
     }
-    return Promise.reject('Public key validation of A4A ads not available');
+    return jwkSetPromises.map(jwkSetPromise =>
+        jwkSetPromise.then(jwkSet =>
+          jwkSet.map(jwk =>
+            importPublicKey(jwk).catch(err => {
+              user().error('Amp Ad', err, this.element);
+              return null;
+            }))));
   }
 
   /**
@@ -580,24 +575,18 @@ export class AmpA4A extends AMP.BaseElement {
       decrementLoadingAds(this.timerId_, this.win);
     }
     // AMP documents are required to be UTF-8
-    return utf8FromArrayBuffer(bytes).then(creative => {
+    return utf8Decode(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
       const creativeMetaData = this.getAmpAdMetadata_(creative);
-      if (!creativeMetaData || !this.supportsShadowDom()) {
-        // Shadow DOM is not supported or could not find appropriate markers
-        // within the creative therefore load within cross domain iframe.
-        // Iframe is created immediately (as opposed to waiting for
-        // layoutCallback) as the the creative has been verified as AMP and
-        // will run efficiently.
-        this.renderViaIframe_();
+      if (!creativeMetaData) {
+        // Could not find appropriate markers within the creative therefore
+        // load within cross domain iframe. Iframe is created immediately
+        // (as opposed to waiting for layoutCallback) as the the creative has
+        // been verified as AMP and will run efficiently.
+        this.renderViaCrossDomainIframe_();
         return true;
       } else {
         try {
-          // Do extraction processing on CSS and body before creating the
-          // shadow root so that if they error out, we don't actually edit
-          // the doc.
-          const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
-          const bodyBlock = this.formatBody_(creative, creativeMetaData);
           // Note: We schedule DOM mutations via the Vsync handler system to
           // avoid user-visible rewrites.  However, that means that rendering
           // is being handled outside this promise chain.  There are two
@@ -615,31 +604,47 @@ export class AmpA4A extends AMP.BaseElement {
           //    render-in-DOM failed, and no ad would be displayed.  However,
           //    all of the enclosed mutations are fairly simple and unlikely
           //    to fail.
-          this.vsync_.mutate(() => {
-            const doc = this.element.ownerDocument;
-            // Copy fonts to host document head.
-            this.relocateFonts_(creativeMetaData);
-            // Create and setup shadow root.
-            const shadowRoot = createShadowEmbedRoot(this.element,
-                creativeMetaData.customElementExtensions || []);
-            // Add custom CSS.
-            const customStyle = doc.createElement('style');
-            customStyle.setAttribute('amp-custom', '');
-            customStyle.textContent = cssBlock;
-            shadowRoot.appendChild(customStyle);
-            // Add body.
-            const bodyAttrString = creativeMetaData.bodyAttributes ?
+          // Create and setup friendly iframe.
+          dev().assert(!!this.element.ownerDocument);
+          const iframe = /** @type {!HTMLIFrameElement} */(
+            createElementWithAttributes(
+              /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+                'frameborder': '0', 'allowfullscreen': '',
+                'allowtransparency': '', 'scrolling': 'no'}));
+          this.applyFillContent(iframe);
+
+          const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
+          const bodyBlock = this.formatBody_(creative, creativeMetaData);
+          const bodyAttrString = creativeMetaData.bodyAttributes ?
                   ' ' + creativeMetaData.bodyAttributes : '';
-            const temp = doc.createElement('div');
-            temp./*OK*/innerHTML =
-                `<${AMP_BODY_STRING}${bodyAttrString}></${AMP_BODY_STRING}>`;
-            const bodyElement = temp.firstElementChild;
-            shadowRoot.appendChild(bodyElement);
-            bodyElement./*OK*/innerHTML = bodyBlock;
-            this.rendered_ = true;
-            this.onAmpCreativeShadowDomRender();
-          });
-          return true;
+          const fontsArray = [];
+          if (creativeMetaData.customStylesheets) {
+            creativeMetaData.customStylesheets.forEach(s => {
+              const href = s['href'];
+              if (href) {
+                fontsArray.push(href);
+              }
+            });
+          }
+          const modifiedCreative =
+            `<!doctype html><html ⚡4ads>
+            <head>
+              <style amp4ads-boilerplate>body{visibility:hidden}</style>
+              <style amp-custom>${cssBlock}</style>
+              </head>
+            <body ${bodyAttrString}>${bodyBlock}</body>
+            </html>`;
+          return installFriendlyIframeEmbed(
+            iframe, this.element, {
+              url: this.adUrl_,
+              html: modifiedCreative,
+              extensionIds: creativeMetaData.customElementExtensions || [],
+              fonts: fontsArray,
+            }).then(() => {
+              this.rendered_ = true;
+              this.onAmpCreativeRender();
+              return true;
+            });
         } catch (e) {
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
@@ -660,8 +665,8 @@ export class AmpA4A extends AMP.BaseElement {
    *    nested frames).
    * @private
    */
-  renderViaIframe_(opt_isNonAmpCreative) {
-    user().assert(this.adUrl_, 'adUrl missing in renderViaIframe_?');
+  renderViaCrossDomainIframe_(opt_isNonAmpCreative) {
+    user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));
@@ -670,7 +675,7 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO: remove call to getCorsUrl and instead have fetch API return
     // modified url.
     iframe.setAttribute(
-      'src', xhrFor(this.win).getCorsUrl(this.win, this.adUrl_));
+        'src', xhrFor(this.win).getCorsUrl(this.win, this.adUrl_));
     this.vsync_.mutate(() => {
       // TODO(keithwrightbos): noContentCallback?
       this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
@@ -678,7 +683,8 @@ export class AmpA4A extends AMP.BaseElement {
       // Set opt_defaultVisible to true as 3p draw code never executed causing
       // render-start event never to fire which will remove visiblity hidden.
       this.apiHandler_.startUp(
-        iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
+          iframe, /* is3p */ !!opt_isNonAmpCreative,
+          /* opt_defaultVisible */ true);
       this.rendered_ = true;
     });
   }
@@ -699,20 +705,20 @@ export class AmpA4A extends AMP.BaseElement {
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
       dev().warn('A4A',
-        'Could not locate start index for amp meta data in: %s', creative);
+          'Could not locate start index for amp meta data in: %s', creative);
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
       dev().warn('A4A',
-        'Could not locate closing script tag for amp meta data in: %s',
-        creative);
+          'Could not locate closing script tag for amp meta data in: %s',
+          creative);
       return null;
     }
     try {
-      return this.buildCreativeMetaData_(JSON.parse(
-        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd)));
+      return this.buildCreativeMetaData_(/** @type {!Object} */ (JSON.parse(
+        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd))));
     } catch (err) {
       dev().warn('A4A', 'Invalid amp metadata: %s',
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
@@ -721,13 +727,12 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object} JSON extraced from creative
+   * @param {!Object} metaDataObj JSON extraced from creative
    * @return {!CreativeMetaDataDef} if valid, null otherwise
    * @private
    */
   buildCreativeMetaData_(metaDataObj) {
     const metaData = {};
-
     metaData.bodyUtf16CharOffsets = metaDataObj['bodyUtf16CharOffsets'];
     if (!isValidOffsetArray(metaData.bodyUtf16CharOffsets)) {
       // Invalid/Missing body offsets array.
@@ -737,18 +742,6 @@ export class AmpA4A extends AMP.BaseElement {
       metaData.cssUtf16CharOffsets = metaDataObj['cssUtf16CharOffsets'];
       if (!isValidOffsetArray(metaData.cssUtf16CharOffsets)) {
         throw new Error('Invalid CSS offsets');
-      }
-    }
-    // Validate array of two member number arrays
-    if (metaDataObj['cssReplacementRanges']) {
-      metaData.cssReplacementRanges = metaDataObj['cssReplacementRanges'];
-      if (!isArray(metaData.cssReplacementRanges)) {
-        throw new Error('Invalid CSS replacement ranges');
-      }
-      for (let i = 0; i < metaData.cssReplacementRanges.length; i++) {
-        if (!isValidOffsetArray(metaData.cssReplacementRanges[i])) {
-          throw new Error('Invalid CSS replacement ranges');
-        }
       }
     }
     if (metaDataObj['bodyAttributes']) {
@@ -767,83 +760,48 @@ export class AmpA4A extends AMP.BaseElement {
       // Expect array of objects with at least one key being 'href' whose value
       // is URL.
       metaData.customStylesheets = metaDataObj['customStylesheets'];
+      const errorMsg = 'Invalid custom stylesheets';
       if (!isArray(metaData.customStylesheets)) {
-        throw new Error('Invalid custom stylesheets');
+        throw new Error(errorMsg);
       }
-      for (let i = 0; i < metaData.customStylesheets.length; i++) {
-        const stylesheet = metaData.customStylesheets[i];
+      metaData.customStylesheets.forEach(stylesheet => {
         if (!isObject(stylesheet) || !stylesheet['href'] ||
             typeof stylesheet['href'] !== 'string' ||
             !/^https:\/\//i.test(stylesheet['href'])) {
-          throw new Error('Invalid custom stylesheets');
+          throw new Error(errorMsg);
         }
-      }
+      });
     }
     return metaData;
   }
 
-  /**
-   * Extracts the body portion of the creative, according to directions in the
-   * metaData, and formats it for insertion into Shadow DOM.
-   * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} metaData Metadata object extracted from the
-   *    reserialized creative.
-   * @returns {string}  Body of AMP creative, surrounded by {@code
-   *     <amp-ad-body>} tags, and suitable for injection into Shadow DOM.
-   * @private
-   */
-  formatBody_(creative, metaData) {
-    return creative.substring(metaData.bodyUtf16CharOffsets[0],
-        metaData.bodyUtf16CharOffsets[1]);
-  }
+ /**
+  * Extracts the body portion of the creative, according to directions in the
+  * metaData, and formats it for insertion into Shadow DOM.
+  * @param {string} creative from which CSS is extracted
+  * @param {!CreativeMetaDataDef} metaData Metadata object extracted from the
+  *    reserialized creative.
+  * @returns {string}  Body of AMP creative, surrounded by {@code
+  *     <amp-ad-body>} tags, and suitable for injection into Shadow DOM.
+  * @private
+  */
+ formatBody_(creative, metaData) {
+   return creative.substring(metaData.bodyUtf16CharOffsets[0],
+       metaData.bodyUtf16CharOffsets[1]);
+ }
 
-  /**
-   * Note: destructively reverses the {@code offsets} list as a side effect.
-   * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} meta data from creative.
-   * @returns {string} CSS to be added to page.
-   */
-  formatCSSBlock_(creative, metaData) {
-    if (!metaData.cssUtf16CharOffsets) {
-      return '';
-    }
-    let css = creative.substring(
-        metaData.cssUtf16CharOffsets[0],
-        metaData.cssUtf16CharOffsets[1]);
-    if (metaData.cssReplacementRanges) {
-      const rangesToKeep = [];
-      let startIndex = 0;
-      metaData.cssReplacementRanges.forEach(replRange => {
-        rangesToKeep.push(css.substring(startIndex, replRange[0]));
-        startIndex = replRange[1];
-      });
-      rangesToKeep.push(css.substring(startIndex, css.length));
-      css = rangesToKeep.join(AMP_BODY_STRING);
-    }
-    return css;
-  }
-
-  /**
-   * Add fonts from the ad metaData block to the host document head (if
-   * they're not already present there).
-   * @param {!CreativeMetaDataDef} metaData Reserialization metadata object.
-   * @private
-   */
-  relocateFonts_(metaData) {
-    if (!metaData.customStylesheets) {
-      return;
-    }
-    metaData.customStylesheets.forEach(s => {
-      // TODO(tdrl): How to test for existence already?
-      const doc = this.element.ownerDocument;
-      const linkElem = doc.createElement('link');
-      for (const attr in s) {
-        if (s.hasOwnProperty(attr)) {
-          linkElem.setAttribute(attr, s[attr]);
-        }
-      }
-      doc.head.appendChild(linkElem);
-      this.stylesheets_.push(linkElem);
-    });
-  }
+ /**
+  * Note: destructively reverses the {@code offsets} list as a side effect.
+  * @param {string} creative from which CSS is extracted
+  * @param {!CreativeMetaDataDef} metaData from creative.
+  * @returns {string} CSS to be added to page.
+  */
+ formatCSSBlock_(creative, metaData) {
+   if (!metaData.cssUtf16CharOffsets) {
+     return '';
+   }
+   return creative.substring(
+       metaData.cssUtf16CharOffsets[0],
+       metaData.cssUtf16CharOffsets[1]);
+ }
 }

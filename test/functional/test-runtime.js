@@ -65,6 +65,7 @@ describe('runtime', () => {
         ampdoc: {obj: ampdocService},
       },
     };
+    ampdocService.getAmpDoc = () => new AmpDocSingle(win);
     installPlatformService(win);
     errorStub = sandbox.stub(dev(), 'error');
   });
@@ -364,6 +365,9 @@ describe('runtime', () => {
 
       // Already installed.
       expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
+
+      // The main top-level service is also pinged to unblock render.
+      return getServicePromise(win, 'service1');
     });
 
     it('should register doc-service factory and install it immediately', () => {
@@ -575,11 +579,12 @@ describe('runtime', () => {
       // Doc services have been installed.
       expect(ampdoc.services.action).to.exist;
       expect(ampdoc.services.action.obj).to.exist;
+      expect(ampdoc.services.viewer).to.exist;
+      expect(ampdoc.services.viewer.obj).to.exist;
 
-      // Single-doc bidings should not be installed.
-      // TODO(dvoytenko): create doc-level services.
-      expect(ret.viewer).to.not.exist;
-      expect(ret.viewport).to.not.exist;
+      // Single-doc bidings have been installed.
+      expect(ret.viewer).to.exist;
+      expect(ret.viewer.ampdoc).to.equal(ampdoc);
     });
 
     it('should install doc services', () => {
