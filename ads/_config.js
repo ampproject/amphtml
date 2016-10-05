@@ -20,7 +20,6 @@
  *
  * yourNetworkName: {  // This is the "type" attribute of <amp-ad>
  *
-<<<<<<< HEAD
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPrefetch = {
@@ -98,10 +97,6 @@ export const adPrefetch = {
  * URLs to connect to for a given ad type.
  * No need to add URLs that have same hosts as in the adPrefetch.
  * This MUST be kept in sync with actual implementation.
-=======
- *   // List of URLs for prefetch
- *   prefetch: string|array
->>>>>>> ampproject/master
  *
  *   // List of hosts for preconnect
  *   preconnect: string|array
