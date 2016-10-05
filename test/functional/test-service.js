@@ -15,6 +15,8 @@
  */
 
 import {
+  assertDisposable,
+  disposeServicesForDoc,
   fromClass,
   getExistingServiceForWindow,
   getExistingServiceForDoc,
@@ -23,6 +25,7 @@ import {
   getServicePromise,
   getServiceForDoc,
   getServicePromiseForDoc,
+  isDisposable,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -40,6 +43,28 @@ describe('service', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  describe('disposable interface', () => {
+
+    let disposable;
+    let nonDisposable;
+
+    beforeEach(() => {
+      nonDisposable = {};
+      disposable = {dispose: sandbox.spy()};
+    });
+
+    it('should test disposable interface', () => {
+      expect(isDisposable(disposable)).to.be.true;
+      expect(isDisposable(nonDisposable)).to.be.false;
+    });
+
+    it('should assert disposable interface', () => {
+      expect(assertDisposable(disposable)).to.equal(disposable);
+      expect(() => assertDisposable(nonDisposable))
+          .to.throw(/required to implement Disposable/);
+    });
   });
 
   describe('window singletons', () => {
@@ -178,6 +203,8 @@ describe('service', () => {
       resetServiceForTesting(windowApi, 'a');
       resetServiceForTesting(windowApi, 'b');
       resetServiceForTesting(windowApi, 'c');
+      resetServiceForTesting(windowApi, 'd');
+      resetServiceForTesting(windowApi, 'e');
       resetServiceForTesting(windowApi, 'e1');
     });
 
@@ -289,6 +316,49 @@ describe('service', () => {
       setParentWindow(grandchildWin, childWin);
       expect(getServiceForDoc(grandChildWinNode, 'c', factory)).to.equal(c);
       expect(getExistingServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
+    });
+
+    it('should dispose disposable services', () => {
+      const disposableFactory = function() {
+        return {
+          dispose: sandbox.spy(),
+        };
+      };
+      const disposable = getServiceForDoc(node, 'a', disposableFactory);
+      const disposableWithError = getServiceForDoc(node, 'b', function() {
+        return {
+          dispose: function() {},
+        };
+      });
+      sandbox.stub(disposableWithError, 'dispose', function() {
+        throw new Error('intentional');
+      });
+      const disposableDeferredPromise = getServicePromiseForDoc(node, 'c');
+      const nonDisposable = getServiceForDoc(node, 'd', () => {
+        return {};
+      });
+      const windowDisposable = getService(windowApi, 'e', disposableFactory);
+
+      disposeServicesForDoc(ampdoc);
+
+      // Disposable and initialized are disposed right away.
+      expect(disposable.dispose).to.be.calledOnce;
+
+      // Failing disposable doesn't fail the overall dispose.
+      expect(disposableWithError.dispose).to.be.calledOnce;
+
+      // Non-disposable are not touched.
+      expect(nonDisposable.dispose).to.be.undefined;
+
+      // Window disposable is not touched.
+      expect(windowDisposable.dispose).to.not.be.called;
+
+      // Deffered.
+      const disposableDeferred = getServiceForDoc(node, 'c', disposableFactory);
+      expect(disposableDeferred.dispose).to.not.be.called;
+      return disposableDeferredPromise.then(() => {
+        expect(disposableDeferred.dispose).to.be.calledOnce;
+      });
     });
   });
 

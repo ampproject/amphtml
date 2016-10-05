@@ -117,6 +117,20 @@ describe('Viewer', () => {
     expect(viewer.getParam('other')).to.equal('something');
   });
 
+  it('should configure ignore name and hash with explicit params', () => {
+    const params = {
+      'paddingTop': '171',
+    };
+    windowApi.name = '__AMP__other=something';
+    windowApi.location.hash = '#paddingTop=17';
+    const viewer = new Viewer(ampdoc, params);
+    expect(viewer.getPaddingTop()).to.equal(171);
+
+    // All of the startup params are also available via getParam.
+    expect(viewer.getParam('paddingTop')).to.equal('171');
+    expect(viewer.getParam('other')).to.not.exist;
+  });
+
   it('should expose viewer capabilities', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.location.hash = '#paddingTop=17&cap=foo,bar';
