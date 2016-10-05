@@ -411,7 +411,7 @@ function getServices(holder) {
  * @return {boolean}
  */
 export function isDisposable(service) {
-  return service.dispose !== undefined;
+  return typeof service.dispose == 'function';
 }
 
 

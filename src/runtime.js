@@ -176,7 +176,7 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {function(new:BaseElement)} implementationClass
    * @param {string=} opt_css
    * @const
    */
@@ -186,7 +186,7 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {function(new:BaseTemplate)} implementationClass
    * @const
    */
   global.AMP.registerTemplate = function(name, implementationClass) {
@@ -354,7 +354,7 @@ export function adoptShadowMode(global) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {!Function} implementationClass
+ * @param {function(new:BaseElement)} implementationClass
  * @param {string=} opt_css
  */
 function prepareAndRegisterElement(global, extensions,
@@ -375,7 +375,7 @@ function prepareAndRegisterElement(global, extensions,
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {!Function} implementationClass
+ * @param {function(new:BaseElement)} implementationClass
  * @param {string=} opt_css
  */
 function prepareAndRegisterElementShadowMode(global, extensions,
@@ -396,7 +396,7 @@ function prepareAndRegisterElementShadowMode(global, extensions,
  * modes.
  * @param {!Window} global
  * @param {string} name
- * @param {!Function} implementationClass
+ * @param {function(new:BaseElement)} implementationClass
  * @param {string=} opt_css
  */
 function registerElementClass(global, name, implementationClass, opt_css) {
