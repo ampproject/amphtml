@@ -492,7 +492,7 @@ export class Resources {
 
   /**
    * Invokes `unload` on the elements' resource which in turn will invoke
-   * the `documentBecameInactive` callback on the custom element.
+   * the `pauseCallback` callback on the custom element.
    * Resources that call `schedulePause` must also call `scheduleResume`.
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
@@ -501,7 +501,8 @@ export class Resources {
     const parentResource = Resource.forElement(parentElement);
     subElements = elements_(subElements);
 
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+    this.discoverResourcesForArray_(parentResource, subElements,
+    /* deepSubtree */ true, resource => {
       resource.pause();
     });
   }
@@ -517,7 +518,8 @@ export class Resources {
     const parentResource = Resource.forElement(parentElement);
     subElements = elements_(subElements);
 
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+    this.discoverResourcesForArray_(parentResource, subElements,
+    /* deepSubtree */ true, resource => {
       resource.resume();
     });
   }
@@ -533,7 +535,8 @@ export class Resources {
     const parentResource = Resource.forElement(parentElement);
     subElements = elements_(subElements);
 
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+    this.discoverResourcesForArray_(parentResource, subElements,
+    /* deepSubtree */ true, resource => {
       resource.unlayout();
     });
   }
@@ -1390,7 +1393,8 @@ export class Resources {
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     const resources = [];
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+    this.discoverResourcesForArray_(parentResource, subElements,
+    /* deepSubtree */ false, resource => {
       if (resource.getState() != ResourceState.NOT_BUILT) {
         resources.push(resource);
       }
@@ -1454,21 +1458,24 @@ export class Resources {
   updateInViewportForSubresources_(parentResource, subElements,
       inLocalViewport) {
     const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+    this.discoverResourcesForArray_(parentResource, subElements,
+    /* deepSubtree */ false, resource => {
       resource.setInViewport(inViewport);
     });
   }
 
   /**
-   * Finds resources within the parent resource's shallow subtree.
+   * Finds resources within the parent resource's shallow or deep subtree.
    * @param {!Resource} parentResource
    * @param {!Array<!Element>} elements
+   * @param {boolean} deepSubtree Whether the parent resource's shallow or deep
+   * subtree is searched for resources.
    * @param {function(!Resource)} callback
    */
-  discoverResourcesForArray_(parentResource, elements, callback) {
+  discoverResourcesForArray_(parentResource, elements, deepSubtree, callback) {
     elements.forEach(element => {
       dev().assert(parentResource.element.contains(element));
-      this.discoverResourcesForElement_(element, callback);
+      this.discoverResourcesForElement_(element, deepSubtree, callback);
     });
   }
 
@@ -1476,14 +1483,26 @@ export class Resources {
    * @param {!Element} element
    * @param {function(!Resource)} callback
    */
-  discoverResourcesForElement_(element, callback) {
+  discoverResourcesForElement_(element, deepSubtree, callback) {
+    if (deepSubtree) {
+      if (element.classList.contains('-amp-element')) {
+        callback(Resource.forElement(element));
+      }
+      const ampElements = element.getElementsByClassName('-amp-element');
+      for (let i = 0; i < ampElements.length; i++) {
+        callback(Resource.forElement(ampElements[i]));
+      }
+      return;
+    }
+
     // Breadth-first search.
     if (element.classList.contains('-amp-element')) {
       callback(Resource.forElement(element));
       // Also schedule amp-element that is a placeholder for the element.
       const placeholder = element.getPlaceholder();
       if (placeholder) {
-        this.discoverResourcesForElement_(placeholder, callback);
+        this.discoverResourcesForElement_(placeholder, /* deepSubtree */ false,
+            callback);
       }
     } else {
       const ampElements = element.getElementsByClassName('-amp-element');

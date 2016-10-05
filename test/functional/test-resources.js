@@ -283,6 +283,8 @@ describe('Resources pause/resume/unlayout scheduling', () => {
   let child0;
   let child1;
   let child2;
+  let grandChild;
+  let grandGrandChild;
 
   function createElement() {
     return {
@@ -320,6 +322,16 @@ describe('Resources pause/resume/unlayout scheduling', () => {
       getPriority() {
         return 0;
       },
+      getElementsByClassName() {
+        if (this.ampChildren) {
+          let all = this.ampChildren;
+          this.ampChildren.forEach(c => {
+            all = all.concat(c.getElementsByClassName());
+          });
+          return all;
+        }
+        return [];
+      },
     };
   }
 
@@ -339,6 +351,10 @@ describe('Resources pause/resume/unlayout scheduling', () => {
     child0 = document.createElement('div');
     child1 = createElementWithResource(2)[0];
     child2 = createElementWithResource(3)[0];
+    grandChild = createElementWithResource(4)[0];
+    grandGrandChild = createElementWithResource(5)[0];
+    grandChild.ampChildren = [grandGrandChild];
+    child2.ampChildren = [grandChild];
     children = [child0, child1, child2];
   });
 
@@ -369,27 +385,36 @@ describe('Resources pause/resume/unlayout scheduling', () => {
     it('should call pauseCallback on custom element', () => {
       const stub1 = sandbox.stub(child1, 'pauseCallback');
       const stub2 = sandbox.stub(child2, 'pauseCallback');
+      const stub3 = sandbox.stub(grandChild, 'pauseCallback');
+      const stub4 = sandbox.stub(grandGrandChild, 'pauseCallback');
 
       resources.schedulePause(parent, children);
       expect(stub1.calledOnce).to.be.true;
       expect(stub2.calledOnce).to.be.true;
+      expect(stub3.calledOnce).to.be.true;
+      expect(stub4.calledOnce).to.be.true;
     });
 
     it('should call unlayoutCallback when unlayoutOnPause', () => {
       const stub1 = sandbox.stub(child1, 'unlayoutCallback');
       const stub2 = sandbox.stub(child2, 'unlayoutCallback');
-      sandbox.stub(child1, 'unlayoutOnPause').returns(true);
+      const stub3 = sandbox.stub(grandChild, 'unlayoutCallback');
+      const stub4 = sandbox.stub(grandGrandChild, 'unlayoutCallback');
+      sandbox.stub(child2, 'unlayoutOnPause').returns(true);
+      sandbox.stub(grandGrandChild, 'unlayoutOnPause').returns(true);
 
       resources.schedulePause(parent, children);
-      expect(stub1.calledOnce).to.be.true;
-      expect(stub2.calledOnce).to.be.false;
+      expect(stub1.calledOnce).to.be.false;
+      expect(stub2.calledOnce).to.be.true;
+      expect(stub3.calledOnce).to.be.false;
+      expect(stub4.calledOnce).to.be.true;
     });
   });
 
   describe('scheduleResume', () => {
     beforeEach(() => {
       // Pause one child.
-      resources.schedulePause(parent, child1);
+      resources.schedulePause(parent, child2);
     });
 
     it('should not throw with a single element', () => {
@@ -412,17 +437,21 @@ describe('Resources pause/resume/unlayout scheduling', () => {
     });
 
     it('should call resumeCallback on paused custom elements', () => {
-      const stub1 = sandbox.stub(child1, 'resumeCallback');
+      const stub1 = sandbox.stub(child2, 'resumeCallback');
+      const stub2 = sandbox.stub(grandChild, 'resumeCallback');
+      const stub3 = sandbox.stub(grandGrandChild, 'resumeCallback');
 
       resources.scheduleResume(parent, children);
       expect(stub1.calledOnce).to.be.true;
+      expect(stub2.calledOnce).to.be.true;
+      expect(stub3.calledOnce).to.be.true;
     });
 
     it('should not call resumeCallback on non-paused custom elements', () => {
-      const stub2 = sandbox.stub(child2, 'resumeCallback');
+      const stub = sandbox.stub(child1, 'resumeCallback');
 
       resources.scheduleResume(parent, children);
-      expect(stub2.calledOnce).to.be.false;
+      expect(stub.calledOnce).to.be.false;
     });
   });
 
@@ -448,9 +477,14 @@ describe('Resources pause/resume/unlayout scheduling', () => {
     it('should schedule on custom element with multiple children', () => {
       const stub1 = sandbox.stub(child1, 'unlayoutCallback');
       const stub2 = sandbox.stub(child2, 'unlayoutCallback');
+      const stub3 = sandbox.stub(grandChild, 'unlayoutCallback');
+      const stub4 = sandbox.stub(grandGrandChild, 'unlayoutCallback');
+
       resources.scheduleUnlayout(parent, children);
       expect(stub1.called).to.be.true;
       expect(stub2.called).to.be.true;
+      expect(stub3.called).to.be.true;
+      expect(stub4.called).to.be.true;
     });
   });
 });

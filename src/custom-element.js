@@ -1088,7 +1088,7 @@ function createBaseAmpElementProto(win) {
    * Requests the element to unload any expensive resources when the element
    * goes into non-visible state. The scope is up to the actual component.
    *
-   * Calling this method on unbuilt ot unupgraded element has no effect.
+   * Calling this method on unbuilt or unupgraded element has no effect.
    *
    * @return {boolean}
    * @package @final @this {!Element}
