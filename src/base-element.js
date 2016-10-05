@@ -478,7 +478,8 @@ export class BaseElement {
     } else {
       this.initActionMap_();
       const handler = this.actionMap_[invocation.method];
-      user().assert(handler, `Method not found: ${invocation.method}`, this);
+      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+          this);
       handler(invocation);
     }
   }
