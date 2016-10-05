@@ -17,6 +17,7 @@
 import {onDocumentElementClick_, onDocumentElementCapturedClick_,
     getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
 import {createIframePromise} from '../../testing/iframe';
+import {installTimerService} from '../../src/service/timer-impl';
 import {urlReplacementsForDoc} from '../../src/url-replacements';
 import * as sinon from 'sinon';
 
@@ -36,11 +37,13 @@ describe('test-document-click onDocumentElementClick_', () => {
   let querySelectorSpy;
   let replaceLocSpy;
   let viewport;
+  let timerFuncSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     preventDefaultSpy = sandbox.spy();
     scrollIntoViewSpy = sandbox.spy();
+    timerFuncSpy = sandbox.spy();
     replaceLocSpy = sandbox.spy();
     elem = {};
     getElementByIdSpy = sandbox.stub();
@@ -51,6 +54,10 @@ describe('test-document-click onDocumentElementClick_', () => {
       location: {
         href: 'https://www.google.com/some-path?hello=world#link',
         replace: replaceLocSpy,
+      },
+      setTimeout: fn => {
+        timerFuncSpy();
+        fn();
       },
     };
     ampdoc = {
@@ -77,6 +84,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     history = {
       push: () => {},
     };
+    installTimerService(win);
   });
 
   afterEach(() => {
@@ -188,7 +196,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(scrollIntoViewSpy.callCount).to.equal(2);
+      expect(timerFuncSpy).to.be.calledOnce;
       expect(replaceLocSpy.callCount).to.equal(1);
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
@@ -200,9 +209,24 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(scrollIntoViewSpy.callCount).to.equal(2);
+      expect(timerFuncSpy).to.be.calledOnce;
       expect(replaceLocSpy.callCount).to.equal(1);
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
+    });
+
+    it('should use escaped css selectors', () => {
+      tgt.href = 'https://www.google.com/some-path?hello=world#test%20hello';
+      getElementByIdSpy.returns(null);
+      querySelectorSpy.returns(elem);
+
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(querySelectorSpy).to.be.calledWith('a[name="test\\%20hello"]');
+
+      querySelectorSpy.reset();
+      tgt.href = 'https://www.google.com/some-path?hello=world#test"hello';
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(querySelectorSpy).to.be.calledWith('a[name="test\\"hello"]');
     });
 
     it('should call location.replace before scrollIntoView', () => {
@@ -218,7 +242,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       };
       onDocumentElementClick_(evt, ampdoc, viewport, history);
 
-      expect(ops).to.have.length(2);
+      expect(timerFuncSpy).to.be.calledOnce;
+      expect(ops).to.have.length(3);
       expect(ops[0]).to.equal('location.replace');
       expect(ops[1]).to.equal('scrollIntoView');
     });
