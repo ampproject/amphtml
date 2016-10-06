@@ -21,21 +21,14 @@ import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
 
-/** @const {string} */
-const PROP = '__AMP_SUBMIT';
-
-
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Object}
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
   return /** @type {!Object} */ (getServiceForDoc(ampdoc, 'submit', ampdoc => {
-    if (!ampdoc.win[PROP]) {
-      ampdoc.win[PROP] = true;
-      ampdoc.win.document.documentElement.addEventListener(
-          'submit', onDocumentFormSubmit_, true);
-    }
+    ampdoc.getRootNode().addEventListener(
+        'submit', onDocumentFormSubmit_, true);
     return {};
   }));
 }
