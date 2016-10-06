@@ -357,7 +357,7 @@ function isInternalOrServiceNode(node) {
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProto(win, name, opt_implementationClass) {
-  const ElementProto = createBaseCustomElementClass(win, name).prototype;
+  const ElementProto = createCustomElementClass(win, name).prototype;
   if (getMode().test && opt_implementationClass) {
     ElementProto.implementationClassForTesting = opt_implementationClass;
   }
@@ -365,15 +365,36 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 }
 
 /**
- * Creates a new custom element class.
+ * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
- * @return {Function} The custom element class.
+ * @return {!Function} The custom element class.
  */
-function createBaseCustomElementClass(win, name) {
-  const superclass = /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
-  return class BaseCustomElement extends superclass {
+function createCustomElementClass(win, name) {
+  const baseCustomElement = createBaseCustomElementClass(win);
+  /** @extends {HTMLElement} */
+  class CustomAmpElement extends baseCustomElement {
+    elementName() {
+      return name;
+    }
+  }
+  return CustomAmpElement;
+}
+
+/**
+ * Creates a base custom element class.
+ *
+ * @param {!Window} win The window in which to register the custom element.
+ * @return {!Function}
+ */
+function createBaseCustomElementClass(win) {
+  if (win.BaseCustomElementClass) {
+    return win.BaseCustomElementClass;
+  }
+  const htmlElement = win.HTMLElement;
+  /** @abstract @extends {HTMLElement} */
+  class BaseCustomElement extends htmlElement {
     /**
      * Constructor uses atypical pattern as part of a workaround for ES6
      * transpilation issue when extending HTMLElement.
@@ -382,20 +403,16 @@ function createBaseCustomElementClass(win, name) {
      */
     constructor(self) {
       self = super(self);
-      self.init_();
+      self.createdCallback();
       return self;
     }
 
     /**
-     * Sets up properties for this class.
-     * @private
-     * @note Suppresses type check for Custom Elements V0 compatibility.
-     * @suppress {checkTypes}
+     * Called when elements is created. Sets instance vars since there is no
+     * constructor.
+     * @final @this {!Element}
      */
-    init_() {
-      /** @type {?string}  */
-      this.name = name;
-
+    createdCallback() {
       // Flag "notbuilt" is removed by Resource manager when the resource is
       // considered to be built. See "setBuilt" method.
       /** @private {boolean} */
@@ -466,11 +483,11 @@ function createBaseCustomElementClass(win, name) {
       this.overflowElement_ = undefined;
 
       // `opt_implementationClass` is only used for tests.
-      let Ctor = knownElements[this.name];
+      let Ctor = knownElements[this.elementName()];
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
-      /** @private {!./base-element.BaseElement} */
+      /** @private {./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
       /**
@@ -496,18 +513,18 @@ function createBaseCustomElementClass(win, name) {
     }
 
     /**
-     * The Custom Elements V0 equivalent to the constructor.
-     * @suppress {checkTypes}
+     * The name of the custom element.
+     * @abstract
+     * @return {!string}
      */
-    createdCallback() {
-      this.init_();
+    elementName() {
     }
 
     /**
      * Returns the associated ampdoc. Only available after attachment. It throws
      * exception before the element is attached.
      * @return {!./service/ampdoc-impl.AmpDoc}
-     * @final
+     * @final @this {!Element}
      * @package
      */
     getAmpDoc() {
@@ -520,7 +537,7 @@ function createBaseCustomElementClass(win, name) {
      * Returns Resources manager. Only available after attachment. It throws
      * exception before the element is attached.
      * @return {!./service/resources-impl.Resources}
-     * @final
+     * @final @this {!Element}
      * @package
      */
     getResources() {
@@ -535,7 +552,7 @@ function createBaseCustomElementClass(win, name) {
      * added to DOM, the value depends on the `BaseElement` implementation and
      * its `upgradeElement` callback.
      * @return {boolean}
-     * @final
+     * @final @this {!Element}
      */
     isUpgraded() {
       return this.upgradeState_ == UpgradeState.UPGRADED;
@@ -546,7 +563,7 @@ function createBaseCustomElementClass(win, name) {
      * has already been attached, it's layout validation and attachment flows
      * are repeated for the new implementation.
      * @param {function(new:./base-element.BaseElement, !Element)} newImplClass
-     * @final @package
+     * @final @package @this {!Element}
      */
     upgrade(newImplClass) {
       if (this.isInTemplate_) {
@@ -558,7 +575,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Completes the upgrade of the element with the provided implementation.
      * @param {!./base-element.BaseElement} newImpl
-     * @final @private
+     * @final @private @this {!Element}
      */
     completeUpgrade_(newImpl) {
       this.upgradeState_ = UpgradeState.UPGRADED;
@@ -585,7 +602,7 @@ function createBaseCustomElementClass(win, name) {
      * Whether the element has been built. A built element had its
      * {@link buildCallback} method successfully invoked.
      * @return {boolean}
-     * @final
+     * @final @this {!Element}
      */
     isBuilt() {
       return this.built_;
@@ -593,7 +610,7 @@ function createBaseCustomElementClass(win, name) {
 
     /**
      * Get the priority to load the element.
-     * @return {number}
+     * @return {number} @this {!Element}
      */
     getPriority() {
       dev().assert(
@@ -607,7 +624,7 @@ function createBaseCustomElementClass(win, name) {
      *
      * This method can only be called on a upgraded element.
      *
-     * @final
+     * @final @this {!Element}
      */
     build() {
       assertNotTemplate(this);
@@ -650,6 +667,7 @@ function createBaseCustomElementClass(win, name) {
      * Called to instruct the element to preconnect to hosts it uses during
      * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
+     * @this {!Element}
      */
     preconnect(onLayout) {
       if (onLayout) {
@@ -667,6 +685,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Whether the custom element declares that it has to be fixed.
      * @return {boolean}
+     * @this {!Element}
      */
     isAlwaysFixed() {
       return this.implementation_.isAlwaysFixed();
@@ -676,6 +695,7 @@ function createBaseCustomElementClass(win, name) {
      * Updates the layout box of the element.
      * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
+     * @this {!Element}
      */
     updateLayoutBox(layoutBox) {
       this.layoutWidth_ = layoutBox.width;
@@ -714,7 +734,7 @@ function createBaseCustomElementClass(win, name) {
      * This method is called by Resources and shouldn't be called by anyone else.
      *
      * @final
-     * @package
+     * @package @this {!Element}
      */
     applySizesAndMediaQuery() {
       assertNotTemplate(this);
@@ -761,7 +781,7 @@ function createBaseCustomElementClass(win, name) {
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
      * @final
-     * @package
+     * @package @this {!Element}
      */
     changeSize(newHeight, newWidth) {
       if (this.sizerElement_) {
@@ -781,7 +801,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Called when the element is first connected to the DOM. Calls
      * {@link firstAttachedCallback} if this is the first attachment.
-     * @final
+     * @final @this {!Element}
      */
     connectedCallback() {
       if (!this.everAttached) {
@@ -847,7 +867,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Try to upgrade the element with the provided implementation.
      * @param {!./base-element.BaseElement=} opt_impl
-     * @private @final
+     * @private @final @this {!Element}
      */
     tryUpgrade_(opt_impl) {
       const impl = opt_impl || this.implementation_;
@@ -879,7 +899,7 @@ function createBaseCustomElementClass(win, name) {
 
     /**
      * Called when the element is disconnected from the DOM.
-     * @final
+     * @final @this {!Element}
      */
     disconnectedCallback() {
       if (this.isInTemplate_) {
@@ -899,7 +919,7 @@ function createBaseCustomElementClass(win, name) {
      *
      * @param {string} name
      * @param {!Object=} opt_data Event data.
-     * @final
+     * @final @this {!Element}
      */
     dispatchCustomEvent(name, opt_data) {
       const data = opt_data || {};
@@ -916,7 +936,7 @@ function createBaseCustomElementClass(win, name) {
      *
      * @param {string} name
      * @param {!Object=} opt_data Event data.
-     * @final
+     * @final @this {!Element}
      */
     dispatchCustomEventForTesting(name, opt_data) {
       if (!getMode().test) {
@@ -928,7 +948,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Whether the element can pre-render.
      * @return {boolean}
-     * @final
+     * @final @this {!Element}
      */
     prerenderAllowed() {
       return this.implementation_.prerenderAllowed();
@@ -937,7 +957,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Creates a placeholder for the element.
      * @returns {?Element}
-     * @final
+     * @final @this {!Element}
      */
     createPlaceholder() {
       return this.implementation_.createPlaceholderCallback();
@@ -946,7 +966,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Whether the element should ever render when it is not in viewport.
      * @return {boolean|number}
-     * @final
+     * @final @this {!Element}
      */
     renderOutsideViewport() {
       return this.implementation_.renderOutsideViewport();
@@ -954,7 +974,7 @@ function createBaseCustomElementClass(win, name) {
 
     /**
      * @return {!./layout-rect.LayoutRectDef}
-     * @final
+     * @final @this {!Element}
      */
     getLayoutBox() {
       return this.getResources().getResourceForElement(this).getLayoutBox();
@@ -964,7 +984,7 @@ function createBaseCustomElementClass(win, name) {
      * Returns a change entry for that should be compatible with
      * IntersectionObserverEntry.
      * @return {!IntersectionObserverEntry} A change entry.
-     * @final
+     * @final @this {!Element}
      */
     getIntersectionChangeEntry() {
       const box = this.implementation_.getIntersectionElementLayoutBox();
@@ -979,7 +999,7 @@ function createBaseCustomElementClass(win, name) {
      * The runtime calls this method to determine if {@link layoutCallback}
      * should be called again when layout changes.
      * @return {boolean}
-     * @package @final
+     * @package @final @this {!Element}
      */
     isRelayoutNeeded() {
       return this.implementation_.isRelayoutNeeded();
@@ -997,7 +1017,7 @@ function createBaseCustomElementClass(win, name) {
      * Can only be called on a upgraded and built element.
      *
      * @return {!Promise}
-     * @package @final
+     * @package @final @this {!Element}
      */
     layoutCallback() {
       assertNotTemplate(this);
@@ -1032,7 +1052,7 @@ function createBaseCustomElementClass(win, name) {
      *
      * @param {boolean} inViewport Whether the element has entered or exited
      *   the visible viewport.
-     * @final @package
+     * @final @package @this {!Element}
      */
     viewportCallback(inViewport) {
       assertNotTemplate(this);
@@ -1057,7 +1077,7 @@ function createBaseCustomElementClass(win, name) {
 
     /**
      * @param {boolean} inViewport
-     * @private
+     * @private @this {!Element}
      */
     updateInViewport_(inViewport) {
       this.implementation_.inViewport_ = inViewport;
@@ -1069,7 +1089,7 @@ function createBaseCustomElementClass(win, name) {
      * inactive state. The scope is up to the actual component. Among other
      * things the active playback of video or audio content must be stopped.
      *
-     * @package @final
+     * @package @final @this {!Element}
      */
     pauseCallback() {
       assertNotTemplate(this);
@@ -1084,7 +1104,7 @@ function createBaseCustomElementClass(win, name) {
      * an inactive state. The scope is up to the actual component. Among other
      * things the active playback of video or audio content may be resumed.
      *
-     * @package @final
+     * @package @final @this {!Element}
      */
     resumeCallback() {
       assertNotTemplate(this);
@@ -1101,7 +1121,7 @@ function createBaseCustomElementClass(win, name) {
      * Calling this method on unbuilt ot unupgraded element has no effect.
      *
      * @return {boolean}
-     * @package @final
+     * @package @final @this {!Element}
      */
     unlayoutCallback() {
       assertNotTemplate(this);
@@ -1122,7 +1142,7 @@ function createBaseCustomElementClass(win, name) {
      * video content), and so we must unlayout to stop playback.
      *
      * @return {boolean}
-     * @package @final
+     * @package @final @this {!Element}
      */
     unlayoutOnPause() {
       return this.implementation_.unlayoutOnPause();
@@ -1152,7 +1172,7 @@ function createBaseCustomElementClass(win, name) {
      * Otherwise the invocation is enqueued until the implementation is ready
      * to receive actions.
      * @param {!./service/action-impl.ActionInvocation} invocation
-     * @final
+     * @final @this {!Element}
      */
     enqueAction(invocation) {
       assertNotTemplate(this);
@@ -1166,7 +1186,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Dequeues events from the queue and dispatches them to the implementation
      * with "deferred" flag.
-     * @private
+     * @private @this {!Element}
      */
     dequeueActions_() {
       if (!this.actionQueue_) {
@@ -1187,7 +1207,7 @@ function createBaseCustomElementClass(win, name) {
      * @param {!./service/action-impl.ActionInvocation} invocation
      * @param {boolean} deferred
      * @final
-     * @private
+     * @private @this {!Element}
      */
     executionAction_(invocation, deferred) {
       try {
@@ -1203,7 +1223,7 @@ function createBaseCustomElementClass(win, name) {
      * that could have been added for markup. These nodes can include Text,
      * Comment and other child nodes.
      * @return {!Array<!Node>}
-     * @package @final
+     * @package @final @this {!Element}
      */
     getRealChildNodes() {
       return dom.childNodes(this, node => !isInternalOrServiceNode(node));
@@ -1213,7 +1233,7 @@ function createBaseCustomElementClass(win, name) {
      * Returns the original children of the custom element without any service
      * nodes that could have been added for markup.
      * @return {!Array<!Element>}
-     * @package @final
+     * @package @final @this {!Element}
      */
     getRealChildren() {
       return dom.childElements(this, element =>
@@ -1223,7 +1243,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Returns an optional placeholder element for this custom element.
      * @return {?Element}
-     * @package @final
+     * @package @final @this {!Element}
      */
     getPlaceholder() {
       return dom.lastChildElement(this, el => {
@@ -1238,7 +1258,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Hides or shows the placeholder, if available.
      * @param {boolean} show
-     * @package @final
+     * @package @final @this {!Element}
      */
     togglePlaceholder(show) {
       assertNotTemplate(this);
@@ -1258,7 +1278,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Returns an optional fallback element for this custom element.
      * @return {?Element}
-     * @package @final
+     * @package @final @this {!Element}
      */
     getFallback() {
       return dom.childElementByAttr(this, 'fallback');
@@ -1268,7 +1288,7 @@ function createBaseCustomElementClass(win, name) {
      * Hides or shows the fallback, if available. This function must only
      * be called inside a mutate context.
      * @param {boolean} state
-     * @package @final
+     * @package @final @this {!Element}
      */
     toggleFallback(state) {
       assertNotTemplate(this);
@@ -1288,7 +1308,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Whether the loading can be shown for this element.
      * @return {boolean}
-     * @private
+     * @private @this {!Element}
      */
     isLoadingEnabled_() {
       // No loading indicator will be shown if either one of these
@@ -1315,7 +1335,7 @@ function createBaseCustomElementClass(win, name) {
      * Creates a loading object. The caller must ensure that loading can
      * actually be shown. This method must also be called in the mutate
      * context.
-     * @private
+     * @private @this {!Element}
      */
     prepareLoading_() {
       if (!this.loadingContainer_) {
@@ -1339,7 +1359,7 @@ function createBaseCustomElementClass(win, name) {
      * Turns the loading indicator on or off.
      * @param {boolean} state
      * @param {boolean=} opt_cleanup
-     * @private @final
+     * @private @final @this {!Element}
      */
     toggleLoading_(state, opt_cleanup) {
       assertNotTemplate(this);
@@ -1385,6 +1405,7 @@ function createBaseCustomElementClass(win, name) {
     /**
      * Returns an optional overflow element for this custom element.
      * @return {?Element}
+     * @this {!Element}
      */
     getOverflowElement() {
       if (this.overflowElement_ === undefined) {
@@ -1407,7 +1428,7 @@ function createBaseCustomElementClass(win, name) {
      * @param {boolean} overflown
      * @param {number|undefined} requestedHeight
      * @param {number|undefined} requestedWidth
-     * @package @final
+     * @package @final @this {!Element}
      */
     overflowCallback(overflown, requestedHeight, requestedWidth) {
       this.getOverflowElement();
@@ -1435,6 +1456,8 @@ function createBaseCustomElementClass(win, name) {
       }
     }
   };
+  win.BaseCustomElementClass = BaseCustomElement;
+  return win.BaseCustomElementClass;
 }
 
 /**
@@ -1445,7 +1468,7 @@ function createBaseCustomElementClass(win, name) {
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
-  const klass = createBaseCustomElementClass(win, name);
+  const klass = createCustomElementClass(win, name);
 
   const supportsCustomElementsV1 = 'customElements' in win;
   if (supportsCustomElementsV1) {
