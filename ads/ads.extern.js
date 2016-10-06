@@ -54,6 +54,13 @@ googletag.cmd.push;
 googletag.pubads;
 googletag.defineSlot
 data.slot;
+
+var _inmobi;
+window._inmobi;
+_inmobi.getNewAd;
+data.siteid;
+data.slotid;
+
 var pubads;
 pubads.addService;
 pubads.markAsGladeOptOut;

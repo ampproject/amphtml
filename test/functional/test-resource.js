@@ -34,6 +34,7 @@ describe('Resource', () => {
     sandbox = sinon.sandbox.create();
 
     element = {
+      ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
       style: {},
       isBuilt: () => false,
@@ -53,6 +54,7 @@ describe('Resource', () => {
       viewportCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 2,
+      dispatchCustomEvent: () => {},
     };
     elementMock = sandbox.mock(element);
 
@@ -717,6 +719,7 @@ describe('Resource renderOutsideViewport', () => {
     sandbox = sinon.sandbox.create();
 
     element = {
+      ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
       isBuilt: () => false,
       isUpgraded: () => false,

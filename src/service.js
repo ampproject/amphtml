@@ -31,6 +31,22 @@ import {dev} from './log';
  */
 let ServiceHolderDef;
 
+
+/**
+ * This interface provides a `dispose` method that will be called by
+ * runtime when a service needs to be disposed of.
+ * @interface
+ */
+export class Disposable {
+
+  /**
+   * Instructs the service to release any resources it might be holding. Can
+   * be called only once in the lifecycle of a service.
+   */
+  dispose() {}
+}
+
+
 /**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
@@ -39,10 +55,12 @@ let ServiceHolderDef;
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
+  win = getTopWindow(win);
   const exists = win.services && win.services[id] && win.services[id].obj;
   return dev().assert(exists, `${id} service not found. Make sure it is ` +
       `installed.`);
 }
+
 
 /**
  * Returns a service with the given id. Assumes that it has been constructed
@@ -59,25 +77,28 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
       `installed.`);
 }
 
+
 /**
  * Returns a service for the given id and window (a per-window singleton).
  * If the service is not yet available the factory function is invoked and
  * expected to return the service.
  * Users should typically wrap this as a special purpose function (e.g.
- * `viewportFor(win)`) for type safety and because the factory should not be
+ * `vsyncFor(win)`) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):T} opt_factory Should create the service
+ * @param {function(!Window):T=} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
  *     if the service does not exist yet.
  * @template T
  * @return {T}
  */
 export function getService(win, id, opt_factory) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id,
       opt_factory ? opt_factory : undefined);
 }
+
 
 /**
  * Returns a service and registers it given a class to be used as
@@ -89,33 +110,37 @@ export function getService(win, id, opt_factory) {
  * @template T
  */
 export function fromClass(win, id, constructor) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id, undefined, constructor);
 }
+
 
 /**
  * Returns a promise for a service for the given id and window. Also expects
  * an element that has the actual implementation. The promise resolves when
  * the implementation loaded.
  * Users should typically wrap this as a special purpose function (e.g.
- * `viewportFor(win)`) for type safety and because the factory should not be
+ * `vsyncFor(win)`) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @return {!Promise<*>}
+ * @return {!Promise<!Object>}
  */
 export function getServicePromise(win, id) {
   return getServicePromiseInternal(win, id);
 }
 
+
 /**
  * Like getServicePromise but returns null if the service was never registered.
  * @param {!Window} win
  * @param {string} id of the service.
- * @return {?Promise<*>}
+ * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNull(win, id) {
   return getServicePromiseOrNullInternal(win, id);
 }
+
 
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
@@ -123,10 +148,11 @@ export function getServicePromiseOrNull(win, id) {
  * expected to return the service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(!AmpDoc):!Object=} opt_factory Should create the service
- *     if it does not exist yet. If the factory is not given, it is an error
- *     if the service does not exist yet.
- * @return {*}
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!T=} opt_factory
+ *     Should create the service if it does not exist yet. If the factory is
+ *     not given, it is an error if the service does not exist yet.
+ * @return {T}
+ * @template T
  */
 export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
   const ampdoc = getAmpdoc(nodeOrDoc);
@@ -137,10 +163,11 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
       opt_factory);
 }
 
+
 /**
  * Returns a service and registers it given a class to be used as
  * implementation.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {function(new:T, !./service/ampdoc-impl.AmpDoc)} constructor
  * @return {T}
@@ -156,13 +183,14 @@ export function fromClassForDoc(nodeOrDoc, id, constructor) {
       constructor);
 }
 
+
 /**
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
  * the implementation loaded.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @return {!Promise<*>}
+ * @return {!Promise<!Object>}
  */
 export function getServicePromiseForDoc(nodeOrDoc, id) {
   return getServicePromiseInternal(
@@ -170,12 +198,13 @@ export function getServicePromiseForDoc(nodeOrDoc, id) {
       id);
 }
 
+
 /**
  * Like getServicePromiseForDoc but returns null if the service was never
  * registered for this ampdoc.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @return {?Promise<*>}
+ * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
   return getServicePromiseOrNullInternal(
@@ -183,17 +212,71 @@ export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
       id);
 }
 
+
+/**
+ * Set the parent and top windows on a child window (friendly iframe).
+ * @param {!Window} win
+ * @param {!Window} parentWin
+ */
+export function setParentWindow(win, parentWin) {
+  win.__AMP_PARENT = parentWin;
+  win.__AMP_TOP = getTopWindow(parentWin);
+}
+
+
+/**
+ * Returns the parent window for a child window (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getParentWindow(win) {
+  return win.__AMP_PARENT || win;
+}
+
+
+/**
+ * Returns the top window where AMP Runtime is installed for a child window
+ * (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getTopWindow(win) {
+  return win.__AMP_TOP || win;
+}
+
+
+/**
+ * Returns the parent "friendly" iframe if the node belongs to a child window.
+ * @param {!Node} node
+ * @param {!Window} topWin
+ * @return {?HTMLIFrameElement}
+ */
+export function getParentWindowFrameElement(node, topWin) {
+  const childWin = (node.ownerDocument || node).defaultView;
+  if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
+    try {
+      return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
+    } catch (e) {
+      // Ignore the error.
+    }
+  }
+  return null;
+}
+
+
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
 function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    const win = (nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
-    return getAmpdocService(win).getAmpDoc(nodeOrDoc);
+    const win = /** @type {!Document} */ (
+        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }
+
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -203,6 +286,7 @@ function getAmpdocServiceHolder(nodeOrDoc) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   return ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
 }
+
 
 /**
  * This is essentially a duplicate of `ampdoc.js`, but necessary to avoid
@@ -215,16 +299,19 @@ function getAmpdocService(win) {
       getService(win, 'ampdoc'));
 }
 
+
 /**
  * @param {!Object} holder Object holding the service instance.
- * @param {!Object} context Win or AmpDoc.
+ * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {!Function=} opt_factory Should create the service
- *     if it does not exist yet. If the factory is not given, it is an error
- *     if the service does not exist yet. Called with context.
- * @param {!Function} opt_constructor Constructor function to new the service.
+ * @param {function(!Window):T|function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
+ *     Should create the service if it does not exist yet. If the factory
+ *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
+ * @param {function(new:T, !Window)|function(new:T, !./service/ampdoc-impl.AmpDoc)=} opt_constructor
+ *     Constructor function to new the service. Called with context.
  * @return {*}
+ * @template T
  */
 function getServiceInternal(holder, context, id, opt_factory,
     opt_constructor) {
@@ -253,10 +340,11 @@ function getServiceInternal(holder, context, id, opt_factory,
   return s.obj;
 }
 
+
 /**
  * @param {!Object} holder
  * @param {string} id of the service.
- * @return {!Promise<*>}
+ * @return {!Promise<!Object>}
  */
 function getServicePromiseInternal(holder, id) {
   const cached = getServicePromiseOrNullInternal(holder, id);
@@ -280,10 +368,11 @@ function getServicePromiseInternal(holder, id) {
   return p;
 }
 
+
 /**
  * @param {!Object} holder
  * @param {string} id of the service.
- * @return {?Promise<*>}
+ * @return {?Promise<!Object>}
  */
 function getServicePromiseOrNullInternal(holder, id) {
   const services = getServices(holder);
@@ -301,6 +390,7 @@ function getServicePromiseOrNullInternal(holder, id) {
   return null;
 }
 
+
 /**
  * Returns the object that holds the services registered in a holder.
  * @param {!Object} holder
@@ -313,6 +403,79 @@ function getServices(holder) {
   }
   return services;
 }
+
+
+/**
+ * Whether the specified service implements `Disposable` interface.
+ * @param {!Object} service
+ * @return {boolean}
+ */
+export function isDisposable(service) {
+  return typeof service.dispose == 'function';
+}
+
+
+/**
+ * Asserts that the specified service implements `Disposable` interface and
+ * typecasts the instance to `Disposable`.
+ * @param {!Object} service
+ * @return {!Disposable}
+ */
+export function assertDisposable(service) {
+  dev().assert(isDisposable(service), 'required to implement Disposable');
+  return /** @type {!Disposable} */ (service);
+}
+
+
+/**
+ * Disposes all disposable (implements `Disposable` interface) services in
+ * ampdoc scope.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function disposeServicesForDoc(ampdoc) {
+  disposeServicesInternal(ampdoc);
+}
+
+
+/**
+ * @param {!Object} holder Object holding the service instances.
+ */
+function disposeServicesInternal(holder) {
+  // TODO(dvoytenko): Consider marking holder as destroyed for later-arriving
+  // service to be canceled automatically.
+  const services = getServices(holder);
+  for (const id in services) {
+    if (!Object.prototype.hasOwnProperty.call(services, id)) {
+      continue;
+    }
+    const serviceHolder = services[id];
+    if (serviceHolder.obj) {
+      disposeServiceInternal(id, serviceHolder.obj);
+    } else if (serviceHolder.promise) {
+      serviceHolder.promise.then(
+          instance => disposeServiceInternal(id, instance));
+    }
+  }
+}
+
+
+/**
+ * @param {string} id
+ * @param {!Object} service
+ */
+function disposeServiceInternal(id, service) {
+  if (!isDisposable(service)) {
+    return;
+  }
+  try {
+    assertDisposable(service).dispose();
+  } catch (e) {
+    // Ensure that a failure to dispose a service does not disrupt other
+    // services.
+    dev().error('service', 'failed to dispose service', id, e);
+  }
+}
+
 
 /**
  * Resets a single service, so it gets recreated on next getService invocation.

@@ -16,11 +16,11 @@
 
 import {Layout} from './layout';
 import {loadPromise} from './event-helper';
-import {preconnectFor} from './preconnect';
+import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {viewportForDoc} from './viewport';
 import {vsyncFor} from './vsync';
+import {user} from './log';
 
 
 /**
@@ -118,7 +118,7 @@ export class BaseElement {
     /** @public @const */
     this.element = element;
     /*
-         \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
@@ -142,11 +142,14 @@ export class BaseElement {
     /** @public @const {!Window}  */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
-    this.actionMap_ = this.win.Object.create(null);
+    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectFor(this.win);
+    this.preconnect = preconnectForElement(this.element);
+
+    /** @public {?Object} For use by sub classes */
+    this.config = null;
   }
 
   /**
@@ -170,6 +173,15 @@ export class BaseElement {
    */
   getWin() {
     return this.win;
+  }
+
+  /**
+   * Returns the associated ampdoc. Only available when `buildCallback` and
+   * going forward. It throws an exception before `buildCallback`.
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   */
+  getAmpDoc() {
+    return this.element.getAmpDoc();
   }
 
   /** @public @return {!./service/vsync-impl.Vsync} */
@@ -433,6 +445,12 @@ export class BaseElement {
     return loadPromise(element, opt_timeout);
   }
 
+  initActionMap_() {
+    if (!this.actionMap_) {
+      this.actionMap_ = this.win.Object.create(null);
+    }
+  }
+
   /**
    * Registers the action handler for the method with the specified name.
    * @param {string} method
@@ -440,6 +458,7 @@ export class BaseElement {
    * @public
    */
   registerAction(method, handler) {
+    this.initActionMap_();
     this.actionMap_[method] = handler;
   }
 
@@ -457,10 +476,10 @@ export class BaseElement {
     if (invocation.method == 'activate') {
       this.activate(invocation);
     } else {
+      this.initActionMap_();
       const handler = this.actionMap_[invocation.method];
-      if (!handler) {
-        throw new Error(`Method not found: ${invocation.method}`);
-      }
+      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+          this);
       handler(invocation);
     }
   }
@@ -607,13 +626,13 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportFor(this.win);
+    return viewportForDoc(this.getAmpDoc());
   }
 
- /**
-  * Returns a previously measured layout box of the element.
-  * @return {!./layout-rect.LayoutRectDef}
-  */
+  /**
+   * Returns a previously measured layout box of the element.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
   getIntersectionElementLayoutBox() {
     return this.element.getResources().getResourceForElement(
         this.element).getLayoutBox();
@@ -755,26 +774,6 @@ export class BaseElement {
    */
   deferMutate(callback) {
     this.element.getResources().deferMutate(this.element, callback);
-  }
-
-  /**
-   * Requests full overlay mode from the viewer.
-   * @public
-   * @deprecated Use `Viewport.enterLightboxMode`.
-   * TODO(dvoytenko, #3406): Remove as deprecated.
-   */
-  requestFullOverlay() {
-    viewerFor(this.win).requestFullOverlay();
-  }
-
-  /**
-   * Requests to cancel full overlay mode from the viewer.
-   * @public
-   * @deprecated Use `Viewport.leaveLightboxMode`.
-   * TODO(dvoytenko, #3406): Remove as deprecated.
-   */
-  cancelFullOverlay() {
-    viewerFor(this.win).cancelFullOverlay();
   }
 
   /**

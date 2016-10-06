@@ -115,6 +115,9 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+    /** @const {!Window} */
+    this.hostWin = element.ownerDocument.defaultView;
+
     /** @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
@@ -164,8 +167,6 @@ export class Resource {
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
-    }).then(() => {
-      this.loadedOnce_ = true;
     });
 
     /** @private {boolean} */
@@ -224,6 +225,14 @@ export class Resource {
   }
 
   /**
+   * Returns whether the resource has been blacklisted.
+   * @return {boolean}
+   */
+  isBlacklisted() {
+    return this.blacklisted_;
+  }
+
+  /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
    */
@@ -244,6 +253,7 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**
@@ -559,7 +569,9 @@ export class Resource {
    */
   layoutComplete_(success, opt_reason) {
     this.loadPromiseResolve_();
+    this.loadPromiseResolve_ = null;
     this.layoutPromise_ = null;
+    this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {

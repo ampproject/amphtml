@@ -15,15 +15,21 @@
  */
 
 import {
+  assertDisposable,
+  disposeServicesForDoc,
   fromClass,
   getExistingServiceForWindow,
   getExistingServiceForDoc,
+  getParentWindowFrameElement,
   getService,
   getServicePromise,
   getServiceForDoc,
   getServicePromiseForDoc,
+  isDisposable,
   resetServiceForTesting,
+  setParentWindow,
 } from '../../src/service';
+import {loadPromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
 
@@ -37,6 +43,28 @@ describe('service', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  describe('disposable interface', () => {
+
+    let disposable;
+    let nonDisposable;
+
+    beforeEach(() => {
+      nonDisposable = {};
+      disposable = {dispose: sandbox.spy()};
+    });
+
+    it('should test disposable interface', () => {
+      expect(isDisposable(disposable)).to.be.true;
+      expect(isDisposable(nonDisposable)).to.be.false;
+    });
+
+    it('should assert disposable interface', () => {
+      expect(assertDisposable(disposable)).to.equal(disposable);
+      expect(() => assertDisposable(nonDisposable))
+          .to.throw(/required to implement Disposable/);
+    });
   });
 
   describe('window singletons', () => {
@@ -130,6 +158,22 @@ describe('service', () => {
         });
       });
     });
+
+    it('should resolve service for a child window', () => {
+      const c = getService(window, 'c', factory);
+
+      // A child.
+      const child = {};
+      setParentWindow(child, window);
+      expect(getService(child, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForWindow(child, 'c')).to.equal(c);
+
+      // A grandchild.
+      const grandchild = {};
+      setParentWindow(grandchild, child);
+      expect(getService(grandchild, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForWindow(grandchild, 'c')).to.equal(c);
+    });
   });
 
   describe('ampdoc singletons', () => {
@@ -159,6 +203,8 @@ describe('service', () => {
       resetServiceForTesting(windowApi, 'a');
       resetServiceForTesting(windowApi, 'b');
       resetServiceForTesting(windowApi, 'c');
+      resetServiceForTesting(windowApi, 'd');
+      resetServiceForTesting(windowApi, 'e');
       resetServiceForTesting(windowApi, 'e1');
     });
 
@@ -249,6 +295,124 @@ describe('service', () => {
           expect(factory.callCount).to.equal(0);
         });
       });
+    });
+
+    it('should resolve service for a child window', () => {
+      ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
+      const c = getServiceForDoc(node, 'c', factory);
+
+      // A child.
+      const childWin = {};
+      const childWinNode =
+          {nodeType: 1, ownerDocument: {defaultView: childWin}};
+      setParentWindow(childWin, windowApi);
+      expect(getServiceForDoc(childWinNode, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForDoc(childWinNode, 'c')).to.equal(c);
+
+      // A grandchild.
+      const grandchildWin = {};
+      const grandChildWinNode =
+          {nodeType: 1, ownerDocument: {defaultView: grandchildWin}};
+      setParentWindow(grandchildWin, childWin);
+      expect(getServiceForDoc(grandChildWinNode, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
+    });
+
+    it('should dispose disposable services', () => {
+      const disposableFactory = function() {
+        return {
+          dispose: sandbox.spy(),
+        };
+      };
+      const disposable = getServiceForDoc(node, 'a', disposableFactory);
+      const disposableWithError = getServiceForDoc(node, 'b', function() {
+        return {
+          dispose: function() {},
+        };
+      });
+      sandbox.stub(disposableWithError, 'dispose', function() {
+        throw new Error('intentional');
+      });
+      const disposableDeferredPromise = getServicePromiseForDoc(node, 'c');
+      const nonDisposable = getServiceForDoc(node, 'd', () => {
+        return {};
+      });
+      const windowDisposable = getService(windowApi, 'e', disposableFactory);
+
+      disposeServicesForDoc(ampdoc);
+
+      // Disposable and initialized are disposed right away.
+      expect(disposable.dispose).to.be.calledOnce;
+
+      // Failing disposable doesn't fail the overall dispose.
+      expect(disposableWithError.dispose).to.be.calledOnce;
+
+      // Non-disposable are not touched.
+      expect(nonDisposable.dispose).to.be.undefined;
+
+      // Window disposable is not touched.
+      expect(windowDisposable.dispose).to.not.be.called;
+
+      // Deffered.
+      const disposableDeferred = getServiceForDoc(node, 'c', disposableFactory);
+      expect(disposableDeferred.dispose).to.not.be.called;
+      return disposableDeferredPromise.then(() => {
+        expect(disposableDeferred.dispose).to.be.calledOnce;
+      });
+    });
+  });
+
+
+  describe('getParentWindowFrameElement', () => {
+    let iframe;
+
+    beforeEach(() => {
+      iframe = document.createElement('iframe');
+      const promise = loadPromise(iframe);
+      const html = '<div id="one"></div>';
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = html;
+        document.body.appendChild(iframe);
+      } else {
+        iframe.src = 'about:blank';
+        document.body.appendChild(iframe);
+        const childDoc = iframe.contentWindow.document;
+        childDoc.open();
+        childDoc.write(html);
+        childDoc.close();
+      }
+      return promise.then(() => {
+        setParentWindow(iframe.contentWindow, window);
+      });
+    });
+
+    afterEach(() => {
+      if (iframe.parentElement) {
+        iframe.parentElement.removeChild(iframe);
+      }
+    });
+
+    it('should return frameElement', () => {
+      const div = iframe.contentWindow.document.getElementById('one');
+      expect(getParentWindowFrameElement(div, window)).to.equal(iframe);
+    });
+
+    it('should return null when not parented', () => {
+      iframe.contentWindow.__AMP_TOP = null;
+      const div = iframe.contentWindow.document.getElementById('one');
+      expect(getParentWindowFrameElement(div, window)).to.equal(null);
+    });
+
+    it('should survive exceptions', () => {
+      const childWin = {};
+      Object.defineProperties(childWin, {
+        frameElement: {
+          get: () => {throw new Error('intentional');},
+        },
+      });
+      setParentWindow(childWin, window);
+      const el = {ownerDocument: {defaultView: childWin}};
+      expect(getParentWindowFrameElement(el, window)).to.equal(null);
     });
   });
 });

@@ -47,6 +47,11 @@ body {
   text-size-adjust: 100%;
 }
 
+/** make-body-block experiment */
+.-amp-make-body-block body {
+  display: block !important;
+}
+
 .-amp-element {
   display: inline-block;
 }
@@ -78,9 +83,11 @@ body {
 .-amp-layout-fill {
   display: block;
   overflow: hidden !important;
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
 .-amp-layout-flex-item {
@@ -376,6 +383,13 @@ amp-analytics {
   visibility: hidden;
 }
 
+/**
+ * Iframe allows setting frameborder, so we need to set box-sizing to border-box
+ * or otherwise the iframe will oevrflow its parent when there is a border.
+ */
+amp-iframe iframe {
+  box-sizing: border-box !important;
+}
 
 /**
  * Minimal AMP Access CSS. This part has to be here so that the correct UI

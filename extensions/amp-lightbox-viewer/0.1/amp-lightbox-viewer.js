@@ -16,13 +16,14 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
-import {ampdocFor} from '../../../src/ampdoc';
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
 import {toggle} from '../../../src/style';
+import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
 /** @const */
@@ -76,13 +77,20 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.container_.classList.add('-amp-lbv');
 
+    /** @private {?Element} */
+    this.descriptionBox_ = null;
+
     /** @private  {?Element} */
     this.gallery_ = null;
 
     /** @private {?Array<{string, Element}>} */
     this.thumbnails_ = null;
 
+    /** @private {?UnlistenDef} */
+    this.elementUnlisten_ = null;
+
     this.buildMask_();
+    this.buildDescriptionBox_();
     this.buildControls_();
     this.element.appendChild(this.container_);
   }
@@ -105,6 +113,31 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const mask = this.win.document.createElement('div');
     mask.classList.add('-amp-lbv-mask');
     this.container_.appendChild(mask);
+  }
+
+  /**
+   * Build description box and append it to the container.
+   * @private
+   */
+  buildDescriptionBox_() {
+    dev().assert(this.container_);
+    this.descriptionBox_ = this.win.document.createElement('div');
+    this.descriptionBox_.classList.add('amp-lbv-desc-box');
+
+    const toggleDescription = this.toggleDescriptionBox_.bind(this);
+    listen(this.container_, 'click', toggleDescription);
+    this.container_.appendChild(this.descriptionBox_);
+  }
+
+  /**
+   * Toggle description box if it has text content
+   * @private
+   */
+  toggleDescriptionBox_() {
+    if (!this.descriptionBox_.textContent) {
+      return;
+    }
+    this.descriptionBox_.classList.toggle('hide');
   }
 
   /**
@@ -142,7 +175,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     button.setAttribute('role', 'button');
     button.setAttribute('aria-label', label);
     button.classList.add(className);
-    button.addEventListener('click', action);
+    button.addEventListener('click', event => {
+      action();
+      event.stopPropagation();
+    });
 
     this.container_.appendChild(button);
   }
@@ -208,6 +244,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     this.activeElement_ = null;
     this.active_ = false;
+
+    // Reset the state of the description box
+    this.descriptionBox_.classList.remove('hide');
 
     // If there's gallery, set gallery to display none
     this.container_.removeAttribute('gallery-view');
@@ -293,8 +332,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   setupElement_(element) {
-    this.updateStackingContext_(element, /* reset */ false);
-    element.classList.add('amp-lightboxed');
+    const descText = this.manager_.getDescription(element);
+    this.vsync_.mutate(() => {
+      this.updateStackingContext_(element, /* reset */ false);
+      element.classList.add('amp-lightboxed');
+      // update description box
+      this.descriptionBox_.textContent = descText;
+    });
+    // add click event to current element to trigger discription box
+    const toggleDescription = this.toggleDescriptionBox_.bind(this);
+    this.elementUnlisten_ =
+        listen(element, 'click', toggleDescription);
   }
 
   /**
@@ -303,8 +351,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   tearDownElement_(element) {
-    this.updateStackingContext_(element, /* reset */ true);
-    element.classList.remove('amp-lightboxed');
+    this.vsync_.mutate(() => {
+      this.updateStackingContext_(element, /* reset */ true);
+      element.classList.remove('amp-lightboxed');
+    });
+    if (this.elementUnlisten_) {
+      this.elementUnlisten_();
+    }
+
   }
 
   /**
@@ -468,9 +522,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgElement.classList.add('-amp-lbv-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
-    const redirect = () => {
+    const redirect = event => {
       this.updateViewer_(thumbnailObj.element);
       this.closeGallery_();
+      event.stopPropagation();
     };
     element.addEventListener('click', redirect);
     return element;
@@ -484,7 +539,7 @@ export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
     // TODO(aghassemi): This only works for singleDoc mode. We will move
     // installation of LightboxManager to core after the experiment, okay for now.
-    const ampdoc = ampdocFor(win).getAmpDoc();
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
     manager_ = new LightboxManager(ampdoc);
   }
 }

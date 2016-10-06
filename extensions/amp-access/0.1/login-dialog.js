@@ -19,7 +19,7 @@ import {listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -38,7 +38,7 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  * @return {!Promise<string>}
  */
 export function openLoginDialog(win, urlOrPromise) {
-  const viewer = viewerFor(win);
+  const viewer = viewerForDoc(win.document);
   const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise).open();
@@ -89,8 +89,9 @@ class ViewerLoginDialog {
 
 /**
  * Web-based implementation of the Login Dialog.
+ * @visibleForTesting
  */
-class WebLoginDialog {
+export class WebLoginDialog {
   /**
    * @param {!Window} win
    * @param {!Viewer} viewer
@@ -114,6 +115,9 @@ class WebLoginDialog {
 
     /** @private {?Window} */
     this.dialog_ = null;
+
+    /** @private {?Promise} */
+    this.dialogReadyPromise_ = null;
 
     /** @private {?number} */
     this.heartbeatInterval_ = null;
@@ -179,19 +183,19 @@ class WebLoginDialog {
     const options = `${sizing},resizable=yes,scrollbars=yes`;
     const returnUrl = this.getReturnUrl_();
 
-    let dialogReadyPromise = null;
+    this.dialogReadyPromise_ = null;
     if (typeof this.urlOrPromise == 'string') {
       const loginUrl = buildLoginUrl(this.urlOrPromise, returnUrl);
       dev().fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
       this.dialog_ = openWindowDialog(this.win, loginUrl, '_blank', options);
       if (this.dialog_) {
-        dialogReadyPromise = Promise.resolve();
+        this.dialogReadyPromise_ = Promise.resolve();
       }
     } else {
       dev().fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
       this.dialog_ = openWindowDialog(this.win, '', '_blank', options);
       if (this.dialog_) {
-        dialogReadyPromise = this.urlOrPromise.then(url => {
+        this.dialogReadyPromise_ = this.urlOrPromise.then(url => {
           const loginUrl = buildLoginUrl(url, returnUrl);
           dev().fine(TAG, 'Set dialog url: ', loginUrl);
           this.dialog_.location.replace(loginUrl);
@@ -201,8 +205,8 @@ class WebLoginDialog {
       }
     }
 
-    if (dialogReadyPromise) {
-      dialogReadyPromise.then(() => {
+    if (this.dialogReadyPromise_) {
+      this.dialogReadyPromise_.then(() => {
         this.setupDialog_(returnUrl);
       }, error => {
         this.loginDone_(/* result */ null, error);

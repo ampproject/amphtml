@@ -39,19 +39,10 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li>
-          <a
-          href="https://github.com/ampproject/amphtml/blob/master/examples/live-blog.amp.html">live-blog.amp.html</a>
-        </li>
-        <li>
-          <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list.amp.html">live-list.amp.html</a>
-        </li>
-        <li>
-          <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list-update.amp.html">live-list-update.amp.html</a> (this requires a server, run `gulp` on the project repo)
-        </li>
-      </ul>
+    <td><ul>
+    <li><a href="https://ampbyexample.com/components/amp-live-list/">Annotated code example for amp-live-list</a></li>
+    <li><a href="https://ampbyexample.com/samples_templates/live_blog/">Annotated code example with amp-live-list for a live blog</a></li>
+    </ul>
     </td>
   </tr>
 </table>
@@ -194,9 +185,9 @@ should be applied to all `amp-live-list` components since the component
 will still try to insert new items if it identifies any and has no notion
 that is not on the first page.
 
-## How Server Side filtering works
+## Server Side filtering
 
-Work in Progress
+See the documentation for [Server side filtering](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
 
 ## Attributes
 

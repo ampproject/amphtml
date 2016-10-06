@@ -76,12 +76,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
   },
   {
-    id: 'amp-sticky-ad',
-    name: 'AMP Sticky Ad',
-    spec: 'https://github.com/ampproject/amphtml/issues/2472',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -98,12 +92,6 @@ const EXPERIMENTS = [
     name: 'AMP Access sign-in',
     spec: 'https://github.com/ampproject/amphtml/issues/4227',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
-  },
-  {
-    id: 'amp-slidescroll',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
   },
   {
     id: 'amp-scrollable-carousel',
@@ -124,6 +112,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
   },
   {
+    id: 'amp-form-custom-validations',
+    name: 'AMP Form Custom Validations',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -140,6 +134,7 @@ const EXPERIMENTS = [
     id: 'amp-share-tracking',
     name: 'AMP Share Tracking',
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
   },
   {
     id: 'amp-viz-vega',
@@ -157,6 +152,7 @@ const EXPERIMENTS = [
     id: 'amp-app-banner',
     name: 'Shows a native app install/open banner.',
     spec: 'https://github.com/ampproject/amphtml/issues/800',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5166',
   },
   {
     id: 'cache-service-worker',
@@ -179,6 +175,12 @@ const EXPERIMENTS = [
     name: 'Guaranteed minimum freshness on sections of a page',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
+  },
+  {
+    id: 'make-body-block',
+    name: 'Sets the body to display:block.',
+    spec: 'https://github.com/ampproject/amphtml/issues/5310',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
   },
   {
     id: 'pan-y',

@@ -29,6 +29,9 @@ export class AmpImg extends BaseElement {
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
+    /** @private {boolean} */
+    this.isPrerenderAllowed_ = true;
+
     /** @private {?Element} */
     this.img_ = null;
 
@@ -38,8 +41,9 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {boolean} */
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
+
+    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -71,8 +75,6 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */

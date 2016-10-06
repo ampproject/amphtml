@@ -15,7 +15,7 @@
  */
 
 import {platformFor} from '../platform';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 import {vsyncFor} from '../vsync';
 
 
@@ -30,16 +30,17 @@ import {vsyncFor} from '../vsync';
  *
  * See #3481 for more details.
  *
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!../service/platform-impl.Platform=} opt_platform
  * @param {!./viewer-impl.Viewer=} opt_viewer
  * @param {!./vsync-impl.Vsync=} opt_vsync
  * @return {?Promise}
  * @package
  */
-export function checkAndFix(win, opt_platform, opt_viewer, opt_vsync) {
+export function checkAndFix(ampdoc, opt_platform, opt_viewer, opt_vsync) {
+  const win = ampdoc.win;
   const platform = opt_platform || platformFor(win);
-  const viewer = opt_viewer || viewerFor(win);
+  const viewer = opt_viewer || viewerForDoc(ampdoc);
   const vsync = opt_vsync || vsyncFor(win);
   if (!platform.isIos() || !platform.isSafari() ||
           platform.getMajorVersion() > 8 ||
