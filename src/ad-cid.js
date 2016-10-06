@@ -37,7 +37,8 @@ export function getAdCid(adElement) {
     if (!cidService) {
       return;
     }
-    return cidService.get(scope, Promise.resolve()).catch(error => {
+    return cidService.get(dev().assertString(scope), Promise.resolve())
+    .catch(error => {
       // Not getting a CID is not fatal.
       dev().error('ad-cid', error);
       return undefined;
