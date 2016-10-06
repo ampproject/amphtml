@@ -411,7 +411,7 @@ export class UrlReplacements {
     // returns the AMP version number
     this.set_('AMP_VERSION', () => '$internalRuntimeVersion$');
 
-    this.setAsync_('BACKGROUNDED_STATE', () => {
+    this.set_('BACKGROUNDED_STATE', () => {
       return viewerForDoc(this.ampdoc.win.document).isVisible() ? '0' : '1';
     });
   }
