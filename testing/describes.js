@@ -196,6 +196,9 @@ function ampSetup(env, win, spec) {
   env.ampdocService = ampdocService;
   env.extensions = installExtensionsService(win);
   installRuntimeServices(win);
+  env.flushVsync = function() {
+    win.services.vsync.obj.runScheduledTasks_();
+  };
   if (singleDoc) {
     const ampdoc = ampdocService.getAmpDoc(win.document);
     env.ampdoc = ampdoc;
@@ -214,6 +217,7 @@ function ampDestroy(env) {
       resetScheduledElementForTesting(env.win, k);
     }
   }
+  delete env.flushVsync;
   delete env.ampdocService;
   delete env.extensions;
   if (env.ampdoc) {
