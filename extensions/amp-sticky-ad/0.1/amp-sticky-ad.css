@@ -63,8 +63,8 @@ amp-sticky-ad[visible] {
   border: 1px solid #c8c8c8;
 }
 
-amp-sticky-ad[visible] > button{
-  visibility: visible !important;
+amp-sticky-ad[visible] > .amp-sticky-ad-close-button {
+  visibility: visible;
 }
 
 /* Increase tapping area of the dismiss button */

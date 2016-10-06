@@ -64,8 +64,8 @@ class AmpStickyAd extends AMP.BaseElement {
         'amp-sticky-ad must have a single amp-ad child');
 
     this.ad_ = children[0];
-    const adType = this.element.getAttribute('type');
-    const config = adConfig[this.ad_.getAttribute('type')];
+    const adType = this.ad_.getAttribute('type');
+    const config = adConfig[adType];
     user().assert(config, `Type "${adType}" is not supported in amp-ad`);
     this.adRenderStartImplemented_ = config.renderStartImplemented;
     this.setAsOwner(this.ad_);
