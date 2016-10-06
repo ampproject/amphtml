@@ -19,8 +19,9 @@ import {getServicePromiseForDoc} from './service';
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!Storage>}
+ * @return {!Promise<!./service/storage-impl.Storage>}
  */
 export function storageForDoc(nodeOrDoc) {
-  return getServicePromiseForDoc(nodeOrDoc, 'storage');
+  return /** @type {!Promise<!./service/storage-impl.Storage>} */ (
+      getServicePromiseForDoc(nodeOrDoc, 'storage'));
 }
