@@ -122,7 +122,7 @@ export class AmpAdApiHandler {
               // event (or that it's not getting dropped somewhere even if it
               // is sent).
               this.baseInstance_.lifecycleReporter_.sendPing(
-                  'renderCrossDomainEnd');
+                  'renderCrossDomainStart');
             }
             //report performance
           } else {

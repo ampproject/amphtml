@@ -209,7 +209,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
-      this.lifecycleReporter_.sendPing('renderCrossDomainStart');
+      this.lifecycleReporter_.sendPing('adRequestStart');
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.apiHandler_ = new AmpAdApiHandler(
