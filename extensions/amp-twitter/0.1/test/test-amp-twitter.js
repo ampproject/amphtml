@@ -28,7 +28,7 @@ describe('amp-twitter', () => {
   const tweetId = '585110598171631616';
 
   function getAmpTwitter(tweetid) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise(/*opt_runtimeOff*/ true).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
@@ -69,4 +69,15 @@ describe('amp-twitter', () => {
     });
   });
 
+  it('removes iframe after unlayoutCallback', () => {
+    return getAmpTwitter(tweetId).then(ampTwitter => {
+      const iframe = ampTwitter.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = ampTwitter.implementation_;
+      obj.unlayoutCallback();
+      expect(ampTwitter.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
+    });
+  });
 });

@@ -33,7 +33,7 @@ describe('amp-facebook', function() {
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
 
   function getAmpFacebook(href, opt_embedAs, opt_noFakeResources) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise(/*opt_runtimeOff*/ true).then(iframe => {
       if (!opt_noFakeResources) {
         doNotLoadExternalResourcesInTest(iframe.win);
       }
@@ -129,5 +129,17 @@ describe('amp-facebook', function() {
             }, '*');
           });
         });
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return getAmpFacebook(fbPostHref).then(ampFB => {
+      const iframe = ampFB.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = ampFB.implementation_;
+      obj.unlayoutCallback();
+      expect(ampFB.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
+    });
   });
 });

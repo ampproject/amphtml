@@ -18,14 +18,22 @@
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
+import {removeElement} from '../../../src/dom';
 
 class AmpFacebook extends AMP.BaseElement {
 
- /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     this.preconnect.url('https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
@@ -48,7 +56,22 @@ class AmpFacebook extends AMP.BaseElement {
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 };
 
