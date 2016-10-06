@@ -67,7 +67,7 @@ unless only a single child is present.
 
 Usage example:
 
-```
+```html
 <amp-carousel width="100" height="100" controls layout="responsive" type="slides">
 ```
 
