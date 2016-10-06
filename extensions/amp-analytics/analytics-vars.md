@@ -396,7 +396,7 @@ Provides the number of seconds that have elapsed since 1970. (Epoch time)
 Example value: `1452710304312`
 
 
-### backgroundedState
+### backgroundState
 
 When used, will provide the current backgrounded state of the page.
 
