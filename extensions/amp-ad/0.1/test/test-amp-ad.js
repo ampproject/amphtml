@@ -20,6 +20,7 @@ import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {childElement} from '../../../../src/dom';
 import {extensionsFor} from '../../../../src/extensions';
+import {stubService} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 
 describe('A4A loader', () => {
@@ -50,10 +51,18 @@ describe('A4A loader', () => {
       let iframePromise;
       let ampAdElement;
       let ampAd;
+      let userNotificationResolver;
 
       beforeEach(() => {
         iframePromise = createIframePromise().then(fixture => {
           const doc = fixture.doc;
+          const getUserNotificationStub = stubService(
+              sandbox, fixture.win, 'userNotificationManager', 'get');
+          getUserNotificationStub.withArgs('notif')
+              .returns(new Promise(resolve => {
+                userNotificationResolver = resolve;
+              }));
+
           ampAdElement = doc.createElement(tag);
           ampAdElement.setAttribute('type', 'nonexistent-tag-type');
           ampAdElement.setAttribute('width', '300');
@@ -64,10 +73,36 @@ describe('A4A loader', () => {
         });
       });
 
+      describe('with consent-notification-id, upgradeCallback', () => {
+        it('should block for notification dismissal', done => {
+          iframePromise.then(() => {
+            ampAdElement.setAttribute('data-consent-notification-id', 'notif');
+
+            ampAd.upgradeCallback().then(() => {
+              done('upgradeCallback should not resolve without ' +
+                  'notification dismissal');
+            });
+            setTimeout(() => done(), 0);
+          });
+        });
+
+        it('should resolve once notification is dismissed', done => {
+          iframePromise.then(() => {
+            ampAdElement.setAttribute('data-consent-notification-id', 'notif');
+
+            ampAd.upgradeCallback().then(() => {
+              done();
+            });
+            userNotificationResolver();
+          });
+        });
+      });
+
       describe('#upgradeCallback', () => {
         it('falls back to 3p for unregistered type', () => {
           return iframePromise.then(() => {
-            expect(ampAd.upgradeCallback()).to.be.instanceof(AmpAd3PImpl);
+            return expect(ampAd.upgradeCallback())
+                .to.eventually.be.instanceof(AmpAd3PImpl);
           });
         });
 
@@ -78,7 +113,8 @@ describe('A4A loader', () => {
             };
             ampAdElement.setAttribute('type', 'zort');
             ampAd = new AmpAd(ampAdElement);
-            expect(ampAd.upgradeCallback()).to.be.instanceof(AmpAd3PImpl);
+            return expect(ampAd.upgradeCallback())
+                .to.eventually.be.instanceof(AmpAd3PImpl);
           });
         });
       });
@@ -96,12 +132,10 @@ describe('A4A loader', () => {
               .withExactArgs('amp-ad-network-zort-impl')
               .returns(Promise.resolve(zortConstructor)).once();
           ampAd = new AmpAd(ampAdElement);
-          const upgradedElementPromise = ampAd.upgradeCallback();
-          extensionsMock.verify();
-          expect(upgradedElementPromise).not.to.be.null;
-          expect(ampAdElement.getAttribute(
-              'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
-          return upgradedElementPromise.then(baseElement => {
+          return ampAd.upgradeCallback().then(baseElement => {
+            extensionsMock.verify();
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
             expect(baseElement).to.equal(zortInstance);
           });
         });
@@ -119,12 +153,11 @@ describe('A4A loader', () => {
               .returns(Promise.resolve(new Error('I failed!')))
               .once();
           ampAd = new AmpAd(ampAdElement);
-          const upgradedElementPromise = ampAd.upgradeCallback();
-          extensionsMock.verify();
-          expect(ampAdElement.getAttribute(
-              'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
-          return upgradedElementPromise.then(baseElement => {
-            expect(baseElement instanceof AmpAd3PImpl).to.be.true;
+          return ampAd.upgradeCallback().then(baseElement => {
+            extensionsMock.verify();
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+            expect(baseElement).to.be.instanceof(AmpAd3PImpl);
           });
         });
       });
@@ -136,13 +169,15 @@ describe('A4A loader', () => {
           };
           ampAdElement.setAttribute('type', 'zort');
           ampAd = new AmpAd(ampAdElement);
-          expect(ampAd.upgradeCallback()).to.not.be.null;
-          expect(childElement(fixture.doc.head,
-              c => {
-                return c.tagName == 'SCRIPT' &&
-                    c.getAttribute('custom-element') ===
-                    'amp-ad-network-zort-impl';
-              })).to.not.be.null;
+          ampAd.upgradeCallback().then(element => {
+            expect(element).to.not.be.null;
+            expect(childElement(fixture.doc.head,
+                c => {
+                  return c.tagName == 'SCRIPT' &&
+                      c.getAttribute('custom-element') ===
+                      'amp-ad-network-zort-impl';
+                })).to.not.be.null;
+          });
         });
       });
     });

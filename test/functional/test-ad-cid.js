@@ -17,9 +17,6 @@
 import {adConfig} from '../../ads/_config';
 import {createIframePromise} from '../../testing/iframe';
 import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
-import {
-  installUserNotificationManager,
-} from '../../extensions/amp-user-notification/0.1/amp-user-notification';
 import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
 import {timerFor} from '../../src/timer';
@@ -31,7 +28,6 @@ describe('ad-cid', () => {
   let sandbox;
 
   let cidService;
-  let uidService;
   let clock;
   let element;
   let adElement;
@@ -40,7 +36,6 @@ describe('ad-cid', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     cidService = installCidService(window);
-    uidService = installUserNotificationManager(window);
     element = document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
     adElement = {
@@ -93,59 +88,6 @@ describe('ad-cid', () => {
       expect(cid).to.be.undefined;
     });
   });
-
-  it('should wait for consent w/ cidScope', () => {
-    config.clientIdScope = cidScope;
-    adElement.element.setAttribute('data-consent-notification-id', 'uid');
-    sandbox.stub(uidService, 'get', id => {
-      expect(id).to.equal('uid');
-      return Promise.resolve('consent');
-    });
-    sandbox.stub(cidService, 'get', (scope, consent) => {
-      expect(scope).to.equal(cidScope);
-      return consent.then(val => {
-        console.log('val is', val);
-        return val + '-cid';
-      });
-    });
-    return getAdCid(adElement).then(cid => {
-      expect(cid).to.equal('consent-cid');
-    });
-  });
-
-  it('should wait for consent w/0 cidScope', () => {
-    config.clientIdScope = null;
-    adElement.element.setAttribute('data-consent-notification-id', 'uid');
-    sandbox.stub(uidService, 'get', id => {
-      expect(id).to.equal('uid');
-      return Promise.resolve('consent');
-    });
-    sandbox.stub(cidService, 'get', (scope, consent) => {
-      expect(scope).to.equal(cidScope);
-      return consent.then(val => {
-        return val + '-cid';
-      });
-    });
-    return getAdCid(adElement).then(cid => {
-      expect(cid).to.equal('consent');
-    });
-  });
-
-  it('should return undefined if notification and cid is not provided',
-      () => {
-        config.clientIdScope = null;
-        sandbox.stub(cidService, 'get', (scope, consent) => {
-          expect(scope).to.equal(cidScope);
-          return consent.then(val => {
-            return val + '-cid';
-          });
-        });
-        const uidSpy = sandbox.spy(uidService, 'get');
-        return getAdCid(adElement).then(cid => {
-          expect(uidSpy).to.not.be.called;
-          expect(cid).to.be.undefined;
-        });
-      });
 
   it('should return null if cid service not available', () => {
     config.clientIdScope = cidScope;
