@@ -521,3 +521,4 @@ export function instrumentationServiceFor(window) {
   return fromClass(window, 'amp-analytics-instrumentation',
       InstrumentationService);
 }
+

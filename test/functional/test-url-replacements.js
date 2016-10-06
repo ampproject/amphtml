@@ -332,6 +332,30 @@ describe('UrlReplacements', () => {
         });
   });
 
+  it('Should replace BACKGROUND_STATE with 0', () => {
+    const win = getFakeWindow();
+    win.services.viewer = {
+      obj: {isVisible: () => true},
+    };
+    return installUrlReplacementsServiceForDoc(win.ampdoc)
+      .expandAsync('?sh=BACKGROUND_STATE')
+      .then(res => {
+        expect(res).to.equal('?sh=0');
+      });
+  });
+
+  it('Should replace BACKGROUND_STATE with 1', () => {
+    const win = getFakeWindow();
+    win.services.viewer = {
+      obj: {isVisible: () => false},
+    };
+    return installUrlReplacementsServiceForDoc(win.ampdoc)
+      .expandAsync('?sh=BACKGROUND_STATE')
+      .then(res => {
+        expect(res).to.equal('?sh=1');
+      });
+  });
+
   describe('PAGE_LOAD_TIME', () => {
     let win;
     let ampdoc;
