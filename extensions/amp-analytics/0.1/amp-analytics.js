@@ -151,10 +151,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.config_['extraUrlParamsReplaceMap']);
 
     const promises = [];
-    let trigger = null;
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
+        let trigger = null;
         trigger = this.config_['triggers'][k];
         if (!trigger) {
           user().error(this.getName_(), 'Trigger should be an object: ', k);
