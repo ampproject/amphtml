@@ -23,7 +23,7 @@ export function meg(global, data) {
   validateData(data, ['code']);
   const code = data.code;
   const lang = global.encodeURIComponent(global.navigator.language);
-  const ref = global.encodeURIComponent(global.referrer);
+  const ref = global.encodeURIComponent(global.context.referrer);
   const params = ['lang=' + lang, 'ref=' + ref].join('&');
   const url = 'https://apps.meg.com/embedjs/' + code + '?' + params;
   global._megAdsLoaderCallbacks = {
