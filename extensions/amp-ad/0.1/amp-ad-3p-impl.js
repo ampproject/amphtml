@@ -26,6 +26,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -80,6 +81,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.layoutPromise_ = null;
+
+    this.lifecycleReporter_ = getLifecycleReporter(this, 'amp');
+    this.lifecycleReporter_.sendPing('adSlotBuilt');
   }
 
   /** @override */
@@ -191,6 +195,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
+    this.lifecycleReporter_.sendPing('preAdThrottle');
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
@@ -200,6 +205,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         clientId: cid || null,
         container: this.container_,
       };
+      // In this path, the request and render start events are entangled,
+      // because both happen inside a cross-domain iframe.  Separating them
+      // here, though, allows us to measure the impact of ad throttling via
+      // incrementLoadingAds().
+      this.lifecycleReporter_.sendPing('adRequestStart');
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.apiHandler_ = new AmpAdApiHandler(
@@ -269,6 +279,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_.unlayoutCallback();
       this.apiHandler_ = null;
     }
+    this.lifecycleReporter_.sendPing('adSlotCleared');
     return true;
   }
 }
