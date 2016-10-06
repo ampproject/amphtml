@@ -16,10 +16,8 @@
 
 import {cidForOrNull} from './cid';
 import {adConfig} from '../ads/_config';
-import {userNotificationManagerFor} from './user-notification';
 import {dev} from '../src/log';
 import {timerFor} from '../src/timer';
-
 
 /**
  * @param {AMP.BaseElement} adElement
@@ -30,25 +28,15 @@ import {timerFor} from '../src/timer';
 export function getAdCid(adElement) {
   const config = adConfig[adElement.element.getAttribute('type')];
   const scope = config ? config.clientIdScope : null;
-  const consentId = adElement.element.getAttribute(
-    'data-consent-notification-id');
-  if (!(scope || consentId)) {
+
+  if (!scope) {
     return Promise.resolve();
   }
   const cidPromise = cidForOrNull(adElement.win).then(cidService => {
     if (!cidService) {
       return;
     }
-    let consent = Promise.resolve();
-    if (consentId) {
-      consent = userNotificationManagerFor(adElement.win).then(service => {
-        return service.get(consentId);
-      });
-      if (!scope && consentId) {
-        return consent;
-      }
-    }
-    return cidService.get(scope, consent).catch(error => {
+    return cidService.get(scope, Promise.resolve()).catch(error => {
       // Not getting a CID is not fatal.
       dev().error('ad-cid', error);
       return undefined;
