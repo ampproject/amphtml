@@ -48,6 +48,7 @@ export class AmpAd extends AMP.BaseElement {
       // Network either has not provided any A4A implementation or the
       // implementation exists, but has explicitly chosen not to handle this
       // tag as A4A.  Fall back to the 3p implementation.
+      console.log('3pad');
       return new AmpAd3PImpl(this.element);
     }
     const extensionTagName = networkImplementationTag(type);
@@ -60,6 +61,7 @@ export class AmpAd extends AMP.BaseElement {
           this.element.tagName,
           'Unable to load ad implementation for type ', type,
           ', falling back to 3p, error: ', error);
+        //console.log('3pad');
         return new AmpAd3PImpl(this.element);
       });
   }

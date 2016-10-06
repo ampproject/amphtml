@@ -87,10 +87,10 @@ export function handleClick(e, opt_directNavigate) {
   }
   const win = link.a.ownerDocument.defaultView;
   const ancestors = win.location.ancestorOrigins;
-  if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
-    destination = destination.replace(`${urls.cdn}/c/`,
-        'http://localhost:8000/max/');
-  }
+  //if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
+    //destination = destination.replace(`${urls.cdn}/c/`,
+      //  'http://localhost:8000/max/');
+  //}
   e.preventDefault();
   if (opt_directNavigate) {
     opt_directNavigate(destination);
@@ -115,6 +115,7 @@ function getLinkInfo(e) {
   //});
   // used for A4A test need to remove
   const a = document.createElement('a');
+
   a.setAttribute('href', "https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjsvenF_MgYsNxq34Qfcf11Jd3Zj-oGnwq9lNtBfk9Z2OIzcOmdBC6Cxo7z_LTDnXUY2OFU7j9RnVxKPCrnyzZPVCm9qBV8gJB_wUo1YWioB1HoNy5tNkGQnmFngnbR4B8TxGIZSgGFIV3xxTN6WeeWSyu6PkyXHzh5JZip1ZaaEYDbA0jt1zdZD7i-q-vloPQDg7xuC-juobHJqhuIzuyIIC7vd06Smzmec&sai=AMfl-YRM4s_tsvh3KxxzqTxeECl7XFF7ZYUAMz5fyi7tXN-bw8govNKz0k5be4H7lu_q9r3eqQanLvNxzg&sig=Cg0ArKJSzE_IUhqd-hBcEAE&urlfix=1&adurl=https://cdn.ampproject.org/c/s/www.buzzfeed.com/amphtml/stephaniemcneal/you-can-use-this-website-to-make-president-obama-say-whateve");
   if (!a) {
     return;
@@ -137,9 +138,9 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
-    return;
-  }
+  // if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+  //   return;
+  // }
   return eventualUrl;
 }
 

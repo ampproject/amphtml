@@ -599,6 +599,7 @@ export class Viewer {
    * @return {!Promise}
    */
   whenFirstVisible() {
+    console.log('when first visible');
     return this.whenFirstVisiblePromise_;
   }
 
