@@ -20,6 +20,7 @@ import {parseUrl, resolveRelativeUrl} from '../src/url';
 /**
  * @typedef {{
  *   historyOff: (boolean|undefined),
+ *   localStorageOff: (boolean|undefined),
  *   location: (string|undefined),
  *   navigator: ({userAgent:(string|undefined)}|undefined),
  * }}
@@ -36,6 +37,12 @@ export class FakeWindow {
   constructor(opt_spec) {
 
     const spec = opt_spec || {};
+
+    // Passthrough.
+    /** @const */
+    this.Object = window.Object;
+    /** @const */
+    this.HTMLElement = window.HTMLElement;
 
     // Events.
     EventListeners.intercept(this);
@@ -73,6 +80,11 @@ export class FakeWindow {
       userAgent: spec.navigator && spec.navigator.userAgent ||
           window.navigator.userAgent,
     });
+
+    // Storage.
+    /** @const {!FakeStorage|undefined} */
+    this.localStorage = spec.localStorageOff ?
+        undefined : new FakeStorage(this);
 
     // Timers and animation frames.
     /**
@@ -361,7 +373,7 @@ export class FakeHistory {
     });
 
     Object.defineProperty(this, 'state', {
-      get: () => this.stack[this.currentIndex].state,
+      get: () => this.stack[this.index].state,
     });
   }
 
@@ -426,6 +438,70 @@ export class FakeHistory {
     if (opt_fireEvent) {
       this.win.eventListeners.fire({type: 'popstate'});
     }
+  }
+}
+
+
+/**
+ * @extends {Storage}
+ */
+export class FakeStorage {
+
+  /** @param {!Window} win */
+  constructor(win) {
+    /** @const */
+    this.win = win;
+
+    /** @const {!Object<string, string>} */
+    this.values = {};
+
+    // Length.
+    Object.defineProperty(this, 'length', {
+      get: () => Object.keys(this.values).length,
+    });
+  }
+
+  /**
+   * @param {number} n
+   * @return {string}
+   */
+  key(n) {
+    return Object.keys(this.values)[n];
+  }
+
+  /**
+   * @param {string} name
+   * @return {?string}
+   */
+  getItem(name) {
+    if (name in this.values) {
+      return this.values[name];
+    }
+    return null;
+  }
+
+  /**
+   * @param {string} name
+   * @param {*} value
+   * @return {?string}
+   */
+  setItem(name, value) {
+    this.values[name] = String(value);
+  }
+
+  /**
+   * @param {string} name
+   */
+  removeItem(name) {
+    delete this.values[name];
+  }
+
+  /**
+   */
+  clear() {
+    Object.keys(this.values).forEach(name => {
+      delete this.values[name];
+    });
   }
 }
 

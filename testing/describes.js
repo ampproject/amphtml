@@ -41,6 +41,7 @@ let iframeCount = 0;
  * @typedef {{
  *   runtimeOn: (boolean|undefined),
  *   ampdoc: (string),
+ *   params: (!Object<string, string>|undefined),
  * }}
  */
 export let AmpTestSpec;
@@ -92,6 +93,7 @@ export function sandboxed(name, spec, fn) {
  * @param {{win: !FakeWindowSpec}} spec
  * @param {function({
  *   win: !FakeWindow,
+ *   amp: (!AmpTestSpec|undefined),
  * })} fn
  */
 export function fakeWin(name, spec, fn) {
@@ -101,9 +103,15 @@ export function fakeWin(name, spec, fn) {
 
     beforeEach(() => {
       env.win = new FakeWindow(spec);
+      if (spec.amp) {
+        ampSetup(env, spec.amp);
+      }
     });
 
     afterEach(() => {
+      if (spec.amp) {
+        ampDestroy(env);
+      }
       // TODO(dvoytenko): test that window is returned in a good condition.
       delete env.win;
     });
@@ -154,7 +162,7 @@ export function realWin(name, spec, fn) {
           }
 
           if (spec.amp) {
-            ampSetup(env, win, spec.amp);
+            ampSetup(env, spec.amp);
           }
           resolve();
         };
@@ -164,7 +172,9 @@ export function realWin(name, spec, fn) {
     });
 
     afterEach(() => {
-      ampDestroy(env);
+      if (spec.amp) {
+        ampDestroy(env);
+      }
       // TODO(dvoytenko): test that window is returned in a good condition.
       if (env.iframe.parentNode) {
         env.iframe.parentNode.removeChild(env.iframe);
@@ -182,28 +192,27 @@ export function realWin(name, spec, fn) {
 
 /**
  * @param {!Object} env
- * @param {!Window} win
  * @param {!AmpTestSpec} spec
  */
-function ampSetup(env, win, spec) {
-  win.ampExtendedElements = {};
+function ampSetup(env, spec) {
+  env.win.ampExtendedElements = {};
   if (!spec.runtimeOn) {
-    win.name = '__AMP__off=1';
+    env.win.name = '__AMP__off=1';
   }
   const ampdocType = spec.ampdoc || 'single';
   const singleDoc = ampdocType == 'single';
-  const ampdocService = installDocService(win, singleDoc);
+  const ampdocService = installDocService(env.win, singleDoc);
   env.ampdocService = ampdocService;
-  env.extensions = installExtensionsService(win);
-  installRuntimeServices(win);
+  env.extensions = installExtensionsService(env.win);
+  installRuntimeServices(env.win);
   env.flushVsync = function() {
-    win.services.vsync.obj.runScheduledTasks_();
+    env.win.services.vsync.obj.runScheduledTasks_();
   };
   if (singleDoc) {
-    const ampdoc = ampdocService.getAmpDoc(win.document);
+    const ampdoc = ampdocService.getAmpDoc(env.win.document);
     env.ampdoc = ampdoc;
-    installAmpdocServices(ampdoc);
-    adopt(win);
+    installAmpdocServices(ampdoc, spec.params);
+    adopt(env.win);
   }
 }
 
