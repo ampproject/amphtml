@@ -1,9 +1,27 @@
 # Integrating ad networks into AMP
 
-See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads integration guidelines](./_integration-guide.md)
+**Table of content**
 
+- [Overview](#overview)
+- [Constraints](#constraints)
+- [The iframe sandbox](#the-iframe-sandbox)
+    - [Available information](#available-information)
+    - [Available APIs](#available-apis)
+    - [Exceptions to available APIs and information](#exceptions-to-available-apis-and-information)
+    - [Ad viewability](#ad-viewability)
+    - [Ad resizing](#ad-resizing)
+    - [Support for multi-size ad requests](#support-for-multi-size-ad-requests)
+    - [Optimizing ad performance](#optimizing-ad-performance)
+    - [Ad markup](#ad-markup)
+    - [1st party cookies](#1st-party-cookies)
+- [Developer guidelines for a pull request](#developer-guidelines-for-a-pull-request)
+    - [Files to change](#files-to-change)
+    - [Verify your examples](#verify-your-examples)
+    - [Tests](#tests)
+    - [Other tips](#other-tips)
+    
 ## Overview
-Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information.
+Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information. If you are an ad technology provider looking to integrate with AMP HTML, please also check the [general 3P inclusion guidelines](../3p/README.md#ads) and [ad service integration guidelines](./_integration-guide.md).
 
 ## Constraints
 A summary of constraints placed on external resources such as ads in AMP HTML:
@@ -23,7 +41,7 @@ Reasons include:
 
 The ad itself is hosted within a document that has an origin different from the primary page.
 
-### Information available to the ad
+### Available information
 We will provide the following information to the ad:
 
 - `window.context.referrer` contains the origin of the referrer value of the primary document if available.
@@ -43,13 +61,13 @@ We will provide the following information to the ad:
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
-### Methods available to the ad.
+### Available APIs
 
-- `window.context.renderStart(opt_data)` is a function that the ad system should call if the ad start rendering. The ad would then set the visibility of the iframe to visible. The ad type needs to be included in `waitForRenderStart` list in [_config.js](./_config.js) for this function to be available. Ad system can use `opt_data` object of form `{width, height}` to send the returned ad size to request a resize. Please check [Ad resizing](#ad-resizing) for more information.
-- `window.context.noContentAvailable()` is a function that the ad system should call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
+- `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
+- `window.context.noContentAvailable()` is a method to inform AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise try to collapse.
 - `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
-### Exceptions to iframe sandbox methods and information
+### Exceptions to available APIs and information
 Depending on the ad server / provider some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. We are working on a creative level API that will enable this information to be accessible in such iframed cases and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
 
 ### Ad viewability
@@ -134,11 +152,11 @@ Here are some factors that affect whether the resize will be executed:
 
 ### Support for multi-size ad requests
 Allowing more than a single ad size to fill a slot improves ad server competition. Increased competition gives the publisher better monetization for the same slot, therefore increasing overall revenue earned by the publisher.
-In order to support multi-size ad requests, AMP accepts an optional `data` param to `window.context.renderStart` (details in [Methods available to the ad](#methods-available-to-the-ad) section) which will automatically invoke request resize with the width and height passed.
+In order to support multi-size ad requests, AMP accepts an optional `data` param to `window.context.renderStart` (details in [Available APIs](#available-apis) section) which will automatically invoke request resize with the width and height passed.
 In case the resize is not successful, AMP will horizontally and vertically center align the creative within the space initially reserved for the creative.
 
 #### Example
-```
+```javascript
 // Use the optional param to specify the width and height to request resize.
 window.context.renderStart({width: 200, height: 100});
 ```
@@ -176,7 +194,7 @@ and another for DoubleClick:
       type="doubleclick"
       json="{…}">
   </amp-ad>
- ````
+```
 
 For ad networks that support loading via a single script tag, this form is supported:
 
@@ -193,8 +211,42 @@ Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that k
 
 ### 1st party cookies
 
-Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap
-
-file. See ["Running ads from a custom domain"](../builtins/amp-ad.md) in the ad documentation for details.
+Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap file. See ["Running ads from a custom domain"](../extensions/amp-ad/amp-ad.md#running-ads-from-a-custom-domain) in the ad documentation for details.
 
 If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.
+
+## Developer guidelines for a pull request
+Please read through [DEVELOPING.md](../DEVELOPING.md) before contributing to this code repository.
+
+### Files to change
+
+If you're adding support for a new 3P ad service, changes to the following files are expected:
+
+- `/ads/yournetwork.js` - implement the main logic here. This is the code that will be invoked in the 3P iframe once loaded.
+- `/ads/yournetwork.md` - have your service documented for the publishers to read. 
+- `/ads/_config.js` - add service specific configuration here.
+- `/3p/integration.js` - register your service here.
+- `/extensions/amp-ad/amp-ad.md` - add a link that points to your publisher doc.
+- `/examples/ads.amp.html` - add publisher examples here.
+
+### Verify your examples
+
+To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.max.html` in your browser to make sure the examples load ads.
+
+### Tests
+
+Please make sure your changes pass the tests:
+
+```
+gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+
+```
+
+If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/functional/ads/test-yournetwork.js` is highly recommended.
+
+### Other tips
+
+- Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
+- [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread. 
+- Run `gulp lint` and `gulp check-types`, then fix errors if any before sending out the PR.
+

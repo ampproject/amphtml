@@ -40,9 +40,9 @@ import {performanceFor} from '../../../src/performance';
 import {resourcesForDoc} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timerFor} from '../../../src/timer';
-import {urlReplacementsFor} from '../../../src/url-replacements';
-import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {viewerForDoc} from '../../../src/viewer';
+import {viewportForDoc} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 
 
@@ -122,16 +122,16 @@ export class AccessService {
     this.vsync_ = vsyncFor(win);
 
     /** @const @private {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(win);
+    this.urlReplacements_ = urlReplacementsForDoc(win.document);
 
     /** @private @const {!Cid} */
     this.cid_ = cidFor(win);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(win);
+    this.viewer_ = viewerForDoc(win.document);
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(win);
+    this.viewport_ = viewportForDoc(win.document);
 
     /** @private @const {!Templates} */
     this.templates_ = templatesFor(win);
@@ -360,7 +360,7 @@ export class AccessService {
    */
   buildUrl_(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
-      return this.urlReplacements_.expand(url, vars);
+      return this.urlReplacements_.expandAsync(url, vars);
     });
   }
 
@@ -416,9 +416,7 @@ export class AccessService {
     }
 
     this.toggleTopClass_('amp-access-loading', true);
-    const startPromise = isExperimentOn(this.win, 'no-auth-in-prerender')
-        ? this.viewer_.whenFirstVisible()
-        : Promise.resolve();
+    const startPromise = this.viewer_.whenFirstVisible();
     const responsePromise = startPromise.then(() => {
       return this.adapter_.authorize();
     }).catch(error => {

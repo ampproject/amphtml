@@ -29,25 +29,7 @@ before_install:
 before_script:
   - npm install -g gulp
   - pip install --user protobuf
-script:
-  - npm run ava
-  - gulp lint
-  - gulp build --css-only
-  - gulp check-types
-  - gulp dist --fortesting
-  - gulp presubmit
-  # dep-check needs to occur after build since we rely on build to generate
-  # the css files into js files.
-  - gulp dep-check
-  # Unit tests with Travis' default chromium
-  - gulp test --nobuild --compiled
-  # Integration tests with all saucelabs browsers
-  - gulp test --nobuild --saucelabs --integration --compiled
-  # All unit tests with an old chrome (best we can do right now to pass tests
-  # and not start relying on new features).
-  # Disabled because it regressed. Better to run the other saucelabs tests.
-  # - gulp test --saucelabs --oldchrome
-  - gulp validator
+script: node build-system/pr-check.js $TRAVIS_COMMIT_RANGE
 branches:
   only:
     - master

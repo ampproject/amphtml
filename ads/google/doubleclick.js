@@ -276,9 +276,20 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
         } else {
-          // We don't want to call renderStart() on ads that failed to load, for
-          // whatever reasons, because then the fallback will not be shown.
-          global.context.renderStart({width: rWidth, height: rHeight});
+          // We only want to call renderStart with a specific size if the
+          // returned creative size matches one of the multi-size sizes.
+          let newSize;
+          for (let i = 1; i < dimensions.length; i++) {
+            // dimensions[0] is the primary or overridden size.
+            if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
+              newSize = {
+                width: rWidth,
+                height: rHeight,
+              };
+              break;
+            }
+          }
+          global.context.renderStart(newSize);
         }
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
@@ -314,7 +325,6 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
     jsonParameters.targeting = data.targeting;
   }
   if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
-    jsonParameters.gladeExp = '1';
     jsonParameters.gladeEids = '108809102';
   }
   const expIds = data['experimentId'];

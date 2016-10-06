@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import '../amp-install-serviceworker';
+import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {adopt} from '../../../../src/runtime';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   getService,
   getServiceForDoc,
@@ -30,21 +31,29 @@ describe('amp-install-serviceworker', () => {
 
   let clock;
   let sandbox;
+  let container;
+  let ampdoc;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    ampdoc = ampdocServiceFor(window).getAmpDoc();
+    container = document.createElement('div');
+    document.body.appendChild(container);
   });
 
   afterEach(() => {
     sandbox.restore();
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
   });
 
   it('should install for same origin', () => {
-    const install = document.createElement('amp-install-serviceworker');
-    const implementation = install.implementation_;
-    expect(implementation).to.be.defined;
+    const install = document.createElement('div');
+    container.appendChild(install);
     install.setAttribute('src', 'https://example.com/sw.js');
+    const implementation = new AmpInstallServiceWorker(install);
     let calledSrc;
     const p = new Promise(() => {});
     implementation.win = {
@@ -136,9 +145,10 @@ describe('amp-install-serviceworker', () => {
     let calledSrc;
 
     beforeEach(() => {
-      install = document.createElement('amp-install-serviceworker');
-      implementation = install.implementation_;
-      expect(implementation).to.be.defined;
+      install = document.createElement('div');
+      container.appendChild(install);
+      install.getAmpDoc = () => ampdoc;
+      implementation = new AmpInstallServiceWorker(install);
       install.setAttribute('src', 'https://www.example.com/sw.js');
       calledSrc = undefined;
       const p = new Promise(() => {});

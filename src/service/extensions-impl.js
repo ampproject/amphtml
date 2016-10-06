@@ -22,6 +22,9 @@ import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
 import {fromClass, setParentWindow} from '../service';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
+import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
@@ -610,9 +613,9 @@ function copyBuiltinElementsToChildWindow(childWin) {
 
 /**
  * Install polyfills in the child window (friendly iframe).
- * @param {!Window} unusedChildWin
+ * @param {!Window} childWin
  */
-function installPolyfillsInChildWindow(unusedChildWin) {
-  // TODO(dvoytenko): polyfill APIs in the childWin as needed. At the very
-  // least, it will be a `registerElement` API.
+function installPolyfillsInChildWindow(childWin) {
+  installDocContains(childWin);
+  installCustomElements(childWin);
 }

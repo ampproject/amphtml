@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getServicePromise} from './service';
+import {getServicePromiseForDoc} from './service';
 
 
 /**
- * @param {!Window} window
- * @return {!Promise<!Storage>}
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<!./service/storage-impl.Storage>}
  */
-export function storageFor(window) {
-  return getServicePromise(window, 'storage');
-};
+export function storageForDoc(nodeOrDoc) {
+  return /** @type {!Promise<!./service/storage-impl.Storage>} */ (
+      getServicePromiseForDoc(nodeOrDoc, 'storage'));
+}

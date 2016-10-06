@@ -19,8 +19,10 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
+import {documentStateFor} from './document-state';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
@@ -117,6 +119,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     const element = stub.element;
     if (element.tagName.toLowerCase() == name) {
       tryUpgradeElementNoInline(element, toClass);
+      // Remove element from array.
+      stubbedElements.splice(i--, 1);
     }
   }
 }
@@ -159,7 +163,8 @@ export function stubElements(win) {
   }
   // Repeat stubbing when HEAD is complete.
   if (!win.document.body) {
-    dom.waitForBody(win.document, () => stubElements(win));
+    const docState = documentStateFor(win);
+    docState.onBodyAvailable(() => stubElements(win));
   }
 }
 
@@ -397,20 +402,28 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.createdCallback = function() {
-    this.classList.add('-amp-element');
-
     // Flag "notbuilt" is removed by Resource manager when the resource is
     // considered to be built. See "setBuilt" method.
     /** @private {boolean} */
     this.built_ = false;
-    this.classList.add('-amp-notbuilt');
-    this.classList.add('amp-notbuilt');
 
+    /** @type {string} */
     this.readyState = 'loading';
+
+    /** @type {boolean} */
     this.everAttached = false;
 
-    /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesForDoc(this);
+    /**
+     * Ampdoc can only be looked up when an element is attached.
+     * @private {?./service/ampdoc-impl.AmpDoc}
+     */
+    this.ampdoc_ = null;
+
+    /**
+     * Resources can only be looked up when an element is attached.
+     * @private {?./service/resources-impl.Resources}
+     */
+    this.resources_ = null;
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -490,13 +503,29 @@ function createBaseAmpElementProto(win) {
   };
 
   /**
-   * Returns Resources manager.
+   * Returns the associated ampdoc. Only available after attachment. It throws
+   * exception before the element is attached.
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   * @final @this {!Element}
+   * @package
+   */
+  ElementProto.getAmpDoc = function() {
+    return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
+        dev().assert(this.ampdoc_,
+            'no ampdoc yet, since element is not attached'));
+  };
+
+  /**
+   * Returns Resources manager. Only available after attachment. It throws
+   * exception before the element is attached.
    * @return {!./service/resources-impl.Resources}
    * @final @this {!Element}
    * @package
    */
   ElementProto.getResources = function() {
-    return this.resources_;
+    return /** @type {!./service/resources-impl.Resources} */ (
+        dev().assert(this.resources_,
+            'no resources yet, since element is not attached'));
   };
 
   /**
@@ -547,7 +576,7 @@ function createBaseAmpElementProto(win) {
       this.dispatchCustomEventForTesting('amp:attached');
       // For a never-added resource, the build will be done automatically
       // via `resources.add` on the first attach.
-      this.resources_.upgraded(this);
+      this.getResources().upgraded(this);
     }
   };
 
@@ -755,11 +784,26 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.attachedCallback = function() {
+    if (!this.everAttached) {
+      this.classList.add('-amp-element');
+      this.classList.add('-amp-notbuilt');
+      this.classList.add('amp-notbuilt');
+    }
+
     if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
       this.isInTemplate_ = !!dom.closestByTag(this, 'template');
     }
     if (this.isInTemplate_) {
       return;
+    }
+    if (!this.ampdoc_) {
+      // Ampdoc can now be initialized.
+      const ampdocService = ampdocServiceFor(this.ownerDocument.defaultView);
+      this.ampdoc_ = ampdocService.getAmpDoc(this);
+    }
+    if (!this.resources_) {
+      // Resources can now be initialized since the ampdoc is now available.
+      this.resources_ = resourcesForDoc(this.ampdoc_);
     }
     if (!this.everAttached) {
       if (!isStub(this.implementation_)) {
@@ -792,7 +836,7 @@ function createBaseAmpElementProto(win) {
       // `resources.add` called twice if upgrade happens immediately.
       this.everAttached = true;
     }
-    this.resources_.add(this);
+    this.getResources().add(this);
   };
 
   /**
@@ -836,7 +880,7 @@ function createBaseAmpElementProto(win) {
     if (this.isInTemplate_) {
       return;
     }
-    this.resources_.remove(this);
+    this.getResources().remove(this);
     this.implementation_.detachedCallback();
   };
 
@@ -904,7 +948,7 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.getLayoutBox = function() {
-    return this.resources_.getResourceForElement(this).getLayoutBox();
+    return this.getResources().getResourceForElement(this).getLayoutBox();
   };
 
  /**
@@ -915,7 +959,7 @@ function createBaseAmpElementProto(win) {
   */
   ElementProto.getIntersectionChangeEntry = function() {
     const box = this.implementation_.getIntersectionElementLayoutBox();
-    const owner = this.resources_.getResourceForElement(this).getOwner();
+    const owner = this.getResources().getResourceForElement(this).getOwner();
     const viewportBox = this.implementation_.getViewport().getRect();
     // TODO(jridgewell, #4826): We may need to make this recursive.
     const ownerBox = owner && owner.getLayoutBox();
@@ -963,6 +1007,7 @@ function createBaseAmpElementProto(win) {
       if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
         this.isFirstLayoutCompleted_ = false;
+        this.dispatchCustomEvent('amp:load:end');
       }
     }, reason => {
       // add layoutCount_ by 1 despite load fails or not
@@ -1226,7 +1271,7 @@ function createBaseAmpElementProto(win) {
     if (state == true) {
       const fallbackElement = this.getFallback();
       if (fallbackElement) {
-        this.resources_.scheduleLayout(this, fallbackElement);
+        this.getResources().scheduleLayout(this, fallbackElement);
       }
     }
   };
@@ -1319,7 +1364,7 @@ function createBaseAmpElementProto(win) {
         const loadingContainer = this.loadingContainer_;
         this.loadingContainer_ = null;
         this.loadingElement_ = null;
-        this.resources_.deferMutate(this, () => {
+        this.getResources().deferMutate(this, () => {
           dom.removeElement(loadingContainer);
         });
       }
@@ -1367,7 +1412,7 @@ function createBaseAmpElementProto(win) {
 
       if (overflown) {
         this.overflowElement_.onclick = () => {
-          this.resources_./*OK*/changeSize(
+          this.getResources()./*OK*/changeSize(
               this, requestedHeight, requestedWidth);
           getVsync(this).mutate(() => {
             this.overflowCallback(

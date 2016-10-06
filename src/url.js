@@ -61,9 +61,10 @@ export let Location;
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
  * @param {string} url
+ * @param {boolean=} opt_nocache
  * @return {!Location}
  */
-export function parseUrl(url) {
+export function parseUrl(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = self.UrlCache || (self.UrlCache = Object.create(null));
@@ -118,8 +119,12 @@ export function parseUrl(url) {
     info.origin = info.protocol + '//' + info.host;
   }
   // Freeze during testing to avoid accidental mutation.
-  cache[url] = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-  return info;
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_nocache) {
+    return frozen;
+  }
+  return cache[url] = frozen;
 }
 
 /**
@@ -130,7 +135,8 @@ export function parseUrl(url) {
  * @param {boolean=} opt_addToFront
  * @return {string}
  */
-function appendParamStringToUrl(url, paramString, opt_addToFront) {
+export function appendEncodedParamStringToUrl(url, paramString,
+  opt_addToFront) {
   if (!paramString) {
     return url;
   }
@@ -157,7 +163,7 @@ function appendParamStringToUrl(url, paramString, opt_addToFront) {
  */
 export function addParamToUrl(url, key, value, opt_addToFront) {
   const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  return appendParamStringToUrl(url, field, opt_addToFront);
+  return appendEncodedParamStringToUrl(url, field, opt_addToFront);
 }
 
 /**
@@ -168,7 +174,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  return appendParamStringToUrl(url, serializeQueryString(params));
+  return appendEncodedParamStringToUrl(url, serializeQueryString(params));
 }
 
 /**

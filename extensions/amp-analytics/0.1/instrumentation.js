@@ -20,8 +20,8 @@ import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewerForDoc} from '../../../src/viewer';
+import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 
@@ -71,12 +71,14 @@ export const AnalyticsEventType = {
 class AnalyticsEvent {
 
   /**
-   * @param {!AnalyticsEventType} type The type of event.
-   * @param {!Object<string, string>} A map of vars and their values.
+   * @param {!AnalyticsEventType|string} type The type of event.
+   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
    */
-  constructor(type, vars) {
+  constructor(type, opt_vars) {
+    /** @const  */
     this.type = type;
-    this.vars = vars || Object.create(null);
+    /** @const  */
+    this.vars = opt_vars || Object.create(null);
   }
 }
 
@@ -92,14 +94,14 @@ export class InstrumentationService {
     /** @const {string} */
     this.TAG_ = 'Analytics.Instrumentation';
 
-    /** @const {!Timer} */
+    /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(window);
 
-    /** @const {!Viewer} */
-    this.viewer_ = viewerFor(window);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(window.document);
 
-    /** @const {!Viewport} */
-    this.viewport_ = viewportFor(window);
+    /** @const {!../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = viewportForDoc(window.document);
 
     /** @private {boolean} */
     this.clickHandlerRegistered_ = false;
@@ -110,7 +112,8 @@ export class InstrumentationService {
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
-    /** @private {!Observable<Event>} */
+    /** @private {!Observable<
+        !../../../src/service/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
 
     /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
@@ -132,7 +135,7 @@ export class InstrumentationService {
 
   /**
    * @param {!JSONType} config Configuration for instrumentation.
-   * @param {!AnalyticsEventListenerDef} The callback to call when the event
+   * @param {!AnalyticsEventListenerDef} listener The callback to call when the event
    *  occurs.
    * @param {!Element} analyticsElement The element associated with the
    *  config.
@@ -165,6 +168,8 @@ export class InstrumentationService {
         left: this.viewport_.getScrollLeft(),
         width: size.width,
         height: size.height,
+        relayoutAll: false,
+        velocity: 0,  // Hack for typing.
       });
     } else if (eventType === AnalyticsEventType.TIMER) {
       if (this.isTimerSpecValid_(config['timerSpec'])) {
@@ -222,8 +227,8 @@ export class InstrumentationService {
   /**
    * Creates listeners for visibility conditions or calls the callback if all
    * the conditions are met.
-   * @param {!AnalyticsEventListenerDef} The callback to call when the event
-   *   occurs.
+   * @param {!AnalyticsEventListenerDef} callback The callback to call when the
+   *   event occurs.
    * @param {!JSONType} config Configuration for instrumentation.
    * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
    * @param {!Element} analyticsElement The element assoicated with the
@@ -247,7 +252,7 @@ export class InstrumentationService {
           const el = getElement(spec['selector'], analyticsElement,
               spec['selectionMethod']);
           if (el) {
-            const attr = getDataParamsFromAttributes(el, null,
+            const attr = getDataParamsFromAttributes(el, undefined,
                 VARIABLE_DATA_ATTRIBUTE_KEY);
             for (const key in attr) {
               vars[key] = attr[key];
@@ -293,7 +298,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!ViewportChangedEventDef} e
+   * @param {!../../../src/service/viewport-impl.ViewportChangedEventDef} e
    * @private
    */
   onScroll_(e) {
@@ -315,7 +320,7 @@ export class InstrumentationService {
             AnalyticsEventType.CLICK,
             getDataParamsFromAttributes(
               el,
-              null,
+              undefined,
               VARIABLE_DATA_ATTRIBUTE_KEY
             )
           )
@@ -330,7 +335,7 @@ export class InstrumentationService {
                 AnalyticsEventType.CLICK,
                 getDataParamsFromAttributes(
                   el,
-                  null,
+                  undefined,
                   VARIABLE_DATA_ATTRIBUTE_KEY
                 )
               )
@@ -490,10 +495,16 @@ export class InstrumentationService {
    * @private
    */
   createTimerListener_(listener, timerSpec) {
+    const hasImmediate = timerSpec.hasOwnProperty('immediate');
+    const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
     const intervalId = this.win_.setInterval(
-        listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
-        timerSpec['interval'] * 1000);
-    listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
+      listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
+      timerSpec['interval'] * 1000
+    );
+
+    if (callImmediate) {
+      listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
+    }
 
     const maxTimerLength = timerSpec['maxTimerLength'] ||
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
