@@ -102,7 +102,7 @@ export const adConfig = {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
     renderStartImplemented: true,
   },
-  
+
   amoad: {
     prefetch: [
       'https://j.amoad.com/js/a.js',
