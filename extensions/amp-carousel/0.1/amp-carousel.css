@@ -118,7 +118,8 @@ amp-carousel .amp-carousel-button.amp-disabled {
   -webkit-overflow-scrolling: touch !important;
 }
 
-.-amp-slides-container.-amp-no-scroll {
+/** Only hide scroll bar for touch devices as it causes jitters on desktops */
+.amp-mode-touch .-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
 
