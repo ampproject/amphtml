@@ -395,6 +395,13 @@ Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
 
+
+### backgroundState
+
+When used, will provide the current backgrounded state of the page.
+
+Possible values are 0, the page is visible, or 1, the page is backgrounded.
+
 ## Visibility Variables
 
 ### backgrounded

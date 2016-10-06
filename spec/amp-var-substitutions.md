@@ -442,6 +442,12 @@ Provides the total time the user has been enagaged with the page since the page
 first became visible in the viewport. Total engaged time will be 0 until the
 page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
+### BACKGROUND_STATE
+
+When used, will provide the current background state of the page.
+
+Possible values are 0, the page is visible, or 1, the page is backgrounded.
+
 ## Access
 
 Access variables are described in [amp-access-analytics.md](../extensions/amp-access/amp-access-analytics.md).
