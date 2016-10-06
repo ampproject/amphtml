@@ -104,6 +104,11 @@ exports.rules = [
           'doubleclick-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config.js',
+      'ads/google/a4a/performance.js->' +
+          'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
+      'ads/google/a4a/performance.js->' +
+          'extensions/amp-ad-network-doubleclick-impl/0.1/' +
+          'doubleclick-a4a-config.js',
     ],
   },
   // Rules for extensions and main src.
