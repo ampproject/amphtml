@@ -94,12 +94,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
-    id: 'amp-slidescroll',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
-  },
-  {
     id: 'amp-scrollable-carousel',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
@@ -116,6 +110,12 @@ const EXPERIMENTS = [
     name: 'AMP Form Extension',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
+  },
+  {
+    id: 'amp-form-custom-validations',
+    name: 'AMP Form Custom Validations',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
   },
   {
     id: 'amp-google-vrview-image',
@@ -175,6 +175,12 @@ const EXPERIMENTS = [
     name: 'Guaranteed minimum freshness on sections of a page',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
+  },
+  {
+    id: 'make-body-block',
+    name: 'Sets the body to display:block.',
+    spec: 'https://github.com/ampproject/amphtml/issues/5310',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
   },
   {
     id: 'pan-y',

@@ -37,7 +37,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-ad">amp-ad.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-ad/">Annotated code example for amp-ad</a></td>
   </tr>
 </table>
 
@@ -113,6 +113,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
 - [Kargo](../../ads/kargo.md)
+- [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
 - [MediaImpact](../../ads/mediaimpact.md)

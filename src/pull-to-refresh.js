@@ -15,7 +15,7 @@
  */
 
 import {platformFor} from './platform';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {viewportForDoc} from './viewport';
 
 
@@ -27,7 +27,8 @@ import {viewportForDoc} from './viewport';
  */
 export function installPullToRefreshBlocker(win) {
   // Only do when requested and don't even try it on Safari!
-  if (viewerFor(win).getParam('p2r') == '0' &&
+  // This mode is only executed in the single-doc mode.
+  if (viewerForDoc(win.document).getParam('p2r') == '0' &&
           platformFor(win).isChrome()) {
     new PullToRefreshBlocker(win.document, viewportForDoc(win.document));
   }

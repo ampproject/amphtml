@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-soundcloud/">amp-soundcloud.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/soundcloud.amp.html">soundcloud.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
   </tr>
 </table>
 

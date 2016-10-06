@@ -19,9 +19,9 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
 import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {storageFor} from '../../../src/storage';
+import {storageForDoc} from '../../../src/storage';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 
@@ -81,25 +81,34 @@ class NotificationInterface {
  */
 export class AmpUserNotification extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {?UrlReplacements} */
+    this.urlReplacements_ = null;
+
+    /** @private @const {?UserNotificationManager} */
+    this.userNotificationManager_ = null;
+
+    /** @const @private {?Promise<!Storage>} */
+    this.storagePromise_ = null;
+  }
+
   /** @override */
   isAlwaysFixed() {
     return true;
   }
 
   /** @override */
-  createdCallback() {
-    /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(this.getAmpDoc());
-
-    /** @private @const {!UserNotificationManager} */
-    this.userNotificationManager_ = getUserNotificationManager_(this.win);
-
-    /** @const @private {!Promise<!Storage>} */
-    this.storagePromise_ = storageFor(this.win);
-  }
-
-  /** @override */
   buildCallback() {
+    const ampdoc = this.getAmpDoc();
+    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
+    this.storagePromise_ = storageForDoc(ampdoc);
+    if (!this.userNotificationManager_) {
+      this.userNotificationManager_ = getUserNotificationManager_(this.win);
+    }
+
     /** @private {?string} */
     this.ampUserId_ = null;
 
@@ -324,7 +333,7 @@ export class UserNotificationManager {
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerForDoc(this.win.document);
 
     /** @private @const {!Promise} */
     this.documentReadyPromise_ = whenDocumentReady(this.win.document);

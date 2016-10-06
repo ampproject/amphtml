@@ -135,6 +135,9 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/**/*-config.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
+      // Currently needed for crypto.js and visibility.js.
+      // Should consider refactoring.
+      'extensions/amp-analytics/**/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
@@ -245,9 +248,10 @@ function compile(entryModuleFilenames, outputDir,
         warning_level: 'DEFAULT',
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
-        jscomp_off: 'unknownDefines',
+        jscomp_off: ['unknownDefines'],
         define: [],
         hide_warnings_for: [
+          'third_party/closure-library/sha384-generated.js',
           'third_party/d3/',
           'third_party/vega/',
           'third_party/webcomponentsjs/',
@@ -267,6 +271,13 @@ function compile(entryModuleFilenames, outputDir,
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error.push(
           'checkTypes', 'accessControls', 'const', 'constantProperty');
+
+      // TODO(aghassemi): Remove when NTI is the default.
+      if (argv.nti) {
+        compilerOptions.compilerFlags.new_type_inf = true;
+        compilerOptions.compilerFlags.jscomp_off.push(
+          'newCheckTypesExtraChecks');
+      }
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');

@@ -17,14 +17,14 @@
 import {Layout} from '../../../src/layout';
 import {user, dev, rethrowAsync} from '../../../src/log';
 import {platformFor} from '../../../src/platform';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
 import {assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement, openWindowDialog} from '../../../src/dom';
-import {storageFor} from '../../../src/storage';
+import {storageForDoc} from '../../../src/storage';
 import {timerFor} from '../../../src/timer';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
@@ -99,7 +99,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
     }, {
       element: this.element,
       viewport: this.getViewport(),
-      storagePromise: storageFor(this.win),
+      storagePromise: storageForDoc(this.getAmpDoc()),
       storageKey: this.getStorageKey_(),
     });
   }
@@ -113,7 +113,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @protected */
   isDismissed() {
-    return storageFor(this.win)
+    return storageForDoc(this.getAmpDoc())
         .then(storage => storage.get(this.getStorageKey_()))
         .then(persistedValue => !!persistedValue, reason => {
           dev().error(TAG, 'Failed to read storage', reason);
@@ -203,6 +203,10 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
   /** @override */
   preconnectCallback(onLayout) {
+    // Ensure the element is in DOM since it removes itself in some cases.
+    if (!this.element.parentNode) {
+      return;
+    }
     this.preconnect.url('https://itunes.apple.com', onLayout);
   }
 
@@ -216,7 +220,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     // We want to fallback to browser builtin mechanism when possible.
     const platform = platformFor(this.win);
-    const viewer = viewerFor(this.win);
+    const viewer = viewerForDoc(this.getAmpDoc());
     /** @private @const {boolean} */
     this.canShowBuiltinBanner_ = !viewer.isEmbedded() && platform.isSafari();
     if (this.canShowBuiltinBanner_) {
@@ -284,6 +288,10 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   preconnectCallback(onLayout) {
+    // Ensure the element is in DOM since it removes itself in some cases.
+    if (!this.element.parentNode) {
+      return;
+    }
     this.preconnect.url('https://play.google.com', onLayout);
     if (this.manifestHref_) {
       this.preconnect.preload(this.manifestHref_);
@@ -298,7 +306,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       visibility: 'hidden',
     });
 
-    const viewer = viewerFor(this.win);
+    const viewer = viewerForDoc(this.getAmpDoc());
     /** @private @const {?Element} */
     this.manifestLink_ = this.win.document.head.querySelector(
         'link[rel=manifest],link[rel=amp-manifest]');

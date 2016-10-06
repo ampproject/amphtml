@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {
+  getElementService,
+  getElementServiceIfAvailable,
+} from './element-service';
 
 
 /**
  * @param {!Window} window
- * @return {!Promise<!InstrumentationService>}
+ * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
 export function analyticsFor(window) {
-  return getElementService(window, 'amp-analytics-instrumentation',
-      'amp-analytics');
+  return (/** @type {!Promise<
+            !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+          >} */ (getElementService(
+                window, 'amp-analytics-instrumentation', 'amp-analytics')));
+};
+
+/**
+ * @param {!Window} window
+ * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
+ */
+export function analyticsForOrNull(window) {
+  return (/** @type {!Promise<
+            ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+          >} */ (getElementServiceIfAvailable(
+                window, 'amp-analytics-instrumentation', 'amp-analytics')));
 };

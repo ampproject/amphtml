@@ -45,14 +45,17 @@ describe('amp-experiment', () => {
 
   let sandbox;
   let win;
+  let ampdoc;
   let experiment;
 
   beforeEach(() => {
     return createIframePromise().then(iframe => {
       sandbox = sinon.sandbox.create();
       win = iframe.win;
+      ampdoc = iframe.ampdoc;
       toggleExperiment(win, 'amp-experiment', true);
       const el = win.document.createElement('amp-experiment');
+      el.ampdoc_ = ampdoc;
       experiment = new AmpExperiment(el);
     });
   });
@@ -123,11 +126,11 @@ describe('amp-experiment', () => {
   it('should add attributes to body element for the allocated variants', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
-    stub.withArgs(win, 'experiment-1', config['experiment-1'])
+    stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
-    stub.withArgs(win, 'experiment-2', config['experiment-2'])
+    stub.withArgs(ampdoc, 'experiment-2', config['experiment-2'])
         .returns(Promise.resolve('variant-d'));
-    stub.withArgs(win, 'experiment-3', config['experiment-3'])
+    stub.withArgs(ampdoc, 'experiment-3', config['experiment-3'])
         .returns(Promise.resolve(null));
 
     experiment.buildCallback();

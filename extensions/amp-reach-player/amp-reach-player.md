@@ -39,7 +39,7 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-    <a href="https://github.com/ampproject/amphtml/blob/master/examples/reach-player.amp.html">reach-player.amp.html</a>
+    <a href="https://ampbyexample.com/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
     </td>
   </tr>
 </table>

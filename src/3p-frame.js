@@ -22,10 +22,9 @@ import {getService} from './service';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {urls} from './config';
 
 
@@ -60,7 +59,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
   const docInfo = documentInfoForDoc(element);
-  const viewer = viewerFor(parentWindow);
+  const viewer = viewerForDoc(element);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
@@ -171,10 +170,10 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
+ * @param {!./preconnect.Preconnect} preconnect
  */
-export function preloadBootstrap(window) {
+export function preloadBootstrap(window, preconnect) {
   const url = getBootstrapBaseUrl(window);
-  const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be

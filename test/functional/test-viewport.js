@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {
   Viewport,
   ViewportBindingDef,
@@ -27,7 +27,7 @@ import {
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
@@ -61,11 +61,18 @@ describe('Viewport', () => {
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
       postScroll: sandbox.spy(),
+      isVisible: () => true,
+      onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
       document: {
-        documentElement: {style: {}},
+        documentElement: {
+          style: {},
+          classList: {
+            add: function() {},
+          },
+        },
       },
       location: {},
       navigator: window.navigator,
@@ -73,10 +80,11 @@ describe('Viewport', () => {
       clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
-    ampdoc = new AmpDocSingle(windowApi);
+    const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
+    ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
     installPlatformService(windowApi);
-    installViewerService(windowApi);
+    installViewerServiceForDoc(ampdoc);
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
     binding.getSize = () => {
@@ -84,6 +92,8 @@ describe('Viewport', () => {
     };
     binding.getScrollTop = () => 17;
     binding.getScrollLeft = () => 0;
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
     viewport = new Viewport(ampdoc, binding, viewer);
@@ -120,6 +130,46 @@ describe('Viewport', () => {
       task.mutate(state);
     });
   }
+
+  it('should connect binding right away when visible', () => {
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+  });
+
+  it('should disconnect binding on dispose', () => {
+    viewport.dispose();
+    expect(binding.disconnect).to.be.calledOnce;
+  });
+
+  it('should connect binding later when visibility changes', () => {
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
+    viewer.isVisible = () => false;
+    let onVisibilityHandler;
+    viewer.onVisibilityChanged = handler => onVisibilityHandler = handler;
+    viewport = new Viewport(ampdoc, binding, viewer);
+
+    // Hasn't been called at first.
+    expect(binding.connect).to.not.be.called;
+    expect(binding.disconnect).to.not.be.called;
+
+    // When becomes visible - it gets called.
+    viewer.isVisible = () => true;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+
+    // Repeat visibility calls do not affect anything.
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+
+    // When becomes invisible - it gets disconnected.
+    viewer.isVisible = () => false;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.be.calledOnce;
+  });
 
   it('should pass through size and scroll', () => {
     expect(viewport.getPaddingTop()).to.equal(19);
@@ -198,29 +248,28 @@ describe('Viewport', () => {
     });
   });
 
-  it('should update padding when changed only', () => {
-    // Shouldn't call updatePaddingTop since it hasn't changed.
-    let bindingMock = sandbox.mock(binding);
+  it('should not do anything if padding is not changed', () => {
+    const bindingMock = sandbox.mock(binding);
     viewerViewportHandler({paddingTop: 19});
-    bindingMock.verify();
-
-    // Should call updatePaddingTop.
-    bindingMock = sandbox.mock(binding);
-    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
-    viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
   });
 
-  it('should update padding for fixed layer', () => {
-    // Should call updatePaddingTop.
+  it('should update padding when viewer wants to hide header', () => {
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
+    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
+        transient: true});
+    bindingMock.verify();
+  });
+
+  it('should update padding for fixed layer when viewer wants to ' +
+      'hide header', () => {
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
-    viewerViewportHandler({paddingTop: 0});
-    bindingMock.verify();
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
+        transient: 'true'});
     fixedLayerMock.verify();
   });
 
@@ -477,6 +526,15 @@ describe('Viewport', () => {
         .to.equal('pan-y');
   });
 
+  it('should add class to HTML element with make-body-block experiment', () => {
+    viewer.isEmbedded = () => true;
+    toggleExperiment(windowApi, 'make-body-block', true);
+    const docElement = windowApi.document.documentElement;
+    const addStub = sandbox.stub(docElement.classList, 'add');
+    viewport = new Viewport(ampdoc, binding, viewer);
+    expect(addStub).to.be.calledWith('-amp-make-body-block');
+  });
+
   describe('for child window', () => {
     let viewport;
     let bindingMock;
@@ -713,6 +771,8 @@ describe('Viewport META', () => {
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
         isIframed: () => false,
+        isVisible: () => true,
+        onVisibilityChanged: () => {},
       };
       viewerMock = sandbox.mock(viewer);
 
@@ -729,7 +789,12 @@ describe('Viewport META', () => {
       });
       windowApi = {
         document: {
-          documentElement: {style: {}},
+          documentElement: {
+            style: {},
+            classList: {
+              add: function() {},
+            },
+          },
           querySelector: selector => {
             if (selector == 'meta[name=viewport]') {
               return viewportMeta;
@@ -742,10 +807,12 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
-      ampdoc = new AmpDocSingle(windowApi);
+      const ampdocService = installDocService(windowApi,
+          /* isSingleDoc */ true);
+      ampdoc = ampdocService.getAmpDoc();
       installTimerService(windowApi);
       installPlatformService(windowApi);
-      installViewerService(windowApi);
+      installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new Viewport(ampdoc, binding, viewer);
     });
@@ -843,6 +910,11 @@ describe('ViewportBindingNatural', () => {
     WindowApi.prototype.addEventListener = function(eventType, handler) {
       windowEventHandlers[eventType] = handler;
     };
+    WindowApi.prototype.removeEventListener = function(eventType, handler) {
+      if (windowEventHandlers[eventType] == handler) {
+        delete windowEventHandlers[eventType];
+      }
+    };
     windowApi = new WindowApi();
 
     documentElement = {
@@ -869,6 +941,7 @@ describe('ViewportBindingNatural', () => {
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewportBindingNatural_(windowApi, viewer);
+    binding.connect();
   });
 
   afterEach(() => {
@@ -888,6 +961,20 @@ describe('ViewportBindingNatural', () => {
   it('should subscribe to scroll and resize events', () => {
     expect(windowEventHandlers['scroll']).to.not.equal(undefined);
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
+  });
+
+  it('should connect/disconnect events', () => {
+    windowEventHandlers = {};
+    binding = new ViewportBindingNatural_(windowApi, viewer);
+    expect(Object.keys(windowEventHandlers)).to.have.length(0);
+
+    binding.connect();
+    expect(windowEventHandlers['scroll']).to.not.equal(undefined);
+    expect(windowEventHandlers['resize']).to.not.equal(undefined);
+
+    // After disconnect, there are no more listeners on window.
+    binding.disconnect();
+    expect(Object.keys(windowEventHandlers)).to.have.length(0);
   });
 
   it('should update padding', () => {
@@ -1021,6 +1108,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     windowApi = new WindowApi();
     windowApi.innerWidth = 555;
     windowApi.document = {
+      nodeType: /* DOCUMENT */ 9,
       readyState: 'complete',
       documentElement: {style: {}},
       body: {
@@ -1043,8 +1131,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
         };
       },
     };
+    windowApi.document.defaultView = windowApi;
     windowMock = sandbox.mock(windowApi);
-    binding = new ViewportBindingNaturalIosEmbed_(windowApi);
+    binding = new ViewportBindingNaturalIosEmbed_(windowApi,
+        new AmpDocSingle(windowApi));
     return Promise.resolve();
   });
 
@@ -1126,10 +1216,15 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(windowApi.document.body.style.borderTopStyle).to.be.undefined;
 
     binding.updateLightboxMode(true);
-    expect(windowApi.document.body.style.borderStyle).to.equal('none');
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('none');
 
     binding.updateLightboxMode(false);
-    expect(windowApi.document.body.style.borderStyle).to.equal('solid');
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('solid');
+    expect(windowApi.document.body.style.borderBottomStyle).to.not.equal(
+        'solid');
+    expect(windowApi.document.body.style.borderLeftStyle).to.not.equal('solid');
+    expect(windowApi.document.body.style.borderRightStyle).to.not.equal(
+        'solid');
   });
 
   it('should calculate size', () => {

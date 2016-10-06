@@ -16,6 +16,7 @@
 
 import {AmpAdApiHandler} from '../amp-ad-api-handler';
 import {BaseElement} from '../../../../src/base-element';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
@@ -31,7 +32,10 @@ describe('amp-ad-api-handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    const ampdocService = ampdocServiceFor(window);
+    const ampdoc = ampdocService.getAmpDoc();
     const adElement = document.createElement('amp-ad');
+    adElement.getAmpDoc = () => ampdoc;
     adImpl = new BaseElement(adElement);
     apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
     testIndex++;

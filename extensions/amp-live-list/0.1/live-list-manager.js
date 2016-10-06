@@ -19,7 +19,7 @@ import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
 import {fromClass} from '../../../src/service';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 
@@ -38,7 +38,7 @@ export class LiveListManager {
     this.liveLists_ = Object.create(null);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerForDoc(this.win.document);
 
     /** @private {number} */
     this.interval_ = 15000;
