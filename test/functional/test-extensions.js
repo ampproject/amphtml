@@ -30,26 +30,15 @@ import {
   resetLogConstructorForTesting,
 } from '../../src/log';
 import {loadPromise} from '../../src/event-helper';
-import * as describes from '../../testing/describes';
 
 
-describes.sandboxed('Extensions', {}, test => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = test.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  describes.fakeWin('registerExtension', {}, test => {
+describes.sandboxed('Extensions', {}, () => {
+  describes.fakeWin('registerExtension', {}, env => {
     let windowApi;
     let extensions;
 
     beforeEach(() => {
-      windowApi = test.win;
+      windowApi = env.win;
       extensions = new Extensions(windowApi);
     });
 
@@ -308,13 +297,13 @@ describes.sandboxed('Extensions', {}, test => {
   describes.realWin('loadExtension', {
     amp: true,
     fakeRegisterElement: true,
-  }, test => {
+  }, env => {
     let win, doc, extensions;
 
     beforeEach(() => {
-      win = test.win;
+      win = env.win;
       doc = win.document;
-      extensions = test.extensions;
+      extensions = env.extensions;
     });
 
     it('should insert extension script correctly', () => {
@@ -397,7 +386,7 @@ describes.sandboxed('Extensions', {}, test => {
     });
   });
 
-  describes.realWin('installExtensionsInChildWindow', {amp: true}, test => {
+  describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     let parentWin;
     let extensions;
     let extensionsMock;
@@ -405,7 +394,7 @@ describes.sandboxed('Extensions', {}, test => {
     let iframeWin;
 
     beforeEach(() => {
-      parentWin = test.win;
+      parentWin = env.win;
       extensions = installExtensionsService(parentWin);
       extensionsMock = sandbox.mock(extensions);
 

@@ -60,25 +60,27 @@ export let AmpTestSpec;
 export function sandboxed(name, spec, fn) {
   return describe(name, function() {
 
-    const test = Object.create(null);
+    const env = Object.create(null);
 
     beforeEach(() => {
-      test.sandbox = sinon.sandbox.create();
+      global.sandbox = env.sandbox = sinon.sandbox.create();
       if (spec.fakeClock) {
-        test.clock = test.sandbox.useFakeTimers();
+        global.clock = env.clock = env.sandbox.useFakeTimers();
       }
     });
 
     afterEach(() => {
-      test.sandbox.restore();
-      delete test.sandbox;
-      if (test.clock) {
-        delete test.clock;
+      env.sandbox.restore();
+      delete env.sandbox;
+      delete global.sandbox;
+      if (env.clock) {
+        delete env.clock;
+        delete global.clock;
       }
     });
 
     describe(SUB, function() {
-      fn.call(this, test);
+      fn.call(this, env);
     });
   });
 }
@@ -95,26 +97,26 @@ export function sandboxed(name, spec, fn) {
 export function fakeWin(name, spec, fn) {
   return describe(name, function() {
 
-    const test = Object.create(null);
+    const env = Object.create(null);
 
     beforeEach(() => {
-      test.win = new FakeWindow(spec);
+      env.win = new FakeWindow(spec);
     });
 
     afterEach(() => {
       // TODO(dvoytenko): test that window is returned in a good condition.
-      delete test.win;
+      delete env.win;
     });
 
     describe(SUB, function() {
-      fn.call(this, test);
+      fn.call(this, env);
     });
   });
 }
 
 
 /**
- * A test with a fake window.
+ * A test with a real (iframed) window.
  * @param {string} name
  * @param {{
  *   fakeRegisterElement: (boolean|undefined),
@@ -128,7 +130,7 @@ export function fakeWin(name, spec, fn) {
 export function realWin(name, spec, fn) {
   return describe(name, function() {
 
-    const test = Object.create(null);
+    const env = Object.create(null);
 
     beforeEach(() => {
       return new Promise(function(resolve, reject) {
@@ -139,8 +141,8 @@ export function realWin(name, spec, fn) {
             '<body style="margin:0"><div id=parent></div>';
         iframe.onload = function() {
           const win = iframe.contentWindow;
-          test.iframe = iframe;
-          test.win = win;
+          env.iframe = iframe;
+          env.win = win;
 
           // Flag as being a test window.
           win.AMP_TEST_IFRAME = true;
@@ -152,7 +154,7 @@ export function realWin(name, spec, fn) {
           }
 
           if (spec.amp) {
-            ampSetup(test, win, spec.amp);
+            ampSetup(env, win, spec.amp);
           }
           resolve();
         };
@@ -162,28 +164,28 @@ export function realWin(name, spec, fn) {
     });
 
     afterEach(() => {
-      ampDestroy(test);
+      ampDestroy(env);
       // TODO(dvoytenko): test that window is returned in a good condition.
-      if (test.iframe.parentNode) {
-        test.iframe.parentNode.removeChild(test.iframe);
+      if (env.iframe.parentNode) {
+        env.iframe.parentNode.removeChild(env.iframe);
       }
-      delete test.iframe;
-      delete test.win;
+      delete env.iframe;
+      delete env.win;
     });
 
     describe(SUB, function() {
-      fn.call(this, test);
+      fn.call(this, env);
     });
   });
 }
 
 
 /**
- * @param {!Object} test
+ * @param {!Object} env
  * @param {!Window} win
  * @param {!AmpTestSpec} spec
  */
-function ampSetup(test, win, spec) {
+function ampSetup(env, win, spec) {
   win.ampExtendedElements = {};
   if (!spec.runtimeOn) {
     win.name = '__AMP__off=1';
@@ -191,12 +193,12 @@ function ampSetup(test, win, spec) {
   const ampdocType = spec.ampdoc || 'single';
   const singleDoc = ampdocType == 'single';
   const ampdocService = installDocService(win, singleDoc);
-  test.ampdocService = ampdocService;
-  test.extensions = installExtensionsService(win);
+  env.ampdocService = ampdocService;
+  env.extensions = installExtensionsService(win);
   installRuntimeServices(win);
   if (singleDoc) {
     const ampdoc = ampdocService.getAmpDoc(win.document);
-    test.ampdoc = ampdoc;
+    env.ampdoc = ampdoc;
     installAmpdocServices(ampdoc);
     adopt(win);
   }
@@ -204,17 +206,17 @@ function ampSetup(test, win, spec) {
 
 
 /**
- * @param {!Object} test
+ * @param {!Object} env
  */
-function ampDestroy(test) {
-  if (test.win.customElements && test.win.customElements.elements) {
-    for (const k in test.win.customElements.elements) {
-      resetScheduledElementForTesting(test.win, k);
+function ampDestroy(env) {
+  if (env.win.customElements && env.win.customElements.elements) {
+    for (const k in env.win.customElements.elements) {
+      resetScheduledElementForTesting(env.win, k);
     }
   }
-  delete test.ampdocService;
-  delete test.extensions;
-  if (test.ampdoc) {
-    delete test.ampdoc;
+  delete env.ampdocService;
+  delete env.extensions;
+  if (env.ampdoc) {
+    delete env.ampdoc;
   }
 }

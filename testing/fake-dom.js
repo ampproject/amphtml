@@ -78,6 +78,7 @@ export class FakeWindow {
     /**
      * @param {function()} handler
      * @param {number=} timeout
+     * @param {...*} var_args
      * @return {number}
      * @const
      */
@@ -92,6 +93,7 @@ export class FakeWindow {
     /**
      * @param {function()} handler
      * @param {number=} timeout
+     * @param {...*} var_args
      * @return {number}
      * @const
      */
