@@ -51,7 +51,7 @@ export function installAlpClickHandler(win) {
  * Filter click event and then transform URL for direct AMP navigation
  * with impression logging.
  * @param {!Event} e
- * @param {function()=} opt_viewerNavigate
+ * @param {function(string)=} opt_viewerNavigate
  * @visibleForTesting
  */
 export function handleClick(e, opt_viewerNavigate) {
