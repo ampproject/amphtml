@@ -164,3 +164,62 @@ var Cid;
  */
 Cid.prototype.get = function(
     externalCidScope, consent, opt_persistenceConsent) {}
+
+var AMP;
+window.AMP;
+// Externed explicitly because we do not export Class shaped names
+// by default.
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor
+ * @extends {BaseElement$$module$src$base_element}
+ */
+AMP.BaseElement = class {
+  /** @param {!AmpElement} element */
+  constructor(element) {}
+};
+
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor
+ * @extends {AmpAdApiHandler$$module$extensions$amp_ad$0_1$amp_ad_api_handler}
+ */
+AMP.AmpAdApiHandler = class {
+  /**
+   * @param {!AMP.BaseElement} baseInstance
+   * @param {!Element} element
+   * @param {function()=} opt_noContentCallback
+   */
+  constructor(baseInstance, element, opt_noContentCallback) {}
+}
+
+/*
+     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+ \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+
+  Any private property for BaseElement should be declared in
+  build-system/amp.extern.js, this is so closure compiler doesn't rename
+  the private properties of BaseElement since if it did there is a
+  possibility that the private property's new symbol in the core compilation
+  unit would collide with a renamed private property in the inheriting class
+  in extensions.
+ */
+var SomeBaseElementLikeClass;
+SomeBaseElementLikeClass.prototype.layout_;
+
+/** @type {number} */
+SomeBaseElementLikeClass.prototype.layoutWidth_;
+
+/** @type {boolean} */
+SomeBaseElementLikeClass.prototype.inViewport_;
+
+SomeBaseElementLikeClass.prototype.actionMap_;
+
+AMP.BaseTemplate;

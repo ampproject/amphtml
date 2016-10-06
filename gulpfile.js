@@ -389,7 +389,6 @@ function checkTypes() {
       'check-types.js', {
         includePolyfills: true,
         checkTypes: true,
-        externs: ['build-system/amp.extension.extern.js',],
       });
 }
 
