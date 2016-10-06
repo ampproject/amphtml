@@ -497,10 +497,8 @@ export class InstrumentationService {
   createTimerListener_(listener, timerSpec) {
     const hasImmediate = timerSpec.hasOwnProperty('immediate');
     const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
-    const viewer = this.viewer_;
     const timerEventFunction = function() {
-      const vars = {backgrounded: viewer.isVisible() ? '0' : '1'};
-      listener(new AnalyticsEvent(AnalyticsEventType.TIMER, vars));
+      listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
     };
     const intervalId = this.win_.setInterval(timerEventFunction,
       timerSpec['interval'] * 1000);
