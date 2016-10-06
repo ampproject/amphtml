@@ -15,7 +15,7 @@
  */
 
 import {getServicePromise, getServicePromiseOrNull} from './service';
-import {dev, user} from './log';
+import {user} from './log';
 import * as dom from './dom';
 
 /**
@@ -79,7 +79,9 @@ export function getElementServiceIfAvailable(win, id, providedByElement) {
  */
 function isElementScheduled(win, elementName) {
   // Set in custom-element.js
-  dev().assert(win.ampExtendedElements,
-      'win.ampExtendedElements not created yet');
+  // TODO(@dvoytenko, #5454): Why hasn't this been created yet.
+  if (!win.ampExtendedElements) {
+    return false;
+  }
   return !!win.ampExtendedElements[elementName];
 }
