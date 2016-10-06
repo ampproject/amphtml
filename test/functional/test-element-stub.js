@@ -48,7 +48,7 @@ describe('test-element-stub', () => {
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', 'blah');
       iframe.doc.head.appendChild(link);
-      return iframe.addElement(testElement);
+      iframe.doc.getElementById('parent').appendChild(testElement);
     });
   }
 
