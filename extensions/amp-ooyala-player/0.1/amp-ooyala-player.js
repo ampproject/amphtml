@@ -29,11 +29,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean=} onLayout
+   * @param {boolean=} opt_onLayout
    * @override
    */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://player.ooyala.com', onLayout);
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://player.ooyala.com', opt_onLayout);
   }
 
   /** @override */
