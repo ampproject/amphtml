@@ -143,8 +143,6 @@ class AmpStickyAd extends AMP.BaseElement {
           this.element.setAttribute('visible', '');
         }
         this.viewport_.addToFixedLayer(this.element);
-        this.updateInViewport(dev().assertElement(this.ad_), true);
-        this.scheduleLayout(dev().assertElement(this.ad_));
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
