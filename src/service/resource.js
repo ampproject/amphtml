@@ -568,8 +568,10 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
-    this.loadPromiseResolve_();
-    this.loadPromiseResolve_ = null;
+    if (this.loadPromiseResolve_) {
+      this.loadPromiseResolve_();
+      this.loadPromiseResolve_ = null;
+    }
     this.layoutPromise_ = null;
     this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
