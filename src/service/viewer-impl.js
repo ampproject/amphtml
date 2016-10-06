@@ -356,6 +356,7 @@ export class Viewer {
 
     /** @const @private {!Promise<string>} */
     this.viewerUrl_ = new Promise(resolve => {
+      /** @const {string} */
       const viewerUrlOverride = this.params_['viewerUrl'];
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
@@ -710,6 +711,7 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
+    /** @const {!Location} */
     const url = parseUrl(urlString);
     if (url.protocol != 'https:') {
       // Non-https origins are never trusted.

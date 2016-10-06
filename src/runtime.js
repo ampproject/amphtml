@@ -149,8 +149,10 @@ function adoptShared(global, opts, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
+  /** @const {!Array<function(!Object)|{n:string, f:function(!Object)}>} */
   const preregisteredExtensions = global.AMP || [];
 
+  /** @const {!./service/extensions-impl.Extensions} */
   const extensions = installExtensionsService(global);
   installRuntimeServices(global);
 
@@ -158,18 +160,14 @@ function adoptShared(global, opts, callback) {
     win: global,
   };
 
-  /** @const */
   global.AMP.config = config;
 
-  /** @const */
   global.AMP.BaseElement = BaseElement;
 
-  /** @const */
   global.AMP.BaseTemplate = BaseTemplate;
 
   /**
    * Registers an extended element and installs its styles.
-   * @const
    */
   global.AMP.registerElement = opts.registerElement.bind(null,
       global, extensions);
@@ -185,15 +183,12 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers an ampdoc service.
-   * @const
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
 
   // Experiments.
-  /** @const */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
-  /** @const */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
@@ -282,19 +277,15 @@ export function adopt(global) {
   }, global => {
     const viewer = viewerForDoc(global.document);
 
-    /** @const */
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
-      /** @const */
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      /** @const */
       global.AMP.resources = resourcesForDoc(global.document);
     }
 
     const viewport = viewportForDoc(global.document);
 
-    /** @const */
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
@@ -468,13 +459,10 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
 
   const viewer = viewerForDoc(ampdoc);
 
-  /** @const */
   shadowRoot.AMP.viewer = viewer;
 
   if (getMode().development) {
-    /** @const */
     global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-    /** @const */
     global.AMP.resources = resourcesForDoc(ampdoc);
   }
 
@@ -546,6 +534,7 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
         dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
       } else if (tagName == 'LINK' && rel == 'stylesheet') {
         // This must be a font definition: no other stylesheets are allowed.
+        /** @const {string} */
         const href = n.getAttribute('href');
         if (parentLinks[href]) {
           dev().fine(TAG, '- stylesheet already included: ', href);
@@ -624,8 +613,9 @@ function emptyService() {
  * @param {!Window} win
  */
 export function registerForUnitTest(win) {
+  let element;
   for (const key in elementsForTesting) {
-    const element = elementsForTesting[key];
+    element = elementsForTesting[key];
     if (element.css) {
       installStyles(win.document, element.css, () => {
         registerElement(win, element.name, element.implementationClass);

@@ -134,7 +134,7 @@ class Cid {
  * @return {!Promise<?string>}
  */
 function getExternalCid(cid, getCidStruct, persistenceConsent) {
-  /** @const {string} */
+  /** @const {!Location} */
   const url = parseUrl(cid.win.location.href);
   if (!isProxyOrigin(url)) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);

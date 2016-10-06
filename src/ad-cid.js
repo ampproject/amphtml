@@ -29,7 +29,9 @@ import {timerFor} from '../src/timer';
  */
 export function getAdCid(adElement) {
   const config = adConfig[adElement.element.getAttribute('type')];
+  /** @const {?string} */
   const scope = config ? config.clientIdScope : null;
+  /** @const {?string} */
   const consentId = adElement.element.getAttribute(
     'data-consent-notification-id');
   if (!(scope || consentId)) {
@@ -48,7 +50,7 @@ export function getAdCid(adElement) {
         return consent;
       }
     }
-    return cidService.get(scope, consent).catch(error => {
+    return cidService.get(dev().assertString(scope), consent).catch(error => {
       // Not getting a CID is not fatal.
       dev().error('ad-cid', error);
       return undefined;

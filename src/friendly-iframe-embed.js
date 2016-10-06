@@ -79,7 +79,9 @@ function isSrcdocSupported() {
  * @return {!Promise<FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec) {
+  /** @const {!Window} */
   const win = getTopWindow(iframe.ownerDocument.defaultView);
+  /** @const {!./service/extensions-impl.Extensions} */
   const extensions = extensionsFor(win);
 
   iframe.style.visibility = 'hidden';
@@ -126,6 +128,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
     readyPromise = Promise.resolve();
   } else {
     readyPromise = new Promise(resolve => {
+      /** @const {number} */
       const interval = win.setInterval(() => {
         if (isIframeReady(iframe)) {
           resolve();

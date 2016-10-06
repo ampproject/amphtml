@@ -81,6 +81,7 @@ let ExtensionHolderDef;
 /**
  * Install extensions service.
  * @param {!Window} window
+ * @return {!Extensions}
  * @restricted
  */
 export function installExtensionsService(window) {

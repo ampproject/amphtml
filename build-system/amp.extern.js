@@ -92,8 +92,6 @@ var Cid = function() {};
 /** @constructor */
 var Activity = function() {};
 
-
-
 // data
 var data;
 data.tweetid;

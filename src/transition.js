@@ -17,18 +17,7 @@
 import {getCurve} from './curve';
 import * as st from './style';
 
-/**
- * TransitionDef function that accepts normtime, typically between 0 and 1 and
- * performs an arbitrary animation action. Notice that sometimes normtime can
- * dip above 1 or below 0. This is an acceptable case for some curves. The
- * second argument is a boolean value that equals "true" for the completed
- * transition and "false" for ongoing.
- * @param {number} unusedNormtime
- * @param {boolean} unusedCompleted
- * @return {function(number):T}
- * @template T
- */
-export const TransitionDef = function(unusedNormtime, unusedCompleted) {};
+
 
 export const NOOP = function(unusedTime) {return null;};
 
@@ -58,6 +47,7 @@ export function all(transitions) {
  * @template RESULT
  */
 export function withCurve(transition, curve) {
+  /** @const {?./curve.CurveDef} */
   const curveFn = getCurve(curve);
   return (time, complete) => {
     return transition(complete ? 1 : curveFn(time), complete);

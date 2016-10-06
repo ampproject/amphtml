@@ -297,7 +297,7 @@ export class AmpCarousel extends BaseCarousel {
       if (Math.abs(newPos - this.pos_) < 1) {
         return undefined;
       }
-      /** @const {!../../../src/transition.TransitionDef<number>} */
+      /** @const {!TransitionDef<number>} */
       const posFunc = tr.numeric(this.pos_, newPos);
       return Animation.animate(this.element, time => {
         this.pos_ = posFunc(time);

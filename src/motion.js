@@ -106,7 +106,7 @@ export class Motion {
    * @param {!./service/vsync-impl.Vsync=} opt_vsync
    */
   constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
-    /** @private @const */
+    /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = opt_vsync || vsyncFor(self);
 
     /** @private @const {!Node} */
