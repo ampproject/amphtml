@@ -35,6 +35,7 @@ const TAG = 'amp-app-banner';
 
 /**
  * @private visible for testing.
+ * @abstract
  */
 export class AbstractAppBanner extends AMP.BaseElement {
 
