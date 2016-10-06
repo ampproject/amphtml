@@ -30,6 +30,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
+      'backgroundState': 'BACKGROUND_STATE',
       'browserLanguage': 'BROWSER_LANGUAGE',
       'canonicalHost': 'CANONICAL_HOST',
       'canonicalPath': 'CANONICAL_PATH',
