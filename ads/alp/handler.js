@@ -51,10 +51,10 @@ export function installAlpClickHandler(win) {
  * Filter click event and then transform URL for direct AMP navigation
  * with impression logging.
  * @param {!Event} e
- * @param {function()=} opt_directNavigate
+ * @param {function()=} opt_viewerNavigate
  * @visibleForTesting
  */
-export function handleClick(e, opt_directNavigate) {
+export function handleClick(e, opt_viewerNavigate) {
   if (e.defaultPrevented) {
     return;
   }
@@ -87,13 +87,16 @@ export function handleClick(e, opt_directNavigate) {
   }
   const win = link.a.ownerDocument.defaultView;
   const ancestors = win.location.ancestorOrigins;
-  //if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
-    //destination = destination.replace(`${urls.cdn}/c/`,
-      //  'http://localhost:8000/max/');
-  //}
+  if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
+    destination = destination.replace(`${urls.cdn}/c/`,
+       'http://localhost:8000/max/');
+  }
   e.preventDefault();
-  if (opt_directNavigate) {
-    opt_directNavigate(destination);
+  if (opt_viewerNavigate) {
+    // TODO: viewer navigate only support navigating top level window to
+    // destination. should we try to open a new window here with target=_blank
+    // here instead of using viewer navigation.
+    opt_viewerNavigate(destination);
   } else {
     navigateTo(win, link.a, destination);
   }
@@ -110,13 +113,9 @@ export function handleClick(e, opt_directNavigate) {
  * }|undefined} A URL on the AMP Cache.
  */
 function getLinkInfo(e) {
-  //const a = closest(/** @type {!Element} */ (e.target), element => {
-    //return element.tagName == 'A' && element.href;
-  //});
-  // used for A4A test need to remove
-  const a = document.createElement('a');
-
-  a.setAttribute('href', "https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjsvenF_MgYsNxq34Qfcf11Jd3Zj-oGnwq9lNtBfk9Z2OIzcOmdBC6Cxo7z_LTDnXUY2OFU7j9RnVxKPCrnyzZPVCm9qBV8gJB_wUo1YWioB1HoNy5tNkGQnmFngnbR4B8TxGIZSgGFIV3xxTN6WeeWSyu6PkyXHzh5JZip1ZaaEYDbA0jt1zdZD7i-q-vloPQDg7xuC-juobHJqhuIzuyIIC7vd06Smzmec&sai=AMfl-YRM4s_tsvh3KxxzqTxeECl7XFF7ZYUAMz5fyi7tXN-bw8govNKz0k5be4H7lu_q9r3eqQanLvNxzg&sig=Cg0ArKJSzE_IUhqd-hBcEAE&urlfix=1&adurl=https://cdn.ampproject.org/c/s/www.buzzfeed.com/amphtml/stephaniemcneal/you-can-use-this-website-to-make-president-obama-say-whateve");
+  const a = closest(/** @type {!Element} */ (e.target), element => {
+    return element.tagName == 'A' && element.href;
+  });
   if (!a) {
     return;
   }
@@ -138,9 +137,9 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  // if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
-  //   return;
-  // }
+  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+    return;
+  }
   return eventualUrl;
 }
 

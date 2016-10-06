@@ -19,6 +19,7 @@ import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
 import {urls} from '../../../src/config';
 
+
 /**
  * Sets up a special document wide listener that relays requests
  * from ad iframes to the viewer to perform A2A navigations.

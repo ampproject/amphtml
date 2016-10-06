@@ -248,26 +248,20 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         // This block returns the ad URL, if one is available.
         .then(() => {
-          console.log('1');
           checkStillCurrent(promiseId);
           return this.getAdUrl();
         })
         // This block returns the (possibly empty) response to the XHR request.
         .then(adUrl => {
-          console.log('2');
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
-          console.log('url is ', this.adUrl_);
           return adUrl && this.sendXhrRequest_(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
         .then(fetchResponse => {
-          console.log('FetchResponse is ', fetchResponse);
-          console.log('3');
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
-            console.log('errr');
             return null;
           }
           // Note: Resolving a .then inside a .then because we need to capture
@@ -351,7 +345,7 @@ export class AmpA4A extends AMP.BaseElement {
           // step again.
           return creative && this.maybeRenderAmpAd_(creative);
         })
-        .catch(error => {console.log('error is ', error); this.promiseErrorHandler_(error)});
+        .catch(error => this.promiseErrorHandler_(error));
   }
 
   /**
@@ -396,7 +390,6 @@ export class AmpA4A extends AMP.BaseElement {
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
     this.timerId_ = incrementLoadingAds(this.win);
-    console.log('render directly');
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error) {
         // If we got as far as getting a URL, then load the ad, but note the
@@ -404,14 +397,12 @@ export class AmpA4A extends AMP.BaseElement {
         if (this.adUrl_) {
           this.renderViaCrossDomainIframe_(true);
         }
-        console.log('render via iframe1');
         throw rendered;
       };
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
         this.renderViaCrossDomainIframe_(true);
-        console.log('render via iframe2');
       }
       this.rendered_ = true;
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));

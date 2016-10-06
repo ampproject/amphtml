@@ -13,21 +13,77 @@
 
     <h1>A4A Examples</h1>
 
-    <h2>A4A ad nework</h2>
-    <amp-ad width="300" height="200"
-        type="adsense"
-        data-ad-client="ca-pub-9350112648257122"
-        data-experiment-id="117152632"
-        data-a4a-upgrade-type="amp-ad-network-adsense-impl">
+    <h2>Fake ad nework</h2>
+    <amp-ad width="300" height="400"
+        type="fake"
+        data-use-a4a="true"
+        src="fake_amp.json">
     </amp-ad>
 
-    <!-- Note to me: add "?exp=a4a:-1&force_a4a_ctypes=1,2" -->
-    <!--<amp-ad width="300" height="250"
-        type="doubleclick"
-        layout="fixed""
-        data-slot="/30497360/cfuertes/a4a_demo"
-        data-experiment-id="117152681"
-        data-a4a-upgrade-type="amp-ad-network-doubleclick-impl">
-    </amp-ad>-->
+    <h2>Adsense</h2>
+    <amp-ad width=300 height=250
+        type="adsense"
+        data-ad-client="ca-pub-2005682797531342"
+        data-ad-slot="7046626912">
+    </amp-ad>
+
+    <h2>Adsense</h2>
+    <amp-ad width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241">
+    </amp-ad>
+
+  <h2>Doubleclick</h2>
+  <amp-ad width=320 height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      >
+  </amp-ad>
+
+  <h2>Doubleclick with JSON based parameters</h2>
+  <amp-ad width=320 height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'
+      >
+  </amp-ad>
+
+  <h2>Doubleclick no ad with fallback</h2>
+  <amp-ad width=300 height=200
+      type="doubleclick"
+      data-slot="/4119129/doesnt-exist"
+      >
+      <div fallback>
+        <b>Thank you for trying AMP!</b>
+
+        <p>You got lucky! We have no ad to show to you!</p>
+      </div>
+  </amp-ad>
+
+  <h2>Doubleclick no ad with placeholder and fallback</h2>
+  <amp-ad width=300 height=200
+      type="doubleclick"
+      data-slot="/4119129/doesnt-exist"
+      >
+      <div placeholder>
+        <b>Placeholder here!!!</b>
+      </div>
+      <div fallback>
+        <b>Thank you for trying AMP!</b>
+
+        <p>You got lucky! We have no ad to show to you!</p>
+      </div>
+  </amp-ad>
+
+  <h2>Doubleclick with overriden size</h2>
+  <amp-ad width=420 height=100
+      data-override-width=320 data-override-height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      class="red"
+      >
+  </amp-ad>
+
   </body>
 </html>
