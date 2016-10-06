@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {VisibilityState} from './visibility-state';
 import {
   addDocFactoryToExtension,
   addElementToExtension,
@@ -28,7 +29,12 @@ import {
 import {ampdocServiceFor} from './ampdoc';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor} from './log';
-import {fromClassForDoc, getService, getServiceForDoc} from './service';
+import {
+  disposeServicesForDoc,
+  fromClassForDoc,
+  getService,
+  getServiceForDoc,
+} from './service';
 import {childElementsByTag} from './dom';
 import {
   createShadowRoot,
@@ -55,7 +61,8 @@ import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc,} from
     './service/url-replacements-impl';
 import {installVideoManagerForDoc} from './service/video-manager-impl';
-import {installViewerServiceForDoc} from './service/viewer-impl';
+import {installViewerServiceForDoc, setViewerVisibilityState,} from
+    './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
@@ -83,7 +90,6 @@ const elementsForTesting = {};
  * @param {!Window} global Global scope to adopt.
  */
 export function installRuntimeServices(global) {
-  // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
   installPlatformService(global);
   installTimerService(global);
   installVsyncService(global);
@@ -98,10 +104,10 @@ export function installRuntimeServices(global) {
 /**
  * Install ampdoc-level services.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Object<string, string>=} opt_initParams
  */
-export function installAmpdocServices(ampdoc) {
-  // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
-  installViewerServiceForDoc(ampdoc);
+export function installAmpdocServices(ampdoc, opt_initParams) {
+  installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
@@ -130,7 +136,7 @@ export function installBuiltins(global) {
  *     registerElement: function(
  *         !Window,
  *         !./service/extensions-impl.Extensions,
- *         string, !Function, (string|undefined)),
+ *         string, !Function, string=),
  *     registerServiceForDoc: function(
  *         !Window,
  *         !./service/extensions-impl.Extensions,
@@ -168,6 +174,9 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers an extended element and installs its styles.
+   * @param {string} name
+   * @param {function(new:BaseElement)} implementationClass
+   * @param {string=} opt_css
    */
   global.AMP.registerElement = opts.registerElement.bind(null,
       global, extensions);
@@ -175,7 +184,7 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {function(new:BaseTemplate)} implementationClass
    */
   global.AMP.registerTemplate = function(name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);
@@ -183,12 +192,24 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers an ampdoc service.
+   * @param {string} name
+   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined} opt_ctor
+   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object|undefined} opt_factory
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
 
   // Experiments.
+  /**
+   * @param {string} experimentId
+   * @return {boolean}
+   */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
+  /**
+   * @param {string} experimentId
+   * @param {boolean=} opt_on
+   * @return {boolean}
+   */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
@@ -308,6 +329,8 @@ export function adoptShadowMode(global) {
      * @param {!Element} hostElement
      * @param {!Document} doc
      * @param {string} url
+     * @param {!Object<string, string>=} opt_initParams
+     * @return {!Object}
      */
     global.AMP.attachShadowDoc = prepareAndAttachShadowDoc.bind(null,
         global, extensions);
@@ -320,7 +343,7 @@ export function adoptShadowMode(global) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {!Function} implementationClass
+ * @param {function(new:BaseElement)} implementationClass
  * @param {string=} opt_css
  */
 function prepareAndRegisterElement(global, extensions,
@@ -341,7 +364,7 @@ function prepareAndRegisterElement(global, extensions,
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {!Function} implementationClass
+ * @param {function(new:BaseElement)} implementationClass
  * @param {string=} opt_css
  */
 function prepareAndRegisterElementShadowMode(global, extensions,
@@ -362,7 +385,7 @@ function prepareAndRegisterElementShadowMode(global, extensions,
  * modes.
  * @param {!Window} global
  * @param {string} name
- * @param {!Function} implementationClass
+ * @param {function(new:BaseElement)} implementationClass
  * @param {string=} opt_css
  */
 function registerElementClass(global, name, implementationClass, opt_css) {
@@ -431,14 +454,18 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
 
 
 /**
- * Attaches the shadow doc and configures ampdoc for it.
+ * Implementation for `attachShadowDoc` function. Attaches the shadow doc and
+ * configures ampdoc for it.
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {!Element} hostElement
  * @param {!Document} doc
  * @param {string} url
+ * @param {!Object<string, string>=} opt_initParams
+ * @return {!Object}
  */
-function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
+function prepareAndAttachShadowDoc(
+    global, extensions, hostElement, doc, url, opt_initParams) {
   dev().fine(TAG, 'Attach shadow doc:', doc);
   const ampdocService = ampdocServiceFor(global);
 
@@ -448,6 +475,7 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   shadowRoot.AMP = {};
   shadowRoot.AMP.url = url;
 
+  /** @const {!./service/ampdoc-impl.AmpDocShadow} */
   const ampdoc = installShadowDoc(ampdocService, url, shadowRoot);
   dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
@@ -455,8 +483,9 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
 
   // Instal doc services.
-  installAmpdocServices(ampdoc);
+  installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
 
+  /** @const {!./service/viewer-impl.Viewer} */
   const viewer = viewerForDoc(ampdoc);
 
   shadowRoot.AMP.viewer = viewer;
@@ -465,6 +494,22 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
     global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
     global.AMP.resources = resourcesForDoc(ampdoc);
   }
+
+  /**
+   * Sets the document's visibility state.
+   * @param {!VisibilityState} state
+   */
+  shadowRoot.AMP.setVisibilityState = function(state) {
+    setViewerVisibilityState(viewer, state);
+  };
+
+  /**
+   * Closes the document. The document can no longer be activated again.
+   */
+  shadowRoot.AMP.close = function() {
+    setViewerVisibilityState(viewer, VisibilityState.INACTIVE);
+    disposeServicesForDoc(ampdoc);
+  };
 
   // Install extensions.
   const extensionIds = mergeShadowHead(global, extensions, shadowRoot, doc);

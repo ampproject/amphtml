@@ -120,7 +120,8 @@ export function parseUrl(url, opt_nocache) {
  * @param {boolean=} opt_addToFront
  * @return {string}
  */
-function appendParamStringToUrl(url, paramString, opt_addToFront) {
+export function appendEncodedParamStringToUrl(url, paramString,
+  opt_addToFront) {
   if (!paramString) {
     return url;
   }
@@ -147,7 +148,7 @@ function appendParamStringToUrl(url, paramString, opt_addToFront) {
  */
 export function addParamToUrl(url, key, value, opt_addToFront) {
   const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  return appendParamStringToUrl(url, field, opt_addToFront);
+  return appendEncodedParamStringToUrl(url, field, opt_addToFront);
 }
 
 /**
@@ -158,7 +159,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  return appendParamStringToUrl(url, serializeQueryString(params));
+  return appendEncodedParamStringToUrl(url, serializeQueryString(params));
 }
 
 /**

@@ -56,6 +56,7 @@ export let ViewportChangedEventDef;
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
+ * @implements {../service.Disposable}
  * @package Visible for type.
  */
 export class Viewport {
@@ -160,6 +161,11 @@ export class Viewport {
 
     this.onScroll(this.sendScrollMessage_.bind(this));
 
+    /** @private {boolean} */
+    this.visible_ = false;
+    this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.updateVisibility_();
+
     // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
     // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
     // The enables passive touch handlers, e.g. for document swipe, since they
@@ -180,9 +186,22 @@ export class Viewport {
     }
   }
 
-  /** For testing. */
-  cleanup_() {
-    this.binding_.cleanup_();
+  /** @override */
+  dispose() {
+    this.binding_.disconnect();
+  }
+
+  /** @private */
+  updateVisibility_() {
+    const visible = this.viewer_.isVisible();
+    if (visible != this.visible_) {
+      this.visible_ = visible;
+      if (visible) {
+        this.binding_.connect();
+      } else {
+        this.binding_.disconnect();
+      }
+    }
   }
 
   /**
@@ -714,6 +733,16 @@ export class Viewport {
 export class ViewportBindingDef {
 
   /**
+   * Add listeners for global resources.
+   */
+  connect() {}
+
+  /**
+   * Remove listeners for global resources.
+   */
+  disconnect() {}
+
+  /**
    * Whether the binding requires fixed elements to be transfered to a
    * independent fixed layer.
    * @return {boolean}
@@ -811,9 +840,6 @@ export class ViewportBindingDef {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
-
-  /** For testing. */
-  cleanup_() {}
 }
 
 
@@ -848,8 +874,11 @@ export class ViewportBindingNatural_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
-    this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+    /** @const {function()} */
+    this.boundScrollEventListener_ = () => this.scrollObservable_.fire();
+
+    /** @const {function()} */
+    this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
     // Override a user-supplied `body{overflow}` to be always visible. This
     // style is set in runtime vs css to avoid conflicts with ios-embedded
@@ -871,8 +900,15 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  cleanup_() {
-    // TODO(dvoytenko): remove listeners
+  connect() {
+    this.win.addEventListener('scroll', this.boundScrollEventListener_);
+    this.win.addEventListener('resize', this.boundResizeEventListener_);
+  }
+
+  /** @override */
+  disconnect() {
+    this.win.removeEventListener('scroll', this.boundScrollEventListener_);
+    this.win.removeEventListener('resize', this.boundResizeEventListener_);
   }
 
   /** @override */
@@ -1141,6 +1177,18 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
+  connect() {
+    // Do nothing: ViewportBindingNaturalIosEmbed_ can only be used in the
+    // single-doc mode.
+  }
+
+  /** @override */
+  disconnect() {
+    // Do nothing: ViewportBindingNaturalIosEmbed_ can only be used in the
+    // single-doc mode.
+  }
+
+  /** @override */
   updateViewerViewport(unusedViewer) {
     // Viewer's viewport is ignored since this window is fully accurate.
   }
@@ -1187,11 +1235,6 @@ export class ViewportBindingNaturalIosEmbed_ {
     onDocumentReady(this.win.document, doc => {
       doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
     });
-  }
-
-  /** @override */
-  cleanup_() {
-    // TODO(dvoytenko): remove listeners
   }
 
   /** @override */

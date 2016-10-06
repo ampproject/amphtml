@@ -20,6 +20,7 @@ import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
 import {viewportForDoc} from './viewport';
 import {vsyncFor} from './vsync';
+import {user} from './log';
 
 
 /**
@@ -141,8 +142,8 @@ export class BaseElement {
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
-    this.actionMap_ = this.win.Object.create(null);
+    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
@@ -444,6 +445,12 @@ export class BaseElement {
     return loadPromise(element, opt_timeout);
   }
 
+  initActionMap_() {
+    if (!this.actionMap_) {
+      this.actionMap_ = this.win.Object.create(null);
+    }
+  }
+
   /**
    * Registers the action handler for the method with the specified name.
    * @param {string} method
@@ -451,6 +458,7 @@ export class BaseElement {
    * @public
    */
   registerAction(method, handler) {
+    this.initActionMap_();
     this.actionMap_[method] = handler;
   }
 
@@ -468,10 +476,10 @@ export class BaseElement {
     if (invocation.method == 'activate') {
       this.activate(invocation);
     } else {
+      this.initActionMap_();
       const handler = this.actionMap_[invocation.method];
-      if (!handler) {
-        throw new Error(`Method not found: ${invocation.method}`);
-      }
+      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+          this);
       handler(invocation);
     }
   }
