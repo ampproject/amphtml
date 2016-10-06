@@ -658,8 +658,8 @@ function emptyService() {
  * @param {!Window} win
  */
 export function registerForUnitTest(win) {
-  let element;
   for (const key in elementsForTesting) {
+    let element = null;
     element = elementsForTesting[key];
     if (element.css) {
       installStyles(win.document, element.css, () => {
