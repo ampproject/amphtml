@@ -390,6 +390,14 @@ function checkTypes() {
         includePolyfills: true,
         checkTypes: true,
       });
+  // Type check 3p/ads code.
+  closureCompile(['./3p/integration.js'],  './dist',
+      'integration-check-types.js', {
+        externs: ['ads/ads.extern.js',],
+        includeBasicPolyfills: true,
+        include3pDirectories: true,
+        checkTypes: true,
+      });
 }
 
 /**
