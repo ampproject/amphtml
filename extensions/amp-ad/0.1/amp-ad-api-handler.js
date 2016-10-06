@@ -75,6 +75,7 @@ export class AmpAdApiHandler {
    * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
+   * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
   startUp(iframe, is3p, opt_defaultVisible) {
     dev().assert(
@@ -111,6 +112,10 @@ export class AmpAdApiHandler {
           if (data.type == 'render-start') {
             this.updateSize_(data.height, data.width,
                 info.source, info.origin);
+            if (this.baseInstance_.lifecyleReporter_) {
+              this.baseInstance_.lifecycleReporter_.sendPing(
+                  'renderCrossDomainStart');
+            }
             //report performance
           } else {
             this.noContent_();
