@@ -43,6 +43,9 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.scrollUnlisten_ = null;
+
+    /** @private {?boolean} */
+    this.adRenderStartImplemented_ = null;
   }
 
   /** @override */
@@ -61,6 +64,10 @@ class AmpStickyAd extends AMP.BaseElement {
         'amp-sticky-ad must have a single amp-ad child');
 
     this.ad_ = children[0];
+    const adType = this.element.getAttribute('type');
+    const config = adConfig[this.ad_.getAttribute('type')];
+    user().assert(config, `Type "${adType}" is not supported in amp-ad`);
+    this.adRenderStartImplemented_ = config.renderStartImplemented;
     this.setAsOwner(this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
@@ -132,7 +139,9 @@ class AmpStickyAd extends AMP.BaseElement {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
         this.visible_ = true;
-        this.element.classList.add('-amp-sticky-ad-visible');
+        if (!this.adRenderStartImplemented_) {
+          this.element.setAttribute('visible', '');
+        }
         this.viewport_.addToFixedLayer(this.element);
         this.updateInViewport(dev().assertElement(this.ad_), true);
         this.scheduleLayout(dev().assertElement(this.ad_));
@@ -191,6 +200,7 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   displayAfterAdLoad_() {
     this.vsync_.mutate(() => {
+      this.element.setAttribute('visible', '');
       this.element.classList.add('amp-sticky-ad-loaded');
     });
   }
