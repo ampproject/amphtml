@@ -248,3 +248,5 @@ If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/
 
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread. 
+- Run `gulp lint` and `gulp check-types`, then fix errors if any before sending out the PR.
+
