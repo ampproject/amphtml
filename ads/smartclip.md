@@ -19,20 +19,22 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=150
+<amp-ad width=400 height=225
       type="smartclip"
-      data-plc="9372"
-      data-sz="400x299"
+      data-plc="68005"
+      data-sz="400x320"
       >
 </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please contact [smartclip](http://www.smartclip.com/about-us/contact-us).
+For semantics of configuration, please contact [smartclip](adtech@smartclip.de).
 
 Supported parameters:
 
-- data-plc
-- data-sz
-- data-extra
+All parameters are mandatory, only "extra" is optional.
+
+- ```data-plc``` (String, non-empty)
+- ```data-sz``` (String, non-empty)
+- ```data-extra``` (String)
