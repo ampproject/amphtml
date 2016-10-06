@@ -61,6 +61,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
       'white-space': 'nowrap',
       'overflow-x': 'auto',
       'overflow-y': 'hidden',
+      'touch-action': 'pan-x',
       '-webkit-overflow-scrolling': 'touch',
     });
     this.element.appendChild(this.container_);
