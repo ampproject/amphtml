@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
+import {getServiceForDoc} from './service';
 import {startsWith} from './string';
 import {user} from './log';
 import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
 
-/** @const {string} */
-const PROP = '__AMP_SUBMIT';
-
-
 /**
- * @param {!Window} window
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installGlobalSubmitListener(window) {
-  if (!window[PROP]) {
-    window[PROP] = true;
-    window.document.documentElement.addEventListener(
+export function installGlobalSubmitListenerForDoc(ampdoc) {
+  return getServiceForDoc(ampdoc, 'submit', ampdoc => {
+    ampdoc.getRootNode().addEventListener(
         'submit', onDocumentFormSubmit_, true);
-  }
+    return {};
+  });
 }
 
 

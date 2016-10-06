@@ -43,7 +43,7 @@ import {
 } from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
-import {installGlobalSubmitListener} from './document-submit';
+import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
@@ -95,9 +95,6 @@ export function installRuntimeServices(global) {
   installVsyncService(global);
   installXhrService(global);
   installTemplatesService(global);
-  if (isExperimentOn(global, 'form-submit')) {
-    installGlobalSubmitListener(global);
-  }
 }
 
 
@@ -116,6 +113,9 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
   installVideoManagerForDoc(ampdoc);
+  if (isExperimentOn(ampdoc.win, 'form-submit')) {
+    installGlobalSubmitListenerForDoc(ampdoc);
+  }
 }
 
 
