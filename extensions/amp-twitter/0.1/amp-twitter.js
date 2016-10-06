@@ -18,9 +18,19 @@
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
 
 
 class AmpTwitter extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+  }
+
   /**
    * @param {boolean=} opt_onLayout
    * @override
@@ -57,7 +67,22 @@ class AmpTwitter extends AMP.BaseElement {
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 };
 
