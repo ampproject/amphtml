@@ -42,14 +42,20 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 // out whether a given ad request is in the overall experiment and, if so,
 // which branch it's on.
 
-/** const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} @private */
-const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
+// We would prefer the following constants to remain private, but we need to
+// refer to them directly in amp-ad-3p-impl.js and amp-a4a.js in order to check
+// whether we're in the experiment or not, for the purposes of enabling
+// debug traffic profiling.  Once we have debugged the a4a implementation and
+// can disable profiling again, we can return these constants to being
+// private to this file.
+/** const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
+export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152650',
   experiment: '117152651',
 };
 
-/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} @private */
-const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
+/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
+export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152670',
   experiment: '117152671',
 };
