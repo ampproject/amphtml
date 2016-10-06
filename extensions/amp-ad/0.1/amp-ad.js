@@ -18,6 +18,7 @@ import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev, user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
+import {userNotificationManagerFor} from '../../../src/user-notification';
 
 
 /**
@@ -37,31 +38,40 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
-    const type = this.element.getAttribute('type');
-    if (!type) {
-      // Unspecified or empty type.  Nothing to do here except bail out.
-      return null;
-    }
-    // TODO(tdrl): Check amp-ad registry to see if they have this already.
-    if (!a4aRegistry[type] ||
-        !a4aRegistry[type](this.win, this.element)) {
-      // Network either has not provided any A4A implementation or the
-      // implementation exists, but has explicitly chosen not to handle this
-      // tag as A4A.  Fall back to the 3p implementation.
-      return new AmpAd3PImpl(this.element);
-    }
-    const extensionTagName = networkImplementationTag(type);
-    this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-    return extensionsFor(this.win).loadElementClass(extensionTagName)
-      .then(ctor => new ctor(this.element))
-      .catch(error => {
-        // Report error and fallback to 3p
-        user().error(
-          this.element.tagName,
-          'Unable to load ad implementation for type ', type,
-          ', falling back to 3p, error: ', error);
+    // Block whole ad load if a consent is needed.
+    const consentId = this.element.getAttribute('data-consent-notification-id');
+    const consent = consentId
+        ? userNotificationManagerFor(this.win)
+            .then(service => service.get(consentId))
+        : Promise.resolve();
+
+    return consent.then(() => {
+      const type = this.element.getAttribute('type');
+      if (!type) {
+        // Unspecified or empty type.  Nothing to do here except bail out.
+        return null;
+      }
+      // TODO(tdrl): Check amp-ad registry to see if they have this already.
+      if (!a4aRegistry[type] ||
+          !a4aRegistry[type](this.win, this.element)) {
+        // Network either has not provided any A4A implementation or the
+        // implementation exists, but has explicitly chosen not to handle this
+        // tag as A4A.  Fall back to the 3p implementation.
         return new AmpAd3PImpl(this.element);
-      });
+      }
+      const extensionTagName = networkImplementationTag(type);
+      this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
+      return extensionsFor(this.win).loadElementClass(extensionTagName)
+        .then(ctor => new ctor(this.element))
+        .catch(error => {
+          // Report error and fallback to 3p
+          user().error(
+            this.element.tagName,
+            'Unable to load ad implementation for type ', type,
+            ', falling back to 3p, error: ', error);
+          return new AmpAd3PImpl(this.element);
+        });
+    });
   }
 
   /** @override */
