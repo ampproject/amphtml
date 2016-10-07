@@ -90,6 +90,9 @@ exports.rules = [
       'ads/google/a4a/**->src/timer.js',
       'ads/google/a4a/**->src/viewer.js',
       'ads/google/a4a/**->src/viewport.js',
+      // alp handler needs to depend on src files
+      'ads/alp/handler.js->src/dom.js',
+      'ads/alp/handler.js->src/config.js',
     ],
   },
   {

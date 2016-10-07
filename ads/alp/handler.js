@@ -52,9 +52,10 @@ export function installAlpClickHandler(win) {
  * Filter click event and then transform URL for direct AMP navigation
  * with impression logging.
  * @param {!Event} e
+ * @param {function(string)=} opt_viewerNavigate
  * @visibleForTesting
  */
-export function handleClick(e) {
+export function handleClick(e, opt_viewerNavigate) {
   if (e.defaultPrevented) {
     return;
   }
@@ -91,9 +92,15 @@ export function handleClick(e) {
     destination = destination.replace(`${urls.cdn}/c/`,
         'http://localhost:8000/max/');
   }
-
   e.preventDefault();
-  navigateTo(win, link.a, destination);
+  if (opt_viewerNavigate) {
+    // TODO: viewer navigate only support navigating top level window to
+    // destination. should we try to open a new window here with target=_blank
+    // here instead of using viewer navigation.
+    opt_viewerNavigate(destination);
+  } else {
+    navigateTo(win, link.a, destination);
+  }
 }
 
 /**

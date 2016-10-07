@@ -189,6 +189,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4820',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
   },
+  {
+    id: 'alp-for-a4a',
+    name: 'Enable redirect to landing page directly for A4A',
+    spec: 'https://github.com/ampproject/amphtml/issues/5212',
+  },
 ];
 
 if (getMode().localDev) {
