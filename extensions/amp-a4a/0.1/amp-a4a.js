@@ -39,6 +39,8 @@ import {
   verifySignature,
   PublicKeyInfoDef,
 } from './crypto-verifier';
+import {isExperimentOn} from '../../../src/experiments';
+import {handleClick} from '../../../ads/alp/handler';
 
 /**
  * Dev public key set. This will go away once the dev signing service goes live.
@@ -665,7 +667,8 @@ export class AmpA4A extends AMP.BaseElement {
               html: modifiedCreative,
               extensionIds: creativeMetaData.customElementExtensions || [],
               fonts: fontsArray,
-            }).then(() => {
+            }).then(friendlyIframeEmbed => {
+              this.registerAlpHandler_(friendlyIframeEmbed.win);
               this.rendered_ = true;
               this.onAmpCreativeRender();
               return true;
@@ -831,4 +834,15 @@ export class AmpA4A extends AMP.BaseElement {
        metaData.cssUtf16CharOffsets[0],
        metaData.cssUtf16CharOffsets[1]);
  }
+
+  registerAlpHandler_(iframeWin) {
+    if (!isExperimentOn(this.win, 'alp-for-a4a')) {
+      return;
+    }
+    iframeWin.document.documentElement.addEventListener('click', event => {
+      handleClick(event, url => {
+        viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
+      });
+    });
+  }
 }
