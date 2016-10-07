@@ -124,7 +124,6 @@
 }
 
 .-amp-lbv-gallery-thumbnail {
-  object-fit: contain;
   width: calc(100vw/3);
   height: calc(100vw/3);
   padding: 5px;
@@ -133,6 +132,7 @@
 }
 
 .-amp-lbv-gallery-thumbnail-img {
+  object-fit: cover;
   width: 100%;
   height: 100%;
 }
