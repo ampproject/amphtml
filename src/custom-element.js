@@ -1555,7 +1555,7 @@ function getVsync(element) {
 
 /**
  * Whether the implementation is a stub.
- * @param {!Object} impl
+ * @param {?./base-element.BaseElement} impl
  * @return {boolean}
  */
 function isStub(impl) {
