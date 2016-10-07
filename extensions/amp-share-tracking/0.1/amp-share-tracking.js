@@ -165,6 +165,8 @@ export class AmpShareTracking extends AMP.BaseElement {
 
 
 // Install the extension.
+// DO NOT SUBMIT: First, we must implement compiler rewrite path to unwrap
+// this code.
 AMP.extension('amp-share-tracking', () => {
   AMP.registerElement('amp-share-tracking', AmpShareTracking);
 });
