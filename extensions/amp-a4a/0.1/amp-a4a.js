@@ -894,8 +894,6 @@ export class AmpA4A extends AMP.BaseElement {
         return e.pageY;
       },
     };
-    top.BOO = this;
-    console.log('BOO', this);
     const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
         hrefToExpand, vars, undefined, /* opt_whitelist */ {
           // For now we only allow to replace the click location vars
