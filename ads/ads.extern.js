@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+// HACK. Define application types used in default AMP externs
+// that are not in the 3p code.
+/** @constructor */
+function BaseElement$$module$src$base_element() {};
+/** @constructor */
+function AmpAdApiHandler$$module$extensions$amp_ad$0_1$amp_ad_api_handler() {};
+
 // Long list of, uhm, stuff the ads code needs to compile.
 // All unquoted external properties need to be added here.
 data.cid;
@@ -166,3 +173,11 @@ data.id;
 data.d;
 data.wid;
 data.url;
+data.customtarget;
+data.dynclickthrough;
+data.viewtracking;
+data.customcss;
+data.enablemraid;
+data.jsplayer;
+var sas;
+sas.callAmpAd;
