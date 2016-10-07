@@ -65,6 +65,12 @@ Visibility of arrows can also be controlled via styling, and a media query can b
 only display arrows at certain screen widths. On desktop, arrows will always be displayed
 unless only a single child is present.
 
+Usage example:
+
+```html
+<amp-carousel width="100" height="100" controls layout="responsive" type="slides">
+```
+
 **type**
 - `carousel` (default) - All slides are shown and are scrollable horizontally.
   Be aware that `type=carousel` does not currently support `layout=responsive`.
