@@ -375,6 +375,13 @@ function createCustomElementClass(win, name) {
   const baseCustomElement = createBaseCustomElementClass(win);
   /** @extends {HTMLElement} */
   class CustomAmpElement extends baseCustomElement {
+    /**
+     * @see https://github.com/WebReflection/document-register-element#v1-caveat
+     */
+    constructor(self) {
+      self = super(self);
+      return self;
+    }
     elementName() {
       return name;
     }
@@ -396,8 +403,6 @@ function createBaseCustomElementClass(win) {
   /** @abstract @extends {HTMLElement} */
   class BaseCustomElement extends htmlElement {
     /**
-     * Constructor uses atypical pattern as part of a workaround for ES6
-     * transpilation issue when extending HTMLElement.
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      * @suppress {checkTypes}
      */
