@@ -166,6 +166,21 @@ function adoptShared(global, opts, callback) {
     win: global,
   };
 
+  // `AMP.extension()` function is only installed in a non-minified mode.
+  // This function is meant to play the same role for development and testing
+  // as `AMP.push()` in production.
+  if (!getMode().minified) {
+    /**
+     * @param {string} name
+     * @param {function()} installer
+     * @const
+     */
+    global.AMP.extension = function(name, installer) {
+      installer.call(null);
+    };
+  }
+
+  /** @const */
   global.AMP.config = config;
 
   global.AMP.BaseElement = BaseElement;
