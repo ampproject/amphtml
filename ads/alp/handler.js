@@ -24,6 +24,7 @@ import {urls} from '../../src/config';
 
 /**
  * Origins that are trusted to serve valid AMP documents.
+ * @const {Object}
  */
 const ampOrigins = {
   [urls.cdn]: true,

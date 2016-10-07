@@ -73,6 +73,7 @@ export function incrementLoadingAds(win) {
     win[LOADING_ADS_WIN_ID_] = loadingAds;
   }
 
+  /** @const {number|string} */
   const timerId = timerFor(win).delay(() => {
     // Unfortunately we don't really have a good way to measure how long it
     // takes to load an ad, so we'll just pretend it takes 1 second for

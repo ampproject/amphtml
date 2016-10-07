@@ -202,6 +202,7 @@ export function onDocumentElementClick_(
     return;
   }
 
+  /** @const {!Window} */
   const win = ampdoc.win;
   const tgtLoc = parseUrl(target.href);
 
@@ -228,6 +229,7 @@ export function onDocumentElementClick_(
     return;
   }
 
+  /** @const {!Location} */
   const curLoc = parseUrl(win.location.href);
   const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
   const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;

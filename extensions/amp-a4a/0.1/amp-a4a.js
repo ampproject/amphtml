@@ -693,6 +693,7 @@ export class AmpA4A extends AMP.BaseElement {
   renderViaCrossDomainIframe_(opt_isNonAmpCreative) {
     user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
     this.lifecycleReporter_.sendPing('renderCrossDomainStart');
+    /** @const {!Element} */
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));

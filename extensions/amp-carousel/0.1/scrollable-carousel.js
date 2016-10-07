@@ -109,6 +109,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
       this.commitSwitch_(newPos);
       this.container_./*OK*/scrollLeft = newPos;
     } else {
+      /** @const {!TransitionDef<number>} */
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
@@ -170,6 +171,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   /**
    * @param {number} pos
    * @param {number} dir
+   * @return {number}
    * @private
    */
   nextPos_(pos, dir) {
