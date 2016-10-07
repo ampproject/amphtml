@@ -89,7 +89,7 @@ export function handleClick(e, opt_viewerNavigate) {
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
     destination = destination.replace(`${urls.cdn}/c/`,
-       'http://localhost:8000/max/');
+        'http://localhost:8000/max/');
   }
   e.preventDefault();
   if (opt_viewerNavigate) {
