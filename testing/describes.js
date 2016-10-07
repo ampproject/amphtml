@@ -36,6 +36,15 @@ let iframeCount = 0;
 
 
 /**
+ * @typedef {{
+ *   fakeClock: (boolean|undefined),
+ *   fakeRegisterElement: (boolean|undefined),
+ * }}
+ */
+export let TestSpec;
+
+
+/**
  * - ampdoc: "single", "shadow", "multi", "none".
  *
  * @typedef {{
@@ -48,78 +57,46 @@ export let AmpTestSpec;
 
 
 /**
+ * @typedef {{
+ *   win: !Window,
+ *   extensions: !Extensions,
+ *   ampdocService: !AmpDocService,
+ *   ampdoc: (!AmpDoc|undefined),
+ *   flushVsync: function(),
+ * }}
+ */
+export let AmpTestEnv;
+
+
+/**
  * A test with a sandbox.
  * @param {string} name
- * @param {{
- *   fakeClock: (boolean|undefined),
- * }} spec
- * @param {function({
- *   sandbox: !Sandbox,
- *   clock: (!FakeClock|undefined),
- * })} fn
+ * @param {!TestSpec} spec
+ * @param {function()} fn
  */
 export function sandboxed(name, spec, fn) {
-  return describe(name, function() {
-
-    const env = Object.create(null);
-
-    beforeEach(() => {
-      global.sandbox = env.sandbox = sinon.sandbox.create();
-      if (spec.fakeClock) {
-        global.clock = env.clock = env.sandbox.useFakeTimers();
-      }
-    });
-
-    afterEach(() => {
-      env.sandbox.restore();
-      delete env.sandbox;
-      delete global.sandbox;
-      if (env.clock) {
-        delete env.clock;
-        delete global.clock;
-      }
-    });
-
-    describe(SUB, function() {
-      fn.call(this, env);
-    });
-  });
+  return describeEnv(name, fn, [new SandboxFixture(spec)]);
 }
 
 
 /**
  * A test with a fake window.
  * @param {string} name
- * @param {{win: !FakeWindowSpec}} spec
+ * @param {{
+ *   win: !FakeWindowSpec,
+ *   amp: (!AmpTestSpec|undefined),
+ * }} spec
  * @param {function({
  *   win: !FakeWindow,
- *   amp: (!AmpTestSpec|undefined),
+ *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
 export function fakeWin(name, spec, fn) {
-  return describe(name, function() {
-
-    const env = Object.create(null);
-
-    beforeEach(() => {
-      env.win = new FakeWindow(spec);
-      if (spec.amp) {
-        ampSetup(env, spec.amp);
-      }
-    });
-
-    afterEach(() => {
-      if (spec.amp) {
-        ampDestroy(env);
-      }
-      // TODO(dvoytenko): test that window is returned in a good condition.
-      delete env.win;
-    });
-
-    describe(SUB, function() {
-      fn.call(this, env);
-    });
-  });
+  return describeEnv(name, fn, [
+      new SandboxFixture(spec),
+      new FakeWinFixture(spec),
+      new AmpFixture(spec),
+    ]);
 }
 
 
@@ -131,56 +108,63 @@ export function fakeWin(name, spec, fn) {
  *   amp: (!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
- *   sandbox: !Sandbox,
- *   clock: (!FakeClock|undefined),
+ *   win: !Window,
+ *   iframe: !HTMLIFrameElement,
+ *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
 export function realWin(name, spec, fn) {
+  return describeEnv(name, fn, [
+      new SandboxFixture(spec),
+      new RealWinFixture(spec),
+      new AmpFixture(spec),
+    ]);
+}
+
+
+/**
+ * A test with in a described environment.
+ * @param {string} name
+ * @param {function(!Object)} fn
+ * @param {!Array<?Fixture>} fixtures
+ */
+function describeEnv(name, fn, fixtures) {
   return describe(name, function() {
 
     const env = Object.create(null);
 
     beforeEach(() => {
-      return new Promise(function(resolve, reject) {
-        const iframe = document.createElement('iframe');
-        iframe.name = 'test_' + iframeCount++;
-        iframe.srcdoc = '<!doctype><html><head>' +
-            '<style>.-amp-element {display: block;}</style>' +
-            '<body style="margin:0"><div id=parent></div>';
-        iframe.onload = function() {
-          const win = iframe.contentWindow;
-          env.iframe = iframe;
-          env.win = win;
-
-          // Flag as being a test window.
-          win.AMP_TEST_IFRAME = true;
-
-          doNotLoadExternalResourcesInTest(win);
-
-          if (spec.fakeRegisterElement) {
-            win.customElements = new FakeCustomElements(win);
+      let totalPromise = undefined;
+      // Set up all fixtures.
+      fixtures.forEach((fixture, index) => {
+        if (!fixture || !fixture.isOn()) {
+          return;
+        }
+        if (totalPromise) {
+          totalPromise = totalPromise.then(() => fixture.setup(env));
+        } else {
+          const res = fixture.setup(env);
+          if (res && typeof res.then == 'function') {
+            totalPromise = res;
           }
-
-          if (spec.amp) {
-            ampSetup(env, spec.amp);
-          }
-          resolve();
-        };
-        iframe.onerror = reject;
-        document.body.appendChild(iframe);
+        }
       });
+      return totalPromise;
     });
 
     afterEach(() => {
-      if (spec.amp) {
-        ampDestroy(env);
+      // Tear down all fixtures.
+      fixtures.forEach(fixture => {
+        if (!fixture || !fixture.isOn()) {
+          return;
+        }
+        fixture.teardown(env);
+      });
+
+      // Delete all other keys.
+      for (const key in env) {
+        delete env[key];
       }
-      // TODO(dvoytenko): test that window is returned in a good condition.
-      if (env.iframe.parentNode) {
-        env.iframe.parentNode.removeChild(env.iframe);
-      }
-      delete env.iframe;
-      delete env.win;
     });
 
     describe(SUB, function() {
@@ -190,46 +174,214 @@ export function realWin(name, spec, fn) {
 }
 
 
-/**
- * @param {!Object} env
- * @param {!AmpTestSpec} spec
- */
-function ampSetup(env, spec) {
-  env.win.ampExtendedElements = {};
-  if (!spec.runtimeOn) {
-    env.win.name = '__AMP__off=1';
+/** @interface */
+class Fixture {
+
+  /** @return {boolean} */
+  isOn() {}
+
+  /**
+   * @param {!Object} env
+   * @return {!Promise|undefined}
+   */
+  setup(env) {}
+
+  /**
+   * @param {!Object} env
+   */
+  teardown(env) {}
+}
+
+
+/** @implements {Fixture} */
+class SandboxFixture {
+
+  /** @param {!TestSpec} spec */
+  constructor(spec) {
+    /** @const */
+    this.spec = spec;
+
+    /** @private {boolean} */
+    this.sandboxOwner_ = false;
+
+    /** @private {boolean} */
+    this.clockOwner_ = false;
   }
-  const ampdocType = spec.ampdoc || 'single';
-  const singleDoc = ampdocType == 'single';
-  const ampdocService = installDocService(env.win, singleDoc);
-  env.ampdocService = ampdocService;
-  env.extensions = installExtensionsService(env.win);
-  installRuntimeServices(env.win);
-  env.flushVsync = function() {
-    env.win.services.vsync.obj.runScheduledTasks_();
-  };
-  if (singleDoc) {
-    const ampdoc = ampdocService.getAmpDoc(env.win.document);
-    env.ampdoc = ampdoc;
-    installAmpdocServices(ampdoc, spec.params);
-    adopt(env.win);
+
+  /** @override */
+  isOn() {
+    return true;
+  }
+
+  /** @override */
+  setup(env) {
+    const spec = this.spec;
+
+    // Sandbox.
+    let sandbox = global.sandbox;
+    if (!sandbox) {
+      sandbox = global.sandbox = sinon.sandbox.create();
+      this.sandboxOwner_ = true;
+    }
+    env.sandbox = sandbox;
+
+    // Clock.
+    if (spec.fakeClock) {
+      let clock = global.clock;
+      if (!clock) {
+        clock = global.clock = sandbox.useFakeTimers();
+        this.clockOwner_ = true;
+      }
+      env.clock = clock;
+    }
+  }
+
+  /** @override */
+  teardown(env) {
+    // Sandbox.
+    if (this.sandboxOwner_) {
+      env.sandbox.restore();
+      delete global.sandbox;
+      this.sandboxOwner_ = false;
+    }
+
+    // Clock.
+    if (this.clockOwner_) {
+      delete global.clock;
+      this.clockOwner_ = false;
+    }
   }
 }
 
 
-/**
- * @param {!Object} env
- */
-function ampDestroy(env) {
-  if (env.win.customElements && env.win.customElements.elements) {
-    for (const k in env.win.customElements.elements) {
-      resetScheduledElementForTesting(env.win, k);
+/** @implements {Fixture} */
+class FakeWinFixture {
+
+  /** @param {!{win: !FakeWindowSpec}} spec */
+  constructor(spec) {
+    /** @const */
+    this.spec = spec;
+  }
+
+  /** @override */
+  isOn() {
+    return true;
+  }
+
+  /** @override */
+  setup(env) {
+    env.win = new FakeWindow(this.spec.win || {});
+  }
+
+  /** @override */
+  teardown(env) {
+  }
+}
+
+
+/** @implements {Fixture} */
+class RealWinFixture {
+
+  /** @param {!{fakeRegisterElement: boolean}} spec */
+  constructor(spec) {
+    /** @const */
+    this.spec = spec;
+  }
+
+  /** @override */
+  isOn() {
+    return true;
+  }
+
+  /** @override */
+  setup(env) {
+    const spec = this.spec;
+    return new Promise(function(resolve, reject) {
+      const iframe = document.createElement('iframe');
+      env.iframe = iframe;
+      iframe.name = 'test_' + iframeCount++;
+      iframe.srcdoc = '<!doctype><html><head>' +
+          '<style>.-amp-element {display: block;}</style>' +
+          '<body style="margin:0"><div id=parent></div>';
+      iframe.onload = function() {
+        const win = iframe.contentWindow;
+        env.win = win;
+
+        // Flag as being a test window.
+        win.AMP_TEST_IFRAME = true;
+
+        doNotLoadExternalResourcesInTest(win);
+
+        if (spec.fakeRegisterElement) {
+          win.customElements = new FakeCustomElements(win);
+        }
+
+        resolve();
+      };
+      iframe.onerror = reject;
+      document.body.appendChild(iframe);
+    });
+  }
+
+  /** @override */
+  teardown(env) {
+    // TODO(dvoytenko): test that window is returned in a good condition.
+    if (env.iframe.parentNode) {
+      env.iframe.parentNode.removeChild(env.iframe);
     }
   }
-  delete env.flushVsync;
-  delete env.ampdocService;
-  delete env.extensions;
-  if (env.ampdoc) {
-    delete env.ampdoc;
+}
+
+
+/** @implements {Fixture} */
+class AmpFixture {
+
+  /**
+   * @param {!{amp: (boolean|!AmpTestSpec)}} spec
+   */
+  constructor(spec) {
+    /** @const */
+    this.spec = spec;
+  }
+
+  /** @override */
+  isOn() {
+    return !!this.spec.amp;
+  }
+
+  /** @override */
+  setup(env) {
+    const spec = this.spec.amp;
+    const win = env.win;
+
+    win.ampExtendedElements = {};
+    if (!spec.runtimeOn) {
+      win.name = '__AMP__off=1';
+    }
+    const ampdocType = spec.ampdoc || 'single';
+    const singleDoc = ampdocType == 'single';
+    const ampdocService = installDocService(win, singleDoc);
+    env.ampdocService  = ampdocService;
+    env.extensions = installExtensionsService(win);
+    installRuntimeServices(win);
+    env.flushVsync = function() {
+      win.services.vsync.obj.runScheduledTasks_();
+    };
+    if (singleDoc) {
+      const ampdoc = ampdocService.getAmpDoc(win.document);
+      env.ampdoc = ampdoc;
+      installAmpdocServices(ampdoc, spec.params);
+      adopt(win);
+    }
+  }
+
+  /** @override */
+  teardown(env) {
+    const win = env.win;
+    if (win.customElements && win.customElements.elements) {
+      for (const k in win.customElements.elements) {
+        resetScheduledElementForTesting(win, k);
+      }
+    }
   }
 }
