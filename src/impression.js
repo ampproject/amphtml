@@ -30,6 +30,7 @@ export function maybeTrackImpression(win) {
     return;
   }
   const viewer = viewerForDoc(win.document);
+  /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
   if (!clickUrl) {
     return;

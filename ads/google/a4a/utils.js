@@ -71,6 +71,7 @@ export function isGoogleAdsA4AValidEnvironment(win, element) {
  */
 export function googleAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams) {
+  /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
       buildAdUrl(

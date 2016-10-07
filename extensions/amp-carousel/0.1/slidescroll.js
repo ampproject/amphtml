@@ -522,6 +522,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (fromScrollLeft == toScrollLeft) {
       return Promise.resolve();
     }
+    /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
     const duration = 80;

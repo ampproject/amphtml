@@ -36,7 +36,7 @@ export class Animation {
    * object that can be used to monitor or control animation.
    *
    * @param {!Node} contextNode The context node.
-   * @param {!./transition.TransitionDef<?>} transition Transition to animate.
+   * @param {!TransitionDef<?>} transition Transition to animate.
    * @param {./time.timeDef} duration Duration in milliseconds.
    * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for animation.
    *   Default is the linear animation.
@@ -92,7 +92,7 @@ export class Animation {
    * animated over the specified duration from 0 to 1.
    *
    * @param {./time.normtimeDef} delay
-   * @param {!./transition.TransitionDef<?>} transition
+   * @param {!TransitionDef<?>} transition
    * @param {./time.normtimeDef} duration
    * @param {(!./curve.CurveDef|string)=} opt_curve
    * @return {!Animation}
@@ -375,7 +375,7 @@ class AnimationPlayer {
 /**
  * @typedef {{
  *   delay: ./time.normtimeDef,
- *   func: !./transition.TransitionDef,
+ *   func: !TransitionDef,
  *   duration: ./time.normtimeDef,
  *   curve: ?./curve.CurveDef
  * }}
@@ -386,7 +386,7 @@ let SegmentDef;
 /**
  * @typedef {{
  *   delay: ./time.normtimeDef,
- *   func: !./transition.TransitionDef,
+ *   func: !TransitionDef,
  *   duration: ./time.normtimeDef,
  *   curve: ?./curve.CurveDef,
  *   started: boolean,

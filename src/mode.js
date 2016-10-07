@@ -29,7 +29,7 @@
  */
 export let ModeDef;
 
-/** @typedef {string} */
+/** @type {string} */
 const version = '$internalRuntimeVersion$';
 
 /**

@@ -97,6 +97,7 @@ export class Transport {
     if (!win.XMLHttpRequest) {
       return false;
     }
+    /** @const {XMLHttpRequest} */
     const xhr = new win.XMLHttpRequest();
     if (!('withCredentials' in xhr)) {
       return false; // Looks like XHR level 1 - CORS is not supported.
@@ -128,6 +129,7 @@ export class Transport {
  */
 export function sendRequestUsingIframe(win, request) {
   assertHttpsUrl(request, 'amp-analytics request');
+  /** @const {!Element} */
   const iframe = win.document.createElement('iframe');
   iframe.style.display = 'none';
   iframe.onload = iframe.onerror = () => {

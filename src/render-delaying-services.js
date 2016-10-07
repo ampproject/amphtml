@@ -62,6 +62,7 @@ export function waitForServices(win) {
  * @private
  */
 function includedServices(win) {
+  /** @const {!Document} */
   const doc = win.document;
   dev().assert(doc.body);
 

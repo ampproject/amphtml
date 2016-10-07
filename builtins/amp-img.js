@@ -59,7 +59,6 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
-    /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.

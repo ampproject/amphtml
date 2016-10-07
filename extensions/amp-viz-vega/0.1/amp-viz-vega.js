@@ -129,7 +129,6 @@ export class AmpVizVega extends AMP.BaseElement {
    * Called lazily in the first `#layoutCallback`.
    */
   initialize_() {
-    /** @private {?Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
 
     this.applyFillContent(this.container_, true);

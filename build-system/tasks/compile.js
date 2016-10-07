@@ -277,6 +277,13 @@ function compile(entryModuleFilenames, outputDir,
         compilerOptions.compilerFlags.new_type_inf = true;
         compilerOptions.compilerFlags.jscomp_off.push(
           'newCheckTypesExtraChecks');
+        compilerOptions.compilerFlags.externs.push(
+          'build-system/amp.nti.extern.js'
+        );
+      } else {
+        compilerOptions.compilerFlags.externs.push(
+          'build-system/amp.oti.extern.js'
+        );
       }
     }
     if (argv.pseudo_names) {

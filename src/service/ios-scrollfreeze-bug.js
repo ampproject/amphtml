@@ -38,9 +38,13 @@ import {vsyncFor} from '../vsync';
  * @package
  */
 export function checkAndFix(ampdoc, opt_platform, opt_viewer, opt_vsync) {
+  /** @const {!Window} */
   const win = ampdoc.win;
+  /** @const {!./platform-impl.Platform} */
   const platform = opt_platform || platformFor(win);
+  /** @const {!./viewer-impl.Viewer} */
   const viewer = opt_viewer || viewerForDoc(ampdoc);
+  /** @const {!./vsync-impl.Vsync} */
   const vsync = opt_vsync || vsyncFor(win);
   if (!platform.isIos() || !platform.isSafari() ||
           platform.getMajorVersion() > 8 ||

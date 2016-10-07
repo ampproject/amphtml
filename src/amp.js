@@ -46,9 +46,11 @@ try {
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
+  /** @const {!./service/ampdoc-impl.AmpDocService} */
   const ampdocService = installDocService(self, /* isSingleDoc */ true);
+  /** @const {!./service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
-
+  /** @const {!./service/performance-impl.Performance} */
   const perf = installPerformanceService(self);
   perf.tick('is');
   installStyles(self.document, cssText, () => {
