@@ -50,6 +50,10 @@ export function criteo(global, data) {
   });
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function setTargeting(global, data) {
   if (data.adserver === 'DFP') {
     const dblParams = {'slot': data.slot,
