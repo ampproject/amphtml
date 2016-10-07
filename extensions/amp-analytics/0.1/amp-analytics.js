@@ -154,7 +154,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
-        const trigger = this.config_['triggers'][k];
+        let trigger = null;
+        trigger = this.config_['triggers'][k];
         if (!trigger) {
           user().error(this.getName_(), 'Trigger should be an object: ', k);
           continue;
@@ -245,6 +246,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
+    /** @const {!Window} */
     const win = this.win;
     return urlReplacementsForDoc(win.document).expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
@@ -433,6 +435,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   isSampledIn_(trigger) {
+    /** @const {!JSONType} */
     const spec = trigger['sampleSpec'];
     const resolve = Promise.resolve(true);
     if (!spec) {

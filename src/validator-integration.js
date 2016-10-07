@@ -32,6 +32,7 @@ export function maybeValidate(win) {
     return;
   }
 
+  /** @const {!Element} */
   const s = win.document.createElement('script');
   // TODO(@cramforce): Introduce a switch to locally built version for local
   // development.

@@ -98,6 +98,7 @@ export class UrlReplacements {
   initialize_() {
     this.initialized_ = true;
 
+    /** @const {!./viewport-impl.Viewport} */
     const viewport = viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.
@@ -653,6 +654,7 @@ export class UrlReplacements {
           user().error(TAG, 'ignoring promise value for key: ', name);
           return '';
         }
+        /** @const {Promise<string>} */
         const p = val.catch(err => {
           // Report error, but do not disrupt URL replacement. This will
           // interpolate as the empty string.

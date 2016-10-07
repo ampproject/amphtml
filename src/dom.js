@@ -41,8 +41,10 @@ export function waitForChild(parent, checkFunc, callback) {
     callback();
     return;
   }
+  /** @const {!Window} */
   const win = parent.ownerDocument.defaultView;
   if (win.MutationObserver) {
+    /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -51,6 +53,7 @@ export function waitForChild(parent, checkFunc, callback) {
     });
     observer.observe(parent, {childList: true});
   } else {
+    /** @const {number} */
     const interval = win.setInterval(() => {
       if (checkFunc(parent)) {
         win.clearInterval(interval);

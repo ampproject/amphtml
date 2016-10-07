@@ -166,6 +166,7 @@ export class ActionService {
     user().assert(target.id && target.id.substring(0, 4) == 'amp-',
         'AMP element is expected: %s', debugid);
 
+    /** @const {!Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
     if (currentQueue) {
       dev().assert(

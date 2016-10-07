@@ -66,6 +66,7 @@ export class AmpFresh extends AMP.BaseElement {
     // Never reparent the surrogate to the current document's subtree
     // as this will trigger custom element life cycles,
     // importing it shouldn't trigger.
+    /** @const {!Element} */
     const orphanSurrogate = dev().assertElement(
       this.win.document.adoptNode(surrogateAmpFresh));
     this.mutateElement(() => {

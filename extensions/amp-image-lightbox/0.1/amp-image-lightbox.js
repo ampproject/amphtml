@@ -598,8 +598,11 @@ export class ImageViewer {
 
     let promise;
     if (dur > 16 && animate) {
+      /** @const {!TransitionDef<number>} */
       const scaleFunc = tr.numeric(this.scale_, newScale);
+      /** @const {!TransitionDef<number>} */
       const xFunc = tr.numeric(this.posX_, newPosX);
+      /** @const {!TransitionDef<number>} */
       const yFunc = tr.numeric(this.posY_, newPosY);
       promise = Animation.animate(this.image_, time => {
         this.scale_ = scaleFunc(time);
@@ -973,6 +976,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       // Move the image back to where it is in the article.
       const dx = rect.left - newLeft;
       const dy = rect.top - newTop;
+      /** @const {!TransitionDef<void>} */
       const move = tr.setStyles(clone, {
         transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
       });

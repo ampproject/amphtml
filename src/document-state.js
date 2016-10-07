@@ -46,7 +46,7 @@ export class DocumentState {
       this.visibilityStateProp_ = null;
     }
 
-    /** @private @const */
+    /** @private @const {!Observable} */
     this.visibilityObservable_ = new Observable();
 
     /** @private {string|null} */

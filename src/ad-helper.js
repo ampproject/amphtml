@@ -49,7 +49,6 @@ function isPositionFixed(el, win) {
 export function isAdPositionAllowed(element, win) {
   let hasFixedAncestor = false;
   let containers = 0;
-  /** @typedef {?Element}  */
   let el = element;
   do {
     if (CONTAINERS[el.tagName]) {
@@ -75,7 +74,6 @@ export function isAdPositionAllowed(element, win) {
  * @return {?string}
  */
 export function getAdContainer(element) {
-  /** @typedef {?Element}  */
   let el = element;
   do {
     el = el.parentElement;

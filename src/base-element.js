@@ -115,7 +115,7 @@ import {user} from './log';
 export class BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-    /** @public @const */
+    /** @public @const {!Element} */
     this.element = element;
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
@@ -139,7 +139,7 @@ export class BaseElement {
     /** @package {boolean} */
     this.inViewport_ = false;
 
-    /** @public @const {!Window}  */
+    /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
     /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
@@ -528,9 +528,8 @@ export class BaseElement {
   forwardEvents(events, element) {
     events = isArray(events) ? events : [events];
     for (let i = 0; i < events.length; i++) {
-      const name = events[i];
-      element.addEventListener(name, event => {
-        this.element.dispatchCustomEvent(name, event.data || {});
+      element.addEventListener(events[i], event => {
+        this.element.dispatchCustomEvent(events[i], event.data || {});
       });
     }
   }

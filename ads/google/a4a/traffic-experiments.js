@@ -29,9 +29,6 @@ import {getMode} from '../../../src/mode';
 import {viewerForDoc} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
 
-/** @typedef {{string: {branches: !Branches}}} */
-export let Branches;
-
 /** @typedef {{control: string, experiment: string}} */
 export let ExperimentInfo;
 

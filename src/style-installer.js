@@ -128,6 +128,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       }
     }
   };
+  /** @const {!Window} */
   const win = doc.defaultView;
   documentStateFor(win).onBodyAvailable(() => {
     if (win[bodyVisibleSentinel]) {

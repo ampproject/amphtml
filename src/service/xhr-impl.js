@@ -408,6 +408,7 @@ function isRetriable(status) {
 export function assertSuccess(response) {
   return new Promise((resolve, reject) => {
     if (response.status < 200 || response.status >= 300) {
+      /** @const {!Error} */
       const err = user().createError(`HTTP error ${response.status}`);
       if (isRetriable(response.status)) {
         err.retriable = true;

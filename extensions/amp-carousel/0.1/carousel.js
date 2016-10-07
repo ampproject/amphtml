@@ -100,6 +100,7 @@ export class AmpCarousel extends BaseCarousel {
   /** @override */
   goCallback(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
+    /** @const {!Element} */
     const container = dev().assertElement(this.container_);
     if (newPos != this.pos_) {
       const oldPos = this.pos_;
@@ -123,6 +124,7 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(oldPos, newPos) {
+    /** @const {!Element} */
     const container = dev().assertElement(this.container_);
     st.setStyles(container, {
       transform: st.translateX(-newPos),
@@ -136,6 +138,7 @@ export class AmpCarousel extends BaseCarousel {
   /**
    * @param {number} pos
    * @param {number} dir
+   * @return {number}
    * @private
    */
   nextPos_(pos, dir) {
@@ -249,6 +252,7 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   onSwipe_(swipe) {
+     /** @const {!Element} */
     const container = dev().assertElement(this.container_);
     this.pos_ = this.boundPos_(this.startPos_ - swipe.deltaX, true);
     st.setStyles(container, {
@@ -266,6 +270,7 @@ export class AmpCarousel extends BaseCarousel {
    */
   onSwipeEnd_(swipe) {
     let promise;
+    /** @const {!Element} */
     const container = dev().assertElement(this.container_);
     if (Math.abs(swipe.velocityX) > 0.1) {
       this.motion_ = continueMotion(this.element,
@@ -292,6 +297,7 @@ export class AmpCarousel extends BaseCarousel {
       if (Math.abs(newPos - this.pos_) < 1) {
         return undefined;
       }
+      /** @const {!TransitionDef<number>} */
       const posFunc = tr.numeric(this.pos_, newPos);
       return Animation.animate(this.element, time => {
         this.pos_ = posFunc(time);

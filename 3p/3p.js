@@ -87,6 +87,7 @@ export function writeScript(win, url, opt_cb) {
  * @param {function()=} opt_errorCb
  */
 export function loadScript(win, url, opt_cb, opt_errorCb) {
+  /** @const {!Element} */
   const s = win.document.createElement('script');
   s.src = url;
   if (opt_cb) {

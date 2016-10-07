@@ -128,7 +128,7 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = task => this.calcTaskScore_(task);
 
    /**
@@ -817,6 +817,7 @@ export class Resources {
       const scrollAdjSet = [];
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
+        /** @const {!Resource} */
         const resource = request.resource;
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
@@ -1189,6 +1190,7 @@ export class Resources {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
+   * @return {number}
    * @private
    */
   calcTaskScore_(task) {
