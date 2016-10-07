@@ -379,8 +379,7 @@ function createCustomElementClass(win, name) {
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
      */
     constructor(self) {
-      self = super(self);
-      return self;
+      return super(self);
     }
     elementName() {
       return name;
