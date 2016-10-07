@@ -20,7 +20,6 @@ import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
-import {adConfig} from '../../../ads/_config';
 import {listenOnce} from '../../../src/event-helper';
 
 
@@ -43,9 +42,6 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.scrollUnlisten_ = null;
-
-    /** @private {?boolean} */
-    this.adRenderStartImplemented_ = null;
   }
 
   /** @override */
@@ -64,10 +60,6 @@ class AmpStickyAd extends AMP.BaseElement {
         'amp-sticky-ad must have a single amp-ad child');
 
     this.ad_ = children[0];
-    const adType = this.ad_.getAttribute('type');
-    const config = adConfig[adType];
-    user().assert(config, `Type "${adType}" is not supported in amp-ad`);
-    this.adRenderStartImplemented_ = config.renderStartImplemented;
     this.setAsOwner(this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
@@ -139,7 +131,7 @@ class AmpStickyAd extends AMP.BaseElement {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
         this.visible_ = true;
-        if (!this.adRenderStartImplemented_) {
+        if (!this.ad_.hasAttribute('render-start-impl')) {
           this.element.setAttribute('visible', '');
         }
         this.viewport_.addToFixedLayer(this.element);
@@ -181,8 +173,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.updateInViewport(dev().assertElement(this.ad_), true);
     this.scheduleLayout(dev().assertElement(this.ad_));
     listenOnce(this.ad_, 'amp:load:end', () => {
-      const adType = this.ad_.getAttribute('type');
-      if (adConfig[adType].renderStartImplemented) {
+      if (this.ad_.hasAttribute('render-start-impl')) {
         this.displayAfterAdLoad_();
       } else {
         timerFor(this.win).delay(() => {

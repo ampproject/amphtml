@@ -19,6 +19,7 @@ import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev, user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
 import {userNotificationManagerFor} from '../../../src/user-notification';
+import {adConfig} from '../../../ads/_config';
 
 
 /**
@@ -51,6 +52,10 @@ export class AmpAd extends AMP.BaseElement {
       if (!type) {
         // Unspecified or empty type.  Nothing to do here except bail out.
         return null;
+      }
+      const config = adConfig[type];
+      if (config && config.renderStartImplemented) {
+        this.element.setAttribute('render-start-impl', '');
       }
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
