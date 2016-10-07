@@ -33,7 +33,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
@@ -842,7 +842,7 @@ export class AmpA4A extends AMP.BaseElement {
    return creative.substring(
        metaData.cssUtf16CharOffsets[0],
        metaData.cssUtf16CharOffsets[1]);
-  }
+ }
 
   /**
    * @param {!Window} iframeWin
@@ -894,7 +894,9 @@ export class AmpA4A extends AMP.BaseElement {
         return e.pageY;
       },
     };
-    const newHref = urlReplacementsFor(this.win).expandSync(
+    top.BOO = this;
+    console.log('BOO', this);
+    const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
         hrefToExpand, vars, undefined, /* opt_whitelist */ {
           // For now we only allow to replace the click location vars
           // and nothing else.

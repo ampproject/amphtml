@@ -28,9 +28,6 @@ import {viewportForDoc} from './viewport';
 import {platformFor} from './platform';
 import {timerFor} from './timer';
 
-/** @private @const {string} */
-const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
-
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
@@ -211,26 +208,4 @@ export function onDocumentElementClick_(
       win.location.replace(`${curLoc.hash || '#'}`);
     });
   }
-}
-
-
-/**
- * Get offset location of click from event taking into account shadowRoot.
- * @param {!Event} e
- * @return {!{left: string, top: string}}
- */
-function getClickLocation_(e) {
-  // Use existence of event path as indicator that event was rewritten
-  // due to shadowDom in which case the event target is the host element.
-  // NOTE(keithwrightbos) - this assumes that there is only one level
-  // of shadowRoot, not sure how this would behave otherwise (likely only
-  // offset to closest shadowRoot).
-  return {
-    left: (e.clientX === undefined ? '' :
-        String(e.clientX -
-          (e.path && e.target ? e.target./*OK*/offsetLeft : 0))),
-    top: (e.clientY === undefined ? '' :
-        String(e.clientY -
-          (e.path && e.target ? e.target./*OK*/offsetTop : 0))),
-  };
 }

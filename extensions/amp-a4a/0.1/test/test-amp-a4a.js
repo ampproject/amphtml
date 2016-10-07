@@ -73,7 +73,7 @@ function createAdTestingIframePromise() {
 }
 
 
-describe.only('amp-a4a', () => {
+describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let xhrMockJson;
@@ -521,10 +521,11 @@ describe.only('amp-a4a', () => {
         });
       });
     });
-    it('should handle click correctly', () => {
+
+    it('should handle click expansion correctly', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         doc.body.appendChild(a4aElement);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
@@ -533,8 +534,8 @@ describe.only('amp-a4a', () => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          const root = a4aElement.shadowRoot;
-          const adBody = root.querySelector('amp-ad-body');
+          const adBody = a4aElement.querySelector('iframe')
+              .contentDocument.querySelector('body');
           let clickHandlerCalled = 0;
 
           adBody.onclick = function(e) {

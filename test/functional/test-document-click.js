@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {onDocumentElementClick_, onDocumentElementCapturedClick_,
-    getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
-import {createIframePromise} from '../../testing/iframe';
+import {onDocumentElementClick_} from '../../src/document-click';
 import {installTimerService} from '../../src/service/timer-impl';
-import {urlReplacementsForDoc} from '../../src/url-replacements';
 import * as sinon from 'sinon';
 
 describe('test-document-click onDocumentElementClick_', () => {
