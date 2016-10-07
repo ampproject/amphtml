@@ -812,7 +812,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (!isExperimentOn(this.win, 'alp-for-a4a')) {
       return;
     }
-    iframeWin.addEventListener('click', event => {
+    iframeWin.document.documentElement.addEventListener('click', event => {
       handleClick(event, url => {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
