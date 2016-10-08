@@ -426,3 +426,73 @@ amp-experiment, amp-share-tracking {
 amp-fresh {
   visibility: hidden;
 }
+
+/**
+ * Animated equalizer icon for muted autoplaying videos.
+ *
+ * TODO(aghassemi, #5306): Move to video extension when video is out of code.
+ */
+.amp-video-eq {
+  align-items: flex-end;
+  bottom: 7px;
+  display: flex;
+  height: 12px;
+  opacity: 0.8;
+  overflow: hidden;
+  position: absolute;
+  right: 7px;
+  width: 20px;
+}
+.amp-video-eq .amp-video-eq-col {
+  flex: 1;
+  height: 100%;
+  margin-right: 1px;
+  position: relative;
+}
+.amp-video-eq .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-play-state: running;
+  background-color: #FAFAFA;
+  height: 100%;
+  position: absolute;
+  transform: translateY(100%);
+  width: 100%;
+  will-change: transform;
+}
+.amp-video-eq-pause .amp-video-eq-col div {
+  animation-play-state: paused;
+}
+.amp-video-eq-hide {
+  display: none;
+}
+.amp-video-eq-1-1 {
+   animation-duration: 0.3s;
+}
+.amp-video-eq-1-2 {
+   animation-duration: 0.45s;
+}
+.amp-video-eq-2-1 {
+   animation-duration: 0.5s;
+}
+.amp-video-eq-2-2 {
+   animation-duration: 0.4s;
+}
+.amp-video-eq-3-1 {
+   animation-duration: 0.3s;
+}
+.amp-video-eq-3-2 {
+   animation-duration: 0.35s;
+}
+.amp-video-eq-4-1 {
+   animation-duration: 0.4s;
+}
+.amp-video-eq-4-2 {
+   animation-duration: 0.25s;
+}
+@keyframes amp-video-eq-animation {
+  0% {transform: translateY(100%);}
+  100% {transform: translateY(0);}
+}

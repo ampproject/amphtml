@@ -18,6 +18,7 @@ import {listen, listenOnce, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {fromClassForDoc} from '../service';
+import {platformFor} from '../platform';
 import {setStyles} from '../style';
 import {VideoEvents, VideoAttributes} from '../video-interface';
 import {viewerForDoc} from '../viewer';
@@ -123,6 +124,9 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
+    /** @package @const {!Element} */
+    this.autoplayIcon_ = null;
+
     /** @private {boolean} */
     this.loaded_ = false;
 
@@ -221,11 +225,17 @@ class VideoEntry {
       // user interaction.
       if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
         this.video.hideControls();
+        this.autoplayIcon_ = this.createAutoplayIcon_();
+
+        this.vsync_.mutate(() => {
+          this.video.element.appendChild(this.autoplayIcon_);
+        });
 
         listenOnce(this.video.element, VideoEvents.USER_TAP, () => {
           this.userInteracted_ = true;
           this.video.showControls();
           this.video.unmute();
+          this.autoplayIcon_.remove();
         });
       }
     });
@@ -251,7 +261,47 @@ class VideoEntry {
         this.video.pause();
       }
 
+      if (this.autoplayIcon_) {
+        this.vsync_.mutate(() => {
+          /** @const {{!./service/platform-impl.Platform}} */
+          const platform = platformFor(this.ampdoc_.win);
+          if (platform.isSafari() && platform.isIos()) {
+            // iOS Safari can not pause hardware accelerated animations, so we
+            // hide the icon instead of pausing animation.
+            this.autoplayIcon_.classList.toggle('amp-video-eq-hide',
+                          !this.isVisible_);
+          } else {
+            this.autoplayIcon_.classList.toggle('amp-video-eq-pause',
+              !this.isVisible_);
+          }
+        });
+      }
     });
+  }
+
+  /**
+   * Creates a pure CSS animated equalizer icon.
+   * @private
+   * @return {!Element}
+   */
+  createAutoplayIcon_() {
+    const doc = this.ampdoc_.win.document;
+    const icon = doc.createElement('i-amp-video-eq');
+    icon.classList.add('amp-video-eq');
+    // Four columns for the equalizer.
+    for (let i = 1; i <= 4; i++) {
+      const column = doc.createElement('div');
+      column.classList.add('amp-video-eq-col');
+      // Two overlapping filler divs that animate at different rates creating
+      // randomness illusion.
+      for (let j = 1; j <= 2; j++) {
+        const filler = doc.createElement('div');
+        filler.classList.add(`amp-video-eq-${i}-${j}`);
+        column.appendChild(filler);
+      }
+      icon.appendChild(column);
+    }
+    return icon;
   }
 
   /**
