@@ -124,7 +124,7 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
-    /** @package @const {?Element} */
+    /** @private {?Element} */
     this.autoplayIcon_ = null;
 
     /** @private {boolean} */
