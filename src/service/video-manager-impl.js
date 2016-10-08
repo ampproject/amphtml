@@ -124,7 +124,7 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
-    /** @package @const {!Element} */
+    /** @package @const {?Element} */
     this.autoplayIcon_ = null;
 
     /** @private {boolean} */
@@ -263,7 +263,6 @@ class VideoEntry {
 
       if (this.autoplayIcon_) {
         this.vsync_.mutate(() => {
-          /** @const {{!./service/platform-impl.Platform}} */
           const platform = platformFor(this.ampdoc_.win);
           if (platform.isSafari() && platform.isIos()) {
             // iOS Safari can not pause hardware accelerated animations, so we
