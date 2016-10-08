@@ -89,10 +89,10 @@ module.exports = function(config) {
         base: 'SauceLabs',
         browserName: 'chrome',
       },
-      SL_Chrome_37: {
+      SL_Chrome_old: {
         base: 'SauceLabs',
         browserName: 'chrome',
-        version: 37,
+        version: 'latest-10',
       },
       SL_iOS_9_1: {
         base: 'SauceLabs',
