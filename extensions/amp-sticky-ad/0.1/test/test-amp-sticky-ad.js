@@ -19,7 +19,7 @@ import * as sinon from 'sinon';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 
-describe.only('amp-sticky-ad', () => {
+describe('amp-sticky-ad', () => {
   let sandbox;
 
   beforeEach(() => {
