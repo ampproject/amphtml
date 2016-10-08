@@ -19,7 +19,7 @@ import * as sinon from 'sinon';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 
-describe('amp-sticky-ad', () => {
+describe.only('amp-sticky-ad', () => {
   let sandbox;
 
   beforeEach(() => {
@@ -37,10 +37,7 @@ describe('amp-sticky-ad', () => {
       const ampAd = iframe.doc.createElement('amp-ad');
       ampAd.setAttribute('width', '300');
       ampAd.setAttribute('height', '50');
-      ampAd.setAttribute('type', 'a9');
-      ampAd.setAttribute('data-aax_size', '300*50');
-      ampAd.setAttribute('data-aax_pubname', 'abc123');
-      ampAd.setAttribute('data-aax_src', '302');
+      ampAd.setAttribute('type', '_ping_');
       ampStickyAd.appendChild(ampAd);
       const link = iframe.doc.createElement('link');
       link.setAttribute('rel', 'canonical');
