@@ -676,7 +676,9 @@ export class AmpA4A extends AMP.BaseElement {
               extensionIds: creativeMetaData.customElementExtensions || [],
               fonts: fontsArray,
             }).then(friendlyIframeEmbed => {
+              // Capture phase click handlers on the ad.
               this.registerExpandUrlParams_(friendlyIframeEmbed.win);
+              // Bubble phase click handlers on the ad.
               this.registerAlpHandler_(friendlyIframeEmbed.win);
               this.rendered_ = true;
               this.onAmpCreativeRender();
@@ -845,6 +847,8 @@ export class AmpA4A extends AMP.BaseElement {
  }
 
   /**
+   * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
+   * viewer navigates to an AMP destination on our behalf.
    * @param {!Window} iframeWin
    */
   registerAlpHandler_(iframeWin) {
@@ -859,6 +863,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Registers a handler that performs URL replacement on the href
+   * of an ad click.
    * @param {!Window} iframeWin
    */
   registerExpandUrlParams_(iframeWin) {
@@ -884,9 +890,6 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     const vars = {
-      // The click location assume a switch from ShadowDOM to friendly iframe
-      // based rendering, in which case the document relative positions are
-      // really ad-relative.
       'CLICK_X': () => {
         return e.pageX;
       },
@@ -898,6 +901,7 @@ export class AmpA4A extends AMP.BaseElement {
         hrefToExpand, vars, undefined, /* opt_whitelist */ {
           // For now we only allow to replace the click location vars
           // and nothing else.
+          // NOTE: Addition to this whitelist requires additional review.
           'CLICK_X': true,
           'CLICK_Y': true,
         });
