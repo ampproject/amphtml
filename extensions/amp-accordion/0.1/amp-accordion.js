@@ -139,6 +139,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   onHeaderClick_(event) {
     event.preventDefault();
+    /** @const {!Element} */
     const section = event.currentTarget.parentNode;
     const sectionComponents_ = section.children;
     const content = sectionComponents_[1];

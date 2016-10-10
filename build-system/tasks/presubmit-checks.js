@@ -152,6 +152,7 @@ var forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/describes.js',
       'testing/iframe.js',
     ],
   },
@@ -339,6 +340,7 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/fake-dom.js',
     ],
   },
   'sessionStorage': {

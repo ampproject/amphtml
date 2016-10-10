@@ -385,6 +385,7 @@ export class Viewport {
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();
     }
+    /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
     // TODO(erwinm): the duration should not be a constant and should
     // be done in steps for better transition experience when things
@@ -576,6 +577,7 @@ export class Viewport {
     const paddingTop = event['paddingTop'];
     const duration = event['duration'];
     const curve = event['curve'];
+    /** @const {boolean} */
     const transient = event['transient'];
 
     if (paddingTop != this.paddingTop_) {
@@ -602,6 +604,7 @@ export class Viewport {
     this.fixedLayer_.updatePaddingTop(this.paddingTop_);
     if (duration > 0) {
       // Add transit effect on position fixed element
+      /** @const {!TransitionDef<number>} */
       const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
       return Animation.animate(this.ampdoc.getRootNode(), time => {
         const p = tr(time);
@@ -673,7 +676,9 @@ export class Viewport {
    * @private
    */
   throttledScroll_(referenceTime, referenceTop) {
-    const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
+    this.scrollTop_ = this.binding_.getScrollTop();
+    /**  @const {number} */
+    const newScrollTop = this.scrollTop_;
     const now = Date.now();
     let velocity = 0;
     if (now != referenceTime) {

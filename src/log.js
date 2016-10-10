@@ -405,17 +405,18 @@ export function rethrowAsync(var_args) {
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log}}
  */
-const logs = self.log = (self.log || {
+self.log = (self.log || {
   user: null,
   dev: null,
 });
 
+const logs = self.log;
 
 /**
  * Eventually holds a constructor for Log objects. Lazily initialized, so we
  * can avoid ever referencing the real constructor except in JS binaries
  * that actually want to include the implementation.
- * @typedef {?Function}
+ * @type {?Function}
  */
 let logConstructor = null;
 

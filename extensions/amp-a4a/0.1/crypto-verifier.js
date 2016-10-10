@@ -20,6 +20,7 @@ import {utf8Encode} from '../../../src/utils/bytes';
 /** @const {boolean} */
 const isWebkit = window.crypto && 'webkitSubtle' in window.crypto;
 
+/** @const {!webCrypto.SubtleCrypto} */
 const crossCrypto = isWebkit ? window.crypto['webkitSubtle'] :
                                window.crypto.subtle;
 
@@ -32,7 +33,7 @@ const VERSION = 0x00;
  * @typedef {{
  *   publicKey: !Object,
  *   hash: Uint8Array,
- *   cryptoKey: webCrypto.CryptoKey
+ *   cryptoKey: !webCrypto.CryptoKey
  * }}
  */
 export let PublicKeyInfoDef;
@@ -75,7 +76,7 @@ export function importPublicKey(jwk) {
             .then(digest => ({
               cryptoKey,
               // Hash is the first 4 bytes of the SHA-1 digest.
-              hash: new Uint8Array(digest, 0, 4),
+              hash: new Uint8Array(/** @type {ArrayBuffer} */(digest), 0, 4),
             }));
       });
 }
@@ -104,11 +105,11 @@ export function verifySignature(data, signature, publicKeyInfo) {
   signedData.set(data);
   signedData[data.length] = VERSION;
 
-  return crossCrypto.verify(
+  return /** @type {!Promise<boolean>} */ (crossCrypto.verify(
       {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
       publicKeyInfo.cryptoKey,
       signature.subarray(5),
-      signedData);
+      signedData));
 }
 
 /**
