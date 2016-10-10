@@ -77,6 +77,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
     /DISALLOWED_TAG amp-ooyala-player/,
+    /GENERAL_DISALLOWED_TAG script amp-ooyala-player/,
     // amp-app-banner related validation discrepancies.
     /GENERAL_DISALLOWED_TAG script amp-app-banner.js/,
     /DISALLOWED_TAG amp-app-banner/,
