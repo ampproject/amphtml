@@ -161,7 +161,7 @@ export class AmpA4A extends AMP.BaseElement {
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
 
     if (this.config.renderStartImplemented) {
-      this.element.setAttribute('amp-render-start-impl', '');
+      this.element.setAttribute('-amp-render-start-impl', '');
     }
   }
 
