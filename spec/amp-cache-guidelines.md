@@ -64,11 +64,11 @@ Accepted MIME types for images include all `image/` subtypes (e.g. `image/gif`).
 
 ### MIME types for fonts
 
-Accepted MIME type prefixes for fonts include the following:
+Accepted MIME types for fonts include the following prefixes:
 
 | Media type / subtype  |
 | ------------- |
-|  font/*   (e.g. `font/opentype`)|
+|  font/   (e.g. `font/opentype`)|
 |  application/font   |
 |  application/x-font   |
 |  application/x-woff   |
