@@ -171,12 +171,12 @@ function adoptShared(global, opts, callback) {
   // as `AMP.push()` in production.
   if (!getMode().minified) {
     /**
-     * @param {string} name
+     * @param {string} unusedName
      * @param {function()} installer
      * @const
      */
-    global.AMP.extension = function(name, installer) {
-      installer.call(null);
+    global.AMP.extension = function(unusedName, installer) {
+      installer();
     };
   }
 
