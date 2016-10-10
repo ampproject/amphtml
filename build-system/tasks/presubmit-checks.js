@@ -152,6 +152,7 @@ var forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/describes.js',
       'testing/iframe.js',
     ],
   },
@@ -183,7 +184,7 @@ var forbiddenTerms = {
       'src/service/url-replacements-impl.js',
     ],
   },
-  'installViewerService': {
+  'installViewerServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -192,6 +193,13 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/viewport-impl.js',
       'src/service/vsync-impl.js',
+    ],
+  },
+  'setViewerVisibilityState': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/viewer-impl.js',
     ],
   },
   'installViewportServiceForDoc': {
@@ -332,6 +340,7 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/fake-dom.js',
     ],
   },
   'sessionStorage': {

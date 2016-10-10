@@ -28,36 +28,31 @@ export const data = {
 </amp-audio></amp-audio>`,
 
   validCssDocCssBlockFormatted: `
-    @supports (animation-name) {
-    }
+      @supports (animation-name) {}
+      @-webkit-keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @-moz-keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @-o-keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
 
-    @-webkit-keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @-moz-keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @-o-keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    amp-user-notification.amp-active {
-      opacity: 0;
-      -webkit-animation: fadeIn ease-in 1s 1 forwards;
-      -moz-animation: fadeIn ease-in 1s 1 forwards;
-      -ms-animation: fadeIn ease-in 1s 1 forwards;
-      -o-animation: fadeIn ease-in 1s 1 forwards;
-      animation: fadeIn ease-in 1s 1 forwards;
-    }
-  `,
+      amp-user-notification.amp-active {
+        opacity: 0;
+        -webkit-animation: fadeIn ease-in 1s 1 forwards;
+        -moz-animation: fadeIn ease-in 1s 1 forwards;
+        -ms-animation: fadeIn ease-in 1s 1 forwards;
+        -o-animation: fadeIn ease-in 1s 1 forwards;
+                animation: fadeIn ease-in 1s 1 forwards;
+      }
+    `,
 };

@@ -123,7 +123,7 @@ export class Timer {
    * resulting promise will either fail when the specified delay expires or
    * will resolve based on the opt_racePromise, whichever happens first.
    * @param {number} delay
-   * @param {!Promise<RESULT>|undefined} opt_racePromise
+   * @param {?Promise<RESULT>|undefined} opt_racePromise
    * @param {string=} opt_message
    * @return {!Promise<RESULT>}
    * @template RESULT

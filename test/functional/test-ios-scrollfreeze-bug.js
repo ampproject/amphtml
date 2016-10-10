@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {checkAndFix} from '../../src/service/ios-scrollfreeze-bug';
 import * as sinon from 'sinon';
 
@@ -21,6 +22,7 @@ import * as sinon from 'sinon';
 describe('ios-scrollfreeze-bug', () => {
   let sandbox;
   let windowApi;
+  let ampdoc;
   let platform;
   let platformMock;
   let vsyncApi;
@@ -40,8 +42,13 @@ describe('ios-scrollfreeze-bug', () => {
     platformMock = sandbox.mock(platform);
 
     windowApi = {
-      document: {body: {style: {}}},
+      document: {
+        nodeType: /* DOCUMENT */ 9,
+        body: {style: {}},
+      },
     };
+    windowApi.document.defaultView = windowApi;
+    ampdoc = new AmpDocSingle(windowApi);
     bodyBottom = '0px';
     bodySetSpy = sandbox.spy();
     Object.defineProperty(windowApi.document.body.style, 'bottom', {
@@ -79,7 +86,7 @@ describe('ios-scrollfreeze-bug', () => {
   });
 
   it('should execute body reset', () => {
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.exist;
     return promise.then(() => {
       expect(windowApi.document.body.style.bottom).to.equal('0px');
@@ -92,30 +99,30 @@ describe('ios-scrollfreeze-bug', () => {
 
   it('should ignore for non-iOS', () => {
     platformMock.expects('isIos').returns(false).once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
   });
 
   it('should ignore for non-Safari', () => {
     platformMock.expects('isSafari').returns(false).once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
   });
 
   it('should ignore for version > 8', () => {
     platformMock.expects('getMajorVersion').returns(9).once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
 
     platformMock.expects('getMajorVersion').returns(10).once();
-    const promise2 = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise2 = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise2).to.not.exist;
   });
 
   it('should ignore when b29185497 is not specified', () => {
     viewerMock.expects('getParam').withExactArgs('b29185497').returns('')
         .once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
   });
 });

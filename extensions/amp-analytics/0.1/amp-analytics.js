@@ -17,7 +17,7 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
+import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
@@ -42,6 +42,49 @@ const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsRep
 
 export class AmpAnalytics extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /**
+     * @const {!JSONType} Copied here for tests.
+     * @private
+     */
+    this.predefinedConfig_ = ANALYTICS_CONFIG;
+
+
+    /** @private {!Promise} */
+    this.consentPromise_ = Promise.resolve();
+
+    /**
+     * The html id of the `amp-user-notification` element.
+     * @private {?string}
+     */
+    this.consentNotificationId_ = null;
+
+    /**
+     * @private {?string} Predefined type associated with the tag. If specified,
+     * the config from the predefined type is merged with the inline config
+     */
+    this.type_ = null;
+
+    /**
+     * @private {Object<string, string>} A map of request names to the request
+     * format string used by the tag to send data
+     */
+    this.requests_ = {};
+
+    /**
+     * @private {JSONType}
+     */
+    this.config_ = /** @type {JSONType} */ ({});
+
+    /**
+     * @private {JSONType}
+     */
+    this.remoteConfig_ = /** @type {JSONType} */ ({});
+  }
+
   /** @override */
   getPriority() {
     // Loads after other content.
@@ -58,29 +101,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     return true;
   }
 
-  /**
-   * @override
-   */
-  createdCallback() {
-    /**
-     * @const {!JSONType} Copied here for tests.
-     * @private
-     */
-    this.predefinedConfig_ = ANALYTICS_CONFIG;
-  }
-
   /** @override */
   buildCallback() {
     this.element.setAttribute('aria-hidden', 'true');
-    /**
-     * The html id of the `amp-user-notification` element.
-     * @private @const {?string}
-     */
+
     this.consentNotificationId_ = this.element
         .getAttribute('data-consent-notification-id');
-
-    /** @private {!Promise} */
-    this.consentPromise_ = Promise.resolve();
 
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = userNotificationManagerFor(this.win)
@@ -94,23 +120,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     // resource consumption.
     toggle(this.element, false);
 
-    /**
-     * @private {?string} Predefinedtype associated with the tag. If specified,
-     * the config from the predefined type is merged with the inline config
-     */
-    this.type_ = null;
-
-    /**
-     * @private {Object<string, string>} A map of request names to the request
-     * format string used by the tag to send data
-     */
-    this.requests_ = {};
-
-    /**
-     * @private {JSONType}
-     */
-    this.remoteConfig_ = {};
-
     return this.consentPromise_
         .then(this.fetchRemoteConfig_.bind(this))
         .then(this.onFetchRemoteConfigSuccess_.bind(this));
@@ -122,9 +131,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   onFetchRemoteConfigSuccess_() {
-    /**
-     * @private {!JSONType} The analytics config associated with the tag
-     */
     this.config_ = this.mergeConfigs_();
 
     if (this.hasOptedOut_()) {
@@ -148,7 +154,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
-        const trigger = this.config_['triggers'][k];
+        let trigger = null;
+        trigger = this.config_['triggers'][k];
         if (!trigger) {
           user().error(this.getName_(), 'Trigger should be an object: ', k);
           continue;
@@ -224,14 +231,14 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
-   * @return {!Promise<undefined|JSONType>}
+   * @return {!Promise<undefined>}
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
     if (!remoteConfigUrl) {
       return Promise.resolve();
     }
-    assertHttpsUrl(remoteConfigUrl);
+    assertHttpsUrl(remoteConfigUrl, this.element);
     dev().fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
     const fetchConfig = {
       requireAmpResponseSourceOrigin: true,
@@ -239,6 +246,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
+    /** @const {!Window} */
     const win = this.win;
     return urlReplacementsForDoc(win.document).expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
@@ -269,11 +277,11 @@ export class AmpAnalytics extends AMP.BaseElement {
   mergeConfigs_() {
     const inlineConfig = this.getInlineConfigNoInline();
     // Initialize config with analytics related vars.
-    const config = {
+    const config = /** @type {!JSONType} */ ({
       'vars': {
         'requestCount': 0,
       },
-    };
+    });
     const defaultConfig = this.predefinedConfig_['default'] || {};
     const typeConfig = this.predefinedConfig_[
       this.element.getAttribute('type')] || {};
@@ -365,7 +373,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @return {!Promise} The request that was sent out.
    * @private
    */
   handleEvent_(trigger, event) {
@@ -406,12 +414,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           params[k] = this.expandTemplate_(params[k], trigger, event);
         }
       }
-      if (request.indexOf('${extraUrlParams}') >= 0) {
-        const extraUrlParams = addParamsToUrl('', params).substr(1);
-        request = request.replace('${extraUrlParams}', extraUrlParams);
-      } else {
-        request = addParamsToUrl(request, params);
-      }
+      request = this.addParamsToUrl_(request, params);
     }
 
     this.config_['vars']['requestCount']++;
@@ -432,6 +435,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   isSampledIn_(trigger) {
+    /** @const {!JSONType} */
     const spec = trigger['sampleSpec'];
     const resolve = Promise.resolve(true);
     if (!spec) {
@@ -457,16 +461,16 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {string} template The template to expand.
-   * @param {!JSONType} The object to use for variable value lookups.
-   * @param {!Object} event Object with details about the event.
-   * @param {number} opt_iterations Number of recursive expansions to perform.
+   * @param {!JSONType} trigger The object to use for variable value lookups.
+   * @param {!Object=} opt_event Object with details about the event.
+   * @param {number=} opt_iterations Number of recursive expansions to perform.
    *    Defaults to 2 substitutions.
    * @param {boolean=} opt_encode Used to determine if the vars should be
    *    encoded or not. Defaults to true.
    * @return {string} The expanded string.
    * @private
    */
-  expandTemplate_(template, trigger, event, opt_iterations, opt_encode) {
+  expandTemplate_(template, trigger, opt_event, opt_iterations, opt_encode) {
     opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
     opt_encode = opt_encode === undefined ? true : opt_encode;
     if (opt_iterations < 0) {
@@ -476,34 +480,88 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     // Replace placeholders with URI encoded values.
-    // Precedence is event.vars > trigger.vars > config.vars.
+    // Precedence is opt_event.vars > trigger.vars > config.vars.
     // Nested expansion not supported.
     return expandTemplate(template, key => {
-      const match = key.match(/([^(]*)(\([^)]*\))?/);
-      const name = match[1];
-      const argList = match[2] || '';
-      let raw = (event && event['vars'] && event['vars'][name]) ||
+      const {name, argList} = this.getNameArgs_(key);
+      let raw = (opt_event && opt_event['vars'] && opt_event['vars'][name]) ||
           (trigger['vars'] && trigger['vars'][name]) ||
           (this.config_['vars'] && this.config_['vars'][name]) ||
           '';
+
+      // Values can also be arrays and objects. Don't expand them.
       if (typeof raw == 'string') {
-        raw = this.expandTemplate_(raw, trigger, event, opt_iterations - 1);
+        raw = this.expandTemplate_(raw, trigger, opt_event, opt_iterations - 1);
       }
       const val = opt_encode ? this.encodeVars_(raw, name) : raw;
-      return val + argList;
+      return val ? val + argList : val;
     });
   }
 
   /**
-   * @param {string} raw The values to URI encode.
+   * Returns an array containing two values: name and args parsed from the key.
+   *
+   * @param {string} key The key to be parsed.
+   * @return {!Object<string>}
+   * @private
+   */
+  getNameArgs_(key) {
+    if (!key) {
+      return {name: '', argList: ''};
+    }
+    const match = key.match(/([^(]*)(\([^)]*\))?/);
+    if (!match) {
+      user().error(this.getName_(),
+          'Variable with invalid format found: ' + key);
+    }
+    return {name: match[1], argList: match[2] || ''};
+  }
+
+  /**
+   * @param {string|!Array<string>} raw The values to URI encode.
    * @param {string} unusedName Name of the variable.
+   * @return {string} The encoded value.
    * @private
    */
   encodeVars_(raw, unusedName) {
+    if (!raw) {
+      return '';
+    }
+
     if (isArray(raw)) {
       return raw.map(encodeURIComponent).join(',');
     }
-    return encodeURIComponent(raw);
+    // Separate out names and arguments from the value and encode the value.
+    const {name, argList} = this.getNameArgs_(String(raw));
+    return encodeURIComponent(name) + argList;
+  }
+
+  /**
+   * Adds parameters to URL. Similar to the function defined in url.js but with
+   * a different encoding method.
+   * @param {string} request
+   * @param {!Object<string, string>} params
+   * @return {string}
+   * @private
+   */
+  addParamsToUrl_(request, params) {
+    const s = [];
+    for (const k in params) {
+      const v = params[k];
+      if (v == null) {
+        continue;
+      } else {
+        const sv = this.encodeVars_(v, k);
+        s.push(`${encodeURIComponent(k)}=${sv}`);
+      }
+    }
+
+    const paramString = s.join('&');
+    if (request.indexOf('${extraUrlParams}') >= 0) {
+      return request.replace('${extraUrlParams}', paramString);
+    } else {
+      return appendEncodedParamStringToUrl(request, paramString);
+    }
   }
 
   /**

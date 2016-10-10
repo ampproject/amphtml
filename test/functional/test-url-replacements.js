@@ -23,7 +23,6 @@ import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService,} from
     '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {
@@ -32,6 +31,7 @@ import {
 import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
+import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -84,7 +84,7 @@ describe('UrlReplacements', () => {
           }));
         }
       }
-      viewerService = installViewerService(iframe.win);
+      viewerService = viewerForDoc(iframe.ampdoc);
       replacements = urlReplacementsForDoc(iframe.ampdoc);
       return replacements;
     });
@@ -330,6 +330,30 @@ describe('UrlReplacements', () => {
         }).then(expanded => {
           expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
         });
+  });
+
+  it('Should replace BACKGROUND_STATE with 0', () => {
+    const win = getFakeWindow();
+    win.services.viewer = {
+      obj: {isVisible: () => true},
+    };
+    return installUrlReplacementsServiceForDoc(win.ampdoc)
+      .expandAsync('?sh=BACKGROUND_STATE')
+      .then(res => {
+        expect(res).to.equal('?sh=0');
+      });
+  });
+
+  it('Should replace BACKGROUND_STATE with 1', () => {
+    const win = getFakeWindow();
+    win.services.viewer = {
+      obj: {isVisible: () => false},
+    };
+    return installUrlReplacementsServiceForDoc(win.ampdoc)
+      .expandAsync('?sh=BACKGROUND_STATE')
+      .then(res => {
+        expect(res).to.equal('?sh=1');
+      });
   });
 
   describe('PAGE_LOAD_TIME', () => {

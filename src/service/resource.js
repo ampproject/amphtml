@@ -167,8 +167,6 @@ export class Resource {
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
-    }).then(() => {
-      this.loadedOnce_ = true;
     });
 
     /** @private {boolean} */
@@ -255,6 +253,7 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**
@@ -569,8 +568,12 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
-    this.loadPromiseResolve_();
+    if (this.loadPromiseResolve_) {
+      this.loadPromiseResolve_();
+      this.loadPromiseResolve_ = null;
+    }
     this.layoutPromise_ = null;
+    this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {

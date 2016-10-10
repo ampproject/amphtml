@@ -360,6 +360,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   insert_(parent, orphans) {
     let count = 0;
+    /** @const {!DocumentFragment} */
     const fragment = this.win.document.createDocumentFragment();
     orphans.forEach(elem => {
       fragment.insertBefore(elem, fragment.firstElementChild);

@@ -17,7 +17,7 @@
 /**
  * @const {!JSONType}
  */
-export const ANALYTICS_CONFIG = {
+export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
@@ -30,6 +30,7 @@ export const ANALYTICS_CONFIG = {
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
+      'backgroundState': 'BACKGROUND_STATE',
       'browserLanguage': 'BROWSER_LANGUAGE',
       'canonicalHost': 'CANONICAL_HOST',
       'canonicalPath': 'CANONICAL_PATH',
@@ -787,6 +788,7 @@ export const ANALYTICS_CONFIG = {
     'requests': {
       'host': 'https://api.segment.io/v1/pixel',
       'base': '?writeKey=${writeKey}' +
+        '&context.library.name=amp' +
         '&anonymousId=${anonymousId}' +
         '&context.locale=${browserLanguage}' +
         '&context.page.path=${canonicalPath}' +
@@ -995,7 +997,7 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
-};
+});
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 

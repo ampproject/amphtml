@@ -118,11 +118,7 @@ function determineBuildTargets(filePaths) {
  * @returns {number}
  */
 function main(argv) {
-  if (argv.length <= 2) {
-    console.error(`Usage: ${__filename} TRAVIS_COMMIT_RANGE`);
-    return -1;
-  }
-  const travisCommitRange = argv[2];
+  const travisCommitRange = argv[2] || '';
   const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
 
   const sortedBuildTargets = [];
