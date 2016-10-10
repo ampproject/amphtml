@@ -89,8 +89,8 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {number} */
     this.previousScrollLeft_ = 0;
 
-    /** @private {Array<?string>} */
-    this.dataSlideIdArr = [];
+    /** @private {!Array<?string>} */
+    this.dataSlideIdArr_ = [];
 
     /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
     this.analyticsPromise_ = null;
@@ -129,8 +129,8 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     this.slides_.forEach((slide, index) => {
-      this.dataSlideIdArr.push(
-          slide.getAttribute('data-slide-id') || index + '');
+      this.dataSlideIdArr_.push(
+          slide.getAttribute('data-slide-id') || index.toString());
       this.setAsOwner(slide);
       const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
@@ -563,8 +563,8 @@ export class AmpSlideScroll extends BaseSlides {
       direction = direction < 0 ? 1 : -1;
     }
     const vars = {
-      'fromSlide': this.dataSlideIdArr[this.slideIndex_],
-      'toSlide': this.dataSlideIdArr[newSlideIndex],
+      'fromSlide': this.dataSlideIdArr_[this.slideIndex_],
+      'toSlide': this.dataSlideIdArr_[newSlideIndex],
     };
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
