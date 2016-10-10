@@ -563,7 +563,7 @@ export class AmpSlideScroll extends BaseSlides {
       direction = direction < 0 ? 1 : -1;
     }
     const vars = {
-      'fromSlide': this.dataSlideIdArr_[this.slideIndex_],
+      'fromSlide': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)],
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
     };
     this.analyticsEvent_('amp-carousel-change', vars);
