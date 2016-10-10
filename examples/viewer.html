@@ -364,7 +364,7 @@
         throw new Error('Only one step push allowed');
       }
       this.stackIndex_ = stackIndex;
-      window.history.pushState({}, '');
+      window.history.pushState({stackIndex: stackIndex}, '');
       return Promise.resolve();
     };
 
@@ -381,10 +381,22 @@
     };
 
 
-    Viewer.prototype.onPopState_ = function() {
-      // Even more trivial. Always assumes that only one step was popped in
-      // history.
-      this.stackIndex_--;
+    Viewer.prototype.onPopState_ = function(e) {
+      if (this.visibilityState_ != 'visible') {
+        return;
+      }
+      console.log('popping: ', e.state);
+      var poppedIndex = e.state && e.state.stackIndex;
+
+      if (poppedIndex <= this.stackIndex_) {
+        // Going Back in history.
+        // Even more trivial. Always assumes that only one step was popped in
+        // history.
+        this.stackIndex_--;
+      } else {
+        // Going Forward in history.
+        this.stackIndex_++;
+      }
       this.sendRequest_('historyPopped', {
         newStackIndex: this.stackIndex_
       }, false);

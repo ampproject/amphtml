@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+import {closestByTag} from '../../../src/dom';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {dev} from '../../../src/log';
 import {Layout} from '../../../src/layout';
 import {historyForDoc} from '../../../src/history';
+import {parseUrl} from '../../../src/url';
 import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timerFor} from '../../../src/timer';
+import {installGlobalClickListenerForDoc} from '../../../src/document-click';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -115,6 +119,19 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
+
+    installGlobalClickListenerForDoc(this.getAmpDoc()).addBeforeHandler(e => {
+      const target = closestByTag(dev().assertElement(e.target), 'A');
+      if (!target) {
+        return;
+      }
+      const tgtLoc = parseUrl(target.href);
+
+      if (!tgtLoc.hash) {
+        return;
+      }
+      this.close_();
+    });
   }
 
  /**
@@ -172,7 +189,9 @@ export class AmpSidebar extends AMP.BaseElement {
         }, ANIMATION_TIMEOUT);
       });
     });
-    this.getHistory_().push(this.close_.bind(this)).then(historyId => {
+    this.getHistory_().push(() => {
+      this.close_();
+    }).then(historyId => {
       this.historyId_ = historyId;
     });
   }

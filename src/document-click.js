@@ -33,7 +33,7 @@ import {timerFor} from './timer';
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalClickListenerForDoc(ampdoc) {
-  fromClassForDoc(ampdoc, 'clickhandler', ClickHandler);
+  return fromClassForDoc(ampdoc, 'clickhandler', ClickHandler);
 }
 
 
@@ -69,6 +69,9 @@ export class ClickHandler {
       this.boundHandle_ = this.handle_.bind(this);
       this.ampdoc.getRootNode().addEventListener('click', this.boundHandle_);
     }
+
+    /** @private {!Array<!function(!Event)>} */
+    this.beforeHandlers_ = [];
   }
 
   /**
@@ -87,8 +90,19 @@ export class ClickHandler {
    * @param {!Event} e
    */
   handle_(e) {
+    for (let i = 0; i < this.beforeHandlers_.length; i++) {
+      this.beforeHandlers_[i](e);
+    }
     onDocumentElementClick_(
         e, this.ampdoc, this.viewport_, this.history_, this.isIosSafari_);
+  }
+
+  /**
+   * Adds a before-handler that gets called before doc-click main handler.
+   * @param {!function(!Event)} handler
+   */
+  addBeforeHandler(handler) {
+    this.beforeHandlers_.push(handler);
   }
 }
 
@@ -203,9 +217,11 @@ export function onDocumentElementClick_(
   }
 
   if (tgtLoc.hash != curLoc.hash) {
+    timerFor(win).delay(() => {
     // Push/pop history.
-    history.push(() => {
-      win.location.replace(`${curLoc.hash || '#'}`);
-    });
+      history.push(() => {
+        win.location.replace(`${curLoc.hash || '#'}`);
+      });
+    }, 1000);
   }
 }
