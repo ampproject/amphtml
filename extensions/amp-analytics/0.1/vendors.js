@@ -788,6 +788,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'requests': {
       'host': 'https://api.segment.io/v1/pixel',
       'base': '?writeKey=${writeKey}' +
+        '&context.library.name=amp' +
         '&anonymousId=${anonymousId}' +
         '&context.locale=${browserLanguage}' +
         '&context.page.path=${canonicalPath}' +
