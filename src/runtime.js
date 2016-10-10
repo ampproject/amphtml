@@ -173,11 +173,11 @@ function adoptShared(global, opts, callback) {
   // once the compile-time inlining is done.
   /**
    * @param {string} unusedName
-   * @param {function()} installer
+   * @param {function(!Object)} installer
    * @const
    */
   global.AMP.extension = function(unusedName, installer) {
-    installer();
+    installer(global.AMP);
   };
 
   /** @const */
