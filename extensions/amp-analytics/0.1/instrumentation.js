@@ -204,9 +204,10 @@ export class InstrumentationService {
   /**
    * Triggers the analytics event with the specified type.
    * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
    */
-  triggerEvent(eventType) {
-    const event = new AnalyticsEvent(eventType);
+  triggerEvent(eventType, opt_vars) {
+    const event = new AnalyticsEvent(eventType, opt_vars);
 
     // Enqueue.
     if (this.customEventBuffer_) {
