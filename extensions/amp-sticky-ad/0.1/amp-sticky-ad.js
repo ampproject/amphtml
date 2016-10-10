@@ -131,7 +131,7 @@ class AmpStickyAd extends AMP.BaseElement {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
         this.visible_ = true;
-        if (!this.ad_.hasAttribute('render-start-impl')) {
+        if (!this.ad_.hasAttribute('amp-render-start-impl')) {
           this.element.setAttribute('visible', '');
         }
         this.viewport_.addToFixedLayer(this.element);
@@ -173,7 +173,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.updateInViewport(dev().assertElement(this.ad_), true);
     this.scheduleLayout(dev().assertElement(this.ad_));
     listenOnce(this.ad_, 'amp:load:end', () => {
-      if (this.ad_.hasAttribute('render-start-impl')) {
+      if (this.ad_.hasAttribute('amp-render-start-impl')) {
         this.displayAfterAdLoad_();
       } else {
         timerFor(this.win).delay(() => {
