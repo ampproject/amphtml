@@ -43,7 +43,8 @@ describe('amp-mustache template', () => {
   describe('Sanitizing data- attributes', () => {
     it('should parse data-&style=value output correctly', () => {
       const templateElement = document.createElement('div');
-      templateElement./*OK*/innerHTML = 'value = <a href="{{value}}" data-&style="color:red;">abc</a>';
+      templateElement./*OK*/innerHTML = 'value = <a href="{{value}}"' +
+          ' data-&style="color:red;">abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
@@ -54,25 +55,29 @@ describe('amp-mustache template', () => {
 
     it('should parse data-&attr=value output correctly', () => {
       const templateElement = document.createElement('div');
-      templateElement./*OK*/innerHTML = 'value = <a data-&href="{{value}}">abc</a>';
+      templateElement./*OK*/innerHTML = 'value = <a data-&href="{{value}}">' +
+          'abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: 'https://google.com/',
       });
-      expect(result./*OK*/innerHTML).to.equal('value = <a data-="" href="https://google.com/">abc</a>');
+      expect(result./*OK*/innerHTML).to.equal('value = <a data-=""' +
+          ' href="https://google.com/">abc</a>');
     });
 
     it('should allow for data-attr=value to output correctly', () => {
       const templateElement = document.createElement('div');
-      templateElement./*OK*/innerHTML = 'value = <a data-my-attr="{{invalidValue}}" data-my-id="{{value}}">abc</a>';
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<a data-my-attr="{{invalidValue}}" data-my-id="{{value}}">abc</a>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: 'myid',
         invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
-      expect(result./*OK*/innerHTML).to.equal('value = <a data-my-id="myid">abc</a>');
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a data-my-id="myid">abc</a>');
     });
   });
 
