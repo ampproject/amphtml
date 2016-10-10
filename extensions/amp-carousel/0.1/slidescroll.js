@@ -89,6 +89,9 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {number} */
     this.previousScrollLeft_ = 0;
 
+    /** @private {!Array<?string>} */
+    this.dataSlideIdArr_ = [];
+
     /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
     this.analyticsPromise_ = null;
   }
@@ -125,7 +128,9 @@ export class AmpSlideScroll extends BaseSlides {
       this.slidesContainer_.appendChild(end);
     }
 
-    this.slides_.forEach(slide => {
+    this.slides_.forEach((slide, index) => {
+      this.dataSlideIdArr_.push(
+          slide.getAttribute('data-slide-id') || index.toString());
       this.setAsOwner(slide);
       const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
@@ -458,7 +463,6 @@ export class AmpSlideScroll extends BaseSlides {
         this.schedulePreload(this.slides_[showIndex]);
       }
     });
-
     this.slidesContainer_./*OK*/scrollLeft =
         this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
@@ -558,26 +562,31 @@ export class AmpSlideScroll extends BaseSlides {
       // Set the correct direction.
       direction = direction < 0 ? 1 : -1;
     }
-    this.analyticsEvent_('amp-carousel-change');
+    const vars = {
+      'fromSlide': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)],
+      'toSlide': this.dataSlideIdArr_[newSlideIndex],
+    };
+    this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {
-      this.analyticsEvent_('amp-carousel-next');
+      this.analyticsEvent_('amp-carousel-next', vars);
     } else {
-      this.analyticsEvent_('amp-carousel-prev');
+      this.analyticsEvent_('amp-carousel-prev', vars);
     }
   }
 
   /**
    * @param {string} eventType
+   * @param {!Object<string, string>} vars A map of vars and their values.
    * @private
    */
-  analyticsEvent_(eventType) {
+  analyticsEvent_(eventType, vars) {
     if (this.analyticsPromise_) {
       this.analyticsPromise_.then(analytics => {
         if (!analytics) {
           return;
         }
-        analytics.triggerEvent(eventType);
+        analytics.triggerEvent(eventType, vars);
       });
     }
   }
