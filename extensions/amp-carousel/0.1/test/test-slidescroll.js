@@ -538,7 +538,6 @@ describe('SlideScroll', () => {
       const getLayoutWidthSpy = sandbox.stub(impl, 'getLayoutWidth', () => {
         return impl.slideWidth_ == 400 ? 200 : 400;
       });
-      impl.slideIndex_ = null;
       impl.onLayoutMeasure();
       expect(getLayoutWidthSpy).to.have.been.called;
       expect(impl.slideWidth_).to.equal(200);
