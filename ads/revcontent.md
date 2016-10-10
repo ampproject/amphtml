@@ -38,3 +38,7 @@ Supported parameters:
 - data-endpoint
 - data-ssl
 - data-testing
+
+## Auto-sizing of Ads
+
+Revcontent's AMP service will be updated to support resizing of ads for improved rendering, no additional tag parameters are required at this time.
