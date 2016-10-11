@@ -29,7 +29,7 @@ export function smartclip(global, data) {
 
   const rand = Math.round(Math.random() * 100000000);
 
-  loadScript(global, 'des.smartclip.net/ads?type=dyn&plc='
+  loadScript(global, 'https://des.smartclip.net/ads?type=dyn&plc='
     + encodeURI(data.plc) + '&sz=' + encodeURI(data.sz)
     + (data.extra ? '&' + data.extra : '') + '&rnd=' + rand);
 }
