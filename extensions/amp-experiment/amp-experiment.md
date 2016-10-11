@@ -47,11 +47,11 @@ The configuration of the experiments is specified in a JSON object.
 
 ```html
 <amp-experiment>
-  <script type=”application/json”>
+  <script type="application/json">
     {
       aExperiment: {
         sticky: true, 
-        consentNotificationId: “consent-notif”,
+        consentNotificationId: "consent-notif",
         variants: {
           treatment1: 12.5,
           treatment2: 12.5,
@@ -82,7 +82,7 @@ Characters used in the experiment name and variant name are restricted to `[a-z,
 For each experiment, the allocated variant is exposed as attribute of the body element of the document.
 
 ```html
-<body amp-x-aExperiment=”treatment1” amp-x-bExperiment=”treatment3”>
+<body amp-x-aExperiment="treatment1" amp-x-bExperiment="treatment3">
 ```
 
 Notice that the experiment name is prefixed by `amp-x-` to avoid naming conflict. Experiments with no variant allocated are ignored.
@@ -90,7 +90,7 @@ Notice that the experiment name is prefixed by `amp-x-` to avoid naming conflict
 Use CSS attribute selector to style the document. For example, the code below hide a test banner for the `treatment1` group of experiment `aExperiment`:
 
 ```css
-body[amp-x-aExperiment=”treatment1”] .test-banner {
+body[amp-x-aExperiment="treatment1"] .test-banner {
   display: none;
 }
 ```
