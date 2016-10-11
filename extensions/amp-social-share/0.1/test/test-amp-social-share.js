@@ -40,7 +40,7 @@ describe('amp-social-share', () => {
 
   function getShare(type, opt_endpoint, opt_params) {
     return getCustomShare(iframe => {
-      sandbox.stub(iframe.win, 'open').returns(true);
+      sandbox./*OK*/stub(iframe.win, 'open').returns(true);
       const share = iframe.doc.createElement('amp-social-share');
       share.addEventListener = sandbox.spy();
       if (opt_endpoint) {
