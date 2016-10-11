@@ -317,7 +317,7 @@ export const adConfig = {
   },
 
   smartclip: {
-    prefetch: 'https://cdn.smartclip.com/amp/amp.v0.js',
+    prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
     preconnect: [
       'https://des.smartclip.net',
     ],
