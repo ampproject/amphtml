@@ -33,7 +33,7 @@ For semantics of configuration, please contact [smartclip](mailto:adtech@smartcl
 
 Supported parameters:
 
-All parameters are mandatory, only "extra" is optional.
+All parameters are mandatory, only `data-extra` is optional.
 
 - ```data-plc``` (String, non-empty)
 - ```data-sz``` (String, non-empty)
