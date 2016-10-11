@@ -26,7 +26,6 @@ For configuration details and to generate your tags, please refer to [your publi
 <amp-ad width=300 height=250
     type="criteo"
     data-tagtype=“rta”
-    data-zone=“123456”
     data-networkid=“76543”
     data-adserver=“DFP”
     data-slot=“/0987654/rta_zone_amp”>
