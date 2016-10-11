@@ -168,6 +168,15 @@ export class BaseElement {
   }
 
   /**
+   * Returns a previously measured layout box of the element.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getLayoutBox() {
+    return this.element.getResources().getResourceForElement(
+        this.element).getLayoutBox();
+  }
+
+  /**
    * DO NOT CALL. Retained for backward compat during rollout.
    * @public @return {!Window}
    */
@@ -629,12 +638,12 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box of the element.
+   * Returns the layout rectangle of the element used for reporting this
+   * element's intersection with the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getIntersectionElementLayoutBox() {
-    return this.element.getResources().getResourceForElement(
-        this.element).getLayoutBox();
+    return this.getLayoutBox();
   }
 
   /**
