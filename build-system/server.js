@@ -410,7 +410,7 @@ app.use('/impression-proxy/', function(req, res) {
   //http.get
   //console.log('url is ', req.get('impression-proxy'));
   //const xhr =
-
+  assertCors(req, res, ['GET']);
   var fakeHeaders = {
     'Host': 'adclick.g.doubleclick.net',
     'Origin': 'https://cdn.ampproject.org',
@@ -431,7 +431,10 @@ app.use('/impression-proxy/', function(req, res) {
   request(options, (error, response, body) => {
     if (!error && response.statusCode == 200) {
       console.log(body);
+      res.send(body);
       return body;
+    } else {
+      console.log(response.statusCode);
     }
   });
 });

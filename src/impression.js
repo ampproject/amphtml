@@ -67,6 +67,9 @@ function invoke(win, clickUrl) {
   xhrFor(win).fetchJson(clickUrl, {
     credentials: 'include',
     requireAmpResponseSourceOrigin: true,
+  }).then(a => {
+    console.log('fetchJson return');
+    console.log(a);
   });
   console.log('invoke');
   // TODO(@cramforce): Do something with the result.
