@@ -81,7 +81,7 @@ class TestConfig {
   }
 
   skipSafari() {
-    return this.skip(this.platform_.isSafari.bind(this.platform_))
+    return this.skip(this.platform_.isSafari.bind(this.platform_));
   }
 
   /**
