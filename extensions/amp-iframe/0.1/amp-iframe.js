@@ -24,6 +24,7 @@ import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {urls} from '../../../src/config';
+import {moveLayoutRect} from '../../../src/layout-rect';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -159,10 +160,8 @@ export class AmpIframe extends AMP.BaseElement {
     this.unlistenViewportChanges_ = null;
 
     /**
-     * The layout box of the ad iframe (as opposed to the amp-ad tag).
-     * In practice it often has padding to create a grey or similar box
-     * around ads.
-     * @private {!LayoutRect}
+     * The (relative) layout box of the ad iframe to the amp-ad tag.
+     * @private {?../../../src/layout-rect.LayoutRectDef}
      */
     this.iframeLayoutBox_ = null;
 
@@ -209,8 +208,9 @@ export class AmpIframe extends AMP.BaseElement {
    */
   measureIframeLayoutBox_() {
     if (this.iframe_) {
-      this.iframeLayoutBox_ =
-          this.getViewport().getLayoutRect(this.iframe_);
+      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
+      const box = super.getIntersectionElementLayoutBox();
+      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
 
@@ -218,13 +218,16 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
+    const box = super.getIntersectionElementLayoutBox();
     if (!this.iframe_) {
-      return super.getIntersectionElementLayoutBox();
+      return box;
     }
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    return this.iframeLayoutBox_;
+    // If the iframe is full size, we avoid an object allocation by moving box.
+    return moveLayoutRect(box, this.iframeLayoutBox_.left,
+        this.iframeLayoutBox_.top);
   }
 
   /** @override */

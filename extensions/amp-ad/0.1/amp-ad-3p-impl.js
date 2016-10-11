@@ -30,6 +30,7 @@ import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
+import {moveLayoutRect} from '../../../src/layout-rect';
 
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -57,9 +58,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.isInFixedContainer_ = false;
 
     /**
-     * The layout box of the ad iframe (as opposed to the amp-ad tag).
-     * In practice it often has padding to create a grey or similar box
-     * around ads.
+     * The (relative) layout box of the ad iframe to the amp-ad tag.
      * @private {?../../../src/layout-rect.LayoutRectDef}
      */
     this.iframeLayoutBox_ = null;
@@ -173,7 +172,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   measureIframeLayoutBox_() {
     if (this.iframe_) {
-      this.iframeLayoutBox_ = this.getViewport().getLayoutRect(this.iframe_);
+      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
+      const box = super.getIntersectionElementLayoutBox();
+      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
 
@@ -181,13 +182,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
+    const box = super.getIntersectionElementLayoutBox();
     if (!this.iframe_) {
-      return super.getIntersectionElementLayoutBox();
+      return box;
     }
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    return this.iframeLayoutBox_;
+    // If the iframe is full size, we avoid an object allocation by moving box.
+    return moveLayoutRect(box, this.iframeLayoutBox_.left,
+        this.iframeLayoutBox_.top);
   }
 
   /** @override */
