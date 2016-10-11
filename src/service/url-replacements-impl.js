@@ -583,11 +583,14 @@ export class UrlReplacements {
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {string}
    */
-  expandSync(url, opt_bindings, opt_collectVars) {
+  expandSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */(
-        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true));
+        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+            opt_whiteList));
   }
 
   /**
@@ -607,10 +610,12 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, *>=} opt_collectVars
    * @param {boolean=} opt_sync
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>|string}
    * @private
    */
-  expand_(url, opt_bindings, opt_collectVars, opt_sync) {
+  expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -620,6 +625,11 @@ export class UrlReplacements {
       let args = [];
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
+      }
+      if (opt_whiteList && !opt_whiteList[name]) {
+        // Do not perform substitution and just return back the original
+        // match, so that the string doesn't change.
+        return match;
       }
       let binding;
       if (opt_bindings && (name in opt_bindings)) {
