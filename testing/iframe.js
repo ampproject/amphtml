@@ -47,6 +47,8 @@ let iframeCount = 0;
  * @param {number} initialIframeHeight in px.
  * @param {function(!Window)} opt_beforeLoad Called just before any other JS
  *     executes in the window.
+ * @param {function(string):string} opt_htmlTransform A transformation applied
+ *     to the html before anything else is done.
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
@@ -54,10 +56,14 @@ let iframeCount = 0;
  *   awaitEvent: function(string, number):!Promise
  * }>}
  */
-export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad) {
+export function createFixtureIframe(fixture, initialIframeHeight,
+    opt_beforeLoad, opt_htmlTransform) {
   let html = __html__[fixture];
   if (!html) {
     throw new Error('Cannot find fixture: ' + fixture);
+  }
+  if (opt_htmlTransform) {
+    html = opt_htmlTransform(html);
   }
   return createFixtureIframeFromHtml(html, initialIframeHeight, opt_beforeLoad);
 }

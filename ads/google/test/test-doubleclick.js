@@ -15,7 +15,7 @@
  */
 
 import {
-  createFixtureIframeFromHtml,
+  createFixtureIframe,
   pollForLayout,
   poll,
 } from '../../../testing/iframe';
@@ -30,7 +30,8 @@ const doubleClickTest = function(config) {
   let canvas;
 
   it(config.it, function() {
-    return createFixtureIframeFromHtml(config.html, 500, config.beforeLoad)
+    return createFixtureIframe('test/fixtures/doubleclick-dynamic.html',
+        500, config.beforeLoad, config.html)
         .then(f => {
           fixture = f;
           return pollForLayout(fixture.win, 1, waitTime).then(() => {
@@ -170,194 +171,200 @@ const doubleClickTest = function(config) {
   });
 };
 
-const htmlFirstHalf =
-'<!doctype html>' +
-'<html ⚡>' +
-'  <head>' +
-'    <meta charset="utf-8">' +
-'    <title>DoubleClick Test</title>' +
-'    <link rel="canonical" href="http://nonblocking.io/" >' +
-'    <script async src="https://cdn.ampproject.org/v0.js"></script>' +
-'    <meta name="amp-3p-iframe-src" ' +
-'content="http://localhost:9876/dist.3p/current/frame.max.html">' +
-'  </head>' +
-'  <body>';
-
-const htmlSecondHalf = '</body></html>';
-
-const createFixtureHtml = function(config, fold) {
-  let ampAd = fold ? '<div style="height: 500px; background: #000;"></div>'
-      : '';
-  ampAd += '<amp-ad type="doubleclick"' +
-      'data-slot="/4119129/mobile_ad_banner" ' +
-      'width=' + config.width + ' ' +
-      'height=' + config.height + ' ';
-  if (config.multiSize) {
-    ampAd += 'data-multi-size="' + config.multiSize + '" ';
-  }
-  if (config.multiSizeValidation) {
-    ampAd += 'data-multi-size-validation="' + config.multiSizeValidation + '" ';
-  }
-  if (config.json) {
-    ampAd += 'json=\'' + config.json + '\' ';
-  }
-  ampAd += '></amp-ad>';
-  return htmlFirstHalf + ampAd + htmlSecondHalf;
+/*
+ * This function returns a function which transforms the
+ * doubleclick-dynamic.html fixture into something that contains an appropriate
+ * amp-ad tag.
+ * @param {{width: number,
+ *          height: number,
+ *          ?multiSize: string,
+ *          ?multiSizeValidation: boolean,
+ *          ?json: string,
+ *        }} Configuration of amp-ad attribute values.
+ * @param {boolean} True if the ad should appear "below the fold".
+ * @return {function(string):string} The transformation function.
+ */
+const createFixtureHtmlTransform = function(config, fold) {
+  return html => {
+    const htmlSplit = html.split('${body}');
+    let ampAd = fold ? '<div style="height: 500px; background: #000;"></div>'
+        : '';
+    ampAd += '<amp-ad type="doubleclick"' +
+        'data-slot="/4119129/mobile_ad_banner" ' +
+        'width=' + config.width + ' ' +
+        'height=' + config.height + ' ';
+    if (config.multiSize) {
+      ampAd += 'data-multi-size="' + config.multiSize + '" ';
+    }
+    if (config.multiSizeValidation) {
+      ampAd += 'data-multi-size-validation="' + config.multiSizeValidation +
+          '" ';
+    }
+    if (config.json) {
+      ampAd += 'json=\'' + config.json + '\' ';
+    }
+    ampAd += '></amp-ad>';
+    return htmlSplit[0] + ampAd + htmlSplit[1];
+  };
 };
 
-describe('doubleclick ad request', function() {
-  this.timeout(waitTime);
-  let beforeHref;
-  afterEach(() => {
-    if (beforeHref) {
-      window.history.replaceState(null, null, beforeHref);
-    }
+describe('doubleclick', () => {
+
+  describe('ad request', function() {
+    this.timeout(waitTime);
+    let beforeHref;
+
+    afterEach(() => {
+      if (beforeHref) {
+        window.history.replaceState(null, null, beforeHref);
+      }
+    });
+
+    doubleClickTest({
+      html: createFixtureHtmlTransform({
+        width: 320,
+        height: 50,
+        json: '{"targeting":{"amptest":"true"}, "categoryExclusions":' +
+          '["health"],"tagForChildDirectedTreatment":0}',
+      }, false),
+      primarySize: {height: '50', width: '320'},
+      actualCreativeSize: {height: '50', width: '320'},
+      expectResize: false,
+      pageUrl: 'http://nonblocking.io/',
+      categoryExclusions: ['health'],
+      targeting: {'amptest': 'true'},
+      adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
+      // Need the following to ensure we don't go into Glade code path.
+      // TODO(levitzky) Figure out some tests for Glade.
+      beforeLoad: function(win) {
+        beforeHref = win.parent.location.href;
+        win.parent.history.replaceState(null, null, win.parent.location.href
+            + '?google_glade=0');
+      },
+      it: 'should render regular non-multi-size non-glade DoubleClick ad',
+    });
   });
 
-  doubleClickTest({
-    html: createFixtureHtml({
-      width: 320,
-      height: 50,
-      json: '{"targeting":{"amptest":"true"}, "categoryExclusions":' +
-        '["health"],"tagForChildDirectedTreatment":0}',
-    }, false),
-    primarySize: {height: '50', width: '320'},
-    actualCreativeSize: {height: '50', width: '320'},
-    expectResize: false,
-    pageUrl: 'http://nonblocking.io/',
-    categoryExclusions: ['health'],
-    targeting: {'amptest': 'true'},
-    adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
-    // Need the following to ensure we don't go into Glade code path.
-    // TODO(levitzky) Figure out some tests for Glade.
-    beforeLoad: function(win) {
-      beforeHref = win.parent.location.href;
-      win.parent.history.replaceState(null, null, win.parent.location.href
-          + '?google_glade=0');
-    },
-    it: 'should render regular non-multi-size non-glade DoubleClick ad',
-  });
-});
-
-describe('multi-size doubleclick ad request, above the fold', function() {
-  this.timeout(waitTime);
-  doubleClickTest({
-    html: createFixtureHtml({
-      width: 480,
-      height: 75,
+  describe('multi-size doubleclick ad request, above the fold', function() {
+    this.timeout(waitTime);
+    doubleClickTest({
+      html: createFixtureHtmlTransform({
+        width: 480,
+        height: 75,
+        multiSize: '320x50',
+      }, false),
       multiSize: '320x50',
-    }, false),
-    multiSize: '320x50',
-    primarySize: {height: '75', width: '480'},
-    actualCreativeSize: {height: '50', width: '320'},
-    expectResize: false,
-    pageUrl: 'http://nonblocking.io/',
-    adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
-    it: '(multi-size) should render an ad without resizing',
+      primarySize: {height: '75', width: '480'},
+      actualCreativeSize: {height: '50', width: '320'},
+      expectResize: false,
+      pageUrl: 'http://nonblocking.io/',
+      adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
+      it: '(multi-size) should render an ad without resizing',
+    });
   });
-});
 
-describe('multi-size doubleclick ad request, below the fold', function() {
-  this.timeout(waitTime);
-  doubleClickTest({
-    html: createFixtureHtml({
-      width: 480,
-      height: 75,
+  describe('multi-size doubleclick ad request, below the fold', function() {
+    this.timeout(waitTime);
+    doubleClickTest({
+      html: createFixtureHtmlTransform({
+        width: 480,
+        height: 75,
+        multiSize: '320x50',
+      }, true),
       multiSize: '320x50',
-    }, true),
-    multiSize: '320x50',
-    primarySize: {height: '75', width: '480'},
-    actualCreativeSize: {height: '50', width: '320'},
-    expectResize: true,
-    pageUrl: 'http://nonblocking.io/',
-    adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
-    it: '(multi-size) should render an ad with resizing',
+      primarySize: {height: '75', width: '480'},
+      actualCreativeSize: {height: '50', width: '320'},
+      expectResize: true,
+      pageUrl: 'http://nonblocking.io/',
+      adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
+      it: '(multi-size) should render an ad with resizing',
+    });
   });
-});
 
-describe(
-    'multi-size doubleclick ad request, secondary size larger than primary',
-    function() {
-      this.timeout(waitTime);
-      doubleClickTest({
-        html: createFixtureHtml({
-          width: 480,
-          height: 75,
+  describe(
+      'multi-size doubleclick ad request, secondary size larger than primary',
+      function() {
+        this.timeout(waitTime);
+        doubleClickTest({
+          html: createFixtureHtmlTransform({
+            width: 480,
+            height: 75,
+            multiSize: '620x50',
+          }, false),
           multiSize: '620x50',
-        }, false),
-        multiSize: '620x50',
-        primarySize: {height: '75', width: '480'},
-        actualCreativeSize: {height: '50', width: '320'},
-        expectResize: false,
-        pageUrl: 'http://nonblocking.io/',
-        adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
-        it: '(multi-size) ad rendering should fail',
-        expectEmpty: true,
+          primarySize: {height: '75', width: '480'},
+          actualCreativeSize: {height: '50', width: '320'},
+          expectResize: false,
+          pageUrl: 'http://nonblocking.io/',
+          adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
+          it: '(multi-size) ad rendering should fail',
+          expectEmpty: true,
+        });
       });
-    });
 
-describe('multi-size doubleclick ad request, ' +
-    'secondary size less than 2/3rds of primary',
-    function() {
-      this.timeout(waitTime);
-      doubleClickTest({
-        html: createFixtureHtml({
-          width: 900,
-          height: 100,
+  describe('multi-size doubleclick ad request, ' +
+      'secondary size less than 2/3rds of primary',
+      function() {
+        this.timeout(waitTime);
+        doubleClickTest({
+          html: createFixtureHtmlTransform({
+            width: 900,
+            height: 100,
+            multiSize: '320x50',
+          }, false),
           multiSize: '320x50',
-        }, false),
-        multiSize: '320x50',
-        primarySize: {height: '100', width: '900'},
-        actualCreativeSize: {height: '50', width: '320'},
-        expectResize: false,
-        pageUrl: 'http://nonblocking.io/',
-        adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
-        it: '(multi-size) ad rendering should fail',
-        expectEmpty: true,
+          primarySize: {height: '100', width: '900'},
+          actualCreativeSize: {height: '50', width: '320'},
+          expectResize: false,
+          pageUrl: 'http://nonblocking.io/',
+          adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
+          it: '(multi-size) ad rendering should fail',
+          expectEmpty: true,
+        });
       });
-    });
 
-describe('multi-size doubleclick ad request, ' +
-    'secondary size less than 2/3rds of primary but validation to be ' +
-    'ignored, above fold',
-    function() {
-      this.timeout(waitTime);
-      doubleClickTest({
-        html: createFixtureHtml({
-          width: 900,
-          height: 100,
+  describe('multi-size doubleclick ad request, ' +
+      'secondary size less than 2/3rds of primary but validation to be ' +
+      'ignored, above fold',
+      function() {
+        this.timeout(waitTime);
+        doubleClickTest({
+          html: createFixtureHtmlTransform({
+            width: 900,
+            height: 100,
+            multiSize: '320x50',
+            multiSizeValidation: 'false',
+          }, false),
           multiSize: '320x50',
-          multiSizeValidation: 'false',
-        }, false),
-        multiSize: '320x50',
-        primarySize: {height: '100', width: '900'},
-        actualCreativeSize: {height: '50', width: '320'},
-        expectResize: false,
-        pageUrl: 'http://nonblocking.io/',
-        adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
-        it: '(multi-size) ad should render',
+          primarySize: {height: '100', width: '900'},
+          actualCreativeSize: {height: '50', width: '320'},
+          expectResize: false,
+          pageUrl: 'http://nonblocking.io/',
+          adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
+          it: '(multi-size) ad should render',
+        });
       });
-    });
 
-describe('multi-size doubleclick ad request, ' +
-    'secondary size less than 2/3rds of primary but validation to be ' +
-    'ignored, below fold',
-    function() {
-      this.timeout(waitTime);
-      doubleClickTest({
-        html: createFixtureHtml({
-          width: 480,
-          height: 76,
+  describe('multi-size doubleclick ad request, ' +
+      'secondary size less than 2/3rds of primary but validation to be ' +
+      'ignored, below fold',
+      function() {
+        this.timeout(waitTime);
+        doubleClickTest({
+          html: createFixtureHtmlTransform({
+            width: 480,
+            height: 76,
+            multiSize: '320x50',
+            multiSizeValidation: 'false',
+          }, true),
           multiSize: '320x50',
-          multiSizeValidation: 'false',
-        }, true),
-        multiSize: '320x50',
-        primarySize: {height: '76', width: '480'},
-        actualCreativeSize: {height: '50', width: '320'},
-        expectResize: true,
-        pageUrl: 'http://nonblocking.io/',
-        adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
-        it: '(multi-size) ad should render',
+          primarySize: {height: '76', width: '480'},
+          actualCreativeSize: {height: '50', width: '320'},
+          expectResize: true,
+          pageUrl: 'http://nonblocking.io/',
+          adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
+          it: '(multi-size) ad should render',
+        });
       });
-    });
 
+});
