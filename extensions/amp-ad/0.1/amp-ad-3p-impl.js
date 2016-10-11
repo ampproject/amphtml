@@ -173,7 +173,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   measureIframeLayoutBox_() {
     if (this.iframe_) {
       const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
-      const box = super.getIntersectionElementLayoutBox();
+      const box = this.getLayoutBox();
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
@@ -182,10 +182,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
-    const box = super.getIntersectionElementLayoutBox();
     if (!this.iframe_) {
-      return box;
+      return super.getIntersectionElementLayoutBox();
     }
+    const box = this.getLayoutBox();
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
