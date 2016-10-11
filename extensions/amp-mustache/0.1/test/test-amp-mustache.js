@@ -40,6 +40,47 @@ describe('amp-mustache template', () => {
     expect(result./*OK*/innerHTML).to.equal('value = <a>abc</a>');
   });
 
+  describe('Sanitizing data- attributes', () => {
+    it('should parse data-&style=value output correctly', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = <a href="{{value}}"' +
+          ' data-&style="color:red;">abc</a>';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal('value = <a data-="">abc</a>');
+    });
+
+    it('should parse data-&attr=value output correctly', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = <a data-&href="{{value}}">' +
+          'abc</a>';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: 'https://google.com/',
+      });
+      expect(result./*OK*/innerHTML).to.equal('value = <a data-=""' +
+          ' href="https://google.com/">abc</a>');
+    });
+
+    it('should allow for data-attr=value to output correctly', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<a data-my-attr="{{invalidValue}}" data-my-id="{{value}}">abc</a>';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: 'myid',
+        invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a data-my-id="myid">abc</a>');
+    });
+  });
+
   it('should sanitize triple-mustache', () => {
     const templateElement = document.createElement('div');
     templateElement.textContent = 'value = {{{value}}}';
