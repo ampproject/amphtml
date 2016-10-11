@@ -52,7 +52,6 @@ The ad size is based on the setup of your Criteo zone. The `width` and `height` 
 Supported parameters:
 
 - `data-tagtype`: identifies the used Criteo technology. Must be “rta”. Required.
-- `data-zone`: your Criteo zone identifier. Required.
 - `data-adserver`: the name of your adserver. Required. Only “DFP” is supported at this stage.
 - `data-slot`: adserver (DFP) slot slot. Required.
 - `data-networkid`: your Criteo network id. Required.
