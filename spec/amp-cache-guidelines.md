@@ -56,6 +56,28 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 * Participation in [AMP Ads For AMP Pages ("A4A")](https://github.com/ampproject/amphtml/issues/3133) advertisement signing.
 
+## Guidelines: Accepted MIME types
+
+### MIME types for images
+
+Accepted MIME types for images include all `image/` subtypes (e.g. `image/gif`).
+
+### MIME types for fonts
+
+Accepted MIME types for fonts include the following prefixes:
+
+| Media type / subtype  |
+| ------------- |
+|  font/   (e.g. `font/opentype`)|
+|  application/font   |
+|  application/x-font   |
+|  application/x-woff   |
+|  image/svg+xml   |
+|  application/octet-stream   |
+|  application/vnd.ms-fontobject   |
+|  binary/octet-stream   |
+|  text/plain (not recommended)   |
+
 # References
 
 ## [Google AMP Cache](https://developers.google.com/amp/cache/)
