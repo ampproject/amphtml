@@ -58,25 +58,25 @@ export function displayNoContentUI(baseInstance) {
     baseInstance.attemptChangeHeight(0).then(() => {
       baseInstance./*OK*/collapse();
       baseInstance.state = AdDisplayState.NO_CONTENT;
-      return;
     }, () => {});
+  } else {
+    baseInstance.deferMutate(() => {
+      if (baseInstance.state == AdDisplayState.UN_LAID_OUT) {
+        // If alreayd unlaid out, do not replace current placeholder then.
+        return;
+      }
+      baseInstance.togglePlaceholder(false);
+      baseInstance.toggleFallback(true);
+      baseInstance.state = AdDisplayState.NO_CONTENT;
+    });
   }
-
-  baseInstance.deferMutate(() => {
-    if (baseInstance.state == AdDisplayState.UN_LAID_OUT) {
-      // If alreayd unlaid out, do not replace current placeholder then.
-      return;
-    }
-    baseInstance.togglePlaceholder(false);
-    baseInstance.toggleFallback(true);
-    baseInstance.state = AdDisplayState.NO_CONTENT;
-  });
 };
 
 /**
  * Apply UI for unlaid out ad
  * Hide fallback and show placeholder if exists
  * Note: Once unlayout UI applied, only another layout will change the UI again
+ * @param {!BaseElement} baseInstance
  */
 export function displayUnlayoutUI(baseInstance) {
   baseInstance.state = AdDisplayState.UN_LAID_OUT;

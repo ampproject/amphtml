@@ -43,8 +43,8 @@ export class AmpAdCrossDomainIframeHandler {
     /** @private {!Element} */
     this.element_ = baseInstance.element;
 
-    /** @private {?Element} iframe instance */
-    this.iframe_ = null;
+    /** {?Element} iframe instance */
+    this.iframe = null;
 
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
@@ -54,9 +54,6 @@ export class AmpAdCrossDomainIframeHandler {
 
     /** @private {boolean} */
     this.is3p_ = false;
-
-    /** @private {boolean} */
-    this.timeout_ = false;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
@@ -80,25 +77,25 @@ export class AmpAdCrossDomainIframeHandler {
    */
   startUp(iframe, is3p, opt_defaultVisible, opt_isA4A) {
     dev().assert(
-        !this.iframe_, 'multiple invocations of startup without destroy!');
-    this.iframe_ = iframe;
+        !this.iframe, 'multiple invocations of startup without destroy!');
+    this.iframe = iframe;
     this.is3p_ = is3p;
-    this.iframe_.setAttribute('scrolling', 'no');
-    this.baseInstance_.applyFillContent(this.iframe_);
+    this.iframe.setAttribute('scrolling', 'no');
+    this.baseInstance_.applyFillContent(this.iframe);
     this.intersectionObserver_ = new IntersectionObserver(
-        this.baseInstance_, this.iframe_, is3p);
+        this.baseInstance_, this.iframe, is3p);
     this.embedStateApi_ = new SubscriptionApi(
-        this.iframe_, 'send-embed-state', is3p,
+        this.iframe, 'send-embed-state', is3p,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOncePromise(this.iframe_, 'entity-id', this.is3p_)
+    listenForOncePromise(this.iframe, 'entity-id', this.is3p_)
         .then(info => {
           this.element_.creativeId = info.data.id;
         });
 
     // Install iframe resize API.
-    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size',
+    this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
           this.updateSize_(data.height, data.width, source, origin);
         }, this.is3p_, this.is3p_));
@@ -125,12 +122,13 @@ export class AmpAdCrossDomainIframeHandler {
     } else {
       // If NOT support render-start, listen to bootstrap-loaded no-content
       // respectively
-      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
+      const responsePromise = listenForOncePromise(this.iframe,
         'bootstrap-loaded', this.is3p_);
-      listenForOncePromise(this.iframe_, 'no-content', this.is3p_).then(() => {
-        if (this.timeout_) {
-          return;
-        }
+      this.adResponsePromise_ =
+          timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+          responsePromise,
+          'timeout waiting for ad response');
+      listenForOncePromise(this.iframe, 'no-content', this.is3p_).then(() => {
         this.noContent_();
       });
     }
@@ -138,27 +136,24 @@ export class AmpAdCrossDomainIframeHandler {
     if (!opt_defaultVisible) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
-      this.iframe_.style.visibility = 'hidden';
+      this.iframe.style.visibility = 'hidden';
     }
 
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
-    this.element_.appendChild(this.iframe_);
-    return loadPromise(this.iframe_).then(() => {
-      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-          this.adResponsePromise_,
-          'timeout waiting for ad response').catch(e => {
-            this.timeout_ = true;
-            this.noContent_();
-            user().warn('AMP-AD', e);
-          }).then(() => {
-            //TODO: add performance reporting;
-            if (this.iframe_) {
-              this.iframe_.style.visibility = '';
-            }
-          });
+    this.element_.appendChild(this.iframe);
+    return loadPromise(this.iframe).then(() => {
+      return this.adResponsePromise_.catch(e => {
+        this.noContent_();
+        user().warn('amp-ad', e);
+      }).then(() => {
+        //TODO: add performance reporting;
+        if (this.iframe) {
+          this.iframe.style.visibility = '';
+        }
+      });
     });
   }
 
@@ -184,10 +179,10 @@ export class AmpAdCrossDomainIframeHandler {
    */
   freeIframe(opt_force) {
     this.cleanup_();
-    if (this.iframe_) {
-      if (opt_force || this.iframe_.name.indexOf('_master') == -1) {
-        removeElement(this.iframe_);
-        this.iframe_ = null;
+    if (this.iframe) {
+      if (opt_force || this.iframe.name.indexOf('_master') == -1) {
+        removeElement(this.iframe);
+        this.iframe = null;
       }
     }
   }
@@ -197,7 +192,7 @@ export class AmpAdCrossDomainIframeHandler {
    * @private
    */
   noContent_() {
-    if (!this.iframe_) {
+    if (!this.iframe) {
       // unlayout already called
       return;
     }
@@ -238,11 +233,11 @@ export class AmpAdCrossDomainIframeHandler {
     let newHeight, newWidth;
     if (height !== undefined) {
       newHeight = Math.max(this.element_./*OK*/offsetHeight +
-          height - this.iframe_./*OK*/offsetHeight, height);
+          height - this.iframe./*OK*/offsetHeight, height);
     }
     if (width !== undefined) {
       newWidth = Math.max(this.element_./*OK*/offsetWidth +
-          width - this.iframe_./*OK*/offsetWidth, width);
+          width - this.iframe./*OK*/offsetWidth, width);
     }
     if (newHeight !== undefined || newWidth !== undefined) {
       this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(() => {
@@ -265,11 +260,11 @@ export class AmpAdCrossDomainIframeHandler {
   sendEmbedSizeResponse_(success, requestedWidth, requestedHeight, source,
       origin) {
     // The iframe may have been removed by the time we resize.
-    if (!this.iframe_) {
+    if (!this.iframe) {
       return;
     }
     postMessageToWindows(
-        this.iframe_,
+        this.iframe,
         [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
         {requestedWidth, requestedHeight},
