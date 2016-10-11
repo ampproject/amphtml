@@ -101,17 +101,9 @@ describe('importPublicKet', function() {
     }));
 });
 
-describe('verifySignature', function() {
+describes.sandboxed('verifySignature', {}, function() {
 
   if (!isCryptoAvailable()) { return; }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 
   it('should validate with the correct key and signature', () =>
       pubKeyInfoPromise.then(pubKeyInfo =>
