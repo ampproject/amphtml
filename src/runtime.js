@@ -463,7 +463,7 @@ class MultidocManager {
 
   /**
    * @param {!Window} win
-   * @param {!./service/ampdoc-impl.AmpdocSevice} ampdocService
+   * @param {!./service/ampdoc-impl.AmpDocService} ampdocService
    * @param {!./service/extensions-impl.Extensions} extensions
    */
   constructor(win, ampdocService, extensions) {
