@@ -573,7 +573,6 @@ class MultidocManager {
     return shadowRoot.AMP;
   }
 
-
   /**
    * Processes the contents of the shadow document's head.
    * @param {!ShadowRoot} shadowRoot
