@@ -575,7 +575,7 @@ export class Viewport {
   updateOnViewportEvent_(event) {
     this.binding_.updateViewerViewport(this.viewer_);
     const paddingTop = event['paddingTop'];
-    const duration = event['duration'];
+    const duration = event['duration'] || 0;
     const curve = event['curve'];
     /** @const {boolean} */
     const transient = event['transient'];
@@ -606,7 +606,6 @@ export class Viewport {
       return Promise.resolve();
     }
     // Add transit effect on position fixed element
-    /** @const {!TransitionDef<number>} */
     const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
     return Animation.animate(this.ampdoc.getRootNode(), time => {
       const p = tr(time);
