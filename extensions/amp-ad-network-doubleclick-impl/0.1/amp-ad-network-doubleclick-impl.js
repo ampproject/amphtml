@@ -90,7 +90,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getSigningServiceNames_() {
+  getSigningServiceNames() {
     // TODO(levitzky) Add dev key name once it goes live.
     return getMode().localDev ? ['google'] : ['google'];
   }

@@ -18,6 +18,7 @@ import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
 
@@ -58,6 +59,12 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         signature: base64DecodeToBytes(decoded['signature']),
       };
     });
+  }
+
+  /** @override */
+  getSigningServiceNames() {
+    // TODO(levitzky) Add dev key name once it goes live.
+    return getMode().localDev ? ['google'] : ['google'];
   }
 }
 

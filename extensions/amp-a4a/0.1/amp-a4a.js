@@ -505,7 +505,7 @@ export class AmpA4A extends AMP.BaseElement {
    * signing service(s) is to be used.
    * @return {!Array<string>} A list of signing services.
    */
-  getSigningServiceNames_() {
+  getSigningServiceNames() {
     throw new Error('getSigningServiceNames not implemented!');
   }
 
@@ -520,7 +520,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (!isCryptoAvailable()) {
       return [];
     }
-    const jwkSetPromises = this.getSigningServiceNames_().map(serviceName => {
+    const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
       const url = signingServerURLs[serviceName];
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
