@@ -491,7 +491,7 @@ function createBaseCustomElementClass(win) {
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
       }
-      /** @private {./base-element.BaseElement} */
+      /** @private {!./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
       /**
@@ -519,7 +519,7 @@ function createBaseCustomElementClass(win) {
     /**
      * The name of the custom element.
      * @abstract
-     * @return {!string}
+     * @return {string}
      */
     elementName() {
     }
