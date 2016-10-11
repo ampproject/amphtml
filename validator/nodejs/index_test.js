@@ -141,7 +141,7 @@ it('handles syntax errors in validator file', function(done) {
 });
 
 it('also works with newInstance', function() {
-  var mini = fs.readFileSync(0
+  var mini = fs.readFileSync(
       '../testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
   var validatorJsContents =
       fs.readFileSync('../dist/validator_minified.js', 'utf-8');
