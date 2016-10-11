@@ -238,7 +238,12 @@ export const adConfig = {
   },
 
   mediaimpact: {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
+    preconnect: [
+      'https://ww251.smartadserver.com',
+      'https://static.sascdn.com/',
+    ],
+    renderStartImplemented: true,
   },
 
   meg: {
