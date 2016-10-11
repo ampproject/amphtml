@@ -21,7 +21,11 @@ import {
 import {adConfig} from '../../../ads/_config';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
-import {removeChildren, createElementWithAttributes} from '../../../src/dom';
+import {
+  closestByTag,
+  removeChildren,
+  createElementWithAttributes,
+} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -29,6 +33,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
@@ -41,6 +46,9 @@ import {
 } from './crypto-verifier';
 import {isExperimentOn} from '../../../src/experiments';
 import {handleClick} from '../../../ads/alp/handler';
+
+/** @private @const {string} */
+const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /**
  * Dev public key set. This will go away once the dev signing service goes live.
@@ -668,6 +676,9 @@ export class AmpA4A extends AMP.BaseElement {
               extensionIds: creativeMetaData.customElementExtensions || [],
               fonts: fontsArray,
             }).then(friendlyIframeEmbed => {
+              // Capture phase click handlers on the ad.
+              this.registerExpandUrlParams_(friendlyIframeEmbed.win);
+              // Bubble phase click handlers on the ad.
               this.registerAlpHandler_(friendlyIframeEmbed.win);
               this.rendered_ = true;
               this.onAmpCreativeRender();
@@ -835,6 +846,11 @@ export class AmpA4A extends AMP.BaseElement {
        metaData.cssUtf16CharOffsets[1]);
  }
 
+  /**
+   * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
+   * viewer navigates to an AMP destination on our behalf.
+   * @param {!Window} iframeWin
+   */
   registerAlpHandler_(iframeWin) {
     if (!isExperimentOn(this.win, 'alp-for-a4a')) {
       return;
@@ -844,5 +860,58 @@ export class AmpA4A extends AMP.BaseElement {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
+  }
+
+  /**
+   * Registers a handler that performs URL replacement on the href
+   * of an ad click.
+   * @param {!Window} iframeWin
+   */
+  registerExpandUrlParams_(iframeWin) {
+    iframeWin.document.documentElement.addEventListener('click',
+        this.maybeExpandUrlParams_.bind(this), /* capture */ true);
+  }
+
+  /**
+   * Handle click on links and replace variables in the click URL.
+   * The function changes the actual href value and stores the
+   * template in the ORIGINAL_HREF_ATTRIBUTE attribute
+   * @param {!Event} e
+   */
+  maybeExpandUrlParams_(e) {
+    const target = closestByTag(dev().assertElement(e.target), 'A');
+    if (!target || !target.href) {
+      // Not a click on a link.
+      return;
+    }
+    const hrefToExpand =
+    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute('href');
+    if (!hrefToExpand) {
+      return;
+    }
+    const vars = {
+      'CLICK_X': () => {
+        return e.pageX;
+      },
+      'CLICK_Y': () => {
+        return e.pageY;
+      },
+    };
+    const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
+        hrefToExpand, vars, undefined, /* opt_whitelist */ {
+          // For now we only allow to replace the click location vars
+          // and nothing else.
+          // NOTE: Addition to this whitelist requires additional review.
+          'CLICK_X': true,
+          'CLICK_Y': true,
+        });
+    if (newHref != hrefToExpand) {
+      // Store original value so that later clicks can be processed with
+      // freshest values.
+      if (!target.getAttribute(ORIGINAL_HREF_ATTRIBUTE)) {
+        target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, hrefToExpand);
+      }
+      target.setAttribute('href', newHref);
+    }
   }
 }
