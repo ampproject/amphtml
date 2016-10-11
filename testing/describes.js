@@ -18,6 +18,7 @@ import {FakeCustomElements, FakeWindow} from './fake-dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   adopt,
+  adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
   registerForUnitTest,
@@ -372,6 +373,8 @@ class AmpFixture {
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
+    } else if (ampdocType == 'multi') {
+      adoptShadowMode(win);
     }
   }
 
