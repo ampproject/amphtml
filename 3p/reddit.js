@@ -61,14 +61,16 @@ function getCommentContainer(global, data) {
  * @param {!Object} data
  */
 export function reddit(global, data) {
+  const embedtype = data.embedtype || 'post';
+
   let container;
-  let scriptSource;
+  let scriptSource = '';
 
   // Post and comment embeds are handled totally differently.
-  if (data.embedtype === 'post') {
+  if (embedtype === 'post') {
     container = getPostContainer(global);
     scriptSource = 'https://embed.redditmedia.com/widgets/platform.js';
-  } else if (data.embedtype === 'comment') {
+  } else if (embedtype === 'comment') {
     container = getCommentContainer(global, data);
     scriptSource = 'https://www.redditstatic.com/comment-embed.js';
   }
