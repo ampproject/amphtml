@@ -363,16 +363,19 @@ describe('amp-sticky-ad', () => {
       impl.ad_.isBuilt = () => {
         return false;
       };
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
       const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
-      const displayAfterAdLoadSpy = sandbox.spy(impl, 'displayAfterAdLoad_');
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.dispatchEvent(new Event('amp:built'));
       expect(layoutAdSpy).to.be.called;
-      expect(displayAfterAdLoadSpy).to.not.been.called;
-      impl.ad_.setAttribute('type', 'doubleclick');
+      impl.ad_.setAttribute('type', '_ping_');
       impl.ad_.dispatchEvent(new Event('amp:load:end'));
-      expect(displayAfterAdLoadSpy).to.be.called;
+      expect(stickyAdElement).to.have.attribute('visible');
+      expect(stickyAdElement.classList.contains('amp-sticky-ad-loaded'))
+          .to.be.true;
     });
   });
 });

@@ -159,35 +159,18 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
-   * Layout ad, and change sticky-ad container style to ad-loaded style after
-   * certain delay.
-   * For ad type that support return render-start wait until ad layoutCallback
-   * resolve and receive amp:load:end.
-   * For ad type that don't support render-start, wait for 1 sec.
+   * Layout ad, and display sticky-ad container after layout complete.
    * @private
    */
   layoutAd_() {
     this.updateInViewport(dev().assertElement(this.ad_), true);
     this.scheduleLayout(dev().assertElement(this.ad_));
     listenOnce(this.ad_, 'amp:load:end', () => {
-      //if (this.ad_.hasAttribute('-amp-render-start-impl')) {
-        this.displayAfterAdLoad_();
-      //} else {
-        //timerFor(this.win).delay(() => {
-          //this.displayAfterAdLoad_();
-        //}, 1000);
-      }
-    });
-  }
-
-  /**
-   * Change sticky-ad container style by adding class name
-   * @private
-   */
-  displayAfterAdLoad_() {
-    this.vsync_.mutate(() => {
-      this.element.setAttribute('visible', '');
-      this.element.classList.add('amp-sticky-ad-loaded');
+      this.vsync_.mutate(() => {
+        // Set sticky-ad to visible and change container style
+        this.element.setAttribute('visible', '');
+        this.element.classList.add('amp-sticky-ad-loaded');
+      });
     });
   }
 
