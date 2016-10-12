@@ -27,7 +27,6 @@ import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import * as describes from '../testing/describes';
-import * as lolex from 'lolex';
 
 
 // All exposed describes.
@@ -132,7 +131,7 @@ it.configure = function() {
 // Used to check if an unrestored sandbox exists
 const sandboxes = [];
 const create = sinon.sandbox.create;
-sinon.sandbox.create = function createSandbox(config) {
+sinon.sandbox.create = function(config) {
   const sandbox = create.call(sinon.sandbox, config);
   sandboxes.push(sandbox);
 
@@ -144,7 +143,6 @@ sinon.sandbox.create = function createSandbox(config) {
     }
     return restore.call(sandbox);
   };
-
   return sandbox;
 };
 
