@@ -126,13 +126,26 @@ i-amp-sizer {
   /* TODO(dvoytenko): explore adding here object-fit. */
 }
 
-/* off-screen, hidden nodes that are invisible but read by screen-readers */
-.-amp-screen-reader {
+/**
+ * Makes nodes visually invisible but still accessible to screen-readers.
+ *
+ * This is a public class so page authors can use it for similiar a11y purposes
+ * within their AMP documents on any element.
+ *
+ * This css has been carefully tested to ensure screen-readers can read and
+ * activate (in case of links and buttons) the elements with this class. Please
+ * use caution when changing anything, even seemingly safe ones. For example
+ * changing width from 1 to 0 would prevent TalkBack from activating (clicking)
+ * buttons despite TalkBack reading them just fine.
+ */
+.amp-screen-reader {
   position: fixed !important;
-  top: -1000px !important;
-  width: 0 !important;
-  height: 0 !important;
+  top: 0px !important;
+  left: 0px !important;
+  width: 1px !important;
+  height: 1px !important;
   opacity: 0 !important;
+  overflow: hidden !important;
   border: none !important;
   margin: 0 !important;
   padding: 0 !important;
