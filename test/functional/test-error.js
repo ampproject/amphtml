@@ -28,12 +28,12 @@ describe('reportErrorToServer', () => {
   beforeEach(() => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
-    sandbox.spy(window, 'Image');
+    // sandbox.spy(window, 'Image');
   });
 
   afterEach(() => {
     window.onerror = onError;
-    sandbox.restore();
+    // sandbox.restore();
     window.viewerState = undefined;
   });
 
