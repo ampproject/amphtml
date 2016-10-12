@@ -34,7 +34,9 @@ describe('reportErrorToServer', () => {
   afterEach(() => {
     window.onerror = onError;
     // sandbox.restore();
-    window.viewerState = undefined;
+    if (sandbox) {
+      window.viewerState = undefined;
+    }
   });
 
   it('reportError with error object', () => {
