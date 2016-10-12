@@ -521,9 +521,10 @@ describe('runtime', () => {
     });
   });
 
-  describe('attachShadowDoc', () => {
+  describes.fakeWin('attachShadowDoc', {}, env => {
     const docUrl = 'https://example.org/doc1';
 
+    let win;
     let clock;
     let extensions;
     let extensionsMock;
@@ -532,11 +533,12 @@ describe('runtime', () => {
     let ampdoc;
 
     beforeEach(() => {
+      win = env.win;
       clock = sandbox.useFakeTimers();
       adoptShadowMode(win);
-      win.setTimeout = window.setTimeout;
-      win.addEventListener = function() {};
-      win.removeEventListener = function() {};
+      // win.setTimeout = window.setTimeout;
+      // win.addEventListener = function() {};
+      // win.removeEventListener = function() {};
       extensions = ext.installExtensionsService(win);
       extensionsMock = sandbox.mock(extensions);
       hostElement = document.createElement('div');
