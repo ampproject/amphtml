@@ -30,7 +30,6 @@ var url = require('url');
 var util = require('util');
 var vm = require('vm');
 
-var VERSION = '0.1.0';
 var DEFAULT_USER_AGENT = 'amphtml-validator';
 
 /**
@@ -381,7 +380,7 @@ function logValidationResult(filename, validationResult, color) {
  * Main entry point into the command line tool.
  */
 function main() {
-  program.version(VERSION)
+  program
       .usage(
           '[options] <fileOrUrlOrMinus...>\n\n' +
           '  Validates the files or urls provided as arguments. If "-" is ' +

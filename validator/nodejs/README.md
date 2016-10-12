@@ -54,3 +54,6 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.12
 * Added support for --user-agent option
+
+### 1.0.13
+* Added newInstance method, a simple API that's not async.
