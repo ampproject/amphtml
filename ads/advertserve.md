@@ -24,7 +24,8 @@ limitations under the License.
       data-client="tester"
       data-pid=0
       data-zid=68>
-  <div placeholder></div>
+  <div placeholder>Loading ad.</div>
+  <div fallback>Ad could not be loaded.</div>
 </amp-ad>
 ```
 
