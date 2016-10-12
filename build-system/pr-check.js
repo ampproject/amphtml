@@ -26,6 +26,8 @@
 const child_process = require('child_process');
 const path = require('path');
 
+const gulp = 'node_modules/gulp/bin/gulp.js';
+
 /**
  * Executes the provided command, returning its stdout as an array of lines.
  * This will throw an exception if something goes wrong.
@@ -133,26 +135,26 @@ function main(argv) {
 
   if (buildTargets.has('RUNTIME')) {
     execOrDie('npm run ava');
-    execOrDie('gulp lint');
-    execOrDie('gulp build --css-only');
-    execOrDie('gulp check-types');
-    execOrDie('gulp dist --fortesting');
+    execOrDie(`${gulp} lint`);
+    execOrDie(`${gulp} build --css-only`);
+    execOrDie(`${gulp} check-types`);
+    execOrDie(`${gulp} dist --fortesting`);
   }
 
-  execOrDie('gulp presubmit');
+  execOrDie(`${gulp} presubmit`);
 
   if (buildTargets.has('RUNTIME')) {
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
-    execOrDie('gulp dep-check');
+    execOrDie(`${gulp} dep-check`);
     // Unit tests with Travis' default chromium
-    execOrDie('gulp test --nobuild --compiled');
+    execOrDie(`${gulp} test --nobuild --compiled`);
     // Integration tests with all saucelabs browsers
-    execOrDie('gulp test --nobuild --saucelabs --integration --compiled');
+    execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    execOrDie('gulp test --saucelabs --oldchrome');
+    execOrDie(`${gulp} test --saucelabs --oldchrome`);
   }
 
   if (buildTargets.has('VALIDATOR_WEBUI')) {
