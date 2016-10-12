@@ -98,6 +98,10 @@ export const adConfig = {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
   },
 
+  advertserve: {
+    renderStartImplemented: true,
+  },
+
   affiliateb: {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
     renderStartImplemented: true,
