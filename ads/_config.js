@@ -280,6 +280,10 @@ export const adConfig = {
       'https://img1.nend.net',
     ],
   },
+  
+  nokta: {
+    prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/amp.js',
+  },
 
   openadstream: {},
 
