@@ -21,7 +21,7 @@ import {documentInfoForDoc} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
@@ -71,7 +71,8 @@ export function isGoogleAdsA4AValidEnvironment(win, element) {
  */
 export function googleAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams) {
-  const referrerPromise = viewerFor(a4a.win).getReferrerUrl();
+  /** @const {!Promise<string>} */
+  const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
       buildAdUrl(
           a4a, baseUrl, startTime, slotNumber, queryParams,
@@ -131,9 +132,7 @@ function buildAdUrl(
     [
       {
         name: 'is_amp',
-        value: a4a.supportsShadowDom() ?
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME,
+        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
       },
       {name: 'amp_v', value: '$internalRuntimeVersion$'},
       {name: 'dt', value: startTime},

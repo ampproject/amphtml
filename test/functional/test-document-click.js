@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {onDocumentElementClick_, onDocumentElementCapturedClick_,
-    getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
-import {createIframePromise} from '../../testing/iframe';
-import {urlReplacementsForDoc} from '../../src/url-replacements';
+import {onDocumentElementClick_} from '../../src/document-click';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 describe('test-document-click onDocumentElementClick_', () => {
@@ -36,11 +34,13 @@ describe('test-document-click onDocumentElementClick_', () => {
   let querySelectorSpy;
   let replaceLocSpy;
   let viewport;
+  let timerFuncSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     preventDefaultSpy = sandbox.spy();
     scrollIntoViewSpy = sandbox.spy();
+    timerFuncSpy = sandbox.spy();
     replaceLocSpy = sandbox.spy();
     elem = {};
     getElementByIdSpy = sandbox.stub();
@@ -51,6 +51,10 @@ describe('test-document-click onDocumentElementClick_', () => {
       location: {
         href: 'https://www.google.com/some-path?hello=world#link',
         replace: replaceLocSpy,
+      },
+      setTimeout: fn => {
+        timerFuncSpy();
+        fn();
       },
     };
     ampdoc = {
@@ -77,6 +81,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     history = {
       push: () => {},
     };
+    installTimerService(win);
   });
 
   afterEach(() => {
@@ -188,7 +193,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(scrollIntoViewSpy.callCount).to.equal(2);
+      expect(timerFuncSpy).to.be.calledOnce;
       expect(replaceLocSpy.callCount).to.equal(1);
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
@@ -200,9 +206,24 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(replaceLocSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(scrollIntoViewSpy.callCount).to.equal(2);
+      expect(timerFuncSpy).to.be.calledOnce;
       expect(replaceLocSpy.callCount).to.equal(1);
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
+    });
+
+    it('should use escaped css selectors', () => {
+      tgt.href = 'https://www.google.com/some-path?hello=world#test%20hello';
+      getElementByIdSpy.returns(null);
+      querySelectorSpy.returns(elem);
+
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(querySelectorSpy).to.be.calledWith('a[name="test\\%20hello"]');
+
+      querySelectorSpy.reset();
+      tgt.href = 'https://www.google.com/some-path?hello=world#test"hello';
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(querySelectorSpy).to.be.calledWith('a[name="test\\"hello"]');
     });
 
     it('should call location.replace before scrollIntoView', () => {
@@ -218,7 +239,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       };
       onDocumentElementClick_(evt, ampdoc, viewport, history);
 
-      expect(ops).to.have.length(2);
+      expect(timerFuncSpy).to.be.calledOnce;
+      expect(ops).to.have.length(3);
       expect(ops[0]).to.equal('location.replace');
       expect(ops[1]).to.equal('scrollIntoView');
     });
@@ -321,71 +343,6 @@ describe('test-document-click onDocumentElementClick_', () => {
       onDocumentElementClick_(evt, ampdoc, viewport, history, false);
       expect(win.top.location.href).to.equal('https://google.com');
       expect(preventDefaultSpy.callCount).to.equal(0);
-    });
-  });
-});
-
-describe('test-document-click onDocumentElementCapturedClick_', () => {
-
-  describe('usage of getElementByTagNameFromEventShadowDomPath_', () => {
-    it('should handle absence of path', () => {
-      expect(getElementByTagNameFromEventShadowDomPath_({}, 'A')).to.be.null;
-    });
-
-    it('should find first anchor in path', () => {
-      const evt = {path: [
-          {tagName: 'FOO'}, {tagName: 'A', item: 1}, {tagName: 'A', item: 2}]};
-      expect(getElementByTagNameFromEventShadowDomPath_(evt, 'A')).to.equal(
-          evt.path[1]);
-    });
-  });
-
-  describe('when including expansion url', () => {
-
-    it('should expand click_x/click_y', () => {
-      return createIframePromise().then(iframe => {
-        const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        const evt = {
-          clientX: 123,
-          clientY: 456,
-          target: iframe.win.document.createElement('a'),
-        };
-        evt.target.href = 'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM';
-        onDocumentElementCapturedClick_(evt, replacements);
-        expect(evt.target.href).to.match(
-            /http:\/\/foo\.com\/\?nx=123&ny=456&r=\d+(\.\d+)?/);
-        expect(evt.target.getAttribute('data-amp-orig-href')).to.equal(
-          'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM');
-        // Execute again with different event values and verify new href.
-        evt.clientX = 999;
-        onDocumentElementCapturedClick_(evt, replacements);
-        expect(evt.target.href).to.match(
-            /http:\/\/foo\.com\/\?nx=999&ny=456&r=\d+(\.\d+)?/);
-      });
-    });
-
-    it('should expand click_x/click_y relative to shadow root', () => {
-      return createIframePromise().then(iframe => {
-        const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        const evt = {
-          clientX: 123,
-          clientY: 456,
-        };
-        const containerDiv = iframe.doc.createElement('div');
-        containerDiv.style.margin = '11px 0 0 16px';
-        iframe.doc.body.appendChild(containerDiv);
-        const shadowRoot = containerDiv.createShadowRoot();
-        // Target should be containerDiv due to target rewrite for shadowRoot.
-        evt.target = containerDiv;
-        const anchorTarget = iframe.doc.createElement('A');
-        anchorTarget.setAttribute(
-            'href', 'http://foo.com/?r=RANDOM&nx=CLICK_X&ny=CLICK_Y');
-        shadowRoot.appendChild(anchorTarget);
-        evt.path = [anchorTarget];
-        onDocumentElementCapturedClick_(evt, replacements);
-        expect(anchorTarget.href).to.match(
-            /http:\/\/foo\.com\/\?r=\d+(\.\d+)?&nx=107&ny=445/);
-      });
     });
   });
 });

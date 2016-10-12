@@ -30,7 +30,7 @@ import {
   parseUrl,
 } from '../../../src/url';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {cryptoFor} from '../../../src/crypto';
 import {user} from '../../../src/log';
 
@@ -116,7 +116,7 @@ class Cid {
         'The client id name must only use the characters ' +
         '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
-      return viewerFor(this.win).whenFirstVisible();
+      return viewerForDoc(this.win.document).whenFirstVisible();
     }).then(() => {
       return getExternalCid(this, getCidStruct,
           opt_persistenceConsent || consent);
@@ -134,6 +134,7 @@ class Cid {
  * @return {!Promise<?string>}
  */
 function getExternalCid(cid, getCidStruct, persistenceConsent) {
+  /** @const {!Location} */
   const url = parseUrl(cid.win.location.href);
   if (!isProxyOrigin(url)) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
@@ -276,7 +277,7 @@ function getBaseCid(cid, persistenceConsent) {
  * @param {string} cidString Actual cid string to store.
  */
 function store(win, persistenceConsent, cidString) {
-  const viewer = viewerFor(win);
+  const viewer = viewerForDoc(win.document);
   // TODO(lannka, #4457): ideally, we should check if viewer has the capability
   // of CID storage, rather than if it is iframed.
   if (viewer.isIframed()) {
@@ -324,7 +325,7 @@ function read(win) {
   } catch (ignore) {
     // If reading from localStorage fails, we assume it is empty.
   }
-  const viewer = viewerFor(win);
+  const viewer = viewerForDoc(win.document);
   let dataPromise = Promise.resolve(data);
   if (!data && viewer.isIframed()) {
     // If we are being embedded, try to get the base cid from the viewer.

@@ -19,8 +19,7 @@ import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityFor} from '../../src/activity';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
-import {viewerFor} from '../../src/viewer';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
 import {viewportForDoc} from '../../src/viewport';
@@ -85,6 +84,7 @@ describe('Activity getTotalEngagedTime', () => {
       clearTimeout: window.clearTimeout,
       // required to instantiate Viewport service
       addEventListener: () => {},
+      removeEventListener: () => {},
     };
     fakeDoc.defaultView = fakeWin;
 
@@ -96,8 +96,7 @@ describe('Activity getTotalEngagedTime', () => {
 
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
-    installViewerService(fakeWin);
-    viewer = viewerFor(fakeWin);
+    viewer = installViewerServiceForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;

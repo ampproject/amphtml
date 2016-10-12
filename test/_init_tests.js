@@ -26,6 +26,12 @@ import {
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import * as describes from '../testing/describes';
+
+
+// All exposed describes.
+global.describes = describes;
+
 
 // Needs to be called before the custom elements are first made.
 beforeTest();

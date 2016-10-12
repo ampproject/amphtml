@@ -16,6 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {analyticsForOrNull} from '../../../src/analytics';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -87,6 +88,12 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {number} */
     this.previousScrollLeft_ = 0;
+
+    /** @private {!Array<?string>} */
+    this.dataSlideIdArr_ = [];
+
+    /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
+    this.analyticsPromise_ = null;
   }
 
   /** @override */
@@ -95,6 +102,8 @@ export class AmpSlideScroll extends BaseSlides {
   }
   /** @override */
   buildSlides() {
+    this.analyticsPromise_ = analyticsForOrNull(this.win);
+
     this.vsync_ = this.getVsync();
 
     this.hasNativeSnapPoints_ = (
@@ -119,7 +128,9 @@ export class AmpSlideScroll extends BaseSlides {
       this.slidesContainer_.appendChild(end);
     }
 
-    this.slides_.forEach(slide => {
+    this.slides_.forEach((slide, index) => {
+      this.dataSlideIdArr_.push(
+          slide.getAttribute('data-slide-id') || index.toString());
       this.setAsOwner(slide);
       const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
@@ -452,9 +463,9 @@ export class AmpSlideScroll extends BaseSlides {
         this.schedulePreload(this.slides_[showIndex]);
       }
     });
-
     this.slidesContainer_./*OK*/scrollLeft =
         this.getScrollLeftForIndex_(newIndex);
+    this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
@@ -515,6 +526,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (fromScrollLeft == toScrollLeft) {
       return Promise.resolve();
     }
+    /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
     const duration = 80;
@@ -535,5 +547,47 @@ export class AmpSlideScroll extends BaseSlides {
     this.element.addEventListener('touchmove', event => {
       event.stopPropagation();
     });
+  }
+
+  /**
+   * @param {number} newSlideIndex
+   * @private
+   */
+  triggerAnalyticsEvent_(newSlideIndex) {
+    let direction = newSlideIndex - this.slideIndex_;
+    if (direction == 0) {
+      return;
+    } else if (Math.abs(direction) !== 1) {
+      // When the direction is not +1 or -1 (happens with loops)
+      // Set the correct direction.
+      direction = direction < 0 ? 1 : -1;
+    }
+    const vars = {
+      'fromSlide': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)],
+      'toSlide': this.dataSlideIdArr_[newSlideIndex],
+    };
+    this.analyticsEvent_('amp-carousel-change', vars);
+    // At this point direction can be only +1 or -1.
+    if (direction == 1) {
+      this.analyticsEvent_('amp-carousel-next', vars);
+    } else {
+      this.analyticsEvent_('amp-carousel-prev', vars);
+    }
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, vars) {
+    if (this.analyticsPromise_) {
+      this.analyticsPromise_.then(analytics => {
+        if (!analytics) {
+          return;
+        }
+        analytics.triggerEvent(eventType, vars);
+      });
+    }
   }
 }

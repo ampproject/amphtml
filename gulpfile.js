@@ -46,7 +46,7 @@ var extensions = {};
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-accordion', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-accordion', '0.1', true);
 declareExtension('amp-ad', '0.1', false);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
@@ -54,7 +54,7 @@ declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-app-banner', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
 declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
@@ -84,7 +84,7 @@ declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
-declareExtension('amp-sidebar', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-sidebar', '0.1', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
@@ -376,6 +376,7 @@ function checkTypes() {
     './src/amp-shadow.js',
     './ads/alp/install-alp.js',
     './src/service-worker/shell.js',
+    './src/service-worker/core.js',
     './src/service-worker/kill.js',
   ];
   var extensionSrcs = Object.values(extensions).filter(function(extension) {
@@ -388,7 +389,14 @@ function checkTypes() {
       'check-types.js', {
         includePolyfills: true,
         checkTypes: true,
-        externs: ['build-system/amp.extension.extern.js',],
+      });
+  // Type check 3p/ads code.
+  closureCompile(['./3p/integration.js'],  './dist',
+      'integration-check-types.js', {
+        externs: ['ads/ads.extern.js',],
+        includeBasicPolyfills: true,
+        include3pDirectories: true,
+        checkTypes: true,
       });
 }
 

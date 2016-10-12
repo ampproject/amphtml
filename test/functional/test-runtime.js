@@ -65,6 +65,7 @@ describe('runtime', () => {
         ampdoc: {obj: ampdocService},
       },
     };
+    ampdocService.getAmpDoc = () => new AmpDocSingle(win);
     installPlatformService(win);
     errorStub = sandbox.stub(dev(), 'error');
   });
@@ -364,6 +365,9 @@ describe('runtime', () => {
 
       // Already installed.
       expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
+
+      // The main top-level service is also pinged to unblock render.
+      return getServicePromise(win, 'service1');
     });
 
     it('should register doc-service factory and install it immediately', () => {
@@ -531,6 +535,8 @@ describe('runtime', () => {
       clock = sandbox.useFakeTimers();
       adoptShadowMode(win);
       win.setTimeout = window.setTimeout;
+      win.addEventListener = function() {};
+      win.removeEventListener = function() {};
       extensions = ext.installExtensionsService(win);
       extensionsMock = sandbox.mock(extensions);
       hostElement = document.createElement('div');
@@ -575,11 +581,12 @@ describe('runtime', () => {
       // Doc services have been installed.
       expect(ampdoc.services.action).to.exist;
       expect(ampdoc.services.action.obj).to.exist;
+      expect(ampdoc.services.viewer).to.exist;
+      expect(ampdoc.services.viewer.obj).to.exist;
 
-      // Single-doc bidings should not be installed.
-      // TODO(dvoytenko): create doc-level services.
-      expect(ret.viewer).to.not.exist;
-      expect(ret.viewport).to.not.exist;
+      // Single-doc bidings have been installed.
+      expect(ret.viewer).to.exist;
+      expect(ret.viewer.ampdoc).to.equal(ampdoc);
     });
 
     it('should install doc services', () => {
@@ -608,7 +615,20 @@ describe('runtime', () => {
       });
     });
 
-    it('should update visibility', () => {
+    it('should pass init parameters to viewer', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'test1': '12',
+      });
+
+      expect(amp.viewer).to.equal(getServiceForDoc(ampdoc, 'viewer'));
+      expect(amp.viewer.getParam('test1')).to.equal('12');
+    });
+
+    it('should update host visibility', () => {
       if (!window.Element.prototype.createShadowRoot) {
         return;
       }
@@ -823,6 +843,50 @@ describe('runtime', () => {
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       expect(hostElement.shadowRoot.querySelector('script[data-id="test1"]'))
           .to.not.exist;
+    });
+
+    it('should start as visible by default', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+    });
+
+    it('should start as prerender when requested', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'visibilityState': 'prerender',
+      });
+      expect(amp.viewer.getVisibilityState()).to.equal('prerender');
+    });
+
+    it('should expose visibility method', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.setVisibilityState).to.be.function;
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+
+      amp.setVisibilityState('inactive');
+      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
+    });
+
+    it('should expose close method and dispose services', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.close).to.be.function;
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+
+      amp.viewer.dispose = sandbox.spy();
+      amp.close();
+      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
+      expect(amp.viewer.dispose).to.be.calledOnce;
     });
   });
 });

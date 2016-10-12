@@ -41,21 +41,6 @@ const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
- * @typedef {({
- *   href: string,
- *   protocol: string,
- *   host: string,
- *   hostname: string,
- *   port: string,
- *   pathname: string,
- *   search: string,
- *   hash: string,
- *   origin: string
- * }|!Location)}
- */
-export let Location;
-
-/**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
@@ -83,7 +68,7 @@ export function parseUrl(url, opt_nocache) {
     a.href = a.href;
   }
 
-  const info = {
+  const info = /** @type {!Location} */({
     href: a.href,
     protocol: a.protocol,
     host: a.host,
@@ -93,7 +78,7 @@ export function parseUrl(url, opt_nocache) {
     search: a.search,
     hash: a.hash,
     origin: null,  // Set below.
-  };
+  });
 
   // Some IE11 specific polyfills.
   // 1) IE11 strips out the leading '/' in the pathname.
@@ -135,7 +120,8 @@ export function parseUrl(url, opt_nocache) {
  * @param {boolean=} opt_addToFront
  * @return {string}
  */
-function appendParamStringToUrl(url, paramString, opt_addToFront) {
+export function appendEncodedParamStringToUrl(url, paramString,
+  opt_addToFront) {
   if (!paramString) {
     return url;
   }
@@ -162,7 +148,7 @@ function appendParamStringToUrl(url, paramString, opt_addToFront) {
  */
 export function addParamToUrl(url, key, value, opt_addToFront) {
   const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  return appendParamStringToUrl(url, field, opt_addToFront);
+  return appendEncodedParamStringToUrl(url, field, opt_addToFront);
 }
 
 /**
@@ -173,7 +159,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  return appendParamStringToUrl(url, serializeQueryString(params));
+  return appendEncodedParamStringToUrl(url, serializeQueryString(params));
 }
 
 /**

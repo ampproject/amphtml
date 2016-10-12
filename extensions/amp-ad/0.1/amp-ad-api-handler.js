@@ -23,7 +23,7 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {IntersectionObserver} from '../../../src/intersection-observer';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 
@@ -61,8 +61,8 @@ export class AmpAdApiHandler {
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
-    /** @private @const */
-    this.viewer_ = viewerFor(this.baseInstance_.win);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {?Promise} */
     this.adResponsePromise_ = null;
@@ -75,6 +75,7 @@ export class AmpAdApiHandler {
    * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
+   * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
   startUp(iframe, is3p, opt_defaultVisible) {
     dev().assert(
@@ -111,6 +112,10 @@ export class AmpAdApiHandler {
           if (data.type == 'render-start') {
             this.updateSize_(data.height, data.width,
                 info.source, info.origin);
+            if (this.baseInstance_.lifecyleReporter_) {
+              this.baseInstance_.lifecycleReporter_.sendPing(
+                  'renderCrossDomainStart');
+            }
             //report performance
           } else {
             this.noContent_();
