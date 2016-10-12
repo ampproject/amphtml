@@ -165,7 +165,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		Environment: "prod",
 		Application: errorType,
 		AppID:       appengine.AppID(c),
-		Filename:    r.URL.Query().Get("f"),
+		Filename:    r.URL.String(),
 		Line:        int32(line),
 		Classname:   r.URL.Query().Get("el"),
 		Severity:    severity,
