@@ -143,9 +143,10 @@ i-amp-sizer {
   /* keep it on viewport */
   top: 0px !important;
   left: 0px !important;
-  /* give it non-zero size */
-  width: 1px !important;
-  height: 1px !important;
+  /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
+     before allowing buttons to be activated. */
+  width: 2px !important;
+  height: 2px !important;
   /* visually hide it with overflow and opacity */
   opacity: 0 !important;
   overflow: hidden !important;
