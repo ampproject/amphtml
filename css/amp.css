@@ -121,34 +121,39 @@ i-amp-sizer {
 }
 
 .-amp-replaced-content {
+
   padding: 0 !important;
   border: none !important;
   /* TODO(dvoytenko): explore adding here object-fit. */
 }
 
 /**
- * Makes nodes visually invisible but still accessible to screen-readers.
+ * Makes elements visually invisible but still accessible to screen-readers.
  *
- * This is a public class so page authors can use it for similiar a11y purposes
- * within their AMP documents on any element.
- *
- * This css has been carefully tested to ensure screen-readers can read and
+ * This Css has been carefully tested to ensure screen-readers can read and
  * activate (in case of links and buttons) the elements with this class. Please
  * use caution when changing anything, even seemingly safe ones. For example
  * changing width from 1 to 0 would prevent TalkBack from activating (clicking)
- * buttons despite TalkBack reading them just fine.
+ * buttons despite TalkBack reading them just fine. This is because
+ * element needs to have a defined size and be on viewport otherwise TalkBack
+ * does not allow activation of buttons.
  */
-.amp-screen-reader {
+.-amp-screen-reader {
   position: fixed !important;
+  /* keep it on viewport */
   top: 0px !important;
   left: 0px !important;
+  /* give it non-zero size */
   width: 1px !important;
   height: 1px !important;
+  /* visually hide it with overflow and opacity */
   opacity: 0 !important;
   overflow: hidden !important;
+  /* remove any margin or padding */
   border: none !important;
   margin: 0 !important;
   padding: 0 !important;
+  /* ensure no other style sets display to none */
   display: block !important;
   visibility: visible !important;
 }

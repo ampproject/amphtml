@@ -104,7 +104,7 @@ export class AmpSidebar extends AMP.BaseElement {
     const screenReaderCloseButton = this.document_.createElement('button');
     // TODO(aghassemi, #4146) i18n
     screenReaderCloseButton.textContent = 'Close the sidebar';
-    screenReaderCloseButton.classList.add('amp-screen-reader');
+    screenReaderCloseButton.classList.add('-amp-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
