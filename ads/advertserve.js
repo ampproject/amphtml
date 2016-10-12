@@ -24,8 +24,8 @@ export function advertserve(global, data) {
   validateData(data, [], ['zid', 'pid', 'client']);
 
   const url = 'https://' + data.client + '.advertserve.com' +
-      '/servlet/view/banner/javascript/zone?' +
-      'zid=' + encodeURIComponent(data.zid) +
+      '/servlet/view/banner/javascript/zone?amp=true' +
+      '&zid=' + encodeURIComponent(data.zid) +
       '&pid=' + encodeURIComponent(data.pid) +
       '&random=' + Math.floor(89999999 * Math.random() + 10000000) +
       '&millis=' + Date.now();

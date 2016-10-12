@@ -98,7 +98,9 @@ export const adConfig = {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
   },
 
-  advertserve: {},
+  advertserve: {
+    renderStartImplemented: true,
+  },
 
   amoad: {
     prefetch: [
