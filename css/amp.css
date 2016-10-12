@@ -126,6 +126,20 @@ i-amp-sizer {
   /* TODO(dvoytenko): explore adding here object-fit. */
 }
 
+/* off-screen, hidden nodes that are invisible but read by screen-readers */
+.-amp-screen-reader {
+  position: fixed !important;
+  top: -1000px !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
 /* For author styling. */
 .amp-unresolved {
 }

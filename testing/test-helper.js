@@ -35,3 +35,35 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   });
   return stub;
 }
+
+/**
+ * Asserts that the given element is only visible to screen readers.
+ * @param {!Element} node
+ */
+export function assertScreenReaderNode(element) {
+  expect(element).to.exist;
+  expect(element.classList.contains('-amp-screen-reader')).to.be.true;
+  const win = element.ownerDocument.defaultView;
+  const computedStyle = win.getComputedStyle(element);
+  expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
+  expect(computedStyle.getPropertyValue('top')).to.equal('-1000px');
+  // We should not set left like other off-screen implementations out there,
+  // if we set left, RTL pages will overflow.
+  expect(computedStyle.getPropertyValue('left')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('width')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('height')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('opacity')).to.equal('0');
+  // Display or visibility should never become none/hidden or screen readers
+  // won't read it anymore.
+  expect(computedStyle.getPropertyValue('display')).to.equal('block');
+  expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
+
+  expect(computedStyle.getPropertyValue('border')).to.contain('none');
+  expect(computedStyle.getPropertyValue('margin')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('padding')).to.equal('0px');
+
+  expect(element.offsetWidth).to.equal(0);
+  expect(element.offsetHeight).to.equal(0);
+  expect(element.offsetTop).to.equal(-1000);
+  expect(element.offsetLeft).to.equal(0);
+}
