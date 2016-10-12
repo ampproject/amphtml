@@ -45,6 +45,27 @@ export function chunk(nodeOrAmpDoc, fn) {
   service.run_(fn);
 };
 
+/**
+ * Runs all currently scheduled chunks.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ */
+export function runChunksForTesting(nodeOrAmpDoc) {
+  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunk);
+  const errors = [];
+  while (true) {
+    try {
+      if (!service.execute_()) {
+        if (errors.length) {
+          break;
+        }
+        return;
+      }
+    } catch (e) {
+      errors.push(e);
+    }
+  }
+  throw errors[0];
+}
 
 class Chunk {
   /**
@@ -97,11 +118,12 @@ class Chunk {
   /**
    * Run a task.
    * Schedule the next round if there are more tasks.
+   * @return {boolean} Whether anything was executed.
    */
   execute_() {
     const t = this.tasks_.shift();
     if (!t) {
-      return;
+      return false;
     }
     const before = Date.now();
     try {
@@ -117,6 +139,7 @@ class Chunk {
       dev().fine('chunk', t.displayName || t.name,
           'Duration', Date.now() - before);
     }
+    return true;
   }
 
   /**

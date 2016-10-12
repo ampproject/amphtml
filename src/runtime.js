@@ -247,8 +247,8 @@ function adoptShared(global, opts, callback) {
    */
   function installExtension(fnOrStruct) {
     if (typeof fnOrStruct == 'function') {
-      // @dvoytenko: CAN WE DELETE THIS?
-      fnOrStruct(global.AMP);
+      const fn = fnOrStruct;
+      chunk(global.document, () => fn(global.AMP));
     } else {
       const register = function() {
         registerExtension(extensions, fnOrStruct.n, fnOrStruct.f, global.AMP);

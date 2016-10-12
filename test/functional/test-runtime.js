@@ -26,7 +26,7 @@ import {
 import {installPlatformService} from '../../src/service/platform-impl';
 import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
-import {timerFor} from '../../src/timer';
+import {runChunksForTesting} from '../../src/chunk';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -35,10 +35,10 @@ import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 
-describes.sandboxed('runtime', {}, () => {
+describes.sandboxed.only('runtime', {}, () => {
 
   let win;
-  let errorStub;
+  let sandbox;
   let ampdocService;
   let ampdocServiceMock;
 
@@ -66,7 +66,6 @@ describes.sandboxed('runtime', {}, () => {
     };
     ampdocService.getAmpDoc = () => new AmpDocSingle(win);
     installPlatformService(win);
-    errorStub = sandbox.stub(dev(), 'error');
   });
 
   afterEach(() => {
@@ -125,17 +124,20 @@ describes.sandboxed('runtime', {}, () => {
     });
     expect(queueExtensions).to.have.length(3);
     adopt(win);
+    runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('123');
     win.AMP.push(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '4';
     });
+    runChunksForTesting(win.document);
     expect(progress).to.equal('1234');
     win.AMP.push(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '5';
     });
+    runChunksForTesting(win.document);
     expect(progress).to.equal('12345');
     expect(queueExtensions).to.have.length(0);
   });
@@ -160,6 +162,7 @@ describes.sandboxed('runtime', {}, () => {
     expect(queueExtensions).to.have.length(2);
     expect(progress).to.equal('');
     adopt(win);
+    runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('1A');
 
@@ -175,7 +178,9 @@ describes.sandboxed('runtime', {}, () => {
         progress += 'B';
       },
     });
+    runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(0);
+
     expect(progress).to.equal('1A2B');
 
     const extensions = ext.installExtensionsService(win);
@@ -206,7 +211,7 @@ describes.sandboxed('runtime', {}, () => {
     });
     expect(queueExtensions).to.have.length(3);
     adopt(win);
-
+    runChunksForTesting(win.document);
     // Extensions are still unprocessed
     expect(queueExtensions).to.have.length(3);
     expect(progress).to.equal('');
@@ -216,11 +221,13 @@ describes.sandboxed('runtime', {}, () => {
       expect(amp).to.equal(win.AMP);
       progress += '4';
     });
+    runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(3);
     expect(progress).to.equal('');
 
     // Body is available now.
     bodyCallbacks.fire();
+    runChunksForTesting(win.document);
     expect(progress).to.equal('1234');
     expect(queueExtensions).to.have.length(0);
   });
@@ -237,14 +244,10 @@ describes.sandboxed('runtime', {}, () => {
       progress += '3';
     });
     adopt(win);
+    expect(() => {
+      runChunksForTesting(win.document);
+    }).to.throw(/extension error/);
     expect(progress).to.equal('13');
-
-    expect(errorStub.callCount).to.equal(1);
-    expect(errorStub).to.be.calledWith('runtime',
-        sinon.match(() => true),
-        sinon.match(arg => {
-          return !!arg.message.match(/extension error/);
-        }));
   });
 
   describe('single-mode', () => {
@@ -281,6 +284,7 @@ describes.sandboxed('runtime', {}, () => {
           amp.registerElement('amp-ext', win.AMP.BaseElement);
         },
       });
+      runChunksForTesting(win.document);
 
       // Extension is added immediately. Can't find for micro-tasks here.
       const ext = extensions.extensions_['amp-ext'].extension;
@@ -315,6 +319,7 @@ describes.sandboxed('runtime', {}, () => {
           amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
         },
       });
+      runChunksForTesting(win.document);
 
       // Extension is added immediately. Can't find for micro-tasks here.
       const ext = extensions.extensions_['amp-ext'].extension;
@@ -356,6 +361,7 @@ describes.sandboxed('runtime', {}, () => {
           amp.registerServiceForDoc('service1', Service1);
         },
       });
+      runChunksForTesting(win.document);
 
       // No factories
       const extHolder = extensions.extensions_['amp-ext'];
@@ -382,6 +388,7 @@ describes.sandboxed('runtime', {}, () => {
           amp.registerServiceForDoc('service1', undefined, factory);
         },
       });
+      runChunksForTesting(win.document);
 
       // No factories
       const extHolder = extensions.extensions_['amp-ext'];
@@ -427,6 +434,7 @@ describes.sandboxed('runtime', {}, () => {
           amp.registerElement('amp-ext', win.AMP.BaseElement);
         },
       });
+      runChunksForTesting(win.document);
 
       // Extension is added immediately. Can't find for micro-tasks here.
       const extHolder = extensions.extensions_['amp-ext'];
@@ -461,6 +469,7 @@ describes.sandboxed('runtime', {}, () => {
           amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
         },
       });
+      runChunksForTesting(win.document);
 
       // Extension is added immediately. Can't find for micro-tasks here.
       const extHolder = extensions.extensions_['amp-ext'];
@@ -502,6 +511,7 @@ describes.sandboxed('runtime', {}, () => {
           amp.registerServiceForDoc('service1', Service1);
         },
       });
+      runChunksForTesting(win.document);
 
       // Factory recorded.
       const extHolder = extensions.extensions_['amp-ext'];
