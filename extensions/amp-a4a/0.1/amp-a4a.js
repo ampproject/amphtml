@@ -115,9 +115,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @{?Object} */
-    this.config = null;
-
     /** @private {?AMP.AmpAdApiHandler} */
     this.apiHandler_ = null;
 
@@ -152,17 +149,6 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  buildCallback() {
-    const adType = this.element.getAttribute('type');
-    this.config = adConfig[adType];
-    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
-
-    if (this.config.renderStartImplemented) {
-      this.element.setAttribute('-amp-render-start-impl', '');
-    }
   }
 
   /** @override */
@@ -208,7 +194,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const preconnect = this.config.preconnect;
+    const preconnect = adConfig[this.element.getAttribute('type')].preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which

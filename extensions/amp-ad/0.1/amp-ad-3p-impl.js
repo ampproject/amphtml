@@ -114,12 +114,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.fallback_ = this.getFallback();
 
     const adType = this.element.getAttribute('type');
-
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
-    if (this.config.renderStartImplemented) {
-      this.element.setAttribute('-amp-render-start-impl', '');
-    }
 
     setupA2AListener(this.win);
   }

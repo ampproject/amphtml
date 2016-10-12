@@ -52,7 +52,6 @@ export class AmpAd extends AMP.BaseElement {
         // Unspecified or empty type.  Nothing to do here except bail out.
         return null;
       }
-
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
