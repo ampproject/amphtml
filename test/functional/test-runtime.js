@@ -17,7 +17,6 @@
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {adopt, adoptShadowMode} from '../../src/runtime';
-import {dev} from '../../src/log';
 import {
   getServiceForDoc,
   getServicePromise,
