@@ -28,6 +28,9 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
+  - npm install --global yarn
+install:
+  - yarn
 script: node build-system/pr-check.js $TRAVIS_COMMIT_RANGE
 branches:
   only:
@@ -42,3 +45,5 @@ env:
 cache:
   directories:
   - node_modules
+  - $HOME/.npm
+  - $HOME/.yarn-cache
