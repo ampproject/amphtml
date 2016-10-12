@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Fetches dynamic content from a CORS JSON endpoint and renders it
+    <td>Fetches content dynamically from a CORS JSON endpoint and renders it
 using a supplied template.</td>
   </tr>
   <tr>
@@ -106,7 +106,8 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 
 ## Behavior
 
-The loading is triggered using normal AMP rules depending on how far the element is from
+The request is always made from the client, even if the document was served from the AMP
+cache. Loading is triggered using normal AMP rules depending on how far the element is from
 the current viewport.
 
 If `amp-list` needs more space after loading it requests the AMP runtime to update its
