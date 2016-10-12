@@ -530,7 +530,6 @@ describes.realWin('runtime multidoc', {
 
   beforeEach(() => {
     win = env.win;
-    win.setTimeout = window.setTimeout;
     extensions = env.extensions;
     extensionsMock = sandbox.mock(extensions);
     ampdocServiceMock = sandbox.mock(env.ampdocService);

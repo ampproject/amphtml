@@ -184,14 +184,13 @@ afterEach(() => {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+  if (global.sandbox) {
+    delete global.sandbox;
+    throw new Error('You forgot to clear global sandbox!');
+  }
   if (sandboxes.length > 0) {
     sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
     throw new Error('You forgot to restore your sandbox!');
-  }
-  if (global.sandbox) {
-    global.sandbox.restore();
-    delete global.sandbox;
-    throw new Error('You forgot to restore global sandbox!');
   }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
