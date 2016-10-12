@@ -281,6 +281,10 @@ export const adConfig = {
     ],
   },
 
+  nokta: {
+    prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/amp.js',
+  },
+
   openadstream: {},
 
   openx: {
