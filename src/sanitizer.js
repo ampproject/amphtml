@@ -68,6 +68,14 @@ const SELF_CLOSING_TAGS = {
   'source': true,
   'track': true,
   'wbr': true,
+  'area': true,
+  'base': true,
+  'command': true,
+  'embed': true,
+  'keygen': true,
+  'link': true,
+  'meta': true,
+  'param': true,
 };
 
 
