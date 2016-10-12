@@ -250,7 +250,7 @@ If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/
 
 ### Lint and type-check
 
-To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors if any before sending out the PR.
+To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors, if any, before sending out the PR.
 
 ### Other tips
 
