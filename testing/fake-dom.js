@@ -523,6 +523,7 @@ export class FakeCustomElements {
     this.elements = {};
 
     /**
+     * Custom Elements V0 API.
      * @param {string} name
      * @param {{prototype: !Prototype}} spec
      */
@@ -533,6 +534,19 @@ export class FakeCustomElements {
       this.elements[name] = spec;
       this.count++;
     };
+  }
+
+  /**
+   * Custom Elements V1 API.
+   * @param {string} name
+   * @param {!Function} klass
+   */
+  define(name, klass) {
+    if (this.elements[name]) {
+      throw new Error('custom element already defined: ' + name);
+    }
+    this.elements[name] = klass.prototype;
+    this.count++;
   }
 }
 
