@@ -270,7 +270,11 @@ function compile(entryModuleFilenames, outputDir,
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error.push(
-          'checkTypes', 'accessControls', 'const', 'constantProperty');
+          'checkTypes',
+          'accessControls',
+          'const',
+          'constantProperty',
+          'globalThis');
 
       // TODO(aghassemi): Remove when NTI is the default.
       if (argv.nti) {
