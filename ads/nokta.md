@@ -25,7 +25,7 @@ limitations under the License.
 	  data-site="izlesene:anasayfa" 
 	  data-zone="152541">
     <div placeholder></div>
-	<div fallback></div>
+    <div fallback></div>
 </amp-ad>
 ```
 
