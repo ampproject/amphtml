@@ -48,7 +48,10 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
 
 Example:
 ```html
-<form method="post" action="https://example.com/subscribe" target="_blank">
+<form method="post" 
+      action="https://example.com/subscribe"
+      action-xhr="https://example.com/subscribe-via-xhr"
+      target="_blank">
     <fieldset>
         <label>
             <span>Your name</span>
