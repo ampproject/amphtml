@@ -371,7 +371,6 @@ describe('amp-sticky-ad', () => {
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.dispatchEvent(new Event('amp:built'));
       expect(layoutAdSpy).to.be.called;
-      impl.ad_.setAttribute('type', '_ping_');
       impl.ad_.dispatchEvent(new Event('amp:load:end'));
       expect(stickyAdElement).to.have.attribute('visible');
       expect(stickyAdElement.classList.contains('amp-sticky-ad-loaded'))
