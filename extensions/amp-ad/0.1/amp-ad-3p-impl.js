@@ -45,6 +45,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** {?Object} */
+    this.config = null;
+
     /** @private {?AmpAdApiHandler} */
     this.apiHandler_ = null;
 
@@ -111,7 +114,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.fallback_ = this.getFallback();
 
     const adType = this.element.getAttribute('type');
-    /** {!Object} */
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
 

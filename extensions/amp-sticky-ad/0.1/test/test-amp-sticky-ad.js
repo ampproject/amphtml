@@ -37,10 +37,7 @@ describe('amp-sticky-ad', () => {
       const ampAd = iframe.doc.createElement('amp-ad');
       ampAd.setAttribute('width', '300');
       ampAd.setAttribute('height', '50');
-      ampAd.setAttribute('type', 'a9');
-      ampAd.setAttribute('data-aax_size', '300*50');
-      ampAd.setAttribute('data-aax_pubname', 'abc123');
-      ampAd.setAttribute('data-aax_src', '302');
+      ampAd.setAttribute('type', '_ping_');
       ampStickyAd.appendChild(ampAd);
       const link = iframe.doc.createElement('link');
       link.setAttribute('rel', 'canonical');
@@ -366,16 +363,18 @@ describe('amp-sticky-ad', () => {
       impl.ad_.isBuilt = () => {
         return false;
       };
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
       const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
-      const displayAfterAdLoadSpy = sandbox.spy(impl, 'displayAfterAdLoad_');
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.dispatchEvent(new Event('amp:built'));
       expect(layoutAdSpy).to.be.called;
-      expect(displayAfterAdLoadSpy).to.not.been.called;
-      impl.ad_.setAttribute('type', 'doubleclick');
       impl.ad_.dispatchEvent(new Event('amp:load:end'));
-      expect(displayAfterAdLoadSpy).to.be.called;
+      expect(stickyAdElement).to.have.attribute('visible');
+      expect(stickyAdElement.classList.contains('amp-sticky-ad-loaded'))
+          .to.be.true;
     });
   });
 });
