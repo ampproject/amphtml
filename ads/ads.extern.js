@@ -40,8 +40,6 @@ data.clmb_slot;
 data.clmb_position;
 data.clmb_divid;
 data.clmb_section;
-var Criteo;
-Criteo.DisplayAd;
 data.epl_si;
 data.epl_isv;
 data.epl_sv;
@@ -50,6 +48,25 @@ data.epl_ksv;
 data.epl_kvs;
 data.epl_e;
 data.guid;
+
+var Criteo;
+Criteo.DisplayAd;
+Criteo.Log.Debug;
+Criteo.CallRTA;
+Criteo.ComputeDFPTargetingForAMP;
+Criteo.PubTag = {};
+Criteo.PubTag.RTA = {};
+Criteo.PubTag.RTA.DefaultCrtgContentName;
+Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
+data.varname;
+data.tagtype;
+data.cookiename;;
+data.networkid;;
+data.zone;
+data.adserver;
+data.slot;
+data.width;
+data.height;
 
 var googletag;
 window.googletag;

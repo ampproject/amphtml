@@ -412,10 +412,26 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="criteo">Criteo (0x0 fake ad)</h2>
+  <h2 id="criteo">Criteo Passback</h2>
+  <p>Due to ad targeting, the slot might not load ad.</p>
+
   <amp-ad width="300" height="250"
       type="criteo"
+      data-tagtype="passback"
       data-zone="314159">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
+  <h2>Criteo RTA</h2>
+  <p>Due to ad targeting, the slot might not load ad.</p>
+
+  <amp-ad width="300" height="250"
+      type="criteo"
+      data-tagtype="rta"
+      data-slot="/2729856/iframe_test_new_tag"
+	  data-adserver="DFP"
+      data-networkid="1976">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
