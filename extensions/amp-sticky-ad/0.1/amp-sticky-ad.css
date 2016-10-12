@@ -21,7 +21,6 @@ amp-sticky-ad {
   left: 0;
   width: 100% !important;
   z-index: 11;
-  /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
   max-height: 100px !important;
   box-sizing: border-box;
   background-color: rgba(0, 0, 0, 0.5);
@@ -37,7 +36,7 @@ amp-sticky-ad {
   transform: translateZ(0) !important;
 }
 
-.-amp-sticky-ad-visible {
+amp-sticky-ad[visible] {
   visibility: visible !important;
 }
 
@@ -52,6 +51,7 @@ amp-sticky-ad {
 
 .amp-sticky-ad-close-button {
   position: absolute;
+  visibility: hidden;
   width: 32px;
   height: 32px;
   top: -32px;
@@ -63,7 +63,7 @@ amp-sticky-ad {
   border: 1px solid #c8c8c8;
 }
 
-.amp-sticky-ad-loaded .amp-sticky-ad-close-button {
+amp-sticky-ad[visible] > .amp-sticky-ad-close-button {
   visibility: visible;
 }
 
