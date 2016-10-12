@@ -188,7 +188,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		URL: r.Referer(),
 	}
 	event.Request.Meta = &ErrorRequestMeta{
-		HTTPReferrer:  r.Referer(),
+		HTTPReferrer:  r.URL.Query().Get("r"),
 		HTTPUserAgent: r.UserAgent(),
 		// Intentionally not logged.
 		// RemoteIP:   r.RemoteAddr,
