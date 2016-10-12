@@ -29,6 +29,7 @@ data.mid;
 data.ws;
 data.s;
 data.sid;
+data.client;
 data.zid;
 data.pid;
 data.custom3;
