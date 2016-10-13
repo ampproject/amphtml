@@ -92,6 +92,14 @@ export class ImageViewer {
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
 
+    /** @private {!Object} */
+    this.captions_ = {
+      'alt': null,
+      'aria-label': null,
+      'aria-labelledby': null,
+      'aria-describedby' : null,
+    };
+
     /** @private {number} */
     this.sourceWidth_ = 0;
 
@@ -187,6 +195,10 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
+    Object.keys(this.captions_).forEach(key => {
+      this.image_.removeAttribute(key);
+      this.captions_[key] = null;
+    });
     this.srcset_ = null;
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
     this.sourceWidth_ = 0;
@@ -223,10 +235,18 @@ export class ImageViewer {
     this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
     this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
     this.srcset_ = srcsetFromElement(sourceElement);
+    Object.keys(this.captions_).forEach(key => {
+      this.captions_[key] = sourceElement.getAttribute(key);
+    });
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
       // It will be updated later.
       this.image_.setAttribute('src', sourceImage.src);
+      Object.keys(this.captions_).forEach(key => {
+        if (this.captions_[key]) {
+          this.image_.setAttribute(key, this.captions_[key]);
+        }
+      });
     }
   }
 
@@ -294,6 +314,11 @@ export class ImageViewer {
     // and then naturally upgrade to a higher quality image.
     return timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
+      Object.keys(this.captions_).forEach(key => {
+        if (this.captions_[key]) {
+          this.image_.setAttribute(key, this.captions_[key]);
+        }
+      });
       return this.loadPromise_(this.image_);
     });
   }
