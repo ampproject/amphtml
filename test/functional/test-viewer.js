@@ -853,6 +853,8 @@ describe('Viewer', () => {
       test('https://www.google.de', true);
       test('https://news.google.de', true);
       test('https://abc.www.google.com', true);
+      test('https://google.cat', true);
+      test('https://www.google.cat', true);
     });
 
     it('should not trust host as referrer with http', () => {
