@@ -21,6 +21,8 @@ package amp.validator;
 // given set of conditions.
 // E.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role"
 message AttrTriggerSpec {
+  // If set, attribute's value must match to also require attribute(s).
+  // If not set, attribute automatically also require attribute(s).
   optional string if_value_regex = 1;       // case sensitive
 
   // If set, other attributes - identified by their name string - must
@@ -55,7 +57,7 @@ message UrlSpec {
   repeated string allowed_protocol = 1;
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
-  optional bool allow_empty = 3;
+  optional bool allow_empty = 3 [default = false];
   // Must be lowercase.
   repeated string disallowed_domain = 4;
 }
@@ -63,7 +65,7 @@ message UrlSpec {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 18
+// NEXT AVAILABLE TAG: 19
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -84,6 +86,7 @@ message AttrSpec {
 
   // The attribute value must be equal to the value in this field.
   optional string value = 4;              // case sensitive
+  optional string value_casei = 18;       // case insensitive
   optional string value_regex = 15;       // case sensitive
   optional string value_regex_casei = 5;  // case insensitive
   optional UrlSpec value_url = 14;
@@ -276,7 +279,7 @@ message ReferencePoint {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 23
+// NEXT AVAILABLE TAG: 25
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -333,6 +336,12 @@ message TagSpec {
   // Same as also_requires_tag, but rather than invalidating a document if not
   // present, emits a deprecation warning.
   repeated string also_requires_tag_warning = 22;
+  // Expresses a generic condition which is satisfied if this tag is found. Used
+  // in combination with the `requires` attribute on a different tag.
+  repeated string satisfies = 23;
+  // Expresses a generic condition which must be satisfied if this tag is found.
+  // Used in combination with the `satisfies` attributes on a different tag.
+  repeated string requires = 24;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,

@@ -36,7 +36,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -49,6 +49,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
 tags: {  # <amp-sticky-ad>
   html_format: AMP
   tag_name: "AMP-STICKY-AD"
+  disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-sticky-ad extension .js script"
   attr_lists: "extended-amp-global"

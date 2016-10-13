@@ -39,7 +39,7 @@ tags: {  # amp-analytics
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -58,7 +58,7 @@ tags: {  # amp-analytics (json)
   attrs: {
     name: "type"
     mandatory: true
-    value: "application/json"
+    value_casei: "application/json"
     dispatch_key: true
   }
   cdata: {
@@ -80,7 +80,7 @@ tags: {  # amp-ad-metadata (json)
   attrs: {
     name: "type"
     mandatory: true
-    value: "application/json"
+    value_casei: "application/json"
   }
   attrs: {
     name: "amp-ad-metadata"
