@@ -199,3 +199,6 @@ data.enablemraid;
 data.jsplayer;
 var sas;
 sas.callAmpAd;
+data.plc;
+data.sz;
+data.extra;
