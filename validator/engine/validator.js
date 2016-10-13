@@ -2859,7 +2859,10 @@ class ParsedTagSpec {
     if (this.spec_.ampLayout !== null) {
       /** @type {!Object<string, string>} */
       const attrsByKey = {};
-      for (let i = 0; i < encounteredAttrs.length; i += 2) {
+      // We iterate in reverse order because if a attribute name is repeated,
+      // we want to use the value from the first instance seen in the tag rather
+      // than later instances. This is the same behavior that browsers have.
+      for (let i = encounteredAttrs.length - 2; i >= 0; i -= 2) {
         attrsByKey[encounteredAttrs[i]] = encounteredAttrs[i + 1];
       }
       this.validateLayout(context, attrsByKey, result);
