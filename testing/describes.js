@@ -184,7 +184,7 @@ function describeEnv(factory) {
    * @param {function(!Object)} fn
    */
   mainFunc.only = function(name, spec, fn) {
-    return templateFunc(name, spec, fn, describe.only);
+    return templateFunc(name, spec, fn, describe./*OK*/only);
   };
 
   return mainFunc;
