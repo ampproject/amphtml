@@ -299,6 +299,7 @@ export const adConfig = {
 
   purch: {
     prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
   },
 
   revcontent: {

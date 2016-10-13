@@ -15,10 +15,9 @@
  */
 
 import {
-  writeScript, 
-  validateData, 
-  validateSrcPrefix,
-  validateSrcContains,} from '../3p/3p';
+  writeScript,
+  validateData,
+  validateSrcPrefix} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -30,8 +29,6 @@ export function purch(global, data) {
   global.data = data;
 
   const adsrc = 'https://ramp.purch.com/serve/creative_amp.js';
-  if (typeof adsrc != 'undefined') {
-    validateSrcPrefix('https:', adsrc);
-    writeScript(global, adsrc);
-  }
+  validateSrcPrefix('https:', adsrc);
+  writeScript(global, adsrc);
 }
