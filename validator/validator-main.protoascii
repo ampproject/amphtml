@@ -25,7 +25,7 @@ min_validator_revision_required: 183
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 298
+spec_file_revision: 299
 
 # Validator extensions.
 # =====================
@@ -2213,7 +2213,6 @@ tags {
 # 4.10.4 The label element
 tags: {
   tag_name: "LABEL"
-  mandatory_ancestor: "FORM"
   also_requires_tag: "amp-form extension .js script"
   attrs: { name: "for" }
   attrs: { name: "form" }
@@ -2222,7 +2221,6 @@ tags: {
 # 4.10.5 The input element
 tags: {
   tag_name: "INPUT"
-  mandatory_ancestor: "FORM"
   also_requires_tag: "amp-form extension .js script"
   attrs: { name: "accept" }
   attrs: { name: "accesskey" }
