@@ -244,7 +244,7 @@ export class Viewer {
      * Whether the AMP document is embedded in a webview.
      * @private @const {boolean}
      */
-    this.isWebviewEmbedded_ = this.params_['webview'];
+    this.isWebviewEmbedded_ = !!this.params_['webview'];
 
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe or
