@@ -3008,11 +3008,14 @@ class ParsedTagSpec {
       if (mandatoryOneof !== null) {
         mandatoryOneofsSeen[mandatoryOneof] = 0;
       }
+      // If the trigger does not have an if_value_regex, then proceed to add the
+      // spec. If it does have an if_value_regex, then test the regex to see
+      // if it should add the spec.
       if (parsedSpec.hasTriggerSpec() &&
-          parsedSpec.getTriggerSpec().hasIfValueRegex()) {
-        if (parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)) {
-          parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
-        }
+          (!parsedSpec.getTriggerSpec().hasIfValueRegex() ||
+           (parsedSpec.getTriggerSpec().hasIfValueRegex() &&
+            parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)))) {
+        parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
       }
       attrspecsValidated[parsedSpec.getId()] = 0;
     }

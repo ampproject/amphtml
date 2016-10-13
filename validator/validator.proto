@@ -21,6 +21,8 @@ package amp.validator;
 // given set of conditions.
 // E.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role"
 message AttrTriggerSpec {
+  // If set, attribute's value must match to also require attribute(s).
+  // If not set, attribute automatically also require attribute(s).
   optional string if_value_regex = 1;       // case sensitive
 
   // If set, other attributes - identified by their name string - must
