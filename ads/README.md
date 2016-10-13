@@ -233,6 +233,10 @@ If you're adding support for a new 3P ad service, changes to the following files
 
 To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.max.html` in your browser to make sure the examples load ads.
 
+Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
+
+It's encouraged to have multiple examples to cover different use cases.
+
 ### Tests
 
 Please make sure your changes pass the tests:
@@ -244,9 +248,12 @@ gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-int
 
 If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/functional/ads/test-yournetwork.js` is highly recommended.
 
+### Lint and type-check
+
+To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors, if any, before sending out the PR.
+
 ### Other tips
 
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread. 
-- Run `gulp lint` and `gulp check-types`, then fix errors if any before sending out the PR.
 
