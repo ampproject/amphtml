@@ -81,6 +81,106 @@ describe('amp-mustache template', () => {
     });
   });
 
+  describe('Rendering Form Fields', () => {
+    it('should allow rendering inputs', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<input value="{{value}}" type="text" onchange="{{invalidValue}}">';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: 'myid',
+        invalidValue: /*eslint no-script-url: 0*/ 'javascript:alert();',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid" type="text">');
+    });
+
+    it('should allow rendering textarea', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<textarea>{{value}}</textarea>';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: 'Cool story bro.',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <textarea>Cool story bro.</textarea>');
+    });
+
+    it('should not allow image/file types rendering', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<input value="{{value}}" type="{{type}}">';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      let result = template.render({
+        value: 'myid',
+        type: 'image',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'file',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'text',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid" type="text">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'button',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+
+      result = template.render({
+        value: 'myid',
+        type: 'password',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+    });
+
+    it('should sanitize forma-related attrs properly', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<input value="{{value}}" ' +
+          'formaction="javascript:javascript:alert(1)" ' +
+          'formmethod="get" form="form1" formtarget="blank" formnovalidate ' +
+          'formenctype="">';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: 'myid',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="myid">');
+    });
+
+    it('should sanitize form tags', () => {
+      const templateElement = document.createElement('div');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<form><input value="{{value}}"></form><input value="hello">';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: 'myid',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <input value="hello">');
+    });
+  });
+
   it('should sanitize triple-mustache', () => {
     const templateElement = document.createElement('div');
     templateElement.textContent = 'value = {{{value}}}';
