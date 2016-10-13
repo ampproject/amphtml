@@ -45,7 +45,6 @@ const BLACKLISTED_TAGS = {
   'frameset': true,
   'iframe': true,
   'img': true,
-  'input': true,
   'link': true,
   'meta': true,
   'object': true,
@@ -55,7 +54,6 @@ const BLACKLISTED_TAGS = {
   // intention to keep this block for any longer than we have to.
   'svg': true,
   'template': true,
-  'textarea': true,
   'video': true,
 };
 
@@ -66,9 +64,18 @@ const SELF_CLOSING_TAGS = {
   'col': true,
   'hr': true,
   'img': true,
+  'input': true,
   'source': true,
   'track': true,
   'wbr': true,
+  'area': true,
+  'base': true,
+  'command': true,
+  'embed': true,
+  'keygen': true,
+  'link': true,
+  'meta': true,
+  'param': true,
 };
 
 
@@ -114,6 +121,37 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '<script',
   /*eslint no-script-url: 0*/ '</script',
 ];
+
+
+/** @const {!Object<string, !Object<string, !RegExp>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
+  'input': {
+    'type': /(?:image|file|password|button)/i,
+  },
+};
+
+
+/** @const {!Array<string>} */
+const BLACKLISTED_FIELDS_ATTR = [
+  // TODO(#5539): Consider allowing these, the only reason to strip these is to be
+  // more inline with the validator rules. Consider allowing these if/when
+  // allowed in validator. Even without this blacklist, Caja or Mustache is
+  // removing the values for these attributes.
+  'form',
+  'formaction',
+  'formmethod',
+  'formtarget',
+  'formnovalidate',
+  'formenctype',
+];
+
+
+/** @const {!Object<string, !Array<string>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = {
+  'input': BLACKLISTED_FIELDS_ATTR,
+  'textarea': BLACKLISTED_FIELDS_ATTR,
+  'select': BLACKLISTED_FIELDS_ATTR,
+};
 
 
 /**
@@ -178,7 +216,7 @@ export function sanitizeHtml(html) {
       for (let i = 0; i < attribs.length; i += 2) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
-        if (!isValidAttr(attrName, attrValue)) {
+        if (!isValidAttr(tagName, attrName, attrValue)) {
           continue;
         }
         emit(' ');
@@ -234,11 +272,12 @@ export function sanitizeFormattingHtml(html) {
 
 /**
  * Whether the attribute/value are valid.
+ * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
  * @return {boolean}
  */
-export function isValidAttr(attrName, attrValue) {
+export function isValidAttr(tagName, attrName, attrValue) {
 
   // "on*" attributes are not allowed.
   if (attrName.indexOf('on') == 0 && attrName != 'on') {
@@ -257,6 +296,22 @@ export function isValidAttr(attrName, attrValue) {
       if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
         return false;
       }
+    }
+  }
+
+  // Remove blacklisted attributes from specific tags e.g. input[formaction].
+  const attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  if (attrNameBlacklist && attrNameBlacklist.indexOf(attrName) != -1) {
+    return false;
+  }
+
+  // Remove blacklisted values for specific attributes e.g. input[type=image].
+  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  if (attrBlacklist) {
+    const blacklistedValuesRegex = attrBlacklist[attrName];
+    if (blacklistedValuesRegex &&
+        attrValue.search(blacklistedValuesRegex) != -1) {
+      return false;
     }
   }
 
