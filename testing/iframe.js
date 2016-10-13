@@ -23,6 +23,7 @@ import {
   installRuntimeServices,
   registerForUnitTest,
 } from '../src/runtime';
+import {installStyles} from '../src/style-installer';
 import {cssText} from '../build/css';
 
 let iframeCount = 0;
@@ -211,37 +212,39 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
-      resolve({
-        win: iframe.contentWindow,
-        doc: iframe.contentWindow.document,
-        ampdoc: ampdoc,
-        iframe: iframe,
-        addElement: function(element) {
-          const iWin = iframe.contentWindow;
-          const p = onInsert(iWin).then(() => {
-            // Make sure it has dimensions since no styles are available.
-            element.style.display = 'block';
-            element.build(true);
-            if (!element.getPlaceholder()) {
-              const placeholder = element.createPlaceholder();
-              if (placeholder) {
-                element.appendChild(placeholder);
+      installStyles(iframe.contentWindow.document, cssText, () => {
+        resolve({
+          win: iframe.contentWindow,
+          doc: iframe.contentWindow.document,
+          ampdoc: ampdoc,
+          iframe: iframe,
+          addElement: function(element) {
+            const iWin = iframe.contentWindow;
+            const p = onInsert(iWin).then(() => {
+              // Make sure it has dimensions since no styles are available.
+              element.style.display = 'block';
+              element.build(true);
+              if (!element.getPlaceholder()) {
+                const placeholder = element.createPlaceholder();
+                if (placeholder) {
+                  element.appendChild(placeholder);
+                }
               }
-            }
-            if (element.layoutCount_ == 0) {
-              if (opt_beforeLayoutCallback) {
-                opt_beforeLayoutCallback(element);
+              if (element.layoutCount_ == 0) {
+                if (opt_beforeLayoutCallback) {
+                  opt_beforeLayoutCallback(element);
+                }
+                return element.layoutCallback().then(() => {
+                  return element;
+                });
               }
-              return element.layoutCallback().then(() => {
-                return element;
-              });
-            }
-            return element;
-          });
-          iWin.document.getElementById('parent')
-              .appendChild(element);
-          return p;
-        }
+              return element;
+            });
+            iWin.document.getElementById('parent')
+                .appendChild(element);
+            return p;
+          },
+        });
       });
     };
     iframe.onerror = reject;

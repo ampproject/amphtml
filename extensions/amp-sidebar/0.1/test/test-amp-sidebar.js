@@ -19,6 +19,7 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/platform';
 import {timerFor} from '../../../../src/timer';
+import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
 
@@ -94,6 +95,21 @@ describe('amp-sidebar', () => {
       impl.open_();
       expect(iframe.doc.querySelectorAll('.-amp-sidebar-mask').length)
           .to.equal(1);
+    });
+  });
+
+  it('should create an invisible close button for screen readers only', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const impl = sidebarElement.implementation_;
+      impl.close_ = sandbox.spy();
+      const closeButton = sidebarElement.lastElementChild;
+      expect(closeButton).to.exist;
+      expect(closeButton.tagName).to.equal('BUTTON');
+      assertScreenReaderElement(closeButton);
+      expect(impl.close_.callCount).to.equal(0);
+      closeButton.click();
+      expect(impl.close_.callCount).to.equal(1);
     });
   });
 
