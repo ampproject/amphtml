@@ -263,16 +263,8 @@ class VideoEntry {
 
       if (this.autoplayIcon_) {
         this.vsync_.mutate(() => {
-          const platform = platformFor(this.ampdoc_.win);
-          if (platform.isSafari() && platform.isIos()) {
-            // iOS Safari can not pause hardware accelerated animations, so we
-            // hide the icon instead of pausing animation.
-            this.autoplayIcon_.classList.toggle('amp-video-eq-hide',
-                          !this.isVisible_);
-          } else {
-            this.autoplayIcon_.classList.toggle('amp-video-eq-pause',
-              !this.isVisible_);
-          }
+          this.autoplayIcon_.classList.toggle('amp-video-eq-play',
+            this.isVisible_);
         });
       }
     });
@@ -299,6 +291,11 @@ class VideoEntry {
         column.appendChild(filler);
       }
       icon.appendChild(column);
+    }
+    const platform = platformFor(this.ampdoc_.win);
+    if (platform.isSafari() && platform.isIos()) {
+      // iOS Safari can not pause hardware accelerated animations.
+      icon.setAttribute('unpausable', '');
     }
     return icon;
   }

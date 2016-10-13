@@ -430,7 +430,7 @@ amp-fresh {
 /**
  * Animated equalizer icon for muted autoplaying videos.
  *
- * TODO(aghassemi, #5306): Move to video extension when video is out of code.
+ * TODO(aghassemi, #5306): Move to video extension when video is out of core.
  */
 .amp-video-eq {
   align-items: flex-end;
@@ -454,43 +454,55 @@ amp-fresh {
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   animation-direction: alternate;
-  animation-play-state: running;
   background-color: #FAFAFA;
   height: 100%;
   position: absolute;
-  transform: translateY(100%);
   width: 100%;
   will-change: transform;
 }
-.amp-video-eq-pause .amp-video-eq-col div {
+.amp-video-eq .amp-video-eq-col div {
   animation-play-state: paused;
 }
-.amp-video-eq-hide {
-  display: none;
+.amp-video-eq[unpausable] .amp-video-eq-col div {
+  animation-name: none;
+}
+.amp-video-eq[unpausable].amp-video-eq-play .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+}
+.amp-video-eq.amp-video-eq-play .amp-video-eq-col div {
+  animation-play-state: running;
 }
 .amp-video-eq-1-1 {
-   animation-duration: 0.3s;
+  animation-duration: 0.3s;
+  transform: translateY(60%);
 }
 .amp-video-eq-1-2 {
-   animation-duration: 0.45s;
+  animation-duration: 0.45s;
+  transform: translateY(60%);
 }
 .amp-video-eq-2-1 {
-   animation-duration: 0.5s;
+  animation-duration: 0.5s;
+  transform: translateY(30%);
 }
 .amp-video-eq-2-2 {
-   animation-duration: 0.4s;
+  animation-duration: 0.4s;
+  transform: translateY(30%);
 }
 .amp-video-eq-3-1 {
-   animation-duration: 0.3s;
+  animation-duration: 0.3s;
+  transform: translateY(70%);
 }
 .amp-video-eq-3-2 {
-   animation-duration: 0.35s;
+  animation-duration: 0.35s;
+  transform: translateY(70%);
 }
 .amp-video-eq-4-1 {
-   animation-duration: 0.4s;
+  animation-duration: 0.4s;
+  transform: translateY(50%);
 }
 .amp-video-eq-4-2 {
-   animation-duration: 0.25s;
+  animation-duration: 0.25s;
+  transform: translateY(50%);
 }
 @keyframes amp-video-eq-animation {
   0% {transform: translateY(100%);}

@@ -14,11 +14,34 @@
  * limitations under the License.
  */
 
+
+import {BaseElement} from '../../src/base-element';
+import {upgradeOrRegisterElement, createAmpElementProto} from '../../src/custom-element';
 import {
   supportsAutoplay,
   clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
+import {VideoEvents} from '../../src/video-interface';
+import {videoManagerForDoc} from '../../src/video-manager';
 import * as sinon from 'sinon';
+
+
+describes.realWin('Autoplay animated icon', {}, env => {
+  let videoElement;
+  let videoImpl;
+
+  beforeEach(() => {
+    videoElement = createMockVideoPlayer(env.win);
+    videoImpl = videoElement.implementation_;
+    // return videoElement.layoutCallback();
+  });
+
+  it('should create an animated icon overlay', () => {
+    const icon = videoElement.lastElementNode;
+    expect(icon).to.exist();
+  });
+
+});
 
 describe('Supports Autoplay', () => {
   let sandbox;
@@ -140,3 +163,85 @@ describe('Supports Autoplay', () => {
     sandbox.restore();
   });
 });
+
+/**
+ * @implements {../../src/video-interface.VideoInterface}
+ */
+class MockVideoPlayer extends BaseElement {
+
+    /** @param {!AmpElement} element */
+    constructor(element) {
+      super(element);
+    }
+
+    /** @override */
+    buildCallback() {
+      videoManagerForDoc(this.win.document).register(this);
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    }
+
+    /** @override */
+    layoutCallback() {
+      return Promise.resolve();
+    }
+
+    // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
+    /**
+     * @override
+     */
+    supportsPlatform() {
+      return true;
+    }
+
+    /**
+     * @override
+     */
+    play(unusedIsAutoplay) {
+    }
+
+    /**
+     * @override
+     */
+    pause() {
+    }
+
+    /**
+     * @override
+     */
+    mute() {
+    }
+
+    /**
+     * @override
+     */
+    unmute() {
+    }
+
+    /**
+     * @override
+     */
+    showControls() {
+    }
+
+    /**
+     * @override
+     */
+    hideControls() {
+    }
+}
+
+function createMockVideoPlayer(win) {
+  win.document.registerElement('amp-test-mock-videoplayer', {
+    prototype: createAmpElementProto(win, 'amp-test-mock-videoplayer',
+        MockVideoPlayer),
+  });
+  const video = win.document.createElement('amp-video');
+  video.setAttribute('autoplay', '');
+  video.setAttribute('controls', '');
+  video.setAttribute('width', '16');
+  video.setAttribute('height', '9');
+  win.document.body.appendChild(video);
+  return video;
+}
+

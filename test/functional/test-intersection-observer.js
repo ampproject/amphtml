@@ -23,17 +23,8 @@ import {createAmpElementProto} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    sandbox.useFakeTimers();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 
   it('intersect correctly base', () => {
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
