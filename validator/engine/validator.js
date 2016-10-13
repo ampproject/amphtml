@@ -3685,7 +3685,6 @@ class ParsedValidatorRules {
   }
 
   /**
-   * Emits errors for tags that specify that another tag is also required.
    * Emits errors for tags that specify that another tag is also required or
    * a condition is required to be satisfied.
    * Returns false iff context.Progress(result).complete.
