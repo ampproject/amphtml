@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 
 /**
- * Created by Webedia on 07/03/16 - last updated on 11/10/16
  * @param {!Window} global
  * @param {!Object} data
  */
-export function webediads(global, data) {
-  validateData(data, ['site', 'page', 'position'], ['query']);
-  loadScript(global, 'https://eu1.wbdds.com/amp.min.js', () => {
-    global.wads.amp.init({
-      'site': data.site,
-      'page': data.page,
-      'position': data.position,
-      'query': (data.query) ? data.query : '',
-    });
-  });
+export function advertserve(global, data) {
+  validateData(data, [], ['zid', 'pid', 'client']);
+
+  const url = 'https://' + data.client + '.advertserve.com' +
+      '/servlet/view/banner/javascript/zone?amp=true' +
+      '&zid=' + encodeURIComponent(data.zid) +
+      '&pid=' + encodeURIComponent(data.pid) +
+      '&random=' + Math.floor(89999999 * Math.random() + 10000000) +
+      '&millis=' + Date.now();
+
+  writeScript(global, url);
 }
