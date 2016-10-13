@@ -165,7 +165,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		Environment: "prod",
 		Application: errorType,
 		AppID:       appengine.AppID(c),
-		Filename:    r.URL.Query().Get("f"),
+		Filename:    r.URL.String(),
 		Line:        int32(line),
 		Classname:   r.URL.Query().Get("el"),
 		Severity:    severity,
@@ -188,7 +188,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		URL: r.Referer(),
 	}
 	event.Request.Meta = &ErrorRequestMeta{
-		HTTPReferrer:  r.Referer(),
+		HTTPReferrer:  r.URL.Query().Get("r"),
 		HTTPUserAgent: r.UserAgent(),
 		// Intentionally not logged.
 		// RemoteIP:   r.RemoteAddr,
