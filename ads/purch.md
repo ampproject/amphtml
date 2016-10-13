@@ -30,5 +30,5 @@ limitations under the License.
 
 Supported parameters:
 
-- data-pid    placement id
-- data-divid  div id of unit
+- data-pid
+- data-divid
