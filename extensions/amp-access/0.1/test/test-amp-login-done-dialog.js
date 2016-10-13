@@ -15,7 +15,6 @@
  */
 
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
-import * as sinon from 'sinon';
 
 
 describe('LoginDoneDialog', () => {

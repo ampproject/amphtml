@@ -22,7 +22,6 @@ import {
   validateData,
   loadScript,
 } from '../../3p/3p';
-import * as sinon from 'sinon';
 
 describe('3p', () => {
 

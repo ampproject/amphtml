@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {viewerForDoc} from '../../src/viewer';

@@ -23,7 +23,6 @@ import {installPerformanceService} from '../../src/service/performance-impl';
 import {resetServiceForTesting} from '../../src/service';
 import {timerFor} from '../../src/timer';
 import {installTimerService} from '../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 
 describe('Viewer', () => {

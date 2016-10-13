@@ -18,7 +18,6 @@ import {maybeTrackImpression} from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import {xhrFor} from '../../src/xhr';
-import * as sinon from 'sinon';
 
 describe('impression', () => {
 

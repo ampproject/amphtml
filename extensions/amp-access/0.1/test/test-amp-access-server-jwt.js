@@ -18,7 +18,6 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {getMode} from '../../../../src/mode';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
 import {isUserErrorMessage} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 describe('AccessServerJwtAdapter', () => {
 

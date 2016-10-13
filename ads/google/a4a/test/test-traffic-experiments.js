@@ -30,7 +30,6 @@ import {
   resetExperimentToggles_,
 } from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 /** @private @const Tag used in dev log messages */
 const TAG_ = 'test-amp-ad';

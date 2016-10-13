@@ -15,7 +15,6 @@
  */
 
 import {AccessClientAdapter} from '../amp-access-client';
-import * as sinon from 'sinon';
 import * as mode from '../../../../src/mode';
 
 describe('AccessClientAdapter', () => {

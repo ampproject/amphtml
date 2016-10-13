@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';

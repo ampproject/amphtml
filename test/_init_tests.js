@@ -287,5 +287,3 @@ chai.Assertion.addMethod('jsonEqual', function(compare) {
     b
   );
 });
-
-sinon = null;

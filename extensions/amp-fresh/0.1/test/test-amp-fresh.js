@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
 import {getOrInsallAmpFreshManager} from '../amp-fresh-manager';
 import {resetServiceForTesting} from '../../../../src/service';

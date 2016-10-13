@@ -30,7 +30,6 @@ import {
     DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
     DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
-import * as sinon from 'sinon';
 
 /**
  * Verify that `address` matches all of the patterns in `matchlist`.

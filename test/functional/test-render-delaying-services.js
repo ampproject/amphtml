@@ -17,7 +17,6 @@
 import {waitForServices} from '../../src/render-delaying-services';
 import {createIframePromise} from '../../testing/iframe';
 import * as service from '../../src/service';
-import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 
 describe('waitForServices', () => {

@@ -23,7 +23,6 @@ import {
   rethrowAsync,
   user,
 } from '../../src/log';
-import * as sinon from 'sinon';
 
 describe('Logging', () => {
 

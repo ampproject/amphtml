@@ -16,7 +16,6 @@
 
 import {AmpCarousel} from '../carousel';
 import {resourcesForDoc} from '../../../../src/resources';
-import * as sinon from 'sinon';
 
 
 describe('Carousel gestures', () => {

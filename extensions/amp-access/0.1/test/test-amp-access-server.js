@@ -16,7 +16,6 @@
 
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
-import * as sinon from 'sinon';
 
 describe('AccessServerAdapter', () => {
 

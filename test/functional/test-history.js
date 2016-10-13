@@ -24,7 +24,6 @@ import {
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrl} from '../../src/url';
-import * as sinon from 'sinon';
 
 
 describe('History', () => {

@@ -18,7 +18,6 @@ import {listenOncePromise} from '../../src/event-helper';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
 import {timerFor} from '../../src/timer';
-import * as sinon from 'sinon';
 
 describe('BaseElement', () => {
 

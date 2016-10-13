@@ -20,7 +20,6 @@ import {isDocumentReady,
   whenDocumentComplete,
 } from '../../src/document-ready';
 import {timerFor} from '../../src/timer';
-import * as sinon from 'sinon';
 
 
 describe('documentReady', () => {

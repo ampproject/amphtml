@@ -16,7 +16,6 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {checkAndFix} from '../../src/service/ios-scrollfreeze-bug';
-import * as sinon from 'sinon';
 
 
 describe('ios-scrollfreeze-bug', () => {

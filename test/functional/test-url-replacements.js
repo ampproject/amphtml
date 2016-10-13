@@ -32,7 +32,6 @@ import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {viewerForDoc} from '../../src/viewer';
-import * as sinon from 'sinon';
 
 
 describe('UrlReplacements', () => {

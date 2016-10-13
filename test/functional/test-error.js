@@ -17,7 +17,6 @@
 import {getErrorReportUrl, cancellation} from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('reportErrorToServer', () => {

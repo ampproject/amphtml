@@ -16,7 +16,6 @@
 
 import {DocumentState} from '../../src/document-state';
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 
 
 describe('DocumentState', () => {

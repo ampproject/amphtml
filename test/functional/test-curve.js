@@ -15,7 +15,6 @@
  */
 
 import {Curves, bezierCurve, getCurve} from '../../src/curve';
-import * as sinon from 'sinon';
 
 describe('Curve', () => {
 

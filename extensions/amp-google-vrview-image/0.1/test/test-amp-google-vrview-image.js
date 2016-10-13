@@ -21,7 +21,6 @@ import {
 import '../amp-google-vrview-image';
 import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
 adopt(window);
 

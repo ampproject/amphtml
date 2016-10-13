@@ -22,7 +22,6 @@ import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
 import {xhrFor} from '../../../../src/xhr';
-import * as sinon from 'sinon';
 
 adopt(window);
 

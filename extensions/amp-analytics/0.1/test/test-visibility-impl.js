@@ -26,7 +26,6 @@ import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
-import * as sinon from 'sinon';
 
 
 adopt(window);

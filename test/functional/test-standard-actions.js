@@ -16,7 +16,6 @@
 
 import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
 
 
 describe('StandardActions', () => {

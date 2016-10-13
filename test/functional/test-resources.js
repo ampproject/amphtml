@@ -19,7 +19,6 @@ import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {

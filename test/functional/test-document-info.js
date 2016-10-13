@@ -17,7 +17,6 @@
 import {createIframePromise} from '../../testing/iframe';
 import {documentInfoForDoc} from '../../src/document-info';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
 
 describe('document-info', () => {
   let sandbox;

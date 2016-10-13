@@ -28,7 +28,6 @@ import {preconnectForElement} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
 import {validateData} from '../../3p/3p';
 import {viewerForDoc} from '../../src/viewer';
-import * as sinon from 'sinon';
 
 describe('3p-frame', () => {
 

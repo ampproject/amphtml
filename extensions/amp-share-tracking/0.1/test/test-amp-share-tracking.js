@@ -20,7 +20,6 @@ import {Viewer} from '../../../../src/service/viewer-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {shareTrackingForOrNull} from '../../../../src/share-tracking-service';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 import * as bytes from '../../../../src/utils/bytes';
 
 describe('amp-share-tracking', () => {

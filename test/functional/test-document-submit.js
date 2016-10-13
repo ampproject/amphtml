@@ -15,7 +15,6 @@
  */
 
 import {onDocumentFormSubmit_} from '../../src/document-submit';
-import * as sinon from 'sinon';
 
 describe('test-document-submit onDocumentFormSubmit_', () => {
   let sandbox;
