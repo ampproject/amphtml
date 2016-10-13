@@ -84,7 +84,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   /**
    * We don't care about the deep GETPROP. What we care about is finding a
-   * call which has an `addExtension` name which then has `AMP` as its
+   * call which has an `extension` name which then has `AMP` as its
    * previous getprop or name, and has a function as the 2nd argument.
    *
    * CALL 3 [length: 96] [source_file: input0]
@@ -94,16 +94,16 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    *         NAME self 3 [length: 4] [source_file: input0]
    *         STRING someproperty 3 [length: 15] [source_file: input0]
    *       STRING AMP 3 [length: 3] [source_file: input0]
-   *     STRING addExtension 3 [length: 12] [source_file: input0]
+   *     STRING etension 3 [length: 12] [source_file: input0]
    *   STRING some-string 3 [length: 9] [source_file: input0]
    *   FUNCTION  3 [length: 46] [source_file: input0]
    */
-  private boolean isAddExtensionCall(Node n) {
+  private boolean isAmpExtensionCall(Node n) {
     if (n != null && n.isCall() && n.getChildCount() == 3) {
       Node getprop = n.getFirstChild();
 
       // The AST has the last getprop higher in the hierarchy.
-      if (isGetPropName(getprop, "addExtension")) {
+      if (isGetPropName(getprop, "extension")) {
         Node firstChild = getprop.getFirstChild();
         // We have to handle both explicit/implicit top level `AMP`
         if ((firstChild != null && firstChild.isName() &&
@@ -128,7 +128,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   /**
-   * This operation should be guarded stringently by `isAddExtensionCall`
+   * This operation should be guarded stringently by `isAmpExtensionCall`
    * predicate.
    *
    * AMP.extension('some-name', function(AMP) {
@@ -140,7 +140,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    *   // BODY...
    * })(self.AMP);
    */
-  private void inlineAddExtensionCall(Node n, Node expr) {
+  private void inlineAmpExtensionCall(Node n, Node expr) {
     if (expr == null || !expr.isExprResult()) {
       return;
     }
