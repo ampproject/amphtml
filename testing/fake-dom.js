@@ -371,7 +371,7 @@ class FakeLocation {
    * entry.
    * @param {string} href
    */
-  setForTesting(href) {
+  resetHref(href) {
     this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
   }
 }

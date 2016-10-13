@@ -21,9 +21,9 @@ import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
 
 /**
- * @const {boolean}
+ * @type {boolean}
  */
-const shouldNotUseMacroTask = /nochunking/.test(self.location.href);
+let deactivated = /nochunking=1/.test(self.location.hash);
 
 /**
  * @const {!Promise}
@@ -41,33 +41,52 @@ const resolved = Promise.resolve();
  * @param {function()} fn Function that will be called as a "chunk".
  */
 export function chunk(nodeOrAmpDoc, fn) {
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunk);
+  if (deactivated) {
+    resolved.then(fn);
+    return;
+  }
+  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   service.run_(fn);
 };
 
 /**
+ * Use a standard micro task for every invocation. This should only
+ * be called from the AMP bootstrap script if it is known that
+ * chunking makes no sense. In particular this is the case when
+ * AMP runs in the `amp-shadow` multi document mode.
+ */
+export function deactivateChunking() {
+  deactivated = true;
+};
+
+export function activateChunkingForTesting() {
+  deactivated = false;
+};
+
+/**
  * Runs all currently scheduled chunks.
+ * Independent of errors it will unwind the queue. Will afterwards
+ * throw the first encountered error.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunk);
+  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   const errors = [];
   while (true) {
     try {
       if (!service.execute_()) {
-        if (errors.length) {
-          break;
-        }
-        return;
+        break;
       }
     } catch (e) {
       errors.push(e);
     }
   }
-  throw errors[0];
+  if (errors.length) {
+    throw errors[0];
+  }
 }
 
-class Chunk {
+class Chunks {
   /**
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
@@ -83,8 +102,7 @@ class Chunk {
     /** @private @const {function()} */
     this.boundExecute_ = () => this.execute_();
     /** @private @const {boolean} */
-    this.active_ = isExperimentOn(this.win_, 'chunked-amp')
-        && !shouldNotUseMacroTask;
+    this.active_ = isExperimentOn(this.win_, 'chunked-amp');
 
     if (!this.active_) {
       return;
@@ -109,6 +127,7 @@ class Chunk {
    * Run fn as a "chunk". It'll run in a micro task when the doc is visible
    * and otherwise run it after having yielded to the event queue once.
    * @param {function()} fn
+   * @private
    */
   run_(fn) {
     this.tasks_.push(fn);
@@ -119,6 +138,7 @@ class Chunk {
    * Run a task.
    * Schedule the next round if there are more tasks.
    * @return {boolean} Whether anything was executed.
+   * @private
    */
   execute_() {
     const t = this.tasks_.shift();
@@ -144,6 +164,7 @@ class Chunk {
 
   /**
    * Schedule running a task.
+   * @private
    */
   schedule_() {
     if (!this.active_ || this.isVisible_()) {
@@ -164,12 +185,19 @@ class Chunk {
 
   /**
    * @return {boolean}
+   * @private
    */
   isVisible_() {
-    // Ask the viewer or try to infer whether we are visible.
-    return this.viewer_
-        ? this.viewer_.isVisible()
-        : !(/visibilityState=hidden/.test(this.win_.location.hash));
+    // Ask the viewer first.
+    if (this.viewer_) {
+      return this.viewer_.isVisible();
+    }
+    // There is no viewer yet. Lets try to guess whether we are visible.
+    if (this.win_.document.hidden) {
+      return false;
+    }
+    // Viewers send a URL param if we are not visible.
+    return !(/visibilityState=prerender/.test(this.win_.location.hash));
   }
 }
 

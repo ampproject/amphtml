@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {chunk, resolvedObjectforTesting} from '../../src/chunk';
+import {
+  activateChunkingForTesting,
+  chunk,
+  deactivateChunking,
+  resolvedObjectforTesting,
+} from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
@@ -27,6 +32,7 @@ describe('chunk', () => {
   beforeEach(() => {
     resolved = resolvedObjectforTesting();
     experimentOn = true;
+    activateChunkingForTesting();
   });
 
   function basicTests(env) {
@@ -73,6 +79,9 @@ describe('chunk', () => {
     beforeEach(() => {
       installDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
+      Object.defineProperty(env.win.document, 'hidden', {
+        get: () => false,
+      });
     });
 
     basicTests(env);
@@ -84,6 +93,10 @@ describe('chunk', () => {
 
     beforeEach(() => {
       expect(env.win.services.viewer).to.not.be.undefined;
+      Object.defineProperty(env.win.document, 'hidden', {
+        get: () => false,
+        configurable: true,
+      });
     });
 
     describe('visible', () => {
@@ -106,7 +119,7 @@ describe('chunk', () => {
         env.win.requestIdleCallback = () => {
           throw new Error('No calls expected: requestIdleCallback');
         };
-        env.win.location.setForTesting('test#visibilityState=hidden');
+        env.win.location.resetHref('test#visibilityState=prerender');
       });
 
       basicTests(env);
@@ -124,7 +137,43 @@ describe('chunk', () => {
         env.sandbox.stub(resolved, 'then', () => {
           throw new Error('No calls expected');
         });
-        env.win.location.setForTesting('test#visibilityState=hidden');
+        env.win.location.resetHref('test#visibilityState=prerender');
+      });
+
+      basicTests(env);
+    });
+
+    describe('invisible but deactivated', () => {
+      beforeEach(() => {
+        deactivateChunking();
+        const viewer = viewerForDoc(env.win.document);
+        env.sandbox.stub(viewer, 'isVisible', () => {
+          return false;
+        });
+        env.win.requestIdleCallback = () => {
+          throw new Error('No calls expected');
+        };
+        env.win.location.resetHref('test#visibilityState=prerender');
+      });
+
+      basicTests(env);
+    });
+
+    describe('invisible via document.hidden', () => {
+      beforeEach(() => {
+        const viewer = viewerForDoc(env.win.document);
+        env.sandbox.stub(viewer, 'isVisible', () => {
+          return false;
+        });
+        env.win.requestIdleCallback = fn => {
+          Promise.resolve().then(fn);
+        };
+        env.sandbox.stub(resolved, 'then', () => {
+          throw new Error('No calls expected');
+        });
+        Object.defineProperty(env.win.document, 'hidden', {
+          get: () => true,
+        });
       });
 
       basicTests(env);
@@ -132,7 +181,7 @@ describe('chunk', () => {
 
     describe('invisible to visible', () => {
       beforeEach(() => {
-        env.win.location.setForTesting('test#visibilityState=hidden');
+        env.win.location.resetHref('test#visibilityState=prerender');
         const viewer = viewerForDoc(env.win.document);
         let visible = false;
         env.sandbox.stub(viewer, 'isVisible', () => {
@@ -150,7 +199,7 @@ describe('chunk', () => {
 
     describe('invisible to visible after a while', () => {
       beforeEach(() => {
-        env.win.location.setForTesting('test#visibilityState=hidden');
+        env.win.location.resetHref('test#visibilityState=prerender');
         const viewer = viewerForDoc(env.win.document);
         let visible = false;
         env.sandbox.stub(viewer, 'isVisible', () => {
@@ -172,6 +221,11 @@ describe('chunk', () => {
   describes.realWin('realWin', {
     amp: true,
   }, env => {
+    beforeEach(() => {
+      Object.defineProperty(env.win.document, 'hidden', {
+        get: () => false,
+      });
+    });
     basicTests(env);
   });
 
@@ -184,6 +238,9 @@ describe('chunk', () => {
       const viewer = viewerForDoc(env.win.document);
       env.sandbox.stub(viewer, 'isVisible', () => {
         return false;
+      });
+      Object.defineProperty(env.win.document, 'hidden', {
+        get: () => false,
       });
     });
     basicTests(env);

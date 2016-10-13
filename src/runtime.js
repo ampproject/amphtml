@@ -281,7 +281,6 @@ function adoptShared(global, opts, callback) {
     };
     register.displayName = fnOrStruct.n;
     chunk(global.document, register);
-
   };
 
   // Execute asynchronously scheduled elements.
