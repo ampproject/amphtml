@@ -25,7 +25,7 @@ min_validator_revision_required: 178
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 293
+spec_file_revision: 294
 
 reference_points_can_define_reference_points: true
 
@@ -2156,6 +2156,10 @@ tags {
   }
   attrs: { name: "action-xhr" }
   attrs: { name: "autocomplete" }
+  attrs: {
+    name: "custom-validation-reporting"
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
+  }
   attrs: { name: "enctype" }
   attrs: { name: "method" }
   attrs: { name: "name" }
@@ -2165,7 +2169,16 @@ tags {
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
+  reference_points: {
+    tag_spec_name: "FORM [submit-success|submit-error]"
+  }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+tags {
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "FORM [submit-success|submit-error]"
+  attrs: { name: "submit-success" }
+  attrs: { name: "submit-error" }
 }
 # 4.10.4 The label element
 tags: {
@@ -2663,6 +2676,31 @@ attr_lists: {
   attrs: { name: "amp-access-style" }
   attrs: { name: "amp-access-template" }
   attrs: { name: "i-amp-access-id" }
+  # amp-form specific attributes, see
+  # https://github.com/ampproject/amphtml/issues/5268
+  attrs: {
+    name: "validation-for"
+    trigger: {
+      if_value_regex: ".*"
+      also_requires_attr: "visible-when-invalid"
+    }
+  }
+  attrs: {
+    name: "visible-when-invalid"
+    value_regex: "(badInput|"
+      "customError|"
+      "patternMismatch|"
+      "rangeOverflow|"
+      "rangeUnderflow|"
+      "stepMismatch|"
+      "tooLong|"
+      "typeMismatch|"
+      "valueMissing)"
+    trigger: {
+      if_value_regex: ".*"
+      also_requires_attr: "validation-for"
+    }
+  }
 }
 
 manufactured_body_tag_is_error: true
