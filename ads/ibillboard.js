@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateDataExists, validateSrcPrefix} from '../3p/3p';
+import {writeScript, validateData, validateSrcPrefix} from '../3p/3p';
 
 const validHosts = [
   'https://go.eu.bbelements.com',
@@ -30,7 +30,7 @@ const validHosts = [
  */
 export function ibillboard(global, data) {
 
-  validateDataExists(data, 'src');
+  validateData(data, ['src']);
   const src = data.src;
   validateSrcPrefix(validHosts, src);
 
