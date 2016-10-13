@@ -1353,7 +1353,8 @@ class ParsedUrlSpec {
    * @param {!amp.validator.ValidationResult} result
    */
   validateUrlAndProtocol(adapter, context, urlStr, tagSpec, result) {
-    if (urlStr === '' &&
+    const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
+    if (urlStr.match(onlyWhitespaceRe) !== null &&
         (this.spec_.allowEmpty === null || this.spec_.allowEmpty === false)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.missingUrl(context, tagSpec, result);
@@ -1827,13 +1828,28 @@ class ParsedAttrSpec {
     // open-source version uses).
     // begin oneof {
     if (this.spec_.value !== null) {
-      if (attrValue == this.spec_.value) {
+      if (attrValue === this.spec_.value) {
         return;
       }
       // Allow spec's with value: "" to also be equal to their attribute
       // name (e.g. script's spec: async has value: "" so both
       // async and async="async" is okay in a script tag).
       if ((this.spec_.value == '') && (attrValue == attrName)) {
+        return;
+      }
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+            tagSpec.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
+    } else if (this.spec_.valueCasei !== null) {
+      if (attrValue.toLowerCase() === this.spec_.valueCasei) {
         return;
       }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -1888,10 +1904,9 @@ class ParsedAttrSpec {
     /** @type {!Array<string>} */
     let maybeUris = [];
     if (attrName !== 'srcset') {
-      maybeUris.push(goog.string.trim(attrValue));
+      maybeUris.push(attrValue);
     } else {
-      let srcset = goog.string.trim(attrValue);
-      if (srcset === '') {
+      if (attrValue === '') {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1905,7 +1920,7 @@ class ParsedAttrSpec {
         return;
       }
       /** @type {!parse_srcset.SrcsetParsingResult} */
-      const parseResult = parse_srcset.parseSrcset(srcset);
+      const parseResult = parse_srcset.parseSrcset(attrValue);
       if (!parseResult.success) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
@@ -2509,7 +2524,9 @@ class ParsedTagSpec {
     var mandatoryParent =
         this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
     const attrName = parsedSpec.getSpec().name;
-    const attrValue = parsedSpec.getSpec().value;
+    const attrValue = parsedSpec.getSpec().value !== null ?
+        parsedSpec.getSpec().value.toLowerCase() :
+        parsedSpec.getSpec().valueCasei;
     goog.asserts.assert(attrValue !== null);
     return makeDispatchKey(attrName, attrValue, mandatoryParent);
   }
@@ -4085,7 +4102,12 @@ amp.validator.ValidationHandler =
         attrName = attrName.toLowerCase();
 
         const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
-            attrName, attrValue, this.context_.getTagStack().getParent());
+            attrName,
+            // Attribute values are case-sensitive by default, but we
+            // match dispatch keys in a case-insensitive manner and then
+            // validate using whatever the tagspec requests.
+            attrValue.toLowerCase(),
+            this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
           const parsedSpec = this.rules_.getTagSpec(maybeTagSpecId);
           goog.asserts.assert(parsedSpec !== undefined, '1');

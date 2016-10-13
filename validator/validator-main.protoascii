@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 183
+min_validator_revision_required: 185
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 299
+spec_file_revision: 300
 
 # Validator extensions.
 # =====================
@@ -131,7 +131,7 @@ attr_lists: {
   attrs: { name: "target" }
   attrs: { name: "type" }
   attrs: { name: "hreflang" }
-  attrs: { name: "charset" value: "utf-8" }
+  attrs: { name: "charset" value_casei: "utf-8" }
   attrs: { name: "color" }
 }
 tags: {
@@ -189,7 +189,7 @@ tags: {
   attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
-    value: "canonical"
+    value_casei: "canonical"
     mandatory: true
     dispatch_key: true
   }
@@ -213,7 +213,7 @@ tags: {
   attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
-    value: "manifest"
+    value_casei: "manifest"
     mandatory: true
     dispatch_key: true
   }
@@ -237,12 +237,12 @@ tags: {
   attrs: {
     name: "rel"
     mandatory: true
-    value: "stylesheet"
+    value_casei: "stylesheet"
     dispatch_key: true
   }
   attrs: {
     name: "type"
-    value: "text/css"
+    value_casei: "text/css"
   }
   attrs: { name: "media" }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
@@ -258,7 +258,7 @@ tags: {
   attrs: {
     name: "itemprop"
     mandatory: true
-    value: "sameAs"
+    value_casei: "sameas"
     dispatch_key: true
   }
   attr_lists: "common-link-attrs"
@@ -291,7 +291,7 @@ tags: {
     dispatch_key: true
     name: "charset"
     mandatory: true
-    value: "utf-8"
+    value_casei: "utf-8"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
@@ -330,27 +330,7 @@ tags: {
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "X-UA-Compatible"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_properties: {
-      properties: { name: "ie" value: "edge" }
-      properties: { name: "chrome" value: "1" }
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
-}
-# Identical to the above, but a common case variant of x-ua-compatible.
-tags: {
-  tag_name: "META"
-  spec_name: "meta http-equiv=x-ua-compatible"
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "x-ua-compatible"
+    value_casei: "x-ua-compatible"
     dispatch_key: true
   }
   attrs: {
@@ -370,7 +350,7 @@ tags: {
   satisfies: "amp-app-banner data source"
   attrs: {
     name: "name"
-    value: "apple-itunes-app"
+    value_casei: "apple-itunes-app"
     mandatory: true
     dispatch_key: true
   }
@@ -400,34 +380,17 @@ tags: {
 # set to utf-8.
 tags: {
   tag_name: "META"
-  spec_name: "meta http-equiv=content-type"
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "content-type"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value: "text/html; charset=utf-8"
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
-}
-# Identical to the above, but a common case variant of content-type.
-tags: {
-  tag_name: "META"
   spec_name: "meta http-equiv=Content-Type"
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "Content-Type"
+    value_casei: "content-type"
     dispatch_key: true
   }
   attrs: {
     name: "content"
     mandatory: true
-    value: "text/html; charset=utf-8"
+    value_casei: "text/html; charset=utf-8"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
@@ -438,7 +401,7 @@ tags: {
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "content-language"
+    value_casei: "content-language"
     dispatch_key: true
   }
   attrs: {
@@ -455,7 +418,7 @@ tags: {
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "pics-label"
+    value_casei: "pics-label"
     dispatch_key: true
   }
   attrs: {
@@ -472,7 +435,7 @@ tags: {
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "imagetoolbar"
+    value_casei: "imagetoolbar"
     dispatch_key: true
   }
   attrs: {
@@ -489,13 +452,13 @@ tags: {
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "Content-Style-Type"
+    value_casei: "content-style-type"
     dispatch_key: true
   }
   attrs: {
     name: "content"
     mandatory: true
-    value: "text/css"
+    value_casei: "text/css"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
@@ -507,13 +470,13 @@ tags: {
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "Content-Script-Type"
+    value_casei: "content-script-type"
     dispatch_key: true
   }
   attrs: {
     name: "content"
     mandatory: true
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
@@ -525,7 +488,7 @@ tags: {
   attrs: {
     name: "http-equiv"
     mandatory: true
-    value: "RESOURCE-TYPE"
+    value_casei: "resource-type"
     dispatch_key: true
   }
   attrs: {
@@ -555,7 +518,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
-    value: "text/css"
+    value_casei: "text/css"
   }
   cdata: {
     max_bytes: 50000
@@ -644,7 +607,7 @@ tags: {  # Special custom 'author' spreadsheet for A4A
   }
   attrs: {  # This is a default, but it doesn't hurt.
     name: "type"
-    value: "text/css"
+    value_casei: "text/css"
   }
   cdata: {
     max_bytes: 20000  # Smaller than AMP, which is 50,000.
@@ -1047,7 +1010,7 @@ tags: {
   }
   attrs: { name: "download" }
   attrs: { name: "media" }
-  attrs: { name: "type" value: "text/html" }
+  attrs: { name: "type" value_casei: "text/html" }
   # These are not valid html5 but are commonly used and are supported in all
   # major browsers.
   attrs: { name: "border" }
@@ -1406,7 +1369,7 @@ attr_lists: {
   attrs: {
     name: "kind"
     mandatory: true
-    value: "subtitles"
+    value_casei: "subtitles"
   }
   attrs: { name: "label" }
   attrs: {
@@ -2410,7 +2373,7 @@ tags: {
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2427,7 +2390,7 @@ tags: {
   attrs: {
     name: "type"
     mandatory: true
-    value: "application/ld+json"
+    value_casei: "application/ld+json"
     dispatch_key: true
   }
   cdata: {
