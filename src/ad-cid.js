@@ -27,6 +27,7 @@ import {timerFor} from '../src/timer';
  */
 export function getAdCid(adElement) {
   const config = adConfig[adElement.element.getAttribute('type')];
+  /** @const {?string} */
   const scope = config ? config.clientIdScope : null;
 
   if (!scope) {
@@ -36,7 +37,8 @@ export function getAdCid(adElement) {
     if (!cidService) {
       return;
     }
-    return cidService.get(scope, Promise.resolve()).catch(error => {
+    return cidService.get(dev().assertString(scope), Promise.resolve())
+    .catch(error => {
       // Not getting a CID is not fatal.
       dev().error('ad-cid', error);
       return undefined;

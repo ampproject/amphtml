@@ -57,6 +57,11 @@ var forbiddenTerms = {
   'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
+  'sandbox\\.(spy|stub|mock)\\([^,\\s]*[iI]?frame[^,\\s]*,': {
+    message: 'Do NOT stub on a cross domain iframe! #5359\n' +
+        '  If this is same domain, mark /*OK*/.\n' +
+        '  If this is cross domain, overwrite the method directly.'
+  },
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
@@ -152,6 +157,7 @@ var forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/describes.js',
       'testing/iframe.js',
     ],
   },
@@ -339,6 +345,7 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/fake-dom.js',
     ],
   },
   'sessionStorage': {

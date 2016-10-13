@@ -148,7 +148,7 @@ export function getServicePromiseOrNull(win, id) {
  * expected to return the service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(!./service/ampdoc-impl.AmpDoc):!T=} opt_factory
+ * @param {function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
  *     Should create the service if it does not exist yet. If the factory is
  *     not given, it is an error if the service does not exist yet.
  * @return {T}
@@ -304,11 +304,11 @@ function getAmpdocService(win) {
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {function(!Window):T|function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
+ * @param {function(?):T=} opt_factory
  *     Should create the service if it does not exist yet. If the factory
  *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
- * @param {function(new:T, !Window)|function(new:T, !./service/ampdoc-impl.AmpDoc)=} opt_constructor
+ * @param {function(new:T, ?)=} opt_constructor
  *     Constructor function to new the service. Called with context.
  * @return {*}
  * @template T

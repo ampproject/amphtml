@@ -106,8 +106,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Subclasses should override this method to configure gestures for carousel.
-   * @abstract
+   * Subclasses may override this method to configure gestures for carousel.
    */
   setupGestures() {
     // Subclasses may override.

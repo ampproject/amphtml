@@ -470,7 +470,7 @@ describe('amp-iframe', () => {
 
   it('should listen for embed-ready event', () => {
     const activateIframeSpy_ =
-        sandbox.spy(AmpIframe.prototype, 'activateIframe_');
+        sandbox./*OK*/spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({
       src: clickableIframeSrc,
       sandbox: 'allow-scripts allow-same-origin',

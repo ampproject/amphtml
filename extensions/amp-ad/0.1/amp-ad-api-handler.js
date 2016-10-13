@@ -61,7 +61,7 @@ export class AmpAdApiHandler {
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
-    /** @private @const */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {?Promise} */
