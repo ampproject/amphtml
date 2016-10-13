@@ -25,7 +25,7 @@ min_validator_revision_required: 183
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 297
+spec_file_revision: 298
 
 # Validator extensions.
 # =====================
@@ -119,7 +119,7 @@ tags: {
   # }
   attrs: {
     name: "target"
-    value_regex_casei: "(_blank|_self)"
+    value_regex_casei: "(_blank|_self|_top)"
   }
 }
 # Disallowed.
@@ -1043,7 +1043,7 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex: "(_blank|_self)"
+    value_regex: "(_blank|_self|_top)"
   }
   attrs: { name: "download" }
   attrs: { name: "media" }
