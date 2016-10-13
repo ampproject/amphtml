@@ -167,8 +167,6 @@ export class Resource {
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
-    }).then(() => {
-      this.loadedOnce_ = true;
     });
 
     /** @private {boolean} */
@@ -255,6 +253,7 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**
@@ -461,10 +460,14 @@ export class Resource {
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
     let distance;
-    // If outside of viewport's x-axis, element is not in viewport.
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
-      return false;
+      // If outside of viewport's x-axis, element is not in viewport.
+      // The exception is for owned resources, since they only attempt to
+      // render outside viewport when the owner has explicitly allowed it.
+      if (!this.hasOwner()) {
+        return false;
+      }
     }
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
@@ -569,8 +572,12 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
-    this.loadPromiseResolve_();
+    if (this.loadPromiseResolve_) {
+      this.loadPromiseResolve_();
+      this.loadPromiseResolve_ = null;
+    }
     this.layoutPromise_ = null;
+    this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {

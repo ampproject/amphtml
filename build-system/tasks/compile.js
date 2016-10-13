@@ -248,7 +248,7 @@ function compile(entryModuleFilenames, outputDir,
         warning_level: 'DEFAULT',
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
-        jscomp_off: 'unknownDefines',
+        jscomp_off: ['unknownDefines'],
         define: [],
         hide_warnings_for: [
           'third_party/closure-library/sha384-generated.js',
@@ -270,7 +270,25 @@ function compile(entryModuleFilenames, outputDir,
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error.push(
-          'checkTypes', 'accessControls', 'const', 'constantProperty');
+          'checkTypes',
+          'accessControls',
+          'const',
+          'constantProperty',
+          'globalThis');
+
+      // TODO(aghassemi): Remove when NTI is the default.
+      if (argv.nti) {
+        compilerOptions.compilerFlags.new_type_inf = true;
+        compilerOptions.compilerFlags.jscomp_off.push(
+          'newCheckTypesExtraChecks');
+        compilerOptions.compilerFlags.externs.push(
+          'build-system/amp.nti.extern.js'
+        );
+      } else {
+        compilerOptions.compilerFlags.externs.push(
+          'build-system/amp.oti.extern.js'
+        );
+      }
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');

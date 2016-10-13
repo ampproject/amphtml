@@ -90,6 +90,8 @@
     <a href="#adstir">AdStir</a> |
     <a href="#adtech">AdTech</a> |
     <a href="#aduptech">Ad Up Technology</a> |
+    <a href="#advertserve">AdvertServe</a> |
+    <a href="#affiliateb">Affiliate-B</a> |
     <a href="#amoad">AMoAd</a> |
     <a href="#appnexus">App Nexus</a> |
     <a href="#atomx">Atomx</a> |
@@ -132,6 +134,7 @@
     <a href="#taboola">Taboola</a> |
     <a href="#teads">Teads</a> |
     <a href="#triplelift">TripleLift</a> |
+    <a href="#webediads">Webediads</a> |
     <a href="#weborama">Weborama</a> |
     <a href="#widespace">Widespace</a> |
     <a href="#yahoojp">YahooJP</a> |
@@ -277,6 +280,26 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="advertserve">AdvertServe</h2>
+  <amp-ad width=300 height=250
+          type="advertserve"
+          data-client="tester"
+          data-pid=0
+          data-zid=68>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="affiliateb">Affiliate-B</h2>
+  <amp-ad width=300 height=250
+      type="affiliateb"
+      data-afb_a="l44x-y174897c"
+      data-afb_p="g2m"
+      data-afb_t="i">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="amoad">AMoAd banner</h2>
   <amp-ad width="300" height="250"
       type="amoad"
@@ -401,10 +424,26 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="criteo">Criteo (0x0 fake ad)</h2>
+  <h2 id="criteo">Criteo Passback</h2>
+  <p>Due to ad targeting, the slot might not load ad.</p>
+
   <amp-ad width="300" height="250"
       type="criteo"
+      data-tagtype="passback"
       data-zone="314159">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
+  <h2>Criteo RTA</h2>
+  <p>Due to ad targeting, the slot might not load ad.</p>
+
+  <amp-ad width="300" height="250"
+      type="criteo"
+      data-tagtype="rta"
+      data-slot="/2729856/iframe_test_new_tag"
+	  data-adserver="DFP"
+      data-networkid="1976">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -902,6 +941,19 @@
   <amp-ad width=300 height=168
       type="yieldmo"
       data-ymid="1349317029731662884">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="webediads">Webediads</h2>
+  <div>It's a private ad network with strict ad targeting, hence very common to see a no-fill.</div>
+  <amp-ad width="300"
+          height="250"
+          type="webediads"
+          data-site="site_test"
+          data-page="amp"
+          data-position="middle"
+          data-query="amptest=1">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>

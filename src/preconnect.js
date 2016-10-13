@@ -24,7 +24,7 @@ import {fromClass} from './service';
 import {parseUrl} from './url';
 import {timerFor} from './timer';
 import {platformFor} from './platform';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {dev} from './log';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
@@ -286,8 +286,7 @@ export class Preconnect {
    */
   getViewer_() {
     if (!this.viewer_) {
-      // TODO(dvoytenko): switch to viewerForDoc.
-      this.viewer_ = viewerFor(this.element_.ownerDocument.defaultView);
+      this.viewer_ = viewerForDoc(this.element_);
     }
     return this.viewer_;
   }

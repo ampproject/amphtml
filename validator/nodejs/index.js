@@ -30,7 +30,6 @@ var url = require('url');
 var util = require('util');
 var vm = require('vm');
 
-var VERSION = '0.1.0';
 var DEFAULT_USER_AGENT = 'amphtml-validator';
 
 /**
@@ -291,6 +290,12 @@ Validator.prototype.validateString = function(inputString, htmlFormat) {
 var instanceByValidatorJs = {};
 
 /**
+ * Provided a URL or a filename from which to fetch the validator.js
+ * file, fetches, instantiates, and caches the validator instance
+ * asynchronously.  If you prefer to implement your own fetching /
+ * caching logic, you may want to consider createInstance() instead,
+ * which is synchronous and much simpler.
+ *
  * @param {string=} opt_validatorJs
  * @param {string=} opt_userAgent
  * @returns {!Promise<Validator>}
@@ -299,8 +304,7 @@ var instanceByValidatorJs = {};
 function getInstance(opt_validatorJs, opt_userAgent) {
   var validatorJs =
       opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
-  var userAgent =
-      opt_userAgent || DEFAULT_USER_AGENT;
+  var userAgent = opt_userAgent || DEFAULT_USER_AGENT;
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return Promise.resolve(instanceByValidatorJs[validatorJs]);
   }
@@ -323,6 +327,23 @@ function getInstance(opt_validatorJs, opt_userAgent) {
   });
 }
 exports.getInstance = getInstance;
+
+/**
+ * Provided the contents of the validator.js file, e.g. as downloaded from
+ * 'https://cdn.ampproject.org/v0/validator.js', returns a new validator
+ * instance. The tradeoff between this function and getInstance() is that this
+ * function is synchronous but requires the contents of the validator.js
+ * file as a parameter, while getInstance is asynchronous, fetches files
+ * from disk or the web, and caches them.
+ *
+ * @param {string} validatorJsContents
+ * @returns {!Validator}
+ * @export
+ */
+function newInstance(validatorJsContents) {
+  return new Validator(validatorJsContents);
+}
+exports.newInstance = newInstance;
 
 /**
  * Logs a validation result to the console using console.log, console.warn,
@@ -359,7 +380,7 @@ function logValidationResult(filename, validationResult, color) {
  * Main entry point into the command line tool.
  */
 function main() {
-  program.version(VERSION)
+  program
       .usage(
           '[options] <fileOrUrlOrMinus...>\n\n' +
           '  Validates the files or urls provided as arguments. If "-" is ' +

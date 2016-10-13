@@ -24,7 +24,7 @@ import {whenDocumentComplete} from '../document-ready';
 import {fromClassForDoc} from '../service';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
@@ -98,6 +98,7 @@ export class UrlReplacements {
   initialize_() {
     this.initialized_ = true;
 
+    /** @const {!./viewport-impl.Viewport} */
     const viewport = viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.
@@ -130,7 +131,7 @@ export class UrlReplacements {
 
     // Returns the referrer URL.
     this.setAsync_('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
-      return viewerFor(this.ampdoc.win).getReferrerUrl();
+      return viewerForDoc(this.ampdoc).getReferrerUrl();
     }));
 
     // Returns the title of this AMP document.
@@ -375,7 +376,7 @@ export class UrlReplacements {
 
     // Returns an identifier for the viewer.
     this.setAsync_('VIEWER', () => {
-      return viewerFor(this.ampdoc.win).getViewerOrigin().then(viewer => {
+      return viewerForDoc(this.ampdoc).getViewerOrigin().then(viewer => {
         return viewer == undefined ? '' : viewer;
       });
     });
@@ -410,6 +411,10 @@ export class UrlReplacements {
 
     // returns the AMP version number
     this.set_('AMP_VERSION', () => '$internalRuntimeVersion$');
+
+    this.set_('BACKGROUND_STATE', () => {
+      return viewerForDoc(this.ampdoc.win.document).isVisible() ? '0' : '1';
+    });
   }
 
   /**
@@ -578,11 +583,14 @@ export class UrlReplacements {
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {string}
    */
-  expandSync(url, opt_bindings, opt_collectVars) {
+  expandSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */(
-        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true));
+        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+            opt_whiteList));
   }
 
   /**
@@ -602,10 +610,12 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, *>=} opt_collectVars
    * @param {boolean=} opt_sync
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>|string}
    * @private
    */
-  expand_(url, opt_bindings, opt_collectVars, opt_sync) {
+  expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -615,6 +625,11 @@ export class UrlReplacements {
       let args = [];
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
+      }
+      if (opt_whiteList && !opt_whiteList[name]) {
+        // Do not perform substitution and just return back the original
+        // match, so that the string doesn't change.
+        return match;
       }
       let binding;
       if (opt_bindings && (name in opt_bindings)) {
@@ -649,6 +664,7 @@ export class UrlReplacements {
           user().error(TAG, 'ignoring promise value for key: ', name);
           return '';
         }
+        /** @const {Promise<string>} */
         const p = val.catch(err => {
           // Report error, but do not disrupt URL replacement. This will
           // interpolate as the empty string.

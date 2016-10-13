@@ -42,6 +42,8 @@ export class AmpImg extends BaseElement {
   /** @override */
   buildCallback() {
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
+
+    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -57,7 +59,6 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
-    /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
@@ -73,8 +74,6 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */

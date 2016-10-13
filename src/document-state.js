@@ -46,7 +46,7 @@ export class DocumentState {
       this.visibilityStateProp_ = null;
     }
 
-    /** @private @const */
+    /** @private @const {!Observable} */
     this.visibilityObservable_ = new Observable();
 
     /** @private {string|null} */
@@ -152,4 +152,4 @@ export class DocumentState {
  */
 export function documentStateFor(window) {
   return fromClass(window, 'documentState', DocumentState);
-};
+}

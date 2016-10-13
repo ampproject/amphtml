@@ -23,8 +23,8 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {IntersectionObserver} from '../../../src/intersection-observer';
-import {viewerFor} from '../../../src/viewer';
-import {user} from '../../../src/log';
+import {viewerForDoc} from '../../../src/viewer';
+import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 
 const TIMEOUT_VALUE = 10000;
@@ -32,12 +32,12 @@ const TIMEOUT_VALUE = 10000;
 export class AmpAdApiHandler {
 
   /**
-   * @param {!BaseElement} baseInstance
+   * @param {!AMP.BaseElement} baseInstance
    * @param {!Element} element
    * @param {function()=} opt_noContentCallback
    */
   constructor(baseInstance, element, opt_noContentCallback) {
-    /** @private {!BaseElement} */
+    /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
     /** @private {!Element} */
@@ -55,14 +55,14 @@ export class AmpAdApiHandler {
     /** @private {boolean} */
     this.is3p_ = false;
 
-    /** @param {?function()} opt_noContentHandler */
+    /** @private {?function()|undefined} opt_noContentHandler */
     this.noContentCallback_ = opt_noContentCallback;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
-    /** @private @const */
-    this.viewer_ = viewerFor(this.baseInstance_.win);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {?Promise} */
     this.adResponsePromise_ = null;
@@ -72,13 +72,14 @@ export class AmpAdApiHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean} is3p whether iframe was loaded via 3p.
-   * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
+   * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
+   * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
   startUp(iframe, is3p, opt_defaultVisible) {
-    user().assert(
-      !this.iframe, 'multiple invocations of startup without destroy!');
+    dev().assert(
+        !this.iframe_, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
@@ -111,6 +112,10 @@ export class AmpAdApiHandler {
           if (data.type == 'render-start') {
             this.updateSize_(data.height, data.width,
                 info.source, info.origin);
+            if (this.baseInstance_.lifecyleReporter_) {
+              this.baseInstance_.lifecycleReporter_.sendPing(
+                  'renderCrossDomainStart');
+            }
             //report performance
           } else {
             this.noContent_();
@@ -141,7 +146,7 @@ export class AmpAdApiHandler {
           this.adResponsePromise_,
           'timeout waiting for ad response').catch(e => {
             this.noContent_();
-            user().warn(e);
+            user().warn('amp-ad', e);
           }).then(() => {
             //TODO: add performance reporting;
             if (this.iframe_) {
@@ -151,7 +156,7 @@ export class AmpAdApiHandler {
     });
   }
 
-  /** @override  */
+  /** See BaseElement.  */
   unlayoutCallback() {
     this.cleanup_();
     if (this.iframe_) {
@@ -261,7 +266,10 @@ export class AmpAdApiHandler {
     });
   }
 
-  /** @override  */
+  /**
+   * See BaseElement method.
+   * @param {boolean} inViewport
+   */
   viewportCallback(inViewport) {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.onViewportCallback(inViewport);
@@ -270,7 +278,9 @@ export class AmpAdApiHandler {
   }
 
 
-  /**  @override */
+  /**
+   * See BaseElement method.
+   */
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This does nothing
