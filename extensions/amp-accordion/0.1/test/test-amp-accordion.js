@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-accordion';
-import * as sinon from 'sinon';
 
 
 describes.sandboxed('amp-accordion', {}, () => {
