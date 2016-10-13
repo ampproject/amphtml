@@ -17,6 +17,22 @@
 amp-carousel {
 }
 
+/**
+ * `amp-carousel-slide` class is added to every item in the carousel to
+ * allow page authors to target items for user-defined styling.
+ * Every `<amp-carousel>'s` immediate child is considered a slide in
+ * the carousel.
+ */
+amp-carousel-slide {
+}
+
+.amp-carousel-slide > .-amp-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
+}
+
 .amp-carousel-button {
   position: absolute;
   box-sizing: border-box;
@@ -102,7 +118,8 @@ amp-carousel .amp-carousel-button.amp-disabled {
   -webkit-overflow-scrolling: touch !important;
 }
 
-.-amp-slides-container.-amp-no-scroll {
+/** Only hide scroll bar for touch devices as it causes jitters on desktops */
+.amp-mode-touch .-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
 

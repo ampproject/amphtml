@@ -29,14 +29,17 @@ import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
-import {user} from '../src/log';
+import {initLogConstructor, user} from '../src/log';
+import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
+import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
+import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
@@ -49,8 +52,11 @@ import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
+import {advertserve} from '../ads/advertserve';
+import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {atomx} from '../ads/atomx';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
@@ -66,17 +72,22 @@ import {gmossp} from '../ads/gmossp';
 import {ibillboard} from '../ads/ibillboard';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
+import {inmobi} from '../ads/inmobi';
 import {kargo} from '../ads/kargo';
+import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
+import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {mixpo} from '../ads/mixpo';
 import {nativo} from '../ads/nativo';
 import {nend} from '../ads/nend';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {plista} from '../ads/plista';
 import {pubmatic} from '../ads/pubmatic';
+import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {revcontent} from '../ads/revcontent';
 import {rubicon} from '../ads/rubicon';
@@ -95,7 +106,7 @@ import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
-
+import {zucks} from '../ads/zucks';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -106,10 +117,22 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   plista: true,
   zergnet: true,
+  _ping_: true,
 };
+
+const data = parseFragment(location.hash);
+window.context = data._context;
+
+// This should only be invoked after window.context is set
+initLogConstructor();
+
+if (getMode().test || getMode().localDev) {
+  register('_ping_', _ping_);
+}
 
 // Keep the list in alphabetic order
 register('a9', a9);
+register('accesstrade', accesstrade);
 register('adblade', adblade);
 register('adform', adform);
 register('adgeneration', adgeneration);
@@ -122,8 +145,11 @@ register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
+register('advertserve', advertserve);
+register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('atomx', atomx);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
@@ -141,18 +167,23 @@ register('ibillboard', ibillboard);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
+register('inmobi', inmobi);
 register('kargo', kargo);
+register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
+register('meg', meg);
 register('microad', microad);
+register('mixpo', mixpo);
 register('nativo', nativo);
 register('nend', nend);
 register('openadstream', openadstream);
 register('openx', openx);
 register('plista', plista);
 register('pubmatic', pubmatic);
+register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
@@ -172,10 +203,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
-
-register('_ping_', function(win, data) {
-  win.document.getElementById('c').textContent = data.ping;
-});
+register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -191,13 +219,6 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
-// List of ad networks that will manually call `window.context.renderStart` to
-// emit render-start event when ad actually starts rendering. Please add
-// yourself here if you'd like to do so (which we encourage).
-const waitForRenderStart = [
-  'doubleclick',
-];
-
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
@@ -211,8 +232,6 @@ const waitForRenderStart = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-  user().assert(win.context.location.originValidated != null,
-      'Origin should have been validated');
 
   user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
@@ -277,8 +296,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
-    const data = parseFragment(location.hash);
-    window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
@@ -321,19 +338,17 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
     delete data._context;
-
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
-    if (waitForRenderStart.indexOf(data.type) < 0) {
-      triggerRenderStart();
-    }
+    nonSensitiveDataPostMessage('bootstrap-loaded');
   } catch (e) {
-    if (!window.context.mode.test) {
-      lightweightErrorReport(e);
+    const c = window.context || {mode: {test: false}};
+    if (!c.mode.test) {
+      lightweightErrorReport(e, c.canary);
       throw e;
     }
   }
@@ -351,8 +366,11 @@ function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
-function triggerRenderStart() {
-  nonSensitiveDataPostMessage('render-start');
+/**
+ * @param {{width, height}=} opt_data
+ */
+function triggerRenderStart(opt_data) {
+  nonSensitiveDataPostMessage('render-start', opt_data);
 }
 
 /**
@@ -434,8 +452,7 @@ function reportRenderedEntityIdentifier(entityId) {
 /**
  * Throws if the current frame's parent origin is not equal to
  * the claimed origin.
- * For browsers that don't support ancestorOrigins it adds
- * `originValidated = false` to the location object.
+ * Only check for browsers that support ancestorOrigins
  * @param {!Window} window
  * @param {!Location} parentLocation
  * @visibleForTesting
@@ -446,13 +463,11 @@ export function validateParentOrigin(window, parentLocation) {
   // ancestorOrigins. In that case we proceed but mark the origin
   // as non-validated.
   if (!ancestors || !ancestors.length) {
-    parentLocation.originValidated = false;
     return;
   }
   user().assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
-  parentLocation.originValidated = true;
 }
 
 /**
@@ -460,7 +475,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @param {!Window} window
  * @param {string} type 3p type
  * @param {!Array<string>|undefined} allowedTypes May be undefined.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
   const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
@@ -486,7 +501,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
  * Check that parent host name was whitelisted.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   if (!window.document.referrer) {
@@ -522,7 +537,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
 /**
  * Throws if this window is a top level window.
  * @param {!Window} window
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function ensureFramed(window) {
   if (window == window.parent) {
@@ -570,10 +585,13 @@ export function isTagNameAllowed(type, tagName) {
  * too many deps for this small JS binary.
  *
  * @param {!Error} e
+ * @param {boolean} isCanary
  */
-function lightweightErrorReport(e) {
+function lightweightErrorReport(e, isCanary) {
   new Image().src = urls.errorReporting +
       '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
-      '&r=' + encodeURIComponent(document.referrer);
+      '&ca=' + (isCanary ? 1 : 0) +
+      '&r=' + encodeURIComponent(document.referrer) +
+      '&s=' + encodeURIComponent(e.stack || '');
 }

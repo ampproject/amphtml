@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
+import {getServiceForDoc} from './service';
 import {startsWith} from './string';
 import {user} from './log';
-import {assertHttpsUrl, getCorsUrl} from './url';
+import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
 
-/** @const {string} */
-const PROP = '__AMP_SUBMIT';
-
-
 /**
- * @param {!Window} window
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installGlobalSubmitListener(window) {
-  if (!window[PROP]) {
-    window[PROP] = true;
-    window.document.documentElement.addEventListener(
+export function installGlobalSubmitListenerForDoc(ampdoc) {
+  return getServiceForDoc(ampdoc, 'submit', ampdoc => {
+    ampdoc.getRootNode().addEventListener(
         'submit', onDocumentFormSubmit_, true);
-  }
+    return {};
+  });
 }
 
 
@@ -52,17 +49,35 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
-  const win = form.ownerDocument.defaultView;
-  const action = form.getAttribute('action');
-  user().assert(action, 'form action attribute is required: %s', form);
-  assertHttpsUrl(action, form, 'action');
-  user().assert(!startsWith(action, urls.cdn),
-      'form action should not be on AMP CDN: %s', form);
+  const inputs = form.elements;
+  for (let i = 0; i < inputs.length; i++) {
+    user().assert(!inputs[i].name ||
+        inputs[i].name != SOURCE_ORIGIN_PARAM,
+        'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+  }
 
-  form.__AMP_INIT_ACTION__ = form.__AMP_INIT_ACTION__ || action;
-  // Update the form non-xhr action to add `__amp_source_origin` parameter.
-  // This allows publishers to understand where the request is coming from.
-  form.setAttribute('action', getCorsUrl(win, form.__AMP_INIT_ACTION__));
+  const action = form.getAttribute('action');
+  const actionXhr = form.getAttribute('action-xhr');
+  const method = (form.getAttribute('method') || 'GET').toUpperCase();
+  if (method == 'GET') {
+    user().assert(action,
+        'form action attribute is required for method=GET: %s', form);
+    assertHttpsUrl(action, /** @type {!Element} */ (form), 'action');
+    user().assert(!startsWith(action, urls.cdn),
+        'form action should not be on AMP CDN: %s', form);
+    checkCorsUrl(action);
+  } else if (action) {
+    e.preventDefault();
+    user().assert(false,
+        'form action attribute is invalid for method=POST: %s', form);
+  } else if (!actionXhr) {
+    e.preventDefault();
+    user().assert(false,
+        'Only XHR based (via action-xhr attribute) submissions are support ' +
+        'for POST requests. %s',
+        form);
+  }
+  checkCorsUrl(actionXhr);
 
   const target = form.getAttribute('target');
   user().assert(target, 'form target attribute is required: %s', form);

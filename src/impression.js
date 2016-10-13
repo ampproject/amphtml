@@ -16,7 +16,7 @@
 
 import {user} from './log';
 import {isExperimentOn} from './experiments';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {xhrFor} from './xhr';
 
 
@@ -29,7 +29,8 @@ export function maybeTrackImpression(win) {
   if (!isExperimentOn(win, 'alp')) {
     return;
   }
-  const viewer = viewerFor(win);
+  const viewer = viewerForDoc(win.document);
+  /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
   if (!clickUrl) {
     return;

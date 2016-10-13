@@ -19,7 +19,10 @@ import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
-import {getService} from '../service';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
@@ -28,9 +31,9 @@ import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
-import {installViewerService} from './viewer-impl';
-import {waitForBody} from '../dom';
+import {installViewerServiceForDoc} from './viewer-impl';
 import {isExperimentOn} from '../experiments';
+import {waitForBody} from '../dom';
 
 
 const TAG_ = 'Viewport';
@@ -46,25 +49,32 @@ const TAG_ = 'Viewport';
  *   velocity: number
  * }}
  */
-let ViewportChangedEventDef;
+export let ViewportChangedEventDef;
 
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
+ * @implements {../service.Disposable}
  * @package Visible for type.
  */
 export class Viewport {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!ViewportBindingDef} binding
    * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, binding, viewer) {
-    /** @const {!Window} */
-    this.win_ = win;
+  constructor(ampdoc, binding, viewer) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
+    /**
+     * Some viewport operations require the global document.
+     * @private @const {!Document}
+     */
+    this.globalDoc_ = this.ampdoc.win.document;
 
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
@@ -102,10 +112,16 @@ export class Viewport {
     this.paddingTop_ = viewer.getPaddingTop();
 
     /** @private {number} */
+    this.lastPaddingTop_ = 0;
+
+    /** @private {number} */
     this.scrollMeasureTime_ = 0;
 
+    /** @private {!./timer-impl.Timer} */
+    this.timer_ = timerFor(this.ampdoc.win);
+
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(win);
+    this.vsync_ = installVsyncService(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -119,7 +135,7 @@ export class Viewport {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private {?HTMLMetaElement|undefined} */
+    /** @private {?Element|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -127,24 +143,16 @@ export class Viewport {
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
-        this.win_.document,
+        this.ampdoc,
         this.vsync_,
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
-    onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
+    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
-    this.viewer_.onViewportEvent(() => {
-      this.binding_.updateViewerViewport(this.viewer_);
-      const paddingTop = this.viewer_.getPaddingTop();
-      if (paddingTop != this.paddingTop_) {
-        this.paddingTop_ = paddingTop;
-        this.binding_.updatePaddingTop(this.paddingTop_);
-        this.fixedLayer_.updatePaddingTop(this.paddingTop_);
-      }
-    });
+    this.viewer_.onViewportEvent(this.updateOnViewportEvent_.bind(this));
     this.binding_.updateViewerViewport(this.viewer_);
     this.binding_.updatePaddingTop(this.paddingTop_);
 
@@ -152,11 +160,48 @@ export class Viewport {
     this.binding_.onResize(this.resize_.bind(this));
 
     this.onScroll(this.sendScrollMessage_.bind(this));
+
+    /** @private {boolean} */
+    this.visible_ = false;
+    this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.updateVisibility_();
+
+    // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
+    // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
+    // The enables passive touch handlers, e.g. for document swipe, since they
+    // no will longer need to try to cancel vertical scrolls during swipes.
+    // This is only done in the embedded mode because (a) the document swipe
+    // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
+    if (this.ampdoc.isSingleDoc() &&
+            viewer.isEmbedded() &&
+            isExperimentOn(this.ampdoc.win, 'pan-y')) {
+      setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
+    }
+
+    // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
+    // on CSS permanent and removing the code block below.
+    if (this.ampdoc.isSingleDoc() &&
+            isExperimentOn(this.ampdoc.win, 'make-body-block')) {
+      this.globalDoc_.documentElement.classList.add('-amp-make-body-block');
+    }
   }
 
-  /** For testing. */
-  cleanup_() {
-    this.binding_.cleanup_();
+  /** @override */
+  dispose() {
+    this.binding_.disconnect();
+  }
+
+  /** @private */
+  updateVisibility_() {
+    const visible = this.viewer_.isVisible();
+    if (visible != this.visible_) {
+      this.visible_ = visible;
+      if (visible) {
+        this.binding_.connect();
+      } else {
+        this.binding_.disconnect();
+      }
+    }
   }
 
   /**
@@ -213,8 +258,8 @@ export class Viewport {
    * @param {number} paddingBottom
    */
   updatePaddingBottom(paddingBottom) {
-    onDocumentReady(this.win_.document, doc => {
-      doc.body.style.borderBottom = `${paddingBottom}px solid transparent`;
+    this.ampdoc.whenBodyAvailable().then(body => {
+      body.style.borderBottom = `${paddingBottom}px solid transparent`;
     });
   }
 
@@ -284,8 +329,22 @@ export class Viewport {
    * @return {!../layout-rect.LayoutRectDef}}
    */
   getLayoutRect(el) {
-    return this.binding_.getLayoutRect(el,
-        this.getScrollLeft(), this.getScrollTop());
+    const scrollLeft = this.getScrollLeft();
+    const scrollTop = this.getScrollTop();
+
+    // Go up the window hierarchy through friendly iframes.
+    const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
+    if (frameElement) {
+      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const c = this.binding_.getLayoutRect(
+          frameElement, scrollLeft, scrollTop);
+      return layoutRectLtwh(Math.round(b.left + c.left),
+          Math.round(b.top + c.top),
+          Math.round(b.width),
+          Math.round(b.height));
+    }
+
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /**
@@ -326,12 +385,13 @@ export class Viewport {
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();
     }
+    /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
     // TODO(erwinm): the duration should not be a constant and should
     // be done in steps for better transition experience when things
     // are closer vs farther.
     // TODO(dvoytenko, #3742): documentElement will be replaced by ampdoc.
-    return Animation.animate(this.win_.document.documentElement, pos => {
+    return Animation.animate(this.ampdoc.getRootNode(), pos => {
       this.binding_.setScrollTop(interpolate(pos));
     }, duration, curve).then();
   }
@@ -382,9 +442,8 @@ export class Viewport {
    * Resets touch zoom to initial scale of 1.
    */
   resetTouchZoom() {
-    const windowHeight = this.win_./*OK*/innerHeight;
-    const documentHeight = this.win_.document
-        .documentElement./*OK*/clientHeight;
+    const windowHeight = this.ampdoc.win./*OK*/innerHeight;
+    const documentHeight = this.globalDoc_.documentElement./*OK*/clientHeight;
     if (windowHeight && documentHeight && windowHeight === documentHeight) {
       // This code only works when scrollbar overlay content and take no space,
       // which is fine on mobile. For non-mobile devices this code is
@@ -392,7 +451,7 @@ export class Viewport {
       return;
     }
     if (this.disableTouchZoom()) {
-      timerFor(this.win_).delay(() => {
+      this.timer_.delay(() => {
         this.restoreOriginalTouchZoom();
       }, 50);
     }
@@ -491,7 +550,7 @@ export class Viewport {
   }
 
   /**
-   * @return {?HTMLMetaElement}
+   * @return {?Element}
    * @private
    */
   getViewportMeta_() {
@@ -500,13 +559,60 @@ export class Viewport {
       return null;
     }
     if (this.viewportMeta_ === undefined) {
-      this.viewportMeta_ = this.win_.document.querySelector(
-          'meta[name=viewport]');
+      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
+          this.globalDoc_.querySelector('meta[name=viewport]'));
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
     }
     return this.viewportMeta_;
+  }
+
+  /**
+   * @param {!JSONType} event
+   * @private
+   */
+  updateOnViewportEvent_(event) {
+    this.binding_.updateViewerViewport(this.viewer_);
+    const paddingTop = event['paddingTop'];
+    const duration = event['duration'] || 0;
+    const curve = event['curve'];
+    /** @const {boolean} */
+    const transient = event['transient'];
+
+    if (paddingTop != this.paddingTop_) {
+      this.lastPaddingTop_ = this.paddingTop_;
+      this.paddingTop_ = paddingTop;
+      if (this.paddingTop_ < this.lastPaddingTop_) {
+        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+        this.animateFixedElements_(duration, curve);
+      } else {
+        this.animateFixedElements_(duration, curve).then(() => {
+          this.binding_.showViewerHeader(transient, this.paddingTop_);
+        });
+      }
+    }
+  }
+
+  /**
+   * @param {number} duration
+   * @param {string} curve
+   * @return {!Promise}
+   * @private
+   */
+  animateFixedElements_(duration, curve) {
+    this.fixedLayer_.updatePaddingTop(this.paddingTop_);
+    if (duration <= 0) {
+      return Promise.resolve();
+    }
+    // Add transit effect on position fixed element
+    const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
+    return Animation.animate(this.ampdoc.getRootNode(), time => {
+      const p = tr(time);
+      this.fixedLayer_.transformMutate(`translateY(${p}px)`);
+    }, duration, curve).thenAlways(() => {
+      this.fixedLayer_.transformMutate(null);
+    });
   }
 
   /**
@@ -551,7 +657,7 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = Date.now();
       // Wait 2 frames and then request an animation frame.
-      timerFor(this.win_).delay(() => {
+      this.timer_.delay(() => {
         this.vsync_.measure(() => {
           this.throttledScroll_(now, newScrollTop);
         });
@@ -569,7 +675,9 @@ export class Viewport {
    * @private
    */
   throttledScroll_(referenceTime, referenceTop) {
-    const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
+    this.scrollTop_ = this.binding_.getScrollTop();
+    /**  @const {number} */
+    const newScrollTop = this.scrollTop_;
     const now = Date.now();
     let velocity = 0;
     if (now != referenceTime) {
@@ -583,7 +691,7 @@ export class Viewport {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      timerFor(this.win_).delay(() => this.vsync_.measure(
+      this.timer_.delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
@@ -601,6 +709,7 @@ export class Viewport {
       });
     }
   }
+
   /** @private */
   resize_() {
     this.rect_ = null;
@@ -623,13 +732,21 @@ export class Viewport {
 export class ViewportBindingDef {
 
   /**
+   * Add listeners for global resources.
+   */
+  connect() {}
+
+  /**
+   * Remove listeners for global resources.
+   */
+  disconnect() {}
+
+  /**
    * Whether the binding requires fixed elements to be transfered to a
    * independent fixed layer.
    * @return {boolean}
    */
-  requiresFixedLayerTransfer() {
-    return false;
-  }
+  requiresFixedLayerTransfer() {}
 
   /**
    * Register a callback for scroll events.
@@ -654,6 +771,20 @@ export class ViewportBindingDef {
    * @param {number} unusedPaddingTop
    */
   updatePaddingTop(unusedPaddingTop) {}
+
+  /**
+   * Updates binding with the new padding when hiding viewer header.
+   * @param {boolean} unusedTransient
+   * @param {number} unusedLastPaddingTop
+   */
+  hideViewerHeader(unusedTransient, unusedLastPaddingTop) {}
+
+  /**
+   * Updates binding with the new padding when showing viewer header.
+   * @param {boolean} unusedTransient
+   * @param {number} unusedPaddingTop
+   */
+  showViewerHeader(unusedTransient, unusedPaddingTop) {}
 
   /**
    * Updates the viewport whether it's currently in the lightbox or a normal
@@ -708,9 +839,6 @@ export class ViewportBindingDef {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
-
-  /** For testing. */
-  cleanup_() {}
 }
 
 
@@ -733,7 +861,7 @@ export class ViewportBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!../platform.Platform} */
+    /** @const {!../service/platform-impl.Platform} */
     this.platform_ = platformFor(win);
 
     /** @private @const {!./viewer-impl.Viewer} */
@@ -745,8 +873,11 @@ export class ViewportBindingNatural_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
-    this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+    /** @const {function()} */
+    this.boundScrollEventListener_ = () => this.scrollObservable_.fire();
+
+    /** @const {function()} */
+    this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
     // Override a user-supplied `body{overflow}` to be always visible. This
     // style is set in runtime vs css to avoid conflicts with ios-embedded
@@ -754,9 +885,8 @@ export class ViewportBindingNatural_ {
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
         this.win.document.body.style.overflow = 'visible';
-        if (isExperimentOn(this.win, 'amp-ios-overflow-x') &&
-                this.platform_.isIos() &&
-                this.viewer_.getParam('webview') === '1') {
+        if (this.platform_.isIos() &&
+            this.viewer_.getParam('webview') === '1') {
           setStyles(this.win.document.body, {
             overflowX: 'hidden',
             overflowY: 'visible',
@@ -769,8 +899,15 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  cleanup_() {
-    // TODO(dvoytenko): remove listeners
+  connect() {
+    this.win.addEventListener('scroll', this.boundScrollEventListener_);
+    this.win.addEventListener('resize', this.boundResizeEventListener_);
+  }
+
+  /** @override */
+  disconnect() {
+    this.win.removeEventListener('scroll', this.boundScrollEventListener_);
+    this.win.removeEventListener('resize', this.boundResizeEventListener_);
   }
 
   /** @override */
@@ -796,6 +933,20 @@ export class ViewportBindingNatural_ {
   /** @override */
   updatePaddingTop(paddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
+  }
+
+  /** @override */
+  hideViewerHeader(transient, unusedLastPaddingTop) {
+    if (!transient) {
+      this.updatePaddingTop(0);
+    }
+  }
+
+  /** @override */
+  showViewerHeader(transient, paddingTop) {
+    if (!transient) {
+      this.updatePaddingTop(paddingTop);
+    }
   }
 
   /** @override */
@@ -897,16 +1048,23 @@ export class ViewportBindingNatural_ {
 export class ViewportBindingNaturalIosEmbed_ {
   /**
    * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
+  constructor(win, ampdoc) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private {?Element} */
     this.scrollPosEl_ = null;
 
     /** @private {?Element} */
     this.scrollMoveEl_ = null;
+
+    /** @private {?Element} */
+    this.endPosEl_ = null;
 
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
@@ -936,7 +1094,8 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @private */
   setup_() {
     const documentElement = this.win.document.documentElement;
-    const documentBody = this.win.document.body;
+    const documentBody = /** @type {!Element} */ (
+        this.win.document.body);
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
@@ -1013,7 +1172,19 @@ export class ViewportBindingNaturalIosEmbed_ {
     documentBody.addEventListener('scroll', this.onScrolled_.bind(this));
 
     // Correct iOS Safari scroll freezing issues if applicable.
-    checkAndFixIosScrollfreezeBug(this.win);
+    checkAndFixIosScrollfreezeBug(this.ampdoc);
+  }
+
+  /** @override */
+  connect() {
+    // Do nothing: ViewportBindingNaturalIosEmbed_ can only be used in the
+    // single-doc mode.
+  }
+
+  /** @override */
+  disconnect() {
+    // Do nothing: ViewportBindingNaturalIosEmbed_ can only be used in the
+    // single-doc mode.
   }
 
   /** @override */
@@ -1022,12 +1193,37 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
+  hideViewerHeader(transient, lastPaddingTop) {
+    if (transient) {
+      // Add extra paddingTop to make the content stay at the same position
+      // when the hiding header operation is transient
+      onDocumentReady(this.win.document, doc => {
+        const existingPaddingTop =
+            this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
+        doc.body.style.paddingTop =
+            `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
+        doc.body.style.borderTop = '';
+      });
+    } else {
+      this.updatePaddingTop(0);
+    }
+  }
+
+  /** @override */
+  showViewerHeader(transient, paddingTop) {
+    if (!transient) {
+      this.updatePaddingTop(paddingTop);
+    }
+    // No need to adjust borderTop and paddingTop when the showing header
+    // operation is transient
+  }
+
+  /** @override */
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
-      // Also tried `paddingTop` but it didn't work for `position:absolute`
-      // on iOS.
       doc.body.style.borderTop = `${paddingTop}px solid transparent`;
+      doc.body.style.paddingTop = '';
     });
   }
 
@@ -1036,13 +1232,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
     onDocumentReady(this.win.document, doc => {
-      doc.body.style.borderStyle = lightboxMode ? 'none' : 'solid';
+      doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
     });
-  }
-
-  /** @override */
-  cleanup_() {
-    // TODO(dvoytenko): remove listeners
   }
 
   /** @override */
@@ -1158,7 +1349,6 @@ export class ViewportBindingNaturalIosEmbed_ {
     if (!this.scrollPosEl_ || !this.scrollMoveEl_) {
       return;
     }
-
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
@@ -1185,7 +1375,7 @@ export class ViewportBindingNaturalIosEmbed_ {
  * width=device-width,initial-scale=1,minimum-scale=1
  * ```
  * @param {string} content
- * @return {!Object<string, string>}
+ * @return {!Object<string, (string|undefined)>}
  * @private Visible for testing only.
  */
 export function parseViewportMeta(content) {
@@ -1253,7 +1443,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
     if (params[k] !== updateParams[k]) {
       changed = true;
       if (updateParams[k] !== undefined) {
-        params[k] = updateParams[k];
+        params[k] = /** @type {string} */ (updateParams[k]);
       } else {
         delete params[k];
       }
@@ -1267,28 +1457,28 @@ export function updateViewportMetaString(currentValue, updateParams) {
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Viewport}
  * @private
  */
-function createViewport_(window) {
-  const viewer = installViewerService(window);
+function createViewport(ampdoc) {
+  const viewer = installViewerServiceForDoc(ampdoc);
   let binding;
-  if (viewer.getViewportType() == 'natural-ios-embed') {
-    binding = new ViewportBindingNaturalIosEmbed_(window);
+  if (ampdoc.isSingleDoc() &&
+          viewer.getViewportType() == 'natural-ios-embed') {
+    binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
   } else {
-    binding = new ViewportBindingNatural_(window, viewer);
+    binding = new ViewportBindingNatural_(ampdoc.win, viewer);
   }
-  return new Viewport(window, binding, viewer);
+  return new Viewport(ampdoc, binding, viewer);
 }
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Viewport}
  */
-export function installViewportService(window) {
-  return getService(window, 'viewport', () => {
-    return createViewport_(window);
-  });
+export function installViewportServiceForDoc(ampdoc) {
+  return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
+      ampdoc => createViewport(ampdoc)));
 };

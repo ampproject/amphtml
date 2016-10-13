@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
+
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function caprofitx(global, data) {
-  checkData(data, ['tagid']);
-  validateDataExists(data, ['tagid']);
+  validateData(data, ['tagid'], []);
 
   global.caprofitxConfig = data;
   loadScript(global, 'https://cdn.caprofitx.com/tags/amp/profitx_amp.js');

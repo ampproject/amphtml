@@ -19,10 +19,10 @@
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist",
-    "heroku-postbuild": "gulp clean && gulp build --fortesting && gulp dist --fortesting"
+    "heroku-postbuild": "gulp clean && gulp build && gulp dist --fortesting"
   },
   "dependencies": {
-    "document-register-element": "0.5.4",
+    "document-register-element": "1.1.1",
     "promise-pjs": "1.1.2"
   },
   "devDependencies": {

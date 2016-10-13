@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function amoad(global, data) {
-  checkData(data, ['sid', 'adType']);
-  validateDataExists(data, ['sid']);
+  validateData(data, ['sid'], ['adType']);
 
   let script;
   const attrs = {};

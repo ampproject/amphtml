@@ -74,8 +74,9 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return dev().assert(Resource.forElementOptional(element),
-        'Missing resource prop on %s', element);
+    return /** @type {!Resource} */ (
+        dev().assert(Resource.forElementOptional(element),
+            'Missing resource prop on %s', element));
   }
 
   /**
@@ -114,13 +115,16 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+    /** @const {!Window} */
+    this.hostWin = element.ownerDocument.defaultView;
+
     /** @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
     /** @private {boolean} */
     this.blacklisted_ = false;
 
-    /** @const {!AmpElement|undefined|null} */
+    /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
     /** @private {!ResourceState} */
@@ -154,9 +158,14 @@ export class Resource {
     */
     this.pendingChangeSize_ = undefined;
 
+    /** @private {boolean} */
+    this.loadedOnce_ = false;
+
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = null;
+
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
-      /** @const  */
       this.loadPromiseResolve_ = resolve;
     });
 
@@ -216,6 +225,14 @@ export class Resource {
   }
 
   /**
+   * Returns whether the resource has been blacklisted.
+   * @return {boolean}
+   */
+  isBlacklisted() {
+    return this.blacklisted_;
+  }
+
+  /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
    */
@@ -236,6 +253,7 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**
@@ -550,8 +568,12 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
-    this.loadPromiseResolve_();
+    if (this.loadPromiseResolve_) {
+      this.loadPromiseResolve_();
+      this.loadPromiseResolve_ = null;
+    }
     this.layoutPromise_ = null;
+    this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {
@@ -573,11 +595,20 @@ export class Resource {
 
   /**
    * Returns a promise that is resolved when this resource is laid out
-   * for the first time and the resource was loaded.
+   * for the first time and the resource was loaded. Note that the resource
+   * could be unloaded subsequently. This method returns resolved promise for
+   * sunch unloaded elements.
    * @return {!Promise}
    */
-  loaded() {
+  loadedOnce() {
     return this.loadPromise_;
+  }
+
+  /**
+   * @return {boolean} true if the resource has been loaded at least once.
+   */
+  hasLoadedOnce() {
+    return this.loadedOnce_;
   }
 
   /**

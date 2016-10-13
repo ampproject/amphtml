@@ -47,6 +47,11 @@ body {
   text-size-adjust: 100%;
 }
 
+/** make-body-block experiment */
+.-amp-make-body-block body {
+  display: block !important;
+}
+
 .-amp-element {
   display: inline-block;
 }
@@ -378,6 +383,13 @@ amp-analytics {
   visibility: hidden;
 }
 
+/**
+ * Iframe allows setting frameborder, so we need to set box-sizing to border-box
+ * or otherwise the iframe will oevrflow its parent when there is a border.
+ */
+amp-iframe iframe {
+  box-sizing: border-box !important;
+}
 
 /**
  * Minimal AMP Access CSS. This part has to be here so that the correct UI
@@ -409,4 +421,8 @@ amp-live-list > [update] {
  */
 amp-experiment, amp-share-tracking {
   display: none;
+}
+
+amp-fresh {
+  visibility: hidden;
 }

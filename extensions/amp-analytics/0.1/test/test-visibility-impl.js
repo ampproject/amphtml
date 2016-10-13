@@ -16,14 +16,16 @@
 
 import {adopt} from '../../../../src/runtime';
 import {
+  getElement,
   isPositiveNumber_,
   isValidPercentage_,
   isVisibilitySpecValid,
   Visibility,
 } from '../visibility-impl';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {viewerFor} from '../../../../src/viewer';
+import {viewerForDoc} from '../../../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -35,8 +37,8 @@ describe('amp-analytics.visibility', () => {
   let visibility;
   let getIntersectionStub;
   let callbackStub;
-  let win;
   let clock;
+  let ampElement;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -49,28 +51,32 @@ describe('amp-analytics.visibility', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
+    ampElement = document.createElement('amp-analytics');
+    ampElement.id = 'abc';
+    document.body.appendChild(ampElement);
     const getIdStub = sandbox.stub();
     getIdStub.returns('0');
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
 
-    viewerFor(window).setVisibilityState_(VisibilityState.VISIBLE);
+    viewerForDoc(window.document).setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new Visibility(window);
     sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
         .returns({
           getLayoutBox: () => {},
           element: {getIntersectionChangeEntry: getIntersectionStub},
           getId: getIdStub,
-          isLayoutPending: () => false});
+          hasLoadedOnce: () => true});
   });
 
   afterEach(() => {
+    document.body.removeChild(ampElement);
     sandbox.restore();
   });
 
   function makeIntersectionEntry(boundingClientRect, rootBounds) {
-    boundingClientRect = layoutRectLtwh.apply(win, boundingClientRect);
-    rootBounds = layoutRectLtwh.apply(win, rootBounds);
+    boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
+    rootBounds = layoutRectLtwh.apply(null, rootBounds);
     return {
       intersectionRect: rectIntersection(boundingClientRect, rootBounds),
       boundingClientRect,
@@ -83,7 +89,7 @@ describe('amp-analytics.visibility', () => {
     opt_visible = opt_visible === undefined ? true : opt_visible;
     getIntersectionStub.returns(intersectionChange);
     config['selector'] = '#abc';
-    visibility.listenOnce(config, callbackStub, opt_visible);
+    visibility.listenOnce(config, callbackStub, opt_visible, ampElement);
     clock.tick(20);
     verifyExpectedVars(expectedCalls, opt_expectedVars);
   }
@@ -129,7 +135,7 @@ describe('amp-analytics.visibility', () => {
       elementHeight: '100',
       loadTimeVisibility: '50',
       totalTime: sinon.match(value => {
-        return !isNaN(Number(value));
+        return isFiniteNumber(Number(value));
       }),
     })]);
   });
@@ -150,7 +156,7 @@ describe('amp-analytics.visibility', () => {
       elementHeight: '100',
       loadTimeVisibility: '50',
       totalTime: sinon.match(value => {
-        return !isNaN(Number(value));
+        return isFiniteNumber(Number(value));
       }),
     })]);
   });
@@ -323,22 +329,75 @@ describe('amp-analytics.visibility', () => {
   });
 
   describe('utils', () => {
-    it('isPositiveNumber_', () => {
-      ['', 1, 0, undefined, 100, 101].forEach(num => {
-        expect(isPositiveNumber_(num)).to.be.true;
+    function checkPositive(value, expectedResult) {
+      it('isPositiveNumber_(' + value + ')', () => {
+        expect(isPositiveNumber_(value)).to.equal(expectedResult);
       });
-      [-1, NaN].forEach(num => {
-        expect(isPositiveNumber_(num)).to.be.false;
-      });
+    }
+
+    [1, 0, undefined, 100, 101].forEach(num => {
+      checkPositive(num, true);
     });
 
-    it('isValidPercentage_', () => {
-      ['', 1, 0, undefined, 100].forEach(num => {
-        expect(isValidPercentage_(num)).to.be.true;
+    ['', -1, NaN].forEach(num => {
+      checkPositive(num, false);
+    });
+
+    function checkValidPercentage(value, expectedResult) {
+      it('isValidPercentage_(' + value + ')', () => {
+        expect(isValidPercentage_(value)).to.equal(expectedResult);
       });
-      [-1, NaN, 101].forEach(num => {
-        expect(isValidPercentage_(num)).to.be.false;
-      });
+    };
+
+    [1, 0, undefined, 100].forEach(num => {
+      checkValidPercentage(num, true);
+    });
+
+    ['', -1, NaN, 101].forEach(num => {
+      checkValidPercentage(num, false);
+    });
+  });
+
+  describe('getElement', () => {
+    let div, img1, img2, analytics;
+    beforeEach(() => {
+      div = document.createElement('div');
+      div.id = 'div';
+      img1 = document.createElement('amp-img');
+      img1.id = 'img1';
+      img2 = document.createElement('amp-img');
+      img2.id = 'img2';
+      analytics = document.createElement('amp-analytics');
+      analytics.id = 'analytics';
+      div.appendChild(img1);
+      img1.appendChild(analytics);
+      img1.appendChild(img2);
+      document.body.appendChild(div);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(div);
+    });
+
+    it('finds element by id', () => {
+      expect(getElement('#div', analytics, undefined)).to.equal(div);
+    });
+
+    // In the following tests, getElement returns non-amp elements. Those are
+    // discarded by visibility-impl later in the code.
+    it('finds element by tagname, selectionMethod=closest', () => {
+      expect(getElement('div', analytics, 'closest')).to.equal(div);
+      expect(getElement('amp-img', analytics, 'closest')).to.equal(img1);
+    });
+
+    it('finds element by id, selectionMethod=scope', () => {
+      expect(getElement('#div', analytics, 'scope')).to.equal(null);
+      expect(getElement('#img2', analytics, 'scope')).to.equal(img2);
+    });
+
+    it('finds element by tagname, selectionMethod=scope', () => {
+      expect(getElement('div', analytics, 'scope')).to.equal(null);
+      expect(getElement('amp-img', analytics, 'scope')).to.equal(img2);
     });
   });
 });

@@ -20,6 +20,7 @@ import {
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
+  checkCorsUrl,
 } from './url';
 import {parseSrcset} from './srcset';
 import {user} from './log';
@@ -101,6 +102,10 @@ const WHITELISTED_ATTRS = [
 ];
 
 
+/** @const {!RegExp} */
+const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
+
+
 /** @const {!Array<string>} */
 const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ 'javascript:',
@@ -155,6 +160,8 @@ export function sanitizeHtml(html) {
           // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
             if (WHITELISTED_ATTRS.indexOf(attribs[i]) != -1) {
+              attribs[i + 1] = savedAttribs[i + 1];
+            } else if (attribs[i].search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -286,6 +293,7 @@ function resolveAttrValue(tagName, attrName, attrValue) {
  * @private Visible for testing.
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 

@@ -14,39 +14,72 @@
  * limitations under the License.
  */
 
+import {dev} from './log';
+
 /**
  * Tags that are allowed to have fixed positioning
  * @const {!Object<string, boolean>}
  */
-const POSITION_FIXED_TAG_WHITELIST = {
+const CONTAINERS = {
   'AMP-FX-FLYING-CARPET': true,
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,
 };
 
 /**
+ * Determines if an element is fixed-positioned.
+ * OK to use, because it's only called from onLayoutMeasure
  * @param {!Element} el
  * @param {!Window} win
+ * @return {boolean}
+ */
+function isPositionFixed(el, win) {
+  return win./*OK*/getComputedStyle(el).position == 'fixed';
+}
+
+/**
+ * @param {!Element} element
+ * @param {!Window} win
  * @return {boolean} whether the element position is allowed. If the element
- * belongs to POSITION_FIXED_TAG_WHITELIST, it is allowed to be position fixed.
+ * belongs to CONTAINERS, it is allowed to be position fixed.
  * If the element has a position fixed ancestor, it is not allowed.
  * This should only be called when a layout on the page was just forced
  * anyway.
  */
-export function isAdPositionAllowed(el, win) {
+export function isAdPositionAllowed(element, win) {
   let hasFixedAncestor = false;
+  let containers = 0;
+  let el = element;
   do {
-    if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
-      return true;
-    }
-    if (win/*because only called from onLayoutMeasure */
-        ./*OK*/getComputedStyle(el).position == 'fixed') {
+    if (CONTAINERS[el.tagName]) {
+      // The containers must not themselves be contained in a fixed-position
+      // element. Continue the search.
+      containers++;
+      hasFixedAncestor = false;
+    } else if (isPositionFixed(dev().assertElement(el), win)) {
       // Because certain blessed elements may contain a position fixed
       // container (which contain an ad), we continue to search the
       // ancestry tree.
       hasFixedAncestor = true;
     }
-    el = el.parentNode;
+    el = el.parentElement;
   } while (el && el.tagName != 'BODY');
-  return !hasFixedAncestor;
+  return !hasFixedAncestor && containers <= 1;
+}
+
+/**
+ * Returns the blessed container element tagName if the ad is contained by one.
+ * This is called during layout measure.
+ * @param {!Element} element
+ * @return {?string}
+ */
+export function getAdContainer(element) {
+  let el = element;
+  do {
+    el = el.parentElement;
+    if (CONTAINERS[el.tagName]) {
+      return el.tagName;
+    }
+  } while (el && el.tagName != 'BODY');
+  return null;
 }

@@ -27,11 +27,11 @@ limitations under the License.
   </tr>
    <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-video">amp-video.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-video/">Annotated code example for amp-video</a></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
 
@@ -73,6 +73,7 @@ default the first frame is displayed.
 **autoplay**
 
 If present, the video will automatically start playback once rendered (if autoplay is supported by the browser).
+Autoplay, when supported, will automatically mute the video before auto playing.
 
 **controls**
 
@@ -82,9 +83,10 @@ Similar to the `video` tag `controls` attribute - if present, the browser offers
 
 If present, will automatically loop the video back to the start upon reaching the end.
 
-**muted**
+**muted (deprecated)**
 
-If present, will mute the audio by default.
+`muted` attribute is deprecated and no longer has any effect.
+`autoplay` attribute automatically controls the mute behavior.
 
 ## Validation
 

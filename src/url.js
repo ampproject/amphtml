@@ -37,23 +37,8 @@ let cache;
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
-/** @private @const {string} */
-const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
-
-/**
- * @typedef {({
- *   href: string,
- *   protocol: string,
- *   host: string,
- *   hostname: string,
- *   port: string,
- *   pathname: string,
- *   search: string,
- *   hash: string,
- *   origin: string
- * }|!Location)}
- */
-export let Location;
+/** @const {string} */
+export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
@@ -61,9 +46,10 @@ export let Location;
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
  * @param {string} url
+ * @param {boolean=} opt_nocache
  * @return {!Location}
  */
-export function parseUrl(url) {
+export function parseUrl(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = self.UrlCache || (self.UrlCache = Object.create(null));
@@ -82,7 +68,7 @@ export function parseUrl(url) {
     a.href = a.href;
   }
 
-  const info = {
+  const info = /** @type {!Location} */({
     href: a.href,
     protocol: a.protocol,
     host: a.host,
@@ -92,7 +78,7 @@ export function parseUrl(url) {
     search: a.search,
     hash: a.hash,
     origin: null,  // Set below.
-  };
+  });
 
   // Some IE11 specific polyfills.
   // 1) IE11 strips out the leading '/' in the pathname.
@@ -118,8 +104,12 @@ export function parseUrl(url) {
     info.origin = info.protocol + '//' + info.host;
   }
   // Freeze during testing to avoid accidental mutation.
-  cache[url] = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-  return info;
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_nocache) {
+    return frozen;
+  }
+  return cache[url] = frozen;
 }
 
 /**
@@ -130,7 +120,8 @@ export function parseUrl(url) {
  * @param {boolean=} opt_addToFront
  * @return {string}
  */
-function appendParamStringToUrl(url, paramString, opt_addToFront) {
+export function appendEncodedParamStringToUrl(url, paramString,
+  opt_addToFront) {
   if (!paramString) {
     return url;
   }
@@ -157,7 +148,7 @@ function appendParamStringToUrl(url, paramString, opt_addToFront) {
  */
 export function addParamToUrl(url, key, value, opt_addToFront) {
   const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  return appendParamStringToUrl(url, field, opt_addToFront);
+  return appendEncodedParamStringToUrl(url, field, opt_addToFront);
 }
 
 /**
@@ -168,7 +159,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  return appendParamStringToUrl(url, serializeQueryString(params));
+  return appendEncodedParamStringToUrl(url, serializeQueryString(params));
 }
 
 /**
@@ -240,7 +231,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
  * @param {string} queryString
- * @return {!Object<string, string>}
+ * @return {!Object<string>}
  */
 export function parseQueryString(queryString) {
   const params = Object.create(null);
@@ -426,10 +417,19 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
  * @return {string}
  */
 export function getCorsUrl(win, url) {
+  checkCorsUrl(url);
   const sourceOrigin = getSourceOrigin(win.location.href);
+  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+}
+
+
+/**
+ * Checks if the url have __amp_source_origin and throws if it does.
+ * @param {string} url
+ */
+export function checkCorsUrl(url) {
   const parsedUrl = parseUrl(url);
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
-  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }

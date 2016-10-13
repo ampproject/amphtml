@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {checkData, validateDataExists, writeScript} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function mads(global, data) {
-  const fields = ['adrequest'];
-  checkData(data, fields);
-  validateDataExists(data, fields);
+  validateData(data, ['adrequest'], []);
 
   writeScript(global, 'https://eu2.madsone.com/js/tags.js', function() {
     window.MADSAdrequest.adrequest(JSON.parse(data.adrequest));

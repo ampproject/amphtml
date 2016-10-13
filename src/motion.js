@@ -16,7 +16,7 @@
 
 import {vsyncFor} from './vsync';
 
-/** @const {!Funtion} */
+/** @const {function()} */
 const NOOP_CALLBACK_ = function() {};
 
 /** @const {number} */
@@ -76,7 +76,7 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * @param {number} veloY Starting Y velocity.
  * @param {function(number, number):boolean} callback The callback for each
  *   step of the deceleration motion.
- * @param {!Vsync=} opt_vsync Mostly for testing only.
+ * @param {!./service/vsync-impl.Vsync=} opt_vsync Mostly for testing only.
  * @return {!Motion}
  */
 export function continueMotion(contextNode, startX, startY, veloX, veloY,
@@ -94,7 +94,7 @@ export function continueMotion(contextNode, startX, startY, veloX, veloY,
  * motion.
  * @implements {IThenable}
  */
-class Motion {
+export class Motion {
   /**
    * @param {!Node} contextNode Context node.
    * @param {number} startX Start X coordinate.
@@ -103,10 +103,10 @@ class Motion {
    * @param {number} veloY Starting Y velocity.
    * @param {function(number, number):boolean} callback The callback for each
    *   step of the deceleration motion.
-   * @param {!Vsync=} opt_vsync
+   * @param {!./service/vsync-impl.Vsync=} opt_vsync
    */
   constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
-    /** @private @const */
+    /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = opt_vsync || vsyncFor(self);
 
     /** @private @const {!Node} */
@@ -150,6 +150,9 @@ class Motion {
       this.resolve_ = resolve;
       this.reject_ = reject;
     });
+
+    /** @private {boolean} */
+    this.continuing_ = false;
   }
 
   /** @private */
@@ -178,9 +181,7 @@ class Motion {
   /**
    * Chains to the motion's promise that will resolve when the motion has
    * completed or will reject if motion has failed or was interrupted.
-   * @param {!Function=} opt_resolve
-   * @param {!Function=} opt_reject
-   * @return {!Promise}
+   * @override
    */
   then(opt_resolve, opt_reject) {
     if (!opt_resolve && !opt_reject) {
@@ -191,12 +192,12 @@ class Motion {
 
   /**
    * Callback for regardless whether the motion succeeds or fails.
-   * @param {!Function=} opt_callback
+   * @param {function()=} opt_callback
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
     const callback = opt_callback || NOOP_CALLBACK_;
-    return this.then(callback, callback);
+    return /** @type {!Promise} */ (this.then(callback, callback));
   }
 
   /**

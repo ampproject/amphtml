@@ -16,7 +16,7 @@
 
 import {fromClassForDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
-import {installResourcesService} from './resources-impl';
+import {installResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
 
 
@@ -34,7 +34,7 @@ export class StandardActions {
     this.actions_ = installActionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = installResourcesService(ampdoc.win);
+    this.resources_ = installResourcesServiceForDoc(ampdoc);
 
     this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
   }

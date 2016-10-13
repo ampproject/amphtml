@@ -18,9 +18,11 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpForm,
   installAmpForm,
-  setReportValiditySupported,
   onInputInteraction_,
 } from '../amp-form';
+import {
+  setReportValiditySupported,
+} from '../form-validators';
 import * as sinon from 'sinon';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
@@ -107,24 +109,26 @@ describe('amp-form', () => {
     expect(() => new AmpForm(form)).to.not.throw;
   });
 
-  it('should listen to submit event and inputs blur and input events', () => {
+  it('should assert none of the inputs named __amp_source_origin', () => {
+    const form = getForm(document, true, false);
+    const illegalInput = document.createElement('input');
+    illegalInput.setAttribute('type', 'hidden');
+    illegalInput.setAttribute('name', '__amp_source_origin');
+    illegalInput.value = 'https://example.com';
+    form.appendChild(illegalInput);
+    expect(() => new AmpForm(form)).to.throw(
+        /Illegal input name, __amp_source_origin found/);
+  });
+
+  it('should listen to submit, blur and input events', () => {
     const form = getForm();
-    const nameInput = form.querySelector('input[name=name]');
-    nameInput.addEventListener = sandbox.spy();
-    const emailInput = document.createElement('input');
-    emailInput.addEventListener = sandbox.spy();
-    form.addEventListener = sandbox.spy();
-    emailInput.setAttribute('type', 'email');
-    form.appendChild(emailInput);
     form.addEventListener = sandbox.spy();
     form.setAttribute('action-xhr', 'https://example.com');
     new AmpForm(form);
     expect(form.addEventListener.called).to.be.true;
-    expect(form.addEventListener.calledWith('submit')).to.be.true;
-    expect(nameInput.addEventListener.calledWith('blur')).to.be.true;
-    expect(nameInput.addEventListener.calledWith('input')).to.be.true;
-    expect(emailInput.addEventListener.calledWith('blur')).to.be.true;
-    expect(emailInput.addEventListener.calledWith('input')).to.be.true;
+    expect(form.addEventListener).to.be.calledWith('submit');
+    expect(form.addEventListener).to.be.calledWith('blur');
+    expect(form.addEventListener).to.be.calledWith('input');
     expect(form.className).to.contain('-amp-form');
   });
 
@@ -229,7 +233,7 @@ describe('amp-form', () => {
       // Check bubble would show with a new message when user
       // change its content.
       emailInput.value = 'cool';
-      emailInput.dispatchEvent(new Event('keyup'));
+      ampForm.validator_.onInput({target: emailInput});
       const showCall2 = validationBubble.show.getCall(1);
       expect(showCall2.args[0]).to.equal(emailInput);
       expect(showCall2.args[1]).to.not.be.null;
@@ -238,31 +242,16 @@ describe('amp-form', () => {
 
       // Check bubble would hide when input becomes valid.
       emailInput.value = 'cool@bea.ns';
-      emailInput.dispatchEvent(new Event('keyup'));
+      ampForm.validator_.onInput({target: emailInput});
       expect(validationBubble.hide.calledOnce).to.be.true;
       expect(validationBubble.show.calledTwice).to.be.true;
 
       // Check that we'd hide the bubble when user move out.
-      emailInput.dispatchEvent(new Event('blur'));
+      ampForm.validator_.onBlur({target: emailInput});
       expect(validationBubble.hide.calledTwice).to.be.true;
 
-      // Check that we no longer have event listeners on the input.
-      emailInput.dispatchEvent(new Event('blur'));
-      expect(validationBubble.hide.calledThrice).to.be.false;
-      emailInput.dispatchEvent(new Event('keyup'));
+      ampForm.validator_.onInput({target: emailInput});
       expect(validationBubble.show.calledThrice).to.be.false;
-
-      // Check that we're removing previously added listeners
-      // everytime the form is submitted.
-      emailInput.value = 'cool';
-      sandbox.spy(emailInput, 'removeEventListener');
-      ampForm.handleSubmit_(event);
-      expect(emailInput.removeEventListener.calledTwice).to.be.true;
-      expect(emailInput.removeEventListener.calledWith('blur')).to.be.true;
-      expect(emailInput.removeEventListener.calledWith('keyup')).to.be.true;
-
-      ampForm.handleSubmit_(event);
-      expect(emailInput.removeEventListener.callCount).to.equal(4);
 
       // Check xhr goes through when form is valid.
       emailInput.value = 'cool@bea.ns';
