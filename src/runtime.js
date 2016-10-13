@@ -518,7 +518,7 @@ class MultidocManager {
     const shadowRoot = createShadowRoot(hostElement);
 
     if (shadowRoot.AMP) {
-      user().log(TAG, 'Shadow doc wasn\'t previously closed');
+      user().warn(TAG, 'Shadow doc wasn\'t previously closed');
       this.closeShadowRoot_(shadowRoot);
     }
 
@@ -742,7 +742,9 @@ class MultidocManager {
       // Broadcast message asynchronously.
       const viewer = viewerForDoc(shadowRoot.AMP.ampdoc);
       this.timer_.delay(() => {
-        viewer.receiveMessage('broadcast', data, /* awaitResponse */ false);
+        viewer.receiveMessage('broadcast',
+            /** @type {!JSONType} */ (data),
+            /* awaitResponse */ false);
       }, 0);
     });
   }
