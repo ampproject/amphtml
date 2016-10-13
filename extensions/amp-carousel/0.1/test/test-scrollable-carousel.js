@@ -16,7 +16,6 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
 describe('ScrollableCarousel', () => {
 

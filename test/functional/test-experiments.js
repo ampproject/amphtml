@@ -22,7 +22,6 @@ import {
   toggleExperiment,
   resetExperimentToggles_,
 } from '../../src/experiments';
-import * as sinon from 'sinon';
 
 describe('isExperimentOn', () => {
   let win;

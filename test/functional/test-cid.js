@@ -27,7 +27,6 @@ import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
 

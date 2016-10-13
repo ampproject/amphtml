@@ -15,7 +15,6 @@
  */
 
 import {install} from '../../src/polyfills/document-contains';
-import * as sinon from 'sinon';
 
 
 describe('HTMLDocument.contains', () => {

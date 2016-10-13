@@ -18,7 +18,6 @@ import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
 import {resourcesForDoc} from '../../src/resources';
-import * as sinon from 'sinon';
 
 describe('amp-img', () => {
   let sandbox;

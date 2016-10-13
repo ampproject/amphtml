@@ -28,9 +28,6 @@ import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
 import {viewportForDoc} from '../../../../src/viewport';
 
-import * as sinon from 'sinon';
-
-
 adopt(window);
 
 describe('amp-analytics.visibility', () => {

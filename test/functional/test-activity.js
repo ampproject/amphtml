@@ -24,7 +24,6 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
 import {viewportForDoc} from '../../src/viewport';
 import {Observable} from '../../src/observable';
-import * as sinon from 'sinon';
 
 describe('Activity getTotalEngagedTime', () => {
 

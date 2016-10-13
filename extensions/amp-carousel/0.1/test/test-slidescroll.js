@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';

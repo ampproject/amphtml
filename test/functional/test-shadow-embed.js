@@ -29,7 +29,6 @@ import {
   setShadowDomSupportedForTesting,
 } from '../../src/shadow-embed';
 import {extensionsFor} from '../../src/extensions';
-import * as sinon from 'sinon';
 
 
 describe('shadow-embed', () => {

@@ -20,7 +20,6 @@ import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
 import {timerFor} from '../../src/timer';
-import * as sinon from 'sinon';
 
 describe('ad-cid', () => {
   const cidScope = 'cid-in-ads-test';

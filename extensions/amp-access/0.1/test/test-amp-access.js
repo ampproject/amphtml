@@ -31,7 +31,6 @@ import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
 
 describe('AccessService', () => {

@@ -21,7 +21,6 @@ import {
 } from '../../src/service/url-replacements-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
-import * as sinon from 'sinon';
 import {toggleExperiment} from '../../src/experiments';
 
 describe('test-document-click onDocumentElementClick_', () => {

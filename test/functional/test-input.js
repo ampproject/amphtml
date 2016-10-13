@@ -15,7 +15,6 @@
  */
 
 import {Input} from '../../src/input';
-import * as sinon from 'sinon';
 
 
 describe('Input', () => {

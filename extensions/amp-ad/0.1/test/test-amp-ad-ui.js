@@ -16,7 +16,6 @@
 
 import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import * as sinon from 'sinon';
 
 describe('amp-ad-ui handler', () => {
   let sandbox;

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {ValidationBubble} from '../validation-bubble';
 import {createIframePromise} from '../../../../testing/iframe';
 

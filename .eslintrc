@@ -65,6 +65,7 @@
     "no-iterator": 2,
     "no-lone-blocks": 2,
     "no-multi-spaces": 2,
+    "no-mocking-unowned": 2,
     "no-native-reassign": 2,
     "no-redeclare": 2,
     "no-script-url": 2,

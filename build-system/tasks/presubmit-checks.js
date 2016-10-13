@@ -478,6 +478,9 @@ var forbiddenTerms = {
       'src/runtime.js',
     ],
   },
+  'import [^\']* from \'sinon\'': {
+    message: 'The global sinon must be used',
+  }
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +

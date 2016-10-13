@@ -15,7 +15,6 @@
  */
 
 import {calcVelocity, continueMotion} from '../../src/motion';
-import * as sinon from 'sinon';
 
 
 describe('Motion calcVelocity', () => {

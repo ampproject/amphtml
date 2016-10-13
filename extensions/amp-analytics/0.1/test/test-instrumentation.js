@@ -20,7 +20,6 @@ import {
 } from '../instrumentation.js';
 import {adopt} from '../../../../src/runtime';
 import {VisibilityState} from '../../../../src/visibility-state';
-import * as sinon from 'sinon';
 
 adopt(window);
 

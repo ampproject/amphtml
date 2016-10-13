@@ -23,7 +23,6 @@ import {
 } from '../../../../src/service';
 import {loadPromise} from '../../../../src/event-helper';
 import {installTimerService} from '../../../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 
 describe('amp-install-serviceworker', () => {

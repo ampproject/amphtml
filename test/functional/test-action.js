@@ -16,7 +16,6 @@
 
 import {ActionService, parseActionMap} from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
 
 
 describe('ActionService parseAction', () => {

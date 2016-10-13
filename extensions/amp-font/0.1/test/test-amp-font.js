@@ -18,7 +18,6 @@ import '../amp-font';
 import {FontLoader} from '../fontloader';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
 
 adopt(window);
 

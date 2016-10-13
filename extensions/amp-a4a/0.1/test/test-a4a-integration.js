@@ -32,7 +32,6 @@ import {
     upgradeOrRegisterElement,
 } from '../../../../src/custom-element';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but

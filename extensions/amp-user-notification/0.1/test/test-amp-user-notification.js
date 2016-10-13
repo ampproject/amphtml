@@ -20,7 +20,6 @@ import {
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
 import {getExistingServiceForDoc} from '../../../../src/service';
-import * as sinon from 'sinon';
 
 
 describe('amp-user-notification', () => {

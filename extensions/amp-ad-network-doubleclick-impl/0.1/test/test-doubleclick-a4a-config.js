@@ -27,7 +27,6 @@ import {
 import {resetExperimentToggles_} from '../../../../src/experiments';
 import {parseUrl} from '../../../../src/url';
 import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
 
 describe('doubleclick-a4a-config', () => {
   let sandbox;

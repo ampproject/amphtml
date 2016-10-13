@@ -17,7 +17,6 @@
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {allocateVariant} from '../variant';
 import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
-import * as sinon from 'sinon';
 
 
 describe('allocateVariant', () => {

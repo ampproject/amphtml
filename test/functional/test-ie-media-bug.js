@@ -16,7 +16,6 @@
 
 import {checkAndFix} from '../../src/service/ie-media-bug';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('ie-media-bug', () => {

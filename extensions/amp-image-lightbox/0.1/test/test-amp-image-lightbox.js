@@ -22,7 +22,6 @@ import {
 } from '../amp-image-lightbox';
 import {adopt} from '../../../../src/runtime';
 import {parseSrcset} from '../../../../src/srcset';
-import * as sinon from 'sinon';
 
 adopt(window);
 

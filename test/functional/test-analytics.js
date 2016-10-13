@@ -20,7 +20,6 @@ import {
 } from '../../src/service';
 import {triggerAnalyticsEvent} from '../../src/analytics';
 import {timerFor} from '../../src/timer';
-import * as sinon from 'sinon';
 
 describe('triggerAnalyticsEvent', () => {
   let sandbox;

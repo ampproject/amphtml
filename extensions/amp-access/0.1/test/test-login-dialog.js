@@ -19,7 +19,6 @@ import {
   openLoginDialog,
 } from '../login-dialog';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
 
 const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
     '/amp-access/0.1/amp-login-done.html?url=' +

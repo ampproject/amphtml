@@ -33,7 +33,6 @@ import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
 import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 
 describes.sandboxed('runtime', {}, env => {
 

@@ -18,7 +18,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';
 import {variantForOrNull} from '../../../../src/variant-service';
-import * as sinon from 'sinon';
 
 describe('amp-experiment', () => {
 

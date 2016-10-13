@@ -19,7 +19,6 @@ import {documentInfoForDoc} from '../../src/document-info';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
 
 describe('document-info', () => {
   let sandbox;

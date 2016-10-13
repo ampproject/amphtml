@@ -33,7 +33,6 @@ import {cssText} from '../build/css';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
-import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';

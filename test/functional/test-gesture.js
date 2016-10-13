@@ -15,7 +15,6 @@
  */
 
 import {GestureRecognizer, Gestures} from '../../src/gesture';
-import * as sinon from 'sinon';
 
 
 describe('Gestures', () => {

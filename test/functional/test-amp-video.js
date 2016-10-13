@@ -17,7 +17,6 @@
 import {createIframePromise} from '../../testing/iframe';
 import {installVideo} from '../../builtins/amp-video';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
-import * as sinon from 'sinon';
 
 describe('amp-video', () => {
 

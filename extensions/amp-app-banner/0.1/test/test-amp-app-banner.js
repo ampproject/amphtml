@@ -30,7 +30,6 @@ import {
 } from '../../../../src/service/performance-impl';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-analytics/0.1/amp-analytics';
-import * as sinon from 'sinon';
 
 
 describe('amp-app-banner', () => {

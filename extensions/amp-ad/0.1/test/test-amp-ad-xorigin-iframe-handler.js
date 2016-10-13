@@ -23,7 +23,6 @@ import {
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {timerFor} from '../../../../src/timer';
-import * as sinon from 'sinon';
 
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;

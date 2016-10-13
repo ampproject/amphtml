@@ -15,7 +15,6 @@
  */
 
 import * as st from '../../src/style';
-import * as sinon from 'sinon';
 
 describe('Style', () => {
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {installLiveListManager, LiveListManager} from '../live-list-manager';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';

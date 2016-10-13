@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../src/animation';
-import * as sinon from 'sinon';
 
 describe('Animation', () => {
 

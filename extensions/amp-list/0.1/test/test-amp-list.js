@@ -18,7 +18,6 @@ import {AmpList} from '../amp-list';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {templatesFor} from '../../../../src/template';
 import {installXhrService} from '../../../../src/service/xhr-impl';
-import * as sinon from 'sinon';
 
 
 describe('amp-list component', () => {

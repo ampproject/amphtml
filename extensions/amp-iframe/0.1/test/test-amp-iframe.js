@@ -26,7 +26,6 @@ import {
   poll,
 } from '../../../../testing/iframe';
 import {viewportForDoc} from '../../../../src/viewport';
-import * as sinon from 'sinon';
 
 adopt(window);
 

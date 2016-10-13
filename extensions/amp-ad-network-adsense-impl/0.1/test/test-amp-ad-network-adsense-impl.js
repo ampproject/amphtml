@@ -17,7 +17,6 @@
 import {AmpAdNetworkAdsenseImpl} from '../amp-ad-network-adsense-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import * as sinon from 'sinon';
 
 describe('amp-ad-network-adsense-impl', () => {
 

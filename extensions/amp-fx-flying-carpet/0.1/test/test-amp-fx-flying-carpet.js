@@ -19,7 +19,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
 import {viewportForDoc} from '../../../../src/viewport';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
 
 adopt(window);

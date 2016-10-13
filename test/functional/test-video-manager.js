@@ -24,7 +24,6 @@ import {
 import {
   runVideoPlayerIntegrationTests,
 } from '../integration/test-video-players-helper';
-import * as sinon from 'sinon';
 
 describe('Fake Video Player Integration Tests', () => {
   // We run the video player integration tests on a fake video player as part

@@ -28,7 +28,6 @@ import {loadPromise} from '../../src/event-helper';
 import {preconnectForElement} from '../../src/preconnect';
 import {validateData} from '../../3p/3p';
 import {viewerForDoc} from '../../src/viewer';
-import * as sinon from 'sinon';
 
 describe('3p-frame', () => {
 
@@ -141,10 +140,8 @@ describe('3p-frame', () => {
     };
 
     const viewer = viewerForDoc(window.document);
-    const viewerMock = sandbox.mock(viewer);
-    viewerMock.expects('getUnconfirmedReferrerUrl')
-        .returns('http://acme.org/')
-        .once();
+    const referrerUrl = sandbox.stub(viewer, 'getUnconfirmedReferrerUrl')
+        .returns('http://acme.org/');
 
     container.appendChild(div);
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
@@ -185,6 +182,7 @@ describe('3p-frame', () => {
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
       const win = iframe.contentWindow;
+      expect(referrerUrl).to.have.been.calledOnce;
       expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
       expect(win.context.location.href).to.equal(locationHref);
       expect(win.context.location.origin).to.equal('http://localhost:9876');

@@ -22,7 +22,6 @@ import {
   loadPromise,
 } from '../../src/event-helper';
 import {Observable} from '../../src/observable';
-import * as sinon from 'sinon';
 
 describe('EventHelper', () => {
 

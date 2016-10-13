@@ -22,7 +22,6 @@ import {
   ViewerStorageBinding,
 } from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('Storage', () => {

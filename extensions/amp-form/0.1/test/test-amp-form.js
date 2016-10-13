@@ -23,7 +23,6 @@ import {
 import {
   setReportValiditySupported,
 } from '../form-validators';
-import * as sinon from 'sinon';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';

@@ -15,7 +15,6 @@
  */
 
 import {AccessOtherAdapter} from '../amp-access-other';
-import * as sinon from 'sinon';
 
 describe('AccessOtherAdapter', () => {
 

@@ -21,7 +21,6 @@ import {
 } from '../../src/intersection-observer';
 import {createAmpElementProto} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 describe('getIntersectionChangeEntry', () => {

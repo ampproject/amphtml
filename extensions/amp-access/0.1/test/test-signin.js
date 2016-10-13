@@ -17,7 +17,6 @@
 import {SignInProtocol} from '../signin';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('SignInProtocol', () => {

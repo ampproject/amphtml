@@ -25,7 +25,6 @@ import {
 import * as dom from '../../src/dom';
 import * as docready from '../../src/document-ready';
 import {createShadowRoot} from '../../src/shadow-embed';
-import * as sinon from 'sinon';
 
 
 describe('AmpDocService', () => {

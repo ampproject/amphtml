@@ -34,7 +34,6 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 
 /**
  * Create a promise for an iframe that has a super-minimal mock AMP environment

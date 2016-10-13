@@ -24,7 +24,6 @@ import {extensionsFor} from '../../src/extensions';
 import {installServiceInEmbedScope} from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
 import {resourcesForDoc} from '../../src/resources';
-import * as sinon from 'sinon';
 
 
 describe('friendly-iframe-embed', () => {
