@@ -46,6 +46,7 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
+  'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
