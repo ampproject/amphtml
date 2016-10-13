@@ -29,8 +29,7 @@
     "sandbox": true,
     "context": false,
     "global": false,
-    "describes": true,
-    "clock": true
+    "describes": true
   },
   "rules": {
     "array-bracket-spacing": [2, "never"],
