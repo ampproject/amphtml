@@ -250,7 +250,7 @@ ex. (w/o vendor prefixes)
 
 Optionally one can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
-- [CLIENT_ID URL substitution.](../../spec/amp-var-substitutions.md#CLIENT_ID)
+- [CLIENT_ID URL substitution.](../../spec/amp-var-substitutions.md#client-id)
 - [`amp-ad`](../../builtins/amp-ad.md)
 - [`amp-analytics`](../amp-analytics/amp-analytics.md)
 
