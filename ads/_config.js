@@ -357,7 +357,14 @@ export const adConfig = {
 
   triplelift: {},
 
-  webediads: {},
+  webediads: {
+    prefetch: 'https://eu1.wbdds.com/amp.min.js',
+    preconnect: [
+      'https://goutee.top',
+      'https://mediaathay.org.uk',
+    ],
+    renderStartImplemented: true,
+  },
 
   'weborama-display': {
     prefetch: [
