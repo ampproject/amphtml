@@ -113,14 +113,12 @@ describe('History', () => {
 });
 
 
-describe('History install', () => {
+describes.sandboxed('History install', {}, () => {
   let win;
   let ampdoc;
   let viewer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-
     viewer = {
       isOvertakeHistory: () => false,
       onHistoryPoppedEvent: () => function() {},
@@ -144,10 +142,6 @@ describe('History install', () => {
     ampdoc = new AmpDocSingle(win);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should create natural binding and make it singleton', () => {
     const history = installHistoryServiceForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
@@ -168,15 +162,12 @@ describe('History install', () => {
 });
 
 
-describe('HistoryBindingNatural', () => {
-
-  let sandbox;
+describes.sandboxed('HistoryBindingNatural', {}, () => {
   let clock;
   let onStackIndexUpdated;
   let history;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     onStackIndexUpdated = sandbox.spy();
     history = new HistoryBindingNatural_(window);
@@ -185,7 +176,6 @@ describe('HistoryBindingNatural', () => {
 
   afterEach(() => {
     history.cleanup_();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
