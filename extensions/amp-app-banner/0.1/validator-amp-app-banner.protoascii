@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-
-tags: {  # amp-carousel
-  html_format: AMP
-  html_format: AMP4ADS
+tags: {  # <script custom-element="amp-sticky-ad">
+  html_format: AMP  # Ads are not allowed inside ads.
   tag_name: "SCRIPT"
-  spec_name: "amp-carousel extension .js script"
+  spec_name: "amp-app-banner extension .js script"
+  also_requires_tag: "amp-app-banner"
   mandatory_parent: "HEAD"
   attrs: {
     name: "async"
@@ -28,13 +27,13 @@ tags: {  # amp-carousel
   attrs: {
     name: "custom-element"
     mandatory: true
-    value: "amp-carousel"
+    value: "amp-app-banner"
     dispatch_key: true
   }
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-app-banner-(latest|0\\.1)\\.js"
   }
   attrs: {
     name: "type"
@@ -46,29 +45,25 @@ tags: {  # amp-carousel
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-app-banner.html"
 }
-tags: {  # <amp-carousel>
+tags: {  # <amp-app-banner>
   html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "AMP-CAROUSEL"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-carousel extension .js script"
-  attrs: { name: "arrows" value: "" }
-  attrs: { name: "autoplay" value: "" }
-  attrs: { name: "controls" }
-  attrs: { name: "delay" value_regex: "[0-9]+" }
-  attrs: { name: "dots" value: "" }
-  attrs: { name: "loop" value: "" }
-  attrs: { name: "type" value_regex: "slides|carousel" }
+  tag_name: "AMP-APP-BANNER"
+  spec_name: "amp-app-banner"
+  mandatory_parent: "BODY"
+
+  requires: "amp-app-banner data source"
+  also_requires_tag: "amp-app-banner extension .js script"
+  # The "amp-app-banner button[open-button]" tag is in
+  # validator-main.protoascii and in turn has an "AMP-APP-BANNER"
+  # mandatory_parent.
+  also_requires_tag: "amp-app-banner button[open-button]"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
+  attrs: { name: "id" mandatory: true }
+  unique: true
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-add-banner.html"
   amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
   }
 }
