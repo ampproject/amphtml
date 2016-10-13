@@ -1126,6 +1126,13 @@ class Context {
      * @private
      */
     this.tagspecsValidated_ = {};
+
+    /**
+     * Set of conditions that we've satisfied.
+     * @type {!Object<string, ?>}
+     * @private
+     */
+    this.conditionsSatisfied_ = {};
   }
 
   /**
@@ -1168,6 +1175,27 @@ class Context {
       error.dataAmpReportTestValue = reportTestValue;
     goog.asserts.assert(validationResult.errors !== undefined);
     validationResult.errors.push(error);
+  }
+
+  /**
+   * Records a condition that's been validated. Returns true iff
+   * `condition` has not been seen before.
+   * @param {string} condition
+   * @return {boolean} whether or not condition has been seen before.
+   */
+  satisfyCondition(condition) {
+    const duplicate = this.conditionsSatisfied_.hasOwnProperty(condition);
+    if (!duplicate) {
+      this.conditionsSatisfied_[condition] = 0;
+    }
+    return !duplicate;
+  }
+
+  /**
+   * @return {!Object<number, ?>}
+   */
+  conditionsSatisfied() {
+    return this.conditionsSatisfied_;
   }
 
   /**
@@ -2384,6 +2412,11 @@ class ParsedTagSpec {
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
     /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.requires_ = [];
+    /**
      * @type {!Array<number>}
      * @private
      */
@@ -2427,6 +2460,9 @@ class ParsedTagSpec {
     }
     this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
+    for (const condition of tagSpec.requires) {
+      this.requires_.push(condition);
+    }
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
       this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
     }
@@ -2497,6 +2533,15 @@ class ParsedTagSpec {
    */
   getAlsoRequiresTagWarning() {
     return this.alsoRequiresTagWarning_;
+  }
+
+  /**
+   * A TagSpec may specify generic conditions which are required if the
+   * tag is present. This accessor returns the list of those conditions.
+   * @return {!Array<string>}
+   */
+  requires() {
+    return this.requires_;
   }
 
   /**
@@ -3361,6 +3406,10 @@ function validateTagAgainstSpec(
     }
   }
 
+  for (const condition of spec.satisfies) {
+    context.satisfyCondition(condition);
+  }
+
   if (parsedSpec.shouldRecordTagspecValidated()) {
     const isUnique = context.recordTagspecValidated(parsedSpec.getId());
     // If a duplicate tag is encountered for a spec that's supposed
@@ -3637,6 +3686,8 @@ class ParsedValidatorRules {
 
   /**
    * Emits errors for tags that specify that another tag is also required.
+   * Emits errors for tags that specify that another tag is also required or
+   * a condition is required to be satisfied.
    * Returns false iff context.Progress(result).complete.
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
@@ -3648,6 +3699,26 @@ class ParsedValidatorRules {
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
       const spec = this.tagSpecById_[tagSpecId];
+      for (const condition of spec.requires()) {
+        if (!context.conditionsSatisfied().hasOwnProperty(condition)) {
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
+                context.getDocLocator(),
+                /* params */
+                [
+                  condition,
+                  getTagSpecName(spec.getSpec())
+                ],
+                spec.getSpec().specUrl, validationResult);
+          } else {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
+        }
+      }
       for (const tagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {

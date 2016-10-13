@@ -278,7 +278,7 @@ message ReferencePoint {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 23
+// NEXT AVAILABLE TAG: 25
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -335,6 +335,12 @@ message TagSpec {
   // Same as also_requires_tag, but rather than invalidating a document if not
   // present, emits a deprecation warning.
   repeated string also_requires_tag_warning = 22;
+  // Expresses a generic condition which is satisfied if this tag is found. Used
+  // in combination with the `requires` attribute on a different tag.
+  repeated string satisfies = 23;
+  // Expresses a generic condition which must be satisfied if this tag is found.
+  // Used in combination with the `satisfies` attributes on a different tag.
+  repeated string requires = 24;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
