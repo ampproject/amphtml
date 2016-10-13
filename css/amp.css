@@ -126,6 +126,38 @@ i-amp-sizer {
   /* TODO(dvoytenko): explore adding here object-fit. */
 }
 
+/**
+ * Makes elements visually invisible but still accessible to screen-readers.
+ *
+ * This Css has been carefully tested to ensure screen-readers can read and
+ * activate (in case of links and buttons) the elements with this class. Please
+ * use caution when changing anything, even seemingly safe ones. For example
+ * changing width from 1 to 0 would prevent TalkBack from activating (clicking)
+ * buttons despite TalkBack reading them just fine. This is because
+ * element needs to have a defined size and be on viewport otherwise TalkBack
+ * does not allow activation of buttons.
+ */
+.-amp-screen-reader {
+  position: fixed !important;
+  /* keep it on viewport */
+  top: 0px !important;
+  left: 0px !important;
+  /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
+     before allowing buttons to be activated. */
+  width: 2px !important;
+  height: 2px !important;
+  /* visually hide it with overflow and opacity */
+  opacity: 0 !important;
+  overflow: hidden !important;
+  /* remove any margin or padding */
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* ensure no other style sets display to none */
+  display: block !important;
+  visibility: visible !important;
+}
+
 /* For author styling. */
 .amp-unresolved {
 }
