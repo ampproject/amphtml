@@ -704,7 +704,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** @private {?ImageViewer} */
     this.imageViewer_ = null;
 
-    /** {?Element} */
+    /** @private {?Element} */
     this.captionElement_ = null;
 
     /** @private {function(this:AmpImageLightbox, Event)} */
