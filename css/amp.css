@@ -121,7 +121,6 @@ i-amp-sizer {
 }
 
 .-amp-replaced-content {
-
   padding: 0 !important;
   border: none !important;
   /* TODO(dvoytenko): explore adding here object-fit. */
