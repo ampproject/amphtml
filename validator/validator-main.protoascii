@@ -25,9 +25,7 @@ min_validator_revision_required: 178
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 294
-
-reference_points_can_define_reference_points: true
+spec_file_revision: 295
 
 # Validator extensions.
 # =====================
@@ -2169,16 +2167,29 @@ tags {
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-  reference_points: {
-    tag_spec_name: "FORM [submit-success|submit-error]"
-  }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 tags {
-  tag_name: "$REFERENCE_POINT"
-  spec_name: "FORM [submit-success|submit-error]"
-  attrs: { name: "submit-success" }
-  attrs: { name: "submit-error" }
+  tag_name: "DIV"
+  spec_name: "FORM > DIV [submit-success]"
+  mandatory_parent: "FORM"
+  attrs: { name: "submit-success" mandatory: true }
+  attrs: { name: "align" }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    first_child_tag_name_oneof: "TEMPLATE"
+  }
+}
+tags {
+  tag_name: "DIV"
+  spec_name: "FORM > DIV [submit-error]"
+  mandatory_parent: "FORM"
+  attrs: { name: "submit-error" mandatory: true }
+  attrs: { name: "align" }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    first_child_tag_name_oneof: "TEMPLATE"
+  }
 }
 # 4.10.4 The label element
 tags: {
