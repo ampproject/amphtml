@@ -93,11 +93,10 @@ export class ImageViewer {
     this.srcset_ = null;
 
     /** @private {!Object} */
-    this.captions_ = {
+    this.ariaAttributes_ = {
       'alt': null,
       'aria-label': null,
       'aria-labelledby': null,
-      'aria-describedby': null,
     };
 
     /** @private {number} */
@@ -195,10 +194,11 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
-    Object.keys(this.captions_).forEach(key => {
+    Object.keys(this.ariaAttributes_).forEach(key => {
       this.image_.removeAttribute(key);
-      this.captions_[key] = null;
+      this.ariaAttributes_[key] = null;
     });
+    this.image_.removeAttribute('aria-describedby');
     this.srcset_ = null;
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
     this.sourceWidth_ = 0;
@@ -235,22 +235,18 @@ export class ImageViewer {
     this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
     this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
     this.srcset_ = srcsetFromElement(sourceElement);
-    Object.keys(this.captions_).forEach(key => {
-      if (key == 'aria-describedby') {
-        this.captions_[key] = this.lightbox_.captionElement.getAttribute('id');
-      } else {
-        this.captions_[key] = sourceElement.getAttribute(key);
+
+    Object.keys(this.ariaAttributes_).forEach(key => {
+      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
+      if (this.ariaAttributes_[key]) {
+        this.image_.setAttribute(key, this.ariaAttributes_[key]);
       }
     });
+
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
       // It will be updated later.
       this.image_.setAttribute('src', sourceImage.src);
-      Object.keys(this.captions_).forEach(key => {
-        if (this.captions_[key]) {
-          this.image_.setAttribute(key, this.captions_[key]);
-        }
-      });
     }
   }
 
@@ -318,11 +314,6 @@ export class ImageViewer {
     // and then naturally upgrade to a higher quality image.
     return timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
-      Object.keys(this.captions_).forEach(key => {
-        if (this.captions_[key]) {
-          this.image_.setAttribute(key, this.captions_[key]);
-        }
-      });
       return this.loadPromise_(this.image_);
     });
   }
@@ -714,7 +705,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.imageViewer_ = null;
 
     /** {?Element} */
-    this.captionElement = null;
+    this.captionElement_ = null;
 
     /** @private {function(this:AmpImageLightbox, Event)} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
@@ -735,15 +726,15 @@ class AmpImageLightbox extends AMP.BaseElement {
         this.loadPromise.bind(this));
     this.container_.appendChild(this.imageViewer_.getElement());
 
-    this.captionElement = this.element.ownerDocument.createElement('div');
+    this.captionElement_ = this.element.ownerDocument.createElement('div');
 
-    // Set id to the captionElement for accessibility reason
-    this.captionElement.setAttribute('id', this.element.getAttribute('id')
+    // Set id to the captionElement_ for accessibility reason
+    this.captionElement_.setAttribute('id', this.element.getAttribute('id')
         + '-caption');
 
-    this.captionElement.classList.add('amp-image-lightbox-caption');
-    this.captionElement.classList.add('-amp-image-lightbox-caption');
-    this.container_.appendChild(this.captionElement);
+    this.captionElement_.classList.add('amp-image-lightbox-caption');
+    this.captionElement_.classList.add('-amp-image-lightbox-caption');
+    this.container_.appendChild(this.captionElement_);
 
     const gestures = Gestures.get(this.element);
     this.element.addEventListener('click', e => {
@@ -874,18 +865,18 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
 
     if (caption) {
-      dom.copyChildren(caption, dev().assertElement(this.captionElement));
+      dom.copyChildren(caption, dev().assertElement(this.captionElement_));
+      this.imageViewer_.getImage().setAttribute('aria-describedby',
+          this.captionElement_.getAttribute('id'));
     }
-    if (!this.captionElement.getAttribute('id')) {
 
-    }
-    this.captionElement.classList.toggle('-amp-empty', !caption);
+    this.captionElement_.classList.toggle('-amp-empty', !caption);
   }
 
   /** @private */
   reset_() {
     this.imageViewer_.reset();
-    dom.removeChildren(dev().assertElement(this.captionElement));
+    dom.removeChildren(dev().assertElement(this.captionElement_));
     this.sourceElement_ = null;
     this.sourceImage_ = null;
     this.toggleViewMode(false);
