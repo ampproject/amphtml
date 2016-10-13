@@ -23,6 +23,8 @@
 import {
   googleAdsIsA4AEnabled,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getMode} from '../../../src/mode';
+import {isProxyOrigin} from '../../../src/url';
 
 /** @const {string} */
 const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
@@ -66,10 +68,19 @@ export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  // Ensure not within remote.html iframe.
-  return !win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
-      googleAdsIsA4AEnabled(
-        win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES);
+  const usesRemoteHTML =
+      !!win.document.querySelector('meta[name=amp-3p-iframe-src]');
+  const a4aRequested = !!element.getAttribute(
+      'data-use-experimental-a4a-implementation');
+  // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
+  // therefore, carves out of the experiment branches.  Any publisher using this
+  // attribute will be excluded from the experiment altogether.
+  const enableA4A = !usesRemoteHTML &&
+      ((a4aRequested &&
+        (isProxyOrigin(win.location) || getMode(win).localDev)) ||
+       googleAdsIsA4AEnabled(
+          win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES));
+  return enableA4A;
 }
