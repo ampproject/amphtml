@@ -48,10 +48,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
 
 Example:
 ```html
-<form method="post" 
-      action="https://example.com/subscribe"
-      action-xhr="https://example.com/subscribe-via-xhr"
-      target="_blank">
+<form method="post" action-xhr="https://example.com/subscribe">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -63,28 +60,34 @@ Example:
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
+    <div submit-success>
+        Subscription successful!
+    </div>
+    <div submit-error>
+        Subscription failed!
+    </div>
 </form>
 ```
 
 ## Attributes
 
 **target**
-__required__
+__required__ for `GET` requests.
 
 Target attribute of the `<form>` must be either `_blank` or `_top`.
 
 **action**
-__required__
+__required__ for `GET` requests
 
-Action must be provided, `https` and is non-cdn link (does **NOT** link to https://cdn.ampproject.org).
+Action must be provided for `GET` requests, use `https` and not link to the AMP Cache (does **NOT** link to https://cdn.ampproject.org). Actions are not allowed for `POST` requests.
 
 __Note__: `target` and `action` will only be used for non-xhr GET requests. AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided AMP would make a GET request to `action` endpoint and use `target` to open a new window (if `_blank`). AMP runtime might also fallback to using action and target in cases where `amp-form` extension fails to load.
 
 **action-xhr**
 __(optional)__ for `GET` __required__ for `POST` requests 
-You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion.
+You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion. For [security reasons](#security-considerations) `POST` requests are only possible via XHR.
 
-This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
+For `GET` requests, this attribute can be the same or a different endpoint than `action` and has the same action requirements above.
 
 
 **Important**: See [Security Considerations](#security-considerations) for notes on how to secure your forms endpoints.
