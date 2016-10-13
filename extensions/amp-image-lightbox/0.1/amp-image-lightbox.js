@@ -97,7 +97,7 @@ export class ImageViewer {
       'alt': null,
       'aria-label': null,
       'aria-labelledby': null,
-      'aria-describedby' : null,
+      'aria-describedby': null,
     };
 
     /** @private {number} */
@@ -236,7 +236,11 @@ export class ImageViewer {
     this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
     this.srcset_ = srcsetFromElement(sourceElement);
     Object.keys(this.captions_).forEach(key => {
-      this.captions_[key] = sourceElement.getAttribute(key);
+      if (key == 'aria-describedby') {
+        this.captions_[key] = this.lightbox_.captionElement.getAttribute('id');
+      } else {
+        this.captions_[key] = sourceElement.getAttribute(key);
+      }
     });
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
@@ -709,8 +713,8 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** @private {?ImageViewer} */
     this.imageViewer_ = null;
 
-    /** @private {?Element} */
-    this.captionElement_ = null;
+    /** {?Element} */
+    this.captionElement = null;
 
     /** @private {function(this:AmpImageLightbox, Event)} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
@@ -731,10 +735,15 @@ class AmpImageLightbox extends AMP.BaseElement {
         this.loadPromise.bind(this));
     this.container_.appendChild(this.imageViewer_.getElement());
 
-    this.captionElement_ = this.element.ownerDocument.createElement('div');
-    this.captionElement_.classList.add('amp-image-lightbox-caption');
-    this.captionElement_.classList.add('-amp-image-lightbox-caption');
-    this.container_.appendChild(this.captionElement_);
+    this.captionElement = this.element.ownerDocument.createElement('div');
+
+    // Set id to the captionElement for accessibility reason
+    this.captionElement.setAttribute('id', this.element.getAttribute('id')
+        + '-caption');
+
+    this.captionElement.classList.add('amp-image-lightbox-caption');
+    this.captionElement.classList.add('-amp-image-lightbox-caption');
+    this.container_.appendChild(this.captionElement);
 
     const gestures = Gestures.get(this.element);
     this.element.addEventListener('click', e => {
@@ -865,15 +874,18 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
 
     if (caption) {
-      dom.copyChildren(caption, dev().assertElement(this.captionElement_));
+      dom.copyChildren(caption, dev().assertElement(this.captionElement));
     }
-    this.captionElement_.classList.toggle('-amp-empty', !caption);
+    if (!this.captionElement.getAttribute('id')) {
+
+    }
+    this.captionElement.classList.toggle('-amp-empty', !caption);
   }
 
   /** @private */
   reset_() {
     this.imageViewer_.reset();
-    dom.removeChildren(dev().assertElement(this.captionElement_));
+    dom.removeChildren(dev().assertElement(this.captionElement));
     this.sourceElement_ = null;
     this.sourceImage_ = null;
     this.toggleViewMode(false);
