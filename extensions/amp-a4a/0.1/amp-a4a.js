@@ -19,8 +19,13 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
-import {removeChildren, createElementWithAttributes} from '../../../src/dom';
+import {
+  closestByTag,
+  removeChildren,
+  createElementWithAttributes,
+} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -28,6 +33,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
@@ -38,6 +44,11 @@ import {
   verifySignature,
   PublicKeyInfoDef,
 } from './crypto-verifier';
+import {isExperimentOn} from '../../../src/experiments';
+import {handleClick} from '../../../ads/alp/handler';
+
+/** @private @const {string} */
+const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /**
  * Dev public key set. This will go away once the dev signing service goes live.
@@ -65,7 +76,7 @@ function isValidOffsetArray(ary) {
   return isArray(ary) && ary.length == 2 &&
       typeof ary[0] === 'number' &&
       typeof ary[1] === 'number';
-};
+}
 
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 
@@ -113,7 +124,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {number} ID of timer used as part of 3p throttling. */
     this.timerId_ = 0;
 
-    /** @private {null|boolean} where layoutMeasure has been executed. */
+    /** @private {boolean} whether layoutMeasure has been executed. */
     this.layoutMeasureExecuted_ = false;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
@@ -121,6 +132,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
+
+    this.lifecycleReporter_ = getLifecycleReporter(this, 'a4a');
+    this.lifecycleReporter_.sendPing('adSlotBuilt');
   }
 
   /** @override */
@@ -153,9 +167,10 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * To be overridden by network specific implementation indicating if element
-   * (and environment generally) are valid for sending XHR rqueries.
-   * @return {boolean} where element is valid and ad request should be sent.  If
-   *    false, no ad request is sent and slot will be collapsed if possible.
+   * (and environment generally) are valid for sending XHR queries.
+   * @return {boolean} whether element is valid and ad request should be
+   *    sent.  If false, no ad request is sent and slot will be collapsed if
+   *    possible.
    */
   isValidElement() {
     return true;
@@ -245,11 +260,14 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         // This block returns the ad URL, if one is available.
+        /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
-          return this.getAdUrl();
+          this.lifecycleReporter_.sendPing('urlBuilt');
+          return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
+        /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
@@ -257,11 +275,13 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
+        /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
+          this.lifecycleReporter_.sendPing('adRequestEnd');
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -277,18 +297,26 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns the ad creative and signature, if available; null
         // otherwise.
+        /**
+         * @return {!Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>}
+         */
         .then(responseParts => {
           checkStillCurrent(promiseId);
+          if (responseParts) {
+            this.lifecycleReporter_.sendPing('extractCreativeAndSignature');
+          }
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
         })
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
+        /** @return {!Promise<?string>} */
         .then(creativeParts => {
           checkStillCurrent(promiseId);
           if (!creativeParts || !creativeParts.signature) {
-            return null;
+            return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
+          this.lifecycleReporter_.sendPing('adResponseValidateStart');
 
           // For each signing service, we have exactly one Promise,
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
@@ -331,6 +359,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
+        /** @return {!Promise<!boolean>} */
         .then(creative => {
           checkStillCurrent(promiseId);
           // Note: It's critical that #maybeRenderAmpAd_ be called
@@ -387,6 +416,7 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
+    this.lifecycleReporter_.sendPing('preAdThrottle');
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error) {
@@ -396,7 +426,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.renderViaCrossDomainIframe_(true);
         }
         throw rendered;
-      };
+      }
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
@@ -408,6 +438,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.lifecycleReporter_.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
@@ -474,7 +505,9 @@ export class AmpA4A extends AMP.BaseElement {
    * Callback executed when AMP creative has successfully rendered within the
    * publisher page.  To be overridden by network implementations as needed.
    */
-  onAmpCreativeRender() {}
+  onAmpCreativeRender() {
+    this.lifecycleReporter_.sendPing('renderFriendlyEnd');
+  }
 
   /**
    * Send ad request, extract the creative and signature from the response.
@@ -483,6 +516,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   sendXhrRequest_(adUrl) {
+    this.lifecycleReporter_.sendPing('adRequestStart');
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
@@ -568,6 +602,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeRenderAmpAd_(bytes) {
+    this.lifecycleReporter_.sendPing('renderFriendlyStart');
     // Timer id will be set if we have entered layoutCallback at which point
     // 3p throttling count was incremented.  We want to "release" the throttle
     // immediately since we now know we are not a 3p ad.
@@ -640,7 +675,11 @@ export class AmpA4A extends AMP.BaseElement {
               html: modifiedCreative,
               extensionIds: creativeMetaData.customElementExtensions || [],
               fonts: fontsArray,
-            }).then(() => {
+            }).then(friendlyIframeEmbed => {
+              // Capture phase click handlers on the ad.
+              this.registerExpandUrlParams_(friendlyIframeEmbed.win);
+              // Bubble phase click handlers on the ad.
+              this.registerAlpHandler_(friendlyIframeEmbed.win);
               this.rendered_ = true;
               this.onAmpCreativeRender();
               return true;
@@ -667,6 +706,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaCrossDomainIframe_(opt_isNonAmpCreative) {
     user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
+    this.lifecycleReporter_.sendPing('renderCrossDomainStart');
+    /** @const {!Element} */
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));
@@ -804,4 +845,73 @@ export class AmpA4A extends AMP.BaseElement {
        metaData.cssUtf16CharOffsets[0],
        metaData.cssUtf16CharOffsets[1]);
  }
+
+  /**
+   * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
+   * viewer navigates to an AMP destination on our behalf.
+   * @param {!Window} iframeWin
+   */
+  registerAlpHandler_(iframeWin) {
+    if (!isExperimentOn(this.win, 'alp-for-a4a')) {
+      return;
+    }
+    iframeWin.document.documentElement.addEventListener('click', event => {
+      handleClick(event, url => {
+        viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
+      });
+    });
+  }
+
+  /**
+   * Registers a handler that performs URL replacement on the href
+   * of an ad click.
+   * @param {!Window} iframeWin
+   */
+  registerExpandUrlParams_(iframeWin) {
+    iframeWin.document.documentElement.addEventListener('click',
+        this.maybeExpandUrlParams_.bind(this), /* capture */ true);
+  }
+
+  /**
+   * Handle click on links and replace variables in the click URL.
+   * The function changes the actual href value and stores the
+   * template in the ORIGINAL_HREF_ATTRIBUTE attribute
+   * @param {!Event} e
+   */
+  maybeExpandUrlParams_(e) {
+    const target = closestByTag(dev().assertElement(e.target), 'A');
+    if (!target || !target.href) {
+      // Not a click on a link.
+      return;
+    }
+    const hrefToExpand =
+    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute('href');
+    if (!hrefToExpand) {
+      return;
+    }
+    const vars = {
+      'CLICK_X': () => {
+        return e.pageX;
+      },
+      'CLICK_Y': () => {
+        return e.pageY;
+      },
+    };
+    const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
+        hrefToExpand, vars, undefined, /* opt_whitelist */ {
+          // For now we only allow to replace the click location vars
+          // and nothing else.
+          // NOTE: Addition to this whitelist requires additional review.
+          'CLICK_X': true,
+          'CLICK_Y': true,
+        });
+    if (newHref != hrefToExpand) {
+      // Store original value so that later clicks can be processed with
+      // freshest values.
+      if (!target.getAttribute(ORIGINAL_HREF_ATTRIBUTE)) {
+        target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, hrefToExpand);
+      }
+      target.setAttribute('href', newHref);
+    }
+  }
 }

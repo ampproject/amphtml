@@ -26,9 +26,11 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
+import {moveLayoutRect} from '../../../src/layout-rect';
 
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -43,6 +45,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** {?Object} */
+    this.config = null;
+
     /** @private {?AmpAdApiHandler} */
     this.apiHandler_ = null;
 
@@ -56,9 +61,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.isInFixedContainer_ = false;
 
     /**
-     * The layout box of the ad iframe (as opposed to the amp-ad tag).
-     * In practice it often has padding to create a grey or similar box
-     * around ads.
+     * The (relative) layout box of the ad iframe to the amp-ad tag.
      * @private {?../../../src/layout-rect.LayoutRectDef}
      */
     this.iframeLayoutBox_ = null;
@@ -80,6 +83,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.layoutPromise_ = null;
+
+    this.lifecycleReporter_ = getLifecycleReporter(this, 'amp');
+    this.lifecycleReporter_.sendPing('adSlotBuilt');
   }
 
   /** @override */
@@ -108,7 +114,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.fallback_ = this.getFallback();
 
     const adType = this.element.getAttribute('type');
-    /** {!Object} */
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
 
@@ -169,7 +174,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   measureIframeLayoutBox_() {
     if (this.iframe_) {
-      this.iframeLayoutBox_ = this.getViewport().getLayoutRect(this.iframe_);
+      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
+      const box = this.getLayoutBox();
+      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
 
@@ -180,10 +187,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!this.iframe_) {
       return super.getIntersectionElementLayoutBox();
     }
+    const box = this.getLayoutBox();
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    return this.iframeLayoutBox_;
+    // If the iframe is full size, we avoid an object allocation by moving box.
+    return moveLayoutRect(box, this.iframeLayoutBox_.left,
+        this.iframeLayoutBox_.top);
   }
 
   /** @override */
@@ -191,6 +201,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
+    this.lifecycleReporter_.sendPing('preAdThrottle');
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
@@ -200,6 +211,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         clientId: cid || null,
         container: this.container_,
       };
+      // In this path, the request and render start events are entangled,
+      // because both happen inside a cross-domain iframe.  Separating them
+      // here, though, allows us to measure the impact of ad throttling via
+      // incrementLoadingAds().
+      this.lifecycleReporter_.sendPing('adRequestStart');
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.apiHandler_ = new AmpAdApiHandler(
@@ -269,6 +285,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_.unlayoutCallback();
       this.apiHandler_ = null;
     }
+    this.lifecycleReporter_.sendPing('adSlotCleared');
     return true;
   }
 }

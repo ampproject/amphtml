@@ -43,7 +43,7 @@ import {
 } from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
-import {installGlobalSubmitListener} from './document-submit';
+import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
@@ -95,9 +95,6 @@ export function installRuntimeServices(global) {
   installVsyncService(global);
   installXhrService(global);
   installTemplatesService(global);
-  if (isExperimentOn(global, 'form-submit')) {
-    installGlobalSubmitListener(global);
-  }
 }
 
 
@@ -116,6 +113,9 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
   installVideoManagerForDoc(ampdoc);
+  if (isExperimentOn(ampdoc.win, 'form-submit')) {
+    installGlobalSubmitListenerForDoc(ampdoc);
+  }
 }
 
 
@@ -155,8 +155,10 @@ function adoptShared(global, opts, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
+  /** @const {!Array<function(!Object)|{n:string, f:function(!Object)}>} */
   const preregisteredExtensions = global.AMP || [];
 
+  /** @const {!./service/extensions-impl.Extensions} */
   const extensions = installExtensionsService(global);
   installRuntimeServices(global);
 
@@ -164,13 +166,25 @@ function adoptShared(global, opts, callback) {
     win: global,
   };
 
+  // `AMP.extension()` function is only installed in a non-minified mode.
+  // This function is meant to play the same role for development and testing
+  // as `AMP.push()` in production.
+  // TODO(dvoytenko, #5507): Only expose this method for `!getMode().minified`
+  // once the compile-time inlining is done.
+  /**
+   * @param {string} unusedName
+   * @param {function(!Object)} installer
+   * @const
+   */
+  global.AMP.extension = function(unusedName, installer) {
+    installer(global.AMP);
+  };
+
   /** @const */
   global.AMP.config = config;
 
-  /** @const */
   global.AMP.BaseElement = BaseElement;
 
-  /** @const */
   global.AMP.BaseTemplate = BaseTemplate;
 
   /**
@@ -178,7 +192,6 @@ function adoptShared(global, opts, callback) {
    * @param {string} name
    * @param {function(new:BaseElement)} implementationClass
    * @param {string=} opt_css
-   * @const
    */
   global.AMP.registerElement = opts.registerElement.bind(null,
       global, extensions);
@@ -187,7 +200,6 @@ function adoptShared(global, opts, callback) {
    * Registers an extended template.
    * @param {string} name
    * @param {function(new:BaseTemplate)} implementationClass
-   * @const
    */
   global.AMP.registerTemplate = function(name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);
@@ -198,7 +210,6 @@ function adoptShared(global, opts, callback) {
    * @param {string} name
    * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined} opt_ctor
    * @param {function(!./service/ampdoc-impl.AmpDoc):!Object|undefined} opt_factory
-   * @const
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
@@ -207,15 +218,12 @@ function adoptShared(global, opts, callback) {
   /**
    * @param {string} experimentId
    * @return {boolean}
-   * @const
    */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
-
   /**
    * @param {string} experimentId
    * @param {boolean=} opt_on
    * @return {boolean}
-   * @const
    */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
@@ -305,19 +313,15 @@ export function adopt(global) {
   }, global => {
     const viewer = viewerForDoc(global.document);
 
-    /** @const */
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
-      /** @const */
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      /** @const */
       global.AMP.resources = resourcesForDoc(global.document);
     }
 
     const viewport = viewportForDoc(global.document);
 
-    /** @const */
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
@@ -335,6 +339,10 @@ export function adoptShadowMode(global) {
     registerElement: prepareAndRegisterElementShadowMode,
     registerServiceForDoc: prepareAndRegisterServiceForDocShadowMode,
   }, (global, extensions) => {
+
+    const manager = new MultidocManager(
+        global, ampdocServiceFor(global), extensions);
+
     /**
      * Registers a shadow root document.
      * @param {!Element} hostElement
@@ -343,8 +351,7 @@ export function adoptShadowMode(global) {
      * @param {!Object<string, string>=} opt_initParams
      * @return {!Object}
      */
-    global.AMP.attachShadowDoc = prepareAndAttachShadowDoc.bind(null,
-        global, extensions);
+    global.AMP.attachShadowDoc = manager.attachShadowDoc.bind(manager);
   });
 }
 
@@ -465,192 +472,206 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
 
 
 /**
- * Implementation for `attachShadowDoc` function. Attaches the shadow doc and
- * configures ampdoc for it.
- * @param {!Window} global
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {!Element} hostElement
- * @param {!Document} doc
- * @param {string} url
- * @param {!Object<string, string>=} opt_initParams
- * @return {!Object}
+ * A manager for documents in the multi-doc environment.
  */
-function prepareAndAttachShadowDoc(
-    global, extensions, hostElement, doc, url, opt_initParams) {
-  dev().fine(TAG, 'Attach shadow doc:', doc);
-  const ampdocService = ampdocServiceFor(global);
+class MultidocManager {
 
-  hostElement.style.visibility = 'hidden';
-  const shadowRoot = createShadowRoot(hostElement);
-
-  shadowRoot.AMP = {};
-  shadowRoot.AMP.url = url;
-
-  const ampdoc = installShadowDoc(ampdocService, url, shadowRoot);
-  dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
-
-  // Install runtime CSS.
-  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
-
-  // Instal doc services.
-  installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
-
-  const viewer = viewerForDoc(ampdoc);
-
-  /** @const */
-  shadowRoot.AMP.viewer = viewer;
-
-  if (getMode().development) {
+  /**
+   * @param {!Window} win
+   * @param {!./service/ampdoc-impl.AmpDocService} ampdocService
+   * @param {!./service/extensions-impl.Extensions} extensions
+   */
+  constructor(win, ampdocService, extensions) {
     /** @const */
-    global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-    /** @const */
-    global.AMP.resources = resourcesForDoc(ampdoc);
+    this.win = win;
+    /** @private @const */
+    this.ampdocService_ = ampdocService;
+    /** @private @const */
+    this.extensions_ = extensions;
   }
 
   /**
-   * Sets the document's visibility state.
-   * @param {!VisibilityState} state
-   * @const
+   * Implementation for `attachShadowDoc` function. Attaches the shadow doc and
+   * configures ampdoc for it.
+   * @param {!Element} hostElement
+   * @param {!Document} doc
+   * @param {string} url
+   * @param {!Object<string, string>=} opt_initParams
+   * @return {!Object}
    */
-  shadowRoot.AMP.setVisibilityState = function(state) {
-    setViewerVisibilityState(viewer, state);
-  };
+  attachShadowDoc(hostElement, doc, url, opt_initParams) {
+    dev().fine(TAG, 'Attach shadow doc:', doc);
 
-  /**
-   * Closes the document. The document can no longer be activated again.
-   * @const
-   */
-  shadowRoot.AMP.close = function() {
-    setViewerVisibilityState(viewer, VisibilityState.INACTIVE);
-    disposeServicesForDoc(ampdoc);
-  };
+    hostElement.style.visibility = 'hidden';
+    const shadowRoot = createShadowRoot(hostElement);
 
-  // Install extensions.
-  const extensionIds = mergeShadowHead(global, extensions, shadowRoot, doc);
+    shadowRoot.AMP = {};
+    shadowRoot.AMP.url = url;
 
-  // Apply all doc extensions.
-  installExtensionsInShadowDoc(extensions, ampdoc, extensionIds);
+    /** @const {!./service/ampdoc-impl.AmpDocShadow} */
+    const ampdoc = installShadowDoc(this.ampdocService_, url, shadowRoot);
+    dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
-  // Append body.
-  if (doc.body) {
-    const body = importShadowBody(shadowRoot, doc.body);
-    body.classList.add('amp-shadow');
-    shadowRoot.appendChild(body);
-    shadowDocHasBody(ampdoc, body);
+    // Install runtime CSS.
+    installStylesForShadowRoot(shadowRoot, cssText,
+        /* opt_isRuntimeCss */ true);
+
+    // Instal doc services.
+    installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
+
+    /** @const {!./service/viewer-impl.Viewer} */
+    const viewer = viewerForDoc(ampdoc);
+
+    shadowRoot.AMP.viewer = viewer;
+
+    if (getMode().development) {
+      shadowRoot.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+      shadowRoot.AMP.resources = resourcesForDoc(ampdoc);
+    }
+
+    /**
+     * Sets the document's visibility state.
+     * @param {!VisibilityState} state
+     */
+    shadowRoot.AMP.setVisibilityState = function(state) {
+      setViewerVisibilityState(viewer, state);
+    };
+
+    /**
+     * Closes the document. The document can no longer be activated again.
+     */
+    shadowRoot.AMP.close = function() {
+      setViewerVisibilityState(viewer, VisibilityState.INACTIVE);
+      disposeServicesForDoc(ampdoc);
+    };
+
+    // Install extensions.
+    const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
+
+    // Apply all doc extensions.
+    installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
+
+    // Append body.
+    if (doc.body) {
+      const body = importShadowBody(shadowRoot, doc.body);
+      body.classList.add('amp-shadow');
+      shadowRoot.appendChild(body);
+      shadowDocHasBody(ampdoc, body);
+    }
+
+    // Document is ready.
+    shadowDocReady(ampdoc);
+
+    // TODO(dvoytenko): find a better and more stable way to make content visible.
+    // E.g. integrate with dynamic classes. In shadow case specifically, we have
+    // to wait for stubbing to complete, which may take awhile due to importNode.
+    setTimeout(() => {
+      hostElement.style.visibility = 'visible';
+    }, 50);
+
+    dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
+    return shadowRoot.AMP;
   }
 
-  // Document is ready.
-  shadowDocReady(ampdoc);
 
-  // TODO(dvoytenko): find a better and more stable way to make content visible.
-  // E.g. integrate with dynamic classes. In shadow case specifically, we have
-  // to wait for stubbing to complete, which may take awhile due to importNode.
-  global.setTimeout(function() {
-    hostElement.style.visibility = 'visible';
-  }, 50);
+  /**
+   * Processes the contents of the shadow document's head.
+   * @param {!ShadowRoot} shadowRoot
+   * @param {!Document} doc
+   * @return {!Array<string>}
+   * @private
+   */
+  mergeShadowHead_(shadowRoot, doc) {
+    const extensionIds = [];
+    if (doc.head) {
+      const parentLinks = {};
+      childElementsByTag(dev().assertElement(this.win.document.head), 'link')
+          .forEach(link => {
+            const href = link.getAttribute('href');
+            if (href) {
+              parentLinks[href] = true;
+            }
+          });
 
-  dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
-  return shadowRoot.AMP;
-}
-
-
-/**
- * Processes the contents of the shadow document's head.
- * @param {!Window} global
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {!ShadowRoot} shadowRoot
- * @param {!Document} doc
- * @return {!Array<string>}
- */
-function mergeShadowHead(global, extensions, shadowRoot, doc) {
-  const extensionIds = [];
-  if (doc.head) {
-    const parentLinks = {};
-    childElementsByTag(dev().assertElement(global.document.head), 'link')
-        .forEach(link => {
-          const href = link.getAttribute('href');
-          if (href) {
-            parentLinks[href] = true;
-          }
-        });
-
-    for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
-      const tagName = n.tagName;
-      const name = n.getAttribute('name');
-      const rel = n.getAttribute('rel');
-      if (n.tagName == 'TITLE') {
-        shadowRoot.AMP.title = n.textContent;
-        dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
-      } else if (tagName == 'META' && n.hasAttribute('charset')) {
-        // Ignore.
-      } else if (tagName == 'META' && name == 'viewport') {
-        // Ignore.
-      } else if (tagName == 'META') {
-        // TODO(dvoytenko): copy other meta tags.
-        dev().warn(TAG, 'meta ignored: ', n);
-      } else if (tagName == 'LINK' && rel == 'canonical') {
-        shadowRoot.AMP.canonicalUrl = n.getAttribute('href');
-        dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
-      } else if (tagName == 'LINK' && rel == 'stylesheet') {
-        // This must be a font definition: no other stylesheets are allowed.
-        const href = n.getAttribute('href');
-        if (parentLinks[href]) {
-          dev().fine(TAG, '- stylesheet already included: ', href);
-        } else {
-          parentLinks[href] = true;
-          const el = global.document.createElement('link');
-          el.setAttribute('rel', 'stylesheet');
-          el.setAttribute('type', 'text/css');
-          el.setAttribute('href', href);
-          global.document.head.appendChild(el);
-          dev().fine(TAG, '- import font to parent: ', href, el);
-        }
-      } else if (n.tagName == 'STYLE') {
-        if (n.hasAttribute('amp-boilerplate')) {
+      for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
+        const tagName = n.tagName;
+        const name = n.getAttribute('name');
+        const rel = n.getAttribute('rel');
+        if (n.tagName == 'TITLE') {
+          shadowRoot.AMP.title = n.textContent;
+          dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
+        } else if (tagName == 'META' && n.hasAttribute('charset')) {
           // Ignore.
-          dev().fine(TAG, '- ignore boilerplate style: ', n);
-        } else {
-          installStylesForShadowRoot(shadowRoot, n.textContent,
-              /* isRuntimeCss */ false, 'amp-custom');
-          dev().fine(TAG, '- import style: ', n);
-        }
-      } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
-        dev().fine(TAG, '- src script: ', n);
-        const src = n.getAttribute('src');
-        const isRuntime = src.indexOf('/amp.js') != -1 ||
-            src.indexOf('/v0.js') != -1;
-        const customElement = n.getAttribute('custom-element');
-        const customTemplate = n.getAttribute('custom-template');
-        if (isRuntime) {
-          dev().fine(TAG, '- ignore runtime script: ', src);
-        } else if (customElement || customTemplate) {
-          // This is an extension.
-          extensions.loadExtension(customElement || customTemplate);
-          dev().fine(
-              TAG, '- load extension: ', customElement || customTemplate);
-          if (customElement) {
-            extensionIds.push(customElement);
+        } else if (tagName == 'META' && name == 'viewport') {
+          // Ignore.
+        } else if (tagName == 'META') {
+          // TODO(dvoytenko): copy other meta tags.
+          dev().warn(TAG, 'meta ignored: ', n);
+        } else if (tagName == 'LINK' && rel == 'canonical') {
+          shadowRoot.AMP.canonicalUrl = n.getAttribute('href');
+          dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
+        } else if (tagName == 'LINK' && rel == 'stylesheet') {
+          // This must be a font definition: no other stylesheets are allowed.
+          /** @const {string} */
+          const href = n.getAttribute('href');
+          if (parentLinks[href]) {
+            dev().fine(TAG, '- stylesheet already included: ', href);
+          } else {
+            parentLinks[href] = true;
+            const el = this.win.document.createElement('link');
+            el.setAttribute('rel', 'stylesheet');
+            el.setAttribute('type', 'text/css');
+            el.setAttribute('href', href);
+            this.win.document.head.appendChild(el);
+            dev().fine(TAG, '- import font to parent: ', href, el);
           }
-        } else if (!n.hasAttribute('data-amp-report-test')) {
-          user().error(TAG, '- unknown script: ', n, src);
-        }
-      } else if (n.tagName == 'SCRIPT') {
-        // Non-src version of script.
-        const type = n.getAttribute('type') || 'application/javascript';
-        if (type.indexOf('javascript') == -1) {
-          shadowRoot.appendChild(global.document.importNode(n, true));
-          dev().fine(TAG, '- non-src script: ', n);
+        } else if (n.tagName == 'STYLE') {
+          if (n.hasAttribute('amp-boilerplate')) {
+            // Ignore.
+            dev().fine(TAG, '- ignore boilerplate style: ', n);
+          } else {
+            installStylesForShadowRoot(shadowRoot, n.textContent,
+                /* isRuntimeCss */ false, 'amp-custom');
+            dev().fine(TAG, '- import style: ', n);
+          }
+        } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
+          dev().fine(TAG, '- src script: ', n);
+          const src = n.getAttribute('src');
+          const isRuntime = src.indexOf('/amp.js') != -1 ||
+              src.indexOf('/v0.js') != -1;
+          const customElement = n.getAttribute('custom-element');
+          const customTemplate = n.getAttribute('custom-template');
+          if (isRuntime) {
+            dev().fine(TAG, '- ignore runtime script: ', src);
+          } else if (customElement || customTemplate) {
+            // This is an extension.
+            this.extensions_.loadExtension(customElement || customTemplate);
+            dev().fine(
+                TAG, '- load extension: ', customElement || customTemplate);
+            if (customElement) {
+              extensionIds.push(customElement);
+            }
+          } else if (!n.hasAttribute('data-amp-report-test')) {
+            user().error(TAG, '- unknown script: ', n, src);
+          }
+        } else if (n.tagName == 'SCRIPT') {
+          // Non-src version of script.
+          const type = n.getAttribute('type') || 'application/javascript';
+          if (type.indexOf('javascript') == -1) {
+            shadowRoot.appendChild(this.win.document.importNode(n, true));
+            dev().fine(TAG, '- non-src script: ', n);
+          } else {
+            user().error(TAG, '- unallowed inline javascript: ', n);
+          }
+        } else if (n.tagName == 'NOSCRIPT') {
+          // Ignore.
         } else {
-          user().error(TAG, '- unallowed inline javascript: ', n);
+          user().error(TAG, '- UNKNOWN head element:', n);
         }
-      } else if (n.tagName == 'NOSCRIPT') {
-        // Ignore.
-      } else {
-        user().error(TAG, '- UNKNOWN head element:', n);
       }
     }
+    return extensionIds;
   }
-  return extensionIds;
 }
 
 
@@ -672,7 +693,8 @@ function emptyService() {
  */
 export function registerForUnitTest(win) {
   for (const key in elementsForTesting) {
-    const element = elementsForTesting[key];
+    let element = null;
+    element = elementsForTesting[key];
     if (element.css) {
       installStyles(win.document, element.css, () => {
         registerElement(win, element.name, element.implementationClass);

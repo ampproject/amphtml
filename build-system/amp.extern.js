@@ -92,8 +92,6 @@ var Cid = function() {};
 /** @constructor */
 var Activity = function() {};
 
-
-
 // data
 var data;
 data.tweetid;
@@ -165,7 +163,7 @@ var Cid;
 Cid.prototype.get = function(
     externalCidScope, consent, opt_persistenceConsent) {}
 
-var AMP;
+var AMP = {};
 window.AMP;
 // Externed explicitly because we do not export Class shaped names
 // by default.

@@ -460,10 +460,14 @@ export class Resource {
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
     let distance;
-    // If outside of viewport's x-axis, element is not in viewport.
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
-      return false;
+      // If outside of viewport's x-axis, element is not in viewport.
+      // The exception is for owned resources, since they only attempt to
+      // render outside viewport when the owner has explicitly allowed it.
+      if (!this.hasOwner()) {
+        return false;
+      }
     }
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
@@ -568,8 +572,10 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
-    this.loadPromiseResolve_();
-    this.loadPromiseResolve_ = null;
+    if (this.loadPromiseResolve_) {
+      this.loadPromiseResolve_();
+      this.loadPromiseResolve_ = null;
+    }
     this.layoutPromise_ = null;
     this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :

@@ -30,6 +30,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
+      'backgroundState': 'BACKGROUND_STATE',
       'browserLanguage': 'BROWSER_LANGUAGE',
       'canonicalHost': 'CANONICAL_HOST',
       'canonicalPath': 'CANONICAL_PATH',
@@ -787,6 +788,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'requests': {
       'host': 'https://api.segment.io/v1/pixel',
       'base': '?writeKey=${writeKey}' +
+        '&context.library.name=amp' +
         '&anonymousId=${anonymousId}' +
         '&context.locale=${browserLanguage}' +
         '&context.page.path=${canonicalPath}' +

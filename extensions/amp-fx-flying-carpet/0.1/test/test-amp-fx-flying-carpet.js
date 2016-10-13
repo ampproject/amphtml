@@ -44,7 +44,11 @@ describe('amp-fx-flying-carpet', () => {
       iframe = i;
       toggleExperiment(iframe.win, 'amp-fx-flying-carpet', true);
 
-      iframe.doc.body.style.height = '400vh';
+      const bodyResizer = iframe.doc.createElement('div');
+      bodyResizer.style.height = '400vh';
+      bodyResizer.style.width = '1px';
+      iframe.doc.body.appendChild(bodyResizer);
+
       iframe.doc.body.style.position = 'relative';
       viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
