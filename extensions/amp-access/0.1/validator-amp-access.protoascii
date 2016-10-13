@@ -36,7 +36,7 @@ tags: {  # amp-access
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -62,7 +62,7 @@ tags: {  # amp-access (json)
   attrs: {
     name: "type"
     mandatory: true
-    value: "application/json"
+    value_casei: "application/json"
   }
   # TODO(gregable): Validate the cdata contents of this script tag.
   cdata: {

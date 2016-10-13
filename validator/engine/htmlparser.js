@@ -864,7 +864,7 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
            // An unquoted value that is not an attribute name.
            // We know it is not an attribute name because the previous
            // zero-width match would've eliminated that possibility.
-           '|[^>\"\'\\s]*' +
+           '|[^>\\s]*' +
            ')') +
           ')') +
          '?' +

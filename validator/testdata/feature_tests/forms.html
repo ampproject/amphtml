@@ -26,14 +26,17 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 </head>
 <body>
   <!-- Valid form -->
-  <form method="post" action="https://example.com/subscribe" target="_blank">
+  <form method="post" action="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
     <fieldset>
       <label>
         <span>Your name</span>
-        <input type="text" name="name" required>
+        <input id="name" type="text" name="name" required>
+        <span visible-when-invalid="valueMissing" validation-for="name"></span>
       </label>
       <label>
         <span>Your email</span>
@@ -41,6 +44,8 @@
       </label>
       <input type="submit" value="Subscribe">
     </fieldset>
+    <div submit-success><template type="amp-mustache">Success</template></div>
+    <div submit-error><template type="amp-mustache">Error</template></div>
   </form>
   <!-- More valid tags (datalist and optgroup) -->
   <form method="post" action="https://example.com/subscribe" target="_blank">
@@ -97,6 +102,25 @@
     <input type="file" name="file">
     <input type="image" name="image">
     <input type="password" name="password">
+  </form>
+  <!-- Invalid: if validation-for is set on an element, then -->
+  <!-- visible-when-invalid must also be set and vice versa. -->
+  <form action="/foo" target="_blank">
+    <div validation-for="bar"></div>
+    <div visibile-when-invalid="valueMissing"></div>
+  </form>
+  <!-- Invalid: template child missing from submit-success and submit-error,
+       misplaced submit-error -->
+  <form method="post" action="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <input submit-error type="submit" value="Subscribe">
+    <div submit-success></div>
+    <div submit-error></div>
+  </form>
+  <!-- Invalid: submit-success must be a div -->
+  <form method="post" action="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <span submit-success><template type="amp-mustache">Success</template></span>
   </form>
 </body>
 </html>
