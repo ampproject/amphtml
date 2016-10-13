@@ -21,7 +21,7 @@ const validHosts = [
   'https://go.idnes.bbelements.com',
   'https://go.goldbachpoland.bbelements.com',
   'https://go.pol.bbelements.com',
-  'https://go.idmnet.bbelements.com'
+  'https://go.idmnet.bbelements.com',
 ];
 
 /**
