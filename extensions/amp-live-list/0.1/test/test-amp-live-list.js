@@ -15,24 +15,26 @@
  */
 
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
-import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
 describe('amp-live-list', () => {
   let sandbox;
+  let ampdoc;
   let liveList;
   let elem;
   let dftAttrs;
   let itemsSlot;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-live-list', true);
     sandbox = sinon.sandbox.create();
+    ampdoc = new AmpDocSingle(window);
     elem = document.createElement('amp-live-list');
+    elem.getAmpDoc = () => ampdoc;
     const updateSlot = document.createElement('button');
     itemsSlot = document.createElement('div');
     updateSlot.setAttribute('update', '');
@@ -48,7 +50,6 @@ describe('amp-live-list', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-live-list', false);
     sandbox.restore();
   });
 

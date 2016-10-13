@@ -63,7 +63,7 @@ export class Gestures {
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
-   * @param {boolean=} shouldPreventDefault
+   * @param {boolean=} shouldNotPreventDefault
    * @return {!Gestures}
    */
   static get(element, shouldNotPreventDefault = false) {
@@ -133,6 +133,9 @@ export class Gestures {
     this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
     this.element_.addEventListener('touchmove', this.boundOnTouchMove_);
     this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
+
+    /** @private {boolean} */
+    this.passAfterEvent_ = false;
   }
 
   /**
@@ -151,8 +154,8 @@ export class Gestures {
    * gesture handler registered in this method the recognizer is installed
    * and from that point on it participates in the event processing.
    *
-   * @param {function(new:GestureRecognizer<DATA>)} recognizerConstr
-   * @param {function(!Gesture<!DATA>)} handler
+   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @param {function(!Gesture<DATA>)} handler
    * @return {!UnlistenDef}
    * @template DATA
    */
@@ -314,7 +317,7 @@ export class Gestures {
    * this time expires the recognizer should either signal readiness or it
    * will be canceled.
    * @param {!GestureRecognizer} recognizer
-   * @param {number} offset
+   * @param {number} timeLeft
    * @private
    */
   signalPending_(recognizer, timeLeft) {
@@ -395,7 +398,6 @@ export class Gestures {
   /**
    * The pass that decides which recognizers can start emitting and which
    * are canceled.
-   * @param {!Event} event
    * @private
    */
   doPass_() {
@@ -579,7 +581,7 @@ export class GestureRecognizer {
    * The recognizer can call this method to emit the gestures while in the
    * "emitting" state. Recognizer can only call this method if it has
    * previously received the {@link acceptStart} call.
-   * @param {!DATA} data
+   * @param {DATA} data
    * @param {?Event} event
    */
   signalEmit(data, event) {

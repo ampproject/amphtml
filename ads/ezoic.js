@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function ezoic(global, data) {
-  checkData(data, ['slot','targeting','extras']);
+  // TODO: check mandatory fields
+  validateData(data, [], ['slot','targeting','extras']);
   loadScript(global, 'https://g.ezoic.net/ezoic/ampad.js', () => {
     loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
       global.googletag.cmd.push(() => {

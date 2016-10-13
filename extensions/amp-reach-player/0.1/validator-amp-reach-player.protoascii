@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-reach-player
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   mandatory_parent: "HEAD"
   spec_name: "amp-reach-player extension .js script"
@@ -47,6 +49,8 @@ tags: {  # amp-reach-player
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
 }
 tags: {  # <amp-reach-player>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-REACH-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-reach-player extension .js script"

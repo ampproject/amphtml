@@ -21,6 +21,20 @@ import {removeFragment} from '../../../src/url';
 
 class AmpAccordion extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?NodeList} */
+    this.sections_ = null;
+
+    /** @private {?string} */
+    this.id_ = null;
+
+    /** @private {?Object} */
+    this.currentState_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
@@ -28,14 +42,10 @@ class AmpAccordion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const @private {!NodeList} */
     this.sections_ = this.getRealChildren();
 
-    /** @const @private {string} */
     this.id_ = this.getSessionStorageKey_();
 
-    /** @const @private {!Object|undefined} */
-    this.currentState_ = null;
     this.element.setAttribute('role', 'tablist');
 
     // sessionStorage key: special created id for this element, this.id_.
@@ -44,7 +54,7 @@ class AmpAccordion extends AMP.BaseElement {
     if (!this.currentState_) {
       this.currentState_ = Object.create(null);
     }
-    const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
+
     this.sections_.forEach((section, index) => {
       user().assert(
           section.tagName.toLowerCase() == 'section',
@@ -76,7 +86,7 @@ class AmpAccordion extends AMP.BaseElement {
       content.setAttribute(
           'aria-expanded', section.hasAttribute('expanded').toString());
       header.setAttribute('aria-controls', contentId);
-      header.addEventListener('click', boundOnHeaderClick_);
+      header.addEventListener('click', this.onHeaderClick_.bind(this));
     });
   }
 
@@ -98,11 +108,13 @@ class AmpAccordion extends AMP.BaseElement {
    */
   getSessionState_() {
     try {
-      const sessionStr = this.win./*OK*/sessionStorage.getItem(this.id_);
-      return JSON.parse(sessionStr);
+      const sessionStr =
+          this.win./*OK*/sessionStorage.getItem(dev().assertString(this.id_));
+      return /** @type {!Object} */ (
+          JSON.parse(dev().assertString(sessionStr)));
     } catch (e) {
       dev().error(e.message, e.stack);
-      return;
+      return null;
     }
   }
 
@@ -113,7 +125,8 @@ class AmpAccordion extends AMP.BaseElement {
   setSessionState_() {
     const sessionStr = JSON.stringify(this.currentState_);
     try {
-      this.win./*OK*/sessionStorage.setItem(this.id_, sessionStr);
+      this.win./*OK*/sessionStorage.setItem(
+          dev().assertString(this.id_), sessionStr);
     } catch (e) {
       dev().error(e.message, e.stack);
     }
@@ -121,11 +134,12 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Handles accordion headers clicks to expand/collapse its content.
-   * @param {!MouseEvent} event Click event.
+   * @param {!Event} event Click event.
    * @private
    */
   onHeaderClick_(event) {
     event.preventDefault();
+    /** @const {!Element} */
     const section = event.currentTarget.parentNode;
     const sectionComponents_ = section.children;
     const content = sectionComponents_[1];

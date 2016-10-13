@@ -15,17 +15,27 @@
  */
 import {timerFor} from '../../../src/timer';
 
+/**
+ * @abstract
+ */
 export class BaseCarousel extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.prevButton_ = null;
+
+    /** @private {?Element} */
+    this.nextButton_ = null;
+
+    /** @private {boolean} */
+    this.showControls_ = false;
+  }
 
   /** @override */
   buildCallback() {
-    /** @private {!Element} */
-    this.prevButton_;
-
-    /** @private {!Element} */
-    this.nextButton_;
-
-    /** @const @private {boolean} */
     this.showControls_ = this.element.hasAttribute('controls');
 
     if (this.showControls_) {
@@ -89,13 +99,14 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /**
    * Subclasses should override this method to build the UI for the carousel.
+   * @abstract
    */
   buildCarousel() {
     // Subclasses may override.
   }
 
   /**
-   * Subclasses should override this method to configure gestures for carousel.
+   * Subclasses may override this method to configure gestures for carousel.
    */
   setupGestures() {
     // Subclasses may override.

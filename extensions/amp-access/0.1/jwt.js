@@ -21,7 +21,6 @@ import {
 import {stringToBytes} from '../../../src/utils/bytes';
 import {pemToBytes} from '../../../src/utils/pem';
 import {tryParseJson} from '../../../src/json';
-import {xhrFor} from '../../../src/xhr';
 
 
 /**
@@ -54,9 +53,6 @@ export class JwtHelper {
      */
     this.subtle_ = win.crypto &&
         (win.crypto.subtle || win.crypto.webkitSubtle) || null;
-
-    /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(win);
   }
 
   /**
@@ -79,10 +75,10 @@ export class JwtHelper {
   /**
    * Decodes HWT token and verifies its signature.
    * @param {string} encodedToken
-   * @param {string} keyUrl
+   * @param {!Promise<string>} pemPromise
    * @return {!Promise<!JSONObject>}
    */
-  decodeAndVerify(encodedToken, keyUrl) {
+  decodeAndVerify(encodedToken, pemPromise) {
     if (!this.subtle_) {
       throw new Error('Crypto is not supported on this platform');
     }
@@ -94,7 +90,7 @@ export class JwtHelper {
         // TODO(dvoytenko@): Support other RS* algos.
         throw new Error('Only alg=RS256 is supported');
       }
-      return this.loadKey_(keyUrl).then(key => {
+      return this.importKey_(pemPromise).then(key => {
         const sig = base64UrlDecodeToBytes(decoded.sig);
         return this.subtle_.verify(
           /* options */ {name: 'RSASSA-PKCS1-v1_5'},
@@ -138,11 +134,11 @@ export class JwtHelper {
   }
 
   /**
-   * @param {string} keyUrl
+   * @param {!Promise<string>} pemPromise
    * @return {!Promise<!CryptoKey>}
    */
-  loadKey_(keyUrl) {
-    return this.xhr_.fetchText(keyUrl).then(pem => {
+  importKey_(pemPromise) {
+    return pemPromise.then(pem => {
       return this.subtle_.importKey(
         /* format */ 'spki',
         pemToBytes(pem),

@@ -27,7 +27,9 @@
     "assert": false,
     "sinon": true,
     "sandbox": true,
-    "context": false
+    "context": false,
+    "global": false,
+    "describes": true
   },
   "rules": {
     "array-bracket-spacing": [2, "never"],

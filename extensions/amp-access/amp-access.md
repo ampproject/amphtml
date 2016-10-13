@@ -41,7 +41,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/article-access.amp.html">article-access.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-access/">Annotated code example for amp-access</a></td>
   </tr>
 </table>
 
@@ -69,7 +69,7 @@ The solution also allows the Publisher to place in the AMP document  a Login Lin
 
 In its basic form, this solution sends the complete (though obscured) document to the Reader and simply shows/hides restricted sections based on the Authorization response. However, the solution also provides the “server” option, where the restricted sections can be excluded from the initial document delivery and downloaded only after the authorization has been confirmed.
 
-Supporting AMP Access requires Publisher to implement the components described above. Access Content Markup, Authorization endpoint, Pingback endpoint and Login Page are required.
+Supporting AMP Access requires Publisher to implement the components described above. Access Content Markup and Authorization endpoint are required. Pingback endpoint and Login Page are optional.
 
 ### AMP Reader ID
 
@@ -99,6 +99,8 @@ Authorization is an endpoint provided by the publisher and called by AMP Runtime
 
 Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
 
+Pingback optional. It can be disabled by setting `noPingback` configuration property to `true`.
+
 ### Login Page and Login Link
 
 Login Page is implemented and served by the Publisher and called by the AMP Runtime. It is normally shown as a browser dialog.
@@ -126,6 +128,7 @@ The following properties are defined in this configuration:
 --------------  | -------------------- | --------------------------------- |
 | authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint. |
 | pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint. |
+| noPingback    | true/false           | When true, disables pingback. |
 | login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages. |
 | authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails. |
 | authorizationTimeout          | &lt;number&gt;          | Timeout (in milliseconds) after which authorization request is considered as failed. Default is 3000. Values greater than 3000 are allowed only in dev environment. |
@@ -165,7 +168,7 @@ When configuring the URLs for various endpoints, the Publisher can use substitut
 | RANDOM            | A random number. Helpful to avoid browser cache. |
 
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
-```
+```html
 https://pub.com/access?
    rid=READER_ID
   &url=CANONICAL_URL
@@ -179,24 +182,24 @@ response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressi
 
 ### Access Content Markup
 
-Access Content Markup describes which sections are visible or hidden. It is comprised of two AMP attributes: ```amp-access``` and ```amp-access-hide``` that can be placed on any HTML element.
+Access Content Markup describes which sections are visible or hidden. It is comprised of two AMP attributes: `amp-access` and `amp-access-hide` that can be placed on any HTML element.
 
-The ```amp-access``` attribute provides the expression that yields true or false based on the authorization response returned by the Authorization endpoint. The resulting value indicates whether or not the element and its contents are visible.
+The `amp-access` attribute provides the expression that yields true or false based on the authorization response returned by the Authorization endpoint. The resulting value indicates whether or not the element and its contents are visible.
 
-The ```amp-access``` value is a boolean expression defined in a SQL-like language. The grammar is defined in the [Appendix A][1]. It is defined as following:
+The `amp-access` value is a boolean expression defined in a SQL-like language. The grammar is defined in the [Appendix A][1]. It is defined as following:
 ```html
 <div amp-access="expression">...</div>
 ```
 Properties and values refer to the properties and values of the Authorization response returned by the Authorization endpoint. This provides a flexible system to support different access scenarios.
 
-The ```amp-access-hide``` attribute can be used to optimistically hide the element before the Authorization response has been received, which can show it. It provides the semantics of “invisible by default”. The authorization response returned by the Authorization later may rescind this default and make section visible. When ```amp-access-hide``` attribute is omitted, the section will be shown/included by default. The ```amp-access-hide``` attribute can only be used in conjunction with the ```amp-access``` attribute.
+The `amp-access-hide` attribute can be used to optimistically hide the element before the Authorization response has been received, which can show it. It provides the semantics of “invisible by default”. The authorization response returned by the Authorization later may rescind this default and make section visible. When `amp-access-hide` attribute is omitted, the section will be shown/included by default. The `amp-access-hide` attribute can only be used in conjunction with the `amp-access` attribute.
 ```html
 <div amp-access="expression" amp-access-hide>...</div>
 ```
 
 If Authorization request fails, `amp-access` expressions are not evaluated and whether a section is visible or hidden is determined by the presence of the `amp-access-hide` attribute initially provided by the document.
 
-We can extend the set of ```amp-access-*``` attributes as needed to support different obfuscation and rendering needs.
+We can extend the set of `amp-access-*` attributes as needed to support different obfuscation and rendering needs.
 
 If Authorization request fails and the "authorizationFallbackResponse" response is not specified in the documentation, `amp-access` expressions are not evaluated and whether a section is visible or hidden is determined by the presence of the `amp-access-hide` attribute initially provided by the document.
 
@@ -240,20 +243,20 @@ And here’s an example that shows additional content to the premium subscribers
 
 ### Authorization Endpoint
 
-Authorization is configured via ```authorization``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS GET endpoint. See [CORS Origin Security][9] for how this request should be secured.
+Authorization is configured via `authorization` property in the [AMP Access Configuration][8] section. It is a credentialed CORS GET endpoint. See [CORS Origin Security][9] for how this request should be secured.
 
 Authorization can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. Besides URL parameters, the Publisher may use any information naturally delivered via HTTP protocol, such as Reader’s IP address. The inclusion of the `READER_ID` is required.
 
 This endpoint produces the authorization response that can be used in the content markup expressions to show/hide different parts of content.
 
 The request format is:
-```
+```html
 https://publisher.com/amp-access.json?
    rid=READER_ID
   &url=SOURCE_URL
 ```
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
- - The property names have to conform to the restrictions defined by the ```amp-access``` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
+ - The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
  - The property values can only be one of the types: string, number or boolean.
  - The total size of the serialized authorization response cannot exceed 500 bytes.
  - Please ensure that the response does not include any personally identifiable information (PII) or personal data.
@@ -284,8 +287,8 @@ This RPC may be called in the prerendering phase and thus it should not be used 
 Another important consideration is that in some cases AMP runtime may need to call Authorization endpoint multiple times per document impression. This can happen when AMP Runtime believes that the access parameters for the Reader have changed significantly, e.g. after a successful Login Flow.
 
 The authorization response may be used by AMP Runtime and extensions for three different purposes:
- 1. When evaluating ```amp-access``` expressions.
- 2. When evaluating ```<template>``` templates such as ```amp-mustache```.
+ 1. When evaluating `amp-access` expressions.
+ 2. When evaluating `<template>` templates such as `amp-mustache`.
  3. When providing additional variables to pingback and login URLs using `AUTHDATA(field)`.
 
 Authorization endpoint is called by AMP Runtime as a credentialed CORS endpoint. As such, it must implement CORS protocol. It should use CORS Origin and source origin to restrict the access to this service as described in the [CORS Origin Security][9]. This endpoint may use publisher cookies for its needs. For instance, it can associate the binding between the Reader ID and the Publisher’s own user identity. AMP itself does not need to know about this (and prefers not to). Reader more on [AMP Reader ID][2] and [AMP Access and Cookies][11] for more detail.
@@ -304,20 +307,22 @@ In the *server* option, the call to Authorization endpoint is done by Google AMP
 
 ### Pingback Endpoint
 
-Pingback is configured via ```pingback``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS POST endpoint. See [CORS Origin Security][9]” for how this request should be secured.
+Pingback is configured via `pingback` property in the [AMP Access Configuration][8] section. It is a credentialed CORS POST endpoint. See [CORS Origin Security][9]” for how this request should be secured.
+
+Pingback URL is optional. It can be disabled with `"noPingback": true` configuration.
 
 Pingback URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. The inclusion of the `READER_ID` is required.
 
 Pingback does not produce a response - any response is ignored by AMP runtime.
 
-Pingback endpoint is called when the reader has started viewing the document and after the Rser has successfully completed the Login Flow.
+Pingback endpoint is called when the reader has started viewing the document and after the Reader has successfully completed the Login Flow.
 
 The publisher may choose to use the pingback as:
  - One of the main purposes for pingback is to count down meter when it is used.
  - As a credentialed CORS endpoint it may contain publisher cookies. Thus it can be used to map AMP Reader ID to the Publisher’s identity.
 
 The request format is:
-```
+```html
 https://publisher.com/amp-pingback?
    rid=READER_ID
   &url=SOURCE_URL
@@ -328,14 +333,14 @@ https://publisher.com/amp-pingback?
 The URL of the Login Page(s) is configured via the `login` property in the [AMP Access Configuration][8] section.
 
 The configuration can specify either a single Login URL or a map of Login URL indexed by the type of login. An example of a single Login URL:
-```
+```json
 {
   "login": "https://publisher.com/amp-login.html?rid={READER_ID}"
 }
 ```
 
 An example of multiple Login URLs:
-```
+```json
 {
   "login": {
     "signin": "https://publisher.com/signin.html?rid={READER_ID}",
@@ -348,10 +353,10 @@ The URL can take any parameters as defined in the [Access URL Variables][7] sect
 required and if the `RETURN_URL` substitution is not specified, it will be injected automatically with the default query parameter name of
 "return".
 
-Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the “Login Flow” section for more details.
+Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the [Login Flow][14] section for more details.
 
 The request format is:
-```
+```html
 https://publisher.com/amp-login.html?
    rid=READER_ID
   &url=SOURCE_URL
@@ -359,7 +364,7 @@ https://publisher.com/amp-login.html?
 ```
 Notice that the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not
 specified. Once Login Page completes its work, it must redirect back to the specified “Return URL” with the following format:
-```
+```html
 RETURN_URL#success=true|false
 ```
 Notice the use of a URL hash parameter “success”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
@@ -410,6 +415,21 @@ To implement FCF, the Publisher must (1) be able to determine the referring serv
 
 Both steps are covered by the AMP Access spec. The referrer can be injected into the Authorization and Pingback URLs using `DOCUMENT_REFERRER` URL substitution as described in [Access URL Variables][7]. The view counting can be done using Pingback endpoint on the server-side. This is very similar to the metering implementation described in [Metering][12].
 
+## Login Flow
+AMP launches a Login Dialog as a 1st party window or a popup or a tab. Whenever possible, AMP Viewers should attempt to launch Login Dialog in the browser context so that it can take advantage of the top-level browser APIs.
+
+The login flow is started by the AMP Runtime when the Reader activates the Login Link and, descriptively, it follows the following steps:
+ 1. The Login Dialog (1st party window) is opened by AMP Runtime or Viewer for the specified Login URL. The URL contains an extra "Return URL" URL query parameter (`&return=RETURN_URL`). A number of other parameters can be also expanded into the URL, such as the Reader ID. For more details see [Login Page][15] section.
+ 2. Publisher displays a free-form Login page.
+ 3. The Reader follows login steps, such as entering username/password or using a social login.
+ 4. The Reader submits login. The publisher completes authentication, set cookies and finally redirects the Reader to the previously requested "Return URL". The redirect contains a URL hash parameter `success` that can be either `true` or `false`.
+ 5. The Login Dialog follows redirect to the "Return URL".
+ 6. AMP Runtime re-authorizes the document.
+
+Only steps 2-5 require handling by the Publisher: the Publisher only provides their own Login Page and ensures correct redirect once it completes. There are no special constraints imposed on the login page, other than it should function well as a dialog.
+
+As usual, the Reader ID should be included in the call to Login Page and can be used by the Publisher for identity mapping. As a 1st party window, the Publisher will also receive their cookies and will be able to set them. If it turns out that the Reader is already signed-in on the Publisher's side, it is recommended that the publisher immediately redirect back to the "Return URL" with the `success=true` response.
+
 ## AMP Glossary
  - **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by Google AMP Cache.
  - **AMP Validator** - the computer program that performs a static analysis of an HTML document and returns success or failure depending on whether the document conforms to the AMP format.
@@ -430,13 +450,14 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
 - Feb 19: Corrected samples to remove `{}` from URL var substitutions.
 - Mar 3: Resend pingback after login (v0.5).
+- Sept 2: "noPingback" configuration property and optional pingback.
 
 ## Appendix A: “amp-access” expression grammar
 
 The most recent BNF grammar is available in [access-expr-impl.jison](./0.1/access-expr-impl.jison) file.
 
 The key excerpt of this grammar is as following:
-```
+```javascript
 search_condition:
     search_condition OR search_condition
   | search_condition AND search_condition
@@ -464,7 +485,7 @@ field_ref: field_ref '.' field_name | field_name
 literal: STRING | NUMERIC | TRUE | FALSE | NULL
 ```
 
-Notice that ```amp-access``` expressions are evaluated by the AMP Runtime and Google AMP Cache. This is NOT part of the specification that the Publisher needs to implement. It is here simply for informational properties.
+Notice that `amp-access` expressions are evaluated by the AMP Runtime and Google AMP Cache. This is NOT part of the specification that the Publisher needs to implement. It is here simply for informational properties.
 
 ## Detailed Discussion
 
@@ -483,6 +504,8 @@ This section will cover a detailed explanation of the design underlying the amp-
 [11]: #amp-access-and-cookies
 [12]: #metering
 [13]: #first-click-free
+[14]: #login-flow
+[15]: #login-page
 
 ## Validation
 

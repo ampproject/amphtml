@@ -52,8 +52,7 @@ describe('amp-instagram', () => {
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
     expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
-    expect(iframe.getAttribute('width')).to.equal('111');
-    expect(iframe.getAttribute('height')).to.equal('222');
+    expect(iframe.className).to.match(/-amp-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
@@ -61,6 +60,13 @@ describe('amp-instagram', () => {
     return getIns('fBwFP').then(ins => {
       testIframe(ins.querySelector('iframe'));
       testImage(ins.querySelector('amp-img'));
+    });
+  });
+
+  it('sets noprerender on amp-img', () => {
+    return getIns('fBwFP').then(ins => {
+      expect(ins.querySelector('amp-img').hasAttribute('noprerender'))
+          .to.be.true;
     });
   });
 

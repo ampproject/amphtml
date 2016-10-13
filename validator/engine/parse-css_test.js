@@ -23,8 +23,9 @@
 goog.provide('parse_css.ParseCssTest');
 
 goog.require('goog.asserts');
-goog.require('json_testutil.defaultCmpFn');
+goog.require('json_testutil.makeJsonKeyCmpFn');
 goog.require('json_testutil.renderJSON');
+goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.SelectorVisitor');
 goog.require('parse_css.TokenStream');
 goog.require('parse_css.extractUrls');
@@ -39,11 +40,8 @@ goog.require('parse_css.tokenize');
 goog.require('parse_css.traverseSelectors');
 
 /**
- * A strict comparison between two values.
- * Note: Unfortunately assert.strictEqual has some drawbacks, including that
- * it truncates the provided arguments (and it's not configurable) and
- * with the Closure compiler, it requires a message argument to which
- * we'd always have to pass undefined. Too messy, so we roll our own.
+ * A strict comparison between two values that does not truncate the
+ * error messages and works well with the closure compiler.
  * @param {*} expected
  * @param {*} saw
  */
@@ -52,47 +50,15 @@ function assertStrictEqual(expected, saw) {
 }
 
 /**
- * Simple function which lets us sort the keys in json output from the parser
- * in a way that makes the most logical sense for viewing in the output.
+ * For emitting json output with keys in logical order for the CSS parser's AST.
  * @param {string} a
  * @param {string} b
  * @return {number}
  */
-function jsonKeyCmp(a, b) {
-  // Lower numbers will be displayed first in the rendered json output.
-  const keyPriority = {
-    'line': 0,
-    'col': 1,
-    'tokenType': 2,
-    'name': 3,
-    'prelude': 4,
-    'declarations': 5,
-    'rules': 6,
-    'errorType': 7,
-    'msg': 8,
-    'type': 9,
-    'value': 10,
-    'repr': 11,
-    'unit': 12,
-    'eof': 13
-  };
-
-  // Handle cases where only only one of the two keys is recognized.
-  // Unrecognized keys go last.
-  if (keyPriority.hasOwnProperty(a) && !keyPriority.hasOwnProperty(b)) {
-    return -1;
-  }
-  if (keyPriority.hasOwnProperty(b) && !keyPriority.hasOwnProperty(a)) {
-    return 1;
-  }
-
-  // Handle case where both keys are recognized.
-  if (keyPriority.hasOwnProperty(b) && keyPriority.hasOwnProperty(a)) {
-    return keyPriority[a] - keyPriority[b];
-  }
-
-  return json_testutil.defaultCmpFn(a, b);
-}
+const jsonKeyCmp = json_testutil.makeJsonKeyCmpFn([
+  'line', 'col', 'tokenType', 'name', 'prelude', 'declarations', 'rules',
+  'errorType', 'msg', 'type', 'value', 'repr', 'unit', 'eof'
+]);
 
 /**
  * @param {!Object} left
@@ -243,6 +209,63 @@ describe('tokenize', () => {
   });
 });
 
+/**
+ * @param {parse_css.Rule} rule
+ * @return {string}
+ */
+function getPos(rule) {
+  return '(' + rule.line + ',' + rule.col + ')';
+}
+
+/** @private */
+class LogRulePositions extends parse_css.RuleVisitor {
+  constructor() {
+    super();
+    /** @type {!Array<string>} */
+    this.out = [];
+  }
+
+  /** @inheritDoc */
+  visitStylesheet(stylesheet) {
+    this.out.push('Stylesheet ', getPos(stylesheet), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveStylesheet(stylesheet) {
+    this.out.push('Leaving Stylesheet ', getPos(stylesheet), '\n');
+  }
+
+  /** @inheritDoc */
+  visitAtRule(atRule) {
+    this.out.push('AtRule name=', atRule.name, ' ', getPos(atRule), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveAtRule(atRule) {
+    this.out.push('Leaving AtRule name=', atRule.name, ' ', getPos(atRule), '\n');
+  }
+
+  /** @inheritDoc */
+  visitQualifiedRule(qualifiedRule) {
+    this.out.push('QualifiedRule ', getPos(qualifiedRule), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveQualifiedRule(qualifiedRule) {
+    this.out.push('Leaving QualifiedRule ', getPos(qualifiedRule), '\n');
+  }
+
+  /** @inheritDoc */
+  visitDeclaration(declaration) {
+    this.out.push('Declaration ', getPos(declaration), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveDeclaration(declaration) {
+    this.out.push('Leaving Declaration ', getPos(declaration), '\n');
+  }
+}
+
 describe('parseAStylesheet', () => {
   it('parses rgb values', () => {
     const css = 'foo { bar: rgb(255, 0, 127); }';
@@ -312,6 +335,17 @@ describe('parseAStylesheet', () => {
           'eof': {'line': 1, 'col': 30, 'tokenType': 'EOF_TOKEN'}
         },
         sheet);
+    // Some assertions about the line/cols of nodes, which we use to test the
+    // visitor pattern implementation.
+    const visitor = new LogRulePositions();
+    sheet.accept(visitor);
+    assertStrictEqual(
+        'Stylesheet (1,0)\n' +
+        'QualifiedRule (1,0)\n' +
+        'Declaration (1,6)\n' +
+        'Leaving Declaration (1,6)\n' +
+        'Leaving QualifiedRule (1,0)\n' +
+        'Leaving Stylesheet (1,0)\n', visitor.out.join(''));
   });
 
   it('parses a hash reference', () => {

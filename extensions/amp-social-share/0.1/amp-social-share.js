@@ -20,7 +20,7 @@ import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {platformFor} from '../../../src/platform';
 
@@ -38,6 +38,9 @@ class AmpSocialShare extends AMP.BaseElement {
   buildCallback() {
     const typeAttr = user().assert(this.element.getAttribute('type'),
         'The type attribute is required. %s', this.element);
+    user().assert(!/\s/.test(typeAttr),
+        'Space characters are not allowed in type attribute value. %s',
+        this.element);
     const typeConfig = getSocialConfig(typeAttr) || {};
 
     /** @private @const {string} */
@@ -50,7 +53,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.params_ = Object.assign({}, typeConfig.defaultParams,
         getDataParamsFromAttributes(this.element));
 
-    /** @private @const {!../../../src/platform.Platform} */
+    /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = platformFor(this.win);
 
     /** @private {string} */
@@ -60,13 +63,13 @@ class AmpSocialShare extends AMP.BaseElement {
     this.target_ = null;
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = urlReplacementsFor(this.win);
-    urlReplacements.expand(hrefWithVars).then(href => {
+    const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
+    urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
       // mailto: protocol breaks when opened in _blank on iOS Safari.
       const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && isMailTo) ? '_self' : '_blank';
+      this.target_ = (isIosSafari && isMailTo) ? '_top' : '_blank';
     });
 
     this.element.setAttribute('role', 'link');

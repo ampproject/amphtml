@@ -22,26 +22,32 @@ import {
   FetchResponse,
   assertSuccess,
 } from '../../src/service/xhr-impl';
+import {getCookie} from '../../src/cookies';
+
 
 describe('XHR', function() {
   let sandbox;
   let requests;
+  const location = {href: 'https://acme.com/path'};
+  const nativeWin = {
+    location,
+    fetch: window.fetch,
+  };
+
+  const polyfillWin = {
+    location,
+    fetch: fetchPolyfill,
+  };
 
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
   const scenarios = [
     {
-      xhr: installXhrService({
-        fetch: window.fetch,
-        location: {href: 'https://acme.com/path'},
-      }),
+      xhr: installXhrService(nativeWin),
       desc: 'Native',
     }, {
-      xhr: installXhrService({
-        fetch: fetchPolyfill,
-        location: {href: 'https://acme.com/path'},
-      }),
+      xhr: installXhrService(polyfillWin),
       desc: 'Polyfill',
     },
   ];
@@ -65,6 +71,7 @@ describe('XHR', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    location.href = 'https://acme.com/path';
   });
 
   afterEach(() => {
@@ -222,6 +229,40 @@ describe('XHR', function() {
       });
     }
 
+    describe('AMP-Same-Origin', () => {
+      it('should not be set for cross origin requests', () => {
+        const init = {};
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
+      });
+
+      it('should be set for all same origin GET requests', () => {
+        const init = {};
+        location.href = '/path';
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+
+      it('should be set for all same origin POST requests', () => {
+        const init = {method: 'post', body: {}};
+        location.href = '/path';
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+
+      it('should check origin not source origin', () => {
+        let init = {method: 'post', body: {}};
+        location.href = 'https://cdn.ampproject.org/c/s/example.com/hello/path';
+        xhr.fetchJson('https://example.com/what/ever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
+
+        init = {method: 'post', body: {}};
+        location.href = 'https://example.com/hello/path';
+        xhr.fetchJson('https://example.com/what/ever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+    });
+
     describe(test.desc, () => {
 
       describe('assertSuccess', () => {
@@ -280,15 +321,15 @@ describe('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
-        return xhr.fetchJson('https://httpbin.org/get?k=v1').then(res => {
+        return xhr.fetchJson('http://localhost:31862/get?k=v1').then(res => {
           expect(res).to.exist;
           expect(res['args']['k']).to.equal('v1');
         });
       });
 
       it('should redirect fetch', () => {
-        const url = 'https://httpbin.org/redirect-to?url=' + encodeURIComponent(
-            'https://httpbin.org/get?k=v2');
+        const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
+            'http://localhost:31862/get?k=v2');
         return xhr.fetchJson(url).then(res => {
           expect(res).to.exist;
           expect(res['args']['k']).to.equal('v2');
@@ -296,7 +337,7 @@ describe('XHR', function() {
       });
 
       it('should fail fetch for 400-error', () => {
-        const url = 'https://httpbin.org/status/404';
+        const url = 'http://localhost:31862/status/404';
         return xhr.fetchJson(url).then(unusedRes => {
           return 'SUCCESS';
         }, error => {
@@ -307,7 +348,7 @@ describe('XHR', function() {
       });
 
       it('should fail fetch for 500-error', () => {
-        const url = 'https://httpbin.org/status/500';
+        const url = 'http://localhost:31862/status/500';
         return xhr.fetchJson(url).then(unusedRes => {
           return 'SUCCESS';
         }, error => {
@@ -320,19 +361,19 @@ describe('XHR', function() {
 
       it('should NOT succeed CORS setting cookies without credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'https://httpbin.org/cookies/set?' + cookieName + '=v1';
+        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
         return xhr.fetchJson(url).then(res => {
           expect(res).to.exist;
-          expect(res['cookies'][cookieName]).to.be.undefined;
+          expect(getCookie(window, cookieName)).to.be.null;
         });
       });
 
       it('should succeed CORS setting cookies with credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'https://httpbin.org/cookies/set?' + cookieName + '=v1';
+        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
         return xhr.fetchJson(url, {credentials: 'include'}).then(res => {
           expect(res).to.exist;
-          expect(res['cookies'][cookieName]).to.equal('v1');
+          expect(getCookie(window, cookieName)).to.equal('v1');
         });
       });
 
@@ -343,7 +384,7 @@ describe('XHR', function() {
       });
 
       it('should expose HTTP headers', () => {
-        const url = 'https://httpbin.org/response-headers?' +
+        const url = 'http://localhost:31862/response-headers?' +
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
         return xhr.fetchAmpCors_(url).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
@@ -476,7 +517,7 @@ describe('XHR', function() {
   });
 
   scenarios.forEach(test => {
-    const url = 'https://httpbin.org/post';
+    const url = 'http://localhost:31862/post';
 
     describe(test.desc + ' POST', () => {
       const xhr = test.xhr;

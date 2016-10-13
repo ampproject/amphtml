@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
+import {installPlatformService} from '../../src/service/platform-impl';
 import * as sinon from 'sinon';
 
 
 describe('FixedLayer', () => {
   let sandbox;
   let documentApi;
+  let ampdoc;
   let vsyncApi;
   let vsyncTasks;
   let docBody, docElem;
@@ -133,6 +136,9 @@ describe('FixedLayer', () => {
       documentElement: docElem,
       body: docBody,
     };
+    documentApi.defaultView.document = documentApi;
+    ampdoc = new AmpDocSingle(documentApi.defaultView);
+    installPlatformService(documentApi.defaultView);
 
     vsyncTasks = [];
     vsyncApi = {
@@ -256,7 +262,7 @@ describe('FixedLayer', () => {
     let fixedLayer;
 
     beforeEach(() => {
-      fixedLayer = new FixedLayer(documentApi, vsyncApi,
+      fixedLayer = new FixedLayer(ampdoc, vsyncApi,
           /* paddingTop */ 11, /* transfer */ false);
       fixedLayer.setup();
     });
@@ -514,7 +520,7 @@ describe('FixedLayer', () => {
     let fixedLayer;
 
     beforeEach(() => {
-      fixedLayer = new FixedLayer(documentApi, vsyncApi,
+      fixedLayer = new FixedLayer(ampdoc, vsyncApi,
           /* paddingTop */ 11, /* transfer */ true);
       fixedLayer.setup();
     });

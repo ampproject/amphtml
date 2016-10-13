@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   Storage,
   Store,
   LocalStorageBinding,
   ViewerStorageBinding,
-} from '../../extensions/amp-analytics/0.1/storage-impl';
+} from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
 import * as sinon from 'sinon';
 
@@ -32,6 +33,7 @@ describe('Storage', () => {
   let viewer;
   let viewerMock;
   let windowApi;
+  let ampdoc;
   let viewerBroadcastHandler;
 
   beforeEach(() => {
@@ -50,6 +52,7 @@ describe('Storage', () => {
       document: {},
       location: 'https://acme.com/document1',
     };
+    ampdoc = new AmpDocSingle(windowApi);
 
     binding = {
       loadBlob: () => {},
@@ -57,7 +60,7 @@ describe('Storage', () => {
     };
     bindingMock = sandbox.mock(binding);
 
-    storage = new Storage(windowApi, viewer, binding);
+    storage = new Storage(ampdoc, viewer, binding);
     storage.start_();
   });
 

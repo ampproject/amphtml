@@ -15,17 +15,20 @@
  */
 
 import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../testing/iframe';
+import {createIframePromise} from '../../testing/iframe';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
+import {installPerformanceService,} from
+    '../../src/service/performance-impl';
 
 
 describe('test-element-stub', () => {
 
   let iframe;
+
+  beforeEach(() => {
+    installPerformanceService(window);
+  });
 
   afterEach(() => {
     resetLoadingCheckForTests();
@@ -33,12 +36,11 @@ describe('test-element-stub', () => {
 
   function getElementStubIframe(name) {
     return createIframePromise().then(f => {
-      doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
       const testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
       testElement.setAttribute('height', '250');
-      testElement.setAttribute('type', 'a9');
+      testElement.setAttribute('type', '_ping_');
       testElement.setAttribute('data-aax_size', '300*250');
       testElement.setAttribute('data-aax_pubname', 'abc123');
       testElement.setAttribute('data-aax_src', '302');
@@ -46,7 +48,7 @@ describe('test-element-stub', () => {
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', 'blah');
       iframe.doc.head.appendChild(link);
-      return iframe.addElement(testElement);
+      iframe.doc.getElementById('parent').appendChild(testElement);
     });
   }
 

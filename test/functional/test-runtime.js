@@ -23,10 +23,13 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
-import * as styles from '../../src/styles';
+import * as styles from '../../src/style-installer';
+import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
@@ -48,8 +51,9 @@ describe('runtime', () => {
     };
     ampdocServiceMock = sandbox.mock(ampdocService);
     win = {
+      localStorage: {},
       AMP: [],
-      location: {},
+      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
       addEventListener: () => {},
       document: window.document,
       history: {},
@@ -61,6 +65,8 @@ describe('runtime', () => {
         ampdoc: {obj: ampdocService},
       },
     };
+    ampdocService.getAmpDoc = () => new AmpDocSingle(win);
+    installPlatformService(win);
     errorStub = sandbox.stub(dev(), 'error');
   });
 
@@ -236,11 +242,11 @@ describe('runtime', () => {
     expect(progress).to.equal('13');
 
     expect(errorStub.callCount).to.equal(1);
-    expect(errorStub.calledWith('runtime',
+    expect(errorStub).to.be.calledWith('runtime',
         sinon.match(() => true),
         sinon.match(arg => {
           return !!arg.message.match(/extension error/);
-        }))).to.be.true;
+        }));
   });
 
   describe('single-mode', () => {
@@ -317,6 +323,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       expect(installStylesStub.callCount).to.equal(1);
       expect(installStylesStub.calledWithExactly(
@@ -358,6 +365,9 @@ describe('runtime', () => {
 
       // Already installed.
       expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
+
+      // The main top-level service is also pinged to unblock render.
+      return getServicePromise(win, 'service1');
     });
 
     it('should register doc-service factory and install it immediately', () => {
@@ -410,7 +420,7 @@ describe('runtime', () => {
 
     it('should register element without CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({
@@ -444,7 +454,7 @@ describe('runtime', () => {
 
     it('should register element with CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({
@@ -460,6 +470,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       // Register is called immediately as well.
       expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))
@@ -499,7 +510,7 @@ describe('runtime', () => {
       expect(extHolder.docFactories).to.have.length(1);
 
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(win, shadowRoot);
+      const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
 
       // Not installed.
       expect(getServicePromiseOrNullForDoc(ampdoc, 'service1')).to.be.null;
@@ -524,6 +535,8 @@ describe('runtime', () => {
       clock = sandbox.useFakeTimers();
       adoptShadowMode(win);
       win.setTimeout = window.setTimeout;
+      win.addEventListener = function() {};
+      win.removeEventListener = function() {};
       extensions = ext.installExtensionsService(win);
       extensionsMock = sandbox.mock(extensions);
       hostElement = document.createElement('div');
@@ -531,10 +544,12 @@ describe('runtime', () => {
       importDoc.head = document.createElement('dochead');
       importDoc.body = document.createElement('docbody');
       importDoc.body.appendChild(document.createElement('child'));
-      ampdoc = new AmpDocShadow(win, document.createElement('div'));
+      ampdoc = new AmpDocShadow(win, docUrl, document.createElement('div'));
 
       ampdocServiceMock.expects('installShadowDoc_')
-          .withExactArgs(sinon.match(arg => arg == hostElement.shadowRoot))
+          .withExactArgs(
+              docUrl,
+              sinon.match(arg => arg == hostElement.shadowRoot))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -566,11 +581,12 @@ describe('runtime', () => {
       // Doc services have been installed.
       expect(ampdoc.services.action).to.exist;
       expect(ampdoc.services.action.obj).to.exist;
+      expect(ampdoc.services.viewer).to.exist;
+      expect(ampdoc.services.viewer.obj).to.exist;
 
-      // Single-doc bidings should not be installed.
-      // TODO(dvoytenko): create doc-level services.
-      expect(ret.viewer).to.not.exist;
-      expect(ret.viewport).to.not.exist;
+      // Single-doc bidings have been installed.
+      expect(ret.viewer).to.exist;
+      expect(ret.viewer.ampdoc).to.equal(ampdoc);
     });
 
     it('should install doc services', () => {
@@ -599,7 +615,20 @@ describe('runtime', () => {
       });
     });
 
-    it('should update visibility', () => {
+    it('should pass init parameters to viewer', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'test1': '12',
+      });
+
+      expect(amp.viewer).to.equal(getServiceForDoc(ampdoc, 'viewer'));
+      expect(amp.viewer.getParam('test1')).to.equal('12');
+    });
+
+    it('should update host visibility', () => {
       if (!window.Element.prototype.createShadowRoot) {
         return;
       }
@@ -611,6 +640,10 @@ describe('runtime', () => {
       // After timeout, it becomes visible again.
       clock.tick(3000);
       expect(hostElement.style.visibility).to.equal('visible');
+
+      return ampdoc.whenReady().then(() => {
+        expect(ampdoc.isReady()).to.be.true;
+      });
     });
 
     it('should import body', () => {
@@ -624,6 +657,7 @@ describe('runtime', () => {
       expect(body).to.have.class('amp-shadow');
       expect(body.style.position).to.equal('relative');
       expect(body.querySelector('child')).to.exist;
+      expect(ampdoc.getBody()).to.exist;
     });
 
     it('should read title element', () => {
@@ -809,6 +843,50 @@ describe('runtime', () => {
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       expect(hostElement.shadowRoot.querySelector('script[data-id="test1"]'))
           .to.not.exist;
+    });
+
+    it('should start as visible by default', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+    });
+
+    it('should start as prerender when requested', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'visibilityState': 'prerender',
+      });
+      expect(amp.viewer.getVisibilityState()).to.equal('prerender');
+    });
+
+    it('should expose visibility method', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.setVisibilityState).to.be.function;
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+
+      amp.setVisibilityState('inactive');
+      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
+    });
+
+    it('should expose close method and dispose services', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(amp.close).to.be.function;
+      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+
+      amp.viewer.dispose = sandbox.spy();
+      amp.close();
+      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
+      expect(amp.viewer.dispose).to.be.calledOnce;
     });
   });
 });

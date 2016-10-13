@@ -192,6 +192,21 @@ describe('alp-handler', () => {
     simpleSuccess();
   });
 
+  it('should perform special navigation if specially asked for', () => {
+    const navigateSpy = sandbox.spy();
+    const opt_navigate = val => {
+      navigateSpy();
+      expect(val).to.equal(
+          'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +
+          'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
+          'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html');
+    };
+    handleClick(event, opt_navigate);
+    expect(event.preventDefault).to.be.calledOnce;
+    expect(open).to.not.be.called;
+    expect(navigateSpy).to.be.calledOnce;
+  });
+
   it('should navigate if trusted is not set.', () => {
     delete event.trusted;
     simpleSuccess();

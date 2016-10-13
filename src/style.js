@@ -37,7 +37,7 @@ export function camelCaseToTitleCase(camelCase) {
  * Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {!CSSStyleDeclaration} style
+ * @param {!CSSStyleDeclaration|!HTMLDocument} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
@@ -56,7 +56,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
  * @export
- * @param {!CSSStyleDeclaration} style
+ * @param {!CSSStyleDeclaration|!HTMLDocument} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
@@ -87,7 +87,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {!Element} element
+ * @param {Element} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units

@@ -1,9 +1,9 @@
 {
   "canary": true,
-  "no-auth-in-prerender": 1,
-  "amp-sticky-ad": 1,
-  "amp-live-list": 1,
   "amp-ios-overflow-x": 1,
-  "expAdsenseA4A": 0.05,
-  "expDoubleclickA4A": 0.05
+  "amp-experiment": 1,
+  "expAdsenseA4A": 1,
+  "expDoubleclickA4A": 1,
+  "a4aProfilingRate": 1,
+  "amp-scrollable-carousel": 1
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, checkData} from '../3p/3p';
+import {writeScript, loadScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 
 /**
@@ -22,7 +22,8 @@ import {doubleclick} from '../ads/google/doubleclick';
  * @param {!Object} data
  */
 export function pulsepoint(global, data) {
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'pid', 'tagid', 'tagtype', 'slot', 'timeout',
   ]);
   if (data.tagtype === 'hb') {
@@ -37,7 +38,10 @@ export function pulsepoint(global, data) {
  * @param {!Object} data
  */
 function tag(global, data) {
-  writeScript(global, 'https://tag.contextweb.com/getjs.aspx?action=VIEWAD&cwpid=' + encodeURIComponent(data.pid) + '&cwtagid=' + encodeURIComponent(data.tagid) + '&cwadformat=' + encodeURIComponent(data.width + 'X' + data.height));
+  writeScript(global, 'https://tag.contextweb.com/getjs.aspx?action=VIEWAD' +
+      '&cwpid=' + encodeURIComponent(data.pid)
+      + '&cwtagid=' + encodeURIComponent(data.tagid)
+      + '&cwadformat=' + encodeURIComponent(data.width + 'X' + data.height));
 }
 
 /**

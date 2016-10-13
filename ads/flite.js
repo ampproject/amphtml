@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
- import {loadScript, checkData} from '../3p/3p';
+ import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
  export function flite(global, data) {
-   checkData(data, ['guid','mixins']);
+  // TODO: check mandatory fields
+   validateData(data, [], ['guid','mixins']);
    const guid = data.guid, o = global, e = encodeURIComponent, x = 0;
    let r = '', m, url, dep = '';
    o.FLITE = o.FLITE || {};

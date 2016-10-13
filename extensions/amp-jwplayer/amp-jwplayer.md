@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-jwplayer"></a> `amp-jwplayer`
+# <a name="amp-jwplayer"></a> `amp-jwplayer`
 
 <table>
   <tr>
@@ -31,15 +31,15 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/jwplayer.amp.html">jwplayer.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-jwplayer/">Annotated code example for amp-jwplayer</a></td>
   </tr>
 </table>
 
-#### Example
+## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
@@ -66,7 +66,7 @@ Example:
 </amp-jwplayer>
 ```
 
-#### Attributes
+## Attributes
 
 **data-player-id**
 

@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-youtube
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-youtube extension .js script"
   mandatory_parent: "HEAD"
@@ -46,9 +48,9 @@ tags: {  # amp-youtube
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
 }
-# amp-youtube either comes with a video-id attribute, or with
-# a data-videoid attribute.
 tags: {  # <amp-youtube>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-YOUTUBE"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-youtube extension .js script"

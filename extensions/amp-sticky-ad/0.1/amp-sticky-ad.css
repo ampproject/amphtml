@@ -20,8 +20,7 @@ amp-sticky-ad {
   bottom: 0 !important;
   left: 0;
   width: 100% !important;
-  z-index: 2;
-  /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
+  z-index: 11;
   max-height: 100px !important;
   box-sizing: border-box;
   background-color: rgba(0, 0, 0, 0.5);
@@ -37,7 +36,7 @@ amp-sticky-ad {
   transform: translateZ(0) !important;
 }
 
-.-amp-sticky-ad-visible {
+amp-sticky-ad[visible] {
   visibility: visible !important;
 }
 
@@ -51,26 +50,40 @@ amp-sticky-ad {
 
 
 .amp-sticky-ad-close-button {
-  visibility: hidden;
   position: absolute;
+  visibility: hidden;
   width: 32px;
   height: 32px;
   top: -32px;
   right: 0;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="#000000" height="24" viewBox="0 0 24 24" width="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23000000%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20width%3D%2224%22%3E%3Cpath%20d%3D%22M19%206.41L17.59%205%2012%2010.59%206.41%205%205%206.41%2010.59%2012%205%2017.59%206.41%2019%2012%2013.41%2017.59%2019%2019%2017.59%2013.41%2012z%22%2F%3E%3Cpath%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E');
   background-size: 26px 26px;
   background-position: center;
   background-color: #fff;
   border: 1px solid #c8c8c8;
 }
 
-.amp-sticky-ad-loaded .amp-sticky-ad-close-button {
+amp-sticky-ad[visible] > .amp-sticky-ad-close-button {
   visibility: visible;
 }
 
+/* Increase tapping area of the dismiss button */
+.amp-sticky-ad-close-button:before {
+  position: absolute;
+  content: '';
+  top: -18px;
+  right: 0;
+  left: -18px;
+  bottom: 0;
+}
 
 [dir=rtl] .amp-sticky-ad-close-button {
   right: auto;
   left: 0;
 }
 
+[dir=rtl] .amp-sticky-ad-close-button:before {
+  top: -18px;
+  right: -18px;
+  left: 0;
+}

@@ -16,9 +16,9 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
-import {historyFor} from '../../../src/history';
+import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
-import {setStyles} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timerFor} from '../../../src/timer';
 
@@ -29,32 +29,30 @@ const ANIMATION_TIMEOUT = 550;
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
 
 export class AmpSidebar extends AMP.BaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NOLAYOUT;
-  }
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  /** @override */
-  buildCallback() {
+    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(this.win);
+
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private @const {!Document} */
     this.document_ = this.win.document;
 
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
 
-    /** @private @const {string} */
-    this.side_ = this.element.getAttribute('side');
-
-    /** @private @const {!Viewport} */
-    this.viewport_ = this.getViewport();
-
-    /** @private @const {!Element} */
-    this.maskElement_ = false;
-
-    /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    /** @private {?string} */
+    this.side_ = null;
 
     const platform = platformFor(this.win);
+
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -63,6 +61,18 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+  buildCallback() {
+    this.side_ = this.element.getAttribute('side');
+
+    this.viewport_ = this.getViewport();
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -132,9 +142,7 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
-      setStyles(this.element, {
-        'display': 'block',
-      });
+      toggle(this.element, /* display */true);
       this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
       if (this.isIosSafari_) {
@@ -174,9 +182,7 @@ export class AmpSidebar extends AMP.BaseElement {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
-            setStyles(this.element, {
-              'display': 'none',
-            });
+            toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());
           });
         }
@@ -204,9 +210,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.maskElement_ = mask;
     }
-    setStyles(this.maskElement_, {
-      'display': 'block',
-    });
+    toggle(this.maskElement_, /* display */true);
   }
 
   /**
@@ -214,9 +218,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   closeMask_() {
     if (this.maskElement_) {
-      setStyles(this.maskElement_, {
-        'display': 'none',
-      });
+      toggle(this.maskElement_, /* display */false);
     }
   }
 
@@ -258,10 +260,10 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * @private @return {!History}
+   * @private @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
-    return historyFor(this.win);
+    return historyForDoc(this.getAmpDoc());
   }
 }
 

@@ -462,6 +462,7 @@ describe('AccessService authorization', () => {
     const adapter = {
       getConfig: () => {},
       isAuthorizationEnabled: () => true,
+      isPingbackEnabled: () => true,
       authorize: () => {},
     };
     service.adapter_ = adapter;
@@ -905,7 +906,8 @@ describe('AccessService pingback', () => {
     service = new AccessService(window);
 
     const adapter = {
-      pingback: () => {},
+      isPingbackEnabled: () => true,
+      pingback: () => Promise.resolve(),
     };
     service.adapter_ = adapter;
     adapterMock = sandbox.mock(adapter);
@@ -1034,7 +1036,8 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
       expect(triggerEventStub.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
-      return service.firstAuthorizationPromise_;
+      return Promise.all([service.firstAuthorizationPromise_,
+          service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
@@ -1060,7 +1063,8 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
       expect(triggerEventStub.callCount).to.equal(triggerStart);
       lastAuthorizationResolver();
-      return service.lastAuthorizationPromise_;
+      return Promise.all([service.lastAuthorizationPromise_,
+          service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
@@ -1100,6 +1104,19 @@ describe('AccessService pingback', () => {
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
     });
+  });
+
+  it('should ignore "viewed" monitoring when pingback is disabled', () => {
+    adapterMock.expects('isPingbackEnabled').returns(false);
+
+    service.reportWhenViewed_ = sandbox.spy();
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+
+    service.scheduleView_(/* timeToView */ 2000);
+
+    expect(service.reportWhenViewed_.callCount).to.equal(0);
+    expect(service.reportViewPromise_).to.be.null;
+    expect(broadcastStub.callCount).to.equal(0);
   });
 
   it('should re-schedule "viewed" monitoring after visibility change', () => {

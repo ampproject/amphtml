@@ -46,7 +46,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win) &&
+    return isGoogleAdsA4AValidEnvironment(this.win, this.element) &&
         this.isAmpAdElement() &&
         // Ensure not within remote.html iframe.
         !document.querySelector('meta[name=amp-3p-iframe-src]');
@@ -66,6 +66,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
       {name: 'gdfp_req', value: '1'},
+      {name: 'd_imp', value: '1'},
       {name: 'impl', value: 'ifr'},
       {name: 'sfv', value: 'A'},
       {name: 'sz', value: `${slotRect.width}x${slotRect.height}`},
@@ -94,7 +95,7 @@ AMP.registerElement(
 
 /**
  * @param {?Object<string, (!Array<string>|string)>} targeting
- * @param {?(!Array<string>|string)} value
+ * @param {?(!Array<string>|string)} categoryExclusions
  * @return {?string}
  */
 function serializeTargeting(targeting, categoryExclusions) {

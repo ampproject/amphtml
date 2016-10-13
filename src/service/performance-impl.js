@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {documentInfoFor} from '../document-info';
-import {whenDocumentReady} from '../document-ready';
+import {documentInfoForDoc} from '../document-info';
+import {whenDocumentReady, whenDocumentComplete} from '../document-ready';
 import {fromClass} from '../service';
-import {loadPromise} from '../event-helper';
-import {resourcesFor} from '../resources';
-import {viewerFor} from '../viewer';
+import {resourcesForDoc} from '../resources';
+import {viewerForDoc} from '../viewer';
 
 
 /**
@@ -97,7 +96,7 @@ export class Performance {
         });
 
     // Tick window.onload event.
-    loadPromise(win).then(() => {
+    whenDocumentComplete(win.document).then(() => {
       this.tick('ol');
       this.flush();
     });
@@ -108,8 +107,8 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = viewerFor(this.win);
-    this.resources_ = resourcesFor(this.win);
+    this.viewer_ = viewerForDoc(this.win.document);
+    this.resources_ = resourcesForDoc(this.win.document);
 
     // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
@@ -121,6 +120,11 @@ export class Performance {
     // Can be null which would mean this AMP page is not embedded
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
+
+    this.viewer_.whenFirstVisible().then(() => {
+      this.tick('ofv');
+      this.flush();
+    });
 
     // We don't check `isPerformanceTrackingOn` here since there are some
     // events that we call on the viewer even though performance tracking
@@ -191,7 +195,7 @@ export class Performance {
     return this.whenReadyToRetrieveResources_().then(() => {
       return Promise.all(this.resources_.getResourcesInViewport().map(r => {
         // We're ok with the layout failing and still reporting.
-        return r.loaded().catch(function() {});
+        return r.loadedOnce().catch(function() {});
       }));
     });
   }
@@ -208,7 +212,7 @@ export class Performance {
   /**
    * Forward an object to be appended as search params to the external
    * intstrumentation library.
-   * @param {!JSONType} params
+   * @param {!Object} params
    * @private
    */
   setFlushParams_(params) {
@@ -237,6 +241,13 @@ export class Performance {
       });
     } else {
       this.queueTick_(label, opt_from, opt_value);
+    }
+    // Add browser performance timeline entries for simple ticks.
+    // These are for example exposed in WPT.
+    if (this.win.performance
+        && this.win.performance.mark
+        && arguments.length == 1) {
+      this.win.performance.mark(label);
     }
   }
 
@@ -330,7 +341,7 @@ export class Performance {
   setDocumentInfoParams_() {
     return this.whenViewportLayoutComplete_().then(() => {
       const params = Object.create(null);
-      const sourceUrl = documentInfoFor(this.win).sourceUrl
+      const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
           .replace(/#.*/, '');
       params['sourceUrl'] = sourceUrl;
 

@@ -52,14 +52,21 @@ export class Observable {
   }
 
   /**
-   * Fires an event. All observers are called.
-   * @param {TYPE} event
+   * Removes all observers.
    */
-  fire(event) {
+  removeAll() {
+    this.handlers_.length = 0;
+  }
+
+  /**
+   * Fires an event. All observers are called.
+   * @param {TYPE=} opt_event
+   */
+  fire(opt_event) {
     const handlers = this.handlers_;
     for (let i = 0; i < handlers.length; i++) {
       const handler = handlers[i];
-      handler(event);
+      handler(opt_event);
     }
   }
 
