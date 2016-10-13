@@ -44,98 +44,98 @@ The tables below list the available URL variables grouped by type of usage. Furt
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
-| [AMP Document Host](#amp-document-host)| `AMPDOC_HOST` | `ampdocHost` |
-| [AMP Document Hostname](#amp-document-hostname)| `AMPDOC_HOSTNAME` | not supported |
-| [AMP Document URL](#amp-document-url) | `AMPDOC_URL` | `ampdocUrl` |
-| [Canonical Host](#canonical-host)     | `CANONICAL_HOST` | `canonicalHost` |
-| [Canonical Hostname](#canonical-hostname)  | `CANONICAL_HOSTNAME` | not supported |
-| [Canonical Path](#canonical-path)     | `CANONICAL_PATH` | `canonicalPath` |
-| [Canonical URL](#canonical-url)       | `CANONICAL_URL`    | `canonicalUrl` |
-| [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `documentCharset` |
-| [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `documentReferrer` |
-| [Source URL](#source-url)           | `SOURCE_URL`      | `sourceUrl` |
-| [Source Host](#source-host)         | `SOURCE_HOST`     | `sourceHost` |
-| [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | not supported |
-| [Source Path](#source-path)         | `SOURCE_PATH`     | `sourcePath` |
-| [Title](#title)                     | `TITLE`           | `title` |
-| [Viewer](#viewer)                   | `VIEWER`          | `viewer` |
+| [AMP Document Host](#amp-document-host)| `AMPDOC_HOST` | `${ampdocHost}` |
+| [AMP Document Hostname](#amp-document-hostname)| `AMPDOC_HOSTNAME` | `${ampdocHostname}` |
+| [AMP Document URL](#amp-document-url) | `AMPDOC_URL` | `${ampdocUrl}` |
+| [Canonical Host](#canonical-host)     | `CANONICAL_HOST` | `${canonicalHost}` |
+| [Canonical Hostname](#canonical-hostname)  | `CANONICAL_HOSTNAME` | `${canonicalHostname}` |
+| [Canonical Path](#canonical-path)     | `CANONICAL_PATH` | `${canonicalPath}` |
+| [Canonical URL](#canonical-url)       | `CANONICAL_URL`    | `${canonicalUrl}` |
+| [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
+| [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
+| [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
+| [Source Host](#source-host)         | `SOURCE_HOST`     | `${sourceHost}` |
+| [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | `${sourceHostname}` |
+| [Source Path](#source-path)         | `SOURCE_PATH`     | `${sourcePath}` |
+| [Title](#title)                     | `TITLE`           | `${title}` |
+| [Viewer](#viewer)                   | `VIEWER`          | `${viewer}` |
 
 ### Performance 
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
-| [Content Load Time](#content-load-time) | `CONTENT_LOAD_TIME`  | `contentLoadTime` |
-| [Domain Lookup Time](#domain-lookup-time) | `DOMAIN_LOOKUP_TIME` | `domainLookupTime` |
-| [DOM Interactive Time](#dom-interactive-time) | `DOM_INTERACTIVE_TIME` | `domInteractiveTime` |
-| [Navigation Redirect Count](#navigation-redirect-count) | `NAV_REDIRECT_COUNT` | `navRedirectCount` |
-| [Navigation Timing ](#navigation-timing) | `NAV_TIMING` | `navTiming` |
-| [Navigation Type](#navigation-type) | `NAV_TYPE` | `navType` |
-| [Page Download Time](#page-download-time) | `PAGE_DOWNLOAD_TIME` | `pageDownloadTime` |
-| [Page Load Time](#page-load-time) | `PAGE_LOAD_TIME` | `pageLoadTime` |
-| [Redirect Time](#redirect-time) | `REDIRECT_TIME` | `redirectTime` |
-| [Server Response Time](#server-response-time) | `SERVER_RESPONSE_TIME` | `serverResponseTime` |
-| [TCP Connection Time](#tcp-connection-time) | `TCP_CONNECT_TIME` | `tcpConnectTime` |
+| [Content Load Time](#content-load-time) | `CONTENT_LOAD_TIME`  | `${contentLoadTime}` |
+| [Domain Lookup Time](#domain-lookup-time) | `DOMAIN_LOOKUP_TIME` | `${domainLookupTime}` |
+| [DOM Interactive Time](#dom-interactive-time) | `DOM_INTERACTIVE_TIME` | `${domInteractiveTime}` |
+| [Navigation Redirect Count](#navigation-redirect-count) | `NAV_REDIRECT_COUNT` | `${navRedirectCount}` |
+| [Navigation Timing ](#navigation-timing) | `NAV_TIMING` | `${navTiming}` |
+| [Navigation Type](#navigation-type) | `NAV_TYPE` | `${navType}` |
+| [Page Download Time](#page-download-time) | `PAGE_DOWNLOAD_TIME` | `${pageDownloadTime}` |
+| [Page Load Time](#page-load-time) | `PAGE_LOAD_TIME` | `${pageLoadTime}` |
+| [Redirect Time](#redirect-time) | `REDIRECT_TIME` | `${redirectTime}` |
+| [Server Response Time](#server-response-time) | `SERVER_RESPONSE_TIME` | `${serverResponseTime}` |
+| [TCP Connection Time](#tcp-connection-time) | `TCP_CONNECT_TIME` | `${tcpConnectTime}` |
 
 ### Device and Browser
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
-| [Available Screen Height](#available-screen-height) | `AVAILABLE_SCREEN_HEIGHT` | `availableScreenHeight` |
-| [Available Screen Width](#available-screen-width) | `AVAILABLE_SCREEN_WIDTH` | `availableScreenWidth` |
-| [Browser Language](#browser-language) | `BROWSER_LANGUAGE` | `browserLanguage` |
-| [Screen Color Depth](#screen-color-depth) | `SCREEN_COLOR_DEPTH` | `screenColorDepth` |
-| [Screen Height](#screen-heigth)     | `SCREEN_HEIGHT`   | `screenHeight`   |
-| [Screen Width](#screen-width)       | `SCREEN_WIDTH`    | `screenWidth`    |
-| [Scroll Height](#scroll-height)     | `SCROLL_HEIGHT`   | `scrollHeight`   |
-| [Scroll Width](#scroll-width)       | `SCROLL_WIDTH`    | `scrollWidth`    |
-| [Scroll Left](#scroll-left)         | `SCROLL_LEFT`     | `scrollLeft`     |
-| [Scroll Top](#scroll-top)           | `SCROLL_TOP`      | `scrollTop`      |
-| [Timezone](#timezone)               | `TIMEZONE`        | `timezone`       |
-| [Viewport Height](#viewport-height) | `VIEWPORT_HEIGHT` | `viewportHeight` |
-| [Viewport Width](#viewport-width)   | `VIEWPORT_WIDTH`  | `viewportWidth`  |
+| [Available Screen Height](#available-screen-height) | `AVAILABLE_SCREEN_HEIGHT` | `${availableScreenHeight}` |
+| [Available Screen Width](#available-screen-width) | `AVAILABLE_SCREEN_WIDTH` | `${availableScreenWidth}` |
+| [Browser Language](#browser-language) | `BROWSER_LANGUAGE` | `${browserLanguage}` |
+| [Screen Color Depth](#screen-color-depth) | `SCREEN_COLOR_DEPTH` | `${screenColorDepth}` |
+| [Screen Height](#screen-heigth)     | `SCREEN_HEIGHT`   | `${screenHeight}`   |
+| [Screen Width](#screen-width)       | `SCREEN_WIDTH`    | `${screenWidth}`    |
+| [Scroll Height](#scroll-height)     | `SCROLL_HEIGHT`   | `${scrollHeight}`   |
+| [Scroll Width](#scroll-width)       | `SCROLL_WIDTH`    | `${scrollWidth}`    |
+| [Scroll Left](#scroll-left)         | `SCROLL_LEFT`     | `${scrollLeft}`     |
+| [Scroll Top](#scroll-top)           | `SCROLL_TOP`      | `${scrollTop}`      |
+| [Timezone](#timezone)               | `TIMEZONE`        | `${timezone}`       |
+| [Viewport Height](#viewport-height) | `VIEWPORT_HEIGHT` | `${viewportHeight}` |
+| [Viewport Width](#viewport-width)   | `VIEWPORT_WIDTH`  | `${viewportWidth}`  |
 
 ### Interaction
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
-| [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `horizontalScrollBoundary` |
-| [Total Engaged Time](#horizontal-scroll-boundary) | `TOTAL_ENGAGED_TIME` | `totalEngagedTime` |
-| [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `verticalScrollBoundary` |
+| [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
+| [Total Engaged Time](#horizontal-scroll-boundary) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
+| [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
 
 ### Visibility
 
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
-| [Backgrounded](#backgrounded) | N/A | `backgrounded` |
-| [Backgrounded At Start](#backgrounded-at-start) | N/A | `backgroundedAtStart` |
-| [Element Height](#element-height) | N/A | `elementHeight` |
-| [Element Width](#element-width) | N/A | `elementWidth` |
-| [Element X](#element-x) | N/A | `elementX` |
-| [Element Y](#element-y) | N/A | `elementY` |
-| [First Seen Time](#first-seen-time) | N/A | `firstSeenTime` |
-| [First Visible Time](#first-visible-time) | N/A | `firstVisibleTime` |
-| [Last Seen Time](#last-seen-time) | N/A | `lastSeenTime` |
-| [Last Visible Time](#last-visible-time) | N/A | `lastVisibleTime` |
-| [Load Time Visibility](#load-time-visibility) | N/A | `loadTimeVisibility` |
-| [Max Continuous Visible Time](#max-continuous-visible-time) | N/A | `maxContinuousVisibleTime` |
-| [Max Visible Percentage](#max-visible-percentage) | N/A | `maxVisiblePercentage` |
-| [Min Visible Percentage](#min-visible-percentage) | N/A | `minVisiblePercentage` |
-| [Total Time](#total-time) | N/A | `totalTime` |
-| [Total Visible Time](#total-visible-time) | N/A | `totalVisibleTime` |
+| [Backgrounded](#backgrounded) | N/A | `${backgrounded}` |
+| [Backgrounded At Start](#backgrounded-at-start) | N/A | `${backgroundedAtStart}` |
+| [Element Height](#element-height) | N/A | `${elementHeight}` |
+| [Element Width](#element-width) | N/A | `${elementWidth}` |
+| [Element X](#element-x) | N/A | `${elementX}` |
+| [Element Y](#element-y) | N/A | `${elementY}` |
+| [First Seen Time](#first-seen-time) | N/A | `${firstSeenTime}` |
+| [First Visible Time](#first-visible-time) | N/A | `${firstVisibleTime}` |
+| [Last Seen Time](#last-seen-time) | N/A | `${lastSeenTime}` |
+| [Last Visible Time](#last-visible-time) | N/A | `${lastVisibleTime}` |
+| [Load Time Visibility](#load-time-visibility) | N/A | `${loadTimeVisibility}` |
+| [Max Continuous Visible Time](#max-continuous-visible-time) | N/A | `${maxContinuousVisibleTime}` |
+| [Max Visible Percentage](#max-visible-percentage) | N/A | `${maxVisiblePercentage}` |
+| [Min Visible Percentage](#min-visible-percentage) | N/A | `${minVisiblePercentage}` |
+| [Total Time](#total-time) | N/A | `${totalTime}` |
+| [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
 
 ### Miscellaneous 
 
 |  Variable Name | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
-| [AMP Version](#amp-version) | `AMP_VERSION` | `ampVersion` |
-| [Background State](#background-state) | `BACKGROUND_STATE` | `backgroundState` |
-| [Client ID](#client-id) | `CLIENT_ID` | `clientId` |
-| [Extra URL Parameters](#extra-url-parameters) | N/A | `extraUrlParams` |
-| [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `pageViewId` |
-| [Query Parameter](#query-parameter) | `QUERY_PARAM` | `queryParam` |
-| [Random](#random) | `RANDOM` | `random` |
-| [Request Count](#request-count) | N/A | `requestCount` |
-| [Timestamp](#timestamp) | `TIMESTAMP` | `timestamp` |
+| [AMP Version](#amp-version) | `AMP_VERSION` | `${ampVersion}` |
+| [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
+| [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
+| [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
+| [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
+| [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
+| [Random](#random) | `RANDOM` | `${random}` |
+| [Request Count](#request-count) | N/A | `${requestCount}` |
+| [Timestamp](#timestamp) | `TIMESTAMP` | `${timestamp}` |
 
 ### Variable Descriptions
 
@@ -149,7 +149,7 @@ Provides the AMP document's URL host.
   <amp-pixel src="https://foo.com/pixel?host=AMPDOC_HOST"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?host=example.com:8080`.
-* **amp-analytics variable**: `ampdocHost`
+* **amp-analytics variable**: `${ampdocHost}`
   * Example value: `example.com`
 
 #### AMP Document Hostname
@@ -162,7 +162,8 @@ Provides the AMP document's URL hostname.
   <amp-pixel src="https://foo.com/pixel?hostname=AMPDOC_HOSTNAME"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?hostname=example.com`.
-* **amp-analytics variable**: not supported
+* **amp-analytics variable**: `${ampdocHostname}`
+  * Example value: `example.com`
 
 #### AMP Document URL
 
@@ -174,7 +175,7 @@ Provides the AMP document's URL. The URL contains the scheme, domain, port and f
   <amp-pixel src="https://foo.com/pixel?ref=AMPDOC_URL"></amp-pixel>
   ```
   Makes a request to something like  `https://foo.com/pixel?ref=https%3A%2F%2Fexample.com%2F`.
-* **amp-analytics variable**: `ampdocUrl`
+* **amp-analytics variable**: `${ampdocUrl}`
   * Example value: `http://example.com:8000/examples/analytics.amp.html`
 
 #### AMP Version
@@ -186,7 +187,7 @@ Provides a string with the AMP release version.
   ```html
   <amp-pixel src="https://foo.com/pixel?v=AMP_VERSION"></amp-pixel>
   ```
-* **amp-analytics variable**: `ampVersion`
+* **amp-analytics variable**: `${ampVersion}`
   * Example value: `1460655576651`
 
 #### Available Screen Height
@@ -198,7 +199,7 @@ Provides the screen height in pixels available for the page rendering. This valu
   ```html
   <amp-pixel src="https://foo.com/pixel?availScreenHeight=AVAILABLE_SCREEN_HEIGHT"></amp-pixel>
   ```
-* **amp-analytics variable**: `availableScreenHeight`
+* **amp-analytics variable**: `${availableScreenHeight}`
   * Example value: `1480`
   
 #### Available Screen Width
@@ -210,7 +211,7 @@ Provides the screen width in pixels available for the page rendering. This value
   ```html
   <amp-pixel src="https://foo.com/pixel?availScreenWidth=AVAILABLE_SCREEN_WIDTH"></amp-pixel>
   ```
-* **amp-analytics variable**: `availableScreenWidth`
+* **amp-analytics variable**: `${availableScreenWidth}`
   * Example value: `2500`
 
 ####  Backgrounded
@@ -218,21 +219,21 @@ Provides the screen width in pixels available for the page rendering. This value
 A binary variable with possible values of 1 and 0 to indicate that the page/tab was sent to background at any point before the hit was sent. 1 indicates that the page was backgrounded while 0 indicates that the page has always been in the foreground. This variable does not count prerender as a backgrounded state.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `backgrounded`
+* **amp-analytics variable**: `${backgrounded}`
 
 #### Backgrounded At Start
 
 A binary variable with possible values of 1 and 0 to indicate that the page/tab was backgrounded at the time when the page was loaded. 1 indicates that the page was loaded in the background while 0 indicates otherwise. This variable does not count prerender as a backgrounded state.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `backgroundedAtStart`
+* **amp-analytics variable**: `${backgroundedAtStart}`
 
 #### Background State
 
 Provides the current background state of the page. Possible values are `0`, the page is visible, or `1`, the page is backgrounded.
 
 * **platform variable**: `BACKGROUND_STATE`
-* **amp-analytics variable**: `backgroundState`
+* **amp-analytics variable**: `${backgroundState}`
 
 #### Browser Language
 
@@ -243,7 +244,7 @@ Provides a string representing the preferred language of the user, usually the l
   ```html
   <amp-pixel src="https://foo.com/pixel?lang=BROWSER_LANGUAGE"></amp-pixel>
   ```
-* **amp-analytics variable**: `browserLanguage`
+* **amp-analytics variable**: `${browserLanguage}`
   * Example value: `en-us`
 
 #### Canonical Host
@@ -256,7 +257,7 @@ Provides the canonical document's URL host.
   <amp-pixel src="https://foo.com/pixel?host=CANONICAL_HOST"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?host=pinterest.com:9000`.
-* **amp-analytics variable**: `canonicalHost`
+* **amp-analytics variable**: `${canonicalHost}`
   * Example value: `http://pinterest.com:9000`
 
 #### Canonical Hostname
@@ -269,7 +270,8 @@ Provides the canonical document's URL hostname.
   <amp-pixel src="https://foo.com/pixel?hostname=CANONICAL_HOSTNAME"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?host=pinterest.com`.
-* **amp-analytics variable**:  not supported
+* **amp-analytics variable**:  `${canonicalHostname}`
+  * Example value: `pinterest.com`
 
 #### Canonical Path
 
@@ -281,7 +283,7 @@ Provides the canonical document's URL path.
   <amp-pixel src="https://foo.com/pixel?path=CANONICAL_PATH"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?path=%2Fpage1.html`.
-* **amp-analytics variable**: `canonicalPath`
+* **amp-analytics variable**: `${canonicalPath}`
   * Example value: `%2Fanalytics.html`
 
 #### Canonical URL
@@ -294,7 +296,7 @@ Provides the canonical document's URL.
   <amp-pixel src="https://foo.com/pixel?href=CANONICAL_URL"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
-* **amp-analytics variable**: `canonicalUrl`
+* **amp-analytics variable**: `${canonicalUrl}`
   * Example value: `http%3A%2F%2Fexample.com%3A8000%2Fanalytics.html`
 
 #### Client ID
@@ -319,7 +321,7 @@ Provides a per document-source-origin (the origin of the website where you publi
 <!-- cid is not provided until `user-consent` is dismissed -->
 <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
   ```
-* **amp-analytics variable**: `clientId`
+* **amp-analytics variable**: `${clientId}`
   * Example usage: `${clientId(foo)}`
   * Example value: `U6XEpUs3yaeQyR2DKATQH1pTZ6kg140fvuLbtl5nynbUWtIodJxP5TEIYBic4qcV`
 
@@ -340,7 +342,7 @@ Provides the time the page takes to fire the `DOMContentLoaded` event from the t
   ```html
   <amp-pixel src="https://foo.com/pixel?contentLoadTime=CONTENT_LOAD_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `contentLoadTime`
+* **amp-analytics variable**: `${contentLoadTime}`
   * Example value: `40`
 
 #### Document Charset
@@ -352,7 +354,7 @@ Provides the character encoding of the current document.
   ```html
   <amp-pixel src="https://foo.com/pixel?charSet=DOCUMENT_CHARSET"></amp-pixel>
   ```
-* **amp-analytics variable**: `documentCharset`
+* **amp-analytics variable**: `${documentCharset}`
   * Example value: `UTF-8`
 
 #### Document Referrer
@@ -364,7 +366,7 @@ Provides the referrer where the user came from, which is read from `document.ref
   ```html
   <amp-pixel src="https://foo.com/pixel?referrer=DOCUMENT_REFERRER"></amp-pixel>
   ```
-* **amp-analytics variable**: `documentReferrer`
+* **amp-analytics variable**: `${documentReferrer}`
   * Example value: `https://www.google.com`
 
 #### Domain Lookup Time
@@ -376,7 +378,7 @@ Provides the time it took to perform the DNS lookup for the current page. The va
   ```html
    <amp-pixel src="https://foo.com/pixel?domainLookupTime=DOMAIN_LOOKUP_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `domainLookupTime`
+* **amp-analytics variable**: `${domainLookupTime}`
   * Example value: `1`
 
 #### DOM Interactive Time
@@ -388,7 +390,7 @@ Provides the time the page to become interactive from the time the previous page
   ```html
    <amp-pixel src="https://foo.com/pixel?domInteractiveTime=DOM_INTERACTIVE_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `domInteractiveTime`
+* **amp-analytics variable**: `${domInteractiveTime}`
   * Example value: `40`
 
 #### Element Height
@@ -396,36 +398,35 @@ Provides the time the page to become interactive from the time the previous page
 Provides the height of the element specified by `visibilitySpec`.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `elementHeight`
+* **amp-analytics variable**: `${elementHeight}`
 
 #### Element Width
 
 Provides the width of the element specified by `visibilitySpec`.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `elementWidth`
+* **amp-analytics variable**: `${elementWidth}`
 
 #### Element X
 
 Provides the X coordinate of the left edge of the element specified by `visibilitySpec`.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `elementX`
+* **amp-analytics variable**: `${elementX}`
 
 #### Element Y
 
 Provides the Y coordinate of the top edge of the element specified by `visibilitySpec`.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `elementY`
+* **amp-analytics variable**: `${elementY}`
 
 #### Extra URL Parameters
 
 Provides all the parameters that are defined in the [`extraUrlParams`](../extensions/amp-analytics/amp-analytics.md#extra-url-params) block of the amp-analytics config as a variable. If you use the `extraUrlParams`  variable, the parameters are not appended to the end of the URL.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `extraUrlParams`
-  * Example usage: `${extraUrlParams}`
+* **amp-analytics variable**: `${extraUrlParams}`
   * Example value: `foo=bar&baz=something`
 
 #### First Seen Time
@@ -433,63 +434,63 @@ Provides all the parameters that are defined in the [`extraUrlParams`](../extens
 Provides the time when at least 1px of the element is on the screen for the first time since the trigger is registered by `amp-analytics`.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `firstSeenTime`
+* **amp-analytics variable**: `${firstSeenTime}`
 
 #### First Visible Time
 
 Provides the time when the element met visibility conditions for the first time since the trigger is registered by `amp-analytics`.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `firstVisibleTime`
+* **amp-analytics variable**: `${firstVisibleTime}`
 
 #### Horizontal Scroll Boundary
 
 Provides the horizontal scroll boundary that triggered a scroll event. This variable is only available in a `trigger` of type `scroll`. The value of the boundary may be rounded based on the precision supported by the extension. For example, a boundary with value `1` and precision of `5` will result in value of var to be 0.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `horizontalScrollBoundary`
+* **amp-analytics variable**: `${horizontalScrollBoundary}`
 
 #### Last Seen Time
 
 Provides the time when at least 1px of the element is on the screen for the last time since javascript load.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `lastSeenTime`
+* **amp-analytics variable**: `${lastSeenTime}`
 
 #### Last Visible Time
 
 Provides the time when the element met visibility conditions for the last time since javascript load.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `lastVisibleTime`
+* **amp-analytics variable**: `${lastVisibleTime}`
 
 #### Load Time Visibility
 
 Provides the percentage of element visible in the viewport at load time. This variable assumes that the page is scrolled to top.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `loadTimeVisibility`
+* **amp-analytics variable**: `${loadTimeVisibility}`
 
 #### Max Continuous Visible Time
 
 Provides the maximum amount of continuous time an element has met the `visibilitySpec` conditions at the time this ping is sent. Note that a ping with a `continuousTimeMin=1000` and `totalTimeMin=5000` that is visible for 1000ms, then not visible, then visible for 2000ms, then not, then visible for 1000ms, then not, then visible for 1020ms will report 2000 for this number as that is the max continuous visible time, even if it is not the current continuous visible time (1020 in this example).
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `maxContinuousVisibleTime`
+* **amp-analytics variable**: `${maxContinuousVisibleTime}`
 
 #### Max Visible Percentage
 
 Provides the maximum visible percentage over the time that `visibilitySpec` conditions were met. For example, a ping where the element was 100%, then off the page, then 100% will report this value as 100. A ping with `visiblePercentageMax=50` undergoing the same transitions would report somewhere between 0 and 50 since any time when the element was 100% on the page would not be counted.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `maxVisiblePercentage`
+* **amp-analytics variable**: `${maxVisiblePercentage}`
 
 #### Min Visible Percentage
 
-Provides the minimum visible percentage over the time that `visibilitySpec`conditions were met. For example, a ping where the element was 100%, then off the page, then 100% will report this value as 0. A ping with `visiblePercentageMin=50` condition undergoing the same transitions would report somewhere between 50 and 100 since any time when the element was 0% to 50% on the page would not be counted.
+Provides the minimum visible percentage over the time that `visibilitySpec` conditions were met. For example, a ping where the element was 100%, then off the page, then 100% will report this value as 0. A ping with `visiblePercentageMin=50` condition undergoing the same transitions would report somewhere between 50 and 100 since any time when the element was 0% to 50% on the page would not be counted.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `minVisiblePercentage`
+* **amp-analytics variable**: `${minVisiblePercentage}`
 
 #### Navigation Redirect Count
 
@@ -501,7 +502,7 @@ For more information, see the W3C Navigation Timing API [PerformanceNavigation i
   ```html
   <amp-pixel src="https://foo.com/pixel?nrc=NAV_REDIRECT_COUNT"></amp-pixel>
   ```
-* **amp-analytics variable**: `navRedirectCount`
+* **amp-analytics variable**: `${navRedirectCount}`
   * Example value: `0`
 
 #### Navigation Timing
@@ -514,7 +515,7 @@ Provides access to metrics from the browser's PerformanceTiming interface. See t
   <amp-pixel src="https://foo.com/pixel?navStart=NAV_TIMING(navigationStart)&amp;pageLoadTime=NAV_TIMING(navigationStart,loadEventStart)"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?navStart=1451606400000&pageLoadTime=100`.
-* **amp-analytics variable**: `navTiming`
+* **amp-analytics variable**: `${navTiming}`
   * Example 1: `${navTiming(navigationStart)}` results in value: `1451606400000`
   * Example 2: `${navTiming(navigationStart,responseStart)}` results in value: `10`
 
@@ -537,7 +538,7 @@ Provides the type of the last non-redirect navigation in the current browsing co
   ```html
   <amp-pixel src="https://foo.com/pixel?nt=NAV_TYPE"></amp-pixel>
   ```
-* **amp-analytics variable**: `navType`
+* **amp-analytics variable**: `${navType}`
   * Example value: `1`
 
 #### Page Download Time
@@ -549,7 +550,7 @@ Provides the time between receiving the first and the last byte of response. The
   ```html
   <amp-pixel src="https://foo.com/pixel?pageDownloadTime=PAGE_DOWNLOAD_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `pageDownloadTime`
+* **amp-analytics variable**: `${pageDownloadTime}`
   * Example value: `100`
 
 #### Page Load Time
@@ -561,7 +562,7 @@ Provides the time taken to load the whole page. The value is calculated from the
   ```html
   <amp-pixel src="https://foo.com/pixel?pageLoadTime=PAGE_LOAD_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `pageLoadTime`
+* **amp-analytics variable**: `${pageLoadTime}`
   * Example value: `220`
 
 ### Page View ID
@@ -573,7 +574,7 @@ Provides a string that is intended to be random and likely to be unique per URL,
   ```html
   <amp-pixel src="https://foo.com/pixel?pid=PAGE_VIEW_ID"></amp-pixel>
   ```
-* **amp-analytics variable**: `pageViewId`
+* **amp-analytics variable**: `${pageViewId}`
   * Example value: `978`
 
 #### Query Parameter
@@ -586,7 +587,7 @@ Pulls a value from the provided query string parameter.
   <amp-pixel src="https://foo.com/pixel?bar=QUERY_PARAM(baz,biz)"</amp-pixel>
   ```
   If a `baz` query string parameter is provided, the corresponding value is inserted into the pixel src; otherwise, the default `biz` is used.
-* **amp-analytics variable**: `queryParam`
+* **amp-analytics variable**: `${queryParam}`
   * Example 1: `${queryParam(foo)}`: If `foo` is available, its associated value is returned; otherwise, an empty string is returned.
   * Example 2: `${queryParam(foo,bar)}`: if `foo` is available, its associated value is returned, otherwise `bar` is returned.
 
@@ -607,7 +608,7 @@ Provides a random value each time a request is constructed.
   <amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?0.8390278471201` where the $RANDOM value is randomly generated upon each impression.
-* **amp-analytics variable**: `random`
+* **amp-analytics variable**: `${random}`
   * Example value: `0.12345632345`
 
 #### Redirect Time
@@ -619,7 +620,7 @@ Provides the time taken to complete all the redirects before the request for the
   ```html
   <amp-pixel src="https://foo.com/pixel?redirectTime=REDIRECT_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `redirectTime`
+* **amp-analytics variable**: `${redirectTime}`
   * Example value: `0`
 
 #### Request Count
@@ -627,7 +628,7 @@ Provides the time taken to complete all the redirects before the request for the
 Provides the number of requests sent out from a particular `amp-analytics` tag. This value can be used to reconstruct the sequence in which requests were sent from a tag. The value starts from 1 and increases monotonically. Note that there may be a gap in `requestCount` numbers if the request sending fails due to network issues.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `requestCount`
+* **amp-analytics variable**: `${requestCount}`
   * Example value: `6`
 
 #### Screen Color Depth
@@ -639,7 +640,7 @@ Provides the screen color depth provided by the browser.
   ```html
   <amp-pixel src="https://foo.com/pixel?colorDepth=SCREEN_COLOR_DEPTH"></amp-pixel>
   ```
-* **amp-analytics variable**: `screenColorDepth`
+* **amp-analytics variable**: `${screenColorDepth}`
   * Example value: `24`
 
 #### Screen Height
@@ -651,7 +652,7 @@ Provides the screen height in pixels. The value is retrieved from `window.screen
   ```html
   <amp-pixel src="https://foo.com/pixel?sh=SCREEN_HEIGHT"></amp-pixel>
   ```
-* **amp-analytics variable**: `screenHeight`
+* **amp-analytics variable**: `${screenHeight}`
   * Example value: `1600`
   
 #### Screen Width
@@ -663,7 +664,7 @@ Provides the screen height in pixels. The value is retrieved from `window.screen
   ```html
   <amp-pixel src="https://foo.com/pixel?sw=SCREEN_WIDTH"></amp-pixel>
   ```
-* **amp-analytics variable**: `screenWidth`
+* **amp-analytics variable**: `${screenWidth}`
   * Example value: `2560`
 
 #### Scroll Height
@@ -675,7 +676,7 @@ Provides the total height of the page in pixels.
   ```html
   <amp-pixel src="https://foo.com/pixel?scrollHeight=SCROLL_HEIGHT"></amp-pixel>
   ```
-* **amp-analytics variable**: `scrollHeight`
+* **amp-analytics variable**: `${scrollHeight}`
   * Example value: `400`
 
 #### Scroll Left
@@ -687,7 +688,7 @@ Provides the number of pixels that the user has scrolled from left.
   ```html
   <amp-pixel src="https://foo.com/pixel?scrollLeft=SCROLL_LEFT"></amp-pixel>
   ```
-* **amp-analytics variable**: `scrollLeft`
+* **amp-analytics variable**: `${scrollLeft}`
   * Example value: `100`
 
 #### Scroll Top
@@ -699,7 +700,7 @@ Provides the number of pixels that the user has scrolled from top.
   ```html
   <amp-pixel src="https://foo.com/pixel?st=SCROLL_TOP"></amp-pixel>
   ```
-* **amp-analytics variable**: `scrollTop`
+* **amp-analytics variable**: `${scrollTop}`
   * Example value: `0`
   
 #### Scroll Width
@@ -711,7 +712,7 @@ Provides the total width of the page in pixels.
   ```html
   <amp-pixel src="https://foo.com/pixel?scrollWidth=SCROLL_WIDTH"></amp-pixel>
   ```
-* **amp-analytics variable**: `scrollWidth`
+* **amp-analytics variable**: `${scrollWidth}`
   * Example value: `600`
 
 #### Server Response Time
@@ -723,7 +724,7 @@ Provides the time taken by the server to start sending the response after it sta
   ```html
   <amp-pixel src="https://foo.com/pixel?serverResponseTime=SERVER_RESPONSE_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `serverResponseTime`
+* **amp-analytics variable**: `${serverResponseTime}`
   * Example value: `10`
 
 #### Source URL
@@ -738,7 +739,7 @@ The source URL is extracted from the proxy URL if the document is being served f
   <amp-pixel src="https://foo.com/pixel?href=SOURCE_URL"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
-* **amp-analytics variable**: `sourceUrl`
+* **amp-analytics variable**: `${sourceUrl}`
   * Example value: `https%3A%2F%2Fpinterest.com%2F`
 
 #### Source Host
@@ -751,7 +752,7 @@ Parses and provides the source URL's host. See the description of [Source URL](#
   <amp-pixel src="https://foo.com/pixel?host=SOURCE_HOST"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?host=pinterest.com:9000`.
-* **amp-analytics variable**: `sourceHost`
+* **amp-analytics variable**: `${sourceHost}`
   * Example value: `example.com`
 
 #### Source Hostname
@@ -764,7 +765,8 @@ Parses and provides the source URL's hostname. See the description of [Source UR
   <amp-pixel src="https://foo.com/pixel?host=SOURCE_HOSTNAME"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?host=pinterest.com`.
-* **amp-analytics variable**: not supported
+* **amp-analytics variable**: `${sourceHostname}`
+  * Example value: `example.com`
 
 #### Source Path
 
@@ -776,7 +778,7 @@ Parses and provides the source URL's path. See the description of [Source URL](#
   <amp-pixel src="https://foo.com/pixel?path=SOURCE_PATH"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?path=%2Fpage2.html`.
-* **amp-analytics variable**: `sourcePath`
+* **amp-analytics variable**: `${sourcePath}`
   * Example value: `%2Fpage2.html`
 
 #### TCP Connection Time
@@ -788,7 +790,7 @@ Provides the time it took for HTTP connection to be setup. The duration includes
   ```html
   <amp-pixel src="https://foo.com/pixel?tcpConnectTime=TCP_CONNECT_TIME"></amp-pixel>
   ```
-* **amp-analytics variable**: `tcpConnectTime`
+* **amp-analytics variable**: `${tcpConnectTime}`
   * Example value: `10`
 
 #### Title
@@ -801,7 +803,7 @@ Provides the title of the current document.
   <amp-pixel src="https://foo.com/pixel?title=TITLE"></amp-pixel>
   ```
   Makes a request to something like `https://foo.com/pixel?title=Breaking%20News`.
-* **amp-analytics variable**: `title`
+* **amp-analytics variable**: `${title}`
   * Example value: `The New York Times - Breaking News, World News...`
 
 #### Timestamp
@@ -813,7 +815,7 @@ Provides the number of seconds that have elapsed since 1970. (Epoch time)
   ```html
   <amp-pixel src="https://foo.com/pixel?timestamp=TIMESTAMP"></amp-pixel>
   ```
-* **amp-analytics variable**: `timestamp`
+* **amp-analytics variable**: `${timestamp}`
   * Example value: `10`
 
 #### Timezone
@@ -825,7 +827,7 @@ Provides the user's time-zone offset from UTC, in minutes.
   ```html
   <amp-pixel src="https://foo.com/pixel?tz=TIMEZONE"></amp-pixel>
   ```
-* **amp-analytics variable**: `timezone`
+* **amp-analytics variable**: `${timezone}`
   * Example value: `480` for [Pacific Standard Time](https://en.wikipedia.org/wiki/Pacific_Time_Zone).
 
 #### Total Engaged Time
@@ -833,7 +835,7 @@ Provides the user's time-zone offset from UTC, in minutes.
 Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 * **platform variable**: `TOTAL_ENGAGED_TIME`
-* **amp-analytics variable**: `totalEngagedTime`
+* **amp-analytics variable**: `${totalEngagedTime}`
   * Example value: `36`
 
 #### Total Time
@@ -841,21 +843,21 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 Provides the total time from the time page was loaded to the time a ping was sent out. The value is calculated from the time document became interactive.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `totalTime`
+* **amp-analytics variable**: `${totalTime}`
 
 #### Total Visible Time
 
 Provides the total time for which the element has met the `visiblitySpec `conditions at time this ping is sent.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `totalVisibleTime`
+* **amp-analytics variable**: `${totalVisibleTime}`
 
 #### Vertical Scroll Boundary
 
 Provides the vertical scroll boundary that triggered a scroll event. This variable is only available in a `trigger` of type `scroll`. The value of the boundary may be rounded based on the precision supported by the extension. For example, a boundary with value `1` and precision of `5` will result in value of var to be 0.
 
 * **platform variable**: N/A
-* **amp-analytics variable**: `verticalScrollBoundary`
+* **amp-analytics variable**: `${verticalScrollBoundary}`
 
 #### Viewer
 
@@ -866,7 +868,7 @@ Provides an identifier for the viewer that contains the AMP document. An empty s
   ```html
   <amp-pixel src="https://foo.com/pixel?viewer=VIEWER"></amp-pixel>
   ```
-* **amp-analytics variable**: `viewer`
+* **amp-analytics variable**: `${viewer}`
   * Example value: `www.google.com`
 
 #### Viewport Height
@@ -878,7 +880,7 @@ Provides the viewport height in pixels available for the page rendering. In cont
   ```html
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
-* **amp-analytics variable**: `viewportHeight`
+* **amp-analytics variable**: `${viewportHeight}`
   * Example value: `1600` 
 
 #### Viewport Width
@@ -890,5 +892,5 @@ Provides the viewport width in pixels available for the page rendering. In contr
   ```html
   <amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
   ```
-* **amp-analytics variable**: `viewportWidth`
+* **amp-analytics variable**: `${viewportWidth}`
   * Example value: `2560` 
