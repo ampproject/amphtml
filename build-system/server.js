@@ -208,7 +208,6 @@ app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
 function proxyToAmpProxy(req, res, minify) {
   var url = 'https://cdn.ampproject.org/c' + req.url;
   var localUrlPrefix = getUrlPrefix(req);
-  console.log('request request');
   request(url, function (error, response, body) {
     body = body
         // Unversion URLs.
@@ -223,7 +222,7 @@ function proxyToAmpProxy(req, res, minify) {
             localUrlPrefix + '/dist/v0/');
     if (minify) {
       body = body.replace(/\.max\.js/g, '.js')
-          .replace('/dist/amp.js', '/dist/v1.js');
+          .replace('/dist/amp.js', '/dist/v0.js');
     }
     res.status(response.statusCode).send(body);
   });
@@ -407,34 +406,20 @@ app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
 
 
 app.use('/impression-proxy/', function(req, res) {
-  //http.get
-  //console.log('url is ', req.get('impression-proxy'));
-  //const xhr =
   assertCors(req, res, ['GET']);
-  var fakeHeaders = {
+  const fakeHeaders = {
     'Host': 'adclick.g.doubleclick.net',
     'Origin': 'https://cdn.ampproject.org',
     'Cookie': 'Cookie:id=4903ef7b59596f28||t=1451370221|et=730|cs=002213fd48e4405e4579c95dfa',
   };
-
-  var options = {
+  const options = {
     url: 'https://googleads.g.doubleclick.net/pcs/click?alp=1&xai=AKAOjstvASJmd6-NeoO3ner8FBNJW2w8n-sXMo0Nj5YC_LIY2NQjbNs0CoXQtM9tPi8by4H4bHRpMdB14qgRLctKkBKkh3vpR3m8fvPCzcFZ6HrxvxXUqzP17YJsihcINtRniOfmGFkzIolJ3ccPSPq6oYdJpg5lPeufOrLhtWsNspOsRgMSBFP7zH0l8tgtAb665jHEFmdAMH1vl69BxpqU2Q0ZoGDO_SVBMArlL--2nLOVgQt8om6IdzkcodppT9c&sig=Cg0ArKJSzEJGKs3-NmXNEAE&urlfix=1&adurl=https://cdn.ampproject.org/c/www.nbcnews.com/news/us-news/amp/milwaukee-cop-cars-smashed-torched-after-police-kill-suspect-n630236',
     headers: fakeHeaders,
   };
 
-// function callback(error, response, body) {
-//     if (!error && response.statusCode == 200) {
-//         console.log(body);
-//     }
-// }
-
   request(options, (error, response, body) => {
     if (!error && response.statusCode == 200) {
-      console.log(body);
       res.send(body);
-      return body;
-    } else {
-      console.log(response.statusCode);
     }
   });
 });

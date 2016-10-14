@@ -18,6 +18,7 @@ import {maybeTrackImpression} from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import {xhrFor} from '../../src/xhr';
+import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -77,6 +78,97 @@ describe('impression', () => {
       expect(params).to.jsonEqual({
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
+      });
+    });
+  });
+
+  it('should redirect if xhr return tracking url', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+
+    const openWindowDialogSpy = sandbox.stub(dom, 'openWindowDialog',
+        (win, url, target) => {
+          expect(url).to.equal('test_tracking_url');
+          expect(target).to.equal('_top');
+        });
+
+    xhr.fetchJson = () => {
+      return Promise.resolve({
+        'location': 'test_location',
+        'tracking_url': 'test_tracking_url',
+      });
+    };
+
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(openWindowDialogSpy).to.be.calledOnce;
+      });
+    });
+  });
+
+  it('should redirect if location is some other url', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+
+    const openWindowDialogSpy = sandbox.stub(dom, 'openWindowDialog',
+        (win, url, target) => {
+          expect(url).to.equal('test_location');
+          expect(target).to.equal('_top');
+        });
+
+    xhr.fetchJson = () => {
+      return Promise.resolve({
+        'location': 'test_location',
+      });
+    };
+
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(openWindowDialogSpy).to.be.calledOnce;
+      });
+    });
+  });
+
+  it('should not redirect if location is valid', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+
+    const openWindowDialogSpy = sandbox.spy(dom, 'openWindowDialog');
+
+    xhr.fetchJson = () => {
+      return Promise.resolve({
+        'location': 'https://cdn.ampproject.org/c/test/?gclid=654321',
+      });
+    };
+
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(openWindowDialogSpy).to.not.be.called;
+        expect(window.location.hash).to.equal('#gclid=654321');
+      });
+    });
+  });
+
+  it('should set gclid to location hash', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+
+    const openWindowDialogSpy = sandbox.spy(dom, 'openWindowDialog');
+
+    xhr.fetchJson = () => {
+      return Promise.resolve({
+        'gclid': '123456',
+      });
+    };
+
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(openWindowDialogSpy).to.not.be.called;
+        expect(window.location.hash).to.be.equal('#gclid=123456');
       });
     });
   });
