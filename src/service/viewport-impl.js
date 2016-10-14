@@ -425,7 +425,6 @@ export class Viewport {
     this.viewer_.requestFullOverlay();
     this.disableTouchZoom();
     this.hideFixedLayer();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
   }
 
   /**
@@ -435,7 +434,6 @@ export class Viewport {
     this.viewer_.cancelFullOverlay();
     this.showFixedLayer();
     this.restoreOriginalTouchZoom();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
   }
 
   /**
@@ -584,11 +582,15 @@ export class Viewport {
       this.lastPaddingTop_ = this.paddingTop_;
       this.paddingTop_ = paddingTop;
       if (this.paddingTop_ < this.lastPaddingTop_) {
-        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+        if (!transient) {
+          this.binding_.updatePaddingTop(this.paddingTop_);
+        }
         this.animateFixedElements_(duration, curve);
       } else {
         this.animateFixedElements_(duration, curve).then(() => {
-          this.binding_.showViewerHeader(transient, this.paddingTop_);
+          if (!transient) {
+            this.binding_.updatePaddingTop(this.paddingTop_);
+          }
         });
       }
     }
@@ -773,27 +775,6 @@ export class ViewportBindingDef {
   updatePaddingTop(unusedPaddingTop) {}
 
   /**
-   * Updates binding with the new padding when hiding viewer header.
-   * @param {boolean} unusedTransient
-   * @param {number} unusedLastPaddingTop
-   */
-  hideViewerHeader(unusedTransient, unusedLastPaddingTop) {}
-
-  /**
-   * Updates binding with the new padding when showing viewer header.
-   * @param {boolean} unusedTransient
-   * @param {number} unusedPaddingTop
-   */
-  showViewerHeader(unusedTransient, unusedPaddingTop) {}
-
-  /**
-   * Updates the viewport whether it's currently in the lightbox or a normal
-   * mode.
-   * @param {boolean} unusedLightboxMode
-   */
-  updateLightboxMode(unusedLightboxMode) {}
-
-  /**
    * Returns the size of the viewport.
    * @return {!{width: number, height: number}}
    */
@@ -936,25 +917,6 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  hideViewerHeader(transient, unusedLastPaddingTop) {
-    if (!transient) {
-      this.updatePaddingTop(0);
-    }
-  }
-
-  /** @override */
-  showViewerHeader(transient, paddingTop) {
-    if (!transient) {
-      this.updatePaddingTop(paddingTop);
-    }
-  }
-
-  /** @override */
-  updateLightboxMode(unusedLightboxMode) {
-    // The layout is always accurate.
-  }
-
-  /** @override */
   getSize() {
     // Prefer window innerWidth/innerHeight but fall back to
     // documentElement clientWidth/clientHeight.
@@ -1078,6 +1040,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
+    /** @private {?number} */
+    this.initialPaddingTop_ = null;
+
     // Microtask is necessary here to let Safari to recalculate scrollWidth
     // post DocumentReady signal.
     whenDocumentReady(this.win.document).then(() => this.setup_());
@@ -1193,46 +1158,22 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  hideViewerHeader(transient, lastPaddingTop) {
-    if (transient) {
-      // Add extra paddingTop to make the content stay at the same position
-      // when the hiding header operation is transient
-      onDocumentReady(this.win.document, doc => {
-        const existingPaddingTop =
-            this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-        doc.body.style.paddingTop =
-            `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
-        doc.body.style.borderTop = '';
-      });
-    } else {
-      this.updatePaddingTop(0);
-    }
-  }
-
-  /** @override */
-  showViewerHeader(transient, paddingTop) {
-    if (!transient) {
-      this.updatePaddingTop(paddingTop);
-    }
-    // No need to adjust borderTop and paddingTop when the showing header
-    // operation is transient
-  }
-
-  /** @override */
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
-      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
-      doc.body.style.paddingTop = '';
-    });
-  }
-
-  /** @override */
-  updateLightboxMode(lightboxMode) {
-    // This code will no longer be needed with the newer iOS viewport
-    // implementation.
-    onDocumentReady(this.win.document, doc => {
-      doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
+      // initialPaddingTop_ is the user-defined padding-top on body
+      if (!this.initialPaddingTop_) {
+        this.initialPaddingTop_ =
+            this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
+      }
+      // Add extra padding-top on body element to create space for the viewer
+      // header. When the body is scrolled up, padding-top blank space will
+      // also be scrolled up. Using border-top on body doesn't work because
+      // when scrolling the body there will be blank space blocking the content.
+      // Using padding-top on document doesn't work either because the body is
+      // position: absolute.
+      doc.body.style.paddingTop =
+          `calc(${this.initialPaddingTop_} + ${paddingTop}px)`;
     });
   }
 
@@ -1326,7 +1267,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     const rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
       this.pos_.x = -rect.left;
-      this.pos_.y = -rect.top + this.paddingTop_;
+      this.pos_.y = -rect.top;
       this.scrollObservable_.fire();
     }
   }

@@ -255,22 +255,29 @@ describe('Viewport', () => {
     bindingMock.verify();
   });
 
-  it('should update padding when viewer wants to hide header', () => {
+  it('should update padding for fixed layer but not update padding for ' +
+      'binding when hide header operation is transient', () => {
     const bindingMock = sandbox.mock(binding);
-    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-    bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
-    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: true});
-    bindingMock.verify();
-  });
-
-  it('should update padding for fixed layer when viewer wants to ' +
-      'hide header', () => {
+    bindingMock.expects('updatePaddingTop').never();
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: 'true'});
+        transient: true});
+    bindingMock.verify();
+    fixedLayerMock.verify();
+  });
+
+  it('should update padding for fixed layer and update padding for ' +
+      'binding when hide header operation is not transient', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('updatePaddingTop').withArgs(0).once();
+    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
+        transient: false});
+    bindingMock.verify();
     fixedLayerMock.verify();
   });
 
@@ -280,7 +287,6 @@ describe('Viewport', () => {
     const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
     const hideFixedLayerStub = sandbox.stub(viewport, 'hideFixedLayer');
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('updateLightboxMode').withArgs(true).once();
 
     viewport.enterLightboxMode();
 
@@ -296,7 +302,6 @@ describe('Viewport', () => {
         'restoreOriginalTouchZoom');
     const showFixedLayerStub = sandbox.stub(viewport, 'showFixedLayer');
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('updateLightboxMode').withArgs(false).once();
 
     viewport.leaveLightboxMode();
 
@@ -1199,34 +1204,14 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyChildren[2].style.visibility).to.equal('hidden');
   });
 
-  it('should update border on BODY', () => {
+  it('should update padding-top on BODY', () => {
     windowApi.document = {
       body: {style: {}},
     };
+
     binding.updatePaddingTop(31);
-    expect(windowApi.document.body.style.borderTop).to
-        .equal('31px solid transparent');
-  });
-
-  it('should update border in lightbox mode', () => {
-    windowApi.document = {
-      body: {style: {}},
-    };
-    binding.updatePaddingTop(31);
-    expect(windowApi.document.body.style.borderTop).to
-        .equal('31px solid transparent');
-    expect(windowApi.document.body.style.borderTopStyle).to.be.undefined;
-
-    binding.updateLightboxMode(true);
-    expect(windowApi.document.body.style.borderTopStyle).to.equal('none');
-
-    binding.updateLightboxMode(false);
-    expect(windowApi.document.body.style.borderTopStyle).to.equal('solid');
-    expect(windowApi.document.body.style.borderBottomStyle).to.not.equal(
-        'solid');
-    expect(windowApi.document.body.style.borderLeftStyle).to.not.equal('solid');
-    expect(windowApi.document.body.style.borderRightStyle).to.not.equal(
-        'solid');
+    expect(windowApi.document.body.style.paddingTop).to
+        .equal('31px');
   });
 
   it('should calculate size', () => {
