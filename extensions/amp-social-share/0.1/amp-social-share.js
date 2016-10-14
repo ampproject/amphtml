@@ -86,10 +86,9 @@ class AmpSocialShare extends AMP.BaseElement {
   handleClick_() {
     user().assert(this.href_ && this.target_, 'Clicked before href is set.');
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-    openWindowDialog(this.win,
-        dev().assertString(this.href_),
-        dev().assertString(this.target_),
-        windowFeatures);
+    const href = dev().assertString(this.href_);
+    const target = dev().assertString(this.target_);
+    openWindowDialog(this.win, href, target, windowFeatures);
   }
 
 };
