@@ -32,8 +32,8 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private {string} */
-    this.shareEndpoint_ = '';
+    /** @private {?string} */
+    this.shareEndpoint_ = null;
 
     /** @private {!Object} */
     this.params_ = {};
@@ -41,11 +41,11 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
 
-    /** @private {string} */
-    this.href_ = '';
+    /** @private {?string} */
+    this.href_ = null;
 
-    /** @private {string} */
-    this.target_ = '';
+    /** @private {?string} */
+    this.target_ = null;
   }
 
   /** @override */
@@ -86,13 +86,12 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @private */
   handleClick_() {
-    if (!this.href_) {
-      dev().error(TAG, 'Clicked before href is set.');
-      return;
-    }
+    user().assert(this.href_ && this.target_, 'Clicked before href is set.');
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-
-    openWindowDialog(this.win, this.href_, this.target_, windowFeatures);
+    openWindowDialog(this.win,
+        dev().assertString(this.href_),
+        dev().assertString(this.target_),
+        windowFeatures);
   }
 
 };
