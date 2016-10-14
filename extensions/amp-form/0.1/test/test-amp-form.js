@@ -505,7 +505,7 @@ describe('amp-form', () => {
 
         const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
         const config = xhrCall.args[1];
-        expect(config.body).to.be.null;
+        expect(config.body).to.be.undefined;
         expect(config.method).to.equal('GET');
         expect(config.credentials).to.equal('include');
         expect(config.requireAmpResponseSourceOrigin).to.be.true;

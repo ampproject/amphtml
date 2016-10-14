@@ -59,6 +59,10 @@ const UserValidityState = {
 };
 
 
+/** @typedef {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} */
+let FormFieldDef;
+
+
 export class AmpForm {
 
   /**
@@ -79,13 +83,13 @@ export class AmpForm {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(this.win_);
 
-    /** @const @private {!Templates} */
+    /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = templatesFor(this.win_);
 
-    /** @const @private {!Xhr} */
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(this.win_);
 
-    /** @const @private {!../../../src/service/action-impl.Action} */
+    /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
     /** @const @private {string} */
@@ -131,7 +135,7 @@ export class AmpForm {
           'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
     }
 
-    /** @const @private {!FormValidator} */
+    /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
     this.installSubmitHandler_();
@@ -193,7 +197,7 @@ export class AmpForm {
         xhrUrl = addParamsToUrl(this.xhrAction_, this.getFormAsObject_());
       }
       this.xhr_.fetchJson(xhrUrl, {
-        body: isHeadOrGet ? null : new FormData(this.form_),
+        body: isHeadOrGet ? undefined : new FormData(this.form_),
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
@@ -261,10 +265,10 @@ export class AmpForm {
   }
 
   /**
-   * @param {!Object=} data
+   * @param {!JSONType} data
    * @private
    */
-  renderTemplate_(data = {}) {
+  renderTemplate_(data) {
     const container = this.form_.querySelector(`[${this.state_}]`);
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
@@ -321,7 +325,7 @@ function checkUserValidityOnSubmission(form) {
 
 /**
  * Returns the user validity state of the element.
- * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @param {!Element} element
  * @return {string}
  */
 function getUserValidityStateFor(element) {
@@ -367,7 +371,7 @@ function updateInvalidTypesClasses(element) {
  * TODO(#4317): Follow up on ancestor propagation behavior and understand the future
  *              specs for the :user-valid/:user-inavlid.
  *
- * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @param {!Element} element
  * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
  * @returns {boolean} Whether the element is valid or not.
  */
@@ -414,14 +418,14 @@ function checkUserValidity(element, propagate = false) {
  * @private visible for testing.
  */
 export function onInputInteraction_(e) {
-  const input = e.target;
+  const input = /** @type {!Element} */ (e.target);
   checkUserValidity(input, /* propagate */ true);
 }
 
 
 /**
  * Checks if a field is disabled.
- * @param {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} element
+ * @param {!Element} element
  * @private
  */
 function isDisabled_(element) {
@@ -437,8 +441,6 @@ function isDisabled_(element) {
   }
   return false;
 }
-
-
 
 
 /**
