@@ -26,6 +26,8 @@ import {
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
+import {installStyles} from '../src/style-installer';
+import {cssText} from '../build/css';
 import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -300,8 +302,7 @@ class RealWinFixture {
       env.iframe = iframe;
       iframe.name = 'test_' + iframeCount++;
       iframe.srcdoc = '<!doctype><html><head>' +
-          '<style>.-amp-element {display: block;}</style>' +
-          '<body style="margin:0"><div id=parent></div>';
+          '<body><div id=parent></div>';
       iframe.onload = function() {
         const win = iframe.contentWindow;
         env.win = win;
@@ -315,7 +316,7 @@ class RealWinFixture {
           win.customElements = new FakeCustomElements(win);
         }
 
-        resolve();
+        installStyles(win.document, cssText, resolve);
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
