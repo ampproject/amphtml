@@ -42,7 +42,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     scrollIntoViewSpy = sandbox.spy();
     timerFuncSpy = sandbox.spy();
     replaceLocSpy = sandbox.spy();
-    elem = {};
+    elem = {nodeType: 1};
     getElementByIdSpy = sandbox.stub();
     querySelectorSpy = sandbox.stub();
     tgt = document.createElement('a');
@@ -68,6 +68,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     };
     doc = {defaultView: win};
     docElem = {
+      nodeType: 1,
       ownerDocument: doc,
     };
     evt = {

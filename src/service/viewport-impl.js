@@ -1094,7 +1094,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @private */
   setup_() {
     const documentElement = this.win.document.documentElement;
-    const documentBody = /** @type {!Element} */ (
+    const documentBody = dev().assertElement(
         this.win.document.body);
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
