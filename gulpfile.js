@@ -66,7 +66,7 @@ declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-facebook', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-form', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-gfycat', '0.1', false);
