@@ -595,7 +595,7 @@ export class HistoryBindingVirtual_ {
     /** @private {!Promise} */
     this.awaitPoppingPromise_ = Promise.resolve();
 
-    /** @private {!function(*)) */
+    /** @private {?function(*)) */
     this.awaitPoppingPromiseResolver_ = null;
   }
 
