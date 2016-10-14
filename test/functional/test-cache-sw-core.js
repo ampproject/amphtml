@@ -74,7 +74,8 @@ const sw =
     require('../../src/service-worker/core'); // eslint-disable-line no-undef
 window.self = old;
 
-describe('Cache SW', () => {
+const runner = describe.configure().skip(() => typeof Request == 'undefined');
+runner.run('Cache SW', () => {
   const rtv = `00${version}`;
   const file = 'v0.js';
   const url = `https://cdn.ampproject.org/rtv/${rtv}/${file}`;
