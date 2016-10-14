@@ -29,7 +29,6 @@ limitations under the License.
     data-channel="727"
     data-publisher="0"
     data-dim="9"
-    json='{"renderer":[{"name":"ampdisplay", "value":{}}]}'>
 </amp-ad>
 ```
 
@@ -49,3 +48,5 @@ For semantics of configuration, please see contact us [https://www.zedo.com/cont
 
 ### Optional parameters
 - `data-charset`
+- `data-callback`
+- `data-renderer`

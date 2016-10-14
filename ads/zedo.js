@@ -24,16 +24,13 @@ import {validateData, loadScript} from '../3p/3p';
 export function zedo(global, data) {
   // check mandatory fields
   validateData(data, ['superId', 'network', 'placementId',
-  'channel', 'publisher', 'dim', 'renderer'], ['charset', 'callback',
-  'tmy', 'g', 'renderer']);
+  'channel', 'publisher', 'dim'], ['charset', 'callback', 'renderer']);
 
   loadScript(global, 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js', () => {
     const ZGTag = global.ZGTag;
-    const tmy = data.tmy ? data.tmy : '0';
-    const g = data.geo ? data.geo : '';
     const charset = data.charset ? data.charset : '';
     const callback = data.callback ? data.callback : () => {};
-    const geckoTag = new ZGTag(data.superId, data.network, tmy, g,
+    const geckoTag = new ZGTag(data.superId, data.network, '', '',
       charset, callback);
     geckoTag.setAMP();
     // define placement
