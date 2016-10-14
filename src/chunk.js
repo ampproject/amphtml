@@ -197,7 +197,7 @@ class Chunks {
       return false;
     }
     // Viewers send a URL param if we are not visible.
-    return !(/visibilityState=prerender/.test(this.win_.location.hash));
+    return !(/visibilityState=hidden/.test(this.win_.location.hash));
   }
 }
 

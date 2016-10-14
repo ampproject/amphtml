@@ -119,7 +119,7 @@ describe('chunk', () => {
         env.win.requestIdleCallback = () => {
           throw new Error('No calls expected: requestIdleCallback');
         };
-        env.win.location.resetHref('test#visibilityState=prerender');
+        env.win.location.resetHref('test#visibilityState=hidden');
       });
 
       basicTests(env);
@@ -137,7 +137,7 @@ describe('chunk', () => {
         env.sandbox.stub(resolved, 'then', () => {
           throw new Error('No calls expected');
         });
-        env.win.location.resetHref('test#visibilityState=prerender');
+        env.win.location.resetHref('test#visibilityState=hidden');
       });
 
       basicTests(env);
@@ -153,7 +153,7 @@ describe('chunk', () => {
         env.win.requestIdleCallback = () => {
           throw new Error('No calls expected');
         };
-        env.win.location.resetHref('test#visibilityState=prerender');
+        env.win.location.resetHref('test#visibilityState=hidden');
       });
 
       basicTests(env);
@@ -181,7 +181,7 @@ describe('chunk', () => {
 
     describe('invisible to visible', () => {
       beforeEach(() => {
-        env.win.location.resetHref('test#visibilityState=prerender');
+        env.win.location.resetHref('test#visibilityState=hidden');
         const viewer = viewerForDoc(env.win.document);
         let visible = false;
         env.sandbox.stub(viewer, 'isVisible', () => {
@@ -199,7 +199,7 @@ describe('chunk', () => {
 
     describe('invisible to visible after a while', () => {
       beforeEach(() => {
-        env.win.location.resetHref('test#visibilityState=prerender');
+        env.win.location.resetHref('test#visibilityState=hidden');
         const viewer = viewerForDoc(env.win.document);
         let visible = false;
         env.sandbox.stub(viewer, 'isVisible', () => {
