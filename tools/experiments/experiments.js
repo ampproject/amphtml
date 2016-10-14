@@ -183,6 +183,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
   },
   {
+    id: 'link-url-replace',
+    name: 'Enables replacing variables in URLs of outgoing links.',
+    spec: 'https://github.com/ampproject/amphtml/issues/4078',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
+  },
+  {
     id: 'pan-y',
     name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
         ' touch handlers',
