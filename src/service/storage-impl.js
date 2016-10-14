@@ -286,7 +286,7 @@ export class LocalStorageBinding {
     this.win = win;
 
     /** @private @const {boolean} */
-    this.isLocalStorageSupported_ = !!this.win.localStorage;
+    this.isLocalStorageSupported_ = 'localStorage' in this.win;
 
     if (!this.isLocalStorageSupported_) {
       dev().error(TAG, 'localStorage not supported.');
