@@ -453,6 +453,13 @@ var forbiddenTerms = {
     whitelist: [
     ],
   },
+  '/\\*\\* @type \\{\\!Element\\} \\*/': {
+    message: 'Use assertElement instead of casting to !Element.',
+    whitelist: [
+      'src/log.js',  // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js',  // Includes the previous.
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +

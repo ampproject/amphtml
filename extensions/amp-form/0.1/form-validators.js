@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {ValidationBubble} from './validation-bubble';
 
@@ -118,7 +119,7 @@ export class PolyfillDefaultValidator extends FormValidator {
 
   /** @override */
   onInput(event) {
-    const input = /** @type {!Element} */ (event.target);
+    const input = dev().assertElement(event.target);
     if (!this.validationBubble_.isActiveOn(input)) {
       return;
     }
@@ -243,7 +244,7 @@ export class AbstractCustomValidator extends FormValidator {
    * @param {!Event} event
    */
   onInteraction(event) {
-    const input = /** @type {!Element} */ (event.target);
+    const input = dev().assertElement(event.target);
     const shouldValidate = this.shouldValidateOnInteraction(input);
     this.hideValidationFor(input);
     if (shouldValidate && !input.checkValidity()) {

@@ -16,7 +16,7 @@
 
 import {childElementByTag} from '../dom';
 import {fromClass} from '../service';
-import {user} from '../log';
+import {dev, user} from '../log';
 
 
 /**
@@ -92,7 +92,7 @@ export class BaseTemplate {
         // Ignore comments.
       } else if (n.nodeType == /* ELEMENT */ 1) {
         if (!singleElement) {
-          singleElement = /** @type {!Element} */ (n);
+          singleElement = dev().assertElement(n);
         } else {
           // This is not the first element - can't unwrap.
           singleElement = null;

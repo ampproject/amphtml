@@ -16,7 +16,7 @@
 
 import {getServiceForDoc} from './service';
 import {startsWith} from './string';
-import {user} from './log';
+import {dev, user} from './log';
 import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
@@ -62,7 +62,7 @@ export function onDocumentFormSubmit_(e) {
   if (method == 'GET') {
     user().assert(action,
         'form action attribute is required for method=GET: %s', form);
-    assertHttpsUrl(action, /** @type {!Element} */ (form), 'action');
+    assertHttpsUrl(action, dev().assertElement(form), 'action');
     user().assert(!startsWith(action, urls.cdn),
         'form action should not be on AMP CDN: %s', form);
     checkCorsUrl(action);
