@@ -99,8 +99,7 @@ class AmpLightbox extends AMP.BaseElement {
         this.element.style.opacity = '';
       });
     }).then(() => {
-      const container = /** @type {!Element} */ (
-          dev().assert(this.container_));
+      const container = dev().assertElement(this.container_);
       this.updateInViewport(container, true);
       this.scheduleLayout(container);
       this.scheduleResume(container);
@@ -136,8 +135,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
-    this.schedulePause(/** @type {!Element} */ (
-        dev().assert(this.container_)));
+    this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
   }
 
