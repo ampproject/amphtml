@@ -29,6 +29,25 @@ const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {string} */
+    this.shareEndpoint_ = '';
+
+    /** @private {!Object} */
+    this.params_ = {};
+
+    /** @private {?../../../src/service/platform-impl.Platform} */
+    this.platform_ = null;
+
+    /** @private {string} */
+    this.href_ = '';
+
+    /** @private {string} */
+    this.target_ = '';
+  }
+
   /** @override */
   isLayoutSupported() {
     return true;
@@ -42,25 +61,13 @@ class AmpSocialShare extends AMP.BaseElement {
         'Space characters are not allowed in type attribute value. %s',
         this.element);
     const typeConfig = getSocialConfig(typeAttr) || {};
-
-    /** @private @const {string} */
     this.shareEndpoint_ = user().assert(
         this.element.getAttribute('data-share-endpoint') ||
         typeConfig.shareEndpoint,
         'The data-share-endpoint attribute is required. %s', this.element);
-
-    /** @private @const {!Object} */
     this.params_ = Object.assign({}, typeConfig.defaultParams,
         getDataParamsFromAttributes(this.element));
-
-    /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = platformFor(this.win);
-
-    /** @private {string} */
-    this.href_ = null;
-
-    /** @private {string} */
-    this.target_ = null;
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
     const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
