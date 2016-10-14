@@ -843,6 +843,7 @@ describe('Viewer', () => {
         windowApi.parent = windowApi;
         windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.true;
