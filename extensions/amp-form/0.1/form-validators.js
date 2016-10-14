@@ -45,9 +45,9 @@ const CustomValidationTypes = {
 
 /**
  * Form validator interface.
- * @interface
+ * @abstract
  */
-class FormValidator {
+export class FormValidator {
 
   /**
    * @param {!HTMLFormElement} form
@@ -57,7 +57,7 @@ class FormValidator {
     this.form = form;
 
     /** @protected @const {!Document} */
-    this.doc = form.ownerDocument;
+    this.doc = /** @type {!Document} */ (form.ownerDocument);
   }
 
   /**
@@ -143,10 +143,10 @@ export class AbstractCustomValidator extends FormValidator {
   constructor(form) {
     super(form);
 
-    /** @private @const {!Object<string, !Element>} */
+    /** @private @const {!Object<string, ?Element>} */
     this.inputValidationsDict_ = {};
 
-    /** @private @const {!Object<string, !Element>} */
+    /** @private @const {!Object<string, ?Element>} */
     this.inputVisibleValidationDict_ = {};
   }
 
@@ -166,7 +166,7 @@ export class AbstractCustomValidator extends FormValidator {
   hideAllValidations() {
     for (const id in this.inputVisibleValidationDict_) {
       const input = this.doc.getElementById(id);
-      this.hideValidationFor(input);
+      this.hideValidationFor(/** @type {!Element} */ (input));
     }
   }
 
@@ -232,7 +232,7 @@ export class AbstractCustomValidator extends FormValidator {
 
   /**
    * Whether an input should validate after an interaction.
-   * @param {!Element} input
+   * @param {!Element} unusedInput
    * @return {boolean}
    */
   shouldValidateOnInteraction(unusedInput) {
@@ -374,7 +374,7 @@ function isReportValiditySupported(doc) {
 
 /**
  * Returns invalid error type on the input.
- * @param {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} input
+ * @param {!Element} input
  * @return {?string}
  */
 function getInvalidType(input) {
