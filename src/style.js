@@ -144,6 +144,7 @@ export function toggle(element, opt_display) {
   element.style.display = opt_display ? '' : 'none';
 }
 
+
 /**
  * Returns a pixel value.
  * @param {number} value
@@ -152,6 +153,7 @@ export function toggle(element, opt_display) {
 export function px(value) {
   return value + 'px';
 }
+
 
 /**
  * Returns a "translateX" for CSS "transform" property.
