@@ -167,7 +167,7 @@ export class AbstractCustomValidator extends FormValidator {
   hideAllValidations() {
     for (const id in this.inputVisibleValidationDict_) {
       const input = this.doc.getElementById(id);
-      this.hideValidationFor(/** @type {!Element} */ (input));
+      this.hideValidationFor(dev().assertElement(input));
     }
   }
 
