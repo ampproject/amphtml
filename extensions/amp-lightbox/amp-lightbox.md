@@ -45,7 +45,7 @@ The `amp-lightbox` component defines the child elements that will be displayed i
 
 ### Closing the lightbox
 Pressing the escape key on the keyboard will close the lightbox.
-Alternatively setting the `on` attribute on one or more elements within the lightbox and setting it's method to `close` will close the lightbox when the element is tapped or clicked.
+Alternatively setting the `on` attribute on one or more elements within the lightbox and setting its method to `close` will close the lightbox when the element is tapped or clicked.
 
 Example:
 ```html
