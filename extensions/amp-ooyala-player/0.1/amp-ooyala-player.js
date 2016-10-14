@@ -79,6 +79,33 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  play(unusedIsAutoplay) {
+    this.iframe_.contentWindow.postMessage("play", "*");
+  }
+
+  /** @override */
+  pause() {
+    this.iframe_.contentWindow.postMessage("pause", "*");
+  }
+
+  /** @override */
+  mute() {
+    this.iframe_.contentWindow.postMessage("mute", "*");
+  }
+
+  /** @override */
+  unmute() {
+    this.iframe_.contentWindow.postMessage("unmute", "*");
+  }
+
+  /** @override */
+  pauseCallback() {
+    if (this.iframe_) {
+      this.pause();
+    }
+  }
+
+  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -89,7 +116,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-    return true;
+    return false;
   }
 };
 
