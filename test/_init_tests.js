@@ -69,22 +69,26 @@ class TestConfig {
   }
 
   skipChrome() {
-    this.skipMatchers.push(this.platform_.isChrome.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isChrome.bind(this.platform_));
   }
 
   skipEdge() {
-    this.skipMatchers.push(this.platform_.isEdge.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isEdge.bind(this.platform_));
   }
 
   skipFirefox() {
-    this.skipMatchers.push(this.platform_.isFirefox.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isFirefox.bind(this.platform_));
   }
 
   skipSafari() {
-    this.skipMatchers.push(this.platform_.isSafari.bind(this.platform_));
+    return this.skip(this.platform_.isSafari.bind(this.platform_));
+  }
+
+  /**
+   * @param {function():boolean} fn
+   */
+  skip(fn) {
+    this.skipMatchers.push(fn);
     return this;
   }
 
