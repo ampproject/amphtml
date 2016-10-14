@@ -68,6 +68,7 @@ describe('Viewport', () => {
     windowApi = {
       document: {
         documentElement: {
+          nodeType: 1,
           style: {},
           classList: {
             add: function() {},
@@ -1112,6 +1113,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       readyState: 'complete',
       documentElement: {style: {}},
       body: {
+        nodeType: 1,
         scrollWidth: 777,
         scrollHeight: 999,
         style: {},
