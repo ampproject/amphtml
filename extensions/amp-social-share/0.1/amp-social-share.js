@@ -24,8 +24,6 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {platformFor} from '../../../src/platform';
 
-/** @const */
-const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
 
