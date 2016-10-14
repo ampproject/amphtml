@@ -145,27 +145,6 @@ export function toggle(element, opt_display) {
 }
 
 /**
- * Visually hides an element but keeps it accessible to screen readers.
- * If opt_visibleOnlyForScreenReaders is false or element was already only
- * visible to screen-readers, it remove the screen-reader specific styling
- * from the element.
- * @param {boolean=} opt_visibleOnlyForScreenReaders
- */
-export function toggleScreenReaderVisibility(element, opt_visibleOnlyForScreenReaders) {
-  if (opt_visibleOnlyForScreenReaders === undefined) {
-    opt_visibleOnlyForScreenReaders = !(element.classList.contains('-amp-screen-reader'));
-  }
-
-  if (opt_visibleOnlyForScreenReaders) {
-
-  } else {
-
-  }
-  element.style.display = opt_display ? '' : 'none';
-}
-
-
-/**
  * Returns a pixel value.
  * @param {number} value
  * @return {string}
@@ -173,7 +152,6 @@ export function toggleScreenReaderVisibility(element, opt_visibleOnlyForScreenRe
 export function px(value) {
   return value + 'px';
 }
-
 
 /**
  * Returns a "translateX" for CSS "transform" property.
