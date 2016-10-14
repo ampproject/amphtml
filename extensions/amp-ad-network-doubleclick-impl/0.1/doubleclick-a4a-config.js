@@ -22,6 +22,8 @@
 
 import {
   googleAdsIsA4AEnabled,
+  EXPERIMENT_ATTRIBUTE,
+  isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
@@ -62,6 +64,12 @@ export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   experiment: '117152681',
 };
 
+/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
+export const DOUBLECLICK_A4A_BETA_BRANCHES = {
+  control: '2077830',
+  experiment: '2077831',
+};
+
 /**
  * @param {!Window} win
  * @param {!Element} element
@@ -76,11 +84,15 @@ export function doubleclickIsA4AEnabled(win, element) {
   // therefore, carves out of the experiment branches.  Any publisher using this
   // attribute will be excluded from the experiment altogether.
   const enableA4A = !usesRemoteHTML &&
-      ((a4aRequested &&
-        (isProxyOrigin(win.location) || getMode(win).localDev)) ||
-       googleAdsIsA4AEnabled(
+      (googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
           DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES));
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES) ||
+       (a4aRequested &&
+        (isProxyOrigin(win.location) || getMode(win).localDev)));
+  if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
+    element.setAttribute(EXPERIMENT_ATTRIBUTE,
+        DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
+  }
   return enableA4A;
 }
