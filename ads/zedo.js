@@ -29,31 +29,34 @@ export function zedo(global, data) {
     'dim', 'renderer']);
 
   loadScript(global, 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js', () => {
-    var tmy = data.tmy ? data.tmy : "0";
-    var g = data.geo ? data.geo : "";
-    var charset = data.charset ? data.charset : "";
-    var callback = data.callback ? data.callback : () => {};
-    var geckoTag = new ZGTag(data.superId, data.network, tmy, g, charset, callback);
+    const ZGTag = global.ZGTag;
+    const tmy = data.tmy ? data.tmy : '0';
+    const g = data.geo ? data.geo : '';
+    const charset = data.charset ? data.charset : '';
+    const callback = data.callback ? data.callback : () => {};
+    const geckoTag = new ZGTag(data.superId, data.network, tmy, g,
+      charset, callback);
     geckoTag.setAMP();
-
     // define placement
-		var placement = geckoTag.addPlacement(data.placementId, data.channel, data.publisher, data.dim, data.width, data.height);
+    const placement = geckoTag.addPlacement(data.placementId,
+        data.channel, data.publisher, data.dim, data.width, data.height);
     if (data.renderer) {
       for (const key in data.renderer) {
-        placement.includeRenderer(data.renderer[key].name, data.renderer[key].value);
+        placement.includeRenderer(data.renderer[key].name,
+          data.renderer[key].value);
       }
+    } else {
+      placement.includeRenderer('ampdisplay', {});
     }
     //create a slot div to display ad
-      var slot = global.document.createElement('div');
-      slot.id = "zdt_" + data.placementId;
-      global.document.body.appendChild(slot);
+    const slot = global.document.createElement('div');
+    slot.id = 'zdt_' + data.placementId;
+    global.document.body.appendChild(slot);
 
-      // call load ads
-		 geckoTag.loadAds();
+    // call load ads
+    geckoTag.loadAds();
 
-     // call div ready
-     geckoTag.placementReady(data.placementId);
+    // call div ready
+    geckoTag.placementReady(data.placementId);
   });
-
-
 }
