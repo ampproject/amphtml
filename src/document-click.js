@@ -217,11 +217,9 @@ export function onDocumentElementClick_(
   }
 
   if (tgtLoc.hash != curLoc.hash) {
-    timerFor(win).delay(() => {
     // Push/pop history.
-      history.push(() => {
-        win.location.replace(`${curLoc.hash || '#'}`);
-      });
-    }, 1000);
+    history.push(() => {
+      win.location.replace(`${curLoc.hash || '#'}`);
+    });
   }
 }
