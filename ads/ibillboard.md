@@ -18,9 +18,7 @@ limitations under the License.
 
 Please visit [our website](https://www.ibillboard.com/) for more information.
 
-## Examples
-
-### Simple ad tag with `data-bn`
+## Example
 
 ### Ad tag with `src`
 
