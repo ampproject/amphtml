@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,9 @@ import {validateData, loadScript} from '../3p/3p';
  */
 export function zedo(global, data) {
   // check mandatory fields
-  validateData(data, [], [
-    'superId', 'network', 'placementId',
-    'channel', 'publisher',
-    'dim', 'renderer']);
+  validateData(data, ['superId', 'network', 'placementId',
+  'channel', 'publisher', 'dim', 'renderer'], ['charset', 'callback',
+  'tmy', 'g', 'renderer']);
 
   loadScript(global, 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js', () => {
     const ZGTag = global.ZGTag;
