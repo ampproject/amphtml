@@ -298,6 +298,7 @@ class MockVideoPlayer extends BaseElement {
      * @override
      */
     play(unusedIsAutoplay) {
+      this.element.dispatchCustomEvent(VideoEvents.PLAY);
       this.waitForPlayCallResolve_();
     }
 
@@ -305,6 +306,7 @@ class MockVideoPlayer extends BaseElement {
      * @override
      */
     pause() {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       this.waitForPauseCallResolve_();
     }
 

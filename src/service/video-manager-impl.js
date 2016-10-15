@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {listen, listenOnce, listenOncePromise} from '../event-helper';
+import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {fromClassForDoc} from '../service';
@@ -125,7 +125,7 @@ class VideoEntry {
     this.video = video;
 
     /** @private {?Element} */
-    this.autoplayIcon_ = null;
+    this.autoplayAnimation_ = null;
 
     /** @private {boolean} */
     this.loaded_ = false;
@@ -147,6 +147,9 @@ class VideoEntry {
 
     /** @private {boolean} */
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
+
+    /** @private {boolean} */
+    this.isInteractive_ = element.hasAttribute(VideoAttributes.CONTROLS);
 
     listenOncePromise(element, VideoEvents.LOAD)
       .then(() => this.videoLoaded_());
@@ -221,24 +224,53 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      // If autoplay video has controls, hide them and only show them on
-      // user interaction.
-      if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
-        this.video.hideControls();
-        this.autoplayIcon_ = this.createAutoplayIcon_();
-
-        this.vsync_.mutate(() => {
-          this.video.element.appendChild(this.autoplayIcon_);
-        });
-
-        listenOnce(this.video.element, VideoEvents.USER_TAP, () => {
-          this.userInteracted_ = true;
-          this.video.showControls();
-          this.video.unmute();
-          this.autoplayIcon_.remove();
-        });
+      if (this.isInteractive_) {
+        this.autoplayInteractiveVideoBuilt_();
       }
     });
+  }
+
+  /**
+   * Called by autoplayVideoBuilt_ when an interactive autoplay video is built.
+   * It handles hiding controls, installing autoplay animation and handling
+   * user interaction by unmuting and showing controls.
+   * @private
+   */
+  autoplayInteractiveVideoBuilt_() {
+    const onInteraction = () => {
+      this.userInteracted_ = true;
+      this.video.showControls();
+      this.video.unmute();
+      unlistenInteraction();
+      unlistenPause();
+      unlistenPlay();
+      animation.remove();
+    };
+
+    const toggleAnimation = playing => {
+      this.vsync_.mutate(() => {
+        animation.classList.toggle('amp-video-eq-play', playing);
+      });
+    };
+
+    // Hide the controls.
+    this.video.hideControls();
+
+    // Create autoplay animation.
+    const animation = this.createAutoplayAnimation_();
+    this.vsync_.mutate(() => {
+      this.video.element.appendChild(animation);
+    });
+
+    // Listen to pause, play and user interaction events.
+    const unlistenInteraction = listen(this.video.element, VideoEvents.USER_TAP,
+        onInteraction.bind(this));
+
+    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false));
+
+    const unlistenPlay = listen(this.video.element, VideoEvents.PLAY,
+        toggleAnimation.bind(this, /*playing*/ true));
   }
 
   /**
@@ -275,10 +307,10 @@ class VideoEntry {
    * @private
    * @return {!Element}
    */
-  createAutoplayIcon_() {
+  createAutoplayAnimation_() {
     const doc = this.ampdoc_.win.document;
-    const icon = doc.createElement('i-amp-video-eq');
-    icon.classList.add('amp-video-eq');
+    const anim = doc.createElement('i-amp-video-eq');
+    anim.classList.add('amp-video-eq');
     // Four columns for the equalizer.
     for (let i = 1; i <= 4; i++) {
       const column = doc.createElement('div');
@@ -290,14 +322,14 @@ class VideoEntry {
         filler.classList.add(`amp-video-eq-${i}-${j}`);
         column.appendChild(filler);
       }
-      icon.appendChild(column);
+      anim.appendChild(column);
     }
     const platform = platformFor(this.ampdoc_.win);
     if (platform.isSafari() && platform.isIos()) {
       // iOS Safari can not pause hardware accelerated animations.
-      icon.setAttribute('unpausable', '');
+      anim.setAttribute('unpausable', '');
     }
-    return icon;
+    return anim;
   }
 
   /**
