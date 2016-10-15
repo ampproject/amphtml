@@ -175,7 +175,6 @@ export const VideoEvents = {
    */
   PAUSE: 'pause',
 
-
   /**
    * amp:video:usertap
    *

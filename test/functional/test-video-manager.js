@@ -30,20 +30,16 @@ import {videoManagerForDoc} from '../../src/video-manager';
 import {createIframePromise} from '../../testing/iframe';
 import * as sinon from 'sinon';
 
-// TODO(aghassemi): Switch to new testing setup when it supports building and
-// laying out elements.
 describe('Autoplay', () => {
   describe('play/pause', () => {
     it('should play when in view port initially', () => {
-      return createMockVideoPlayer(/* opt_outsideView */ false)
-      .then(v => {
+      return createMockVideoPlayer(/* opt_outsideView */ false).then(v => {
         return v.implementation_.waitForPlayCall;
       });
     });
 
     it('should not play when not in view port initially', () => {
-      return createMockVideoPlayer(/* opt_outsideView */ true)
-      .then(v => {
+      return createMockVideoPlayer(/* opt_outsideView */ true).then(v => {
         const timer = timerFor(v.implementation_.win);
         const playPromise = v.implementation_.waitForPlayCall.then(() => {
           return Promise.reject('should not have autoplayed');
@@ -56,16 +52,14 @@ describe('Autoplay', () => {
     it('should play/pause when video enters/exists viewport', () => {
       let video;
       let viewport;
-      return createMockVideoPlayer(/* opt_outsideView */ true)
-      .then(v => {
+      return createMockVideoPlayer(/* opt_outsideView */ true).then(v => {
         video = v;
         viewport = viewportForDoc(video);
 
         // scroll to the bottom, make video fully visible
         viewport.setScrollTop(viewport.getHeight());
         return video.implementation_.waitForPlayCall;
-      })
-      .then(() => {
+      }).then(() => {
         // scroll back to top, make video not visible
         viewport.setScrollTop(0);
         return video.implementation_.waitForPauseCall;
@@ -78,14 +72,12 @@ describe('Autoplay', () => {
       let video;
       let viewport;
       let icon;
-      return createMockVideoPlayer(/* opt_outsideView */ true)
-      .then(v => {
+      return createMockVideoPlayer(/* opt_outsideView */ true).then(v => {
         video = v;
         return waitForChildPromise(video, () => {
           return !!video.querySelector('i-amp-video-eq');
         });
-      })
-      .then(() => {
+      }).then(() => {
         icon = video.querySelector('i-amp-video-eq');
         expect(icon).to.exist;
         // animation should be paused since video is not played yet
@@ -138,8 +130,7 @@ describe('Supports Autoplay', () => {
   let playSpy;
 
   it('should create an invisible test video element', () => {
-    return supportsAutoplay(ampdoc, isLite)
-    .then(() => {
+    return supportsAutoplay(ampdoc, isLite).then(() => {
       expect(video.style.position).to.equal('fixed');
       expect(video.style.top).to.equal('0');
       expect(video.style.width).to.equal('0');
@@ -162,8 +153,7 @@ describe('Supports Autoplay', () => {
 
   it('should return false if `paused` is true after `play()` call', () => {
     video.paused = true;
-    return supportsAutoplay(ampdoc, isLite)
-    .then(supportsAutoplay => {
+    return supportsAutoplay(ampdoc, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
       expect(playSpy.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -172,8 +162,7 @@ describe('Supports Autoplay', () => {
 
   it('should return true if `paused` is false after `play()` call', () => {
     video.paused = false;
-    return supportsAutoplay(ampdoc, isLite)
-    .then(supportsAutoplay => {
+    return supportsAutoplay(ampdoc, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.true;
       expect(playSpy.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -182,8 +171,7 @@ describe('Supports Autoplay', () => {
 
   it('should be false when in amp-lite mode', () => {
     isLite = true;
-    return supportsAutoplay(ampdoc, isLite)
-    .then(supportsAutoplay => {
+    return supportsAutoplay(ampdoc, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
     });
   });
