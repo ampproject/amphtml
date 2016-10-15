@@ -70,7 +70,7 @@ export const ViewportType = {
  *
  * @export {!Array<!RegExp>}
  */
-export const TRUSTED_VIEWER_HOSTS = [
+const TRUSTED_VIEWER_HOSTS = [
   /**
    * Google domains, including country-codes and subdomains:
    * - google.com
@@ -78,13 +78,15 @@ export const TRUSTED_VIEWER_HOSTS = [
    * - google.co
    * - www.google.co
    * - google.az
-   * - www.google..az
+   * - www.google.az
    * - google.com.az
    * - www.google.com.az
    * - google.co.az
    * - www.google.co.az
+   * - google.cat
+   * - www.google.cat
    */
-  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2})$/,
+  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
 
 
@@ -241,11 +243,18 @@ export class Viewer {
     dev().fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
     /**
+     * Whether the AMP document is embedded in a webview.
+     * @private @const {boolean}
+     */
+    this.isWebviewEmbedded_ = !this.isIframed_ &&
+        this.params_['webview'] == '1';
+
+    /**
      * Whether the AMP document is embedded in a viewer, such as an iframe or
      * a web view.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = (this.isIframed_ || this.params_['webview'] === '1') &&
+    this.isEmbedded_ = (this.isIframed_ || this.isWebviewEmbedded_) &&
         !this.win.AMP_TEST_IFRAME;
 
     /** @private {boolean} */
@@ -293,7 +302,7 @@ export class Viewer {
       // Not embedded in IFrame - can't trust the viewer.
       trustedViewerResolved = false;
       trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins) {
+    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
