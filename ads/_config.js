@@ -98,6 +98,10 @@ export const adConfig = {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
   },
 
+  advertserve: {
+    renderStartImplemented: true,
+  },
+
   affiliateb: {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
     renderStartImplemented: true,
@@ -353,7 +357,14 @@ export const adConfig = {
 
   triplelift: {},
 
-  webediads: {},
+  webediads: {
+    prefetch: 'https://eu1.wbdds.com/amp.min.js',
+    preconnect: [
+      'https://goutee.top',
+      'https://mediaathay.org.uk',
+    ],
+    renderStartImplemented: true,
+  },
 
   'weborama-display': {
     prefetch: [

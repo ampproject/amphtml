@@ -575,7 +575,7 @@ export class Viewport {
   updateOnViewportEvent_(event) {
     this.binding_.updateViewerViewport(this.viewer_);
     const paddingTop = event['paddingTop'];
-    const duration = event['duration'];
+    const duration = event['duration'] || 0;
     const curve = event['curve'];
     /** @const {boolean} */
     const transient = event['transient'];
@@ -602,18 +602,17 @@ export class Viewport {
    */
   animateFixedElements_(duration, curve) {
     this.fixedLayer_.updatePaddingTop(this.paddingTop_);
-    if (duration > 0) {
-      // Add transit effect on position fixed element
-      /** @const {!TransitionDef<number>} */
-      const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
-      return Animation.animate(this.ampdoc.getRootNode(), time => {
-        const p = tr(time);
-        this.fixedLayer_.transformMutate(`translateY(${p}px)`);
-      }, duration, curve).thenAlways(() => {
-        this.fixedLayer_.transformMutate(null);
-      });
+    if (duration <= 0) {
+      return Promise.resolve();
     }
-    return Promise.resolve();
+    // Add transit effect on position fixed element
+    const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
+    return Animation.animate(this.ampdoc.getRootNode(), time => {
+      const p = tr(time);
+      this.fixedLayer_.transformMutate(`translateY(${p}px)`);
+    }, duration, curve).thenAlways(() => {
+      this.fixedLayer_.transformMutate(null);
+    });
   }
 
   /**
@@ -1195,9 +1194,7 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   hideViewerHeader(transient, lastPaddingTop) {
-    if (!transient) {
-      this.updatePaddingTop(0);
-    } else {
+    if (transient) {
       // Add extra paddingTop to make the content stay at the same position
       // when the hiding header operation is transient
       onDocumentReady(this.win.document, doc => {
@@ -1207,6 +1204,8 @@ export class ViewportBindingNaturalIosEmbed_ {
             `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
         doc.body.style.borderTop = '';
       });
+    } else {
+      this.updatePaddingTop(0);
     }
   }
 
