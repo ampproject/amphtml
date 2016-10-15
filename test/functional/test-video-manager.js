@@ -21,12 +21,12 @@ import {waitForChildPromise} from '../../src/dom';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {timerFor} from '../../src/timer';
 import {viewportForDoc} from '../../src/viewport';
+import {VideoEvents} from '../../src/video-interface';
+import {videoManagerForDoc} from '../../src/video-manager';
 import {
   supportsAutoplay,
   clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
-import {VideoEvents} from '../../src/video-interface';
-import {videoManagerForDoc} from '../../src/video-manager';
 import {createIframePromise} from '../../testing/iframe';
 import * as sinon from 'sinon';
 
