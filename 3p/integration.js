@@ -177,8 +177,6 @@ register('facebook', facebook);
 register('flite', flite);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
-register('holder', holder);
-register('ibillboard', ibillboard);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
