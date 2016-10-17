@@ -33,6 +33,7 @@ import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
+import * as trackPromise from '../../src/impression';
 import * as sinon from 'sinon';
 
 
@@ -198,6 +199,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SOURCE_URL and _HOST', () => {
+    sandbox.stub(trackPromise, 'trackImpressionPromise', Promise.resolve());
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOST/);
@@ -205,10 +207,30 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SOURCE_URL and _HOSTNAME', () => {
+    sandbox.stub(trackPromise, 'trackImpressionPromise', Promise.resolve());
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOSTNAME/);
     });
+  });
+
+  it('should update SOURCE_URL after track impression', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://wrong.com');
+    const clock = sandbox.useFakeTimers();
+    sandbox.stub(trackPromise, 'trackImpressionPromise',
+        new Promise(resolve => {
+          setTimeout(() => {
+            win.location = parseUrl('https://example.com#gclid=123456');
+            resolve();
+          }, 1000);
+        }));
+    clock.tick(1001);
+    return installUrlReplacementsServiceForDoc(win.ampdoc)
+      .expandAsync('?url=SOURCE_URL')
+      .then(res => {
+        expect(res).to.contain('example.com');
+      });
   });
 
   it('should replace SOURCE_PATH', () => {
@@ -727,7 +749,17 @@ describe('UrlReplacements', () => {
 
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?query_string_param1=foo');
+    win.location = parseUrl('https://example.com?query_string_param1=wrong');
+    const clock = sandbox.useFakeTimers();
+    sandbox.stub(trackPromise, 'trackImpressionPromise',
+        new Promise(resolve => {
+          setTimeout(() => {
+            win.location =
+                parseUrl('https://example.com?query_string_param1=foo');
+            resolve();
+          }, 1000);
+        }));
+    clock.tick(1001);
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {

@@ -407,21 +407,13 @@ app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
 
 app.use('/impression-proxy/', function(req, res) {
   assertCors(req, res, ['GET']);
-  const fakeHeaders = {
-    'Host': 'adclick.g.doubleclick.net',
-    'Origin': 'https://cdn.ampproject.org',
-    'Cookie': 'Cookie:id=4903ef7b59596f28||t=1451370221|et=730|cs=002213fd48e4405e4579c95dfa',
+  // TODO(@zhouyx): How to request real ad server response with cookie set
+  const body = {
+    'location': 'localhost:8000/examples/#gclid=1234',
+    'gclid': '1234',
+    'tracking': 'tracking_url',
   };
-  const options = {
-    url: 'https://googleads.g.doubleclick.net/pcs/click?alp=1&xai=AKAOjstvASJmd6-NeoO3ner8FBNJW2w8n-sXMo0Nj5YC_LIY2NQjbNs0CoXQtM9tPi8by4H4bHRpMdB14qgRLctKkBKkh3vpR3m8fvPCzcFZ6HrxvxXUqzP17YJsihcINtRniOfmGFkzIolJ3ccPSPq6oYdJpg5lPeufOrLhtWsNspOsRgMSBFP7zH0l8tgtAb665jHEFmdAMH1vl69BxpqU2Q0ZoGDO_SVBMArlL--2nLOVgQt8om6IdzkcodppT9c&sig=Cg0ArKJSzEJGKs3-NmXNEAE&urlfix=1&adurl=https://cdn.ampproject.org/c/www.nbcnews.com/news/us-news/amp/milwaukee-cop-cars-smashed-torched-after-police-kill-suspect-n630236',
-    headers: fakeHeaders,
-  };
-
-  request(options, (error, response, body) => {
-    if (!error && response.statusCode == 200) {
-      res.send(body);
-    }
-  });
+  res.send(body);
 });
 
 // Proxy with unminified JS.

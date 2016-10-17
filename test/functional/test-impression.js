@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {maybeTrackImpression} from '../../src/impression';
+import {
+  trackImpressionPromise,
+  maybeTrackImpression,
+} from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import {xhrFor} from '../../src/xhr';
-import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -49,6 +51,7 @@ describe('impression', () => {
   it('should do nothing if the experiment is off', () => {
     viewer.getParam.throws(new Error('Should not be called'));
     maybeTrackImpression(window);
+    return trackImpressionPromise.should.be.fulfilled;
   });
 
   it('should do nothing if there is no click arg', () => {
@@ -56,6 +59,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('');
     maybeTrackImpression(window);
     expect(xhr.fetchJson.callCount).to.equal(0);
+    return trackImpressionPromise.should.be.fulfilled;
   });
 
   it('should do nothing if there is the click arg is http', () => {
@@ -63,6 +67,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('http://www.example.com');
     maybeTrackImpression(window);
     expect(xhr.fetchJson.callCount).to.equal(0);
+    return trackImpressionPromise.should.be.fulfilled;
   });
 
   it('should invoke URL', () => {
@@ -82,84 +87,12 @@ describe('impression', () => {
     });
   });
 
-  it('should redirect if xhr return tracking url', () => {
+  it('should replace location href', () => {
     toggleExperiment(window, 'alp', true);
     viewer.getParam.withArgs('click').returns('https://www.example.com');
-
-    const openWindowDialogSpy = sandbox.stub(dom, 'openWindowDialog',
-        (win, url, target) => {
-          expect(url).to.equal('test_tracking_url');
-          expect(target).to.equal('_top');
-        });
-
     xhr.fetchJson = () => {
       return Promise.resolve({
         'location': 'test_location',
-        'tracking_url': 'test_tracking_url',
-      });
-    };
-
-    maybeTrackImpression(window);
-    return Promise.resolve().then(() => {
-      return Promise.resolve().then(() => {
-        expect(openWindowDialogSpy).to.be.calledOnce;
-      });
-    });
-  });
-
-  it('should redirect if location is some other url', () => {
-    toggleExperiment(window, 'alp', true);
-    viewer.getParam.withArgs('click').returns('https://www.example.com');
-
-    const openWindowDialogSpy = sandbox.stub(dom, 'openWindowDialog',
-        (win, url, target) => {
-          expect(url).to.equal('test_location');
-          expect(target).to.equal('_top');
-        });
-
-    xhr.fetchJson = () => {
-      return Promise.resolve({
-        'location': 'test_location',
-      });
-    };
-
-    maybeTrackImpression(window);
-    return Promise.resolve().then(() => {
-      return Promise.resolve().then(() => {
-        expect(openWindowDialogSpy).to.be.calledOnce;
-      });
-    });
-  });
-
-  it('should not redirect if location is valid', () => {
-    toggleExperiment(window, 'alp', true);
-    viewer.getParam.withArgs('click').returns('https://www.example.com');
-
-    const openWindowDialogSpy = sandbox.spy(dom, 'openWindowDialog');
-
-    xhr.fetchJson = () => {
-      return Promise.resolve({
-        'location': 'https://cdn.ampproject.org/c/test/?gclid=654321',
-      });
-    };
-
-    maybeTrackImpression(window);
-    return Promise.resolve().then(() => {
-      return Promise.resolve().then(() => {
-        expect(openWindowDialogSpy).to.not.be.called;
-        expect(window.location.hash).to.equal('#gclid=654321');
-      });
-    });
-  });
-
-  it('should set gclid to location hash', () => {
-    toggleExperiment(window, 'alp', true);
-    viewer.getParam.withArgs('click').returns('https://www.example.com');
-
-    const openWindowDialogSpy = sandbox.spy(dom, 'openWindowDialog');
-
-    xhr.fetchJson = () => {
-      return Promise.resolve({
         'gclid': '123456',
       });
     };
@@ -167,8 +100,8 @@ describe('impression', () => {
     maybeTrackImpression(window);
     return Promise.resolve().then(() => {
       return Promise.resolve().then(() => {
-        expect(openWindowDialogSpy).to.not.be.called;
-        expect(window.location.hash).to.be.equal('#gclid=123456');
+        expect(window.location.href).to.contain('test_location');
+        return trackImpressionPromise.should.be.fulfilled;
       });
     });
   });

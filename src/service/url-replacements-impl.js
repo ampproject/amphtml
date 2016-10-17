@@ -29,6 +29,7 @@ import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
 import {isExperimentOn} from '../experiments';
+import {trackImpressionPromise} from '../impression.js';
 
 
 /** @private @const {string} */
@@ -163,6 +164,18 @@ export class UrlReplacements {
       return removeFragment(info.sourceUrl);
     }));
 
+    this.setAsync_('SOURCE_URL', () => {
+      let promise = trackImpressionPromise;
+      if (!promise) {
+        promise = Promise.resolve();
+      }
+      return promise.then(
+        this.getDocInfoValue_.bind(this, info => {
+          return removeFragment(info.sourceUrl);
+        })
+      );
+    });
+
     // Returns the host of the Source URL for this AMP document.
     this.set_('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
       return parseUrl(info.sourceUrl).host;
@@ -195,6 +208,24 @@ export class UrlReplacements {
       return (typeof params[param] !== 'undefined') ?
         params[param] :
         defaultValue;
+    });
+
+    this.setAsync_('QUERY_PARAM', (param, defaultValue = '') => {
+      user().assert(param,
+          'The first argument to QUERY_PARAM, the query string ' +
+          'param is required');
+      let promise = trackImpressionPromise;
+      if (!promise) {
+        promise = Promise.resolve();
+      }
+      return promise.then(() => {
+        const url = parseUrl(this.ampdoc.win.location.href);
+        const params = parseQueryString(url.search);
+
+        return (typeof params[param] !== 'undefined') ?
+            params[param] :
+            defaultValue;
+      });
     });
 
     /**

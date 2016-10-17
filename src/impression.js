@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {user} from './log';
+import {dev, user} from './log';
 import {isExperimentOn} from './experiments';
 import {viewerForDoc} from './viewer';
 import {xhrFor} from './xhr';
 import {getMode} from './mode';
-import {openWindowDialog} from './dom';
 
+/** A promise that resolve after getting info from ad server
+ * {Promise=}
+ */
+export let trackImpressionPromise;
 
 /**
  * Emit a HTTP request to a destination defined on the incoming URL.
@@ -28,23 +31,30 @@ import {openWindowDialog} from './dom';
  * @param {!Window} win
  */
 export function maybeTrackImpression(win) {
+  let resolveImpression;
+
+  trackImpressionPromise = new Promise(resolve => {
+    resolveImpression = resolve;
+  });
+
   if (!isExperimentOn(win, 'alp')) {
+    resolveImpression();
     return;
   }
 
   const viewer = viewerForDoc(win.document);
   /** @const {string|undefined} */
-  let clickUrl = viewer.getParam('click');
+  const clickUrl = viewer.getParam('click');
 
-  // One test clickUrl
-  clickUrl = 'https://googleads.g.doubleclick.net/pcs/click?alp=1&xai=AKAOjstvASJmd6-NeoO3ner8FBNJW2w8n-sXMo0Nj5YC_LIY2NQjbNs0CoXQtM9tPi8by4H4bHRpMdB14qgRLctKkBKkh3vpR3m8fvPCzcFZ6HrxvxXUqzP17YJsihcINtRniOfmGFkzIolJ3ccPSPq6oYdJpg5lPeufOrLhtWsNspOsRgMSBFP7zH0l8tgtAb665jHEFmdAMH1vl69BxpqU2Q0ZoGDO_SVBMArlL--2nLOVgQt8om6IdzkcodppT9c&sig=Cg0ArKJSzEJGKs3-NmXNEAE&urlfix=1&adurl=https://cdn.ampproject.org/c/www.nbcnews.com/news/us-news/amp/milwaukee-cop-cars-smashed-torched-after-police-kill-suspect-n630236';
   if (!clickUrl) {
+    resolveImpression();
     return;
   }
   if (clickUrl.indexOf('https://') != 0) {
     user().warn('Impression',
         'click fragment param should start with https://. Found ',
         clickUrl);
+    resolveImpression();
     return;
   }
   if (win.location.hash) {
@@ -57,11 +67,9 @@ export function maybeTrackImpression(win) {
   viewer.whenFirstVisible().then(() => {
     // TODO(@zhouyx) We need a timeout here?
     // TODO(@zhouyx) need test with a real response.
-    invoke(win, clickUrl).then(response => {
-      if (!response) {
-        return;
-      }
+    invoke(win, dev().assertString(clickUrl)).then(response => {
       applyResponse(win, viewer, response);
+      resolveImpression();
     });
   });
 }
@@ -70,7 +78,7 @@ export function maybeTrackImpression(win) {
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise}
+ * @return {!Promise<!JSONType>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
@@ -80,7 +88,6 @@ function invoke(win, clickUrl) {
     credentials: 'include',
     requireAmpResponseSourceOrigin: true,
   });
-  // TODO(@cramforce): Do something with the result.
 }
 
 /**
@@ -91,34 +98,24 @@ function invoke(win, clickUrl) {
  */
 function applyResponse(win, viewer, response) {
   const adLocation = response['location'];
+  const adTracking = response['tracking'];
 
-  // If there's a tracking_url, need to redirect to that url.
-  const adTrackingUrl = response['tracking_url'];
-  if (adTrackingUrl) {
-    // TODO(@zhouyx) Confirm we assume the tracking_url is not
-    // a cdn.ampproject page, and we don't do viewer redirect
-    openWindowDialog(win, adTrackingUrl, '_top');
-    return;
+  // If there is a tracking_url, need to track it
+  // Otherwise track the location
+  const trackUrl = adTracking || adLocation;
+  if (trackUrl) {
+    new Image().src = trackUrl;
   }
 
-  // If adLocation is not an amp page, need to redirect to it.
-  if (adLocation && adLocation.indexOf('https://cdn.ampproject.org') != 0) {
-    // TODO(@zhouyx) Confirm we assume the tracking_url is not
-    // a cdn.ampproject page, and we don't do viewer redirect
-    openWindowDialog(win, adLocation, '_top');
-    return;
-  }
-
-  // If have gclid, or location contains gclid. add it to location hash
-  // Set gclid.
-  // If provided use it, if not try to find in adLocation from response
-  let gclid = response['gclid'];
-  if (!gclid) {
-    if (adLocation.indexOf('gclid=') > 0) {
-      gclid = adLocation.substr(adLocation.indexOf('gclid=') + 6);
+  // If have we have gclid replace the location href with new location we get.
+  // TODO(@zhouyx) should we replaceState directly w/o checking gclid?
+  const gclid = response['gclid'];
+  if (gclid && adLocation) {
+    if (getMode().localDev && !getMode().test) {
+      win.history.replaceState(null, '', win.location.href +
+          '#gclid=' + gclid);
+      return;
     }
-  }
-  if (gclid) {
-    win.location.hash = '#gclid=' + gclid;
+    win.history.replaceState(null, '', adLocation);
   }
 }
