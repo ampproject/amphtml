@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {FakeCustomElements, FakeWindow} from './fake-dom';
+import {
+  FakeCustomElements,
+  FakeWindow,
+  interceptEventListeners,
+} from './fake-dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   adopt,
@@ -23,8 +27,10 @@ import {
   installRuntimeServices,
   registerForUnitTest,
 } from '../src/runtime';
+import {cssText} from '../build/css';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
+import {installStyles} from '../src/style-installer';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import * as sinon from 'sinon';
 
@@ -281,7 +287,7 @@ class FakeWinFixture {
 /** @implements {Fixture} */
 class RealWinFixture {
 
-  /** @param {!{fakeRegisterElement: boolean}} spec */
+  /** @param {!{fakeRegisterElement: boolean, ampCss: boolean}} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
@@ -303,6 +309,7 @@ class RealWinFixture {
           '<style>.-amp-element {display: block;}</style>' +
           '<body style="margin:0"><div id=parent></div>';
       iframe.onload = function() {
+        let completePromise;
         const win = iframe.contentWindow;
         env.win = win;
 
@@ -311,11 +318,25 @@ class RealWinFixture {
 
         doNotLoadExternalResourcesInTest(win);
 
+        // Install AMP CSS if requested.
+        if (spec.ampCss) {
+          completePromise = new Promise(resolve => {
+            installStyles(win.document, cssText, resolve);
+          });
+        }
+
         if (spec.fakeRegisterElement) {
           win.customElements = new FakeCustomElements(win);
         }
 
-        resolve();
+        // Intercept event listeners
+        interceptEventListeners(win);
+        interceptEventListeners(win.document);
+        interceptEventListeners(win.document.documentElement);
+        interceptEventListeners(win.document.body);
+        env.interceptEventListeners = interceptEventListeners;
+
+        resolve(completePromise);
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);

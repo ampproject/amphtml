@@ -1518,6 +1518,17 @@ describe('Resources.add', () => {
     sandbox.restore();
   });
 
+  it('should enforce that viewport is ready for first add', () => {
+    const ensureViewportReady = sandbox.stub(resources.viewport_,
+        'ensureReadyForElements');
+    resources.add(child1);
+    expect(ensureViewportReady).to.be.calledOnce;
+
+    // Second `add` is ignored.
+    resources.add(child2);
+    expect(ensureViewportReady).to.be.calledOnce;
+  });
+
   it('should build elements immediately if the document is ready', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     child1.isBuilt = () => false;

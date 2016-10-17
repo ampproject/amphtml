@@ -194,6 +194,13 @@ const EXPERIMENTS = [
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
   },
+  {
+    id: 'ios-embed-wrapper',
+    name: 'A new iOS embedded viewport model that wraps the body into' +
+        ' a synthetic root',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
+  },
 ];
 
 if (getMode().localDev) {
