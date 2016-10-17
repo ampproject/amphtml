@@ -35,7 +35,6 @@ import {urls} from '../config';
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 
-
 /**
  * The structure that contains the declaration of a custom element.
  *
@@ -513,7 +512,7 @@ export class Extensions {
     const loc = this.win.location;
     const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        getMode().version, getMode().localDev, getMode().test, useCompiledJs);
+        getMode().localDev, getMode().test, useCompiledJs);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
@@ -540,14 +539,13 @@ export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
  * Calculate script url for amp-ad.
  * @param {!Location} location The window's location
  * @param {string} extensionId
- * @param {string} version
  * @param {boolean=} isLocalDev
  * @param {boolean=} isTest
  * @param {boolean=} isUsingCompiledJs
  * @return {string}
  */
-export function calculateExtensionScriptUrl(location, extensionId, version,
-    isLocalDev, isTest, isUsingCompiledJs) {
+export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
+    isTest, isUsingCompiledJs) {
   const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
   if (isLocalDev) {
     if ((isTest && !isUsingCompiledJs) || isMax(location)) {
@@ -555,9 +553,7 @@ export function calculateExtensionScriptUrl(location, extensionId, version,
     }
     return `${base}/v0/${extensionId}-0.1.js`;
   }
-  const folderPath = version == '$internalRuntimeVersion$' ?
-      'v0' : `rtv/${version}/v0`;
-  return `${base}/${folderPath}/${extensionId}-0.1.js`;
+  return `${base}/rtv/${getMode().version}/v0/${extensionId}-0.1.js`;
 }
 
 
