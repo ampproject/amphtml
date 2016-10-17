@@ -17,6 +17,7 @@
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {adopt, adoptShadowMode} from '../../src/runtime';
+import {deactivateChunking} from '../../src/chunk';
 import {
   getServiceForDoc,
   getServicePromise,
@@ -33,8 +34,7 @@ import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
-
-describes.sandboxed.only('runtime', {}, () => {
+describes.sandboxed.only('runtime', {}, env => {
 
   let win;
   let sandbox;
@@ -42,6 +42,7 @@ describes.sandboxed.only('runtime', {}, () => {
   let ampdocServiceMock;
 
   beforeEach(() => {
+    sandbox = env.sandbox;
     ampdocService = {
       isSingleDoc: () => true,
       getAmpDoc: () => null,
@@ -559,6 +560,7 @@ describes.realWin('runtime multidoc', {
     let ampdoc;
 
     beforeEach(() => {
+      deactivateChunking();
       clock = sandbox.useFakeTimers();
       hostElement = win.document.createElement('div');
       importDoc = win.document.implementation.createHTMLDocument('');
