@@ -250,12 +250,14 @@ export class Viewer {
         this.params_['webview'] == '1';
 
     /**
-     * Whether the AMP document is embedded in a viewer, such as an iframe or
-     * a web view.
+     * Whether the AMP document is embedded in a viewer, such as an iframe, or
+     * a web view, or a shadow doc in PWA.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = (this.isIframed_ || this.isWebviewEmbedded_) &&
-        !this.win.AMP_TEST_IFRAME;
+    this.isEmbedded_ = (
+        this.isIframed_ && !this.win.AMP_TEST_IFRAME ||
+        this.isWebviewEmbedded_ ||
+        !ampdoc.isSingleDoc());
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
