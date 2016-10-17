@@ -25,10 +25,8 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
-import {cssText} from '../../build/css';
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installStyles} from '../../src/style-installer';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {loadPromise} from '../../src/event-helper';
