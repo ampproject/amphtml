@@ -53,12 +53,18 @@ The resulting HTTP response has to also contain the following headers:
  - `Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin`. This header simply allows CORS response to contain the "AMP-Access-Control-Allow-Source-Origin" header.
 
 #### Note on State Changing Requests
-When making CORS requests that would change the state of your system (e.g. user subscribes to or unsubscribes from a mailing list) the first two steps you need to make sure to do:
+When making requests that would change the state of your system (e.g. user subscribes to or unsubscribes from a mailing list), make sure to check the following:
 
-1. Check the `Origin` header, if it doesn't exist move to step 3. If the origin was not `*.ampproject.org` or the publisher's origin, stop and return an error response.
+If `Origin` header is set:
+
+1. If the origin was not `*.ampproject.org` or the publisher's (aka your) origin, stop and return an error response.
 2. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
-3. Check if the request has `AMP-Same-Origin: true` header. If yes, proceed to process the request safely (skip next steps).
-  * This custom request header is sent by AMP runtime when making an XHR request on sameorigin (document served from non-cache URL).
-4. Otherwise reject the request and return an error response.
+3. If both checks pass, proceed to process the request.
 
-It's very important that these are done first before processing the request, this provides protection against CSRF attacks and avoids processing untrusted sources requests.
+Otherwise, if `Origin` header is NOT set:
+
+1. Check if the request has `AMP-Same-Origin: true` header. If not, stop and return an error response.
+    * This custom request header is sent by AMP runtime when making an XHR request on sameorigin (document served from non-cache URL).
+2. Otherwise proceed to process the request.
+
+It's very important that these all are done first before processing the request, this provides protection against CSRF attacks and avoids processing untrusted sources requests.
