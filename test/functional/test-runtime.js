@@ -27,6 +27,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
+import {timerFor} from '../../src/timer';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -34,7 +35,7 @@ import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
-describes.sandboxed.only('runtime', {}, env => {
+describes.sandboxed('runtime', {}, env => {
 
   let win;
   let sandbox;
