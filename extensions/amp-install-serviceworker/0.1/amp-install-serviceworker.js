@@ -17,7 +17,6 @@
 import {assertHttpsUrl, isProxyOrigin, parseUrl} from '../../../src/url';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {getMode} from '../../../src/mode';
-import {loadPromise} from '../../../src/event-helper';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
@@ -69,7 +68,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      install(this.win, src);
+      this.laodPromise(() => {
+        install(this.win, src);
+      });
     } else {
       user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
@@ -112,15 +113,13 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
  * @param {string} src
  */
 function install(win, src) {
-  loadPromise(win).then(() => {
-    win.navigator.serviceWorker.register(src).then(function(registration) {
-      if (getMode().development) {
-        user().info(TAG, 'ServiceWorker registration successful with scope: ',
-            registration.scope);
-      }
-    }).catch(function(e) {
-      user().error(TAG, 'ServiceWorker registration failed:', e);
-    });
+  win.navigator.serviceWorker.register(src).then(function(registration) {
+    if (getMode().development) {
+      user().info(TAG, 'ServiceWorker registration successful with scope: ',
+          registration.scope);
+    }
+  }).catch(function(e) {
+    user().error(TAG, 'ServiceWorker registration failed:', e);
   });
 }
 
