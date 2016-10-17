@@ -1519,4 +1519,13 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(rect.width).to.equal(14);  // round(13.5)
     expect(rect.height).to.equal(15);  // round(14.5)
   });
+
+  it('should call scroll event', () => {
+    return new Promise(resolve => {
+      binding.onScroll(resolve);
+      binding.wrapper_.scrollTop = 11;
+    }).then(() => {
+      expect(binding.getScrollTop()).to.equal(11);
+    });
+  });
 });

@@ -336,11 +336,7 @@ class RealWinFixture {
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
 
-        if (!completePromise) {
-          resolve();
-        } else {
-          completePromise.then(resolve);
-        }
+        resolve(completePromise);
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
