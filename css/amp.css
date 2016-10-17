@@ -52,7 +52,7 @@ body {
  * iOS-Embed Wrapper mode. The `body` is wrapper into `i-amp-html-wrapper`
  * element.
  */
-html.i-amp-ios-embed {
+html.-amp-ios-embed {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
 }

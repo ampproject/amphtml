@@ -1406,12 +1406,11 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /**
    * @param {!Window} win
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win, ampdoc) {
+  constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    this.win.document.documentElement.classList.add('i-amp-ios-embed');
+    this.win.document.documentElement.classList.add('-amp-ios-embed');
 
     /** @private @const {!Element} */
     this.wrapper_ = this.win.document.createElement('i-amp-html-wrapper');
@@ -1697,7 +1696,7 @@ function createViewport(ampdoc) {
   if (ampdoc.isSingleDoc() &&
           viewer.getViewportType() == 'natural-ios-embed') {
     if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')) {
-      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win, ampdoc);
+      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
     }
