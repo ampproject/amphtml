@@ -1367,6 +1367,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.height = '100px';
     win = env.win;
     child = win.document.createElement('div');
+    child.style.width = '200px';
     child.style.height = '300px';
     child.textContent = 'test';
     win.document.body.appendChild(child);
@@ -1471,7 +1472,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   });
 
   it('should calculate scrollWidth from scrollElement', () => {
-    expect(binding.getScrollWidth()).to.equal(100);
+    expect(binding.getScrollWidth()).to.equal(200);
   });
 
   it('should calculate scrollHeight from scrollElement', () => {
