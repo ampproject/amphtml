@@ -67,11 +67,13 @@ import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {parseUrl} from './url';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesForDoc} from './resources';
 import {setStyle} from './style';
+import {timerFor} from './timer';
 import {viewerForDoc} from './viewer';
 import {viewportForDoc} from './viewport';
 import {waitForBody} from './dom';
@@ -341,7 +343,10 @@ export function adoptShadowMode(global) {
   }, (global, extensions) => {
 
     const manager = new MultidocManager(
-        global, ampdocServiceFor(global), extensions);
+        global,
+        ampdocServiceFor(global),
+        extensions,
+        timerFor(global));
 
     /**
      * Registers a shadow root document.
@@ -480,14 +485,20 @@ class MultidocManager {
    * @param {!Window} win
    * @param {!./service/ampdoc-impl.AmpDocService} ampdocService
    * @param {!./service/extensions-impl.Extensions} extensions
+   * @param {!./service/timer-impl.Timer} timer
    */
-  constructor(win, ampdocService, extensions) {
+  constructor(win, ampdocService, extensions, timer) {
     /** @const */
     this.win = win;
     /** @private @const */
     this.ampdocService_ = ampdocService;
     /** @private @const */
     this.extensions_ = extensions;
+    /** @private @const */
+    this.timer_ = timer;
+
+    /** @private @const {!Array<!ShadowRoot>} */
+    this.shadowRoots_ = [];
   }
 
   /**
@@ -501,15 +512,24 @@ class MultidocManager {
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
     dev().fine(TAG, 'Attach shadow doc:', doc);
+    this.purgeShadowRoots_();
 
     hostElement.style.visibility = 'hidden';
     const shadowRoot = createShadowRoot(hostElement);
 
-    shadowRoot.AMP = {};
-    shadowRoot.AMP.url = url;
+    if (shadowRoot.AMP) {
+      user().warn(TAG, 'Shadow doc wasn\'t previously closed');
+      this.closeShadowRoot_(shadowRoot);
+    }
 
-    /** @const {!./service/ampdoc-impl.AmpDocShadow} */
+    const amp = {};
+    shadowRoot.AMP = amp;
+    amp.url = url;
+    const origin = parseUrl(url).origin;
+
     const ampdoc = installShadowDoc(this.ampdocService_, url, shadowRoot);
+    /** @const {!./service/ampdoc-impl.AmpDocShadow} */
+    amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
     // Install runtime CSS.
@@ -518,32 +538,62 @@ class MultidocManager {
 
     // Instal doc services.
     installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
-
-    /** @const {!./service/viewer-impl.Viewer} */
     const viewer = viewerForDoc(ampdoc);
-
-    shadowRoot.AMP.viewer = viewer;
-
-    if (getMode().development) {
-      shadowRoot.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      shadowRoot.AMP.resources = resourcesForDoc(ampdoc);
-    }
 
     /**
      * Sets the document's visibility state.
      * @param {!VisibilityState} state
      */
-    shadowRoot.AMP.setVisibilityState = function(state) {
+    amp.setVisibilityState = function(state) {
       setViewerVisibilityState(viewer, state);
     };
+
+    // Messaging pipe.
+    /**
+     * Posts message to the ampdoc.
+     * @param {string} eventType
+     * @param {!JSONType} data
+     * @param {boolean} unusedAwaitResponse
+     * @return {(!Promise<*>|undefined)}
+     */
+    amp.postMessage = viewer.receiveMessage.bind(viewer);
+
+    /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
+    let onMessage;
+
+    /**
+     * Provides a message delivery mechanism by which AMP document can send
+     * messages to the viewer.
+     * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
+     */
+    amp.onMessage = function(callback) {
+      onMessage = callback;
+    };
+
+    viewer.setMessageDeliverer((eventType, data, awaitResponse) => {
+      // Special messages.
+      if (eventType == 'broadcast') {
+        this.broadcast_(data, shadowRoot);
+        return awaitResponse ? Promise.resolve() : undefined;
+      }
+
+      // All other messages.
+      if (onMessage) {
+        return onMessage(eventType, data, awaitResponse);
+      }
+    }, origin);
 
     /**
      * Closes the document. The document can no longer be activated again.
      */
-    shadowRoot.AMP.close = function() {
-      setViewerVisibilityState(viewer, VisibilityState.INACTIVE);
-      disposeServicesForDoc(ampdoc);
+    amp.close = () => {
+      this.closeShadowRoot_(shadowRoot);
     };
+
+    if (getMode().development) {
+      amp.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+      amp.resources = resourcesForDoc(ampdoc);
+    }
 
     // Install extensions.
     const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
@@ -569,10 +619,14 @@ class MultidocManager {
       hostElement.style.visibility = 'visible';
     }, 50);
 
-    dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
-    return shadowRoot.AMP;
-  }
+    // Store reference.
+    if (this.shadowRoots_.indexOf(shadowRoot) == -1) {
+      this.shadowRoots_.push(shadowRoot);
+    }
 
+    dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
+    return amp;
+  }
 
   /**
    * Processes the contents of the shadow document's head.
@@ -671,6 +725,74 @@ class MultidocManager {
       }
     }
     return extensionIds;
+  }
+
+  /**
+   * @param {*} data
+   * @param {!ShadowRoot} sender
+   * @private
+   */
+  broadcast_(data, sender) {
+    this.purgeShadowRoots_();
+    this.shadowRoots_.forEach(shadowRoot => {
+      if (shadowRoot == sender) {
+        // Don't broadcast to the sender.
+        return;
+      }
+      // Broadcast message asynchronously.
+      const viewer = viewerForDoc(shadowRoot.AMP.ampdoc);
+      this.timer_.delay(() => {
+        viewer.receiveMessage('broadcast',
+            /** @type {!JSONType} */ (data),
+            /* awaitResponse */ false);
+      }, 0);
+    });
+  }
+
+  /**
+   * @param {!ShadowRoot} shadowRoot
+   * @private
+   */
+  closeShadowRoot_(shadowRoot) {
+    this.removeShadowRoot_(shadowRoot);
+    const amp = shadowRoot.AMP;
+    delete shadowRoot.AMP;
+    const ampdoc = /** @type {!./service/ampdoc-impl.AmpDoc} */ (amp.ampdoc);
+    setViewerVisibilityState(viewerForDoc(ampdoc), VisibilityState.INACTIVE);
+    disposeServicesForDoc(ampdoc);
+  }
+
+  /**
+   * @param {!ShadowRoot} shadowRoot
+   * @private
+   */
+  removeShadowRoot_(shadowRoot) {
+    const index = this.shadowRoots_.indexOf(shadowRoot);
+    if (index != -1) {
+      this.shadowRoots_.splice(index, 1);
+    }
+  }
+
+  /**
+   * @param {!ShadowRoot} shadowRoot
+   * @private
+   */
+  closeShadowRootAsync_(shadowRoot) {
+    this.timer_.delay(() => {
+      this.closeShadowRoot_(shadowRoot);
+    }, 0);
+  }
+
+  /** @private */
+  purgeShadowRoots_() {
+    this.shadowRoots_.forEach(shadowRoot => {
+      // The shadow root has been disconnected. Force it closed.
+      if (!this.win.document.contains(shadowRoot.host)) {
+        user().warn(TAG, 'Shadow doc wasn\'t previously closed');
+        this.removeShadowRoot_(shadowRoot);
+        this.closeShadowRootAsync_(shadowRoot);
+      }
+    });
   }
 }
 
