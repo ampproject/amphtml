@@ -22,6 +22,7 @@ import {
   getServiceForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {loadPromise} from '../../../../src/event-helper';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
@@ -57,6 +58,7 @@ describe('amp-install-serviceworker', () => {
     let calledSrc;
     const p = new Promise(() => {});
     implementation.win = {
+      complete: true,
       location: {
         href: 'https://example.com/some/path',
       },
@@ -71,7 +73,10 @@ describe('amp-install-serviceworker', () => {
       },
     };
     implementation.buildCallback();
-    expect(calledSrc).to.equal('https://example.com/sw.js');
+    expect(calledSrc).to.be.undefined;
+    return loadPromise(implementation.win).then(() => {
+      expect(calledSrc).to.equal('https://example.com/sw.js');
+    });
   });
 
   it('should be ok without service worker.', () => {
