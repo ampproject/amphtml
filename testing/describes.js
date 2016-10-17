@@ -320,9 +320,7 @@ class RealWinFixture {
 
         // Install AMP CSS if requested.
         if (spec.ampCss) {
-          completePromise = new Promise(resolve => {
-            installStyles(win.document, cssText, resolve);
-          });
+          completePromise = installRuntimeStylesPromise(win);
         }
 
         if (spec.fakeRegisterElement) {
@@ -373,6 +371,7 @@ class AmpFixture {
   setup(env) {
     const spec = this.spec.amp;
     const win = env.win;
+    let completePromise;
 
     win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
@@ -388,13 +387,19 @@ class AmpFixture {
       win.services.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
+      // Install AMP CSS for main runtime, if it hasn't been installed yet.
+      completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
     } else if (ampdocType == 'multi') {
       adoptShadowMode(win);
+      // Notice that ampdoc's themselves install runtime styles in shadow roots.
+      // Thus, not changes needed here.
     }
+
+    return completePromise;
   }
 
   /** @override */
@@ -406,4 +411,19 @@ class AmpFixture {
       }
     }
   }
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {!Promise}
+ */
+function installRuntimeStylesPromise(win) {
+  if (win.document.querySelector('style[amp-runtime]')) {
+    // Already installed.
+    return Promise.resolve();
+  }
+  return new Promise(resolve => {
+    installStyles(win.document, cssText, resolve);
+  });
 }
