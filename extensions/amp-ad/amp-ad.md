@@ -131,6 +131,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)
+- [Purch](../../ads/purch.md)
 - [Revcontent](../../ads/revcontent.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
