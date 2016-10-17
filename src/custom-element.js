@@ -444,6 +444,9 @@ function createBaseCustomElementClass(win) {
       this.layout_ = Layout.NODISPLAY;
 
       /** @private {number} */
+      this.layoutWidth_ = -1;
+
+      /** @private {number} */
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
