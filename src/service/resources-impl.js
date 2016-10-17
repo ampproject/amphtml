@@ -85,6 +85,9 @@ export class Resources {
     /** @private @const {!Array<!Resource>} */
     this.resources_ = [];
 
+    /** @private {number} */
+    this.addCount_ = 0;
+
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
 
@@ -331,6 +334,13 @@ export class Resources {
    * @param {!AmpElement} element
    */
   add(element) {
+    // Ensure the viewport is ready to accept the first element.
+    this.addCount_++;
+    if (this.addCount_ == 1) {
+      this.viewport_.ensureReadyForElements();
+    }
+
+    // Create and add the resource.
     const resource = new Resource((++this.resourceIdCounter_), element, this);
     if (!element.id) {
       element.id = 'AMP_' + resource.getId();

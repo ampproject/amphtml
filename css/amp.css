@@ -47,6 +47,39 @@ body {
   text-size-adjust: 100%;
 }
 
+
+/**
+ * iOS-Embed Wrapper mode. The `body` is wrapper into `i-amp-html-wrapper`
+ * element.
+ */
+html.-amp-ios-embed {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/** Wrapper for iOS-Embed-Wrapper mode. */
+i-amp-html-wrapper {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+i-amp-html-wrapper > body {
+  position: relative !important;
+  display: block !important;
+  /* Border is necessary to avoid margins collapsing outside body.
+     Alternatively we can also set overflow to hidden. */
+  border-top: 1px solid transparent !important;
+}
+
+
 /** make-body-block experiment */
 .-amp-make-body-block body {
   display: block !important;
