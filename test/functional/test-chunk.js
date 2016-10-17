@@ -197,6 +197,24 @@ describe('chunk', () => {
       basicTests(env);
     });
 
+    describe('invisible to visible', () => {
+      beforeEach(() => {
+        env.win.location.resetHref('test#visibilityState=prerender');
+        const viewer = viewerForDoc(env.win.document);
+        let visible = false;
+        env.sandbox.stub(viewer, 'isVisible', () => {
+          return visible;
+        });
+        env.win.requestIdleCallback = () => {
+          // Don't call the callback, but transition to visible
+          visible = true;
+          viewer.onVisibilityChange_();
+        };
+      });
+
+      basicTests(env);
+    });
+
     describe('invisible to visible after a while', () => {
       beforeEach(() => {
         env.win.location.resetHref('test#visibilityState=hidden');
