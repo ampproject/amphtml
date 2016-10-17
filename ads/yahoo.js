@@ -21,15 +21,8 @@ import {validateData, loadScript} from '../3p/3p';
 * @param {!Object} data
 */
 export function yahoo(global, data) {
-  function cb() {
+  validateData(data, ['sid', 'site', 'sa']);
+  loadScript(global, 'https://s.yimg.com/os/ampad/display.js', function () {
     window.ampAdExecute(global, data);
-  }
-
-  if (data && data.adtype === 'gemini') {
-    validateData(data, ['json']);
-    loadScript(global, 'https://s.yimg.com/os/ampad/gemini.js', cb);
-  } else { /* display ad */
-    validateData(data, ['sid', 'site', 'sa']);
-    loadScript(global, 'https://s.yimg.com/os/ampad/display.js', cb);
-  }
+  });
 }

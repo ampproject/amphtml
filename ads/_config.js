@@ -383,10 +383,7 @@ export const adConfig = {
   widespace: {},
 
   yahoo: {
-    prefetch: [
-      'https://s.yimg.com/os/ampad/display.js',
-      'https://s.yimg.com/os/ampad/gemini.js',
-    ],
+    prefetch: 'https://s.yimg.com/os/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
   },
 

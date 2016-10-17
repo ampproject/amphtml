@@ -21,8 +21,8 @@ limitations under the License.
 ```html
 <amp-ad 
     type="yahoo"
-    width="300"
-    height="250"
+    width="316"
+    height="264"
     data-sid="954014446"
     data-site="news"
     data-sa='{"LREC":"300x250","secure":"true","content":"no_expandable;"}'>
@@ -40,26 +40,3 @@ Supported parameters:
 - data-sid
 - data-site
 - data-sa
-
-## Gemini
-
-```html
-<amp-ad 
-    type="yahoo"
-    width="300"
-    height="250"
-    data-adtype="gemini"
-    data-json='{"beacon": "https://www.example.com/beaconurl"}'>
-</amp-ad>
-```
-
-### Configuration
-
-For configuration details, please contact https://advertising.yahoo.com/contact
-
-Supported parameters:
-
-- height
-- width
-- data-adtype=gemini
-- data-json
