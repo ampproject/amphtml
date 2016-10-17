@@ -313,6 +313,11 @@ export const adConfig = {
     preconnect: 'https://tag.contextweb.com',
   },
 
+  purch: {
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
+  },
+
   revcontent: {
     prefetch: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
     preconnect: [
