@@ -644,6 +644,9 @@ export class UrlReplacements {
       return;
     }
     const docInfo = documentInfoForDoc(this.ampdoc);
+    // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
+    // We set this to the original value before doing any work and use it
+    // on subsequent replacements, so that each run gets a fresh value.
     const href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
     const url = parseUrl(href);
