@@ -223,8 +223,7 @@ class AmpViewer {
     this.ampReadyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
       this.win.document.title = this.amp_.title || '';
-      this.amp_.viewer.setMessageDeliverer(this.onMessage_.bind(this),
-          this.getOrigin_(this.win.location.href));
+      this.amp_.onMessage(this.onMessage_.bind(this));
       this.amp_.setVisibilityState('visible');
     });
   }

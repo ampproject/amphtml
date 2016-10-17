@@ -26,6 +26,7 @@ import {
 import {installPlatformService} from '../../src/service/platform-impl';
 import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
+import {timerFor} from '../../src/timer';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -586,8 +587,8 @@ describes.realWin('runtime multidoc', {
       expect(ampdoc.services.viewer.obj).to.exist;
 
       // Single-doc bidings have been installed.
-      expect(ret.viewer).to.exist;
-      expect(ret.viewer.ampdoc).to.equal(ampdoc);
+      expect(ret.ampdoc).to.equal(ampdoc);
+      expect(ret.viewer).to.not.exist;
     });
 
     it('should install doc services', () => {
@@ -613,12 +614,12 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should pass init parameters to viewer', () => {
-      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
         'test1': '12',
       });
 
-      expect(amp.viewer).to.equal(getServiceForDoc(ampdoc, 'viewer'));
-      expect(amp.viewer.getParam('test1')).to.equal('12');
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(viewer.getParam('test1')).to.equal('12');
     });
 
     it('should update host visibility', () => {
@@ -795,35 +796,153 @@ describes.realWin('runtime multidoc', {
     });
 
     it('should start as visible by default', () => {
-      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(viewer.getVisibilityState()).to.equal('visible');
     });
 
     it('should start as prerender when requested', () => {
-      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
         'visibilityState': 'prerender',
       });
-      expect(amp.viewer.getVisibilityState()).to.equal('prerender');
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(viewer.getVisibilityState()).to.equal('prerender');
     });
 
     it('should expose visibility method', () => {
       const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
       expect(amp.setVisibilityState).to.be.function;
-      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.getVisibilityState()).to.equal('visible');
 
       amp.setVisibilityState('inactive');
-      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
     });
 
     it('should expose close method and dispose services', () => {
       const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
       expect(amp.close).to.be.function;
-      expect(amp.viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.getVisibilityState()).to.equal('visible');
 
-      amp.viewer.dispose = sandbox.spy();
+      viewer.dispose = sandbox.spy();
       amp.close();
-      expect(amp.viewer.getVisibilityState()).to.equal('inactive');
-      expect(amp.viewer.dispose).to.be.calledOnce;
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.dispose).to.be.calledOnce;
+    });
+  });
+
+
+  describe('messaging', () => {
+    let timer;
+    let doc1, doc2, doc3;
+
+    beforeEach(() => {
+      timer = timerFor(win);
+      doc1 = attach('https://example.org/doc1');
+      doc2 = attach('https://example.org/doc2');
+      doc3 = attach('https://example.org/doc3');
+    });
+
+    function attach(docUrl) {
+      const host = win.document.createElement('div');
+      win.document.body.appendChild(host);
+      const importDoc = win.document.implementation.createHTMLDocument('');
+      const ampdoc = new AmpDocShadow(win, docUrl,
+          win.document.createElement('div'));
+
+      ampdocServiceMock.expects('installShadowDoc_')
+          .withExactArgs(
+              docUrl,
+              sinon.match(arg => arg == host.shadowRoot))
+          .returns(ampdoc)
+          .atLeast(0);
+      ampdocServiceMock.expects('getAmpDoc')
+          .withExactArgs(sinon.match(arg => arg == host.shadowRoot))
+          .returns(ampdoc)
+          .atLeast(0);
+
+      const amp = win.AMP.attachShadowDoc(host, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      const broadcastReceived = sandbox.spy();
+      viewer.onBroadcast(broadcastReceived);
+      const onMessage = sandbox.spy();
+      amp.onMessage(function(eventType, data) {
+        if (eventType == 'ignore' || eventType == 'documentLoaded') {
+          return undefined;
+        }
+        return onMessage(eventType, data);
+      });
+      return {host, amp, ampdoc, viewer, broadcastReceived, onMessage};
+    }
+
+    it('should broadcast to all but sender', () => {
+      doc1.viewer.broadcast({test: 1});
+      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        // Sender is not called.
+        expect(doc1.broadcastReceived).to.not.be.called;
+
+        // All others are called.
+        expect(doc2.broadcastReceived).to.be.calledOnce;
+        expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
+        expect(doc3.broadcastReceived).to.be.calledOnce;
+        expect(doc3.broadcastReceived.args[0][0]).deep.equal({test: 1});
+
+        // None of the onMessage are called.
+        expect(doc1.onMessage).to.not.be.called;
+        expect(doc2.onMessage).to.not.be.called;
+        expect(doc3.onMessage).to.not.be.called;
+      });
+    });
+
+    it('should stop broadcasting after close', () => {
+      doc3.amp.close();
+      doc1.viewer.broadcast({test: 1});
+      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        // Sender is not called, closed is not called.
+        expect(doc1.broadcastReceived).to.not.be.called;
+        expect(doc3.broadcastReceived).to.not.be.called;
+
+        // All others are called.
+        expect(doc2.broadcastReceived).to.be.calledOnce;
+        expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
+      });
+    });
+
+    it('should stop broadcasting after force-close', () => {
+      doc3.host.parentNode.removeChild(doc3.host);
+      doc1.viewer.broadcast({test: 1});
+      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        // Sender is not called, closed is not called.
+        expect(doc1.broadcastReceived).to.not.be.called;
+        expect(doc3.broadcastReceived).to.not.be.called;
+
+        // All others are called.
+        expect(doc2.broadcastReceived).to.be.calledOnce;
+        expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
+      });
+    });
+
+    it('should send message', () => {
+      return doc1.viewer.sendMessage('test3', {test: 3}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        expect(doc1.onMessage).to.be.calledOnce;
+        expect(doc1.onMessage.args[0][0]).to.equal('test3');
+        expect(doc1.onMessage.args[0][1]).to.deep.equal({test: 3});
+      });
+    });
+
+    it('should receive message', () => {
+      doc1.amp.postMessage('broadcast', {test: 4}, true);
+      expect(doc1.broadcastReceived).to.be.calledOnce;
+      expect(doc1.broadcastReceived.args[0][0]).to.deep.equal({test: 4});
     });
   });
 });
