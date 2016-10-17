@@ -36,6 +36,10 @@
  * }
  */
 export const adConfig = {
+  '4w': {},
+
+  '4wppn': {},
+
   _ping_: {
     renderStartImplemented: true,
   },
@@ -47,6 +51,8 @@ export const adConfig = {
   accesstrade: {
     prefetch: 'https://h.accesstrade.net/js/amp/amp.js',
   },
+
+  adagio: {},
 
   adblade: {
     prefetch: 'https://web.adblade.com/js/ads/async/show.js',
