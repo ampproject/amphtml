@@ -1461,6 +1461,10 @@ export class ViewportBindingIosEmbedWrapper_ {
     const body = dev().assertElement(doc.body, 'body is not available');
     doc.documentElement.appendChild(this.wrapper_);
     this.wrapper_.appendChild(body);
+    // Redefine `document.body`, otherwise it'd be `null`.
+    Object.defineProperty(doc, 'body', {
+      get: () => body,
+    });
 
     // TODO(dvoytenko): test if checkAndFixIosScrollfreezeBug is required.
 

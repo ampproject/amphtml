@@ -256,6 +256,14 @@ class EventListeners {
 
 
 /**
+ * @param {!EventTarget} target
+ */
+export function interceptEventListeners(target) {
+  EventListeners.intercept(target);
+}
+
+
+/**
  * @extends {!Location}
  */
 class FakeLocation {
