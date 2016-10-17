@@ -62,6 +62,24 @@ Example:
 
 The `amp-lightbox` component can be styled with standard CSS.
 
+## Actions
+The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>open (default)</td>
+    <td>Opens the lightbox</td>
+  </tr>
+  <tr>
+    <td>close</td>
+    <td>Closes the lightbox</td>
+  </tr>
+</table>
+
 ## Validation
 
 See [amp-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/0.1/validator-amp-lightbox.protoascii) in the AMP validator specification.
