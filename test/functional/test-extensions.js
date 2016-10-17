@@ -520,6 +520,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('with remote mode', () => {
+      window.AMP_MODE = {version: '123'};
       const script = calculateExtensionScriptUrl({
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
