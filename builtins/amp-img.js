@@ -18,6 +18,7 @@ import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
+import {user} from '../src/log';
 
 
 export class AmpImg extends BaseElement {
@@ -70,7 +71,18 @@ export class AmpImg extends BaseElement {
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
-    this.propagateAttributes(['alt', 'referrerpolicy'], this.img_);
+
+    // Remove role=img otherwise this breaks screen-readers focus and
+    // only read "Graphic" when using only 'alt'.
+    if (this.element.getAttribute('role') == 'img') {
+      this.element.removeAttribute('role');
+      user().error('Setting role=img on amp-img elements breaks screen ' +
+          'readers please just set alt or ARIA attributes, they will be ' +
+          'correctly propagated for the underlying <img> element.');
+    }
+
+    this.propagateAttributes(['alt', 'referrerpolicy', 'aria-label',
+      'aria-describedby', 'aria-labelledby'], this.img_);
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);

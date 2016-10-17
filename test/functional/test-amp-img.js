@@ -268,4 +268,22 @@ describe('amp-img', () => {
     impl.buildCallback();
     expect(impl.prerenderAllowed()).to.equal(true);
   });
+
+  it('should propagate ARIA attributes', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+    el.setAttribute('aria-label', 'Hello');
+    el.setAttribute('aria-labelledby', 'id2');
+    el.setAttribute('aria-describedby', 'id3');
+
+    const impl = new AmpImg(el);
+    impl.buildCallback();
+    impl.layoutCallback();
+    const img = el.querySelector('img');
+    expect(img.getAttribute('aria-label')).to.equal('Hello');
+    expect(img.getAttribute('aria-labelledby')).to.equal('id2');
+    expect(img.getAttribute('aria-describedby')).to.equal('id3');
+  });
 });

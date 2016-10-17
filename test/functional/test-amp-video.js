@@ -303,4 +303,20 @@ describe('amp-video', () => {
       expect(impl.toggleFallback.calledWith(true)).to.be.true;
     });
   });
+
+  it('should propagate ARIA attributes', () => {
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+      'aria-label': 'Hello',
+      'aria-labelledby': 'id2',
+      'aria-describedby': 'id3',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.getAttribute('aria-label')).to.equal('Hello');
+      expect(video.getAttribute('aria-labelledby')).to.equal('id2');
+      expect(video.getAttribute('aria-describedby')).to.equal('id3');
+    });
+  });
 });

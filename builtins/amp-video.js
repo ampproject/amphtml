@@ -64,7 +64,8 @@ export function installVideo(win) {
       this.video_.setAttribute('webkit-playsinline', '');
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
-      this.propagateAttributes(['poster', 'controls'], this.video_);
+      this.propagateAttributes(['poster', 'controls', 'aria-label',
+          'aria-describedby', 'aria-labelledby'], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
