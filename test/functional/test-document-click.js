@@ -16,7 +16,6 @@
 
 import {onDocumentElementClick_} from '../../src/document-click';
 import {installTimerService} from '../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 describe('test-document-click onDocumentElementClick_', () => {
   let sandbox;

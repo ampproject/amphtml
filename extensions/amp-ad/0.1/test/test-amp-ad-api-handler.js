@@ -22,7 +22,6 @@ import {
   expectPostMessage,
 } from '../../../../testing/iframe';
 import {timerFor} from '../../../../src/timer';
-import * as sinon from 'sinon';
 
 describe('amp-ad-api-handler', () => {
   let sandbox;

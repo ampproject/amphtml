@@ -31,7 +31,6 @@
  */
 
 import {BaseSlides} from '../base-slides';
-import * as sinon from 'sinon';
 
 describe('BaseSlides', () => {
 

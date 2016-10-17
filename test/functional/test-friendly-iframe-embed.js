@@ -22,7 +22,6 @@ import {
 import {extensionsFor} from '../../src/extensions';
 import {loadPromise} from '../../src/event-helper';
 import {resourcesForDoc} from '../../src/resources';
-import * as sinon from 'sinon';
 
 
 describe('friendly-iframe-embed', () => {

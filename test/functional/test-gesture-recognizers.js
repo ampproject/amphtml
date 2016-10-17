@@ -17,7 +17,6 @@
 import {Gestures} from '../../src/gesture';
 import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
     TapzoomRecognizer} from '../../src/gesture-recognizers';
-import * as sinon from 'sinon';
 
 
 describe('TapRecognizer', () => {

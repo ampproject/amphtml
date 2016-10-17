@@ -18,7 +18,6 @@ import {
   supportsAutoplay,
   clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
-import * as sinon from 'sinon';
 
 describe('Supports Autoplay', () => {
   let sandbox;

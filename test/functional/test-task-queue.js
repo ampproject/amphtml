@@ -15,7 +15,6 @@
  */
 
 import {TaskQueue} from '../../src/service/task-queue';
-import * as sinon from 'sinon';
 
 
 describe('TaskQueue', () => {

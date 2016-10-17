@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as IframeHelper from '../../src/iframe-helper';
-import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {generateSentinel} from '../../src/3p-frame.js';
 

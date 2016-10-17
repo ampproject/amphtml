@@ -16,7 +16,6 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
 import '../amp-social-share';
 import {platformFor} from '../../../../src/platform';
 

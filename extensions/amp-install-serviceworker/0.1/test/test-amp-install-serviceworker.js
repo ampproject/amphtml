@@ -23,7 +23,6 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {installTimerService} from '../../../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 adopt(window);
 

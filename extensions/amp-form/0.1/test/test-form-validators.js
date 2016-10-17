@@ -15,7 +15,6 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
 import {
   setReportValiditySupported,
   getFormValidator,

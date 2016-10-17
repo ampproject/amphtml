@@ -33,7 +33,6 @@ import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncFor} from '../../src/vsync';
-import * as sinon from 'sinon';
 
 describe('Viewport', () => {
   let sandbox;

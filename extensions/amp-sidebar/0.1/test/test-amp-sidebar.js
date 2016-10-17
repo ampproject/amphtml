@@ -20,7 +20,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/platform';
 import {timerFor} from '../../../../src/timer';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import * as sinon from 'sinon';
 import '../amp-sidebar';
 
 adopt(window);

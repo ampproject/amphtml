@@ -24,7 +24,6 @@ import {
 } from '../../src/service/ampdoc-impl';
 import * as dom from '../../src/dom';
 import * as docready from '../../src/document-ready';
-import * as sinon from 'sinon';
 
 
 describe('AmpDocService', () => {

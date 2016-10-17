@@ -23,7 +23,6 @@ import {createAmpElementProto} from '../../src/custom-element';
 import {viewerForDoc} from '../../src/viewer';
 import {resourcesForDoc} from '../../src/resources';
 import {VisibilityState} from '../../src/visibility-state';
-import * as sinon from 'sinon';
 
 describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 

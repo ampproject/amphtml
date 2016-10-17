@@ -17,7 +17,6 @@
 import {Crypto} from '../crypto-impl';
 import {Platform} from '../../../../src/service/platform-impl';
 import * as lib from '../../../../third_party/closure-library/sha384-generated';
-import * as sinon from 'sinon';
 
 describe('crypto-impl', () => {
 

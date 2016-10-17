@@ -22,7 +22,6 @@ import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 
 function createAmpAd(win) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {

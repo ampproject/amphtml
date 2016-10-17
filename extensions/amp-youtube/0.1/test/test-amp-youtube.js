@@ -21,7 +21,6 @@ import {
 import '../amp-youtube';
 import {adopt} from '../../../../src/runtime';
 import {timerFor} from '../../../../src/timer';
-import * as sinon from 'sinon';
 
 adopt(window);
 

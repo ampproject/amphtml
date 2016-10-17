@@ -25,7 +25,6 @@ import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {documentStateFor} from '../../../../src/document-state';
-import * as sinon from 'sinon';
 
 const EXP_ID = 'EXP_ID';
 /** @type {!Branches} */
