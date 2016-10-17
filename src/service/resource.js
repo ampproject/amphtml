@@ -313,11 +313,11 @@ export class Resource {
    */
   measure() {
     this.isMeasureRequested_ = false;
-    this.layoutBox_ = box;
 
     const box = this.resources_.getViewport().getLayoutRect(this.element);
     const oldBox = this.layoutBox_;
     const viewport = this.resources_.getViewport();
+    this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
