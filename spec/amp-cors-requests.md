@@ -59,7 +59,7 @@ If `Origin` header is set:
 
 1. If the origin was not `*.ampproject.org` or the publisher's (aka your) origin, stop and return an error response.
 2. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
-3. If both checks passes, proceed to process the request.
+3. If both checks pass, proceed to process the request.
 
 Otherwise, if `Origin` header is NOT set:
 
