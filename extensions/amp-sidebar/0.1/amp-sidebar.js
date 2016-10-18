@@ -24,7 +24,6 @@ import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timerFor} from '../../../src/timer';
-import {installGlobalClickListenerForDoc} from '../../../src/document-click';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -111,16 +110,14 @@ export class AmpSidebar extends AMP.BaseElement {
     screenReaderCloseButton.classList.add('-amp-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
-    screenReaderCloseButton.addEventListener('click', () => {
-      this.close_();
-    });
+    screenReaderCloseButton.addEventListener('click', () => this.close_());
     this.element.appendChild(screenReaderCloseButton);
 
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    installGlobalClickListenerForDoc(this.getAmpDoc()).addBeforeHandler(e => {
+    this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (!target) {
         return;
@@ -189,9 +186,7 @@ export class AmpSidebar extends AMP.BaseElement {
         }, ANIMATION_TIMEOUT);
       });
     });
-    this.getHistory_().push(() => {
-      this.close_();
-    }).then(historyId => {
+    this.getHistory_().push(() => this.close_()).then(historyId => {
       this.historyId_ = historyId;
     });
   }
@@ -232,9 +227,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
       mask.classList.add('-amp-sidebar-mask');
-      mask.addEventListener('click', () => {
-        this.close_();
-      });
+      mask.addEventListener('click', () => this.close_());
       this.element.parentNode.appendChild(mask);
       mask.addEventListener('touchmove', e => {
         e.preventDefault();
