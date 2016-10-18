@@ -30,7 +30,6 @@ import {
 import {cssText} from '../build/css';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
-import {installStyles} from '../src/style-installer';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import * as sinon from 'sinon';
 
@@ -309,7 +308,6 @@ class RealWinFixture {
           '<style>.-amp-element {display: block;}</style>' +
           '<body style="margin:0"><div id=parent></div>';
       iframe.onload = function() {
-        let completePromise;
         const win = iframe.contentWindow;
         env.win = win;
 
@@ -320,7 +318,7 @@ class RealWinFixture {
 
         // Install AMP CSS if requested.
         if (spec.ampCss) {
-          completePromise = installRuntimeStylesPromise(win);
+          installRuntimeStylesPromise(win);
         }
 
         if (spec.fakeRegisterElement) {
@@ -334,7 +332,7 @@ class RealWinFixture {
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
 
-        resolve(completePromise);
+        resolve();
       };
       iframe.onerror = reject;
       document.body.appendChild(iframe);
@@ -416,14 +414,14 @@ class AmpFixture {
 
 /**
  * @param {!Window} win
- * @return {!Promise}
  */
 function installRuntimeStylesPromise(win) {
   if (win.document.querySelector('style[amp-runtime]')) {
     // Already installed.
-    return Promise.resolve();
+    return;
   }
-  return new Promise(resolve => {
-    installStyles(win.document, cssText, resolve);
-  });
+  const style = document.createElement('style');
+  style.setAttribute('amp-runtime', '');
+  style.textContent = cssText;
+  win.document.head.appendChild(style);
 }

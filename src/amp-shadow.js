@@ -27,8 +27,12 @@ import {
   installBuiltins,
   installRuntimeServices,
 } from './runtime';
+import {deactivateChunking} from './chunk';
 import {stubElements} from './custom-element';
 
+// This feature doesn't make sense in shadow mode as it only applies to
+// background rendered iframes;
+deactivateChunking();
 
 // Declare that this runtime will support multiple shadow-root docs.
 installDocService(self, /* isSingleDoc */ false);

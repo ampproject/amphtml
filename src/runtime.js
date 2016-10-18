@@ -27,6 +27,7 @@ import {
   registerExtension,
 } from './service/extensions-impl';
 import {ampdocServiceFor} from './ampdoc';
+import {chunk} from './chunk';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor} from './log';
 import {
@@ -246,9 +247,14 @@ function adoptShared(global, opts, callback) {
    */
   function installExtension(fnOrStruct) {
     if (typeof fnOrStruct == 'function') {
-      fnOrStruct(global.AMP);
+      const fn = fnOrStruct;
+      chunk(global.document, () => fn(global.AMP));
     } else {
-      registerExtension(extensions, fnOrStruct.n, fnOrStruct.f, global.AMP);
+      const register = function() {
+        registerExtension(extensions, fnOrStruct.n, fnOrStruct.f, global.AMP);
+      };
+      register.displayName = fnOrStruct.n;
+      chunk(global.document, register);
     }
   }
 
@@ -268,9 +274,13 @@ function adoptShared(global, opts, callback) {
    */
   global.AMP.push = function(fnOrStruct) {
     // Extensions are only processed once HEAD is complete.
-    waitForBody(global.document, () => {
-      installExtension(fnOrStruct);
-    });
+    const register = function() {
+      waitForBody(global.document, () => {
+        installExtension(fnOrStruct);
+      });
+    };
+    register.displayName = fnOrStruct.n;
+    chunk(global.document, register);
   };
 
   // Execute asynchronously scheduled elements.
