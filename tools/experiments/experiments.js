@@ -207,6 +207,11 @@ const EXPERIMENTS = [
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
   },
+  {
+    id: 'chunked-amp',
+    name: 'Split AMP\'s loading phase into chunks',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
+  },
 ];
 
 if (getMode().localDev) {
