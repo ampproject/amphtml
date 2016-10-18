@@ -68,7 +68,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      install(this.win, src);
+      this.loadPromise(this.win).then(() => {
+        install(this.win, src);
+      });
     } else {
       user().error(TAG,
           'Did not install ServiceWorker because it does not ' +

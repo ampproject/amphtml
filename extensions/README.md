@@ -44,6 +44,7 @@ Current list of extended components by category:
 | Component | Description |
 | --------- | ----------- |
 | [`amp-analytics`](amp-analytics/amp-analytics.md) | Captures analytics data from an AMP document. |
+| [`amp-experiment`](amp-experiment/amp-experiment.md) | Conducts user experience experiments on an AMP document. |
 
 ### Audio/Video
 

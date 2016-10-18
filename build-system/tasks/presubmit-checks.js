@@ -46,6 +46,7 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
+  'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
@@ -56,6 +57,11 @@ var forbiddenTerms = {
   },
   'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
+  'sandbox\\.(spy|stub|mock)\\([^,\\s]*[iI]?frame[^,\\s]*,': {
+    message: 'Do NOT stub on a cross domain iframe! #5359\n' +
+        '  If this is same domain, mark /*OK*/.\n' +
+        '  If this is cross domain, overwrite the method directly.'
   },
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
@@ -445,6 +451,21 @@ var forbiddenTerms = {
   '\\.getWin\\(': {
     message: backwardCompat,
     whitelist: [
+    ],
+  },
+  '/\\*\\* @type \\{\\!Element\\} \\*/': {
+    message: 'Use assertElement instead of casting to !Element.',
+    whitelist: [
+      'src/log.js',  // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js',  // Includes the previous.
+    ],
+  },
+  'chunk\\(': {
+    message: 'chunk( should only be used during startup',
+    whitelist: [
+      'src/amp.js',
+      'src/chunk.js',
+      'src/runtime.js',
     ],
   },
 };

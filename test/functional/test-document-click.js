@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {onDocumentElementClick_, onDocumentElementCapturedClick_,
-    getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
-import {createIframePromise} from '../../testing/iframe';
+import {onDocumentElementClick_} from '../../src/document-click';
 import {installTimerService} from '../../src/service/timer-impl';
-import {urlReplacementsForDoc} from '../../src/url-replacements';
+import {
+  installUrlReplacementsServiceForDoc,
+} from '../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('test-document-click onDocumentElementClick_', () => {
   let sandbox;
@@ -45,12 +46,13 @@ describe('test-document-click onDocumentElementClick_', () => {
     scrollIntoViewSpy = sandbox.spy();
     timerFuncSpy = sandbox.spy();
     replaceLocSpy = sandbox.spy();
-    elem = {};
+    elem = {nodeType: 1};
     getElementByIdSpy = sandbox.stub();
     querySelectorSpy = sandbox.stub();
     tgt = document.createElement('a');
     tgt.href = 'https://www.google.com';
     win = {
+      document: {},
       location: {
         href: 'https://www.google.com/some-path?hello=world#link',
         replace: replaceLocSpy,
@@ -59,18 +61,26 @@ describe('test-document-click onDocumentElementClick_', () => {
         timerFuncSpy();
         fn();
       },
+      Object,
+      Math,
+      services: {
+        'viewport': {obj: {}},
+      },
     };
     ampdoc = {
       win,
+      isSingleDoc: () => true,
       getRootNode: () => {
         return {
           getElementById: getElementByIdSpy,
           querySelector: querySelectorSpy,
         };
       },
+      getUrl: () => win.location.href,
     };
     doc = {defaultView: win};
     docElem = {
+      nodeType: 1,
       ownerDocument: doc,
     };
     evt = {
@@ -85,6 +95,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       push: () => {},
     };
     installTimerService(win);
+    installUrlReplacementsServiceForDoc(ampdoc);
   });
 
   afterEach(() => {
@@ -348,69 +359,41 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
   });
-});
 
-describe('test-document-click onDocumentElementCapturedClick_', () => {
-
-  describe('usage of getElementByTagNameFromEventShadowDomPath_', () => {
-    it('should handle absence of path', () => {
-      expect(getElementByTagNameFromEventShadowDomPath_({}, 'A')).to.be.null;
-    });
-
-    it('should find first anchor in path', () => {
-      const evt = {path: [
-          {tagName: 'FOO'}, {tagName: 'A', item: 1}, {tagName: 'A', item: 2}]};
-      expect(getElementByTagNameFromEventShadowDomPath_(evt, 'A')).to.equal(
-          evt.path[1]);
-    });
-  });
-
-  describe('when including expansion url', () => {
-
-    it('should expand click_x/click_y', () => {
-      return createIframePromise().then(iframe => {
-        const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        const evt = {
-          clientX: 123,
-          clientY: 456,
-          target: iframe.win.document.createElement('a'),
-        };
-        evt.target.href = 'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM';
-        onDocumentElementCapturedClick_(evt, replacements);
-        expect(evt.target.href).to.match(
-            /http:\/\/foo\.com\/\?nx=123&ny=456&r=\d+(\.\d+)?/);
-        expect(evt.target.getAttribute('data-amp-orig-href')).to.equal(
-          'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM');
-        // Execute again with different event values and verify new href.
-        evt.clientX = 999;
-        onDocumentElementCapturedClick_(evt, replacements);
-        expect(evt.target.href).to.match(
-            /http:\/\/foo\.com\/\?nx=999&ny=456&r=\d+(\.\d+)?/);
+  describe('link expansion', () => {
+    it('should expand a link', () => {
+      querySelectorSpy.returns({
+        href: 'https://www.google.com',
       });
+      toggleExperiment(win, 'link-url-replace', true);
+      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+      tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(tgt.href).to.equal(
+           'https://www.google.com/link?out=world');
     });
 
-    it('should expand click_x/click_y relative to shadow root', () => {
-      return createIframePromise().then(iframe => {
-        const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        const evt = {
-          clientX: 123,
-          clientY: 456,
-        };
-        const containerDiv = iframe.doc.createElement('div');
-        containerDiv.style.margin = '11px 0 0 16px';
-        iframe.doc.body.appendChild(containerDiv);
-        const shadowRoot = containerDiv.createShadowRoot();
-        // Target should be containerDiv due to target rewrite for shadowRoot.
-        evt.target = containerDiv;
-        const anchorTarget = iframe.doc.createElement('A');
-        anchorTarget.setAttribute(
-            'href', 'http://foo.com/?r=RANDOM&nx=CLICK_X&ny=CLICK_Y');
-        shadowRoot.appendChild(anchorTarget);
-        evt.path = [anchorTarget];
-        onDocumentElementCapturedClick_(evt, replacements);
-        expect(anchorTarget.href).to.match(
-            /http:\/\/foo\.com\/\?r=\d+(\.\d+)?&nx=107&ny=445/);
+    it('should only expand with whitelist', () => {
+      querySelectorSpy.returns({
+        href: 'https://www.google.com',
       });
+      toggleExperiment(win, 'link-url-replace', true);
+      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(tgt.href).to.equal(
+           'https://www.google.com/link?out=QUERY_PARAM(hello)');
+    });
+
+    it('should not expand a link with experiment off', () => {
+      querySelectorSpy.returns({
+        href: 'https://www.google.com',
+      });
+      toggleExperiment(win, 'link-url-replace', false);
+      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+      tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(tgt.href).to.equal(
+           'https://www.google.com/link?out=QUERY_PARAM(hello)');
     });
   });
 });

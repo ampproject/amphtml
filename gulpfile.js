@@ -66,7 +66,7 @@ declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-facebook', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-form', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-gfycat', '0.1', false);
@@ -75,7 +75,7 @@ declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-lightbox', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-lightbox', '0.1', false);
 declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-live-list', '0.1', true);
@@ -94,7 +94,7 @@ declareExtension('amp-sticky-ad', '0.1', true);
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
 declareExtension('amp-slides', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-social-share', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-social-share', '0.1', true);
 declareExtension('amp-twitter', '0.1', false);
 declareExtension('amp-user-notification', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');

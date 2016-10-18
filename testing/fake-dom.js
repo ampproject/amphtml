@@ -171,11 +171,19 @@ class EventListeners {
    */
   static intercept(target) {
     target.eventListeners = new EventListeners();
+    const originalAdd = target.addEventListener;
+    const originalRemove = target.removeEventListener;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
+      if (originalAdd) {
+        originalAdd.apply(target, arguments);
+      }
     };
     target.removeEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.remove(type, handler, captureOrOpts);
+      if (originalRemove) {
+        originalRemove.apply(target, arguments);
+      }
     };
   }
 
@@ -252,6 +260,14 @@ class EventListeners {
       listener.handler.call(null, event);
     });
   }
+}
+
+
+/**
+ * @param {!EventTarget} target
+ */
+export function interceptEventListeners(target) {
+  EventListeners.intercept(target);
 }
 
 
@@ -348,6 +364,15 @@ class FakeLocation {
    */
   reload(forceReload) {
     this.change_({reload: true, forceReload});
+  }
+
+  /**
+   * Resets the URL without firing any events or triggering a history
+   * entry.
+   * @param {string} href
+   */
+  resetHref(href) {
+    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
   }
 }
 
@@ -523,6 +548,7 @@ export class FakeCustomElements {
     this.elements = {};
 
     /**
+     * Custom Elements V0 API.
      * @param {string} name
      * @param {{prototype: !Prototype}} spec
      */
@@ -533,6 +559,19 @@ export class FakeCustomElements {
       this.elements[name] = spec;
       this.count++;
     };
+  }
+
+  /**
+   * Custom Elements V1 API.
+   * @param {string} name
+   * @param {!Function} klass
+   */
+  define(name, klass) {
+    if (this.elements[name]) {
+      throw new Error('custom element already defined: ' + name);
+    }
+    this.elements[name] = klass.prototype;
+    this.count++;
   }
 }
 

@@ -176,9 +176,6 @@ describe('amp-a4a', () => {
           expect(iframeDoc.querySelector('style[amp-boilerplate]'))
             .to.not.be.ok;
           expect(iframeDoc.querySelector('noscript')).to.not.be.ok;
-          // Should contain amp4ads-boilerplate.
-          expect(iframeDoc.querySelector('style[amp4ads-boilerplate]'))
-            .to.be.ok;
           // Should contain font link and extension in main document.
           expect(iframeDoc.querySelector(
             'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
@@ -518,6 +515,58 @@ describe('amp-a4a', () => {
               s => { return s.innerHTML == 'p { background: green }'; }),
               'Some style is "background: green"').to.be.true;
           expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+        });
+      });
+    });
+
+    it('should handle click expansion correctly', () => {
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        doc.body.appendChild(a4aElement);
+        const a4a = new AmpA4A(a4aElement);
+        a4a.adUrl_ = 'https://nowhere.org';
+        const bytes = buildCreativeArrayBuffer();
+        return a4a.maybeRenderAmpAd_(bytes).then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          const adBody = a4aElement.querySelector('iframe')
+              .contentDocument.querySelector('body');
+          let clickHandlerCalled = 0;
+
+          adBody.onclick = function(e) {
+            expect(e.defaultPrevented).to.be.false;
+            e.preventDefault();  // Make the test not actually navigate.
+            clickHandlerCalled++;
+          };
+          adBody.innerHTML = '<a ' +
+              'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+              '<button id="target"><button></div>';
+          const button = adBody.querySelector('#target');
+          const a = adBody.querySelector('a');
+          const ev1 = new Event('click', {bubbles: true});
+          ev1.pageX = 10;
+          ev1.pageY = 20;
+          button.dispatchEvent(ev1);
+          expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+          expect(clickHandlerCalled).to.equal(1);
+
+          const ev2 = new Event('click', {bubbles: true});
+          ev2.pageX = 111;
+          ev2.pageY = 222;
+          a.dispatchEvent(ev2);
+          expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
+          expect(clickHandlerCalled).to.equal(2);
+
+          const ev3 = new Event('click', {bubbles: true});
+          ev3.pageX = 666;
+          ev3.pageY = 666;
+          // Click parent of a tag.
+          a.parentElement.dispatchEvent(ev3);
+          // Had no effect, because actual link wasn't clicked.
+          expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
+          expect(clickHandlerCalled).to.equal(3);
         });
       });
     });

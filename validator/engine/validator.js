@@ -1126,6 +1126,13 @@ class Context {
      * @private
      */
     this.tagspecsValidated_ = {};
+
+    /**
+     * Set of conditions that we've satisfied.
+     * @type {!Object<string, ?>}
+     * @private
+     */
+    this.conditionsSatisfied_ = {};
   }
 
   /**
@@ -1168,6 +1175,27 @@ class Context {
       error.dataAmpReportTestValue = reportTestValue;
     goog.asserts.assert(validationResult.errors !== undefined);
     validationResult.errors.push(error);
+  }
+
+  /**
+   * Records a condition that's been validated. Returns true iff
+   * `condition` has not been seen before.
+   * @param {string} condition
+   * @return {boolean} whether or not condition has been seen before.
+   */
+  satisfyCondition(condition) {
+    const duplicate = this.conditionsSatisfied_.hasOwnProperty(condition);
+    if (!duplicate) {
+      this.conditionsSatisfied_[condition] = 0;
+    }
+    return !duplicate;
+  }
+
+  /**
+   * @return {!Object<number, ?>}
+   */
+  conditionsSatisfied() {
+    return this.conditionsSatisfied_;
   }
 
   /**
@@ -1325,7 +1353,8 @@ class ParsedUrlSpec {
    * @param {!amp.validator.ValidationResult} result
    */
   validateUrlAndProtocol(adapter, context, urlStr, tagSpec, result) {
-    if (urlStr === '' &&
+    const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
+    if (urlStr.match(onlyWhitespaceRe) !== null &&
         (this.spec_.allowEmpty === null || this.spec_.allowEmpty === false)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.missingUrl(context, tagSpec, result);
@@ -1799,13 +1828,28 @@ class ParsedAttrSpec {
     // open-source version uses).
     // begin oneof {
     if (this.spec_.value !== null) {
-      if (attrValue == this.spec_.value) {
+      if (attrValue === this.spec_.value) {
         return;
       }
       // Allow spec's with value: "" to also be equal to their attribute
       // name (e.g. script's spec: async has value: "" so both
       // async and async="async" is okay in a script tag).
       if ((this.spec_.value == '') && (attrValue == attrName)) {
+        return;
+      }
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+            tagSpec.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
+    } else if (this.spec_.valueCasei !== null) {
+      if (attrValue.toLowerCase() === this.spec_.valueCasei) {
         return;
       }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -1860,10 +1904,9 @@ class ParsedAttrSpec {
     /** @type {!Array<string>} */
     let maybeUris = [];
     if (attrName !== 'srcset') {
-      maybeUris.push(goog.string.trim(attrValue));
+      maybeUris.push(attrValue);
     } else {
-      let srcset = goog.string.trim(attrValue);
-      if (srcset === '') {
+      if (attrValue === '') {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1877,7 +1920,7 @@ class ParsedAttrSpec {
         return;
       }
       /** @type {!parse_srcset.SrcsetParsingResult} */
-      const parseResult = parse_srcset.parseSrcset(srcset);
+      const parseResult = parse_srcset.parseSrcset(attrValue);
       if (!parseResult.success) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
@@ -2384,6 +2427,11 @@ class ParsedTagSpec {
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
     /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.requires_ = [];
+    /**
      * @type {!Array<number>}
      * @private
      */
@@ -2427,6 +2475,9 @@ class ParsedTagSpec {
     }
     this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
+    for (const condition of tagSpec.requires) {
+      this.requires_.push(condition);
+    }
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
       this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
     }
@@ -2473,7 +2524,9 @@ class ParsedTagSpec {
     var mandatoryParent =
         this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
     const attrName = parsedSpec.getSpec().name;
-    const attrValue = parsedSpec.getSpec().value;
+    const attrValue = parsedSpec.getSpec().value !== null ?
+        parsedSpec.getSpec().value.toLowerCase() :
+        parsedSpec.getSpec().valueCasei;
     goog.asserts.assert(attrValue !== null);
     return makeDispatchKey(attrName, attrValue, mandatoryParent);
   }
@@ -2497,6 +2550,15 @@ class ParsedTagSpec {
    */
   getAlsoRequiresTagWarning() {
     return this.alsoRequiresTagWarning_;
+  }
+
+  /**
+   * A TagSpec may specify generic conditions which are required if the
+   * tag is present. This accessor returns the list of those conditions.
+   * @return {!Array<string>}
+   */
+  requires() {
+    return this.requires_;
   }
 
   /**
@@ -2859,7 +2921,10 @@ class ParsedTagSpec {
     if (this.spec_.ampLayout !== null) {
       /** @type {!Object<string, string>} */
       const attrsByKey = {};
-      for (let i = 0; i < encounteredAttrs.length; i += 2) {
+      // We iterate in reverse order because if a attribute name is repeated,
+      // we want to use the value from the first instance seen in the tag rather
+      // than later instances. This is the same behavior that browsers have.
+      for (let i = encounteredAttrs.length - 2; i >= 0; i -= 2) {
         attrsByKey[encounteredAttrs[i]] = encounteredAttrs[i + 1];
       }
       this.validateLayout(context, attrsByKey, result);
@@ -3005,11 +3070,14 @@ class ParsedTagSpec {
       if (mandatoryOneof !== null) {
         mandatoryOneofsSeen[mandatoryOneof] = 0;
       }
+      // If the trigger does not have an if_value_regex, then proceed to add the
+      // spec. If it does have an if_value_regex, then test the regex to see
+      // if it should add the spec.
       if (parsedSpec.hasTriggerSpec() &&
-          parsedSpec.getTriggerSpec().hasIfValueRegex()) {
-        if (parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)) {
-          parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
-        }
+          (!parsedSpec.getTriggerSpec().hasIfValueRegex() ||
+           (parsedSpec.getTriggerSpec().hasIfValueRegex() &&
+            parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)))) {
+        parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
       }
       attrspecsValidated[parsedSpec.getId()] = 0;
     }
@@ -3355,6 +3423,10 @@ function validateTagAgainstSpec(
     }
   }
 
+  for (const condition of spec.satisfies) {
+    context.satisfyCondition(condition);
+  }
+
   if (parsedSpec.shouldRecordTagspecValidated()) {
     const isUnique = context.recordTagspecValidated(parsedSpec.getId());
     // If a duplicate tag is encountered for a spec that's supposed
@@ -3630,7 +3702,8 @@ class ParsedValidatorRules {
   }
 
   /**
-   * Emits errors for tags that specify that another tag is also required.
+   * Emits errors for tags that specify that another tag is also required or
+   * a condition is required to be satisfied.
    * Returns false iff context.Progress(result).complete.
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
@@ -3642,6 +3715,26 @@ class ParsedValidatorRules {
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
       const spec = this.tagSpecById_[tagSpecId];
+      for (const condition of spec.requires()) {
+        if (!context.conditionsSatisfied().hasOwnProperty(condition)) {
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
+                context.getDocLocator(),
+                /* params */
+                [
+                  condition,
+                  getTagSpecName(spec.getSpec())
+                ],
+                spec.getSpec().specUrl, validationResult);
+          } else {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
+        }
+      }
       for (const tagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -4009,7 +4102,12 @@ amp.validator.ValidationHandler =
         attrName = attrName.toLowerCase();
 
         const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
-            attrName, attrValue, this.context_.getTagStack().getParent());
+            attrName,
+            // Attribute values are case-sensitive by default, but we
+            // match dispatch keys in a case-insensitive manner and then
+            // validate using whatever the tagspec requests.
+            attrValue.toLowerCase(),
+            this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
           const parsedSpec = this.rules_.getTagSpec(maybeTagSpecId);
           goog.asserts.assert(parsedSpec !== undefined, '1');
