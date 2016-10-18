@@ -872,8 +872,16 @@ export class Viewer {
       return Promise.resolve('');
     }
     return this.sendMessageUnreliable_('fragment', undefined, true).then(
-      hash => hash || ''
-    );
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          /* Strip leading '#' */
+          if (hash.indexOf('#') == 0) {
+            hash = hash.substr(1);
+          }
+          return hash;
+        });
   }
 
   /**
