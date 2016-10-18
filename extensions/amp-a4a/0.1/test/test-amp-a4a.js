@@ -29,7 +29,10 @@ import {
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {extensionsFor} from '../../../../src/extensions';
 import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
+import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {AmpAd} from '../../../../extensions/amp-ad/0.1/amp-ad';
 import * as sinon from 'sinon';
 
 class MockA4AImpl extends AmpA4A {
@@ -94,16 +97,10 @@ describe('amp-a4a', () => {
         return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
       },
       bodyUsed: false,
-      headers: {
-        get: function(name) {
-          const headerValues = {
-            'X-Google-header': validCSSAmp.signature,
-          };
-          return headerValues[name];
-        },
-      },
+      headers: new Headers(),
       catch: callback => callback(),
     };
+    mockResponse.headers.append('X-Google-header', validCSSAmp.signature);
   });
 
   afterEach(() => {
@@ -123,6 +120,41 @@ describe('amp-a4a', () => {
     doc.body.appendChild(element);
     return element;
   }
+
+  describe('basic end-to-end', () => {
+    it('should render a single AMP ad in a friendly iframe', () => {
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        a4aRegistry['mock'] = () => {return true;};
+        // const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
+        // extensionsMock.expects('loadElementClass')
+        //     .withExactArgs('amp-ad-network-mock-impl')
+        //     .returns(Promise.resolve(MockA4AImpl))
+        //     .once();
+        const ampAdElement = doc.createElement('amp-a4a');
+        ampAdElement.setAttribute('width', 200);
+        ampAdElement.setAttribute('height', 50);
+        ampAdElement.setAttribute('type', 'mock');
+        const ampAd = new MockA4AImpl(ampAdElement);
+        return fixture.addElement(ampAdElement);
+        // return ampAd.upgradeCallback().then(baseElement => {
+        //   extensionsMock.verify();
+        //   expect(ampAdElement.getAttribute('data-a4a-upgrade-type')).to.equal(
+        //       'amp-ad-network-mock-impl');
+        //   return fixture.addElement(ampAdElement).then(element => {
+        //     expect(element).to.not.be.null;
+        //   });
+        // });
+      });
+    });
+  });
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in friendly iframe', () => {
@@ -202,7 +234,7 @@ describe('amp-a4a', () => {
         expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
       });
     });
-    it('#onLayoutMeasure #layoutCallback not valid AMP', () => {
+    it('#layoutCallback not valid AMP', () => {
       viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',

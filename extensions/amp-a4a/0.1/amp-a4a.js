@@ -78,7 +78,20 @@ function isValidOffsetArray(ary) {
       typeof ary[1] === 'number';
 }
 
+/** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
+
+// TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
+// acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
+// cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
+/** @type {string} */
+const SAFEFRAME_VERSION = '1-0-4';
+/** @type {string} */
+const SAFEFRAME_IMPL_PATH =
+    'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
+    '/html/container.html';
+/** @type {string} */
+const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
 export let AdResponseDef;
@@ -132,6 +145,14 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
+
+    // TODO(tdrl): Temporary, while we're verifying whether this is an
+    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src
+    // from cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
+    /** @private {?ArrayBuffer} */
+    this.creativeBody_ = null;
+    /** @private {?string} */
+    this.shouldRenderViaSafeFrame_ = null;
 
     this.lifecycleReporter_ = getLifecycleReporter(this, 'a4a');
     this.lifecycleReporter_.sendPing('adSlotBuilt');
@@ -282,6 +303,11 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           }
           this.lifecycleReporter_.sendPing('adRequestEnd');
+          // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
+          // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
+          // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
+          this.shouldRenderViaSafeFrame_ =
+              fetchResponse.headers.get(RENDERING_TYPE_HEADER);
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -313,6 +339,15 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(creativeParts => {
           checkStillCurrent(promiseId);
+          // Keep a handle to the creative body so that we can render into
+          // SafeFrame later, if necessary.  TODO(tdrl): Temporary, while we
+          // assess whether this is the right solution to the Safari+iOS iframe
+          // src cache issue.  If we decide to keep a SafeFrame-like solution,
+          // we should restructure the promise chain to pass this info along
+          // more cleanly, without use of an object variable outside the chain.
+          if (creativeParts && creativeParts.creative) {
+            this.creativeBody_ = creativeParts.creative;
+          }
           if (!creativeParts || !creativeParts.signature) {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
@@ -726,6 +761,34 @@ export class AmpA4A extends AMP.BaseElement {
           iframe, /* is3p */ !!opt_isNonAmpCreative,
           /* opt_defaultVisible */ true);
       this.rendered_ = true;
+    });
+  }
+
+  renderViaSafeFrame_() {
+    user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
+    this.lifecycleReporter_.sendPing('renderCrossDomainStart');
+    utf8Decode(this.creativeBody_).then(creative => {
+      /** @const {!Element} */
+      const iframe = this.element.ownerDocument.createElement('iframe');
+      iframe.setAttribute('height', this.element.getAttribute('height'));
+      iframe.setAttribute('width', this.element.getAttribute('width'));
+      iframe.setAttribute('src', SAFEFRAME_IMPL_PATH + '?n=0');
+      iframe.setAttribute('name',
+          `${SAFEFRAME_VERSION};${creative.length};${creative}`);
+      // TODO(tdrl): Do we really need vsync here?  This is only ever called in
+      // the context of layoutCallback(), which is vsync safe.  However, it is
+      // inside a couple of nested promises, so maybe it's not guaranteed to be
+      // running in a vsync-safe context?
+      this.vsync_.mutate(() => {
+        this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
+        // TODO(keithwrightbos): startup returns load event, do we need to wait?
+        // Set opt_defaultVisible to true as 3p draw code never executed causing
+        // render-start event never to fire which will remove visiblity hidden.
+        this.apiHandler_.startUp(
+            iframe, /* is3p */ !!opt_isNonAmpCreative,
+            /* opt_defaultVisible */ true);
+        this.rendered_ = true;
+      });
     });
   }
 
