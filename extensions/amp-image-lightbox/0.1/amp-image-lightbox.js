@@ -92,6 +92,13 @@ export class ImageViewer {
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
 
+    /** @private {!Object} */
+    this.ariaAttributes_ = {
+      'alt': null,
+      'aria-label': null,
+      'aria-labelledby': null,
+    };
+
     /** @private {number} */
     this.sourceWidth_ = 0;
 
@@ -187,6 +194,11 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
+    Object.keys(this.ariaAttributes_).forEach(key => {
+      this.image_.removeAttribute(key);
+      this.ariaAttributes_[key] = null;
+    });
+    this.image_.removeAttribute('aria-describedby');
     this.srcset_ = null;
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
     this.sourceWidth_ = 0;
@@ -223,6 +235,14 @@ export class ImageViewer {
     this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
     this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
     this.srcset_ = srcsetFromElement(sourceElement);
+
+    Object.keys(this.ariaAttributes_).forEach(key => {
+      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
+      if (this.ariaAttributes_[key]) {
+        this.image_.setAttribute(key, this.ariaAttributes_[key]);
+      }
+    });
+
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
       // It will be updated later.
@@ -707,6 +727,11 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.imageViewer_.getElement());
 
     this.captionElement_ = this.element.ownerDocument.createElement('div');
+
+    // Set id to the captionElement_ for accessibility reason
+    this.captionElement_.setAttribute('id', this.element.getAttribute('id')
+        + '-caption');
+
     this.captionElement_.classList.add('amp-image-lightbox-caption');
     this.captionElement_.classList.add('-amp-image-lightbox-caption');
     this.container_.appendChild(this.captionElement_);
@@ -841,7 +866,10 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     if (caption) {
       dom.copyChildren(caption, dev().assertElement(this.captionElement_));
+      this.imageViewer_.getImage().setAttribute('aria-describedby',
+          this.captionElement_.getAttribute('id'));
     }
+
     this.captionElement_.classList.toggle('-amp-empty', !caption);
   }
 

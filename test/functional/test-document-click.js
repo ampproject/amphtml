@@ -16,7 +16,11 @@
 
 import {onDocumentElementClick_} from '../../src/document-click';
 import {installTimerService} from '../../src/service/timer-impl';
+import {
+  installUrlReplacementsServiceForDoc,
+} from '../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('test-document-click onDocumentElementClick_', () => {
   let sandbox;
@@ -42,12 +46,13 @@ describe('test-document-click onDocumentElementClick_', () => {
     scrollIntoViewSpy = sandbox.spy();
     timerFuncSpy = sandbox.spy();
     replaceLocSpy = sandbox.spy();
-    elem = {};
+    elem = {nodeType: 1};
     getElementByIdSpy = sandbox.stub();
     querySelectorSpy = sandbox.stub();
     tgt = document.createElement('a');
     tgt.href = 'https://www.google.com';
     win = {
+      document: {},
       location: {
         href: 'https://www.google.com/some-path?hello=world#link',
         replace: replaceLocSpy,
@@ -56,18 +61,26 @@ describe('test-document-click onDocumentElementClick_', () => {
         timerFuncSpy();
         fn();
       },
+      Object,
+      Math,
+      services: {
+        'viewport': {obj: {}},
+      },
     };
     ampdoc = {
       win,
+      isSingleDoc: () => true,
       getRootNode: () => {
         return {
           getElementById: getElementByIdSpy,
           querySelector: querySelectorSpy,
         };
       },
+      getUrl: () => win.location.href,
     };
     doc = {defaultView: win};
     docElem = {
+      nodeType: 1,
       ownerDocument: doc,
     };
     evt = {
@@ -82,6 +95,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       push: () => {},
     };
     installTimerService(win);
+    installUrlReplacementsServiceForDoc(ampdoc);
   });
 
   afterEach(() => {
@@ -343,6 +357,43 @@ describe('test-document-click onDocumentElementClick_', () => {
       onDocumentElementClick_(evt, ampdoc, viewport, history, false);
       expect(win.top.location.href).to.equal('https://google.com');
       expect(preventDefaultSpy.callCount).to.equal(0);
+    });
+  });
+
+  describe('link expansion', () => {
+    it('should expand a link', () => {
+      querySelectorSpy.returns({
+        href: 'https://www.google.com',
+      });
+      toggleExperiment(win, 'link-url-replace', true);
+      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+      tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(tgt.href).to.equal(
+           'https://www.google.com/link?out=world');
+    });
+
+    it('should only expand with whitelist', () => {
+      querySelectorSpy.returns({
+        href: 'https://www.google.com',
+      });
+      toggleExperiment(win, 'link-url-replace', true);
+      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(tgt.href).to.equal(
+           'https://www.google.com/link?out=QUERY_PARAM(hello)');
+    });
+
+    it('should not expand a link with experiment off', () => {
+      querySelectorSpy.returns({
+        href: 'https://www.google.com',
+      });
+      toggleExperiment(win, 'link-url-replace', false);
+      tgt.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+      tgt.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      expect(tgt.href).to.equal(
+           'https://www.google.com/link?out=QUERY_PARAM(hello)');
     });
   });
 });

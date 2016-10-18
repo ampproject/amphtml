@@ -27,6 +27,7 @@ import {viewerForDoc} from './viewer';
 import {viewportForDoc} from './viewport';
 import {platformFor} from './platform';
 import {timerFor} from './timer';
+import {urlReplacementsForDoc} from './url-replacements';
 
 
 /**
@@ -113,9 +114,10 @@ export function onDocumentElementClick_(
   }
 
   const target = closestByTag(dev().assertElement(e.target), 'A');
-  if (!target) {
+  if (!target || !target.href) {
     return;
   }
+  urlReplacementsForDoc(ampdoc).maybeExpandLink(target);
 
   /** @const {!Window} */
   const win = ampdoc.win;
@@ -196,7 +198,7 @@ export function onDocumentElementClick_(
     // See https://github.com/ampproject/amphtml/issues/5334 for more details.
     viewport./*OK*/scrollIntoView(elem);
     timerFor(win).delay(() => viewport./*OK*/scrollIntoView(
-        /** @type {!Element} */ (elem)), 1);
+        dev().assertElement(elem)), 1);
   } else {
     dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);

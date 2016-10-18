@@ -83,9 +83,9 @@ class AmpAccordion extends AMP.BaseElement {
       } else if (this.currentState_[contentId] == false) {
         section.removeAttribute('expanded');
       }
-      content.setAttribute(
-          'aria-expanded', section.hasAttribute('expanded').toString());
       header.setAttribute('aria-controls', contentId);
+      header.setAttribute('aria-expanded',
+          section.hasAttribute('expanded').toString());
       header.addEventListener('click', this.onHeaderClick_.bind(this));
     });
   }
@@ -142,16 +142,17 @@ class AmpAccordion extends AMP.BaseElement {
     /** @const {!Element} */
     const section = event.currentTarget.parentNode;
     const sectionComponents_ = section.children;
+    const header = sectionComponents_[0];
     const content = sectionComponents_[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
       if (section.hasAttribute('expanded')) {
         section.removeAttribute('expanded');
-        content.setAttribute('aria-expanded', 'false');
+        header.setAttribute('aria-expanded', 'false');
       } else {
         section.setAttribute('expanded', '');
-        content.setAttribute('aria-expanded', 'true');
+        header.setAttribute('aria-expanded', 'true');
       }
     }, content);
     this.currentState_[contentId] = !isSectionClosedAfterClick;

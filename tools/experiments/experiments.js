@@ -183,6 +183,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
   },
   {
+    id: 'link-url-replace',
+    name: 'Enables replacing variables in URLs of outgoing links.',
+    spec: 'https://github.com/ampproject/amphtml/issues/4078',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
+  },
+  {
     id: 'pan-y',
     name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
         ' touch handlers',
@@ -193,6 +199,18 @@ const EXPERIMENTS = [
     id: 'alp-for-a4a',
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
+  },
+  {
+    id: 'ios-embed-wrapper',
+    name: 'A new iOS embedded viewport model that wraps the body into' +
+        ' a synthetic root',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
+  },
+  {
+    id: 'chunked-amp',
+    name: 'Split AMP\'s loading phase into chunks',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
 ];
 

@@ -189,6 +189,8 @@ export const adConfig = {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  ibillboard: {},
+
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',
@@ -285,6 +287,11 @@ export const adConfig = {
     ],
   },
 
+  nokta: {
+    prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
+    renderStartImplemented: true,
+  },
+
   openadstream: {},
 
   openx: {
@@ -309,6 +316,11 @@ export const adConfig = {
   pulsepoint: {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
+  },
+
+  purch: {
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
   },
 
   revcontent: {
