@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDocInEmbedScope} from './service';
+import {
+  getExistingServiceForDocInEmbedScope,
+  installServiceInEmbedScope,
+} from './service';
+import {UrlReplacements} from './service/url-replacements-impl';
 
 
 /**
@@ -24,4 +28,14 @@ import {getExistingServiceForDocInEmbedScope} from './service';
 export function urlReplacementsForDoc(nodeOrDoc) {
   return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
       getExistingServiceForDocInEmbedScope(nodeOrDoc, 'url-replace'));
+}
+
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} embedWin
+ * @param {*} varSource
+ */
+export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
+  installServiceInEmbedScope(embedWin, 'url-replace',
+    new UrlReplacements(ampdoc, varSource));
 }

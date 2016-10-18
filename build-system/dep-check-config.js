@@ -56,6 +56,14 @@ exports.rules = [
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
     ]
   },
+  // Rules for URL Replacements.
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/service/url-replacement-impl.js',
+    whitelist: [
+      'src/url-replacement.js->src/service/url-replacement-impl.js',
+    ],
+  },
   // Rules for 3p
   {
     filesMatching: '3p/**/*.js',
