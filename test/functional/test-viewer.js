@@ -244,17 +244,16 @@ describe('Viewer', () => {
     });
   });
 
-  it('should get fragment from the viewer in embedded mode' +
+  it('should get fragment from the viewer in embedded mode ' +
       'if the viewer has capability of getting fragment', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
-      expect(name).to.equal('fragment');
-      return Promise.resolve('#from-viewer');
-    });
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    send.onFirstCall().returns(Promise.resolve('#from-viewer'));
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
+      expect(send.withArgs('fragment', undefined, true)).to.be.calledOnce;
     });
   });
 
@@ -278,10 +277,6 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
-      expect(name).to.equal('getFragment');
-      return Promise.resolve('from-viewer');
-    });
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.equal('');
     });
@@ -290,14 +285,13 @@ describe('Viewer', () => {
   it('should NOT get fragment from the viewer in embedded mode ' +
       'if the viewer does NOT return a fragment', () => {
     windowApi.parent = {};
-    windowApi.location.hash = '#foo';
+    windowApi.location.hash = '#foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
-      expect(name).to.equal('fragment');
-      return Promise.resolve();
-    });
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    send.onFirstCall().returns(Promise.resolve());
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.equal('');
+      expect(send.withArgs('fragment', undefined, true)).to.be.calledOnce;
     });
   });
 
@@ -306,10 +300,10 @@ describe('Viewer', () => {
     windowApi.location.href = 'http://www.example.com#foo';
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    return viewer.updateFragment('bar').then(() => {
+    return viewer.updateFragment('#bar').then(() => {
       expect(windowApi.history.replaceState.callCount).to.equal(1);
       const replace = windowApi.history.replaceState.lastCall;
-      expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#bar']);
+      expect(replace.args).to.jsonEqual([{}, '', '#bar']);
     });
   });
 
@@ -318,10 +312,10 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com';
     const viewer = new Viewer(ampdoc);
-    return viewer.updateFragment('bar').then(() => {
+    return viewer.updateFragment('#bar').then(() => {
       expect(windowApi.history.replaceState.callCount).to.equal(1);
       const replace = windowApi.history.replaceState.lastCall;
-      expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#bar']);
+      expect(replace.args).to.jsonEqual([{}, '', '#bar']);
     });
   });
 
@@ -331,9 +325,9 @@ describe('Viewer', () => {
     windowApi.location.hash = '#foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
     const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
-    viewer.updateFragment('bar');
-    expect(send.lastCall.args[0]).to.equal('updateFragment');
-    expect(send.lastCall.args[1]).to.jsonEqual({fragment: 'bar'});
+    viewer.updateFragment('#bar');
+    expect(send.withArgs('fragment', {fragment: '#bar'}, true)).to.be
+        .calledOnce;
   });
 
   it('should NOT update fragment of the viewer in embedded mode ' +
@@ -342,7 +336,7 @@ describe('Viewer', () => {
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
     const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
-    viewer.updateFragment('bar');
+    viewer.updateFragment('#bar');
     expect(send.callCount).to.equal(0);
   });
 

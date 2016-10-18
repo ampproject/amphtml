@@ -72,18 +72,21 @@ export class AmpShareTracking extends AMP.BaseElement {
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    this.shareTrackingFragments_ = Promise.all([
-      this.getIncomingFragment_(),
-      this.getOutgoingFragment_()]).then(results => {
-        const incomingFragment = results[0];
-        const outgoingFragment = results[1];
-        dev().fine(TAG, 'incomingFragment: ', incomingFragment);
-        dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
-        const newFragment = this.getNewViewerFragment_(
-            this.originalViewerFragment_, incomingFragment, outgoingFragment);
-        viewerForDoc(this.getAmpDoc()).updateFragment(newFragment);
-        return {incomingFragment, outgoingFragment};
-      });
+    this.shareTrackingFragments_ = Promise.all(
+      [this.getIncomingFragment_(), this.getOutgoingFragment_()]
+    ).then(results => {
+      const incomingFragment = results[0];
+      const outgoingFragment = results[1];
+      dev().fine(TAG, 'incomingFragment: ', incomingFragment);
+      dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
+      if (outgoingFragment) {
+        const newFragment = this.getNewViewerFragment_(incomingFragment,
+            outgoingFragment);
+        // Update the viewer fragment with leading '#'
+        viewerForDoc(this.getAmpDoc()).updateFragment('#' + newFragment);
+      }
+      return {incomingFragment, outgoingFragment};
+    });
 
     getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);
   }
@@ -94,13 +97,26 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getIncomingFragment_() {
-    dev().fine(TAG, 'getting incoming fragment');
-    return viewerForDoc(this.getAmpDoc()).getFragment().then(fragment => {
-      this.originalViewerFragment_ = fragment;
+    return this.getOriginalViewerFragment_().then(fragment => {
+      // The share tracking fragment should be the first parameter and start
+      // with dot in the url fragment
       const match = fragment.match(/\.([^&]*)/);
       return match ? match[1] : '';
     });
   }
+
+  /**
+   * Get the original url fragment from the viewer
+   * @return {!Promise<string>}
+   * @private
+   */
+  getOriginalViewerFragment_() {
+    return viewerForDoc(this.getAmpDoc()).getFragment().then(fragment => {
+      this.originalViewerFragment_ = fragment;
+      return fragment;
+    });
+  }
+
 
   /**
    * Get an outgoing share-tracking fragment
@@ -108,7 +124,6 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getOutgoingFragment_() {
-    dev().fine(TAG, 'getting outgoing fragment');
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
@@ -172,23 +187,23 @@ export class AmpShareTracking extends AMP.BaseElement {
    * Generate the new url fragment by replacing incoming share tracking fragment
    * with outgoing share tracking fragment.
    * The original fragment is not modified.
-   * @param {string} originalViewerFragment
    * @param {string} incomingFragment
    * @param {string} outgoingFragment
    * @return {string}
    * @private
    */
-  getNewViewerFragment_(originalViewerFragment, incomingFragment,
-      outgoingFragment) {
-    if (originalViewerFragment == '') {
-      return '.' + outgoingFragment;
+  getNewViewerFragment_(incomingFragment, outgoingFragment) {
+    const fragmentResidual = incomingFragment ?
+        this.originalViewerFragment_.substr(incomingFragment.length + 1) :
+        this.originalViewerFragment_;
+    let result = '.' + outgoingFragment;
+    if (fragmentResidual) {
+      if (fragmentResidual[0] != '&') {
+        result += '&';
+      }
+      result += fragmentResidual;
     }
-    if (incomingFragment == '') {
-      return '.' + outgoingFragment + '&' + originalViewerFragment;
-    } else {
-      return originalViewerFragment.replace('.' + incomingFragment, '.' +
-          outgoingFragment);
-    }
+    return result;
   }
 
 }

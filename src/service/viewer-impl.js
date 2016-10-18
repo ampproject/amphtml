@@ -892,14 +892,16 @@ export class Viewer {
   /**
    * Update the fragment of the viewer if embedded in a viewer,
    * otherwise update the page url fragment
+   * The fragment variable should contain leading '#'
    * @param {string} fragment
    * @return {!Promise}
    */
   updateFragment(fragment) {
+    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
+        'should start with #');
     if (!this.isEmbedded_) {
       if (this.win.history.replaceState) {
-        const newUrl = this.win.location.href.split('#')[0] + '#' + fragment;
-        this.win.history.replaceState({}, '', newUrl);
+        this.win.history.replaceState({}, '', fragment);
       }
       return Promise.resolve();
     }
@@ -907,7 +909,7 @@ export class Viewer {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.sendMessageUnreliable_(
-        'updateFragment', {fragment}, true));
+        'fragment', {fragment}, true));
   }
 
   /**

@@ -60,8 +60,7 @@ describe('amp-share-tracking', () => {
     viewerGetFragmentStub.onFirstCall().returns(Promise.resolve('.12345'));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('12345');
       });
     });
@@ -73,8 +72,7 @@ describe('amp-share-tracking', () => {
         .returns(Promise.resolve('.12345&key=value'));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('12345');
       });
     });
@@ -84,8 +82,7 @@ describe('amp-share-tracking', () => {
     viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('');
       });
     });
@@ -95,23 +92,58 @@ describe('amp-share-tracking', () => {
     viewerGetFragmentStub.onFirstCall().returns(Promise.resolve('12345'));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('');
       });
     });
   });
 
-  it('should get outgoing fragment randomly if no vendor url ' +
-      'is provided and win.crypto is availble', () => {
+  it('should get outgoing fragment randomly if no vendor url is provided ' +
+      'and win.crypto is availble, update the url fragment correctly ' +
+      'when original fragment is empty', () => {
     viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         // the base64url of byte array [1, 2, 3, 4, 5, 6]
         expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+        expect(viewerUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+            .calledOnce;
+      });
+    });
+  });
+
+  it('should get outgoing fragment randomly if no vendor url is provided ' +
+      'and win.crypto is availble, update the url fragment correctly ' +
+      'when original fragment only contains share tracking fragment', () => {
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve('.12345'));
+    randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        // the base64url of byte array [1, 2, 3, 4, 5, 6]
+        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+        expect(viewerUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+            .calledOnce;
+      });
+    });
+  });
+
+  it('should get outgoing fragment randomly if no vendor url is provided ' +
+      'and win.crypto is availble, update the url fragment correctly ' +
+      'when original fragment contains share tracking fragment and ' +
+      'other fragments', () => {
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(
+        '.12345&key=value'));
+    randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        // the base64url of byte array [1, 2, 3, 4, 5, 6]
+        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+        expect(viewerUpdateFragmentStub.withArgs('#.AQIDBAUG&key=value'))
+            .to.be.calledOnce;
       });
     });
   });
@@ -123,9 +155,10 @@ describe('amp-share-tracking', () => {
     randomBytesStub.onFirstCall().returns(null);
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
+        expect(viewerUpdateFragmentStub.withArgs('#.H5rdN8Eh')).to.be
+            .calledOnce;
       });
     });
   });
@@ -137,9 +170,9 @@ describe('amp-share-tracking', () => {
     xhrStub.onFirstCall().returns(Promise.resolve(mockJsonResponse));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.outgoingFragment).to.equal('54321');
+        expect(viewerUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
       });
     });
   });
@@ -150,8 +183,8 @@ describe('amp-share-tracking', () => {
     xhrStub.onFirstCall().returns(Promise.resolve({foo: 'bar'}));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        expect(viewerUpdateFragmentStub).to.not.be.called;
         expect(fragments.outgoingFragment).to.equal('');
       });
     });
@@ -171,8 +204,8 @@ describe('amp-share-tracking', () => {
         body: {},
       });
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        expect(viewerUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
         expect(fragments.outgoingFragment).to.equal('54321');
       });
     });
@@ -184,8 +217,8 @@ describe('amp-share-tracking', () => {
     xhrStub.onFirstCall().returns(Promise.reject('404'));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(viewerGetFragmentStub.callCount).to.equal(1);
-        expect(viewerUpdateFragmentStub.callCount).to.equal(1);
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        expect(viewerUpdateFragmentStub).to.not.be.called;
         expect(fragments.outgoingFragment).to.equal('');
       });
     });
