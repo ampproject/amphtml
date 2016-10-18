@@ -18,6 +18,7 @@ import {
   doubleclickIsA4AEnabled,
   DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
   DOUBLECLICK_A4A_BETA_BRANCHES,
+  BETA_ATTRIBUTE,
 } from '../doubleclick-a4a-config';
 import {
   EXPERIMENT_ATTRIBUTE,
@@ -31,7 +32,8 @@ import * as sinon from 'sinon';
 describe('doubleclick-a4a-config', () => {
   let sandbox;
   let mockWin;
-  let iframe;
+  // Captures the fixture built by createIframePromise().
+  let testFixture;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -45,7 +47,7 @@ describe('doubleclick-a4a-config', () => {
         webkitSubtle: true,
       },
     };
-    iframe = createIframePromise();
+    return createIframePromise().then(i => { testFixture = i; });
   });
   afterEach(() => {
     sandbox.restore();
@@ -54,159 +56,139 @@ describe('doubleclick-a4a-config', () => {
 
   describe('#doubleclickIsA4AEnabled', () => {
     it('should enable a4a when requested and on CDN', () => {
-      return iframe.then(fixture => {
-        mockWin.location = parseUrl(
-            'https://cdn.ampproject.org/some/path/to/content.html');
-        const elem = fixture.doc.createElement('div');
-        elem.setAttribute('data-use-experimental-a4a-implementation', 'true');
-        fixture.doc.body.appendChild(elem);
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-        expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-            DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
-      });
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute(BETA_ATTRIBUTE, 'true');
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
     });
 
     it('should enable a4a when requested and in local dev', () => {
-      return iframe.then(fixture => {
-        const elem = fixture.doc.createElement('div');
-        elem.setAttribute('data-use-experimental-a4a-implementation', 'true');
-        mockWin.AMP_MODE = {localDev: true};
-        fixture.doc.body.appendChild(elem);
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-        expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-            DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
-      });
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute(BETA_ATTRIBUTE, 'true');
+      mockWin.AMP_MODE = {localDev: true};
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
     });
 
     it('should not enable a4a, even if requested, when on bad origin', () => {
-      return iframe.then(fixture => {
-        const elem = fixture.doc.createElement('div');
-        elem.setAttribute('data-use-experimental-a4a-implementation', 'true');
-        fixture.doc.body.appendChild(elem);
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-        expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-      });
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute(BETA_ATTRIBUTE, 'true');
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
     it('should carve out remote.html, in spite of experiment override', () => {
-      return iframe.then(fixture => {
-        const doc = fixture.doc;
-        mockWin.location = parseUrl(
-            'https://cdn.ampproject.org/some/path/to/content.html');
-        mockWin.document.querySelector = doc.querySelector.bind(doc);
-        const remoteTag = doc.createElement('meta');
-        remoteTag.setAttribute('name', 'amp-3p-iframe-src');
-        doc.head.appendChild(remoteTag);
-        const elem = doc.createElement('div');
-        elem.setAttribute('data-use-experimental-a4a-implementation', 'true');
-        doc.body.appendChild(elem);
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-        expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-      });
+      const doc = testFixture.doc;
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      mockWin.document.querySelector = doc.querySelector.bind(doc);
+      const remoteTag = doc.createElement('meta');
+      remoteTag.setAttribute('name', 'amp-3p-iframe-src');
+      doc.head.appendChild(remoteTag);
+      const elem = doc.createElement('div');
+      elem.setAttribute(BETA_ATTRIBUTE, 'true');
+      doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
     [-1, 0, 1, 2].forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
-        return iframe.then(fixture => {
-          mockWin.location = parseUrl(
-              'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
-              String(expFlagValue));
-          const expectedEnabledState =
-              (expFlagValue == -1 || expFlagValue == 2);
-          const elem = fixture.doc.createElement('div');
-          fixture.doc.body.appendChild(elem);
-          expect(doubleclickIsA4AEnabled(mockWin, elem)).to.equal(
-              expectedEnabledState);
-          if (expFlagValue == 0) {
-            expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-          } else {
-            expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.be.ok;
-          }
-        });
+        mockWin.location = parseUrl(
+            'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
+            String(expFlagValue));
+        const expectedEnabledState =
+            (expFlagValue == -1 || expFlagValue == 2);
+        const elem = testFixture.doc.createElement('div');
+        testFixture.doc.body.appendChild(elem);
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.equal(
+            expectedEnabledState);
+        if (expFlagValue == 0) {
+          expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+        } else {
+          expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.be.ok;
+        }
       });
 
       it(`should carve out remote.html, in spite of exp flag=${expFlagValue}`,
           () => {
-            return iframe.then(fixture => {
-              const doc = fixture.doc;
-              mockWin.location = parseUrl(
-                  'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
-                  String(expFlagValue));
-              mockWin.document.querySelector = doc.querySelector.bind(doc);
-              const remoteTag = doc.createElement('meta');
-              remoteTag.setAttribute('name', 'amp-3p-iframe-src');
-              doc.head.appendChild(remoteTag);
-              const elem = doc.createElement('div');
-              doc.body.appendChild(elem);
-              expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-              expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-            });
+            const doc = testFixture.doc;
+            mockWin.location = parseUrl(
+                'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
+                String(expFlagValue));
+            mockWin.document.querySelector = doc.querySelector.bind(doc);
+            const remoteTag = doc.createElement('meta');
+            remoteTag.setAttribute('name', 'amp-3p-iframe-src');
+            doc.head.appendChild(remoteTag);
+            const elem = doc.createElement('div');
+            doc.body.appendChild(elem);
+            expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
+            expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
           });
     });
 
     [0, 1, 2].forEach(expFlagValue => {
       it(`force a4a attribute should preempt exp flag=${expFlagValue}`, () => {
-        return iframe.then(fixture => {
-          mockWin.location = parseUrl(
-              'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
-              String(expFlagValue));
-          const elem = fixture.doc.createElement('div');
-          elem.setAttribute('data-use-experimental-a4a-implementation', 'true');
-          fixture.doc.body.appendChild(elem);
-          expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-          expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-              DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
-        });
+        mockWin.location = parseUrl(
+            'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
+            String(expFlagValue));
+        const elem = testFixture.doc.createElement('div');
+        elem.setAttribute(BETA_ATTRIBUTE, 'true');
+        testFixture.doc.body.appendChild(elem);
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+        expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+            DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
       });
     });
 
     it('manual experiment should win over force a4a attribute', () => {
-      return iframe.then(fixture => {
-        mockWin.location = parseUrl(
-            'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:-1');
-        const elem = fixture.doc.createElement('div');
-        elem.setAttribute('data-use-experimental-a4a-implementation', 'true');
-        fixture.doc.body.appendChild(elem);
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-        expect(isInManualExperiment(elem)).to.be.true;
-      });
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:-1');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute(BETA_ATTRIBUTE, 'true');
+      testFixture.doc.body.appendChild(elem);
+      expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+      expect(isInManualExperiment(elem)).to.be.true;
     });
 
     it('should not switch on other slot on page', () => {
-      return iframe.then(fixture => {
-        const doc = fixture.doc;
-        mockWin.location = parseUrl(
-            'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:0');
-        const elem0 = doc.createElement('div');
-        elem0.setAttribute('data-use-experimental-a4a-implementation', 'true');
-        doc.body.appendChild(elem0);
-        const elem1 = doc.createElement('div');
-        doc.body.appendChild(elem1);
-        expect(doubleclickIsA4AEnabled(mockWin, elem0)).to.be.true;
-        expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-            DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
-        expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.false;
-        expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-      });
+      const doc = testFixture.doc;
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:0');
+      const elem0 = doc.createElement('div');
+      elem0.setAttribute(BETA_ATTRIBUTE, 'true');
+      doc.body.appendChild(elem0);
+      const elem1 = doc.createElement('div');
+      doc.body.appendChild(elem1);
+      expect(doubleclickIsA4AEnabled(mockWin, elem0)).to.be.true;
+      expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
+      expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.false;
+      expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
     it('should not interfere with other slot on page', () => {
-      return iframe.then(fixture => {
-        const doc = fixture.doc;
-        mockWin.location = parseUrl(
-            'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:2');
-        const elem0 = doc.createElement('div');
-        elem0.setAttribute('data-use-experimental-a4a-implementation', 'true');
-        doc.body.appendChild(elem0);
-        const elem1 = doc.createElement('div');
-        doc.body.appendChild(elem1);
-        expect(doubleclickIsA4AEnabled(mockWin, elem0)).to.be.true;
-        expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-            DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
-        expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
-        expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment);
-      });
+      const doc = testFixture.doc;
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:2');
+      const elem0 = doc.createElement('div');
+      elem0.setAttribute(BETA_ATTRIBUTE, 'true');
+      doc.body.appendChild(elem0);
+      const elem1 = doc.createElement('div');
+      doc.body.appendChild(elem1);
+      expect(doubleclickIsA4AEnabled(mockWin, elem0)).to.be.true;
+      expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
+      expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
+      expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment);
     });
   });
 });

@@ -70,6 +70,8 @@ export const DOUBLECLICK_A4A_BETA_BRANCHES = {
   experiment: '2077831',
 };
 
+export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
+
 /**
  * @param {!Window} win
  * @param {!Element} element
@@ -79,8 +81,7 @@ export function doubleclickIsA4AEnabled(win, element) {
   if (!!win.document.querySelector('meta[name=amp-3p-iframe-src]')) {
     return false;
   }
-  const a4aRequested = element.hasAttribute(
-      'data-use-experimental-a4a-implementation');
+  const a4aRequested = element.hasAttribute(BETA_ATTRIBUTE);
   // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
   // therefore, carves out of the experiment branches.  Any publisher using this
   // attribute will be excluded from the experiment altogether.
