@@ -237,16 +237,6 @@ class VideoEntry {
    * @private
    */
   autoplayInteractiveVideoBuilt_() {
-    const onInteraction = () => {
-      this.userInteracted_ = true;
-      this.video.showControls();
-      this.video.unmute();
-      unlistenInteraction();
-      unlistenPause();
-      unlistenPlay();
-      animation.remove();
-    };
-
     const toggleAnimation = playing => {
       this.vsync_.mutate(() => {
         animation.classList.toggle('amp-video-eq-play', playing);
@@ -271,6 +261,16 @@ class VideoEntry {
 
     const unlistenPlay = listen(this.video.element, VideoEvents.PLAY,
         toggleAnimation.bind(this, /*playing*/ true));
+
+    function onInteraction() {
+      this.userInteracted_ = true;
+      this.video.showControls();
+      this.video.unmute();
+      unlistenInteraction();
+      unlistenPause();
+      unlistenPlay();
+      animation.remove();
+    }
   }
 
   /**
