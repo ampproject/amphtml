@@ -293,12 +293,6 @@ class VideoEntry {
         this.video.pause();
       }
 
-      if (this.autoplayIcon_) {
-        this.vsync_.mutate(() => {
-          this.autoplayIcon_.classList.toggle('amp-video-eq-play',
-            this.isVisible_);
-        });
-      }
     });
   }
 
