@@ -176,14 +176,13 @@ describe('amp-form', () => {
     };
     sandbox.spy(form, 'checkValidity');
     sandbox.spy(emailInput, 'reportValidity');
-    ampForm.xhrAction_ = null;
+
     ampForm.handleSubmit_(event);
     // Check validity should always be called regardless of novalidate.
     expect(form.checkValidity.called).to.be.true;
 
     // However reporting validity shouldn't happen when novalidate.
     expect(emailInput.reportValidity.called).to.be.false;
-    expect(event.preventDefault.called).to.be.false;
     expect(form.hasAttribute('amp-novalidate')).to.be.true;
   });
 
