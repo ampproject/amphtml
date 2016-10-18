@@ -138,8 +138,8 @@ For example, the following is possible in AMP.
     <td>Updates the DOM items to show updated content.</td>
   </tr>
   <tr>
-      <td width="30%">amp-user-notification</td>
-      <td>dismiss (default)</td>
-      <td>Hides the referenced user notification element</td>
+    <td width="30%">amp-user-notification</td>
+    <td>dismiss (default)</td>
+    <td>Hides the referenced user notification element</td>
   </tr>
 </table>

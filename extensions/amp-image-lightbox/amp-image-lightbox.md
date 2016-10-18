@@ -89,6 +89,13 @@ The `amp-image-lightbox` exposes the following actions you can use [AMP on-synta
   </tr>
 </table>
 
+### Examples
+
+```html
+<amp-img on="tap:lightbox1" role="button" tabindex="0" src="image1" width=200 height=100></amp-img>
+<amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+```
+
 ## Validation
 
 See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/0.1/validator-amp-image-lightbox.protoascii) in the AMP validator specification.

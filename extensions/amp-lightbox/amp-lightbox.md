@@ -80,6 +80,16 @@ The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to t
   </tr>
 </table>
 
+### Examples
+
+```html
+<button on="tap:tweets-lb.open">See Quote</button>
+<amp-lightbox id="tweets-lb" layout="nodisplay">
+    <blockquote>"Don't talk to me about JavaScript fatigue" - Horse JS</blockquote>
+    <button on="tap:tweets-lb.close">Nice!</button>
+</amp-lightbox>
+```
+
 ## Validation
 
 See [amp-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/0.1/validator-amp-lightbox.protoascii) in the AMP validator specification.

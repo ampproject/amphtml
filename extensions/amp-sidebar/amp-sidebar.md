@@ -132,6 +132,19 @@ The `amp-sidebar` exposes the following actions you can use [AMP on-syntax to tr
   </tr>
 </table>
 
+
+### Examples
+
+```html
+<button on="tap:sidebar.open"> = </button>
+<amp-sidebar id="sidebar" layout="nodisplay">
+  <ul>
+    <li on="tap:sidebar.toggle">Toggle</li>
+    <li on="tap:sidebar.close">Close</li>
+  </ul>
+</amp-sidebar>
+```
+
 ## UX considerations
 
 When using `<amp-sidebar>`, bear in mind that your users will often view your page on mobile in an AMP viewer, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
