@@ -192,7 +192,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%"><code><a name="ancr"></a>a</code></td>
-    <td>The <code>href</code> attribute value must not begin with <code>javascript:</code>. If set, the <code>target</code> attribute value must be <code>_blank</code> or `_top`. Otherwise allowed. <a href="#ancr">🔗</a></td>
+    <td>The <code>href</code> attribute value must not begin with <code>javascript:</code>. If set, the <code>target</code> attribute value must be <code>_blank</code>. Otherwise allowed. <a href="#ancr">🔗</a></td>
   </tr>
   <tr>
     <td width="30%">svg</td>
