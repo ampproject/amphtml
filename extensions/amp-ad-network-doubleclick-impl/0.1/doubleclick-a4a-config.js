@@ -76,20 +76,19 @@ export const DOUBLECLICK_A4A_BETA_BRANCHES = {
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  const usesRemoteHTML =
-      !!win.document.querySelector('meta[name=amp-3p-iframe-src]');
-  const a4aRequested = !!element.getAttribute(
+  if (!!win.document.querySelector('meta[name=amp-3p-iframe-src]')) {
+    return false;
+  }
+  const a4aRequested = element.hasAttribute(
       'data-use-experimental-a4a-implementation');
   // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
   // therefore, carves out of the experiment branches.  Any publisher using this
   // attribute will be excluded from the experiment altogether.
-  const enableA4A = !usesRemoteHTML &&
-      (googleAdsIsA4AEnabled(
+  const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
           DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES) ||
-       (a4aRequested &&
-        (isProxyOrigin(win.location) || getMode(win).localDev)));
+      (a4aRequested && (isProxyOrigin(win.location) || getMode(win).localDev));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,
         DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
