@@ -98,6 +98,15 @@ export const adConfig = {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
   },
 
+  advertserve: {
+    renderStartImplemented: true,
+  },
+
+  affiliateb: {
+    prefetch: 'https://track.affiliate-b.com/amp/a.js',
+    renderStartImplemented: true,
+  },
+
   amoad: {
     prefetch: [
       'https://j.amoad.com/js/a.js',
@@ -180,6 +189,8 @@ export const adConfig = {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  ibillboard: {},
+
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',
@@ -233,7 +244,12 @@ export const adConfig = {
   },
 
   mediaimpact: {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
+    preconnect: [
+      'https://ww251.smartadserver.com',
+      'https://static.sascdn.com/',
+    ],
+    renderStartImplemented: true,
   },
 
   meg: {
@@ -297,6 +313,11 @@ export const adConfig = {
     preconnect: 'https://tag.contextweb.com',
   },
 
+  purch: {
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
+  },
+
   revcontent: {
     prefetch: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
     preconnect: [
@@ -343,7 +364,14 @@ export const adConfig = {
 
   triplelift: {},
 
-  webediads: {},
+  webediads: {
+    prefetch: 'https://eu1.wbdds.com/amp.min.js',
+    preconnect: [
+      'https://goutee.top',
+      'https://mediaathay.org.uk',
+    ],
+    renderStartImplemented: true,
+  },
 
   'weborama-display': {
     prefetch: [

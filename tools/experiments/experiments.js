@@ -112,6 +112,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
   },
   {
+    id: 'amp-form-custom-validations',
+    name: 'AMP Form Custom Validations',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -177,11 +183,29 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
   },
   {
+    id: 'link-url-replace',
+    name: 'Enables replacing variables in URLs of outgoing links.',
+    spec: 'https://github.com/ampproject/amphtml/issues/4078',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
+  },
+  {
     id: 'pan-y',
     name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
         ' touch handlers',
     spec: 'https://github.com/ampproject/amphtml/issues/4820',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
+  },
+  {
+    id: 'alp-for-a4a',
+    name: 'Enable redirect to landing page directly for A4A',
+    spec: 'https://github.com/ampproject/amphtml/issues/5212',
+  },
+  {
+    id: 'ios-embed-wrapper',
+    name: 'A new iOS embedded viewport model that wraps the body into' +
+        ' a synthetic root',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
   },
 ];
 

@@ -26,6 +26,12 @@ import {
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import * as describes from '../testing/describes';
+
+
+// All exposed describes.
+global.describes = describes;
+
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
@@ -63,22 +69,26 @@ class TestConfig {
   }
 
   skipChrome() {
-    this.skipMatchers.push(this.platform_.isChrome.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isChrome.bind(this.platform_));
   }
 
   skipEdge() {
-    this.skipMatchers.push(this.platform_.isEdge.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isEdge.bind(this.platform_));
   }
 
   skipFirefox() {
-    this.skipMatchers.push(this.platform_.isFirefox.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isFirefox.bind(this.platform_));
   }
 
   skipSafari() {
-    this.skipMatchers.push(this.platform_.isSafari.bind(this.platform_));
+    return this.skip(this.platform_.isSafari.bind(this.platform_));
+  }
+
+  /**
+   * @param {function():boolean} fn
+   */
+  skip(fn) {
+    this.skipMatchers.push(fn);
     return this;
   }
 
@@ -178,9 +188,18 @@ afterEach(() => {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+  const forgotGlobal = !!global.sandbox;
+  if (forgotGlobal) {
+    // The error will be thrown later to give possibly other sandboxes a
+    // chance to restore themselves.
+    delete global.sandbox;
+  }
   if (sandboxes.length > 0) {
     sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
     throw new Error('You forgot to restore your sandbox!');
+  }
+  if (forgotGlobal) {
+    throw new Error('You forgot to clear global sandbox!');
   }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +

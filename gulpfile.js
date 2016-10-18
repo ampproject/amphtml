@@ -55,7 +55,7 @@ declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-aparat', 0.1, false, 'NO_TYPE_CHECK');
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-app-banner', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
 declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
@@ -67,7 +67,7 @@ declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-facebook', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-form', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-gfycat', '0.1', false);
@@ -76,7 +76,7 @@ declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-lightbox', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-lightbox', '0.1', false);
 declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-live-list', '0.1', true);
@@ -85,7 +85,7 @@ declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
-declareExtension('amp-sidebar', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-sidebar', '0.1', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
@@ -94,7 +94,7 @@ declareExtension('amp-sticky-ad', '0.1', true);
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
 declareExtension('amp-slides', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-social-share', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-social-share', '0.1', true);
 declareExtension('amp-twitter', '0.1', false);
 declareExtension('amp-user-notification', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
@@ -390,7 +390,14 @@ function checkTypes() {
       'check-types.js', {
         includePolyfills: true,
         checkTypes: true,
-        externs: ['build-system/amp.extension.extern.js',],
+      });
+  // Type check 3p/ads code.
+  closureCompile(['./3p/integration.js'],  './dist',
+      'integration-check-types.js', {
+        externs: ['ads/ads.extern.js',],
+        includeBasicPolyfills: true,
+        include3pDirectories: true,
+        checkTypes: true,
       });
 }
 

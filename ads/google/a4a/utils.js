@@ -71,6 +71,7 @@ export function isGoogleAdsA4AValidEnvironment(win, element) {
  */
 export function googleAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams) {
+  /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
       buildAdUrl(
@@ -131,9 +132,7 @@ function buildAdUrl(
     [
       {
         name: 'is_amp',
-        value: a4a.supportsShadowDom() ?
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME,
+        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
       },
       {name: 'amp_v', value: '$internalRuntimeVersion$'},
       {name: 'dt', value: startTime},

@@ -20,6 +20,7 @@ import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
 import {viewportForDoc} from './viewport';
 import {vsyncFor} from './vsync';
+import {user} from './log';
 
 
 /**
@@ -114,7 +115,7 @@ import {vsyncFor} from './vsync';
 export class BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-    /** @public @const */
+    /** @public @const {!Element} */
     this.element = element;
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
@@ -138,11 +139,11 @@ export class BaseElement {
     /** @package {boolean} */
     this.inViewport_ = false;
 
-    /** @public @const {!Window}  */
+    /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
-    this.actionMap_ = this.win.Object.create(null);
+    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
@@ -164,6 +165,15 @@ export class BaseElement {
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
+  }
+
+  /**
+   * Returns a previously measured layout box of the element.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getLayoutBox() {
+    return this.element.getResources().getResourceForElement(
+        this.element).getLayoutBox();
   }
 
   /**
@@ -444,6 +454,12 @@ export class BaseElement {
     return loadPromise(element, opt_timeout);
   }
 
+  initActionMap_() {
+    if (!this.actionMap_) {
+      this.actionMap_ = this.win.Object.create(null);
+    }
+  }
+
   /**
    * Registers the action handler for the method with the specified name.
    * @param {string} method
@@ -451,6 +467,7 @@ export class BaseElement {
    * @public
    */
   registerAction(method, handler) {
+    this.initActionMap_();
     this.actionMap_[method] = handler;
   }
 
@@ -468,10 +485,10 @@ export class BaseElement {
     if (invocation.method == 'activate') {
       this.activate(invocation);
     } else {
+      this.initActionMap_();
       const handler = this.actionMap_[invocation.method];
-      if (!handler) {
-        throw new Error(`Method not found: ${invocation.method}`);
-      }
+      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+          this);
       handler(invocation);
     }
   }
@@ -520,9 +537,8 @@ export class BaseElement {
   forwardEvents(events, element) {
     events = isArray(events) ? events : [events];
     for (let i = 0; i < events.length; i++) {
-      const name = events[i];
-      element.addEventListener(name, event => {
-        this.element.dispatchCustomEvent(name, event.data || {});
+      element.addEventListener(events[i], event => {
+        this.element.dispatchCustomEvent(events[i], event.data || {});
       });
     }
   }
@@ -622,12 +638,12 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box of the element.
+   * Returns the layout rectangle of the element used for reporting this
+   * element's intersection with the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getIntersectionElementLayoutBox() {
-    return this.element.getResources().getResourceForElement(
-        this.element).getLayoutBox();
+    return this.getLayoutBox();
   }
 
   /**

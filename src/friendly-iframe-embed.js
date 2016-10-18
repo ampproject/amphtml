@@ -79,7 +79,9 @@ function isSrcdocSupported() {
  * @return {!Promise<FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec) {
+  /** @const {!Window} */
   const win = getTopWindow(iframe.ownerDocument.defaultView);
+  /** @const {!./service/extensions-impl.Extensions} */
   const extensions = extensionsFor(win);
 
   iframe.style.visibility = 'hidden';
@@ -126,6 +128,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
     readyPromise = Promise.resolve();
   } else {
     readyPromise = new Promise(resolve => {
+      /** @const {number} */
       const interval = win.setInterval(() => {
         if (isIframeReady(iframe)) {
           resolve();
@@ -147,7 +150,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
   return readyPromise.then(() => {
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        iframe.contentWindow, spec.extensionIds || []);
+        /** @type {!Window} */(iframe.contentWindow), spec.extensionIds || []);
     // Ready to be shown.
     iframe.style.visibility = '';
     return new FriendlyIframeEmbed(iframe, spec, loadedPromise);
@@ -167,7 +170,7 @@ function isIframeReady(iframe) {
   // no other reliable signal for `readyState` in a child window and thus
   // the best way to check is to see the contents of the body.
   const childDoc = iframe.contentWindow && iframe.contentWindow.document;
-  return (childDoc &&
+  return !!(childDoc &&
       isDocumentReady(childDoc) &&
       childDoc.body &&
       childDoc.body.firstChild);
@@ -258,7 +261,7 @@ export class FriendlyIframeEmbed {
     this.iframe = iframe;
 
     /** @const {!Window} */
-    this.win = iframe.contentWindow;
+    this.win = /** @type{!Window} */(iframe.contentWindow);
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;

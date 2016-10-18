@@ -26,6 +26,7 @@ import {
 import {installPlatformService} from '../../src/service/platform-impl';
 import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
+import {timerFor} from '../../src/timer';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -34,16 +35,14 @@ import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 
-describe('runtime', () => {
+describes.sandboxed('runtime', {}, () => {
 
   let win;
-  let sandbox;
   let errorStub;
   let ampdocService;
   let ampdocServiceMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     ampdocService = {
       isSingleDoc: () => true,
       getAmpDoc: () => null,
@@ -72,7 +71,6 @@ describe('runtime', () => {
 
   afterEach(() => {
     ampdocServiceMock.verify();
-    sandbox.restore();
   });
 
   it('should convert AMP from array to AMP object in single-doc', () => {
@@ -365,6 +363,9 @@ describe('runtime', () => {
 
       // Already installed.
       expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
+
+      // The main top-level service is also pinged to unblock render.
+      return getServicePromise(win, 'service1');
     });
 
     it('should register doc-service factory and install it immediately', () => {
@@ -517,29 +518,43 @@ describe('runtime', () => {
       expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
     });
   });
+});
+
+
+describes.realWin('runtime multidoc', {
+  amp: {ampdoc: 'multi'},
+}, env => {
+  let win;
+  let extensions;
+  let extensionsMock;
+  let ampdocServiceMock;
+
+  beforeEach(() => {
+    win = env.win;
+    extensions = env.extensions;
+    extensionsMock = sandbox.mock(extensions);
+    ampdocServiceMock = sandbox.mock(env.ampdocService);
+  });
+
+  afterEach(() => {
+    extensionsMock.verify();
+    ampdocServiceMock.verify();
+  });
 
   describe('attachShadowDoc', () => {
     const docUrl = 'https://example.org/doc1';
 
     let clock;
-    let extensions;
-    let extensionsMock;
     let importDoc;
     let hostElement;
     let ampdoc;
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
-      adoptShadowMode(win);
-      win.setTimeout = window.setTimeout;
-      extensions = ext.installExtensionsService(win);
-      extensionsMock = sandbox.mock(extensions);
-      hostElement = document.createElement('div');
-      importDoc = document.createDocumentFragment();
-      importDoc.head = document.createElement('dochead');
-      importDoc.body = document.createElement('docbody');
-      importDoc.body.appendChild(document.createElement('child'));
-      ampdoc = new AmpDocShadow(win, docUrl, document.createElement('div'));
+      hostElement = win.document.createElement('div');
+      importDoc = win.document.implementation.createHTMLDocument('');
+      importDoc.body.appendChild(win.document.createElement('child'));
+      ampdoc = new AmpDocShadow(win, docUrl, win.document.createElement('div'));
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
@@ -553,15 +568,7 @@ describe('runtime', () => {
           .atLeast(0);
     });
 
-    afterEach(() => {
-      extensionsMock.verify();
-    });
-
     it('should install services and styles', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
       const ret = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       expect(ret).to.exist;
 
@@ -580,15 +587,11 @@ describe('runtime', () => {
       expect(ampdoc.services.viewer.obj).to.exist;
 
       // Single-doc bidings have been installed.
-      expect(ret.viewer).to.exist;
-      expect(ret.viewer.ampdoc).to.equal(ampdoc);
+      expect(ret.ampdoc).to.equal(ampdoc);
+      expect(ret.viewer).to.not.exist;
     });
 
     it('should install doc services', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
       class Service1 {}
       win.AMP.push({
         n: 'amp-ext',
@@ -597,7 +600,7 @@ describe('runtime', () => {
         },
       });
 
-      const script = document.createElement('script');
+      const script = win.document.createElement('script');
       script.setAttribute('custom-element', 'amp-ext');
       script.setAttribute('src', '');
       importDoc.head.appendChild(script);
@@ -610,10 +613,16 @@ describe('runtime', () => {
       });
     });
 
-    it('should update visibility', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
+    it('should pass init parameters to viewer', () => {
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'test1': '12',
+      });
+
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(viewer.getParam('test1')).to.equal('12');
+    });
+
+    it('should update host visibility', () => {
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
 
       // Document is invisible at first.
@@ -629,12 +638,10 @@ describe('runtime', () => {
     });
 
     it('should import body', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       const shadowRoot = hostElement.shadowRoot;
-      const body = shadowRoot.querySelector('docbody');
+      const body = shadowRoot.querySelector('body') ||
+          shadowRoot.querySelector('amp-body');
       expect(body).to.exist;
       expect(body).to.have.class('amp-shadow');
       expect(body.style.position).to.equal('relative');
@@ -643,10 +650,7 @@ describe('runtime', () => {
     });
 
     it('should read title element', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-      const titleEl = document.createElement('title');
+      const titleEl = win.document.createElement('title');
       titleEl.textContent = 'test title';
       importDoc.head.appendChild(titleEl);
       const ret = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
@@ -655,10 +659,7 @@ describe('runtime', () => {
     });
 
     it('should read canonical element', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-      const canonicalEl = document.createElement('link');
+      const canonicalEl = win.document.createElement('link');
       canonicalEl.setAttribute('rel', 'canonical');
       canonicalEl.setAttribute('href', 'http://example.org/canonical');
       importDoc.head.appendChild(canonicalEl);
@@ -667,26 +668,23 @@ describe('runtime', () => {
     });
 
     it('should import fonts', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-      const fontEl1 = document.createElement('link');
+      const fontEl1 = win.document.createElement('link');
       fontEl1.setAttribute('rel', 'stylesheet');
       fontEl1.setAttribute('href', 'http://example.org/font1');
       importDoc.head.appendChild(fontEl1);
-      const fontEl2 = document.createElement('link');
+      const fontEl2 = win.document.createElement('link');
       fontEl2.setAttribute('rel', 'stylesheet');
       fontEl2.setAttribute('href', 'http://example.org/font2');
       importDoc.head.appendChild(fontEl2);
-      document.head.appendChild(fontEl2.cloneNode(true));
+      win.document.head.appendChild(fontEl2.cloneNode(true));
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-      expect(document.querySelector('link[href="http://example.org/font1"]'))
-          .to.exist;
+      expect(win.document.querySelector(
+          'link[href="http://example.org/font1"]')).to.exist;
       // Duplicates are ignored.
-      expect(document.querySelectorAll('link[href="http://example.org/font2"]'))
-          .to.have.length(1);
+      expect(win.document.querySelectorAll(
+          'link[href="http://example.org/font2"]')).to.have.length(1);
 
-      const fontEl = document.querySelector(
+      const fontEl = win.document.querySelector(
           'link[href="http://example.org/font1"]');
       expect(fontEl.getAttribute('type')).to.equal('text/css');
       expect(fontEl.getAttribute('rel')).to.equal('stylesheet');
@@ -694,10 +692,7 @@ describe('runtime', () => {
     });
 
     it('should ignore boilerplate style', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-      const styleEl = document.createElement('style');
+      const styleEl = win.document.createElement('style');
       styleEl.setAttribute('amp-boilerplate', '');
       importDoc.head.appendChild(styleEl);
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
@@ -706,10 +701,7 @@ describe('runtime', () => {
     });
 
     it('should import custom style', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-      const styleEl = document.createElement('style');
+      const styleEl = win.document.createElement('style');
       styleEl.setAttribute('amp-custom', '');
       styleEl.textContent = '/*custom*/';
       importDoc.head.appendChild(styleEl);
@@ -721,41 +713,29 @@ describe('runtime', () => {
     });
 
     it('should ignore runtime extension', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
       extensionsMock.expects('loadExtension').never();
 
-      const scriptEl = document.createElement('script');
+      const scriptEl = win.document.createElement('script');
       scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0.js');
       importDoc.head.appendChild(scriptEl);
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
     });
 
     it('should ignore unknown script', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
       extensionsMock.expects('loadExtension').never();
 
-      const scriptEl = document.createElement('script');
+      const scriptEl = win.document.createElement('script');
       scriptEl.setAttribute('data-id', 'unknown1');
       scriptEl.setAttribute('src', 'https://cdn.ampproject.org/other.js');
       importDoc.head.appendChild(scriptEl);
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       expect(hostElement.shadowRoot.querySelector('script[data-id="unknown1"]'))
           .to.not.exist;
-      expect(document.querySelector('script[data-id="unknown1"]'))
+      expect(win.document.querySelector('script[data-id="unknown1"]'))
           .to.not.exist;
     });
 
     it('should import extension element', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
       extensionsMock.expects('loadExtension')
           .withExactArgs('amp-ext1')
           .returns(Promise.resolve({
@@ -765,40 +745,32 @@ describe('runtime', () => {
           }))
           .once();
 
-      const scriptEl = document.createElement('script');
+      const scriptEl = win.document.createElement('script');
       scriptEl.setAttribute('custom-element', 'amp-ext1');
       scriptEl.setAttribute('src', '');
       importDoc.head.appendChild(scriptEl);
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-      expect(document.querySelector('script[custom-element="amp-ext1"]'))
+      expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
           .to.not.exist;
     });
 
     it('should import extension template', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
       extensionsMock.expects('loadExtension')
           .withExactArgs('amp-ext1')
           .returns(Promise.resolve({elements: {}}))
           .once();
 
-      const scriptEl = document.createElement('script');
+      const scriptEl = win.document.createElement('script');
       scriptEl.setAttribute('custom-template', 'amp-ext1');
       scriptEl.setAttribute('src', '');
       importDoc.head.appendChild(scriptEl);
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-      expect(document.querySelector('script[custom-template="amp-ext1"]'))
+      expect(win.document.querySelector('script[custom-template="amp-ext1"]'))
           .to.not.exist;
     });
 
     it('should import inline script', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
-      const scriptEl = document.createElement('script');
+      const scriptEl = win.document.createElement('script');
       scriptEl.setAttribute('type', 'application/json');
       scriptEl.setAttribute('data-id', 'test1');
       scriptEl.textContent = '{}';
@@ -811,20 +783,166 @@ describe('runtime', () => {
     });
 
     it('should ignore inline script if javascript', () => {
-      if (!window.Element.prototype.createShadowRoot) {
-        return;
-      }
-
-      const scriptEl1 = document.createElement('script');
+      const scriptEl1 = win.document.createElement('script');
       scriptEl1.setAttribute('type', 'application/javascript');
       scriptEl1.setAttribute('data-id', 'test1');
       importDoc.head.appendChild(scriptEl1);
-      const scriptEl2 = document.createElement('script');
+      const scriptEl2 = win.document.createElement('script');
       scriptEl2.setAttribute('data-id', 'test1');
       importDoc.head.appendChild(scriptEl2);
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       expect(hostElement.shadowRoot.querySelector('script[data-id="test1"]'))
           .to.not.exist;
+    });
+
+    it('should start as visible by default', () => {
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(viewer.getVisibilityState()).to.equal('visible');
+    });
+
+    it('should start as prerender when requested', () => {
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
+        'visibilityState': 'prerender',
+      });
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(viewer.getVisibilityState()).to.equal('prerender');
+    });
+
+    it('should expose visibility method', () => {
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(amp.setVisibilityState).to.be.function;
+      expect(viewer.getVisibilityState()).to.equal('visible');
+
+      amp.setVisibilityState('inactive');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+    });
+
+    it('should expose close method and dispose services', () => {
+      const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      expect(amp.close).to.be.function;
+      expect(viewer.getVisibilityState()).to.equal('visible');
+
+      viewer.dispose = sandbox.spy();
+      amp.close();
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.dispose).to.be.calledOnce;
+    });
+  });
+
+
+  describe('messaging', () => {
+    let timer;
+    let doc1, doc2, doc3;
+
+    beforeEach(() => {
+      timer = timerFor(win);
+      doc1 = attach('https://example.org/doc1');
+      doc2 = attach('https://example.org/doc2');
+      doc3 = attach('https://example.org/doc3');
+    });
+
+    function attach(docUrl) {
+      const host = win.document.createElement('div');
+      win.document.body.appendChild(host);
+      const importDoc = win.document.implementation.createHTMLDocument('');
+      const ampdoc = new AmpDocShadow(win, docUrl,
+          win.document.createElement('div'));
+
+      ampdocServiceMock.expects('installShadowDoc_')
+          .withExactArgs(
+              docUrl,
+              sinon.match(arg => arg == host.shadowRoot))
+          .returns(ampdoc)
+          .atLeast(0);
+      ampdocServiceMock.expects('getAmpDoc')
+          .withExactArgs(sinon.match(arg => arg == host.shadowRoot))
+          .returns(ampdoc)
+          .atLeast(0);
+
+      const amp = win.AMP.attachShadowDoc(host, importDoc, docUrl);
+      const viewer = getServiceForDoc(ampdoc, 'viewer');
+      const broadcastReceived = sandbox.spy();
+      viewer.onBroadcast(broadcastReceived);
+      const onMessage = sandbox.spy();
+      amp.onMessage(function(eventType, data) {
+        if (eventType == 'ignore' || eventType == 'documentLoaded') {
+          return undefined;
+        }
+        return onMessage(eventType, data);
+      });
+      return {host, amp, ampdoc, viewer, broadcastReceived, onMessage};
+    }
+
+    it('should broadcast to all but sender', () => {
+      doc1.viewer.broadcast({test: 1});
+      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        // Sender is not called.
+        expect(doc1.broadcastReceived).to.not.be.called;
+
+        // All others are called.
+        expect(doc2.broadcastReceived).to.be.calledOnce;
+        expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
+        expect(doc3.broadcastReceived).to.be.calledOnce;
+        expect(doc3.broadcastReceived.args[0][0]).deep.equal({test: 1});
+
+        // None of the onMessage are called.
+        expect(doc1.onMessage).to.not.be.called;
+        expect(doc2.onMessage).to.not.be.called;
+        expect(doc3.onMessage).to.not.be.called;
+      });
+    });
+
+    it('should stop broadcasting after close', () => {
+      doc3.amp.close();
+      doc1.viewer.broadcast({test: 1});
+      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        // Sender is not called, closed is not called.
+        expect(doc1.broadcastReceived).to.not.be.called;
+        expect(doc3.broadcastReceived).to.not.be.called;
+
+        // All others are called.
+        expect(doc2.broadcastReceived).to.be.calledOnce;
+        expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
+      });
+    });
+
+    it('should stop broadcasting after force-close', () => {
+      doc3.host.parentNode.removeChild(doc3.host);
+      doc1.viewer.broadcast({test: 1});
+      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        // Sender is not called, closed is not called.
+        expect(doc1.broadcastReceived).to.not.be.called;
+        expect(doc3.broadcastReceived).to.not.be.called;
+
+        // All others are called.
+        expect(doc2.broadcastReceived).to.be.calledOnce;
+        expect(doc2.broadcastReceived.args[0][0]).deep.equal({test: 1});
+      });
+    });
+
+    it('should send message', () => {
+      return doc1.viewer.sendMessage('test3', {test: 3}).then(() => {
+        return timer.promise(0);
+      }).then(() => {
+        expect(doc1.onMessage).to.be.calledOnce;
+        expect(doc1.onMessage.args[0][0]).to.equal('test3');
+        expect(doc1.onMessage.args[0][1]).to.deep.equal({test: 3});
+      });
+    });
+
+    it('should receive message', () => {
+      doc1.amp.postMessage('broadcast', {test: 4}, true);
+      expect(doc1.broadcastReceived).to.be.calledOnce;
+      expect(doc1.broadcastReceived.args[0][0]).to.deep.equal({test: 4});
     });
   });
 });

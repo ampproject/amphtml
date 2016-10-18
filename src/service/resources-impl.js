@@ -85,6 +85,9 @@ export class Resources {
     /** @private @const {!Array<!Resource>} */
     this.resources_ = [];
 
+    /** @private {number} */
+    this.addCount_ = 0;
+
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
 
@@ -128,7 +131,7 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = task => this.calcTaskScore_(task);
 
    /**
@@ -331,6 +334,13 @@ export class Resources {
    * @param {!AmpElement} element
    */
   add(element) {
+    // Ensure the viewport is ready to accept the first element.
+    this.addCount_++;
+    if (this.addCount_ == 1) {
+      this.viewport_.ensureReadyForElements();
+    }
+
+    // Create and add the resource.
     const resource = new Resource((++this.resourceIdCounter_), element, this);
     if (!element.id) {
       element.id = 'AMP_' + resource.getId();
@@ -817,6 +827,7 @@ export class Resources {
       const scrollAdjSet = [];
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
+        /** @const {!Resource} */
         const resource = request.resource;
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
@@ -1189,6 +1200,7 @@ export class Resources {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
+   * @return {number}
    * @private
    */
   calcTaskScore_(task) {

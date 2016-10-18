@@ -16,7 +16,7 @@
 
 import {childElementByTag} from '../dom';
 import {fromClass} from '../service';
-import {user} from '../log';
+import {dev, user} from '../log';
 
 
 /**
@@ -29,7 +29,7 @@ import {user} from '../log';
 /**
  * @typedef {function(new:BaseTemplate, !Element)}
  */
-const TemplateClassDef = {};
+let TemplateClassDef;
 
 /** @private @const {string} */
 const PROP_ = '__AMP_IMPL_';
@@ -48,7 +48,7 @@ export class BaseTemplate {
     /** @public @const */
     this.element = element;
 
-    /** @public @const */
+    /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
     this.compileCallback();
@@ -92,7 +92,7 @@ export class BaseTemplate {
         // Ignore comments.
       } else if (n.nodeType == /* ELEMENT */ 1) {
         if (!singleElement) {
-          singleElement = /** @type {!Element} */ (n);
+          singleElement = dev().assertElement(n);
         } else {
           // This is not the first element - can't unwrap.
           singleElement = null;
@@ -219,6 +219,7 @@ export class Templates {
    * @private
    */
   getImplementation_(element) {
+    /** @const {!BaseTemplate} */
     const impl = element[PROP_];
     if (impl) {
       return Promise.resolve(impl);

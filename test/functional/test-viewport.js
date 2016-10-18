@@ -18,6 +18,7 @@ import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {
   Viewport,
   ViewportBindingDef,
+  ViewportBindingIosEmbedWrapper_,
   ViewportBindingNatural_,
   ViewportBindingNaturalIosEmbed_,
   parseViewportMeta,
@@ -61,11 +62,14 @@ describe('Viewport', () => {
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
       postScroll: sandbox.spy(),
+      isVisible: () => true,
+      onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
       document: {
         documentElement: {
+          nodeType: 1,
           style: {},
           classList: {
             add: function() {},
@@ -90,6 +94,8 @@ describe('Viewport', () => {
     };
     binding.getScrollTop = () => 17;
     binding.getScrollLeft = () => 0;
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
     viewport = new Viewport(ampdoc, binding, viewer);
@@ -126,6 +132,46 @@ describe('Viewport', () => {
       task.mutate(state);
     });
   }
+
+  it('should connect binding right away when visible', () => {
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+  });
+
+  it('should disconnect binding on dispose', () => {
+    viewport.dispose();
+    expect(binding.disconnect).to.be.calledOnce;
+  });
+
+  it('should connect binding later when visibility changes', () => {
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
+    viewer.isVisible = () => false;
+    let onVisibilityHandler;
+    viewer.onVisibilityChanged = handler => onVisibilityHandler = handler;
+    viewport = new Viewport(ampdoc, binding, viewer);
+
+    // Hasn't been called at first.
+    expect(binding.connect).to.not.be.called;
+    expect(binding.disconnect).to.not.be.called;
+
+    // When becomes visible - it gets called.
+    viewer.isVisible = () => true;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+
+    // Repeat visibility calls do not affect anything.
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+
+    // When becomes invisible - it gets disconnected.
+    viewer.isVisible = () => false;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.be.calledOnce;
+  });
 
   it('should pass through size and scroll', () => {
     expect(viewport.getPaddingTop()).to.equal(19);
@@ -727,6 +773,8 @@ describe('Viewport META', () => {
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
         isIframed: () => false,
+        isVisible: () => true,
+        onVisibilityChanged: () => {},
       };
       viewerMock = sandbox.mock(viewer);
 
@@ -864,6 +912,11 @@ describe('ViewportBindingNatural', () => {
     WindowApi.prototype.addEventListener = function(eventType, handler) {
       windowEventHandlers[eventType] = handler;
     };
+    WindowApi.prototype.removeEventListener = function(eventType, handler) {
+      if (windowEventHandlers[eventType] == handler) {
+        delete windowEventHandlers[eventType];
+      }
+    };
     windowApi = new WindowApi();
 
     documentElement = {
@@ -890,6 +943,7 @@ describe('ViewportBindingNatural', () => {
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewportBindingNatural_(windowApi, viewer);
+    binding.connect();
   });
 
   afterEach(() => {
@@ -909,6 +963,20 @@ describe('ViewportBindingNatural', () => {
   it('should subscribe to scroll and resize events', () => {
     expect(windowEventHandlers['scroll']).to.not.equal(undefined);
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
+  });
+
+  it('should connect/disconnect events', () => {
+    windowEventHandlers = {};
+    binding = new ViewportBindingNatural_(windowApi, viewer);
+    expect(Object.keys(windowEventHandlers)).to.have.length(0);
+
+    binding.connect();
+    expect(windowEventHandlers['scroll']).to.not.equal(undefined);
+    expect(windowEventHandlers['resize']).to.not.equal(undefined);
+
+    // After disconnect, there are no more listeners on window.
+    binding.disconnect();
+    expect(Object.keys(windowEventHandlers)).to.have.length(0);
   });
 
   it('should update padding', () => {
@@ -1046,6 +1114,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       readyState: 'complete',
       documentElement: {style: {}},
       body: {
+        nodeType: 1,
         scrollWidth: 777,
         scrollHeight: 999,
         style: {},
@@ -1284,5 +1353,179 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     binding.adjustScrollPos_(event);
     expect(moveEl.scrollIntoView.callCount).to.equal(0);
     expect(event.preventDefault.callCount).to.equal(0);
+  });
+});
+
+
+describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
+  let win;
+  let binding;
+  let child;
+
+  beforeEach(() => {
+    env.iframe.style.width = '100px';
+    env.iframe.style.height = '100px';
+    win = env.win;
+    child = win.document.createElement('div');
+    child.style.width = '200px';
+    child.style.height = '300px';
+    child.textContent = 'test';
+    win.document.body.appendChild(child);
+    binding = new ViewportBindingIosEmbedWrapper_(win);
+    binding.connect();
+  });
+
+  it('should NOT require fixed layer transferring', () => {
+    expect(binding.requiresFixedLayerTransfer()).to.be.true;
+  });
+
+  it('should have UI setup', () => {
+    expect(binding.setupDone_).to.be.true;
+    expect(win.document.documentElement)
+        .to.have.class('-amp-ios-embed');
+    expect(win.document.body).to.exist;
+    expect(win.document.body.parentNode)
+        .to.not.equal(win.document.documentElement);
+    expect(win.document.body.parentNode)
+        .to.equal(binding.wrapper_);
+    expect(binding.wrapper_.parentNode)
+        .to.equal(win.document.documentElement);
+    expect(binding.wrapper_.tagName).to.equal('I-AMP-HTML-WRAPPER');
+    expect(win.document.body.contains(child)).to.be.true;
+    expect(binding.wrapper_.contains(child)).to.be.true;
+    expect(win.document.contains(child)).to.be.true;
+    expect(child.textContent).to.equal('test');
+  });
+
+  it('should have CSS setup', () => {
+    const htmlCss = win.getComputedStyle(win.document.documentElement);
+    const wrapperCss = win.getComputedStyle(binding.wrapper_);
+    const bodyCss = win.getComputedStyle(win.document.body);
+
+    // `<html>` and `<i-amp-html-wrapper>` must be scrollable, but not `body`.
+    // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
+    expect(htmlCss.overflowY).to.equal('auto');
+    expect(htmlCss.overflowX).to.equal('hidden');
+    expect(wrapperCss.overflowY).to.equal('auto');
+    expect(wrapperCss.overflowX).to.equal('hidden');
+    expect(bodyCss.overflowY).to.equal('visible');
+    expect(bodyCss.overflowX).to.equal('visible');
+
+    // Wrapper must be a block and positioned absolute at 0/0/0/0.
+    expect(wrapperCss.display).to.equal('block');
+    expect(wrapperCss.position).to.equal('absolute');
+    expect(wrapperCss.top).to.equal('0px');
+    expect(wrapperCss.left).to.equal('0px');
+    expect(wrapperCss.right).to.equal('0px');
+    expect(wrapperCss.bottom).to.equal('0px');
+    expect(wrapperCss.margin).to.equal('0px');
+
+    // `body` must have `relative` positioning and `block` display.
+    expect(bodyCss.position).to.equal('relative');
+    expect(bodyCss.display).to.equal('block');
+
+    // `body` must have a 1px transparent body for two purposes:
+    // (1) to cancel out margin collapse in body's children;
+    // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
+    expect(bodyCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent'))
+        .to.equal('1px solid transparent');
+    expect(bodyCss.margin).to.equal('0px');
+  });
+
+  it('should be immediately scrolled to 1 to avoid freeze', () => {
+    expect(binding.wrapper_.scrollTop).to.equal(1);
+  });
+
+  it('should subscribe to scroll and resize events', () => {
+    expect(win.eventListeners.count('resize')).to.equal(1);
+    // Note that scroll event is on the wrapper, and NOT on root or body.
+    expect(win.eventListeners.count('scroll')).to.equal(0);
+    expect(win.document.eventListeners.count('scroll')).to.equal(0);
+    expect(win.document.documentElement.eventListeners.count('scroll'))
+        .to.equal(0);
+    expect(win.document.body.eventListeners.count('scroll'))
+        .to.equal(0);
+  });
+
+  it('should connect/disconnect events', () => {
+    // After disconnect, there are no more listeners on window.
+    binding.disconnect();
+    expect(win.eventListeners.count('resize')).to.equal(0);
+  });
+
+  it('should update padding', () => {
+    binding.updatePaddingTop(31);
+    expect(binding.wrapper_.style.paddingTop).to.equal('31px');
+    // Notice, root is not touched.
+    expect(win.document.documentElement.style.paddingTop).to.equal('');
+  });
+
+  it('should calculate size', () => {
+    const size = binding.getSize();
+    expect(size.width).to.equal(100);
+    expect(size.height).to.equal(100);
+  });
+
+  it('should calculate scrollTop from scrollElement', () => {
+    binding.wrapper_.scrollTop = 17;
+    expect(binding.getScrollTop()).to.equal(17);
+  });
+
+  it('should calculate scrollWidth from scrollElement', () => {
+    expect(binding.getScrollWidth()).to.equal(200);
+  });
+
+  it('should calculate scrollHeight from scrollElement', () => {
+    expect(binding.getScrollHeight()).to.equal(301); // +1px for border-top.
+  });
+
+  it('should update scrollTop on scrollElement', () => {
+    binding.setScrollTop(21);
+    expect(binding.wrapper_.scrollTop).to.equal(21);
+  });
+
+  it('should adjust scrollTop to avoid scroll freeze', () => {
+    binding.setScrollTop(21);
+    expect(binding.wrapper_.scrollTop).to.equal(21);
+
+    // `scrollTop=0` is normally not allowed.
+    binding.setScrollTop(0);
+    expect(binding.wrapper_.scrollTop).to.equal(1);
+  });
+
+  it('should offset client rect for layout', () => {
+    binding.wrapper_.scrollTop = 200;
+    const el = {
+      getBoundingClientRect: () => {
+        return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
+      },
+    };
+    const rect = binding.getLayoutRect(el);
+    expect(rect.top).to.equal(213);  // round(200 + 12.5)
+    expect(rect.width).to.equal(14);  // round(13.5)
+    expect(rect.height).to.equal(15);  // round(14.5)
+  });
+
+  it('should offset client rect for layout and position passed in', () => {
+    binding.wrapper_.scrollTop = 10;
+    const el = {
+      getBoundingClientRect: () => {
+        return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
+      },
+    };
+    const rect = binding.getLayoutRect(el, 100, 200);
+    expect(rect.left).to.equal(112);  // round(100 + 11.5)
+    expect(rect.top).to.equal(213);  // round(200 + 12.5)
+    expect(rect.width).to.equal(14);  // round(13.5)
+    expect(rect.height).to.equal(15);  // round(14.5)
+  });
+
+  it('should call scroll event', () => {
+    return new Promise(resolve => {
+      binding.onScroll(resolve);
+      binding.wrapper_.scrollTop = 11;
+    }).then(() => {
+      expect(binding.getScrollTop()).to.equal(11);
+    });
   });
 });
