@@ -87,6 +87,8 @@ If a test flaked on a pull request you can ask a project owner to restart the te
 
 ### Manual testing
 
+The below assume you ran `gulp` in a terminal.
+
 #### Examples
 
 The content in the `examples` directory can be reached at: http://localhost:8000/examples/
