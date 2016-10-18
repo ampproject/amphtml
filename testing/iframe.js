@@ -16,6 +16,8 @@
 
 
 import {Timer} from '../src/timer';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {
@@ -208,6 +210,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
+      installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
