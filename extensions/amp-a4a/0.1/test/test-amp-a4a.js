@@ -81,6 +81,7 @@ describe('amp-a4a', () => {
   let mockResponse;
 
   beforeEach(() => {
+    window.AMP_MODE.localDev = false;
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
