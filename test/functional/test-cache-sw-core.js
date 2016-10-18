@@ -78,7 +78,7 @@ const runner = describe.configure().skip(() => typeof Request == 'undefined');
 runner.run('Cache SW', () => {
   const rtv = `00${version}`;
   const file = 'v0.js';
-  const url = `https://cdn.ampproject.org/rtv/${rtv}/${file}`;
+  const url = `https://cdn.ampproject.org/rtv/${rtv}/v0/${file}`;
   let sandbox;
 
   beforeEach(() => {
@@ -90,19 +90,59 @@ runner.run('Cache SW', () => {
     cache.cached.length = 0;
   });
 
-  describe('rtvVersion', () => {
-    it('matches the RTV version of a url', () => {
-      expect(sw.rtvVersion(url)).to.equal(rtv);
+  describe('urlWithVersion', () => {
+    describe('with RTVless file', () => {
+      const v0 = 'https://cdn.ampproject.org/v0.js';
+      const v1 = v0.replace('v0', 'v1');
+      const comp = v0.replace('.js', '/amp-comp.js');
+      const v1comp = v1.replace('.js', '/amp-comp.js');
+
+      it('rewrites v0 to versioned v0', () => {
+        expect(sw.urlWithVersion(v0, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v0.js')
+      });
+
+      it('rewrites v1 to versioned v1', () => {
+        expect(sw.urlWithVersion(v1, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v1.js')
+      });
+
+      it('rewrites comp to versioned comp', () => {
+        expect(sw.urlWithVersion(comp, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v0/amp-comp.js')
+      });
+
+      it('rewrites v1 comp to versioned v1 comp', () => {
+        expect(sw.urlWithVersion(v1comp, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v1/amp-comp.js')
+      });
     });
 
-    it('defaults RTV-less url to the current prod rtv', () => {
-      const rtvless = url.replace(/rtv\/\d+\//, '');
-      expect(sw.rtvVersion(rtvless)).to.equal(`01${version}`);
-    });
+    describe('with RTV versioned file', () => {
+      const v0 = `https://cdn.ampproject.org/rtv/${rtv}/v0.js`;
+      const v1 = v0.replace('v0', 'v1');
+      const comp = v0.replace('.js', '/amp-comp.js');
+      const v1comp = v1.replace('.js', '/amp-comp.js');
 
-    it('only recognizes prefix and timestamp RTVs', () => {
-      const prefixless = url.replace(rtv, version);
-      expect(sw.rtvVersion(prefixless)).to.equal(`01${version}`);
+      it('rewrites versioned v0 to other version', () => {
+        expect(sw.urlWithVersion(v0, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v0.js')
+      });
+
+      it('rewrites versioned v1 to other version', () => {
+        expect(sw.urlWithVersion(v1, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v1.js')
+      });
+
+      it('rewrites versioned comp to other version', () => {
+        expect(sw.urlWithVersion(comp, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v0/amp-comp.js')
+      });
+
+      it('rewrites versioned v1 comp to other version', () => {
+        expect(sw.urlWithVersion(v1comp, '123')).to.equal(
+            'https://cdn.ampproject.org/rtv/123/v1/amp-comp.js')
+      });
     });
   });
 
@@ -253,13 +293,13 @@ runner.run('Cache SW', () => {
   describe('handleFetch', () => {
     const prod = url.replace('00', '01');
     const blacklisted = url.replace(version, '1313131313131');
+    const prevVersion = url.replace(version, parseInt(version, 10) - 1);
     const request = new Request(url);
-    const compRequest = new Request(url.replace('v0.js', 'amp-comp.js'));
-    const otherVersion = new Request(url.replace(/(\d+)\/v0.js/, (match, v) => {
-      return `00${parseInt(v, 10) - 1}/amp-comp.js`;
-    }));
+    const compRequest = new Request(url.replace('.js', '/amp-comp.js'));
+    const otherVersion = new Request(
+        prevVersion.replace('.js', '/amp-comp.js'));
     const blacklistedRequest = new Request(
-        blacklisted.replace('v0.js', 'amp-comp.js'));
+        blacklisted.replace('.js', '/amp-comp.js'));
     let clientId = 0;
     let fetch;
 
@@ -392,7 +432,7 @@ runner.run('Cache SW', () => {
         });
 
         it('updates cached file if new one is the latest RTV', () => {
-          const prodRequest = new Request(prod.replace('v0.js', 'amp-comp.js'));
+          const prodRequest = new Request(prod.replace('.js', '/amp-comp.js'));
           return sw.handleFetch(prodRequest, clientId).then(() => {
             return new Promise(resolve => {
               // Update is out of band with response.
