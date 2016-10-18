@@ -664,7 +664,6 @@ export class AmpA4A extends AMP.BaseElement {
           const modifiedCreative =
             `<!doctype html><html ⚡4ads>
             <head>
-              <style amp4ads-boilerplate>body{visibility:hidden}</style>
               <style amp-custom>${cssBlock}</style>
               </head>
             <body ${bodyAttrString}>${bodyBlock}</body>

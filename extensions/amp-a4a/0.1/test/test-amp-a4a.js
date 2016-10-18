@@ -176,9 +176,6 @@ describe('amp-a4a', () => {
           expect(iframeDoc.querySelector('style[amp-boilerplate]'))
             .to.not.be.ok;
           expect(iframeDoc.querySelector('noscript')).to.not.be.ok;
-          // Should contain amp4ads-boilerplate.
-          expect(iframeDoc.querySelector('style[amp4ads-boilerplate]'))
-            .to.be.ok;
           // Should contain font link and extension in main document.
           expect(iframeDoc.querySelector(
             'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
