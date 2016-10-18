@@ -457,7 +457,9 @@ export class AmpA4A extends AMP.BaseElement {
       if (rendered instanceof Error) {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
-        if (this.adUrl_) {
+        if (this.shouldRenderViaSafeFrame_ && this.creativeBody_) {
+          this.renderViaSafeFrame_();
+        } else if (this.adUrl_) {
           this.renderViaCrossDomainIframe_(true);
         }
         throw rendered;
@@ -465,7 +467,11 @@ export class AmpA4A extends AMP.BaseElement {
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
-        this.renderViaCrossDomainIframe_(true);
+        if (this.shouldRenderViaSafeFrame_ && this.creativeBody_) {
+          this.renderViaSafeFrame_();
+        } else {
+          this.renderViaCrossDomainIframe_(true);
+        }
       }
       this.rendered_ = true;
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
