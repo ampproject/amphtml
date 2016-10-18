@@ -23,6 +23,7 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
+import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
@@ -153,6 +154,7 @@ sinon.sandbox.create = function(config) {
 beforeEach(beforeTest);
 
 function beforeTest() {
+  activateChunkingForTesting();
   window.AMP_MODE = null;
   window.AMP_CONFIG = {
     canary: 'testSentinel',

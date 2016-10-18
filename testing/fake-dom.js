@@ -365,6 +365,15 @@ class FakeLocation {
   reload(forceReload) {
     this.change_({reload: true, forceReload});
   }
+
+  /**
+   * Resets the URL without firing any events or triggering a history
+   * entry.
+   * @param {string} href
+   */
+  resetHref(href) {
+    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+  }
 }
 
 
