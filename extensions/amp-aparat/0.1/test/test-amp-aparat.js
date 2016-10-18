@@ -28,77 +28,30 @@ describe('amp-aparat', () => {
   function getaparatplayer(attributes) {
     return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
-      const jw = iframe.doc.createElement('amp-aparat');
+      const aparat = iframe.doc.createElement('amp-aparat');
       for (const key in attributes) {
-        jw.setAttribute(key, attributes[key]);
+        aparat.setAttribute(key, attributes[key]);
       }
-      jw.setAttribute('width', '320');
-      jw.setAttribute('height', '180');
-      jw.setAttribute('layout', 'responsive');
-      iframe.doc.body.appendChild(jw);
-      jw.implementation_.layoutCallback();
-      return jw;
+      aparat.setAttribute('width', '320');
+      aparat.setAttribute('height', '180');
+      aparat.setAttribute('layout', 'responsive');
+      iframe.doc.body.appendChild(aparat);
+      aparat.implementation_.layoutCallback();
+      return aparat;
     });
   }
 
   it('renders', () => {
-    return getaparatplayer({
-      'data-media-id': 'Wferorsv',
-      'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
+    return getaparatplayer({'uid': 'sd3vW'}).then(aparat => {
+      const iframe = aparat.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
+          'https://www.aparat.com/video/video/embed/videohash/sd3vW/vt/frame/amp/true');
       expect(iframe.className).to.match(/-amp-fill-content/);
     });
   });
 
-  it('renders with a playlist', () => {
-    return getaparatplayer({
-      'data-playlist-id': '482jsTAr',
-      'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html');
-    });
-  });
 
-  // These tests fail if the corresponding errors occur in buildCallback instead of
-  // layoutCallback.  Commenting them out for now.
-  /*
-  it('fails if no media is specified', () => {
-    return getaparatplayer({
-      'data-player-id': 'sDZEo0ea',
-    }).should.eventually.be.rejectedWith(
-      /Either the data-media-id or the data-playlist-id attributes must be/
-    );
-  });
-
-  it('fails if no player is specified', () => {
-    return getaparatplayer({
-      'data-media-id': 'Wferorsv',
-    }).should.eventually.be.rejectedWith(
-      /The data-player-id attribute is required for/
-    );
-  });
-  */
-
-  it('renders with a bad playlist', () => {
-    return getaparatplayer({
-      'data-playlist-id': 'zzz',
-      'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/zzz-sDZEo0ea.html');
-    });
-  });
 
 });
