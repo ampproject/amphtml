@@ -143,6 +143,8 @@ describe('amp-sidebar', () => {
       impl.open_();
       expect(sidebarElement.hasAttribute('open')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.getAttribute('role')).to.equal('menu');
+      expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
       expect(sidebarElement.style.display).to.equal('');
       expect(impl.scheduleLayout.callCount).to.equal(1);
       expect(historyPushSpy.callCount).to.equal(1);
@@ -218,9 +220,12 @@ describe('amp-sidebar', () => {
       });
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+      expect(sidebarElement.getAttribute('role')).to.equal('menu');
+      expect(obj.iframe.doc.activeElement).to.not.equal(sidebarElement);
       impl.toggle_();
       expect(sidebarElement.hasAttribute('open')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
       expect(sidebarElement.style.display).to.equal('');
       expect(impl.scheduleLayout.callCount).to.equal(1);
       impl.toggle_();
