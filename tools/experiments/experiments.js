@@ -185,7 +185,7 @@ const EXPERIMENTS = [
   {
     id: 'make-body-relative',
     name: 'Sets the body to position:relative.',
-    spec: '',
+    spec: 'https://github.com/ampproject/amphtml/issues/5667',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
   },
   {
