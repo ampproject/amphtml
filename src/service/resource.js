@@ -314,7 +314,7 @@ export class Resource {
   measure() {
     this.isMeasureRequested_ = false;
 
-    const box = this.resources_.getViewport().getLayoutRect(this.element);
+    let box = this.resources_.getViewport().getLayoutRect(this.element);
     const oldBox = this.layoutBox_;
     const viewport = this.resources_.getViewport();
     this.layoutBox_ = box;

@@ -1206,7 +1206,7 @@ export class Resources {
   calcTaskScore_(task) {
     const viewport = this.viewport_.getRect();
     const box = task.resource.getLayoutBox();
-    const posPriority = Math.floor((box.top - viewport.top) / viewport.height);
+    let posPriority = Math.floor((box.top - viewport.top) / viewport.height);
     if (Math.sign(posPriority) != this.getScrollDirection()) {
       posPriority *= 2;
     }
