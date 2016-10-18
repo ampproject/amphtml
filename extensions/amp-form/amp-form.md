@@ -84,6 +84,8 @@ __optional__ when `method=GET`
 
 You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion.
 
+An XHR request, is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
+
 This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
 
 **Important**: See [Security Considerations](#security-considerations) for notes on how to secure your forms endpoints.
