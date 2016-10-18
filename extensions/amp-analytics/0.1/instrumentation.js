@@ -16,6 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
+import {isInIframe} from '../../../src/iframe-helper';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
@@ -142,6 +143,11 @@ export class InstrumentationService {
    */
   addListener(config, listener, analyticsElement) {
     const eventType = config['on'];
+    if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
+      user().error(this.TAG_, 'Trigger type "' + eventType + '" is not ' +
+        'allowed.');
+      return;
+    }
     if (eventType === AnalyticsEventType.VISIBLE) {
       this.createVisibilityListener_(listener, config,
           AnalyticsEventType.VISIBLE, analyticsElement);
@@ -513,6 +519,16 @@ export class InstrumentationService {
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);
+  }
+
+  isTriggerAllowed_(triggerType, element) {
+    if (!isInIframe(element) ||
+      triggerType == AnalyticsEventType.VISIBLE ||
+      triggerType == AnalyticsEventType.TIMER ||
+      triggerType == AnalyticsEventType.HIDDEN ||
+      triggerType == AnalyticsEventType.CLICK) {
+      return true;
+    }
   }
 }
 

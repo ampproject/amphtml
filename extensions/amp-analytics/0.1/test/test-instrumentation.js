@@ -42,6 +42,7 @@ describe('amp-analytics.instrumentation', function() {
       'onChanged': sandbox.stub(),
     };
     ins.viewport_ = fakeViewport;
+    sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
   });
 
   afterEach(() => {
