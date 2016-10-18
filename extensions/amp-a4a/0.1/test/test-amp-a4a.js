@@ -45,6 +45,21 @@ class MockA4AImpl extends AmpA4A {
   }
 }
 
+class MockA4AImplNoGetAdUrl extends AmpA4A {
+  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
+    return Promise.resolve({
+      creative: responseArrayBuffer,
+      signature: base64UrlDecodeToBytes(responseHeaders.get('X-Google-header')),
+    });
+  }
+}
+
+class MockA4AImplNoExtractCreativeAndSignature extends AmpA4A{
+  getAdUrl() {
+    return Promise.resolve('https://test.location.org/ad/012345?args');
+  }
+}
+
 
 /**
  * Create a promise for an iframe that has a super-minimal mock AMP environment
@@ -123,6 +138,198 @@ describe('amp-a4a', () => {
     doc.body.appendChild(element);
     return element;
   }
+
+  describe('#extractCreativeAndSignature', () => {
+    it('should extract creative and signature if they exist', () => {
+     viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImpl(a4aElement);
+	const extractCreativeAndSignatureSpy = sandbox.spy(
+            a4a, 'extractCreativeAndSignature');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+	  expect(extractCreativeAndSignatureSpy.calledOnce,
+		 'extractCreativeAndSignatureSpy called exactly once').to.be.true;
+        });
+      });
+    });
+
+    it('should throw error if extractCreativeAndSignature not implemented', () => {
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImplNoExtractCreativeAndSignature(a4aElement);
+	const extractCreativeAndSignatureSpy = sandbox.spy(
+            a4a, 'extractCreativeAndSignature');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+	  expect(extractCreativeAndSignatureSpy.calledOnce,
+		 'extractCreativeAndSignatureSpy called exactly once').to.be.true;
+	  expect(extractCreativeAndSignatureSpy.exceptions.length).to.equal(1);
+	});
+      });
+    });
+  });
+
+  describe('#getAdUrl', () => {
+    it('should be called once', () => {
+     viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImpl(a4aElement);
+	const getAdUrlSpy = sandbox.spy(
+            a4a, 'getAdUrl');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+	  expect(getAdUrlSpy.calledOnce,
+		 'getAdUrlSpy called exactly once').to.be.true;
+        });
+      });
+    });
+
+    it('should throw error if getAdUrl not implemented', () => {
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImplNoGetAdUrl(a4aElement);
+	const getAdUrlSpy = sandbox.spy(
+            a4a, 'getAdUrl');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+	  expect(getAdUrlSpy.calledOnce,
+		 'getAdUrlSpy called exactly once').to.be.true;
+	  expect(getAdUrlSpy.exceptions.length).to.equal(1);
+	});
+      });
+    });
+  });
+
+  describe('#sendXhrRequest_', () => {
+    it('should be called once', () => {
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImpl(a4aElement);
+	const sendXhrRequest_Spy = sandbox.spy(
+            a4a, 'sendXhrRequest_');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+	  expect(sendXhrRequest_Spy.calledOnce,
+		 'sendXhrRequest_Spy called exactly once').to.be.true;
+        });
+      });
+    });
+
+   it('should handle network error', () => {
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).returns(Promise.reject("Network Error"));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+	const a4a = new MockA4AImpl(a4aElement);
+	const sendXhrRequest_Spy = sandbox.spy(
+            a4a, 'sendXhrRequest_');
+        doc.body.appendChild(a4aElement);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+	  expect(sendXhrRequest_Spy.calledOnce,
+		 'sendXhrRequest_Spy called exactly once').to.be.true;
+	  expect(sendXhrRequest_Spy.returnValues.length).to.equal(1);
+	  return sendXhrRequest_Spy.returnValues[0].then(returnedValue => {
+	    expect(returnedValue).to.be.null;
+	  });
+        });
+      });
+    });
+  });
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in friendly iframe', () => {
