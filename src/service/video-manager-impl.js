@@ -17,8 +17,8 @@
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {fromClassForDoc} from '../service';
 import {platformFor} from '../platform';
+import {fromClassForDoc} from '../service';
 import {setStyles} from '../style';
 import {VideoEvents, VideoAttributes} from '../video-interface';
 import {viewerForDoc} from '../viewer';
