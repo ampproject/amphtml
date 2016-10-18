@@ -171,11 +171,19 @@ class EventListeners {
    */
   static intercept(target) {
     target.eventListeners = new EventListeners();
+    const originalAdd = target.addEventListener;
+    const originalRemove = target.removeEventListener;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
+      if (originalAdd) {
+        originalAdd.apply(target, arguments);
+      }
     };
     target.removeEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.remove(type, handler, captureOrOpts);
+      if (originalRemove) {
+        originalRemove.apply(target, arguments);
+      }
     };
   }
 
