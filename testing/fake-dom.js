@@ -175,11 +175,15 @@ class EventListeners {
     const originalRemove = target.removeEventListener;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
-      originalAdd.call(target, arguments);
+      if (originalAdd) {
+        originalAdd.call(target, arguments);
+      }
     };
     target.removeEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.remove(type, handler, captureOrOpts);
-      originalRemove.call(target, arguments);
+      if (originalRemove) {
+        originalRemove.call(target, arguments);
+      }
     };
   }
 
