@@ -29,7 +29,7 @@ import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
 import {isExperimentOn} from '../experiments';
-import {trackImpressionPromise} from '../impression.js';
+import {getTrackImpressionPromise} from '../impression.js';
 
 
 /** @private @const {string} */
@@ -165,11 +165,7 @@ export class UrlReplacements {
     }));
 
     this.setAsync_('SOURCE_URL', () => {
-      let promise = trackImpressionPromise;
-      if (!promise) {
-        promise = Promise.resolve();
-      }
-      return promise.then(
+      return getTrackImpressionPromise().then(
         this.getDocInfoValue_.bind(this, info => {
           return removeFragment(info.sourceUrl);
         })
@@ -199,32 +195,12 @@ export class UrlReplacements {
     }));
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      user().assert(param,
-          'The first argument to QUERY_PARAM, the query string ' +
-          'param is required');
-      const url = parseUrl(this.ampdoc.win.location.href);
-      const params = parseQueryString(url.search);
-
-      return (typeof params[param] !== 'undefined') ?
-        params[param] :
-        defaultValue;
+      return this.getQueryParamData_(param, defaultValue, /* opt_sync */ true);
     });
 
     this.setAsync_('QUERY_PARAM', (param, defaultValue = '') => {
-      user().assert(param,
-          'The first argument to QUERY_PARAM, the query string ' +
-          'param is required');
-      let promise = trackImpressionPromise;
-      if (!promise) {
-        promise = Promise.resolve();
-      }
-      return promise.then(() => {
-        const url = parseUrl(this.ampdoc.win.location.href);
-        const params = parseQueryString(url.search);
-
-        return (typeof params[param] !== 'undefined') ?
-            params[param] :
-            defaultValue;
+      return getTrackImpressionPromise().then(() => {
+        return this.getQueryParamData_(param, defaultValue);
       });
     });
 
@@ -569,6 +545,17 @@ export class UrlReplacements {
     }
 
     return navigationInfo[attribute];
+  }
+
+  getQueryParamData_(param, defaultValue, opt_sync) {
+    user().assert(param,
+        'The first argument to QUERY_PARAM, the query string ' +
+        'param is required');
+    const url = parseUrl(this.ampdoc.win.location.href);
+    const params = parseQueryString(url.search);
+    return (typeof params[param] !== 'undefined') ?
+      params[param] :
+      defaultValue;
   }
 
   /**

@@ -18,12 +18,24 @@ import {dev, user} from './log';
 import {isExperimentOn} from './experiments';
 import {viewerForDoc} from './viewer';
 import {xhrFor} from './xhr';
+import {
+  isProxyOrigin,
+  parseUrl,
+  parseQueryString,
+  addParamsToUrl,
+} from './url';
 import {getMode} from './mode';
 
-/** A promise that resolve after getting info from ad server
- * {Promise=}
+let trackImpressionPromise = null;
+
+/**
+ * A function to get the trackImpressionPromise;
+ * @return {!Promise}
  */
-export let trackImpressionPromise;
+export function getTrackImpressionPromise() {
+  dev().assert(trackImpressionPromise);
+  return trackImpressionPromise;
+}
 
 /**
  * Emit a HTTP request to a destination defined on the incoming URL.
@@ -103,19 +115,17 @@ function applyResponse(win, viewer, response) {
   // If there is a tracking_url, need to track it
   // Otherwise track the location
   const trackUrl = adTracking || adLocation;
-  if (trackUrl) {
+
+  if (trackUrl && !isProxyOrigin(trackUrl)) {
     new Image().src = trackUrl;
   }
 
-  // If have we have gclid replace the location href with new location we get.
-  // TODO(@zhouyx) should we replaceState directly w/o checking gclid?
-  const gclid = response['gclid'];
-  if (gclid && adLocation) {
-    if (getMode().localDev && !getMode().test) {
-      win.history.replaceState(null, '', win.location.href +
-          '#gclid=' + gclid);
-      return;
-    }
-    win.history.replaceState(null, '', adLocation);
+  // Replace the location href params with new location params we get.
+  if (adLocation) {
+    const currentHref = win.location.href;
+    const url = parseUrl(adLocation);
+    const params = parseQueryString(url.search);
+    const newHref = addParamsToUrl(currentHref, params);
+    win.history.replaceState(null, '', newHref);
   }
 }

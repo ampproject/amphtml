@@ -15,7 +15,7 @@
  */
 
 import {
-  trackImpressionPromise,
+  getTrackImpressionPromise,
   maybeTrackImpression,
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
@@ -51,7 +51,7 @@ describe('impression', () => {
   it('should do nothing if the experiment is off', () => {
     viewer.getParam.throws(new Error('Should not be called'));
     maybeTrackImpression(window);
-    return trackImpressionPromise.should.be.fulfilled;
+    return getTrackImpressionPromise().should.be.fulfilled;
   });
 
   it('should do nothing if there is no click arg', () => {
@@ -59,7 +59,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('');
     maybeTrackImpression(window);
     expect(xhr.fetchJson.callCount).to.equal(0);
-    return trackImpressionPromise.should.be.fulfilled;
+    return getTrackImpressionPromise().should.be.fulfilled;
   });
 
   it('should do nothing if there is the click arg is http', () => {
@@ -67,7 +67,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('http://www.example.com');
     maybeTrackImpression(window);
     expect(xhr.fetchJson.callCount).to.equal(0);
-    return trackImpressionPromise.should.be.fulfilled;
+    return getTrackImpressionPromise().should.be.fulfilled;
   });
 
   it('should invoke URL', () => {
@@ -87,21 +87,64 @@ describe('impression', () => {
     });
   });
 
-  it('should replace location href', () => {
+  it('should do nothing if response is not received', () => {
     toggleExperiment(window, 'alp', true);
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     xhr.fetchJson = () => {
-      return Promise.resolve({
-        'location': 'test_location',
-        'gclid': '123456',
-      });
+      setTimeout(() => {
+        return Promise.resolve({
+          'location': 'test_location?gclid=654321',
+        });
+      }, 5000);
     };
+    const clock = sandbox.useFakeTimers();
+    const promise = new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 2000);
+    });
+    clock.tick(2001);
+    return promise.then(() => {
+      expect(window.location.href).to.not.contain('gclid=654321');
+      xhr.fetchJson = () => {
+        return Promise.resolve();
+      };
+    });
+  });
 
+  it('should do nothing if get empty response', () => {
+    toggleExperiment(window, 'alo', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    const prevHref = window.location.href;
     maybeTrackImpression(window);
     return Promise.resolve().then(() => {
       return Promise.resolve().then(() => {
-        expect(window.location.href).to.contain('test_location');
-        return trackImpressionPromise.should.be.fulfilled;
+        expect(window.location.href).to.equal(prevHref);
+        return getTrackImpressionPromise().should.be.fulfilled;
+      });
+    });
+  });
+
+  it('should replace location href only with query params', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+
+    xhr.fetchJson = () => {
+      return Promise.resolve({
+        'location': 'test_location?gclid=123456',
+      });
+    };
+    const prevHref = window.location.href;
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(window.location.href).to.contain('gclid=123456');
+        expect(window.location.href).to.not.contain('test_location');
+        xhr.fetchJson = () => {
+          return Promise.resolve();
+        };
+        window.history.replaceState(null, '', prevHref);
+        return getTrackImpressionPromise().should.be.fulfilled;
       });
     });
   });
