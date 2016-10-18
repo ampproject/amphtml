@@ -893,15 +893,27 @@ export class ViewportBindingNatural_ {
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
-    // Override a user-supplied `body{overflow}` to be always visible. This
-    // style is set in runtime vs css to avoid conflicts with ios-embedded
-    // mode and fixed transfer layer.
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
+        // Override a user-supplied `body{overflow}` to be always visible. This
+        // style is set in runtime vs css to avoid conflicts with ios-embedded
+        // mode and fixed transfer layer.
         this.win.document.body.style.overflow = 'visible';
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
           setStyles(this.win.document.body, {
+            overflowX: 'hidden',
+            overflowY: 'visible',
+          });
+        }
+
+        // Require `body{position:relative}`.
+        // TODO(dvoytenko, #5660): cleanup "make-body-relative" experiment by
+        // merging this style into `amp.css`.
+        if (isExperimentOn(this.win, 'make-body-relative')) {
+          setStyles(this.win.document.body, {
+            display: 'block',
+            position: 'relative',
             overflowX: 'hidden',
             overflowY: 'visible',
           });
