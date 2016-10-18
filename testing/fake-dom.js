@@ -176,13 +176,13 @@ class EventListeners {
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
       if (originalAdd) {
-        originalAdd.call(target, arguments);
+        originalAdd.apply(target, arguments);
       }
     };
     target.removeEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.remove(type, handler, captureOrOpts);
       if (originalRemove) {
-        originalRemove.call(target, arguments);
+        originalRemove.apply(target, arguments);
       }
     };
   }
