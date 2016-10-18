@@ -183,6 +183,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
   },
   {
+    id: 'make-body-relative',
+    name: 'Sets the body to position:relative.',
+    spec: 'https://github.com/ampproject/amphtml/issues/5667',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
+  },
+  {
     id: 'link-url-replace',
     name: 'Enables replacing variables in URLs of outgoing links.',
     spec: 'https://github.com/ampproject/amphtml/issues/4078',
