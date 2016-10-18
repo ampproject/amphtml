@@ -406,6 +406,27 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
+  'googleconversion': {
+    'requests': {
+      'conversion': 'https://www.googleadservices.com/pagead/conversion/' +
+          '${google_conversion_id}/?' +
+          'value=${google_conversion_value}&' +
+          'currency_code=${google_conversion_currency}&' +
+          'label=${google_conversion_label}&'+
+          'random=${random}&'+
+          'url=${sourceUrl}&'+
+          'fmt=${google_conversion_format}&'+
+          'bg=${google_conversion_color}&'+
+          'u_h=${screenHeight}&u_w=${screenWidth}&'+
+          'guid=ON&script=0&from_amp=1',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'krux': {
     'requests': {
       'beaconHost': 'https://beacon.krxd.net',
