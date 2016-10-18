@@ -144,8 +144,8 @@ export class Resource {
     /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
-    /** @private {!../layout-rect.LayoutRectDef} */
-    this.initialLayoutBox_ = this.layoutBox_;
+    /** @private {?../layout-rect.LayoutRectDef} */
+    this.initialLayoutBox_ = null;
 
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
@@ -393,7 +393,7 @@ export class Resource {
    * @return {boolean}
    */
   hasBeenMeasured() {
-    return this.layoutBox_.top != -10000;
+    return !!this.initialLayoutBox_;
   }
 
   /**
@@ -425,7 +425,9 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getInitialLayoutBox() {
-    return this.initialLayoutBox_;
+    // Before the first measure, there will be no initial layoutBox.
+    // Luckily, layoutBox will be present but essentially useless.
+    return this.initialLayoutBox_ || this.layoutBox_;
   }
 
   /**
