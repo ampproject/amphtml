@@ -950,6 +950,16 @@ describe('ViewportBindingNatural', () => {
     windowMock.verify();
     viewerMock.verify();
     sandbox.restore();
+    toggleExperiment(windowApi, 'make-body-relative', false);
+  });
+
+  it('should configure make-body-relative', () => {
+    toggleExperiment(windowApi, 'make-body-relative', true);
+    binding = new ViewportBindingNatural_(windowApi, viewer);
+    expect(documentBody.style.display).to.equal('block');
+    expect(documentBody.style.position).to.equal('relative');
+    expect(documentBody.style.overflowY).to.equal('visible');
+    expect(documentBody.style.overflowX).to.equal('hidden');
   });
 
   it('should setup overflow:visible on body', () => {
