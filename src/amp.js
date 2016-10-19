@@ -107,7 +107,8 @@ chunk(self.document, function initial() {
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
+      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$',
+      self.location.href);
 }
 self.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');
