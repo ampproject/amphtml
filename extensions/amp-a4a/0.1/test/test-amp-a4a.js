@@ -522,6 +522,7 @@ describe('amp-a4a', () => {
 
   describe('#preconnectCallback', () => {
     it('validate adsense', () => {
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
