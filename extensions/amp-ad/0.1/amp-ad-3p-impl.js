@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdCrossDomainIframeHandler,}
+import {AmpAdXDomainIframeHandler,}
     from './amp-ad-cross-domain-iframe-handler';
 import {
   allowRenderOutsideViewport,
@@ -31,10 +31,7 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {
-  AdDisplayState,
-  displayUnlayoutUI,
-} from './amp-ad-ui';
+import {AmpAdUIHandler} from './amp-ad-ui';
 
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -52,7 +49,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** {?Object} */
     this.config = null;
 
-    /** @private {?AmpAdCrossDomainIframeHandler} */
+    /** {?AmpAdUIHandler} */
+    this.uiHandler = null;
+
+    /** @private {?AmpAdXDomainIframeHandler} */
     this.iframeHandler_ = null;
 
     /** @private {?Element} */
@@ -116,12 +116,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    console.log('buildCallback');
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+
+    this.uiHandler = new AmpAdUIHandler(this);
+    this.uiHandler.init();
 
     setupA2AListener(this.win);
   }
@@ -205,6 +209,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    console.log('layoutCallback');
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -212,9 +217,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
-    this.state = AdDisplayState.LOADING;
     incrementLoadingAds(this.win);
     return this.layoutPromise_ = getAdCid(this).then(cid => {
+      if (this.uiHandler) {
+        this.uiHandler.displayLoadingUI();
+      }
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
@@ -226,7 +233,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.lifecycleReporter.sendPing('adRequestStart');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
-      this.iframeHandler_ = new AmpAdCrossDomainIframeHandler(
+      this.iframeHandler_ = new AmpAdXDomainIframeHandler(
           this);
       return this.iframeHandler_.startUp(iframe, true);
     });
@@ -242,9 +249,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.layoutPromise_ = null;
-    displayUnlayoutUI(this);
+    if (this.uiHandler) {
+      this.uiHandler.displayUnlayoutUI();
+    }
     if (this.iframeHandler_) {
-      this.iframeHandler_.freeIframe(true /* force */);
+      this.iframeHandler_.freeXDomainIframe();
       this.iframeHandler_ = null;
     }
     this.lifecycleReporter.sendPing('adSlotCleared');

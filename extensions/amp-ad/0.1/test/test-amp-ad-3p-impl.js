@@ -53,7 +53,6 @@ describe('amp-ad-3p-impl', () => {
           }));
       ad3p = createAmpAd(win);
       win.document.body.appendChild(ad3p.element);
-
       // Turn the doc to visible so prefetch will be proceeded.
       stubService(sandbox, win, 'viewer', 'whenFirstVisible')
           .returns(Promise.resolve());

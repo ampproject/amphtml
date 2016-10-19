@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdCrossDomainIframeHandler}
+import {AmpAdXDomainIframeHandler,}
     from '../amp-ad-cross-domain-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
@@ -24,7 +24,6 @@ import {
 } from '../../../../testing/iframe';
 import {timerFor} from '../../../../src/timer';
 import * as sinon from 'sinon';
-import * as UI from '../amp-ad-ui';
 
 describe('amp-ad-api-handler', () => {
   let sandbox;
@@ -39,7 +38,7 @@ describe('amp-ad-api-handler', () => {
     const adElement = document.createElement('amp-ad');
     adElement.getAmpDoc = () => ampdoc;
     adImpl = new BaseElement(adElement);
-    iframeHandler = new AmpAdCrossDomainIframeHandler(adImpl);
+    iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
     testIndex++;
   });
 
@@ -105,8 +104,8 @@ describe('amp-ad-api-handler', () => {
       it('should resolve on message "render-start" if render-start is'
           + 'implemented by 3P"', () => {
         adImpl.config = {renderStartImplemented: true};
-        iframeHandler = new AmpAdCrossDomainIframeHandler(adImpl);
-        const noContentSpy = sandbox.spy(iframeHandler, 'freeIframe');
+        iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
+        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = iframeHandler.startUp(element, true);
@@ -144,7 +143,7 @@ describe('amp-ad-api-handler', () => {
           expect(width).to.equal(114);
           return Promise.resolve();
         });
-        iframeHandler = new AmpAdCrossDomainIframeHandler(adImpl);
+        iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = iframeHandler.startUp(element, true);
@@ -174,9 +173,8 @@ describe('amp-ad-api-handler', () => {
       it('should resolve on message "no-content" if render-start is'
           + 'implemented by 3P', () => {
         adImpl.config = {renderStartImplemented: true};
-        iframeHandler = new AmpAdCrossDomainIframeHandler(adImpl);
-        sandbox.stub(UI, 'displayNoContentUI', () => {});
-        const noContentSpy = sandbox.spy(iframeHandler, 'freeIframe');
+        iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
+        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           element.name = 'test_master';
@@ -193,6 +191,31 @@ describe('amp-ad-api-handler', () => {
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
                 expect(noContentSpy).to.be.calledOnce;
+                expect(noContentSpy).to.be.calledWith(true);
+              });
+            });
+      });
+
+      it('should remove non master iframe on message "no-content"', () => {
+        adImpl.config = {renderStartImplemented: true};
+        iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
+        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
+        const beforeAttachedToDom = element => {
+          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+          element.name = 'test_nomaster';
+          startUpPromise = iframeHandler.startUp(element, true);
+        };
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              iframe = newIframe;
+              expect(iframe.style.visibility).to.equal('hidden');
+              iframe.postMessageToParent({
+                sentinel: 'amp3ptest' + testIndex,
+                type: 'no-content',
+              });
+              return startUpPromise.then(() => {
+                expect(noContentSpy).to.be.calledWith(false);
+                expect(iframeHandler.iframe).to.be.null;
               });
             });
       });
@@ -200,7 +223,7 @@ describe('amp-ad-api-handler', () => {
       it('should NOT resolve on message "bootstrap-loaded" if render-start is'
           + 'implemented by 3P', () => {
         adImpl.config = {renderStartImplemented: true};
-        iframeHandler = new AmpAdCrossDomainIframeHandler(adImpl);
+        iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = iframeHandler.startUp(element, true);
@@ -230,9 +253,8 @@ describe('amp-ad-api-handler', () => {
       });
 
       it('should resolve on timeout', () => {
-        iframeHandler = new AmpAdCrossDomainIframeHandler(adImpl);
-        sandbox.stub(UI, 'displayNoContentUI', () => {});
-        const noContentSpy = sandbox.spy(iframeHandler, 'freeIframe');
+        iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
+        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
         const clock = sandbox.useFakeTimers();
         clock.tick(0);
         const beforeAttachedToDom = element => {
@@ -248,6 +270,7 @@ describe('amp-ad-api-handler', () => {
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
                 expect(noContentSpy).to.be.calledOnce;
+                expect(noContentSpy).to.be.calledWith(true);
               });
             });
       });

@@ -780,6 +780,7 @@ export class BaseElement {
    * @param {!Function} callback
    */
   deferMutate(callback) {
+    console.log(this.element);
     this.element.getResources().deferMutate(this.element, callback);
   }
 

@@ -121,7 +121,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    dev().assert(AMP.AmpAdCrossDomainIframeHandler);
+    dev().assert(AMP.AmpAdUIHandler);
+    dev().assert(AMP.AmpAdXDomainIframeHandler);
 
     /** @private {?Promise<!boolean>} */
     this.adPromise_ = null;
@@ -138,7 +139,10 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AmpAdCrossDomainIframeHandler} */
+    /** {?AmpAdUIHandler} */
+    this.uiHandler = null;
+
+    /** @private {?AmpAdXDomainIframeHandler} */
     this.crossDomainIframeHandler_ = null;
 
     /** @private {boolean} */
@@ -189,6 +193,12 @@ export class AmpA4A extends AMP.BaseElement {
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+  }
+
+  /** @override */
+  buildCallback() {
+    this.uiHandler = new AMP.AmpAdUIHandler(this);
+    this.uiHandler.init();
   }
 
   /** @override */
@@ -502,6 +512,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    if (this.uiHandler) {
+      this.uiHandler.displayUnlayoutUI();
+    }
     this.lifecycleReporter.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
@@ -755,7 +768,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   iframeRenderHelper_(iframe, is3p) {
     // TODO(keithwrightbos): noContentCallback?
-    this.crossDomainIframeHandler_ = new AMP.AmpAdCrossDomainIframeHandler(this);
+    this.crossDomainIframeHandler_ = new AMP.AmpAdXDomainIframeHandler(this);
     // TODO(keithwrightbos): startup returns load event, do we need to wait?
     // Set opt_defaultVisible to true as 3p draw code never executed causing
     // render-start event never to fire which will remove visiblity hidden.

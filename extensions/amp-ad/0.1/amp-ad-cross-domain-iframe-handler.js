@@ -26,11 +26,10 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
-import {displayNoContentUI} from './amp-ad-ui';
 
 const TIMEOUT_VALUE = 10000;
 
-export class AmpAdCrossDomainIframeHandler {
+export class AmpAdXDomainIframeHandler {
 
   /**
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
@@ -42,6 +41,9 @@ export class AmpAdCrossDomainIframeHandler {
 
     /** @private {!Element} */
     this.element_ = baseInstance.element;
+
+    /** @private {!AmpAdUIHandler} */
+    this.uiHandler_ = baseInstance.uiHandler;
 
     /** {?Element} iframe instance */
     this.iframe = null;
@@ -175,15 +177,34 @@ export class AmpAdCrossDomainIframeHandler {
   /**
    * Cleans up the listeners on the cross domain ad iframe.
    * And free the iframe resource
-   * @param {boolean=} opt_force
+   * @param {boolean=} opt_keep
    */
-  freeIframe(opt_force) {
+  freeXDomainIframe(opt_keep) {
     this.cleanup_();
+    // If ask to keep the iframe.
+    // Use in the case of no-content and iframe is a master iframe.
+    if (opt_keep) {
+      return;
+    }
     if (this.iframe) {
-      if (opt_force || this.iframe.name.indexOf('_master') == -1) {
-        removeElement(this.iframe);
-        this.iframe = null;
-      }
+      removeElement(this.iframe);
+      this.iframe = null;
+    }
+  }
+
+  /**
+   * Update size based on render-start returned size.
+   */
+  renderStart_(info) {
+    const data = info.data;
+    if (this.uiHandler_) {
+      this.uiHandler_.displayRenderStartUI();
+    }
+    this.updateSize_(data.height, data.width,
+        info.source, info.origin);
+    if (this.baseInstance_.lifecyleReporter_) {
+      this.baseInstance_.lifecycleReporter_.sendPing(
+          'renderCrossDomainStart');
     }
   }
 
@@ -196,8 +217,10 @@ export class AmpAdCrossDomainIframeHandler {
       // unlayout already called
       return;
     }
-    this.freeIframe();
-    displayNoContentUI(this.baseInstance_);
+    this.freeXDomainIframe(this.iframe.name.indexOf('_master') >= 0);
+    if (this.uiHandler_) {
+      this.uiHandler_.displayNoContentUI();
+    }
   }
 
   /**
@@ -312,4 +335,4 @@ export class AmpAdCrossDomainIframeHandler {
 
 // Make the class available to other late loaded amp-ad implementations
 // without them having to depend on it directly.
-AMP.AmpAdCrossDomainIframeHandler = AmpAdCrossDomainIframeHandler;
+AMP.AmpAdXDomainIframeHandler = AmpAdXDomainIframeHandler;
