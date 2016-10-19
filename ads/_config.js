@@ -334,7 +334,9 @@ export const adConfig = {
 
   rubicon: {},
 
-  sharethrough: {},
+  sharethrough: {
+    renderStartImplemented: true,
+  },
 
   smartadserver: {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
