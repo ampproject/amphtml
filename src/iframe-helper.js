@@ -158,15 +158,6 @@ function isDescendantWindow(ancestor, descendant) {
   return false;
 }
 
-export function isInIframe(element) {
-  dev().assert(element);
-  const win = element.ownerDocument.defaultView;
-  if (win && win != win.parent) {
-    return true;
-  }
-  return false;
-}
-
 /**
  * Removes any listenFors registed on listenSentinel that do not have
  * a contentWindow (the frame was removed from the DOM tree).

@@ -16,7 +16,6 @@
 
 import {dev} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
-import {isInIframe} from '../../../src/iframe-helper';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
@@ -64,6 +63,17 @@ export const AnalyticsEventType = {
   SCROLL: 'scroll',
   HIDDEN: 'hidden',
 };
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const {Array<AnalyticsEventType>}
+ */
+const AllowedInEmbed = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.CLICK,
+  AnalyticsEventType.TIMER,
+  AnalyticsEventType.HIDDEN,
+];
 
 /**
  * Ignore Most of this class as it has not been thought through yet. It will
@@ -145,7 +155,7 @@ export class InstrumentationService {
     const eventType = config['on'];
     if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
       user().error(this.TAG_, 'Trigger type "' + eventType + '" is not ' +
-        'allowed.');
+        'allowed in the embed.');
       return;
     }
     if (eventType === AnalyticsEventType.VISIBLE) {
@@ -521,14 +531,19 @@ export class InstrumentationService {
         maxTimerLength * 1000);
   }
 
+  /**
+   * Checks to confirm that a given trigger type is allowed for the element.
+   * Specifically, ti confirms that if the element is in the embed, only a
+   * subset of the trigger types are allowed.
+   * @param  {!AnalyticsEventType} triggerType
+   * @param  {!Element} element
+   * @return {boolean} True if the trigger is allowed. False otherwise.
+   */
   isTriggerAllowed_(triggerType, element) {
-    if (!isInIframe(element) ||
-      triggerType == AnalyticsEventType.VISIBLE ||
-      triggerType == AnalyticsEventType.TIMER ||
-      triggerType == AnalyticsEventType.HIDDEN ||
-      triggerType == AnalyticsEventType.CLICK) {
-      return true;
+    if (element.ownerDocument.defaultView != this.win_) {
+      return (AllowedInEmbed.indexOf(triggerType) > -1);
     }
+    return true;
   }
 }
 
