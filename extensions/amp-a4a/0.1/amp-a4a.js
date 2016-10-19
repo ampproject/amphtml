@@ -92,6 +92,13 @@ const SAFEFRAME_IMPL_PATH =
     '/html/container.html';
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+/** @type {!Object} @private */
+const SHARED_IFRAME_PROPERTIES = {
+  'frameborder': '0',
+  'allowfullscreen': '',
+  'allowtransparency': '',
+  'scrolling': 'no',
+};
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
 export let AdResponseDef;
@@ -768,7 +775,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @const {!Element} */
     const iframe = createElementWithAttributes(
         /** @type {!Document} */(this.element.ownerDocument),
-        'iframe', {
+        'iframe', Object.assign({
           'height': this.element.getAttribute('height'),
           'width': this.element.getAttribute('width'),
           // XHR request modifies URL by adding origin as parameter.  Need to
@@ -776,7 +783,7 @@ export class AmpA4A extends AMP.BaseElement {
           // TODO: remove call to getCorsUrl and instead have fetch API return
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        });
+        }, SHARED_IFRAME_PROPERTIES));
     this.iframeRenderHelper_(iframe, /* is3p */ !!opt_isNonAmpCreative);
   }
 
@@ -791,16 +798,12 @@ export class AmpA4A extends AMP.BaseElement {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument),
-          'iframe', {
-            'frameborder': '0',
-            'allowfullscreen': '',
-            'allowtransparency': '',
-            'scrolling': 'no',
+          'iframe', Object.assign({
             'height': this.element.getAttribute('height'),
             'width': this.element.getAttribute('width'),
             'src': SAFEFRAME_IMPL_PATH + '?n=0',
             'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
-          });
+          }, SHARED_IFRAME_PROPERTIES));
       this.iframeRenderHelper_(iframe, true);
     });
   }
