@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
 import {
   FakeCustomElements,
   FakeWindow,
@@ -323,6 +325,8 @@ class RealWinFixture {
 
         if (spec.fakeRegisterElement) {
           win.customElements = new FakeCustomElements(win);
+        } else {
+          installCustomElements(win);
         }
 
         // Intercept event listeners
