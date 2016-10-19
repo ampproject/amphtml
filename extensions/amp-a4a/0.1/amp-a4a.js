@@ -459,22 +459,9 @@ export class AmpA4A extends AMP.BaseElement {
     this.lifecycleReporter_.sendPing('preAdThrottle');
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
-      if (rendered instanceof Error) {
-        // If we got as far as getting a URL, then load the ad, but note the
-        // error.
-        if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
-            this.creativeBody_) {
-          this.renderViaSafeFrame_(this.creativeBody_);
-          this.creativeBody_ = null;  // Free resources.
-          this.experimentalNonAmpCreativeRenderMethod_ = null;
-        } else if (this.adUrl_) {
-          this.renderViaCachedContentIframe_(this.adUrl_, true);
-        }
-        throw rendered;
-      }
-      if (!rendered) {
-        // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
-        // has already executed so can do so immediately.
+      if (rendered instanceof Error || !rendered) {
+        // Haven't rendered yet, so try rendering via one of our
+        // cross-domain iframe solutions.
         if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
             this.creativeBody_) {
           this.renderViaSafeFrame_(this.creativeBody_);
@@ -488,6 +475,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
       }
       this.rendered_ = true;
+      if (rendered instanceof Error) {
+        throw rendered;
+      }
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
   }
 

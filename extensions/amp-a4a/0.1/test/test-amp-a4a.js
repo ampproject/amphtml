@@ -91,6 +91,7 @@ describe('amp-a4a', () => {
         {mode: 'cors', method: 'GET'})
     .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
+    viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
       arrayBuffer: function() {
         return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
@@ -120,13 +121,93 @@ describe('amp-a4a', () => {
     return element;
   }
 
+  /**
+   *
+   * @param {!Window} win
+   * @param {!Element} element
+   */
+  function isStyleVisible(win, element) {
+    return win.getComputedStyle(element).getPropertyValue('visibility') ==
+        'visible';
+  }
+
+  describe('ads are visible', () => {
+    let a4aElement;
+    let a4a;
+    let fixture;
+    beforeEach(() => {
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(f => {
+        fixture = f;
+        a4aElement = createA4aElement(fixture.doc);
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        a4a = new MockA4AImpl(a4aElement);
+        return fixture;
+      });
+    });
+
+    it('for SafeFrame rendering case', () => {
+      // Make sure there's no signature, so that we go down the 3p iframe path.
+      mockResponse.headers.delete('X-Google-header');
+      // If rendering type is safeframe, we SHOULD attach a SafeFrame.
+      mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
+      fixture.doc.body.appendChild(a4aElement);
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        // Force vsync system to run all queued tasks, so that DOM mutations
+        // are actually completed before testing.
+        a4a.vsync_.runScheduledTasks_();
+        const child = a4aElement.querySelector('iframe[name]');
+        expect(child).to.be.ok;
+        expect(isStyleVisible(fixture.win, child)).to.be.true;
+      });
+    });
+
+    it('for cached content iframe rendering case', () => {
+      // Make sure there's no signature, so that we go down the 3p iframe path.
+      mockResponse.headers.delete('X-Google-header');
+      fixture.doc.body.appendChild(a4aElement);
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        // Force vsync system to run all queued tasks, so that DOM mutations
+        // are actually completed before testing.
+        a4a.vsync_.runScheduledTasks_();
+        const child = a4aElement.querySelector('iframe[src]');
+        expect(child).to.be.ok;
+        expect(isStyleVisible(fixture.win, child)).to.be.true;
+      });
+    });
+
+    it('for A4A friendly iframe rendering case', () => {
+      fixture.doc.body.appendChild(a4aElement);
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        // Force vsync system to run all queued tasks, so that DOM mutations
+        // are actually completed before testing.
+        a4a.vsync_.runScheduledTasks_();
+        const child = a4aElement.querySelector('iframe[srcdoc]');
+        expect(child).to.be.ok;
+        expect(isStyleVisible(fixture.win, child)).to.be.true;
+        const a4aBody = child.contentDocument.body;
+        expect(a4aBody).to.be.ok;
+        expect(isStyleVisible(fixture.win, a4aBody)).to.be.true;
+      });
+    });
+  });
+
   describe('#renderViaSafeFrame', () => {
     // This is supposed to be an end-to-end test, but there seems to be an
     // AMP initialization or upgrade issue somewhere, so the
     // fixture.addElement() step fails with a 'element.build does not exist'
     // error.  Skip this until we sort out how to properly do an E2E.
     it.skip('should render a single AMP ad in a friendly iframe', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -159,7 +240,6 @@ describe('amp-a4a', () => {
     });
 
     it('should attach a SafeFrame when header is set', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       // Make sure there's no signature, so that we go down the 3p iframe path.
       mockResponse.headers.delete('X-Google-header');
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
@@ -193,7 +273,6 @@ describe('amp-a4a', () => {
 
     ['', 'client_cache', 'some_random_thing'].forEach(headerVal => {
       it(`should not attach a SafeFrame when header is ${headerVal}`, () => {
-        viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
         // Make sure there's no signature, so that we go down the 3p iframe path.
         mockResponse.headers.delete('X-Google-header');
         // If rendering type is anything but safeframe, we SHOULD NOT attach a
@@ -230,7 +309,6 @@ describe('amp-a4a', () => {
     });
 
     it('should not use SafeFrame if creative is A4A', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       // Set safeframe header, but it should be ignored when a signature
       // exists and validates.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
@@ -268,7 +346,6 @@ describe('amp-a4a', () => {
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in friendly iframe', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -327,7 +404,6 @@ describe('amp-a4a', () => {
       });
     });
     it('must not be position:fixed', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -345,7 +421,6 @@ describe('amp-a4a', () => {
       });
     });
     it('#layoutCallback not valid AMP', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -388,7 +463,6 @@ describe('amp-a4a', () => {
       });
     });
     it('should not leak full response to rendered dom', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -448,7 +522,6 @@ describe('amp-a4a', () => {
       });
     });
     it('should run end-to-end in the presence of an XHR error', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -474,7 +547,6 @@ describe('amp-a4a', () => {
       });
     });
     it('should handle XHR error when resolves before layoutCallback', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -493,7 +565,6 @@ describe('amp-a4a', () => {
       });
     });
     it('should handle XHR error when resolves after layoutCallback', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       let rejectXhr;
       xhrMock.onFirstCall().returns(new Promise((unusedResolve, reject) => {
         rejectXhr = reject;
@@ -522,7 +593,6 @@ describe('amp-a4a', () => {
 
   describe('#preconnectCallback', () => {
     it('validate adsense', () => {
-      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
@@ -772,7 +842,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         doc.body.appendChild(a4aElement);
         const a4a = new MockA4AImpl(a4aElement);
-        viewerWhenVisibleMock.returns(Promise.resolve());
         xhrMock.withArgs('https://test.location.org/ad/012345?args', {
           mode: 'cors',
           method: 'GET',
