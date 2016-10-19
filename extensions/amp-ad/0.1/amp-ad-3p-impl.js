@@ -79,9 +79,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
 
-    /** @private @const {function()} */
-    this.boundNoContentHandler_ = () => this.noContentHandler_();
-
     /** @private {?string|undefined} */
     this.container_ = undefined;
 
@@ -116,7 +113,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    console.log('buildCallback');
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
@@ -209,7 +205,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('layoutCallback');
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }

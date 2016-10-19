@@ -129,7 +129,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     /**
      * @private {number} unique ID of the currently executing promise to allow
-     *    for cancellation.
+     * for cancellation.
      */
     this.promiseId_ = 0;
 
@@ -139,10 +139,10 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** {?AmpAdUIHandler} */
+    /** {?AMP.AmpAdUIHandler} */
     this.uiHandler = null;
 
-    /** @private {?AmpAdXDomainIframeHandler} */
+    /** @private {?AMP.AmpAdXDomainIframeHandler} */
     this.crossDomainIframeHandler_ = null;
 
     /** @private {boolean} */

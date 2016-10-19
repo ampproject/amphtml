@@ -59,7 +59,7 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
-    /** @private {?number} */
+    /** {?number} */
     this.state = null;
   }
 

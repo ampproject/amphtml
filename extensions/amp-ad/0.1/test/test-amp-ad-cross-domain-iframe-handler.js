@@ -105,7 +105,8 @@ describe('amp-ad-api-handler', () => {
           + 'implemented by 3P"', () => {
         adImpl.config = {renderStartImplemented: true};
         iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
-        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
+        const noContentSpy =
+            sandbox.spy/*OK*/(iframeHandler, 'freeXDomainIframe');
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = iframeHandler.startUp(element, true);
@@ -174,7 +175,8 @@ describe('amp-ad-api-handler', () => {
           + 'implemented by 3P', () => {
         adImpl.config = {renderStartImplemented: true};
         iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
-        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
+        const noContentSpy =
+            sandbox.spy/*OK*/(iframeHandler, 'freeXDomainIframe');
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           element.name = 'test_master';
@@ -199,7 +201,8 @@ describe('amp-ad-api-handler', () => {
       it('should remove non master iframe on message "no-content"', () => {
         adImpl.config = {renderStartImplemented: true};
         iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
-        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
+        const noContentSpy =
+            sandbox.spy/*OK*/(iframeHandler, 'freeXDomainIframe');
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           element.name = 'test_nomaster';
@@ -254,7 +257,8 @@ describe('amp-ad-api-handler', () => {
 
       it('should resolve on timeout', () => {
         iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
-        const noContentSpy = sandbox.spy(iframeHandler, 'freeXDomainIframe');
+        const noContentSpy =
+            sandbox.spy/*OK*/(iframeHandler, 'freeXDomainIframe');
         const clock = sandbox.useFakeTimers();
         clock.tick(0);
         const beforeAttachedToDom = element => {

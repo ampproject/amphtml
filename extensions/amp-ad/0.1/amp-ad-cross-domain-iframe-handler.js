@@ -42,7 +42,7 @@ export class AmpAdXDomainIframeHandler {
     /** @private {!Element} */
     this.element_ = baseInstance.element;
 
-    /** @private {!AmpAdUIHandler} */
+    /** @private {?AMP.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
     /** {?Element} iframe instance */
