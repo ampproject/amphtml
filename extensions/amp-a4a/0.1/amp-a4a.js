@@ -483,7 +483,6 @@ export class AmpA4A extends AMP.BaseElement {
               ' any ad');
         }
       }
-      this.rendered_ = true;
       if (rendered instanceof Error) {
         throw rendered;
       }
