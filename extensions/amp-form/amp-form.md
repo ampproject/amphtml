@@ -98,8 +98,14 @@ Enables and selects a custom validation reporting strategy, valid values are one
 
 See [Custom Validation](#custom-validations) section for more details on this.
 
-## Inputs
-Currently, `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>` are not allowed. (This might be reconsidered in the future - please let us know if you require these and use cases).
+## Inputs and Fields
+Currently, `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>` are not allowed.
+
+Most of form-related attributes on inputs are not allowed, this include `form`, `formaction`, `formtarget`, `formmethod` and others.
+
+(Relaxing some of these rules might be reconsidered in the future - please let us know if you require these and use cases).
+
+Other `input` types, `textarea`, `select`, `option`, `fieldset`, `label` are allowed.
 
 ## Events
 `amp-form` exposes 3 events:

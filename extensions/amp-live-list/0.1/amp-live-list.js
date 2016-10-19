@@ -240,6 +240,11 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /** @override */
+  activate() {
+    this.updateAction_();
+  }
+
+  /** @override */
   update(updatedElement) {
     const container = this.getItemsSlot_(updatedElement);
     if (!container) {
