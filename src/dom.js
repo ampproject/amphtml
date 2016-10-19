@@ -63,6 +63,18 @@ export function waitForChild(parent, checkFunc, callback) {
   }
 }
 
+/**
+ * Waits until the child element is constructed. Once the child is found, the
+ * promise is resolved.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @return {!Promise}
+ */
+export function waitForChildPromise(parent, checkFunc) {
+  return new Promise(resolve => {
+    waitForChild(parent, checkFunc, resolve);
+  });
+}
 
 /**
  * Waits for document's body to be available.
