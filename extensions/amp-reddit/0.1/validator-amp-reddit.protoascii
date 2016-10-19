@@ -56,6 +56,14 @@ tags: {  # <amp-reddit>
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-reddit extension .js script"
   attrs: {
+    name: "data-embedlive"
+    value_regex_casei: "(false|true)"
+  }
+  attrs: {
+    name: "data-embedparent"
+    value_regex_casei: "(false|true)"
+  }
+  attrs: {
     name: "data-embedtype"
     mandatory: true
     value_regex_casei: "(comment|post)"
