@@ -428,7 +428,8 @@ describe('amp-analytics.visibility', () => {
     // discarded by visibility-impl later in the code.
     it('finds element by tagname, selectionMethod=closest', () => {
       expect(getElement(ampdoc, 'div', analytics, 'closest')).to.equal(div);
-      expect(getElement(ampdoc, 'amp-img', analytics, 'closest')).to.equal(img1);
+      expect(getElement(
+          ampdoc, 'amp-img', analytics, 'closest')).to.equal(img1);
     });
 
     it('finds element by id, selectionMethod=scope', () => {

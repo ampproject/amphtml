@@ -17,7 +17,7 @@
 import {
   getServicePromise,
   getServicePromiseOrNull,
-  getAmpDoc,
+  getAmpdoc,
   getServicePromiseForDoc,
   getServicePromiseOrNullForDoc,
 } from './service';
@@ -128,7 +128,7 @@ export function getElementServiceForDoc(nodeOrDoc, id, providedByElement) {
  */
 export function getElementServiceIfAvailableForDoc(
     nodeOrDoc, id, providedByElement) {
-  const ampdoc = getAmpDoc(nodeOrDoc);
+  const ampdoc = getAmpdoc(nodeOrDoc);
   const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);

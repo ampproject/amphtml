@@ -38,7 +38,7 @@ const CLICK_LISTENER_REGISTERED_ = 'AMP_ANALYTICS_CLICK_LISTENER_REGISTERED';
 let AnalyticsEventListenerDef;
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JSONType} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *  fires.
@@ -267,8 +267,8 @@ export class InstrumentationService {
 
       visibilityForDoc(this.ampdoc_).then(visibility => {
         visibility.listenOnce(spec, vars => {
-          const el = getElement(spec['selector'], analyticsElement,
-              spec['selectionMethod']);
+          const el = getElement(this.ampdoc_, spec['selector'],
+              analyticsElement, spec['selectionMethod']);
           if (el) {
             const attr = getDataParamsFromAttributes(el, undefined,
                 VARIABLE_DATA_ATTRIBUTE_KEY);
@@ -528,7 +528,7 @@ export class InstrumentationService {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!InstrumentationService}
  */
 export function instrumentationServiceForDoc(ampdoc) {
