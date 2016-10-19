@@ -47,6 +47,12 @@ export function _ping_(global, data) {
     } else {
       context.renderStart();
     }
+    window.context.observeIntersection(function(changes) {
+      changes.forEach(function(c) {
+        dev().info('Intersection: ' +
+            `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+      });
+    });
   } else {
     context.noContentAvailable();
   }
