@@ -421,24 +421,24 @@ describe('amp-analytics.visibility', () => {
     });
 
     it('finds element by id', () => {
-      expect(getElement('#ampEl', analytics, undefined)).to.equal(ampEl);
+      expect(getElement(ampdoc, '#ampEl', analytics, undefined)).to.equal(ampEl);
     });
 
     // In the following tests, getElement returns non-amp elements. Those are
     // discarded by visibility-impl later in the code.
     it('finds element by tagname, selectionMethod=closest', () => {
-      expect(getElement('div', analytics, 'closest')).to.equal(div);
-      expect(getElement('amp-img', analytics, 'closest')).to.equal(img1);
+      expect(getElement(ampdoc, 'div', analytics, 'closest')).to.equal(div);
+      expect(getElement(ampdoc, 'amp-img', analytics, 'closest')).to.equal(img1);
     });
 
     it('finds element by id, selectionMethod=scope', () => {
-      expect(getElement('#div', analytics, 'scope')).to.equal(null);
-      expect(getElement('#img2', analytics, 'scope')).to.equal(img2);
+      expect(getElement(ampdoc, '#div', analytics, 'scope')).to.equal(null);
+      expect(getElement(ampdoc, '#img2', analytics, 'scope')).to.equal(img2);
     });
 
     it('finds element by tagname, selectionMethod=scope', () => {
-      expect(getElement('div', analytics, 'scope')).to.equal(null);
-      expect(getElement('amp-img', analytics, 'scope')).to.equal(img2);
+      expect(getElement(ampdoc, 'div', analytics, 'scope')).to.equal(null);
+      expect(getElement(ampdoc, 'amp-img', analytics, 'scope')).to.equal(img2);
     });
 
     it('finds element for selectionMethod=host', () => {
