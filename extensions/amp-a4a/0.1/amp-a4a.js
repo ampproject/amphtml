@@ -90,8 +90,8 @@ const SAFEFRAME_VERSION = '1-0-4';
 const SAFEFRAME_IMPL_PATH =
     'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
     '/html/container.html';
-/** @type {string} */
-const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+/** @type {string} @visibleForTesting */
+export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
 export let AdResponseDef;
@@ -457,7 +457,8 @@ export class AmpA4A extends AMP.BaseElement {
       if (rendered instanceof Error) {
         // If we got as far as getting a URL, then load the ad, but note the
         // error.
-        if (this.shouldRenderViaSafeFrame_ && this.creativeBody_) {
+        if (this.shouldRenderViaSafeFrame_ == 'safeframe' &&
+            this.creativeBody_) {
           this.renderViaSafeFrame_();
         } else if (this.adUrl_) {
           this.renderViaCrossDomainIframe_(true);
@@ -467,7 +468,8 @@ export class AmpA4A extends AMP.BaseElement {
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
-        if (this.shouldRenderViaSafeFrame_ && this.creativeBody_) {
+        if (this.shouldRenderViaSafeFrame_ == 'safeframe' &&
+            this.creativeBody_) {
           this.renderViaSafeFrame_();
         } else {
           this.renderViaCrossDomainIframe_(true);
@@ -771,7 +773,8 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   renderViaSafeFrame_() {
-    user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
+    user().assert(this.creativeBody_,
+        'creativeBody missing in renderViaSafeFrame_?');
     this.lifecycleReporter_.sendPing('renderCrossDomainStart');
     utf8Decode(this.creativeBody_).then(creative => {
       /** @const {!Element} */
