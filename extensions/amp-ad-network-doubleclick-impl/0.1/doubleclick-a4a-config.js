@@ -85,11 +85,15 @@ export function doubleclickIsA4AEnabled(win, element) {
   // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
   // therefore, carves out of the experiment branches.  Any publisher using this
   // attribute will be excluded from the experiment altogether.
+  // TODO(tdrl): The "is this site eligible" logic has gotten scattered around
+  // and is now duplicated.  It should be cleaned up and factored into a single,
+  // shared location.
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
           DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES) ||
-      (a4aRequested && (isProxyOrigin(win.location) || getMode(win).localDev));
+      (a4aRequested && (isProxyOrigin(win.location) ||
+       getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,
         DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
