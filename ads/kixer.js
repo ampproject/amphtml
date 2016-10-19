@@ -16,11 +16,19 @@
 
 import {loadScript, validateData} from '../3p/3p';
 
+/* global
+__kxamp: false,
+__kx_ad_slots: false,
+__kx_ad_start: false,
+*/
+
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
+
 export function kixer(global, data) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
   validateData(data, ['adslot'], []);
 
   const d = global.document.createElement('div');
@@ -28,8 +36,8 @@ export function kixer(global, data) {
   global.document.getElementById('c').appendChild(d);
 
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
-    global.__kxamp[data.adslot] = 1;
-    global.__kx_ad_slots.push(data.adslot);
-    global.__kx_ad_start();
+    __kxamp[data.adslot] = 1;
+    __kx_ad_slots.push(data.adslot);
+    __kx_ad_start();
   });
 }

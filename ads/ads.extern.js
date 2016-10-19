@@ -49,6 +49,7 @@ data.epl_ksv;
 data.epl_kvs;
 data.epl_e;
 data.guid;
+data.adslot;
 
 var Criteo;
 Criteo.DisplayAd;
