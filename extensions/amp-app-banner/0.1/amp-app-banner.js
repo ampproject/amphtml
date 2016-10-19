@@ -466,7 +466,7 @@ function hideBanner(state) {
  * @param {!Object} state
  */
 function measureBanner(state) {
-  state.bannerRect = state.viewport.getLayoutRect(state.element);
+  state.bannerHeight = state.viewport.getLayoutRect(state.element).height;
 }
 
 
@@ -475,7 +475,7 @@ function measureBanner(state) {
  * @param {!Object} state.
  */
 function updateViewportPadding(state) {
-  state.viewport.updatePaddingBottom(state.bannerRect.height);
+  state.viewport.updatePaddingBottom(state.bannerHeight);
   state.viewport.addToFixedLayer(state.element);
 }
 
