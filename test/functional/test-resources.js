@@ -44,10 +44,10 @@ describe('Resources', () => {
     sandbox.stub(resources.viewport_, 'getRect', () => viewportRect);
 
     // Task 1 is right in the middle of the viewport and priority 0
-    const task_vp0_p0 = {
+    const task_in_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100);
+          return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -56,10 +56,10 @@ describe('Resources', () => {
       priority: 0,
     };
     // Task 2 is in the viewport and priority 1
-    const task_vp0_p1 = {
+    const task_in_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100);
+          return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -68,7 +68,7 @@ describe('Resources', () => {
       priority: 1,
     };
     // Task 3 is above viewport and priority 0
-    const task_vpu_p0 = {
+    const task_above_viewport_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
@@ -79,8 +79,8 @@ describe('Resources', () => {
       },
       priority: 0,
     };
-    // Task 4 is above viewport and priority 0
-    const task_vpu_p1 = {
+    // Task 4 is above viewport and priority 1
+    const task_above_viewport_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
@@ -92,7 +92,7 @@ describe('Resources', () => {
       priority: 1,
     };
     // Task 5 is below viewport and priority 0
-    const task_vpd_p0 = {
+    const task_below_viewport_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
@@ -103,8 +103,8 @@ describe('Resources', () => {
       },
       priority: 0,
     };
-    // Task 6 is below viewport and priority 0
-    const task_vpd_p1 = {
+    // Task 6 is below viewport and priority 1
+    const task_below_viewport_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
@@ -115,45 +115,102 @@ describe('Resources', () => {
       },
       priority: 1,
     };
-    // Task 7 is fixed with priority 0.
-    const task_vpf_p0 = {
+    // Task 7 is fixed right in the middle of the viewport and priority 0
+    const task_fixed_in_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50);
+          return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
-          return true;
+          return false;
         },
       },
       priority: 0,
     };
-    // Task 8 is fixed with priority 1.
-    const task_vpf_p1 = {
+    // Task 8 is fixed in the viewport and priority 1
+    const task_fixed_in_viewport_p1 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 200, 300, 100);
+        },
+        isFixed() {
+          return false;
+        },
+      },
+      priority: 1,
+    };
+    // Task 9 is fixed above viewport and priority 0
+    const task_fixed_above_viewport_p0 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 0, 300, 50);
+        },
+        isFixed() {
+          return false;
+        },
+      },
+      priority: 0,
+    };
+    // Task 10 is fixed above viewport and priority 1
+    const task_fixed_above_viewport_p1 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 0, 300, 50);
+        },
+        isFixed() {
+          return false;
+        },
+      },
+      priority: 1,
+    };
+    // Task 11 is fixed below viewport and priority 0
+    const task_fixed_below_viewport_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
-          return true;
+          return false;
+        },
+      },
+      priority: 0,
+    };
+    // Task 12 is fixed below viewport and priority 1
+    const task_fixed_below_viewport_p1 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 600, 300, 50);
+        },
+        isFixed() {
+          return false;
         },
       },
       priority: 1,
     };
 
-    expect(resources.calcTaskScore_(task_vp0_p0)).to.equal(0);
-    expect(resources.calcTaskScore_(task_vp0_p1)).to.equal(10);
+    // 0 for in viewport
+    expect(resources.calcTaskScore_(task_in_viewport_p0)).to.equal(0);
+    expect(resources.calcTaskScore_(task_in_viewport_p1)).to.equal(10);
 
     // +2 for "one viewport away" * 2 because dir is opposite
-    expect(resources.calcTaskScore_(task_vpu_p0)).to.equal(2);
-    expect(resources.calcTaskScore_(task_vpu_p1)).to.equal(12);
+    expect(resources.calcTaskScore_(task_above_viewport_p0)).to.equal(2);
+    expect(resources.calcTaskScore_(task_above_viewport_p1)).to.equal(12);
 
     // +1 for "one viewport away" * 1 because dir is the same
-    expect(resources.calcTaskScore_(task_vpd_p0)).to.equal(1);
-    expect(resources.calcTaskScore_(task_vpd_p1)).to.equal(11);
+    expect(resources.calcTaskScore_(task_below_viewport_p0)).to.equal(1);
+    expect(resources.calcTaskScore_(task_below_viewport_p1)).to.equal(11);
 
-    // 0 for fixed.
-    expect(resources.calcTaskScore_(task_vpf_p0)).to.equal(0);
-    expect(resources.calcTaskScore_(task_vpf_p1)).to.equal(10);
+    // 0 for fixed in viewport
+    expect(resources.calcTaskScore_(task_fixed_in_viewport_p0)).to.equal(0);
+    expect(resources.calcTaskScore_(task_fixed_in_viewport_p1)).to.equal(10);
+
+    // +2 for fixed "one viewport away", * 2 because dir is opposite
+    expect(resources.calcTaskScore_(task_fixed_above_viewport_p0)).to.equal(2);
+    expect(resources.calcTaskScore_(task_fixed_above_viewport_p1)).to.equal(12);
+
+    // +1 for fixed "one viewport away" * 1 because dir is the same
+    expect(resources.calcTaskScore_(task_fixed_below_viewport_p0)).to.equal(1);
+    expect(resources.calcTaskScore_(task_fixed_below_viewport_p1)).to.equal(11);
   });
 
   it('should calculate correct calcTaskTimeout', () => {
