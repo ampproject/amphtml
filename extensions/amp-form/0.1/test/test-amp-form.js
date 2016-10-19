@@ -149,6 +149,22 @@ describe('amp-form', () => {
     expect(ampForm.xhr_.fetchJson.called).to.be.false;
   });
 
+  it('should throw error if POST non-xhr', () => {
+    const form = getForm();
+    form.removeAttribute('action-xhr');
+    const ampForm = new AmpForm(form);
+    const event = {
+      stopImmediatePropagation: sandbox.spy(),
+      target: form,
+      preventDefault: sandbox.spy(),
+    };
+    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.spy(form, 'checkValidity');
+    expect(() => ampForm.handleSubmit_(event)).to.throw(
+        /Only XHR based \(via action-xhr attribute\) submissions are support/);
+    expect(event.preventDefault).to.be.called;
+  });
+
   it('should respect novalidate on a form', () => {
     setReportValiditySupported(true);
     const form = getForm();
@@ -176,14 +192,13 @@ describe('amp-form', () => {
     };
     sandbox.spy(form, 'checkValidity');
     sandbox.spy(emailInput, 'reportValidity');
-    ampForm.xhrAction_ = null;
+
     ampForm.handleSubmit_(event);
     // Check validity should always be called regardless of novalidate.
     expect(form.checkValidity.called).to.be.true;
 
     // However reporting validity shouldn't happen when novalidate.
     expect(emailInput.reportValidity.called).to.be.false;
-    expect(event.preventDefault.called).to.be.false;
     expect(form.hasAttribute('amp-novalidate')).to.be.true;
   });
 
