@@ -1115,6 +1115,39 @@ describe('Resources changeSize', () => {
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
   });
 
+  it('should measure non-measured elements', () => {
+    let measureCallbacks = [];
+    resources.vsync_ = {
+      measure: callback => {
+        measureCallbacks.push(callback);
+      },
+      mutate: () => {},
+    };
+    resource1.layoutBox_.top = -10000;
+    resource1.measure = sandbox.spy();
+    resource2.measure = sandbox.spy();
+
+    resources.scheduleChangeSize_(resource1, 111, 200, true);
+    resources.scheduleChangeSize_(resource2, 111, 222, true);
+    expect(resource1.hasBeenMeasured()).to.be.false;
+    expect(resource2.hasBeenMeasured()).to.be.true;
+
+    // Not yet scheduled, will wait until vsync.
+    expect(resource1.measure).to.not.be.called;
+    expect(measureCallbacks).to.have.length(1);
+
+    // Scheduling is done after vsync.
+    measureCallbacks[0]();
+    expect(resource1.measure).to.be.calledOnce;
+    expect(resource2.measure).to.not.be.called;
+
+    // Notice that the `resource2` was scheduled first since it didn't
+    // require vsync.
+    expect(resources.requestsChangeSize_).to.have.length(2);
+    expect(resources.requestsChangeSize_[0].resource).to.equal(resource2);
+    expect(resources.requestsChangeSize_[1].resource).to.equal(resource1);
+  });
+
   describe('attemptChangeSize rules wrt viewport', () => {
     let overflowCallbackSpy;
     let vsyncSpy;
