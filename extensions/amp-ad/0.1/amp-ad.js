@@ -20,12 +20,6 @@ import {dev, user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 
-export const AdDisplayState = {
-  LOADING: 0,
-  LOADED: 1,
-  NO_CONTENT: 2,
-  UN_LAID_OUT: 3,
-};
 
 /**
  * Construct ad network type-specific tag and script name.  Note that this
