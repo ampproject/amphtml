@@ -226,7 +226,7 @@ describe('amp-a4a', () => {
         ampAdElement.setAttribute('width', 200);
         ampAdElement.setAttribute('height', 50);
         ampAdElement.setAttribute('type', 'mock');
-        const ampAd = new MockA4AImpl(ampAdElement);
+        // const ampAd = new MockA4AImpl(ampAdElement);
         return fixture.addElement(ampAdElement);
         // return ampAd.upgradeCallback().then(baseElement => {
         //   extensionsMock.verify();

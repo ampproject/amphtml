@@ -766,8 +766,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @const {!Element} */
     const iframe = createElementWithAttributes(
         /** @type {!Document} */(this.element.ownerDocument),
-        'iframe',
-        {
+        'iframe', {
           'height': this.element.getAttribute('height'),
           'width': this.element.getAttribute('width'),
           // XHR request modifies URL by adding origin as parameter.  Need to
@@ -790,8 +789,7 @@ export class AmpA4A extends AMP.BaseElement {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument),
-          'iframe',
-          {
+          'iframe', {
             'frameborder': '0',
             'allowfullscreen': '',
             'allowtransparency': '',
