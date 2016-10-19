@@ -172,7 +172,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly Allowed with exception of some input types, namely, `input[type=image]`, `input[type=button]`, `input[type=password]`, `input[type=file]` are invalid. Related tags are also allowed: `fieldset`, `label`</td>
+    <td>Mostly Allowed with [exception of some input types](../extensions/amp-form/amp-form.md#inputs), namely, `input[type=image]`, `input[type=button]`, `input[type=password]`, `input[type=file]` are invalid. Related tags are also allowed: `fieldset`, `label`</td>
   </tr>
   <tr>
     <td width="30%">button</td>
