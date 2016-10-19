@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {listen, listenOnce, listenOncePromise} from '../event-helper';
+import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
+import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {setStyles} from '../style';
 import {VideoEvents, VideoAttributes} from '../video-interface';
@@ -123,6 +124,9 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
+    /** @private {?Element} */
+    this.autoplayAnimation_ = null;
+
     /** @private {boolean} */
     this.loaded_ = false;
 
@@ -143,6 +147,9 @@ class VideoEntry {
 
     /** @private {boolean} */
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
+
+    /** @private {boolean} */
+    this.isInteractive_ = element.hasAttribute(VideoAttributes.CONTROLS);
 
     listenOncePromise(element, VideoEvents.LOAD)
       .then(() => this.videoLoaded_());
@@ -217,18 +224,53 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      // If autoplay video has controls, hide them and only show them on
-      // user interaction.
-      if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
-        this.video.hideControls();
-
-        listenOnce(this.video.element, VideoEvents.USER_TAP, () => {
-          this.userInteracted_ = true;
-          this.video.showControls();
-          this.video.unmute();
-        });
+      if (this.isInteractive_) {
+        this.autoplayInteractiveVideoBuilt_();
       }
     });
+  }
+
+  /**
+   * Called by autoplayVideoBuilt_ when an interactive autoplay video is built.
+   * It handles hiding controls, installing autoplay animation and handling
+   * user interaction by unmuting and showing controls.
+   * @private
+   */
+  autoplayInteractiveVideoBuilt_() {
+    const toggleAnimation = playing => {
+      this.vsync_.mutate(() => {
+        animation.classList.toggle('amp-video-eq-play', playing);
+      });
+    };
+
+    // Hide the controls.
+    this.video.hideControls();
+
+    // Create autoplay animation.
+    const animation = this.createAutoplayAnimation_();
+    this.vsync_.mutate(() => {
+      this.video.element.appendChild(animation);
+    });
+
+    // Listen to pause, play and user interaction events.
+    const unlistenInteraction = listen(this.video.element, VideoEvents.USER_TAP,
+        onInteraction.bind(this));
+
+    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false));
+
+    const unlistenPlay = listen(this.video.element, VideoEvents.PLAY,
+        toggleAnimation.bind(this, /*playing*/ true));
+
+    function onInteraction() {
+      this.userInteracted_ = true;
+      this.video.showControls();
+      this.video.unmute();
+      unlistenInteraction();
+      unlistenPause();
+      unlistenPlay();
+      animation.remove();
+    }
   }
 
   /**
@@ -252,6 +294,36 @@ class VideoEntry {
       }
 
     });
+  }
+
+  /**
+   * Creates a pure CSS animated equalizer icon.
+   * @private
+   * @return {!Element}
+   */
+  createAutoplayAnimation_() {
+    const doc = this.ampdoc_.win.document;
+    const anim = doc.createElement('i-amp-video-eq');
+    anim.classList.add('amp-video-eq');
+    // Four columns for the equalizer.
+    for (let i = 1; i <= 4; i++) {
+      const column = doc.createElement('div');
+      column.classList.add('amp-video-eq-col');
+      // Two overlapping filler divs that animate at different rates creating
+      // randomness illusion.
+      for (let j = 1; j <= 2; j++) {
+        const filler = doc.createElement('div');
+        filler.classList.add(`amp-video-eq-${i}-${j}`);
+        column.appendChild(filler);
+      }
+      anim.appendChild(column);
+    }
+    const platform = platformFor(this.ampdoc_.win);
+    if (platform.isSafari() && platform.isIos()) {
+      // iOS Safari can not pause hardware accelerated animations.
+      anim.setAttribute('unpausable', '');
+    }
+    return anim;
   }
 
   /**
