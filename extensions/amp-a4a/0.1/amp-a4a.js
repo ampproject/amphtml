@@ -155,6 +155,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
     this.lifecycleReporter_ = getLifecycleReporter(this, 'a4a');
+    // Note: The reporting ping should be the last action in the constructor.
     this.lifecycleReporter_.sendPing('adSlotBuilt');
   }
 
@@ -234,7 +235,7 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
     // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
     // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
-    this.preconnect.preload(SAFEFRAME_IMPL_PATH);
+    this.preconnect.url(SAFEFRAME_IMPL_PATH);
   }
 
   /** @override */
@@ -350,7 +351,8 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (creativeParts && creativeParts.creative) {
+          if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
+              creativeParts && creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
           }
           if (!creativeParts || !creativeParts.signature) {
