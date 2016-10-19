@@ -153,7 +153,6 @@ export class Viewport {
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
     this.viewer_.onViewportEvent(this.updateOnViewportEvent_.bind(this));
-    this.binding_.updateViewerViewport(this.viewer_);
     this.binding_.updatePaddingTop(this.paddingTop_);
 
     this.binding_.onScroll(this.scroll_.bind(this));
@@ -581,7 +580,6 @@ export class Viewport {
    * @private
    */
   updateOnViewportEvent_(event) {
-    this.binding_.updateViewerViewport(this.viewer_);
     const paddingTop = event['paddingTop'];
     const duration = event['duration'] || 0;
     const curve = event['curve'];
@@ -775,12 +773,6 @@ export class ViewportBindingDef {
   onResize(unusedCallback) {}
 
   /**
-   * Updates binding with the new viewer's viewport info.
-   * @param {!./viewer-impl.Viewer} unusedViewer
-   */
-  updateViewerViewport(unusedViewer) {}
-
-  /**
    * Updates binding with the new padding.
    * @param {number} unusedPaddingTop
    */
@@ -954,11 +946,6 @@ export class ViewportBindingNatural_ {
   /** @override */
   onResize(callback) {
     this.resizeObservable_.add(callback);
-  }
-
-  /** @override */
-  updateViewerViewport(unusedViewer) {
-    // Viewer's viewport is ignored since this window is fully accurate.
   }
 
   /** @override */
@@ -1221,11 +1208,6 @@ export class ViewportBindingNaturalIosEmbed_ {
   disconnect() {
     // Do nothing: ViewportBindingNaturalIosEmbed_ can only be used in the
     // single-doc mode.
-  }
-
-  /** @override */
-  updateViewerViewport(unusedViewer) {
-    // Viewer's viewport is ignored since this window is fully accurate.
   }
 
   /** @override */
@@ -1509,11 +1491,6 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   onResize(callback) {
     this.resizeObservable_.add(callback);
-  }
-
-  /** @override */
-  updateViewerViewport(unusedViewer) {
-    // Viewer's viewport is ignored since this window is fully accurate.
   }
 
   /** @override */
