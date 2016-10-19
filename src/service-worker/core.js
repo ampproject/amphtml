@@ -58,7 +58,7 @@ const BASE_RTV_VERSION = self.AMP_CONFIG.v;
 export function rtvVersion(url) {
   // RTVs are 2 digit prefixes followed by the timestamp of the release.
   const matches = /rtv\/(\d{2}\d{13,})/.exec(url);
-  return matches ? matches[1] : BASE_RTV_VERSION;
+  return matches ? matches[1] : '';
 }
 
 /**
@@ -78,10 +78,15 @@ function basename(url) {
  * @param {string} url
  * @param {RtvVersion} version
  * @return {string}
+ * @visibleForTesting
  */
-function urlWithVersion(url, version) {
+export function urlWithVersion(url, version) {
+  const currentVersion = rtvVersion(url);
+  if (currentVersion) {
+    return url.replace(currentVersion, version);
+  }
   const location = new URL(url);
-  location.pathname = `/rtv/${version}/${basename(url)}`;
+  location.pathname = `/rtv/${version}${location.pathname}`;
   return location.href;
 }
 
@@ -96,7 +101,7 @@ function urlWithVersion(url, version) {
  */
 function normalizedRequest(request, version) {
   const url = request.url;
-  if (url.indexOf(`rtv/${version}`) > -1) {
+  if (rtvVersion(url) === version) {
     return request;
   }
 
@@ -252,7 +257,7 @@ export function handleFetch(request, maybeClientId) {
   const clientId = /** @type {string} */(maybeClientId);
 
   const requestFile = basename(url);
-  const requestVersion = rtvVersion(url);
+  const requestVersion = rtvVersion(url) || BASE_RTV_VERSION;
   // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
   // it's already versioned.
   request = normalizedRequest(request, requestVersion);
