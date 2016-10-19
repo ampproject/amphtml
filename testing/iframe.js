@@ -198,8 +198,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
-        '<style>.-amp-element {display: block;}</style>' +
-        '<body style="margin:0"><div id=parent></div>';
+        '<body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST_IFRAME = true;
@@ -224,8 +223,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
           addElement: function(element) {
             const iWin = iframe.contentWindow;
             const p = onInsert(iWin).then(() => {
-              // Make sure it has dimensions since no styles are available.
-              element.style.display = 'block';
               element.build(true);
               if (!element.getPlaceholder()) {
                 const placeholder = element.createPlaceholder();
