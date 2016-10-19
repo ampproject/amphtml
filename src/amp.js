@@ -75,29 +75,24 @@ chunk(self.document, function initial() {
       installBuiltins(self);
     });
     chunk(self.document, function adoptWindow() {
-      try {
-        adopt(self);
-      } finally {
-        // Everything from here is nested because adopt itself
-        // may add additional chunks that should run first.
-        chunk(self.document, function stub() {
-          stubElements(self);
-        });
-        chunk(self.document, function final() {
-          installPullToRefreshBlocker(self);
-          installGlobalClickListenerForDoc(ampdoc);
+      adopt(self);
+    });
+    chunk(self.document, function stub() {
+      stubElements(self);
+    });
+    chunk(self.document, function final() {
+      installPullToRefreshBlocker(self);
+      installGlobalClickListenerForDoc(ampdoc);
 
-          maybeValidate(self);
-          makeBodyVisible(self.document, /* waitForServices */ true);
-          installCacheServiceWorker(self);
-        });
-        chunk(self.document, function finalTick() {
-          perf.tick('e_is');
-          // TODO(erwinm): move invocation of the `flush` method when we have the
-          // new ticks in place to batch the ticks properly.
-          perf.flush();
-        });
-      }
+      maybeValidate(self);
+      makeBodyVisible(self.document, /* waitForServices */ true);
+      installCacheServiceWorker(self);
+    });
+    chunk(self.document, function finalTick() {
+      perf.tick('e_is');
+      // TODO(erwinm): move invocation of the `flush` method when we have the
+      // new ticks in place to batch the ticks properly.
+      perf.flush();
     });
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 });
