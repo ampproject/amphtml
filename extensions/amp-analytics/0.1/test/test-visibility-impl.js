@@ -30,7 +30,13 @@ import {viewportForDoc} from '../../../../src/viewport';
 import {loadPromise} from '../../../../src/event-helper';
 
 import * as sinon from 'sinon';
-
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {
+  installResourcesServiceForDoc,
+} from '../../../../src/service/resources-impl';
+import {documentStateFor} from '../../../../src/document-state';
 
 adopt(window);
 
@@ -44,6 +50,7 @@ describe('amp-analytics.visibility', () => {
   let callbackStub;
   let clock;
   let ampElement;
+  let ampdoc;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -55,22 +62,29 @@ describe('amp-analytics.visibility', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    const docState = documentStateFor(window);
+    sandbox.stub(docState, 'isHidden', () => false);
+    ampdoc = new AmpDocSingle(window);
+    installResourcesServiceForDoc(ampdoc);
+    installPlatformService(window);
+    installTimerService(window);
 
     ampElement = document.createElement('amp-analytics');
     ampElement.id = 'abc';
     document.body.appendChild(ampElement);
+
     const getIdStub = sandbox.stub();
     getIdStub.returns('0');
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
 
-    const viewport = viewportForDoc(window.document);
+    const viewport = viewportForDoc(ampdoc);
     viewportScrollTopStub = sandbox.stub(viewport, 'getScrollTop');
     viewportScrollTopStub.returns(0);
     viewportScrollLeftStub = sandbox.stub(viewport, 'getScrollLeft');
     viewportScrollLeftStub.returns(0);
-    viewerForDoc(window.document).setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new Visibility(window);
+    viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new Visibility(ampdoc);
     sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
         .returns({
           getLayoutBox: () => {},

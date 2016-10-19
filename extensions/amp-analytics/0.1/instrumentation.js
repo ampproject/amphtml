@@ -17,11 +17,10 @@
 import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
-import {fromClass} from '../../../src/service';
+import {fromClassForDoc} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
-import {visibilityFor} from '../../../src/visibility';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
@@ -39,15 +38,15 @@ const CLICK_LISTENER_REGISTERED_ = 'AMP_ANALYTICS_CLICK_LISTENER_REGISTERED';
 let AnalyticsEventListenerDef;
 
 /**
- * @param {!Window} window Window object to listen on.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JSONType} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *  fires.
  * @param {!Element} analyticsElement The element associated with the
  *  config.
  */
-export function addListener(window, config, listener, analyticsElement) {
-  return instrumentationServiceFor(window).addListener(config, listener,
+export function addListener(ampdoc, config, listener, analyticsElement) {
+  return instrumentationServiceForDoc(ampdoc).addListener(config, listener,
       analyticsElement);
 }
 
@@ -100,20 +99,22 @@ class AnalyticsEvent {
 /** @private Visible for testing. */
 export class InstrumentationService {
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    this.ampdoc_ = ampdoc;
     /** @const {!Window} */
-    this.win_ = window;
+    this.win_ = this.ampdoc_.win;
 
     /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(window);
+    this.timer_ = timerFor(this.win_);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(window.document);
+    this.viewer_ = viewerForDoc(this.ampdoc_);
 
     /** @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(window.document);
+    this.viewport_ = viewportForDoc(this.ampdoc_);
 
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
@@ -264,7 +265,7 @@ export class InstrumentationService {
         return;
       }
 
-      visibilityFor(this.win_).then(visibility => {
+      visibilityForDoc(this.ampdoc_).then(visibility => {
         visibility.listenOnce(spec, vars => {
           const el = getElement(spec['selector'], analyticsElement,
               spec['selectionMethod']);
@@ -301,10 +302,10 @@ export class InstrumentationService {
    * @private
    */
   ensureClickListener_(analyticsElement) {
-    const doc = analyticsElement.ownerDocument;
-    if (!doc[CLICK_LISTENER_REGISTERED_]) {
-      doc[CLICK_LISTENER_REGISTERED_] = true;
-      doc.documentElement.addEventListener('click', this.onClick_.bind(this));
+    if (!this.clickHandlerRegistered_) {
+      this.clickHandlerRegistered_ = true;
+      this.ampdoc_.getRootNode().addEventListener(
+          'click', this.onClick_.bind(this));
     }
   }
 
@@ -527,11 +528,19 @@ export class InstrumentationService {
 }
 
 /**
- * @param {!Window} window
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!InstrumentationService}
  */
-export function instrumentationServiceFor(window) {
-  return fromClass(window, 'amp-analytics-instrumentation',
+export function instrumentationServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'amp-analytics-instrumentation',
       InstrumentationService);
 }
 
+
+// Register doc-service factory.
+AMP.registerServiceForDoc(
+    'amp-analytics-instrumentation',
+    /* ctor */ undefined,
+    ampdoc => {
+      return instrumentationServiceForDoc(ampdoc);
+    });

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {getElementServiceForDoc} from './element-service';
 
 /**
- * @param {!Window} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<!../extensions/amp-analytics/0.1/visibility-impl.Visibility>}
  */
-export function visibilityFor(win) {
+export function visibilityForDoc(nodeOrDoc) {
   return (/** @type {!Promise<
       !../extensions/amp-analytics/0.1/visibility-impl.Visibility>}} */ (
-      getElementService(win, 'visibility', 'amp-analytics')));
+      getElementServiceForDoc(nodeOrDoc, 'visibility', 'amp-analytics')));
 };

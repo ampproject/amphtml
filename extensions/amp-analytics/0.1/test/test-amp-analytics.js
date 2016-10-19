@@ -17,7 +17,7 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {Crypto} from '../crypto-impl';
-import {instrumentationServiceFor} from '../instrumentation';
+import {instrumentationServiceForDoc} from '../instrumentation';
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
@@ -29,6 +29,8 @@ import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
+
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 
 
 /* global require: false */
@@ -44,6 +46,7 @@ describe('amp-analytics', function() {
   let configWithCredentials;
   let uidService;
   let crypto;
+  let ampdoc;
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}',
@@ -86,6 +89,7 @@ describe('amp-analytics', function() {
       link.setAttribute('href', './test-canonical.html');
       iframe.win.document.head.appendChild(link);
       windowApi = iframe.win;
+      ampdoc = new AmpDocSingle(windowApi);
     });
   });
 
@@ -476,7 +480,7 @@ describe('amp-analytics', function() {
   it('expands element level vars with higher precedence than trigger vars',
     () => {
       const analytics = getAnalyticsTag();
-      const ins = instrumentationServiceFor(windowApi);
+      const ins = instrumentationServiceForDoc(ampdoc);
       sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
       const el1 = windowApi.document.createElement('div');
       el1.className = 'x';
@@ -606,7 +610,7 @@ describe('amp-analytics', function() {
   });
 
   it('expands selector with config variable', () => {
-    const ins = instrumentationServiceFor(windowApi);
+    const ins = instrumentationServiceForDoc(ampdoc);
     const addListenerSpy = sandbox.spy(ins, 'addListener');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
@@ -621,7 +625,7 @@ describe('amp-analytics', function() {
 
   function selectorExpansionTest(selector) {
     it('expand selector value: ' + selector, () => {
-      const ins = instrumentationServiceFor(windowApi);
+      const ins = instrumentationServiceForDoc(ampdoc);
       const addListenerSpy = sandbox.spy(ins, 'addListener');
       const analytics = getAnalyticsTag({
         requests: {foo: 'https://example.com/bar'},
@@ -643,7 +647,7 @@ describe('amp-analytics', function() {
         .map(selectorExpansionTest);
 
   it('does not expands selector with platform variable', () => {
-    const ins = instrumentationServiceFor(windowApi);
+    const ins = instrumentationServiceForDoc(ampdoc);
     const addListenerSpy = sandbox.spy(ins, 'addListener');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
