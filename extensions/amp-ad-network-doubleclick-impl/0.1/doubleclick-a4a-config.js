@@ -22,7 +22,11 @@
 
 import {
   googleAdsIsA4AEnabled,
+  EXPERIMENT_ATTRIBUTE,
+  isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getMode} from '../../../src/mode';
+import {isProxyOrigin} from '../../../src/url';
 
 /** @const {string} */
 const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
@@ -60,16 +64,39 @@ export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   experiment: '117152681',
 };
 
+/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
+export const DOUBLECLICK_A4A_BETA_BRANCHES = {
+  control: '2077830',
+  experiment: '2077831',
+};
+
+export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
+
 /**
  * @param {!Window} win
  * @param {!Element} element
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  // Ensure not within remote.html iframe.
-  return !win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
-      googleAdsIsA4AEnabled(
-        win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES);
+  if (!!win.document.querySelector('meta[name=amp-3p-iframe-src]')) {
+    return false;
+  }
+  const a4aRequested = element.hasAttribute(BETA_ATTRIBUTE);
+  // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
+  // therefore, carves out of the experiment branches.  Any publisher using this
+  // attribute will be excluded from the experiment altogether.
+  // TODO(tdrl): The "is this site eligible" logic has gotten scattered around
+  // and is now duplicated.  It should be cleaned up and factored into a single,
+  // shared location.
+  const enableA4A = googleAdsIsA4AEnabled(
+          win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES) ||
+      (a4aRequested && (isProxyOrigin(win.location) ||
+       getMode(win).localDev || getMode(win).test));
+  if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
+    element.setAttribute(EXPERIMENT_ATTRIBUTE,
+        DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
+  }
+  return enableA4A;
 }
