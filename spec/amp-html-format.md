@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -127,20 +127,20 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">img</td>
-    <td>Replaced with amp-img.<br>
+    <td>Replaced with `amp-img`.<br>
         Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
   <tr>
     <td width="30%">video</td>
-    <td>Replaced with amp-video.</td>
+    <td>Replaced with `amp-video`.</td>
   </tr>
   <tr>
     <td width="30%">audio</td>
-    <td>Replaced with amp-audio.</td>
+    <td>Replaced with `amp-audio`.</td>
   </tr>
   <tr>
     <td width="30%">iframe</td>
-    <td>Replaced with amp-iframe.</td>
+    <td>Replaced with `amp-iframe`.</td>
   </tr>
     <tr>
     <td width="30%">frame</td>
@@ -168,11 +168,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Prohibited. <a href="https://github.com/ampproject/amphtml/issues/1286">Support coming in the future</a>.</td>
+    <td>Allowed. Require including [amp-form extension](../extensions/amp-form/amp-form.md).</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Prohibited. Includes <code>input</code>, <code>textarea</code>, <code>select</code>, <code>option</code>. Notably, the <code>button</code> element is allowed.</td>
+    <td>Mostly Allowed with [exception of some input types](../extensions/amp-form/amp-form.md#inputs), namely, `input[type=image]`, `input[type=button]`, `input[type=password]`, `input[type=file]` are invalid. Related tags are also allowed: `fieldset`, `label`</td>
   </tr>
   <tr>
     <td width="30%">button</td>
@@ -368,6 +368,8 @@ Some actions, if documented, may accept arguments. The arguments are defined bet
 You can listen to multiple events on an element by separating the two events with a semicolon `;`.
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
+
+Read more about [AMP Actions and Events](./amp-actions-and-events.md).
 
 ### Extended components
 

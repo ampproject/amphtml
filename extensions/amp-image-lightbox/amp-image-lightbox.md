@@ -75,6 +75,27 @@ properties that can be styled are `background` and `color`.
 The `amp-image-lightbox-caption` class is also available to style the caption
 section.
 
+## Actions
+The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>(default)</td>
+    <td>Opens the image lightbox with the source image being the one that triggered the action.</td>
+  </tr>
+</table>
+
+### Examples
+
+```html
+<amp-img on="tap:lightbox1" role="button" tabindex="0" src="image1" width=200 height=100></amp-img>
+<amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+```
+
 ## Validation
 
 See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/0.1/validator-amp-image-lightbox.protoascii) in the AMP validator specification.

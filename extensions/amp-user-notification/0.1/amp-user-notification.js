@@ -289,6 +289,11 @@ export class AmpUserNotification extends AMP.BaseElement {
         });
   }
 
+  /** @override */
+  activate() {
+    this.dismiss();
+  }
+
   /**
    * Hides the current user notification and invokes the `dialogResolve_`
    * method. Removes the `.amp-active` class from the element.
