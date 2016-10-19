@@ -213,6 +213,10 @@ export const adConfig = {
 
   kargo: {},
 
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+  },
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
