@@ -306,13 +306,6 @@ describe('Viewport', () => {
     expect(showFixedLayerStub.callCount).to.equal(1);
   });
 
-  it('should call binding.updateViewerViewport', () => {
-    const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('updateViewerViewport').once();
-    viewerViewportHandler({paddingTop: 19});
-    bindingMock.verify();
-  });
-
   it('should send scroll events', () => {
     // 0         ->    6     ->      12   ->      16         ->   18
     // scroll-10    scroll-20    scroll-30   2nd anim frame    scroll-40
