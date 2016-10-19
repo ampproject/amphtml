@@ -71,18 +71,22 @@ __required__
 Target attribute of the `<form>` must be either `_blank` or `_top`.
 
 **action**
-__required__
+__invalid__ when `method=POST`
+__required__ when `method=GET`
 
 Action must be provided, `https` and is non-cdn link (does **NOT** link to https://cdn.ampproject.org).
 
 __Note__: `target` and `action` will only be used for non-xhr GET requests. AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided AMP would make a GET request to `action` endpoint and use `target` to open a new window (if `_blank`). AMP runtime might also fallback to using action and target in cases where `amp-form` extension fails to load.
 
 **action-xhr**
-__(optional)__ for `GET` __required__ for `POST` requests 
+__required__ when `method=POST`
+__optional__ when `method=GET`
+
 You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion.
 
-This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
+An XHR request is where the browser would make the request without a full load of the page or opening a new page also sometimes called Ajax request. Browsers will send the request in the background using [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
 
+This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
 
 **Important**: See [Security Considerations](#security-considerations) for notes on how to secure your forms endpoints.
 
