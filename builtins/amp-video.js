@@ -66,6 +66,7 @@ export function installVideo(win) {
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls', 'aria-label',
           'aria-describedby', 'aria-labelledby'], this.video_);
+      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
