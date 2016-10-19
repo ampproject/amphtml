@@ -1302,6 +1302,31 @@ export class Resources {
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
       opt_callback) {
+    if (resource.hasBeenMeasured()) {
+      this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+          opt_callback);
+    } else {
+      // This is a rare case since most of times the element itself schedules
+      // resize requests. However, this case is possible when another element
+      // requests resize of a controlled element.
+      this.vsync_.measure(() => {
+        resource.measure();
+        this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+            opt_callback);
+      });
+    }
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @param {boolean} force
+   * @param {function(boolean)=} opt_callback A callback function
+   * @private
+   */
+  completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+      opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
