@@ -20,12 +20,12 @@ import {user} from '../../../src/log';
 
 
 /**
- * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
+ * @implements {AccessVendor}
  */
 export class LaterpayVendor {
 
   /**
-   * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
+   * @param {!AccessService} accessService
    */
   constructor(accessService) {
     /** @private @const */
