@@ -43,9 +43,9 @@ export function _ping_(global, data) {
     }
     document.body.appendChild(img);
     if (width || height) {
-      context.renderStart({width, height});
+      global.context.renderStart({width, height});
     } else {
-      context.renderStart();
+      global.context.renderStart();
     }
     global.context.observeIntersection(function(changes) {
       changes.forEach(function(c) {
@@ -54,6 +54,6 @@ export function _ping_(global, data) {
       });
     });
   } else {
-    context.noContentAvailable();
+    global.context.noContentAvailable();
   }
 }
