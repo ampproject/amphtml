@@ -192,7 +192,7 @@ describe('vsync', () => {
         vsync.mutate(resolve);
       }).then(() => {
         // Notice that `mu2` is skipped becuase `me2` failed.
-        expect(result).to.equal('me1me3me5' + 'mu1mu5');
+        expect(result).to.equal('me1me3me5mu1mu5');
       });
     });
 
