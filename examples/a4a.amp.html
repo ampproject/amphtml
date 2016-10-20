@@ -8,6 +8,8 @@
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <style>
     amp-ad {
       border: 1px solid #ccc;
@@ -59,13 +61,11 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2>Adsense</h2>
+  <h2>Adsense w/o placeholder and fallback</h2>
   <amp-ad width=300 height=300
       type="adsense"
-      data-ad-client="ca-pub-8125901705757971"
-      data-ad-slot="7783467241">
-    <div placeholder></div>
-    <div fallback></div>
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912">
   </amp-ad>
 
   <h2>Doubleclick</h2>
@@ -76,7 +76,13 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2>Doubleclick with JSON based parameters</h2>
+  <h2>Doubleclick w/o placeholder and fallback</h2>
+  <amp-ad width=320 height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner">
+  </amp-ad>
+
+  <h2>Doubleclick w/ JSON based parameters</h2>
   <amp-ad width=320 height=50
       type="doubleclick"
       data-slot="/4119129/mobile_ad_banner"
@@ -85,7 +91,7 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2>Doubleclick no ad with fallback</h2>
+  <h2>Doubleclick no ad</h2>
   <amp-ad width=300 height=200
       type="doubleclick"
       data-slot="/4119129/doesnt-exist">
@@ -93,12 +99,11 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2>Doubleclick no ad with placeholder and fallback</h2>
+  <h2>Doubleclick no ad w/o fallback</h2>
   <amp-ad width=300 height=200
       type="doubleclick"
       data-slot="/4119129/doesnt-exist">
     <div placeholder></div>
-    <div fallback></div>
   </amp-ad>
 
   <h2>Doubleclick with overriden size</h2>
