@@ -70,6 +70,7 @@ const LIFECYCLE_STAGES = {
   renderFriendlyEnd: '8',
   renderCrossDomainEnd: '9',
   preAdThrottle: '10',
+  renderSafeFrameStart: '11',
   adSlotCleared: '20',
 };
 
