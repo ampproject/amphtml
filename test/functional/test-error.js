@@ -158,4 +158,11 @@ describe('reportErrorToServer', () => {
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
     expect(url).to.be.undefined;
   });
+
+  it('should not report load errors', () => {
+    const e = new Error('Failed to load:');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.undefined;
+  });
 });
