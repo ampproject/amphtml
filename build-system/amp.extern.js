@@ -188,12 +188,12 @@ AMP.BaseElement = class {
  */
 AMP.AmpAdApiHandler = class {
   /**
-   * @param {!AMP.BaseElement} baseInstance
+   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
    * @param {!Element} element
    * @param {function()=} opt_noContentCallback
    */
   constructor(baseInstance, element, opt_noContentCallback) {}
-}
+};
 
 /*
      \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|

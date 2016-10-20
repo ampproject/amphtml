@@ -32,12 +32,13 @@ const TIMEOUT_VALUE = 10000;
 export class AmpAdApiHandler {
 
   /**
-   * @param {!AMP.BaseElement} baseInstance
+   * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
    * @param {!Element} element
    * @param {function()=} opt_noContentCallback
    */
   constructor(baseInstance, element, opt_noContentCallback) {
-    /** @private {!AMP.BaseElement} */
+
+    /** @private */
     this.baseInstance_ = baseInstance;
 
     /** @private {!Element} */
@@ -110,12 +111,7 @@ export class AmpAdApiHandler {
         ['render-start', 'no-content'], this.is3p_).then(info => {
           const data = info.data;
           if (data.type == 'render-start') {
-            this.updateSize_(data.height, data.width,
-                info.source, info.origin);
-            if (this.baseInstance_.lifecyleReporter_) {
-              this.baseInstance_.lifecycleReporter_.sendPing(
-                  'renderCrossDomainStart');
-            }
+            this.renderStart_(info);
             //report performance
           } else {
             this.noContent_();
@@ -154,6 +150,21 @@ export class AmpAdApiHandler {
             }
           });
     });
+  }
+
+  /**
+   * callback functon on receiving render-start
+   * @param {!Object} info
+   * @private
+   */
+  renderStart_(info) {
+    const data = info.data;
+    this.updateSize_(data.height, data.width,
+                info.source, info.origin);
+    if (this.baseInstance_.lifecycleReporter) {
+      this.baseInstance_.lifecycleReporter.sendPing(
+          'renderCrossDomainStart');
+    }
   }
 
   /** See BaseElement.  */
