@@ -309,7 +309,8 @@ export class Resource {
   }
 
   /**
-   * Measures the resource's boundaries. Only allowed for upgraded elements.
+   * Measures the resource's boundaries. An upgraded element will be
+   * transitioned to the "ready for layout" state.
    */
   measure() {
     this.isMeasureRequested_ = false;
