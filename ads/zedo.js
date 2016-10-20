@@ -42,7 +42,7 @@ export function zedo(global, data) {
           data.renderer[key].value);
       }
     } else {
-      placement.includeRenderer('ampdisplay', {});
+      placement.includeRenderer('display', {});
     }
     //create a slot div to display ad
     const slot = global.document.createElement('div');

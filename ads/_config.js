@@ -404,7 +404,9 @@ export const adConfig = {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
   },
 
-  zedo: {},
+  zedo: {
+    renderStartImplemented: true,
+  },
 
   zergnet: {},
 
