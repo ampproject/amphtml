@@ -17,7 +17,7 @@
 import {Pass} from '../pass';
 import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
-import {dev} from '../log';
+import {dev, rethrowAsync} from '../log';
 import {documentStateFor} from '../document-state';
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
@@ -375,12 +375,22 @@ export class Vsync {
     this.states_ = this.nextStates_;
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].measure) {
-        tasks[i].measure(states[i]);
+        try {
+          tasks[i].measure(states[i]);
+        } catch (e) {
+          // Ensure that the mutate is not executed when measure fails.
+          tasks[i].mutate = null;
+          rethrowAsync(e);
+        }
       }
     }
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
-        tasks[i].mutate(states[i]);
+        try {
+          tasks[i].mutate(states[i]);
+        } catch (e) {
+          rethrowAsync(e);
+        }
       }
     }
     // Swap last arrays into double buffer.
