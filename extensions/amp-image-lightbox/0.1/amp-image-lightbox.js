@@ -48,7 +48,7 @@ const SUPPORTED_ELEMENTS_ = {
 };
 
 /** @private @const {!../../../src/curve.CurveDef} */
-const ENTER_CURVE_ = bezierCurve(0.4, -0.3, 0.2, 1);
+const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
 /** @private @const {!../../../src/curve.CurveDef} */
 const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
@@ -913,20 +913,21 @@ class AmpImageLightbox extends AMP.BaseElement {
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
+      const imageBox = this.imageViewer_.getImageBox();
       const clone = this.sourceImage_.cloneNode(true);
+      clone.className = '';
       st.setStyles(clone, {
         position: 'absolute',
         top: st.px(rect.top),
         left: st.px(rect.left),
-        width: st.px(rect.width),
-        height: st.px(rect.height),
+        width: st.px(imageBox.width),
+        height: st.px(imageBox.height),
       });
       transLayer.appendChild(clone);
 
       this.sourceImage_.classList.add('-amp-ghost');
 
       // Move the image to the location given by the lightbox.
-      const imageBox = this.imageViewer_.getImageBox();
       const dx = imageBox.left - rect.left;
       const dy = imageBox.top - rect.top;
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
