@@ -1007,6 +1007,7 @@ describe('Resources changeSize', () => {
     const resource = new Resource(id, createElement(rect), resources);
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.initialLayoutBox_ = rect;
     resource.layoutBox_ = rect;
     resource.changeSize = sandbox.spy();
     return resource;
@@ -1113,6 +1114,40 @@ describe('Resources changeSize', () => {
     resources.scheduleChangeSize_(resource1, 111, 222, true);
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+  });
+
+  it('should measure non-measured elements', () => {
+    let measureCallbacks = [];
+    resources.vsync_ = {
+      measure: callback => {
+        measureCallbacks.push(callback);
+      },
+      mutate: () => {},
+    };
+    resource1.initialLayoutBox_ = null;
+    expect(resource1.hasBeenMeasured()).to.be.false;
+    expect(resource2.hasBeenMeasured()).to.be.true;
+    resource1.measure = sandbox.spy();
+    resource2.measure = sandbox.spy();
+
+    debugger;
+    resources.scheduleChangeSize_(resource1, 111, 200, true);
+    resources.scheduleChangeSize_(resource2, 111, 222, true);
+
+    // Not yet scheduled, will wait until vsync.
+    expect(resource1.measure).to.not.be.called;
+    expect(measureCallbacks).to.have.length(1);
+
+    // Scheduling is done after vsync.
+    measureCallbacks[0]();
+    expect(resource1.measure).to.be.calledOnce;
+    expect(resource2.measure).to.not.be.called;
+
+    // Notice that the `resource2` was scheduled first since it didn't
+    // require vsync.
+    expect(resources.requestsChangeSize_).to.have.length(2);
+    expect(resources.requestsChangeSize_[0].resource).to.equal(resource2);
+    expect(resources.requestsChangeSize_[1].resource).to.equal(resource1);
   });
 
   describe('attemptChangeSize rules wrt viewport', () => {
