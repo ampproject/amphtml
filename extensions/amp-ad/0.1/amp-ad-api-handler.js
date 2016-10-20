@@ -85,8 +85,6 @@ export class AmpAdApiHandler {
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe_);
-    /** @const {AMP.BaseElement} */
-    const baseInstance = this.baseInstance_;
     this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe_, is3p);
     this.embedStateApi_ = new SubscriptionApi(
@@ -116,10 +114,6 @@ export class AmpAdApiHandler {
             this.renderStart_(info);
             //report performance
           } else {
-            if (baseInstance.lifecyleReporter_) {
-              baseInstance.lifecycleReporter_.sendPing(
-                  'renderCrossDomainStart');
-            }
             this.noContent_();
           }
         });

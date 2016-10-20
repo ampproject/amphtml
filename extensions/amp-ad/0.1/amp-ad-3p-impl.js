@@ -219,7 +219,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.lifeCycleReporter.sendPing('adRequestStart');
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
-      ///** {sdfdsf} */(this)
       this.apiHandler_ = new AmpAdApiHandler(
           this, this.element, this.boundNoContentHandler_);
       return this.apiHandler_.startUp(this.iframe_, true);
