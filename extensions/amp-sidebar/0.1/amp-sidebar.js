@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
@@ -171,11 +172,8 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
-        try {
-          this.element./*OK*/focus();
-        } catch (e) {
-          // IE <= 7 may throw exceptions when focusing on hidden items.
-        }
+        // Focus on the sidebar for a11y.
+        tryFocus(this.element);
         timerFor(this.win).delay(() => {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
