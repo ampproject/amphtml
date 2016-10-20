@@ -25,6 +25,40 @@ const EXPERIMENT = 'amp-fx-flying-carpet';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /**
+     * Preserved so that we may keep track of the "good" children. When an
+     * element collapses, we remove it from the list.
+     *
+     * @type{!Array<!Element>}
+     * @private
+     */
+    this.children_ = [];
+
+    /**
+     * The number of non-empty child nodes left that are still "good". If no
+     * more are left, we attempt to collapse the flying carpet.
+     * Note that this may not be the number for child elements, since Text also
+     * appears inside the flying carpet.
+     *
+     * @type {number}
+     * @private
+     */
+    this.totalChildren_ = 0;
+
+    /**
+     * A cached reference to the container, used to set its width to match
+     * the flying carpet's.
+     * @type {?Element}
+     * @private
+     */
+    this.container_ = null;
+  }
+
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED_HEIGHT;
@@ -32,8 +66,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
-    if (!this.isExperimentOn_) {
+    if (!isExperimentOn(this.win, EXPERIMENT)) {
       dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
       return;
@@ -41,47 +74,29 @@ class AmpFlyingCarpet extends AMP.BaseElement {
 
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
-    const childNodes = this.getRealChildNodes();
 
-    /** @const @private {!Vsync} */
-    this.vsync_ = this.getVsync();
-
-    /**
-     * Preserved so that we may keep track of the "good" children. When an
-     * element collapses, we remove it from the list.
-     * @private @const
-     */
     this.children_ = this.getRealChildren();
+    this.container_ = container;
 
-    /**
-     * The number of non-empty child nodes left that are still "good". If no
-     * more are left, we attempt to collapse the flying carpet.
-     * Note that this may not be the number for child elements, since Text also
-     * appears inside the flying carpet.
-     * @private
-     */
+    const childNodes = this.getRealChildNodes();
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
-    /**
-     * A cached reference to the container, used to set its width to match
-     * the flying carpet's.
-     * @private @const
-     */
-    this.container_ = container;
+    this.children_.forEach(child => this.setAsOwner(child));
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
     container.setAttribute('class', '-amp-fx-flying-carpet-container');
 
-    this.children_.forEach(child => this.setAsOwner(child));
     childNodes.forEach(child => container.appendChild(child));
     clip.appendChild(container);
     this.element.appendChild(clip);
+
+    this.getViewport().addToFixedLayer(container);
   }
 
   onLayoutMeasure() {
     const width = this.getLayoutWidth();
-    this.vsync_.mutate(() => {
+    this.getVsync().mutate(() => {
       setStyle(this.container_, 'width', width, 'px');
     });
   }
@@ -148,11 +163,11 @@ class AmpFlyingCarpet extends AMP.BaseElement {
    */
   visibileChildren_(nodes) {
     return nodes.filter(node => {
-      if (node.nodeType === /* Element */1) {
+      if (node.nodeType === /* Element */ 1) {
         return true;
       }
 
-      if (node.nodeType === /* Text */3) {
+      if (node.nodeType === /* Text */ 3) {
         // Is there a non-whitespace character?
         return /\S/.test(node.textContent);
       }
