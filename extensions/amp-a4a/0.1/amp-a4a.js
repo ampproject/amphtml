@@ -534,7 +534,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.rendered_ = false;
       this.timerId_ = 0;
       if (this.crossDomainIframeHandler_) {
-        this.crossDomainIframeHandler_.freeIframe(true /* force */);
+        this.crossDomainIframeHandler_.freeXDomainIframe();
         this.crossDomainIframeHandler_ = null;
       }
       this.layoutMeasureExecuted_ = false;
