@@ -22,9 +22,17 @@ import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
 import {isObject} from '../../../src/types';
+import {VideoEvents} from '../../../src/video-interface';
+import {videoManagerForDoc} from '../../../src/video-manager';
 
 /** @type {number} Value of YouTube player state when playing. */
 const YT_PLAYER_STATE_PLAYING = 1;
+
+/** @type {number} Value of YouTube player state when paused. */
+const YT_PLAYER_STATE_PAUSED = 2;
+
+/** @type {number} Config to tell YouTube to hide annotations by default*/
+const YT_PLAYER_FLAG_HIDE_ANNOTATION = 3;
 
 class AmpYoutube extends AMP.BaseElement {
 
@@ -73,6 +81,11 @@ class AmpYoutube extends AMP.BaseElement {
     return 0.75;
   }
 
+   /** @override */
+   viewportCallback(visible) {
+     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+   }
+
   /** @override */
   buildCallback() {
     this.videoid_ = user().assert(
@@ -104,9 +117,32 @@ class AmpYoutube extends AMP.BaseElement {
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
+      // Autoplay is managed by VideManager, do not pass it to Youtube.
       delete params['autoplay'];
-      user().warn('Autoplay is currently not support with amp-youtube.');
+      user().error('Use autoplay attribute instead of data-param-autoplay');
     }
+
+    // Unless inline play policy is set explicitly, enable inline play for iOS
+    // in all cases.
+    if (!('playsinline' in params)) {
+      params['playsinline'] = '1';
+    }
+
+    const hasAutoplay = this.element.hasAttribute('autoplay');
+    if (hasAutoplay) {
+      // Unless annotations policy is set explicitly, change the default to
+      // hide annotations when autoplay is set.
+      // We do this because we like the fist user interaction with an
+      // autoplaying video to be just unmute the video so annotations are not
+      // interactive during autoplay.
+      if (!('iv_load_policy' in params)) {
+        params['iv_load_policy'] = YT_PLAYER_FLAG_HIDE_ANNOTATION;
+      }
+
+      // Inline play must be set for autoplay regardless of original value.
+      params['playsinline'] = '1';
+    }
+
     src = addParamsToUrl(src, params);
 
     iframe.setAttribute('frameborder', '0');
@@ -123,6 +159,8 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
+
+    videoManagerForDoc(this.win.document).register(this);
 
     return this.loadPromise(iframe)
         .then(() => {
@@ -143,16 +181,16 @@ class AmpYoutube extends AMP.BaseElement {
     // on mobile.
     if (this.iframe_ && this.iframe_.contentWindow &&
         this.playerState_ == YT_PLAYER_STATE_PLAYING) {
-      this.pauseVideo_();
+      this.pause();
     }
   }
 
   /** @private */
-  pauseVideo_() {
+  sendCommand_(command, args) {
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
       'event': 'command',
-      'func': 'pauseVideo',
-      'args': '',
+      'func': command,
+      'args': args || '',
     }), '*');
   }
 
@@ -171,10 +209,16 @@ class AmpYoutube extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
     if (data.event == 'onReady') {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
       this.playerReadyResolver_(this.iframe_);
     } else if (data.event == 'infoDelivery' &&
         data.info && data.info.playerState !== undefined) {
       this.playerState_ = data.info.playerState;
+      if (this.playerState_ == YT_PLAYER_STATE_PAUSED) {
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (this.playerState_ == YT_PLAYER_STATE_PLAYING) {
+        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      }
     }
   }
 
@@ -233,6 +277,73 @@ class AmpYoutube extends AMP.BaseElement {
         'visibility': '',
       });
     });
+  }
+
+  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
+  /**
+   * @override
+   */
+  supportsPlatform() {
+    return true;
+  }
+
+  /** @private */
+  isInteractive() {
+    // YouTube videos are always interactive. There is no YouTube param that
+    // makes the video non-interactive. Even data-param-control=0 will not
+    // prevent user from pausing or resuming the video by tapping it.
+    return true;
+  }
+
+  /**
+   * @override
+   */
+  play(unusedIsAutoplay) {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('playVideo');
+    });
+  }
+
+  /**
+   * @override
+   */
+  pause() {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('pauseVideo');
+    });
+  }
+
+  /**
+   * @override
+   */
+  mute() {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('mute');
+    });
+  }
+
+  /**
+   * @override
+   */
+  unmute() {
+    this.playerReadyPromise_.then(() => {
+      this.sendCommand_('unMute');
+    });
+  }
+
+  /**
+   * @override
+   */
+  showControls() {
+    // Not supported.
+  }
+
+  /**
+   * @override
+   */
+  hideControls() {
+    // Not supported.
   }
 };
 

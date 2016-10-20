@@ -116,11 +116,6 @@ export function installVideo(win) {
         this.video_.appendChild(child);
       });
 
-      // Dispatch a user tap event on click of the player.
-      listen(this.video_, 'click', () => {
-        this.element.dispatchCustomEvent(VideoEvents.USER_TAP);
-      });
-
       // loadPromise for media elements listens to `loadstart`
       return this.loadPromise(this.video_).then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);

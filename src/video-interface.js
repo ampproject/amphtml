@@ -172,15 +172,6 @@ export const VideoEvents = {
   PAUSE: 'pause',
 
   /**
-   * amp:video:usertap
-   *
-   * Fired when user taps any part of the video player.
-   *
-   * @event amp:video:usertap
-   */
-  USER_TAP: 'amp:video:usertap',
-
-  /**
    * amp:video:visibility
    *
    * Fired when the video's visibility changes. Normally fired

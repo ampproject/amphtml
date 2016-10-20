@@ -160,6 +160,7 @@ class VideoEntry {
    * @private
    */
   videoBuilt_() {
+    this.updateVisibility();
     if (this.hasAutoplay_) {
       this.autoplayVideoBuilt_();
     }
@@ -170,6 +171,7 @@ class VideoEntry {
    * @private
    */
   videoLoaded_() {
+    this.updateVisibility();
     this.loaded_ = true;
     if (this.isVisible_) {
       // Handles the case when the video becomes visible before loading
@@ -245,15 +247,16 @@ class VideoEntry {
     // Hide the controls.
     this.video.hideControls();
 
-    // Create autoplay animation.
+    // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
+    const mask = this.createAutoplayMask_();
     this.vsync_.mutate(() => {
       this.video.element.appendChild(animation);
+      this.video.element.appendChild(mask);
     });
 
     // Listen to pause, play and user interaction events.
-    const unlistenInteraction = listen(this.video.element, VideoEvents.USER_TAP,
-        onInteraction.bind(this));
+    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
 
     const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
         toggleAnimation.bind(this, /*playing*/ false));
@@ -269,6 +272,7 @@ class VideoEntry {
       unlistenPause();
       unlistenPlay();
       animation.remove();
+      mask.remove();
     }
   }
 
@@ -323,6 +327,25 @@ class VideoEntry {
       anim.setAttribute('unpausable', '');
     }
     return anim;
+  }
+
+  /**
+   * Creates a mask to overlay on top of an autoplay video to detect the first
+   * user tap.
+   * We have to do this since many players are iframe-based and we can not get
+   * the click event from the iframe.
+   * We also can not rely on hacks such as constantly checking doc.activeElement
+   * to know if user has tapped on the iframe since they won't be a trusted
+   * event that would allow us to unmuted the vide as only trusted
+   * user-initiated events can be used to interact with the video.
+   * @private
+   * @return {!Element}
+   */
+  createAutoplayMask_() {
+    const doc = this.ampdoc_.win.document;
+    const mask = doc.createElement('i-amp-video-mask');
+    mask.classList.add('-amp-fill-content');
+    return mask;
   }
 
   /**
