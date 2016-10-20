@@ -110,9 +110,6 @@ export class AmpAdXDomainIframeHandler {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
-          if (this.timeout_) {
-            return;
-          }
           const data = info.data;
           if (data.type == 'render-start') {
             this.renderStart_(info);
@@ -124,15 +121,10 @@ export class AmpAdXDomainIframeHandler {
     } else {
       // If NOT support render-start, listen to bootstrap-loaded no-content
       // respectively
-      const responsePromise = listenForOncePromise(this.iframe,
+      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         'bootstrap-loaded', this.is3p_);
-      this.adResponsePromise_ =
-          timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-          responsePromise,
-          'timeout waiting for ad response');
-      listenForOncePromise(this.iframe, 'no-content', this.is3p_).then(() => {
-        this.noContent_();
-      });
+      listenForOncePromise(this.iframe_, 'no-content', this.is3p_)
+          .then(() => this.noContent_());
     }
 
     if (!opt_defaultVisible) {
@@ -146,16 +138,17 @@ export class AmpAdXDomainIframeHandler {
     }));
 
     this.element_.appendChild(this.iframe);
-    return loadPromise(this.iframe).then(() => {
-      return this.adResponsePromise_.catch(e => {
-        this.noContent_();
-        user().warn('amp-ad', e);
-      }).then(() => {
-        //TODO: add performance reporting;
-        if (this.iframe) {
-          this.iframe.style.visibility = '';
-        }
-      });
+    return loadPromise(this.iframe_).then(() => {
+      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+        this.adResponsePromise_,
+        'timeout waiting for ad response').catch(e => {
+          this.noContent_();
+          user().warn('amp-ad', e);
+        }).then(() => {
+          if (this.iframe_) {
+            this.iframe_.style.visibility = '';
+          }
+        });
     });
   }
 
