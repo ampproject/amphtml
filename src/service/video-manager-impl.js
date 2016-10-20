@@ -148,9 +148,6 @@ class VideoEntry {
     /** @private {boolean} */
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
-    /** @private {boolean} */
-    this.isInteractive_ = element.hasAttribute(VideoAttributes.CONTROLS);
-
     listenOncePromise(element, VideoEvents.LOAD)
       .then(() => this.videoLoaded_());
 
@@ -211,10 +208,12 @@ class VideoEntry {
     // Hide controls until we know if autoplay is supported, otherwise hiding
     // and showing the controls quickly becomes a bad user experience for the
     // common case where autoplay is supported.
-    this.video.hideControls();
+    if (this.video.isInteractive()) {
+      this.video.hideControls();
+    }
 
     this.boundSupportsAutoplay_().then(supportsAutoplay => {
-      if (!supportsAutoplay) {
+      if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
         this.video.showControls();
@@ -224,7 +223,7 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      if (this.isInteractive_) {
+      if (this.video.isInteractive()) {
         this.autoplayInteractiveVideoBuilt_();
       }
     });

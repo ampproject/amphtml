@@ -151,6 +151,13 @@ export function installVideo(win) {
     /**
      * @override
      */
+    isInteractive() {
+      return this.element.hasAttribute('controls');
+    }
+
+    /**
+     * @override
+     */
     play(unusedIsAutoplay) {
       this.video_.play();
     }

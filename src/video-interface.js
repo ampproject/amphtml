@@ -39,6 +39,15 @@ export class VideoInterface {
   supportsPlatform() {}
 
   /**
+   * Whether users can interact with the video such as pausing it.
+   * Example of non-interactive videos include design background videos where
+   * all controls are hidden from the user.
+   *
+   * @return {boolean}
+   */
+  isInteractive() {}
+
+  /**
    * Plays the video..
    *
    * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
@@ -122,19 +131,6 @@ export const VideoAttributes = {
    *
    */
   AUTOPLAY: 'autoplay',
-
-  /**
-   * controls
-   *
-   * Whether the developer has configured the component to show UI controls such
-   * as play, pause, etc... buttons.
-   * This is normally done by setting `controls` attribute on the component.
-   *
-   * AMP runtime makes certain assumptions based on the presence of this attribute
-   * such as whether to allow end-users to interact with an
-   * auto-playing video or not.
-   */
-  CONTROLS: 'controls',
 };
 
 
