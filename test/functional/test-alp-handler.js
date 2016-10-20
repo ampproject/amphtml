@@ -66,6 +66,7 @@ describe('alp-handler', () => {
     };
     win.document = doc;
     anchor = {
+      nodeType: 1,
       tagName: 'A',
       href: 'https://test.com?adurl=' +
         encodeURIComponent(
@@ -256,7 +257,9 @@ describe('alp-handler', () => {
   it('should find the closest a tag', () => {
     const a = anchor;
     event.target = {
+      nodeType: 1,
       parentElement: {
+        nodeType: 1,
         parentElement: a,
       },
     };
@@ -264,7 +267,9 @@ describe('alp-handler', () => {
   });
 
   it('should require an a tag', () => {
-    event.target = {};
+    event.target = {
+      nodeType: 1,
+    };
     noNavigation();
   });
 
@@ -297,8 +302,7 @@ describe('alp-handler', () => {
     expect(win.document.head.appendChild.callCount).to.equal(1);
     const link = win.document.head.appendChild.lastCall.args[0];
     expect(link.rel).to.equal('preload');
-    expect(link.href).to.equal(
-        'https://cdn.ampproject.org/rtv/01$internalRuntimeVersion$/v0.js');
+    expect(link.href).to.equal('https://cdn.ampproject.org/v0.js');
   });
 
   it('should warmup dynamically', () => {
@@ -311,7 +315,9 @@ describe('alp-handler', () => {
   });
 
   it('should ignore irrelevant events for warmup (bad target)', () => {
-    event.target = {};
+    event.target = {
+      nodeType: 1,
+    };
     warmupDynamic(event);
     expect(win.document.head.appendChild.callCount).to.equal(0);
   });

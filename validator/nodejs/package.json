@@ -1,7 +1,8 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.13",
-  "description": "Validator for AMP HTML (www.ampproject.org)",
+  "version": "1.0.14",
+  "description": "Official validator for AMP HTML (www.ampproject.org)",
+  "keywords": ["AMP", "validator", "validate", "AMP HTML", "Accelerated Mobile Pages"],
   "engines": {
     "node": ">=0.10.25"
   },

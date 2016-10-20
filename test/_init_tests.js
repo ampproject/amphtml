@@ -23,6 +23,7 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
+import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
@@ -69,22 +70,26 @@ class TestConfig {
   }
 
   skipChrome() {
-    this.skipMatchers.push(this.platform_.isChrome.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isChrome.bind(this.platform_));
   }
 
   skipEdge() {
-    this.skipMatchers.push(this.platform_.isEdge.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isEdge.bind(this.platform_));
   }
 
   skipFirefox() {
-    this.skipMatchers.push(this.platform_.isFirefox.bind(this.platform_));
-    return this;
+    return this.skip(this.platform_.isFirefox.bind(this.platform_));
   }
 
   skipSafari() {
-    this.skipMatchers.push(this.platform_.isSafari.bind(this.platform_));
+    return this.skip(this.platform_.isSafari.bind(this.platform_));
+  }
+
+  /**
+   * @param {function():boolean} fn
+   */
+  skip(fn) {
+    this.skipMatchers.push(fn);
     return this;
   }
 
@@ -149,6 +154,7 @@ sinon.sandbox.create = function(config) {
 beforeEach(beforeTest);
 
 function beforeTest() {
+  activateChunkingForTesting();
   window.AMP_MODE = null;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
