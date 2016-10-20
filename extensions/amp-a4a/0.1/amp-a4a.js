@@ -540,8 +540,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Array<string>} A list of signing services.
    */
   getSigningServiceNames() {
-    // TODO(levitzky) Add dev key name once it goes live.
-    return getMode().localDev ? ['google'] : ['google'];
+    throw new Error('getSigningServiceNames not implemented!');
   }
 
   /**

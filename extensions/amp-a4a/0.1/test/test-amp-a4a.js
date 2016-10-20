@@ -30,6 +30,7 @@ import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
+import {getMode} from '../../../../src/mode';
 import * as sinon from 'sinon';
 
 class MockA4AImpl extends AmpA4A {
@@ -42,6 +43,12 @@ class MockA4AImpl extends AmpA4A {
       creative: responseArrayBuffer,
       signature: base64UrlDecodeToBytes(responseHeaders.get('X-Google-header')),
     });
+  }
+
+  /** @override */
+  getSigningServiceNames() {
+    // TODO(levitzky) Add dev key name once it goes live.
+    return getMode().localDev ? ['google'] : ['google'];
   }
 }
 
@@ -384,7 +391,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('type', 'adsense');
-        const a4a = new AmpA4A(a4aElement);
+        const a4a = new MockA4AImpl(a4aElement);
         a4a.preconnectCallback(false);
         const preconnects = doc.querySelectorAll('link[rel=preconnect]');
         expect(preconnects.length).to.not.equal(0);
@@ -469,7 +476,7 @@ describe('amp-a4a', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
-        const a4a = new AmpA4A(a4aElement);
+        const a4a = new MockA4AImpl(a4aElement);
         a4a.adUrl_ = 'http://foo.com';
         a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
         return a4a.maybeRenderAmpAd_().then(rendered => {
@@ -498,7 +505,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         doc.body.appendChild(a4aElement);
-        const a4a = new AmpA4A(a4aElement);
+        const a4a = new MockA4AImpl(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         const bytes = buildCreativeArrayBuffer();
         return a4a.maybeRenderAmpAd_(bytes).then(rendered => {

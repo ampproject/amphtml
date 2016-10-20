@@ -119,6 +119,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return null;
   }
 
+  /** @override */
+  getSigningServiceNames() {
+    // TODO(levitzky) Add dev key name once it goes live.
+    return getMode().localDev ? ['google'] : ['google'];
+  }
+
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
