@@ -42,7 +42,7 @@ Supported parameters:
 for further information regarding this implementation please contact adtechnology@axelspringer.de 
 or visit http://www.mediaimpact.de/ 
 
-## optional features
+## Optional features
 
-- loading placeholder for ads, see <a href="../extensions/amp-ad/amp-ad.md#placeholder">official AMP readme</a>
-- noad fallback for ads, see <a href="../extensions/amp-ad/amp-ad.md#no-ad-available">official AMP readme</a>
+- loading placeholder for ads, see [official AMP readme]('../extensions/amp-ad/amp-ad.md#placeholder')
+- noad fallback for ads, see [official AMP readme]('../extensions/amp-ad/amp-ad.md#no-ad-available')
