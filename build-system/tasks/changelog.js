@@ -43,11 +43,25 @@ const pullOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/pulls',
   headers: {
     'User-Agent': 'amp-changelog-gulp-task',
+    'Accept': 'application/vnd.github.v3+json'
   },
 };
+const latestReleaseOptions = {
+  url: 'https://api.github.com/repos/ampproject/amphtml/releases/latest',
+  headers: {
+    'User-Agent': 'amp-changelog-gulp-task',
+    'Accept': 'application/vnd.github.v3+json'
+  },
+}
 
 if (GITHUB_ACCESS_TOKEN) {
   pullOptions.qs = {
+    access_token: GITHUB_ACCESS_TOKEN
+  }
+}
+
+if (GITHUB_ACCESS_TOKEN) {
+  latestReleaseOptions.qs = {
     access_token: GITHUB_ACCESS_TOKEN
   }
 }
@@ -222,6 +236,7 @@ function buildChangelog(gitMetadata) {
         if (!pr) {
           return true;
         }
+        // Ignore pr's that are just all docs changes.
         return !pr.filenames.every(function(filename) {
           return config.changelogIgnoreFileTypes.test(filename);
         });
@@ -237,12 +252,12 @@ function buildChangelog(gitMetadata) {
   var sections = buildSections(gitMetadata);
 
   Object.keys(sections).sort().forEach(function(section) {
-    changelog += `### ${section}\n\n`;
+    changelog += `<details>\n<summary>${section}</summary>\n`;
     var uniqueItems = sections[section].filter(function(title, idx) {
       return sections[section].indexOf(title) == idx;
     });
     changelog += uniqueItems.join('');
-    changelog += '\n';
+    changelog += '</details>\n';
   });
 
   gitMetadata.changelog = changelog;
@@ -263,8 +278,7 @@ function buildSections(gitMetadata) {
     var hasNonDocChange = !pr.filenames.every(function(filename) {
       return config.changelogIgnoreFileTypes.test(filename);
     });
-    var listItem = `  - ${pr.title.trim()}\n`;
-
+    var listItem = `${pr.title.trim()} (#${pr.id})\n`;
     if (hasNonDocChange) {
       changelog += listItem;
     }
@@ -299,7 +313,7 @@ function buildSections(gitMetadata) {
         // if its the validator section, read the body of the PR
         // and format it correctly under the bullet list.
         if (section == 'validator') {
-          body = `\n    ${pr.body.split('\n').join('\n    ')}`;
+          body = `${pr.body}\n`;
         }
         sections[section].push(listItem + body);
       }
@@ -314,15 +328,9 @@ function buildSections(gitMetadata) {
  * @return {!Promise<GitMetadataDef>}
  */
 function getLastGitTag(gitMetadata) {
-  var options = {
-    args: `describe --abbrev=0 --first-parent --tags ${branch}`
-  };
-  return gitExec(options).then(function(tag) {
-    if (!tag) {
-      throw new Error('Could not find latest ' + branch + ' tag.');
-    }
-    gitMetadata.tag = tag.trim();
-    util.log(util.colors.green('Current latest tag: ' + gitMetadata.tag));
+  return request(latestReleaseOptions).then(res => {
+    var body = JSON.parse(res.body);
+    gitMetadata.tag = body.tag_name;
     return gitMetadata;
   });
 }
