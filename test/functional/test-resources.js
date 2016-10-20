@@ -1007,6 +1007,7 @@ describe('Resources changeSize', () => {
     const resource = new Resource(id, createElement(rect), resources);
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.initialLayoutBox_ = rect;
     resource.layoutBox_ = rect;
     resource.changeSize = sandbox.spy();
     return resource;
@@ -1123,14 +1124,15 @@ describe('Resources changeSize', () => {
       },
       mutate: () => {},
     };
-    resource1.layoutBox_.top = -10000;
+    resource1.initialLayoutBox_ = null;
+    expect(resource1.hasBeenMeasured()).to.be.false;
+    expect(resource2.hasBeenMeasured()).to.be.true;
     resource1.measure = sandbox.spy();
     resource2.measure = sandbox.spy();
 
+    debugger;
     resources.scheduleChangeSize_(resource1, 111, 200, true);
     resources.scheduleChangeSize_(resource2, 111, 222, true);
-    expect(resource1.hasBeenMeasured()).to.be.false;
-    expect(resource2.hasBeenMeasured()).to.be.true;
 
     // Not yet scheduled, will wait until vsync.
     expect(resource1.measure).to.not.be.called;
