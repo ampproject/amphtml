@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, loadScript} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
 * @param {!Window} global
@@ -22,7 +22,6 @@ import {validateData, loadScript} from '../3p/3p';
 */
 export function yahoo(global, data) {
   validateData(data, ['sid', 'site', 'sa']);
-  loadScript(global, 'https://s.yimg.com/os/ampad/display.js', function() {
-    window.ampAdExecute(global, data);
-  });
+  global.yadData = data;
+  writeScript(global, 'https://s.yimg.com/os/ampad/display.js');
 }
