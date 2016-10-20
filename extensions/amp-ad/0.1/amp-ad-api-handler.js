@@ -32,7 +32,7 @@ const TIMEOUT_VALUE = 10000;
 export class AmpAdApiHandler {
 
   /**
-   * @param {!./amp-ad-3p-impl.AmpAd3PImpl|../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
+   * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
    * @param {!Element} element
    * @param {function()=} opt_noContentCallback
    */

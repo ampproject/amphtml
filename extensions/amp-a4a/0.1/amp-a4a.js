@@ -162,7 +162,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
     /** @public {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
-    this.lifeCycleReporter = getLifecycleReporter(this, 'a4a');
+    this.lifecycleReporter = getLifecycleReporter(this, 'a4a');
     // Note: The reporting ping should be the last action in the constructor.
     this.lifecycleReporter.sendPing('adSlotBuilt');
   }
@@ -793,7 +793,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaSafeFrame_(creativeBody) {
-    this.lifecycleReporter_.sendPing('renderSafeFrameStart');
+    this.lifecycleReporter.sendPing('renderSafeFrameStart');
     utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
