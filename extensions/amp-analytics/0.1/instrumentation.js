@@ -68,7 +68,7 @@ export const AnalyticsEventType = {
  * Events that can result in analytics data to be sent.
  * @const {Array<AnalyticsEventType>}
  */
-const AllowedInEmbed = [
+const ALLOWED_IN_EMBED = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.CLICK,
   AnalyticsEventType.TIMER,
@@ -541,7 +541,7 @@ export class InstrumentationService {
    */
   isTriggerAllowed_(triggerType, element) {
     if (element.ownerDocument.defaultView != this.win_) {
-      return (AllowedInEmbed.indexOf(triggerType) > -1);
+      return ALLOWED_IN_EMBED.indexOf(triggerType) > -1;
     }
     return true;
   }
