@@ -56,6 +56,10 @@ export const adConfig = {
     ],
   },
 
+  adbutler: {
+    prefetch: 'https://servedbyadbutler.com/app.js'
+  },
+
   adform: {},
 
   adgeneration: {
