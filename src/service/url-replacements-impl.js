@@ -547,10 +547,18 @@ export class UrlReplacements {
     return navigationInfo[attribute];
   }
 
+  /**
+   * Return the QUERY_PARAM from the current location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @param {boolean=} opt_sync
+   * @return {string}
+   */
   getQueryParamData_(param, defaultValue, opt_sync) {
     user().assert(param,
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
+    user().assert(typeof param == 'string', 'param should be a string');
     const url = parseUrl(this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined') ?

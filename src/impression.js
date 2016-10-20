@@ -33,8 +33,7 @@ let trackImpressionPromise = null;
  * @return {!Promise}
  */
 export function getTrackImpressionPromise() {
-  dev().assert(trackImpressionPromise);
-  return trackImpressionPromise;
+  return dev().assert(trackImpressionPromise);
 }
 
 /**
