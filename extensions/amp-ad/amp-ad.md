@@ -207,6 +207,17 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 
 - If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
+
+## Serving video ads 
+AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here] (../README.md#audiovideo).
+
+If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+
+When using `amp-iframe` approach:
+ - Make sure there is a poster if loading the player in the first viewport. [Details](../amp-iframe/amp-iframe.md#iframe-with-placeholder).
+ - Video and poster have to be served over HTTPS.
+ 
+
 ## Running ads from a custom domain
 
 AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
