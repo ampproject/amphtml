@@ -78,12 +78,25 @@ describe('sanitizeHtml', () => {
 
   it('should output "href" attribute', () => {
     expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
-        'a<a href="http://acme.com/">b</a>');
+        'a<a href="http://acme.com/" target="_top">b</a>');
   });
 
-  it('should default target to _top', () => {
-    expect(sanitizeHtml('<a>a</a><a target="">b</a>'))
-        .to.equal('<a target="_top">a</a><a target="_top">b</a>');
+  it('should default target to _top with href', () => {
+    expect(sanitizeHtml(
+        '<a href="">a</a>'
+        + '<a href="" target="">c</a>'
+        )).to.equal(
+        '<a href="" target="_top">a</a>'
+        + '<a href="" target="_top">c</a>');
+  });
+
+  it('should NOT default target to _top w/o href', () => {
+    expect(sanitizeHtml(
+        + '<a>b</a>'
+        +  '<a target="">d</a>'
+        )).to.equal(
+        + '<a>b</a>'
+        + '<a target="_top">d</a>');
   });
 
   it('should output a valid target', () => {
@@ -118,26 +131,26 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<a STYLE="color: red;">b</a>')).to.be.equal(
         'a<a>b</a>');
     expect(sanitizeHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="vbscript:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="data:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="DATA:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="<script">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="</script">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
   });
 
   it('should catch attribute value whitespace variations', () => {
     expect(sanitizeHtml('a<a href=" j\na\tv\ra s&#00;cript:alert">b</a>'))
-        .to.be.equal('a<a>b</a>');
+        .to.be.equal('a<a target="_top">b</a>');
   });
 
   it('should NOT output security-sensitive attributes', () => {

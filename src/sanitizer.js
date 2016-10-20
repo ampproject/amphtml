@@ -213,13 +213,16 @@ export function sanitizeHtml(html) {
         // - All other targets are rewritted to "_top".
         if (tagName == 'a') {
           let index = -1;
+          let hasHref = false;
           for (let i = 0; i < savedAttribs.length; i += 2) {
             if (savedAttribs[i] == 'target') {
               index = i + 1;
-              break;
+            } else if (savedAttribs[i] == 'href') {
+              // Only allow valid `href` values.
+              hasHref = attribs[i + 1] != null;
             }
           }
-          let origTarget = savedAttribs[index];
+          let origTarget = index != -1 ? savedAttribs[index] : null;
           if (origTarget != null) {
             origTarget = origTarget.toLowerCase();
             if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
@@ -227,7 +230,7 @@ export function sanitizeHtml(html) {
             } else {
               attribs[index] = '_top';
             }
-          } else {
+          } else if (hasHref) {
             attribs.push('target');
             attribs.push('_top');
           }
