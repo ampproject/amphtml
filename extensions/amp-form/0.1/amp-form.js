@@ -21,7 +21,7 @@ import {
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
 } from '../../../src/url';
-import {user, rethrowAsync} from '../../../src/log';
+import {dev, user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
@@ -211,9 +211,12 @@ export class AmpForm {
         this.renderTemplate_(error.responseJson || {});
         rethrowAsync('Form submission failed:', error);
       });
-    } else if (this.target_ == '_top' && this.method_ == 'POST') {
-      this.cleanupRenderedTemplate_();
-      this.setState_(FormState_.SUBMITTING);
+    } else if (this.method_ == 'POST') {
+      e.preventDefault();
+      user().assert(false,
+          'Only XHR based (via action-xhr attribute) submissions are support ' +
+          'for POST requests. %s',
+          this.form_);
     }
   }
 
@@ -418,7 +421,7 @@ function checkUserValidity(element, propagate = false) {
  * @private visible for testing.
  */
 export function onInputInteraction_(e) {
-  const input = /** @type {!Element} */ (e.target);
+  const input = dev().assertElement(e.target);
   checkUserValidity(input, /* propagate */ true);
 }
 

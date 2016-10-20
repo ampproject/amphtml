@@ -31,12 +31,14 @@ import {
 import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
+import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
 describe('UrlReplacements', () => {
 
+  let canonical;
   let sandbox;
   let loadObservable;
   let replacements;
@@ -44,6 +46,7 @@ describe('UrlReplacements', () => {
   let userErrorStub;
 
   beforeEach(() => {
+    canonical = 'https://canonical.com/doc1';
     sandbox = sinon.sandbox.create();
     userErrorStub = sandbox.stub(user(), 'error');
   });
@@ -114,11 +117,17 @@ describe('UrlReplacements', () => {
       },
       document: {
         nodeType: /* document */ 9,
-        querySelector: () => {return {href: 'https://example.com/doc1'};},
+        querySelector: () => {return {href: canonical};},
+        cookie: '',
       },
       Math: window.Math,
       services: {
         'viewport': {obj: {}},
+        'cid': {
+          promise: Promise.resolve({
+            get: config => Promise.resolve('test-cid(' + config.scope + ')'),
+          }),
+        },
       },
     };
     win.document.defaultView = win;
@@ -222,6 +231,21 @@ describe('UrlReplacements', () => {
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
           expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
+  });
+
+  it('should replace CLIENT_ID synchronously when available', () => {
+    return getReplacements({withCid: true}).then(urlReplacements => {
+      setCookie(window, 'url-abc', 'cid-for-abc');
+      setCookie(window, 'url-xyz', 'cid-for-xyz');
+      // Only requests cid-for-xyz in async path
+      return urlReplacements.expandAsync('b=CLIENT_ID(url-xyz)').then(res => {
+        expect(res).to.equal('b=cid-for-xyz');
+      }).then(() => {
+        const result = urlReplacements.expandSync(
+            '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)&c=CLIENT_ID(other)');
+        expect(result).to.equal('?a=&b=cid-for-xyz&c=');
+      });
+    });
   });
 
   it('should replace VARIANT', () => {
@@ -892,6 +916,109 @@ describe('UrlReplacements', () => {
             expect(res).to.match(/a=;/);
             expect(userErrorStub.callCount).to.equal(1);
           });
+    });
+  });
+
+  describe('link expansion', () => {
+    let urlReplacements;
+    let a;
+    let win;
+
+    beforeEach(() => {
+      a = document.createElement('a');
+      win = getFakeWindow();
+      win.location = parseUrl('https://example.com/base?foo=bar&bar=abc');
+      urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      toggleExperiment(win, 'link-url-replace', true);
+    });
+
+    it('should replace href', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=bar');
+    });
+
+    it('should replace href 2x', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=bar');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=bar');
+    });
+
+    it('should not do anything with experiment off', () => {
+      toggleExperiment(win, 'link-url-replace', false);
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should replace href 2', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)&' +
+          'out2=QUERY_PARAM(bar)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=bar&out2=abc');
+    });
+
+    it('has nothing to replace', () => {
+      a.href = 'https://example.com/link';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link');
+    });
+
+    it('should not replace without user whitelisting', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should not replace without user whitelisting 2', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'ABC');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should not replace unwhitelisted fields', () => {
+      a.href = 'https://example.com/link?out=RANDOM';
+      a.setAttribute('data-amp-replace', 'RANDOM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link?out=RANDOM');
+    });
+
+    it('should replace with canonical origin', () => {
+      a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://canonical.com/link?out=bar');
+    });
+
+    it('should not replace to different origin', () => {
+      a.href = 'https://example2.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal(
+          'https://example2.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should replace CID', () => {
+      a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM,CLIENT_ID');
+      // No replacement without previous async replacement
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal(
+            'https://canonical.com/link?out=bar&c=');
+      // Get a cid, then proceed.
+      return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
+        urlReplacements.maybeExpandLink(a);
+        expect(a.href).to.equal(
+            'https://canonical.com/link?out=bar&c=test-cid(abc)');
+      });
     });
   });
 });

@@ -158,6 +158,24 @@ export const VideoEvents = {
   LOAD: 'load',
 
   /**
+   * play
+   *
+   * Fired when the video plays.
+   *
+   * @event play
+   */
+  PLAY: 'play',
+
+  /**
+   * pause
+   *
+   * Fired when the video pauses.
+   *
+   * @event pause
+   */
+  PAUSE: 'pause',
+
+  /**
    * amp:video:usertap
    *
    * Fired when user taps any part of the video player.
