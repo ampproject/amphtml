@@ -876,10 +876,10 @@ export class Viewer {
           if (!hash) {
             return '';
           }
+          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
+              'should start with #');
           /* Strip leading '#' */
-          if (hash.indexOf('#') == 0) {
-            hash = hash.substr(1);
-          }
+          hash = hash.substr(1);
           return hash;
         });
   }

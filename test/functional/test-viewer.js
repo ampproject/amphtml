@@ -251,10 +251,25 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
       expect(name).to.equal('fragment');
-      return Promise.resolve('from-viewer');
+      return Promise.resolve('#from-viewer');
     });
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
+    });
+  });
+
+  it('should NOT get fragment in embedded mode ' +
+      'if the viewer has capability of getting fragment, ' +
+      'but fragment from the viewer does not start with #', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo&cap=fragment';
+    const viewer = new Viewer(ampdoc);
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    send.onFirstCall().returns(Promise.resolve('from-viewer'));
+    return viewer.getFragment().then(() => {
+      throw new Error('should not happen');
+    }, error => {
+      expect(error.message).to.match(/should start with #/);
     });
   });
 
