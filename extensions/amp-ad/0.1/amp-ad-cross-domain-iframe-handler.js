@@ -108,7 +108,7 @@ export class AmpAdXDomainIframeHandler {
     } else if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
-      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
+      this.adResponsePromise_ = listenForOncePromise(this.iframe,
         ['render-start', 'no-content'], this.is3p_).then(info => {
           const data = info.data;
           if (data.type == 'render-start') {
@@ -121,9 +121,9 @@ export class AmpAdXDomainIframeHandler {
     } else {
       // If NOT support render-start, listen to bootstrap-loaded no-content
       // respectively
-      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
+      this.adResponsePromise_ = listenForOncePromise(this.iframe,
         'bootstrap-loaded', this.is3p_);
-      listenForOncePromise(this.iframe_, 'no-content', this.is3p_)
+      listenForOncePromise(this.iframe, 'no-content', this.is3p_)
           .then(() => this.noContent_());
     }
 
@@ -138,15 +138,15 @@ export class AmpAdXDomainIframeHandler {
     }));
 
     this.element_.appendChild(this.iframe);
-    return loadPromise(this.iframe_).then(() => {
+    return loadPromise(this.iframe).then(() => {
       return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
           this.adResponsePromise_,
           'timeout waiting for ad response').catch(e => {
             this.noContent_();
             user().warn('amp-ad', e);
           }).then(() => {
-            if (this.iframe_) {
-              this.iframe_.style.visibility = '';
+            if (this.iframe) {
+              this.iframe.style.visibility = '';
             }
           });
     });
