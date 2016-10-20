@@ -38,7 +38,7 @@ export class AmpAdApiHandler {
    */
   constructor(baseInstance, element, opt_noContentCallback) {
 
-    /** @private {!./amp-ad-3p-impl.AmpAd3PImpl|../../amp-a4a/0.1/amp-a4a.AmpA4A}*/
+    /** @private {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A}*/
     this.baseInstance_ = baseInstance;
 
     /** @private {!Element} */
