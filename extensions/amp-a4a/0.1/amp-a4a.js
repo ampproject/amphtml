@@ -161,7 +161,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
-    /** @public {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
+    /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
     this.lifecycleReporter = getLifecycleReporter(this, 'a4a');
     // Note: The reporting ping should be the last action in the constructor.
     this.lifecycleReporter.sendPing('adSlotBuilt');
