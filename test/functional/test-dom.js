@@ -688,7 +688,7 @@ describe('DOM', () => {
     it('should not throw exception if element focus throws exception', () => {
       const element = {
         focus() {
-          throw 'Cannot focus';
+          throw new Error('Cannot focus');
         },
       };
       const focusSpy = sandbox.spy(element, 'focus');
