@@ -28,7 +28,7 @@ import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
 const FRAME_TIME = 16;
 
 /**
- * @typedef {Object<string, *>}
+ * @typedef {!Object<string, *>}
  */
 let VsyncStateDef;
 
@@ -420,10 +420,11 @@ export class Vsync {
 
 /**
  * For optimization reasons to stop try/catch from blocking optimization.
- * @param {function(!VsyncStateDef)} callback
+ * @param {function(!VsyncStateDef)|undefined} callback
  * @param {!VsyncStateDef} state
  */
 function callTaskNoInline(callback, state) {
+  dev().assert(callback);
   try {
     callback(state);
   } catch (e) {
