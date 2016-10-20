@@ -32,6 +32,7 @@ describe('Resources', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
   });
 
   afterEach(() => {
@@ -391,6 +392,7 @@ describe('Resources pause/resume/unlayout scheduling', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
     const parentTuple = createElementWithResource(1);
     parent = parentTuple[0];
     child0 = document.createElement('div');
@@ -580,6 +582,7 @@ describe('Resources schedulePreload', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
     const parentTuple = createElementWithResource(1);
     parent = parentTuple[0];
     placeholder = document.createElement('div');
@@ -1007,7 +1010,7 @@ describe('Resources changeSize', () => {
     const resource = new Resource(id, createElement(rect), resources);
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = rect;
+    resource.initialLayoutBox_ = resource.layoutBox_ = rect;
     resource.changeSize = sandbox.spy();
     return resource;
   }
@@ -1113,6 +1116,31 @@ describe('Resources changeSize', () => {
     resources.scheduleChangeSize_(resource1, 111, 222, true);
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+  });
+
+  it('should measure non-measured elements', () => {
+    resource1.initialLayoutBox_ = null;
+    resource1.measure = sandbox.spy();
+    resource2.measure = sandbox.spy();
+
+    resources.scheduleChangeSize_(resource1, 111, 200, true);
+    resources.scheduleChangeSize_(resource2, 111, 222, true);
+    expect(resource1.hasBeenMeasured()).to.be.false;
+    expect(resource2.hasBeenMeasured()).to.be.true;
+
+    // Not yet scheduled, will wait until vsync.
+    expect(resource1.measure).to.not.be.called;
+
+    // Scheduling is done after vsync.
+    resources.vsync_.runScheduledTasks_();
+    expect(resource1.measure).to.be.calledOnce;
+    expect(resource2.measure).to.not.be.called;
+
+    // Notice that the `resource2` was scheduled first since it didn't
+    // require vsync.
+    expect(resources.requestsChangeSize_).to.have.length(2);
+    expect(resources.requestsChangeSize_[0].resource).to.equal(resource2);
+    expect(resources.requestsChangeSize_[1].resource).to.equal(resource1);
   });
 
   describe('attemptChangeSize rules wrt viewport', () => {
@@ -1383,6 +1411,7 @@ describe('Resources mutateElement and collapse', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
       mutate: callback => callback(),
