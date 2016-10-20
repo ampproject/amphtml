@@ -161,9 +161,10 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
-    this.lifecycleReporter_ = getLifecycleReporter(this, 'a4a');
+    /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
+    this.lifecycleReporter = getLifecycleReporter(this, 'a4a');
     // Note: The reporting ping should be the last action in the constructor.
-    this.lifecycleReporter_.sendPing('adSlotBuilt');
+    this.lifecycleReporter.sendPing('adSlotBuilt');
   }
 
   /** @override */
@@ -296,7 +297,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing('urlBuilt');
+          this.lifecycleReporter.sendPing('urlBuilt');
           return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
@@ -314,7 +315,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
-          this.lifecycleReporter_.sendPing('adRequestEnd');
+          this.lifecycleReporter.sendPing('adRequestEnd');
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -342,7 +343,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(responseParts => {
           checkStillCurrent(promiseId);
           if (responseParts) {
-            this.lifecycleReporter_.sendPing('extractCreativeAndSignature');
+            this.lifecycleReporter.sendPing('extractCreativeAndSignature');
           }
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
@@ -365,7 +366,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts || !creativeParts.signature) {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
-          this.lifecycleReporter_.sendPing('adResponseValidateStart');
+          this.lifecycleReporter.sendPing('adResponseValidateStart');
 
           // For each signing service, we have exactly one Promise,
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
@@ -465,7 +466,7 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
-    this.lifecycleReporter_.sendPing('preAdThrottle');
+    this.lifecycleReporter.sendPing('preAdThrottle');
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error || !rendered) {
@@ -491,7 +492,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    this.lifecycleReporter_.sendPing('adSlotCleared');
+    this.lifecycleReporter.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
@@ -561,7 +562,7 @@ export class AmpA4A extends AMP.BaseElement {
    * publisher page.  To be overridden by network implementations as needed.
    */
   onAmpCreativeRender() {
-    this.lifecycleReporter_.sendPing('renderFriendlyEnd');
+    this.lifecycleReporter.sendPing('renderFriendlyEnd');
   }
 
   /**
@@ -571,7 +572,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   sendXhrRequest_(adUrl) {
-    this.lifecycleReporter_.sendPing('adRequestStart');
+    this.lifecycleReporter.sendPing('adRequestStart');
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
@@ -657,7 +658,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeRenderAmpAd_(bytes) {
-    this.lifecycleReporter_.sendPing('renderFriendlyStart');
+    this.lifecycleReporter.sendPing('renderFriendlyStart');
     // Timer id will be set if we have entered layoutCallback at which point
     // 3p throttling count was incremented.  We want to "release" the throttle
     // immediately since we now know we are not a 3p ad.
@@ -770,7 +771,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaCachedContentIframe_(adUrl, opt_isNonAmpCreative) {
-    this.lifecycleReporter_.sendPing('renderCrossDomainStart');
+    this.lifecycleReporter.sendPing('renderCrossDomainStart');
     /** @const {!Element} */
     const iframe = createElementWithAttributes(
         /** @type {!Document} */(this.element.ownerDocument),
@@ -792,7 +793,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaSafeFrame_(creativeBody) {
-    this.lifecycleReporter_.sendPing('renderSafeFrameStart');
+    this.lifecycleReporter.sendPing('renderSafeFrameStart');
     utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(

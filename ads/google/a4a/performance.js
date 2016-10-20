@@ -106,6 +106,9 @@ function isInReportableBranch(ampElement, namespace) {
   }
 }
 
+/**
+ * @return {!AmpAdLifecycleReporter|!NullLifecycleReporter}
+ */
 export function getLifecycleReporter(ampElement, namespace) {
   // Carve-outs: We only want to enable profiling pingbacks when:
   //   - The ad is from one of the Google networks (AdSense or Doubleclick).
