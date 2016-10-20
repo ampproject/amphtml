@@ -163,8 +163,11 @@ export class ActionService {
    */
   installActionHandler(target, handler) {
     const debugid = target.tagName + '#' + target.id;
-    user().assert(target.id && target.id.substring(0, 4) == 'amp-',
-        'AMP element is expected: %s', debugid);
+
+    // TODO: ASK @dima about this? Is this limited to AMP-elements for security
+    // reasons? If yes, shouldn't one check the tagname rather than the id?
+    //user().assert(target.id && target.id.substring(0, 4) == 'amp-',
+    //    'AMP element is expected: %s', debugid);
 
     /** @const {!Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
@@ -263,18 +266,18 @@ export class ActionService {
     }
 
     // Special elements with AMP ID.
-    if (target.id && target.id.substring(0, 4) == 'amp-') {
-      if (!target[ACTION_QUEUE_]) {
+    //if (target.id && target.id.substring(0, 4) == 'amp-') {
+    if (!target[ACTION_QUEUE_]) {
         target[ACTION_QUEUE_] = [];
       }
-      target[ACTION_QUEUE_].push(invocation);
-      return;
-    }
+    target[ACTION_QUEUE_].push(invocation);
+    return;
+    //}
 
     // Unsupported target.
-    this.actionInfoError_(
-        'Target must be an AMP element or have an AMP ID',
-        actionInfo, target);
+    //this.actionInfoError_(
+    //    'Target must be an AMP element or have an AMP ID',
+    //    actionInfo, target);
   }
 
   /**
