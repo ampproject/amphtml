@@ -67,6 +67,7 @@ class AmpLightbox extends AMP.BaseElement {
       this.container_.appendChild(child);
     });
 
+    this.registerAction('open', this.activate.bind(this));
     this.registerAction('close', this.close.bind(this));
 
     const gestures = Gestures.get(this.element);
