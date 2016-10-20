@@ -81,12 +81,34 @@ describe('sanitizeHtml', () => {
         'a<a href="http://acme.com/">b</a>');
   });
 
-  it('sanitizes out the "target" attribute', () => {
-    // TODO(dvoytenko, #1572): Confirm if the target actually needs to be
-    // sanitized.
-    // See https://github.com/google/caja/issues/1991.
-    expect(sanitizeHtml('a<a target="_blank">b</a>')).to.be.equal(
-        'a<a target="">b</a>');
+  it('should default target to _top', () => {
+    expect(sanitizeHtml('<a>a</a><a target="">b</a>'))
+        .to.equal('<a target="_top">a</a><a target="_top">b</a>');
+  });
+
+  it('should output a valid target', () => {
+    expect(sanitizeHtml('<a target="_top">a</a><a target="_blank">b</a>'))
+        .to.equal('<a target="_top">a</a><a target="_blank">b</a>');
+  });
+
+  it('should output a valid target in different case', () => {
+    expect(sanitizeHtml('<a target="_TOP">a</a><a target="_BLANK">b</a>'))
+        .to.equal('<a target="_top">a</a><a target="_blank">b</a>');
+  });
+
+  it('should override a unallowed target', () => {
+    expect(sanitizeHtml(
+        '<a target="_self">_self</a>'
+        + '<a target="_parent">_parent</a>'
+        + '<a target="_other">_other</a>'
+        + '<a target="_OTHER">_OTHER</a>'
+        + '<a target="other">other</a>'
+        )).to.equal(
+        '<a target="_top">_self</a>'
+        + '<a target="_top">_parent</a>'
+        + '<a target="_top">_other</a>'
+        + '<a target="_top">_OTHER</a>'
+        + '<a target="_top">other</a>');
   });
 
   it('should NOT output security-sensitive attributes', () => {
