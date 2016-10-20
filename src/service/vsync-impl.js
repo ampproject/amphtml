@@ -379,7 +379,7 @@ export class Vsync {
           tasks[i].measure(states[i]);
         } catch (e) {
           // Ensure that the mutate is not executed when measure fails.
-          tasks[i].mutate = null;
+          tasks[i].mutate = undefined;
           rethrowAsync(e);
         }
       }
