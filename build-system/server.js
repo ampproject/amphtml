@@ -431,7 +431,7 @@ app.use(['/examples/*', '/extensions/*'], function (req, res, next) {
   next();
 });
 
-app.get('/examples/*', function(req, res, next) {
+app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
   var mode = getPathMode(filePath);
   if (!mode) {
