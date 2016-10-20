@@ -121,7 +121,7 @@ describe('amp-fx-flying-carpet', () => {
       const container = flyingCarpet.firstChild.firstChild;
       let width = 10;
 
-      impl.vsync_.mutate = function(callback) {
+      impl.getVsync().mutate = function(callback) {
         callback();
       };
       impl.getLayoutWidth = () => width;
