@@ -15,12 +15,17 @@
  */
 
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {ampdocFor} from './ampdoc';
+import {ampdocServiceFor} from './ampdoc';
 import {dev} from './log';
-import {escapeCssSelectorIdent} from './dom';
+import {closestNode, escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
 import {insertStyleElement} from './style-installer';
 
+/**
+ * Used for non-composed root-node search. See `getRootNode`.
+ * @const {!GetRootNodeOptions}
+ */
+const UNCOMPOSED_SEARCH = {composed: false};
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
@@ -85,6 +90,7 @@ export function createShadowRoot(hostElement) {
  */
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
+  /** @const {!Window} */
   const win = doc.defaultView;
   const shadowRoot = /** @type {!ShadowRoot} */ (
       // Cast to ShadowRoot even though it is an Element
@@ -96,10 +102,8 @@ function createShadowRootPolyfill(hostElement) {
 
   // API: https://www.w3.org/TR/shadow-dom/#the-shadowroot-interface
 
-  /** @type {!Element} */
   shadowRoot.host = hostElement;
 
-  /** @type {function (this:ShadowRoot, string): ?HTMLElement} */
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
@@ -107,6 +111,39 @@ function createShadowRootPolyfill(hostElement) {
   };
 
   return shadowRoot;
+}
+
+
+/**
+ * Determines if value is actually a `ShadowRoot` node.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isShadowRoot(value) {
+  if (!value) {
+    return false;
+  }
+  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
+  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
+  if (value.tagName == 'I-AMP-SHADOW-ROOT') {
+    return true;
+  }
+  return (value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
+      Object.prototype.toString.call(value) === '[object ShadowRoot]');
+}
+
+
+/**
+ * Return shadow root for the specified node.
+ * @param {!Node} node
+ * @return {?ShadowRoot}
+ */
+export function getShadowRootNode(node) {
+  if (isShadowDomSupported() && Node.prototype.getRootNode) {
+    return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
+  }
+  // Polyfill shadow root lookup.
+  return /** @type {?ShadowRoot} */ (closestNode(node, n => isShadowRoot(n)));
 }
 
 
@@ -121,8 +158,9 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
   shadowRoot.AMP = {};
 
   const win = hostElement.ownerDocument.defaultView;
+  /** @const {!./service/extensions-impl.Extensions} */
   const extensions = extensionsFor(win);
-  const ampdocService = ampdocFor(win);
+  const ampdocService = ampdocServiceFor(win);
   const ampdoc = ampdocService.getAmpDoc(hostElement);
 
   // Instal runtime CSS.
@@ -253,7 +291,10 @@ export function scopeShadowCss(shadowRoot, css) {
   }
 
   // Patch selectors.
-  return ShadowCSS.scopeRules(rules, `#${id}`, transformRootSelectors);
+  // Invoke `ShadowCSS.scopeRules` via `call` because the way it uses `this`
+  // internally conflicts with Closure compiler's advanced optimizations.
+  const scopeRules = ShadowCSS.scopeRules;
+  return scopeRules.call(ShadowCSS, rules, `#${id}`, transformRootSelectors);
 }
 
 

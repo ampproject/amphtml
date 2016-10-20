@@ -177,7 +177,7 @@
       margin: 3px 0;
     }
 
-    amp-app-banner a {
+    amp-app-banner button {
       padding: 8px;
       margin-right: 10px;
     }
@@ -225,6 +225,9 @@
         <li><a href="#">Link 2</a></li>
         <li><a href="#">Link 3</a></li>
         <li><a href="#">Link 4</a></li>
+        <li><a href="#section1">Section 1</a></li>
+        <li><a href="#section2">Section 2</a></li>
+        <li><a href="#section3">Section 3</a></li>
       </ul>
     </nav>
   </amp-sidebar>
@@ -238,7 +241,7 @@
       </div>
     </div>
     <div class="actions">
-      <a open-link>Open in app</a>
+      <button open-button>Open in app</button>
     </div>
   </amp-app-banner>
 
@@ -268,8 +271,10 @@
             src="img/hero@1x.jpg"
             srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
-            alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="216" on="tap:headline-img-lightbox" role="img" tabindex="0">
+            alt="Picture of two chairs on a lake shore with big pine trees"
+            title="Opens image in a lightbox"
+            role="button" on="tap:headline-img-lightbox"
+            height="216" tabindex="0">
         </amp-img>
       </figure>
 
@@ -280,6 +285,7 @@
           <amp-img id="floating-headline-img"
               src="img/hero@1x.jpg"
               srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
+              alt="Two chairs on a lake shore with big pine trees"
               placeholder
               width="360" height="216" layout="responsive">
           </amp-img>
@@ -290,6 +296,10 @@
       </amp-lightbox>
 
       <div class="content-container">
+        <ul>
+          <li><a href="#section1">Section 1</a></li>
+          <li><a href="#section2">Section 2</a></li>
+        </ul>
         <header>
           <h1 itemprop="headline">Lorem Ipsum</h1>
           <time class="header-time" itemprop="datePublished"
@@ -358,7 +368,7 @@
             ac molestie nulla porttitor ac. Donec porta risus ut enim
             pellentesque, id placerat elit ornare.
           </p>
-          <p>
+          <p id="section1">
             Curabitur convallis, urna quis pulvinar feugiat, purus diam
             posuere turpis, sit amet tincidunt purus justo et mi. Donec
             sapien urna, aliquam ut lacinia quis, varius vitae ex.
@@ -408,7 +418,7 @@
             </amp-ad>
           </div>
 
-          <p>
+          <p id="section2">
             Morbi at velit vitae eros congue congue venenatis non dui.
             Sed lacus sem, feugiat sed elementum sed, maximus sed lacus.
             Integer accumsan magna in sagittis pharetra. Class aptent taciti

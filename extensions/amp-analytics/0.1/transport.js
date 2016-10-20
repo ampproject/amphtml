@@ -33,7 +33,7 @@ const TAG_ = 'amp-analytics.Transport';
  * @param {!Object<string, string>} transportOptions
  */
 export function sendRequest(win, request, transportOptions) {
-  assertHttpsUrl(request);
+  assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
   if (transportOptions['beacon'] &&
       Transport.sendRequestUsingBeacon(win, request)) {
@@ -97,6 +97,7 @@ export class Transport {
     if (!win.XMLHttpRequest) {
       return false;
     }
+    /** @const {XMLHttpRequest} */
     const xhr = new win.XMLHttpRequest();
     if (!('withCredentials' in xhr)) {
       return false; // Looks like XHR level 1 - CORS is not supported.
@@ -108,7 +109,7 @@ export class Transport {
     xhr.setRequestHeader('Content-Type', 'text/plain');
 
     xhr.onreadystatechange = () => {
-      if (xhr.readystate == 4) {
+      if (xhr.readyState == 4) {
         dev().fine(TAG_, 'Sent XHR request', request);
       }
     };
@@ -127,7 +128,8 @@ export class Transport {
  * @param {string} request The request URL.
  */
 export function sendRequestUsingIframe(win, request) {
-  assertHttpsUrl(request);
+  assertHttpsUrl(request, 'amp-analytics request');
+  /** @const {!Element} */
   const iframe = win.document.createElement('iframe');
   iframe.style.display = 'none';
   iframe.onload = iframe.onerror = () => {

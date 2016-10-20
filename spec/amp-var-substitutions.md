@@ -24,6 +24,14 @@ in the relevant URLs. AMP provides a number of standard variable substitutions a
 allows each component to add their own. The rest of this document talks about
 the variables supported by the platform.
 
+Anchor href's that are the target (or have a child who is the target) of a click
+are synchronously expanded.  Variables below that are asynchronous by nature
+are replaced with empty string to ensure page navigation is not delayed.  If
+the navigation is prevented, the href is still updated however later clicks
+will still update to the most current values of the variables.  Note that some
+variables will not allow for expansion for A4A creatives.  Specifics will be
+addressed at a later time.
+
 ## Page and Content
 
 ### AMPDOC_HOST
@@ -433,6 +441,12 @@ For instance:
 Provides the total time the user has been enagaged with the page since the page
 first became visible in the viewport. Total engaged time will be 0 until the
 page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+
+### BACKGROUND_STATE
+
+When used, will provide the current background state of the page.
+
+Possible values are 0, the page is visible, or 1, the page is backgrounded.
 
 ## Access
 

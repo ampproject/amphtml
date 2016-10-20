@@ -41,8 +41,10 @@ export function waitForChild(parent, checkFunc, callback) {
     callback();
     return;
   }
+  /** @const {!Window} */
   const win = parent.ownerDocument.defaultView;
   if (win.MutationObserver) {
+    /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -51,6 +53,7 @@ export function waitForChild(parent, checkFunc, callback) {
     });
     observer.observe(parent, {childList: true});
   } else {
+    /** @const {number} */
     const interval = win.setInterval(() => {
       if (checkFunc(parent)) {
         win.clearInterval(interval);
@@ -63,6 +66,8 @@ export function waitForChild(parent, checkFunc, callback) {
 
 /**
  * Waits for document's body to be available.
+ * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
+ * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
@@ -80,39 +85,6 @@ export function waitForBodyPromise(doc) {
   return new Promise(resolve => {
     waitForBody(doc, resolve);
   });
-}
-
-
-/**
- * Whether the element is currently contained in the DOM. Polyfills
- * `document.contains()` method when necessary. Notice that according to spec
- * `document.contains` is inclusionary.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- */
-export function documentContains(doc, element) {
-  if (!doc.contains) {
-    return documentContainsPolyfillInternal_(doc, element);
-  }
-  return doc.contains(element);
-}
-
-
-/**
- * Polyfill for `document.contains()` method.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- * @private Visible for testing only.
- */
-export function documentContainsPolyfillInternal_(doc, element) {
-  // Per spec, "contains" method is inclusionary
-  // i.e. `node.contains(node) == true`. However, we still need to test
-  // equality to the document itself.
-  return element == doc || doc.documentElement.contains(element);
 }
 
 
@@ -426,7 +398,7 @@ export function childElementsByTag(parent, tagName) {
  * @param {!Element} element
  * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
- * @param {string=} opt_paramPattern Regex pattern to match data attributes.
+ * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,

@@ -90,6 +90,8 @@
     <a href="#adstir">AdStir</a> |
     <a href="#adtech">AdTech</a> |
     <a href="#aduptech">Ad Up Technology</a> |
+    <a href="#advertserve">AdvertServe</a> |
+    <a href="#affiliateb">Affiliate-B</a> |
     <a href="#amoad">AMoAd</a> |
     <a href="#appnexus">App Nexus</a> |
     <a href="#atomx">Atomx</a> |
@@ -105,21 +107,27 @@
     <a href="#flite">Flite</a> |
     <a href="#genieessp"></a> |
     <a href="#gmossp" class="broken"></a> |
+    <a href="#ibillboard">iBILLBOARD</a> |
     <a href="#imobile">I-Mobile</a> |
     <a href="#industrybrains">Industrybrains</a> |
     <a href="#inmobi">InMobi</a> |
     <a href="#kargo">Kargo</a> |
+    <a href="#loka">LOKA</a> |
     <a href="#mads">MADS</a> |
     <a href="#mantis-display">MANTIS</a> |
     <a href="#mediaimpact">Media Impact</a> |
+    <a href="#meg">Meg</a> |
     <a href="#microad">MicroAd</a> |
+    <a href="#mixpo">Mixpo</a> |
     <a href="#nativo">Nativo</a> |
     <a href="#nend">Nend</a> |
+    <a href="#nokta">Nokta</a> |
     <a href="#openadstream">Open AdStream</a> |
     <a href="#openx">OpenX</a> |
     <a href="#plista">Plista</a> |
     <a href="#pubmine">Pubmine</a> |
     <a href="#pulsepoint" class="broken">PulsePoint</a> |
+    <a href="#purch">Purch</a> |
     <a href="#revcontent" class="broken">Revcontent</a> |
     <a href="#rubicon">Rubicon</a> |
     <a href="#sharethrough">Sharethrough</a> |
@@ -129,6 +137,7 @@
     <a href="#taboola">Taboola</a> |
     <a href="#teads">Teads</a> |
     <a href="#triplelift">TripleLift</a> |
+    <a href="#webediads">Webediads</a> |
     <a href="#weborama">Weborama</a> |
     <a href="#widespace">Widespace</a> |
     <a href="#yahoojp">YahooJP</a> |
@@ -136,6 +145,7 @@
     <a href="#yieldone">Yield One</a> |
     <a href="#yieldmo">Yieldmo</a> |
     <a href="#zergnet">ZergNet</a> |
+    <a href="#zucks">Zucks</a> |
   </nav>
 
   <div class="fixed">
@@ -273,6 +283,26 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="advertserve">AdvertServe</h2>
+  <amp-ad width=300 height=250
+          type="advertserve"
+          data-client="tester"
+          data-pid=0
+          data-zid=68>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="affiliateb">Affiliate-B</h2>
+  <amp-ad width=300 height=250
+      type="affiliateb"
+      data-afb_a="l44x-y174897c"
+      data-afb_p="g2m"
+      data-afb_t="i">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="amoad">AMoAd banner</h2>
   <amp-ad width="300" height="250"
       type="amoad"
@@ -397,10 +427,26 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="criteo">Criteo (0x0 fake ad)</h2>
+  <h2 id="criteo">Criteo Passback</h2>
+  <p>Due to ad targeting, the slot might not load ad.</p>
+
   <amp-ad width="300" height="250"
       type="criteo"
+      data-tagtype="passback"
       data-zone="314159">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Criteo RTA</h2>
+  <p>Due to ad targeting, the slot might not load ad.</p>
+
+  <amp-ad width="300" height="250"
+      type="criteo"
+      data-tagtype="rta"
+      data-slot="/2729856/iframe_test_new_tag"
+	  data-adserver="DFP"
+      data-networkid="1976">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -520,6 +566,12 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="ibillboard">iBillboard 300x250 banner</h2>
+  <amp-ad width="300" height="250"
+      type="ibillboard"
+      src="https://go.eu.bbelements.com/please/code?j-21414.1.5.6.0.0._blank">
+  </amp-ad>
+
   <h2 id="imobile">I-Mobile 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="imobile"
@@ -555,6 +607,14 @@
       data-site="_tt9gZ3qxCc2RCg6CADfLAAFR"
       data-slot="_vypM8bkVCf"
       data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="loka">LOKA</h2>
+  <amp-ad width="300" height="250"
+      type="loka"
+      data-unit-params='{"unit":"mvbanner","id":"YdzhBxTvKwZlLeeQ"}'>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -597,6 +657,14 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="meg">Meg</h2>
+  <amp-ad width="320" height="250"
+      type="meg"
+      data-code="6rc0ERhN75">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="microad">MicroAd 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="microad"
@@ -606,6 +674,15 @@
       data-ifa="${COMPASS_EXT_IFA}"
       data-appid="${COMPASS_EXT_APPID}"
       data-geo="${COMPASS_EXT_GEO}">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="mixpo">Mixpo</h2>
+  <amp-ad width="300" height="250"
+      type = "mixpo"
+      data-guid = "b0caf856-fd92-4adb-aaec-e91948c9ffc8"
+      data-subdomain = "www">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -624,6 +701,16 @@
   <amp-ad width="320" height="50"
       type="nend"
       data-nend_params='{"media":82,"site":58536,"spot":127513,"type":1,"oriented":1}'>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
+  <h2 id="nokta">Nokta</h2>
+  <amp-ad width="300" height="250"
+      type="nokta" 
+      data-category="izlesene_anasayfa" 
+      data-site="izlesene:anasayfa" 
+      data-zone="152541">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -694,6 +781,15 @@
       type="pulsepoint"
       data-pid="512379"
       data-tagid="472988">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="purch">Purch 300x250</h2>
+  <amp-ad width=300 height=250
+      type="purch"
+      data-pid="2882"
+      data-divid="rightcol_top">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -877,6 +973,19 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="webediads">Webediads</h2>
+  <div>It's a private ad network with strict ad targeting, hence very common to see a no-fill.</div>
+  <amp-ad width="300"
+          height="250"
+          type="webediads"
+          data-site="site_test"
+          data-page="amp"
+          data-position="middle"
+          data-query="amptest=1">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="zergnet">ZergNet</h2>
   <amp-embed width="780" height="100"
       heights="(max-width:645px) 100%, (max-width:845px) 31%, 23%"
@@ -886,6 +995,15 @@
     <div placeholder></div>
     <div fallback></div>
   </amp-embed>
+
+  <h2 id="zucks">Zucks</h2>
+  <amp-ad width="320" height="50"
+      type="zucks"
+      data-frame-id="_bda46cf5ac">
+     <div placeholder></div>
+     <div fallback></div>
+   </amp-ad>
+
 </amp-ad>
 </body>
 </html>

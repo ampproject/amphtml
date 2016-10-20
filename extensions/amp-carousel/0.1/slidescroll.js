@@ -16,10 +16,12 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {analyticsForOrNull} from '../../../src/analytics';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
+import {platformFor} from '../../../src/platform';
 import {timerFor} from '../../../src/timer';
 import {dev} from '../../../src/log';
 
@@ -87,6 +89,17 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {number} */
     this.previousScrollLeft_ = 0;
+
+    /** @private {!Array<?string>} */
+    this.dataSlideIdArr_ = [];
+
+    /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
+    this.analyticsPromise_ = null;
+
+    const platform = platformFor(this.win);
+
+    /** @private @const {boolean} */
+    this.isAndroidFF_ = platform.isAndroid() && platform.isFirefox();
   }
 
   /** @override */
@@ -95,6 +108,8 @@ export class AmpSlideScroll extends BaseSlides {
   }
   /** @override */
   buildSlides() {
+    this.analyticsPromise_ = analyticsForOrNull(this.win);
+
     this.vsync_ = this.getVsync();
 
     this.hasNativeSnapPoints_ = (
@@ -119,7 +134,9 @@ export class AmpSlideScroll extends BaseSlides {
       this.slidesContainer_.appendChild(end);
     }
 
-    this.slides_.forEach(slide => {
+    this.slides_.forEach((slide, index) => {
+      this.dataSlideIdArr_.push(
+          slide.getAttribute('data-slide-id') || index.toString());
       this.setAsOwner(slide);
       const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
@@ -136,12 +153,12 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
 
+    this.slidesContainer_.addEventListener(
+          'touchmove', this.touchMoveHandler_.bind(this));
+
     if (this.hasNativeSnapPoints_) {
       this.slidesContainer_.addEventListener(
           'touchend', this.touchEndHandler_.bind(this));
-
-      this.slidesContainer_.addEventListener(
-          'touchmove', this.touchMoveHandler_.bind(this));
     }
   }
 
@@ -156,6 +173,9 @@ export class AmpSlideScroll extends BaseSlides {
    */
   touchMoveHandler_() {
     this.clearAutoplay();
+    if (!this.hasNativeSnapPoints_) {
+      return;
+    }
     this.hasTouchMoved_ = true;
     if (this.touchEndTimeout_) {
       timerFor(this.win).cancel(this.touchEndTimeout_);
@@ -188,7 +208,11 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   onLayoutMeasure() {
     this.slideWidth_ = this.getLayoutWidth();
-
+    if (this.slideIndex_ !== null) {
+      // Reset scrollLeft on orientationChange.
+      this.slidesContainer_./*OK*/scrollLeft =
+          this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
+    }
     this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
@@ -252,9 +276,6 @@ export class AmpSlideScroll extends BaseSlides {
       timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
-    // TODO (sriram): clear autoplay timer on user scroll.
-    //    event.isTarget is set on non-user scrolls as well.
-
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
     if (!this.hasNativeSnapPoints_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
@@ -300,7 +321,7 @@ export class AmpSlideScroll extends BaseSlides {
     } else if (currentScrollLeft < 0) {
       // Direction = -1.
       this.elasticScrollState_ = -1;
-    } else if ((currentScrollLeft + this.slideWidth_) >= scrollWidth) {
+    } else if ((currentScrollLeft + this.slideWidth_) > scrollWidth) {
       // Direction = +1.
       this.elasticScrollState_ = 1;
     } else {
@@ -390,13 +411,19 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      // Make the container non scrollable to stop scroll events.
-      this.slidesContainer_.classList.add('-amp-no-scroll');
+      //TODO (camelburrito): Identify more platforms that dont require
+      // -amp-no-scroll.
+      if (!this.isAndroidFF_) {
+        // Make the container non scrollable to stop scroll events.
+        this.slidesContainer_.classList.add('-amp-no-scroll');
+      }
       // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlide_(newIndex);
       this.vsync_.mutate(() => {
-        // Make the container scrollable again to enable user swiping.
-        this.slidesContainer_.classList.remove('-amp-no-scroll');
+        if (!this.isAndroidFF_) {
+          // Make the container scrollable again to enable user swiping.
+          this.slidesContainer_.classList.remove('-amp-no-scroll');
+        }
         this.snappingInProgress_ = false;
       });
     });
@@ -445,19 +472,30 @@ export class AmpSlideScroll extends BaseSlides {
         this.schedulePreload(this.slides_[showIndex]);
       }
     });
+    this.slidesContainer_./*OK*/scrollLeft =
+        this.getScrollLeftForIndex_(newIndex);
+    this.triggerAnalyticsEvent_(newIndex);
+    this.slideIndex_ = newIndex;
+    this.hideRestOfTheSlides_(showIndexArr);
+    this.setControlsState();
+  }
+
+  /**
+   * Returns the scrollLeft position for a given slide index.
+   * @param {number} index Index of the slide to be displayed.
+   * @return {number}
+   * @private
+   */
+  getScrollLeftForIndex_(index) {
     // A max of 3 slides are displayed at a time - we show the first slide
     // (which is at scrollLeft 0) when slide 0 is requested - for all other
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if (!this.shouldLoop && newIndex == 0) {
+    if (!this.shouldLoop && index == 0) {
       newScrollLeft = 0;
     }
-
-    this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
-    this.slideIndex_ = newIndex;
-    this.hideRestOfTheSlides_(showIndexArr);
-    this.setControlsState();
+    return newScrollLeft;
   }
 
   /**
@@ -491,11 +529,13 @@ export class AmpSlideScroll extends BaseSlides {
    * @param {number} fromScrollLeft.
    * @param {number} toScrollLeft.
    * @return {!Promise}
+   * @private
    */
   animateScrollLeft_(fromScrollLeft, toScrollLeft) {
     if (fromScrollLeft == toScrollLeft) {
       return Promise.resolve();
     }
+    /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
     const duration = 80;
@@ -516,5 +556,47 @@ export class AmpSlideScroll extends BaseSlides {
     this.element.addEventListener('touchmove', event => {
       event.stopPropagation();
     });
+  }
+
+  /**
+   * @param {number} newSlideIndex
+   * @private
+   */
+  triggerAnalyticsEvent_(newSlideIndex) {
+    let direction = newSlideIndex - this.slideIndex_;
+    if (direction == 0) {
+      return;
+    } else if (Math.abs(direction) !== 1) {
+      // When the direction is not +1 or -1 (happens with loops)
+      // Set the correct direction.
+      direction = direction < 0 ? 1 : -1;
+    }
+    const vars = {
+      'fromSlide': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)],
+      'toSlide': this.dataSlideIdArr_[newSlideIndex],
+    };
+    this.analyticsEvent_('amp-carousel-change', vars);
+    // At this point direction can be only +1 or -1.
+    if (direction == 1) {
+      this.analyticsEvent_('amp-carousel-next', vars);
+    } else {
+      this.analyticsEvent_('amp-carousel-prev', vars);
+    }
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, vars) {
+    if (this.analyticsPromise_) {
+      this.analyticsPromise_.then(analytics => {
+        if (!analytics) {
+          return;
+        }
+        analytics.triggerEvent(eventType, vars);
+      });
+    }
   }
 }

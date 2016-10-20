@@ -78,9 +78,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     // amp-app-banner related validation discrepancies.
     /GENERAL_DISALLOWED_TAG script amp-app-banner.js/,
     /DISALLOWED_TAG amp-app-banner/,
-    /DISALLOWED_ATTR open-link a/,
-    /DISALLOWED_TAG amp-gfycat/,
-    /GENERAL_DISALLOWED_TAG script amp-gfycat/,
+    /DISALLOWED_ATTR open-button button/,
   ];
 
   const usedWhitelist = [];

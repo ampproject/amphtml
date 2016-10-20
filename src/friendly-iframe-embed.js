@@ -17,8 +17,10 @@
 import {escapeHtml} from './dom';
 import {extensionsFor} from './extensions';
 import {getTopWindow} from './service';
+import {isDocumentReady} from './document-ready';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './resources';
+import {rethrowAsync} from './log';
 
 
 /**
@@ -77,7 +79,9 @@ function isSrcdocSupported() {
  * @return {!Promise<FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec) {
+  /** @const {!Window} */
   const win = getTopWindow(iframe.ownerDocument.defaultView);
+  /** @const {!./service/extensions-impl.Extensions} */
   const extensions = extensionsFor(win);
 
   iframe.style.visibility = 'hidden';
@@ -96,13 +100,10 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
-  let readyPromise;
+  let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
-    // TODO(dvoytenko): Look for a way to get a faster call from here.
-    // Experiments show that the iframe's "load" event is consistently 50-100ms
-    // later than the contentWindow actually available.
-    readyPromise = loadPromise(iframe);
+    loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
   } else {
     iframe.src = 'about:blank';
@@ -110,18 +111,69 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
     const childDoc = iframe.contentWindow.document;
     childDoc.open();
     childDoc.write(html);
+    // With document.write, `iframe.onload` arrives almost immediately, thus
+    // we need to wait for child's `window.onload`.
+    loadedPromise = loadPromise(iframe.contentWindow);
     childDoc.close();
-    // Window is created synchornously in this case.
-    readyPromise = Promise.resolve();
   }
+
+  // Wait for document ready signal.
+  // This is complicated due to crbug.com/649201 on Chrome and a similar issue
+  // on Safari where newly created document's `readyState` immediately equals
+  // `complete`, even though the document itself is not yet available. There's
+  // no other reliable signal for `readyState` in a child window and thus
+  // we have to fallback to polling.
+  let readyPromise;
+  if (isIframeReady(iframe)) {
+    readyPromise = Promise.resolve();
+  } else {
+    readyPromise = new Promise(resolve => {
+      /** @const {number} */
+      const interval = win.setInterval(() => {
+        if (isIframeReady(iframe)) {
+          resolve();
+          win.clearInterval(interval);
+        }
+      }, /* milliseconds */ 5);
+
+      // For safety, make sure we definitely stop polling when child doc is
+      // loaded.
+      loadedPromise.catch(error => {
+        rethrowAsync(error);
+      }).then(() => {
+        resolve();
+        win.clearInterval(interval);
+      });
+    });
+  }
+
   return readyPromise.then(() => {
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        iframe.contentWindow, spec.extensionIds || []);
+        /** @type {!Window} */(iframe.contentWindow), spec.extensionIds || []);
     // Ready to be shown.
     iframe.style.visibility = '';
-    return new FriendlyIframeEmbed(iframe, spec);
+    return new FriendlyIframeEmbed(iframe, spec, loadedPromise);
   });
+}
+
+
+/**
+ * Returns `true` when iframe is ready.
+ * @param {!HTMLIFrameElement} iframe
+ * @return {boolean}
+ */
+function isIframeReady(iframe) {
+  // This is complicated due to crbug.com/649201 on Chrome and a similar issue
+  // on Safari where newly created document's `readyState` immediately equals
+  // `complete`, even though the document itself is not yet available. There's
+  // no other reliable signal for `readyState` in a child window and thus
+  // the best way to check is to see the contents of the body.
+  const childDoc = iframe.contentWindow && iframe.contentWindow.document;
+  return !!(childDoc &&
+      isDocumentReady(childDoc) &&
+      childDoc.body &&
+      childDoc.body.firstChild);
 }
 
 
@@ -202,16 +254,29 @@ export class FriendlyIframeEmbed {
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {!FriendlyIframeSpec} spec
+   * @param {!Promise} loadedPromise
    */
-  constructor(iframe, spec) {
+  constructor(iframe, spec, loadedPromise) {
     /** @const {!HTMLIFrameElement} */
     this.iframe = iframe;
 
     /** @const {!Window} */
-    this.win = iframe.contentWindow;
+    this.win = /** @type{!Window} */(iframe.contentWindow);
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
+
+    /** @private @const {!Promise} */
+    this.loadedPromise_ = loadedPromise;
+  }
+
+  /**
+   * Returns promise that will resolve when the child window has fully been
+   * loaded.
+   * @return {!Promise}
+   */
+  whenLoaded() {
+    return this.loadedPromise_;
   }
 
   /**

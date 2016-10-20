@@ -25,7 +25,7 @@ import {
   createIframePromise,
   poll,
 } from '../../../../testing/iframe';
-import {viewportFor} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/viewport';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -72,7 +72,7 @@ describe('amp-iframe', () => {
         iframe.iframe.style.height = opt_height;
       }
       const top = opt_top || '600px';
-      const viewport = viewportFor(iframe.win);
+      const viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
       i.style.position = 'absolute';
       if (attributes.position) {
@@ -171,6 +171,16 @@ describe('amp-iframe', () => {
       // unsupproted attributes
       expect(amp.iframe.getAttribute('longdesc')).to.be.null;
       expect(amp.iframe.getAttribute('marginwidth')).to.be.null;
+    });
+  });
+
+  it('should default frameborder to 0 if not set', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      width: 100,
+      height: 100,
+    }).then(amp => {
+      expect(amp.iframe.getAttribute('frameborder')).to.equal('0');
     });
   });
 
@@ -460,7 +470,7 @@ describe('amp-iframe', () => {
 
   it('should listen for embed-ready event', () => {
     const activateIframeSpy_ =
-        sandbox.spy(AmpIframe.prototype, 'activateIframe_');
+        sandbox./*OK*/spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({
       src: clickableIframeSrc,
       sandbox: 'allow-scripts allow-same-origin',

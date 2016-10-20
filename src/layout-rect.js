@@ -55,7 +55,7 @@ export function layoutRectLtwh(left, top, width, height) {
 /**
  * Creates a layout rect based on the DOMRect, e.g. obtained from calling
  * getBoundingClientRect.
- * @param {!Rect} rect
+ * @param {!ClientRect} rect
  * @return {!LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {
@@ -124,7 +124,8 @@ export function expandLayoutRect(rect, dw, dh) {
  * @return {!LayoutRectDef}
  */
 export function moveLayoutRect(rect, dx, dy) {
-  if (dx == 0 && dy == 0) {
+  if ((dx == 0 && dy == 0) ||
+      (rect.width == 0 && rect.height == 0)) {
     return rect;
   }
   return layoutRectLtwh(rect.left + dx, rect.top + dy,

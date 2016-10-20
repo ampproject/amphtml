@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {closestNode} from '../dom';
 import {dev} from '../log';
 import {
   getParentWindowFrameElement,
   getService,
 } from '../service';
-import {isShadowRoot} from '../types';
+import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {waitForBodyPromise} from '../dom';
 
@@ -103,24 +102,31 @@ export class AmpDocService {
    * instance is always returned. Otherwise, this method locates the `AmpDoc`
    * that contains the specified node and, if necessary, initializes it.
    *
-   * @param {!Node=} node
+   * @param {!Node=} opt_node
    * @return {!AmpDoc}
    */
-  getAmpDoc(node) {
+  getAmpDoc(opt_node) {
+    // Ensure that node is attached if specified. This check uses a new and
+    // fast `isConnected` API and thus only checked on platforms that have it.
+    // See https://www.chromestatus.com/feature/5676110549352448.
+    if (opt_node) {
+      dev().assert(
+          opt_node['isConnected'] === undefined ||
+          opt_node['isConnected'] === true,
+          'The node must be attached to request ampdoc.');
+    }
+
     // Single document: return it immediately.
     if (this.singleDoc_) {
       return this.singleDoc_;
     }
-    dev().assert(node);
+    dev().assert(opt_node);
     // Otherwise discover and possibly create the ampdoc.
-    let n = node;
+    let n = opt_node;
     while (n) {
       // A custom element may already have the reference to the ampdoc.
-      if (typeof n.getAmpDoc == 'function') {
-        const ampdoc = n.getAmpDoc();
-        if (ampdoc) {
-          return ampdoc;
-        }
+      if (n.ampdoc_) {
+        return n.ampdoc_;
       }
 
       // Traverse the boundary of a friendly iframe.
@@ -131,8 +137,7 @@ export class AmpDocService {
       }
 
       // Shadow doc.
-      // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
-      const shadowRoot = closestNode(n, n => isShadowRoot(n));
+      const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
         break;
       }
@@ -144,7 +149,7 @@ export class AmpDocService {
       n = shadowRoot.host;
     }
 
-    throw dev().createError('No ampdoc found for', node);
+    throw dev().createError('No ampdoc found for', opt_node);
   }
 
   /**
@@ -276,6 +281,15 @@ export class AmpDoc {
    */
   getElementById(id) {
     return this.getRootNode().getElementById(id);
+  }
+
+  /**
+   * Whether the node is currently contained in the DOM of the root.
+   * @param {?Node} node
+   * @return {boolean}
+   */
+  contains(node) {
+    return this.getRootNode().contains(node);
   }
 }
 

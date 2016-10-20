@@ -37,7 +37,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-ad">amp-ad.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-ad/">Annotated code example for amp-ad</a></td>
   </tr>
 </table>
 
@@ -93,6 +93,8 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdStir](../../ads/adstir.md)
 - [AdTech](../../ads/adtech.md)
 - [Ad Up Technology](../../ads/aduptech.md)
+- [AdvertServe](../../ads/advertserve.md)
+- [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
@@ -109,22 +111,28 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [GenieeSSP](../../ads/genieessp.md)
 - [GMOSSP](../../ads/gmossp.md)
 - [I-Mobile](../../ads/imobile.md)
+- [iBillboard](../../ads/ibillboard.md)
 - [Improve Digital](../../ads/improvedigital.md)
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
 - [Kargo](../../ads/kargo.md)
+- [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
 - [MediaImpact](../../ads/mediaimpact.md)
+- [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
+- [Mixpo](../../ads/mixpo.md)
 - [Nativo](../../ads/nativo.md)
 - [Nend](../../ads/nend.md)
+- [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [plista](../../ads/plista.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)
+- [Purch](../../ads/purch.md)
 - [Revcontent](../../ads/revcontent.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
@@ -140,6 +148,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Zucks](../../ads/zucks.md)
 
 ## Supported embed types
 

@@ -16,7 +16,7 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {xhrFor} from '../../../src/xhr';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
@@ -90,7 +90,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    */
   getIncomingFragment_() {
     dev().fine(TAG, 'getting incoming fragment');
-    return viewerFor(this.win).getFragment().then(fragment => {
+    return viewerForDoc(this.getAmpDoc()).getFragment().then(fragment => {
       const match = fragment.match(/\.([^&]*)/);
       return match ? match[1] : '';
     });
@@ -163,4 +163,8 @@ export class AmpShareTracking extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-share-tracking', AmpShareTracking);
+
+// Install the extension.
+AMP.extension('amp-share-tracking', AMP => {
+  AMP.registerElement('amp-share-tracking', AmpShareTracking);
+});

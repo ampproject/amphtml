@@ -30,12 +30,14 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {initLogConstructor, user} from '../src/log';
+import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
+import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
@@ -50,6 +52,8 @@ import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
+import {advertserve} from '../ads/advertserve';
+import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
@@ -62,26 +66,31 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
-import {fakead3p} from '../ads/fakead3p';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
+import {ibillboard} from '../ads/ibillboard';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {kargo} from '../ads/kargo';
+import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
+import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {mixpo} from '../ads/mixpo';
 import {nativo} from '../ads/nativo';
 import {nend} from '../ads/nend';
+import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {plista} from '../ads/plista';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
+import {purch} from '../ads/purch';
 import {revcontent} from '../ads/revcontent';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
@@ -99,8 +108,7 @@ import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
-
-initLogConstructor();
+import {zucks} from '../ads/zucks';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -114,8 +122,15 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
 };
 
-// used for extracting fakead3p from production code.
-const IS_DEV = true;
+const data = parseFragment(location.hash);
+window.context = data._context;
+
+// This should only be invoked after window.context is set
+initLogConstructor();
+
+if (getMode().test || getMode().localDev) {
+  register('_ping_', _ping_);
+}
 
 // Keep the list in alphabetic order
 register('a9', a9);
@@ -132,6 +147,8 @@ register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
+register('advertserve', advertserve);
+register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
@@ -148,24 +165,30 @@ register('facebook', facebook);
 register('flite', flite);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
+register('ibillboard', ibillboard);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('kargo', kargo);
+register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
+register('meg', meg);
 register('microad', microad);
+register('mixpo', mixpo);
 register('nativo', nativo);
 register('nend', nend);
+register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
 register('plista', plista);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
+register('purch', purch);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
@@ -184,10 +207,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
-
-register('_ping_', function(win, data) {
-  win.document.getElementById('c').textContent = data.ping;
-});
+register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -280,8 +300,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
-    const data = parseFragment(location.hash);
-    window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
@@ -301,10 +319,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
-
-    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
-      register('fakead3p', fakead3p);
-    }
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the

@@ -17,14 +17,14 @@
 import {Layout} from '../../../src/layout';
 import {user, dev, rethrowAsync} from '../../../src/log';
 import {platformFor} from '../../../src/platform';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
 import {assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement, openWindowDialog} from '../../../src/dom';
-import {storageFor} from '../../../src/storage';
+import {storageForDoc} from '../../../src/storage';
 import {timerFor} from '../../../src/timer';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
@@ -34,9 +34,21 @@ const TAG = 'amp-app-banner';
 
 
 /**
- * @private visible for testing.
+ * visible for testing.
+ * @abstract
  */
 export class AbstractAppBanner extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @protected {?Element} */
+    this.openButton_ = null;
+
+    /** @protected {boolean} */
+    this.canShowBuiltinBanner_ = false;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -44,15 +56,15 @@ export class AbstractAppBanner extends AMP.BaseElement {
   }
 
   /** @protected */
-  setupOpenLink_(openLink, openInAppUrl, installAppUrl) {
-    openLink.addEventListener('click', () => {
-      this.openLinkClicked_(openInAppUrl, installAppUrl);
+  setupOpenButton_(openButton, openInAppUrl, installAppUrl) {
+    openButton.addEventListener('click', () => {
+      this.openButtonClicked_(openInAppUrl, installAppUrl);
     });
   }
 
 
   /** @private */
-  openLinkClicked_(openInAppUrl, installAppUrl) {
+  openButtonClicked_(openInAppUrl, installAppUrl) {
     // This redirect-after-timeout workaround will trigger if the user has not
     // been already navigated away to the app itself. This will only trigger
     // if the user doesn't have the app installed and will redirect the user
@@ -94,12 +106,12 @@ export class AbstractAppBanner extends AMP.BaseElement {
    */
   onDismissButtonClick_() {
     this.getVsync().run({
-      measure: null,
+      measure: undefined,
       mutate: handleDismiss,
     }, {
       element: this.element,
       viewport: this.getViewport(),
-      storagePromise: storageFor(this.win),
+      storagePromise: storageForDoc(this.getAmpDoc()),
       storageKey: this.getStorageKey_(),
     });
   }
@@ -113,7 +125,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @protected */
   isDismissed() {
-    return storageFor(this.win)
+    return storageForDoc(this.getAmpDoc())
         .then(storage => storage.get(this.getStorageKey_()))
         .then(persistedValue => !!persistedValue, reason => {
           dev().error(TAG, 'Failed to read storage', reason);
@@ -139,7 +151,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
   /** @protected */
   hide_() {
     return this.getVsync().runPromise({
-      measure: null,
+      measure: undefined,
       mutate: hideBanner,
     }, {
       element: this.element,
@@ -164,9 +176,16 @@ export class AbstractAppBanner extends AMP.BaseElement {
  */
 export class AmpAppBanner extends AbstractAppBanner {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {boolean} */
+    this.isExperimentOn_ = false;
+  }
+
   /** @override */
   upgradeCallback() {
-    /** @private @const {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
       return null;
@@ -183,8 +202,6 @@ export class AmpAppBanner extends AbstractAppBanner {
 
   /** @override */
   layoutCallback() {
-    /** @private @const {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
       user().warn(TAG, `Experiment ${TAG} disabled`);
       return Promise.resolve();
@@ -201,9 +218,24 @@ export class AmpAppBanner extends AbstractAppBanner {
  */
 export class AmpIosAppBanner extends AbstractAppBanner {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://itunes.apple.com', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.metaTag_ = null;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    // Ensure the element is in DOM since it removes itself in some cases.
+    if (!this.element.parentNode) {
+      return;
+    }
+    this.preconnect.url('https://itunes.apple.com', opt_onLayout);
   }
 
   /** @override */
@@ -216,8 +248,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     // We want to fallback to browser builtin mechanism when possible.
     const platform = platformFor(this.win);
-    const viewer = viewerFor(this.win);
-    /** @private @const {boolean} */
+    const viewer = viewerForDoc(this.getAmpDoc());
     this.canShowBuiltinBanner_ = !viewer.isEmbedded() && platform.isSafari();
     if (this.canShowBuiltinBanner_) {
       dev().info(TAG,
@@ -226,7 +257,6 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    /** @private @const {?Element} */
     this.metaTag_ = this.win.document.head.querySelector(
         'meta[name=apple-itunes-app]');
     if (!this.metaTag_) {
@@ -234,9 +264,9 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    /** @private @const {!Element} */
-    this.openLink_ = user().assert(this.element.querySelector('a[open-link]'),
-        '<a open-link> is required inside %s: %s', TAG, this.element);
+    this.openButton_ = user().assert(
+        this.element.querySelector('button[open-button]'),
+        '<button open-button> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
   }
@@ -271,7 +301,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const openUrl = config['app-argument'];
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenLink_(this.openLink_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
   }
 }
 
@@ -281,9 +311,30 @@ export class AmpIosAppBanner extends AbstractAppBanner {
  */
 export class AmpAndroidAppBanner extends AbstractAppBanner {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://play.google.com', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLLinkElement} */
+    this.manifestLink_ = null;
+
+    /** @private {string} */
+    this.manifestHref_ = '';
+
+    /** @private {boolean} */
+    this.missingDataSources_ = false;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    // Ensure the element is in DOM since it removes itself in some cases.
+    if (!this.element.parentNode) {
+      return;
+    }
+    this.preconnect.url('https://play.google.com', opt_onLayout);
     if (this.manifestHref_) {
       this.preconnect.preload(this.manifestHref_);
     }
@@ -297,15 +348,13 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       visibility: 'hidden',
     });
 
-    const viewer = viewerFor(this.win);
-    /** @private @const {?Element} */
+    const viewer = viewerForDoc(this.getAmpDoc());
     this.manifestLink_ = this.win.document.head.querySelector(
         'link[rel=manifest],link[rel=amp-manifest]');
 
     const platform = platformFor(this.win);
     // We want to fallback to browser builtin mechanism when possible.
     const isChromeAndroid = platform.isAndroid() && platform.isChrome();
-    /** @private @const {boolean} */
     this.canShowBuiltinBanner_ = !isProxyOrigin(this.win.location) &&
         !viewer.isEmbedded() && isChromeAndroid;
 
@@ -316,7 +365,6 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       return;
     }
 
-    /** @private @const {boolean} */
     this.missingDataSources_ = platform.isAndroid() && !this.manifestLink_;
 
     if (this.missingDataSources_) {
@@ -324,13 +372,12 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       return;
     }
 
-    /** @private @const {string} */
     this.manifestHref_ = this.manifestLink_.getAttribute('href');
     assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
 
-    /** @private @const {!Element} */
-    this.openLink_ = user().assert(this.element.querySelector('a[open-link]'),
-        '<a open-link> is required inside %s: %s', TAG, this.element);
+    this.openButton_ = user().assert(
+        this.element.querySelector('button[open-button]'),
+        '<button open-button> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
   }
@@ -354,7 +401,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   }
 
   /**
-   * @param {!JSONObject} manifestJson
+   * @param {!JSONType} manifestJson
    * @private
    */
   parseManifest_(manifestJson) {
@@ -376,7 +423,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     const installAppUrl = (
         `https://play.google.com/store/apps/details?id=${app['id']}`);
     const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-    this.setupOpenLink_(this.openLink_, openInAppUrl, installAppUrl);
+    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
   }
 
   /** @private */

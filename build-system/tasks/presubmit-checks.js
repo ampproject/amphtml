@@ -46,7 +46,9 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
+  'describes.*\\.only': '',
   'it\\.only': '',
+  'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
@@ -56,10 +58,16 @@ var forbiddenTerms = {
   'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
+  'sandbox\\.(spy|stub|mock)\\([^,\\s]*[iI]?frame[^,\\s]*,': {
+    message: 'Do NOT stub on a cross domain iframe! #5359\n' +
+        '  If this is same domain, mark /*OK*/.\n' +
+        '  If this is cross domain, overwrite the method directly.'
+  },
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
     whitelist: [
+      'build-system/pr-check.js',
       'build-system/server.js',
       'validator/nodejs/index.js',  // NodeJs only.
       'validator/engine/parse-css.js',
@@ -93,7 +101,6 @@ var forbiddenTerms = {
         'dist.3p/current/integration.js',
     whitelist: [
       'src/mode.js',
-      '3p/integration.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -151,6 +158,7 @@ var forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/describes.js',
       'testing/iframe.js',
     ],
   },
@@ -161,7 +169,7 @@ var forbiddenTerms = {
       'src/service/performance-impl.js',
     ],
   },
-  'installStorageService': {
+  'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -175,14 +183,14 @@ var forbiddenTerms = {
       'src/service/template-impl.js',
     ],
   },
-  'installUrlReplacementsService': {
+  'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
   },
-  'installViewerService': {
+  'installViewerServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -193,7 +201,14 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installViewportService': {
+  'setViewerVisibilityState': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
+  'installViewportServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -318,7 +333,7 @@ var forbiddenTerms = {
     ]
   },
   'eval\\(': '',
-  'storageFor': {
+  'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/storage.js',
@@ -331,6 +346,7 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/fake-dom.js',
     ],
   },
   'sessionStorage': {
@@ -375,6 +391,7 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/pr-check.js',
       'validator/engine/tokenize-css.js',
       'validator/engine/validator.js',
       // Service workers are only available in ES6 environments
@@ -386,6 +403,7 @@ var forbiddenTerms = {
   '\\.endsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/pr-check.js',
       'build-system/tasks/csvify-size/index.js',
       // Service workers are only available in ES6 environments
       'src/service-worker/core.js',
@@ -404,12 +422,6 @@ var forbiddenTerms = {
       'src/error.js',
     ],
   },
-  '(doc[^.]*)\\.contains': {
-    message: 'Use dom.documentContains API.',
-    whitelist: [
-      'src/dom.js',
-    ],
-  },
   'getUnconfirmedReferrerUrl': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
@@ -424,6 +436,12 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
+  '\\.schedulePass\\(': {
+    message: 'schedulePass is heavy, thinking twice before using it',
+    whitelist: [
+      'src/service/resources-impl.js',
+    ],
+  },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
     whitelist: [
@@ -433,6 +451,21 @@ var forbiddenTerms = {
   '\\.getWin\\(': {
     message: backwardCompat,
     whitelist: [
+    ],
+  },
+  '/\\*\\* @type \\{\\!Element\\} \\*/': {
+    message: 'Use assertElement instead of casting to !Element.',
+    whitelist: [
+      'src/log.js',  // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js',  // Includes the previous.
+    ],
+  },
+  'chunk\\(': {
+    message: 'chunk( should only be used during startup',
+    whitelist: [
+      'src/amp.js',
+      'src/chunk.js',
+      'src/runtime.js',
     ],
   },
 };
@@ -551,6 +584,7 @@ var forbiddenTermsSrcInclusive = {
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
     ]
   },

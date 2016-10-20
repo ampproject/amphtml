@@ -15,6 +15,7 @@
  */
 
 import {AmpList} from '../amp-list';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {templatesFor} from '../../../../src/template';
 import {installXhrService} from '../../../../src/service/xhr-impl';
 import * as sinon from 'sinon';
@@ -40,8 +41,11 @@ describe('amp-list component', () => {
     xhr = installXhrService(window);
     xhrMock = sandbox.mock(xhr);
 
+    const ampdoc = ampdocServiceFor(window).getAmpDoc();
+
     element = document.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');
+    element.getAmpDoc = () => ampdoc;
     list = new AmpList(element);
     list.buildCallback();
     listMock = sandbox.mock(list);

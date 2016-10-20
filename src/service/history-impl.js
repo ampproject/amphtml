@@ -15,11 +15,11 @@
  */
 
 import {Pass} from '../pass';
-import {getService} from '../service';
+import {fromClass, getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {timerFor} from '../timer';
-import {installViewerService} from './viewer-impl';
+import {installViewerServiceForDoc} from './viewer-impl';
 
 
 /** @private @const */
@@ -48,12 +48,12 @@ let HistoryIdDef;
 export class History {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!HistoryBindingInterface} binding
    */
-  constructor(win, binding) {
+  constructor(ampdoc, binding) {
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = timerFor(ampdoc.win);
 
     /** @private @const {!HistoryBindingInterface} */
     this.binding_ = binding;
@@ -643,27 +643,31 @@ export class HistoryBindingVirtual_ {
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!History}
  * @private
  */
-function createHistory_(window) {
-  const viewer = installViewerService(window);
+function createHistory(ampdoc) {
+  const viewer = installViewerServiceForDoc(ampdoc);
   let binding;
-  if (viewer.isOvertakeHistory() || getMode().test) {
+  if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
+          ampdoc.win.AMP_TEST_IFRAME) {
     binding = new HistoryBindingVirtual_(viewer);
   } else {
-    binding = new HistoryBindingNatural_(window);
+    // Only one global "natural" binding is allowed since it works with the
+    // global history stack.
+    binding = fromClass(ampdoc.win, 'global-history-binding',
+        HistoryBindingNatural_);
   }
-  return new History(window, binding);
-};
+  return new History(ampdoc, binding);
+}
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!History}
  */
-export function installHistoryService(window) {
-  getService(window, 'history', () => {
-    return createHistory_(window);
-  });
-};
+export function installHistoryServiceForDoc(ampdoc) {
+  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
+      ampdoc => createHistory(ampdoc)));
+}

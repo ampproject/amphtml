@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-carousel">amp-carousel.html</a><br /><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel">image_galleries_with_amp-carousel.html</a></br><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-carousel/">Annotated code example for amp-carousel.html</a><br /><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/">Annotated code example for Image Galleries with amp-carousel</a></td>
   </tr>
 </table>
 
@@ -64,6 +64,12 @@ If present, displays left and right arrows for the user to use in navigation on 
 Visibility of arrows can also be controlled via styling, and a media query can be used to
 only display arrows at certain screen widths. On desktop, arrows will always be displayed
 unless only a single child is present.
+
+Usage example:
+
+```html
+<amp-carousel width="100" height="100" controls layout="responsive" type="slides">
+```
 
 **type**
 - `carousel` (default) - All slides are shown and are scrollable horizontally.
