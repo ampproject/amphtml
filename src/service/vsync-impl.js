@@ -375,22 +375,15 @@ export class Vsync {
     this.states_ = this.nextStates_;
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].measure) {
-        try {
-          tasks[i].measure(states[i]);
-        } catch (e) {
+        if (!callTaskNoInline(tasks[i].measure, states[i])) {
           // Ensure that the mutate is not executed when measure fails.
           tasks[i].mutate = undefined;
-          rethrowAsync(e);
         }
       }
     }
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
-        try {
-          tasks[i].mutate(states[i]);
-        } catch (e) {
-          rethrowAsync(e);
-        }
+        callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
     // Swap last arrays into double buffer.
@@ -422,6 +415,22 @@ export class Vsync {
       this.win.setTimeout(fn, timeToCall);
     };
   }
+}
+
+
+/**
+ * For optimization reasons to stop try/catch from blocking optimization.
+ * @param {function(!VsyncStateDef)} callback
+ * @param {!VsyncStateDef} state
+ */
+function callTaskNoInline(callback, state) {
+  try {
+    callback(state);
+  } catch (e) {
+    rethrowAsync(e);
+    return false;
+  }
+  return true;
 }
 
 
