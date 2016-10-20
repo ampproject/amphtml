@@ -17,6 +17,7 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
@@ -151,6 +152,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   }
   if (!message) {
     message = 'Unknown error';
+  }
+  if (isLoadErrorMessage(message)) {
+    return;
   }
 
   // This is the App Engine app in
