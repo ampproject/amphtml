@@ -17,7 +17,7 @@
 import {Pass} from '../pass';
 import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
-import {dev} from '../log';
+import {dev, rethrowAsync} from '../log';
 import {documentStateFor} from '../document-state';
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
@@ -28,7 +28,7 @@ import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
 const FRAME_TIME = 16;
 
 /**
- * @typedef {Object<string, *>}
+ * @typedef {!Object<string, *>}
  */
 let VsyncStateDef;
 
@@ -375,12 +375,15 @@ export class Vsync {
     this.states_ = this.nextStates_;
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].measure) {
-        tasks[i].measure(states[i]);
+        if (!callTaskNoInline(tasks[i].measure, states[i])) {
+          // Ensure that the mutate is not executed when measure fails.
+          tasks[i].mutate = undefined;
+        }
       }
     }
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
-        tasks[i].mutate(states[i]);
+        callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
     // Swap last arrays into double buffer.
@@ -412,6 +415,23 @@ export class Vsync {
       this.win.setTimeout(fn, timeToCall);
     };
   }
+}
+
+
+/**
+ * For optimization reasons to stop try/catch from blocking optimization.
+ * @param {function(!VsyncStateDef)|undefined} callback
+ * @param {!VsyncStateDef} state
+ */
+function callTaskNoInline(callback, state) {
+  dev().assert(callback);
+  try {
+    callback(state);
+  } catch (e) {
+    rethrowAsync(e);
+    return false;
+  }
+  return true;
 }
 
 
