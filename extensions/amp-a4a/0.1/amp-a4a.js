@@ -94,10 +94,10 @@ const SAFEFRAME_IMPL_PATH =
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 /** @type {!Object} @private */
 const SHARED_IFRAME_PROPERTIES = {
-  'frameborder': '0',
-  'allowfullscreen': '',
-  'allowtransparency': '',
-  'scrolling': 'no',
+  frameborder: '0',
+  allowfullscreen: '',
+  allowtransparency: '',
+  scrolling: 'no',
 };
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
