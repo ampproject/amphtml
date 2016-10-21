@@ -22,6 +22,7 @@ import {
   createIframeWithMessageStub,
   expectPostMessage,
 } from '../../../../testing/iframe';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 import {timerFor} from '../../../../src/timer';
 import * as sinon from 'sinon';
 
@@ -38,6 +39,7 @@ describe('amp-ad-api-handler', () => {
     const adElement = document.createElement('amp-ad');
     adElement.getAmpDoc = () => ampdoc;
     adImpl = new BaseElement(adElement);
+    adImpl.uiHandler = new AmpAdUIHandler(adImpl);
     iframeHandler = new AmpAdXDomainIframeHandler(adImpl);
     testIndex++;
   });

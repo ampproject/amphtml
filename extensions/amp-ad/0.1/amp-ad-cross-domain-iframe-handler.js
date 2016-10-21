@@ -159,9 +159,7 @@ export class AmpAdXDomainIframeHandler {
    */
   renderStart_(info) {
     const data = info.data;
-    if (this.uiHandler_) {
-      this.uiHandler_.displayRenderStartUI();
-    }
+    this.uiHandler_.displayRenderStartUI();
     this.updateSize_(data.height, data.width,
                 info.source, info.origin);
     if (this.baseInstance_.lifecycleReporter) {
@@ -198,9 +196,7 @@ export class AmpAdXDomainIframeHandler {
       return;
     }
     this.freeXDomainIframe(this.iframe.name.indexOf('_master') >= 0);
-    if (this.uiHandler_) {
-      this.uiHandler_.displayNoContentUI();
-    }
+    this.uiHandler_.displayNoContentUI();
   }
 
   /**
