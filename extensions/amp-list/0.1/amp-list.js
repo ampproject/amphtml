@@ -39,8 +39,8 @@ export class AmpList extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
-    if (!this.element.hasAttribute('role')) {
-      this.element.setAttribute('role', 'list');
+    if (!this.container_.hasAttribute('role')) {
+      this.container_.setAttribute('role', 'list');
     }
 
     /** @private @const {!UrlReplacements} */
