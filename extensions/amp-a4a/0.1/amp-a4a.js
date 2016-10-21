@@ -194,10 +194,6 @@ export class AmpA4A extends AMP.BaseElement {
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
-  }
-
-  /** @override */
-  buildCallback() {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.init();
   }

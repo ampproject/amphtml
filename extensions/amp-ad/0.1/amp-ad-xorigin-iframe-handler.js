@@ -143,7 +143,7 @@ export class AmpAdXOriginIframeHandler {
           this.adResponsePromise_,
           'timeout waiting for ad response').catch(e => {
             this.noContent_();
-            user().warn('amp-ad', e);
+            user().warn('AMP-AD', e);
           }).then(() => {
             if (this.iframe) {
               this.iframe.style.visibility = '';
