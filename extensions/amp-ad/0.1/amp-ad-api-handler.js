@@ -142,7 +142,7 @@ export class AmpAdApiHandler {
           this.adResponsePromise_,
           'timeout waiting for ad response').catch(e => {
             this.noContent_();
-            user().warn('amp-ad', e);
+            user().warn('AMP-AD', e);
           }).then(() => {
             //TODO: add performance reporting;
             if (this.iframe_) {
@@ -186,7 +186,7 @@ export class AmpAdApiHandler {
     if (this.noContentCallback_) {
       this.noContentCallback_();
     } else {
-      user().info('no content callback was specified');
+      user().info('AMP-AD', 'no content callback was specified');
     }
     this.cleanup_();
   }

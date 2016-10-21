@@ -415,7 +415,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     const app = apps.find(app => app['platform'] == 'play');
     if (!app) {
-      dev().warn(app, 'Could not find a platform=play app in manifest: %s',
+      dev().warn(TAG, 'Could not find a platform=play app in manifest: %s',
           this.element);
       return;
     }
