@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {InstrumentationService} from '../instrumentation.js';
+import {
+  InstrumentationService,
+  AnalyticsEventType,
+} from '../instrumentation.js';
 import {adopt} from '../../../../src/runtime';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
@@ -42,6 +45,7 @@ describe('amp-analytics.instrumentation', function() {
       'onChanged': sandbox.stub(),
     };
     ins.viewport_ = fakeViewport;
+    sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
   });
 
   afterEach(() => {
@@ -474,4 +478,44 @@ describe('amp-analytics.instrumentation', function() {
         });
       ins.onClick_({target: el1});
     });
+
+  describe('isTriggerAllowed_', () => {
+    let el;
+    beforeEach(() => {
+      ins.isTriggerAllowed_.restore();
+    });
+
+    it('allows all triggers for top level window', () => {
+      el = document.createElement('amp-analytics');
+      document.body.appendChild(el);
+
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.VISIBLE, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.CLICK, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.TIMER, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.SCROLL, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.HIDDEN, el)).to.be.true;
+    });
+
+    it('allows some trigger', () => {
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
+      iframe.contentWindow.document.body.appendChild(el);
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.VISIBLE, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.CLICK, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.TIMER, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.HIDDEN, el)).to.be.true;
+    });
+
+
+    it('disallows scroll trigger', () => {
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
+      iframe.contentWindow.document.body.appendChild(el);
+
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.SCROLL, el)).to.be.false;
+      expect(ins.isTriggerAllowed_('custom-trigger', el)).to.be.false;
+    });
+  });
 });

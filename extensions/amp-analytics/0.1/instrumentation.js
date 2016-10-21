@@ -69,6 +69,17 @@ const TAG = 'Analytics.Instrumentation';
 
 
 /**
+ * Events that can result in analytics data to be sent.
+ * @const {Array<AnalyticsEventType>}
+ */
+const ALLOWED_IN_EMBED = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.CLICK,
+  AnalyticsEventType.TIMER,
+  AnalyticsEventType.HIDDEN,
+];
+
+/**
  * Ignore Most of this class as it has not been thought through yet. It will
  * change completely.
  */
@@ -143,6 +154,11 @@ export class InstrumentationService {
    */
   addListener(config, listener, analyticsElement) {
     const eventType = config['on'];
+    if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
+      user().error(this.TAG_, 'Trigger type "' + eventType + '" is not ' +
+        'allowed in the embed.');
+      return;
+    }
     if (eventType === AnalyticsEventType.VISIBLE) {
       this.createVisibilityListener_(listener, config,
           AnalyticsEventType.VISIBLE, analyticsElement);
@@ -514,6 +530,21 @@ export class InstrumentationService {
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);
+  }
+
+  /**
+   * Checks to confirm that a given trigger type is allowed for the element.
+   * Specifically, ti confirms that if the element is in the embed, only a
+   * subset of the trigger types are allowed.
+   * @param  {!AnalyticsEventType} triggerType
+   * @param  {!Element} element
+   * @return {boolean} True if the trigger is allowed. False otherwise.
+   */
+  isTriggerAllowed_(triggerType, element) {
+    if (element.ownerDocument.defaultView != this.win_) {
+      return ALLOWED_IN_EMBED.indexOf(triggerType) > -1;
+    }
+    return true;
   }
 }
 
