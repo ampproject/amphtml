@@ -20,7 +20,13 @@ import {dev, user} from '../../../src/log';
 const TAG = 'amp-access-vendor';
 
 
-/** @implements {AccessTypeAdapterDef} */
+/**
+ * The adapter for a vendor implementation that implements `AccessVendor`
+ * interface and delivered via a separate extension. The vendor implementation
+ * mainly requires two method: `authorize` and `pingback`. The actual
+ * extension is registered via `registerVendor` method.
+ * @implements {AccessTypeAdapterDef}
+ */
 export class AccessVendorAdapter {
 
   /**
