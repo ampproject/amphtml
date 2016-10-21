@@ -213,6 +213,8 @@ export const adConfig = {
 
   kargo: {},
 
+  ligatus: {},
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
