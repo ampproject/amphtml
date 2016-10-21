@@ -436,6 +436,10 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([\'"`])?[A-Z-]+([\'"`])?)[^)]*\\)': {
+    message: 'Logging message require explicitly `TAG`, or an all uppercase' +
+        ' string as the first parameter',
+  },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, thinking twice before using it',
     whitelist: [
