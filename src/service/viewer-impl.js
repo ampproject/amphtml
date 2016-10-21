@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../observable';
+import {documentInfoForDoc} from '../document-info';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getServiceForDoc} from '../service';
@@ -772,6 +773,7 @@ export class Viewer {
   postDocumentReady() {
     this.sendMessageUnreliable_('documentLoaded', {
       title: this.win.document.title,
+      sourceUrl: documentInfoForDoc(this.ampdoc).sourceUrl,
     }, false);
   }
 

@@ -65,6 +65,7 @@ describe('Viewer', () => {
       href: '/test/viewer',
       ancestorOrigins: null,
     };
+    windowApi.Math = Math;
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
       defaultView: windowApi,
@@ -77,6 +78,11 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
+      querySelector: () => {
+        const link = document.createElement('link');
+        link.href = 'http://not-used.com';
+        return link;
+      },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
@@ -508,6 +514,7 @@ describe('Viewer', () => {
     const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.title).to.equal('Awesome doc');
+    expect(m.data.sourceUrl).to.equal('http://localhost:9876/test/viewer');
   });
 
   it('should post scroll event', () => {
