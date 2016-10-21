@@ -18,6 +18,7 @@ var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
 var srcGlobs = require('../config').presubmitGlobs;
 var util = require('gulp-util');
+var through2 = require('through2');
 
 var dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -769,14 +770,10 @@ function checkForbiddenAndRequiredTerms() {
   var forbiddenFound = false;
   var missingRequirements = false;
   return gulp.src(srcGlobs)
-    .pipe(util.buffer(function(err, files) {
-      forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
-        return errorFound;
-      });
-      missingRequirements = files.map(isMissingTerms).some(
-          function(errorFound) {
-        return errorFound;
-      });
+    .pipe(through2.obj(function(file, enc, cb) {
+      forbiddenFound = hasAnyTerms(file) || forbiddenFound;
+      missingRequirements = isMissingTerms(file) || missingRequirements;
+      cb();
     }))
     .on('end', function() {
       if (forbiddenFound) {
