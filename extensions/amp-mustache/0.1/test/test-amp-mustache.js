@@ -37,7 +37,7 @@ describe('amp-mustache template', () => {
     const result = template.render({
       value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
-    expect(result./*OK*/innerHTML).to.equal('value = <a>abc</a>');
+    expect(result./*OK*/innerHTML).to.equal('value = <a target="_top">abc</a>');
   });
 
   describe('Sanitizing data- attributes', () => {
@@ -50,7 +50,8 @@ describe('amp-mustache template', () => {
       const result = template.render({
         value: /*eslint no-script-url: 0*/ 'javascript:alert();',
       });
-      expect(result./*OK*/innerHTML).to.equal('value = <a data-="">abc</a>');
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a data-="" target="_top">abc</a>');
     });
 
     it('should parse data-&attr=value output correctly', () => {
@@ -63,7 +64,7 @@ describe('amp-mustache template', () => {
         value: 'https://google.com/',
       });
       expect(result./*OK*/innerHTML).to.equal('value = <a data-=""' +
-          ' href="https://google.com/">abc</a>');
+          ' href="https://google.com/" target="_top">abc</a>');
     });
 
     it('should allow for data-attr=value to output correctly', () => {
