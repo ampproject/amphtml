@@ -598,6 +598,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new AmpA4A(a4aElement);
+        a4a.buildCallback();
         a4a.preconnectCallback(false);
         const preconnects = doc.querySelectorAll('link[rel=preconnect]');
         expect(preconnects.length).to.not.equal(0);
