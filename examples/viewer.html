@@ -381,7 +381,10 @@
     };
 
 
-    Viewer.prototype.onPopState_ = function() {
+    Viewer.prototype.onPopState_ = function(e) {
+      if (this.visibilityState_ != 'visible') {
+        return;
+      }
       // Even more trivial. Always assumes that only one step was popped in
       // history.
       this.stackIndex_--;

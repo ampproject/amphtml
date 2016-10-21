@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {closestByTag} from '../../../src/dom';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {dev} from '../../../src/log';
 import {Layout} from '../../../src/layout';
 import {historyForDoc} from '../../../src/history';
+import {parseUrl} from '../../../src/url';
 import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
@@ -107,14 +110,25 @@ export class AmpSidebar extends AMP.BaseElement {
     screenReaderCloseButton.classList.add('-amp-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
-    screenReaderCloseButton.addEventListener('click', () => {
-      this.close_();
-    });
+    screenReaderCloseButton.addEventListener('click', () => this.close_());
     this.element.appendChild(screenReaderCloseButton);
 
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
+
+    this.element.addEventListener('click', e => {
+      const target = closestByTag(dev().assertElement(e.target), 'A');
+      if (!target) {
+        return;
+      }
+      const tgtLoc = parseUrl(target.href);
+
+      if (!tgtLoc.hash) {
+        return;
+      }
+      this.close_();
+    });
   }
 
  /**
@@ -172,7 +186,7 @@ export class AmpSidebar extends AMP.BaseElement {
         }, ANIMATION_TIMEOUT);
       });
     });
-    this.getHistory_().push(this.close_.bind(this)).then(historyId => {
+    this.getHistory_().push(() => this.close_()).then(historyId => {
       this.historyId_ = historyId;
     });
   }
@@ -213,9 +227,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
       mask.classList.add('-amp-sidebar-mask');
-      mask.addEventListener('click', () => {
-        this.close_();
-      });
+      mask.addEventListener('click', () => this.close_());
       this.element.parentNode.appendChild(mask);
       mask.addEventListener('touchmove', e => {
         e.preventDefault();

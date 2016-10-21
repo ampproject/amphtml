@@ -573,8 +573,12 @@ export class HistoryBindingVirtual_ {
 
   /**
    * @param {!./viewer-impl.Viewer} viewer
+   * @param {!Window} win
    */
-  constructor(viewer) {
+  constructor(viewer, win) {
+    /** @private @const {!../service/timer-impl.Timer} */
+    this.timer_ = timerFor(win);
+
     /** @private @const */
     this.viewer_ = viewer;
 
@@ -587,6 +591,12 @@ export class HistoryBindingVirtual_ {
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
         this.onHistoryPopped_.bind(this));
+
+    /** @private {!Promise} */
+    this.awaitPoppingPromise_ = Promise.resolve();
+
+    /** @private {?function(*)) */
+    this.awaitPoppingPromiseResolver_ = null;
   }
 
   /** @override */
@@ -601,14 +611,25 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   push() {
-    // Current implementation doesn't wait for response from viewer.
-    this.updateStackIndex_(this.stackIndex_ + 1);
-    this.viewer_.postPushHistory(this.stackIndex_);
-    return Promise.resolve(this.stackIndex_);
+    // Waiting for popping confirmation to happen otherwise a race condition
+    // between popping and pushing might happen causing history to be messed
+    // up. This will only wait 100ms to avoid getting stuck if confirmation
+    // never arrived.
+    return Promise.race([this.timer_.promise(100), this.awaitPoppingPromise_])
+        .then(() => {
+          // Current implementation doesn't wait for response from viewer.
+          this.updateStackIndex_(this.stackIndex_ + 1);
+          this.viewer_.postPushHistory(this.stackIndex_);
+          return Promise.resolve(this.stackIndex_);
+        });
   }
 
   /** @override */
   pop(stackIndex) {
+    this.awaitPoppingPromise_ = new Promise(resolve => {
+      this.awaitPoppingPromiseResolver_ = resolve;
+    });
+
     if (stackIndex > this.stackIndex_) {
       return Promise.resolve(this.stackIndex_);
     }
@@ -623,6 +644,10 @@ export class HistoryBindingVirtual_ {
    */
   onHistoryPopped_(event) {
     this.updateStackIndex_(event.newStackIndex);
+    if (this.awaitPoppingPromiseResolver_) {
+      this.awaitPoppingPromiseResolver_();
+      this.awaitPoppingPromiseResolver_ = null;
+    }
   }
 
   /**
@@ -652,7 +677,7 @@ function createHistory(ampdoc) {
   let binding;
   if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
           ampdoc.win.AMP_TEST_IFRAME) {
-    binding = new HistoryBindingVirtual_(viewer);
+    binding = new HistoryBindingVirtual_(viewer, ampdoc.win);
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
