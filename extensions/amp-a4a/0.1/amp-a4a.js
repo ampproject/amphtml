@@ -46,6 +46,7 @@ import {
 } from './crypto-verifier';
 import {isExperimentOn} from '../../../src/experiments';
 import {handleClick} from '../../../ads/alp/handler';
+import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -512,7 +513,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    this.uiHandler.displayUnlayoutUI();
+    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     this.lifecycleReporter.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {

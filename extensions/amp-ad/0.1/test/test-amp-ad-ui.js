@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdUIHandler} from '../amp-ad-ui';
+import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import * as sinon from 'sinon';
 
@@ -28,7 +28,7 @@ describe('amp-ad-ui handler', () => {
     const adElement = document.createElement('amp-ad');
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
-    uiHandler.displayLoadingUI();
+    uiHandler.setDisplayState(AdDisplayState.LOADING);
   });
 
   afterEach(() => {
@@ -46,7 +46,7 @@ describe('amp-ad-ui handler', () => {
     });
     const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
     uiHandler.init();
-    uiHandler.displayNoContentUI();
+    uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
     return Promise.resolve().then(() => {
       expect(collapseSpy).to.be.calledOnce;
       expect(uiHandler.state).to.equal(3);
@@ -63,7 +63,7 @@ describe('amp-ad-ui handler', () => {
     });
     const placeHolderSpy = sandbox.stub(adImpl, 'togglePlaceholder');
     uiHandler.init();
-    uiHandler.displayNoContentUI();
+    uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
     expect(spy).to.be.called;
     expect(placeHolderSpy).to.not.be.called;
     expect(uiHandler.state).to.equal(0);

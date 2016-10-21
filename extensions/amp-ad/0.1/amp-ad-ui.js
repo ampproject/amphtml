@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 
 /**
  * Ad display state.
  * @enum {number}
  */
-const AdDisplayState = {
+export const AdDisplayState = {
   /**
    * The ad has not been laid out, or the ad has already be unlaid out
    */
@@ -65,19 +66,47 @@ export class AmpAdUIHandler {
   }
 
   /**
-   * TODO(@zhouyx): apply placeholder, add ad loading indicator
+   * Exposed function to ad that enable them to set UI to correct display state
+   * @param {number} state
    */
-  displayLoadingUI() {
+  setDisplayState(state) {
+    if (this.state == AdDisplayState.NOT_LAID_OUT) {
+      // Once unlayout UI applied, only another layout will change the UI again
+      if (state != AdDisplayState.LOADING) {
+        return;
+      }
+    }
+    switch (state) {
+      case AdDisplayState.LOADING:
+        this.displayLoadingUI_();
+        break;
+      case AdDisplayState.LOADED_RENDER_START:
+        this.displayRenderStartUI_();
+        break;
+      case AdDisplayState.LOADED_NO_CONTENT:
+        this.displayNoContentUI_();
+        break;
+      case AdDisplayState.NOT_LAID_OUT:
+        this.displayUnlayoutUI_();
+        break;
+      default:
+        dev.assert(state, 'state is not supported');
+    }
+  }
+
+  /**
+   * TODO(@zhouyx): apply placeholder, add ad loading indicator
+   * @private
+   */
+  displayLoadingUI_() {
     this.state = AdDisplayState.LOADING;
   }
 
   /**
    * TODO(@zhouyx): remove ad loading indicator
+   * @private
    */
-  displayRenderStartUI() {
-    if (this.state == AdDisplayState.NOT_LAID_OUT) {
-      return;
-    }
+  displayRenderStartUI_() {
     this.state = AdDisplayState.LOADED_RENDER_START;
   }
 
@@ -86,16 +115,13 @@ export class AmpAdUIHandler {
    * If fallback exist try to display provided fallback
    * Else try to collapse the ad (Note: may not succeed)
    * TODO(@zhouyx): apply fallback, remove ad loading indicator
+   * @private
    */
-  displayNoContentUI() {
-    if (this.state == AdDisplayState.NOT_LAID_OUT) {
-      return;
-    }
-
+  displayNoContentUI_() {
     if (this.baseInstance_.getFallback()) {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
-          // If alreayd unlaid out, do not replace current placeholder then.
+          // If already unlaid out, do not replace current placeholder then.
           return;
         }
         this.baseInstance_.togglePlaceholder(false);
@@ -117,11 +143,9 @@ export class AmpAdUIHandler {
    * Hide fallback and show placeholder if exists
    * Once unlayout UI applied, only another layout will change the UI again
    * TODO(@zhouyx): remove ad loading indicator
+   * @private
    */
-  displayUnlayoutUI() {
-    if (this.state == AdDisplayState.NOT_LAID_OUT) {
-      return;
-    }
+  displayUnlayoutUI_() {
     this.state = AdDisplayState.NOT_LAID_OUT;
     this.baseInstance_.deferMutate(() => {
       this.baseInstance_.togglePlaceholder(true);

@@ -26,6 +26,7 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
+import {AdDisplayState} from './amp-ad-ui';
 
 const TIMEOUT_VALUE = 10000;
 
@@ -159,7 +160,7 @@ export class AmpAdXDomainIframeHandler {
    */
   renderStart_(info) {
     const data = info.data;
-    this.uiHandler_.displayRenderStartUI();
+    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.updateSize_(data.height, data.width,
                 info.source, info.origin);
     if (this.baseInstance_.lifecycleReporter) {
@@ -196,7 +197,7 @@ export class AmpAdXDomainIframeHandler {
       return;
     }
     this.freeXDomainIframe(this.iframe.name.indexOf('_master') >= 0);
-    this.uiHandler_.displayNoContentUI();
+    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
   }
 
   /**

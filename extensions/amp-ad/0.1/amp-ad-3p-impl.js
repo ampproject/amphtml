@@ -31,7 +31,7 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {AmpAdUIHandler} from './amp-ad-ui';
+import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
 
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -214,7 +214,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'position:fixed: %s', this.element);
     incrementLoadingAds(this.win);
     return this.layoutPromise_ = getAdCid(this).then(cid => {
-      this.uiHandler.displayLoadingUI();
+      this.uiHandler.setDisplayState(AdDisplayState.LOADING);
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
@@ -242,7 +242,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.layoutPromise_ = null;
-    this.uiHandler.displayUnlayoutUI();
+    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     if (this.iframeHandler_) {
       this.iframeHandler_.freeXDomainIframe();
       this.iframeHandler_ = null;
