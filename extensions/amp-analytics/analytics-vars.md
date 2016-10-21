@@ -1,10 +1,10 @@
 # <a name="amp-analytics"></a> Variables supported in `amp-analytics`
 
-Use the format `${varName}` in a request string for a page or platform-defined variable. `amp-analytics` tag will replace the template with its actual value at the time of construction of the analytics request.
+Use the format `${varName}` in a request string for a page or platform-defined variable. The `amp-analytics` tag will replace the template with its actual value at the time of construction of the analytics request.
 
 Since the request that is constructed is sent over HTTP, the request needs to be encoded. To achieve this, the `var` values are url-encoded using [`encodeUrlComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) before being inserted into the request.
 
-##Variable definitions
+## Variable definitions
 Vars can be defined by the platform, in the config at the top level, inside the triggers or in a remote config, as shown in this example.
 
 ```html
@@ -32,7 +32,7 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 </amp-analytics>
 ```
 
-##Variables as data attribute
+## Variables as data attribute
 For the following event types, variables can be passed as part of the element level data attribute
 
 * visible
