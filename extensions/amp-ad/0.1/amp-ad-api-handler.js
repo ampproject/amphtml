@@ -26,6 +26,7 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
+import {endsWith} from '../../../src/string';
 
 const TIMEOUT_VALUE = 10000;
 
@@ -52,6 +53,9 @@ export class AmpAdApiHandler {
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
+
+    /** @private {boolean} */
+    this.useApi_ = true;
 
     /** @private {boolean} */
     this.is3p_ = false;
@@ -84,6 +88,9 @@ export class AmpAdApiHandler {
     this.iframe_ = iframe;
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
+    let iframeSrc = this.iframe_.getAttribute('src');
+    iframeSrc = iframeSrc.substring(0, iframeSrc.indexOf('#'));
+    this.useApi_ = endsWith(iframeSrc, '.html');
     this.baseInstance_.applyFillContent(this.iframe_);
     this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe_, is3p);
@@ -104,7 +111,9 @@ export class AmpAdApiHandler {
         }, this.is3p_, this.is3p_));
 
     // Install API that listen to ad response
-    if (this.baseInstance_.config
+    if (!this.useApi_) {
+      this.adResponsePromise_ = Promise.resolve();
+    } else if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
