@@ -35,6 +35,12 @@ export function kixer(global, data) {
   d.id = '__kx_ad_' + data.adslot;
   global.document.getElementById('c').appendChild(d);
 
+  const kxload = function() {
+    d.removeEventListener('load', kxload, false);
+    global.context.renderStart();
+  };
+  d.addEventListener('load', kxload, false);
+
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
     __kxamp[data.adslot] = 1;
     __kx_ad_slots.push(data.adslot);
