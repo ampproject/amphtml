@@ -228,53 +228,6 @@ describe('Template', () => {
           expect(res[1].textContent).to.equal('abc2');
         });
   });
-
-  it('should replace target attribute in anchors', () => {
-    const prerendered = document.createElement('div');
-
-    const anchorWithoutTarget = document.createElement('a');
-    anchorWithoutTarget.setAttribute('href', 'https://acme.com/');
-    prerendered.appendChild(anchorWithoutTarget);
-
-    const anchorWithoutHref = document.createElement('a');
-    anchorWithoutHref.setAttribute('on', 'tap:my-element');
-    prerendered.appendChild(anchorWithoutHref);
-
-    const anchorWithTargetSelf = document.createElement('a');
-    anchorWithTargetSelf.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetSelf.setAttribute('target', '_self');
-    prerendered.appendChild(anchorWithTargetSelf);
-
-    const anchorWithTargetTop = document.createElement('a');
-    anchorWithTargetTop.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetTop.setAttribute('target', '_top');
-    prerendered.appendChild(anchorWithTargetTop);
-
-    const anchorWithTargetBlank = document.createElement('a');
-    anchorWithTargetBlank.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetBlank.setAttribute('target', '_blank');
-    prerendered.appendChild(anchorWithTargetBlank);
-
-    const anchorWithTargetParent = document.createElement('a');
-    anchorWithTargetParent.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetParent.setAttribute('target', '_parent');
-    prerendered.appendChild(anchorWithTargetParent);
-
-    templates.render_({render: () => prerendered});
-
-    // The unknown target is replaced with "_blank", at least until #1572
-    // is resolved.
-    expect(anchorWithoutTarget.getAttribute('target')).to.equal('_blank');
-
-    // No target substitution is done for anchors without href.
-    expect(anchorWithoutHref.getAttribute('target')).to.be.null;
-
-    // All others require _blank.
-    expect(anchorWithTargetSelf.getAttribute('target')).to.equal('_blank');
-    expect(anchorWithTargetTop.getAttribute('target')).to.equal('_blank');
-    expect(anchorWithTargetBlank.getAttribute('target')).to.equal('_blank');
-    expect(anchorWithTargetParent.getAttribute('target')).to.equal('_blank');
-  });
 });
 
 
