@@ -21,7 +21,7 @@
  */
 const AdDisplayState = {
   /**
-   * The ad has not been laid out
+   * The ad has not been laid out, or the ad has already be unlaid out
    */
   NOT_LAID_OUT: 0,
 
@@ -36,18 +36,13 @@ const AdDisplayState = {
    * ad server.
    * Not used now.
    */
-  LOADED_RS: 2,
+  LOADED_RENDER_START: 2,
 
   /**
    * The ad has been laid out, and runtime has received no-content msg from
    * ad server.
    */
-  LOADED_NC: 3,
-
-  /**
-   * The ad has not been laid out yet, or the ad has already be unlaid out.
-   */
-  UN_LAID_OUT: 4,
+  LOADED_NO_CONTENT: 3,
 };
 
 export class AmpAdUIHandler {
@@ -59,15 +54,14 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
-    /** {?number} */
-    this.state = null;
+    /** {number} */
+    this.state = AdDisplayState.NOT_LAID_OUT;;
   }
 
   /**
    * TODO(@zhouyx): Add ad tag to the ad.
    */
   init() {
-    this.state = AdDisplayState.NOT_LAID_OUT;
   }
 
   /**
@@ -81,7 +75,10 @@ export class AmpAdUIHandler {
    * TODO(@zhouyx): remove ad loading indicator
    */
   displayRenderStartUI() {
-    this.state = AdDisplayState.LOADED_RS;
+    if (this.state == AdDisplayState.NOT_LAID_OUT) {
+      return;
+    }
+    this.state = AdDisplayState.LOADED_RENDER_START;
   }
 
   /**
@@ -91,25 +88,26 @@ export class AmpAdUIHandler {
    * TODO(@zhouyx): apply fallback, remove ad loading indicator
    */
   displayNoContentUI() {
-    if (this.state == AdDisplayState.UN_LAID_OUT) {
+    if (this.state == AdDisplayState.NOT_LAID_OUT) {
       return;
     }
-    if (!this.baseInstance_.getFallback()) {
-      this.baseInstance_.attemptChangeHeight(0).then(() => {
-        this.baseInstance_./*OK*/collapse();
-        this.state = AdDisplayState.LOADED_NC;
-      }, () => {
-        this.state = AdDisplayState.LOADED_NC;
-      });
-    } else {
+
+    if (this.baseInstance_.getFallback()) {
       this.baseInstance_.deferMutate(() => {
-        if (this.state == AdDisplayState.UN_LAID_OUT) {
+        if (this.state == AdDisplayState.NOT_LAID_OUT) {
           // If alreayd unlaid out, do not replace current placeholder then.
           return;
         }
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
-        this.state = AdDisplayState.LOADED_NC;
+        this.state = AdDisplayState.LOADED_NO_CONTENT;
+      });
+    } else {
+      this.baseInstance_.attemptChangeHeight(0).then(() => {
+        this.baseInstance_./*OK*/collapse();
+        this.state = AdDisplayState.LOADED_NO_CONTENT;
+      }, () => {
+        this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
     }
   }
@@ -121,7 +119,10 @@ export class AmpAdUIHandler {
    * TODO(@zhouyx): remove ad loading indicator
    */
   displayUnlayoutUI() {
-    this.state = AdDisplayState.UN_LAID_OUT;
+    if (this.state == AdDisplayState.NOT_LAID_OUT) {
+      return;
+    }
+    this.state = AdDisplayState.NOT_LAID_OUT;
     this.baseInstance_.deferMutate(() => {
       this.baseInstance_.togglePlaceholder(true);
       this.baseInstance_.toggleFallback(false);

@@ -869,8 +869,11 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         const adPromise = a4a.adPromise_;
+        // This is to prevent `displayUnlayoutUI` to be called;
+        a4a.uiHandler.state = 0;
         a4a.unlayoutCallback();
         // Force vsync system to run all queued tasks, so that DOM mutations
         // are actually completed before testing.

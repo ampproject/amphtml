@@ -28,6 +28,7 @@ describe('amp-ad-ui handler', () => {
     const adElement = document.createElement('amp-ad');
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
+    uiHandler.displayLoadingUI();
   });
 
   afterEach(() => {
@@ -36,6 +37,9 @@ describe('amp-ad-ui handler', () => {
   });
 
   it('should try to collapse element', () => {
+    sandbox.stub(adImpl, 'getFallback', () => {
+      return false;
+    });
     sandbox.stub(adImpl, 'attemptChangeHeight', height => {
       expect(height).to.equal(0);
       return Promise.resolve();
@@ -54,7 +58,7 @@ describe('amp-ad-ui handler', () => {
       return true;
     });
     const spy = sandbox.stub(adImpl, 'deferMutate', callback => {
-      uiHandler.state = 4;
+      uiHandler.state = 0;
       callback();
     });
     const placeHolderSpy = sandbox.stub(adImpl, 'togglePlaceholder');
@@ -62,6 +66,6 @@ describe('amp-ad-ui handler', () => {
     uiHandler.displayNoContentUI();
     expect(spy).to.be.called;
     expect(placeHolderSpy).to.not.be.called;
-    expect(uiHandler.state).to.equal(4);
+    expect(uiHandler.state).to.equal(0);
   });
 });

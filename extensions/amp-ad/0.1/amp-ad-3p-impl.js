@@ -214,9 +214,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'position:fixed: %s', this.element);
     incrementLoadingAds(this.win);
     return this.layoutPromise_ = getAdCid(this).then(cid => {
-      if (this.uiHandler) {
-        this.uiHandler.displayLoadingUI();
-      }
+      this.uiHandler.displayLoadingUI();
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
@@ -244,9 +242,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.layoutPromise_ = null;
-    if (this.uiHandler) {
-      this.uiHandler.displayUnlayoutUI();
-    }
+    this.uiHandler.displayUnlayoutUI();
     if (this.iframeHandler_) {
       this.iframeHandler_.freeXDomainIframe();
       this.iframeHandler_ = null;
