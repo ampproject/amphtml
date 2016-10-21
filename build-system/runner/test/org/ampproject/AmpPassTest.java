@@ -20,7 +20,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
 
   ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev",
-          ImmutableSet.of("assert", "fine", "assertElement", "assertString", "assertNumber"),
+          ImmutableSet.of("assert", "fine", "assertElement", "assertError", "assertString", "assertNumber"),
       "module$src$log.user", ImmutableSet.of("fine"));
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
