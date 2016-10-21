@@ -58,5 +58,7 @@ export function adbutler(global,data) {
       click: 'CLICK_MACRO_PLACEHOLDER',
     },
   });
-  loadScript(global, 'https://servedbyadbutler.com/app.js');
+  loadScript(global, 'https://servedbyadbutler.com/app.js', function() {
+    global.context.renderStart();
+  });
 }
