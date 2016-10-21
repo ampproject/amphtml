@@ -614,11 +614,19 @@ function isInTestFolder(path) {
 
 function stripComments(contents) {
   // Multi-line comments
-  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, '');
-  // Single line comments with only leading whitespace
-  contents = contents.replace(/\n\s*\/\/.*/g, '');
-  // Single line comments following a space, semi-colon, or closing brace
-  return contents.replace(/( |\}|;)\s*\/\/.*/g, '$1');
+  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
+    // Preserve the newlines
+    var newlines = [];
+    for (var i = 0; i < match.length; i++) {
+      if (match[i] === '\n') {
+        newlines.push('\n');
+      }
+    }
+    return newlines.join('');
+  });
+  // Single line comments either on its own line or following a space,
+  // semi-colon, or closing brace
+  return contents.replace(/( |}|;|^) *\/\/.*/g, '$1');
 }
 
 /**
@@ -650,11 +658,26 @@ function matchTerms(file, terms) {
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var matches = contents.match(new RegExp(term, 'gm'));
+    var regex = new RegExp(term, 'gm');
+    var index = 0;
+    var line = 1;
+    var column = 0;
+    var match;
+    var hasTerm = false;
 
-    if (matches) {
-      util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + relative));
+    while ((match = regex.exec(contents))) {
+      hasTerm = true;
+      for (index; index < match.index; index++) {
+        if (contents[index] === '\n') {
+          line++;
+          column = 1;
+        } else {
+          column++;
+        }
+      }
+
+      util.log(util.colors.red('Found forbidden: "' + match[0] +
+          '" in ' + relative + ':' + line + ':' + column));
       if (typeof terms[term] == 'string') {
         fix = terms[term];
       } else {
@@ -666,9 +689,9 @@ function matchTerms(file, terms) {
         util.log(util.colors.blue(fix));
       }
       util.log(util.colors.blue('=========='));
-      return true;
     }
-    return false;
+
+    return hasTerm;
   }).some(function(hasAnyTerm) {
     return hasAnyTerm;
   });
