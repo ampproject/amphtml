@@ -497,13 +497,6 @@ describe('Logging', () => {
       clock = sandbox.useFakeTimers();
     });
 
-    it('should rethrow error with single message', () => {
-      rethrowAsync('intended');
-      expect(() => {
-        clock.tick(1);
-      }).to.throw(Error, /^intended$/);
-    });
-
     it('should rethrow a single error', () => {
       const orig = new Error('intended');
       rethrowAsync(orig);
@@ -515,30 +508,6 @@ describe('Logging', () => {
       }
       expect(error).to.equal(orig);
       expect(error.message).to.equal('intended');
-    });
-
-    it('should rethrow error with many messages', () => {
-      rethrowAsync('first', 'second', 'third');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error.message).to.equal('first second third');
-    });
-
-    it('should rethrow error with original error and messages', () => {
-      const orig = new Error('intended');
-      rethrowAsync('first', orig, 'second', 'third');
-      let error;
-      try {
-        clock.tick(1);
-      } catch (e) {
-        error = e;
-      }
-      expect(error).to.equal(orig);
-      expect(error.message).to.equal('first second third: intended');
     });
 
     it('should preserve error suffix', () => {

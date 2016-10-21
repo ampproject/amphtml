@@ -277,7 +277,7 @@ export class Log {
   assertError(shouldBeError, opt_message) {
     const shouldBeTrueish = shouldBeError && shouldBeError instanceof Error;
     this.assert(shouldBeTrueish, (opt_message || 'Error instance expected') +
-        ': %s', shouldBeElement);
+        ': %s', shouldBeError);
     return /** @type {!Error} */ (shouldBeError);
   }
 
@@ -402,10 +402,9 @@ function createErrorVargs(var_args) {
 /**
  * Rethrows the error without terminating the current context. This preserves
  * whether the original error designation is a user error or a dev error.
- * @param {...*} var_args
+ * @param {!Error} error
  */
-export function rethrowAsync(var_args) {
-  const error = createErrorVargs.apply(null, arguments);
+export function rethrowAsync(error) {
   setTimeout(() => {throw error;});
 }
 

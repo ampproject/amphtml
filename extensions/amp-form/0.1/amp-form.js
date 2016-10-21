@@ -209,7 +209,7 @@ export class AmpForm {
         this.actions_.trigger(this.form_, 'submit-error', null);
         this.setState_(FormState_.SUBMIT_ERROR);
         this.renderTemplate_(error.responseJson || {});
-        rethrowAsync('Form submission failed:', error);
+        rethrowAsync(user().createError('Form submission failed:', error));
       });
     } else if (this.method_ == 'POST') {
       e.preventDefault();

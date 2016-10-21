@@ -314,14 +314,16 @@ export class Extensions {
           try {
             factory(/** @type {!ShadowRoot} */ (ampdoc.getRootNode()));
           } catch (e) {
-            rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
+            rethrowAsync(dev().createError('ShadowRoot factory failed: ',
+                e, extensionId));
           }
         });
         holder.docFactories.forEach(factory => {
           try {
             factory(ampdoc);
           } catch (e) {
-            rethrowAsync('Doc factory failed: ', e, extensionId);
+            rethrowAsync(dev().createError('Doc factory failed: ', e,
+                extensionId));
           }
         });
       }));
@@ -346,7 +348,8 @@ export class Extensions {
           try {
             factory(/** @type {!ShadowRoot} */ (shadowRoot));
           } catch (e) {
-            rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
+            rethrowAsync(dev().createError('ShadowRoot factory failed: ', e,
+                extensionId));
           }
         });
       }));

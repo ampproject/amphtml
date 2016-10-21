@@ -396,7 +396,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         .then(response => this.parseManifest_(response))
         .catch(error => {
           this.hide_();
-          rethrowAsync(error);
+          rethrowAsync(dev().assertError(error));
         });
   }
 
