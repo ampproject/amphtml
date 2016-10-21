@@ -15,6 +15,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
+import {AmpAdImage} from './amp-ad-image';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev, user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
@@ -52,6 +53,10 @@ export class AmpAd extends AMP.BaseElement {
         // Unspecified or empty type.  Nothing to do here except bail out.
         return null;
       }
+      // Check for the simplified Image Ad type
+      if (type === 'imagead') {
+        return new AmpAdImage(this.element);
+      }
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
@@ -86,7 +91,7 @@ export class AmpAd extends AMP.BaseElement {
     // upgrade element fell through.
     dev().assert(this.element.getAttribute('type'), 'Required attribute type');
   }
-}
+};
 
 AMP.registerElement('amp-ad', AmpAd);
 AMP.registerElement('amp-embed', AmpAd);
