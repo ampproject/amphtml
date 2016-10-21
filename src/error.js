@@ -72,12 +72,12 @@ export function reportError(error, opt_associatedElement) {
     if (element) {
       (console.error || console.log).call(console,
           element.tagName + '#' + element.id, error.message);
+    } else if (!getMode().minified) {
+      (console.error || console.log).call(console, error.stack);
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!getMode().minified) {
-      (console.error || console.log).call(console, error.stack);
-    }
+
   }
   if (element && element.dispatchCustomEventForTesting) {
     element.dispatchCustomEventForTesting('amp:error', error.message);
