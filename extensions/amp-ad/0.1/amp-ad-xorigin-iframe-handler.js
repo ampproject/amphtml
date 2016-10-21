@@ -82,6 +82,7 @@ export class AmpAdXOriginIframeHandler {
     dev().assert(
         !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe = iframe;
+    this.is3p_ = is3p;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
     this.intersectionObserver_ = new IntersectionObserver(
