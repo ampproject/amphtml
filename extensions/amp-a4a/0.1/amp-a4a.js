@@ -132,6 +132,9 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.promiseId_ = 0;
 
+    /** {?Object} */
+    this.config = null;
+
     /** @private {?string} */
     this.adUrl_ = null;
 
@@ -182,6 +185,13 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    const adType = this.element.getAttribute('type');
+    this.config = adConfig[adType];
+    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+  }
+
+  /** @override */
   renderOutsideViewport() {
     // Only relevant if non-AMP as AMP creative will be injected within
     // buildCallback promise chain.
@@ -224,7 +234,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const preconnect = adConfig[this.element.getAttribute('type')].preconnect;
+    const preconnect = this.config.preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
