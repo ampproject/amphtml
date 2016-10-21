@@ -220,7 +220,6 @@ export class Log {
    * @return {T} The value of shouldBeTrueish.
    * @template T
    */
-  /*eslint "google-camelcase/google-camelcase": 0*/
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (!shouldBeTrueish) {
@@ -258,14 +257,28 @@ export class Log {
    * @param {*} shouldBeElement
    * @param {string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
-   * @template T
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
     this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
         shouldBeElement);
     return /** @type {!Element} */ (shouldBeElement);
+  }
+
+  /**
+   * Throws an error if the first argument isn't an Error
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeError
+   * @param {string=} opt_message The assertion message
+   * @return {!Error} The value of shouldBeTrueish.
+   */
+  assertError(shouldBeError, opt_message) {
+    const shouldBeTrueish = shouldBeError && shouldBeError instanceof Error;
+    this.assert(shouldBeTrueish, (opt_message || 'Error instance expected') +
+        ': %s', shouldBeElement);
+    return /** @type {!Error} */ (shouldBeError);
   }
 
   /**
@@ -276,9 +289,7 @@ export class Log {
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
    * @return {string} The value of shouldBeTrueish.
-   * @template T
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
     this.assert(typeof shouldBeString == 'string',
         (opt_message || 'String expected') + ': %s', shouldBeString);
@@ -310,7 +321,6 @@ export class Log {
    * @return T
    * @template T
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
     for (const k in enumObj) {
       if (enumObj[k] == s) {
