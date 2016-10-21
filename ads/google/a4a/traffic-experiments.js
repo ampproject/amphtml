@@ -143,7 +143,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
   } else {
-    dev().warn('a4a-config', 'Unknown a4a URL parameter: ', a4aParam,
+    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
         'branch), or 2 (a4a experiment branch)');
   }
