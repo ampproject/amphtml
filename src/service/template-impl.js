@@ -312,20 +312,7 @@ export class Templates {
    * @private
    */
   render_(impl, data) {
-    const root = impl.render(data);
-    const anchors = root.getElementsByTagName('a');
-    for (let i = 0; i < anchors.length; i++) {
-      const anchor = anchors[i];
-      if (!anchor.hasAttribute('href')) {
-        // Ignore anchors without href.
-        continue;
-      }
-
-      // TODO(dvoytenko, #1572): This code should be unnecessary after
-      // sanitization issue has been addressed.
-      anchor.setAttribute('target', '_blank');
-    }
-    return root;
+    return impl.render(data);
   }
 }
 
