@@ -155,7 +155,7 @@ export class InstrumentationService {
   addListener(config, listener, analyticsElement) {
     const eventType = config['on'];
     if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
-      user().error(this.TAG_, 'Trigger type "' + eventType + '" is not ' +
+      user().error(TAG, 'Trigger type "' + eventType + '" is not ' +
         'allowed in the embed.');
       return;
     }
