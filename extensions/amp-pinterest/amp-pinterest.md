@@ -43,19 +43,23 @@ limitations under the License.
 
 Pin It button: `data-do="buttonPin"`
 
-    <amp-pinterest height=20 width=40
-      data-do="buttonPin"
-      data-url="http://www.flickr.com/photos/kentbrew/6851755809/"
-      data-media="http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg"
-      data-description="Next stop: Pinterest">
-    </amp-pinterest>
+```html
+<amp-pinterest height=20 width=40
+  data-do="buttonPin"
+  data-url="http://www.flickr.com/photos/kentbrew/6851755809/"
+  data-media="http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg"
+  data-description="Next stop: Pinterest">
+</amp-pinterest>
+```
 
 Embedded pin widget: `data-do="embedPin"`
 
-    <amp-pinterest width=245 height=330
-      data-do="embedPin"
-      data-url="https://www.pinterest.com/pin/99360735500167749/">
-    </amp-pinterest>
+```html
+<amp-pinterest width=245 height=330
+  data-do="embedPin"
+  data-url="https://www.pinterest.com/pin/99360735500167749/">
+</amp-pinterest>
+```
 
 ## Pin It Button
 
@@ -75,35 +79,51 @@ Required when `data-do` is `buttonPin`.  Contains the default description that a
 
 Default small rectangular button:
 
-    height=20 width=40
+```html
+height=20 width=40
+```
 
 Small rectangular button with pin count to the right, using `data-count="beside"`
 
-    height=28 width=85
+```html
+height=28 width=85
+```
 
 Small rectangular button with pin count on top, using `data-count="above"`
 
-    height=50 width=40
+```html
+height=50 width=40
+```
 
-Large rectangular button using data-height="tall"
+Large rectangular button using `data-height="tall"`
 
-    height=28 width=56
+```html
+height=28 width=56
+```
 
 Large rectangular button with pin count to the right, using `data-tall="true"` and `data-count="beside"`
 
-    height=28 width=107
+```html
+height=28 width=107
+```
 
 Large rectangular button with pin count on top, using `data-height="tall"` and `data-count="above"`
 
-    height=66 width=56
+```html
+height=66 width=56
+```
 
 Small circular button using `data-round="true"`
 
-    height=16 width=16
+```html
+height=16 width=16
+```
 
 Large circular button using `data-round="true"` and `data-height="tall"`
 
-    height=32 width=32
+```html
+height=32 width=32
+```
 
 ## Follow Button
 
@@ -121,8 +141,10 @@ Required when `data-do` is `buttonFollow`.  Contains the text to display on the 
 
 When building the Embedded Pin widget, `data-url` is required and must contain the fully-qualified URL of the Pinterest resource to be shown as a widget.
 
-    data-do="embedPin"
-    data-url="https://www.pinterest.com/pin/99360735500167749/"
+```html
+data-do="embedPin"
+data-url="https://www.pinterest.com/pin/99360735500167749/"
+```
 
 ## Validation
 

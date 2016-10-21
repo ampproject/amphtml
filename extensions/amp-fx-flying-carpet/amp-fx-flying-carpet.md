@@ -58,14 +58,6 @@ The height of the flying carpets "window".
 - You may use the `amp-fx-flying-carpet` element selector to style it freely.
 - `amp-fx-flying-carpet` elements are always `position: relative`.
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-fx-flying-carpet` tag
-(see also `amp-fx-flying-carpet` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/0.1/validator-amp-fx-flying-carpet.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-</table>
+See [amp-fx-flying-carpet rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/0.1/validator-amp-fx-flying-carpet.protoascii) in the AMP validator specification.

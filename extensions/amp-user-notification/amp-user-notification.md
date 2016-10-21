@@ -110,7 +110,7 @@ You can add it as a query string field. (ex.
     - `ampUserId`
 
   Example:
-  ```html
+  ```text
   https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
   ```
 
