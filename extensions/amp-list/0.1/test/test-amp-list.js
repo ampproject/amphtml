@@ -109,7 +109,7 @@ describe('amp-list component', () => {
         .returns(renderPromise).once();
     return list.layoutCallback().then(() => {
       return Promise.all([xhrPromise, renderPromise]).then(() => {
-        expect(list.element.getAttribute('role')).to.equal('list');
+        expect(list.container_.getAttribute('role')).to.equal('list');
         expect(itemElement.getAttribute('role')).to.equal('listitem');
       });
     });
