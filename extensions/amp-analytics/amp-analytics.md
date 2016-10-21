@@ -226,7 +226,7 @@ Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
-## Segment
+### Segment
 
 Type attribute value: `segment`
 
