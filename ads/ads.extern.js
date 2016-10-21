@@ -19,7 +19,7 @@
 /** @constructor */
 function BaseElement$$module$src$base_element() {};
 /** @constructor */
-function AmpAdXDomainIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_cross_domain_iframe_handler() {};
+function AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler() {};
 /** @constructor */
 function AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl() {};
 /** @constructor */

@@ -30,7 +30,7 @@ import {AdDisplayState} from './amp-ad-ui';
 
 const TIMEOUT_VALUE = 10000;
 
-export class AmpAdXDomainIframeHandler {
+export class AmpAdXOriginIframeHandler {
 
   /**
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
@@ -82,7 +82,6 @@ export class AmpAdXDomainIframeHandler {
     dev().assert(
         !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe = iframe;
-    this.is3p_ = is3p;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
     this.intersectionObserver_ = new IntersectionObserver(
@@ -114,7 +113,6 @@ export class AmpAdXDomainIframeHandler {
           const data = info.data;
           if (data.type == 'render-start') {
             this.renderStart_(info);
-            //report performance
           } else {
             this.noContent_();
           }
@@ -174,7 +172,7 @@ export class AmpAdXDomainIframeHandler {
    * And free the iframe resource
    * @param {boolean=} opt_keep
    */
-  freeXDomainIframe(opt_keep) {
+  freeXOriginIframe(opt_keep) {
     this.cleanup_();
     // If ask to keep the iframe.
     // Use in the case of no-content and iframe is a master iframe.
@@ -196,7 +194,7 @@ export class AmpAdXDomainIframeHandler {
       // unlayout already called
       return;
     }
-    this.freeXDomainIframe(this.iframe.name.indexOf('_master') >= 0);
+    this.freeXOriginIframe(this.iframe.name.indexOf('_master') >= 0);
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
   }
 
@@ -312,4 +310,4 @@ export class AmpAdXDomainIframeHandler {
 
 // Make the class available to other late loaded amp-ad implementations
 // without them having to depend on it directly.
-AMP.AmpAdXDomainIframeHandler = AmpAdXDomainIframeHandler;
+AMP.AmpAdXOriginIframeHandler = AmpAdXOriginIframeHandler;

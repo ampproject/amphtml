@@ -30,7 +30,7 @@ import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
-import '../../../../extensions/amp-ad/0.1/amp-ad-cross-domain-iframe-handler';
+import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
 class MockA4AImpl extends AmpA4A {

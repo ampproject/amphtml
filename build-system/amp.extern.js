@@ -184,9 +184,9 @@ AMP.BaseElement = class {
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
  * @constructor
- * @extends {AmpAdXDomainIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_cross_domain_iframe_handler}
+ * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
  */
-AMP.AmpAdXDomainIframeHandler = class {
+AMP.AmpAdXOriginIframeHandler = class {
   /**
    * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
    */

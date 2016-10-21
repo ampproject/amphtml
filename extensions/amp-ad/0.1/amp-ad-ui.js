@@ -90,7 +90,7 @@ export class AmpAdUIHandler {
         this.displayUnlayoutUI_();
         break;
       default:
-        dev.assert(state, 'state is not supported');
+        dev().assert(state, 'state is not supported');
     }
   }
 

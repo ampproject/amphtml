@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpAdXDomainIframeHandler,}
-    from './amp-ad-cross-domain-iframe-handler';
+import {AmpAdXOriginIframeHandler,}
+    from './amp-ad-xorigin-iframe-handler';
 import {
   allowRenderOutsideViewport,
   incrementLoadingAds,
@@ -52,8 +52,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** {?AmpAdUIHandler} */
     this.uiHandler = null;
 
-    /** @private {?AmpAdXDomainIframeHandler} */
-    this.iframeHandler_ = null;
+    /** @private {?AmpAdXOriginIframeHandler} */
+    this.xOriginIframeHandler_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = null;
@@ -169,8 +169,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
-    if (this.iframeHandler_) {
-      this.iframeHandler_.onLayoutMeasure();
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.onLayoutMeasure();
     }
   }
 
@@ -179,9 +179,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   measureIframeLayoutBox_() {
-    if (this.iframeHandler_ && this.iframeHandler_.iframe) {
+    if (this.xOriginIframeHandler_ && this.xOriginIframeHandler_.iframe) {
       const iframeBox =
-          this.getViewport().getLayoutRect(this.iframeHandler_.iframe);
+          this.getViewport().getLayoutRect(this.xOriginIframeHandler_.iframe);
       const box = this.getLayoutBox();
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
@@ -191,7 +191,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
-    if (!this.iframeHandler_ || !this.iframeHandler_.iframe) {
+    if (!this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.iframe) {
       return super.getIntersectionElementLayoutBox();
     }
     const box = this.getLayoutBox();
@@ -226,16 +226,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.lifecycleReporter.sendPing('adRequestStart');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
-      this.iframeHandler_ = new AmpAdXDomainIframeHandler(
+      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
-      return this.iframeHandler_.startUp(iframe, true);
+      return this.xOriginIframeHandler_.startUp(iframe, true);
     });
   }
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.iframeHandler_) {
-      this.iframeHandler_.viewportCallback(inViewport);
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
   }
 
@@ -243,9 +243,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   unlayoutCallback() {
     this.layoutPromise_ = null;
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
-    if (this.iframeHandler_) {
-      this.iframeHandler_.freeXDomainIframe();
-      this.iframeHandler_ = null;
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.freeXOriginIframe();
+      this.xOriginIframeHandler_ = null;
     }
     this.lifecycleReporter.sendPing('adSlotCleared');
     return true;
