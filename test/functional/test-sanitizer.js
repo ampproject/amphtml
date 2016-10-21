@@ -92,10 +92,10 @@ describe('sanitizeHtml', () => {
 
   it('should NOT default target to _top w/o href', () => {
     expect(sanitizeHtml(
-        + '<a>b</a>'
-        +  '<a target="">d</a>'
+        '<a>b</a>'
+        + '<a target="">d</a>'
         )).to.equal(
-        + '<a>b</a>'
+        '<a>b</a>'
         + '<a target="_top">d</a>');
   });
 
