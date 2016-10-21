@@ -117,7 +117,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
-      // Autoplay is managed by VideManager, do not pass it to Youtube.
+      // Autoplay is managed by VideManager, do not pass it to YouTube.
       delete params['autoplay'];
       user().error('Use autoplay attribute instead of data-param-autoplay');
     }
@@ -288,7 +288,7 @@ class AmpYoutube extends AMP.BaseElement {
     return true;
   }
 
-  /** @private */
+  /** @override */
   isInteractive() {
     // YouTube videos are always interactive. There is no YouTube param that
     // makes the video non-interactive. Even data-param-control=0 will not

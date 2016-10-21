@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {listen} from '../src/event-helper';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
