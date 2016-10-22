@@ -20,6 +20,11 @@
 function BaseElement$$module$src$base_element() {};
 /** @constructor */
 function AmpAdApiHandler$$module$extensions$amp_ad$0_1$amp_ad_api_handler() {};
+/** @constructor */
+function AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl() {};
+/** @constructor */
+function AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a() {};
+
 
 // Long list of, uhm, stuff the ads code needs to compile.
 // All unquoted external properties need to be added here.

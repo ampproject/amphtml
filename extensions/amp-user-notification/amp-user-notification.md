@@ -110,7 +110,7 @@ You can add it as a query string field. (ex.
     - `ampUserId`
 
   Example:
-  ```html
+  ```text
   https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
   ```
 
@@ -245,6 +245,20 @@ ex. (w/o vendor prefixes)
     animation: fadeIn ease-in 1s 1 forwards;
   }
 ```
+
+## Actions
+The `amp-user-notification` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>dismiss (default)</td>
+    <td>Closes the user notification - see [Usage](#usage) for more details</td>
+  </tr>
+</table>
 
 ## Delaying Client ID generation until the notification is acknowledged
 

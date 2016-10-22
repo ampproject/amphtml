@@ -63,6 +63,18 @@ export function waitForChild(parent, checkFunc, callback) {
   }
 }
 
+/**
+ * Waits until the child element is constructed. Once the child is found, the
+ * promise is resolved.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @return {!Promise}
+ */
+export function waitForChildPromise(parent, checkFunc) {
+  return new Promise(resolve => {
+    waitForChild(parent, checkFunc, resolve);
+  });
+}
 
 /**
  * Waits for document's body to be available.
@@ -489,7 +501,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev().error('dom', 'Failed to open url on target: ', target, e);
+    dev().error('DOM', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.

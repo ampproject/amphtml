@@ -16,6 +16,8 @@
 
 
 import {Timer} from '../src/timer';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {
@@ -196,8 +198,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
-        '<style>.-amp-element {display: block;}</style>' +
-        '<body style="margin:0"><div id=parent></div>';
+        '<body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST_IFRAME = true;
@@ -208,6 +209,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
+      installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
@@ -221,8 +223,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
           addElement: function(element) {
             const iWin = iframe.contentWindow;
             const p = onInsert(iWin).then(() => {
-              // Make sure it has dimensions since no styles are available.
-              element.style.display = 'block';
               element.build(true);
               if (!element.getPlaceholder()) {
                 const placeholder = element.createPlaceholder();

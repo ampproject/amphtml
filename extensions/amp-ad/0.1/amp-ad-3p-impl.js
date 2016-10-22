@@ -84,8 +84,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
-    this.lifecycleReporter_ = getLifecycleReporter(this, 'amp');
-    this.lifecycleReporter_.sendPing('adSlotBuilt');
+    /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
+    this.lifecycleReporter = getLifecycleReporter(this, 'amp');
+
+    this.lifecycleReporter.sendPing('adSlotBuilt');
   }
 
   /** @override */
@@ -201,7 +203,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    this.lifecycleReporter_.sendPing('preAdThrottle');
+    this.lifecycleReporter.sendPing('preAdThrottle');
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
@@ -215,7 +217,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
-      this.lifecycleReporter_.sendPing('adRequestStart');
+      this.lifecycleReporter.sendPing('adRequestStart');
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.apiHandler_ = new AmpAdApiHandler(
@@ -285,7 +287,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_.unlayoutCallback();
       this.apiHandler_ = null;
     }
-    this.lifecycleReporter_.sendPing('adSlotCleared');
+    this.lifecycleReporter.sendPing('adSlotCleared');
     return true;
   }
 }
