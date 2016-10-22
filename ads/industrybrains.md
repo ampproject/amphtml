@@ -34,5 +34,5 @@ For semantics of configuration, please see [ad network documentation](https://ww
 Supported parameters:
 
 - data-cid
-- width
-- height
+- data-width
+- data-height
