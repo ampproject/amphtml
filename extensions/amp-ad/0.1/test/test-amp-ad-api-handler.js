@@ -78,8 +78,7 @@ describe('amp-ad-api-handler', () => {
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
             null);
         const beforeAttachedToDom = element => {
-          element.setAttribute('src', 'test');
-          startUpPromise = apiHandler.startUp(element, true);
+          startUpPromise = apiHandler.startUp(element, true, undefined, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {

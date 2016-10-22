@@ -26,7 +26,6 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
-import {endsWith} from '../../../src/string';
 
 const TIMEOUT_VALUE = 10000;
 
@@ -55,9 +54,6 @@ export class AmpAdApiHandler {
     this.embedStateApi_ = null;
 
     /** @private {boolean} */
-    this.useApi_ = true;
-
-    /** @private {boolean} */
     this.is3p_ = false;
 
     /** @private {?function()|undefined} opt_noContentHandler */
@@ -79,18 +75,16 @@ export class AmpAdApiHandler {
    * @param {boolean} is3p whether iframe was loaded via 3p.
    * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
+   * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @return {!Promise} awaiting load event for ad frame
    * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
-  startUp(iframe, is3p, opt_defaultVisible) {
+  startUp(iframe, is3p, opt_defaultVisible, opt_isA4A) {
     dev().assert(
         !this.iframe_, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
-    let iframeSrc = this.iframe_.getAttribute('src');
-    iframeSrc = iframeSrc.substring(0, iframeSrc.indexOf('#'));
-    this.useApi_ = endsWith(iframeSrc, '.html');
     this.baseInstance_.applyFillContent(this.iframe_);
     this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe_, is3p);
@@ -111,7 +105,7 @@ export class AmpAdApiHandler {
         }, this.is3p_, this.is3p_));
 
     // Install API that listen to ad response
-    if (!this.useApi_) {
+    if (opt_isA4A) {
       this.adResponsePromise_ = Promise.resolve();
     } else if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
