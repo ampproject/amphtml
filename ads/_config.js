@@ -419,6 +419,7 @@ export const adConfig = {
   },
 
   zedo: {
+    prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
     renderStartImplemented: true,
   },
 
