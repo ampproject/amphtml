@@ -113,12 +113,12 @@ import {zucks} from '../ads/zucks';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  taboola: true,
+  _ping_: true,
   'mantis-recommend': true,
   plista: true,
-  zergnet: true,
-  _ping_: true,
   smartclip: true,
+  taboola: true,
+  zergnet: true,
 };
 
 const data = parseFragment(location.hash);
