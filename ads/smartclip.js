@@ -34,6 +34,6 @@ export function smartclip(global, data) {
   const rand = Math.round(Math.random() * 100000000);
 
   loadScript(global, 'https://des.smartclip.net/ads?type=dyn&plc='
-    + encodeURI(data.plc) + '&sz=' + encodeURI(data.sz)
-    + (data.extra ? '&' + data.extra : '') + '&rnd=' + rand);
+    + encodeURIComponent(data.plc) + '&sz=' + encodeURIComponent(data.sz)
+    + (data.extra ? '&' + encodeURI(data.extra) : '') + '&rnd=' + rand);
 }
