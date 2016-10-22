@@ -674,4 +674,27 @@ describe('DOM', () => {
           'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f');
     });
   });
+
+  describe('tryFocus', () => {
+    it('should call focus on the element', () => {
+      const element = {
+        focus() {},
+      };
+      const focusSpy = sandbox.spy(element, 'focus');
+      dom.tryFocus(element);
+      expect(focusSpy).to.have.been.called;
+    });
+
+    it('should not throw exception if element focus throws exception', () => {
+      const element = {
+        focus() {
+          throw new Error('Cannot focus');
+        },
+      };
+      const focusSpy = sandbox.spy(element, 'focus');
+      dom.tryFocus(element);
+      expect(focusSpy).to.have.been.called;
+      expect(focusSpy).to.not.throw;
+    });
+  });
 });
