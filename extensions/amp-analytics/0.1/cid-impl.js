@@ -112,9 +112,9 @@ class Cid {
     } else {
       getCidStruct = /** @type {!GetCidDef} */ (externalCidScope);
     }
-    user().assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
+    user().assert(/^[a-zA-Z0-9-_.]+$/.test(getCidStruct.scope),
         'The client id name must only use the characters ' +
-        '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
+        '[a-zA-Z0-9-_.]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
       return viewerForDoc(this.win.document).whenFirstVisible();
     }).then(() => {
