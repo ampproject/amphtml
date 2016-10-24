@@ -46,6 +46,7 @@ import {
 } from './crypto-verifier';
 import {isExperimentOn} from '../../../src/experiments';
 import {handleClick} from '../../../ads/alp/handler';
+import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -121,14 +122,15 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    dev().assert(AMP.AmpAdApiHandler);
+    dev().assert(AMP.AmpAdUIHandler);
+    dev().assert(AMP.AmpAdXOriginIframeHandler);
 
     /** @private {?Promise<!boolean>} */
     this.adPromise_ = null;
 
     /**
      * @private {number} unique ID of the currently executing promise to allow
-     *    for cancellation.
+     * for cancellation.
      */
     this.promiseId_ = 0;
 
@@ -138,8 +140,11 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AMP.AmpAdApiHandler} */
-    this.apiHandler_ = null;
+    /** {?AMP.AmpAdUIHandler} */
+    this.uiHandler = null;
+
+    /** @private {?AMP.AmpAdXOriginIframeHandler} */
+    this.xOriginIframeHandler_ = null;
 
     /** @private {boolean} */
     this.rendered_ = false;
@@ -189,6 +194,8 @@ export class AmpA4A extends AMP.BaseElement {
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+    this.uiHandler = new AMP.AmpAdUIHandler(this);
+    this.uiHandler.init();
   }
 
   /** @override */
@@ -258,8 +265,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    if (this.apiHandler_) {
-      this.apiHandler_.onLayoutMeasure();
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.onLayoutMeasure();
     }
     if (this.layoutMeasureExecuted_ || !isCryptoAvailable()) {
       // onLayoutMeasure gets called multiple times.
@@ -502,6 +509,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     this.lifecycleReporter.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
@@ -520,9 +528,9 @@ export class AmpA4A extends AMP.BaseElement {
       this.experimentalNonAmpCreativeRenderMethod_ = null;
       this.rendered_ = false;
       this.timerId_ = 0;
-      if (this.apiHandler_) {
-        this.apiHandler_.unlayoutCallback();
-        this.apiHandler_ = null;
+      if (this.xOriginIframeHandler_) {
+        this.xOriginIframeHandler_.freeXOriginIframe();
+        this.xOriginIframeHandler_ = null;
       }
       this.layoutMeasureExecuted_ = false;
     });
@@ -533,8 +541,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.apiHandler_) {
-      this.apiHandler_.viewportCallback(inViewport);
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
   }
 
@@ -755,12 +763,12 @@ export class AmpA4A extends AMP.BaseElement {
    */
   iframeRenderHelper_(iframe, is3p) {
     // TODO(keithwrightbos): noContentCallback?
-    this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
-    // TODO(keithwrightbos): startup returns load event, do we need to wait?
+    this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
+    // TODO(keithwrightbos): init returns load event, do we need to wait?
     // Set opt_defaultVisible to true as 3p draw code never executed causing
     // render-start event never to fire which will remove visiblity hidden.
-    this.apiHandler_.startUp(iframe, is3p, /* opt_defaultVisible */ true,
-        /* opt_isA4A */ true);
+    this.xOriginIframeHandler_.init(iframe,
+        is3p, /* opt_defaultVisible */ true, /* opt_isA4A */ true);
     this.rendered_ = true;
   }
 
