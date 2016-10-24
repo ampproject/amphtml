@@ -18,6 +18,7 @@ import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
+import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
 import {installActionServiceForDoc,} from
@@ -130,7 +131,7 @@ describe('AccessService', () => {
   });
 
   it('should parse type', () => {
-    const config = {
+    let config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
@@ -173,6 +174,21 @@ describe('AccessService', () => {
     expect(new AccessService(window).type_).to.equal('other');
     expect(new AccessService(window).adapter_).to.be
         .instanceOf(AccessOtherAdapter);
+
+    config = {};
+    config['type'] = 'vendor';
+    config['vendor'] = 'vendor1';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('vendor');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessVendorAdapter);
+
+    delete config['type'];
+    config['vendor'] = 'vendor1';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('vendor');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessVendorAdapter);
   });
 
   it('should parse type for JWT w/o experiment', () => {
@@ -298,6 +314,35 @@ describe('AccessService', () => {
     const service = new AccessService(window);
     expect(service.authorizationFallbackResponse_).to.deep.equal(
         {'error': true});
+  });
+
+  it('should register vendor', () => {
+    const config = {
+      'vendor': 'vendor1',
+    };
+    element.textContent = JSON.stringify(config);
+    const accessService = new AccessService(window);
+    class Vendor1 {};
+    const vendor1 = new Vendor1();
+    accessService.registerVendor('vendor1', vendor1);
+    return accessService.adapter_.vendorPromise_.then(vendor => {
+      expect(vendor).to.equal(vendor1);
+    });
+  });
+
+  it('should prohibit vendor registration for non-vendor config', () => {
+    const config = {
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l',
+    };
+    element.textContent = JSON.stringify(config);
+    const accessService = new AccessService(window);
+    class Vendor1 {};
+    const vendor1 = new Vendor1();
+    expect(() => {
+      accessService.registerVendor('vendor1', vendor1);
+    }).to.throw(/can only be used for "type=vendor"/);
   });
 });
 
