@@ -553,6 +553,15 @@ describe('cid', () => {
     });
   });
 
+  it('should retreive cookie value with . in name', () => {
+    fakeWin.location.href =
+        'https://abc.org/';
+    fakeWin.document.cookie = '_sp_id.44=4567;';
+    return compare(
+        '_sp_id.44',
+        '4567');
+  });
+
   function compare(externalCidScope, compareValue) {
     return cid.get(externalCidScope, hasConsent).then(c => {
       expect(c).to.equal(compareValue);
