@@ -16,6 +16,8 @@
 
 import {dev} from '../../../src/log';
 
+const TAG = 'AmpAdUIHandler';
+
 /**
  * Ad display state.
  * @enum {number}
@@ -90,7 +92,7 @@ export class AmpAdUIHandler {
         this.displayUnlayoutUI_();
         break;
       default:
-        dev().error('state is not supported');
+        dev().error(TAG, 'state is not supported');
     }
   }
 
