@@ -90,7 +90,7 @@ export class AmpAdUIHandler {
         this.displayUnlayoutUI_();
         break;
       default:
-        dev().assert(state, 'state is not supported');
+        dev().error('state is not supported');
     }
   }
 
@@ -148,6 +148,9 @@ export class AmpAdUIHandler {
   displayUnlayoutUI_() {
     this.state = AdDisplayState.NOT_LAID_OUT;
     this.baseInstance_.deferMutate(() => {
+      if (this.state != AdDisplayState.NOT_LAID_OUT) {
+        return;
+      }
       this.baseInstance_.togglePlaceholder(true);
       this.baseInstance_.toggleFallback(false);
     });
