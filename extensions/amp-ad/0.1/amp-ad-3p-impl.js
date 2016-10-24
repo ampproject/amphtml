@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpAdApiHandler} from './amp-ad-api-handler';
+import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   allowRenderOutsideViewport,
   incrementLoadingAds,
 } from './concurrent-load';
-import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -31,6 +30,7 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
 
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -48,8 +48,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** {?Object} */
     this.config = null;
 
-    /** @private {?AmpAdApiHandler} */
-    this.apiHandler_ = null;
+    /** {?AmpAdUIHandler} */
+    this.uiHandler = null;
+
+    /** @private {?AmpAdXOriginIframeHandler} */
+    this.xOriginIframeHandler_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = null;
@@ -74,9 +77,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
-
-    /** @private @const {function()} */
-    this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     /** @private {?string|undefined} */
     this.container_ = undefined;
@@ -118,6 +118,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType];
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+
+    this.uiHandler = new AmpAdUIHandler(this);
+    this.uiHandler.init();
 
     setupA2AListener(this.win);
   }
@@ -165,8 +168,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
-    if (this.apiHandler_) {
-      this.apiHandler_.onLayoutMeasure();
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.onLayoutMeasure();
     }
   }
 
@@ -175,8 +178,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   measureIframeLayoutBox_() {
-    if (this.iframe_) {
-      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
+    if (this.xOriginIframeHandler_ && this.xOriginIframeHandler_.iframe) {
+      const iframeBox =
+          this.getViewport().getLayoutRect(this.xOriginIframeHandler_.iframe);
       const box = this.getLayoutBox();
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
@@ -186,7 +190,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
-    if (!this.iframe_) {
+    if (!this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.iframe) {
       return super.getIntersectionElementLayoutBox();
     }
     const box = this.getLayoutBox();
@@ -209,6 +213,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'position:fixed: %s', this.element);
     incrementLoadingAds(this.win);
     return this.layoutPromise_ = getAdCid(this).then(cid => {
+      this.uiHandler.setDisplayState(AdDisplayState.LOADING);
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
@@ -218,74 +223,28 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
       this.lifecycleReporter.sendPing('adRequestStart');
-      this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+      const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
-      this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.boundNoContentHandler_);
-      return this.apiHandler_.startUp(this.iframe_, true);
+      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
+          this);
+      return this.xOriginIframeHandler_.init(iframe, true);
     });
   }
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.apiHandler_) {
-      this.apiHandler_.viewportCallback(inViewport);
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
-  }
-
-  /**
-   * Activates the fallback if the ad reports that the ad slot cannot
-   * be filled.
-   * @private
-   */
-  noContentHandler_() {
-    // If iframe is null nothing to do.
-    if (!this.iframe_) {
-      return;
-    }
-    // If a fallback does not exist attempt to collapse the ad.
-    if (!this.fallback_) {
-      this.attemptChangeHeight(0).then(() => {
-        this./*OK*/collapse();
-      }, () => {});
-    }
-    this.deferMutate(() => {
-      if (!this.iframe_) {
-        return;
-      }
-      if (this.fallback_) {
-        // Hide placeholder when falling back.
-        if (this.placeholder_) {
-          this.togglePlaceholder(false);
-        }
-        this.toggleFallback(true);
-      }
-      // Remove the iframe only if it is not the master.
-      if (this.iframe_.name.indexOf('_master') == -1) {
-        removeElement(this.iframe_);
-        this.iframe_ = null;
-      }
-    });
   }
 
   /** @override  */
   unlayoutCallback() {
     this.layoutPromise_ = null;
-    if (!this.iframe_) {
-      return true;
-    }
-
-    if (this.placeholder_) {
-      this.togglePlaceholder(true);
-    }
-    if (this.fallback_) {
-      this.toggleFallback(false);
-    }
-
-    this.iframe_ = null;
-    if (this.apiHandler_) {
-      this.apiHandler_.unlayoutCallback();
-      this.apiHandler_ = null;
+    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.freeXOriginIframe();
+      this.xOriginIframeHandler_ = null;
     }
     this.lifecycleReporter.sendPing('adSlotCleared');
     return true;
