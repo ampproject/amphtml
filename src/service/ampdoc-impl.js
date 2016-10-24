@@ -265,10 +265,9 @@ export class AmpDoc {
 
   /**
    * Returns the URL from which the document was loaded.
-   * @param {boolean=} opt_force
    * @return {string}
    */
-  getUrl(opt_force) {
+  getUrl() {
     return dev().assertString(null, 'not implemented');
   }
 
@@ -329,7 +328,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  getUrl(opt_force) {
+  getUrl() {
     return this.win.location.href;
   }
 
@@ -373,7 +372,7 @@ export class AmpDocShadow extends AmpDoc {
    */
   constructor(win, url, shadowRoot) {
     super(win);
-    /** @private {string} */
+    /** @private @const {string} */
     this.url_ = url;
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
@@ -412,10 +411,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  getUrl(opt_force) {
-    if (opt_force) {
-
-    }
+  getUrl() {
     return this.url_;
   }
 
