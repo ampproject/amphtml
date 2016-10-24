@@ -213,6 +213,11 @@ export const adConfig = {
 
   kargo: {},
 
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+    renderStartImplemented: true,
+  },
+
   ligatus: {},
 
   loka: {
