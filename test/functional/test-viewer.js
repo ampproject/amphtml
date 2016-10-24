@@ -508,6 +508,7 @@ describe('Viewer', () => {
     const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.title).to.equal('Awesome doc');
+    expect(m.data.sourceUrl).to.equal('http://localhost:9876/test/viewer');
   });
 
   it('should post scroll event', () => {
