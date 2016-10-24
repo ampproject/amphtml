@@ -18,11 +18,12 @@ limitations under the License.
 
 ## Overview
 
-Some components such as [`amp-pixel`](../builtins/amp-pixel.md) and
-[`amp-list`](../extensions/amp-list/amp-list.md) allow variables to be substituted
+Some components such as [`amp-pixel`](../builtins/amp-pixel.md), 
+[`amp-list`](../extensions/amp-list/amp-list.md) and 
+[`amp-analytics`](../extensions/amp-analytics/amp-analytics.md) allow variables to be substituted
 in the relevant URLs. AMP provides a number of standard variable substitutions and
 allows each component to add their own. The rest of this document talks about
-the variables supported by the platform.
+the variables supported by the platform and various extensions.
 
 Anchor href's that are the target (or have a child who is the target) of a click
 are synchronously expanded.  Variables below that are asynchronous by nature
@@ -32,11 +33,21 @@ will still update to the most current values of the variables.  Note that some
 variables will not allow for expansion for A4A creatives.  Specifics will be
 addressed at a later time.
 
+| Table of Contents  |
+|---|
+| [Device and Browser](#device-and-browser) |
+| [Interaction](#interaction) |
+| [Miscellaneous](#miscellaneous) |
+| [Page and content](#page-and-content) |
+| [Performance](#performance) |
+| [Visibility](#visibility-variables) |
+
+
 ## Page and Content
 
-### AMPDOC_HOST
+### AMP Document Host
 
-Use the special string `AMPDOC_HOST` to add the AMP document's URL host.
+Use the special string `AMPDOC_HOST` to add the AMP document's URL host. `amp-analytics` also supports expansion of `${ampdocHost}`. Example values: `example.com`.
 
 For instance:
 ```html
@@ -44,7 +55,7 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?host=example.com:8080`.
 
-### AMPDOC_HOSTNAME
+### AMP Document Hostname
 
 Use the special string `AMPDOC_HOSTNAME` to add the AMP document's URL hostname.
 
@@ -54,9 +65,9 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?hostname=example.com`.
 
-### AMPDOC_URL
+### AMP Document URL
 
-Use the special string `AMPDOC_URL` to add the AMP document's URL.
+Use the special string `AMPDOC_URL` to add the AMP document's URL. The URL contains the scheme, domain, port and full path. It does not contain the fragment part of the URL. `amp-analytics` also supports expansion of `${ampdocUrl}`. Example value: `http://example.com:8000/examples/analytics.amp.html`.
 
 For instance:
 ```html
@@ -64,9 +75,9 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?ref=https%3A%2F%2Fexample.com%2F`.
 
-### CANONICAL_HOST
+### Canonical Host
 
-Use the special string `CANONICAL_HOST` to add the canonical URL's host of the current document to the URL
+Use the special string `CANONICAL_HOST` to add the canonical URL's host. `amp-analytics` also supports expansion of `${canonicalHost}`. Example value: `http://pinterest.com:9000`.
 
 For instance:
 ```html
