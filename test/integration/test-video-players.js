@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * Runs the video manager integration test suite against a video player that
+ * implements the video interface (@see ../../src/video-interface.js)
+ *
+ * To include a new video player to the test suite, simply:
+ * (1) Include the component's script file in test/fixtures/video-players.html
+ * (2) Add a test here and create your component with the required attributes.
+ *     Note that attributes such as layout, width, height and autoplay are
+ *     automatically added by the test suite.
+ * @fileoverview
+ */
+
 import {runVideoPlayerIntegrationTests} from './video-players-test-helper';
 
 describe('amp-video', () => {

@@ -25,6 +25,7 @@ import {
 } from '../../testing/iframe';
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
+
   describe('Autoplay', function() {
     this.timeout(10000);
     it('should play when in view port initially', () => {
@@ -137,7 +138,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       sizer.style.height = '200vh';
       fixture.doc.body.appendChild(sizer);
       fixture.doc.body.appendChild(video);
-      return fixture.awaitEvent('amp:load:end', 1).then(() => {
+      return fixture.awaitEvent('amp:load:start', 1).then(() => {
         return video;
       });
     });

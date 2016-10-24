@@ -120,13 +120,14 @@ class AmpYoutube extends AMP.BaseElement {
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
-      // Autoplay is managed by VideManager, do not pass it to YouTube.
+      // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
       user().error('Use autoplay attribute instead of data-param-autoplay');
     }
 
     // Unless inline play policy is set explicitly, enable inline play for iOS
-    // in all cases.
+    // in all cases similar to Android. Inline play is the desired default for
+    // video in AMP.
     if (!('playsinline' in params)) {
       params['playsinline'] = '1';
     }
@@ -135,11 +136,11 @@ class AmpYoutube extends AMP.BaseElement {
     if (hasAutoplay) {
       // Unless annotations policy is set explicitly, change the default to
       // hide annotations when autoplay is set.
-      // We do this because we like the fist user interaction with an
-      // autoplaying video to be just unmute the video so annotations are not
-      // interactive during autoplay.
+      // We do this because we like the first user interaction with an
+      // autoplaying video to be just unmute tso annotations are not
+      // interactive during autoplay anyway.
       if (!('iv_load_policy' in params)) {
-        params['iv_load_policy'] = `{YT_PLAYER_FLAG_HIDE_ANNOTATION}`;
+        params['iv_load_policy'] = `${YT_PLAYER_FLAG_HIDE_ANNOTATION}`;
       }
 
       // Inline play must be set for autoplay regardless of original value.
@@ -189,6 +190,7 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /**
+   * Sends a command to the player through postMessage.
    * @param {string} command
    * @param {Object=} opt_args
    * @private
@@ -299,7 +301,7 @@ class AmpYoutube extends AMP.BaseElement {
   isInteractive() {
     // YouTube videos are always interactive. There is no YouTube param that
     // makes the video non-interactive. Even data-param-control=0 will not
-    // prevent user from pausing or resuming the video by tapping it.
+    // prevent user from pausing or resuming the video.
     return true;
   }
 

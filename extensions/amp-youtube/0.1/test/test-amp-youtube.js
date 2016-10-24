@@ -74,7 +74,7 @@ describe('amp-youtube', function() {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          'https://www.youtube.com/embed/mGENRKrdoGY?enablejsapi=1');
+          'https://www.youtube.com/embed/mGENRKrdoGY?enablejsapi=1&playsinline=1');
     });
   });
 
@@ -229,7 +229,7 @@ describe('amp-youtube', function() {
       // data-param-autoplay is black listed in favour of just autoplay
       expect(iframe.src).to.not.contain('autoplay=1');
       // playsinline should default to 1 if not provided.
-      expect(iframe.src).to.not.contain('playsinline=1');
+      expect(iframe.src).to.contain('playsinline=1');
     });
   });
 
@@ -241,7 +241,7 @@ describe('amp-youtube', function() {
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       // playsinline must be set 1 even if specified as 0
-      expect(iframe.src).to.not.contain('playsinline=1');
+      expect(iframe.src).to.contain('playsinline=1');
       // annotation policy should default to 3 if not specified.
       expect(iframe.src).to.contain('iv_load_policy=3');
     });

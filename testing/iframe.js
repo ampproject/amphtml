@@ -64,8 +64,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:attached': 0,
       'amp:error': 0,
       'amp:stubbed': 0,
-      'amp:load:start': 0,
-      'amp:load:end': 0,
+      'amp:load:start': 0
     };
     const messages = [];
     let html = __html__[fixture];
