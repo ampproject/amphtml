@@ -37,7 +37,7 @@ export function kixer(global, data) {
 
   const kxload = function() {
     d.removeEventListener('load', kxload, false);
-    if (d.innerHTML.length > 0) {
+    if (d.childNodes.length > 0) {
       global.context.renderStart();
     } else {
       global.context.noContentAvailable();
