@@ -218,6 +218,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  ligatus: {},
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
@@ -393,6 +395,11 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  yahoo: {
+    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    preconnect: 'https://us.adserver.yahoo.com',
+  },
 
   yahoojp: {
     prefetch: [

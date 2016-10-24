@@ -472,7 +472,7 @@ function disposeServiceInternal(id, service) {
   } catch (e) {
     // Ensure that a failure to dispose a service does not disrupt other
     // services.
-    dev().error('service', 'failed to dispose service', id, e);
+    dev().error('SERVICE', 'failed to dispose service', id, e);
   }
 }
 

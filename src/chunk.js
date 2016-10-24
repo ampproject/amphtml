@@ -156,7 +156,7 @@ class Chunks {
       if (this.tasks_.length) {
         this.schedule_();
       }
-      dev().fine('chunk', t.displayName || t.name,
+      dev().fine('CHUNK', t.displayName || t.name,
           'Duration', Date.now() - before);
     }
     return true;

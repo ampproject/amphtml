@@ -64,6 +64,21 @@ export const AnalyticsEventType = {
   HIDDEN: 'hidden',
 };
 
+/** @const {string} */
+const TAG = 'Analytics.Instrumentation';
+
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const {Array<AnalyticsEventType>}
+ */
+const ALLOWED_IN_EMBED = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.CLICK,
+  AnalyticsEventType.TIMER,
+  AnalyticsEventType.HIDDEN,
+];
+
 /**
  * Ignore Most of this class as it has not been thought through yet. It will
  * change completely.
@@ -90,9 +105,6 @@ export class InstrumentationService {
   constructor(window) {
     /** @const {!Window} */
     this.win_ = window;
-
-    /** @const {string} */
-    this.TAG_ = 'Analytics.Instrumentation';
 
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(window);
@@ -142,12 +154,17 @@ export class InstrumentationService {
    */
   addListener(config, listener, analyticsElement) {
     const eventType = config['on'];
+    if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
+      user().error(TAG, 'Trigger type "' + eventType + '" is not ' +
+        'allowed in the embed.');
+      return;
+    }
     if (eventType === AnalyticsEventType.VISIBLE) {
       this.createVisibilityListener_(listener, config,
           AnalyticsEventType.VISIBLE, analyticsElement);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
-        user().error(this.TAG_, 'Missing required selector on click trigger');
+        user().error(TAG, 'Missing required selector on click trigger');
         return;
       }
 
@@ -156,7 +173,7 @@ export class InstrumentationService {
           this.createSelectiveListener_(listener, config['selector']));
     } else if (eventType === AnalyticsEventType.SCROLL) {
       if (!config['scrollSpec']) {
-        user().error(this.TAG_, 'Missing scrollSpec on scroll trigger.');
+        user().error(TAG, 'Missing scrollSpec on scroll trigger.');
         return;
       }
       this.registerScrollTrigger_(config['scrollSpec'], listener);
@@ -362,7 +379,7 @@ export class InstrumentationService {
   registerScrollTrigger_(config, listener) {
     if (!Array.isArray(config['verticalBoundaries']) &&
         !Array.isArray(config['horizontalBoundaries'])) {
-      user().error(this.TAG_, 'Boundaries are required for the scroll ' +
+      user().error(TAG, 'Boundaries are required for the scroll ' +
           'trigger to work.');
       return;
     }
@@ -430,7 +447,7 @@ export class InstrumentationService {
     for (let b = 0; b < bounds.length; b++) {
       let bound = bounds[b];
       if (typeof bound !== 'number' || !isFinite(bound)) {
-        user().error(this.TAG_, 'Scroll trigger boundaries must be finite.');
+        user().error(TAG, 'Scroll trigger boundaries must be finite.');
         return result;
       }
 
@@ -462,7 +479,7 @@ export class InstrumentationService {
       while (i-- > 0 && matches.item(i) != el) {};
       return i > -1;
     } catch (selectorError) {
-      user().error(this.TAG_, 'Bad query selector.', selector, selectorError);
+      user().error(TAG, 'Bad query selector.', selector, selectorError);
     }
     return false;
   }
@@ -473,19 +490,19 @@ export class InstrumentationService {
    */
   isTimerSpecValid_(timerSpec) {
     if (!timerSpec) {
-      user().error(this.TAG_, 'Bad timer specification');
+      user().error(TAG, 'Bad timer specification');
       return false;
     } else if (!timerSpec.hasOwnProperty('interval')) {
-      user().error(this.TAG_, 'Timer interval specification required');
+      user().error(TAG, 'Timer interval specification required');
       return false;
     } else if (typeof timerSpec['interval'] !== 'number' ||
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      user().error(this.TAG_, 'Bad timer interval specification');
+      user().error(TAG, 'Bad timer interval specification');
       return false;
     } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
               (typeof timerSpec['maxTimerLength'] !== 'number' ||
                   timerSpec['maxTimerLength'] <= 0)) {
-      user().error(this.TAG_, 'Bad maxTimerLength specification');
+      user().error(TAG, 'Bad maxTimerLength specification');
       return false;
     } else {
       return true;
@@ -513,6 +530,21 @@ export class InstrumentationService {
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);
+  }
+
+  /**
+   * Checks to confirm that a given trigger type is allowed for the element.
+   * Specifically, ti confirms that if the element is in the embed, only a
+   * subset of the trigger types are allowed.
+   * @param  {!AnalyticsEventType} triggerType
+   * @param  {!Element} element
+   * @return {boolean} True if the trigger is allowed. False otherwise.
+   */
+  isTriggerAllowed_(triggerType, element) {
+    if (element.ownerDocument.defaultView != this.win_) {
+      return ALLOWED_IN_EMBED.indexOf(triggerType) > -1;
+    }
+    return true;
   }
 }
 
