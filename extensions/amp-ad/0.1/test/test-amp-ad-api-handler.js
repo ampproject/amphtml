@@ -74,6 +74,20 @@ describe('amp-ad-api-handler', () => {
     });
 
     describe('method startUp return promise', () => {
+      it('should resolve directly if iframe do not support API', () => {
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
+            null);
+        const beforeAttachedToDom = element => {
+          startUpPromise = apiHandler.startUp(element, true, undefined, true);
+        };
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              return startUpPromise.then(() => {
+                expect(newIframe.style.visibility).to.equal('');
+              });
+            });
+      });
+
       it('should resolve on message "bootstrap-loaded" if render-start is'
           + 'NOT implemented by 3P', () => {
         expect(iframe.style.visibility).to.equal('hidden');
