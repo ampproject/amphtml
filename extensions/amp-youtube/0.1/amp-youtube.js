@@ -34,6 +34,9 @@ const YT_PLAYER_STATE_PAUSED = 2;
 /** @type {number} Config to tell YouTube to hide annotations by default*/
 const YT_PLAYER_FLAG_HIDE_ANNOTATION = 3;
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpYoutube extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -136,7 +139,7 @@ class AmpYoutube extends AMP.BaseElement {
       // autoplaying video to be just unmute the video so annotations are not
       // interactive during autoplay.
       if (!('iv_load_policy' in params)) {
-        params['iv_load_policy'] = YT_PLAYER_FLAG_HIDE_ANNOTATION;
+        params['iv_load_policy'] = `{YT_PLAYER_FLAG_HIDE_ANNOTATION}`;
       }
 
       // Inline play must be set for autoplay regardless of original value.
@@ -185,12 +188,16 @@ class AmpYoutube extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  sendCommand_(command, args) {
+  /**
+   * @param {string} command
+   * @param {Object=} opt_args
+   * @private
+   * */
+  sendCommand_(command, opt_args) {
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
       'event': 'command',
       'func': command,
-      'args': args || '',
+      'args': opt_args || '',
     }), '*');
   }
 
