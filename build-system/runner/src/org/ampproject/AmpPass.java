@@ -66,8 +66,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
     if (isCallRemovable(n)) {
-      Node rootcall = n.getGrandparent();
-      maybeEliminateCallExceptFirstParam(rootcall, rootcall.getParent());
+      maybeEliminateCallExceptFirstParam(n, parent);
     // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("localDev", "test"))) {
@@ -100,26 +99,36 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    * and a child STRING "assert" (or any other signature from Set<String> value)
    */
   private boolean isCallRemovable(Node n) {
-    if (n != null && n.isCall()) {
-      Node grandparent = n.getGrandparent();
-      // We want to make sure an `Log.prototype` method is actually invoked and not just
-      // a pointer to it.
-      if (grandparent == null || !grandparent.isCall()) {
-        return false;
-      }
-      Node callname = n.getFirstChild();
-      Node getprop = n.getNext();
-      if (callname != null && callname.isGetProp()) {
-       Set<String> methodCallNames = stripTypeSuffixes
-          .get(callname.getQualifiedName());
-       if (methodCallNames != null) {
-         for (String methodCallName : methodCallNames) {
-           if (getprop != null && getprop.isString() &&
-               methodCallName == getprop.getString()) {
-             return true;
-           }
-         }
-       }
+    if (n == null || !n.isCall()) {
+      return false;
+    }
+
+    Node callGetprop = n.getFirstChild();
+    if (callGetprop == null || !callGetprop.isGetProp()) {
+      return false;
+    }
+
+    Node parentCall = callGetprop.getFirstChild();
+    if (parentCall == null || !parentCall.isCall()) {
+      return false;
+    }
+
+    Node parentCallGetprop = parentCall.getFirstChild();
+    Node methodName = parentCall.getNext();
+    if (parentCallGetprop == null || !parentCallGetprop.isGetProp() ||
+        methodName == null || !methodName.isString()) {
+      return false;
+    }
+
+    String parentMethodName = parentCallGetprop.getQualifiedName();
+    Set<String> methodCallNames = stripTypeSuffixes.get(parentMethodName);
+    if (methodCallNames == null) {
+      return false;
+    }
+
+    for (String methodCallName : methodCallNames) {
+      if (methodCallName == methodName.getString()) {
+        return true;
       }
     }
     return false;
@@ -195,8 +204,9 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     compiler.reportCodeChange();
   }
 
-  private void maybeEliminateCallExceptFirstParam(Node call, Node p) {
-    if (call == null) {
+  private void maybeEliminateCallExceptFirstParam(Node call, Node parent) {
+    // Extra precaution if the item we're traversing has already been detached.
+    if (call == null || parent == null) {
       return;
     }
     Node getprop = call.getFirstChild();
@@ -205,12 +215,12 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     }
     Node firstArg = getprop.getNext();
     if (firstArg == null) {
-      removeExpression(call, p);
+      removeExpression(call, parent);
       return;
     }
 
     firstArg.detachFromParent();
-    p.replaceChild(call, firstArg);
+    parent.replaceChild(call, firstArg);
     compiler.reportCodeChange();
   }
 

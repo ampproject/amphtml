@@ -123,6 +123,22 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "  var someValue = true;",
              "  console.log('this is preserved', someValue);",
             "})()"));
+
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  function add(a, b) { return a + b; }",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = add(module$src$log.dev().assert(3), module$src$log.dev().assert(3));",
+             "  console.log('this is preserved', someValue);",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  function add(a, b) { return a + b; }",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = add(3, 3);",
+             "  console.log('this is preserved', someValue);",
+            "})()"));
   }
 
   public void testShouldPreserveNoneCalls() throws Exception {
