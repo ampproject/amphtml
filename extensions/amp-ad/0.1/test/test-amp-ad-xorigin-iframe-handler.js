@@ -78,10 +78,11 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
     describe('method startUp return promise', () => {
       it('should resolve directly if iframe do not support API', () => {
-        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
+        iframeHandler = new AmpAdXOriginIframeHandler(adImpl, adImpl.element,
             null);
         const beforeAttachedToDom = element => {
-          startUpPromise = apiHandler.startUp(element, true, undefined, true);
+          startUpPromise =
+              iframeHandler.startUp(element, true, undefined, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
