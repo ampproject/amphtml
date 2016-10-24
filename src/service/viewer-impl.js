@@ -878,8 +878,15 @@ export class Viewer {
       return Promise.resolve('');
     }
     return this.sendMessageUnreliable_('fragment', undefined, true).then(
-      hash => hash || ''
-    );
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
+              'should start with #');
+          /* Strip leading '#' */
+          return hash.substr(1);
+        });
   }
 
   /**
