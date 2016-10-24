@@ -53,44 +53,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     let iframe;
     let initPromise;
 
-    describe('render-start not implemented', () => {
-      it('should resolve directly if iframe do not support API', () => {
-        iframeHandler = new AmpAdXOriginIframeHandler(adImpl, adImpl.element,
-            null);
-        const beforeAttachedToDom = element => {
-          initPromise =
-              iframeHandler.init(element, true, undefined, true);
-        };
-        return createIframeWithMessageStub(window, beforeAttachedToDom)
-            .then(newIframe => {
-              return initPromise.then(() => {
-                expect(newIframe.style.visibility).to.equal('');
-              });
-            });
-      });
-
-      it('should resolve on message "bootstrap-loaded" if render-start is'
-          + 'NOT implemented by 3P', () => {
-        const beforeAttachedToDom = element => {
-          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-          initPromise = iframeHandler.init(element, true);
-        };
-        return createIframeWithMessageStub(window, beforeAttachedToDom)
-            .then(newIframe => {
-              iframe = newIframe;
-              expect(iframe.style.visibility).to.equal('hidden');
-              iframe.postMessageToParent({
-                sentinel: 'amp3ptest' + testIndex,
-                type: 'bootstrap-loaded',
-              });
-              return initPromise.then(() => {
-                expect(iframe.style.visibility).to.equal('');
-              });
-            });
-      });
-    });
-
-    describe('render-start implemented', () => {
+    describe('if render-start is implemented', () => {
 
       let noContentSpy;
 
@@ -158,7 +121,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
       });
 
-      it('should remove non master iframe on message "no-content"', () => {
+      it('should resolve on message "no-content" ' +
+          'and remove non-master iframe', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           sentinel: 'amp3ptest' + testIndex,
@@ -167,6 +131,20 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         return initPromise.then(() => {
           expect(noContentSpy).to.be.calledWith(false);
           expect(iframeHandler.iframe).to.be.null;
+        });
+      });
+
+      it('should not remove master iframe', () => {
+        iframe.name = 'test_master';
+        expect(iframe.style.visibility).to.equal('hidden');
+        iframe.postMessageToParent({
+          sentinel: 'amp3ptest' + testIndex,
+          type: 'no-content',
+        });
+        return initPromise.then(() => {
+          expect(iframe.style.visibility).to.equal('');
+          expect(noContentSpy).to.be.calledOnce;
+          expect(noContentSpy).to.be.calledWith(true);
         });
       });
 
@@ -193,34 +171,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
     });
 
-    // TODO(zhouyx): group this test into the above 'describe'
-    it('should resolve on message "no-content" if render-start is'
-        + 'implemented by 3P', () => {
-      adImpl.config = {renderStartImplemented: true};
-      iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
-      const noContentSpy =
-          sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
-      const beforeAttachedToDom = element => {
-        element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-        element.name = 'test_master';
-        initPromise = iframeHandler.init(element, true);
-      };
-      return createIframeWithMessageStub(window, beforeAttachedToDom)
-          .then(newIframe => {
-            iframe = newIframe;
-            expect(iframe.style.visibility).to.equal('hidden');
-            iframe.postMessageToParent({
-              sentinel: 'amp3ptest' + testIndex,
-              type: 'no-content',
-            });
-            return initPromise.then(() => {
-              expect(iframe.style.visibility).to.equal('');
-              expect(noContentSpy).to.be.calledOnce;
-              expect(noContentSpy).to.be.calledWith(true);
-            });
-          });
-    });
-
     it('should resolve on timeout', () => {
       iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
       const noContentSpy =
@@ -241,6 +191,40 @@ describe('amp-ad-xorigin-iframe-handler', () => {
               expect(iframe.style.visibility).to.equal('');
               expect(noContentSpy).to.be.calledOnce;
               expect(noContentSpy).to.be.calledWith(true);
+            });
+          });
+    });
+
+    it('should resolve directly if it is A4A', () => {
+      iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
+      const beforeAttachedToDom = element => {
+        initPromise =
+            iframeHandler.init(element, true, undefined, true);
+      };
+      return createIframeWithMessageStub(window, beforeAttachedToDom)
+          .then(newIframe => {
+            return initPromise.then(() => {
+              expect(newIframe.style.visibility).to.equal('');
+            });
+          });
+    });
+
+    it('should resolve on message "bootstrap-loaded" if render-start is'
+        + 'NOT implemented', () => {
+      const beforeAttachedToDom = element => {
+        element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+        initPromise = iframeHandler.init(element, true);
+      };
+      return createIframeWithMessageStub(window, beforeAttachedToDom)
+          .then(newIframe => {
+            iframe = newIframe;
+            expect(iframe.style.visibility).to.equal('hidden');
+            iframe.postMessageToParent({
+              sentinel: 'amp3ptest' + testIndex,
+              type: 'bootstrap-loaded',
+            });
+            return initPromise.then(() => {
+              expect(iframe.style.visibility).to.equal('');
             });
           });
     });
