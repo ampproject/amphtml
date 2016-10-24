@@ -29,8 +29,8 @@ import {
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
+import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
 class MockA4AImpl extends AmpA4A {
@@ -869,8 +869,11 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         const adPromise = a4a.adPromise_;
+        // This is to prevent `displayUnlayoutUI` to be called;
+        a4a.uiHandler.state = 0;
         a4a.unlayoutCallback();
         // Force vsync system to run all queued tasks, so that DOM mutations
         // are actually completed before testing.

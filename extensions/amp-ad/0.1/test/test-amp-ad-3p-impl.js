@@ -53,7 +53,7 @@ describe('amp-ad-3p-impl', () => {
           }));
       ad3p = createAmpAd(win);
       win.document.body.appendChild(ad3p.element);
-
+      ad3p.buildCallback();
       // Turn the doc to visible so prefetch will be proceeded.
       stubService(sandbox, win, 'viewer', 'whenFirstVisible')
           .returns(Promise.resolve());
@@ -151,6 +151,7 @@ describe('amp-ad-3p-impl', () => {
       win.document.body.appendChild(adContainerElement);
       const ad3p = createAmpAd(win);
       adContainerElement.appendChild(ad3p.element);
+      ad3p.buildCallback();
       ad3p.onLayoutMeasure();
       return ad3p.layoutCallback();
     });
@@ -160,6 +161,7 @@ describe('amp-ad-3p-impl', () => {
       win.document.body.appendChild(adContainerElement);
       const ad3p = createAmpAd(win);
       adContainerElement.appendChild(ad3p.element);
+      ad3p.buildCallback();
       ad3p.onLayoutMeasure();
       return ad3p.layoutCallback().then(() => {
         const src = ad3p.element.firstChild.getAttribute('src');
