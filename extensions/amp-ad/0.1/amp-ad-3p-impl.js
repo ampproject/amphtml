@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdXOriginIframeHandler,}
-    from './amp-ad-xorigin-iframe-handler';
+import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   allowRenderOutsideViewport,
   incrementLoadingAds,
