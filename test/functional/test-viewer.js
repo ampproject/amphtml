@@ -65,7 +65,6 @@ describe('Viewer', () => {
       href: '/test/viewer',
       ancestorOrigins: null,
     };
-    windowApi.Math = Math;
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
       defaultView: windowApi,
@@ -78,11 +77,6 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
-      querySelector: () => {
-        const link = document.createElement('link');
-        link.href = 'http://not-used.com';
-        return link;
-      },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
