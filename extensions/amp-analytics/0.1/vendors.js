@@ -25,6 +25,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
       'ampdocHost': 'AMPDOC_HOST',
+      'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
       'ampVersion': 'AMP_VERSION',
       'authdata': 'AUTHDATA',
@@ -33,6 +34,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'backgroundState': 'BACKGROUND_STATE',
       'browserLanguage': 'BROWSER_LANGUAGE',
       'canonicalHost': 'CANONICAL_HOST',
+      'canonicalHostname': 'CANONICAL_HOSTNAME',
       'canonicalPath': 'CANONICAL_PATH',
       'canonicalUrl': 'CANONICAL_URL',
       'clientId': 'CLIENT_ID',
@@ -60,6 +62,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'serverResponseTime': 'SERVER_RESPONSE_TIME',
       'sourceUrl': 'SOURCE_URL',
       'sourceHost': 'SOURCE_HOST',
+      'sourceHostname': 'SOURCE_HOSTNAME',
       'sourcePath': 'SOURCE_PATH',
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
