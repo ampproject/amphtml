@@ -56,11 +56,9 @@ export function documentInfoForDoc(nodeOrDoc) {
           canonicalUrl = parseUrl(canonicalTag.href).href;
         }
         const pageViewId = getPageViewId(ampdoc.win);
-        const res = {url, sourceUrl, canonicalUrl, pageViewId};
-        Object.defineProperties(res, 'sourceUrl', {
-          get: () => {
-            return getSourceUrl(ampdoc.getUrl());
-          },
+        const res = {sourceUrl, canonicalUrl, pageViewId};
+        Object.defineProperty(res, 'sourceUrl', {
+          get: () => getSourceUrl(ampdoc.getUrl()),
         });
         return res;
       }));
