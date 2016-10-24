@@ -78,9 +78,9 @@ export class AmpAdXOriginIframeHandler {
    * @return {!Promise} awaiting load event for ad frame
    * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
-  startUp(iframe, is3p, opt_defaultVisible, opt_isA4A) {
+  init(iframe, is3p, opt_defaultVisible, opt_isA4A) {
     dev().assert(
-        !this.iframe, 'multiple invocations of startup without destroy!');
+        !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.is3p_ = is3p;
     this.iframe.setAttribute('scrolling', 'no');

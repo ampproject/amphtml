@@ -49,12 +49,12 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     iframeHandler = null;
   });
 
-  describe('iframe that is initialized by startUp()', () => {
+  describe('iframe that is initialized by init()', () => {
     let iframe;
-    let startUpPromise;
+    let initPromise;
     const beforeAttachedToDom = element => {
       element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-      startUpPromise = iframeHandler.startUp(element, true);
+      initPromise = iframeHandler.init(element, true);
     };
     beforeEach(() => {
       return createIframeWithMessageStub(window, beforeAttachedToDom)
@@ -76,17 +76,17 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       }));
     });
 
-    describe('method startUp return promise', () => {
+    describe('method init return promise', () => {
       it('should resolve directly if iframe do not support API', () => {
         iframeHandler = new AmpAdXOriginIframeHandler(adImpl, adImpl.element,
             null);
         const beforeAttachedToDom = element => {
-          startUpPromise =
-              iframeHandler.startUp(element, true, undefined, true);
+          initPromise =
+              iframeHandler.init(element, true, undefined, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
-              return startUpPromise.then(() => {
+              return initPromise.then(() => {
                 expect(newIframe.style.visibility).to.equal('');
               });
             });
@@ -99,7 +99,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           sentinel: 'amp3ptest' + testIndex,
           type: 'bootstrap-loaded',
         });
-        return startUpPromise.then(() => {
+        return initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
         });
       });
@@ -112,7 +112,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-          startUpPromise = iframeHandler.startUp(element, true);
+          initPromise = iframeHandler.init(element, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
@@ -122,7 +122,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
                 sentinel: 'amp3ptest' + testIndex,
                 type: 'render-start',
               });
-              return startUpPromise.then(() => {
+              return initPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
               }).then(() => {
                 iframe.postMessageToParent({
@@ -150,7 +150,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-          startUpPromise = iframeHandler.startUp(element, true);
+          initPromise = iframeHandler.init(element, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
@@ -162,7 +162,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
                 type: 'render-start',
                 sentinel: 'amp3ptest' + testIndex,
               });
-              return startUpPromise.then(() => {
+              return initPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
                 return iframe.expectMessageFromParent('amp-' + JSON.stringify({
                   requestedWidth: 114,
@@ -183,7 +183,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           element.name = 'test_master';
-          startUpPromise = iframeHandler.startUp(element, true);
+          initPromise = iframeHandler.init(element, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
@@ -193,7 +193,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
                 sentinel: 'amp3ptest' + testIndex,
                 type: 'no-content',
               });
-              return startUpPromise.then(() => {
+              return initPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
                 expect(noContentSpy).to.be.calledOnce;
                 expect(noContentSpy).to.be.calledWith(true);
@@ -209,7 +209,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           element.name = 'test_nomaster';
-          startUpPromise = iframeHandler.startUp(element, true);
+          initPromise = iframeHandler.init(element, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
@@ -219,7 +219,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
                 sentinel: 'amp3ptest' + testIndex,
                 type: 'no-content',
               });
-              return startUpPromise.then(() => {
+              return initPromise.then(() => {
                 expect(noContentSpy).to.be.calledWith(false);
                 expect(iframeHandler.iframe).to.be.null;
               });
@@ -232,7 +232,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-          startUpPromise = iframeHandler.startUp(element, true);
+          initPromise = iframeHandler.init(element, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
@@ -250,7 +250,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
                 const clock = sandbox.useFakeTimers();
                 clock.tick(0);
                 const timeoutPromise =
-                    timerFor(window).timeoutPromise(2000, startUpPromise);
+                    timerFor(window).timeoutPromise(2000, initPromise);
                 clock.tick(2001);
                 return expect(timeoutPromise).to.eventually
                     .be.rejectedWith(/timeout/);
@@ -267,14 +267,14 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           element.name = 'test_master';
-          startUpPromise = iframeHandler.startUp(element, true);
+          initPromise = iframeHandler.init(element, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
               iframe = newIframe;
               expect(noContentSpy).to.not.be.called;
               clock.tick(10001);
-              return startUpPromise.then(() => {
+              return initPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
                 expect(noContentSpy).to.be.calledOnce;
                 expect(noContentSpy).to.be.calledWith(true);
