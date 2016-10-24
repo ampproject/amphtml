@@ -18,15 +18,13 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
 
-
-
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_AD_IMAGE = 'amp-ad-image';
 
-/** @const {int} The number of milliseconds between checks to see if the response has arrived */
+/** @const {number} The number of milliseconds between checks to see if the response has arrived */
 const IMAGEAD_TICK_LENGTH = 50;
 
-/** @const {int} The number of ticks to wait for a response from the ad server before timing out */
+/** @const {number} The number of ticks to wait for a response from the ad server before timing out */
 const IMAGEAD_TIMEOUT = 100;
 
 export class AmpAdImage extends AMP.BaseElement {
@@ -56,39 +54,36 @@ export class AmpAdImage extends AMP.BaseElement {
 
     // If this is our first imagead, create a map of responses for each value of 'data-url'
     // This allows ads from multiple ad servers on the same page
-    if (!global.hasOwnProperty('imageadResponses')) {
+    if (!this.win.hasOwnProperty('imageadResponses')) {
       // Map in the form {url1:xxx, url2:yyy} where xxx and yyy contain 0 initially, then 1 when the fetch for that URL is in
       // progress, then the data from the ad server when it arrives in the form {888:{src:xxx,target:yyy}}} where xxx is the
       // URL to use as the source of the image (which may be base64 if desired), and yyy is the URL to which to send the user
       // when the ad is clicked on
-      global.imageadResponses = {};
+      this.win.imageadResponses = {};
       // Timers: the first imagead to be laid out for any given is will be used by all ads on the page except the first
-      global.imageadTimeouts = {};
+      this.win.imageadTimeouts = {};
       // Map of slots for each URL
-      global.imageadSlots = {};
+      this.win.imageadSlots = {};
     }
-    if (!(this.url_ in global.imageadResponses)) {
+    if (!(this.url_ in this.win.imageadResponses)) {
       // This is the first time we've seen this URL
-      global.imageadResponses[this.url_] = 0;
-      global.imageadTimeouts[this.url_] = IMAGEAD_TIMEOUT;
-      global.imageadSlots[this.url_] = [];
+      this.win.imageadResponses[this.url_] = 0;
+      this.win.imageadTimeouts[this.url_] = IMAGEAD_TIMEOUT;
+      this.win.imageadSlots[this.url_] = [];
     }
     // If we haven't seen this slot yet (which will be the case unless there are two ads with the sam slot), add it.
     let done = false;
-    for (const x in global.imageadSlots[this.url_]) {
-      if (global.imageadSlots[this.url_][x] == this.slot_) {
+    for (const x in this.win.imageadSlots[this.url_]) {
+      if (this.win.imageadSlots[this.url_][x] == this.slot_) {
         done = true;
       }
     }
     if (!done) {
-      global.imageadSlots[this.url_].push(this.slot_);
+      this.win.imageadSlots[this.url_].push(this.slot_);
     }
 
     /** @private {?Element} */
     this.iframe_ = null;
-
-    /** @private {?AmpAdApiHandler} */
-    this.apiHandler_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = null;
@@ -143,7 +138,7 @@ export class AmpAdImage extends AMP.BaseElement {
    * Display an ad in this element. Call this only when we know that the responses have been fetched from the ad server
    */
   showImageAd() {
-    const resp = global.imageadResponses[this.url_];
+    const resp = this.win.imageadResponses[this.url_];
     for (const s in resp) {
       if (s == this.slot_) {
         const d = resp[s];
@@ -175,12 +170,12 @@ export class AmpAdImage extends AMP.BaseElement {
   getResponseWhenReady() {
     const t = this;
     return new Promise(function(resolve, reject) {
-      if (global.imageadResponses[t.url_] !== 0 &&
-              global.imageadResponses[t.url_] !== 1) {
+      if (t.win.imageadResponses[t.url_] !== 0 &&
+              t.win.imageadResponses[t.url_] !== 1) {
         resolve('OK');
       } else {
       // t's not ready. Let's wait 50 ms and try again
-        if (--global.imageadTimeouts[t.url_]) {
+        if (--t.win.imageadTimeouts[t.url_]) {
           setTimeout(function() {
             t.getResponseWhenReady().then(function() {
               resolve('OK');
@@ -201,17 +196,17 @@ export class AmpAdImage extends AMP.BaseElement {
       const d = global.imageadResponses[t.url_];
       if (d === 0) {
         // We have not yet asked the ad server for this url for data. Do so now
-        global.imageadResponses[t.url_] = 1; // Means "in progress"
+        t.win.imageadResponses[t.url_] = 1; // Means "in progress"
         // Gather the parameters to be added to the URL. First, make a list of the slot ids for all ads on this page with this URL
         const req = new XMLHttpRequest();
         req.responseType = 'json';
 
-        req.open('GET', t.url_ + '?s=' + global.imageadSlots[t.url_].join());
+        req.open('GET', t.url_ + '?s=' + t.win.imageadSlots[t.url_].join());
 
         req.onload = function() {
           if (req.status == 200) {
             // @todo What if the ad server wants to return an error? Need to trap it here
-            global.imageadResponses[t.url_] = req.response;
+            t.win.imageadResponses[t.url_] = req.response;
             try {
               t.showImageAd();
             } catch (e) {
