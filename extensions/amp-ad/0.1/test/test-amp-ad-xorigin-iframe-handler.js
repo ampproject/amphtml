@@ -172,7 +172,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should resolve on timeout', () => {
-      iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
       const noContentSpy =
           sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
       const clock = sandbox.useFakeTimers();
@@ -196,7 +195,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should resolve directly if it is A4A', () => {
-      iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
       const beforeAttachedToDom = element => {
         initPromise =
             iframeHandler.init(element, true, undefined, true);
