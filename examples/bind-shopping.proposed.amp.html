@@ -227,11 +227,10 @@
 
     <amp-accordion>
       <section expanded bind-attr="{expanded: !size}">
-          <!-- Nested here due to accordion's child limit. -->
-          <amp-img width=355 height=50 src="https://placehold.it/355x50?text=SIZE%20???"
-              bind-src="https://placehold.it/355x50?text=SIZE%20{{size}}">
-          </amp-img>
-        </amp-bind-attribute>
+        <!-- Nested here due to accordion's child limit. -->
+        <amp-img width=355 height=50 src="https://placehold.it/355x50?text=SIZE%20???"
+            bind-src="https://placehold.it/355x50?text=SIZE%20{{size}}">
+        </amp-img>
 
         <div class="sizes">
           <button
