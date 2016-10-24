@@ -139,7 +139,7 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+  if (eventualUrl.indexOf(`${urls.cdn}/c/`) != 0) {
     return;
   }
   return eventualUrl;
