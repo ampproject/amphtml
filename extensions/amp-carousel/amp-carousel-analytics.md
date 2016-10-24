@@ -16,7 +16,7 @@ limitations under the License.
 
 # <a name="amp-carousel-analytics"></a>AMP Carousel and Analytics
 
-## Access carousel (slides) triggers
+## Carousel (slides) triggers
 
 `<amp-carousel type="slides">` issues events for major states . These events can be reported via an analytics package using triggers.
 
@@ -74,10 +74,5 @@ The `amp-carousel-next` event is issued when there is a travesal to the previous
 ```
 
 ### Vars
-#### fromSlide
 
-Provides the slide from which the traversal happens. The value is either taken from `data-slide-id` attribute of the slide when present , else it represents the index of the slide (starting from 0).
-
-#### toSlide
-
-Provides the slide to which the traversal happens. The value is either taken from `data-slide-id` attribute of the slide when present , else it represents the index of the slide (starting from 0).
+Description of the variables can be found in the [analytics-vars.md](/extensions/amp-analytics/analytics-vars.md#fromslide) file.
