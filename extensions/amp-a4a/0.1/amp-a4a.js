@@ -19,7 +19,10 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {
+  getLifecycleReporter,
+  QQID_HEADER,
+} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {
   closestByTag,
@@ -321,6 +324,8 @@ export class AmpA4A extends AMP.BaseElement {
         // object), or null if no response is available / response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
+          const qqid = fetchResponse.headers.get(QQID_HEADER);
+          this.lifecycleReporter.setQqid(qqid);
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;

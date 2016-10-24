@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {makeCorrelator} from '../correlator.js';
 import {
     EXPERIMENT_ATTRIBUTE,
     isInManualExperiment,
@@ -27,6 +28,7 @@ import {
     DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
     DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
+import {documentInfoForDoc} from '../../../src/document-info';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -151,9 +153,13 @@ export class AmpAdLifecycleReporter {
     this.element_ = element;
     this.namespace_ = namespace;
     this.win_.ampAdSlotId = this.win_.ampAdSlotId || 0;
-    this.win_.ampAdPageCorrelator = this.win_.ampAdPageCorrelator ||
-        Math.floor(Math.pow(2, 52) * Math.random());
     this.slotId_ = this.win_.ampAdSlotId++;
+
+    const docInfo = documentInfoForDoc(window.document);
+    this.correlator_ = this.win_.ampAdPageCorrelator ||
+        makeCorrelator(this.slotId_, docInfo.pageViewId);
+    this.win_.ampAdPageCorrelator = this.correlator_;
+
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
     this.qqid_ = null;
     this.initTime_ = Date.now();
@@ -184,6 +190,20 @@ export class AmpAdLifecycleReporter {
    */
   sendPing(name) {
     this.emitPing_(this.buildPingAddress_(name));
+  }
+
+  /**
+   * @returns {number} The slot ID.
+   */
+  getSlotId() {
+    return this.slotId_;
+  }
+
+  /**
+   * @returns {number} The correlator.
+   */
+  getCorrelator() {
+    return this.correlator_;
   }
 
   /**
@@ -237,6 +257,16 @@ export class AmpAdLifecycleReporter {
     pingElement.setAttribute('aria-hidden', 'true');
     this.element_.parentNode.insertBefore(pingElement, this.element_);
     dev().info('PING', url);
+  }
+
+  /**
+   * Resets values which might cross-contaminate between queries.
+   */
+  reset() {
+    this.correlator_ = undefined;
+    this.win_.ampAdPageCorrelator = undefined;
+    this.slotId_ = undefined;
+    this.win_.ampAdSlotId = undefined;
   }
 }
 

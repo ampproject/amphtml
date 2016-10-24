@@ -212,6 +212,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
+        c: this.lifecycleReporter.getCorrelator(),
+        ifi: this.lifecycleReporter.getSlotId(),
       };
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
