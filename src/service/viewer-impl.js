@@ -879,8 +879,7 @@ export class Viewer {
           dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
               'should start with #');
           /* Strip leading '#' */
-          hash = hash.substr(1);
-          return hash;
+          return hash.substr(1);
         });
   }
 
