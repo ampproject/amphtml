@@ -359,7 +359,7 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonResolver();
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(ampForm.state_).to.equal('submit-success');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
@@ -398,7 +398,7 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonRejecter();
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(button1.hasAttribute('disabled')).to.be.false;
         expect(button2.hasAttribute('disabled')).to.be.false;
         expect(ampForm.state_).to.equal('submit-error');
@@ -442,7 +442,7 @@ describe('amp-form', () => {
       };
       ampForm.handleSubmit_(event);
       fetchJsonRejecter({responseJson: {message: 'hello there'}});
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
             errorContainer, {message: 'hello there'})).to.be.true;
@@ -489,7 +489,7 @@ describe('amp-form', () => {
       };
       ampForm.handleSubmit_(event);
       fetchJsonResolver({'message': 'What What'});
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
             successContainer, {'message': 'What What'})).to.be.true;
