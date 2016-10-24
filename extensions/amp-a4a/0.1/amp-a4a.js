@@ -759,7 +759,8 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO(keithwrightbos): startup returns load event, do we need to wait?
     // Set opt_defaultVisible to true as 3p draw code never executed causing
     // render-start event never to fire which will remove visiblity hidden.
-    this.apiHandler_.startUp(iframe, is3p, /* opt_defaultVisible */ true);
+    this.apiHandler_.startUp(iframe, is3p, /* opt_defaultVisible */ true,
+        /* opt_isA4A */ true);
     this.rendered_ = true;
   }
 

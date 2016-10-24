@@ -75,10 +75,11 @@ export class AmpAdApiHandler {
    * @param {boolean} is3p whether iframe was loaded via 3p.
    * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
+   * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @return {!Promise} awaiting load event for ad frame
    * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
-  startUp(iframe, is3p, opt_defaultVisible) {
+  startUp(iframe, is3p, opt_defaultVisible, opt_isA4A) {
     dev().assert(
         !this.iframe_, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -104,7 +105,9 @@ export class AmpAdApiHandler {
         }, this.is3p_, this.is3p_));
 
     // Install API that listen to ad response
-    if (this.baseInstance_.config
+    if (opt_isA4A) {
+      this.adResponsePromise_ = Promise.resolve();
+    } else if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
