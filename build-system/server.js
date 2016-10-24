@@ -440,6 +440,15 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     file = replaceUrls(mode, file);
+
+    // Extract amp-ad for the given 'type' specified in URL query.
+    if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
+      var ads = file.match(new RegExp('<amp-ad [^>]*'
+          + req.query.type + '[^>]*>([\\s\\S]+?)<\/amp-ad>', 'gm'));
+      file = file.replace(
+          /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
+    }
+
     res.send(file);
   }).catch(() => {
     next();
