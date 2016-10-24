@@ -43,7 +43,8 @@ describe.configure().retryOnSaucelabs().run('error page', () => {
     });
   });
 
-  it.configure().skipFirefox().run('should show the body in error test', () => {
+  it.configure().skipFirefox().skipEdge()
+  .run('should show the body in error test', () => {
     return expectBodyToBecomeVisible(fixture.win);
   });
 
