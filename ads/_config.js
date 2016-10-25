@@ -179,6 +179,8 @@ export const adConfig = {
     ],
   },
 
+  fake: {},
+
   flite: {},
 
   genieessp: {
