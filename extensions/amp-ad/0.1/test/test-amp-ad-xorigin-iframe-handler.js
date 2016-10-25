@@ -37,7 +37,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     sandbox = sinon.sandbox.create();
     const ampdocService = ampdocServiceFor(window);
     const ampdoc = ampdocService.getAmpDoc();
-    const adElement = document.createElement('amp-ad');
+    const adElement = document.createElement('container-element');
     adElement.getAmpDoc = () => ampdoc;
     adImpl = new BaseElement(adElement);
     document.body.appendChild(adElement);
@@ -52,7 +52,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
   afterEach(() => {
     sandbox.restore();
-    iframeHandler = null;
+    document.body.removeChild(adImpl.element);
   });
 
   describe('init() returned promise', () => {
@@ -189,13 +189,13 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       const noContentSpy =
           sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
       const clock = sandbox.useFakeTimers();
-      clock.tick(0);
 
       iframe.name = 'test_master';
       initPromise = iframeHandler.init(iframe, true);
       iframe.onload = () => {
+        clock.tick(9999);
         expect(noContentSpy).to.not.be.called;
-        clock.tick(10001);
+        clock.tick(1);
         initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
           expect(noContentSpy).to.be.calledOnce;
