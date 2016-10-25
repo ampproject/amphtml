@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdXOriginIframeHandler,}
-    from '../amp-ad-xorigin-iframe-handler';
+import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
