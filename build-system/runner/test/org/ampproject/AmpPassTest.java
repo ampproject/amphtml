@@ -24,11 +24,16 @@ public class AmpPassTest extends Es6CompilerTestCase {
       "module$src$log.user", ImmutableSet.of("fine"));
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
+      "IS_MINIFIED",
+      IR.trueNode());
+
+  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
       "IS_DEV",
       IR.falseNode());
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements);
+    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements,
+        prodAssignmentReplacements);
   }
 
   @Override protected int getNumRepetitions() {
@@ -304,11 +309,13 @@ public class AmpPassTest extends Es6CompilerTestCase {
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = true;",
+             "const IS_MINIFIED = false;",
              "const IS_SOMETHING = true;",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = false;",
+             "const IS_MINIFIED = true;",
              "const IS_SOMETHING = true;",
             "})()"));
   }
