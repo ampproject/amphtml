@@ -162,11 +162,12 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       const sizer = fixture.doc.createElement('div');
       sizer.position = 'relative';
       sizer.style.height = '200vh';
-      fixture.doc.body.appendChild(sizer);
-      fixture.doc.body.appendChild(video);
-      return fixture.awaitEvent('amp:load:start', 1).then(() => {
+      const p = fixture.awaitEvent('amp:load:end', 1).then(() => {
         return video;
       });
+      fixture.doc.body.appendChild(sizer);
+      fixture.doc.body.appendChild(video);
+      return p;
     });
   }
 }
