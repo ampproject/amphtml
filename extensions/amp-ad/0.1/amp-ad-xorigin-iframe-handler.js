@@ -220,8 +220,8 @@ export class AmpAdXOriginIframeHandler {
    * Updates the element's dimensions to accommodate the iframe's
    * requested dimensions. Notifies the window that request the resize
    * of success or failure.
-   * @param {number|undefined} height
-   * @param {number|undefined} width
+   * @param {number|string|undefined} height
+   * @param {number|string|undefined} width
    * @param {!Window} source
    * @param {string} origin
    * @private
@@ -230,11 +230,13 @@ export class AmpAdXOriginIframeHandler {
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
-    if (height !== undefined) {
+    height = parseInt(height, 10);
+    if (!isNaN(height)) {
       newHeight = Math.max(this.element_./*OK*/offsetHeight +
           height - this.iframe./*OK*/offsetHeight, height);
     }
-    if (width !== undefined) {
+    width = parseInt(width, 10);
+    if (!isNaN(width)) {
       newWidth = Math.max(this.element_./*OK*/offsetWidth +
           width - this.iframe./*OK*/offsetWidth, width);
     }

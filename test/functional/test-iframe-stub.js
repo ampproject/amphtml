@@ -32,10 +32,12 @@ describe('test-iframe-createIframeWithMessageStub', () => {
 
   let iframe;
 
-  beforeEach(() => {
-    return createIframeWithMessageStub(window).then(newIframe => {
-      iframe = newIframe;
-    });
+  beforeEach(done => {
+    iframe = createIframeWithMessageStub(window);
+    document.body.appendChild(iframe);
+    iframe.onload = () => {
+      done();
+    };
   });
 
   it('should get message from fragment and post back to parent window', () => {

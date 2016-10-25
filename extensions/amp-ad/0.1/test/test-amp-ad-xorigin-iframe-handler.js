@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdXOriginIframeHandler,}
-    from '../amp-ad-xorigin-iframe-handler';
+import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
@@ -30,36 +29,40 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
   let adImpl;
   let iframeHandler;
+  let iframe;
   let testIndex = 0;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const ampdocService = ampdocServiceFor(window);
     const ampdoc = ampdocService.getAmpDoc();
-    const adElement = document.createElement('amp-ad');
+    const adElement = document.createElement('container-element');
     adElement.getAmpDoc = () => ampdoc;
     adImpl = new BaseElement(adElement);
+    document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
     testIndex++;
+
+    iframe = createIframeWithMessageStub(window);
+    iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+    iframe.name = 'test_nomaster';
   });
 
   afterEach(() => {
     sandbox.restore();
-    iframeHandler = null;
+    document.body.removeChild(adImpl.element);
   });
 
   describe('init() returned promise', () => {
-    let iframe;
     let initPromise;
 
     describe('if render-start is implemented', () => {
 
       let noContentSpy;
 
-      beforeEach(() => {
+      beforeEach(done => {
         adImpl.config = {renderStartImplemented: true};
-        iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
         sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
           expect(height).to.equal(217);
           expect(width).to.equal(114);
@@ -67,15 +70,11 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
         noContentSpy =
             sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
-        const beforeAttachedToDom = element => {
-          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-          element.name = 'test_nomaster';
-          initPromise = iframeHandler.init(element, true);
+
+        initPromise = iframeHandler.init(iframe, true);
+        iframe.onload = () => {
+          done();
         };
-        return createIframeWithMessageStub(window, beforeAttachedToDom)
-            .then(newIframe => {
-              iframe = newIframe;
-            });
       });
 
       it('should resolve on message "render-start"', () => {
@@ -104,7 +103,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           width: 114,
-          height: 217,
+          height: '217',  // should be tolerant to string number
           type: 'render-start',
           sentinel: 'amp3ptest' + testIndex,
         });
@@ -169,74 +168,56 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should resolve on message "bootstrap-loaded" if render-start is'
-        + 'NOT implemented', () => {
-      const beforeAttachedToDom = element => {
-        element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-        initPromise = iframeHandler.init(element, true);
+        + 'NOT implemented', done => {
+
+      initPromise = iframeHandler.init(iframe, true);
+      iframe.onload = () => {
+        expect(iframe.style.visibility).to.equal('hidden');
+        iframe.postMessageToParent({
+          sentinel: 'amp3ptest' + testIndex,
+          type: 'bootstrap-loaded',
+        });
+        initPromise.then(() => {
+          expect(iframe.style.visibility).to.equal('');
+          done();
+        });
       };
-      return createIframeWithMessageStub(window, beforeAttachedToDom)
-          .then(newIframe => {
-            iframe = newIframe;
-            expect(iframe.style.visibility).to.equal('hidden');
-            iframe.postMessageToParent({
-              sentinel: 'amp3ptest' + testIndex,
-              type: 'bootstrap-loaded',
-            });
-            return initPromise.then(() => {
-              expect(iframe.style.visibility).to.equal('');
-            });
-          });
     });
 
-    it('should resolve on timeout', () => {
+    it('should resolve on timeout', done => {
       const noContentSpy =
           sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
       const clock = sandbox.useFakeTimers();
-      clock.tick(0);
-      const beforeAttachedToDom = element => {
-        element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-        element.name = 'test_master';
-        initPromise = iframeHandler.init(element, true);
+
+      iframe.name = 'test_master';
+      initPromise = iframeHandler.init(iframe, true);
+      iframe.onload = () => {
+        clock.tick(9999);
+        expect(noContentSpy).to.not.be.called;
+        clock.tick(1);
+        initPromise.then(() => {
+          expect(iframe.style.visibility).to.equal('');
+          expect(noContentSpy).to.be.calledOnce;
+          expect(noContentSpy).to.be.calledWith(true);
+          done();
+        });
       };
-      return createIframeWithMessageStub(window, beforeAttachedToDom)
-          .then(newIframe => {
-            iframe = newIframe;
-            expect(noContentSpy).to.not.be.called;
-            clock.tick(10001);
-            return initPromise.then(() => {
-              expect(iframe.style.visibility).to.equal('');
-              expect(noContentSpy).to.be.calledOnce;
-              expect(noContentSpy).to.be.calledWith(true);
-            });
-          });
     });
 
     it('should resolve directly if it is A4A', () => {
-      const beforeAttachedToDom = element => {
-        initPromise =
-            iframeHandler.init(element, true, undefined, true);
-      };
-      return createIframeWithMessageStub(window, beforeAttachedToDom)
-          .then(newIframe => {
-            return initPromise.then(() => {
-              expect(newIframe.style.visibility).to.equal('');
-            });
-          });
+      return iframeHandler.init(iframe, true, undefined, true).then(() => {
+        expect(iframe.style.visibility).to.equal('');
+      });
     });
   });
 
   describe('Initialized iframe', () => {
-    let iframe;
 
-    const beforeAttachedToDom = element => {
-      element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-      iframeHandler.init(element, true);
-    };
-    beforeEach(() => {
-      return createIframeWithMessageStub(window, beforeAttachedToDom)
-        .then(newIframe => {
-          iframe = newIframe;
-        });
+    beforeEach(done => {
+      iframeHandler.init(iframe, true);
+      iframe.onload = () => {
+        done();
+      };
     });
 
     it('should be able to use embed-state API', () => {
@@ -280,7 +261,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
       iframe.postMessageToParent({
         width: 114,
-        height: 217,
+        height: '217',  // should be tolerant to string number
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
