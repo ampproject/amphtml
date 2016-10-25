@@ -133,5 +133,4 @@ Here is an example response, assuming two slots named simply 1 and 2:
 ## To do
 
 Give some advice for how to use amp-analytics
-Move the test ads to the amp build server
 Do some proper support for different layouts - right now, there's strange behaviour if you use responsive
