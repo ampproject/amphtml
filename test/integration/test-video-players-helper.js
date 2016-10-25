@@ -26,8 +26,9 @@ import {
 } from '../../testing/iframe';
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
-
+  const TIMEOUT = 20000;
   it('should override the video interface methods', function() {
+    this.timeout(TIMEOUT);
     return getVideoPlayer(/* opt_outsideView */ false).then(v => {
       const impl = v.implementation_;
       const methods = Object.getOwnPropertyNames(
@@ -42,7 +43,6 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   });
 
   describe.configure().retryOnSaucelabs().run('Autoplay', function() {
-    const TIMEOUT = 20000;
     this.timeout(TIMEOUT);
 
     describe('play/pause', () => {
