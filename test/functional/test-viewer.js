@@ -251,10 +251,25 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
       expect(name).to.equal('fragment');
-      return Promise.resolve('from-viewer');
+      return Promise.resolve('#from-viewer');
     });
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
+    });
+  });
+
+  it('should NOT get fragment in embedded mode ' +
+      'if the viewer has capability of getting fragment, ' +
+      'but fragment from the viewer does not start with #', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo&cap=fragment';
+    const viewer = new Viewer(ampdoc);
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    send.onFirstCall().returns(Promise.resolve('from-viewer'));
+    return viewer.getFragment().then(() => {
+      throw new Error('should not happen');
+    }, error => {
+      expect(error.message).to.match(/should start with #/);
     });
   });
 
@@ -508,6 +523,7 @@ describe('Viewer', () => {
     const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.title).to.equal('Awesome doc');
+    expect(m.data.sourceUrl).to.equal('http://localhost:9876/test/viewer');
   });
 
   it('should post scroll event', () => {
@@ -838,6 +854,123 @@ describe('Viewer', () => {
       });
     });
 
+    describe('when in webview', () => {
+      it('should decide trusted on connection with origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://google.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.true;
+        });
+      });
+
+      it('should NOT allow channel without origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        expect(() => {
+          viewer.setMessageDeliverer(() => {});
+        }).to.throw(/message channel must have an origin/);
+      });
+
+      it('should decide non-trusted on connection with wrong origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
+      it('should NOT give precedence to ancestor', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = ['https://google.com'];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+    });
+
+    describe('when in a fake webview (a bad actor iframe)', () => {
+      it('should consider trusted by ancestor', () => {
+        windowApi.parent = {};
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = ['https://google.com'];
+        return new Viewer(ampdoc).isTrustedViewer().then(res => {
+          expect(res).to.be.true;
+        });
+      });
+
+      it('should consider non-trusted without ancestor', () => {
+        windowApi.parent = {};
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = [];
+        return new Viewer(ampdoc).isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
+      it('should consider non-trusted with wrong ancestor', () => {
+        windowApi.parent = {};
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = ['https://untrusted.com'];
+        return new Viewer(ampdoc).isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
+      it('should decide trusted on connection with origin', () => {
+        windowApi.parent = {};
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = null;
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://google.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.true;
+        });
+      });
+
+      it('should NOT allow channel without origin', () => {
+        windowApi.parent = {};
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = null;
+        const viewer = new Viewer(ampdoc);
+        expect(() => {
+          viewer.setMessageDeliverer(() => {});
+        }).to.throw(/message channel must have an origin/);
+      });
+
+      it('should decide non-trusted on connection with wrong origin', () => {
+        windowApi.parent = {};
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = null;
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
+      it('should give precedence to ancestor', () => {
+        windowApi.parent = {};
+        windowApi.location.hash = '#webview=1';
+        windowApi.location.ancestorOrigins = ['https://google.com'];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.true;
+        });
+      });
+    });
+
     it('should trust domain variations', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
@@ -853,6 +986,8 @@ describe('Viewer', () => {
       test('https://www.google.de', true);
       test('https://news.google.de', true);
       test('https://abc.www.google.com', true);
+      test('https://google.cat', true);
+      test('https://www.google.cat', true);
     });
 
     it('should not trust host as referrer with http', () => {

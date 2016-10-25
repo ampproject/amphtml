@@ -70,6 +70,7 @@ const LIFECYCLE_STAGES = {
   renderFriendlyEnd: '8',
   renderCrossDomainEnd: '9',
   preAdThrottle: '10',
+  renderSafeFrameStart: '11',
   adSlotCleared: '20',
 };
 
@@ -105,6 +106,9 @@ function isInReportableBranch(ampElement, namespace) {
   }
 }
 
+/**
+ * @return {!AmpAdLifecycleReporter|!NullLifecycleReporter}
+ */
 export function getLifecycleReporter(ampElement, namespace) {
   // Carve-outs: We only want to enable profiling pingbacks when:
   //   - The ad is from one of the Google networks (AdSense or Doubleclick).

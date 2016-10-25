@@ -19,6 +19,7 @@ import {
   parseQueryString,
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
+import {dev} from '../../src/log';
 import {urls} from '../../src/config';
 
 
@@ -114,7 +115,7 @@ export function handleClick(e, opt_viewerNavigate) {
  * }|undefined} A URL on the AMP Cache.
  */
 function getLinkInfo(e) {
-  const a = closest(/** @type {!Element} */ (e.target), element => {
+  const a = closest(dev().assertElement(e.target), element => {
     return element.tagName == 'A' && element.href;
   });
   if (!a) {
@@ -138,7 +139,7 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+  if (eventualUrl.indexOf(`${urls.cdn}/c/`) != 0) {
     return;
   }
   return eventualUrl;
@@ -177,8 +178,7 @@ export function warmupStatic(win) {
   const linkRel = /*OK*/document.createElement('link');
   linkRel.rel = 'preload';
   linkRel.setAttribute('as', 'script');
-  linkRel.href =
-      `${urls.cdn}/rtv/01$internalRuntimeVersion$/v0.js`;
+  linkRel.href = `${urls.cdn}/v0.js`;
   getHeadOrFallback(win.document).appendChild(linkRel);
 }
 

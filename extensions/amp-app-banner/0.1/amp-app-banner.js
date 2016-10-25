@@ -415,7 +415,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     const app = apps.find(app => app['platform'] == 'play');
     if (!app) {
-      dev().warn(app, 'Could not find a platform=play app in manifest: %s',
+      dev().warn(TAG, 'Could not find a platform=play app in manifest: %s',
           this.element);
       return;
     }
@@ -466,7 +466,7 @@ function hideBanner(state) {
  * @param {!Object} state
  */
 function measureBanner(state) {
-  state.bannerRect = state.viewport.getLayoutRect(state.element);
+  state.bannerHeight = state.viewport.getLayoutRect(state.element).height;
 }
 
 
@@ -475,7 +475,7 @@ function measureBanner(state) {
  * @param {!Object} state.
  */
 function updateViewportPadding(state) {
-  state.viewport.updatePaddingBottom(state.bannerRect.height);
+  state.viewport.updatePaddingBottom(state.bannerHeight);
   state.viewport.addToFixedLayer(state.element);
 }
 
