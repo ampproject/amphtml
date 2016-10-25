@@ -14,6 +14,29 @@
  * limitations under the License.
  */
 
+import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+
+/** @type {string} @private */
+export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
+
+/** @type {string} @private */
+export const TEST_URL = 'https://test.location.org/ad/012345?args';
+
+export class MockA4AImpl extends AmpA4A {
+  getAdUrl() {
+    return Promise.resolve(TEST_URL);
+  }
+
+  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
+    return Promise.resolve({
+      creative: responseArrayBuffer,
+      signature: responseHeaders.has(SIGNATURE_HEADER) ?
+          base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
+    });
+  }
+}
+
 export function stringToArrayBuffer(str) {
   return new TextEncoder('utf-8').encode(str);
 }

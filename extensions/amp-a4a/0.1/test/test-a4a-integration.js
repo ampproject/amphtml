@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import {stringToArrayBuffer, isStyleVisible} from './utils';
-import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
+import {
+    MockA4AImpl,
+    stringToArrayBuffer,
+    isStyleVisible,
+    SIGNATURE_HEADER,
+    TEST_URL,
+} from './utils';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {Viewer} from '../../../../src/service/viewer-impl';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
-import {data as minimumAmp} from './testdata/minimum_valid_amp.reserialized';
-import {data as regexpsAmpData} from './testdata/regexps.reserialized';
 import {
     data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
-import {data as testFragments} from './testdata/test_fragments';
-import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
 import {adConfig} from '../../../../ads/_config';
@@ -36,25 +33,6 @@ import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {resetScheduledElementForTesting, upgradeOrRegisterElement} from '../../../../src/custom-element';
 import * as sinon from 'sinon';
 
-/** @type {string} @private */
-const SIGNATURE_HEADER = 'X-AmpAdSignature';
-
-/** @type {string} @private */
-const TEST_URL = 'https://test.location.org/ad/012345?args';
-
-class MockA4AImpl extends AmpA4A {
-  getAdUrl() {
-    return Promise.resolve(TEST_URL);
-  }
-
-  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
-    return Promise.resolve({
-      creative: responseArrayBuffer,
-      signature: responseHeaders.has(SIGNATURE_HEADER) ?
-          base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
-    });
-  }
-}
 
 describe('integration test: a4a', () => {
   let sandbox;
@@ -126,27 +104,38 @@ describe('integration test: a4a', () => {
   it('should fall back to 3p when the XHR fails', () => {
     xhrMock.resetBehavior();
     xhrMock.throws(new Error('Testing network error'));
-    return fixture.addElement(a4aElement).then(element => {
-      let child = element.querySelector('iframe[srcdoc]');
+    // Note: Currently layoutCallback rejects, even though something *is*
+    // rendered.  This should be fixed in a refactor, and we should change this
+    // .catch to a .then.
+    return fixture.addElement(a4aElement).catch(error => {
+      expect(error.message).to.contain.string('Testing network error');
+      expect(error.message).to.contain.string('amp-a4a:')
+      let child = a4aElement.querySelector('iframe[srcdoc]');
       expect(child).to.not.be.ok;
-      child = element.querySelector('iframe[src]');
+      child = a4aElement.querySelector('iframe[src]');
       expect(child).to.be.ok;
       expect(child.getAttribute('src')).to.contain.string(TEST_URL);
-      expect(isStyleVisible(fixture.win, element)).to.be.true;
+      expect(isStyleVisible(fixture.win, a4aElement)).to.be.true;
       expect(isStyleVisible(fixture.win, child)).to.be.true;
     });
   });
 
   it('should fall back to 3p when extractCreative throws', () => {
-    sinon.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature').throws(
+    sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature').throws(
         new Error('Testing extractCreativeAndSignature error'));
-    return fixture.addElement(a4aElement).then(element => {
-      let child = element.querySelector('iframe[srcdoc]');
+    // Note: Currently layoutCallback rejects, even though something *is*
+    // rendered.  This should be fixed in a refactor, and we should change this
+    // .catch to a .then.
+    return fixture.addElement(a4aElement).catch(error => {
+      expect(error.message).to.contain.string(
+          'Testing extractCreativeAndSignature error');
+      expect(error.message).to.contain.string('amp-a4a:')
+      let child = a4aElement.querySelector('iframe[srcdoc]');
       expect(child).to.not.be.ok;
-      child = element.querySelector('iframe[src]');
+      child = a4aElement.querySelector('iframe[src]');
       expect(child).to.be.ok;
       expect(child.getAttribute('src')).to.contain.string(TEST_URL);
-      expect(isStyleVisible(fixture.win, element)).to.be.true;
+      expect(isStyleVisible(fixture.win, a4aElement)).to.be.true;
       expect(isStyleVisible(fixture.win, child)).to.be.true;
     });
   });

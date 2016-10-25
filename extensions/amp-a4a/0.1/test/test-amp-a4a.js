@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {stringToArrayBuffer, isStyleVisible} from './utils';
+import {stringToArrayBuffer, isStyleVisible, MockA4AImpl, TEST_URL, SIGNATURE_HEADER} from './utils';
 import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -28,28 +27,15 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {resetScheduledElementForTesting, upgradeOrRegisterElement} from '../../../../src/custom-element';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
 const XHR_URL = 'http://iframe.localhost:' + location.port +
-      '/test/fixtures/served/iframe.html?args';
-
-class MockA4AImpl extends AmpA4A {
-  getAdUrl() {
-    return Promise.resolve(XHR_URL);
-  }
-
-  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
-    return Promise.resolve({
-      creative: responseArrayBuffer,
-      signature: responseHeaders.has('X-Google-header') ?
-          base64UrlDecodeToBytes(responseHeaders.get('X-Google-header')) : null,
-    });
-  }
-}
-
+    '/test/fixtures/served/iframe.html?args';
 
 /**
  * Create a promise for an iframe that has a super-minimal mock AMP environment
@@ -107,7 +93,7 @@ describe('amp-a4a', () => {
       headers: new Headers(),
       catch: callback => callback(),
     };
-    mockResponse.headers.append('X-Google-header', validCSSAmp.signature);
+    mockResponse.headers.append(SIGNATURE_HEADER, validCSSAmp.signature);
   });
 
   afterEach(() => {
@@ -154,7 +140,7 @@ describe('amp-a4a', () => {
     let a4a;
     let fixture;
     beforeEach(() => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -174,7 +160,7 @@ describe('amp-a4a', () => {
     it('for SafeFrame rendering case', () => {
       verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete('X-Google-header');
+      mockResponse.headers.delete(SIGNATURE_HEADER);
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
       fixture.doc.body.appendChild(a4aElement);
@@ -192,7 +178,7 @@ describe('amp-a4a', () => {
     it('for cached content iframe rendering case', () => {
       verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete('X-Google-header');
+      mockResponse.headers.delete(SIGNATURE_HEADER);
       fixture.doc.body.appendChild(a4aElement);
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -226,10 +212,10 @@ describe('amp-a4a', () => {
 
     it('should attach a SafeFrame when header is set', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete('X-Google-header');
+      mockResponse.headers.delete(SIGNATURE_HEADER);
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -260,11 +246,11 @@ describe('amp-a4a', () => {
     ['', 'client_cache', 'some_random_thing'].forEach(headerVal => {
       it(`should not attach a SafeFrame when header is ${headerVal}`, () => {
         // Make sure there's no signature, so that we go down the 3p iframe path.
-        mockResponse.headers.delete('X-Google-header');
+        mockResponse.headers.delete(SIGNATURE_HEADER);
         // If rendering type is anything but safeframe, we SHOULD NOT attach a
         // SafeFrame.
         mockResponse.headers.append(RENDERING_TYPE_HEADER, headerVal);
-        xhrMock.withArgs(XHR_URL, {
+        xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
@@ -289,7 +275,7 @@ describe('amp-a4a', () => {
             const unsafeChild = a4aElement.querySelector('iframe');
             expect(unsafeChild).to.be.ok;
             expect(unsafeChild.getAttribute('src')).to.have.string(
-                XHR_URL);
+                TEST_URL);
           });
         });
       });
@@ -299,7 +285,7 @@ describe('amp-a4a', () => {
       // Set safeframe header, but it should be ignored when a signature
       // exists and validates.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -333,7 +319,7 @@ describe('amp-a4a', () => {
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in friendly iframe', () => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -413,7 +399,7 @@ describe('amp-a4a', () => {
       });
     });
     it('#layoutCallback not valid AMP', () => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -448,7 +434,7 @@ describe('amp-a4a', () => {
             const iframe = a4aElement.getElementsByTagName('iframe')[0];
             expect(iframe.getAttribute('srcdoc')).to.be.null;
             expect(iframe.src, 'verify iframe src w/ origin').to
-                .equal(XHR_URL +
+                .equal(TEST_URL +
                        '&__amp_source_origin=about%3Asrcdoc');
             expect(a4a.rendered_).to.be.true;
           });
@@ -456,7 +442,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should not leak full response to rendered dom', () => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -795,7 +781,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         doc.body.appendChild(a4aElement);
         const a4a = new MockA4AImpl(a4aElement);
-        xhrMock.withArgs(XHR_URL, {
+        xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
