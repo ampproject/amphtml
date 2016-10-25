@@ -312,4 +312,40 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "const IS_SOMETHING = true;",
             "})()"));
   }
+
+  public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
+    testEs6(
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "self.AMP.extension('hello', function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "});",
+            "console.log(a);"),
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "(function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "})(self.AMP);",
+            "console.log(a);"));
+  }
+
+  public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
+    testEs6(
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "AMP.extension('hello', function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "});",
+            "console.log(a);"),
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "(function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "})(self.AMP);",
+            "console.log(a);"));
+  }
 }
