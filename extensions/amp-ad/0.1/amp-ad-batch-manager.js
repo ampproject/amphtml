@@ -25,6 +25,28 @@ const AD_BATCH_TIMEOUT = 100;
 /** @const {!string} Tag name for ad batch manager implementation. */
 export const TAG_AD_BATCH_MANAGER = 'amp-ad-batch-manager';
 
+/**
+  * Get a batch manager that will be used to batch together elements with the same data-url
+  * Note a side effect: the first ad with a given data-url to be processed will have its isBatchMaster_ variable set to true
+  * @param {Element} e The element which is to be batched
+  * @returns {AmpAdBatchManager}
+  */
+export function getBatchManager(e) {
+  // If this is our first imagead, create a map of responses for each value of 'data-url'
+  // This allows ads from multiple ad servers on the same page
+  if (!this.win.hasOwnProperty('imageadBatchManagers')) {
+    // Create an array of batch mangers. There will be one for each URL.
+    e.win.imageadBatchManagers = {};
+  }
+  if (!(this.url_ in this.win.imageadBatchManagers)) {
+    // This is the first time we've seen this URL, so this will be the master for this batch
+    e.isBatchMaster_ = true;
+    e.win.imageadBatchManagers[this.url_] = new AmpAdBatchManager(e);
+  } else {
+    e.isBatchMaster_ = false;
+  }
+  return e.win.imageadBatchManagers[e.url_];
+}
 
 export class AmpAdBatchManager {
 
@@ -47,6 +69,7 @@ export class AmpAdBatchManager {
     this.responseData = null;
     
     // Scan the document for all elements with the same URL, and put them into the list to be batched
+    // @todo - the selector could be made a variable in order to generalise this to things other than imageads.
     const elements = document.querySelectorAll('amp-ad[type=imagead]');
     const slots = [];
     for (var i = 0; i < elements.length; i++) {

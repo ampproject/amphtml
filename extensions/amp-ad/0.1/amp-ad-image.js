@@ -19,6 +19,7 @@ import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 import {AmpAdBatchManager} from './amp-ad-batch-manager.js';
+import {getBatchManager} from './amp-ad-batch-manager.js';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_AD_IMAGE = 'amp-ad-image';
@@ -49,12 +50,9 @@ export class AmpAdImage extends AMP.BaseElement {
         "Invalid data-target: only '_blank' and '_self' are permitted");
       }
     }
-
-    /** @private {boolean} True for the first ad to be processed with a given data-url, otherwise false */
-    this.isBatchMaster_ = false;
     
     /** @private {AmpAdBatchManager} This will batch up the display of this ad together with others of the same URL */
-    this.batchManager_ = this.getBatchManager();
+    this.batchManager_ = getBatchManager(this);
 
     this.lifecycleReporter_ = getLifecycleReporter(this, 'amp');
     this.lifecycleReporter_.sendPing('adSlotBuilt');
@@ -73,27 +71,8 @@ export class AmpAdImage extends AMP.BaseElement {
   }
 
   /**
-   * Get a batch manager that will be used to batch together ads with the same data-url
-   * Note a side effect: the first ad with a given data-url to be processed will have its isBatchMaster_ variable set to true
-   * @returns {AmpAdBatchManager}
-   */
-  getBatchManager() {
-    // If this is our first imagead, create a map of responses for each value of 'data-url'
-    // This allows ads from multiple ad servers on the same page
-    if (!this.win.hasOwnProperty('imageadBatchManagers')) {
-      // Create an array of batch mangers. There will be one for each URL.
-      this.win.imageadBatchManagers = {};
-    }
-    if (!(this.url_ in this.win.imageadBatchManagers)) {
-      // This is the first time we've seen this URL, so this will be the master for this batch
-      this.isBatchMaster_ = true;
-      this.win.imageadBatchManagers[this.url_] = new AmpAdBatchManager(this);
-    }
-    return this.win.imageadBatchManagers[this.url_];
-  }
-  
-  /**
-   * Display an ad in this element. Call this only when we know that the responses have been fetched from the ad server
+   * Display an ad in this element. Call this only when we know that the responses have been fetched from the ad server.
+   * The response data can be found in the batch manager's responseData variable, indexed by slot.
    */
   showImageAd() {
     var d = this.batchManager_.responseData[this.slot_];
