@@ -20,7 +20,12 @@ import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {listenOnce} from '../../../src/event-helper';
+import {startsWith} from '../../../src/string';
+import {setStyle} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 
+/** @private @const {string} */
+const TAG = 'amp-sticky-ad-v1';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -169,6 +174,7 @@ class AmpStickyAd extends AMP.BaseElement {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
         this.element.classList.add('amp-sticky-ad-loaded');
+        this.forceOpacity_();
       });
     });
   }
@@ -201,6 +207,26 @@ class AmpStickyAd extends AMP.BaseElement {
       this.viewport_.updatePaddingBottom(0);
     });
   }
+
+  // Whoever call this needs to make sure it's in a vsync.
+  forceOpacity_() {
+    if (!isExperimentOn(this.win, TAG)) {
+      return;
+    }
+    const background = this.win.getComputedStyle(this.element)
+        .getPropertyValue('background-color');
+    if (!startsWith(background, 'rgba')) {
+      return;
+    }
+    user().warn('AMP-STICKY-AD', 'Do not allow container to be transparent');
+    const backgroundColor = background.substring(
+        background.indexOf('(') + 1,
+        background.lastIndexOf(','));
+    console.log('set styles');
+    setStyle(this.element, 'background-color', 'rgb(' + backgroundColor + ')');
+  }
 }
+
+
 
 AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);

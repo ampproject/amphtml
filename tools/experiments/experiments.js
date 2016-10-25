@@ -218,6 +218,11 @@ const EXPERIMENTS = [
     name: 'Split AMP\'s loading phase into chunks',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
+  {
+    id: 'amp-sticky-ad-v1',
+    name: 'New breaking UX changes make to amp-sticky-ad',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5432',
+  },
 ];
 
 if (getMode().localDev) {
