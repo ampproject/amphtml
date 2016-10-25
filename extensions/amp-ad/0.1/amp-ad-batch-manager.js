@@ -34,14 +34,14 @@ export const TAG_AD_BATCH_MANAGER = 'amp-ad-batch-manager';
 export function getBatchManager(e) {
   // If this is our first imagead, create a map of responses for each value of 'data-url'
   // This allows ads from multiple ad servers on the same page
-  if (!this.win.hasOwnProperty('imageadBatchManagers')) {
+  if (!(e.win.hasOwnProperty('imageadBatchManagers'))) {
     // Create an array of batch mangers. There will be one for each URL.
     e.win.imageadBatchManagers = {};
   }
-  if (!(this.url_ in this.win.imageadBatchManagers)) {
+  if (!(e.url_ in e.win.imageadBatchManagers)) {
     // This is the first time we've seen this URL, so this will be the master for this batch
     e.isBatchMaster_ = true;
-    e.win.imageadBatchManagers[this.url_] = new AmpAdBatchManager(e);
+    e.win.imageadBatchManagers[e.url_] = new AmpAdBatchManager(e);
   } else {
     e.isBatchMaster_ = false;
   }
@@ -78,7 +78,7 @@ export class AmpAdBatchManager {
         this.elements.push(e);
       }
       // If a slot is defined, add it to the list if it isn't there already
-      const s = e.getAttribute('data-slot');
+      var s = e.getAttribute('data-slot');
       if (s === null) {
         s = 0;
       }
