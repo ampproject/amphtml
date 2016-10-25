@@ -186,7 +186,7 @@ describe('integration test: a4a', () => {
   it('should fall back to 3p when the XHR fails', () => {
     xhrMock.resetBehavior();
     xhrMock.throws(new Error('Testing network error'));
-    // Note: Currently layoutCallback rejects, even though something *is*
+    // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
     return fixture.addElement(a4aElement).catch(error => {
@@ -199,7 +199,7 @@ describe('integration test: a4a', () => {
   it('should fall back to 3p when extractCreative throws', () => {
     sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature').throws(
         new Error('Testing extractCreativeAndSignature error'));
-    // Note: Currently layoutCallback rejects, even though something *is*
+    // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
     return fixture.addElement(a4aElement).catch(error => {
@@ -220,6 +220,24 @@ describe('integration test: a4a', () => {
             'Testing extractCreativeAndSignature should not occur error'));
     return fixture.addElement(a4aElement).then(element => {
       expect(element).to.be.renderedInXDomainIframe(TEST_URL);
+    })
+  });
+
+  it('should fall back to 3p when extractCreative returns empty creative', () => {
+    sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
+        .onFirstCall().returns({
+          creative: null,
+          signature: validCSSAmp.signature,
+        })
+        .onSecondCall().throws(new Error(
+        'Testing extractCreativeAndSignature should not occur error'));
+    // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
+    // rendered.  This should be fixed in a refactor, and we should change this
+    // .catch to a .then.
+    return fixture.addElement(a4aElement).catch(error => {
+      expect(error.message).to.contain.string('Key failed to validate');
+      expect(error.message).to.contain.string('amp-a4a:');
+      expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
     })
   });
 });
