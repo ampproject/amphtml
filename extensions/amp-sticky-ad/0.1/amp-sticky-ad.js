@@ -208,7 +208,11 @@ class AmpStickyAd extends AMP.BaseElement {
     });
   }
 
-  // Whoever call this needs to make sure it's in a vsync.
+  /**
+   * To check for background-color alpha and force it to be 1.
+   * Whoever call this needs to make sure it's in a vsync.
+   * @private
+   */
   forceOpacity_() {
     if (!isExperimentOn(this.win, TAG)) {
       return;
