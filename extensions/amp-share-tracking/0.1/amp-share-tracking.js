@@ -100,7 +100,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     return this.getOriginalViewerFragment_().then(fragment => {
       // The share tracking fragment should be the first parameter and start
       // with dot in the url fragment
-      const match = fragment.match(/\.([^&]*)/);
+      const match = fragment.match(/^\.([^&]*)/);
       return match ? match[1] : '';
     });
   }
