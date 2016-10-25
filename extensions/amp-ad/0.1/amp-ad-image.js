@@ -17,9 +17,8 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
-import {AmpAdBatchManager} from './amp-ad-batch-manager.js';
 import {getBatchManager} from './amp-ad-batch-manager.js';
+import {templatesFor} from '../../../src/template';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_AD_IMAGE = 'amp-ad-image';
@@ -35,7 +34,7 @@ export class AmpAdImage extends AMP.BaseElement {
 
     /** @private {string} A string identifying this ad slot: the server's responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
-    
+
     /** @private {Object} Data passed back from the ad server, via the batch manager */
     this.jsondata_ = null;
 
@@ -50,7 +49,7 @@ export class AmpAdImage extends AMP.BaseElement {
         "Invalid data-target: only '_blank' and '_self' are permitted");
       }
     }
-    
+
     /** @private {AmpAdBatchManager} This will batch up the display of this ad together with others of the same URL */
     this.batchManager_ = getBatchManager(this);
 
@@ -75,27 +74,40 @@ export class AmpAdImage extends AMP.BaseElement {
    * The response data can be found in the batch manager's responseData variable, indexed by slot.
    */
   showImageAd() {
-    var d = this.batchManager_.responseData[this.slot_];
-    const a = document.createElement('a');
-    a.setAttribute('target', this.target_);
-    a.setAttribute('href', d.target);
-    a.style.width = '100%';
-    // If the server sent back some info for analytics purposes, put it where analytics can get at it
-    if (d.hasOwnProperty('info')) {
-      a.setAttribute('data-info', d.info);
+    const d = this.batchManager_.responseData[this.slot_];
+    // See if there are any templates in this ad
+    const templates = this.element.querySelectorAll('template');
+    if (templates.length) {
+      // We have a template. Use it to do the rendering.
+      const t = this;
+      templatesFor(this.win).findAndRenderTemplate(this.element, d)
+          .then(function(x) {
+            // Clear out the template and replace it by the rendered version
+            t.element.innerHTML = '';
+            t.element.appendChild(x);
+          });
+    } else {
+      // We have no template. Fall back to a simple default image ad.
+      const a = document.createElement('a');
+      a.setAttribute('target', this.target_);
+      a.setAttribute('href', d.href);
+      a.style.width = '100%';
+      // If the server sent back some info for analytics purposes, put it where analytics can get at it
+      if (d.hasOwnProperty('info')) {
+        a.setAttribute('data-info', d.info);
+      }
+      this.element.appendChild(a);
+      const i = document.createElement('img');
+      i.setAttribute('src', d.src);
+      i.style.width = '100%';
+      a.appendChild(i);
     }
-    this.element.appendChild(a);
-    const i = document.createElement('img');
-    i.setAttribute('src', d.src);
-    i.style.width = '100%';
-    a.appendChild(i);
   }
-
   /** @override */
   layoutCallback() {
     const t = this;
     // Call the batch manager to do the layout
-    return t.batchManager_.doLayout(t, function(){
+    return t.batchManager_.doLayout(t, function() {
       t.showImageAd();
     });
   }

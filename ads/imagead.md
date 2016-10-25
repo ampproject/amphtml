@@ -20,6 +20,9 @@ Imagead does not represent a specific network. Rather, it provides a way for
 a site to display simple image ads on a self-service basis. You must provide
 your own ad server to deliver the ads in json format as shown below.
 
+Ads may have a custom mustache template (see mustache.js). If they don't, a simple
+template will be used consisting only of a link and 
+
 ## Examples
 
 ### Single ad
@@ -77,6 +80,18 @@ your own ad server to deliver the ads in json format as shown below.
 <!-- The second: https://my-other-site/my-other-ad-server?s=123 -->
 ```
 
+### Ad using a mustache template
+```html
+ <amp-ad type="imagead" width="200" height="200"
+    data-url="https://my-site/my-ad-server"
+    data-slot='2'>
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}">
+        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
+  </amp-ad>
+```
 
 
 ## Supported parameters
@@ -107,11 +122,12 @@ A parameter like `?s=1,2` will be appended to the URL specified by `data-url` in
 to specify the slots being fetched. See the examples above for details.
 
 The ad server should return a json object containing a record for each slot in the request.
-The record contains three fields:
+For a mustache template, the record format is defined by your template. For the fallback
+simple template, the record contains three fields:
 
 * src - string to go into the source parameter of the image to be displayed. This can be a 
 web reference (in which case it must be `https:` or a `data:` URI including the base64-encoded image.
-* target - URL to which the user is to be directed
+* href - URL to which the user is to be directed when he clicks on the ad
 * info - A string with additional info about the ad that was served, to be sent to analytics
 
 Here is an example response, assuming two slots named simply 1 and 2:
@@ -120,17 +136,21 @@ Here is an example response, assuming two slots named simply 1 and 2:
 {
     "1":{
         "src":"https:\/\/my-ad-server.com\/my-advertisement.gif",
-        "target":"https:\/\/bachtrack.com",
+        "href":"https:\/\/bachtrack.com",
         "info":"Info1"
     },
     "2":{
         "src":"data:image/gif;base64,R0lGODlhyAAiALM...DfD0QAADs=",
-        "target":"http:\/\/onestoparts.com",
+        "href":"http:\/\/onestoparts.com",
         "info":"Info2"}
     }
 ```
 
 ## To do
 
+Add support for json variables - and perhaps other variable substitutions in the way amp-list does - but ensure that 
+we don't mess things up by adding a ?s= to a URL that already has a ?
+
 Give some advice for how to use amp-analytics
+
 Do some proper support for different layouts - right now, there's strange behaviour if you use responsive

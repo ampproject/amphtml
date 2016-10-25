@@ -55,30 +55,25 @@ export class AmpAdBatchManager {
 
     /** @private {string} The base URL of the ad server */
     this.url_ = element.url_;
-    
+
     /** @private {string} The full URL of the ad server, including any slot ids */
     this.fullurl_ = this.url_;
-    
+
     /** @private {string} The number of timer ticks remaining before we give up waiting for an ad server response */
     this.timeout_ = AD_BATCH_TIMEOUT;
-    
-    /** @private {array} elements All amp-ad imagead elements which are part of this batch */
-    this.elements = [];
-    
-    /** @private {Object} responseData Map of JSON responses indexed by slot */
+
+    /** @public {Object} responseData Map of JSON responses indexed by slot */
     this.responseData = null;
-    
+
     // Scan the document for all elements with the same URL, and put them into the list to be batched
     // @todo - the selector could be made a variable in order to generalise this to things other than imageads.
     const elements = document.querySelectorAll('amp-ad[type=imagead]');
     const slots = [];
-    for (var i = 0; i < elements.length; i++) {
-      var e = elements[i];
-      if (e.getAttribute('data-url') == this.url_) {
-        this.elements.push(e);
-      }
+    for (let i = 0; i < elements.length; i++) {
+      const e = elements[i];
+
       // If a slot is defined, add it to the list if it isn't there already
-      var s = e.getAttribute('data-slot');
+      let s = e.getAttribute('data-slot');
       if (s === null) {
         s = 0;
       }
@@ -86,7 +81,7 @@ export class AmpAdBatchManager {
       for (const x in slots) {
         if (slots[x] == s) {
           done = true;
-        } 
+        }
       }
       if (!done) {
         slots.push(s);
@@ -94,10 +89,10 @@ export class AmpAdBatchManager {
     }
     // If any slots were defined, add them to the URL
     if (slots.length) {
-      this.fullurl_ += "?s=" + slots.join(',');
+      this.fullurl_ += '?s=' + slots.join(',');
     }
   }
-  
+
   /**
    * Call this to instruct the batch manager to do the layout for an element. Prior to doing the layout, the batch manager
    * will fetch the data (if this is the batch master) or wait for it to be ready (if not the batch master).
@@ -107,12 +102,12 @@ export class AmpAdBatchManager {
    * @returns {Promise}
    */
   doLayout(e, callback) {
-    var t = this;
-    return new Promise(function(resolve, reject) {
+    const t = this;
+    return new Promise(function(resolve) {
       if (e.isBatchMaster_) {
         // This is the master. We're going to do the layout for all ads in the batch
         // Gather the parameters to be added to the URL. First, make a list of the slot ids for all ads on this page with this URL
-        xhrFor(e.win).fetchJson(t.fullurl_).then(function(data){
+        xhrFor(e.win).fetchJson(t.fullurl_).then(function(data) {
           t.responseData = data;
           // Now call the real layout function for this element
           for (const s in data) {
@@ -137,8 +132,8 @@ export class AmpAdBatchManager {
       }
     });
   }
-  
-    /**
+
+  /**
    * Return a promise that will complete when the response from the image server has been received.
    * If the response is not ready after the specified timeout, reject the promise.
    * @returns {Promise}
