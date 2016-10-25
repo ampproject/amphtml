@@ -3,7 +3,7 @@
  72.79 kB   |     6.19 kB   |     2.58 kB   |   alp.js / alp.max.js
 904.96 kB   |    183.2 kB   |    56.68 kB   |   shadow-v0.js / amp-shadow.js
    5.8 kB   |       428 B   |       278 B   |   sw-kill.js / sw-kill.max.js
-385.52 kB   |     1.38 kB   |       788 B   |   sw.js / sw.max.js
+385.52 kB   |     1.38 kB   |       790 B   |   sw.js / sw.max.js
 940.96 kB   |   182.09 kB   |    56.34 kB   |   v0.js / amp.js
 333.56 kB   |    38.49 kB   |    12.89 kB   |   v0/amp-access-0.1.js
 131.45 kB   |     2.47 kB   |     1.19 kB   |   v0/amp-access-laterpay-0.1.js
@@ -23,7 +23,7 @@
  34.99 kB   |     1.82 kB   |       924 B   |   v0/amp-dailymotion-0.1.js
 121.89 kB   |     2.08 kB   |     1.06 kB   |   v0/amp-dynamic-css-classes-0.1.js
 155.92 kB   |     5.53 kB   |     2.43 kB   |   v0/amp-experiment-0.1.js
-178.25 kB   |     9.24 kB   |     4.17 kB   |   v0/amp-facebook-0.1.js
+178.25 kB   |     9.24 kB   |     4.18 kB   |   v0/amp-facebook-0.1.js
  43.48 kB   |     3.11 kB   |     1.38 kB   |   v0/amp-fit-text-0.1.js
 137.77 kB   |     4.06 kB   |     1.82 kB   |   v0/amp-font-0.1.js
 211.36 kB   |    14.51 kB   |     5.43 kB   |   v0/amp-form-0.1.js
