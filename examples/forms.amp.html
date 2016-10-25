@@ -417,7 +417,8 @@
     </fieldset>
 </form>
 
-<h4>on=change and form.submit examples</h4>
+<h4 id="header1">on=change and form.submit examples</h4>
+<button on="tap:header1.submit">Wrong Action - should throw an error</button>
 <form method="post"
       id="poll1"
       action-xhr="/form/json/poll1"

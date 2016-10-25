@@ -33,6 +33,10 @@ const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
+/** @const {!Object<string,!Array<string>>} */
+const ELEMENTS_ACTIONS_MAP_ = {
+  'form': ['submit'],
+};
 
 /**
  * @typedef {{
@@ -163,12 +167,6 @@ export class ActionService {
    */
   installActionHandler(target, handler) {
     const debugid = target.tagName + '#' + target.id;
-
-    // TODO: ASK @dima about this? Is this limited to AMP-elements for security
-    // reasons? If yes, shouldn't one check the tagname rather than the id?
-    //user().assert(target.id && target.id.substring(0, 4) == 'amp-',
-    //    'AMP element is expected: %s', debugid);
-
     /** @const {!Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
     if (currentQueue) {
@@ -252,13 +250,14 @@ export class ActionService {
       return;
     }
 
+    const lowerTagName = target.tagName.toLowerCase();
     // AMP elements.
-    if (target.tagName.toLowerCase().substring(0, 4) == 'amp-') {
+    if (lowerTagName.substring(0, 4) == 'amp-') {
       if (target.enqueAction) {
         target.enqueAction(invocation);
       } else {
         this.actionInfoError_('Unrecognized AMP element "' +
-            target.tagName.toLowerCase() + '". ' +
+            lowerTagName + '". ' +
             'Did you forget to include it via <script custom-element>?',
             actionInfo, target);
       }
@@ -266,18 +265,26 @@ export class ActionService {
     }
 
     // Special elements with AMP ID.
-    //if (target.id && target.id.substring(0, 4) == 'amp-') {
-    if (!target[ACTION_QUEUE_]) {
+    if (target.id && target.id.substring(0, 4) == 'amp-') {
+      if (!target[ACTION_QUEUE_]) {
         target[ACTION_QUEUE_] = [];
       }
-    target[ACTION_QUEUE_].push(invocation);
-    return;
-    //}
+      target[ACTION_QUEUE_].push(invocation);
+      return;
+    }
+
+    // Check if this is an element has a known action.
+    const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
+    if (target[ACTION_QUEUE_] && supportedActions &&
+        supportedActions.indexOf(method) != -1) {
+      target[ACTION_QUEUE_].push(invocation);
+      return;
+    }
 
     // Unsupported target.
-    //this.actionInfoError_(
-    //    'Target must be an AMP element or have an AMP ID',
-    //    actionInfo, target);
+    this.actionInfoError_(
+        'Target element does not support provided action',
+        actionInfo, target);
   }
 
   /**
