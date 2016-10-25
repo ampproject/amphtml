@@ -21,9 +21,8 @@ goog.provide('amp.validator.annotateWithErrorCategories');
 goog.provide('amp.validator.isSeverityWarning');
 goog.provide('amp.validator.renderErrorMessage');
 goog.provide('amp.validator.renderValidationResult');
-goog.provide('amp.validator.validateNode');
+goog.provide('amp.validator.validateSaxEvents');
 goog.provide('amp.validator.validateString');
-goog.require('amp.domwalker.DomWalker');
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AtRuleSpec');
@@ -4781,22 +4780,51 @@ amp.validator.annotateWithErrorCategories = function(result) {
 };
 
 /**
- * Validates a document stored below a DOM node.
+ * Validates a document based on SAX events.
  * EXPERIMENTAL: Do not rely on this API for now, it is still a work in
- * progress.
- *
- * @param {!Document} rootDoc
- * @return {!amp.validator.ValidationResult} Validation Result (status and
- *     errors)
+ * progress. It will change and/or go away without notice.
+ * @param {!Array<!Array<string>>} saxEvents
+ * @param {string} htmlFormat
+ * @return {!amp.validator.ValidationResult}
  * @export
  */
-amp.validator.validateNode = function(rootDoc) {
+amp.validator.validateSaxEvents = function(saxEvents, htmlFormat) {
   if (amp.validator.GENERATE_DETAILED_ERRORS) {
     throw 'not implemented';
   }
-  const handler = new amp.validator.ValidationHandler('AMP');
-  const visitor = new amp.domwalker.DomWalker();
-  visitor.walktree(handler, rootDoc);
-
+  // TODO(powdercloud): This needs additional logic to make sure
+  // that markManufacturedBody / the start of the body tag is not
+  // inserted in the wrong spot.
+  const handler = new amp.validator.ValidationHandler(htmlFormat);
+  for (const e of saxEvents) {
+    switch (e[0]) {
+      case 'startTag':
+        e.shift();
+        const tagName = e.shift();
+        handler.startTag(tagName, e);
+        break;
+      case 'endTag':
+        handler.endTag(e[1]);
+        break;
+      case 'pcdata':
+        handler.pcdata(e[1]);
+        break;
+      case 'rcdata':
+        handler.rcdata(e[1]);
+        break;
+      case 'cdata':
+        handler.cdata(e[1]);
+        break;
+      case 'startDoc':
+        handler.startDoc();
+        break;
+      case 'endDoc':
+        handler.endDoc();
+        break;
+      case 'markManufacturedBody':
+        handler.markManufacturedBody();
+        break;
+    }
+  }
   return handler.Result();
 };
