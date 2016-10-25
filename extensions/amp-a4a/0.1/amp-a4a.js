@@ -38,6 +38,7 @@ import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
+import {endsWith} from '../../../src/string';
 import {
   importPublicKey,
   isCryptoAvailable,
@@ -538,7 +539,7 @@ export class AmpA4A extends AMP.BaseElement {
       return [];
     }
     const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
-      dev().assert(!serviceName.endsWith('-dev'));
+      dev().assert(!endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
