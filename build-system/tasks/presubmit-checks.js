@@ -18,6 +18,7 @@ var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
 var srcGlobs = require('../config').presubmitGlobs;
 var util = require('gulp-util');
+var through2 = require('through2');
 
 var dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -436,6 +437,10 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([\'"`])?[A-Z-]+([\'"`])?)[^)]*\\)': {
+    message: 'Logging message require explicitly `TAG`, or an all uppercase' +
+        ' string as the first parameter',
+  },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, thinking twice before using it',
     whitelist: [
@@ -583,7 +588,7 @@ var forbiddenTermsSrcInclusive = {
       'src/friendly-iframe-embed.js',
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
-      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
     ]
@@ -614,11 +619,19 @@ function isInTestFolder(path) {
 
 function stripComments(contents) {
   // Multi-line comments
-  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, '');
-  // Single line comments with only leading whitespace
-  contents = contents.replace(/\n\s*\/\/.*/g, '');
-  // Single line comments following a space, semi-colon, or closing brace
-  return contents.replace(/( |\}|;)\s*\/\/.*/g, '$1');
+  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
+    // Preserve the newlines
+    var newlines = [];
+    for (var i = 0; i < match.length; i++) {
+      if (match[i] === '\n') {
+        newlines.push('\n');
+      }
+    }
+    return newlines.join('');
+  });
+  // Single line comments either on its own line or following a space,
+  // semi-colon, or closing brace
+  return contents.replace(/( |}|;|^) *\/\/.*/g, '$1');
 }
 
 /**
@@ -650,11 +663,26 @@ function matchTerms(file, terms) {
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var matches = contents.match(new RegExp(term, 'gm'));
+    var regex = new RegExp(term, 'gm');
+    var index = 0;
+    var line = 1;
+    var column = 0;
+    var match;
+    var hasTerm = false;
 
-    if (matches) {
-      util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + relative));
+    while ((match = regex.exec(contents))) {
+      hasTerm = true;
+      for (index; index < match.index; index++) {
+        if (contents[index] === '\n') {
+          line++;
+          column = 1;
+        } else {
+          column++;
+        }
+      }
+
+      util.log(util.colors.red('Found forbidden: "' + match[0] +
+          '" in ' + relative + ':' + line + ':' + column));
       if (typeof terms[term] == 'string') {
         fix = terms[term];
       } else {
@@ -666,9 +694,9 @@ function matchTerms(file, terms) {
         util.log(util.colors.blue(fix));
       }
       util.log(util.colors.blue('=========='));
-      return true;
     }
-    return false;
+
+    return hasTerm;
   }).some(function(hasAnyTerm) {
     return hasAnyTerm;
   });
@@ -746,14 +774,10 @@ function checkForbiddenAndRequiredTerms() {
   var forbiddenFound = false;
   var missingRequirements = false;
   return gulp.src(srcGlobs)
-    .pipe(util.buffer(function(err, files) {
-      forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
-        return errorFound;
-      });
-      missingRequirements = files.map(isMissingTerms).some(
-          function(errorFound) {
-        return errorFound;
-      });
+    .pipe(through2.obj(function(file, enc, cb) {
+      forbiddenFound = hasAnyTerms(file) || forbiddenFound;
+      missingRequirements = isMissingTerms(file) || missingRequirements;
+      cb();
     }))
     .on('end', function() {
       if (forbiddenFound) {

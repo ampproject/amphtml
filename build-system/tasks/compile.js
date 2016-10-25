@@ -172,6 +172,9 @@ function compile(entryModuleFilenames, outputDir,
       var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
       srcs.push(path);
     });
+    if (options.extraGlobs) {
+      srcs.push.apply(srcs, options.extraGlobs);
+    }
     if (options.include3pDirectories) {
       srcs.push(
         '3p/**/*.js',

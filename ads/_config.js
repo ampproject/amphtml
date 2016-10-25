@@ -213,6 +213,13 @@ export const adConfig = {
 
   kargo: {},
 
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+    renderStartImplemented: true,
+  },
+
+  ligatus: {},
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
@@ -388,6 +395,11 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  yahoo: {
+    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    preconnect: 'https://us.adserver.yahoo.com',
+  },
 
   yahoojp: {
     prefetch: [

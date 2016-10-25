@@ -149,7 +149,7 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*-ad-network-*.js',
     mustNotDependOn: [
-      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-ad/0.1/concurrent-load.js',
       'src/3p-frame.js',
       'src/iframe-helper.js',

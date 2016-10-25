@@ -19,7 +19,13 @@
 /** @constructor */
 function BaseElement$$module$src$base_element() {};
 /** @constructor */
-function AmpAdApiHandler$$module$extensions$amp_ad$0_1$amp_ad_api_handler() {};
+function AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler() {};
+/** @constructor */
+function AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl() {};
+/** @constructor */
+function AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a() {};
+/** @constructor */
+function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 
 // Long list of, uhm, stuff the ads code needs to compile.
 // All unquoted external properties need to be added here.
@@ -49,6 +55,7 @@ data.epl_ksv;
 data.epl_kvs;
 data.epl_e;
 data.guid;
+data.adslot;
 
 var Criteo;
 Criteo.DisplayAd;

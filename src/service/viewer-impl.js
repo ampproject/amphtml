@@ -19,7 +19,12 @@ import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
-import {parseQueryString, parseUrl, removeFragment} from '../url';
+import {
+  getSourceUrl,
+  parseQueryString,
+  parseUrl,
+  removeFragment,
+} from '../url';
 import {platformFor} from '../platform';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
@@ -772,6 +777,7 @@ export class Viewer {
   postDocumentReady() {
     this.sendMessageUnreliable_('documentLoaded', {
       title: this.win.document.title,
+      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
     }, false);
   }
 
@@ -872,8 +878,15 @@ export class Viewer {
       return Promise.resolve('');
     }
     return this.sendMessageUnreliable_('fragment', undefined, true).then(
-      hash => hash || ''
-    );
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
+              'should start with #');
+          /* Strip leading '#' */
+          return hash.substr(1);
+        });
   }
 
   /**

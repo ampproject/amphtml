@@ -1279,7 +1279,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev().error(TAG_, 'task failed:',
+      dev().info(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1295,6 +1295,31 @@ export class Resources {
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
+      opt_callback) {
+    if (resource.hasBeenMeasured()) {
+      this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+          opt_callback);
+    } else {
+      // This is a rare case since most of times the element itself schedules
+      // resize requests. However, this case is possible when another element
+      // requests resize of a controlled element.
+      this.vsync_.measure(() => {
+        resource.measure();
+        this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+            opt_callback);
+      });
+    }
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @param {boolean} force
+   * @param {function(boolean)=} opt_callback A callback function
+   * @private
+   */
+  completeScheduleChangeSize_(resource, newHeight, newWidth, force,
       opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();

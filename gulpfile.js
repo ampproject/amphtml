@@ -46,6 +46,7 @@ var extensions = {};
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-access-laterpay', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true);
 declareExtension('amp-ad', '0.1', false);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
@@ -68,7 +69,7 @@ declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
-declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true);
@@ -108,13 +109,16 @@ declareExtension('amp-youtube', '0.1', false);
  * @param {boolean} hasCss Whether the extension comes with CSS.
  * @param {string=} opt_noTypeCheck Whether not to check types.
  *     No new extension must pass this.
+ * @param {!Array<string>=} opt_extraGlobs
  */
-function declareExtension(name, version, hasCss, opt_noTypeCheck) {
+function declareExtension(name, version, hasCss, opt_noTypeCheck,
+    opt_extraGlobs) {
   extensions[name + '-' + version] = {
     name: name,
     version: version,
     hasCss: hasCss,
-    noTypeCheck: !!opt_noTypeCheck
+    noTypeCheck: !!opt_noTypeCheck,
+    extraGlobs: opt_extraGlobs,
   }
 }
 
@@ -126,7 +130,7 @@ function declareExtension(name, version, hasCss, opt_noTypeCheck) {
 function buildExtensions(options) {
   for (var key in extensions) {
     var e = extensions[key];
-    buildExtension(e.name, e.version, e.hasCss, options);
+    buildExtension(e.name, e.version, e.hasCss, options, e.extraGlobs);
   }
 }
 
@@ -252,13 +256,15 @@ function watch() {
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
+ * @param {!Array=} opt_extraGlobs
  * @return {!Stream} Gulp object
  */
-function buildExtension(name, version, hasCss, options) {
+function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   if (cssOnly && !hasCss) {
     return Promise.resolve();
   }
   options = options || {};
+  options.extraGlobs = opt_extraGlobs;
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
   var jsTestPath = path + '/test/' + 'test-' + name + '.js';
@@ -319,6 +325,7 @@ function buildExtensionJs(path, name, version, options) {
     toName:  name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
     latestName: name + '-latest.js',
+    extraGlobs: options.extraGlobs,
     // Wrapper that either registers the extension or schedules it for
     // execution after the main binary comes back.
     // The `function` is wrapped in `()` to avoid lazy parsing it,
