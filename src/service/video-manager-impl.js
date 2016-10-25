@@ -140,7 +140,7 @@ class VideoEntry {
     this.vsync_ = vsyncFor(ampdoc.win);
 
     /** @private @const {function(): !Promise<boolean>} */
-    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc,
+    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
         getMode(ampdoc.win).lite);
 
     const element = dev().assert(video.element);
@@ -399,11 +399,11 @@ let supportsAutoplayCache_ = null;
  * Service dependencies are taken explicitly for testability.
  *
  * @private visible for testing.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} win
  * @param {boolean} isLiteViewer
  * @return {!Promise<boolean>}
  */
-export function supportsAutoplay(ampdoc, isLiteViewer) {
+export function supportsAutoplay(win, isLiteViewer) {
 
   // Use cached result if available.
   if (supportsAutoplayCache_) {
@@ -419,7 +419,7 @@ export function supportsAutoplay(ampdoc, isLiteViewer) {
   // `paused` is true after `play()` call, autoplay is supported. Although
   // this is unintuitive, it works across browsers and is currently the lightest
   // way to detect autoplay without using a data source.
-  const detectionElement = ampdoc.win.document.createElement('video');
+  const detectionElement = win.document.createElement('video');
   // NOTE(aghassemi): We need both attributes and properties due to Chrome and
   // Safari differences when dealing with non-attached elements.
   detectionElement.setAttribute('muted', '');

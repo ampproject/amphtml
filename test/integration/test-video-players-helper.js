@@ -17,7 +17,8 @@
 import {listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/timer';
 import {viewportForDoc} from '../../src/viewport';
-import {VideoEvents} from '../../src/video-interface';
+import {VideoInterface, VideoEvents} from '../../src/video-interface';
+import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
@@ -26,13 +27,23 @@ import {
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
-  describe('Autoplay', function() {
-    this.timeout(10000);
-    it('should play when in view port initially', () => {
-      return getVideoPlayer(/* opt_outsideView */ false).then(v => {
-        return listenOncePromise(v, VideoEvents.PLAY);
-      });
+  it('should override the video interface methods', function() {
+    return getVideoPlayer(/* opt_outsideView */ false).then(v => {
+      const impl = v.implementation_;
+      const methods = Object.getOwnPropertyNames(
+          Object.getPrototypeOf(new VideoInterface()));
+
+      expect(methods.length).to.be.above(1);
+      for (let i = 0; i < methods.length; i++) {
+        const methodName = methods[i];
+        expect(impl[methodName]).to.exist;
+      }
     });
+  });
+
+  describe.configure().retryOnSaucelabs().run('Autoplay', function() {
+    const TIMEOUT = 20000;
+    this.timeout(TIMEOUT);
 
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
@@ -60,17 +71,19 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           viewport = viewportForDoc(video);
 
           // scroll to the bottom, make video fully visible
-          viewport.setScrollTop(viewport.getHeight());
-          return listenOncePromise(video, VideoEvents.PLAY);
+          const p = listenOncePromise(video, VideoEvents.PLAY);
+          viewport.scrollIntoView(video);
+          return p;
         }).then(() => {
           // scroll back to top, make video not visible
+          const p = listenOncePromise(video, VideoEvents.PAUSE);
           viewport.setScrollTop(0);
-          return listenOncePromise(video, VideoEvents.PAUSE);
+          return p;
         });
       });
     });
 
-    describe('animated icon', () => {
+    describe('Animated Icon', () => {
       it('should create an animated icon overlay', () => {
         let video;
         let viewport;
@@ -88,7 +101,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
           viewport = viewportForDoc(video);
           // scroll to the bottom, make video fully visible so it autoplays
-          viewport.setScrollTop(viewport.getHeight());
+          viewport.scrollIntoView(video);
 
           return waitForAnimationPlay(icon).then(() => {
             expect(isAnimationPaused(icon)).to.be.false;
@@ -101,14 +114,27 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           const computedStyle = win.getComputedStyle(animElement);
           const isPaused =
             (computedStyle.getPropertyValue('animation-play-state') == 'paused'
-            || computedStyle.getPropertyValue('animation-name') == 'none');
+            || computedStyle.getPropertyValue('-webkit-animation-play-state') ==
+              'paused'
+            || computedStyle.getPropertyValue('animation-name') == 'none'
+            || computedStyle.getPropertyValue('-webkit-animation-name') ==
+              'none');
           return isPaused;
         }
 
         function waitForAnimationPlay(iconElement) {
           return poll('animation play', () => {
             return iconElement.classList.contains('amp-video-eq-play');
-          }, undefined, 5000);
+          }, undefined, TIMEOUT);
+        }
+      });
+
+    });
+    before(function() {
+      // Skip autoplay tests if browser does not support autoplay.
+      return supportsAutoplay(window, false).then(supportsAutoplay => {
+        if (!supportsAutoplay) {
+          this.skip();
         }
       });
     });

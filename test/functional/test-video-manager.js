@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
 import {isLayoutSizeDefined} from '../../src/layout';
@@ -26,10 +25,13 @@ import {
 } from '../../src/service/video-manager-impl';
 import {
   runVideoPlayerIntegrationTests,
-} from '../integration/video-players-test-helper';
+} from '../integration/test-video-players-helper';
 import * as sinon from 'sinon';
 
 describe('Mock Video Player Integration Tests', () => {
+  // We run the video player integration tests on a mocked video player as part
+  // of functional testing. Same tests run on real video players such as
+  // `amp-video` and `amp-youtube` as part of integration testing.
   runVideoPlayerIntegrationTests(fixture => {
     fixture.doc.registerElement('amp-test-mock-videoplayer', {
       prototype: createAmpElementProto(fixture.win, 'amp-test-mock-videoplayer',
@@ -44,7 +46,7 @@ describe('Mock Video Player Integration Tests', () => {
 describe('Supports Autoplay', () => {
   let sandbox;
 
-  let ampdoc;
+  let win;
   let video;
 
   let isLite;
@@ -54,7 +56,7 @@ describe('Supports Autoplay', () => {
   let playSpy;
 
   it('should create an invisible test video element', () => {
-    return supportsAutoplay(ampdoc, isLite).then(() => {
+    return supportsAutoplay(win, isLite).then(() => {
       expect(video.style.position).to.equal('fixed');
       expect(video.style.top).to.equal('0');
       expect(video.style.width).to.equal('0');
@@ -77,7 +79,7 @@ describe('Supports Autoplay', () => {
 
   it('should return false if `paused` is true after `play()` call', () => {
     video.paused = true;
-    return supportsAutoplay(ampdoc, isLite).then(supportsAutoplay => {
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
       expect(playSpy.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -86,7 +88,7 @@ describe('Supports Autoplay', () => {
 
   it('should return true if `paused` is false after `play()` call', () => {
     video.paused = false;
-    return supportsAutoplay(ampdoc, isLite).then(supportsAutoplay => {
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.true;
       expect(playSpy.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -95,19 +97,19 @@ describe('Supports Autoplay', () => {
 
   it('should be false when in amp-lite mode', () => {
     isLite = true;
-    return supportsAutoplay(ampdoc, isLite).then(supportsAutoplay => {
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
     });
   });
 
   it('should cache the result', () => {
-    const firstResultRef = supportsAutoplay(ampdoc, isLite);
-    const secondResultRef = supportsAutoplay(ampdoc, isLite);
+    const firstResultRef = supportsAutoplay(win, isLite);
+    const secondResultRef = supportsAutoplay(win, isLite);
     expect(firstResultRef).to.equal(secondResultRef);
 
     clearSupportsAutoplayCacheForTesting();
 
-    const thirdResultRef = supportsAutoplay(ampdoc, isLite);
+    const thirdResultRef = supportsAutoplay(win, isLite);
     expect(thirdResultRef).to.not.equal(firstResultRef);
     expect(thirdResultRef).to.not.equal(secondResultRef);
   });
@@ -138,12 +140,8 @@ describe('Supports Autoplay', () => {
       },
     };
 
-    const win = {
+    win = {
       document: doc,
-    };
-
-    ampdoc = {
-      win,
     };
 
     isLite = false;

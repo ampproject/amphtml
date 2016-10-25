@@ -25,14 +25,23 @@ import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
 
-/** @type {number} Value of YouTube player state when playing. */
-const YT_PLAYER_STATE_PLAYING = 1;
+/**
+ * @enum {number}
+ * @private
+ */
+const PlayerStates = {
+  PLAYING: 1,
+  PAUSED: 2,
+};
 
-/** @type {number} Value of YouTube player state when paused. */
-const YT_PLAYER_STATE_PAUSED = 2;
-
-/** @type {number} Config to tell YouTube to hide annotations by default*/
-const YT_PLAYER_FLAG_HIDE_ANNOTATION = 3;
+/**
+ * @enum {number}
+ * @private
+ */
+const PlayerFlags = {
+  /* Config to tell YouTube to hide annotations by default*/
+  HIDE_ANNOTATION: 3,
+};
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -140,7 +149,7 @@ class AmpYoutube extends AMP.BaseElement {
       // autoplaying video to be just unmute tso annotations are not
       // interactive during autoplay anyway.
       if (!('iv_load_policy' in params)) {
-        params['iv_load_policy'] = `${YT_PLAYER_FLAG_HIDE_ANNOTATION}`;
+        params['iv_load_policy'] = `${PlayerFlags.HIDE_ANNOTATION}`;
       }
 
       // Inline play must be set for autoplay regardless of original value.
@@ -184,7 +193,7 @@ class AmpYoutube extends AMP.BaseElement {
     // The player breaks if the user haven't played the video yet specially
     // on mobile.
     if (this.iframe_ && this.iframe_.contentWindow &&
-        this.playerState_ == YT_PLAYER_STATE_PLAYING) {
+        this.playerState_ == PlayerStates.PLAYING) {
       this.pause();
     }
   }
@@ -223,9 +232,9 @@ class AmpYoutube extends AMP.BaseElement {
     } else if (data.event == 'infoDelivery' &&
         data.info && data.info.playerState !== undefined) {
       this.playerState_ = data.info.playerState;
-      if (this.playerState_ == YT_PLAYER_STATE_PAUSED) {
+      if (this.playerState_ == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-      } else if (this.playerState_ == YT_PLAYER_STATE_PLAYING) {
+      } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
       }
     }

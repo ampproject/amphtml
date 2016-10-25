@@ -26,7 +26,7 @@
  * @fileoverview
  */
 
-import {runVideoPlayerIntegrationTests} from './video-players-test-helper';
+import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
 describe('amp-video', () => {
   runVideoPlayerIntegrationTests(fixture => {
