@@ -33,6 +33,98 @@ import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {resetScheduledElementForTesting, upgradeOrRegisterElement} from '../../../../src/custom-element';
 import * as sinon from 'sinon';
 
+chai.Assertion.addMethod('renderedInFriendlyIframe', function (srcdoc) {
+  const obj = this._obj;
+  this.assert(obj,
+      'amp ad element should be #{exp}, got #{act}',  // if true message
+      'amp ad element should not be #{exp}, got #{act}',  // if negated message
+      'truthy',  // expected
+      obj);      // actual
+  const elementName = obj.tagName.toLowerCase();
+  const child = obj.querySelector('iframe[srcdoc]');
+  this.assert(child,
+      `child of amp ad element ${elementName} should be #{exp}, got #{act}`,
+      `child of amp ad element ${elementName} should not be #{exp}, got #{act}`,
+      'truthy',
+      child);
+  this.assert(child.getAttribute('srcdoc').indexOf(srcdoc) >= 0,
+      `iframe child of amp ad element ${elementName} should contain #{exp}, ` +
+      'was #{act}',
+      `iframe child of amp ad element ${elementName} should not contain ` +
+      '#{exp}, was #{act}',
+      srcdoc,
+      child.getAttribute('srcdoc'));
+  const childBody = child.contentDocument.body;
+  this.assert(childBody,
+      `iframe child of amp ad element ${elementName} should have #{exp}`,
+      `iframe child of amp ad element ${elementName} should have #{exp}, ` +
+      'got #{act}',
+      'body tag',
+      childBody);
+  // I would like to just invoke the .visible assertion from test/_init_test.js,
+  // but it doesn't work to just do this.assert(child).visible.  So just copy
+  // the test code from _init_test.js.  Bleh.
+  [obj, child, childBody].forEach(toTest => {
+    const computedStyle =
+        toTest.ownerDocument.defaultView.getComputedStyle(toTest);
+    const visibility = computedStyle.getPropertyValue('visibility');
+    const opacity = computedStyle.getPropertyValue('opacity');
+    const tagName = toTest.tagName.toLowerCase();
+    this.assert(
+        visibility === 'visible' && parseInt(opacity, 10) > 0,
+        'expected element \'' +
+        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+        'expected element \'' +
+        tagName + '\' not to be #{exp}. with classes: ' + obj.className,
+        'visible',
+        visibility);
+  });
+});
+
+chai.Assertion.addMethod('renderedInXDomainIframe', function (src) {
+  const obj = this._obj;
+  this.assert(obj,
+      'amp ad element should be #{exp}, got #{act}',  // if true message
+      'amp ad element should not be #{exp}, got #{act}',  // if negated message
+      'truthy',  // expected
+      obj);      // actual
+  const elementName = obj.tagName.toLowerCase();
+  const friendlyChild = obj.querySelector('iframe[srcdoc]');
+  this.assert(!friendlyChild,
+      `child of amp ad element ${elementName} should not be cross-domain`,
+      `child of amp ad element ${elementName} should be cross-domain`);
+  const child = obj.querySelector('iframe[src]');
+  this.assert(child,
+      `child of amp ad element ${elementName} should be #{exp}, got #{act}`,
+      `child of amp ad element ${elementName} should not be #{exp}, got #{act}`,
+      'truthy',
+      child);
+  this.assert(child.getAttribute('src').indexOf(src) >= 0,
+      `iframe child of amp ad element ${elementName} src should contain ` +
+      '#{exp}, was #{act}',
+      `iframe child of amp ad element ${elementName} src should not contain ` +
+      '#{exp}, was #{act}',
+      src,
+      child.getAttribute('src'));
+  // I would like to just invoke the .visible assertion from test/_init_test.js,
+  // but it doesn't work to just do this.assert(child).visible.  So just copy
+  // the test code from _init_test.js.  Bleh.
+  [obj, child].forEach(toTest => {
+    const computedStyle =
+        toTest.ownerDocument.defaultView.getComputedStyle(toTest);
+    const visibility = computedStyle.getPropertyValue('visibility');
+    const opacity = computedStyle.getPropertyValue('opacity');
+    const tagName = toTest.tagName.toLowerCase();
+    this.assert(
+        visibility === 'visible' && parseInt(opacity, 10) > 0,
+        'expected element \'' +
+        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+        'expected element \'' +
+        tagName + '\' not to be #{exp}. with classes: ' + obj.className,
+        'visible',
+        visibility);
+  });
+});
 
 describe('integration test: a4a', () => {
   let sandbox;
@@ -80,24 +172,14 @@ describe('integration test: a4a', () => {
 
   it('should render a single AMP ad in a friendly iframe', () => {
     return fixture.addElement(a4aElement).then(element => {
-      const child = element.querySelector('iframe[srcdoc]');
-      expect(child).to.be.ok;
-      expect(child.getAttribute('srcdoc')).to.contain.string('Hello, world.');
-      expect(isStyleVisible(fixture.win, element)).to.be.true;
-      expect(isStyleVisible(fixture.win, child)).to.be.true;
+      expect(element).to.be.renderedInFriendlyIframe('Hello, world.');
     });
   });
 
   it('should fall back to 3p when no signature is present', () => {
     mockResponse.headers.delete(SIGNATURE_HEADER);
     return fixture.addElement(a4aElement).then(element => {
-      let child = element.querySelector('iframe[srcdoc]');
-      expect(child).to.not.be.ok;
-      child = element.querySelector('iframe[src]');
-      expect(child).to.be.ok;
-      expect(child.getAttribute('src')).to.contain.string(TEST_URL);
-      expect(isStyleVisible(fixture.win, element)).to.be.true;
-      expect(isStyleVisible(fixture.win, child)).to.be.true;
+      expect(element).to.be.renderedInXDomainIframe(TEST_URL);
     });
   });
 
@@ -109,14 +191,8 @@ describe('integration test: a4a', () => {
     // .catch to a .then.
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
-      expect(error.message).to.contain.string('amp-a4a:')
-      let child = a4aElement.querySelector('iframe[srcdoc]');
-      expect(child).to.not.be.ok;
-      child = a4aElement.querySelector('iframe[src]');
-      expect(child).to.be.ok;
-      expect(child.getAttribute('src')).to.contain.string(TEST_URL);
-      expect(isStyleVisible(fixture.win, a4aElement)).to.be.true;
-      expect(isStyleVisible(fixture.win, child)).to.be.true;
+      expect(error.message).to.contain.string('amp-a4a:');
+      expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
     });
   });
 
@@ -129,14 +205,21 @@ describe('integration test: a4a', () => {
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string(
           'Testing extractCreativeAndSignature error');
-      expect(error.message).to.contain.string('amp-a4a:')
-      let child = a4aElement.querySelector('iframe[srcdoc]');
-      expect(child).to.not.be.ok;
-      child = a4aElement.querySelector('iframe[src]');
-      expect(child).to.be.ok;
-      expect(child.getAttribute('src')).to.contain.string(TEST_URL);
-      expect(isStyleVisible(fixture.win, a4aElement)).to.be.true;
-      expect(isStyleVisible(fixture.win, child)).to.be.true;
+      expect(error.message).to.contain.string('amp-a4a:');
+      expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
     });
+  });
+
+  it('should fall back to 3p when extractCreative returns empty sig', () => {
+    sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
+        .onFirstCall().returns({
+          creative: stringToArrayBuffer(validCSSAmp.reserialized),
+          signature: null,
+        })
+        .onSecondCall().throws(new Error(
+            'Testing extractCreativeAndSignature should not occur error'));
+    return fixture.addElement(a4aElement).then(element => {
+      expect(element).to.be.renderedInXDomainIframe(TEST_URL);
+    })
   });
 });
