@@ -26,11 +26,11 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  getGoogleAdSlotCounter,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  constructLifecycleReporter,
+  getCorrelator,
 } from '../../../ads/google/a4a/utils';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
 
@@ -49,9 +49,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
+   * @param {!Object=} opt_adContext
    */
-  constructor(element) {
-    super(element);
+  constructor(element, opt_adContext) {
+    super(element, opt_adContext);
   }
 
   /** @override */
@@ -64,13 +65,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
-    const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
+    const slotId = this.adContext.slotId;
+    const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = documentStateFor(global).getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotNumber, [
+    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotId, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
       {name: 'format', value: `${slotRect.width}x${slotRect.height}`},
       {name: 'w', value: slotRect.width},
@@ -85,7 +87,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'ctypes', value: this.getCtypes_()},
       {name: 'd_imp', value: '1'},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'ifi', value: slotNumber},
+      {name: 'ifi', value: slotId},
+      {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
       {name: 'u_aw', value: screen ? screen.availWidth : null},
@@ -122,9 +125,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   initLifecycleReporter() {
-    return constructLifecycleReporter(window, this);
+    return getLifecycleReporter(this, 'a4a', this.adContext.slotId);
   }
-
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);

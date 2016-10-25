@@ -121,8 +121,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @param {!Element} element
+   * @param {!Ojbect=} opt_adContext
    */
-  constructor(element) {
+  constructor(element, opt_adContext) {
     super(element);
     dev().assert(AMP.AmpAdApiHandler);
 
@@ -137,6 +138,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** {?Object} */
     this.config = null;
+
+    /** {?Object} */
+    this.adContext = opt_adContext;
 
     /** @private {?string} */
     this.adUrl_ = null;

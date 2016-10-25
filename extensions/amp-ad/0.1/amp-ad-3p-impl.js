@@ -27,20 +27,21 @@ import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
-import {constructLifecycleReporter} from '../../../ads/google/a4a/utils';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
-
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
 export class AmpAd3PImpl extends AMP.BaseElement {
 
-  /** @param {!AmpElement} element */
-  constructor(element) {
+  /**
+   * @param {!AmpElement} element
+   * @param {!Ojbect=} opt_adContext
+   */
+  constructor(element, opt_adContext) {
     super(element);
 
     /** @private {?Element} */
@@ -48,6 +49,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** {?Object} */
     this.config = null;
+
+    /** {?Object} */
+    this.adContext = opt_adContext || {};
 
     /** @private {?AmpAdApiHandler} */
     this.apiHandler_ = null;
@@ -86,7 +90,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.layoutPromise_ = null;
 
     /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
-    this.lifecycleReporter = constructLifecycleReporter(window, this);
+    this.lifecycleReporter = getLifecycleReporter(this, 'amp',
+        this.adContext.slotId);
 
     this.lifecycleReporter.sendPing('adSlotBuilt');
   }
@@ -213,9 +218,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
-        c: this.lifecycleReporter.getCorrelator(),
-        ifi: this.lifecycleReporter.getSlotId(),
       };
+
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via

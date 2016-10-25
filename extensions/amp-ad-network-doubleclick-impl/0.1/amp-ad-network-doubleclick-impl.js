@@ -26,11 +26,11 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  getGoogleAdSlotCounter,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  constructLifecycleReporter,
+  getCorrelator,
 } from '../../../ads/google/a4a/utils';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -40,9 +40,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
+   * @param {!Object=} opt_adContext
    */
-  constructor(element) {
-    super(element);
+  constructor(element, opt_adContext) {
+    super(element, opt_adContext);
   }
 
   /** @override */
@@ -57,13 +58,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
-    const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
+    const slotId = this.adContext.slotId;
+    const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
     const adTestOn = isInManualExperiment(this.element);
-    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotNumber, [
+    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotId, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
       {name: 'gdfp_req', value: '1'},
@@ -74,6 +76,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
       {name: 'adtest', value: adTestOn},
+      {name: 'ifi', value: slotId},
+      {name: 'c', value: correlator},
+
     ], [
       {
         name: 'scp',
@@ -91,7 +96,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   initLifecycleReporter() {
-    return constructLifecycleReporter(window, this);
+    return getLifecycleReporter(this, 'a4a', this.adContext.slotId);
   }
 }
 

@@ -30,6 +30,7 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {getCorrelator}from './utils';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -109,7 +110,7 @@ function isInReportableBranch(ampElement, namespace) {
 /**
  * @return {!GoogleAdLifecycleReporter|!NullLifecycleReporter}
  */
-export function getLifecycleReporter(ampElement, namespace) {
+export function getLifecycleReporter(ampElement, namespace, slotId) {
   // Carve-outs: We only want to enable profiling pingbacks when:
   //   - The ad is from one of the Google networks (AdSense or Doubleclick).
   //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
@@ -132,7 +133,8 @@ export function getLifecycleReporter(ampElement, namespace) {
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, 'a4aProfilingRate')) {
-    return new GoogleAdLifecycleReporter(win, ampElement.element, 'a4a');
+    return new GoogleAdLifecycleReporter(win, ampElement.element, 'a4a',
+        getCorrelator(win, slotId), slotId);
   } else {
     return new NullLifecycleReporter();
   }
