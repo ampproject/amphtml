@@ -415,10 +415,8 @@ describe('amp-iframe', () => {
     }).then(amp => {
       const impl = amp.container.implementation_;
       const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
-      impl.updateSize_(217, 114);
-      expect(attemptChangeSize.callCount).to.equal(1);
-      expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
-      expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
+      impl.updateSize_(217, '114' /* be tolerant to string number */);
+      expect(attemptChangeSize).to.be.calledWith(217, 114);
     });
   });
 
