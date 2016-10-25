@@ -920,8 +920,8 @@ class AmpImageLightbox extends AMP.BaseElement {
         position: 'absolute',
         top: st.px(rect.top),
         left: st.px(rect.left),
-        width: st.px(imageBox.width),
-        height: st.px(imageBox.height),
+        width: st.px(rect.width),
+        height: st.px(rect.height),
       });
       transLayer.appendChild(clone);
 
@@ -935,6 +935,12 @@ class AmpImageLightbox extends AMP.BaseElement {
       const motionTime = Math.max(0.2, Math.min(0.8, Math.abs(dy) / 250 * 0.8));
       anim.add(0, tr.setStyles(clone, {
         transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+      }), motionTime, ENTER_CURVE_);
+
+      // Animate size change as well.
+      anim.add(0, tr.setStyles(clone, {
+        width: tr.px(tr.numeric(rect.width, imageBox.width)),
+        height: tr.px(tr.numeric(rect.height, imageBox.height)),
       }), motionTime, ENTER_CURVE_);
 
       // Fade in the container. This will mostly affect the caption.
@@ -984,15 +990,13 @@ class AmpImageLightbox extends AMP.BaseElement {
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
-      const newLeft = imageBox.left + (imageBox.width - rect.width) / 2;
-      const newTop = imageBox.top + (imageBox.height - rect.height) / 2;
       const clone = image.cloneNode(true);
       st.setStyles(clone, {
         position: 'absolute',
-        top: st.px(newTop),
-        left: st.px(newLeft),
-        width: st.px(rect.width),
-        height: st.px(rect.height),
+        top: st.px(imageBox.top),
+        left: st.px(imageBox.left),
+        width: st.px(imageBox.width),
+        height: st.px(imageBox.height),
         transform: '',
       });
       transLayer.appendChild(clone);
@@ -1002,23 +1006,31 @@ class AmpImageLightbox extends AMP.BaseElement {
         opacity: tr.numeric(1, 0),
       }), 0.1, EXIT_CURVE_);
 
-      // Move the image back to where it is in the article.
-      const dx = rect.left - newLeft;
-      const dy = rect.top - newTop;
+      // Move and resize the image back to where it is in the article.
+      const dx = rect.left - imageBox.left;
+      const dy = rect.top - imageBox.top;
       /** @const {!TransitionDef<void>} */
       const move = tr.setStyles(clone, {
         transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
       });
+      /** @const {!TransitionDef<void>} */
+      const resize = tr.setStyles(clone, {
+        width: tr.px(tr.numeric(imageBox.width, rect.width)),
+        height: tr.px(tr.numeric(imageBox.height, rect.height)),
+      });
+
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move. Start the motion later too, but no later
       // than 0.2.
       const motionTime = Math.max(0.2, Math.min(0.8, Math.abs(dy) / 250 * 0.8));
       anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
         move(time);
+        resize(time);
         if (complete) {
           this.sourceImage_.classList.remove('-amp-ghost');
         }
       }, motionTime, EXIT_CURVE_);
+
 
       // Fade out the transition image.
       anim.add(0.8, tr.setStyles(transLayer, {
