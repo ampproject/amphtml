@@ -189,20 +189,6 @@ export class GoogleAdLifecycleReporter {
   }
 
   /**
-   * @returns {number} The slot ID.
-   */
-  getSlotId() {
-    return this.slotId_;
-  }
-
-  /**
-   * @returns {number} The correlator.
-   */
-  getCorrelator() {
-    return this.correlator_;
-  }
-
-  /**
    * @param {string} name  Metric name to send.
    * @returns {string}  URL to send metrics to.
    * @private

@@ -15,7 +15,7 @@
  */
 
 /**
- * @param {(string|undefined)} clientId
+ * @param {(string|number|undefined)} clientId
  * @param {string} pageViewId
  * @return {number}
  */
