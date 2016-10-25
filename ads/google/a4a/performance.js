@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {makeCorrelator} from '../correlator.js';
 import {
     EXPERIMENT_ATTRIBUTE,
     isInManualExperiment,
@@ -28,7 +27,6 @@ import {
     DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
     DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
-import {documentInfoForDoc} from '../../../src/document-info';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -109,7 +107,7 @@ function isInReportableBranch(ampElement, namespace) {
 }
 
 /**
- * @return {!AmpAdLifecycleReporter|!NullLifecycleReporter}
+ * @return {!GoogleAdLifecycleReporter|!NullLifecycleReporter}
  */
 export function getLifecycleReporter(ampElement, namespace) {
   // Carve-outs: We only want to enable profiling pingbacks when:
@@ -134,32 +132,28 @@ export function getLifecycleReporter(ampElement, namespace) {
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, 'a4aProfilingRate')) {
-    return new AmpAdLifecycleReporter(win, ampElement.element, 'a4a');
+    return new GoogleAdLifecycleReporter(win, ampElement.element, 'a4a');
   } else {
     return new NullLifecycleReporter();
   }
 }
 
-export class AmpAdLifecycleReporter {
+export class GoogleAdLifecycleReporter {
 
   /**
    * @param {!Window} win  Parent window object.
    * @param {!Element} element  Parent element object.
    * @param {string} namespace  Namespace for page-level info.  (E.g.,
    *   'amp' vs 'a4a'.)
+   * @param {number} correlator
+   * @param {number} slotId
    */
-  constructor(win, element, namespace) {
+  constructor(win, element, namespace, correlator, slotId) {
     this.win_ = win;
     this.element_ = element;
     this.namespace_ = namespace;
-    this.win_.ampAdSlotId = this.win_.ampAdSlotId || 0;
-    this.slotId_ = this.win_.ampAdSlotId++;
-
-    const docInfo = documentInfoForDoc(window.document);
-    this.correlator_ = this.win_.ampAdPageCorrelator ||
-        makeCorrelator(this.slotId_, docInfo.pageViewId);
-    this.win_.ampAdPageCorrelator = this.correlator_;
-
+    this.slotId_ = slotId;
+    this.correlator_ = correlator;
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
     this.qqid_ = null;
     this.initTime_ = Date.now();
@@ -263,19 +257,17 @@ export class AmpAdLifecycleReporter {
    * Resets values which might cross-contaminate between queries.
    */
   reset() {
-    this.correlator_ = undefined;
-    this.win_.ampAdPageCorrelator = undefined;
-    this.slotId_ = undefined;
-    this.win_.ampAdSlotId = undefined;
+    this.setQQId(null);
   }
 }
 
 /**
- * A fake version of AmpAdLifecycleReporter that simply discards all pings.
+ * A fake version of GoogleAdLifecycleReporter that simply discards all pings.
  * This is used for non-Google ad types, to avoid gathering data about their
  * ads.
  */
 export class NullLifecycleReporter {
   setQQId(unusedQqid) {}
   sendPing(unusedName, unusedStageId) {}
+  reset() {}
 }

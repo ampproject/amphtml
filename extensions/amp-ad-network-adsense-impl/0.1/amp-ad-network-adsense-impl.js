@@ -29,6 +29,7 @@ import {
   getGoogleAdSlotCounter,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  constructLifecycleReporter,
 } from '../../../ads/google/a4a/utils';
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
@@ -117,6 +118,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return ctypesReMatch[1];
     }
     return null;
+  }
+
+  /** @override */
+  initLifecycleReporter() {
+    return constructLifecycleReporter(window, this);
   }
 
 }

@@ -29,6 +29,7 @@ import {
   getGoogleAdSlotCounter,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  constructLifecycleReporter,
 } from '../../../ads/google/a4a/utils';
 
 /** @const {string} */
@@ -88,6 +89,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
+  /** @override */
+  initLifecycleReporter() {
+    return constructLifecycleReporter(window, this);
+  }
 }
 
 AMP.registerElement(

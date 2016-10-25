@@ -15,6 +15,7 @@
  */
 
 import {buildUrl} from './url-builder';
+import {getLifecycleReporter} from './performance';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/document-info';
@@ -305,4 +306,12 @@ function elapsedTimeWithCeiling(time, start) {
     return duration;
   }
   return '-M';
+}
+
+export function constructLifecycleReporter(win, element) {
+  const correlator = win.ampAdPageCorrelator || makeCorrelator(this.slotId_,
+      documentInfoForDoc(this.element_).pageViewId);
+  win.ampAdSlotIdCounter = win.ampAdSlotIdCounter || 0;
+  const slotId = win.ampAdSlotIdCounter++;
+  return getLifecycleReporter(win, element, 'a4a', correlator, slotId);
 }

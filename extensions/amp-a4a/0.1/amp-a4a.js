@@ -20,8 +20,8 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
 import {
-  getLifecycleReporter,
   QQID_HEADER,
+  NullLifecycleReporter,
 } from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {
@@ -167,8 +167,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
-    /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
-    this.lifecycleReporter = getLifecycleReporter(this, 'a4a');
+    /** {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
+    this.lifecycleReporter = this.initLifecycleReporter();
     // Note: The reporting ping should be the last action in the constructor.
     this.lifecycleReporter.sendPing('adSlotBuilt');
   }
@@ -508,6 +508,7 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.lifecycleReporter.sendPing('adSlotCleared');
+    this.lifecycleReporter.reset();
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
@@ -1006,5 +1007,15 @@ export class AmpA4A extends AMP.BaseElement {
       }
       target.setAttribute('href', newHref);
     }
+  }
+
+  /**
+   * To be overridden by network specific implementation. If no implementation
+   * is provided, a NullLifecycleReporter will be returned.
+   *
+   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter}
+   */
+  initLifecycleReporter() {
+    return new NullLifecycleReporter();
   }
 }
