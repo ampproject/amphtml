@@ -26,10 +26,11 @@ import {
 } from '../../testing/iframe';
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
-  const TIMEOUT = 20000;
+
   it('should override the video interface methods', function() {
-    this.timeout(TIMEOUT);
-    return getVideoPlayer(/* opt_outsideView */ false).then(v => {
+    return getVideoPlayer(/* opt_outsideView */ false,
+        /* opt_dontWaitForLoad */ true)
+    .then(v => {
       const impl = v.implementation_;
       const methods = Object.getOwnPropertyNames(
           Object.getPrototypeOf(new VideoInterface()));
@@ -43,6 +44,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   });
 
   describe.configure().retryOnSaucelabs().run('Autoplay', function() {
+    const TIMEOUT = 20000;
     this.timeout(TIMEOUT);
 
     describe('play/pause', () => {
@@ -140,7 +142,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
   });
 
-  function getVideoPlayer(opt_outsideView) {
+  function getVideoPlayer(opt_outsideView, opt_dontWaitForLoad) {
     const top = opt_outsideView ? '100vh' : '0';
     let fixture;
     return createFixtureIframe('test/fixtures/video-players.html', 1000)
@@ -162,9 +164,11 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       const sizer = fixture.doc.createElement('div');
       sizer.position = 'relative';
       sizer.style.height = '200vh';
-      const p = fixture.awaitEvent('amp:load:end', 1).then(() => {
+      const eventName = opt_dontWaitForLoad ? 'amp:attached' : 'amp:load:end';
+      const p = fixture.awaitEvent(eventName, 1).then(() => {
         return video;
       });
+
       fixture.doc.body.appendChild(sizer);
       fixture.doc.body.appendChild(video);
       return p;
