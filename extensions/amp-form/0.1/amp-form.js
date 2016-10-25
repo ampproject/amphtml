@@ -173,13 +173,13 @@ export class AmpForm {
    * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
    *
    *
-   * @param {?Event} optEvent
+   * @param {?Event} opt_event
    * @private
    */
-  handleSubmit_(optEvent) {
+  handleSubmit_(opt_event) {
     if (this.state_ == FormState_.SUBMITTING) {
-      if (optEvent) {
-        optEvent.stopImmediatePropagation();
+      if (opt_event) {
+        opt_event.stopImmediatePropagation();
       }
       return;
     }
@@ -188,8 +188,8 @@ export class AmpForm {
     // reporting and blocking submission on non-valid forms.
     const isValid = checkUserValidityOnSubmission(this.form_);
     if (this.shouldValidate_ && !isValid) {
-      if (optEvent) {
-        optEvent.stopImmediatePropagation();
+      if (opt_event) {
+        opt_event.stopImmediatePropagation();
       }
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({
@@ -202,8 +202,8 @@ export class AmpForm {
     }
 
     if (this.xhrAction_) {
-      if (optEvent) {
-        optEvent.preventDefault();
+      if (opt_event) {
+        opt_event.preventDefault();
       }
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
@@ -228,8 +228,8 @@ export class AmpForm {
         rethrowAsync('Form submission failed:', error);
       });
     } else if (this.method_ == 'POST') {
-      if (optEvent) {
-        optEvent.preventDefault();
+      if (opt_event) {
+        opt_event.preventDefault();
       }
       user().assert(false,
           'Only XHR based (via action-xhr attribute) submissions are support ' +
