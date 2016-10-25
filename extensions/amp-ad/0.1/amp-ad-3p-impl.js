@@ -27,6 +27,7 @@ import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {constructLifecycleReporter} from '../../../ads/google/a4a/utils';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -85,7 +86,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.layoutPromise_ = null;
 
     /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
-    this.lifecycleReporter = getLifecycleReporter(this, 'amp');
+    this.lifecycleReporter = constructLifecycleReporter(window, this);
 
     this.lifecycleReporter.sendPing('adSlotBuilt');
   }
