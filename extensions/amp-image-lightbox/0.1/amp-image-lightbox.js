@@ -1033,7 +1033,6 @@ class AmpImageLightbox extends AMP.BaseElement {
         }
       }, motionTime, EXIT_CURVE_);
 
-
       // Fade out the transition image.
       anim.add(0.8, tr.setStyles(transLayer, {
         opacity: tr.numeric(1, 0.01),
