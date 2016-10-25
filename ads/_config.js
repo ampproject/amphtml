@@ -430,6 +430,11 @@ export const adConfig = {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
   },
 
+  zedo: {
+    prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
+  },
+
   zergnet: {},
 
   zucks: {

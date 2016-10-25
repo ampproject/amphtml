@@ -151,6 +151,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
 
 ## Supported embed types
