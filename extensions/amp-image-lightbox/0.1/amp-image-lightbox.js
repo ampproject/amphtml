@@ -922,6 +922,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         left: st.px(rect.left),
         width: st.px(rect.width),
         height: st.px(rect.height),
+        willChange: 'width, height, transform',
       });
       transLayer.appendChild(clone);
 
@@ -998,6 +999,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         width: st.px(imageBox.width),
         height: st.px(imageBox.height),
         transform: '',
+        willChange: 'width, height, transform',
       });
       transLayer.appendChild(clone);
 
