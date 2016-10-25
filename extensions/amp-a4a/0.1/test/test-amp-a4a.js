@@ -27,9 +27,7 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {resetScheduledElementForTesting, upgradeOrRegisterElement} from '../../../../src/custom-element';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';

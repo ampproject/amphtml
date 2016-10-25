@@ -17,7 +17,6 @@
 import {
     MockA4AImpl,
     stringToArrayBuffer,
-    isStyleVisible,
     SIGNATURE_HEADER,
     TEST_URL,
 } from './utils';
@@ -27,7 +26,6 @@ import {
     data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {resetScheduledElementForTesting, upgradeOrRegisterElement} from '../../../../src/custom-element';
