@@ -427,7 +427,7 @@ export function expectBodyToBecomeVisible(win) {
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  });
+  }, undefined, 5000);
 }
 
 /**
