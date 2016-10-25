@@ -45,15 +45,17 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   final AbstractCompiler compiler;
   private final Map<String, Set<String>> stripTypeSuffixes;
   private final Map<String, Node> assignmentReplacements;
+  private final Map<String, Node> prodAssignmentReplacements;
   final boolean isProd;
 
   public AmpPass(AbstractCompiler compiler, boolean isProd,
         Map<String, Set<String>> stripTypeSuffixes,
-        Map<String, Node> assignmentReplacements) {
+        Map<String, Node> assignmentReplacements, Map<String, Node> prodAssignmentReplacements) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
     this.assignmentReplacements = assignmentReplacements;
+    this.prodAssignmentReplacements = prodAssignmentReplacements;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -77,7 +79,10 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("minified"))) {
       replaceWithBooleanExpression(true, n, parent);
-    } else if (isProd) {
+    } else {
+      if (isProd) {
+        maybeReplaceRValueInVar(n, prodAssignmentReplacements);
+      }
       maybeReplaceRValueInVar(n, assignmentReplacements);
     }
   }
