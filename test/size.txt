@@ -3,16 +3,16 @@
  72.79 kB   |     6.19 kB   |     2.58 kB   |   alp.js / alp.max.js
 904.96 kB   |    183.2 kB   |    56.68 kB   |   shadow-v0.js / amp-shadow.js
    5.8 kB   |       428 B   |       278 B   |   sw-kill.js / sw-kill.max.js
-385.52 kB   |     1.38 kB   |       788 B   |   sw.js / sw.max.js
+385.52 kB   |     1.38 kB   |       790 B   |   sw.js / sw.max.js
 940.96 kB   |   182.09 kB   |    56.34 kB   |   v0.js / amp.js
 333.56 kB   |    38.49 kB   |    12.89 kB   |   v0/amp-access-0.1.js
 131.45 kB   |     2.47 kB   |     1.19 kB   |   v0/amp-access-laterpay-0.1.js
  56.64 kB   |      3.5 kB   |     1.43 kB   |   v0/amp-accordion-0.1.js
-325.32 kB   |    33.15 kB   |     11.9 kB   |   v0/amp-ad-0.1.js
-362.08 kB   |    37.48 kB   |    13.02 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
-361.81 kB   |     35.6 kB   |    12.44 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
-359.96 kB   |    29.38 kB   |    10.21 kB   |   v0/amp-ad-network-fake-impl-0.1.js
-309.12 kB   |    57.39 kB   |    20.77 kB   |   v0/amp-analytics-0.1.js
+325.51 kB   |    33.28 kB   |    11.94 kB   |   v0/amp-ad-0.1.js
+362.21 kB   |    37.58 kB   |    13.05 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
+361.93 kB   |     35.7 kB   |    12.47 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
+360.09 kB   |    29.48 kB   |    10.24 kB   |   v0/amp-ad-network-fake-impl-0.1.js
+309.28 kB   |    57.47 kB   |    20.81 kB   |   v0/amp-analytics-0.1.js
  51.23 kB   |     4.06 kB   |     1.88 kB   |   v0/amp-anim-0.1.js
 142.51 kB   |     4.85 kB   |      2.1 kB   |   v0/amp-apester-media-0.1.js
 181.47 kB   |    11.15 kB   |     4.43 kB   |   v0/amp-app-banner-0.1.js
@@ -59,4 +59,4 @@
 670.58 kB   |   511.38 kB   |   167.49 kB   |   v0/amp-viz-vega-0.1.js
 160.13 kB   |      4.3 kB   |     1.98 kB   |   v0/amp-youtube-0.1.js
  19.04 kB   |     1.94 kB   |       936 B   |   v0/cache-service-worker-0.1.js
-227.39 kB   |    49.65 kB   |    17.13 kB   |   current-min/f.js / current/integration.js
+ 229.5 kB   |    50.29 kB   |    17.36 kB   |   current-min/f.js / current/integration.js
