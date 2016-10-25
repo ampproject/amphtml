@@ -396,6 +396,10 @@ export const adConfig = {
 
   widespace: {},
 
+  xlift: {
+    prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+  },
+
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
