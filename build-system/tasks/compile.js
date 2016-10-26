@@ -227,8 +227,7 @@ function compile(entryModuleFilenames, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
-        rewrite_polyfills: !!(
-            options.includePolyfills || options.includeBasicPolyfills),
+        rewrite_polyfills: false,
         externs: externs,
         js_module_root: [
           'node_modules/',

@@ -161,7 +161,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: true,
     include3pDirectories: true,
   });
 
@@ -401,7 +400,6 @@ function checkTypes() {
   closureCompile(['./3p/integration.js'],  './dist',
       'integration-check-types.js', {
         externs: ['ads/ads.extern.js',],
-        includeBasicPolyfills: true,
         include3pDirectories: true,
         checkTypes: true,
       });
