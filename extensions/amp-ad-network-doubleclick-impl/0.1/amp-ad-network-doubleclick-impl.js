@@ -43,6 +43,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /**
+     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     */
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
   }
 
   /** @override */
@@ -58,13 +64,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const startTime = Date.now();
     const global = this.win;
     const slotId = this.element.getAttribute('data-slot-id');
+    const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
     const adTestOn = isInManualExperiment(this.element);
-    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotId, [
+    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotIdNumber, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
       {name: 'gdfp_req', value: '1'},
@@ -75,7 +82,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
       {name: 'adtest', value: adTestOn},
-      {name: 'ifi', value: slotId},
+      {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
 
     ], [
@@ -95,22 +102,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName, opt_associatedEventData) {
-    if (!this.lifecycleReporter) {
-      this.lifecycleReporter = this.initLifecycleReporter();
-    }
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
     switch (eventName) {
       case 'adRequestEnd':
         const fetchResponse = opt_associatedEventData;
         const qqid = fetchResponse.headers.get(
-            this.lifecycleReporter.QQID_HEADER);
-        this.lifecycleReporter.setQqid(qqid);
+            this.lifecycleReporter_.QQID_HEADER);
+        this.lifecycleReporter_.setQqid(qqid);
         break;
       case 'adSlotCleared':
-        this.lifecycleReporter.sendPing(eventName);
-        this.lifecycleReporter.reset();
+        this.lifecycleReporter_.sendPing(eventName);
+        this.lifecycleReporter_.reset();
         this.element.setAttribute('data-slot-id',
             this.win.ampAdSlotIdCounter++);
-        this.lifecycleReporter = this.initLifecycleReporter();
+        this.lifecycleReporter_ = this.initLifecycleReporter();
         return;
       case 'adSlotBuilt':
       case 'urlBuilt':
@@ -126,12 +132,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         break;
       default:
     }
-    this.lifecycleReporter.sendPing(eventName);
+    this.lifecycleReporter_.sendPing(eventName);
   }
 
+  /**
+   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   */
   initLifecycleReporter() {
-    return getLifecycleReporter(this, 'a4a',
-        this.element.getAttribute('data-slot-id'));
+    const reporter =
+        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
+        (getLifecycleReporter(this, 'a4a', this.element.getAttribute('data-slot-id')));
+    return reporter;
   }
 }
 

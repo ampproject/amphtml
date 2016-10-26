@@ -52,6 +52,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /**
+     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     */
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
   }
 
   /** @override */
@@ -65,13 +71,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const startTime = Date.now();
     const global = this.win;
     const slotId = this.element.getAttribute('data-slot-id');
+    const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = documentStateFor(global).getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotId, [
+    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotIdNumber, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
       {name: 'format', value: `${slotRect.width}x${slotRect.height}`},
       {name: 'w', value: slotRect.width},
@@ -86,7 +93,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'ctypes', value: this.getCtypes_()},
       {name: 'd_imp', value: '1'},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'ifi', value: slotId},
+      {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
@@ -124,22 +131,21 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName, opt_associatedEventData) {
-    if (!this.lifecycleReporter) {
-      this.lifecycleReporter = this.initLifecycleReporter();
-    }
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
     switch (eventName) {
       case 'adRequestEnd':
         const fetchResponse = opt_associatedEventData;
         const qqid = fetchResponse.headers.get(
-            this.lifecycleReporter.QQID_HEADER);
-        this.lifecycleReporter.setQqid(qqid);
+            this.lifecycleReporter_.QQID_HEADER);
+        this.lifecycleReporter_.setQqid(qqid);
         break;
       case 'adSlotCleared':
-        this.lifecycleReporter.sendPing(eventName);
-        this.lifecycleReporter.reset();
+        this.lifecycleReporter_.sendPing(eventName);
+        this.lifecycleReporter_.reset();
         this.element.setAttribute('data-slot-id',
             this.win.ampAdSlotIdCounter++);
-        this.lifecycleReporter = this.initLifecycleReporter();
+        this.lifecycleReporter_ = this.initLifecycleReporter();
         return;
       case 'adSlotBuilt':
       case 'urlBuilt':
@@ -155,12 +161,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         break;
       default:
     }
-    this.lifecycleReporter.sendPing(eventName);
+    this.lifecycleReporter_.sendPing(eventName);
   }
 
+  /**
+   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   */
   initLifecycleReporter() {
-    return getLifecycleReporter(
-        this, 'a4a', this.element.getAttribute('data-slot-id'));
+    const reporter =
+        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
+        (getLifecycleReporter(this, 'a4a', this.element.getAttribute('data-slot-id')));
+    return reporter;
   }
 }
 

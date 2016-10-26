@@ -158,7 +158,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   }
 
   /**
-   * @param {string} qqid
+   * @param {?string} qqid
    */
   setQqid(qqid) {
     this.qqid_ = qqid;
@@ -242,6 +242,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @override
    */
   reset() {
-    this.setQQId(null);
+    this.setQqid(null);
   }
 }

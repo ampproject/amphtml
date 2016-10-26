@@ -309,13 +309,13 @@ function elapsedTimeWithCeiling(time, start) {
 
 /**
  * @param {!Window} win
- * @param {number} slotId
+ * @param {string|undefined} opt_cid
  * @return {number} The correlator.
  */
-export function getCorrelator(win, slotId) {
+export function getCorrelator(win, opt_cid) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        slotId, documentInfoForDoc(win.document).pageViewId);
+        opt_cid, documentInfoForDoc(win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }
