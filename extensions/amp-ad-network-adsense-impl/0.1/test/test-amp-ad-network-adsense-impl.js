@@ -23,16 +23,16 @@ describe('amp-ad-network-adsense-impl', () => {
   let sandbox;
   let adsenseImpl;
   let adsenseImplElem;
-  let getSigningServiceNamesMock;
-
+  
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     adsenseImplElem = document.createElement('amp-ad');
     adsenseImplElem.setAttribute('data-ad-client', 'adsense');
     adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
-    getSigningServiceNamesMock = sandbox.stub(
-        AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames');
-    getSigningServiceNamesMock.returns(['google']);
+    sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
+        () => {
+          return ['google'];
+        });
   });
 
   afterEach(() => {
