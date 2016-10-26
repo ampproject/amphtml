@@ -92,6 +92,7 @@
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
+    "reject-with-error": 2,
     "semi": 2,
     "space-after-keywords": 2,
     "space-before-blocks": 2,
