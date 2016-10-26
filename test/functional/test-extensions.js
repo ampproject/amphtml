@@ -29,6 +29,7 @@ import {
   initLogConstructor,
   resetLogConstructorForTesting,
 } from '../../src/log';
+import {resetScheduledElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 
 
@@ -309,28 +310,24 @@ describes.sandboxed('Extensions', {}, () => {
     it('should insert extension script correctly', () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(0);
-      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
-          .to.be.undefined;
-
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
       extensions.loadExtension('amp-test');
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
-      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
-          .to.be.true;
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
       expect(win.customElements.elements['amp-test']).to.exist;
+      expect(win.ampExtendedElements['amp-test']).to.be.true;
     });
 
     it('should only insert script once', () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(0);
-      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
-          .to.be.undefined;
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
 
       extensions.loadExtension('amp-test');
       expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
           .to.have.length(1);
-      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
-          .to.be.true;
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
 
       extensions.loadExtension('amp-test');
       expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
@@ -345,15 +342,14 @@ describes.sandboxed('Extensions', {}, () => {
       doc.head.appendChild(ampTestScript);
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
-      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
-          .to.be.undefined;
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
 
       extensions.loadExtension('amp-test');
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
-      expect(extensions.getExtensionHolder_('amp-test').scriptPresent)
-          .to.be.true;
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
       expect(win.customElements.elements['amp-test']).to.not.exist;
+      expect(win.ampExtendedElements['amp-test']).to.be.undefined;
     });
 
     it('should give script correct attributes', () => {
@@ -376,8 +372,7 @@ describes.sandboxed('Extensions', {}, () => {
       extensions.loadExtension('amp-embed');
       expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
-      expect(extensions.getExtensionHolder_('amp-ad').scriptPresent)
-          .to.be.true;
+      expect(extensions.extensions_['amp-ad'].scriptPresent).to.be.true;
 
       // The amp-embed module has never been created.
       expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
@@ -395,6 +390,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     beforeEach(() => {
       parentWin = env.win;
+      resetScheduledElementForTesting(parentWin, 'amp-test');
       extensions = installExtensionsService(parentWin);
       extensionsMock = sandbox.mock(extensions);
 
