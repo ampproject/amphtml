@@ -97,6 +97,7 @@ import {revcontent} from '../ads/revcontent';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {smartadserver} from '../ads/smartadserver';
+import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {taboola} from '../ads/taboola';
@@ -119,11 +120,12 @@ import {zucks} from '../ads/zucks';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  taboola: true,
+  _ping_: true,
   'mantis-recommend': true,
   plista: true,
+  smartclip: true,
+  taboola: true,
   zergnet: true,
-  _ping_: true,
 };
 
 const data = parseFragment(location.hash);
@@ -199,6 +201,7 @@ register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
 register('smartadserver', smartadserver);
+register('smartclip', smartclip);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('taboola', taboola);

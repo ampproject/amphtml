@@ -221,3 +221,6 @@ data.dim;
 placement.includeRenderer;
 geckoTag.loadAds;
 geckoTag.placementReady;
+data.plc;
+data.sz;
+data.extra;
