@@ -79,6 +79,7 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let xhrMockJson;
+  let getSigningServiceNamesMock;
   let viewerWhenVisibleMock;
   let mockResponse;
 
@@ -86,6 +87,9 @@ describe('amp-a4a', () => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
+    getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
+        'getSigningServiceNames');
+    getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         {mode: 'cors', method: 'GET'})
