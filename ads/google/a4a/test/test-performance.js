@@ -201,7 +201,8 @@ describe('GoogleAdLifecycleReporter', () => {
       const doc = iframeFixture.doc;
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
-      const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo', 0, 0);
+      const reporter = new GoogleAdLifecycleReporter(
+          win, elem, 'test_foo', 0, 0);
       reporter.setPingAddress('/');
       return {win, doc, elem, reporter};
     });
@@ -286,7 +287,8 @@ describe('GoogleAdLifecycleReporter', () => {
           const elem = doc.createElement('div');
           elem.setAttribute('id', i);
           doc.body.appendChild(elem);
-          const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo', 1, i + 1);
+          const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo',
+              1, i + 1);
           reporter.setPingAddress('/');
           allReporters.push(reporter);
         }
@@ -298,11 +300,11 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
         const allImgNodes = childElements(doc.body, x => isImgNode(x));
         expect(allImgNodes.length).to.equal(nSlots * nStages);
-        let commonCorrelator = '1';
+        const commonCorrelator = '1';
         const slotCounts = {};
         allImgNodes.forEach(n => {
           const src = n.getAttribute('src');
-          expect(src).to.match(/[?&]s=test_foo/); debugger;
+          expect(src).to.match(/[?&]s=test_foo/);
           const corr = /[?&]c=([0-9]+)/.exec(src)[1];
           const slotId = /[?&]rt=[^&?]*slotId\.([0-9]+)[&?,]/.exec(src)[1];
           expect(corr).to.equal(commonCorrelator);
