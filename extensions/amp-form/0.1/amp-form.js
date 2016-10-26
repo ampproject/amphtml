@@ -141,7 +141,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {!../../../src/service/action-impl.ActionInvocation}
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
   actionHandler_(invocation) {
