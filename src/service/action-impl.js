@@ -167,6 +167,10 @@ export class ActionService {
    */
   installActionHandler(target, handler) {
     const debugid = target.tagName + '#' + target.id;
+    dev().assert((target.id && target.id.substring(0, 4) == 'amp-') ||
+        target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
+        'AMP element or a whitelisted target element is expected: %s', debugid);
+
     /** @const {!Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
     if (currentQueue) {
@@ -275,8 +279,13 @@ export class ActionService {
 
     // Check if this is an element has a known action.
     const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
-    if (target[ACTION_QUEUE_] && supportedActions &&
-        supportedActions.indexOf(method) != -1) {
+    if (supportedActions && supportedActions.indexOf(method) != -1) {
+      if (!target[ACTION_QUEUE_]) {
+        this.actionInfoError_(
+            'Action queue not initialized, probably tried to execute before ' +
+            'calling installActionHandler.', actionInfo, target);
+        return;
+      }
       target[ACTION_QUEUE_].push(invocation);
       return;
     }

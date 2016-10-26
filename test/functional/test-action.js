@@ -368,12 +368,27 @@ describe('Action method', () => {
     expect(inv.args['key1']).to.equal(11);
   });
 
-  it('should not allow invoke on non-AMP element', () => {
+  it('should not allow invoke on non-AMP and non-whitelisted element', () => {
     expect(() => {
       action.invoke_({tagName: 'img'}, 'method1', /* args */ null,
           'source1', 'event1');
-    }).to.throw(/Target must be an AMP element/);
+    }).to.throw(/Target element does not support provided action/);
     expect(onEnqueue.callCount).to.equal(0);
+  });
+
+  it('should invoke on non-AMP but whitelisted element', () => {
+    const handlerSpy = sandbox.spy();
+    const target = {tagName: 'form'};
+    action.installActionHandler(target, handlerSpy);
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap');
+    expect(handlerSpy).to.be.calledOnce;
+    const callArgs = handlerSpy.getCall(0).args[0];
+    expect(callArgs.target).to.be.equal(target);
+    expect(callArgs.method).to.be.equal('submit');
+    expect(callArgs.args).to.be.equal(null);
+    expect(callArgs.source).to.be.equal('button');
+    expect(callArgs.event).to.be.equal('tap');
   });
 
   it('should not allow invoke on unresolved AMP element', () => {

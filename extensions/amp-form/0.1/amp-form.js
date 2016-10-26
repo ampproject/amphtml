@@ -135,15 +135,19 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
-    this.actions_.installActionHandler(this.form_, invocation => {
-      if (invocation.method == 'submit') {
-        this.handleSubmit_();
-      }
-    });
-
-    // This is defined on BaseElement which AmpForm does not extend.
-    //this.registerAction('submit', () => this.form_.submit());
+    this.actions_.installActionHandler(
+        this.form_, this.actionHandler_.bind(this));
     this.installSubmitHandler_();
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation}
+   * @private
+   */
+  actionHandler_(invocation) {
+    if (invocation.method == 'submit') {
+      this.handleSubmit_();
+    }
   }
 
   /** @private */
@@ -157,11 +161,16 @@ export class AmpForm {
       onInputInteraction_(e);
       this.validator_.onInput(e);
     });
-    this.form_.addEventListener('change', e => {
-      const input = e.target;
-      // TODO(#5702): Consider a debounced-input event for text-type inputs.
-      this.actions_.trigger(input, 'change', null);
-    });
+    this.form_.addEventListener('change', this.changeEventHandler_.bind(this));
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  changeEventHandler_(e) {
+    // TODO(mkhatib, #5702): Consider a debounced-input event for text-type inputs.
+    this.actions_.trigger(dev().assertElement(e.target), 'change', null);
   }
 
   /**
@@ -173,7 +182,7 @@ export class AmpForm {
    * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
    *
    *
-   * @param {?Event} opt_event
+   * @param {?Event=} opt_event
    * @private
    */
   handleSubmit_(opt_event) {

@@ -32,6 +32,7 @@ import {installDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
+import {actionServiceForDoc} from '../../../../src/action';
 
 describe('amp-form', () => {
 
@@ -89,14 +90,6 @@ describe('amp-form', () => {
     sandbox.restore();
   });
 
-  it('should assert form has at least 1 submit button', () => {
-    let form = getForm(document, false, false);
-    expect(() => new AmpForm(form)).to.throw(
-        /form requires at least one <input type=submit>/);
-    form = getForm(document, true, false);
-    expect(() => new AmpForm(form)).to.not.throw;
-  });
-
   it('should assert valid action-xhr when provided', () => {
     const form = getForm();
     form.setAttribute('action-xhr', 'http://example.com');
@@ -129,6 +122,7 @@ describe('amp-form', () => {
     expect(form.addEventListener).to.be.calledWith('submit');
     expect(form.addEventListener).to.be.calledWith('blur');
     expect(form.addEventListener).to.be.calledWith('input');
+    expect(form.addEventListener).to.be.calledWith('change');
     expect(form.className).to.contain('-amp-form');
   });
 
@@ -345,7 +339,7 @@ describe('amp-form', () => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
         fetchJsonResolver = resolve;
       }));
-      sandbox.spy(ampForm.actions_, 'trigger');
+      sandbox.stub(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -378,7 +372,7 @@ describe('amp-form', () => {
           .returns(new Promise((unusedResolve, reject) => {
             fetchJsonRejecter = reject;
           }));
-      sandbox.spy(ampForm.actions_, 'trigger');
+      sandbox.stub(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -823,6 +817,34 @@ describe('amp-form', () => {
         expect(emailInput.className).to.contain('user-valid');
         expect(form.className).to.not.contain('user-valid');
       });
+    });
+  });
+
+  it('should install action handler and handle submit action', () => {
+    const form = getForm();
+    const actions = actionServiceForDoc(form.ownerDocument);
+    sandbox.stub(actions, 'installActionHandler');
+    const ampForm = new AmpForm(form);
+    expect(actions.installActionHandler).to.be.calledWith(form);
+    sandbox.spy(ampForm, 'handleSubmit_');
+    ampForm.actionHandler_({method: 'anything'});
+    expect(ampForm.handleSubmit_).to.have.not.been.called;
+    ampForm.actionHandler_({method: 'submit'});
+    expect(ampForm.handleSubmit_).to.have.been.called;
+  });
+
+  it('should trigger change events on inputs', () => {
+    return getAmpForm(true).then(ampForm => {
+      const form = ampForm.form_;
+      const actions = actionServiceForDoc(form.ownerDocument);
+      sandbox.stub(actions, 'trigger');
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('type', 'email');
+      form.appendChild(emailInput);
+      ampForm.changeEventHandler_({target: emailInput});
+      expect(actions.trigger).to.have.been.called;
+      expect(actions.trigger).to.have.been.calledWith(emailInput, 'change');
     });
   });
 
