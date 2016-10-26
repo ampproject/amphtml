@@ -40,15 +40,3 @@ export class MockA4AImpl extends AmpA4A {
 export function stringToArrayBuffer(str) {
   return new TextEncoder('utf-8').encode(str);
 }
-
-/**
- *
- * @param {!Window} win
- * @param {!Element} element
- */
-export function isStyleVisible(win, element) {
-  return win.getComputedStyle(element).getPropertyValue('visibility') ==
-      'visible';
-}
-
-

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {stringToArrayBuffer, isStyleVisible, MockA4AImpl, TEST_URL, SIGNATURE_HEADER} from './utils';
+import {
+  stringToArrayBuffer,
+  MockA4AImpl,
+  TEST_URL,
+  SIGNATURE_HEADER
+} from './utils';
 import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -169,7 +174,7 @@ describe('amp-a4a', () => {
         a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
-        expect(isStyleVisible(fixture.win, child)).to.be.true;
+        expect(child).to.be.visible;
       });
     });
 
@@ -185,7 +190,7 @@ describe('amp-a4a', () => {
         a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[src]');
         expect(child).to.be.ok;
-        expect(isStyleVisible(fixture.win, child)).to.be.true;
+        expect(child).to.be.visible;
       });
     });
 
@@ -198,10 +203,10 @@ describe('amp-a4a', () => {
         a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[srcdoc]');
         expect(child).to.be.ok;
-        expect(isStyleVisible(fixture.win, child)).to.be.true;
+        expect(child).to.be.visible;
         const a4aBody = child.contentDocument.body;
         expect(a4aBody).to.be.ok;
-        expect(isStyleVisible(fixture.win, a4aBody)).to.be.true;
+        expect(a4aBody).to.be.visible;
       });
     });
   });
