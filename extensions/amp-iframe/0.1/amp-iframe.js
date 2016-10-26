@@ -422,13 +422,15 @@ export class AmpIframe extends AMP.BaseElement {
     height = parseInt(height, 10);
     if (!isNaN(height)) {
       newHeight = Math.max(
-          height + (this.element.offsetHeight - this.iframe_.offsetHeight),
+          height + (this.element./*OK*/offsetHeight
+              - this.iframe_./*OK*/offsetHeight),
           height);
     }
     width = parseInt(width, 10);
     if (!isNaN(width)) {
       newWidth = Math.max(
-          width + (this.element.offsetWidth - this.iframe_.offsetWidth),
+          width + (this.element./*OK*/offsetWidth
+              - this.iframe_./*OK*/offsetWidth),
           width);
     }
 
