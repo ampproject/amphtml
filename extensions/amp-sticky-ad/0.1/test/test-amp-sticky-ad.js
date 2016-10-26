@@ -383,7 +383,7 @@ describe('amp-sticky-ad', () => {
   });
 
   it('should not allow container to be set transparent', () => {
-    toggleExperiment(window, 'amp-sticky-ad-v1', true);
+    toggleExperiment(window, 'amp-sticky-ad-better-ux', true);
     return getAmpStickyAd({
       'style': 'background-color: rgba(55, 55, 55, 0.55) !important',
     }).then(obj => {
