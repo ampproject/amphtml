@@ -27,7 +27,7 @@ import {
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
-  it.only('should override the video interface methods', function() {
+  it('should override the video interface methods', function() {
     return getVideoPlayer(/* opt_outsideView */ false)
     .then(v => {
       const impl = v.implementation_;
