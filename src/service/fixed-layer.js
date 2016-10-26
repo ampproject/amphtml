@@ -127,7 +127,8 @@ export class FixedLayer {
   }
 
   /**
-   * Apply or reset transform style to fixed elements
+   * Apply or reset transform style to fixed elements. The existing transition,
+   * if any, is disabled when custom transform is supplied.
    * @param {?string} transform
    */
   transformMutate(transform) {
