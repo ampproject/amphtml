@@ -19,7 +19,7 @@ import {getModeObject} from './mode-object';
 
 
 /** @const Time when this JS loaded.  */
-const start = new Date().getTime();
+const start = Date.now();
 
 /**
  * Triple zero width space.

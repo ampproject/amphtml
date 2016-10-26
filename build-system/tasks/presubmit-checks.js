@@ -593,6 +593,9 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/transport.js',
     ]
   },
+  '\\.getTime\\(\\)': {
+    message: 'Unless you do weird date math (whitelist), use Date.now().',
+  },
 };
 
 // Terms that must appear in a source file.
