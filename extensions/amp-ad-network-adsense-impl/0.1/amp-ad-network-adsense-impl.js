@@ -49,10 +49,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
    * @param {!Element} element
-   * @param {!Object=} opt_adContext
    */
-  constructor(element, opt_adContext) {
-    super(element, opt_adContext);
+  constructor(element) {
+    super(element);
   }
 
   /** @override */
@@ -65,7 +64,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
-    const slotId = this.adContext.slotId;
+    const slotId = this.element.getAttribute('data-slot-id');
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
@@ -124,8 +123,44 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  emitLifecycleEvent(eventName, opt_associatedEventData) {
+    if (!this.lifecycleReporter) {
+      this.lifecycleReporter = this.initLifecycleReporter();
+    }
+    switch (eventName) {
+      case 'adRequestEnd':
+        const fetchResponse = opt_associatedEventData;
+        const qqid = fetchResponse.headers.get(
+            this.lifecycleReporter.QQID_HEADER);
+        this.lifecycleReporter.setQqid(qqid);
+        break;
+      case 'adSlotCleared':
+        this.lifecycleReporter.sendPing(eventName);
+        this.lifecycleReporter.reset();
+        this.element.setAttribute('data-slot-id',
+            this.win.ampAdSlotIdCounter++);
+        this.lifecycleReporter = this.initLifecycleReporter();
+        return;
+      case 'adSlotBuilt':
+      case 'urlBuilt':
+      case 'adRequestStart':
+      case 'extractCreativeAndSignature':
+      case 'adResponseValidateStart':
+      case 'renderFriendlyStart':
+      case 'renderCrossDomainStart':
+      case 'renderFriendlyEnd':
+      case 'renderCrossDomainEnd':
+      case 'preAdThrottle':
+      case 'renderSafeFrameStart':
+        break;
+      default:
+    }
+    this.lifecycleReporter.sendPing(eventName);
+  }
+
   initLifecycleReporter() {
-    return getLifecycleReporter(this, 'a4a', this.adContext.slotId);
+    return getLifecycleReporter(
+        this, 'a4a', this.element.getAttribute('data-slot-id'));
   }
 }
 

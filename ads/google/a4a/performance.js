@@ -27,10 +27,11 @@ import {
     DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
     DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
+import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getCorrelator}from './utils';
+import {getCorrelator} from './utils';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -46,34 +47,6 @@ import {getCorrelator}from './utils';
  * module should go away once we have verified that A4A is performing as
  * desired.
  */
-
-/**
- * Header name for per-ad-slot QQid.
- * @type {string}
- */
-export const QQID_HEADER = 'X-QQID';
-
-/** @private */
-const PINGBACK_ADDRESS = 'https://csi.gstatic.com/csi';
-
-/** @private */
-const LIFECYCLE_STAGES = {
-  // Note: Use strings as values here, rather than numbers, so that "0" does
-  // not test as `false` later.
-  adSlotBuilt: '0',
-  urlBuilt: '1',
-  adRequestStart: '2',
-  adRequestEnd: '3',
-  extractCreativeAndSignature: '4',
-  adResponseValidateStart: '5',
-  renderFriendlyStart: '6',
-  renderCrossDomainStart: '7',
-  renderFriendlyEnd: '8',
-  renderCrossDomainEnd: '9',
-  preAdThrottle: '10',
-  renderSafeFrameStart: '11',
-  adSlotCleared: '20',
-};
 
 export const PROFILING_RATE = {
   a4aProfilingRate: {on: 1},
@@ -136,11 +109,30 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
     return new GoogleAdLifecycleReporter(win, ampElement.element, 'a4a',
         getCorrelator(win, slotId), slotId);
   } else {
-    return new NullLifecycleReporter();
+    return new BaseLifecycleReporter();
   }
 }
 
-export class GoogleAdLifecycleReporter {
+/**
+ * A NOOP base class for the LifecycleReporter
+ */
+export class BaseLifecycleReporter {
+  /**
+   * A beacon function that will be called at various stages of the lifecycle.
+   *
+   * To be overriden by network specific implementations.
+   *
+   * @param {string} unusedName A descriptive name for the beacon signal.
+   */
+  sendPing(unusedName) {}
+  /**
+   * A function to reset the lifecycle reporter. Will be called immediately
+   * after firing the last beacon signal in unlayoutCallback.
+   */
+  reset() {}
+}
+
+export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @param {!Window} win  Parent window object.
@@ -151,6 +143,9 @@ export class GoogleAdLifecycleReporter {
    * @param {number} slotId
    */
   constructor(win, element, namespace, correlator, slotId) {
+    super();
+
+    this.QQID_HEADER = 'X-QQID';
     this.win_ = win;
     this.element_ = element;
     this.namespace_ = namespace;
@@ -159,7 +154,7 @@ export class GoogleAdLifecycleReporter {
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
     this.qqid_ = null;
     this.initTime_ = Date.now();
-    this.pingbackAddress_ = PINGBACK_ADDRESS;
+    this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
   }
 
   /**
@@ -183,6 +178,7 @@ export class GoogleAdLifecycleReporter {
    * @param {string} name  Stage name to ping out.  Should be one of the ones
    * from `LIFECYCLE_STAGES`.  If it's an unknown name, it will still be pinged,
    * but the stage ID will be set to `9999`.
+   * @override
    */
   sendPing(name) {
     this.emitPing_(this.buildPingAddress_(name));
@@ -243,19 +239,9 @@ export class GoogleAdLifecycleReporter {
 
   /**
    * Resets values which might cross-contaminate between queries.
+   * @override
    */
   reset() {
     this.setQQId(null);
   }
-}
-
-/**
- * A fake version of GoogleAdLifecycleReporter that simply discards all pings.
- * This is used for non-Google ad types, to avoid gathering data about their
- * ads.
- */
-export class NullLifecycleReporter {
-  setQQId(unusedQqid) {}
-  sendPing(unusedName, unusedStageId) {}
-  reset() {}
 }

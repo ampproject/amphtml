@@ -54,28 +54,26 @@ export class AmpAd extends AMP.BaseElement {
       }
       window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
       const slotId = window.ampAdSlotIdCounter++;
-      const adContext = {
-        slotId,
-      };
+      this.element.setAttribute('data-slot-id', slotId);
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
         // Network either has not provided any A4A implementation or the
         // implementation exists, but has explicitly chosen not to handle this
         // tag as A4A.  Fall back to the 3p implementation.
-        return new AmpAd3PImpl(this.element, adContext);
+        return new AmpAd3PImpl(this.element);
       }
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
       return extensionsFor(this.win).loadElementClass(extensionTagName)
-        .then(ctor => new ctor(this.element, adContext))
+        .then(ctor => new ctor(this.element))
         .catch(error => {
           // Work around presubmit restrictions.
           const TAG = this.element.tagName;
           // Report error and fallback to 3p
           user().error(TAG, 'Unable to load ad implementation for type ', type,
               ', falling back to 3p, error: ', error);
-          return new AmpAd3PImpl(this.element, adContext);
+          return new AmpAd3PImpl(this.element);
         });
     });
   }

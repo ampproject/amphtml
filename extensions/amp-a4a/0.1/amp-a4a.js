@@ -19,10 +19,6 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {
-  QQID_HEADER,
-  NullLifecycleReporter,
-} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {
   closestByTag,
@@ -115,15 +111,34 @@ export let AdResponseDef;
     }} */
 let CreativeMetaDataDef;
 
+/** @private */
+export const LIFECYCLE_STAGES = {
+  // Note: Use strings as values here, rather than numbers, so that "0" does
+  // not test as `false` later.
+  adSlotBuilt: '0',
+  urlBuilt: '1',
+  adRequestStart: '2',
+  adRequestEnd: '3',
+  extractCreativeAndSignature: '4',
+  adResponseValidateStart: '5',
+  renderFriendlyStart: '6',
+  renderCrossDomainStart: '7',
+  renderFriendlyEnd: '8',
+  renderCrossDomainEnd: '9',
+  preAdThrottle: '10',
+  renderSafeFrameStart: '11',
+  adSlotCleared: '20',
+};
+
+
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
 
   /**
    * @param {!Element} element
-   * @param {!Ojbect=} opt_adContext
    */
-  constructor(element, opt_adContext) {
+  constructor(element) {
     super(element);
     dev().assert(AMP.AmpAdApiHandler);
 
@@ -138,9 +153,6 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** {?Object} */
     this.config = null;
-
-    /** {?Object} */
-    this.adContext = opt_adContext;
 
     /** @private {?string} */
     this.adUrl_ = null;
@@ -171,10 +183,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
-    /** {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
-    this.lifecycleReporter = this.initLifecycleReporter();
-    // Note: The reporting ping should be the last action in the constructor.
-    this.lifecycleReporter.sendPing('adSlotBuilt');
+    this.emitLifecycleEvent('adSlotBuilt');
   }
 
   /** @override */
@@ -314,7 +323,6 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter.sendPing('urlBuilt');
           return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
@@ -322,19 +330,18 @@ export class AmpA4A extends AMP.BaseElement {
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
+          this.emitLifecycleEvent('urlBuilt', adUrl);
           return adUrl && this.sendXhrRequest_(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
-          const qqid = fetchResponse.headers.get(QQID_HEADER);
-          this.lifecycleReporter.setQqid(qqid);
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
-          this.lifecycleReporter.sendPing('adRequestEnd');
+          this.emitLifecycleEvent('adRequestEnd', fetchResponse);
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -362,7 +369,8 @@ export class AmpA4A extends AMP.BaseElement {
         .then(responseParts => {
           checkStillCurrent(promiseId);
           if (responseParts) {
-            this.lifecycleReporter.sendPing('extractCreativeAndSignature');
+            this.emitLifecycleEvent('extractCreativeAndSignature',
+                responseParts);
           }
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
@@ -385,7 +393,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts || !creativeParts.signature) {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
-          this.lifecycleReporter.sendPing('adResponseValidateStart');
+          this.emitLifecycleEvent('adResponseValidateStart', creativeParts);
 
           // For each signing service, we have exactly one Promise,
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
@@ -485,7 +493,7 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
-    this.lifecycleReporter.sendPing('preAdThrottle');
+    this.emitLifecycleEvent('preAdThrottle');
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error || !rendered) {
@@ -511,8 +519,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    this.lifecycleReporter.sendPing('adSlotCleared');
-    this.lifecycleReporter.reset();
+    this.emitLifecycleEvent('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
@@ -582,7 +589,7 @@ export class AmpA4A extends AMP.BaseElement {
    * publisher page.  To be overridden by network implementations as needed.
    */
   onAmpCreativeRender() {
-    this.lifecycleReporter.sendPing('renderFriendlyEnd');
+    this.emitLifecycleEvent('renderFriendlyEnd');
   }
 
   /**
@@ -592,7 +599,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   sendXhrRequest_(adUrl) {
-    this.lifecycleReporter.sendPing('adRequestStart');
+    this.emitLifecycleEvent('adRequestStart');
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
@@ -678,7 +685,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeRenderAmpAd_(bytes) {
-    this.lifecycleReporter.sendPing('renderFriendlyStart');
+    this.emitLifecycleEvent('renderFriendlyStart', bytes);
     // Timer id will be set if we have entered layoutCallback at which point
     // 3p throttling count was incremented.  We want to "release" the throttle
     // immediately since we now know we are not a 3p ad.
@@ -791,7 +798,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaCachedContentIframe_(adUrl, opt_isNonAmpCreative) {
-    this.lifecycleReporter.sendPing('renderCrossDomainStart');
+    this.emitLifecycleEvent('renderCrossDomainStart');
     /** @const {!Element} */
     const iframe = createElementWithAttributes(
         /** @type {!Document} */(this.element.ownerDocument),
@@ -813,7 +820,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaSafeFrame_(creativeBody) {
-    this.lifecycleReporter.sendPing('renderSafeFrameStart');
+    this.emitLifecycleEvent('renderSafeFrameStart');
     utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
@@ -1014,12 +1021,13 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * To be overridden by network specific implementation. If no implementation
-   * is provided, a NullLifecycleReporter will be returned.
+   * To be overriden by network specific implementation.
+   * This function will be called for each lifecycle event as specified in the
+   * LIFECYCLE_STAGES enum declaration. For certain events, an optional
+   * associated piece of data will be passed.
    *
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter}
+   * @param {string} eventName
+   * @param {!Object=} opt_associatedEventData
    */
-  initLifecycleReporter() {
-    return new NullLifecycleReporter();
-  }
+  emitLifecycleEvent(eventName, opt_associatedEventData) {}
 }

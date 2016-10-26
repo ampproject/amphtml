@@ -22,7 +22,6 @@
 export function makeCorrelator(clientId, pageViewId) {
   const pageViewIdNumeric = Number(pageViewId || 0);
   if (clientId) {
-    clientId = typeof clientId == 'string' ? clientId : String(clientId);
     return pageViewIdNumeric + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
   } else {
     return pageViewIdNumeric;
