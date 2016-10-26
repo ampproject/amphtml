@@ -81,7 +81,7 @@ function isInReportableBranch(ampElement, namespace) {
 }
 
 /**
- * @return {!GoogleAdLifecycleReporter|!NullLifecycleReporter}
+ * @return {!GoogleAdLifecycleReporter|!BaseLifecycleReporter}
  */
 export function getLifecycleReporter(ampElement, namespace, slotId) {
   // Carve-outs: We only want to enable profiling pingbacks when:
