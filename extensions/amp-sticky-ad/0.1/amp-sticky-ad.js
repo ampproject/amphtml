@@ -221,7 +221,7 @@ class AmpStickyAd extends AMP.BaseElement {
     }
 
     // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
-    // Not using setStyles because we will remove this line later.
+    // Note: Use setStyle because we will remove this line later.
     setStyle(this.element, 'opacity', '1 !important');
 
     const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
@@ -231,7 +231,8 @@ class AmpStickyAd extends AMP.BaseElement {
       return;
     }
 
-    user().warn('AMP-STICKY-AD', 'Do not allow container to be transparent');
+    user().warn('AMP-STICKY-AD',
+        'Do not allow container to be semitransparent');
     setStyle(this.element, 'background-color', newBackgroundColor);
   }
 }

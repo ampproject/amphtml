@@ -197,10 +197,10 @@ export function scale(value) {
 }
 
 /**
- * Remove alpha value from a "background-color" CSS property.
- * Return the new "background-color" property with alpha equals 1.
+ * Remove alpha value from a color CSS property.
+ * Return the new color property with alpha equals 1.
  * Note caller needs to make sure the input cssColorValue is a valid
- * CSS "background-color" value.
+ * CSS color value.
  * @param {string} cssColor
  * @return {string}
  */
