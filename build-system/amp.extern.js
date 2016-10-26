@@ -35,6 +35,7 @@ window.draw3p;
 // AMP's globals
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
+window.onAsyncErrorForTesting;
 window.AMP_TAG;
 window.AMP_CONFIG = {};
 window.AMP = {};
