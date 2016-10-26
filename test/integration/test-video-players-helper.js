@@ -27,7 +27,7 @@ import {
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
-  it('should override the video interface methods', function() {
+  it.only('should override the video interface methods', function() {
     return getVideoPlayer(/* opt_outsideView */ false)
     .then(v => {
       const impl = v.implementation_;
@@ -164,8 +164,10 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       sizer.position = 'relative';
       sizer.style.height = '200vh';
 
-      fixture.doc.body.appendChild(sizer);
-      fixture.doc.body.appendChild(video);
+      Promise.resolve().then(() => {
+        fixture.doc.body.appendChild(sizer);
+        fixture.doc.body.appendChild(video);
+      });
 
       return poll('video built', () => {
         return video.isBuilt();
