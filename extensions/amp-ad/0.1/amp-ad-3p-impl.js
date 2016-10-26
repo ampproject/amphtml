@@ -39,9 +39,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /**
    * @param {!AmpElement} element
-   * @param {!Ojbect=} opt_adContext
    */
-  constructor(element, opt_adContext) {
+  constructor(element) {
     super(element);
 
     /** @private {?Element} */
@@ -49,9 +48,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** {?Object} */
     this.config = null;
-
-    /** {?Object} */
-    this.adContext = opt_adContext || {};
 
     /** @private {?AmpAdApiHandler} */
     this.apiHandler_ = null;
