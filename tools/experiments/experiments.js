@@ -219,9 +219,9 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
-    id: 'amp-sticky-ad-v1',
+    id: 'amp-sticky-ad-better-ux',
     name: 'New breaking UX changes make to amp-sticky-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5432',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
   },
 ];
 

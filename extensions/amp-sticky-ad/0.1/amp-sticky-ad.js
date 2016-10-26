@@ -25,7 +25,7 @@ import {setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @private @const {string} */
-const TAG = 'amp-sticky-ad-v1';
+const UX_EXPERIMENT = 'amp-sticky-ad-better-ux';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -98,6 +98,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   collapsedCallback() {
+    console.log('collapsed Callback being called');
     toggle(this.element, false);
     this.vsync_.mutate(() => {
       this.viewport_.updatePaddingBottom(0);
@@ -167,9 +168,11 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   layoutAd_() {
+    console.log('layout ad');
     this.updateInViewport(dev().assertElement(this.ad_), true);
     this.scheduleLayout(dev().assertElement(this.ad_));
     listenOnce(this.ad_, 'amp:load:end', () => {
+      console.log('ad loaded');
       this.vsync_.mutate(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
@@ -210,14 +213,14 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /**
    * To check for background-color alpha and force it to be 1.
-   * Whoever call this needs to make sure it's in a vsync.
+   * Whoever calls this needs to make sure it's in a vsync.
    * @private
    */
   forceOpacity_() {
-    if (!isExperimentOn(this.win, TAG)) {
+    if (!isExperimentOn(this.win, UX_EXPERIMENT)) {
       return;
     }
-    const background = this.win.getComputedStyle(this.element)
+    const background = this.win./*OK*/getComputedStyle(this.element)
         .getPropertyValue('background-color');
     if (!startsWith(background, 'rgba')) {
       return;
@@ -226,7 +229,10 @@ class AmpStickyAd extends AMP.BaseElement {
     const backgroundColor = background.substring(
         background.indexOf('(') + 1,
         background.lastIndexOf(','));
-    console.log('set styles');
+
+    // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
+    // Not using setStyles because we will remove this line later.
+    setStyle(this.element, 'opacity', '1 !important');
     setStyle(this.element, 'background-color', 'rgb(' + backgroundColor + ')');
   }
 }
