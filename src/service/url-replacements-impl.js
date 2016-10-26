@@ -561,9 +561,8 @@ export class UrlReplacements {
     user().assert(typeof param == 'string', 'param should be a string');
     const url = parseUrl(this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
-    return (typeof params[param] !== 'undefined') ?
-      params[param] :
-      defaultValue;
+    return (typeof params[param] !== 'undefined')
+        ? params[param] : defaultValue;
   }
 
   /**

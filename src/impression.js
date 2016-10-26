@@ -24,7 +24,10 @@ import {
   parseQueryString,
   addParamsToUrl,
 } from './url';
+import {timerFor} from './timer';
 import {getMode} from './mode';
+
+const TIMEOUT_VALUE = 8000;
 
 let trackImpressionPromise = null;
 
@@ -34,6 +37,14 @@ let trackImpressionPromise = null;
  */
 export function getTrackImpressionPromise() {
   return dev().assert(trackImpressionPromise);
+}
+
+/**
+ * Function that reset the trackImpressionPromise only for testing
+ * @visibleForTesting
+ */
+export function resetTrackImpressionPromiseForTesting() {
+  trackImpressionPromise = null;
 }
 
 /**
@@ -76,12 +87,17 @@ export function maybeTrackImpression(win) {
   }
 
   viewer.whenFirstVisible().then(() => {
-    // TODO(@zhouyx) We need a timeout here?
     // TODO(@zhouyx) need test with a real response.
-    invoke(win, dev().assertString(clickUrl)).then(response => {
+    const promise = invoke(win, dev().assertString(clickUrl)).then(response => {
       applyResponse(win, viewer, response);
-      resolveImpression();
     });
+
+    // Timeout invoke promise after 8s and resolve trackImpressionPromise.
+    timerFor(win).timeoutPromise(TIMEOUT_VALUE, promise,
+        'timeout waiting for ad server response').catch(() => {
+        }).then(() => {
+          resolveImpression();
+        });
   });
 }
 
@@ -109,18 +125,22 @@ function invoke(win, clickUrl) {
  */
 function applyResponse(win, viewer, response) {
   const adLocation = response['location'];
-  const adTracking = response['tracking'];
+  const adTracking = response['tracking_url'];
 
   // If there is a tracking_url, need to track it
   // Otherwise track the location
   const trackUrl = adTracking || adLocation;
 
   if (trackUrl && !isProxyOrigin(trackUrl)) {
+    // To request the provided trackUrl for tracking purposes.
     new Image().src = trackUrl;
   }
 
   // Replace the location href params with new location params we get.
   if (adLocation) {
+    if (!win.history.replaceState) {
+      return;
+    }
     const currentHref = win.location.href;
     const url = parseUrl(adLocation);
     const params = parseQueryString(url.search);

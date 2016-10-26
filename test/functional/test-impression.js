@@ -17,6 +17,7 @@
 import {
   getTrackImpressionPromise,
   maybeTrackImpression,
+  resetTrackImpressionPromiseForTesting,
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
@@ -40,13 +41,13 @@ describe('impression', () => {
     };
     sandbox.spy(xhr, 'fetchJson');
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
+    resetTrackImpressionPromiseForTesting();
   });
 
   afterEach(() => {
     toggleExperiment(window, 'alp', false);
     sandbox.restore();
   });
-
 
   it('should do nothing if the experiment is off', () => {
     viewer.getParam.throws(new Error('Should not be called'));
@@ -106,14 +107,33 @@ describe('impression', () => {
     clock.tick(2001);
     return promise.then(() => {
       expect(window.location.href).to.not.contain('gclid=654321');
+      // Reset
       xhr.fetchJson = () => {
         return Promise.resolve();
       };
     });
   });
 
+  it('should resolve trackImpressionPromise after timeout', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    xhr.fetchJson = () => {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 10000);
+      });
+    };
+    const clock = sandbox.useFakeTimers();
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      clock.tick(8001);
+      return getTrackImpressionPromise().should.be.fulfilled;
+    });
+  });
+
   it('should do nothing if get empty response', () => {
-    toggleExperiment(window, 'alo', true);
+    toggleExperiment(window, 'alp', true);
     viewer.getParam.withArgs('click').returns('https://www.example.com');
     const prevHref = window.location.href;
     maybeTrackImpression(window);

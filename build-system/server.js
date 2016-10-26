@@ -407,11 +407,14 @@ app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
 
 app.use('/impression-proxy/', function(req, res) {
   assertCors(req, res, ['GET']);
-  // TODO(@zhouyx): How to request real ad server response with cookie set
+  // Fake response with the following optional fields:
+  // location: The Url the that server would have sent redirect to w/o ALP
+  // tracking_url: URL that should be requested to track click
+  // gclid: The conversion tracking value
   const body = {
-    'location': 'localhost:8000/examples/#gclid=1234',
+    'location': 'localhost:8000/examples/#gclid=1234?gclid=RANDOM&r=1&url=SOURCE_URL',
+    'tracking_url': 'tracking_url',
     'gclid': '1234',
-    'tracking': 'tracking_url',
   };
   res.send(body);
 });
