@@ -1,17 +1,17 @@
       max   |         min   |        gzip   |   file
       ---   |         ---   |         ---   |   ---
  72.97 kB   |     6.14 kB   |     2.55 kB   |   alp.js / alp.max.js
-905.14 kB   |   183.16 kB   |    56.65 kB   |   shadow-v0.js / amp-shadow.js
+906.18 kB   |   183.44 kB   |     56.7 kB   |   shadow-v0.js / amp-shadow.js
    5.8 kB   |       386 B   |       250 B   |   sw-kill.js / sw-kill.max.js
  385.7 kB   |     1.34 kB   |       762 B   |   sw.js / sw.max.js
-941.14 kB   |   182.05 kB   |    56.31 kB   |   v0.js / amp.js
+942.18 kB   |   182.33 kB   |    56.37 kB   |   v0.js / amp.js
 333.74 kB   |    38.45 kB   |    12.87 kB   |   v0/amp-access-0.1.js
 131.63 kB   |     2.42 kB   |     1.16 kB   |   v0/amp-access-laterpay-0.1.js
  56.81 kB   |     3.46 kB   |      1.4 kB   |   v0/amp-accordion-0.1.js
 325.69 kB   |    33.24 kB   |    11.92 kB   |   v0/amp-ad-0.1.js
 362.39 kB   |    37.53 kB   |    13.02 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
 362.11 kB   |    35.66 kB   |    12.44 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
-360.27 kB   |    29.44 kB   |    10.21 kB   |   v0/amp-ad-network-fake-impl-0.1.js
+360.27 kB   |    29.44 kB   |    10.22 kB   |   v0/amp-ad-network-fake-impl-0.1.js
 309.46 kB   |    57.42 kB   |    20.78 kB   |   v0/amp-analytics-0.1.js
  51.41 kB   |     4.02 kB   |     1.85 kB   |   v0/amp-anim-0.1.js
 142.69 kB   |     4.81 kB   |     2.07 kB   |   v0/amp-apester-media-0.1.js
@@ -45,7 +45,7 @@
  35.72 kB   |     2.24 kB   |       959 B   |   v0/amp-o2-player-0.1.js
 172.83 kB   |    17.39 kB   |     4.95 kB   |   v0/amp-pinterest-0.1.js
  34.28 kB   |     1.34 kB   |       676 B   |   v0/amp-reach-player-0.1.js
-129.72 kB   |     3.24 kB   |     1.55 kB   |   v0/amp-share-tracking-0.1.js
+ 131.3 kB   |     3.43 kB   |     1.65 kB   |   v0/amp-share-tracking-0.1.js
 143.49 kB   |      5.5 kB   |     2.12 kB   |   v0/amp-sidebar-0.1.js
  144.9 kB   |     7.24 kB   |     2.97 kB   |   v0/amp-slides-0.1.js
 154.92 kB   |      9.7 kB   |      3.8 kB   |   v0/amp-social-share-0.1.js
