@@ -15,6 +15,7 @@
  */
 
 import {listenOncePromise} from '../../src/event-helper';
+import {platformFor} from '../../src/platform';
 import {timerFor} from '../../src/timer';
 import {viewportForDoc} from '../../src/viewport';
 import {VideoInterface, VideoEvents} from '../../src/video-interface';
@@ -135,6 +136,12 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       // Skip autoplay tests if browser does not support autoplay.
       return supportsAutoplay(window, false).then(supportsAutoplay => {
         if (!supportsAutoplay) {
+          this.skip();
+        }
+
+        const platform = platformFor(window);
+        if (platform.isSafari() && platform.getMajorVersion() == 9) {
+          // TODO(aghassemi): Tests are flaky on Safari 9 on SauceLabs
           this.skip();
         }
       });
