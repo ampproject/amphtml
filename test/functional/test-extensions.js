@@ -315,6 +315,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-test']).to.exist;
       expect(win.ampExtendedElements['amp-test']).to.be.true;
     });
 
@@ -347,6 +348,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-test']).to.not.exist;
       expect(win.ampExtendedElements['amp-test']).to.be.undefined;
     });
 
