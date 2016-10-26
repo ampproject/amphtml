@@ -179,6 +179,8 @@ export const adConfig = {
     ],
   },
 
+  fake: {},
+
   flite: {},
 
   genieessp: {
@@ -212,6 +214,11 @@ export const adConfig = {
   },
 
   kargo: {},
+
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+    renderStartImplemented: true,
+  },
 
   ligatus: {},
 
@@ -346,6 +353,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  smartclip: {
+    prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
+    preconnect: 'https://des.smartclip.net',
+    renderStartImplemented: true,
+  },
+
   sortable: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
@@ -423,6 +436,11 @@ export const adConfig = {
 
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
+  },
+
+  zedo: {
+    prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
   },
 
   zergnet: {},

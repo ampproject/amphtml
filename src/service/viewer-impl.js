@@ -19,7 +19,12 @@ import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
-import {parseQueryString, parseUrl, removeFragment} from '../url';
+import {
+  getSourceUrl,
+  parseQueryString,
+  parseUrl,
+  removeFragment,
+} from '../url';
 import {platformFor} from '../platform';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
@@ -772,6 +777,7 @@ export class Viewer {
   postDocumentReady() {
     this.sendMessageUnreliable_('documentLoaded', {
       title: this.win.document.title,
+      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
     }, false);
   }
 
@@ -872,8 +878,38 @@ export class Viewer {
       return Promise.resolve('');
     }
     return this.sendMessageUnreliable_('fragment', undefined, true).then(
-      hash => hash || ''
-    );
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
+              'should start with #');
+          /* Strip leading '#' */
+          return hash.substr(1);
+        });
+  }
+
+  /**
+   * Update the fragment of the viewer if embedded in a viewer,
+   * otherwise update the page url fragment
+   * The fragment variable should contain leading '#'
+   * @param {string} fragment
+   * @return {!Promise}
+   */
+  updateFragment(fragment) {
+    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
+        'should start with #');
+    if (!this.isEmbedded_) {
+      if (this.win.history.replaceState) {
+        this.win.history.replaceState({}, '', fragment);
+      }
+      return Promise.resolve();
+    }
+    if (!this.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'fragment', {fragment}, true));
   }
 
   /**
