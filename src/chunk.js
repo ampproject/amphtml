@@ -71,18 +71,18 @@ export function activateChunkingForTesting() {
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  const errors = [];
-  while (true) {
-    try {
-      if (!service.execute_()) {
-        break;
-      }
-    } catch (e) {
-      errors.push(e);
+  runChunks(service);
+}
+
+function runChunks(service) {
+  try {
+    while (service.execute_()) {
+      // noop.
     }
-  }
-  if (errors.length) {
-    throw errors[0];
+  } catch (e) {
+    // Can you feel the recursion!
+    runChunks(service);
+    throw e;
   }
 }
 

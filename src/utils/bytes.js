@@ -24,12 +24,14 @@ import {dev} from '../log';
  */
 export function utf8Decode(bytes) {
   if (TextDecoder) {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+    return new Promise(resolve => {
+      resolve(new TextDecoder('utf-8').decode(bytes));
+    });
   }
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => {
-      reject(reader.error);
+      reject(dev().assertError(reader.error));
     };
     reader.onloadend = () => {
       resolve(reader.result);
@@ -45,12 +47,14 @@ export function utf8Decode(bytes) {
  */
 export function utf8Encode(string) {
   if (TextEncoder) {
-    return Promise.resolve(new TextEncoder('utf-8').encode(string));
+    return new Promise(resolve => {
+      resolve(new TextEncoder('utf-8').encode(string));
+    });
   }
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => {
-      reject(reader.error);
+      reject(dev().assertError(reader.error));
     };
     reader.onloadend = () => {
       // Because we used readAsArrayBuffer, we know the result must be an

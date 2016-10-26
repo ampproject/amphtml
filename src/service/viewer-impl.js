@@ -282,9 +282,8 @@ export class Viewer {
             20000,
             new Promise(resolve => {
               this.messagingReadyResolver_ = resolve;
-            })).catch(reason => {
-              throw getChannelError(/** @type {!Error|string|undefined} */ (
-                  reason));
+            })).catch(() => {
+              throw new Error('Timed out waiting for messaging channel');
             }) : null;
 
     /**
@@ -298,8 +297,7 @@ export class Viewer {
         this.messagingReadyPromise_
             .catch(reason => {
               // Don't fail promise, but still report.
-              reportError(getChannelError(
-                  /** @type {!Error|string|undefined} */ (reason)));
+              reportError(reason);
             }) : null;
 
     // Trusted viewer and referrer.
@@ -1035,7 +1033,7 @@ export class Viewer {
    */
   sendMessage(eventType, data, awaitResponse) {
     if (!this.messagingReadyPromise_) {
-      return Promise.reject(getChannelError());
+      return Promise.reject(new Error('No messaging channel'));
     }
     return this.messagingReadyPromise_.then(() => {
       return this.sendMessageUnreliable_(eventType, data, awaitResponse);
@@ -1143,19 +1141,6 @@ function parseParams_(str, allParams) {
   }
 }
 
-
-/**
- * Creates an error for the case where a channel cannot be established.
- * @param {*=} opt_reason
- * @return {!Error}
- */
-function getChannelError(opt_reason) {
-  if (opt_reason instanceof Error) {
-    opt_reason.message = 'No messaging channel: ' + opt_reason.message;
-    return opt_reason;
-  }
-  return new Error('No messaging channel: ' + opt_reason);
-}
 
 /**
  * @typedef {{

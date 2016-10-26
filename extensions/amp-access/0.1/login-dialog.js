@@ -267,7 +267,7 @@ export class WebLoginDialog {
     }
     dev().fine(TAG, 'Login done: ', result, opt_error);
     if (opt_error) {
-      this.reject_(opt_error);
+      this.reject_(user().createError('login failed', opt_error));
     } else {
       this.resolve_(result);
     }

@@ -1281,7 +1281,7 @@ export class Resources {
     if (!success) {
       dev().info(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
-      return Promise.reject(opt_reason);
+      return Promise.reject(dev().createError('task failed', opt_reason));
     }
   }
 

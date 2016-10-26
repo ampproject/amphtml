@@ -398,7 +398,7 @@ export class AmpA4A extends AMP.BaseElement {
                 // Resolve Promise into signing key.
                 return keyInfoPromise.then(keyInfo => {
                   if (!keyInfo) {
-                    return Promise.reject('Promise resolved to null key.');
+                    throw new Error('Promise resolved to null key.');
                   }
                   // If the key exists, try verifying with it.
                   return verifySignature(
@@ -409,11 +409,11 @@ export class AmpA4A extends AMP.BaseElement {
                         if (isValid) {
                           return creativeParts.creative;
                         }
-                        return Promise.reject(
-                            'Key failed to validate creative\'s signature.');
+                        throw new Error("Key failed to validate creative's " +
+                            'signature.');
                       },
                       err => {
-                        user().error('Amp Ad', err, this.element);
+                        throw user().createError('Amp Ad', err, this.element);
                       });
                 });
               }))
@@ -444,7 +444,6 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Handles uncaught errors within promise flow.
    * @param {*} error
-   * @return {*}
    * @private
    */
   promiseErrorHandler_(error) {
@@ -455,7 +454,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
       if (error.message == cancellation().message) {
         // Rethrow if cancellation
-        throw error;
+        throw dev().assertError(error);
       }
     }
     // Returning promise reject should trigger unhandledrejection which will
@@ -468,7 +467,7 @@ export class AmpA4A extends AMP.BaseElement {
       'au': adQueryIdx < 0 ? '' :
           this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
     };
-    return new Error('amp-a4a: ' + JSON.stringify(state));
+    throw new Error('amp-a4a: ' + JSON.stringify(state));
   }
 
   /** @override */
@@ -501,9 +500,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
       }
       if (rendered instanceof Error) {
-        throw rendered;
+        throw dev().assertError(rendered);
       }
-    }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
+    }).catch(error => this.promiseErrorHandler_(error));
   }
 
   /** @override  */

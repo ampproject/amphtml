@@ -453,7 +453,7 @@ export class Extensions {
       if (holder.loaded) {
         holder.promise = Promise.resolve(holder.extension);
       } else if (holder.error) {
-        holder.promise = Promise.reject(holder.error);
+        holder.promise = Promise.reject(dev().assertError(holder.error));
       } else {
         holder.promise = new Promise((resolve, reject) => {
           holder.resolve = resolve;

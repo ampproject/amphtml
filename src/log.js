@@ -186,7 +186,7 @@ export class Log {
       const error = createErrorVargs.apply(null,
           Array.prototype.slice.call(arguments, 1));
       this.prepareError_(error);
-      this.win.setTimeout(() => {throw error;});
+      rethrowAsync(error);
     }
   }
 
