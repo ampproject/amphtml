@@ -59,23 +59,8 @@ chai.Assertion.addMethod('renderedInFriendlyIframe', function (srcdoc) {
       'got #{act}',
       'body tag',
       childBody);
-  // I would like to just invoke the .visible assertion from test/_init_test.js,
-  // but it doesn't work to just do this.assert(child).visible.  So just copy
-  // the test code from _init_test.js.  Bleh.
   [obj, child, childBody].forEach(toTest => {
-    const computedStyle =
-        toTest.ownerDocument.defaultView.getComputedStyle(toTest);
-    const visibility = computedStyle.getPropertyValue('visibility');
-    const opacity = computedStyle.getPropertyValue('opacity');
-    const tagName = toTest.tagName.toLowerCase();
-    this.assert(
-        visibility === 'visible' && parseInt(opacity, 10) > 0,
-        'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-        'expected element \'' +
-        tagName + '\' not to be #{exp}. with classes: ' + obj.className,
-        'visible',
-        visibility);
+    expect(toTest).to.be.visible;
   });
 });
 
@@ -104,23 +89,8 @@ chai.Assertion.addMethod('renderedInXDomainIframe', function (src) {
       '#{exp}, was #{act}',
       src,
       child.getAttribute('src'));
-  // I would like to just invoke the .visible assertion from test/_init_test.js,
-  // but it doesn't work to just do this.assert(child).visible.  So just copy
-  // the test code from _init_test.js.  Bleh.
   [obj, child].forEach(toTest => {
-    const computedStyle =
-        toTest.ownerDocument.defaultView.getComputedStyle(toTest);
-    const visibility = computedStyle.getPropertyValue('visibility');
-    const opacity = computedStyle.getPropertyValue('opacity');
-    const tagName = toTest.tagName.toLowerCase();
-    this.assert(
-        visibility === 'visible' && parseInt(opacity, 10) > 0,
-        'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-        'expected element \'' +
-        tagName + '\' not to be #{exp}. with classes: ' + obj.className,
-        'visible',
-        visibility);
+    expect(toTest).to.be.visible;
   });
 });
 
