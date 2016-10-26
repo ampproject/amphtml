@@ -336,7 +336,7 @@ class VideoEntry {
    * the click event from the iframe.
    * We also can not rely on hacks such as constantly checking doc.activeElement
    * to know if user has tapped on the iframe since they won't be a trusted
-   * event that would allow us to unmuted the vide as only trusted
+   * event that would allow us to unmuted the video as only trusted
    * user-initiated events can be used to interact with the video.
    * @private
    * @return {!Element}

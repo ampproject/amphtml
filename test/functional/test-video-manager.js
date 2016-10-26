@@ -28,17 +28,17 @@ import {
 } from '../integration/test-video-players-helper';
 import * as sinon from 'sinon';
 
-describe('Mock Video Player Integration Tests', () => {
-  // We run the video player integration tests on a mocked video player as part
+describe('Fake Video Player Integration Tests', () => {
+  // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
   // `amp-video` and `amp-youtube` as part of integration testing.
   runVideoPlayerIntegrationTests(fixture => {
-    fixture.doc.registerElement('amp-test-mock-videoplayer', {
-      prototype: createAmpElementProto(fixture.win, 'amp-test-mock-videoplayer',
-          MockVideoPlayer),
+    fixture.doc.registerElement('amp-test-fake-videoplayer', {
+      prototype: createAmpElementProto(fixture.win, 'amp-test-fake-videoplayer',
+          FakeVideoPlayer),
     });
 
-    const video = fixture.doc.createElement('amp-test-mock-videoplayer');
+    const video = fixture.doc.createElement('amp-test-fake-videoplayer');
     return video;
   });
 });
@@ -159,7 +159,7 @@ describe('Supports Autoplay', () => {
 /**
  * @implements {../../src/video-interface.VideoInterface}
  */
-class MockVideoPlayer extends BaseElement {
+class FakeVideoPlayer extends BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {

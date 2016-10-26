@@ -15,7 +15,6 @@
  */
 
 import {listenOncePromise} from '../../src/event-helper';
-import {platformFor} from '../../src/platform';
 import {timerFor} from '../../src/timer';
 import {viewportForDoc} from '../../src/viewport';
 import {VideoInterface, VideoEvents} from '../../src/video-interface';
@@ -28,7 +27,9 @@ import {
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
+  const TIMEOUT = 20000;
   it('should override the video interface methods', function() {
+    this.timeout(TIMEOUT);
     return getVideoPlayer(/* opt_outsideView */ false)
     .then(v => {
       const impl = v.implementation_;
@@ -43,10 +44,9 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
   });
 
-  describe.configure().retryOnSaucelabs().run('Autoplay', function() {
-    const TIMEOUT = 20000;
+  describe.configure().retryOnSaucelabs().skipSafari()
+  .run('Autoplay', function() {
     this.timeout(TIMEOUT);
-
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
         return getVideoPlayer(/* opt_outsideView */ false).then(v => {
@@ -130,18 +130,12 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           }, undefined, TIMEOUT);
         }
       });
-
     });
     before(function() {
+      this.timeout(TIMEOUT);
       // Skip autoplay tests if browser does not support autoplay.
       return supportsAutoplay(window, false).then(supportsAutoplay => {
         if (!supportsAutoplay) {
-          this.skip();
-        }
-
-        const platform = platformFor(window);
-        if (platform.isSafari() && platform.getMajorVersion() == 9) {
-          // TODO(aghassemi): Tests are flaky on Safari 9 on SauceLabs
           this.skip();
         }
       });
