@@ -764,8 +764,8 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     // TODO(keithwrightbos): init returns load event, do we need to wait?
-    // Set opt_defaultVisible to true as 3p draw code never executed causing
-    // render-start event never to fire which will remove visiblity hidden.
+    // Set opt_isA4A to true to prevent unwanted timeout
+    // as 3p draw code never executed causing ender-start event never fire.
     this.xOriginIframeHandler_.init(iframe,
         is3p, /* opt_isA4A */ true);
     this.rendered_ = true;
