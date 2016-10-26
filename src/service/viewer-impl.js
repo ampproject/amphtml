@@ -890,6 +890,29 @@ export class Viewer {
   }
 
   /**
+   * Update the fragment of the viewer if embedded in a viewer,
+   * otherwise update the page url fragment
+   * The fragment variable should contain leading '#'
+   * @param {string} fragment
+   * @return {!Promise}
+   */
+  updateFragment(fragment) {
+    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
+        'should start with #');
+    if (!this.isEmbedded_) {
+      if (this.win.history.replaceState) {
+        this.win.history.replaceState({}, '', fragment);
+      }
+      return Promise.resolve();
+    }
+    if (!this.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'fragment', {fragment}, true));
+  }
+
+  /**
    * Triggers "tick" event for the viewer.
    * @param {!Object} message
    */
