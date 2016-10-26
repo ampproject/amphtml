@@ -244,17 +244,16 @@ describe('Viewer', () => {
     });
   });
 
-  it('should get fragment from the viewer in embedded mode' +
+  it('should get fragment from the viewer in embedded mode ' +
       'if the viewer has capability of getting fragment', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
-      expect(name).to.equal('fragment');
-      return Promise.resolve('#from-viewer');
-    });
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    send.onFirstCall().returns(Promise.resolve('#from-viewer'));
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
+      expect(send.withArgs('fragment', undefined, true)).to.be.calledOnce;
     });
   });
 
@@ -273,32 +272,72 @@ describe('Viewer', () => {
     });
   });
 
-  it('should NOT get fragment from the viewer in embedded mode' +
+  it('should NOT get fragment from the viewer in embedded mode ' +
       'if the viewer does NOT have capability of getting fragment', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
-      expect(name).to.equal('fragment');
-      return Promise.resolve('from-viewer');
-    });
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.equal('');
     });
   });
 
-  it('should NOT get fragment from the viewer in embedded mode' +
+  it('should NOT get fragment from the viewer in embedded mode ' +
       'if the viewer does NOT return a fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo&cap=fragment';
+    const viewer = new Viewer(ampdoc);
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    send.onFirstCall().returns(Promise.resolve());
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.equal('');
+      expect(send.withArgs('fragment', undefined, true)).to.be.calledOnce;
+    });
+  });
+
+  it('should update fragment of the url in non-embedded mode', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com#foo';
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(ampdoc);
+    return viewer.updateFragment('#bar').then(() => {
+      expect(windowApi.history.replaceState.callCount).to.equal(1);
+      const replace = windowApi.history.replaceState.lastCall;
+      expect(replace.args).to.jsonEqual([{}, '', '#bar']);
+    });
+  });
+
+  it('should update fragment of the url in non-embedded mode' +
+      ' if the url does not contain fragment previously', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com';
+    const viewer = new Viewer(ampdoc);
+    return viewer.updateFragment('#bar').then(() => {
+      expect(windowApi.history.replaceState.callCount).to.equal(1);
+      const replace = windowApi.history.replaceState.lastCall;
+      expect(replace.args).to.jsonEqual([{}, '', '#bar']);
+    });
+  });
+
+  it('should update fragment of the viewer in embedded mode ' +
+      'if the viewer has capability of updating fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo&cap=fragment';
+    const viewer = new Viewer(ampdoc);
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    viewer.updateFragment('#bar');
+    expect(send.withArgs('fragment', {fragment: '#bar'}, true)).to.be
+        .calledOnce;
+  });
+
+  it('should NOT update fragment of the viewer in embedded mode ' +
+      'if the viewer does NOT have capability of updating fragment', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
-      expect(name).to.equal('fragment');
-      return Promise.resolve();
-    });
-    return viewer.getFragment().then(fragment => {
-      expect(fragment).to.equal('');
-    });
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    viewer.updateFragment('#bar');
+    expect(send.callCount).to.equal(0);
   });
 
   it('should configure correctly for iOS embedding', () => {
