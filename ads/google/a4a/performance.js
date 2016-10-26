@@ -91,7 +91,7 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
   //     selection).
   //   - We haven't turned off profiling via the rate controls in
   //     build-system/global-config/{canary,prod}-config.json
-  // If any of those fail, we use the `NullLifecycleReporter`, which is a
+  // If any of those fail, we use the `BaseLifecycleReporter`, which is a
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
   const win = ampElement.win;
