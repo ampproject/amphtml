@@ -19,7 +19,12 @@ import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
-import {parseQueryString, parseUrl, removeFragment} from '../url';
+import {
+  getSourceUrl,
+  parseQueryString,
+  parseUrl,
+  removeFragment,
+} from '../url';
 import {platformFor} from '../platform';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
@@ -70,7 +75,7 @@ export const ViewportType = {
  *
  * @export {!Array<!RegExp>}
  */
-export const TRUSTED_VIEWER_HOSTS = [
+const TRUSTED_VIEWER_HOSTS = [
   /**
    * Google domains, including country-codes and subdomains:
    * - google.com
@@ -78,13 +83,15 @@ export const TRUSTED_VIEWER_HOSTS = [
    * - google.co
    * - www.google.co
    * - google.az
-   * - www.google..az
+   * - www.google.az
    * - google.com.az
    * - www.google.com.az
    * - google.co.az
    * - www.google.co.az
+   * - google.cat
+   * - www.google.cat
    */
-  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2})$/,
+  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
 
 
@@ -241,12 +248,21 @@ export class Viewer {
     dev().fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
     /**
-     * Whether the AMP document is embedded in a viewer, such as an iframe or
-     * a web view.
+     * Whether the AMP document is embedded in a webview.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = (this.isIframed_ || this.params_['webview'] === '1') &&
-        !this.win.AMP_TEST_IFRAME;
+    this.isWebviewEmbedded_ = !this.isIframed_ &&
+        this.params_['webview'] == '1';
+
+    /**
+     * Whether the AMP document is embedded in a viewer, such as an iframe, or
+     * a web view, or a shadow doc in PWA.
+     * @private @const {boolean}
+     */
+    this.isEmbedded_ = (
+        this.isIframed_ && !this.win.AMP_TEST_IFRAME ||
+        this.isWebviewEmbedded_ ||
+        !ampdoc.isSingleDoc());
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -293,7 +309,7 @@ export class Viewer {
       // Not embedded in IFrame - can't trust the viewer.
       trustedViewerResolved = false;
       trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins) {
+    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
@@ -761,6 +777,7 @@ export class Viewer {
   postDocumentReady() {
     this.sendMessageUnreliable_('documentLoaded', {
       title: this.win.document.title,
+      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
     }, false);
   }
 
@@ -861,8 +878,38 @@ export class Viewer {
       return Promise.resolve('');
     }
     return this.sendMessageUnreliable_('fragment', undefined, true).then(
-      hash => hash || ''
-    );
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
+              'should start with #');
+          /* Strip leading '#' */
+          return hash.substr(1);
+        });
+  }
+
+  /**
+   * Update the fragment of the viewer if embedded in a viewer,
+   * otherwise update the page url fragment
+   * The fragment variable should contain leading '#'
+   * @param {string} fragment
+   * @return {!Promise}
+   */
+  updateFragment(fragment) {
+    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
+        'should start with #');
+    if (!this.isEmbedded_) {
+      if (this.win.history.replaceState) {
+        this.win.history.replaceState({}, '', fragment);
+      }
+      return Promise.resolve();
+    }
+    if (!this.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'fragment', {fragment}, true));
   }
 
   /**

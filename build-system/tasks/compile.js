@@ -95,15 +95,11 @@ function compile(entryModuleFilenames, outputDir,
     var unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
-    var wrapper = '(function(){var process={env:{NODE_ENV:"production"}};' +
-        '%output%})();';
+    var wrapper = '(function(){%output%})();';
     if (options.wrapper) {
-      wrapper = options.wrapper.replace('<%= contents %>',
-          // TODO(@cramforce): Switch to define.
-          'var process={env:{NODE_ENV:"production"}};%output%');
+      wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
-    wrapper += '\n//# sourceMappingURL=' +
-        outputFilename + '.map\n';
+    wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
     patchRegisterElement();
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
@@ -172,6 +168,9 @@ function compile(entryModuleFilenames, outputDir,
       var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
       srcs.push(path);
     });
+    if (options.extraGlobs) {
+      srcs.push.apply(srcs, options.extraGlobs);
+    }
     if (options.include3pDirectories) {
       srcs.push(
         '3p/**/*.js',

@@ -139,13 +139,14 @@ export class Gestures {
   }
 
   /**
-   * Unsubscribes from all pointer events.
+   * Unsubscribes from all pointer events and removes the shared cache instance.
    */
   cleanup() {
     this.element_.removeEventListener('touchstart', this.boundOnTouchStart_);
     this.element_.removeEventListener('touchend', this.boundOnTouchEnd_);
     this.element_.removeEventListener('touchmove', this.boundOnTouchMove_);
     this.element_.removeEventListener('touchcancel', this.boundOnTouchCancel_);
+    delete this.element_[PROP_];
     this.pass_.cancel();
   }
 

@@ -17,6 +17,7 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
@@ -71,12 +72,12 @@ export function reportError(error, opt_associatedElement) {
     if (element) {
       (console.error || console.log).call(console,
           element.tagName + '#' + element.id, error.message);
+    } else if (!getMode().minified) {
+      (console.error || console.log).call(console, error.stack);
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!getMode().minified) {
-      (console.error || console.log).call(console, error.stack);
-    }
+
   }
   if (element && element.dispatchCustomEventForTesting) {
     element.dispatchCustomEventForTesting('amp:error', error.message);
@@ -151,6 +152,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   }
   if (!message) {
     message = 'Unknown error';
+  }
+  if (isLoadErrorMessage(message)) {
+    return;
   }
 
   // This is the App Engine app in

@@ -47,6 +47,39 @@ body {
   text-size-adjust: 100%;
 }
 
+
+/**
+ * iOS-Embed Wrapper mode. The `body` is wrapper into `i-amp-html-wrapper`
+ * element.
+ */
+html.-amp-ios-embed {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/** Wrapper for iOS-Embed-Wrapper mode. */
+i-amp-html-wrapper {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+i-amp-html-wrapper > body {
+  position: relative !important;
+  display: block !important;
+  /* Border is necessary to avoid margins collapsing outside body.
+     Alternatively we can also set overflow to hidden. */
+  border-top: 1px solid transparent !important;
+}
+
+
 /** make-body-block experiment */
 .-amp-make-body-block body {
   display: block !important;
@@ -124,6 +157,38 @@ i-amp-sizer {
   padding: 0 !important;
   border: none !important;
   /* TODO(dvoytenko): explore adding here object-fit. */
+}
+
+/**
+ * Makes elements visually invisible but still accessible to screen-readers.
+ *
+ * This Css has been carefully tested to ensure screen-readers can read and
+ * activate (in case of links and buttons) the elements with this class. Please
+ * use caution when changing anything, even seemingly safe ones. For example
+ * changing width from 1 to 0 would prevent TalkBack from activating (clicking)
+ * buttons despite TalkBack reading them just fine. This is because
+ * element needs to have a defined size and be on viewport otherwise TalkBack
+ * does not allow activation of buttons.
+ */
+.-amp-screen-reader {
+  position: fixed !important;
+  /* keep it on viewport */
+  top: 0px !important;
+  left: 0px !important;
+  /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
+     before allowing buttons to be activated. */
+  width: 2px !important;
+  height: 2px !important;
+  /* visually hide it with overflow and opacity */
+  opacity: 0 !important;
+  overflow: hidden !important;
+  /* remove any margin or padding */
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* ensure no other style sets display to none */
+  display: block !important;
+  visibility: visible !important;
 }
 
 /* For author styling. */
@@ -425,4 +490,86 @@ amp-experiment, amp-share-tracking {
 
 amp-fresh {
   visibility: hidden;
+}
+
+/**
+ * Animated equalizer icon for muted autoplaying videos.
+ *
+ * TODO(aghassemi, #5306): Move to video extension when video is out of core.
+ */
+.amp-video-eq {
+  align-items: flex-end;
+  bottom: 7px;
+  display: flex;
+  height: 12px;
+  opacity: 0.8;
+  overflow: hidden;
+  position: absolute;
+  right: 7px;
+  width: 20px;
+}
+.amp-video-eq .amp-video-eq-col {
+  flex: 1;
+  height: 100%;
+  margin-right: 1px;
+  position: relative;
+}
+.amp-video-eq .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  background-color: #FAFAFA;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  will-change: transform;
+}
+.amp-video-eq .amp-video-eq-col div {
+  animation-play-state: paused;
+}
+.amp-video-eq[unpausable] .amp-video-eq-col div {
+  animation-name: none;
+}
+.amp-video-eq[unpausable].amp-video-eq-play .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+}
+.amp-video-eq.amp-video-eq-play .amp-video-eq-col div {
+  animation-play-state: running;
+}
+.amp-video-eq-1-1 {
+  animation-duration: 0.3s;
+  transform: translateY(60%);
+}
+.amp-video-eq-1-2 {
+  animation-duration: 0.45s;
+  transform: translateY(60%);
+}
+.amp-video-eq-2-1 {
+  animation-duration: 0.5s;
+  transform: translateY(30%);
+}
+.amp-video-eq-2-2 {
+  animation-duration: 0.4s;
+  transform: translateY(30%);
+}
+.amp-video-eq-3-1 {
+  animation-duration: 0.3s;
+  transform: translateY(70%);
+}
+.amp-video-eq-3-2 {
+  animation-duration: 0.35s;
+  transform: translateY(70%);
+}
+.amp-video-eq-4-1 {
+  animation-duration: 0.4s;
+  transform: translateY(50%);
+}
+.amp-video-eq-4-2 {
+  animation-duration: 0.25s;
+  transform: translateY(50%);
+}
+@keyframes amp-video-eq-animation {
+  0% {transform: translateY(100%);}
+  100% {transform: translateY(0);}
 }

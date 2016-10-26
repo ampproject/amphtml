@@ -71,18 +71,22 @@ __required__
 Target attribute of the `<form>` must be either `_blank` or `_top`.
 
 **action**
-__required__
+__invalid__ when `method=POST`
+__required__ when `method=GET`
 
 Action must be provided, `https` and is non-cdn link (does **NOT** link to https://cdn.ampproject.org).
 
 __Note__: `target` and `action` will only be used for non-xhr GET requests. AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided AMP would make a GET request to `action` endpoint and use `target` to open a new window (if `_blank`). AMP runtime might also fallback to using action and target in cases where `amp-form` extension fails to load.
 
 **action-xhr**
-__(optional)__ for `GET` __required__ for `POST` requests 
+__required__ when `method=POST`
+__optional__ when `method=GET`
+
 You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion.
 
-This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
+An XHR request is where the browser would make the request without a full load of the page or opening a new page also sometimes called Ajax request. Browsers will send the request in the background using [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
 
+This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
 
 **Important**: See [Security Considerations](#security-considerations) for notes on how to secure your forms endpoints.
 
@@ -94,8 +98,14 @@ Enables and selects a custom validation reporting strategy, valid values are one
 
 See [Custom Validation](#custom-validations) section for more details on this.
 
-## Inputs
-Currently, `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>` are not allowed. (This might be reconsidered in the future - please let us know if you require these and use cases).
+## Inputs and Fields
+Currently, `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>` are not allowed.
+
+Most of form-related attributes on inputs are not allowed, this include `form`, `formaction`, `formtarget`, `formmethod` and others.
+
+(Relaxing some of these rules might be reconsidered in the future - please let us know if you require these and use cases).
+
+Other `input` types, `textarea`, `select`, `option`, `fieldset`, `label` are allowed.
 
 ## Events
 `amp-form` exposes 3 events:
