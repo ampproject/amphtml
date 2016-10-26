@@ -28,8 +28,7 @@ import {
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
   it('should override the video interface methods', function() {
-    return getVideoPlayer(/* opt_outsideView */ false,
-        /* opt_dontWaitForLoad */ true)
+    return getVideoPlayer(/* opt_outsideView */ false)
     .then(v => {
       const impl = v.implementation_;
       const methods = Object.getOwnPropertyNames(
@@ -142,7 +141,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
   });
 
-  function getVideoPlayer(opt_outsideView, opt_dontWaitForLoad) {
+  function getVideoPlayer(opt_outsideView) {
     const top = opt_outsideView ? '100vh' : '0';
     let fixture;
     return createFixtureIframe('test/fixtures/video-players.html', 1000)
@@ -164,14 +163,15 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
       const sizer = fixture.doc.createElement('div');
       sizer.position = 'relative';
       sizer.style.height = '200vh';
-      const eventName = opt_dontWaitForLoad ? 'amp:attached' : 'amp:load:end';
-      const p = fixture.awaitEvent(eventName, 1).then(() => {
-        return video;
-      });
 
       fixture.doc.body.appendChild(sizer);
       fixture.doc.body.appendChild(video);
-      return p;
+
+      return poll('video built', () => {
+        return video.isBuilt();
+      },undefined, 5000).then(() => {
+        return video;
+      });
     });
   }
 }
