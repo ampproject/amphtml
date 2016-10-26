@@ -423,6 +423,21 @@ describe('FixedLayer', () => {
 
     it('should collect for implicit top = auto, but not update top', () => {
       element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['top'] = '12px';
+      element1.autoOffsetTop = 12;
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal('');
+    });
+
+    it('should override implicit top = auto to 0 when equals padding', () => {
+      element1.computedStyle['position'] = 'fixed';
       element1.computedStyle['top'] = '11px';
       element1.autoOffsetTop = 11;
       element1.offsetWidth = 10;
@@ -433,7 +448,7 @@ describe('FixedLayer', () => {
       vsyncTasks[0].measure(state);
 
       expect(state['F0'].fixed).to.equal(true);
-      expect(state['F0'].top).to.equal('');
+      expect(state['F0'].top).to.equal('0px');
     });
 
     it('should always collect and update top = 0', () => {
@@ -513,6 +528,50 @@ describe('FixedLayer', () => {
 
       expect(fe.fixedNow).to.be.false;
       expect(fe.element.style.top).to.equal('');
+    });
+
+    it('should transform fixed elements with anchored top', () => {
+      const fe = fixedLayer.fixedElements_[0];
+      fixedLayer.mutateFixedElement_(fe, 1, {
+        fixed: true,
+        top: '17px',
+      });
+      expect(fe.fixedNow).to.be.true;
+      expect(fe.element.style.top).to.equal('calc(17px + 11px)');
+
+      fixedLayer.transformMutate('translateY(-10px)');
+      expect(fe.element.style.transform).to.equal('translateY(-10px)');
+      expect(fe.element.style.transition).to.equal('none');
+
+      // Reset back.
+      fixedLayer.transformMutate(null);
+      expect(fe.element.style.transform).to.equal('');
+      expect(fe.element.style.transition).to.equal('');
+    });
+
+    it('should compound transform with anchored top', () => {
+      const fe = fixedLayer.fixedElements_[0];
+      fixedLayer.mutateFixedElement_(fe, 1, {
+        fixed: true,
+        top: '17px',
+        transform: 'scale(2)',
+      });
+
+      fixedLayer.transformMutate('translateY(-10px)');
+      expect(fe.element.style.transform).to.equal('scale(2) translateY(-10px)');
+    });
+
+    it('should NOT transform fixed elements w/o anchored top', () => {
+      const fe = fixedLayer.fixedElements_[0];
+      fe.element.style.transform = '';
+      fixedLayer.mutateFixedElement_(fe, 1, {
+        fixed: true,
+        top: '',
+      });
+      expect(fe.fixedNow).to.be.true;
+
+      fixedLayer.transformMutate('translateY(-10px)');
+      expect(fe.element.style.transform).to.equal('');
     });
   });
 
