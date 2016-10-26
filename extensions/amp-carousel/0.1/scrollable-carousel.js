@@ -273,4 +273,11 @@ export class AmpScrollableCarousel extends BaseCarousel {
       event.stopPropagation();
     });
   }
+
+  /** @override */
+  shouldPreloadOwned(element) {
+    // TODO(@camelburrito): Allow next and prev slide to preload by returning
+    // true for them.
+    return element == this.cells_[this.pos_]
+  }
 }

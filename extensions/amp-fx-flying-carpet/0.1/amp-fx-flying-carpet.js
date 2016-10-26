@@ -137,7 +137,6 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       this./*OK*/collapse();
       throw e;
     }
-    this.scheduleLayout(this.children_);
     return Promise.resolve();
   }
 
@@ -152,6 +151,12 @@ class AmpFlyingCarpet extends AMP.BaseElement {
         }, () => {});
       }
     }
+  }
+
+  /** @override */
+  shouldPreloadOwned(element) {
+    // Allow resources to render whenever it thinks it should.
+    return true;
   }
 
   /**

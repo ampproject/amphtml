@@ -1173,6 +1173,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Called by Resources to determine if it can preload an element.
+     * @param {!AmpElement} element
+     * @return {boolean}
+     */
+    shouldPreloadOwned(element) {
+      return this.implementation_.shouldPreloadOwned(element);
+    }
+
+    /**
      * Enqueues the action with the element. If element has been upgraded and
      * built, the action is dispatched to the implementation right away.
      * Otherwise the invocation is enqueued until the implementation is ready
