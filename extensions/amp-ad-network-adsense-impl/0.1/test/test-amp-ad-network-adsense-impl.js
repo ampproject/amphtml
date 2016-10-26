@@ -28,6 +28,10 @@ describe('amp-ad-network-adsense-impl', () => {
     sandbox = sinon.sandbox.create();
     adsenseImplElem = document.createElement('amp-ad');
     adsenseImplElem.setAttribute('data-ad-client', 'adsense');
+    sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
+        () => {
+          return ['google'];
+        });
     adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
   });
 

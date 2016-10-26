@@ -64,5 +64,5 @@ if (getMode().localDev || getMode().test) {
  */
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-  // TODO(levitzky) Add dev key path once it is live.
+  'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
 };
