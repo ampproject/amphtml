@@ -513,7 +513,7 @@ describe('Logging', () => {
     it('should preserve error suffix', () => {
       const orig = user().createError('intended');
       expect(isUserErrorMessage(orig.message)).to.be.true;
-      rethrowAsync('first', orig, 'second');
+      rethrowAsync(orig);
       let error;
       try {
         clock.tick(1);
