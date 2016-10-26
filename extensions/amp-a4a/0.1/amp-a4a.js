@@ -525,12 +525,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-<<<<<<< HEAD
     this.emitLifecycleEvent('adSlotCleared');
-=======
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
-    this.lifecycleReporter.sendPing('adSlotCleared');
->>>>>>> upstream/master
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
