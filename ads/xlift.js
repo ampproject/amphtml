@@ -24,7 +24,7 @@ export function xlift(global, data) {
   validateData(data, ['mediaid']);
   global.xliftParams = data;
   const d = global.document.createElement('div');
-  d.id = "_XL_recommend";
+  d.id = '_XL_recommend';
   global.document.getElementById('c').appendChild(d);
-  loadScript(global, "https://cdn.x-lift.jp/resources/common/xlift_amp.js");
+  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js');
 }
