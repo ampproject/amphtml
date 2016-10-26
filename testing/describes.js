@@ -324,7 +324,10 @@ class RealWinFixture {
         }
 
         if (spec.fakeRegisterElement) {
-          win.customElements = new FakeCustomElements(win);
+          const customElements = new FakeCustomElements(win);
+          Object.defineProperty(win, 'customElements', {
+            get: () => customElements,
+          });
         } else {
           installCustomElements(win);
         }
