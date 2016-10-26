@@ -16,7 +16,7 @@
 
 import {dev} from './log';
 import {fromClassForDoc} from './service';
-import {isExperimentOn} from './experiments';
+import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
 
@@ -102,7 +102,7 @@ class Chunks {
     /** @private @const {function()} */
     this.boundExecute_ = () => this.execute_();
     /** @private @const {boolean} */
-    this.active_ = isExperimentOn(this.win_, 'chunked-amp');
+    this.active_ = isExperimentOnAllowUrlOverride(this.win_, 'chunked-amp');
 
     if (!this.active_) {
       return;
