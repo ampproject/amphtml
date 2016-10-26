@@ -22,7 +22,7 @@ import {toggle} from '../../../src/style';
 import {listenOnce} from '../../../src/event-helper';
 import {
   setStyle,
-  removeAlphaFromBackgroundColor,
+  removeAlphaFromColor,
 } from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 
@@ -226,7 +226,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
         .getPropertyValue('background-color');
-    const newBackgroundColor = removeAlphaFromBackgroundColor(backgroundColor);
+    const newBackgroundColor = removeAlphaFromColor(backgroundColor);
     if (backgroundColor == newBackgroundColor) {
       return;
     }

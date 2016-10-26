@@ -85,14 +85,14 @@ describe('Style', () => {
     expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
   });
 
-  it('removeAlphaFromBackgroundColor', () => {
-    expect(st.removeAlphaFromBackgroundColor('rgba(1, 1, 1, 0)')).to.equal(
+  it('removeAlphaFromColor', () => {
+    expect(st.removeAlphaFromColor('rgba(1, 1, 1, 0)')).to.equal(
+        'rgba(1, 1, 1, 1)');
+    expect(st.removeAlphaFromColor('hsla(1, 1, 1, 0.6)')).to.equal(
+        'hsla(1, 1, 1, 1)');
+    expect(st.removeAlphaFromColor('rgb(1, 1, 1)')).to.equal(
         'rgb(1, 1, 1)');
-    expect(st.removeAlphaFromBackgroundColor('hsla(1, 1, 1, 0.6)')).to.equal(
-        'hsl(1, 1, 1)');
-    expect(st.removeAlphaFromBackgroundColor('rgb(1, 1, 1)')).to.equal(
-        'rgb(1, 1, 1)');
-    expect(st.removeAlphaFromBackgroundColor('hsla(1, 1, 1, 0.6)')).to.equal(
+    expect(st.removeAlphaFromColor('hsl(1, 1, 1)')).to.equal(
         'hsl(1, 1, 1)');
   });
 
