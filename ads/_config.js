@@ -353,6 +353,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  smartclip: {
+    prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
+    preconnect: 'https://des.smartclip.net',
+    renderStartImplemented: true,
+  },
+
   sortable: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
