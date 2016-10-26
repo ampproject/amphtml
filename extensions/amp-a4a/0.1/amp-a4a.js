@@ -767,7 +767,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Set opt_defaultVisible to true as 3p draw code never executed causing
     // render-start event never to fire which will remove visiblity hidden.
     this.xOriginIframeHandler_.init(iframe,
-        is3p, /* opt_defaultVisible */ true, /* opt_isA4A */ true);
+        is3p, /* opt_isA4A */ true);
     this.rendered_ = true;
   }
 

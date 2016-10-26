@@ -72,13 +72,11 @@ export class AmpAdXOriginIframeHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean} is3p whether iframe was loaded via 3p.
-   * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
-   *    set on the iframe element (remains visible
    * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @return {!Promise} awaiting load event for ad frame
    * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
-  init(iframe, is3p, opt_defaultVisible, opt_isA4A) {
+  init(iframe, is3p, opt_isA4A) {
     dev().assert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
@@ -105,6 +103,8 @@ export class AmpAdXOriginIframeHandler {
 
     // Install API that listen to ad response
     if (opt_isA4A) {
+      // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
+      // creative as it will not expect having to send the render-start message.
       this.adResponsePromise_ = Promise.resolve();
     } else if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
@@ -126,13 +126,7 @@ export class AmpAdXOriginIframeHandler {
       listenForOncePromise(this.iframe, 'no-content', this.is3p_)
           .then(() => this.noContent_());
     }
-
-    if (!opt_defaultVisible) {
-      // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
-      // creative as it will not expect having to send the render-start message.
-      this.iframe.style.visibility = 'hidden';
-    }
-
+    this.iframe.style.visibility = 'hidden';
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));

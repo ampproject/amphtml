@@ -205,7 +205,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should resolve directly if it is A4A', () => {
-      return iframeHandler.init(iframe, true, undefined, true).then(() => {
+      return iframeHandler.init(iframe, true, true).then(() => {
         expect(iframe.style.visibility).to.equal('');
       });
     });
