@@ -475,9 +475,9 @@ Provides the total time for which the element has met the visiblitySpec conditio
 
 ### fromSlide
 
-Provides the slide from which the traversal happens. The value is either taken from `data-slide-id` attribute of the slide when present , else it represents the index of the slide (starting from 0).
+Provides the slide from which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
 
 ### toSlide
 
-Provides the slide to which the traversal happens. The value is either taken from `data-slide-id` attribute of the slide when present , else it represents the index of the slide (starting from 0).
+Provides the slide to which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
 

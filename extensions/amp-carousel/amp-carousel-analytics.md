@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Carousel (slides) triggers
 
-`<amp-carousel type="slides">` issues events for major states . These events can be reported via an analytics package using triggers.
+`<amp-carousel type="slides">` issues events for major states . These events can be reported through the analytics configuration by using triggers.
 
 See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
 
@@ -47,11 +47,7 @@ The `amp-carousel-next` event is issued when there is a travesal to the next sli
 "triggers": {
   "ampCarouselNext": {
     "on": "amp-carousel-next",
-    "request": "event",
-    "vars": {
-      "fromSlide": 0,
-      "toSlide": 1
-    }
+    "request": "event"
   }
 }
 ```
@@ -64,11 +60,7 @@ The `amp-carousel-next` event is issued when there is a travesal to the previous
 "triggers": {
   "ampCarouselPrev": {
     "on": "amp-carousel-prev",
-    "request": "event",
-    "vars": {
-      "fromSlide": 0,
-      "toSlide": 5
-    }
+    "request": "event"
   }
 }
 ```
