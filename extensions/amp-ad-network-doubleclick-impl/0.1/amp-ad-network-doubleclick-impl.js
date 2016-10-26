@@ -141,7 +141,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   initLifecycleReporter() {
     const reporter =
         /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
-        (getLifecycleReporter(this, 'a4a', this.element.getAttribute('data-slot-id')));
+        (getLifecycleReporter(this, 'a4a',
+                              this.element.getAttribute('data-slot-id')));
     return reporter;
   }
 }
