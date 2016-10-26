@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 /** @type {Object<string, string>} */
@@ -195,4 +194,25 @@ export function translate(x, opt_y) {
  */
 export function scale(value) {
   return `scale(${value})`;
+}
+
+/**
+ * Remove alpha value from a "background-color" CSS property.
+ * Return the new "background-color" property without alpha.
+ * Note caller needs to make sure the input cssColorValue is a valid
+ * CSS "background-color" value.
+ * @param{string} cssColorValue
+ * @return {?string}
+ */
+export function removeAlphaFromBackgroundColor(cssColorValue) {
+  let res;
+  const sepIndex = cssColorValue.indexOf('(');
+  const method = cssColorValue.substring(0, sepIndex);
+  if (method == 'rgba' || method == 'hsla') {
+    const value = cssColorValue.substring(
+        sepIndex,
+        cssColorValue.lastIndexOf(','));
+    res = method.substring(0, 3) + value + ')';
+  }
+  return res || cssColorValue;
 }

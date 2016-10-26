@@ -20,8 +20,10 @@ import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
-import {setStyle} from '../../../src/style';
+import {
+  setStyle,
+  removeAlphaFromBackgroundColor,
+} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @private @const {string} */
@@ -98,7 +100,6 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   collapsedCallback() {
-    console.log('collapsed Callback being called');
     toggle(this.element, false);
     this.vsync_.mutate(() => {
       this.viewport_.updatePaddingBottom(0);
@@ -168,11 +169,9 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   layoutAd_() {
-    console.log('layout ad');
     this.updateInViewport(dev().assertElement(this.ad_), true);
     this.scheduleLayout(dev().assertElement(this.ad_));
     listenOnce(this.ad_, 'amp:load:end', () => {
-      console.log('ad loaded');
       this.vsync_.mutate(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
@@ -220,20 +219,20 @@ class AmpStickyAd extends AMP.BaseElement {
     if (!isExperimentOn(this.win, UX_EXPERIMENT)) {
       return;
     }
-    const background = this.win./*OK*/getComputedStyle(this.element)
-        .getPropertyValue('background-color');
-    if (!startsWith(background, 'rgba')) {
-      return;
-    }
-    user().warn('AMP-STICKY-AD', 'Do not allow container to be transparent');
-    const backgroundColor = background.substring(
-        background.indexOf('(') + 1,
-        background.lastIndexOf(','));
 
     // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
     // Not using setStyles because we will remove this line later.
     setStyle(this.element, 'opacity', '1 !important');
-    setStyle(this.element, 'background-color', 'rgb(' + backgroundColor + ')');
+
+    const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
+        .getPropertyValue('background-color');
+    const newBackgroundColor = removeAlphaFromBackgroundColor(backgroundColor);
+    if (backgroundColor == newBackgroundColor) {
+      return;
+    }
+
+    user().warn('AMP-STICKY-AD', 'Do not allow container to be transparent');
+    setStyle(this.element, 'background-color', newBackgroundColor);
   }
 }
 
