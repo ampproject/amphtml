@@ -184,7 +184,7 @@ class AnimationPlayer {
     /** @const {function()} */
     this.resolve_;
 
-    /** @const {function()} */
+    /** @const {function(!Error)} */
     this.reject_;
 
     /** @private {!Promise} */

@@ -140,10 +140,10 @@ export class Motion {
     /** @private {time} */
     this.lastTime_ = this.startTime_;
 
-    /** @private {!Function} */
+    /** @private {function()} */
     this.resolve_;
 
-    /** @private {!Function} */
+    /** @private {function(!Error)} */
     this.reject_;
 
     /** @private {!Promise} */
