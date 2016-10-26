@@ -23,7 +23,7 @@ describe('amp-ad-network-adsense-impl', () => {
   let sandbox;
   let adsenseImpl;
   let adsenseImplElem;
-  
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     adsenseImplElem = document.createElement('amp-ad');
