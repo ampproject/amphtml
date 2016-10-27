@@ -108,7 +108,7 @@ export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
       isExperimentOn(win, 'a4aProfilingRate')) {
     let correlator;
     if (typeof corr === 'undefined') {
-      correlator = getCorrelator(win, slotId);
+      correlator = getCorrelator(win);
     } else {
       correlator = corr;
     }

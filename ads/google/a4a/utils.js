@@ -309,7 +309,7 @@ function elapsedTimeWithCeiling(time, start) {
 
 /**
  * @param {!Window} win
- * @param {string|undefined} opt_cid
+ * @param {string=} opt_cid
  * @return {number} The correlator.
  */
 export function getCorrelator(win, opt_cid) {
