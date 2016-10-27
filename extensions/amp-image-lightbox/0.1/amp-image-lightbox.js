@@ -922,26 +922,25 @@ class AmpImageLightbox extends AMP.BaseElement {
         left: st.px(rect.left),
         width: st.px(rect.width),
         height: st.px(rect.height),
-        willChange: 'width, height, transform',
+        transformOrigin: 'top left',
+        willChange: 'transform',
       });
       transLayer.appendChild(clone);
 
       this.sourceImage_.classList.add('-amp-ghost');
 
-      // Move the image to the location given by the lightbox.
+      // Move and resize the image to the location given by the lightbox.
       const dx = imageBox.left - rect.left;
       const dy = imageBox.top - rect.top;
+      const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move.
       const motionTime = Math.max(0.2, Math.min(0.8, Math.abs(dy) / 250 * 0.8));
       anim.add(0, tr.setStyles(clone, {
-        transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-      }), motionTime, ENTER_CURVE_);
-
-      // Animate size change as well.
-      anim.add(0, tr.setStyles(clone, {
-        width: tr.px(tr.numeric(rect.width, imageBox.width)),
-        height: tr.px(tr.numeric(rect.height, imageBox.height)),
+        transform: tr.concat([
+          tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+          tr.scale(tr.numeric(1, scaleX)),
+        ]),
       }), motionTime, ENTER_CURVE_);
 
       // Fade in the container. This will mostly affect the caption.
@@ -999,7 +998,8 @@ class AmpImageLightbox extends AMP.BaseElement {
         width: st.px(imageBox.width),
         height: st.px(imageBox.height),
         transform: '',
-        willChange: 'width, height, transform',
+        transformOrigin: 'top left',
+        willChange: 'transform',
       });
       transLayer.appendChild(clone);
 
@@ -1011,14 +1011,13 @@ class AmpImageLightbox extends AMP.BaseElement {
       // Move and resize the image back to where it is in the article.
       const dx = rect.left - imageBox.left;
       const dy = rect.top - imageBox.top;
+      const scaleX = imageBox.width != 0 ? rect.width / imageBox.width : 1;
       /** @const {!TransitionDef<void>} */
-      const move = tr.setStyles(clone, {
-        transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-      });
-      /** @const {!TransitionDef<void>} */
-      const resize = tr.setStyles(clone, {
-        width: tr.px(tr.numeric(imageBox.width, rect.width)),
-        height: tr.px(tr.numeric(imageBox.height, rect.height)),
+      const moveAndScale = tr.setStyles(clone, {
+        transform: tr.concat([
+          tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+          tr.scale(tr.numeric(1, scaleX)),
+        ]),
       });
 
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
@@ -1026,8 +1025,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       // than 0.2.
       const motionTime = Math.max(0.2, Math.min(0.8, Math.abs(dy) / 250 * 0.8));
       anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
-        move(time);
-        resize(time);
+        moveAndScale(time);
         if (complete) {
           this.sourceImage_.classList.remove('-amp-ghost');
         }
