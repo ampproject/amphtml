@@ -721,13 +721,11 @@ describe('amp-form', () => {
         expect(fieldset.checkValidity.called).to.be.true;
         expect(form.className).to.contain('user-invalid');
         expect(emailInput.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         emailInput.value = 'cool@bea.ns';
         ampForm.handleSubmit_(event);
         expect(form.className).to.contain('user-valid');
         expect(emailInput.className).to.contain('user-valid');
-        expect(fieldset.className).to.contain('user-valid');
       });
     });
 
@@ -757,7 +755,6 @@ describe('amp-form', () => {
         expect(fieldset.checkValidity.called).to.be.true;
         expect(form.className).to.contain('user-invalid');
         expect(emailInput.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // No interaction happened with usernameInput, so no user-class should
         // be added at this point.
@@ -769,7 +766,6 @@ describe('amp-form', () => {
         onInputInteraction_({target: emailInput});
         expect(emailInput.className).to.contain('user-valid');
         expect(form.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // Still no interaction.
         expect(usernameInput.className).to.not.contain('user-invalid');
@@ -780,7 +776,6 @@ describe('amp-form', () => {
         onInputInteraction_({target: emailInput});
         expect(emailInput.className).to.contain('user-invalid');
         expect(form.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // Still no interaction.
         expect(usernameInput.className).to.not.contain('user-invalid');
@@ -792,7 +787,6 @@ describe('amp-form', () => {
         expect(emailInput.className).to.contain('user-invalid');
         expect(form.className).to.contain('user-invalid');
         expect(usernameInput.className).to.contain('user-valid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // Both input are finally valid.
         emailInput.value = 'cool@bea.ns';
@@ -800,7 +794,6 @@ describe('amp-form', () => {
         expect(emailInput.className).to.contain('user-valid');
         expect(usernameInput.className).to.contain('user-valid');
         expect(form.className).to.contain('user-valid');
-        expect(fieldset.className).to.contain('user-valid');
       });
     });
 
@@ -829,7 +822,6 @@ describe('amp-form', () => {
         expect(fieldset.checkValidity.called).to.be.false;
         expect(emailInput.className).to.contain('user-valid');
         expect(form.className).to.not.contain('user-valid');
-        expect(fieldset.className).to.not.contain('user-valid');
       });
     });
   });
