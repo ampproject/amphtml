@@ -223,7 +223,7 @@ describe('UrlReplacements', () => {
     win.location = parseUrl('https://wrong.com');
     sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
       return new Promise(resolve => {
-        win.location = parseUrl('https://example.com#gclid=123456');
+        win.location = parseUrl('https://example.com?gclid=123456');
         resolve();
       });
     });

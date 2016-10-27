@@ -412,7 +412,7 @@ app.use('/impression-proxy/', function(req, res) {
   // tracking_url: URL that should be requested to track click
   // gclid: The conversion tracking value
   const body = {
-    'location': 'localhost:8000/examples/#gclid=1234?gclid=RANDOM&r=1&url=SOURCE_URL',
+    'location': 'localhost:8000/examples/?gclid=1234&foo=bar&example=123',
     'tracking_url': 'tracking_url',
     'gclid': '1234',
   };

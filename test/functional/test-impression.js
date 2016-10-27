@@ -151,15 +151,18 @@ describe('impression', () => {
 
     xhr.fetchJson = () => {
       return Promise.resolve({
-        'location': 'test_location?gclid=123456',
+        'location': 'test_location?gclid=123456&foo=bar&example=123',
       });
     };
     const prevHref = window.location.href;
+    console.log(prevHref);
+    window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
+    console.log(window.location.href);
     maybeTrackImpression(window);
     return Promise.resolve().then(() => {
       return Promise.resolve().then(() => {
-        expect(window.location.href).to.contain('gclid=123456');
-        expect(window.location.href).to.not.contain('test_location');
+        expect(window.location.href).to.equal('http://localhost:9876/context.html'
+            + '?bar=foo&test=4321&gclid=123456&foo=bar&example=123');
         xhr.fetchJson = () => {
           return Promise.resolve();
         };
