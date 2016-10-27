@@ -62,13 +62,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-experiment',
-    name: 'AMP Experiment',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-experiment/amp-experiment.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4004',
-  },
-  {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
