@@ -23,7 +23,6 @@ amp-sticky-ad {
   z-index: 11;
   max-height: 100px !important;
   box-sizing: border-box;
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .-amp-sticky-ad-layout {

@@ -15,6 +15,7 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
@@ -30,10 +31,13 @@ describe('amp-sticky-ad', () => {
     sandbox.restore();
   });
 
-  function getAmpStickyAd() {
+  function getAmpStickyAd(opt_attributes) {
     return createIframePromise().then(iframe => {
       const ampStickyAd = iframe.doc.createElement('amp-sticky-ad');
       ampStickyAd.setAttribute('layout', 'nodisplay');
+      for (const attr in opt_attributes) {
+        ampStickyAd.setAttribute(attr, opt_attributes[attr]);
+      }
       const ampAd = iframe.doc.createElement('amp-ad');
       ampAd.setAttribute('width', '300');
       ampAd.setAttribute('height', '50');
@@ -375,6 +379,63 @@ describe('amp-sticky-ad', () => {
       expect(stickyAdElement).to.have.attribute('visible');
       expect(stickyAdElement.classList.contains('amp-sticky-ad-loaded'))
           .to.be.true;
+    });
+  });
+
+  it('should not allow container to be set transparent', () => {
+    toggleExperiment(window, 'amp-sticky-ad-better-ux', true);
+    return getAmpStickyAd({
+      'style': 'background-color: rgba(55, 55, 55, 0.55) !important',
+    }).then(obj => {
+      console.log(obj.ampStickyAd);
+      const stickyAdElement = obj.ampStickyAd;
+      const impl = stickyAdElement.implementation_;
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      impl.scheduleLayoutForAd_();
+      impl.ad_.dispatchEvent(new Event('amp:built'));
+      impl.ad_.dispatchEvent(new Event('amp:load:end'));
+      expect(window.getComputedStyle(stickyAdElement)
+          .getPropertyValue('background-color')).to.equal('rgb(55, 55, 55)');
+    });
+  });
+
+  it('should not allow container to be set semitransparent in rgba', () => {
+    toggleExperiment(window, 'amp-sticky-ad-better-ux', true);
+    return getAmpStickyAd({
+      'style': 'background-color: rgba(55, 55, 55, 0.55) !important',
+    }).then(obj => {
+      console.log(obj.ampStickyAd);
+      const stickyAdElement = obj.ampStickyAd;
+      const impl = stickyAdElement.implementation_;
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      impl.scheduleLayoutForAd_();
+      impl.ad_.dispatchEvent(new Event('amp:built'));
+      impl.ad_.dispatchEvent(new Event('amp:load:end'));
+      expect(window.getComputedStyle(stickyAdElement)
+          .getPropertyValue('background-color')).to.equal('rgb(55, 55, 55)');
+    });
+  });
+
+  it('should not allow container to be set to transparent', () => {
+    toggleExperiment(window, 'amp-sticky-ad-better-ux', true);
+    return getAmpStickyAd({
+      'style': 'background-color: transparent !important',
+    }).then(obj => {
+      console.log(obj.ampStickyAd);
+      const stickyAdElement = obj.ampStickyAd;
+      const impl = stickyAdElement.implementation_;
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      impl.scheduleLayoutForAd_();
+      impl.ad_.dispatchEvent(new Event('amp:built'));
+      impl.ad_.dispatchEvent(new Event('amp:load:end'));
+      expect(window.getComputedStyle(stickyAdElement)
+          .getPropertyValue('background-color')).to.equal('rgb(0, 0, 0)');
     });
   });
 });
