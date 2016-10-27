@@ -56,6 +56,55 @@ describe('Transition', () => {
     expect(func2.calledWithExactly(1, true)).to.equal(true);
   });
 
+  describe('concat', () => {
+    it('should concat two string transitions', () => {
+      const t1 = tr.translateX(tr.numeric(0, 10));
+      const t2 = tr.scale(tr.numeric(0, 10));
+      const concat = tr.concat([t1, t2]);
+
+      expect(concat(0, false)).to.equal('translateX(0px) scale(0)');
+      expect(concat(0.5, false)).to.equal('translateX(5px) scale(5)');
+      expect(concat(1, true)).to.equal('translateX(10px) scale(10)');
+    });
+
+    it('should handle single transitions', () => {
+      const t1 = tr.translateX(tr.numeric(0, 10));
+      const concat = tr.concat([t1]);
+
+      expect(concat(0, false)).to.equal('translateX(0px)');
+      expect(concat(0.5, false)).to.equal('translateX(5px)');
+      expect(concat(1, true)).to.equal('translateX(10px)');
+    });
+
+    it('should handle empty input', () => {
+      const concat = tr.concat([]);
+
+      expect(concat(0, false)).to.equal('');
+      expect(concat(0.5, false)).to.equal('');
+      expect(concat(1, true)).to.equal('');
+    });
+
+    it('should ignore non-string transitions', () => {
+      const t1 = tr.translateX(tr.numeric(0, 10));
+      const t2 = tr.spring(2, 10, 12, 0.8);
+      const concat = tr.concat([t1, t2]);
+
+      expect(concat(0, false)).to.equal('translateX(0px)');
+      expect(concat(0.5, false)).to.equal('translateX(5px)');
+      expect(concat(1, true)).to.equal('translateX(10px)');
+    });
+
+    it('should support other delimeters', () => {
+      const t1 = tr.px(tr.numeric(0, 10));
+      const t2 = tr.px(tr.numeric(0, 20));
+      const concat = tr.concat([t1, t2], ', ');
+
+      expect(concat(0, false)).to.equal('0px, 0px');
+      expect(concat(0.5, false)).to.equal('5px, 10px');
+      expect(concat(1, true)).to.equal('10px, 20px');
+    });
+  });
+
   it('withCurve', () => {
     const func1 = (time, complete) => `${time * 2};${complete}`;
     const curve = unusedTime => 0.2;
