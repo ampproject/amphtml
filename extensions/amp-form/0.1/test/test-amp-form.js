@@ -32,6 +32,7 @@ import {installDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installActionServiceForDoc,} from
     '../../../../src/service/action-impl';
+import {actionServiceForDoc} from '../../../../src/action';
 
 describe('amp-form', () => {
 
@@ -89,14 +90,6 @@ describe('amp-form', () => {
     sandbox.restore();
   });
 
-  it('should assert form has at least 1 submit button', () => {
-    let form = getForm(document, false, false);
-    expect(() => new AmpForm(form)).to.throw(
-        /form requires at least one <input type=submit>/);
-    form = getForm(document, true, false);
-    expect(() => new AmpForm(form)).to.not.throw;
-  });
-
   it('should assert valid action-xhr when provided', () => {
     const form = getForm();
     form.setAttribute('action-xhr', 'http://example.com');
@@ -141,7 +134,7 @@ describe('amp-form', () => {
       target: form,
       preventDefault: sandbox.spy(),
     };
-    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     sandbox.spy(form, 'checkValidity');
     ampForm.handleSubmit_(event);
     expect(event.stopImmediatePropagation.called).to.be.true;
@@ -158,7 +151,7 @@ describe('amp-form', () => {
       target: form,
       preventDefault: sandbox.spy(),
     };
-    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     sandbox.spy(form, 'checkValidity');
     expect(() => ampForm.handleSubmit_(event)).to.throw(
         /Only XHR based \(via action-xhr attribute\) submissions are support/);
@@ -175,6 +168,7 @@ describe('amp-form', () => {
     emailInput.setAttribute('required', '');
     form.appendChild(emailInput);
     const ampForm = new AmpForm(form);
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     const event = {
       stopImmediatePropagation: sandbox.spy(),
       target: form,
@@ -212,7 +206,7 @@ describe('amp-form', () => {
       emailInput.setAttribute('required', '');
       form.appendChild(emailInput);
       sandbox.spy(form, 'checkValidity');
-      sandbox.spy(ampForm.xhr_, 'fetchJson');
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
 
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -345,7 +339,7 @@ describe('amp-form', () => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
         fetchJsonResolver = resolve;
       }));
-      sandbox.spy(ampForm.actions_, 'trigger');
+      sandbox.stub(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -378,7 +372,7 @@ describe('amp-form', () => {
           .returns(new Promise((unusedResolve, reject) => {
             fetchJsonRejecter = reject;
           }));
-      sandbox.spy(ampForm.actions_, 'trigger');
+      sandbox.stub(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -473,22 +467,16 @@ describe('amp-form', () => {
       const newRender = document.createElement('div');
       newRender.innerText = 'New Success: What What';
 
-      let fetchJsonResolver;
       sandbox.stub(ampForm.xhr_, 'fetchJson')
-          .returns(new Promise(resolve => {
-            fetchJsonResolver = resolve;
-          }));
+          .returns(Promise.resolve({'message': 'What What'}));
       sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
-          .returns(new Promise(resolve => {
-            resolve(newRender);
-          }));
+          .returns(Promise.resolve(newRender));
       const event = {
         stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };
       ampForm.handleSubmit_(event);
-      fetchJsonResolver({'message': 'What What'});
       return timer.promise(5).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
@@ -826,4 +814,17 @@ describe('amp-form', () => {
     });
   });
 
+  it('should install action handler and handle submit action', () => {
+    const form = getForm();
+    const actions = actionServiceForDoc(form.ownerDocument);
+    sandbox.stub(actions, 'installActionHandler');
+    const ampForm = new AmpForm(form);
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+    expect(actions.installActionHandler).to.be.calledWith(form);
+    sandbox.spy(ampForm, 'handleSubmit_');
+    ampForm.actionHandler_({method: 'anything'});
+    expect(ampForm.handleSubmit_).to.have.not.been.called;
+    ampForm.actionHandler_({method: 'submit'});
+    expect(ampForm.handleSubmit_).to.have.been.called;
+  });
 });
