@@ -185,15 +185,8 @@ function compile(entryModuleFilenames, outputDir,
         '!build/fake-module/src/polyfills/**/*.js'
       );
     } else {
-      srcs.push(
-        '!src/polyfills.js',
-        '!src/polyfills/**/*.js'
-      );
-      unneededFiles.push(
-          'build/fake-module/src/polyfills.js',
-          'build/fake-module/src/polyfills/document-contains.js',
-          'build/fake-module/src/polyfills/promise.js',
-          'build/fake-module/src/polyfills/math-sign.js');
+      srcs.push('!src/polyfills.js');
+      unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
