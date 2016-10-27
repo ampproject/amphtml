@@ -83,8 +83,7 @@ function isInReportableBranch(ampElement, namespace) {
 /**
  * @return {!GoogleAdLifecycleReporter|!BaseLifecycleReporter}
  */
-export function getLifecycleReporter(ampElement, namespace, slotId,
-    opt_correlator) {
+export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
   // Carve-outs: We only want to enable profiling pingbacks when:
   //   - The ad is from one of the Google networks (AdSense or Doubleclick).
   //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
@@ -108,10 +107,10 @@ export function getLifecycleReporter(ampElement, namespace, slotId,
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, 'a4aProfilingRate')) {
     let correlator;
-    if (typeof opt_correlator === 'undefined') {
+    if (typeof corr === 'undefined') {
       correlator = getCorrelator(win, slotId);
     } else {
-      correlator = opt_correlator;
+      correlator = corr;
     }
     return new GoogleAdLifecycleReporter(win, ampElement.element, 'a4a',
         correlator, slotId);
