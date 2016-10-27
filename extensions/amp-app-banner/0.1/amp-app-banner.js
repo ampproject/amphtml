@@ -90,6 +90,9 @@ export class AbstractAppBanner extends AMP.BaseElement {
    * @protected
    */
   addDismissButton_() {
+    const paddingBar = this.win.document.createElement(
+        'i-amp-app-banner-top-padding');
+    this.element.appendChild(paddingBar);
     const dismissButton = this.win.document.createElement('button');
     dismissButton.classList.add('amp-app-banner-dismiss-button');
     dismissButton.setAttribute('aria-label',

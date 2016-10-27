@@ -12,6 +12,7 @@ selector                                    |   z-index   |   file
 amp-sticky-ad                               |   11         |   extensions/amp-sticky-ad/0.1/amp-sticky-ad.css
 amp-app-banner                              |   12        |   extensions/amp-app-banner/0.1/amp-app-banner.css
 .amp-app-banner-dismiss-button              |   13        |   extensions/amp-app-banner/0.1/amp-app-banner.css
+i-amp-app-banner-top-padding                |   14        |   extensions/amp-app-banner/0.1/amp-app-banner.css
 amp-image-lightbox                          |   1000      |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
 amp-live-list > [update]                    |   1000      |   extensions/amp-live-list/0.1/amp-live-list.css
 amp-user-notification                       |   1000      |   extensions/amp-user-notification/0.1/amp-user-notification.css
