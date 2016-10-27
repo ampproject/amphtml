@@ -42,11 +42,10 @@ export function all(transitions) {
  * Returns a transition that combines the string result of other string-based
  * transitions such as transform and scale using the given opt_delimiter.
  * @param {!Array<!TransitionDef<string>>} transitions
- * @param {string=} opt_delimiter Default to a single whitespace.
+ * @param {string=} opt_delimiter Defaults to a single whitespace.
  * @return {!TransitionDef<string>}
  */
-export function concat(transitions, opt_delimiter) {
-  opt_delimiter = opt_delimiter || ' ';
+export function concat(transitions, opt_delimiter = ' ') {
   return (time, complete) => {
     const results = [];
     for (let i = 0; i < transitions.length; i++) {
