@@ -45,7 +45,7 @@ export function assign(target) {
 
 
 /**
- * Sets the Math.sign polyfill if it does not exist.
+ * Sets the Object.assign polyfill if it does not exist.
  * @param {!Window} win
  */
 export function install(win) {

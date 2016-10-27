@@ -161,8 +161,8 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: true,
     include3pDirectories: true,
+    includePolyfills: true,
   });
 
   // For compilation with babel we start with the amp-babel entry point,
@@ -401,8 +401,8 @@ function checkTypes() {
   closureCompile(['./3p/integration.js'],  './dist',
       'integration-check-types.js', {
         externs: ['ads/ads.extern.js',],
-        includeBasicPolyfills: true,
         include3pDirectories: true,
+        includePolyfills: true,
         checkTypes: true,
       });
 }
