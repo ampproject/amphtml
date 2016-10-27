@@ -28,10 +28,13 @@ import {
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
-import {resetScheduledElementForTesting, upgradeOrRegisterElement} from '../../../../src/custom-element';
+import {
+    resetScheduledElementForTesting,
+    upgradeOrRegisterElement,
+} from '../../../../src/custom-element';
 import * as sinon from 'sinon';
 
-chai.Assertion.addMethod('renderedInFriendlyIframe', function (srcdoc) {
+chai.Assertion.addMethod('renderedInFriendlyIframe', function(srcdoc) {
   const obj = this._obj;
   this.assert(obj,
       'amp ad element should be #{exp}, got #{act}',  // if true message
@@ -64,7 +67,7 @@ chai.Assertion.addMethod('renderedInFriendlyIframe', function (srcdoc) {
   });
 });
 
-chai.Assertion.addMethod('renderedInXDomainIframe', function (src) {
+chai.Assertion.addMethod('renderedInXDomainIframe', function(src) {
   const obj = this._obj;
   this.assert(obj,
       'amp ad element should be #{exp}, got #{act}',  // if true message
@@ -188,24 +191,31 @@ describe('integration test: a4a', () => {
             'Testing extractCreativeAndSignature should not occur error'));
     return fixture.addElement(a4aElement).then(element => {
       expect(element).to.be.renderedInXDomainIframe(TEST_URL);
-    })
+    });
   });
 
-  it('should fall back to 3p when extractCreative returns empty creative', () => {
-    sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
-        .onFirstCall().returns({
-          creative: null,
-          signature: validCSSAmp.signature,
-        })
-        .onSecondCall().throws(new Error(
-        'Testing extractCreativeAndSignature should not occur error'));
-    // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
-    // rendered.  This should be fixed in a refactor, and we should change this
-    // .catch to a .then.
-    return fixture.addElement(a4aElement).catch(error => {
-      expect(error.message).to.contain.string('Key failed to validate');
-      expect(error.message).to.contain.string('amp-a4a:');
-      expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
-    })
-  });
+  it('should fall back to 3p when extractCreative returns empty creative',
+      () => {
+        sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
+            .onFirstCall().returns({
+              creative: null,
+              signature: validCSSAmp.signature,
+            })
+            .onSecondCall().throws(new Error(
+            'Testing extractCreativeAndSignature should not occur error'));
+        // TODO(tdrl) Currently layoutCallback rejects, even though something
+        // *is* rendered.  This should be fixed in a refactor, and we should
+        // change this .catch to a .then.
+        return fixture.addElement(a4aElement).catch(error => {
+          expect(error.message).to.contain.string('Key failed to validate');
+          expect(error.message).to.contain.string('amp-a4a:');
+          expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
+        });
+      });
 });
+
+// TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
+// are propagated out and printed to console and/or sent upstream to error
+// logging systems.  This is a bit tricky, because it's handled by the AMP
+// runtime and can't be done within the context of a
+// fixture.addElement().then() or .catch().

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
+import {AmpA4A} from '../amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 
 /** @type {string} @private */
