@@ -33,6 +33,10 @@ const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
+/** @const {!Object<string,!Array<string>>} */
+const ELEMENTS_ACTIONS_MAP_ = {
+  'form': ['submit'],
+};
 
 /**
  * @typedef {{
@@ -102,6 +106,8 @@ export class ActionService {
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
+    // TODO(mkhatib, #5702): Consider a debounced-input event for text-type inputs.
+    this.addEvent('change');
   }
 
   /**
@@ -118,9 +124,9 @@ export class ActionService {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
-    } else if (name == 'submit') {
-      this.ampdoc.getRootNode().addEventListener('submit', event => {
-        this.trigger(dev().assertElement(event.target), 'submit', event);
+    } else if (name == 'submit' || name == 'change') {
+      this.ampdoc.getRootNode().addEventListener(name, event => {
+        this.trigger(dev().assertElement(event.target), name, event);
       });
     }
   }
@@ -163,8 +169,9 @@ export class ActionService {
    */
   installActionHandler(target, handler) {
     const debugid = target.tagName + '#' + target.id;
-    user().assert(target.id && target.id.substring(0, 4) == 'amp-',
-        'AMP element is expected: %s', debugid);
+    dev().assert((target.id && target.id.substring(0, 4) == 'amp-') ||
+        target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
+        'AMP element or a whitelisted target element is expected: %s', debugid);
 
     /** @const {!Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
@@ -249,21 +256,24 @@ export class ActionService {
       return;
     }
 
+    const lowerTagName = target.tagName.toLowerCase();
     // AMP elements.
-    if (target.tagName.toLowerCase().substring(0, 4) == 'amp-') {
+    if (lowerTagName.substring(0, 4) == 'amp-') {
       if (target.enqueAction) {
         target.enqueAction(invocation);
       } else {
         this.actionInfoError_('Unrecognized AMP element "' +
-            target.tagName.toLowerCase() + '". ' +
+            lowerTagName + '". ' +
             'Did you forget to include it via <script custom-element>?',
             actionInfo, target);
       }
       return;
     }
 
-    // Special elements with AMP ID.
-    if (target.id && target.id.substring(0, 4) == 'amp-') {
+    // Special elements with AMP ID or known supported actions.
+    const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
+    if ((target.id && target.id.substring(0, 4) == 'amp-') ||
+        (supportedActions && supportedActions.indexOf(method) != -1)) {
       if (!target[ACTION_QUEUE_]) {
         target[ACTION_QUEUE_] = [];
       }
@@ -273,7 +283,7 @@ export class ActionService {
 
     // Unsupported target.
     this.actionInfoError_(
-        'Target must be an AMP element or have an AMP ID',
+        'Target element does not support provided action',
         actionInfo, target);
   }
 
