@@ -599,4 +599,11 @@ export class AmpSlideScroll extends BaseSlides {
       });
     }
   }
+
+  /** @override */
+  shouldPreloadOwned(element) {
+    // TODO(@camelburrito): Allow next and prev slide to preload by returning
+    // true for them.
+    return element == this.slides_[this.slideIndex_];
+  }
 }

@@ -1005,7 +1005,7 @@ export class Resources {
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    let toUnload;
+    let toUnload = [];
     if (relayoutCount > 0 || remeasureCount > 0 ||
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -1020,9 +1020,6 @@ export class Resources {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
-            if (!toUnload) {
-              toUnload = [];
-            }
             toUnload.push(r);
           }
         }
@@ -1030,7 +1027,7 @@ export class Resources {
     }
 
     // Unload all in one cycle.
-    if (toUnload) {
+    if (toUnload.length) {
       this.vsync_.mutate(() => {
         toUnload.forEach(r => {
           r.unload();
@@ -1066,9 +1063,6 @@ export class Resources {
       }
       // Note that when the document is not visible, neither are any of its
       // elements to reduce CPU cycles.
-      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-      // layers. This is currently a short-term fix to the problem that
-      // the fixed elements get incorrect top coord.
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
           r.overlaps(visibleRect));
       r.setInViewport(shouldBeInViewport);
@@ -1079,12 +1073,14 @@ export class Resources {
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+        if (r.getState() != ResourceState.READY_FOR_LAYOUT) {
           continue;
         }
-        // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-        // layers. This is currently a short-term fix to the problem that
-        // the fixed elements get incorrect top coord.
+
+        if (r.hasOwner() && !r.getOwner().shouldPreloadOwned(r.element)) {
+          continue;
+        }
+
         if (r.isDisplayed() && r.overlaps(loadRect)) {
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
@@ -1100,8 +1096,15 @@ export class Resources {
       let idleScheduledCount = 0;
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
-                !r.hasOwner() && r.isDisplayed()) {
+        if (r.getState() != ResourceState.READY_FOR_LAYOUT) {
+          continue;
+        }
+
+        if (r.hasOwner() && !r.getOwner().shouldPreloadOwned(r.element)) {
+          continue;
+        }
+
+        if (r.isDisplayed()) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;

@@ -802,6 +802,16 @@ export class BaseElement {
   }
 
   /**
+   * Called by Resources to determine if it can preload an element.
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   */
+  collapsedCallback(unusedElement) {
+    // Subclasses may override.
+    return false;
+  }
+
+  /**
    * Called when we just measured the layout rect of this element. Doing
    * more expensive style reads should now be cheap.
    * This may currently not work with extended elements. Please file

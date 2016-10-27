@@ -345,4 +345,11 @@ export class AmpCarousel extends BaseCarousel {
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
   }
+
+  /** @override */
+  shouldPreloadOwned(element) {
+    // TODO(@camelburrito): Allow next and prev slide to preload by returning
+    // true for them.
+    return element == this.cells_[this.pos_]
+  }
 }

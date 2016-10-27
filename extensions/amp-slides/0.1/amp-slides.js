@@ -213,6 +213,11 @@ class AmpSlides extends AMP.BaseElement {
       this.schedulePreload(this.slides_[nextIndex]);
     }
   }
+
+  /** @override */
+  shouldPreloadOwned(element) {
+    return element == this.slides_[this.currentIndex_];
+  }
 }
 
 AMP.registerElement('amp-slides', AmpSlides);
