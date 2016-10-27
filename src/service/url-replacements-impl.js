@@ -165,11 +165,11 @@ export class UrlReplacements {
     }));
 
     this.setAsync_('SOURCE_URL', () => {
-      return getTrackImpressionPromise().then(
-        this.getDocInfoValue_.bind(this, info => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getDocInfoValue_(info => {
           return removeFragment(info.sourceUrl);
-        })
-      );
+        });
+      });
     });
 
     // Returns the host of the Source URL for this AMP document.
@@ -551,10 +551,9 @@ export class UrlReplacements {
    * Return the QUERY_PARAM from the current location href
    * @param {*} param
    * @param {string} defaultValue
-   * @param {boolean=} opt_sync
    * @return {string}
    */
-  getQueryParamData_(param, defaultValue, opt_sync) {
+  getQueryParamData_(param, defaultValue) {
     user().assert(param,
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
