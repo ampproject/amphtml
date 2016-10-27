@@ -25,6 +25,8 @@
  */
 const child_process = require('child_process');
 const path = require('path');
+const minimist = require('minimist');
+const argv = minimist(process.argv.slice(2));
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 
@@ -73,6 +75,16 @@ function isValidatorWebuiFile(filePath) {
 }
 
 /**
+ * Determines whether the given file belongs to the Validator webui,
+ * that is, the 'BUILD_SYSTEM' target.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isBuildSystem(filePath) {
+  return filePath.startsWith('build-system');
+}
+
+/**
  * Determines whether the given file belongs to the validator,
  * that is, the 'VALIDATOR' target. This assumes (but does not
  * check) that the file is not part of 'VALIDATOR_WEBUI'.
@@ -98,11 +110,13 @@ function isValidatorFile(filePath) {
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
-    return new Set(['VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME']);
+    return new Set(['BUILD_SYSTEM', 'VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME']);
   }
   const targetSet = new Set();
   for (p of filePaths) {
-    if (isValidatorWebuiFile(p)) {
+    if (isBuildSystem(p)) {
+      targetSet.add('BUILD_SYSTEM');
+    } else if (isValidatorWebuiFile(p)) {
       targetSet.add('VALIDATOR_WEBUI');
     } else if (isValidatorFile(p)) {
       targetSet.add('VALIDATOR');
@@ -113,37 +127,18 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
-/**
- * The main method for the script execution which much like a C main function
- * receives the command line arguments and returns an exit status.
- * @param {!Array<string>} argv
- * @returns {number}
- */
-function main(argv) {
-  const travisCommitRange = argv[2] || '';
-  const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
 
-  const sortedBuildTargets = [];
-  for (const t of buildTargets) {
-    sortedBuildTargets.push(t);
-  }
-  sortedBuildTargets.sort();
-
-  console.log(
-      '\npr-check.js: detected build targets: ' +
-      sortedBuildTargets.join(', ') + '\n');
-
-  if (buildTargets.has('RUNTIME')) {
+const command = {
+  testBuildSystem: function() {
     execOrDie('npm run ava');
+  },
+  buildRuntime: function() {
     execOrDie(`${gulp} lint`);
     execOrDie(`${gulp} build --css-only`);
     execOrDie(`${gulp} check-types`);
     execOrDie(`${gulp} dist --fortesting`);
-  }
-
-  execOrDie(`${gulp} presubmit`);
-
-  if (buildTargets.has('RUNTIME')) {
+  },
+  testRuntime: function() {
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
     execOrDie(`${gulp} dep-check`);
@@ -155,17 +150,78 @@ function main(argv) {
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
     execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+  },
+  presubmit: function() {
+    execOrDie(`${gulp} presubmit`);
+  },
+  buildValidatorWebUI: function() {
+    execOrDie('cd validator/webui && python build.py');
+  },
+  buildValidator: function() {
+    execOrDie('cd validator && python build.py');
+  },
+};
+
+function runAllCommands() {
+  command.testBuildSystem();
+  command.buildRuntime();
+  command.presubmit();
+  command.testRuntime();
+  command.buildValidatorWebUI();
+  command.buildValidator();
+}
+
+/**
+ * The main method for the script execution which much like a C main function
+ * receives the command line arguments and returns an exit status.
+ * @param {!Array<string>} argv
+ * @returns {number}
+ */
+function main(argv) {
+  console.log('branch', argv.branch);
+  const travisCommitRange = `master...${argv.branch}`;
+  const files = filesInPr(travisCommitRange);
+  console.log('files in pr');
+  console.log(files);
+  const buildTargets = determineBuildTargets(files);
+
+  const sortedBuildTargets = [];
+  for (const t of buildTargets) {
+    sortedBuildTargets.push(t);
+  }
+  sortedBuildTargets.sort();
+
+  console.log(
+      '\npr-check.js: detected build targets: ' +
+      sortedBuildTargets.join(', ') + '\n');
+
+  if (buildTargets.has('BUILD_SYSTEM')) {
+    command.testBuildSystem();
+  }
+
+  if (buildTargets.has('RUNTIME')) {
+    command.buildRuntime();
+  }
+
+  // Presubmit needs to run after `gulp dist` as some checks runs through the
+  // dist/ folder.
+  // Also presubmit always needs to run even for just docs to check for
+  // copyright at the top.
+  command.presubmit();
+
+  if (buildTargets.has('RUNTIME')) {
+    command.testRuntime();
   }
 
   if (buildTargets.has('VALIDATOR_WEBUI')) {
-    execOrDie('cd validator/webui && python build.py');
+    command.buildValidatorWebUI();
   }
 
   if (buildTargets.has('VALIDATOR')) {
-    execOrDie('cd validator && python build.py');
+    command.buildValidator();
   }
 
   return 0;
 }
 
-process.exit(main(process.argv));
+process.exit(main(argv));
