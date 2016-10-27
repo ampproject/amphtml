@@ -28,7 +28,7 @@ export function xlift(global, data) {
   d.id = '_XL_recommend';
   global.document.getElementById('c').appendChild(d);
 
-  d.addEventListener('SuccessLoadedXliftAd', function(e) { 
+  d.addEventListener('SuccessLoadedXliftAd', function(e) {
     global.context.renderStart(e.detail.adSizeInfo);
   });
   d.addEventListener('FailureLoadedXliftAd', function() {
@@ -39,5 +39,5 @@ export function xlift(global, data) {
     global.XliftAmpHelper.show();
   }, () => {
     global.context.noContentAvailable();
-  }) ;
+  });
 }
