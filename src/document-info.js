@@ -44,8 +44,6 @@ export let DocumentInfoDef;
 export function documentInfoForDoc(nodeOrDoc) {
   return /** @type {!DocumentInfoDef} */ (getServiceForDoc(nodeOrDoc,
       'documentInfo', ampdoc => {
-        const url = ampdoc.getUrl();
-        const sourceUrl = getSourceUrl(url);
         const rootNode = ampdoc.getRootNode();
         let canonicalUrl = rootNode && rootNode.AMP
             && rootNode.AMP.canonicalUrl;
@@ -56,10 +54,13 @@ export function documentInfoForDoc(nodeOrDoc) {
           canonicalUrl = parseUrl(canonicalTag.href).href;
         }
         const pageViewId = getPageViewId(ampdoc.win);
-        const res = {sourceUrl, canonicalUrl, pageViewId};
-        Object.defineProperty(res, 'sourceUrl', {
-          get: () => getSourceUrl(ampdoc.getUrl()),
-        });
+        const res = {
+          get sourceUrl() {
+            return getSourceUrl(ampdoc.getUrl());
+          },
+          canonicalUrl,
+          pageViewId,
+        };
         return res;
       }));
 }

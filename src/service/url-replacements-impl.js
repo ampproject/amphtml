@@ -195,7 +195,7 @@ export class UrlReplacements {
     }));
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      return this.getQueryParamData_(param, defaultValue, /* opt_sync */ true);
+      return this.getQueryParamData_(param, defaultValue);
     });
 
     this.setAsync_('QUERY_PARAM', (param, defaultValue = '') => {
