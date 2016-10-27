@@ -31,10 +31,6 @@ The `amp-carousel-change` event is issued when there is any change in the slide 
   "ampCarouselChange": {
     "on": "amp-carousel-change",
     "request": "event"
-    "vars": {
-      "fromSlide": 0,
-      "toSlide": 1
-    }
   }
 }
 ```
