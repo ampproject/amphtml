@@ -102,7 +102,6 @@ export const adConfig = {
     prefetch: 'https://ads.adverline.com/richmedias/amp.js',
     preconnect: [
       'https://adnext.fr',
-      'https://ads.adverline.com',
     ],
     renderStartImplemented: true,
   },
