@@ -106,6 +106,8 @@ export class ActionService {
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
+    // TODO(mkhatib, #5702): Consider a debounced-input event for text-type inputs.
+    this.addEvent('change');
   }
 
   /**
@@ -122,9 +124,9 @@ export class ActionService {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
-    } else if (name == 'submit') {
-      this.ampdoc.getRootNode().addEventListener('submit', event => {
-        this.trigger(dev().assertElement(event.target), 'submit', event);
+    } else if (name == 'submit' || name == 'change') {
+      this.ampdoc.getRootNode().addEventListener(name, event => {
+        this.trigger(dev().assertElement(event.target), name, event);
       });
     }
   }
@@ -268,23 +270,12 @@ export class ActionService {
       return;
     }
 
-    // Special elements with AMP ID.
-    if (target.id && target.id.substring(0, 4) == 'amp-') {
+    // Special elements with AMP ID or known supported actions.
+    const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
+    if ((target.id && target.id.substring(0, 4) == 'amp-') ||
+        (supportedActions && supportedActions.indexOf(method) != -1)) {
       if (!target[ACTION_QUEUE_]) {
         target[ACTION_QUEUE_] = [];
-      }
-      target[ACTION_QUEUE_].push(invocation);
-      return;
-    }
-
-    // Check if this is an element has a known action.
-    const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
-    if (supportedActions && supportedActions.indexOf(method) != -1) {
-      if (!target[ACTION_QUEUE_]) {
-        this.actionInfoError_(
-            'Action queue not initialized, probably tried to execute before ' +
-            'calling installActionHandler.', actionInfo, target);
-        return;
       }
       target[ACTION_QUEUE_].push(invocation);
       return;

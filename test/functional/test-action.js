@@ -544,3 +544,52 @@ describe('Action common handler', () => {
     expect(target['__AMP_ACTION_QUEUE__']).to.not.exist;
   });
 });
+
+
+describe('Core events', () => {
+  let sandbox;
+  let action;
+  let target;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(window.document, 'addEventListener');
+    action = new ActionService(new AmpDocSingle(window));
+    sandbox.stub(action, 'trigger');
+    target = document.createElement('target');
+    target.setAttribute('id', 'amp-test-1');
+
+    action.vsync_ = {mutate: callback => callback()};
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should trigger tap event', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('click');
+    const handler = window.document.addEventListener.getCall(0).args[1];
+    const element = {tagName: 'target1', nodeType: 1};
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
+  it('should trigger submit event', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('submit');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = {tagName: 'target1', nodeType: 1};
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(element, 'submit', event);
+  });
+
+  it('should trigger change event', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('change');
+    const handler = window.document.addEventListener.getCall(2).args[1];
+    const element = {tagName: 'target2', nodeType: 1};
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(element, 'change', event);
+  });
+});

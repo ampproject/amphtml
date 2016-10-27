@@ -122,7 +122,6 @@ describe('amp-form', () => {
     expect(form.addEventListener).to.be.calledWith('submit');
     expect(form.addEventListener).to.be.calledWith('blur');
     expect(form.addEventListener).to.be.calledWith('input');
-    expect(form.addEventListener).to.be.calledWith('change');
     expect(form.className).to.contain('-amp-form');
   });
 
@@ -135,7 +134,7 @@ describe('amp-form', () => {
       target: form,
       preventDefault: sandbox.spy(),
     };
-    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     sandbox.spy(form, 'checkValidity');
     ampForm.handleSubmit_(event);
     expect(event.stopImmediatePropagation.called).to.be.true;
@@ -152,7 +151,7 @@ describe('amp-form', () => {
       target: form,
       preventDefault: sandbox.spy(),
     };
-    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     sandbox.spy(form, 'checkValidity');
     expect(() => ampForm.handleSubmit_(event)).to.throw(
         /Only XHR based \(via action-xhr attribute\) submissions are support/);
@@ -169,6 +168,7 @@ describe('amp-form', () => {
     emailInput.setAttribute('required', '');
     form.appendChild(emailInput);
     const ampForm = new AmpForm(form);
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     const event = {
       stopImmediatePropagation: sandbox.spy(),
       target: form,
@@ -206,7 +206,7 @@ describe('amp-form', () => {
       emailInput.setAttribute('required', '');
       form.appendChild(emailInput);
       sandbox.spy(form, 'checkValidity');
-      sandbox.spy(ampForm.xhr_, 'fetchJson');
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
 
       const event = {
         stopImmediatePropagation: sandbox.spy(),
@@ -467,22 +467,16 @@ describe('amp-form', () => {
       const newRender = document.createElement('div');
       newRender.innerText = 'New Success: What What';
 
-      let fetchJsonResolver;
       sandbox.stub(ampForm.xhr_, 'fetchJson')
-          .returns(new Promise(resolve => {
-            fetchJsonResolver = resolve;
-          }));
+          .returns(Promise.resolve({'message': 'What What'}));
       sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
-          .returns(new Promise(resolve => {
-            resolve(newRender);
-          }));
+          .returns(Promise.resolve(newRender));
       const event = {
         stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };
       ampForm.handleSubmit_(event);
-      fetchJsonResolver({'message': 'What What'});
       return timer.promise(5).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
@@ -825,6 +819,7 @@ describe('amp-form', () => {
     const actions = actionServiceForDoc(form.ownerDocument);
     sandbox.stub(actions, 'installActionHandler');
     const ampForm = new AmpForm(form);
+    sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     expect(actions.installActionHandler).to.be.calledWith(form);
     sandbox.spy(ampForm, 'handleSubmit_');
     ampForm.actionHandler_({method: 'anything'});
@@ -832,20 +827,4 @@ describe('amp-form', () => {
     ampForm.actionHandler_({method: 'submit'});
     expect(ampForm.handleSubmit_).to.have.been.called;
   });
-
-  it('should trigger change events on inputs', () => {
-    return getAmpForm(true).then(ampForm => {
-      const form = ampForm.form_;
-      const actions = actionServiceForDoc(form.ownerDocument);
-      sandbox.stub(actions, 'trigger');
-      const emailInput = document.createElement('input');
-      emailInput.setAttribute('name', 'email');
-      emailInput.setAttribute('type', 'email');
-      form.appendChild(emailInput);
-      ampForm.changeEventHandler_({target: emailInput});
-      expect(actions.trigger).to.have.been.called;
-      expect(actions.trigger).to.have.been.calledWith(emailInput, 'change');
-    });
-  });
-
 });

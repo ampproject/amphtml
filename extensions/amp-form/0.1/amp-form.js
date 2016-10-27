@@ -137,7 +137,7 @@ export class AmpForm {
 
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
-    this.installSubmitHandler_();
+    this.installEventHandlers_();
   }
 
   /**
@@ -151,7 +151,7 @@ export class AmpForm {
   }
 
   /** @private */
-  installSubmitHandler_() {
+  installEventHandlers_() {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
     this.form_.addEventListener('blur', e => {
       onInputInteraction_(e);
@@ -161,16 +161,6 @@ export class AmpForm {
       onInputInteraction_(e);
       this.validator_.onInput(e);
     });
-    this.form_.addEventListener('change', this.changeEventHandler_.bind(this));
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  changeEventHandler_(e) {
-    // TODO(mkhatib, #5702): Consider a debounced-input event for text-type inputs.
-    this.actions_.trigger(dev().assertElement(e.target), 'change', null);
   }
 
   /**
