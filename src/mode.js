@@ -69,7 +69,11 @@ function getMode_(win) {
     return win.context.mode;
   }
 
+  // Magic constants that are replaced by closure compiler.
+  // IS_MINIFIED is always replaced with true when closure compiler is used
+  // while IS_DEV is only replaced when the --fortesting flag is NOT used.
   const IS_DEV = true;
+  const IS_MINIFIED = false;
 
   const isLocalDev = IS_DEV && !!(win.location.hostname == 'localhost' ||
       (win.location.ancestorOrigins && win.location.ancestorOrigins[0] &&
@@ -102,8 +106,7 @@ function getMode_(win) {
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: hashQuery['filter'],
-    /* global process: false */
-    minified: !IS_DEV || process.env.NODE_ENV == 'production',
+    minified: IS_MINIFIED,
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
