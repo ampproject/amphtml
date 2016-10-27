@@ -48,7 +48,7 @@ i-amp-app-banner-top-padding {
   background-position: 9px center;
   background-color: #fff;
   background-repeat: no-repeat;
-  z-index: 13;
+  z-index: 13 !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2);
   border: none;
   border-top-left-radius: 12px;
@@ -73,7 +73,6 @@ i-amp-app-banner-top-padding {
 }
 
 [dir=rtl] .amp-app-banner-dismiss-button:before {
-  top: -20px;
   right: -20px;
   left: 0;
 }
