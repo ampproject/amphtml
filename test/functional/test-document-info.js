@@ -16,6 +16,8 @@
 
 import {createIframePromise} from '../../testing/iframe';
 import {documentInfoForDoc} from '../../src/document-info';
+import {installDocumentInfoServiceForDoc,} from
+    '../../src/service/document-info-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
@@ -39,6 +41,8 @@ describe('document-info', () => {
         iframe.doc.head.appendChild(link);
       }
       installDocService(iframe.win, true);
+      sandbox.stub(iframe/*OK*/.win.Math, 'random', () => 0.123456789);
+      installDocumentInfoServiceForDoc(iframe.win.document);
       return iframe.win;
     });
   }
@@ -63,6 +67,9 @@ describe('document-info', () => {
     };
     win.document.defaultView = win;
     installDocService(win, true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(documentInfoForDoc(win.document).url).to.equal(
+        'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0');
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');
   });
@@ -89,7 +96,6 @@ describe('document-info', () => {
 
   it('should provide the pageViewId', () => {
     return getWin('https://twitter.com/').then(win => {
-      sandbox.stub(win.Math, 'random', () => 0.123456789);
       expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
       expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
     });
@@ -99,14 +105,6 @@ describe('document-info', () => {
     return getWin('./foo.html').then(win => {
       expect(documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'http://localhost:' + location.port + '/foo.html');
-    });
-  });
-
-  it('should throw if no canonical is available.', () => {
-    return getWin(null).then(win => {
-      expect(() => {
-        documentInfoForDoc(win.document).canonicalUrl;
-      }).to.throw(/AMP files are required to have a/);
     });
   });
 });
