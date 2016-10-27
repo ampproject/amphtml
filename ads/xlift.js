@@ -22,9 +22,22 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function xlift(global, data) {
   validateData(data, ['mediaid']);
+
   global.xliftParams = data;
   const d = global.document.createElement('div');
   d.id = '_XL_recommend';
   global.document.getElementById('c').appendChild(d);
-  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js');
+
+  d.addEventListener("SuccessLoadedXliftAd", function(e) {
+    global.context.renderStart(e.detail.adSizeInfo);
+  });
+  d.addEventListener("FailureLoadedXliftAd", function(e) {
+    global.context.noContentAvailable();
+  });
+
+  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
+    global.XliftAmpHelper.show();
+  }, () => {
+    global.context.noContentAvailable();
+  }) ;
 }

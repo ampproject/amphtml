@@ -398,6 +398,7 @@ export const adConfig = {
 
   xlift: {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+    renderStartImplemented: true,
   },
 
   yahoo: {
