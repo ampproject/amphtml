@@ -29,7 +29,7 @@ export function xlift(global, data) {
   global.document.getElementById('c').appendChild(d);
 
   d.addEventListener('SuccessLoadedXliftAd', function(e) {
-    e.detail = e.detail || {adSizeInfo:{}};
+    e.detail = e.detail || {adSizeInfo: {}};
     global.context.renderStart(e.detail.adSizeInfo);
   });
   d.addEventListener('FailureLoadedXliftAd', function() {
@@ -37,7 +37,13 @@ export function xlift(global, data) {
   });
 
   loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
-    XliftAmpHelper.show();
+    global.XliftAmpHelper = global.XliftAmpHelper || null;
+    if (global.XliftAmpHelper == null) {
+      global.context.noContentAvailable();
+    }
+    else {
+      global.XliftAmpHelper.show();
+    }
   }, () => {
     global.context.noContentAvailable();
   });
