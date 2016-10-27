@@ -38,6 +38,7 @@ import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
+import {endsWith} from '../../../src/string';
 import {
   importPublicKey,
   isCryptoAvailable,
@@ -50,23 +51,6 @@ import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
-
-/**
- * Dev public key set. This will go away once the dev signing service goes live.
- * @type {Array<!Promise<!./crypto-verifier.PublicKeyInfoDef>>}
- */
-const devJwkSet = [{
-  kty: 'RSA',
-  n: 'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
-      'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +
-      'nvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEz' +
-      'fZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca' +
-      '8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2' +
-      'sQuM5KangAkjJRe-Ej6aaQ',
-  e: 'AQAB',
-  alg: 'RS256',
-  ext: true,
-}];
 
 /**
  * @param {*} ary
@@ -613,8 +597,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Array<string>} A list of signing services.
    */
   getSigningServiceNames() {
-    // TODO(levitzky) Add dev key name once it goes live.
-    return getMode().localDev ? ['google'] : ['google'];
+    return getMode().localDev ? ['google', 'google-dev'] : ['google'];
   }
 
   /**
@@ -629,6 +612,7 @@ export class AmpA4A extends AMP.BaseElement {
       return [];
     }
     const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
+      dev().assert(!endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
@@ -655,9 +639,6 @@ export class AmpA4A extends AMP.BaseElement {
         return [];
       }
     });
-    if (getMode().localDev) {
-      jwkSetPromises.push(Promise.resolve(devJwkSet));
-    }
     return jwkSetPromises.map(jwkSetPromise =>
         jwkSetPromise.then(jwkSet =>
           jwkSet.map(jwk =>
