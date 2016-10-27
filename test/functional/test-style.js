@@ -88,16 +88,10 @@ describe('Style', () => {
   it('removeAlphaFromColor', () => {
     expect(st.removeAlphaFromColor('rgba(1, 1, 1, 0)')).to.equal(
         'rgba(1, 1, 1, 1)');
-    expect(st.removeAlphaFromColor('hsla(120, 100%, 25%, 0.6)')).to.equal(
-        'hsla(120, 100%, 25%, 1)');
     expect(st.removeAlphaFromColor('rgb(1, 1, 1)')).to.equal(
         'rgb(1, 1, 1)');
-    expect(st.removeAlphaFromColor('hsl(120, 100%, 25%)')).to.equal(
-        'hsl(120, 100%, 25%)');
-    expect(st.removeAlphaFromColor('hsla(120, 100%, 25%, -0.5)')).to.equal(
-        'hsla(120, 100%, 25%, 1)');
-    expect(st.removeAlphaFromColor('white')).to.equal('white');
-    expect(st.removeAlphaFromColor('')).to.equal('');
+    expect(st.removeAlphaFromColor('rgba(0, 0, 0,-0.5)')).to.equal(
+      'rgba(0, 0, 0, 1)');
   });
 
   describe('getVendorJsPropertyName', () => {

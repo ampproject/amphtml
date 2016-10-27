@@ -197,14 +197,13 @@ export function scale(value) {
 }
 
 /**
- * Remove alpha value from a color CSS property.
- * Return the new color property with alpha equals 1.
- * Note caller needs to make sure the input cssColorValue is a valid
- * CSS color value.
- * @param {string} cssColor
+ * Remove alpha value from a rgba color value.
+ * Return the new color property with alpha equals if has the alpha value.
+ * Caller needs to make sure the input color value is a valid rgba/rgb value
+ * @param {string} rgbaColor
  * @return {string}
  */
-export function removeAlphaFromColor(cssColor) {
-  return cssColor.replace(
+export function removeAlphaFromColor(rgbaColor) {
+  return rgbaColor.replace(
       /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g, '($1,$2,$3, 1)');
 }

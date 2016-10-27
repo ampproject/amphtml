@@ -223,6 +223,7 @@ class AmpStickyAd extends AMP.BaseElement {
     // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
     // Note: Use setStyle because we will remove this line later.
     setStyle(this.element, 'opacity', '1 !important');
+    setStyle(this.element, 'background-image', 'none');
 
     const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
         .getPropertyValue('background-color');
