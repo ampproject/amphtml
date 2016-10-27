@@ -66,17 +66,20 @@ export function isShadowDomSupported() {
  * @param {!Element} hostElement
  * @return {!ShadowRoot}
  */
-export function createShadowRoot(hostElement) {
+export function createShadowRoot(hostElement, isCriticalPath) {
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
     existingRoot./*OK*/innerHTML = '';
     return existingRoot;
   }
 
+  //TODO when it's critical path, the correct shadowRoot would be hostElement.ownerDocument
+
   // Native support.
-  if (isShadowDomSupported()) {
+  if (isShadowDomSupported() && !isCriticalPath) {
     return hostElement.createShadowRoot();
   }
+
 
   // Polyfill.
   return createShadowRootPolyfill(hostElement);
@@ -92,12 +95,8 @@ function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
   /** @const {!Window} */
   const win = doc.defaultView;
-  const shadowRoot = /** @type {!ShadowRoot} */ (
-      // Cast to ShadowRoot even though it is an Element
-      // TODO(@dvoytenko) Consider to switch to a type union instead.
-      /** @type {?}  */ (doc.createElement('i-amp-shadow-root')));
-  shadowRoot.id = 'i-amp-sd-' + Math.floor(win.Math.random() * 10000);
-  hostElement.appendChild(shadowRoot);
+  const shadowRoot = createShadowRootElementForPolyfill(doc, hostElement);
+
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
   // API: https://www.w3.org/TR/shadow-dom/#the-shadowroot-interface
@@ -113,6 +112,25 @@ function createShadowRootPolyfill(hostElement) {
   return shadowRoot;
 }
 
+function createShadowRootElementForPolyfill(doc, hostElement) {
+  let shadowRoot;
+
+  if (hostElement.hasAttribute('I-AMP-SHADOW-ROOT')) {
+    shadowRoot = hostElement;
+  } else {
+    shadowRoot = /** @type {!ShadowRoot} */ (
+      // Cast to ShadowRoot even though it is an Element
+      // TODO(@dvoytenko) Consider to switch to a type union instead.
+    /** @type {?}  */ (doc.createElement('i-amp-shadow-root')));
+
+    hostElement.appendChild(shadowRoot);
+  }
+
+  shadowRoot.id = 'i-amp-sd-' + Math.floor(win.Math.random() * 10000);
+
+  return hostElement;
+}
+
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
@@ -125,7 +143,7 @@ export function isShadowRoot(value) {
   }
   // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
   // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
-  if (value.tagName == 'I-AMP-SHADOW-ROOT') {
+  if (value.tagName == 'I-AMP-SHADOW-ROOT' || value.__AMP_SHADOW_ROOT === value) {
     return true;
   }
   return (value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&

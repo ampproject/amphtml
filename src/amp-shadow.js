@@ -40,12 +40,13 @@ installDocService(self, /* isSingleDoc */ false);
 // Core services.
 installRuntimeServices(self);
 
-// Builtins.
-installBuiltins(self);
-
 // Final configuration and stubbing.
 adoptShadowMode(self);
 stubElements(self);
+
+// Builtins.
+installBuiltins(self);
+
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
