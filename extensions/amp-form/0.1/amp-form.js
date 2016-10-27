@@ -119,9 +119,6 @@ export class AmpForm {
     this.form_.classList.add('-amp-form');
 
     const submitButtons = this.form_.querySelectorAll('input[type=submit]');
-    user().assert(submitButtons && submitButtons.length > 0,
-        'form requires at least one <input type=submit>: %s', this.form_);
-
     /** @const @private {!Array<!Element>} */
     this.submitButtons_ = toArray(submitButtons);
 
@@ -138,11 +135,23 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
-    this.installSubmitHandler_();
+    this.actions_.installActionHandler(
+        this.form_, this.actionHandler_.bind(this));
+    this.installEventHandlers_();
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  actionHandler_(invocation) {
+    if (invocation.method == 'submit') {
+      this.handleSubmit_();
+    }
   }
 
   /** @private */
-  installSubmitHandler_() {
+  installEventHandlers_() {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
     this.form_.addEventListener('blur', e => {
       onInputInteraction_(e);
@@ -163,12 +172,14 @@ export class AmpForm {
    * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
    *
    *
-   * @param {!Event} e
+   * @param {?Event=} opt_event
    * @private
    */
-  handleSubmit_(e) {
+  handleSubmit_(opt_event) {
     if (this.state_ == FormState_.SUBMITTING) {
-      e.stopImmediatePropagation();
+      if (opt_event) {
+        opt_event.stopImmediatePropagation();
+      }
       return;
     }
 
@@ -176,7 +187,9 @@ export class AmpForm {
     // reporting and blocking submission on non-valid forms.
     const isValid = checkUserValidityOnSubmission(this.form_);
     if (this.shouldValidate_ && !isValid) {
-      e.stopImmediatePropagation();
+      if (opt_event) {
+        opt_event.stopImmediatePropagation();
+      }
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({
         measure: undefined,
@@ -188,7 +201,9 @@ export class AmpForm {
     }
 
     if (this.xhrAction_) {
-      e.preventDefault();
+      if (opt_event) {
+        opt_event.preventDefault();
+      }
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
       const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
@@ -212,7 +227,9 @@ export class AmpForm {
         rethrowAsync('Form submission failed:', error);
       });
     } else if (this.method_ == 'POST') {
-      e.preventDefault();
+      if (opt_event) {
+        opt_event.preventDefault();
+      }
       user().assert(false,
           'Only XHR based (via action-xhr attribute) submissions are support ' +
           'for POST requests. %s',

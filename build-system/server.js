@@ -173,6 +173,28 @@ app.use('/form/echo-json/post', function(req, res) {
   });
 });
 
+app.use('/form/json/poll1', function(req, res) {
+  assertCors(req, res, ['POST']);
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      result: [{
+        answer: 'Penguins',
+        percentage: new Array(77),
+      }, {
+        answer: 'Ostriches',
+        percentage: new Array(8),
+      }, {
+        answer: 'Kiwis',
+        percentage: new Array(14),
+      }, {
+        answer: 'Wekas',
+        percentage: new Array(1),
+      },]
+    }));
+  });
+});
 
 app.use('/form/search-html/get', function(req, res) {
   res.setHeader('Content-Type', 'text/html');
