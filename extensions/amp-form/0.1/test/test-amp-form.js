@@ -149,6 +149,22 @@ describe('amp-form', () => {
     expect(ampForm.xhr_.fetchJson.called).to.be.false;
   });
 
+  it('should throw error if POST non-xhr', () => {
+    const form = getForm();
+    form.removeAttribute('action-xhr');
+    const ampForm = new AmpForm(form);
+    const event = {
+      stopImmediatePropagation: sandbox.spy(),
+      target: form,
+      preventDefault: sandbox.spy(),
+    };
+    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.spy(form, 'checkValidity');
+    expect(() => ampForm.handleSubmit_(event)).to.throw(
+        /Only XHR based \(via action-xhr attribute\) submissions are support/);
+    expect(event.preventDefault).to.be.called;
+  });
+
   it('should respect novalidate on a form', () => {
     setReportValiditySupported(true);
     const form = getForm();
@@ -176,14 +192,13 @@ describe('amp-form', () => {
     };
     sandbox.spy(form, 'checkValidity');
     sandbox.spy(emailInput, 'reportValidity');
-    ampForm.xhrAction_ = null;
+
     ampForm.handleSubmit_(event);
     // Check validity should always be called regardless of novalidate.
     expect(form.checkValidity.called).to.be.true;
 
     // However reporting validity shouldn't happen when novalidate.
     expect(emailInput.reportValidity.called).to.be.false;
-    expect(event.preventDefault.called).to.be.false;
     expect(form.hasAttribute('amp-novalidate')).to.be.true;
   });
 
@@ -344,7 +359,7 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonResolver();
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(ampForm.state_).to.equal('submit-success');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
@@ -383,7 +398,7 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonRejecter();
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(button1.hasAttribute('disabled')).to.be.false;
         expect(button2.hasAttribute('disabled')).to.be.false;
         expect(ampForm.state_).to.equal('submit-error');
@@ -427,7 +442,7 @@ describe('amp-form', () => {
       };
       ampForm.handleSubmit_(event);
       fetchJsonRejecter({responseJson: {message: 'hello there'}});
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
             errorContainer, {message: 'hello there'})).to.be.true;
@@ -474,7 +489,7 @@ describe('amp-form', () => {
       };
       ampForm.handleSubmit_(event);
       fetchJsonResolver({'message': 'What What'});
-      return timer.promise(0).then(() => {
+      return timer.promise(5).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
             successContainer, {'message': 'What What'})).to.be.true;
@@ -706,13 +721,11 @@ describe('amp-form', () => {
         expect(fieldset.checkValidity.called).to.be.true;
         expect(form.className).to.contain('user-invalid');
         expect(emailInput.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         emailInput.value = 'cool@bea.ns';
         ampForm.handleSubmit_(event);
         expect(form.className).to.contain('user-valid');
         expect(emailInput.className).to.contain('user-valid');
-        expect(fieldset.className).to.contain('user-valid');
       });
     });
 
@@ -742,7 +755,6 @@ describe('amp-form', () => {
         expect(fieldset.checkValidity.called).to.be.true;
         expect(form.className).to.contain('user-invalid');
         expect(emailInput.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // No interaction happened with usernameInput, so no user-class should
         // be added at this point.
@@ -754,7 +766,6 @@ describe('amp-form', () => {
         onInputInteraction_({target: emailInput});
         expect(emailInput.className).to.contain('user-valid');
         expect(form.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // Still no interaction.
         expect(usernameInput.className).to.not.contain('user-invalid');
@@ -765,7 +776,6 @@ describe('amp-form', () => {
         onInputInteraction_({target: emailInput});
         expect(emailInput.className).to.contain('user-invalid');
         expect(form.className).to.contain('user-invalid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // Still no interaction.
         expect(usernameInput.className).to.not.contain('user-invalid');
@@ -777,7 +787,6 @@ describe('amp-form', () => {
         expect(emailInput.className).to.contain('user-invalid');
         expect(form.className).to.contain('user-invalid');
         expect(usernameInput.className).to.contain('user-valid');
-        expect(fieldset.className).to.contain('user-invalid');
 
         // Both input are finally valid.
         emailInput.value = 'cool@bea.ns';
@@ -785,7 +794,6 @@ describe('amp-form', () => {
         expect(emailInput.className).to.contain('user-valid');
         expect(usernameInput.className).to.contain('user-valid');
         expect(form.className).to.contain('user-valid');
-        expect(fieldset.className).to.contain('user-valid');
       });
     });
 
@@ -814,7 +822,6 @@ describe('amp-form', () => {
         expect(fieldset.checkValidity.called).to.be.false;
         expect(emailInput.className).to.contain('user-valid');
         expect(form.className).to.not.contain('user-valid');
-        expect(fieldset.className).to.not.contain('user-valid');
       });
     });
   });

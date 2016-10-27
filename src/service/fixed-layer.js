@@ -127,7 +127,8 @@ export class FixedLayer {
   }
 
   /**
-   * Apply or reset transform style to fixed elements
+   * Apply or reset transform style to fixed elements. The existing transition,
+   * if any, is disabled when custom transform is supplied.
    * @param {?string} transform
    */
   transformMutate(transform) {
@@ -135,6 +136,7 @@ export class FixedLayer {
       // Apply transform style to all fixed elements
       this.fixedElements_.forEach(e => {
         if (e.fixedNow && e.top) {
+          setStyle(e.element, 'transition', 'none');
           if (e.transform && e.transform != 'none') {
             setStyle(e.element, 'transform', e.transform + ' ' + transform);
           } else {
@@ -146,7 +148,10 @@ export class FixedLayer {
       // Reset transform style to all fixed elements
       this.fixedElements_.forEach(e => {
         if (e.fixedNow && e.top) {
-          setStyle(e.element, 'transform', '');
+          setStyles(e.element, {
+            transform: '',
+            transition: '',
+          });
         }
       });
     }
@@ -273,10 +278,11 @@ export class FixedLayer {
           let top = styles.getPropertyValue('top');
           const currentOffsetTop = element./*OK*/offsetTop;
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
-          if ((top == 'auto' || isImplicitAuto) &&
-                  top != '0px' &&
-                  currentOffsetTop != 0) {
+          if ((top == 'auto' || isImplicitAuto) && top != '0px') {
             top = '';
+            if (currentOffsetTop == this.paddingTop_) {
+              top = '0px';
+            }
           }
 
           const bottom = styles.getPropertyValue('bottom');

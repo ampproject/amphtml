@@ -65,11 +65,11 @@ export class AmpAd extends AMP.BaseElement {
       return extensionsFor(this.win).loadElementClass(extensionTagName)
         .then(ctor => new ctor(this.element))
         .catch(error => {
+          // Work around presubmit restrictions.
+          const TAG = this.element.tagName;
           // Report error and fallback to 3p
-          user().error(
-            this.element.tagName,
-            'Unable to load ad implementation for type ', type,
-            ', falling back to 3p, error: ', error);
+          user().error(TAG, 'Unable to load ad implementation for type ', type,
+              ', falling back to 3p, error: ', error);
           return new AmpAd3PImpl(this.element);
         });
     });
