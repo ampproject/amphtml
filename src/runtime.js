@@ -367,6 +367,13 @@ export function adoptShadowMode(global) {
      * @return {!Object}
      */
     global.AMP.attachShadowDoc = manager.attachShadowDoc.bind(manager);
+
+    /**
+     * An AmpDoc for the critical path content
+     */
+    const body = global.document.body;
+    body.setAttribute('I-AMP-SHADOW-ROOT', '');
+    manager.attachShadowDoc(body, null, global.location.href, {isCriticalPath: true});
   });
 }
 
@@ -520,12 +527,14 @@ class MultidocManager {
    * @param {!Object<string, string>=} opt_initParams
    * @return {!Object}
    */
-  attachShadowDoc(hostElement, doc, url, opt_initParams) {
+  attachShadowDoc(hostElement, doc, url, opt_initParams = {}) {
+    const isCriticalPath = opt_initParams.isCriticalPath;
+
     dev().fine(TAG, 'Attach shadow doc:', doc);
     this.purgeShadowRoots_();
 
     hostElement.style.visibility = 'hidden';
-    const shadowRoot = createShadowRoot(hostElement);
+    const shadowRoot = createShadowRoot(hostElement, isCriticalPath);
 
     if (shadowRoot.AMP) {
       user().warn(TAG, 'Shadow doc wasn\'t previously closed');
@@ -547,7 +556,7 @@ class MultidocManager {
         /* opt_isRuntimeCss */ true);
 
     // Instal doc services.
-    installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
+    installAmpdocServices(ampdoc, opt_initParams);
     const viewer = viewerForDoc(ampdoc);
 
     /**
@@ -605,14 +614,17 @@ class MultidocManager {
       amp.resources = resourcesForDoc(ampdoc);
     }
 
-    // Install extensions.
-    const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
 
-    // Apply all doc extensions.
-    installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
+    if (!isCriticalPath) {
+      // Install extensions.
+      const extensionIds = this.mergeShadowHead_(shadowRoot, doc);
+
+      // Apply all doc extensions.
+      installExtensionsInShadowDoc(this.extensions_, ampdoc, extensionIds);
+    }
 
     // Append body.
-    if (doc.body) {
+    if (!isCriticalPath && doc.body) {
       const body = importShadowBody(shadowRoot, doc.body);
       body.classList.add('amp-shadow');
       shadowRoot.appendChild(body);
