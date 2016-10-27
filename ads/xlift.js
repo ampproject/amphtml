@@ -29,6 +29,7 @@ export function xlift(global, data) {
   global.document.getElementById('c').appendChild(d);
 
   d.addEventListener('SuccessLoadedXliftAd', function(e) {
+    e.detail = e.detail || {adSizeInfo:{}};
     global.context.renderStart(e.detail.adSizeInfo);
   });
   d.addEventListener('FailureLoadedXliftAd', function() {
@@ -36,7 +37,7 @@ export function xlift(global, data) {
   });
 
   loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
-    global.XliftAmpHelper.show();
+    XliftAmpHelper.show();
   }, () => {
     global.context.noContentAvailable();
   });
