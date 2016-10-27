@@ -276,6 +276,17 @@ describe('amp-live-list', () => {
       expect(stub.callCount).to.equal(1);
     });
 
+    it('should call updateFixedLayer on update with inserts', () => {
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+      const spy = sandbox.spy(liveList.viewport_, 'updateFixedLayer');
+      expect(liveList.itemsSlot_.childElementCount).to.equal(0);
+      const fromServer1 = createFromServer([{id: 'id0'}]);
+      expect(spy).to.have.not.been.called;
+      liveList.update(fromServer1);
+      expect(spy).to.have.been.calledOnce;
+    });
+
     it('no items slot on update should be a no op update', () => {
       const update = document.createElement('div');
       expect(() => {

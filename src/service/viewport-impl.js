@@ -521,7 +521,7 @@ export class Viewport {
   /**
    * Updates the fixed layer.
    */
-  updatedFixedLayer() {
+  updateFixedLayer() {
     this.fixedLayer_.update();
   }
 
