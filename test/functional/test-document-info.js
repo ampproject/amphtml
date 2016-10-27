@@ -40,9 +40,10 @@ describe('document-info', () => {
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);
       }
-      installDocService(iframe.win, true);
-      sandbox.stub(iframe/*OK*/.win.Math, 'random', () => 0.123456789);
-      installDocumentInfoServiceForDoc(iframe.win.document);
+      const win = iframe.win;
+      installDocService(win, true);
+      sandbox.stub(win.Math, 'random', () => 0.123456789);
+      installDocumentInfoServiceForDoc(win.document);
       return iframe.win;
     });
   }
