@@ -38,10 +38,8 @@ __Required:__
 
 `data-site` - The site's unique name this ad will be served on. This is the same name from your Mediavine script wrapper.
 
-`width` + `height` - Required for all `<amp-ad>` units. Specifies the default fixed ad size. Will resize iframe for flex ads.
+__Optional:__
 
 `data-sizes` - Comma separated list of ad sizes this placement should support. Will cause iframe resize if different from hard-coded width and height.
-
-`type` - always set to "mediavine"
 
 Each site must be approved and signed up with [Mediavine](http://www.mediavine.com) prior to launch. The site name will be the same as name in the Mediavine script wrapper. The site name `amp-project` can be used for testing and will serve placeholder ads.
