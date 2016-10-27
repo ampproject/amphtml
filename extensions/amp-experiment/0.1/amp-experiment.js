@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
+import {user} from '../../../src/log';
 import {Layout} from '../../../src/layout';
 import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
 import {getService} from '../../../src/service';
 
 /** @const */
-const EXPERIMENT = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
 
 export class AmpExperiment extends AMP.BaseElement {
@@ -35,14 +32,6 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
-    if (!this.isExperimentOn_) {
-      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
-      toggle(this.element, false);
-      getService(this.win, 'variant', () => Promise.resolve());
-      return;
-    }
-
     const config = this.getConfig_();
     const results = Object.create(null);
     const variants = Object.keys(config).map(experimentName => {
