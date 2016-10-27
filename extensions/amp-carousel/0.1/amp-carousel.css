@@ -69,7 +69,7 @@ amp-carousel[controls] .amp-carousel-button,
 }
 
 :not(.amp-mode-mouse) .-amp-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
-  animation: -amp-carousel-hint 1s ease-in 0s 1 normal both;
+  animation: -amp-carousel-hint 1s ease-in 3s 1 normal both;
 }
 
 @keyframes -amp-carousel-hint {
