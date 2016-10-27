@@ -146,13 +146,13 @@
     }
 
     amp-app-banner {
-      background: #f4f4f4;
       padding: 10px;
-      box-shadow: 0 2px 5px 0 #000;
     }
 
     amp-app-banner .content {
       display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     amp-img {
@@ -165,21 +165,30 @@
     }
 
     amp-app-banner amp-img {
+      background-color: transparent;
       margin-right: 15px
     }
 
-    amp-app-banner h3 {
+    amp-app-banner .description {
+      margin-right: 20px;
+    }
+
+    amp-app-banner h5 {
       margin: 0;
     }
 
     amp-app-banner p {
-      font-size: 14px;
+      font-size: 10px;
       margin: 3px 0;
     }
 
-    amp-app-banner button {
-      padding: 8px;
-      margin-right: 10px;
+    amp-app-banner .actions button {
+      padding: 5px;
+      width: 70px;
+      border: 1px solid #aaa;
+      font-size: 8px;
+      background: #fff;
+    }
     }
     amp-app-banner .actions {
       text-align: right;
@@ -234,14 +243,14 @@
   <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
     <div class="content">
       <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
-               width="60" height="51"></amp-img>
+               width="40" height="34"></amp-img>
       <div class="description">
-        <h3>Medium App</h3>
+        <h5>Medium App</h5>
         <p>Experience a richer experience on our mobile app!</p>
       </div>
-    </div>
-    <div class="actions">
-      <button open-button>Open in app</button>
+      <div class="actions">
+        <button open-button>Open In App</button>
+      </div>
     </div>
   </amp-app-banner>
 

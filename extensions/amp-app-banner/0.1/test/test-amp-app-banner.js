@@ -354,6 +354,10 @@ describe('amp-app-banner', () => {
         doc.body.appendChild(element);
         const banner = new AbstractAppBanner(element);
         banner.addDismissButton_();
+
+        const bannerTop = element.querySelector(
+            'i-amp-app-banner-top-padding');
+        expect(bannerTop).to.exist;
         const dismissBtn = element.querySelector(
             '.amp-app-banner-dismiss-button');
         expect(dismissBtn).to.not.be.null;
