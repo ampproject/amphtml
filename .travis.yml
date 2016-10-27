@@ -19,7 +19,7 @@ addons:
     - python-protobuf
 before_install:
   - |
-      [ -z "$(git diff --name-only $TRAVIS_COMMIT_RANGE)" ] || git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(\.(md|txt)$)|(^(examples|spec))/' || {
+      [ -z "$(git diff --name-only $TRAVIS_COMMIT_RANGE)" ] || git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(\.(md|txt)$)|(^spec)/' || {
         echo "Only docs were updated, stopping build process."
         exit
       }
