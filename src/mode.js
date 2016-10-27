@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import {urls} from './config';
+
+
+/** @type {string} */
+const thirdPartyFrameHost = urls.thirdPartyFrameHost;
+
+/** @type {boolean} */
+const urlsForceLocalDev = !!urls.localDev;
 
 /**
  * @typedef {{
@@ -77,6 +85,7 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const isLocalDev = IS_DEV && !!(win.location.hostname == 'localhost' ||
+      (urlsForceLocalDev && win.location.hostname == thirdPartyFrameHost) ||
       (win.location.ancestorOrigins && win.location.ancestorOrigins[0] &&
         win.location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.

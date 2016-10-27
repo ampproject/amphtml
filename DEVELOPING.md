@@ -127,6 +127,31 @@ For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) 
 
 Meantime, you can also use our automatic build on Heroku [link](http://amphtml-nightly.herokuapp.com/), which is normally built with latest head on master branch (please allow delay). The first time load is normally slow due to Heroku's free account throttling policy.
 
+To be able to test ads and third party frame make sure to `thirdPartyFrameHost`
+and `thirdPartyFrameRegex` in [src/config.js](src/config.js) and add a new
+attribute in the exported `urls` object with the key `localDev` and with
+boolean the value `true`. DO NOT push these changes with your pull request
+as these values should not be changed and should only be done for hosted testing
+purposes.
+
+Example:
+
+```js
+export const urls = {
+  thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
+  // Change the thirdPartyFrameHost
+  thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'my-heroku-app.herokuapp.com',
+  // Change the thirdPartyFrameRegex
+  thirdPartyFrameRegex: env['thirdPartyFrameRegex'] ||
+      /my-heroku-app\.herokuapp\.com/,
+  cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
+  errorReporting: env['errorReportingUrl'] ||
+      'https://amp-error-reporting.appspot.com/r',
+  // Add `localDev: true`
+  localDev: true
+};
+```
+
 ## Repository Layout
 <pre>
   3p/             - Implementation of third party sandbox iframes.
