@@ -185,15 +185,8 @@ function compile(entryModuleFilenames, outputDir,
         '!build/fake-module/src/polyfills/**/*.js'
       );
     } else {
-      srcs.push(
-        '!src/polyfills.js',
-        '!src/polyfills/**/*.js'
-      );
-      unneededFiles.push(
-          'build/fake-module/src/polyfills.js',
-          'build/fake-module/src/polyfills/document-contains.js',
-          'build/fake-module/src/polyfills/promise.js',
-          'build/fake-module/src/polyfills/math-sign.js');
+      srcs.push('!src/polyfills.js');
+      unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
@@ -227,8 +220,10 @@ function compile(entryModuleFilenames, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
-        rewrite_polyfills: !!(
-            options.includePolyfills || options.includeBasicPolyfills),
+        // We do not use the polyfills provided by closure compiler.
+        // If you need a polyfill. Manually include them in the
+        // respective top level polyfills.js files.
+        rewrite_polyfills: false,
         externs: externs,
         js_module_root: [
           'node_modules/',

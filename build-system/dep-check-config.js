@@ -67,6 +67,9 @@ exports.rules = [
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
+      '3p/**->src/mode.js',
+      '3p/polyfills.js->src/polyfills/math-sign.js',
+      '3p/polyfills.js->src/polyfills/object-assign.js',
     ],
   },
   {
@@ -130,8 +133,29 @@ exports.rules = [
     mustNotDependOn: 'src/base-element.js',
   },
   {
-    filesMatching: 'extensions/**/*.js',
+    filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills/**/*.js',
+    whitelist: [
+      // DO NOT add extensions/ files
+      '3p/polyfills.js->src/polyfills/math-sign.js',
+      '3p/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/*.js',
+      'src/polyfills.js->src/polyfills/document-contains.js',
+      'src/polyfills.js->src/polyfills/math-sign.js',
+      'src/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/promise.js',
+      'src/service/extensions-impl.js->src/polyfills/document-contains.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/polyfills.js',
+    whitelist: [
+      'src/amp.js->src/polyfills.js',
+      'src/service.js->src/polyfills.js',
+      'src/service/timer-impl.js->src/polyfills.js',
+      'src/service/extensions-impl.js->src/polyfills.js',
+    ],
   },
 
   // Rules for main src.
