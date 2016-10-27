@@ -220,6 +220,9 @@ function compile(entryModuleFilenames, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
+        // We do not use the polyfills provided by closure compiler.
+        // If you need a polyfill. Manually include them in the
+        // respective top level polyfills.js files.
         rewrite_polyfills: false,
         externs: externs,
         js_module_root: [
