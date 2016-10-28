@@ -99,6 +99,9 @@ export class Resource {
    */
   static setOwner(element, owner) {
     dev().assert(owner.contains(element), 'Owner must contain the element');
+    if (Resource.forElementOptional(element)) {
+      Resource.forElementOptional(element).owner_ = owner;
+    }
     element[OWNER_PROP_] = owner;
   }
 
