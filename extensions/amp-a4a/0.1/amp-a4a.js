@@ -612,7 +612,7 @@ export class AmpA4A extends AMP.BaseElement {
       return [];
     }
     const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
-      dev().assert(!endsWith(serviceName, '-dev'));
+      dev().assert(getMode().localDev || !endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
