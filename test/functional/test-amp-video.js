@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
 import {installVideo} from '../../builtins/amp-video';
-import {VideoEvents} from '../../src/video-interface';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
@@ -272,19 +270,6 @@ describe('amp-video', () => {
       sandbox.spy(video, 'pause');
       impl.pauseCallback();
       expect(video.pause.called).to.be.true;
-    });
-  });
-
-  it('should dispatch VideoEvents.USER_TAP event when tapped', () => {
-    return getVideo({
-      src: 'video.mp4',
-      width: 160,
-      height: 90,
-    }).then(v => {
-      const video = v.querySelector('video');
-      const p = listenOncePromise(v, VideoEvents.USER_TAP);
-      video.dispatchEvent(new Event('click'));
-      return p;
     });
   });
 
