@@ -122,6 +122,10 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.slidesContainer_ = this.win.document.createElement('div');
     this.slidesContainer_.classList.add('-amp-slides-container');
+    // Let screen reader know that this is a live area and changes
+    // to it (such after pressing next) should be announced to the
+    // user.
+    this.slidesContainer_.setAttribute('aria-live', 'polite');
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
