@@ -22,30 +22,6 @@ import {getModeObject} from './mode-object';
 const start = Date.now();
 
 /**
- * @const {!Array<!Error>}
- */
-const asyncErrorsThrownForTesting = [];
-
-
-/**
- * @param {!Error} error
- */
-function recordAsyncErrorForTesting(error) {
-  asyncErrorsThrownForTesting.push(error);
-}
-
-
-/**
- * @param {!Error} error
- * @visibleForTesting
- */
-export function removeAsyncErrorForTesting(error) {
-  asyncErrorsThrownForTesting.splice(
-      asyncErrorsThrownForTesting.indexOf(error), 1);
-}
-
-
-/**
  * Triple zero width space.
  *
  * This is added to user error messages, so that we can later identify
@@ -420,7 +396,6 @@ function createErrorVargs(var_args) {
  */
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
-  recordAsyncErrorForTesting(error);
   setTimeout(() => {throw error;});
 }
 

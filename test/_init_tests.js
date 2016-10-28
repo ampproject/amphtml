@@ -19,9 +19,6 @@ import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {
-  removeAsyncErrorForTesting,
-} from '../src/log';
-import {
   adopt,
   installAmpdocServices,
   installRuntimeServices,
@@ -43,7 +40,6 @@ adopt(window);
 
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
-
 
 /**
  * Helper class to skip or retry tests under specific environment.
@@ -157,15 +153,8 @@ sinon.sandbox.create = function(config) {
 
 beforeEach(beforeTest);
 
-
-let onAsyncErrorHandlers = [];
 function beforeTest() {
   activateChunkingForTesting();
-  window.onAsyncErrorForTesting = handler => onAsyncErrorHandlers.push(handler);
-  window.onerror = e => {
-    removeAsyncErrorForTesting(e);
-    onAsyncErrorHandlers.forEach(handler => handler(e));
-  };
   window.AMP_MODE = null;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
@@ -180,10 +169,7 @@ function beforeTest() {
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
-afterEach(function() {
-  onAsyncErrorHandlers = [];
-  window.onAsyncErrorForTesting = undefined;
-  window.onerror = null;
+afterEach(() => {
   const cleanupTagNames = ['link', 'meta'];
   if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.

@@ -430,28 +430,30 @@ describe('amp-form', () => {
         target: form,
         preventDefault: sandbox.spy(),
       };
-      let asyncErrorRejecter;
-      const asyncErrorPromise = new Promise((unusedResolve, reject) => {
-        asyncErrorRejecter = reject;
-      });
 
-      // Catch expected rethrown async error.
-      window.onAsyncErrorForTesting(e => {
-        asyncErrorRejecter(e);
+      const errors = [];
+      const realSetTimeout = window.setTimeout;
+      sandbox.stub(window, 'setTimeout', (callback, delay) => {
+        realSetTimeout(() => {
+          try {
+            callback();
+          } catch (e) {
+            errors.push(e);
+          }
+        }, delay);
       });
       ampForm.handleSubmit_(event);
       const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
-      return Promise.all([
-        asyncErrorPromise.should.be.eventually.rejectedWith(
-            /Form submission failed/),
-        timer.promise(5).then(() => {
-          expect(findTemplateStub.called).to.be.true;
-          expect(findTemplateStub).to.have.been.calledWith(
-              errorContainer, {message: 'hello there'});
-          // Check that form has a rendered div with class .submit-error-message.
-          renderedTemplate = form.querySelector('[i-amp-rendered]');
-          expect(renderedTemplate).to.not.be.null;
-        })]);
+      return timer.promise(5).then(() => {
+        expect(findTemplateStub).to.be.called;
+        expect(findTemplateStub).to.have.been.calledWith(
+            errorContainer, {message: 'hello there'});
+        // Check that form has a rendered div with class .submit-error-message.
+        renderedTemplate = form.querySelector('[i-amp-rendered]');
+        expect(renderedTemplate).to.not.be.null;
+        expect(errors.length).to.be.equal(1);
+        expect(errors[0].message).to.match(/Form submission failed/);
+      });
     });
   });
 
