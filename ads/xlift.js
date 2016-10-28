@@ -35,6 +35,9 @@ export function xlift(global, data) {
   d.addEventListener('FailureLoadedXliftAd', function() {
     global.context.noContentAvailable();
   });
+  
+  //assign XliftAmpHelper property to global(window)
+  global.XliftAmpHelper = null;
 
   loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
     if (!global.XliftAmpHelper) {
