@@ -94,6 +94,9 @@ describe('Types', () => {
       expect(types.map({}).__proto__).to.be.undefined;
       expect(types.map({}).toString).to.be.undefined;
       expect(types.map({foo: 'bar'}).foo).to.equal('bar');
+      const obj = {foo: 'bar', test: 1};
+      expect(types.map(obj).test).to.equal(1);
+      expect(types.map(obj)).to.not.equal(obj);
     });
   });
 });
