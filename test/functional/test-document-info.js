@@ -69,8 +69,6 @@ describe('document-info', () => {
     win.document.defaultView = win;
     installDocService(win, true);
     installDocumentInfoServiceForDoc(win.document);
-    expect(documentInfoForDoc(win.document).url).to.equal(
-        'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0');
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');
   });
@@ -88,6 +86,7 @@ describe('document-info', () => {
     };
     win.document.defaultView = win;
     installDocService(win, true);
+    installDocumentInfoServiceForDoc(win.document);
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');
     win.location.href = 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=1';

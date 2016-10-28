@@ -61,10 +61,10 @@ export class DocInfo {
     if (this.info_) {
       return this.info_;
     }
-
-    const url = this.ampdoc_.getUrl();
+    const ampdoc = this.ampdoc_;
+    const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
-    const rootNode = this.ampdoc_.getRootNode();
+    const rootNode = ampdoc.getRootNode();
     let canonicalUrl = rootNode && rootNode.AMP
         && rootNode.AMP.canonicalUrl;
     if (!canonicalUrl) {
@@ -73,8 +73,14 @@ export class DocInfo {
           ? parseUrl(canonicalTag.href).href
           : sourceUrl;
     }
-    const pageViewId = getPageViewId(this.ampdoc_.win);
-    return this.info_ = {url, sourceUrl, canonicalUrl, pageViewId};
+    const pageViewId = getPageViewId(ampdoc.win);
+    return this.info_ = {
+      get sourceUrl() {
+        return getSourceUrl(ampdoc.getUrl());
+      },
+      canonicalUrl,
+      pageViewId,
+    };
   }
 }
 
