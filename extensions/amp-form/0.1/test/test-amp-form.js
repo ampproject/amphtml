@@ -47,7 +47,8 @@ describe('amp-form', () => {
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
       const form = getForm(iframe.doc, button1, button2);
-      const ampForm = new AmpForm(form);
+      iframe.doc.body.appendChild(form);
+      const ampForm = new AmpForm(form, 'amp-form-test-id');
       return ampForm;
     });
   }
@@ -418,31 +419,40 @@ describe('amp-form', () => {
       errorTemplate.content.appendChild(
           document.createTextNode('Error: {{message}}'));
       errorContainer.appendChild(errorTemplate);
-      const renderedTemplate = document.createElement('div');
+      let renderedTemplate = document.createElement('div');
       renderedTemplate.innerText = 'Error: hello there';
-      let fetchJsonRejecter;
       sandbox.stub(ampForm.xhr_, 'fetchJson')
-          .returns(new Promise((unusedResolve, reject) => {
-            fetchJsonRejecter = reject;
-          }));
+          .returns(Promise.reject({responseJson: {message: 'hello there'}}));
       sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
-          .returns(new Promise(resolve => {
-            resolve(renderedTemplate);
-          }));
+          .returns(Promise.resolve(renderedTemplate));
       const event = {
         stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };
+
+      const errors = [];
+      const realSetTimeout = window.setTimeout;
+      sandbox.stub(window, 'setTimeout', (callback, delay) => {
+        realSetTimeout(() => {
+          try {
+            callback();
+          } catch (e) {
+            errors.push(e);
+          }
+        }, delay);
+      });
       ampForm.handleSubmit_(event);
-      fetchJsonRejecter({responseJson: {message: 'hello there'}});
+      const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
       return timer.promise(5).then(() => {
-        expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
-        expect(ampForm.templates_.findAndRenderTemplate.calledWith(
-            errorContainer, {message: 'hello there'})).to.be.true;
+        expect(findTemplateStub).to.be.called;
+        expect(findTemplateStub).to.have.been.calledWith(
+            errorContainer, {message: 'hello there'});
         // Check that form has a rendered div with class .submit-error-message.
-        const renderedTemplate = form.querySelector('[i-amp-rendered]');
+        renderedTemplate = form.querySelector('[i-amp-rendered]');
         expect(renderedTemplate).to.not.be.null;
+        expect(errors.length).to.be.equal(1);
+        expect(errors[0].message).to.match(/Form submission failed/);
       });
     });
   });
