@@ -19,6 +19,7 @@ import {
   mergeHtmlForTesting,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
+import {getStyle} from '../../src/style';
 import {extensionsFor} from '../../src/extensions';
 import {loadPromise} from '../../src/event-helper';
 import {resourcesForDoc} from '../../src/resources';
@@ -79,6 +80,9 @@ describe('friendly-iframe-embed', () => {
 
       // Iframe is made visible again.
       expect(iframe.style.visibility).to.equal('');
+      expect(embed.win.document.body.style.visibility).to.equal('visible');
+      expect(String(embed.win.document.body.style.opacity)).to.equal('1');
+      expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
 
       // BASE element has been inserted.
       expect(embed.win.document.querySelector('base').href)
@@ -341,7 +345,7 @@ describe('friendly-iframe-embed', () => {
       };
       contentWindow = {};
       contentDocument = {};
-      contentBody = {};
+      contentBody = {nodeType: 1, style: {}};
       container = {
         appendChild: () => {},
       };
@@ -424,6 +428,7 @@ describe('friendly-iframe-embed', () => {
         html: '<body></body>',
       });
       expect(polls).to.have.length(1);
+      iframe.contentWindow = contentWindow;
       loadListener();
       return embedPromise.then(() => {
         expect(polls).to.have.length(0);
@@ -436,6 +441,7 @@ describe('friendly-iframe-embed', () => {
         html: '<body></body>',
       });
       expect(polls).to.have.length(1);
+      iframe.contentWindow = contentWindow;
       errorListener();
       return embedPromise.then(() => {
         expect(polls).to.have.length(0);
