@@ -302,10 +302,10 @@ runner.run('Cache SW', () => {
     let clientId = 0;
     let fetch;
 
-    const request = new Request(url);
-    const compRequest = new Request(`https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp.js`);
-    const prevRequest = new Request(`https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp.js`);
-    const blacklistedRequest = new Request(`https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0/amp-comp.js`);
+    let request;
+    let compRequest;
+    let prevRequest;
+    let blacklistedRequest;
 
     function responseFromRequest(request) {
       return {
@@ -318,6 +318,11 @@ runner.run('Cache SW', () => {
     }
 
     beforeEach(() => {
+      request = new Request(url);
+      compRequest = new Request(`https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp.js`);
+      prevRequest = new Request(`https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp.js`);
+      blacklistedRequest = new Request(`https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0/amp-comp.js`);
+
       clientId++;
       fetch = sandbox.stub(window, 'fetch', req => {
         return Promise.resolve({
@@ -340,7 +345,11 @@ runner.run('Cache SW', () => {
     });
 
     describe('with non-RTV request', () => {
-      const rtvless = new Request(`https://cdn.ampproject.org/v0.js`);
+      let rtvless;
+
+      beforeEach(() => {
+        rtvless = new Request(`https://cdn.ampproject.org/v0.js`);
+      });
 
       it('fetches current prod RTV', () => {
         return sw.handleFetch(rtvless, clientId).then(resp => {
