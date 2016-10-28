@@ -100,7 +100,7 @@ export class Resource {
   static setOwner(element, owner) {
     dev().assert(owner.contains(element), 'Owner must contain the element');
     if (Resource.forElementOptional(element)) {
-      Resource.forElementOptional(element).owner_ = owner;
+      Resource.forElementOptional(element).updateOwner(owner);
     }
     element[OWNER_PROP_] = owner;
   }
@@ -186,6 +186,14 @@ export class Resource {
    */
   getId() {
     return this.id_;
+  }
+
+  /**
+   * Update owner element
+   * @param {!AmpElement} owner
+   */
+  updateOwner(owner) {
+    this.owner_ = owner;
   }
 
   /**
