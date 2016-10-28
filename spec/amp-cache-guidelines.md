@@ -6,7 +6,7 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 ## Preamble
 
-In the AMP ecosystem, the platform that links to content should get to freely choose which AMP Cache (if any) to use. It is an inversion of the typical model where content delivery is the responsibility of the publisher. 
+In the AMP ecosystem, the platform that links to content may freely choose which AMP Cache (if any) to use. It is an inversion of the typical model where content delivery is the responsibility of the publisher. 
 
 This allows platforms to provide their users with predictable load performance and among other things allows them to ensure required security and privacy invariants during AMP’s pre-rendering phase.
 
