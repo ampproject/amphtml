@@ -479,7 +479,7 @@ describe('amp-user-notification', () => {
     });
   });
 
-  it('should have an default `role` if unspecified', () => {
+  it('should have a default `role` if unspecified', () => {
     return getUserNotification({ id: 'n1' }).then(el => {
       const impl = el.implementation_;
       impl.buildCallback();
