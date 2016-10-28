@@ -36,9 +36,8 @@ export function xlift(global, data) {
     global.context.noContentAvailable();
   });
 
-  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
-    global.XliftAmpHelper = global.XliftAmpHelper || null;
-    if (global.XliftAmpHelper == null) {
+  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {    
+    if (!global.XliftAmpHelper) {
       global.context.noContentAvailable();
     }
     else {

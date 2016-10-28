@@ -31,7 +31,5 @@ For configuration details and to generate your tags, please contact https://www.
 
 Supported parameters:
 
-- width
-- height
-- data-mediaid
+- data-mediaid: For loading javascripts each media. This parameter is required.
 
