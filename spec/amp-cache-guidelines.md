@@ -36,11 +36,11 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
     1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
 
-9. Provides a faithful visual and UX reproduction of source document, although visually imperceptible changes in image resolution or compression rate are acceptable.  
+9. Provides a faithful visual and UX reproduction of source document. E.g. changes in image resolution or compression rate may be acceptable if they provide strong benefits in terms of bandwidth usage and load time.
 
-10. No obstruction of the contents of the original AMP document. 
+10. No obstruction of the contents, branding or attribution of the original AMP document. 
 
-11. No changes to ads, access, analytics, or similar.
+11. No changes to ads, monetization, access (paywall monetization and similar), analytics, or similar.
 
 12. Respects all resource deletions within a reasonable timeframe.
 
