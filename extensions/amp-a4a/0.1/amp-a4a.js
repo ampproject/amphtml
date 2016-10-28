@@ -240,9 +240,9 @@ export class AmpA4A extends AMP.BaseElement {
     // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
     // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
     this.preconnect.url(SAFEFRAME_IMPL_PATH);
-    //if (!this.config) {
-    //  return;
-    //}
+    if (!this.config) {
+      return;
+    }
     const preconnect = this.config.preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
@@ -447,7 +447,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   promiseErrorHandler_(error) {
-    console.log('promiseErrorHandler_', error);
     if (error && error.message) {
       if (error.message.indexOf('amp-a4a: ') == 0) {
         // caught previous call to promiseErrorHandler?  Infinite loop?
@@ -483,7 +482,6 @@ export class AmpA4A extends AMP.BaseElement {
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
     return this.adPromise_.then(rendered => {
-      console.log('layoutCallback after promise: ' + rendered);
       if (rendered instanceof Error || !rendered) {
         this.lifecycleReporter.sendPing('preAdThrottle');
         incrementLoadingAds(this.win);
