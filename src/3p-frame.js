@@ -220,8 +220,9 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
       return overrideBootstrapBaseUrl;
     }
     return getAdsLocalhost(parentWindow)
-        + '/dist.3p/current'
-        + (getMode().minified ? '-min/frame' : '/frame.max')
+        + '/dist.3p/'
+        + (getMode().minified ? '$internalRuntimeVersion$/frame'
+            : 'current/frame.max')
         + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +

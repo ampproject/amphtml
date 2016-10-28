@@ -51,6 +51,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
+| `gulp build --fortesting`<sup>[[1]](#footnote-1)</sup>                  | Builds the AMP library and will read the AMP_TESTING_HOST environment variable to write out an override AMP_CONFIG. |
 | `gulp build --css-only`<sup>[[1]](#footnote-1)</sup>                    | Builds only the embedded css into js files for the AMP library.       |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`                                                              | Recompile css to build directory.                                     |
@@ -127,30 +128,10 @@ For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) 
 
 Meantime, you can also use our automatic build on Heroku [link](http://amphtml-nightly.herokuapp.com/), which is normally built with latest head on master branch (please allow delay). The first time load is normally slow due to Heroku's free account throttling policy.
 
-To be able to test ads and third party frame make sure to `thirdPartyFrameHost`
-and `thirdPartyFrameRegex` in [src/config.js](src/config.js) and add a new
-attribute in the exported `urls` object with the key `localDev` and with
-boolean the value `true`. DO NOT push these changes with your pull request
-as these values should not be changed and should only be done for hosted testing
-purposes.
-
-Example:
-
-```js
-export const urls = {
-  thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
-  // Change the thirdPartyFrameHost
-  thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'my-heroku-app.herokuapp.com',
-  // Change the thirdPartyFrameRegex
-  thirdPartyFrameRegex: env['thirdPartyFrameRegex'] ||
-      /my-heroku-app\.herokuapp\.com/,
-  cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
-  errorReporting: env['errorReportingUrl'] ||
-      'https://amp-error-reporting.appspot.com/r',
-  // Add `localDev: true`
-  localDev: true
-};
-```
+To correctly get ads and third party working when testing on hosted services
+you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
+is done through
+`heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
 
 ## Repository Layout
 <pre>
