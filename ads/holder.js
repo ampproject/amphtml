@@ -21,37 +21,15 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function holder(global, data) {
-  validateData(data, ['placement'], ['width', 'height', 'optin', 'keyvalue']);
-
-  let url = 'https://h.holder.com.ua' +
-      '/s?' +
-      'p=' + encodeURIComponent(data.placement) +
-      '&w=' + encodeURIComponent(data.width) +
-      '&h=' + encodeURIComponent(data.height) +
-      '&optin=' + encodeURIComponent(data.optin) +
-      '&tz=' + new Date().getTimezoneOffset();
-
-  const value = data.keyvalue;
-  let newData = '';
-  const amps = '&';
-  let validKey = 0;
-
-  if (value && value.length > 0) {
-    const keys = value.split('&');
-    for (let i = 0; i < keys.length; i++)
-    {
-      if (!keys[i]) {continue;}
-      const segment = keys[i].split('=');
-      const segment1 = (segment[1] ? encodeURIComponent(segment[1]) : '');
-      if (validKey > 0) {
-        newData += amps;
-      }
-      validKey++;
-      newData += segment[0] + '=' + segment1;
-    }
-  }
-  if (newData) {
-    url += '&' + newData;
-  }
-  writeScript(global, url);
+  validateData(data, ['block'], []);
+  
+  var d = document,
+  wl = window.location,
+  l = "&r" + Math.round((Math.random() * 10000000)),
+  n = navigator.userAgent;
+  d.cookie = "b=1; path=/";
+  if (d.cookie.indexOf('b=') != -1 && !(n.indexOf('Safari') != -1 && n.indexOf('Chrome') == -1)) l += "&c1";
+  l += "&" + escape((self != top) ? "f" + d.referrer : "h" + wl.href);
+	  
+  writeScript(global, 'https://h.holder.com.ua/s?tj&b7101' + );
 }
