@@ -33,6 +33,7 @@ import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
+import * as trackPromise from '../../src/impression';
 import * as sinon from 'sinon';
 
 
@@ -198,6 +199,9 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SOURCE_URL and _HOST', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOST/);
@@ -205,10 +209,29 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SOURCE_URL and _HOSTNAME', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOSTNAME/);
     });
+  });
+
+  it('should update SOURCE_URL after track impression', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://wrong.com');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return new Promise(resolve => {
+        win.location = parseUrl('https://example.com?gclid=123456');
+        resolve();
+      });
+    });
+    return installUrlReplacementsServiceForDoc(win.ampdoc)
+      .expandAsync('?url=SOURCE_URL')
+      .then(res => {
+        expect(res).to.contain('example.com');
+      });
   });
 
   it('should replace SOURCE_PATH', () => {
@@ -727,10 +750,19 @@ describe('UrlReplacements', () => {
 
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?query_string_param1=foo');
+    win.location = parseUrl('https://example.com?query_string_param1=wrong');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return new Promise(resolve => {
+        win.location =
+            parseUrl('https://example.com?query_string_param1=foo');
+        resolve();
+        console.log('promise resolve');
+      });
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
+        console.log('compare happend', res);
         expect(res).to.match(/sh=foo&s/);
       });
   });
@@ -738,6 +770,9 @@ describe('UrlReplacements', () => {
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
@@ -748,6 +783,9 @@ describe('UrlReplacements', () => {
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
       .then(res => {
@@ -758,6 +796,9 @@ describe('UrlReplacements', () => {
   it('should collect vars', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com?p1=foo');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
         .collectVars('?SOURCE_HOST&QUERY_PARAM(p1)&SIMPLE&FUNC&PROMISE', {
           'SIMPLE': 21,
