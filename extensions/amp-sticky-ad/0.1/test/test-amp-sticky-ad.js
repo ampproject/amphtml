@@ -377,28 +377,4 @@ describe('amp-sticky-ad', () => {
           .to.be.true;
     });
   });
-
-  it.only('should display for corner case that even ad load before', () => {
-    return getAmpStickyAd().then(obj => {
-      const stickyAdElement = obj.ampStickyAd;
-      const impl = stickyAdElement.implementation_;
-      impl.vsync_.mutate = function(callback) {
-        callback();
-      };
-      return impl.ad_.layoutCallback().then(() => {
-        return;
-        const promise = new Promise(resolve => {
-          impl.ad_.addEventListener('amp:load:end', () => {
-            resolve();
-          });
-        });
-        impl.scheduleLayoutForAd_();
-        return promise.then(() => {
-          expect(stickyAdElement).to.have.attribute('visible');
-          expect(stickyAdElement.classList.contains('amp-sticky-ad-loaded'))
-          .to.be.true;
-        });
-      });
-    });
-  });
 });
