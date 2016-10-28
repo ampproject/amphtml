@@ -138,6 +138,12 @@ export class AmpUserNotification extends AMP.BaseElement {
       assertHttpsUrl(this.dismissHref_, this.element);
     }
 
+    // Default to alert role if unspecified.
+    const roleAttribute = this.element.getAttribute('role');
+    if (!roleAttribute) {
+      this.element.setAttribute('role', 'alert');
+    }
+
     const persistDismissal = this.element.getAttribute(
         'data-persist-dismissal');
     /** @private @const {boolean} */
