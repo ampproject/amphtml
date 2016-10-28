@@ -116,6 +116,8 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
 - [Kargo](../../ads/kargo.md)
+- [Kixer](../../ads/kixer.md)
+- [Ligatus](../../ads/ligatus.md)
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
@@ -137,6 +139,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Smart AdServer](../../ads/smartadserver.md)
+- [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
 - [Teads](../../ads/teads.md)
@@ -144,10 +147,12 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)
+- [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
 
 ## Supported embed types
@@ -206,6 +211,17 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 ```
 
 - If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
+
+
+## Serving video ads
+AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here] (../README.md#audiovideo).
+
+If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+
+When using `amp-iframe` approach:
+ - Make sure there is a poster if loading the player in the first viewport. [Details](../amp-iframe/amp-iframe.md#iframe-with-placeholder).
+ - Video and poster have to be served over HTTPS.
+
 
 ## Running ads from a custom domain
 

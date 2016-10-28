@@ -200,7 +200,7 @@ export function onDocumentElementClick_(
     timerFor(win).delay(() => viewport./*OK*/scrollIntoView(
         dev().assertElement(elem)), 1);
   } else {
-    dev().warn('documentElement',
+    dev().warn('HTML',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 

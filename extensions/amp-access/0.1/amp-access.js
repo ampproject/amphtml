@@ -18,6 +18,7 @@ import {AccessClientAdapter} from './amp-access-client';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
+import {AccessVendorAdapter} from './amp-access-vendor';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
 import {actionServiceForDoc} from '../../../src/action';
@@ -56,6 +57,7 @@ const TAG = 'amp-access';
 const AccessType = {
   CLIENT: 'client',
   SERVER: 'server',
+  VENDOR: 'vendor',
   OTHER: 'other',
 };
 
@@ -188,6 +190,17 @@ export class AccessService {
   }
 
   /**
+   * @param {string} name
+   * @param {./access-vendor.AccessVendor} vendor
+   */
+  registerVendor(name, vendor) {
+    user().assert(this.type_ == AccessType.VENDOR,
+        'Acccess vendor "%s" can only be used for "type=vendor"', name);
+    const vendorAdapter = /** @type {!AccessVendorAdapter} */ (this.adapter_);
+    vendorAdapter.registerVendor(name, vendor);
+  }
+
+  /**
    * @param {!JSONType} configJson
    * @return {!AccessTypeAdapterDef}
    * @private
@@ -209,6 +222,8 @@ export class AccessService {
           return new AccessServerJwtAdapter(this.win, configJson, context);
         }
         return new AccessServerAdapter(this.win, configJson, context);
+      case AccessType.VENDOR:
+        return new AccessVendorAdapter(this.win, configJson, context);
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
     }
@@ -222,7 +237,14 @@ export class AccessService {
   buildConfigType_(configJson) {
     let type = configJson['type'] ?
         user().assertEnumValue(AccessType, configJson['type'], 'access type') :
-        AccessType.CLIENT;
+        null;
+    if (!type) {
+      if (configJson['vendor']) {
+        type = AccessType.VENDOR;
+      } else {
+        type = AccessType.CLIENT;
+      }
+    }
     if (type == AccessType.SERVER && !this.isServerEnabled_) {
       user().warn(TAG, 'Experiment "amp-access-server" is not enabled.');
       type = AccessType.CLIENT;

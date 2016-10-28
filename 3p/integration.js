@@ -74,6 +74,8 @@ import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {kargo} from '../ads/kargo';
+import {kixer} from '../ads/kixer';
+import {ligatus} from '../ads/ligatus';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -95,6 +97,7 @@ import {revcontent} from '../ads/revcontent';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {smartadserver} from '../ads/smartadserver';
+import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {taboola} from '../ads/taboola';
@@ -103,10 +106,12 @@ import {triplelift} from '../ads/triplelift';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
+import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
+import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
@@ -115,11 +120,12 @@ import {zucks} from '../ads/zucks';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  taboola: true,
+  _ping_: true,
   'mantis-recommend': true,
   plista: true,
+  smartclip: true,
+  taboola: true,
   zergnet: true,
-  _ping_: true,
 };
 
 const data = parseFragment(location.hash);
@@ -171,6 +177,8 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('kargo', kargo);
+register('kixer', kixer);
+register('ligatus', ligatus);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -193,6 +201,7 @@ register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
 register('smartadserver', smartadserver);
+register('smartclip', smartclip);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('taboola', taboola);
@@ -202,11 +211,13 @@ register('twitter', twitter);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
+register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
+register('zedo', zedo);
 register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe

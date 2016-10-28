@@ -46,6 +46,7 @@ import {
 } from './crypto-verifier';
 import {isExperimentOn} from '../../../src/experiments';
 import {handleClick} from '../../../ads/alp/handler';
+import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -78,7 +79,27 @@ function isValidOffsetArray(ary) {
       typeof ary[1] === 'number';
 }
 
+/** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
+
+// TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
+// acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
+// cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
+/** @type {string} */
+const SAFEFRAME_VERSION = '1-0-4';
+/** @type {string} */
+const SAFEFRAME_IMPL_PATH =
+    'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
+    '/html/container.html';
+/** @type {string} @visibleForTesting */
+export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+/** @type {!Object} @private */
+const SHARED_IFRAME_PROPERTIES = {
+  frameborder: '0',
+  allowfullscreen: '',
+  allowtransparency: '',
+  scrolling: 'no',
+};
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
 export let AdResponseDef;
@@ -101,22 +122,29 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    dev().assert(AMP.AmpAdApiHandler);
+    dev().assert(AMP.AmpAdUIHandler);
+    dev().assert(AMP.AmpAdXOriginIframeHandler);
 
     /** @private {?Promise<!boolean>} */
     this.adPromise_ = null;
 
     /**
      * @private {number} unique ID of the currently executing promise to allow
-     *    for cancellation.
+     * for cancellation.
      */
     this.promiseId_ = 0;
+
+    /** {?Object} */
+    this.config = null;
 
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?AMP.AmpAdApiHandler} */
-    this.apiHandler_ = null;
+    /** {?AMP.AmpAdUIHandler} */
+    this.uiHandler = null;
+
+    /** @private {?AMP.AmpAdXOriginIframeHandler} */
+    this.xOriginIframeHandler_ = null;
 
     /** @private {boolean} */
     this.rendered_ = false;
@@ -133,8 +161,18 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     this.keyInfoSetPromises_ = this.getKeyInfoSets_();
 
-    this.lifecycleReporter_ = getLifecycleReporter(this, 'a4a');
-    this.lifecycleReporter_.sendPing('adSlotBuilt');
+    // TODO(tdrl): Temporary, while we're verifying whether this is an
+    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src
+    // from cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
+    /** @private {?ArrayBuffer} */
+    this.creativeBody_ = null;
+    /** @private {?string} */
+    this.experimentalNonAmpCreativeRenderMethod_ = null;
+
+    /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
+    this.lifecycleReporter = getLifecycleReporter(this, 'a4a');
+    // Note: The reporting ping should be the last action in the constructor.
+    this.lifecycleReporter.sendPing('adSlotBuilt');
   }
 
   /** @override */
@@ -149,6 +187,14 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    const adType = this.element.getAttribute('type');
+    this.config = adConfig[adType] || {};
+    this.uiHandler = new AMP.AmpAdUIHandler(this);
+    this.uiHandler.init();
   }
 
   /** @override */
@@ -194,7 +240,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const preconnect = adConfig[this.element.getAttribute('type')].preconnect;
+    const preconnect = this.config.preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
@@ -210,12 +256,16 @@ export class AmpA4A extends AMP.BaseElement {
         this.preconnect.url(p, true);
       });
     }
+    // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
+    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
+    // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
+    this.preconnect.url(SAFEFRAME_IMPL_PATH);
   }
 
   /** @override */
   onLayoutMeasure() {
-    if (this.apiHandler_) {
-      this.apiHandler_.onLayoutMeasure();
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.onLayoutMeasure();
     }
     if (this.layoutMeasureExecuted_ || !isCryptoAvailable()) {
       // onLayoutMeasure gets called multiple times.
@@ -263,7 +313,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter_.sendPing('urlBuilt');
+          this.lifecycleReporter.sendPing('urlBuilt');
           return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
@@ -281,7 +331,13 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
-          this.lifecycleReporter_.sendPing('adRequestEnd');
+          this.lifecycleReporter.sendPing('adRequestEnd');
+          // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
+          // an acceptable solution to the 'Safari on iOS doesn't fetch
+          // iframe src from cache' issue.  See
+          // https://github.com/ampproject/amphtml/issues/5614
+          this.experimentalNonAmpCreativeRenderMethod_ =
+              fetchResponse.headers.get(RENDERING_TYPE_HEADER);
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -303,7 +359,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(responseParts => {
           checkStillCurrent(promiseId);
           if (responseParts) {
-            this.lifecycleReporter_.sendPing('extractCreativeAndSignature');
+            this.lifecycleReporter.sendPing('extractCreativeAndSignature');
           }
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
@@ -313,10 +369,20 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(creativeParts => {
           checkStillCurrent(promiseId);
+          // Keep a handle to the creative body so that we can render into
+          // SafeFrame later, if necessary.  TODO(tdrl): Temporary, while we
+          // assess whether this is the right solution to the Safari+iOS iframe
+          // src cache issue.  If we decide to keep a SafeFrame-like solution,
+          // we should restructure the promise chain to pass this info along
+          // more cleanly, without use of an object variable outside the chain.
+          if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
+              creativeParts && creativeParts.creative) {
+            this.creativeBody_ = creativeParts.creative;
+          }
           if (!creativeParts || !creativeParts.signature) {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
-          this.lifecycleReporter_.sendPing('adResponseValidateStart');
+          this.lifecycleReporter.sendPing('adResponseValidateStart');
 
           // For each signing service, we have exactly one Promise,
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
@@ -416,29 +482,34 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
-    this.lifecycleReporter_.sendPing('preAdThrottle');
+    this.lifecycleReporter.sendPing('preAdThrottle');
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
-      if (rendered instanceof Error) {
-        // If we got as far as getting a URL, then load the ad, but note the
-        // error.
-        if (this.adUrl_) {
-          this.renderViaCrossDomainIframe_(true);
+      if (rendered instanceof Error || !rendered) {
+        // Haven't rendered yet, so try rendering via one of our
+        // cross-domain iframe solutions.
+        if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
+            this.creativeBody_) {
+          this.renderViaSafeFrame_(this.creativeBody_);
+          this.creativeBody_ = null;  // Free resources.
+          this.experimentalNonAmpCreativeRenderMethod_ = null;
+        } else if (this.adUrl_) {
+          this.renderViaCachedContentIframe_(this.adUrl_, true);
+        } else {
+          throw new Error('No creative or URL available -- A4A can\'t render' +
+              ' any ad');
         }
+      }
+      if (rendered instanceof Error) {
         throw rendered;
       }
-      if (!rendered) {
-        // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
-        // has already executed so can do so immediately.
-        this.renderViaCrossDomainIframe_(true);
-      }
-      this.rendered_ = true;
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
   }
 
   /** @override  */
   unlayoutCallback() {
-    this.lifecycleReporter_.sendPing('adSlotCleared');
+    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.lifecycleReporter.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
@@ -452,11 +523,13 @@ export class AmpA4A extends AMP.BaseElement {
 
       this.adPromise_ = null;
       this.adUrl_ = null;
+      this.creativeBody_ = null;
+      this.experimentalNonAmpCreativeRenderMethod_ = null;
       this.rendered_ = false;
       this.timerId_ = 0;
-      if (this.apiHandler_) {
-        this.apiHandler_.unlayoutCallback();
-        this.apiHandler_ = null;
+      if (this.xOriginIframeHandler_) {
+        this.xOriginIframeHandler_.freeXOriginIframe();
+        this.xOriginIframeHandler_ = null;
       }
       this.layoutMeasureExecuted_ = false;
     });
@@ -467,8 +540,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.apiHandler_) {
-      this.apiHandler_.viewportCallback(inViewport);
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
   }
 
@@ -506,7 +579,7 @@ export class AmpA4A extends AMP.BaseElement {
    * publisher page.  To be overridden by network implementations as needed.
    */
   onAmpCreativeRender() {
-    this.lifecycleReporter_.sendPing('renderFriendlyEnd');
+    this.lifecycleReporter.sendPing('renderFriendlyEnd');
   }
 
   /**
@@ -516,7 +589,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   sendXhrRequest_(adUrl) {
-    this.lifecycleReporter_.sendPing('adRequestStart');
+    this.lifecycleReporter.sendPing('adRequestStart');
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
@@ -602,7 +675,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeRenderAmpAd_(bytes) {
-    this.lifecycleReporter_.sendPing('renderFriendlyStart');
+    this.lifecycleReporter.sendPing('renderFriendlyStart');
     // Timer id will be set if we have entered layoutCallback at which point
     // 3p throttling count was incremented.  We want to "release" the throttle
     // immediately since we now know we are not a 3p ad.
@@ -617,28 +690,15 @@ export class AmpA4A extends AMP.BaseElement {
         // Could not find appropriate markers within the creative therefore
         // load within cross domain iframe. Iframe is created immediately
         // (as opposed to waiting for layoutCallback) as the the creative has
-        // been verified as AMP and will run efficiently.
-        this.renderViaCrossDomainIframe_();
+        // been verified as AMP and will run efficiently.  Render inside a
+        // vsync block so that AMP can coordinate visual impact.
+        this.vsync_.mutate(() => {
+          dev().assert(this.adUrl_, 'Ad URL missing in A4A creative rendering');
+          this.renderViaCachedContentIframe_(this.adUrl_);
+        });
         return true;
       } else {
         try {
-          // Note: We schedule DOM mutations via the Vsync handler system to
-          // avoid user-visible rewrites.  However, that means that rendering
-          // is being handled outside this promise chain.  There are two
-          // consequences, both *probably* minor:
-          // 1) If everything succeeds, the promise chain will resolve(true)
-          //    before any content is actually rendered.  Thus, the enclosing
-          //    layoutCallback will think that stuff is rendered before it
-          //    actually is.  This shouldn't be a problem, though, because
-          //    vsync will *eventually* get around to rendering it.
-          // 2) If any of the calls in this block fails, they will do so outside
-          //    the try/catch block, so we won't have any notification of
-          //    failure.  As a result, the outside world will see
-          //    Promise.resolve(true), even though things have failed.  That
-          //    would cause render-in-iframe to be skipped, even though
-          //    render-in-DOM failed, and no ad would be displayed.  However,
-          //    all of the enclosed mutations are fairly simple and unlikely
-          //    to fail.
           // Create and setup friendly iframe.
           dev().assert(!!this.element.ownerDocument);
           const iframe = /** @type {!HTMLIFrameElement} */(
@@ -694,38 +754,75 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Shared functionality for cross-domain iframe-based rendering methods.
+   * @param {!Element} iframe Iframe to render.  Should be fully configured
+   * (all attributes set), but not yet attached to DOM.
+   * @param is3p Whether the content is 3p / general HTML vs. verified A4A.
+   * @private
+   */
+  iframeRenderHelper_(iframe, is3p) {
+    // TODO(keithwrightbos): noContentCallback?
+    this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
+    // TODO(keithwrightbos): init returns load event, do we need to wait?
+    // Set opt_defaultVisible to true as 3p draw code never executed causing
+    // render-start event never to fire which will remove visiblity hidden.
+    this.xOriginIframeHandler_.init(iframe,
+        is3p, /* opt_defaultVisible */ true, /* opt_isA4A */ true);
+    this.rendered_ = true;
+  }
+
+  /**
    * Creates iframe whose src matches that of the ad URL.  The response should
    * have been cached causing the browser to render without callout.  However,
    * it is possible for cache miss to occur which can be detected server-side
    * by missing ORIGIN header.
+   *
+   * Note: As of 2016-10-18, the fill-from-cache assumption appears to fail on
+   * Safari-on-iOS, which issues a fresh network request, even though the
+   * content is already in cache.
+   *
+   * @param {string} adUrl  Ad request URL, as sent to #sendXhrRequest_ (i.e.,
+   *    before any modifications that XHR module does to it.)
    * @param {boolean=} opt_isNonAmpCreative whether creative within iframe
    *    is AMP creative (if not, intersection observer allows sending info into
    *    nested frames).
    * @private
    */
-  renderViaCrossDomainIframe_(opt_isNonAmpCreative) {
-    user().assert(this.adUrl_, 'adUrl missing in renderViaCrossDomainIframe_?');
-    this.lifecycleReporter_.sendPing('renderCrossDomainStart');
+  renderViaCachedContentIframe_(adUrl, opt_isNonAmpCreative) {
+    this.lifecycleReporter.sendPing('renderCrossDomainStart');
     /** @const {!Element} */
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('height', this.element.getAttribute('height'));
-    iframe.setAttribute('width', this.element.getAttribute('width'));
-    // XHR request modifies URL by adding origin as parameter.  Need to append
-    // ad URL otherwise cache will miss.
-    // TODO: remove call to getCorsUrl and instead have fetch API return
-    // modified url.
-    iframe.setAttribute(
-        'src', xhrFor(this.win).getCorsUrl(this.win, this.adUrl_));
-    this.vsync_.mutate(() => {
-      // TODO(keithwrightbos): noContentCallback?
-      this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
-      // TODO(keithwrightbos): startup returns load event, do we need to wait?
-      // Set opt_defaultVisible to true as 3p draw code never executed causing
-      // render-start event never to fire which will remove visiblity hidden.
-      this.apiHandler_.startUp(
-          iframe, /* is3p */ !!opt_isNonAmpCreative,
-          /* opt_defaultVisible */ true);
-      this.rendered_ = true;
+    const iframe = createElementWithAttributes(
+        /** @type {!Document} */(this.element.ownerDocument),
+        'iframe', Object.assign({
+          'height': this.element.getAttribute('height'),
+          'width': this.element.getAttribute('width'),
+          // XHR request modifies URL by adding origin as parameter.  Need to
+          // append ad URL, otherwise cache will miss.
+          // TODO: remove call to getCorsUrl and instead have fetch API return
+          // modified url.
+          'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        }, SHARED_IFRAME_PROPERTIES));
+    this.iframeRenderHelper_(iframe, /* is3p */ !!opt_isNonAmpCreative);
+  }
+
+  /**
+   * Render creative via SafeFrame.
+   * @param {!ArrayBuffer} creativeBody  The creative, as raw bytes.
+   * @private
+   */
+  renderViaSafeFrame_(creativeBody) {
+    this.lifecycleReporter.sendPing('renderSafeFrameStart');
+    utf8Decode(creativeBody).then(creative => {
+      /** @const {!Element} */
+      const iframe = createElementWithAttributes(
+          /** @type {!Document} */(this.element.ownerDocument),
+          'iframe', Object.assign({
+            'height': this.element.getAttribute('height'),
+            'width': this.element.getAttribute('width'),
+            'src': SAFEFRAME_IMPL_PATH + '?n=0',
+            'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
+          }, SHARED_IFRAME_PROPERTIES));
+      this.iframeRenderHelper_(iframe, true);
     });
   }
 
