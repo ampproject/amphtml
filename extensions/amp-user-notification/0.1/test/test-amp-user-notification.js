@@ -479,6 +479,22 @@ describe('amp-user-notification', () => {
     });
   });
 
+  it('should have a default `role` if unspecified', () => {
+    return getUserNotification({id: 'n1'}).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(el.getAttribute('role')).to.equal('alert');
+    });
+  });
+
+  it('should not override `role` if specified', () => {
+    return getUserNotification({id: 'n1', role: 'status'}).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(el.getAttribute('role')).to.equal('status');
+    });
+  });
+
   describe('buildGetHref_', () => {
 
     it('should do url replacement', () => {
