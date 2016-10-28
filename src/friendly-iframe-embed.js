@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {dev, rethrowAsync} from './log';
 import {escapeHtml} from './dom';
 import {extensionsFor} from './extensions';
 import {getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './resources';
-import {rethrowAsync} from './log';
+import {setStyles} from './style';
 
 
 /**
@@ -148,11 +149,19 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
   }
 
   return readyPromise.then(() => {
+    const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        /** @type {!Window} */(iframe.contentWindow), spec.extensionIds || []);
+        childWin, spec.extensionIds || []);
     // Ready to be shown.
     iframe.style.visibility = '';
+    if (childWin.document && childWin.document.body) {
+      setStyles(dev().assertElement(childWin.document.body), {
+        opacity: 1,
+        visibility: 'visible',
+        animation: 'none',
+      });
+    }
     return new FriendlyIframeEmbed(iframe, spec, loadedPromise);
   });
 }
