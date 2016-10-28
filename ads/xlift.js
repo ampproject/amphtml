@@ -36,7 +36,7 @@ export function xlift(global, data) {
     global.context.noContentAvailable();
   });
 
-  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {    
+  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
     if (!global.XliftAmpHelper) {
       global.context.noContentAvailable();
     }
