@@ -16,7 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {analyticsForOrNull} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -93,9 +93,6 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
 
-    /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
-    this.analyticsPromise_ = null;
-
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -108,8 +105,6 @@ export class AmpSlideScroll extends BaseSlides {
   }
   /** @override */
   buildSlides() {
-    this.analyticsPromise_ = analyticsForOrNull(this.win);
-
     this.vsync_ = this.getVsync();
 
     this.hasNativeSnapPoints_ = (
@@ -594,13 +589,6 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    if (this.analyticsPromise_) {
-      this.analyticsPromise_.then(analytics => {
-        if (!analytics) {
-          return;
-        }
-        analytics.triggerEvent(eventType, vars);
-      });
-    }
+    triggerAnalyticsEvent(this.win, eventType, vars);
   }
 }
