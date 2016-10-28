@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
-import {createAmpElementProto} from '../../src/custom-element';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {VideoEvents} from '../../src/video-interface';
 import {videoManagerForDoc} from '../../src/video-manager';
@@ -33,13 +31,9 @@ describe('Fake Video Player Integration Tests', () => {
   // of functional testing. Same tests run on real video players such as
   // `amp-video` and `amp-youtube` as part of integration testing.
   runVideoPlayerIntegrationTests(fixture => {
-    fixture.doc.registerElement('amp-test-fake-videoplayer', {
-      prototype: createAmpElementProto(fixture.win, 'amp-test-fake-videoplayer',
-          FakeVideoPlayer),
-    });
-
-    const video = fixture.doc.createElement('amp-test-fake-videoplayer');
-    return video;
+    fixture.win.AMP.registerElement('amp-test-fake-videoplayer',
+      createFakeVideoPlayerClass(fixture.win));
+    return fixture.doc.createElement('amp-test-fake-videoplayer');
   });
 });
 
@@ -156,93 +150,95 @@ describe('Supports Autoplay', () => {
   });
 });
 
-/**
- * @implements {../../src/video-interface.VideoInterface}
- */
-class FakeVideoPlayer extends BaseElement {
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  buildCallback() {
-    videoManagerForDoc(this.win.document).register(this);
-  }
-
-  /** @override */
-  layoutCallback() {
-    return Promise.resolve().then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
-
+function createFakeVideoPlayerClass(win) {
   /**
-   * @override
+   * @implements {../../src/video-interface.VideoInterface}
    */
-  supportsPlatform() {
-    return true;
-  }
+  return class FakeVideoPlayer extends win.AMP.BaseElement {
 
-  /**
-   * @override
-   */
-  isInteractive() {
-    return true;
-  }
+    /** @param {!AmpElement} element */
+    constructor(element) {
+      super(element);
+    }
 
-  /**
-   * @override
-   */
-  play(unusedIsAutoplay) {
-    Promise.resolve().then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    });
-  }
+    /** @override */
+    isLayoutSupported(layout) {
+      return isLayoutSizeDefined(layout);
+    }
 
-  /**
-   * @override
-   */
-  pause() {
-    Promise.resolve().then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    });
-  }
+    /** @override */
+    buildCallback() {
+      videoManagerForDoc(this.win.document).register(this);
+    }
 
-  /**
-   * @override
-   */
-  mute() {
-  }
+    /** @override */
+    layoutCallback() {
+      return Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
+    }
 
-  /**
-   * @override
-   */
-  unmute() {
-  }
+    /** @override */
+    viewportCallback(visible) {
+      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+    }
 
-  /**
-   * @override
-   */
-  showControls() {
-  }
+    // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
-  /**
-   * @override
-   */
-  hideControls() {
-  }
+    /**
+     * @override
+     */
+    supportsPlatform() {
+      return true;
+    }
+
+    /**
+     * @override
+     */
+    isInteractive() {
+      return true;
+    }
+
+    /**
+     * @override
+     */
+    play(unusedIsAutoplay) {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      });
+    }
+
+    /**
+     * @override
+     */
+    pause() {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      });
+    }
+
+    /**
+     * @override
+     */
+    mute() {
+    }
+
+    /**
+     * @override
+     */
+    unmute() {
+    }
+
+    /**
+     * @override
+     */
+    showControls() {
+    }
+
+    /**
+     * @override
+     */
+    hideControls() {
+    }
+  };
 }
