@@ -27,7 +27,6 @@ import {parseUrl, getSourceUrl} from '../url';
  *       for concurrent page views of a user().
  *
  * @typedef {{
- *   url: string,
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
@@ -75,6 +74,7 @@ export class DocInfo {
     }
     const pageViewId = getPageViewId(ampdoc.win);
     return this.info_ = {
+      /** @return {string} */
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
       },
