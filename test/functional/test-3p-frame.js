@@ -21,11 +21,11 @@ import {
   getSubDomain,
   preloadBootstrap,
   resetCountForTesting,
+  resetBootstrapBaseUrlForTesting,
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {preconnectForElement} from '../../src/preconnect';
-import {resetServiceForTesting} from '../../src/service';
 import {validateData} from '../../3p/3p';
 import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
@@ -46,8 +46,8 @@ describe('3p-frame', () => {
   });
 
   afterEach(() => {
+    resetBootstrapBaseUrlForTesting(window);
     sandbox.restore();
-    resetServiceForTesting(window, 'bootstrapBaseUrl');
     resetCountForTesting();
     const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
@@ -321,7 +321,7 @@ describe('3p-frame', () => {
 
     container.appendChild(div);
     const name = getIframe(window, div).name;
-    resetServiceForTesting(window, 'bootstrapBaseUrl');
+    resetBootstrapBaseUrlForTesting(window);
     resetCountForTesting();
     const newName = getIframe(window, div).name;
     expect(name).to.match(/d-\d+.ampproject.net__ping__0/);

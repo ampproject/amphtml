@@ -448,7 +448,7 @@ export class UrlReplacements {
 
   /**
    * Resolves the value via document info.
-   * @param {function(!../document-info.DocumentInfoDef):T} getter
+   * @param {function(!./document-info-impl.DocumentInfoDef):T} getter
    * @return {T}
    * @template T
    */

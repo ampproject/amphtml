@@ -534,9 +534,13 @@ describe('performance', () => {
     perf.coreServicesAvailable();
     resetServiceForTesting(window, 'documentInfo');
     const info = {
-      canonicalUrl: 'https://foo.bar/baz',
-      pageViewId: 12345,
-      sourceUrl: 'https://hello.world/baz/#development',
+      get: () => {
+        return {
+          canonicalUrl: 'https://foo.bar/baz',
+          pageViewId: 12345,
+          sourceUrl: 'https://hello.world/baz/#development',
+        };
+      },
     };
     getService(window, 'documentInfo', () => info);
 
