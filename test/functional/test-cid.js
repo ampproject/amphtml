@@ -115,7 +115,7 @@ describe('cid', () => {
           crypto = results[1];
           crypto.sha384Base64 = val => {
             if (val instanceof Uint8Array) {
-              val = '[' + val + ']';
+              val = '[' + Array.apply([], val).join(',') + ']';
             }
 
             return Promise.resolve('sha384(' + val + ')');
@@ -416,7 +416,7 @@ describe('cid', () => {
     let sha384Promise;
     crypto.sha384Base64 = val => {
       if (val instanceof Uint8Array) {
-        val = '[' + val + ']';
+        val = '[' + Array.apply([], val).join(',') + ']';
       }
 
       return sha384Promise = Promise.resolve('sha384(' + val + ')');
