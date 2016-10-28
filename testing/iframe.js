@@ -64,7 +64,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:attached': 0,
       'amp:error': 0,
       'amp:stubbed': 0,
-      'amp:load:start': 0
+      'amp:load:start': 0,
     };
     const messages = [];
     let html = __html__[fixture];
@@ -417,7 +417,7 @@ export function expectBodyToBecomeVisible(win) {
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  });
+  }, undefined, 5000);
 }
 
 /**

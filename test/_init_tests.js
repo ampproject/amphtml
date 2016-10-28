@@ -33,6 +33,9 @@ import * as describes from '../testing/describes';
 // All exposed describes.
 global.describes = describes;
 
+// Increase the before/after each timeout since certain times they have timedout
+// during the normal 2000 allowance.
+const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
@@ -151,7 +154,10 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
-beforeEach(beforeTest);
+beforeEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
+  beforeTest();
+});
 
 function beforeTest() {
   activateChunkingForTesting();
@@ -169,7 +175,8 @@ function beforeTest() {
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
-afterEach(() => {
+afterEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.
