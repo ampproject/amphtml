@@ -81,4 +81,19 @@ describe('Types', () => {
       expect(types.isFiniteNumber(123e5)).to.be.true;
     });
   });
+
+  describe('map', () => {
+    it('should make map like objects', () => {
+      expect(types.map().prototype).to.be.undefined;
+      expect(types.map().__proto__).to.be.undefined;
+      expect(types.map().toString).to.be.undefined;
+    });
+
+    it('should make map like objects from objects', () => {
+      expect(types.map({}).prototype).to.be.undefined;
+      expect(types.map({}).__proto__).to.be.undefined;
+      expect(types.map({}).toString).to.be.undefined;
+      expect(types.map({foo: 'bar'}).foo).to.equal('bar');
+    });
+  });
 });

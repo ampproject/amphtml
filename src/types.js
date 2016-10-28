@@ -53,6 +53,24 @@ export function toArray(arrayLike) {
 }
 
 /**
+ * Returns a map-like object.
+ * If opt_initial is omitted returns an objects with a null prototype.
+ * Otherwise takes the given object and sets its prototype to null.
+ * @param {T=} opt_initial This should typically be an object literal.
+ * @return {T}
+ * @template T
+ */
+export function map(opt_initial) {
+  if (opt_initial) {
+    if (opt_initial.__proto__) {
+      opt_initial.__proto__ = null;
+    }
+    return opt_initial
+  }
+  return Object.create(null);
+}
+
+/**
  * Determines if value is actually an Object.
  * @param {*} value
  * @return {boolean}
