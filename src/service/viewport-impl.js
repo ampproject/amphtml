@@ -1686,8 +1686,8 @@ export function updateViewportMetaString(currentValue, updateParams) {
 function createViewport(ampdoc) {
   const viewer = installViewerServiceForDoc(ampdoc);
   let binding;
-  if (ampdoc.isSingleDoc()
-      && getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
+  if (ampdoc.isSingleDoc() &&
+      getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {

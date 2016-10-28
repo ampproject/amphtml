@@ -36,7 +36,6 @@ describe('Viewer', () => {
   let clock;
   let events;
   let errorStub;
-  let platform;
 
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
@@ -89,7 +88,6 @@ describe('Viewer', () => {
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
-    platform = platformFor(windowApi);
     viewer = new Viewer(ampdoc);
   });
 
