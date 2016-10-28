@@ -23,6 +23,8 @@ import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService,} from
     '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc,} from
+    '../../src/service/document-info-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {
@@ -63,6 +65,7 @@ describe('UrlReplacements', () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      installDocumentInfoServiceForDoc(iframe.ampdoc);
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
@@ -134,6 +137,7 @@ describe('UrlReplacements', () => {
     win.document.defaultView = win;
     const ampdocService = installDocService(win, true);
     const ampdoc = ampdocService.getAmpDoc(win.document);
+    installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     return win;
   }
