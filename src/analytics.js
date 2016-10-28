@@ -48,7 +48,7 @@ export function analyticsForOrNull(window) {
  * @param {!Window} window
  * @param {string} eventType
  * @param {?Object<string, string>=} opt_vars A map of vars and their values.
- * @returns {boolean} Whether the event was sent or not.
+ * @returns {!Promise<boolean>} Whether the event was sent or not.
  */
 export function triggerAnalyticsEvent(window, eventType, opt_vars) {
   return analyticsForOrNull(window).then(analytics => {

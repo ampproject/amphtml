@@ -88,7 +88,7 @@ class AnalyticsEvent {
 
   /**
    * @param {!AnalyticsEventType|string} type The type of event.
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {?Object<string, string>=} opt_vars A map of vars and their values.
    */
   constructor(type, opt_vars) {
     /** @const  */
@@ -219,7 +219,7 @@ export class InstrumentationService {
   /**
    * Triggers the analytics event with the specified type.
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {?Object<string, string>=} opt_vars A map of vars and their values.
    */
   triggerEvent(eventType, opt_vars) {
     const event = new AnalyticsEvent(eventType, opt_vars);
