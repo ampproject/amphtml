@@ -167,16 +167,17 @@ runner.run('Cache SW', () => {
       expect(sw.isCdnJsFile(rtvless)).to.be.true;
     });
 
-    it('does not match for other CDN RTV files', () => {
-      const url = `https://cdn.ampproject.org/rtv/${rtv}/v0.json`;
-      const rtvless = `https://cdn.ampproject.org/v0.json`;
+    it('does not match for experiments.js', () => {
+      const url = `https://cdn.ampproject.org/v0/experiments.js`;
       expect(sw.isCdnJsFile(url)).to.be.false;
-      expect(sw.isCdnJsFile(rtvless)).to.be.false;
     });
 
     it('does not match for other CDN files', () => {
-      const url = `https://cdn.ampproject.org/c/amp/`;
-      expect(sw.isCdnJsFile(url)).to.be.false;
+      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/c/amp.js`)).to.be.false;
+      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v/amp.js`)).to.be.false;
+      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/i/amp.js`)).to.be.false;
+      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/rtv/${rtv}/v0.json`)).to.be.false;
+      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v0.json`)).to.be.false;
     });
 
     it('does not match for non CDN domains', () => {
