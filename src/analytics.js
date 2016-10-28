@@ -44,7 +44,7 @@ export function analyticsForOrNull(window) {
 
 
 /**
- * Helper method to trigger analytics event if analytics is available.
+ * Helper method to trigger analytics event if amp-analytics is available.
  * @param {!Window} window
  * @param {string} eventType
  * @param {?Object<string, string>=} opt_vars A map of vars and their values.

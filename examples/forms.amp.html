@@ -121,18 +121,9 @@
     <script type="application/json">
         {
             "requests": {
-                "test-ping": "https://my-analytics.com/ping?title=${title}&acct=${account}",
-                "event": "https://my-analytics.com/ping?eid=${eventId}&elab=${eventLabel}"
-            },
-            "vars": {
-                "title": "A page that sends a ping",
-                "account": "12345"
+                "event": "https://www.ampproject.org/static/img/logo-blue.svg?eid=${eventId}"
             },
             "triggers": {
-                "page-view": {
-                    "on": "visible",
-                    "request": "test-ping"
-                },
                 "formSubmitSuccess": {
                     "on": "amp-form-submit-success",
                     "request": "event",
