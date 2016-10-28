@@ -16,7 +16,6 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
-import {platformFor} from '../../src/platform';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installPerformanceService} from '../../src/service/performance-impl';
