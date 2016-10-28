@@ -195,13 +195,51 @@ module.exports = function(context) {
       }, 'throw');
     },
 
+    NewExpression: function(node) {
+      if (/test-/.test(context.getFilename())) {
+        return;
+      }
+
+      var call = node.callee;
+      if (call.name != 'Promise') {
+        return;
+      }
+
+      if (node.arguments.length < 1) {
+        return context.report(node, 'Promises take a resolver function');
+      }
+
+      var resolver = node.arguments[0];
+      if (resolver.params.length < 2) {
+        return;
+      }
+
+      var reject = resolver.params[1];
+
+      var variable = context.getDeclaredVariables(resolver)[1];
+      var assigned = variable.references.filter(function(ref) {
+        return context.getTokenBefore(variable.references[0].identifier) == '=';
+      }).map(function(ref) {
+        return context.getTokenBefore(variable.references[0].identifier, 1);
+      });
+      if (assigned.length == 0) {
+        assigned.push(reject);
+      }
+
+      assigned.forEach(function(id) {
+        if (!/[Rr]eject/.test(id.name)) {
+          return context.report(id, 'reject must be called "reject"');
+        }
+      });
+    },
+
     CallExpression: function(node) {
       if (/test-/.test(context.getFilename())) {
         return;
       }
 
       var call = node.callee;
-      if (!(call.name == 'reject' ||
+      if (!(/[Rr]eject/.test(call.name) ||
           (call.type == 'MemberExpression' && /[Rr]eject/.test(call.property.name)))) {
         return;
       }
