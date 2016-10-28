@@ -16,6 +16,7 @@
 
 import {vsyncFor} from './vsync';
 import {dev} from './log';
+import {cancellation} from './error';
 
 /** @const {function()} */
 const NOOP_CALLBACK_ = function() {};
@@ -175,7 +176,7 @@ export class Motion {
    */
   halt() {
     if (this.continuing_) {
-      this.completeContinue_(new Error('halting motion'));
+      this.completeContinue_(cancellation());
     }
   }
 

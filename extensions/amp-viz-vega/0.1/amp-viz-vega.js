@@ -193,7 +193,7 @@ export class AmpVizVega extends AMP.BaseElement {
     const parsePromise = new Promise((resolve, reject) => {
       this.vega_.parse.spec(this.data_, (error, chartFactory) => {
         if (error) {
-          reject(dev().createError('parsing failed', error));
+          reject(user().createError('parsing failed', error));
         }
         resolve(chartFactory);
       });

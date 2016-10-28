@@ -15,7 +15,8 @@
  */
 
 import {getCurve} from './curve';
-import {dev} from './log';
+import {dev, rethrowAsync} from './log';
+import {cancellation} from './error';
 import {vsyncFor} from './vsync';
 
 const TAG_ = 'Animation';
@@ -278,8 +279,7 @@ class AnimationPlayer {
           }
         }
       } catch (e) {
-        error = dev().createError('completion failed', e);
-        dev().error(TAG_, error);
+        rethrowAsync(dev().createError('completion failed', e));
       }
     }
     if (error) {
@@ -328,7 +328,7 @@ class AnimationPlayer {
         this.task_(this.state_);
       } else {
         dev().warn(TAG_, 'cancel animation');
-        this.complete_(new Error('cancel animation'), /* dir */ 0);
+        this.complete_(cancellation(), /* dir */ 0);
       }
     }
   }
