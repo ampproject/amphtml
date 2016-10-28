@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {maybeTrackImpression} from '../../src/impression';
+import {
+  getTrackImpressionPromise,
+  maybeTrackImpression,
+  resetTrackImpressionPromiseForTesting,
+} from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import {xhrFor} from '../../src/xhr';
@@ -37,6 +41,7 @@ describe('impression', () => {
     };
     sandbox.spy(xhr, 'fetchJson');
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
+    resetTrackImpressionPromiseForTesting();
   });
 
   afterEach(() => {
@@ -44,10 +49,10 @@ describe('impression', () => {
     sandbox.restore();
   });
 
-
   it('should do nothing if the experiment is off', () => {
     viewer.getParam.throws(new Error('Should not be called'));
     maybeTrackImpression(window);
+    return getTrackImpressionPromise().should.be.fulfilled;
   });
 
   it('should do nothing if there is no click arg', () => {
@@ -55,6 +60,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('');
     maybeTrackImpression(window);
     expect(xhr.fetchJson.callCount).to.equal(0);
+    return getTrackImpressionPromise().should.be.fulfilled;
   });
 
   it('should do nothing if there is the click arg is http', () => {
@@ -62,6 +68,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('http://www.example.com');
     maybeTrackImpression(window);
     expect(xhr.fetchJson.callCount).to.equal(0);
+    return getTrackImpressionPromise().should.be.fulfilled;
   });
 
   it('should invoke URL', () => {
@@ -77,6 +84,90 @@ describe('impression', () => {
       expect(params).to.jsonEqual({
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
+      });
+    });
+  });
+
+  it('should do nothing if response is not received', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    xhr.fetchJson = () => {
+      setTimeout(() => {
+        return Promise.resolve({
+          'location': 'test_location?gclid=654321',
+        });
+      }, 5000);
+    };
+    const clock = sandbox.useFakeTimers();
+    const promise = new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 2000);
+    });
+    clock.tick(2001);
+    return promise.then(() => {
+      expect(window.location.href).to.not.contain('gclid=654321');
+      // Reset
+      xhr.fetchJson = () => {
+        return Promise.resolve();
+      };
+    });
+  });
+
+  it('should resolve trackImpressionPromise after timeout', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    xhr.fetchJson = () => {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 10000);
+      });
+    };
+    const clock = sandbox.useFakeTimers();
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      clock.tick(8001);
+      return getTrackImpressionPromise().should.be.fulfilled;
+    });
+  });
+
+  it('should do nothing if get empty response', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+    const prevHref = window.location.href;
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(window.location.href).to.equal(prevHref);
+        return getTrackImpressionPromise().should.be.fulfilled;
+      });
+    });
+  });
+
+  it('should replace location href only with query params', () => {
+    toggleExperiment(window, 'alp', true);
+    viewer.getParam.withArgs('click').returns('https://www.example.com');
+
+    xhr.fetchJson = () => {
+      return Promise.resolve({
+        'location': 'test_location?gclid=123456&foo=bar&example=123',
+      });
+    };
+    const prevHref = window.location.href;
+    console.log(prevHref);
+    window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
+    console.log(window.location.href);
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(window.location.href).to.equal('http://localhost:9876/context.html'
+            + '?bar=foo&test=4321&gclid=123456&foo=bar&example=123');
+        xhr.fetchJson = () => {
+          return Promise.resolve();
+        };
+        window.history.replaceState(null, '', prevHref);
+        return getTrackImpressionPromise().should.be.fulfilled;
       });
     });
   });

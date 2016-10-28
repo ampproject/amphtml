@@ -63,10 +63,28 @@ describe('document-info', () => {
     };
     win.document.defaultView = win;
     installDocService(win, true);
-    expect(documentInfoForDoc(win.document).url).to.equal(
-        'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0');
     expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');
+  });
+
+  it('should provide the updated sourceUrl', () => {
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, true);
+    expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
+        'http://www.origin.com/foo/?f=0');
+    win.location.href = 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=1';
+    expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
+        'http://www.origin.com/foo/?f=1');
   });
 
   it('should provide the pageViewId', () => {
