@@ -47,6 +47,10 @@ limitations under the License.
   </tr>
 </table>
 
+## How it works
+
+In the background, while an AMP page using `<amp-live-list>` is displayed on the client, the AMP runtime polls the origin document on the host for updates. When the client receives a response, it then [filters](#server-side-filtering) and dynamically inserts those updates back into the page on the client. Publishers can customize the polling rate in order to control the number of incoming requests, and AMP caches like the Google AMP Cache can perform optimizations to reduce the server response payload, saving client bandwidth and CPU cycles.
+
 ## Behavior
 
 `amp-live-list` provides support for content that is updated live on the client,
