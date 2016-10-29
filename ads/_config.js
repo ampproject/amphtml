@@ -98,6 +98,14 @@ export const adConfig = {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
   },
 
+  adverline: {
+    prefetch: 'https://ads.adverline.com/richmedias/amp.js',
+    preconnect: [
+      'https://adnext.fr',
+    ],
+    renderStartImplemented: true,
+  },
+
   advertserve: {
     renderStartImplemented: true,
   },
@@ -179,6 +187,8 @@ export const adConfig = {
     ],
   },
 
+  fake: {},
+
   flite: {},
 
   genieessp: {
@@ -194,6 +204,8 @@ export const adConfig = {
     preconnect: 'https://h.holder.com.ua',
   },  
   
+  ibillboard: {},
+
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',
@@ -215,6 +227,13 @@ export const adConfig = {
   },
 
   kargo: {},
+
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+    renderStartImplemented: true,
+  },
+
+  ligatus: {},
 
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
@@ -290,6 +309,11 @@ export const adConfig = {
     ],
   },
 
+  nokta: {
+    prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
+    renderStartImplemented: true,
+  },
+
   openadstream: {},
 
   openx: {
@@ -316,6 +340,11 @@ export const adConfig = {
     preconnect: 'https://tag.contextweb.com',
   },
 
+  purch: {
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
+  },
+
   revcontent: {
     prefetch: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
     preconnect: [
@@ -327,11 +356,19 @@ export const adConfig = {
 
   rubicon: {},
 
-  sharethrough: {},
+  sharethrough: {
+    renderStartImplemented: true,
+  },
 
   smartadserver: {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
+    renderStartImplemented: true,
+  },
+
+  smartclip: {
+    prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
+    preconnect: 'https://des.smartclip.net',
     renderStartImplemented: true,
   },
 
@@ -380,6 +417,11 @@ export const adConfig = {
 
   widespace: {},
 
+  yahoo: {
+    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    preconnect: 'https://us.adserver.yahoo.com',
+  },
+
   yahoojp: {
     prefetch: [
       'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
@@ -407,6 +449,11 @@ export const adConfig = {
 
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
+  },
+
+  zedo: {
+    prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
   },
 
   zergnet: {},

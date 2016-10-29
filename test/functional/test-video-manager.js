@@ -14,16 +14,33 @@
  * limitations under the License.
  */
 
+import {isLayoutSizeDefined} from '../../src/layout';
+import {VideoEvents} from '../../src/video-interface';
+import {videoManagerForDoc} from '../../src/video-manager';
 import {
   supportsAutoplay,
   clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
+import {
+  runVideoPlayerIntegrationTests,
+} from '../integration/test-video-players-helper';
 import * as sinon from 'sinon';
+
+describe('Fake Video Player Integration Tests', () => {
+  // We run the video player integration tests on a fake video player as part
+  // of functional testing. Same tests run on real video players such as
+  // `amp-video` and `amp-youtube` as part of integration testing.
+  runVideoPlayerIntegrationTests(fixture => {
+    fixture.win.AMP.registerElement('amp-test-fake-videoplayer',
+      createFakeVideoPlayerClass(fixture.win));
+    return fixture.doc.createElement('amp-test-fake-videoplayer');
+  });
+});
 
 describe('Supports Autoplay', () => {
   let sandbox;
 
-  let ampdoc;
+  let win;
   let video;
 
   let isLite;
@@ -33,8 +50,7 @@ describe('Supports Autoplay', () => {
   let playSpy;
 
   it('should create an invisible test video element', () => {
-    return supportsAutoplay(ampdoc, isLite)
-    .then(() => {
+    return supportsAutoplay(win, isLite).then(() => {
       expect(video.style.position).to.equal('fixed');
       expect(video.style.top).to.equal('0');
       expect(video.style.width).to.equal('0');
@@ -57,8 +73,7 @@ describe('Supports Autoplay', () => {
 
   it('should return false if `paused` is true after `play()` call', () => {
     video.paused = true;
-    return supportsAutoplay(ampdoc, isLite)
-    .then(supportsAutoplay => {
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
       expect(playSpy.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -67,8 +82,7 @@ describe('Supports Autoplay', () => {
 
   it('should return true if `paused` is false after `play()` call', () => {
     video.paused = false;
-    return supportsAutoplay(ampdoc, isLite)
-    .then(supportsAutoplay => {
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.true;
       expect(playSpy.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -77,20 +91,19 @@ describe('Supports Autoplay', () => {
 
   it('should be false when in amp-lite mode', () => {
     isLite = true;
-    return supportsAutoplay(ampdoc, isLite)
-    .then(supportsAutoplay => {
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
     });
   });
 
   it('should cache the result', () => {
-    const firstResultRef = supportsAutoplay(ampdoc, isLite);
-    const secondResultRef = supportsAutoplay(ampdoc, isLite);
+    const firstResultRef = supportsAutoplay(win, isLite);
+    const secondResultRef = supportsAutoplay(win, isLite);
     expect(firstResultRef).to.equal(secondResultRef);
 
     clearSupportsAutoplayCacheForTesting();
 
-    const thirdResultRef = supportsAutoplay(ampdoc, isLite);
+    const thirdResultRef = supportsAutoplay(win, isLite);
     expect(thirdResultRef).to.not.equal(firstResultRef);
     expect(thirdResultRef).to.not.equal(secondResultRef);
   });
@@ -121,12 +134,8 @@ describe('Supports Autoplay', () => {
       },
     };
 
-    const win = {
+    win = {
       document: doc,
-    };
-
-    ampdoc = {
-      win,
     };
 
     isLite = false;
@@ -140,3 +149,96 @@ describe('Supports Autoplay', () => {
     sandbox.restore();
   });
 });
+
+function createFakeVideoPlayerClass(win) {
+  /**
+   * @implements {../../src/video-interface.VideoInterface}
+   */
+  return class FakeVideoPlayer extends win.AMP.BaseElement {
+
+    /** @param {!AmpElement} element */
+    constructor(element) {
+      super(element);
+    }
+
+    /** @override */
+    isLayoutSupported(layout) {
+      return isLayoutSizeDefined(layout);
+    }
+
+    /** @override */
+    buildCallback() {
+      videoManagerForDoc(this.win.document).register(this);
+    }
+
+    /** @override */
+    layoutCallback() {
+      return Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
+    }
+
+    /** @override */
+    viewportCallback(visible) {
+      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+    }
+
+    // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
+    /**
+     * @override
+     */
+    supportsPlatform() {
+      return true;
+    }
+
+    /**
+     * @override
+     */
+    isInteractive() {
+      return true;
+    }
+
+    /**
+     * @override
+     */
+    play(unusedIsAutoplay) {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      });
+    }
+
+    /**
+     * @override
+     */
+    pause() {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      });
+    }
+
+    /**
+     * @override
+     */
+    mute() {
+    }
+
+    /**
+     * @override
+     */
+    unmute() {
+    }
+
+    /**
+     * @override
+     */
+    showControls() {
+    }
+
+    /**
+     * @override
+     */
+    hideControls() {
+    }
+  };
+}

@@ -20,18 +20,18 @@ import {AmpScrollableCarousel} from './scrollable-carousel';
 import {CSS} from '../../../build/amp-carousel-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
 
-class CarouselSelector {
-
-  constructor(element) {
-    if (element.getAttribute('type') == 'slides') {
-      return new AmpSlideScroll(element);
+class CarouselSelector extends AMP.BaseElement {
+  /** @override */
+  upgradeCallback() {
+    if (this.element.getAttribute('type') == 'slides') {
+      return new AmpSlideScroll(this.element);
     }
     const scrollableCarouselExpt = isExperimentOn(
-        element.ownerDocument.defaultView, 'amp-scrollable-carousel');
+        this.element.ownerDocument.defaultView, 'amp-scrollable-carousel');
     if (scrollableCarouselExpt) {
-      return new AmpScrollableCarousel(element);
+      return new AmpScrollableCarousel(this.element);
     }
-    return new AmpCarousel(element);
+    return new AmpCarousel(this.element);
   }
 }
 

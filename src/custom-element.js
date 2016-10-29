@@ -707,6 +707,7 @@ function createBaseCustomElementClass(win) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
       // TODO(malteubl): Forward for stubbed elements.
+      // TODO(jridgewell): We should pass the layoutBox down.
       this.implementation_.onLayoutMeasure();
 
       if (this.isLoadingEnabled_()) {

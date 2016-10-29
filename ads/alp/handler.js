@@ -139,7 +139,7 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+  if (eventualUrl.indexOf(`${urls.cdn}/c/`) != 0) {
     return;
   }
   return eventualUrl;
@@ -178,8 +178,7 @@ export function warmupStatic(win) {
   const linkRel = /*OK*/document.createElement('link');
   linkRel.rel = 'preload';
   linkRel.setAttribute('as', 'script');
-  linkRel.href =
-      `${urls.cdn}/rtv/01$internalRuntimeVersion$/v0.js`;
+  linkRel.href = `${urls.cdn}/v0.js`;
   getHeadOrFallback(win.document).appendChild(linkRel);
 }
 

@@ -16,9 +16,10 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {srcsetFromElement} from '../../../src/srcset';
+import {user} from '../../../src/log';
 import * as st from '../../../src/style';
 
-class AmpAnim extends AMP.BaseElement {
+export class AmpAnim extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -41,8 +42,18 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.propagateAttributes(['alt'], this.img_);
+    this.propagateAttributes(['alt', 'aria-label',
+      'aria-describedby', 'aria-labelledby'], this.img_);
     this.applyFillContent(this.img_, true);
+
+    // Remove role=img otherwise this breaks screen-readers focus and
+    // only read "Graphic" when using only 'alt'.
+    if (this.element.getAttribute('role') == 'img') {
+      this.element.removeAttribute('role');
+      user().error('Setting role=img on amp-anim elements breaks screen ' +
+          'readers please just set alt or ARIA attributes, they will be ' +
+          'correctly propagated for the underlying <img> element.');
+    }
 
     // The image is initially hidden if a placeholder is available.
     st.toggle(this.img_, !this.getPlaceholder());

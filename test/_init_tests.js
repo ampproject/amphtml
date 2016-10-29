@@ -23,6 +23,7 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
+import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
@@ -32,6 +33,9 @@ import * as describes from '../testing/describes';
 // All exposed describes.
 global.describes = describes;
 
+// Increase the before/after each timeout since certain times they have timedout
+// during the normal 2000 allowance.
+const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
@@ -150,9 +154,13 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
-beforeEach(beforeTest);
+beforeEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
+  beforeTest();
+});
 
 function beforeTest() {
+  activateChunkingForTesting();
   window.AMP_MODE = null;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
@@ -167,7 +175,8 @@ function beforeTest() {
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
-afterEach(() => {
+afterEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.

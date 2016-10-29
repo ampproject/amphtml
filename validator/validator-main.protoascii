@@ -25,7 +25,7 @@ min_validator_revision_required: 185
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 300
+spec_file_revision: 305
 
 # Validator extensions.
 # =====================
@@ -1862,7 +1862,7 @@ tags: {
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "gradientunits" }
-  attrs: { name: "gradientransform" }
+  attrs: { name: "gradienttransform" }
   attrs: { name: "spreadmethod" }
   attrs: { name: "x1" }
   attrs: { name: "y1" }
@@ -2118,12 +2118,14 @@ tags: {
 # Form elements are allowed only when amp-form extension script is included
 # with the exception of the button element which is always allowed.
 # 4.10.3 The form element
-tags {
+tags {  # <form method=GET ...>
   tag_name: "FORM"
+  spec_name: "FORM [method=GET]"
   also_requires_tag: "amp-form extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "accept" }
   attrs: { name: "accept-charset" }
+  # For method=GET forms, we require `action` and allow `action-xhr`.
   attrs: {
     name: "action"
     mandatory: true
@@ -2134,14 +2136,66 @@ tags {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "action-xhr" }
+  attrs: {
+    name: "action-xhr"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      disallowed_domain: "cdn.ampproject.org"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
     value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
   }
   attrs: { name: "enctype" }
-  attrs: { name: "method" }
+  attrs: {
+    name: "method"
+    # Default value is GET, so if method attribute is missing,
+    # it matches this tagspec.
+    value_casei: "get"
+  }
+  attrs: { name: "name" }
+  attrs: { name: "novalidate" }
+  attrs: {
+    name: "target"
+    mandatory: true
+    value_regex_casei: "(_blank|_top)"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+tags {  # <form method=POST ...>
+  tag_name: "FORM"
+  spec_name: "FORM [method=POST]"
+  also_requires_tag: "amp-form extension .js script"
+  disallowed_ancestor: "AMP-APP-BANNER"
+  attrs: { name: "accept" }
+  attrs: { name: "accept-charset" }
+  # For method=POST forms, we require `action-xhr` and disallow `action`.
+  attrs: {
+    name: "action-xhr"
+    mandatory: true
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      disallowed_domain: "cdn.ampproject.org"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "autocomplete" }
+  attrs: {
+    name: "custom-validation-reporting"
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
+  }
+  attrs: { name: "enctype" }
+  attrs: {
+    name: "method"
+    mandatory: true
+    value_casei: "post"
+    dispatch_key: true
+  }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
   attrs: {
@@ -2176,24 +2230,18 @@ tags {
 # 4.10.4 The label element
 tags: {
   tag_name: "LABEL"
-  also_requires_tag: "amp-form extension .js script"
   attrs: { name: "for" }
-  attrs: { name: "form" }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.5 The input element
 tags: {
   tag_name: "INPUT"
-  also_requires_tag: "amp-form extension .js script"
   attrs: { name: "accept" }
   attrs: { name: "accesskey" }
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "checked" }
   attrs: { name: "disabled" }
-  attrs: { name: "form" }
-  attrs: { name: "formmethod" }
-  attrs: { name: "formnovalidate" }
   attrs: { name: "height" }
   attrs: { name: "inputmode" }
   attrs: { name: "list" }
@@ -2246,10 +2294,6 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
-  attrs: {
-    name: "formtarget"
-    value_regex_casei: "(_blank|_top)"
-  }
 }
 # Button variant specifically supporting <amp-app-banner> tag with the
 # open-button attribute.
@@ -2280,7 +2324,6 @@ tags: {
   also_requires_tag: "amp-form extension .js script"
   attrs: { name: "autofocus" }
   attrs: { name: "disabled" }
-  attrs: { name: "form" }
   attrs: { name: "multiple" }
   attrs: { name: "name" }
   attrs: { name: "required" }
@@ -2323,7 +2366,6 @@ tags: {
   attrs: { name: "autofocus" }
   attrs: { name: "cols" }
   attrs: { name: "disabled" }
-  attrs: { name: "form" }
   attrs: { name: "maxlength" }
   attrs: { name: "minlength" }
   attrs: { name: "name" }
@@ -2342,7 +2384,6 @@ tags: {
 tags: {
   tag_name: "FIELDSET"
   attrs: { name: "disabled" }
-  attrs: { name: "form" }
   attrs: { name: "name" }
 }
 # 4.10.17 The legend element

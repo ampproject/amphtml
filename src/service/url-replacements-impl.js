@@ -28,12 +28,15 @@ import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
+import {isExperimentOn} from '../experiments';
+import {getTrackImpressionPromise} from '../impression.js';
 
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
+const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 
 /** @typedef {string|number|boolean|undefined|null} */
 let ResolverReturnDef;
@@ -161,6 +164,14 @@ export class UrlReplacements {
       return removeFragment(info.sourceUrl);
     }));
 
+    this.setAsync_('SOURCE_URL', () => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getDocInfoValue_(info => {
+          return removeFragment(info.sourceUrl);
+        });
+      });
+    });
+
     // Returns the host of the Source URL for this AMP document.
     this.set_('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
       return parseUrl(info.sourceUrl).host;
@@ -184,17 +195,21 @@ export class UrlReplacements {
     }));
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      user().assert(param,
-          'The first argument to QUERY_PARAM, the query string ' +
-          'param is required');
-      const url = parseUrl(this.ampdoc.win.location.href);
-      const params = parseQueryString(url.search);
-
-      return (typeof params[param] !== 'undefined') ?
-        params[param] :
-        defaultValue;
+      return this.getQueryParamData_(param, defaultValue);
     });
 
+    this.setAsync_('QUERY_PARAM', (param, defaultValue = '') => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getQueryParamData_(param, defaultValue);
+      });
+    });
+
+    /**
+     * Stores client ids that were generated during this page view
+     * indexed by scope.
+     * @type {?Object<string, string>}
+     */
+    let clientIds = null;
     this.setAsync_('CLIENT_ID', (scope, opt_userNotificationId) => {
       user().assertString(scope,
           'The first argument to CLIENT_ID, the fallback c' +
@@ -213,7 +228,21 @@ export class UrlReplacements {
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
         }, consent);
+      }).then(cid => {
+        if (!clientIds) {
+          clientIds = Object.create(null);
+        }
+        clientIds[scope] = cid;
+        return cid;
       });
+    });
+    // Synchronous alternative. Only works for scopes that were previously
+    // requested using the async method.
+    this.set_('CLIENT_ID', scope => {
+      if (!clientIds) {
+        return null;
+      }
+      return clientIds[dev().assertString(scope)];
     });
 
     // Returns assigned variant name for the given experiment.
@@ -419,7 +448,7 @@ export class UrlReplacements {
 
   /**
    * Resolves the value via document info.
-   * @param {function(!../document-info.DocumentInfoDef):T} getter
+   * @param {function(!./document-info-impl.DocumentInfoDef):T} getter
    * @return {T}
    * @template T
    */
@@ -519,6 +548,23 @@ export class UrlReplacements {
   }
 
   /**
+   * Return the QUERY_PARAM from the current location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @return {string}
+   */
+  getQueryParamData_(param, defaultValue) {
+    user().assert(param,
+        'The first argument to QUERY_PARAM, the query string ' +
+        'param is required');
+    user().assert(typeof param == 'string', 'param should be a string');
+    const url = parseUrl(this.ampdoc.win.location.href);
+    const params = parseQueryString(url.search);
+    return (typeof params[param] !== 'undefined')
+        ? params[param] : defaultValue;
+  }
+
+  /**
    *
    * Sets a synchronous value resolver for the variable with the specified name.
    * The value resolver may optionally take an extra parameter.
@@ -603,6 +649,59 @@ export class UrlReplacements {
    */
   expandAsync(url, opt_bindings) {
     return /** @type {!Promise<string>} */(this.expand_(url, opt_bindings));
+  }
+
+  /**
+   * Replaces values in the link of an anchor tag if
+   * - the link opts into it (via data-amp-replace argument)
+   * - the destination is the source or canonical origin of this doc.
+   * @param {!Element} element An anchor element.
+   * @return {string|undefined} Replaced string for testing
+   */
+  maybeExpandLink(element) {
+    if (!isExperimentOn(this.ampdoc.win, 'link-url-replace')) {
+      return;
+    }
+    dev().assert(element.tagName == 'A');
+    const whitelist = element.getAttribute('data-amp-replace');
+    if (!whitelist) {
+      return;
+    }
+    const docInfo = documentInfoForDoc(this.ampdoc);
+    // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
+    // We set this to the original value before doing any work and use it
+    // on subsequent replacements, so that each run gets a fresh value.
+    const href = dev().assertString(
+        element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
+    const url = parseUrl(href);
+    if (url.origin != parseUrl(docInfo.canonicalUrl).origin &&
+        url.origin != parseUrl(docInfo.sourceUrl).origin) {
+      user().warn('URL', 'Ignoring link replacement', href,
+          ' because the link does not go to the document\'s' +
+          ' source or canonical origin.');
+      return;
+    }
+    if (element[ORIGINAL_HREF_PROPERTY] == null) {
+      element[ORIGINAL_HREF_PROPERTY] = href;
+    }
+    const supportedReplacements = {
+      'CLIENT_ID': true,
+      'QUERY_PARAM': true,
+    };
+    const requestedReplacements = {};
+    whitelist.trim().split(/\s*,\s*/).forEach(replacement => {
+      if (supportedReplacements.hasOwnProperty(replacement)) {
+        requestedReplacements[replacement] = true;
+      } else {
+        user().warn('URL', 'Ignoring unsupported link replacement',
+            replacement);
+      }
+    });
+    return element.href = this.expandSync(
+        href,
+        /* opt_bindings */ undefined,
+        /* opt_collectVars */ undefined,
+        requestedReplacements);
   }
 
   /**

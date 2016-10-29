@@ -302,8 +302,7 @@ describe('alp-handler', () => {
     expect(win.document.head.appendChild.callCount).to.equal(1);
     const link = win.document.head.appendChild.lastCall.args[0];
     expect(link.rel).to.equal('preload');
-    expect(link.href).to.equal(
-        'https://cdn.ampproject.org/rtv/01$internalRuntimeVersion$/v0.js');
+    expect(link.href).to.equal('https://cdn.ampproject.org/v0.js');
   });
 
   it('should warmup dynamically', () => {
