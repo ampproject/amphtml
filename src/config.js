@@ -32,6 +32,9 @@ export const urls = {
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
   thirdPartyFrameRegex: thirdPartyFrameRegex || /^d-\d+\.ampproject\.net$/,
   cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
+  cdnProxyRegex: /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/,
+  cdnPrefixedRegex: /^https:\/\/[a-zA-Z0-9_-]+\.cdn\.ampproject\.org/,
+  localhostProxyRegex: /^https?:\/\/localhost:[0-9]+\/(c|v)\//,
   errorReporting: env['errorReportingUrl'] ||
       'https://amp-error-reporting.appspot.com/r',
   localDev: env['localDev'] || false,

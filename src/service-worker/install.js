@@ -19,8 +19,7 @@ import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {timerFor} from '../timer';
-import {parseUrl} from '../url';
-import {urls} from '../config';
+import {isProxyOrigin} from '../url';
 
 /** @const */
 const TAG = 'cache-service-worker';
@@ -36,8 +35,7 @@ export function installCacheServiceWorker(win) {
     if (!('serviceWorker' in navigator)) {
       return;
     }
-    if (!getMode().localDev &&
-        win.location.hostname !== parseUrl(urls.cdn).hostname) {
+    if (!getMode().localDev && !isProxyOrigin(win.location.hostname)) {
       return;
     }
     const base = calculateScriptBaseUrl(win.location, getMode().localDev,

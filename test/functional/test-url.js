@@ -416,7 +416,7 @@ describe('addParamsToUrl', () => {
 describe('isProxyOrigin', () => {
 
   function testProxyOrigin(href, bool) {
-    it('should return whether it is a proxy origin origin for ' + href, () => {
+    it('should return whether it is a proxy origin for ' + href, () => {
       expect(isProxyOrigin(parseUrl(href))).to.equal(bool);
     });
   }
@@ -424,11 +424,19 @@ describe('isProxyOrigin', () => {
   testProxyOrigin(
       'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
+      'https://xyz.cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'https://cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'https://xyz.cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
       'http://localhost:123', false);
   testProxyOrigin(
-      'http://localhost:123/c', true);
+      'http://localhost:123/cba/www.origin.com/foo/?f=0', false);
   testProxyOrigin(
-      'http://localhost:123/v', true);
+      'http://localhost:123/c/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'http://localhost:123/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
       'https://cdn.ampproject.net/v/www.origin.com/foo/?f=0', false);
   testProxyOrigin(
@@ -465,6 +473,26 @@ describe('getSourceOrigin/Url', () => {
       'https://origin.com/foo/?f=0');
   testOrigin(
       'https://cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
+      'https://origin.com:81/foo/?f=0');
+
+  // Prefixed CDN
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/v/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/v/s/www.origin.com/foo/?f=0#h',
+      'https://www.origin.com/foo/?f=0#h');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/www.origin.com/foo/?f=0',
+      'http://www.origin.com/foo/?f=0');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/s/www.origin.com/foo/?f=0',
+      'https://www.origin.com/foo/?f=0');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/s/origin.com/foo/?f=0',
+      'https://origin.com/foo/?f=0');
+  testOrigin(
+      'https://xyz.cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
       'https://origin.com:81/foo/?f=0');
 
   // Removes amp-related paramters.

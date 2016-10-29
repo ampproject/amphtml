@@ -298,12 +298,8 @@ export function isProxyOrigin(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  const path = url.pathname.split('/');
-  const prefix = path[1];
-  // List of well known proxy hosts. New proxies must be added here.
-  return (url.origin == urls.cdn ||
-      (url.origin.indexOf('http://localhost:') == 0 &&
-       (prefix == 'c' || prefix == 'v')));
+  return !!url.href.match(urls.cdnProxyRegex) ||
+      !!url.href.match(urls.localhostProxyRegex);
 }
 
 /**

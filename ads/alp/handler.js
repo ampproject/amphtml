@@ -21,17 +21,7 @@ import {
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
 import {urls} from '../../src/config';
-
-
-/**
- * Origins that are trusted to serve valid AMP documents.
- * @const {Object}
- */
-const ampOrigins = {
-  [urls.cdn]: true,
-  'http://localhost:8000': true,
-};
-
+import {isProxyOrigin} from '../../src/url';
 
 /**
  * Install a click listener that transforms navigation to the AMP cache
@@ -139,7 +129,8 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (eventualUrl.indexOf(`${urls.cdn}/c/`) != 0) {
+  if (eventualUrl.indexOf(`${urls.cdn}/c/`) != 0 &&
+      !eventualUrl.match(new RegExp(urls.cdnPrefixedRegex.source + '/c/'))) {
     return;
   }
   return eventualUrl;
@@ -235,7 +226,7 @@ export function getA2AAncestor(win) {
     return null;
   }
   const amp = origins[origins.length - 2];
-  if (!ampOrigins[amp] && !ampOrigins.hasOwnProperty(amp)) {
+  if (!isProxyOrigin(amp)) {
     return null;
   }
   return {
