@@ -1137,7 +1137,7 @@ describe('CustomElement', () => {
       expect(testElementViewportCallback.callCount).to.equal(1);
     });
 
-    it('StubElement - should be called once upgraded before attach', () => {
+    it('StubElement - should not upgrade before attach', () => {
       const element = new StubElementClass();
       element.setAttribute('layout', 'fill');
       resourcesMock.expects('upgraded').withExactArgs(element).never();
