@@ -573,7 +573,14 @@ function createBaseCustomElementClass(win) {
       if (this.isInTemplate_) {
         return;
       }
-      this.tryUpgrade_(new newImplClass(this));
+      if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
+        // Already upgraded or in progress or failed.
+        return;
+      }
+      this.implementation_ = new newImplClass(this);
+      if (this.everAttached) {
+        this.tryUpgrade_();
+      }
     }
 
     /**
@@ -832,7 +839,7 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.everAttached) {
         if (!isStub(this.implementation_)) {
-          this.tryUpgrade_(this.implementation_);
+          this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
@@ -871,11 +878,10 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Try to upgrade the element with the provided implementation.
-     * @param {!./base-element.BaseElement=} opt_impl
      * @private @final @this {!Element}
      */
-    tryUpgrade_(opt_impl) {
-      const impl = opt_impl || this.implementation_;
+    tryUpgrade_() {
+      const impl = this.implementation_;
       dev().assert(!isStub(impl), 'Implementation must not be a stub');
       if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.

@@ -346,45 +346,42 @@ describe('CustomElement', () => {
     expect(element.implementation_.layoutWidth_).to.equal(111);
   });
 
-  it('StubElement - upgrade', () => {
+  it('StubElement - upgrade after attached', () => {
     const element = new StubElementClass();
     expect(element.isUpgraded()).to.equal(false);
     expect(testElementCreatedCallback.callCount).to.equal(0);
 
-    element.layout_ = Layout.FILL;
+    element.setAttribute('layout', 'fill');
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-    resourcesMock.expects('upgraded').withExactArgs(element).never();
-
-    element.upgrade(TestElement);
-
-    expect(element.isUpgraded()).to.equal(true);
-    expect(element.implementation_ instanceof TestElement).to.equal(true);
-    expect(element.implementation_.layout_).to.equal(Layout.FILL);
-    expect(element.implementation_.layoutWidth_).to.equal(111);
-    expect(testElementCreatedCallback.callCount).to.equal(1);
-    expect(testElementFirstAttachedCallback.callCount).to.equal(0);
-    expect(element.isBuilt()).to.equal(false);
-  });
-
-  it('StubElement - upgrade previously attached', () => {
-    const element = new StubElementClass();
-    expect(element.isUpgraded()).to.equal(false);
-    expect(testElementCreatedCallback.callCount).to.equal(0);
-
-    element.layout_ = Layout.FILL;
-    element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-    element.everAttached = true;
-    element.resources_ = resources;
+    container.appendChild(element);
     resourcesMock.expects('upgraded').withExactArgs(element).once();
 
     element.upgrade(TestElement);
 
     expect(element.isUpgraded()).to.equal(true);
-    expect(element.implementation_ instanceof TestElement).to.equal(true);
+    expect(element.implementation_).to.be.instanceOf(TestElement);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
     expect(element.implementation_.layoutWidth_).to.equal(111);
     expect(testElementCreatedCallback.callCount).to.equal(1);
     expect(testElementFirstAttachedCallback.callCount).to.equal(1);
+    expect(element.isBuilt()).to.equal(false);
+  });
+
+  it('StubElement - upgrade before attached', () => {
+    const element = new StubElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    expect(testElementCreatedCallback.callCount).to.equal(0);
+
+    element.setAttribute('layout', 'fill');
+    element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+    resourcesMock.expects('upgraded').withExactArgs(element).never();
+
+    element.upgrade(TestElement);
+
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.implementation_).to.be.instanceOf(TestElement);
+    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(testElementFirstAttachedCallback.callCount).to.equal(0);
     expect(element.isBuilt()).to.equal(false);
   });
 
@@ -492,9 +489,8 @@ describe('CustomElement', () => {
 
     element.upgrade(TestElementWithReUpgrade);
 
-    expect(element.isUpgraded()).to.equal(true);
-    expect(element.implementation_ instanceof TestElement).to.equal(true);
-    expect(testElementCreatedCallback.callCount).to.equal(1);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(testElementCreatedCallback.callCount).to.equal(0);
   });
 
 
@@ -694,6 +690,26 @@ describe('CustomElement', () => {
     resourcesMock.expects('upgraded').withExactArgs(element).never();
     element.upgrade(TestElement);
 
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.isBuilt()).to.equal(false);
+    expect(() => {
+      element.layoutCallback();
+    }).to.throw(/Must be built to receive viewport events/);
+
+    expect(testElementLayoutCallback.callCount).to.equal(0);
+  });
+
+  it('StubElement - layoutCallback after upgrade but before build', () => {
+    const element = new StubElementClass();
+    element.setAttribute('layout', 'fill');
+    expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.isBuilt()).to.equal(false);
+
+    resourcesMock.expects('upgraded').withExactArgs(element).once();
+    container.appendChild(element);
+    element.upgrade(TestElement);
+
     expect(element.isUpgraded()).to.equal(true);
     expect(element.isBuilt()).to.equal(false);
     expect(() => {
@@ -760,24 +776,18 @@ describe('CustomElement', () => {
     }).to.throw(/Must never be called in template/);
   });
 
-  it('StubElement - layoutCallback', () => {
+  it('StubElement - layoutCallback should fail before attach', () => {
     const element = new StubElementClass();
     element.setAttribute('layout', 'fill');
     resourcesMock.expects('upgraded').withExactArgs(element).never();
     element.upgrade(TestElement);
-    element.build();
-    expect(element.isUpgraded()).to.equal(true);
-    expect(element.isBuilt()).to.equal(true);
+    expect(() => element.build()).to.throw(/Cannot build unupgraded element/);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.isBuilt()).to.equal(false);
     expect(testElementLayoutCallback.callCount).to.equal(0);
-
-    const p = element.layoutCallback();
-    expect(testElementLayoutCallback.callCount).to.equal(1);
-    return p.then(() => {
-      expect(element.readyState).to.equal('complete');
-    });
   });
 
-  it('StubElement - layoutCallback previously attached', () => {
+  it('StubElement - layoutCallback after attached', () => {
     const element = new StubElementClass();
     element.setAttribute('layout', 'fill');
     element.everAttached = true;
@@ -1091,7 +1101,7 @@ describe('CustomElement', () => {
       resourcesMock.expects('upgraded').withExactArgs(element).never();
       element.upgrade(TestElement);
 
-      expect(element.isUpgraded()).to.equal(true);
+      expect(element.isUpgraded()).to.equal(false);
       expect(element.isBuilt()).to.equal(false);
       element.viewportCallback(false);
       expect(element.isInViewport_).to.equal(false);
@@ -1114,7 +1124,8 @@ describe('CustomElement', () => {
     it('StubElement - should be called once upgraded', () => {
       const element = new StubElementClass();
       element.setAttribute('layout', 'fill');
-      resourcesMock.expects('upgraded').withExactArgs(element).never();
+      resourcesMock.expects('upgraded').withExactArgs(element).once();
+      container.appendChild(element);
       element.upgrade(TestElement);
       element.build();
       expect(element.isUpgraded()).to.equal(true);
@@ -1124,6 +1135,17 @@ describe('CustomElement', () => {
       element.viewportCallback(true);
       expect(element.implementation_.inViewport_).to.equal(true);
       expect(testElementViewportCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement - should not upgrade before attach', () => {
+      const element = new StubElementClass();
+      element.setAttribute('layout', 'fill');
+      resourcesMock.expects('upgraded').withExactArgs(element).never();
+      element.upgrade(TestElement);
+      expect(element.isUpgraded()).to.equal(false);
+      expect(element.isBuilt()).to.equal(false);
+      expect(element.implementation_).to.be.instanceOf(TestElement);
+      expect(testElementViewportCallback.callCount).to.equal(0);
     });
 
     it('StubElement - should be called once upgraded, attached', () => {
