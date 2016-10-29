@@ -51,6 +51,9 @@ export class FixedLayer {
     /** @private {number} */
     this.paddingTop_ = paddingTop;
 
+    /** @private {number} */
+    this.committedPaddingTop_ = paddingTop;
+
     /** @private @const {boolean} */
     this.transfer_ = transfer && ampdoc.isSingleDoc();
 
@@ -120,9 +123,13 @@ export class FixedLayer {
    * Updates the viewer's padding-top position and recalculates offsets of
    * all elements.
    * @param {number} paddingTop
+   * @param {boolean} opt_transient
    */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_transient) {
     this.paddingTop_ = paddingTop;
+    if (!opt_transient) {
+      this.committedPaddingTop_ = paddingTop;
+    }
     this.update();
   }
 
@@ -280,7 +287,7 @@ export class FixedLayer {
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
           if ((top == 'auto' || isImplicitAuto) && top != '0px') {
             top = '';
-            if (currentOffsetTop == this.paddingTop_) {
+            if (currentOffsetTop == this.committedPaddingTop_) {
               top = '0px';
             }
           }
