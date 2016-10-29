@@ -216,6 +216,13 @@ const EXPERIMENTS = [
     name: 'New breaking UX changes make to amp-sticky-ad',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
   },
+  {
+    id: 'amp-animation',
+    name: 'High-performing keyframe animations in AMP.',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-animation/amp-animation.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
+  },
 ];
 
 if (getMode().localDev) {
