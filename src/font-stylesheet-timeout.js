@@ -25,12 +25,12 @@ import {timerFor} from './timer';
  * stylesheets. Users may thus wait a long time for these to download
  * even though all they do is reference fonts.
  *
- * For that reasons this function identifies fonts that have not
- * downloaded within 1 second of the page response starting and turns
- * the respective reinserts the link tags dynamically. This removes
- * their blocking nature and lets the doc render.
+ * For that reasons this function identifies (or rather infers) font
+ * stylesheets that have not downloaded within 1 second of the page
+ * response starting and reinserts equivalent link tags  dynamically. This
+ * removes their page-render-blocking nature and lets the doc render.
  *
- * 1 second was picked, because the fonf-stylesheets are typically
+ * 1 second was picked, because the font-stylesheets are typically
  * tiny. If a connection wasn't able to deliver them within 1s
  * of page load start, then it is unlikely that it will be able
  * to download the font itself within 3s.
