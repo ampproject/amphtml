@@ -99,9 +99,12 @@ describe('Viewport', () => {
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
     viewport = new Viewport(ampdoc, binding, viewer);
-    viewport.fixedLayer_ = {update: () => {
-      return {then: callback => callback()};
-    }};
+    viewport.fixedLayer_ = {
+      update: () => {
+        return {then: callback => callback()};
+      },
+      updatePaddingTop: () => {},
+    };
     viewport.getSize();
 
     // Use window since Animation by default will use window.
@@ -256,13 +259,28 @@ describe('Viewport', () => {
     bindingMock.verify();
   });
 
+  it('should update non-transient padding', () => {
+    const bindingMock = sandbox.mock(binding);
+    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    fixedLayerMock.expects('updatePaddingTop')
+        .withExactArgs(/* paddingTop */ 0, /* transient */ undefined)
+        .once();
+    viewerViewportHandler({paddingTop: 0});
+    bindingMock.verify();
+    fixedLayerMock.verify();
+  });
+
   it('should update padding when viewer wants to hide header', () => {
     const bindingMock = sandbox.mock(binding);
-    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    fixedLayerMock.expects('updatePaddingTop')
+        .withExactArgs(/* paddingTop */ 0, /* transient */ true)
+        .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
         transient: true});
     bindingMock.verify();
+    fixedLayerMock.verify();
   });
 
   it('should update padding for fixed layer when viewer wants to ' +
