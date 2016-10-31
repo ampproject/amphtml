@@ -786,47 +786,6 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('#formatBody_', () => {
-    it('handles full reserialized minimum AMP doc', () => {
-      const metaData = AmpA4A.prototype.getAmpAdMetadata_(
-          minimumAmp.reserialized);
-      expect(metaData).to.not.be.null;
-      expect(AmpA4A.prototype.formatBody_(minimumAmp.reserialized, metaData))
-          .to.equal(expectations.minimumDocBodyFormatted);
-    });
-
-    it('handles full reserialized regexp AMP doc', () => {
-      const metaData = AmpA4A.prototype.getAmpAdMetadata_(regexpsAmpData);
-      expect(metaData).to.not.be.null;
-      expect(AmpA4A.prototype.formatBody_(regexpsAmpData, metaData)).to
-        .equal(expectations.regexpDocBodyFormatted);
-    });
-  });
-
-  describe('#formatCSSBlock_', () => {
-    it('skips empty CSS blocks', () => {
-      expect(AmpA4A.prototype.formatCSSBlock_('', {})).to.equal('');
-    });
-
-    it('handles empty CSS offsets list gracefully', () => {
-      const creative = 'div { background-color: red }';
-      const metaData = {
-        cssUtf16CharOffsets: [0, creative.length],
-        cssReplacementRanges: [],
-      };
-      expect(AmpA4A.prototype.formatCSSBlock_(creative, metaData)).to.equal(
-        'div { background-color: red }');
-    });
-
-    it('should rewrite CSS from validCSSAmp', () => {
-      const metaData = AmpA4A.prototype.getAmpAdMetadata_(
-          validCSSAmp.reserialized);
-      expect(AmpA4A.prototype.formatCSSBlock_(validCSSAmp.reserialized,
-                                              metaData))
-        .to.equal(expectations.validCssDocCssBlockFormatted);
-    });
-  });
-
   describe('#getPriority', () => {
     it('validate priority', () => {
       expect(AmpA4A.prototype.getPriority()).to.equal(2);
@@ -849,9 +808,8 @@ describe('amp-a4a', () => {
           credentials: 'include',
           requireAmpResponseSourceOrigin: true,
         }).returns(Promise.resolve(mockResponse));
-        a4a.onLayoutMeasure();
-        expect(a4a.adPromise_).to.not.be.null;
-        return a4a.adPromise_.then(() => {
+        return a4a.onLayoutMeasure(() => {
+          expect(a4a.adPromise_).to.not.be.null;
           expect(a4a.element.children.length).to.equal(1);
         });
       });
