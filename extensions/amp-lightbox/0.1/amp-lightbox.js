@@ -40,40 +40,14 @@ class AmpLightbox extends AMP.BaseElement {
 
     /**  @private {?function(this:AmpLightbox, Event)}*/
     this.boundCloseOnEscape_ = null;
+
+    /** @private {boolean} */
+    this.isBuilt_ = false;
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  buildCallback() {
-    st.setStyles(this.element, {
-      position: 'fixed',
-      zIndex: 1000,
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-    });
-
-    const children = this.getRealChildren();
-
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.applyFillContent(this.container_);
-    this.element.appendChild(this.container_);
-    children.forEach(child => {
-      this.container_.appendChild(child);
-    });
-
-    this.registerAction('open', this.activate.bind(this));
-    this.registerAction('close', this.close.bind(this));
-
-    const gestures = Gestures.get(this.element);
-    gestures.onGesture(SwipeXYRecognizer, () => {
-      // Consume to block scroll events and side-swipe.
-    });
   }
 
   /** @override */
@@ -100,6 +74,7 @@ class AmpLightbox extends AMP.BaseElement {
         this.element.style.opacity = '';
       });
     }).then(() => {
+      this.build();
       const container = dev().assertElement(this.container_);
       this.updateInViewport(container, true);
       this.scheduleLayout(container);
@@ -111,6 +86,40 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     this.active_ = true;
+  }
+
+  build() {
+    if (this.isBuilt_) {
+      return;
+    }
+
+    st.setStyles(this.element, {
+      position: 'fixed',
+      zIndex: 1000,
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+    });
+
+    const children = this.getRealChildren();
+
+    this.container_ = this.element.ownerDocument.createElement('div');
+    this.applyFillContent(this.container_);
+    this.element.appendChild(this.container_);
+    children.forEach(child => {
+      this.container_.appendChild(child);
+    });
+
+    this.registerAction('open', this.activate.bind(this));
+    this.registerAction('close', this.close.bind(this));
+
+    const gestures = Gestures.get(this.element);
+    gestures.onGesture(SwipeXYRecognizer, () => {
+      // Consume to block scroll events and side-swipe.
+    });
+
+    this.isBuilt_ = true;
   }
 
   /**
