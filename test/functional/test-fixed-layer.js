@@ -451,6 +451,38 @@ describe('FixedLayer', () => {
       expect(state['F0'].top).to.equal('0px');
     });
 
+    it('should override implicit top = auto to 0 w/transient padding', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['top'] = '11px';
+      element1.autoOffsetTop = 11;
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal('0px');
+
+      // Update to transient padding.
+      sandbox.stub(fixedLayer, 'update', () => {});
+      fixedLayer.updatePaddingTop(22, /* transient */ true);
+      vsyncTasks[0].measure(state);
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal('0px');
+      expect(fixedLayer.paddingTop_).to.equal(22);
+      expect(fixedLayer.committedPaddingTop_).to.equal(11);
+
+      // Update to non-transient padding.
+      fixedLayer.updatePaddingTop(22, /* transient */ false);
+      vsyncTasks[0].measure(state);
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal(''); // Reset completely.
+      expect(fixedLayer.paddingTop_).to.equal(22);
+      expect(fixedLayer.committedPaddingTop_).to.equal(22);
+    });
+
     it('should always collect and update top = 0', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.computedStyle['top'] = '0px';
