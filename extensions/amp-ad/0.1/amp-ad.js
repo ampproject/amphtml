@@ -52,6 +52,9 @@ export class AmpAd extends AMP.BaseElement {
         // Unspecified or empty type.  Nothing to do here except bail out.
         return null;
       }
+      window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
+      const slotId = window.ampAdSlotIdCounter++;
+      this.element.setAttribute('data-amp-slot-index', slotId);
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
