@@ -450,7 +450,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (error && error.message) {
       if (error.message.indexOf('amp-a4a: ') == 0) {
         // caught previous call to promiseErrorHandler?  Infinite loop?
-        return error;
+        throw error;
       }
       if (error.message == cancellation().message) {
         // Rethrow if cancellation
