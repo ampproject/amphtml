@@ -491,8 +491,10 @@ export class Visibility {
    */
   prepareStateForCallback_(state, rb, br, ir) {
     const perf = this.win_.performance;
-    state[ELEMENT_X] = rb.left + br.left;
-    state[ELEMENT_Y] = rb.top + br.top;
+    const viewport = viewportForDoc(this.win_.document);
+
+    state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
+    state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
     state[ELEMENT_WIDTH] = br.width;
     state[ELEMENT_HEIGHT] = br.height;
     state[TOTAL_TIME] = perf && perf.timing && perf.timing.domInteractive
