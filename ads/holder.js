@@ -23,7 +23,7 @@ import {writeScript, validateData} from '../3p/3p';
 export function holder(global, data) {
   validateData(data, ['block'], []);
   
-  var d = document,
+ /* var d = document,
   wl = window.location,
   l = "&r" + Math.round((Math.random() * 10000000)),
   n = navigator.userAgent;
@@ -31,5 +31,6 @@ export function holder(global, data) {
   if (d.cookie.indexOf('b=') != -1 && !(n.indexOf('Safari') != -1 && n.indexOf('Chrome') == -1)) l += "&c1";
   l += "&" + escape((self != top) ? "f" + d.referrer : "h" + wl.href);
 	  
-  writeScript(global, 'https://h.holder.com.ua/s?tj&b7101' + );
+  writeScript(global, 'https://h.holder.com.ua/s?tj&b7101' + );*/
+  console.log('Holder Ad Call');
 }
