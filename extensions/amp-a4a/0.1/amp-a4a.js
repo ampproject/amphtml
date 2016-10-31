@@ -18,7 +18,6 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {
   closestByTag,
@@ -96,6 +95,26 @@ export let AdResponseDef;
     }} */
 let CreativeMetaDataDef;
 
+/** @private */
+export const LIFECYCLE_STAGES = {
+  // Note: Use strings as values here, rather than numbers, so that "0" does
+  // not test as `false` later.
+  adSlotBuilt: '0',
+  urlBuilt: '1',
+  adRequestStart: '2',
+  adRequestEnd: '3',
+  extractCreativeAndSignature: '4',
+  adResponseValidateStart: '5',
+  renderFriendlyStart: '6',
+  renderCrossDomainStart: '7',
+  renderFriendlyEnd: '8',
+  renderCrossDomainEnd: '9',
+  preAdThrottle: '10',
+  renderSafeFrameStart: '11',
+  adSlotCleared: '20',
+};
+
+
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
@@ -149,10 +168,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
-    /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
-    this.lifecycleReporter = getLifecycleReporter(this, 'a4a');
-    // Note: The reporting ping should be the last action in the constructor.
-    this.lifecycleReporter.sendPing('adSlotBuilt');
+    this.emitLifecycleEvent('adSlotBuilt');
   }
 
   /** @override */
@@ -296,7 +312,6 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
-          this.lifecycleReporter.sendPing('urlBuilt');
           return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
@@ -304,6 +319,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
+          this.emitLifecycleEvent('urlBuilt', adUrl);
           return adUrl && this.sendXhrRequest_(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
@@ -314,7 +330,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
-          this.lifecycleReporter.sendPing('adRequestEnd');
+          this.emitLifecycleEvent('adRequestEnd', fetchResponse);
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -342,7 +358,8 @@ export class AmpA4A extends AMP.BaseElement {
         .then(responseParts => {
           checkStillCurrent(promiseId);
           if (responseParts) {
-            this.lifecycleReporter.sendPing('extractCreativeAndSignature');
+            this.emitLifecycleEvent('extractCreativeAndSignature',
+                responseParts);
           }
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
@@ -365,7 +382,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts || !creativeParts.signature) {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
-          this.lifecycleReporter.sendPing('adResponseValidateStart');
+          this.emitLifecycleEvent('adResponseValidateStart', creativeParts);
 
           // For each signing service, we have exactly one Promise,
           // keyInfoSetPromise, that holds an Array of Promises of signing keys.
@@ -465,9 +482,10 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
+    this.emitLifecycleEvent('preAdThrottle');
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error || !rendered) {
-        this.lifecycleReporter.sendPing('preAdThrottle');
+        this.emitLifecycleEvent('preAdThrottle');
         incrementLoadingAds(this.win);
         // Haven't rendered yet, so try rendering via one of our
         // cross-domain iframe solutions.
@@ -492,8 +510,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.emitLifecycleEvent('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
-    this.lifecycleReporter.sendPing('adSlotCleared');
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
@@ -562,7 +580,7 @@ export class AmpA4A extends AMP.BaseElement {
    * publisher page.  To be overridden by network implementations as needed.
    */
   onAmpCreativeRender() {
-    this.lifecycleReporter.sendPing('renderFriendlyEnd');
+    this.emitLifecycleEvent('renderFriendlyEnd');
   }
 
   /**
@@ -581,7 +599,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   sendXhrRequest_(adUrl) {
-    this.lifecycleReporter.sendPing('adRequestStart');
+    this.emitLifecycleEvent('adRequestStart');
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
@@ -664,7 +682,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeRenderAmpAd_(bytes) {
-    this.lifecycleReporter.sendPing('renderFriendlyStart');
+    this.emitLifecycleEvent('renderFriendlyStart', bytes);
     // AMP documents are required to be UTF-8
     return utf8Decode(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
@@ -773,7 +791,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaCachedContentIframe_(adUrl) {
-    this.lifecycleReporter.sendPing('renderCrossDomainStart');
+    this.emitLifecycleEvent('renderCrossDomainStart');
     /** @const {!Element} */
     const iframe = createElementWithAttributes(
         /** @type {!Document} */(this.element.ownerDocument),
@@ -796,7 +814,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaSafeFrame_(creativeBody) {
-    this.lifecycleReporter.sendPing('renderSafeFrameStart');
+    this.emitLifecycleEvent('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
@@ -995,4 +1013,15 @@ export class AmpA4A extends AMP.BaseElement {
       target.setAttribute('href', newHref);
     }
   }
+
+  /**
+   * To be overriden by network specific implementation.
+   * This function will be called for each lifecycle event as specified in the
+   * LIFECYCLE_STAGES enum declaration. For certain events, an optional
+   * associated piece of data will be passed.
+   *
+   * @param {string} eventName
+   * @param {!Object=} opt_associatedEventData
+   */
+  emitLifecycleEvent(eventName, opt_associatedEventData) {}
 }
