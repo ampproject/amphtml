@@ -149,7 +149,7 @@ When only one Login URL is configured, the event is `access-login[-type]-failed`
 
 ## Access analytics variables
 
-Access contributes the following URL substitutions to the [amp-var-substitutions.md](spec/amp-var-substitutions.md).
+Access contributes the following URL substitutions to the [amp-var-substitutions.md](/spec/amp-var-substitutions.md).
 
 ### ACCESS_READER_ID
 
