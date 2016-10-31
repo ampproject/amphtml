@@ -63,10 +63,19 @@ export function fontStylesheetTimeout(win) {
         'link[rel~="stylesheet"]');
     for (let i = 0; i < styleLinkElements.length; i++) {
       const existingLink = styleLinkElements[i];
+      const media = existingLink.media || 'all';
       // Make a new link tag, copying the href from the original.
       const newLink = win.document.createElement('link');
-      newLink.setAttribute('rel', existingLink.rel);
-      newLink.setAttribute('href', existingLink.href);
+      newLink.rel = existingLink.rel;
+      newLink.href = existingLink.href;
+      // To avoid blocking the render, we assign a non-matching media
+      // attribute first…
+      newLink.media = 'not-matching';
+      // And then switch it back to the original after the stylesheet
+      // loaded.
+      newLink.onload = () => {
+        newLink.media = media;
+      };
       newLink.setAttribute('i-amp-timeout', timeout);
       const parent = existingLink.parentElement;
       // Insert the stylesheet. We do it right before the existing one,
