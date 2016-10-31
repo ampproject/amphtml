@@ -494,7 +494,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.experimentalNonAmpCreativeRenderMethod_ = null;
           return renderPromise;
         } else if (this.adUrl_) {
-          return this.renderViaCachedContentIframe_(this.adUrl_, true);
+          return this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
           throw new Error('No creative or URL available -- A4A can\'t render' +
               ' any ad');
@@ -526,7 +526,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.creativeBody_ = null;
       this.experimentalNonAmpCreativeRenderMethod_ = null;
       this.rendered_ = false;
-      this.timerId_ = 0;
       if (this.xOriginIframeHandler_) {
         this.xOriginIframeHandler_.freeXOriginIframe();
         this.xOriginIframeHandler_ = null;
@@ -789,9 +788,6 @@ export class AmpA4A extends AMP.BaseElement {
    *
    * @param {string} adUrl  Ad request URL, as sent to #sendXhrRequest_ (i.e.,
    *    before any modifications that XHR module does to it.)
-   * @param {boolean=} opt_isNonAmpCreative whether creative within iframe
-   *    is AMP creative (if not, intersection observer allows sending info into
-   *    nested frames).
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
