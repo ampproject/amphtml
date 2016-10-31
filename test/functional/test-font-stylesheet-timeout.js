@@ -74,7 +74,7 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]')).to.equal(link);
   });
 
-  it('should time out if doc is not interactive', () => {
+  it('should time out if doc is not interactive', done => {
     readyState = 'loading';
     const link = addLink();
     fontStylesheetTimeout(win);
@@ -84,10 +84,15 @@ describes.realWin('font-stylesheet-timeout', {
     clock.tick(1);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(1);
-    expect(win.document.querySelector(
-        'link[rel="stylesheet"]')).to.not.equal(link);
-    expect(win.document.querySelector(
-        'link[rel="stylesheet"]').href).to.equal(link.href);
+    const after = win.document.querySelector(
+        'link[rel="stylesheet"]');
+    expect(after).to.not.equal(link);
+    expect(after.href).to.equal(link.href);
+    expect(after.media).to.equal('not-matching');
+    after.addEventListener('load', () => {
+      expect(after.media).to.equal('all');
+      done();
+    });
   });
 
   it('should time out from response start', () => {
