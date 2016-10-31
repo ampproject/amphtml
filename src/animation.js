@@ -15,7 +15,8 @@
  */
 
 import {getCurve} from './curve';
-import {dev} from './log';
+import {dev, rethrowAsync} from './log';
+import {cancellation} from './error';
 import {vsyncFor} from './vsync';
 
 const TAG_ = 'Animation';
@@ -184,7 +185,7 @@ class AnimationPlayer {
     /** @const {function()} */
     this.resolve_;
 
-    /** @const {function()} */
+    /** @const {function(!Error)} */
     this.reject_;
 
     /** @private {!Promise} */
@@ -207,9 +208,6 @@ class AnimationPlayer {
    * @return {!Promise}
    */
   then(opt_resolve, opt_reject) {
-    if (!opt_resolve && !opt_reject) {
-      return this.promise_;
-    }
     return this.promise_.then(opt_resolve, opt_reject);
   }
 
@@ -234,7 +232,7 @@ class AnimationPlayer {
    * @param {number=} opt_dir
    */
   halt(opt_dir) {
-    this.complete_(/* success */ false, /* dir */ opt_dir || 0);
+    this.complete_(new Error('animation halted'), /* dir */ opt_dir || 0);
   }
 
   /**
@@ -247,16 +245,16 @@ class AnimationPlayer {
       this.task_(this.state_);
     } else {
       dev().warn(TAG_, 'cannot animate');
-      this.complete_(/* success */ false, /* dir */ 0);
+      this.complete_(new Error('cannot animate'), /* dir */ 0);
     }
   }
 
   /**
-   * @param {boolean} success
+   * @param {?Error} error the failure reason
    * @param {number} dir
    * @private
    */
-  complete_(success, dir) {
+  complete_(error, dir) {
     if (!this.running_) {
       return;
     }
@@ -281,16 +279,17 @@ class AnimationPlayer {
           }
         }
       } catch (e) {
-        dev().error(TAG_, 'completion failed: ' + e, e);
-        success = false;
+        rethrowAsync(dev().createError('completion failed', e));
       }
     }
-    if (success) {
-      this.resolve_();
+    if (error) {
+      this.reject_(dev().assertError(error));
     } else {
-      this.reject_();
+      this.resolve_();
     }
   }
+
+
 
   /**
    * @param {!Object<string, *>} unusedState
@@ -323,13 +322,13 @@ class AnimationPlayer {
 
     // Complete or start next cycle.
     if (normLinearTime == 1) {
-      this.complete_(/* success */ true, /* dir */ 0);
+      this.complete_(null, /* dir */ 0);
     } else {
       if (this.vsync_.canAnimate(this.contextNode_)) {
         this.task_(this.state_);
       } else {
         dev().warn(TAG_, 'cancel animation');
-        this.complete_(/* success */ false, /* dir */ 0);
+        this.complete_(cancellation(), /* dir */ 0);
       }
     }
   }
@@ -349,8 +348,9 @@ class AnimationPlayer {
         try {
           normTime = segment.curve(normLinearTime);
         } catch (e) {
-          dev().error(TAG_, 'step curve failed: ' + e, e);
-          this.complete_(/* success */ false, /* dir */ 0);
+          const error = dev().createError('step curve failed', e);
+          dev().error(TAG_, error);
+          this.complete_(error, /* dir */ 0);
           return;
         }
       }
@@ -364,8 +364,9 @@ class AnimationPlayer {
     try {
       segment.func(normTime, segment.completed);
     } catch (e) {
-      dev().error(TAG_, 'step mutate failed: ' + e, e);
-      this.complete_(/* success */ false, /* dir */ 0);
+      const error = dev().createError('step mutate failed', e);
+      dev().error(TAG_, error);
+      this.complete_(error, /* dir */ 0);
       return;
     }
   }

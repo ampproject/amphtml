@@ -15,6 +15,8 @@
  */
 
 import {vsyncFor} from './vsync';
+import {dev} from './log';
+import {cancellation} from './error';
 
 /** @const {function()} */
 const NOOP_CALLBACK_ = function() {};
@@ -139,10 +141,10 @@ export class Motion {
     /** @private {time} */
     this.lastTime_ = this.startTime_;
 
-    /** @private {!Function} */
+    /** @private {function()} */
     this.resolve_;
 
-    /** @private {!Function} */
+    /** @private {function(!Error)} */
     this.reject_;
 
     /** @private {!Promise} */
@@ -161,7 +163,7 @@ export class Motion {
     if (Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
             Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
       this.fireMove_();
-      this.completeContinue_(true);
+      this.completeContinue_(null);
     } else {
       this.runContinuing_();
     }
@@ -174,19 +176,17 @@ export class Motion {
    */
   halt() {
     if (this.continuing_) {
-      this.completeContinue_(false);
+      this.completeContinue_(cancellation());
     }
   }
 
   /**
    * Chains to the motion's promise that will resolve when the motion has
    * completed or will reject if motion has failed or was interrupted.
+   * @return {!Promise}
    * @override
    */
   then(opt_resolve, opt_reject) {
-    if (!opt_resolve && !opt_reject) {
-      return this.promise_;
-    }
     return this.promise_.then(opt_resolve, opt_reject);
   }
 
@@ -197,7 +197,7 @@ export class Motion {
    */
   thenAlways(opt_callback) {
     const callback = opt_callback || NOOP_CALLBACK_;
-    return /** @type {!Promise} */ (this.then(callback, callback));
+    return this.then(callback, callback);
   }
 
   /**
@@ -208,7 +208,7 @@ export class Motion {
     this.velocityX_ = this.maxVelocityX_;
     this.velocityY_ = this.maxVelocityY_;
     const boundStep = this.stepContinue_.bind(this);
-    const boundComplete = this.completeContinue_.bind(this, true);
+    const boundComplete = this.completeContinue_.bind(this, null);
     return this.vsync_.runAnimMutateSeries(this.contextNode_, boundStep, 5000)
         .then(boundComplete, boundComplete);
   }
@@ -240,20 +240,20 @@ export class Motion {
   }
 
   /**
-   * @param {boolean} success
+   * @param {?Error} error the failure reason
    * @private
    */
-  completeContinue_(success) {
+  completeContinue_(error) {
     if (!this.continuing_) {
       return;
     }
     this.continuing_ = false;
     this.lastTime_ = Date.now();
     this.fireMove_();
-    if (success) {
-      this.resolve_();
+    if (error) {
+      this.reject_(dev().assertError(error));
     } else {
-      this.reject_();
+      this.resolve_();
     }
   }
 

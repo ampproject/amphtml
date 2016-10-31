@@ -49,7 +49,9 @@ export function some(promises, count = 1) {
         reasons.push(reason);
       }
       if (reasons.length > extra) {
-        reject(reasons);
+        const error = new Error('not enough promises resolved');
+        error.reasons = reasons;
+        reject(error);
       }
     };
     for (let i = 0; i < promises.length; i++) {

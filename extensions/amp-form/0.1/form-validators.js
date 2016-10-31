@@ -237,7 +237,7 @@ export class AbstractCustomValidator extends FormValidator {
    * @return {boolean}
    */
   shouldValidateOnInteraction(unusedInput) {
-    throw Error('Not Implemented');
+    throw new Error('Not Implemented');
   }
 
   /**

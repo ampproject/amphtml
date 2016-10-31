@@ -555,7 +555,7 @@ export class Resource {
       return Promise.resolve();
     }
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
-      return Promise.reject('already failed');
+      return Promise.reject(new Error('layout already failed'));
     }
 
     dev().assert(this.state_ != ResourceState.NOT_BUILT,
@@ -625,7 +625,7 @@ export class Resource {
       dev().fine(TAG, 'layout complete:', this.debugid);
     } else {
       dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
-      return Promise.reject(opt_reason);
+      return Promise.reject(dev().createError('loading failed', opt_reason));
     }
   }
 

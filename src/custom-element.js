@@ -900,7 +900,7 @@ function createBaseCustomElementClass(win) {
         // It's a promise: wait until it's done.
         res.then(impl => this.completeUpgrade_(impl)).catch(reason => {
           this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
-          rethrowAsync(reason);
+          rethrowAsync(dev().assertError(reason));
         });
       } else {
         // It's an actual instance: upgrade immediately.
@@ -1225,8 +1225,8 @@ function createBaseCustomElementClass(win) {
       try {
         this.implementation_.executeAction(invocation, deferred);
       } catch (e) {
-        rethrowAsync('Action execution failed:', e,
-          invocation.target.tagName, invocation.method);
+        rethrowAsync(dev().createError('Action execution failed:', e,
+          invocation.target.tagName, invocation.method));
       }
     }
 
