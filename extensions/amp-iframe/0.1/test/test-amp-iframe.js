@@ -514,9 +514,13 @@ describe('amp-iframe', () => {
       // appended amp-iframe 10x10
       expect(iframes[0].implementation_
           .looksLikeTrackingIframe_()).to.be.true;
+      expect(iframes[0].implementation_
+          .getPriority()).to.equal(1);
       // appended amp-iframe 100x100
       expect(iframes[1].implementation_
           .looksLikeTrackingIframe_()).to.be.false;
+      expect(iframes[1].implementation_
+          .getPriority()).to.equal(0);
       // amp-iframe 5x5
       expect(iframes[2].implementation_
           .looksLikeTrackingIframe_()).to.be.true;
