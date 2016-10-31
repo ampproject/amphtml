@@ -142,8 +142,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
     if (!this.win.ampA4aValidationKeys) {
+      /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
       this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
     }
 
@@ -369,7 +369,8 @@ export class AmpA4A extends AMP.BaseElement {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
           this.lifecycleReporter.sendPing('adResponseValidateStart');
-          return this.verifyCreativeSignature_(creativeParts)
+          return this.verifyCreativeSignature_(
+              creativeParts.creative, creativeParts.signature)
               .then(creative => {
                 if (creative) {
                   return creative;
@@ -377,7 +378,8 @@ export class AmpA4A extends AMP.BaseElement {
                 // Attempt to re-fetch the keys in case our locally cached
                 // batch has expired.
                 this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
-                return this.verifyCreativeSignature_(creativeParts);
+                return this.verifyCreativeSignature_(
+                    creativeParts.creative, creativeParts.signature);
               });
         })
         // This block returns true iff the creative was rendered in the shadow
@@ -403,10 +405,11 @@ export class AmpA4A extends AMP.BaseElement {
    * our possession. This should never be called before at least one key fetch
    * attempt is made.
    *
-   * @param {!Promise<!AdResponseDef>} creativeParts
-   * @return {!ArrayBuffer} The creative.
+   * @param {!ArrayBuffer} creative
+   * @param {!Uint8Array} signature
+   * @return {!Promise<!ArrayBuffer>} The creative.
    */
-  verifyCreativeSignature_(creativeParts) {
+  verifyCreativeSignature_(creative, signature) {
     // For each signing service, we have exactly one Promise,
     // keyInfoSetPromise, that holds an Array of Promises of signing keys.
     // So long as any one of these signing services can verify the
@@ -426,12 +429,12 @@ export class AmpA4A extends AMP.BaseElement {
             }
             // If the key exists, try verifying with it.
             return verifySignature(
-                new Uint8Array(creativeParts.creative),
-                creativeParts.signature,
+                new Uint8Array(creative),
+                signature,
                 keyInfo)
                 .then(isValid => {
                   if (isValid) {
-                    return creativeParts.creative;
+                    return creative;
                   }
                   return Promise.reject(
                       'Key failed to validate creative\'s signature.');
