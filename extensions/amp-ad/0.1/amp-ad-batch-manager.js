@@ -39,7 +39,7 @@ export function getBatchManager(e, url, selector) {
   if (!(e.win.hasOwnProperty('imageadBatchManagers'))) {
     // Create an array of batch mangers. There will be one for each URL.
     e.win.imageadBatchManagers = {};
-    // Scan the page to get a list of all image ads on this page, indexed by url. 
+    // Scan the page to get a list of all image ads on this page, indexed by url.
     // For performance reasons, we only do the scan once, the first time that a batch manager is constructed.
     e.win.imageadElements = {};
     const elements = document.querySelectorAll(selector);
@@ -48,7 +48,7 @@ export function getBatchManager(e, url, selector) {
       const el = elements[i];
       const url = el.getAttribute('data-url');
       if (!(url in e.win.imageadElements)) {
-          e.win.imageadElements[url] = [];
+        e.win.imageadElements[url] = [];
       }
       e.win.imageadElements[url].push(el);
     }
