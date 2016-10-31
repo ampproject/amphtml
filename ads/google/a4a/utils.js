@@ -306,3 +306,16 @@ function elapsedTimeWithCeiling(time, start) {
   }
   return '-M';
 }
+
+/**
+ * @param {!Window} win
+ * @param {string=} opt_cid
+ * @return {number} The correlator.
+ */
+export function getCorrelator(win, opt_cid) {
+  if (!win.ampAdPageCorrelator) {
+    win.ampAdPageCorrelator = makeCorrelator(
+        opt_cid, documentInfoForDoc(win.document).pageViewId);
+  }
+  return win.ampAdPageCorrelator;
+}

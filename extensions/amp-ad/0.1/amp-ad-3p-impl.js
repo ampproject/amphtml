@@ -32,13 +32,14 @@ import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
 
-
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
 export class AmpAd3PImpl extends AMP.BaseElement {
 
-  /** @param {!AmpElement} element */
+  /**
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
 
@@ -84,8 +85,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
-    /** {!../../../ads/google/a4a/performance.AmpAdLifecycleReporter|!../../../ads/google/a4a/performance.NullLifecycleReporter} */
-    this.lifecycleReporter = getLifecycleReporter(this, 'amp');
+    /** {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
+    this.lifecycleReporter = getLifecycleReporter(this, 'amp', undefined,
+        this.element.getAttribute('data-amp-slot-index'));
 
     this.lifecycleReporter.sendPing('adSlotBuilt');
   }
@@ -218,6 +220,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         clientId: cid || null,
         container: this.container_,
       };
+
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via

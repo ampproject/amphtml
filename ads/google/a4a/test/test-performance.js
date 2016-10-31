@@ -15,8 +15,8 @@
  */
 
 import {
-  AmpAdLifecycleReporter,
-  NullLifecycleReporter,
+  GoogleAdLifecycleReporter,
+  BaseLifecycleReporter,
   getLifecycleReporter,
 } from '../performance';
 import {EXPERIMENT_ATTRIBUTE} from '../traffic-experiments';
@@ -107,7 +107,7 @@ function buildElementWithEid(namespace, type, opt_eid) {
       win,
       element: elem,
     };
-    return getLifecycleReporter(pseudoAmpElement, namespace);
+    return getLifecycleReporter(pseudoAmpElement, namespace, 0, 0);
   });
 }
 
@@ -130,25 +130,25 @@ describe('#getLifecycleReporter', () => {
     EXPERIMENT_BRANCH_EIDS.forEach(eid => {
       it(`should return real reporter for a4a eid = ${eid}`, () => {
         return buildElementWithEid('a4a', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(AmpAdLifecycleReporter);
+          expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
         });
       });
 
       it(`should return a null reporter for amp eid = ${eid}`, () => {
         return buildElementWithEid('amp', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(NullLifecycleReporter);
+          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
         });
       });
 
       it(`should return null reporter for bogus namespace eid = ${eid}`, () => {
         return buildElementWithEid('fnord', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(NullLifecycleReporter);
+          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
         });
       });
 
       it(`should return null reporter for non-Google ad, eid = ${eid}`, () => {
         return buildElementWithEid('a4a', 'a9', eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(NullLifecycleReporter);
+          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
         });
       });
     });
@@ -156,25 +156,25 @@ describe('#getLifecycleReporter', () => {
     CONTROL_BRANCH_EIDS.forEach(eid => {
       it(`should return null reporter for a4a eid = ${eid}`, () => {
         return buildElementWithEid('a4a', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(NullLifecycleReporter);
+          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
         });
       });
 
       it(`should return a real reporter for amp eid = ${eid}`, () => {
         return buildElementWithEid('amp', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(AmpAdLifecycleReporter);
+          expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
         });
       });
 
       it(`should return null reporter for bogus namespace eid = ${eid}`, () => {
         return buildElementWithEid('fnord', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(NullLifecycleReporter);
+          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
         });
       });
 
       it(`should return null reporter for non-Google ad, eid = ${eid}`, () => {
         return buildElementWithEid('amp', 'a9', eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(NullLifecycleReporter);
+          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
         });
       });
     });
@@ -182,26 +182,27 @@ describe('#getLifecycleReporter', () => {
     for (const namespace in ['a4a', 'amp']) {
       it(`should return null reporter for ${namespace} and no eid`, () => {
         return buildElementWithEid(namespace, type).then(reporter => {
-          expect(reporter).to.be.instanceOf(NullLifecycleReporter);
+          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
         });
       });
     }
   });
 });
 
-describe('AmpAdLifecycleReporter', () => {
+describe('GoogleAdLifecycleReporter', () => {
   let sandbox;
   let emitPingSpy;
   let iframe;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    emitPingSpy = sandbox.spy(AmpAdLifecycleReporter.prototype, 'emitPing_');
+    emitPingSpy = sandbox.spy(GoogleAdLifecycleReporter.prototype, 'emitPing_');
     iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;
       const doc = iframeFixture.doc;
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
-      const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
+      const reporter = new GoogleAdLifecycleReporter(
+          win, elem, 'test_foo', 0, 0);
       reporter.setPingAddress('/');
       return {win, doc, elem, reporter};
     });
@@ -286,7 +287,8 @@ describe('AmpAdLifecycleReporter', () => {
           const elem = doc.createElement('div');
           elem.setAttribute('id', i);
           doc.body.appendChild(elem);
-          const reporter = new AmpAdLifecycleReporter(win, elem, 'test_foo');
+          const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo',
+              1, i + 1);
           reporter.setPingAddress('/');
           allReporters.push(reporter);
         }
@@ -298,14 +300,13 @@ describe('AmpAdLifecycleReporter', () => {
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
         const allImgNodes = childElements(doc.body, x => isImgNode(x));
         expect(allImgNodes.length).to.equal(nSlots * nStages);
-        let commonCorrelator = null;
+        const commonCorrelator = '1';
         const slotCounts = {};
         allImgNodes.forEach(n => {
           const src = n.getAttribute('src');
           expect(src).to.match(/[?&]s=test_foo/);
           const corr = /[?&]c=([0-9]+)/.exec(src)[1];
           const slotId = /[?&]rt=[^&?]*slotId\.([0-9]+)[&?,]/.exec(src)[1];
-          commonCorrelator = commonCorrelator || corr;
           expect(corr).to.equal(commonCorrelator);
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
@@ -328,7 +329,7 @@ describe('AmpAdLifecycleReporter', () => {
         const elem2 = doc.createElement('div');
         elem2.setAttribute(EXPERIMENT_ATTRIBUTE, '123456');
         doc.body.appendChild(elem2);
-        const reporter2 = new AmpAdLifecycleReporter(win, elem2, 'test_foo');
+        const reporter2 = new GoogleAdLifecycleReporter(win, elem2, 'test_foo');
         reporter2.setPingAddress('/');
         reporter2.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledTwice;
