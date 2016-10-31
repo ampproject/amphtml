@@ -64,7 +64,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:attached': 0,
       'amp:error': 0,
       'amp:stubbed': 0,
-      'amp:load:start': 0
+      'amp:load:start': 0,
     };
     const messages = [];
     let html = __html__[fixture];
@@ -288,16 +288,11 @@ const IFRAME_STUB_URL =
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
  * @param win {!Window}
- * @param opt_beforeAttachToDom {function(!HTMLIFrameElement)=}
- * @returns {!Promise<!HTMLIFrameElement>}
+ * @returns {!HTMLIFrameElement}
  */
-export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
+export function createIframeWithMessageStub(win) {
   const element = win.document.createElement('iframe');
   element.src = IFRAME_STUB_URL;
-  if (opt_beforeAttachToDom) {
-    opt_beforeAttachToDom(element);
-  }
-  win.document.body.appendChild(element);
 
   /**
    * Instructs the iframe to send a message to parent window.
@@ -329,12 +324,7 @@ export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
       win.addEventListener('message', listener);
     });
   };
-
-  return new Promise(resolve => {
-    element.onload = () => {
-      resolve(element);
-    };
-  });
+  return element;
 }
 
 /**
@@ -427,7 +417,7 @@ export function expectBodyToBecomeVisible(win) {
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  });
+  }, undefined, 5000);
 }
 
 /**
