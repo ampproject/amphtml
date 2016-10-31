@@ -483,7 +483,6 @@ export class AmpA4A extends AMP.BaseElement {
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
     this.emitLifecycleEvent('preAdThrottle');
-    this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error || !rendered) {
         this.emitLifecycleEvent('preAdThrottle');
