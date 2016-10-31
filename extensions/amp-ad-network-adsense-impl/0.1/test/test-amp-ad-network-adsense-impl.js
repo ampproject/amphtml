@@ -16,6 +16,7 @@
 
 import {AmpAdNetworkAdsenseImpl} from '../amp-ad-network-adsense-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 
 describe('amp-ad-network-adsense-impl', () => {
@@ -64,30 +65,30 @@ describe('amp-ad-network-adsense-impl', () => {
 
   describe('#extractCreativeAndSignature', () => {
     it('without signature', () => {
-      const creative =
-        new TextEncoder('utf-8').encode('some creative');
-      return expect(adsenseImpl.extractCreativeAndSignature(
-        creative,
-        {
-          get: function() { return undefined; },
-          has: function() { return false; },
-        })).to.eventually.deep.equal(
-              {creative, signature: null});
+      return utf8Encode('some creative').then(creative => {
+        return expect(adsenseImpl.extractCreativeAndSignature(
+          creative,
+          {
+            get: function() { return undefined; },
+            has: function() { return false; },
+          })).to.eventually.deep.equal(
+                {creative, signature: null});
+      });
     });
     it('with signature', () => {
-      const creative =
-        new TextEncoder('utf-8').encode('some creative');
-      return expect(adsenseImpl.extractCreativeAndSignature(
-        creative,
-        {
-          get: function(name) {
-            return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-          },
-          has: function(name) {
-            return name === 'X-AmpAdSignature';
-          },
-        })).to.eventually.deep.equal(
-            {creative, signature: base64UrlDecodeToBytes('AQAB')});
+      return utf8Encode('some creative').then(creative => {
+        return expect(adsenseImpl.extractCreativeAndSignature(
+          creative,
+          {
+            get: function(name) {
+              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+            },
+            has: function(name) {
+              return name === 'X-AmpAdSignature';
+            },
+          })).to.eventually.deep.equal(
+              {creative, signature: base64UrlDecodeToBytes('AQAB')});
+      });
     });
   });
 });
