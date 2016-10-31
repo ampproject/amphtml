@@ -29,23 +29,38 @@ export const TAG_AD_BATCH_MANAGER = 'amp-ad-batch-manager';
   * Get a batch manager that will be used to batch together elements with the same data-url
   * Note a side effect: the first ad with a given data-url to be processed will have its isBatchMaster_ variable set to true
   * @param {Element} e The element which is to be batched
+  * @param {string} url The URL identifying which batch
+  * @param {string} selector The selector to choose the things to be batched (e.g. 'amp-ad[type=imagead]')
   * @returns {AmpAdBatchManager}
   */
-export function getBatchManager(e) {
+export function getBatchManager(e, url, selector) {
   // If this is our first imagead, create a map of responses for each value of 'data-url'
   // This allows ads from multiple ad servers on the same page
   if (!(e.win.hasOwnProperty('imageadBatchManagers'))) {
     // Create an array of batch mangers. There will be one for each URL.
     e.win.imageadBatchManagers = {};
+    // Scan the page to get a list of all image ads on this page, indexed by url. 
+    // For performance reasons, we only do the scan once, the first time that a batch manager is constructed.
+    e.win.imageadElements = {};
+    const elements = document.querySelectorAll(selector);
+    console.log(elements);
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      const url = el.getAttribute('data-url');
+      if (!(url in e.win.imageadElements)) {
+          e.win.imageadElements[url] = [];
+      }
+      e.win.imageadElements[url].push(el);
+    }
   }
-  if (!(e.url_ in e.win.imageadBatchManagers)) {
+  if (!(url in e.win.imageadBatchManagers)) {
     // This is the first time we've seen this URL, so this will be the master for this batch
     e.isBatchMaster_ = true;
-    e.win.imageadBatchManagers[e.url_] = new AmpAdBatchManager(e);
+    e.win.imageadBatchManagers[url] = new AmpAdBatchManager(e);
   } else {
     e.isBatchMaster_ = false;
   }
-  return e.win.imageadBatchManagers[e.url_];
+  return e.win.imageadBatchManagers[url];
 }
 
 export class AmpAdBatchManager {
@@ -65,10 +80,9 @@ export class AmpAdBatchManager {
     /** @public {Object} responseData Map of JSON responses indexed by slot */
     this.responseData = null;
 
-    // Scan the document for all elements with the same URL, and put them into the list to be batched
-    // @todo - the selector could be made a variable in order to generalise this to things other than imageads.
-    const elements = document.querySelectorAll('amp-ad[type=imagead]');
+    // Get a list of slots that are in use for this URL
     const slots = [];
+    const elements = element.win.imageadElements[this.url_];
     for (let i = 0; i < elements.length; i++) {
       const e = elements[i];
 
@@ -97,11 +111,10 @@ export class AmpAdBatchManager {
    * Call this to instruct the batch manager to do the layout for an element. Prior to doing the layout, the batch manager
    * will fetch the data (if this is the batch master) or wait for it to be ready (if not the batch master).
    * @param {Element} e The element for which the layout is to be done
-   * @param {function} callback The callback to be provided to do the actual layout. The element's "jsondata_" variable will
-   *    be filled its with the data from the ad server before this is called.
-   * @returns {Promise}
+   * @returns {Promise} The element's "jsondata_" variable will be filled its with the data from the ad server before this is
+   *     resolved.
    */
-  doLayout(e, callback) {
+  doLayout(e) {
     const t = this;
     return new Promise(function(resolve) {
       if (e.isBatchMaster_) {
@@ -109,12 +122,6 @@ export class AmpAdBatchManager {
         // Gather the parameters to be added to the URL. First, make a list of the slot ids for all ads on this page with this URL
         xhrFor(e.win).fetchJson(t.fullurl_).then(function(data) {
           t.responseData = data;
-          // Now call the real layout function for this element
-          for (const s in data) {
-            if (e.slot_ == s) {
-              callback();
-            }
-          }
           resolve('OK');
         }, function(err) {
           user().error(TAG_AD_BATCH_MANAGER, err);
@@ -122,9 +129,8 @@ export class AmpAdBatchManager {
 
       } else {
         // This is not the master. We need to wait for the master to have fetched the response for the ad server; when this is done,
-        // it's OK to call the layout callback.
+        // it's OK to proceed
         t.getResponseWhenReady().then(function() {
-          callback();
           resolve('OK');
         }, function(err) {
           user().error(TAG_AD_BATCH_MANAGER, err);

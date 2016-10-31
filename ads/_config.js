@@ -389,11 +389,6 @@ export const adConfig = {
 
   widespace: {},
 
-  yahoo: {
-    prefetch: 'https://s.yimg.com/os/ampad/display.js',
-    preconnect: 'https://us.adserver.yahoo.com',
-  },
-
   yahoojp: {
     prefetch: [
       'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',

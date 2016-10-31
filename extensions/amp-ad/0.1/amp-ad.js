@@ -20,6 +20,7 @@ import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev, user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
 import {userNotificationManagerFor} from '../../../src/user-notification';
+import {isExperimentOn} from '../../../src/experiments';
 
 
 /**
@@ -54,7 +55,7 @@ export class AmpAd extends AMP.BaseElement {
         return null;
       }
       // Check for the simplified Image Ad type
-      if (type === 'imagead') {
+      if (type === 'imagead' && isExperimentOn(this.win, 'ad-type-imagead')) {
         return new AmpAdImage(this.element);
       }
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
