@@ -26,6 +26,8 @@ import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
+import {viewportForDoc} from '../../../../src/viewport';
+
 import * as sinon from 'sinon';
 
 
@@ -36,6 +38,8 @@ describe('amp-analytics.visibility', () => {
   let sandbox;
   let visibility;
   let getIntersectionStub;
+  let viewportScrollTopStub;
+  let viewportScrollLeftStub;
   let callbackStub;
   let clock;
   let ampElement;
@@ -59,6 +63,11 @@ describe('amp-analytics.visibility', () => {
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
 
+    const viewport = viewportForDoc(window.document);
+    viewportScrollTopStub = sandbox.stub(viewport, 'getScrollTop');
+    viewportScrollTopStub.returns(0);
+    viewportScrollLeftStub = sandbox.stub(viewport, 'getScrollLeft');
+    viewportScrollLeftStub.returns(0);
     viewerForDoc(window.document).setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new Visibility(window);
     sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
@@ -123,17 +132,21 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires for non-trivial on=visible config', () => {
+    viewportScrollTopStub.returns(13);
+    viewportScrollLeftStub.returns(5);
     listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
           {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
-    verifyChange(INTERSECTION_50P, 1, [sinon.match({
+    const intersection =
+        makeIntersectionEntry([30, 10, 100, 100], [0, 0, 100, 100]);
+    verifyChange(intersection, 1, [sinon.match({
       backgrounded: '0',
       backgroundedAtStart: '0',
-      elementX: '50',
-      elementY: '0',
+      elementX: '35', // 5 + 30
+      elementY: '23', // 13 + 10
       elementWidth: '100',
       elementHeight: '100',
-      loadTimeVisibility: '50',
+      loadTimeVisibility: '63', // (100 - 30) * (100 - 10) / 100
       totalTime: sinon.match(value => {
         return isFiniteNumber(Number(value));
       }),

@@ -429,11 +429,11 @@ Provides the width of the element specified by `visibilitySpec`.
 
 ### elementX
 
-Provides the X coordinate of the left edge of the element specified by `visibilitySpec`.
+Provides the absolute X coordinate of the left edge of the element specified by `visibilitySpec`.
 
 ### elementY
 
-Provides the Y coordinate of the top edge of the element specified by `visibilitySpec`.
+Provides the absolute Y coordinate of the top edge of the element specified by `visibilitySpec`.
 
 ### firstSeenTime
 
