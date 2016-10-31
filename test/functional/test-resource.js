@@ -513,6 +513,41 @@ describe('Resource', () => {
     });
   });
 
+  describe('Resource set/get ownership', () => {
+    let child;
+    let parentResource;
+    let resources;
+    beforeEach(() => {
+      const parent = {
+        ownerDocument: {defaultView: window},
+        tagName: 'AMP-STICKY-AD',
+        isBuilt: () => false,
+        contains: () => true,
+      };
+      child = {
+        ownerDocument: {defaultView: window},
+        tagName: 'AMP-AD',
+        isBuilt: () => false,
+        contains: () => true,
+      };
+      resources = new Resources(new AmpDocSingle(window));
+      parentResource = new Resource(1, parent, resources);
+    });
+
+    it('should set resource before Resource created for child element', () => {
+      resources.setOwner(child, parentResource.element);
+      const childResource = new Resource(1, child, resources);
+      expect(childResource.getOwner()).to.equal(parentResource.element);
+    });
+
+    it('should always get the lastest owner value', () => {
+      const childResource = new Resource(1, child, resources);
+      expect(childResource.getOwner()).to.be.null;
+      resources.setOwner(childResource.element, parentResource.element);
+      expect(childResource.owner_).to.equal(parentResource.element);
+      expect(childResource.getOwner()).to.equal(parentResource.element);
+    });
+  });
 
   describe('unlayoutCallback', () => {
     it('should NOT call unlayoutCallback on unbuilt element', () => {
