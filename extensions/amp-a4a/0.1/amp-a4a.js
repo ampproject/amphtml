@@ -143,7 +143,9 @@ export class AmpA4A extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
 
     /** @private {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
-    this.keyInfoSetPromises_ = this.getKeyInfoSets_();
+    if (!this.win.ampA4aValidationKeys) {
+      this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
+    }
 
     // TODO(tdrl): Temporary, while we're verifying whether this is an
     // acceptable solution to the 'Safari on iOS doesn't fetch iframe src
@@ -367,45 +369,16 @@ export class AmpA4A extends AMP.BaseElement {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
           this.lifecycleReporter.sendPing('adResponseValidateStart');
-
-          // For each signing service, we have exactly one Promise,
-          // keyInfoSetPromise, that holds an Array of Promises of signing keys.
-          // So long as any one of these signing services can verify the
-          // signature, then the creative is valid AMP.
-          return some(this.keyInfoSetPromises_.map(keyInfoSetPromise => {
-            // Resolve Promise into Array of Promises of signing keys.
-            return keyInfoSetPromise.then(keyInfoSet => {
-              // As long as any one individual key of a particular signing
-              // service, keyInfoPromise, can verify the signature, then the
-              // creative is valid AMP.
-              return some(keyInfoSet.map(keyInfoPromise => {
-                // Resolve Promise into signing key.
-                return keyInfoPromise.then(keyInfo => {
-                  if (!keyInfo) {
-                    return Promise.reject('Promise resolved to null key.');
-                  }
-                  // If the key exists, try verifying with it.
-                  return verifySignature(
-                      new Uint8Array(creativeParts.creative),
-                      creativeParts.signature,
-                      keyInfo)
-                      .then(isValid => {
-                        if (isValid) {
-                          return creativeParts.creative;
-                        }
-                        return Promise.reject(
-                            'Key failed to validate creative\'s signature.');
-                      },
-                      err => {
-                        user().error('Amp Ad', err, this.element);
-                      });
-                });
-              }))
-              // some() returns an array of which we only need a single value.
-              .then(returnedArray => returnedArray[0]);
-            });
-          }))
-          .then(returnedArray => returnedArray[0]);
+          return this.verifyCreativeSignature_(creativeParts)
+              .then(creative => {
+                if (creative) {
+                  return creative;
+                }
+                // Attempt to re-fetch the keys in case our locally cached
+                // batch has expired.
+                this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
+                return this.verifyCreativeSignature_(creativeParts);
+              });
         })
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
@@ -423,6 +396,56 @@ export class AmpA4A extends AMP.BaseElement {
           return creative && this.maybeRenderAmpAd_(creative);
         })
         .catch(error => this.promiseErrorHandler_(error));
+  }
+
+  /**
+   * Attempts to validate the creative signature against every key currently in
+   * our possession. This should never be called before at least one key fetch
+   * attempt is made.
+   *
+   * @param {!Promise<!AdResponseDef>} creativeParts
+   * @return {!ArrayBuffer} The creative.
+   */
+  verifyCreativeSignature_(creativeParts) {
+    // For each signing service, we have exactly one Promise,
+    // keyInfoSetPromise, that holds an Array of Promises of signing keys.
+    // So long as any one of these signing services can verify the
+    // signature, then the creative is valid AMP.
+    const keyInfoSetPromises = this.win.ampA4aValidationKeys;
+    return some(keyInfoSetPromises.map(keyInfoSetPromise => {
+      // Resolve Promise into Array of Promises of signing keys.
+      return keyInfoSetPromise.then(keyInfoSet => {
+        // As long as any one individual key of a particular signing
+        // service, keyInfoPromise, can verify the signature, then the
+        // creative is valid AMP.
+        return some(keyInfoSet.map(keyInfoPromise => {
+          // Resolve Promise into signing key.
+          return keyInfoPromise.then(keyInfo => {
+            if (!keyInfo) {
+              return Promise.reject('Promise resolved to null key.');
+            }
+            // If the key exists, try verifying with it.
+            return verifySignature(
+                new Uint8Array(creativeParts.creative),
+                creativeParts.signature,
+                keyInfo)
+                .then(isValid => {
+                  if (isValid) {
+                    return creativeParts.creative;
+                  }
+                  return Promise.reject(
+                      'Key failed to validate creative\'s signature.');
+                },
+                err => {
+                  user().error('Amp Ad', err, this.element);
+                });
+          });
+        }))
+        // some() returns an array of which we only need a single value.
+        .then(returnedArray => returnedArray[0]);
+      });
+    }))
+    .then(returnedArray => returnedArray[0]);
   }
 
   /**
