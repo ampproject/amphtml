@@ -587,7 +587,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @visibleForTesting
    */
   onCrossDomainIframeCreated(iframe) {
-    dev().info(`onCrossDomainIframeCreated ${iframe}`);
+    dev().info('A4A', `onCrossDomainIframeCreated ${iframe}`);
   }
 
   /**
