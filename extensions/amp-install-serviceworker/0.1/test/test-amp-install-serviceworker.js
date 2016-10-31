@@ -182,7 +182,9 @@ describe('amp-install-serviceworker', () => {
       };
       resetServiceForTesting(window, 'documentInfo');
       getServiceForDoc(document, 'documentInfo', () => {
-        return documentInfo;
+        return {
+          get: () => documentInfo,
+        };
       });
       whenVisible = Promise.resolve();
       getService(win, 'viewer', () => {

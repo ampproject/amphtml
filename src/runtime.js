@@ -44,6 +44,7 @@ import {
 } from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryServiceForDoc} from './service/history-impl';
@@ -107,6 +108,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);

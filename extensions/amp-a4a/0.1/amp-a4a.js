@@ -15,7 +15,6 @@
  */
 import {
   allowRenderOutsideViewport,
-  decrementLoadingAds,
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
@@ -37,6 +36,7 @@ import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
+import {endsWith} from '../../../src/string';
 import {
   importPublicKey,
   isCryptoAvailable,
@@ -49,23 +49,6 @@ import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
-
-/**
- * Dev public key set. This will go away once the dev signing service goes live.
- * @type {Array<!Promise<!./crypto-verifier.PublicKeyInfoDef>>}
- */
-const devJwkSet = [{
-  kty: 'RSA',
-  n: 'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
-      'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +
-      'nvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEz' +
-      'fZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca' +
-      '8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2' +
-      'sQuM5KangAkjJRe-Ej6aaQ',
-  e: 'AQAB',
-  alg: 'RS256',
-  ext: true,
-}];
 
 /**
  * @param {*} ary
@@ -168,9 +151,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {boolean} */
     this.rendered_ = false;
 
-    /** @private {number} ID of timer used as part of 3p throttling. */
-    this.timerId_ = 0;
-
     /** @private {boolean} whether layoutMeasure has been executed. */
     this.layoutMeasureExecuted_ = false;
 
@@ -256,6 +236,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
+    // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
+    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
+    // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
+    this.preconnect.url(SAFEFRAME_IMPL_PATH);
+    if (!this.config) {
+      return;
+    }
     const preconnect = this.config.preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
@@ -272,10 +259,6 @@ export class AmpA4A extends AMP.BaseElement {
         this.preconnect.url(p, true);
       });
     }
-    // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
-    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
-    // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
-    this.preconnect.url(SAFEFRAME_IMPL_PATH);
   }
 
   /** @override */
@@ -503,15 +486,18 @@ export class AmpA4A extends AMP.BaseElement {
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error || !rendered) {
+        this.emitLifecycleEvent('preAdThrottle');
+        incrementLoadingAds(this.win);
         // Haven't rendered yet, so try rendering via one of our
         // cross-domain iframe solutions.
         if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
             this.creativeBody_) {
-          this.renderViaSafeFrame_(this.creativeBody_);
+          const renderPromise = this.renderViaSafeFrame_(this.creativeBody_);
           this.creativeBody_ = null;  // Free resources.
           this.experimentalNonAmpCreativeRenderMethod_ = null;
+          return renderPromise;
         } else if (this.adUrl_) {
-          this.renderViaCachedContentIframe_(this.adUrl_, true);
+          return this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
           throw new Error('No creative or URL available -- A4A can\'t render' +
               ' any ad');
@@ -543,7 +529,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.creativeBody_ = null;
       this.experimentalNonAmpCreativeRenderMethod_ = null;
       this.rendered_ = false;
-      this.timerId_ = 0;
       if (this.xOriginIframeHandler_) {
         this.xOriginIframeHandler_.freeXOriginIframe();
         this.xOriginIframeHandler_ = null;
@@ -600,6 +585,15 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Element} iframe that was just created.  To be overridden for
+   * testing.
+   * @visibleForTesting
+   */
+  onCrossDomainIframeCreated(iframe) {
+    dev().info('A4A', `onCrossDomainIframeCreated ${iframe}`);
+  }
+
+  /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
    * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
@@ -630,8 +624,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Array<string>} A list of signing services.
    */
   getSigningServiceNames() {
-    // TODO(levitzky) Add dev key name once it goes live.
-    return getMode().localDev ? ['google'] : ['google'];
+    return getMode().localDev ? ['google', 'google-dev'] : ['google'];
   }
 
   /**
@@ -646,6 +639,7 @@ export class AmpA4A extends AMP.BaseElement {
       return [];
     }
     const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
+      dev().assert(getMode().localDev || !endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
@@ -672,9 +666,6 @@ export class AmpA4A extends AMP.BaseElement {
         return [];
       }
     });
-    if (getMode().localDev) {
-      jwkSetPromises.push(Promise.resolve(devJwkSet));
-    }
     return jwkSetPromises.map(jwkSetPromise =>
         jwkSetPromise.then(jwkSet =>
           jwkSet.map(jwk =>
@@ -693,12 +684,6 @@ export class AmpA4A extends AMP.BaseElement {
    */
   maybeRenderAmpAd_(bytes) {
     this.emitLifecycleEvent('renderFriendlyStart', bytes);
-    // Timer id will be set if we have entered layoutCallback at which point
-    // 3p throttling count was incremented.  We want to "release" the throttle
-    // immediately since we now know we are not a 3p ad.
-    if (this.timerId_) {
-      decrementLoadingAds(this.timerId_, this.win);
-    }
     // AMP documents are required to be UTF-8
     return utf8Decode(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
@@ -774,18 +759,21 @@ export class AmpA4A extends AMP.BaseElement {
    * Shared functionality for cross-domain iframe-based rendering methods.
    * @param {!Element} iframe Iframe to render.  Should be fully configured
    * (all attributes set), but not yet attached to DOM.
-   * @param is3p Whether the content is 3p / general HTML vs. verified A4A.
+   * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  iframeRenderHelper_(iframe, is3p) {
+  iframeRenderHelper_(iframe) {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
-    // TODO(keithwrightbos): init returns load event, do we need to wait?
+    this.rendered_ = true;
     // Set opt_defaultVisible to true as 3p draw code never executed causing
     // render-start event never to fire which will remove visiblity hidden.
-    this.xOriginIframeHandler_.init(iframe,
-        is3p, /* opt_defaultVisible */ true, /* opt_isA4A */ true);
-    this.rendered_ = true;
+    const handlerPromise = this.xOriginIframeHandler_.init(
+      iframe, /* opt_isA4A */ true);
+    if (getMode().localDev || getMode().test) {
+      this.onCrossDomainIframeCreated(iframe);
+    }
+    return handlerPromise;
   }
 
   /**
@@ -800,12 +788,10 @@ export class AmpA4A extends AMP.BaseElement {
    *
    * @param {string} adUrl  Ad request URL, as sent to #sendXhrRequest_ (i.e.,
    *    before any modifications that XHR module does to it.)
-   * @param {boolean=} opt_isNonAmpCreative whether creative within iframe
-   *    is AMP creative (if not, intersection observer allows sending info into
-   *    nested frames).
+   * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  renderViaCachedContentIframe_(adUrl, opt_isNonAmpCreative) {
+  renderViaCachedContentIframe_(adUrl) {
     this.emitLifecycleEvent('renderCrossDomainStart');
     /** @const {!Element} */
     const iframe = createElementWithAttributes(
@@ -819,17 +805,18 @@ export class AmpA4A extends AMP.BaseElement {
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
-    this.iframeRenderHelper_(iframe, /* is3p */ !!opt_isNonAmpCreative);
+    return this.iframeRenderHelper_(iframe);
   }
 
   /**
    * Render creative via SafeFrame.
    * @param {!ArrayBuffer} creativeBody  The creative, as raw bytes.
+   * @return {!Promise} awaiting load event for ad frame
    * @private
    */
   renderViaSafeFrame_(creativeBody) {
     this.emitLifecycleEvent('renderSafeFrameStart');
-    utf8Decode(creativeBody).then(creative => {
+    return utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument),
@@ -839,7 +826,7 @@ export class AmpA4A extends AMP.BaseElement {
             'src': SAFEFRAME_IMPL_PATH + '?n=0',
             'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
           }, SHARED_IFRAME_PROPERTIES));
-      this.iframeRenderHelper_(iframe, true);
+      return this.iframeRenderHelper_(iframe);
     });
   }
 

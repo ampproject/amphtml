@@ -52,6 +52,11 @@ With responsive layout the width and height from the example should yield correc
 
 ## Attributes
 
+**autoplay**
+
+If present, the video will automatically start playback once rendered (if autoplay is supported by the browser).
+Autoplay, when supported, will automatically mute the video before auto playing.
+
 **data-videoid**
 
 The Youtube video id found in every Youtube video page URL
@@ -67,8 +72,6 @@ Keys and values will be URI encoded. Keys will be camel cased.
 - `data-param-controls=1` becomes `&controls=1`
 
 See [Youtube Embedded Player Parameters](https://developers.google.com/youtube/player_parameters) for more parameter options for youtube.
-
-Because of limitations in mobile browsers, the `autoplay` param is currently not supported. Follow [this issue](https://github.com/ampproject/amphtml/issues/3799) for updates on autoplay support in AMP.
 
 ## Validation
 
