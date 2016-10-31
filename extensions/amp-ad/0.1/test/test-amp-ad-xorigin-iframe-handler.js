@@ -71,7 +71,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         noContentSpy =
             sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
 
-        initPromise = iframeHandler.init(iframe, true);
+        initPromise = iframeHandler.init(iframe);
         iframe.onload = () => {
           done();
         };
@@ -170,7 +170,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should resolve on message "bootstrap-loaded" if render-start is'
         + 'NOT implemented', done => {
 
-      initPromise = iframeHandler.init(iframe, true);
+      initPromise = iframeHandler.init(iframe);
       iframe.onload = () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
@@ -190,7 +190,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       const clock = sandbox.useFakeTimers();
 
       iframe.name = 'test_master';
-      initPromise = iframeHandler.init(iframe, true);
+      initPromise = iframeHandler.init(iframe);
       iframe.onload = () => {
         clock.tick(9999);
         expect(noContentSpy).to.not.be.called;
@@ -205,7 +205,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should resolve directly if it is A4A', () => {
-      return iframeHandler.init(iframe, true, undefined, true).then(() => {
+      return iframeHandler.init(iframe, true).then(() => {
         expect(iframe.style.visibility).to.equal('');
       });
     });
@@ -214,7 +214,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   describe('Initialized iframe', () => {
 
     beforeEach(done => {
-      iframeHandler.init(iframe, true);
+      iframeHandler.init(iframe);
       iframe.onload = () => {
         done();
       };
