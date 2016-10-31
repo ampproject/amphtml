@@ -121,7 +121,11 @@ export class FixedLayer {
 
   /**
    * Updates the viewer's padding-top position and recalculates offsets of
-   * all elements.
+   * all elements. The padding update can be transient, in which case the
+   * UI itself is not updated leaving the blank space up top, which is invisible
+   * due to scroll position. This mode saves significant resources. However,
+   * eventhough layout is not updated, the fixed coordinates still need to be
+   * recalculated.
    * @param {number} paddingTop
    * @param {boolean} opt_transient
    */
