@@ -19,7 +19,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 
-describes.fakeWin('0.1 version', {}, () => {
+describes.fakeWin('1.0 version', {}, () => {
   function getAmpStickyAd(opt_attributes) {
     return createIframePromise().then(iframe => {
       const ampStickyAd = iframe.doc.createElement('amp-sticky-ad');
