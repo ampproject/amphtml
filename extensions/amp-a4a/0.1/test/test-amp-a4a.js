@@ -30,11 +30,9 @@ import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
-import {AmpAdXOriginIframeHandler}
-  from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
-const XHR_URL =  'http://iframe.localhost:' + location.port +
+const XHR_URL = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe.html?args';
 
 class MockA4AImpl extends AmpA4A {
@@ -127,7 +125,7 @@ describe('amp-a4a', () => {
 
   function verifyNonAMPRender(a4a, win) {
     a4a.onAmpCreativeRender = () => {
-      fail('AMP creative should never have rendered!');
+      assert.fail('AMP creative should never have rendered!');
     };
     a4a.onCrossDomainIframeCreated = iframe => {
       // Iframe should be hidden at time of creation and only made visible
@@ -135,7 +133,7 @@ describe('amp-a4a', () => {
       expect(isStyleVisible(win, iframe)).to.be.false;
       iframe.onload = () => {
         expect(isStyleVisible(win, iframe)).to.be.true;
-      }
+      };
     };
   }
 

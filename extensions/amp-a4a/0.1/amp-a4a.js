@@ -587,7 +587,9 @@ export class AmpA4A extends AMP.BaseElement {
    * testing.
    * @visibleForTesting
    */
-  onCrossDomainIframeCreated(iframe) {}
+  onCrossDomainIframeCreated(iframe) {
+    dev().info(`onCrossDomainIframeCreated ${iframe}`);
+  }
 
   /**
    * Send ad request, extract the creative and signature from the response.
