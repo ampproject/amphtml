@@ -736,6 +736,19 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.captionElement_.classList.add('-amp-image-lightbox-caption');
     this.container_.appendChild(this.captionElement_);
 
+    // Invisible close button at the end of lightbox for screen-readers.
+    const screenReaderCloseButton = this.element.ownerDocument
+        .createElement('button');
+    // TODO(aghassemi, #4146) i18n
+    screenReaderCloseButton.textContent = 'Close the lightbox';
+    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    // This is for screen-readers only, should not get a tab stop.
+    screenReaderCloseButton.tabIndex = -1;
+    screenReaderCloseButton.addEventListener('click', () => {
+      this.close();
+    });
+    this.element.appendChild(screenReaderCloseButton);
+
     const gestures = Gestures.get(this.element);
     this.element.addEventListener('click', e => {
       if (!this.entering_ &&
