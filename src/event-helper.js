@@ -17,6 +17,9 @@
 import {timerFor} from './timer';
 import {user} from './log';
 
+/** @const {string}  */
+const LOAD_FAILURE_PREFIX = 'Failed to load:';
+
 
 /**
  * Listens for the specified event on the element.
@@ -138,7 +141,16 @@ function failedToLoad(event) {
   if (target && target.src) {
     target = target.src;
   }
-  throw user().createError('Failed to load:', target);
+  throw user().createError(LOAD_FAILURE_PREFIX, target);
+}
+
+/**
+ * Returns true if this error message is was created for a load error.
+ * @param {string} message An error message
+ * @return {boolean}
+ */
+export function isLoadErrorMessage(message) {
+  return message.indexOf(LOAD_FAILURE_PREFIX) != -1;
 }
 
 /**

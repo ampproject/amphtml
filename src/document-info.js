@@ -14,60 +14,14 @@
  * limitations under the License.
  */
 
-import {getServiceForDoc} from './service';
-import {parseUrl, getSourceUrl} from './url';
-import {user} from './log';
-
-
-/**
- * Properties:
- *     - url: The doc's url.
- *     - sourceUrl: the source url of an amp document.
- *     - canonicalUrl: The doc's canonical.
- *     - pageViewId: Id for this page view. Low entropy but should be unique
- *       for concurrent page views of a user().
- *
- * @typedef {{
- *   url: string,
- *   sourceUrl: string,
- *   canonicalUrl: string,
- *   pageViewId: string,
- * }}
- */
-export let DocumentInfoDef;
+import {getExistingServiceForDoc} from './service';
 
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!DocumentInfoDef} Info about the doc
+ * @return {!./service/document-info-impl.DocumentInfoDef} Info about the doc
  */
 export function documentInfoForDoc(nodeOrDoc) {
-  return /** @type {!DocumentInfoDef} */ (getServiceForDoc(nodeOrDoc,
-      'documentInfo', ampdoc => {
-        const url = ampdoc.getUrl();
-        const sourceUrl = getSourceUrl(url);
-        const rootNode = ampdoc.getRootNode();
-        let canonicalUrl = rootNode && rootNode.AMP
-            && rootNode.AMP.canonicalUrl;
-        if (!canonicalUrl) {
-          const canonicalTag = user().assert(
-              rootNode.querySelector('link[rel=canonical]'),
-              'AMP files are required to have a <link rel=canonical> tag.');
-          canonicalUrl = parseUrl(canonicalTag.href).href;
-        }
-        const pageViewId = getPageViewId(ampdoc.win);
-        return {url, sourceUrl, canonicalUrl, pageViewId};
-      }));
-}
-
-
-/**
- * Returns a relatively low entropy random string.
- * This should be called once per window and then cached for subsequent
- * access to the same value to be persistent per page.
- * @param {!Window} win
- * @return {string}
- */
-function getPageViewId(win) {
-  return String(Math.floor(win.Math.random() * 10000));
+  return /** @type {!./service/document-info-impl.DocInfo} */ (
+      getExistingServiceForDoc(nodeOrDoc, 'documentInfo')).get();
 }

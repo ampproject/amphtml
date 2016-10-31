@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {listen} from '../src/event-helper';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/custom-element';
@@ -66,6 +65,7 @@ export function installVideo(win) {
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls', 'aria-label',
           'aria-describedby', 'aria-labelledby'], this.video_);
+      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
@@ -115,11 +115,6 @@ export function installVideo(win) {
         this.video_.appendChild(child);
       });
 
-      // Dispatch a user tap event on click of the player.
-      listen(this.video_, 'click', () => {
-        this.element.dispatchCustomEvent(VideoEvents.USER_TAP);
-      });
-
       // loadPromise for media elements listens to `loadstart`
       return this.loadPromise(this.video_).then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
@@ -145,6 +140,13 @@ export function installVideo(win) {
      */
     supportsPlatform() {
       return this.isVideoSupported_();
+    }
+
+    /**
+     * @override
+     */
+    isInteractive() {
+      return this.element.hasAttribute('controls');
     }
 
     /**

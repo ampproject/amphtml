@@ -474,7 +474,9 @@ describe('amp-analytics', function() {
 
   it('expands element level vars with higher precedence than trigger vars',
     () => {
+      const analytics = getAnalyticsTag();
       const ins = instrumentationServiceFor(windowApi);
+      sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
       const el1 = windowApi.document.createElement('div');
       el1.className = 'x';
       el1.dataset.varsTest = 'foo';
@@ -482,7 +484,7 @@ describe('amp-analytics', function() {
         {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
         function(arg) {
           expect(arg.vars.test).to.equal('foo');
-        });
+        }, analytics.element);
       ins.onClick_({target: el1});
     });
 
