@@ -42,7 +42,7 @@ export function doubleclick(global, data) {
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotId',
+    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
   ]);
 
   if (global.context.clientId) {
