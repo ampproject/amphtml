@@ -63,7 +63,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
-    const slotId = this.element.getAttribute('data-slot-id');
+    const slotId = this.element.getAttribute('data-amp-slot-id');
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
@@ -114,7 +114,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       case 'adSlotCleared':
         this.lifecycleReporter_.sendPing(eventName);
         this.lifecycleReporter_.reset();
-        this.element.setAttribute('data-slot-id',
+        this.element.setAttribute('data-amp-slot-id',
             this.win.ampAdSlotIdCounter++);
         this.lifecycleReporter_ = this.initLifecycleReporter();
         return;
@@ -142,7 +142,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const reporter =
         /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
         (getLifecycleReporter(this, 'a4a', undefined,
-                              this.element.getAttribute('data-slot-id')));
+                              this.element.getAttribute('data-amp-slot-id')));
     return reporter;
   }
 }

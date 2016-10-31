@@ -54,7 +54,7 @@ export class AmpAd extends AMP.BaseElement {
       }
       window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
       const slotId = window.ampAdSlotIdCounter++;
-      this.element.setAttribute('data-slot-id', slotId);
+      this.element.setAttribute('data-amp-slot-id', slotId);
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
