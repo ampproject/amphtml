@@ -20,6 +20,7 @@
 
 import './polyfills';
 import {chunk} from './chunk';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListenerForDoc} from './document-click';
@@ -65,6 +66,7 @@ chunk(self.document, function initial() {
     chunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
+      fontStylesheetTimeout(self);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
