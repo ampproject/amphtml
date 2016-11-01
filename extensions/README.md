@@ -124,19 +124,4 @@ Current list of extended components by category:
 
 ## AMP HTML Extended Templates
 
-NOT LAUNCHED YET
-
-Extended templates must be explicitly included into the document as custom templates.
-
-For example, to include an amp-mustache template in your page
-include the following script in the `<head>`:
-
-```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
-```
-
-Current list of extended templates:
-
-| Component                                     | Description                                                                                 |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------
-| [`amp-mustache`](amp-mustache/amp-mustache.md) | [Mustache](https://github.com/janl/mustache.js/) templates. |
+See the [AMP template spec](../spec/amp-html-templates.md) for details about supported templates.
