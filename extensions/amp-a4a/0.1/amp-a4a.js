@@ -510,7 +510,7 @@ export class AmpA4A extends AMP.BaseElement {
     // valid AMP.
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error || !rendered) {
-         this.emitLifecycleEvent('preAdThrottle');
+        this.emitLifecycleEvent('preAdThrottle');
         incrementLoadingAds(this.win);
         // Haven't rendered yet, so try rendering via one of our
         // cross-domain iframe solutions.
@@ -707,11 +707,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeRenderAmpAd_(bytes) {
-<<<<<<< HEAD
-    this.lifecycleReporter.sendPing('renderFriendlyStart');
-=======
     this.emitLifecycleEvent('renderFriendlyStart', bytes);
->>>>>>> e5501a30adf15c8fef049729f5e0e3137dbb18ca
     // AMP documents are required to be UTF-8
     return utf8Decode(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
@@ -794,18 +790,7 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     this.rendered_ = true;
-<<<<<<< HEAD
     return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
-=======
-    // Set opt_defaultVisible to true as 3p draw code never executed causing
-    // render-start event never to fire which will remove visiblity hidden.
-    const handlerPromise = this.xOriginIframeHandler_.init(
-      iframe, /* opt_isA4A */ true);
-    if (getMode().localDev || getMode().test) {
-      this.onCrossDomainIframeCreated(iframe);
-    }
-    return handlerPromise;
->>>>>>> e5501a30adf15c8fef049729f5e0e3137dbb18ca
   }
 
   /**
@@ -824,11 +809,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaCachedContentIframe_(adUrl) {
-<<<<<<< HEAD
-    this.lifecycleReporter.sendPing('renderCrossDomainStart');
-=======
     this.emitLifecycleEvent('renderCrossDomainStart');
->>>>>>> e5501a30adf15c8fef049729f5e0e3137dbb18ca
     /** @const {!Element} */
     const iframe = createElementWithAttributes(
         /** @type {!Document} */(this.element.ownerDocument),
@@ -851,11 +832,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaSafeFrame_(creativeBody) {
-<<<<<<< HEAD
-    this.lifecycleReporter.sendPing('renderSafeFrameStart');
-=======
     this.emitLifecycleEvent('renderSafeFrameStart');
->>>>>>> e5501a30adf15c8fef049729f5e0e3137dbb18ca
     return utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
