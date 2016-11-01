@@ -257,25 +257,16 @@ chai.Assertion.addProperty('visible', function() {
   const computedStyle = window.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
+  const isOpaque = parseInt(opacity, 10) > 0;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-    visibility === 'visible',
-    'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-    'expected element \'' +
-        tagName + '\' not to be #{exp}. with classes: ' + obj.className,
-    'visible',
-    visibility
-  );
-  this.assert(
-    parseInt(opacity, 10) > 0,
-    'expected element \'' +
-        tagName + '\' to have #{exp}, got #{act}. with classes: ' +
-        obj.className,
-    'expected element \'' +
-        tagName + '\' not to be #{exp}. with classes: ' + obj.className,
-    'opacity > 0',
-    opacity
+      visibility === 'visible' && isOpaque,
+      'expected element \'' +
+      tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+      'expected element \'' +
+      tagName + '\' not to be #{exp}, got #{act}. with classes: ' + obj.className,
+      'visible and opaque',
+      `visibility = ${visibility} and opacity = ${opacity}`
   );
 });
 

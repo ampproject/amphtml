@@ -36,9 +36,6 @@ import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
-const XHR_URL = 'http://iframe.localhost:' + location.port +
-    '/test/fixtures/served/iframe.html?args';
-
 /**
  * Create a promise for an iframe that has a super-minimal mock AMP environment
  * in it.
@@ -530,8 +527,8 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.querySelector('iframe[src]');
           expect(iframe).to.be.ok;
-          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
-          expect(isStyleVisible(fixture.win, iframe)).to.be.true;
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+          expect(iframe).to.be.visible;
         });
       });
     });
@@ -549,8 +546,8 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.children[0];
           expect(iframe.tagName).to.equal('IFRAME');
-          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
-          expect(isStyleVisible(fixture.win, iframe)).to.be.true;
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+          expect(iframe).to.be.visible;
         }));
       });
     });
@@ -573,7 +570,7 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.children[0];
           expect(iframe.tagName).to.equal('IFRAME');
-          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe.style.visibility).to.equal('');
         });
       });

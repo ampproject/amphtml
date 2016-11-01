@@ -21,7 +21,8 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
 
 /** @type {string} @private */
-export const TEST_URL = 'https://test.location.org/ad/012345?args';
+export const TEST_URL = 'http://iframe.localhost:' + location.port +
+    '/test/fixtures/served/iframe.html?args';
 
 export class MockA4AImpl extends AmpA4A {
   getAdUrl() {
