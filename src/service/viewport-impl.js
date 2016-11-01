@@ -1723,8 +1723,8 @@ const ViewportType = {
 
 /**
  * @param {!Window} win
- * @param {!Viewer} viewer
- * @return {!ViewportType}
+ * @param {!./viewer-impl.Viewer} viewer
+ * @return {string}
  */
 function getViewportType(win, viewer) {
   let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
