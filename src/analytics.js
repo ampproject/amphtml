@@ -42,12 +42,11 @@ export function analyticsForOrNull(window) {
                 window, 'amp-analytics-instrumentation', 'amp-analytics')));
 };
 
-
 /**
  * Helper method to trigger analytics event if amp-analytics is available.
  * @param {!Window} window
  * @param {string} eventType
- * @param {?Object<string, string>=} opt_vars A map of vars and their values.
+ * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @returns {!Promise<boolean>} Whether the event was sent or not.
  */
 export function triggerAnalyticsEvent(window, eventType, opt_vars) {

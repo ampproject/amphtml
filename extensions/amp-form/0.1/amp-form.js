@@ -242,7 +242,7 @@ export class AmpForm {
 
   /**
    * @param {string} eventType
-   * @param {?Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
