@@ -23,7 +23,7 @@ import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -465,23 +465,12 @@ export class InstrumentationService {
    * @private
    */
   matchesSelector_(el, selector) {
-    try {
-      const matcher = el.matches ||
-          el.webkitMatchesSelector ||
-          el.mozMatchesSelector ||
-          el.msMatchesSelector ||
-          el.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(el, selector);
-      }
+    return matches(el, selector, () => {
       const matches = el.ownerDocument.querySelectorAll(selector);
       let i = matches.length;
       while (i-- > 0 && matches.item(i) != el) {};
       return i > -1;
-    } catch (selectorError) {
-      user().error(TAG, 'Bad query selector.', selector, selectorError);
-    }
-    return false;
+    });
   }
 
   /**

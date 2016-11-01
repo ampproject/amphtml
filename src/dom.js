@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {dev,user} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
 
@@ -204,6 +204,49 @@ export function closestByTag(element, tagName) {
   });
 }
 
+/**
+ * Finds the closest element with the specified selector from this element
+ * @param {!Element} element
+ * @param {string} selector
+ * @return {?Element} closest ancestor if found.
+ */
+export function closestBySelector(element, selector) {
+  if (element.closest) {
+    return element.closest(selector);
+  }
+
+  return closest(element, el => {
+    return matches(el, selector);
+  });
+}
+
+/**
+ * Checks if the given element matches the selector
+ * @param  {!Element} el The element to verify
+ * @param  {!string} selector The selector to check against
+ * @param  {!function(!Element, string):boolean=} opt_callback Function to call
+ *  when 'matches' API is unavailable
+ * @return {boolean} True if the element matched the selector. False otherwise
+ */
+export function matches(el, selector, opt_callback) {
+  try {
+    const matcher = el.matches ||
+        el.webkitMatchesSelector ||
+        el.mozMatchesSelector ||
+        el.msMatchesSelector ||
+        el.oMatchesSelector;
+    if (matcher) {
+      return matcher.call(el, selector);
+    }
+    if (opt_callback) {
+      return opt_callback(el, selector);
+    }
+  } catch (selectorError) {
+    user().error('DOM', 'Bad query selector.', selector, selectorError);
+  }
+  // Out of luck.
+  return false;
+}
 
 /**
  * Finds the first descendant element with the specified name.

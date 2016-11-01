@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {closestByTag} from '../../../src/dom';
+import {closestByTag, closestBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
@@ -102,7 +102,8 @@ export function isVisibilitySpecValid(config) {
 
   const spec = config['visibilitySpec'];
   const selector = spec['selector'];
-  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0)) {
+  if (spec['selectionMethod'] != 'host' &&
+      (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0))) {
     user().error(TAG_, 'Visibility spec requires an id selector or a tag ' +
         'name starting with "amp-"');
     return false;
@@ -160,6 +161,10 @@ export function getElement(selector, el, selectionMethod) {
     return closestByTag(el, selector);
   } else if (selectionMethod == 'scope') {
     return el.parentElement.querySelector(selector);
+  } else if (selectionMethod == 'host') {
+    const elWin = el.ownerDocument.defaultView;
+    const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
+    return closestBySelector(parentEl, '.-amp-element');
   } else if (selector[0] == '#') {
     return el.ownerDocument.getElementById(selector.slice(1));
   }
