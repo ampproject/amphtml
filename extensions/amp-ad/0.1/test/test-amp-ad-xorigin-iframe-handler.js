@@ -61,7 +61,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
       let noContentSpy;
 
-      beforeEach(done => {
+      beforeEach(() => {
         adImpl.config = {renderStartImplemented: true};
         sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
           expect(height).to.equal(217);
@@ -71,10 +71,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         noContentSpy =
             sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
 
-        initPromise = iframeHandler.init(iframe, true);
-        iframe.onload = () => {
-          done();
-        };
+        initPromise = iframeHandler.init(iframe);
       });
 
       it('should resolve on message "render-start"', () => {
@@ -170,7 +167,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should resolve on message "bootstrap-loaded" if render-start is'
         + 'NOT implemented', done => {
 
-      initPromise = iframeHandler.init(iframe, true);
+      initPromise = iframeHandler.init(iframe);
       iframe.onload = () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
@@ -190,22 +187,20 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       const clock = sandbox.useFakeTimers();
 
       iframe.name = 'test_master';
-      initPromise = iframeHandler.init(iframe, true);
-      iframe.onload = () => {
-        clock.tick(9999);
-        expect(noContentSpy).to.not.be.called;
-        clock.tick(1);
-        initPromise.then(() => {
-          expect(iframe.style.visibility).to.equal('');
-          expect(noContentSpy).to.be.calledOnce;
-          expect(noContentSpy).to.be.calledWith(true);
-          done();
-        });
-      };
+      initPromise = iframeHandler.init(iframe);
+      clock.tick(9999);
+      expect(noContentSpy).to.not.be.called;
+      clock.tick(1);
+      initPromise.then(() => {
+        expect(iframe.style.visibility).to.equal('');
+        expect(noContentSpy).to.be.calledOnce;
+        expect(noContentSpy).to.be.calledWith(true);
+        done();
+      });
     });
 
     it('should resolve directly if it is A4A', () => {
-      return iframeHandler.init(iframe, true, undefined, true).then(() => {
+      return iframeHandler.init(iframe, true).then(() => {
         expect(iframe.style.visibility).to.equal('');
       });
     });
@@ -213,11 +208,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
   describe('Initialized iframe', () => {
 
-    beforeEach(done => {
-      iframeHandler.init(iframe, true);
-      iframe.onload = () => {
-        done();
-      };
+    beforeEach(() => {
+      iframeHandler.init(iframe);
     });
 
     it('should be able to use embed-state API', () => {
