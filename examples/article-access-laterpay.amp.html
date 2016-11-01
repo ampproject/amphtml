@@ -9,7 +9,9 @@
   <script id="amp-access" type="application/json">
     {
       "vendor": "laterpay",
-      "laterpay": {},
+      "laterpay": {
+        "access": true
+      },
       "authorizationFallbackResponse": {"error": true}
     }
   </script>
@@ -234,15 +236,8 @@
           </div>
         </div>
 
-        <section id="meter-notif" amp-access="views > 0" amp-access-hide class="meter-section">
-          <template amp-access-template type="amp-mustache">
-            You are viewing article {{views}} of {{maxViews}}!
-          </template>
-          <a on="tap:meter-notif.hide">[Close]</a>
-        </section>
-
         <section amp-access="NOT error AND NOT access" amp-access-hide class="login-section">
-          <a on="tap:amp-access.login">Login to read more!</a>
+          <amp-access-laterpay-list></amp-access-laterpay-list>
         </section>
 
         <section amp-access="error" amp-access-hide class="error-section">

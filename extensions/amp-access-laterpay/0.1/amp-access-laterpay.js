@@ -15,9 +15,14 @@
  */
 
 import {accessServiceFor} from '../../../src/access-service';
+import {xhrFor} from '../../../src/xhr';
 import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {listen, listenOnce} from '../../../src/event-helper';
 
+const TAG = 'amp-access-laterpay';
+const CONFIG_URL = 'http://localhost:8080/api/public/initial_config';
+const AUTHORIZATION_TIMEOUT = 3000;
 
 /**
  * @implements {AccessVendor}
@@ -30,18 +35,120 @@ export class LaterpayVendor {
   constructor(accessService) {
     /** @private @const */
     this.accessService_ = accessService;
-    // TODO: implement
+    this.win_ = this.accessService_.win;
+    this.laterpayConfig_ = this.accessService_.adapter_.getConfig();
+    this.purchaseConfig_ = null;
+    this.purchaseOptionListeners_ = [];
+    this.selectedPurchaseOption_ = null;
+    this.purchaseButton_ = null;
+
+    /** @const @private {!Xhr} */
+    this.xhr_ = xhrFor(this.win_);
   }
 
   /**
    * @return {!Promise<!JSONType>}
    */
   authorize() {
-    const win = this.accessService_.win;
-    user().assert(isExperimentOn(win, 'amp-access-laterpay'),
+    user().assert(isExperimentOn(this.win_, 'amp-access-laterpay'),
         'Enable "amp-access-laterpay" experiment');
-    // TODO: implement
-    return Promise.resolve({access: true});
+    return this.getInitialPurchaseConfig_().then(purchaseConfig => {
+      this.purchaseConfig_ = purchaseConfig;
+      if (!purchaseConfig.access) {
+        this.renderPurchaseOverlay_();
+      }
+      return {access: purchaseConfig.access};
+    });
+  }
+
+  getInitialPurchaseConfig_() {
+    const urlPromise = this.accessService_.buildUrl_(CONFIG_URL,
+        /* useAuthData */ false);
+    return urlPromise.then(url => {
+      dev().fine(TAG, 'Authorization URL: ', url);
+      return this.accessService_.timer_.timeoutPromise(
+          AUTHORIZATION_TIMEOUT,
+          this.xhr_.fetchJson(url, {
+            credentials: 'include',
+            requireAmpResponseSourceOrigin: true,
+          }));
+    });
+  }
+
+  renderPurchaseOverlay_() {
+    const laterpayList = this.win_.document.querySelectorAll(
+      'amp-access-laterpay-list')[0];
+    const listContainer = document.createElement('ul');
+    // TODO set these up somewhere else and make them configurable
+    this.purchaseConfig_.premiumcontent.title = 'Buy this article';
+    this.purchaseConfig_.premiumcontent.description =
+      'title of the article should go here';
+    listContainer.appendChild(
+      this.createPurchaseOption_(this.purchaseConfig_.premiumcontent)
+    );
+    this.purchaseConfig_.timepasses.forEach(timepass => {
+      listContainer.appendChild(this.createPurchaseOption_(timepass));
+    });
+    const purchaseButton = document.createElement('button');
+    purchaseButton.innerHTML = 'Confirm your selection';
+    purchaseButton.disabled = true;
+    this.purchaseButton_ = purchaseButton;
+    listenOnce(purchaseButton, 'click', this.handlePurchase_.bind(this));
+    // TODO figure out if there's some specific way of triggering this last render
+    laterpayList.appendChild(listContainer);
+    laterpayList.appendChild(purchaseButton);
+  }
+
+  createPurchaseOption_(option) {
+    const li = document.createElement('li');
+    const title = document.createElement('h3');
+    const link = document.createElement('a');
+    link.href = option.purchase_url;
+    link.innerHTML = option.title;
+    this.purchaseOptionListeners_.push(listen(
+      link, 'click', this.handlePurchaseOptionSelection_.bind(this)
+    ));
+    title.appendChild(link);
+    const description = document.createElement('p');
+    description.innerHTML = option.description;
+    const price = document.createElement('p');
+    price.innerHTML = this.formatPrice_(option.price);
+    li.appendChild(title);
+    li.appendChild(description);
+    li.appendChild(price);
+    return li;
+  }
+
+  formatPrice_(price) {
+    // TODO do the actual formatting of the currency value based on the
+    // currency type
+    const currency = Object.keys(price)[0];
+    return price[currency] + currency;
+  }
+
+  handlePurchaseOptionSelection_(ev) {
+    const selectedOptionClassname = 'amp-access-laterpay-selected';
+    const prevPurchaseOption = this.selectedPurchaseOption_;
+    ev.preventDefault();
+    if (prevPurchaseOption &&
+        prevPurchaseOption.classList.contains(selectedOptionClassname)) {
+      prevPurchaseOption.classList.remove(selectedOptionClassname);
+    }
+    this.selectedPurchaseOption_ = ev.target;
+    this.selectedPurchaseOption_.classList.add(selectedOptionClassname);
+    if (this.purchaseButton_.disabled) {
+      this.purchaseButton_.disabled = false;
+    }
+  }
+
+  handlePurchase_(ev) {
+    const purchaseUrl = this.selectedPurchaseOption_.href;
+    let unlistener;
+    while (unlistener = this.purchaseOptionListeners_.shift()) {
+      unlistener();
+    }
+    // TODO
+    // this.accessService_.login(purchaseUrl);
   }
 
   /**
