@@ -23,3 +23,17 @@ amp-ad iframe {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+.-amp-ad-holder {
+  background-color: #d3d3d3;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  visibility: hidden;
+}
+
+.-amp-ad-holder[visible] {
+  visibility: visible;
+}

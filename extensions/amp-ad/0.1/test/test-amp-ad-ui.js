@@ -16,7 +16,11 @@
 
 import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
+import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
+
+/** @private @const {string} */
+const UX_EXPERIMENT = 'amp-ad-loading-ux';
 
 describe('amp-ad-ui handler', () => {
   let sandbox;
@@ -36,20 +40,39 @@ describe('amp-ad-ui handler', () => {
     uiHandler = null;
   });
 
-  it('should try to collapse element', () => {
-    sandbox.stub(adImpl, 'getFallback', () => {
-      return false;
+  describe('with state LOADED_NO_CONTENT', () => {
+    it('should try to collapse element', () => {
+      sandbox.stub(adImpl, 'getFallback', () => {
+        return false;
+      });
+      sandbox.stub(adImpl, 'attemptChangeHeight', height => {
+        expect(height).to.equal(0);
+        return Promise.resolve();
+      });
+      const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
+      uiHandler.init();
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      return Promise.resolve().then(() => {
+        expect(collapseSpy).to.be.calledOnce;
+        expect(uiHandler.state).to.equal(3);
+      });
     });
-    sandbox.stub(adImpl, 'attemptChangeHeight', height => {
-      expect(height).to.equal(0);
-      return Promise.resolve();
-    });
-    const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
-    uiHandler.init();
-    uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-    return Promise.resolve().then(() => {
-      expect(collapseSpy).to.be.calledOnce;
-      expect(uiHandler.state).to.equal(3);
+
+    it('should apply default holder when collapse fail', () => {
+      sandbox.stub(adImpl, 'getFallback', () => {
+        return false;
+      });
+      sandbox.stub(adImpl, 'attemptChangeHeight', () => {
+        return Promise.reject();
+      });
+      toggleExperiment(window, UX_EXPERIMENT, true);
+      uiHandler.init();
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      return Promise.resolve().then(() => {
+        const holder = adImpl.element.querySelector('.-amp-ad-holder');
+        expect(holder).to.not.be.null;
+        expect(holder).to.have.attribute('visible');
+      });
     });
   });
 
