@@ -176,14 +176,16 @@ function adoptShared(global, opts, callback) {
   // as `AMP.push()` in production.
   // TODO(dvoytenko, #5507): Only expose this method for `!getMode().minified`
   // once the compile-time inlining is done.
-  /**
-   * @param {string} unusedName
-   * @param {function(!Object)} installer
-   * @const
-   */
-  global.AMP.extension = function(unusedName, installer) {
-    installer(global.AMP);
-  };
+  if (!global.AMP.extension) {
+    /**
+     * @param {string} unusedName
+     * @param {function(!Object)} installer
+     * @const
+     */
+    global.AMP.extension = function(unusedName, installer) {
+      installer(global.AMP);
+    };
+  }
 
   /** @const */
   global.AMP.config = config;

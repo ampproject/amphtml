@@ -19,40 +19,53 @@ import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 
-describes.fakeWin('1.0 version', {}, () => {
-  function getAmpStickyAd(opt_attributes) {
-    return createIframePromise().then(iframe => {
-      const ampStickyAd = iframe.doc.createElement('amp-sticky-ad');
-      ampStickyAd.setAttribute('layout', 'nodisplay');
-      for (const attr in opt_attributes) {
-        ampStickyAd.setAttribute(attr, opt_attributes[attr]);
-      }
-      const ampAd = iframe.doc.createElement('amp-ad');
-      ampAd.setAttribute('width', '300');
-      ampAd.setAttribute('height', '50');
-      ampAd.setAttribute('type', '_ping_');
-      ampStickyAd.appendChild(ampAd);
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'blah');
-      iframe.doc.head.appendChild(link);
-      return iframe.addElement(ampStickyAd).then(() => {
-        return Promise.resolve({
-          iframe,
-          ampStickyAd,
-        });
-      });
-    });
-  }
+describes.realWin('1.0 version', {
+  win: { /* window spec */
+    location: '...',
+    historyOff: false,
+  },
 
-  it('should listen to scroll event', () => {
-    return getAmpStickyAd().then(obj => {
-      const stickyAdElement = obj.ampStickyAd;
-      const impl = stickyAdElement.implementation_;
-      expect(impl.scrollUnlisten_).to.be.function;
-    });
+
+  amp: { /* amp spec */
+    extensions: ['amp-sticky-ad'],
+  },
+}, env => {
+  let win;
+  let ampStickyAd;
+
+  beforeEach(() => {
+    win = env.win;
+    ampStickyAd = win.document.createElement('amp-sticky-ad');
+    ampStickyAd.setAttribute('layout', 'nodisplay');
+    // for (const attr in opt_attributes) {
+    //   ampStickyAd.setAttribute(attr, opt_attributes[attr]);
+    // }
+    const ampAd = win.document.createElement('amp-ad');
+    ampAd.setAttribute('width', '300');
+    ampAd.setAttribute('height', '50');
+    ampAd.setAttribute('type', '_ping_');
+    ampStickyAd.appendChild(ampAd);
+
+    win.document.body.appendChild(ampStickyAd);
+    ampStickyAd.build();
+  // function getAmpStickyAd(opt_attributes) {
+  //   return createIframePromise().then(iframe => {
+  //     return iframe.addElement(ampStickyAd).then(() => {
+  //       return Promise.resolve({
+  //         iframe,
+  //         ampStickyAd,
+  //       });
+  //     });
+  //   });
+  // }
   });
 
+  it('should listen to scroll event', () => {
+    const impl = ampStickyAd.implementation_;
+    expect(impl.scrollUnlisten_).to.be.function;
+  });
+
+/*
   it('should not build when scrollTop less than viewportHeight', () => {
     return getAmpStickyAd().then(obj => {
       const stickyAdElement = obj.ampStickyAd;
@@ -427,4 +440,5 @@ describes.fakeWin('1.0 version', {}, () => {
           .getPropertyValue('background-color')).to.equal('rgb(0, 0, 0)');
     });
   });
+*/
 });

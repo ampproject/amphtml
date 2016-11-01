@@ -44,6 +44,22 @@ let iframeCount = 0;
 
 
 /**
+ * @const {!Object<string, function(!Object)>}
+ */
+const extensionsBuffer = {};
+
+
+/**
+ * @param {string} name
+ * @param {function(!Object)} installer
+ * @const
+ */
+export function bufferExtension(name, installer) {
+  extensionsBuffer[name] = installer;
+}
+
+
+/**
  * @typedef {{
  *   fakeRegisterElement: (boolean|undefined),
  * }}
@@ -56,7 +72,9 @@ export let TestSpec;
  *
  * @typedef {{
  *   runtimeOn: (boolean|undefined),
- *   ampdoc: (string),
+ *   extensions: (!Array<string>|undefined),
+ *   canonicalUrl: (string|undefined),
+ *   ampdoc: (string|undefined),
  *   params: (!Object<string, string>|undefined),
  * }}
  */
@@ -378,6 +396,12 @@ class AmpFixture {
     const win = env.win;
     let completePromise;
 
+    // AMP requires canonical URL.
+    const link = win.document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', spec.canonicalUrl || window.location.href);
+    win.document.head.appendChild(link);
+
     win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
       win.name = '__AMP__off=1';
@@ -402,6 +426,15 @@ class AmpFixture {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
+    }
+    if (spec.extensions) {
+      spec.extensions.forEach(extensionId => {
+        const installer = extensionsBuffer[extensionId];
+        if (!installer) {
+          throw new Error('extension not found: ', extensionId);
+        }
+        installer(win.AMP);
+      });
     }
 
     return completePromise;
