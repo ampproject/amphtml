@@ -40,9 +40,6 @@ class AmpLightbox extends AMP.BaseElement {
 
     /**  @private {?function(this:AmpLightbox, Event)}*/
     this.boundCloseOnEscape_ = null;
-
-    /** @private {boolean} */
-    this.isBuilt_ = false;
   }
 
   /** @override */
@@ -50,46 +47,12 @@ class AmpLightbox extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
-  /** @override */
-  layoutCallback() {
-    return Promise.resolve();
-  }
-
-  /** @override */
-  activate() {
-    if (this.active_) {
-      return;
-    }
-    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
-    this.win.document.documentElement.addEventListener(
-        'keydown', this.boundCloseOnEscape_);
-    this.getViewport().enterLightboxMode();
-
-    this.mutateElement(() => {
-      this.element.style.display = '';
-      this.element.style.opacity = 0;
-      // TODO(dvoytenko): use new animations support instead.
-      this.element.style.transition = 'opacity 0.1s ease-in';
-      vsyncFor(this.win).mutate(() => {
-        this.element.style.opacity = '';
-      });
-    }).then(() => {
-      this.build();
-      const container = dev().assertElement(this.container_);
-      this.updateInViewport(container, true);
-      this.scheduleLayout(container);
-      this.scheduleResume(container);
-    });
-
-    this.getHistory_().push(this.close.bind(this)).then(historyId => {
-      this.historyId_ = historyId;
-    });
-
-    this.active_ = true;
-  }
-
-  build() {
-    if (this.isBuilt_) {
+  /**
+   * Lazily builds the lightbox DOM on the first open.
+   * @private 
+   */
+  initialize_() {
+    if (this.container_) {
       return;
     }
 
@@ -118,8 +81,44 @@ class AmpLightbox extends AMP.BaseElement {
     gestures.onGesture(SwipeXYRecognizer, () => {
       // Consume to block scroll events and side-swipe.
     });
+  }
 
-    this.isBuilt_ = true;
+  /** @override */
+  layoutCallback() {
+    return Promise.resolve();
+  }
+
+  /** @override */
+  activate() {
+    if (this.active_) {
+      return;
+    }
+    this.initialize_();
+    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+    this.win.document.documentElement.addEventListener(
+        'keydown', this.boundCloseOnEscape_);
+    this.getViewport().enterLightboxMode();
+
+    this.mutateElement(() => {
+      this.element.style.display = '';
+      this.element.style.opacity = 0;
+      // TODO(dvoytenko): use new animations support instead.
+      this.element.style.transition = 'opacity 0.1s ease-in';
+      vsyncFor(this.win).mutate(() => {
+        this.element.style.opacity = '';
+      });
+    }).then(() => {
+      const container = dev().assertElement(this.container_);
+      this.updateInViewport(container, true);
+      this.scheduleLayout(container);
+      this.scheduleResume(container);
+    });
+
+    this.getHistory_().push(this.close.bind(this)).then(historyId => {
+      this.historyId_ = historyId;
+    });
+
+    this.active_ = true;
   }
 
   /**
