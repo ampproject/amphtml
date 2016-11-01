@@ -434,7 +434,7 @@ The `id` attribute is optional. Individual AMP elements discover their own templ
 
 The syntax within the template element depends on the specific template language. However, the template language could be restricted within AMP. For instance, in accordance with the "template" element, all productions have to be over a valid well-formed DOM. All of the template outputs are also subject to sanitizing to ensure AMP-valid output.
 
-See the documentation for a specific extended template on the syntax and restrictions.
+To learn about the syntax and restrictions for an extended template, visit the [extended template's documentation](./amp-html-templates.md#templates). 
 
 ##### URL
 
