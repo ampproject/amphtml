@@ -512,10 +512,8 @@ export class Visibility {
         ? Math.round(intersection.width * intersection.height * 10000
               / (br.width * br.height)) / 100
         : 0;
-    state[MIN_VISIBLE] = Math.round(
-        dev().assertNumber(state[MIN_VISIBLE]) * 100) / 100;
-    state[MAX_VISIBLE] = Math.round(
-        dev().assertNumber(state[MAX_VISIBLE]) * 100) / 100;
+    state[MIN_VISIBLE] = Math.round(state[MIN_VISIBLE] * 100) / 100;
+    state[MAX_VISIBLE] = Math.round(state[MAX_VISIBLE] * 100) / 100;
     state[BACKGROUNDED] = this.backgrounded_ ? '1' : '0';
     state[BACKGROUNDED_AT_START] = this.backgroundedAtStart_ ? '1' : '0';
 
