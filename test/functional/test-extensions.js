@@ -457,6 +457,32 @@ describes.sandboxed('Extensions', {}, () => {
             .querySelector('style[amp-extension=amp-test]')).to.exist;
       });
     });
+
+    it('should call pre-install callback before other installs', () => {
+      const loadExtensionStub = sandbox.stub(extensions, 'loadExtension',
+          () => Promise.resolve({
+            elements: {'amp-test': {css: 'a{}'}},
+          }));
+      let preinstallCount = 0;
+      extensions.installExtensionsInChildWindow(iframeWin, ['amp-test'],
+          function() {
+            // Built-ins not installed yet.
+            expect(
+                iframeWin.ampExtendedElements &&
+                iframeWin.ampExtendedElements['amp-img']).to.not.exist;
+            // Extension is not loaded yet.
+            expect(loadExtensionStub).to.not.be.called;
+            expect(
+                iframeWin.ampExtendedElements &&
+                iframeWin.ampExtendedElements['amp-test']).to.not.exist;
+            preinstallCount++;
+          });
+      expect(preinstallCount).to.equal(1);
+      expect(iframeWin.ampExtendedElements).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
+      expect(loadExtensionStub).to.be.calledOnce;
+      expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+    });
   });
 
   describe('get correct script source', () => {
