@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingEmbedServiceForDoc} from './service';
+import {getExistingServiceForDocInEmbedScope} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getExistingEmbedServiceForDoc} from './service';
  */
 export function urlReplacementsForDoc(nodeOrDoc) {
   return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingEmbedServiceForDoc(nodeOrDoc, 'url-replace'));
+      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'url-replace'));
 }

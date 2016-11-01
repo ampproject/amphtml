@@ -21,7 +21,7 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {getStyle} from '../../src/style';
 import {extensionsFor} from '../../src/extensions';
-import {installEmbedService} from '../../src/service';
+import {installServiceInEmbedScope} from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
 import {resourcesForDoc} from '../../src/resources';
 import * as sinon from 'sinon';
@@ -187,7 +187,7 @@ describe('friendly-iframe-embed', () => {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
     }, embedWin => {
-      installEmbedService(embedWin, 'c', embedService);
+      installServiceInEmbedScope(embedWin, 'c', embedService);
     });
     return embedPromise.then(embed => {
       expect(embed.win.services['c'].obj).to.equal(embedService);

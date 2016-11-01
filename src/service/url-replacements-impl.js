@@ -21,7 +21,7 @@ import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
 import {whenDocumentComplete} from '../document-ready';
-import {fromClassForDoc, installEmbedService} from '../service';
+import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../viewer';
@@ -899,5 +899,5 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
  */
 export function installUrlReplacementsForEmbed(embedWin, varSource) {
   // TODO(avimehta): Implement.
-  installEmbedService(embedWin, 'url-replace', {varSource});
+  installServiceInEmbedScope(embedWin, 'url-replace', {varSource});
 }

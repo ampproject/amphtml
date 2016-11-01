@@ -717,7 +717,7 @@ export class AmpA4A extends AMP.BaseElement {
               fonts: fontsArray,
             }, unusedEmbedWin => {
               // TODO(avimehta): Install `url-replace` override and other
-              // services using `installEmbedService(embedWin, id, ...)`.
+              // services using `installServiceInEmbedScope(embedWin, id, ...)`.
               // See `url-replacements.js` `installUrlReplacementsForEmbed`.
             }).then(friendlyIframeEmbed => {
               // Capture phase click handlers on the ad.

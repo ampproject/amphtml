@@ -69,7 +69,7 @@ export function getExistingServiceForWindow(win, id) {
  * @param {string} id
  * @return {!Object} The service.
  */
-export function getExistingEmbedServiceForWindow(win, id) {
+export function getExistingServiceForWindowInEmbedScope(win, id) {
   // First, try to resolve via local (embed) window.
   const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
   if (local) {
@@ -103,7 +103,7 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
  * @param {string} id
  * @return {!Object} The service.
  */
-export function getExistingEmbedServiceForDoc(nodeOrDoc, id) {
+export function getExistingServiceForDocInEmbedScope(nodeOrDoc, id) {
   // First, try to resolve via local (embed) window.
   if (nodeOrDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
@@ -125,7 +125,7 @@ export function getExistingEmbedServiceForDoc(nodeOrDoc, id) {
  * @param {string} id
  * @param {!Object} service The service.
  */
-export function installEmbedService(embedWin, id, service) {
+export function installServiceInEmbedScope(embedWin, id, service) {
   const topWin = getTopWindow(embedWin);
   dev().assert(embedWin != topWin,
       'Service override can only be installed in embed window: %s', id);
