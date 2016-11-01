@@ -49,7 +49,7 @@ class AmpLightbox extends AMP.BaseElement {
 
   /**
    * Lazily builds the lightbox DOM on the first open.
-   * @private 
+   * @private
    */
   initialize_() {
     if (this.container_) {
