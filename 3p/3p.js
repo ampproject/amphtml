@@ -84,12 +84,17 @@ export function writeScript(win, url, opt_cb) {
  * @param {!Window} win
  * @param {string} url
  * @param {function()=} opt_cb
+ * @param {function()=} opt_errorCb
  */
-export function loadScript(win, url, opt_cb) {
+export function loadScript(win, url, opt_cb, opt_errorCb) {
+  /** @const {!Element} */
   const s = win.document.createElement('script');
   s.src = url;
   if (opt_cb) {
     s.onload = opt_cb;
+  }
+  if (opt_errorCb) {
+    s.onerror = opt_errorCb;
   }
   win.document.body.appendChild(s);
 }
@@ -264,6 +269,7 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
+    container: true,
   };
 
   for (const field in data) {

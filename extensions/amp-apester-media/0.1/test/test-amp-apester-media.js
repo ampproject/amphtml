@@ -29,10 +29,12 @@ adopt(window);
 describe('amp-apester-media', () => {
   let sandbox;
   let xhrMock;
+  let changeSizeSpy;
 
   beforeEach(() => {
     toggleExperiment(window, 'amp-apester-media', true);
     sandbox = sinon.sandbox.create();
+
   });
 
   afterEach(() => {
@@ -46,14 +48,13 @@ describe('amp-apester-media', () => {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const media = iframe.doc.createElement('amp-apester-media');
-      xhrMock = sandbox.mock(xhrFor(iframe.win));
       const response = {
         'code': 200,
         'message': 'ok',
         'payload': {
           'interactionId': '57a336dba187a2ca3005e826',
           'data': {
-            'size': {'width': 600, 'height': 444},
+            'size': {'width': '600', 'height': '444'},
           },
           'layout': {
             'id': '557d52c059081084b94845c3',
@@ -63,11 +64,15 @@ describe('amp-apester-media', () => {
           'language': 'en',
         },
       };
+      changeSizeSpy = sandbox.spy(
+          media.implementation_, 'attemptChangeHeight');
+      xhrMock = sandbox.mock(xhrFor(iframe.win));
       xhrMock.expects('fetchJson').returns(Promise.resolve(response));
       for (const key in attributes) {
         media.setAttribute(key, attributes[key]);
 
       }
+      media.setAttribute('width', '600');
       media.setAttribute('height', '390');
       //todo test width?
       if (opt_responsive) {
@@ -81,14 +86,12 @@ describe('amp-apester-media', () => {
     return getApester({
       'data-apester-media-id': '57a336dba187a2ca3005e826',
     }).then(ape => {
-      console.log(ape);
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      setTimeout(() => { // need to wait for attemptChangeHeight to update
-        expect(iframe.getAttribute('height')).to.equal('444');
-      }, 0);
+      expect(changeSizeSpy.callCount).to.equal(1);
+      expect(changeSizeSpy.args[0][0]).to.equal('444');
     });
   });
 
@@ -100,9 +103,8 @@ describe('amp-apester-media', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      setTimeout(() => {  // need to wait for attemptChangeHeight to update
-        expect(iframe.getAttribute('height')).to.equal('444');
-      }, 0);
+      expect(changeSizeSpy.callCount).to.equal(1);
+      expect(changeSizeSpy.args[0][0]).to.equal('444');
     });
   });
 

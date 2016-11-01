@@ -17,7 +17,7 @@
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 import {cidFor} from '../../../src/cid';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 
@@ -27,17 +27,18 @@ const nameValidator = /^[\w-]+$/;
 /**
  * Allocates the current page view to an experiment variant based on the given
  * experiment config.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} experimentName
  * @param {!Object} config
  * @return {!Promise<?string>}
  */
-export function allocateVariant(win, experimentName, config) {
+export function allocateVariant(ampdoc, experimentName, config) {
   assertName(experimentName);
   validateConfig(config);
 
   // Variant can be overridden from URL fragment.
-  const override = viewerFor(win).getParam(ATTR_PREFIX + experimentName);
+  const viewer = viewerForDoc(ampdoc);
+  const override = viewer.getParam(ATTR_PREFIX + experimentName);
   if (override && config.variants.hasOwnProperty(override)) {
     return Promise.resolve(override);
   }
@@ -48,7 +49,7 @@ export function allocateVariant(win, experimentName, config) {
   let hasConsentPromise = Promise.resolve(true);
 
   if (sticky && config.consentNotificationId) {
-    hasConsentPromise = userNotificationManagerFor(win)
+    hasConsentPromise = userNotificationManagerFor(ampdoc.win)
         .then(manager => manager.getNotification(config.consentNotificationId))
         .then(userNotification => {
           user().assert(userNotification,
@@ -62,7 +63,7 @@ export function allocateVariant(win, experimentName, config) {
       return null;
     }
     const group = config.group || experimentName;
-    return getBucketTicket(win, group, sticky ? cidScope : null)
+    return getBucketTicket(ampdoc, group, sticky ? cidScope : null)
         .then(ticket => {
           let upperBound = 0;
 
@@ -99,7 +100,8 @@ function validateConfig(config) {
       const percentage = variants[variantName];
       user().assert(
           typeof percentage === 'number' && percentage > 0 && percentage < 100,
-          'Invalid percentage %s:%s. Has to be in range of (0,100)',
+          'Invalid percentage %s:%s.'
+              + ' Has to be greater than 0 and less than 100',
           variantName, percentage);
       totalPercentage += percentage;
     }
@@ -112,21 +114,21 @@ function validateConfig(config) {
  * Returns a float number (bucket ticket) in the range of [0, 100). The number
  * is hashed from the CID of the given scope (opt_cidScope). If the
  * scope is not provided, a random number is used.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} group
  * @param {string=} opt_cidScope
  * @return {!Promise<!number>} a float number in the range of [0, 100)
  */
-function getBucketTicket(win, group, opt_cidScope) {
+function getBucketTicket(ampdoc, group, opt_cidScope) {
   if (!opt_cidScope) {
-    return Promise.resolve(win.Math.random() * 100);
+    return Promise.resolve(ampdoc.win.Math.random() * 100);
   }
 
-  const cidPromise = cidFor(win).then(cidService => cidService.get(
+  const cidPromise = cidFor(ampdoc.win).then(cidService => cidService.get(
         {scope: opt_cidScope, createCookieIfNotPresent: true},
         Promise.resolve()));
 
-  return Promise.all([cidPromise, cryptoFor(win)])
+  return Promise.all([cidPromise, cryptoFor(ampdoc.win)])
       .then(results => results[1].uniform(group + ':' + results[0]))
       .then(hash => hash * 100);
 }

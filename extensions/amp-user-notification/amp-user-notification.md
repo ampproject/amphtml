@@ -39,11 +39,11 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>NODISPLAY</td>
+    <td>nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-user-notification/">amp-user-notification_with_local_storage.html</a><br /><a href="https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/">amp-user-notification_with_server_endpoint.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/user-notification.amp.html">user-notification.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-user-notification/">Annotated code example for amp-user-notification (with local storage)</a><br /><a href="https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/">Annotated code example for amp-user-notification (with Server Endpoint)</a></td>
   </tr>
 </table>
 
@@ -98,7 +98,7 @@ Example:
 When specified, AMP will make a [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
 GET request with credentials to this URL to determine whether the notification should be shown.
 We will append the `elementId` and `ampUserId` query string fields to the href provided
-on the `data-show-if-href` attribute. (see #1228 on why this is a GET instead of a POST)
+on the `data-show-if-href` attribute. (see [#1228](https://github.com/ampproject/amphtml/issues/1228) on why this is a GET instead of a POST)
 
 For best practice to not let the browser cache the GET response values you should add
 a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
@@ -110,9 +110,9 @@ You can add it as a query string field. (ex.
     - `ampUserId`
 
   Example:
-    ```
-      https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
-    ```
+  ```text
+  https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
+  ```
 
  - `CORS GET response` json fields
     The response must contain a single JSON object with a field
@@ -186,7 +186,7 @@ This notification should ALWAYS show on every page visit.
 ```
 
 
---------
+---
 
 ## JSON Fields
 
@@ -245,6 +245,20 @@ ex. (w/o vendor prefixes)
     animation: fadeIn ease-in 1s 1 forwards;
   }
 ```
+
+## Actions
+The `amp-user-notification` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>dismiss (default)</td>
+    <td>Closes the user notification - see [Usage](#usage) for more details</td>
+  </tr>
+</table>
 
 ## Delaying Client ID generation until the notification is acknowledged
 

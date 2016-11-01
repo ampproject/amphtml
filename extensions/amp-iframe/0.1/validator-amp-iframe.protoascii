@@ -37,7 +37,7 @@ tags: {  # amp-iframe
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -67,6 +67,7 @@ tags: {  # <amp-iframe>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "srcdoc" mandatory_oneof: "['src', 'srcdoc']" }
   attr_lists: "extended-amp-global"

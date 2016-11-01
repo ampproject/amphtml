@@ -21,7 +21,7 @@ import {
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
 } from '../../../src/url';
-import {user, rethrowAsync} from '../../../src/log';
+import {dev, user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
@@ -34,10 +34,10 @@ import {
 } from '../../../src/dom';
 import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
 import {urls} from '../../../src/config';
+import {getFormValidator} from './form-validators';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -59,34 +59,8 @@ const UserValidityState = {
 };
 
 
-/** @type {?./validation-bubble.ValidationBubble|undefined} */
-let validationBubble;
-
-
-/** @type {boolean|undefined} */
-let reportValiditySupported;
-
-
-/**
- * @param {boolean} isSupported
- * @private visible for testing.
- */
-export function setReportValiditySupported(isSupported) {
-  reportValiditySupported = isSupported;
-}
-
-
-/**
- * Returns whether reportValidity API is supported.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isReportValiditySupported(doc) {
-  if (reportValiditySupported === undefined) {
-    reportValiditySupported = !!doc.createElement('form').reportValidity;
-  }
-  return reportValiditySupported;
-}
+/** @typedef {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} */
+let FormFieldDef;
 
 
 export class AmpForm {
@@ -109,13 +83,13 @@ export class AmpForm {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(this.win_);
 
-    /** @const @private {!Templates} */
+    /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = templatesFor(this.win_);
 
-    /** @const @private {!Xhr} */
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(this.win_);
 
-    /** @const @private {!../../../src/service/action-impl.Action} */
+    /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
     /** @const @private {string} */
@@ -145,9 +119,6 @@ export class AmpForm {
     this.form_.classList.add('-amp-form');
 
     const submitButtons = this.form_.querySelectorAll('input[type=submit]');
-    user().assert(submitButtons && submitButtons.length > 0,
-        'form requires at least one <input type=submit>: %s', this.form_);
-
     /** @const @private {!Array<!Element>} */
     this.submitButtons_ = toArray(submitButtons);
 
@@ -161,17 +132,35 @@ export class AmpForm {
           'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
     }
 
-    this.installSubmitHandler_();
+    /** @const @private {!./form-validators.FormValidator} */
+    this.validator_ = getFormValidator(this.form_);
+
+    this.actions_.installActionHandler(
+        this.form_, this.actionHandler_.bind(this));
+    this.installEventHandlers_();
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  actionHandler_(invocation) {
+    if (invocation.method == 'submit') {
+      this.handleSubmit_();
+    }
   }
 
   /** @private */
-  installSubmitHandler_() {
+  installEventHandlers_() {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
-    const inputs = this.form_.querySelectorAll('input,select,textarea');
-    for (let i = 0; i < inputs.length; i++) {
-      inputs[i].addEventListener('blur', onInputInteraction_);
-      inputs[i].addEventListener('input', onInputInteraction_);
-    }
+    this.form_.addEventListener('blur', e => {
+      onInputInteraction_(e);
+      this.validator_.onBlur(e);
+    }, true);
+    this.form_.addEventListener('input', e => {
+      onInputInteraction_(e);
+      this.validator_.onInput(e);
+    });
   }
 
   /**
@@ -183,12 +172,14 @@ export class AmpForm {
    * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
    *
    *
-   * @param {!Event} e
+   * @param {?Event=} opt_event
    * @private
    */
-  handleSubmit_(e) {
+  handleSubmit_(opt_event) {
     if (this.state_ == FormState_.SUBMITTING) {
-      e.stopImmediatePropagation();
+      if (opt_event) {
+        opt_event.stopImmediatePropagation();
+      }
       return;
     }
 
@@ -196,17 +187,23 @@ export class AmpForm {
     // reporting and blocking submission on non-valid forms.
     const isValid = checkUserValidityOnSubmission(this.form_);
     if (this.shouldValidate_ && !isValid) {
-      e.stopImmediatePropagation();
+      if (opt_event) {
+        opt_event.stopImmediatePropagation();
+      }
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({
         measure: undefined,
         mutate: reportValidity,
-      }, {form: this.form_});
+      }, {
+        validator: this.validator_,
+      });
       return;
     }
 
     if (this.xhrAction_) {
-      e.preventDefault();
+      if (opt_event) {
+        opt_event.preventDefault();
+      }
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
       const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
@@ -215,7 +212,7 @@ export class AmpForm {
         xhrUrl = addParamsToUrl(this.xhrAction_, this.getFormAsObject_());
       }
       this.xhr_.fetchJson(xhrUrl, {
-        body: isHeadOrGet ? null : new FormData(this.form_),
+        body: isHeadOrGet ? undefined : new FormData(this.form_),
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
@@ -229,9 +226,14 @@ export class AmpForm {
         this.renderTemplate_(error.responseJson || {});
         rethrowAsync('Form submission failed:', error);
       });
-    } else if (this.target_ == '_top' && this.method_ == 'POST') {
-      this.cleanupRenderedTemplate_();
-      this.setState_(FormState_.SUBMITTING);
+    } else if (this.method_ == 'POST') {
+      if (opt_event) {
+        opt_event.preventDefault();
+      }
+      user().assert(false,
+          'Only XHR based (via action-xhr attribute) submissions are support ' +
+          'for POST requests. %s',
+          this.form_);
     }
   }
 
@@ -283,10 +285,10 @@ export class AmpForm {
   }
 
   /**
-   * @param {!Object=} data
+   * @param {!JSONType} data
    * @private
    */
-  renderTemplate_(data = {}) {
+  renderTemplate_(data) {
     const container = this.form_.querySelector(`[${this.state_}]`);
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
@@ -323,71 +325,7 @@ export class AmpForm {
  * @param {!Object} state
  */
 function reportValidity(state) {
-  reportFormValidity(state.form);
-}
-
-
-/**
- * Reports validity for the first invalid input - if any.
- * @param {!HTMLFormElement} form
- */
-function reportFormValidity(form) {
-  const inputs = form.querySelectorAll('input,select,textarea');
-  for (let i = 0; i < inputs.length; i++) {
-    if (!inputs[i].checkValidity()) {
-      reportInputValidity(inputs[i]);
-      break;
-    }
-  }
-}
-
-
-/**
- * Revalidates the currently focused input after a change.
- * @param {!KeyboardEvent} event
- */
-function onInvalidInputKeyUp_(event) {
-  if (event.target.checkValidity()) {
-    event.target.removeAttribute('aria-invalid');
-    validationBubble.hide();
-  } else {
-    event.target.setAttribute('aria-invalid', 'true');
-    validationBubble.show(event.target, event.target.validationMessage);
-  }
-}
-
-
-/**
- * Hides validation bubble and removes listeners on the invalid input.
- * @param {!Event} event
- */
-function onInvalidInputBlur_(event) {
-  validationBubble.hide();
-  event.target.removeEventListener('blur', onInvalidInputBlur_);
-  event.target.removeEventListener('keyup', onInvalidInputKeyUp_);
-}
-
-
-/**
- * Focuses and reports the invalid message of the input in a message bubble.
- * @param {!HTMLInputElement} input
- */
-function reportInputValidity(input) {
-  if (isReportValiditySupported(input.ownerDocument)) {
-    input.reportValidity();
-  } else {
-    input./*OK*/focus();
-
-    // Remove any previous listeners on the same input. This avoids adding many
-    // listeners on the same element when the user submit pressing Enter or any
-    // other method to submit the form without the element losing focus.
-    input.removeEventListener('blur', onInvalidInputBlur_);
-    input.removeEventListener('keyup', onInvalidInputKeyUp_);
-
-    input.addEventListener('keyup', onInvalidInputKeyUp_);
-    input.addEventListener('blur', onInvalidInputBlur_);
-    validationBubble.show(input, input.validationMessage);
-  }
+  state.validator.report();
 }
 
 
@@ -407,7 +345,7 @@ function checkUserValidityOnSubmission(form) {
 
 /**
  * Returns the user validity state of the element.
- * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @param {!Element} element
  * @return {string}
  */
 function getUserValidityStateFor(element) {
@@ -418,6 +356,23 @@ function getUserValidityStateFor(element) {
   }
 
   return UserValidityState.NONE;
+}
+
+
+/**
+ * Updates class names on the element to reflect the active invalid types on it.
+ *
+ * TODO(#5005): Maybe propagate the invalid type classes to parents of the input as well.
+ *
+ * @param {!Element} element
+ */
+function updateInvalidTypesClasses(element) {
+  if (!element.validity) {
+    return;
+  }
+  for (const validationType in element.validity) {
+    element.classList.toggle(validationType, element.validity[validationType]);
+  }
 }
 
 
@@ -436,14 +391,14 @@ function getUserValidityStateFor(element) {
  * TODO(#4317): Follow up on ancestor propagation behavior and understand the future
  *              specs for the :user-valid/:user-inavlid.
  *
- * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @param {!Element} element
  * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
  * @returns {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
-  const isCurrentlyValid = element.checkValidity && element.checkValidity();
+  const isCurrentlyValid = element.checkValidity();
   if (previousValidityState != UserValidityState.USER_VALID &&
       isCurrentlyValid) {
     element.classList.add('user-valid');
@@ -458,6 +413,7 @@ function checkUserValidity(element, propagate = false) {
     // guaranteed to make the fieldset and form invalid as well.
     shouldPropagate = true;
   }
+  updateInvalidTypesClasses(element);
 
   if (propagate && shouldPropagate) {
     // Propagate user validity to ancestor fieldsets.
@@ -482,14 +438,14 @@ function checkUserValidity(element, propagate = false) {
  * @private visible for testing.
  */
 export function onInputInteraction_(e) {
-  const input = e.target;
+  const input = dev().assertElement(e.target);
   checkUserValidity(input, /* propagate */ true);
 }
 
 
 /**
  * Checks if a field is disabled.
- * @param {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} element
+ * @param {!Element} element
  * @private
  */
 function isDisabled_(element) {
@@ -528,7 +484,6 @@ export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
       installStyles(win.document, CSS, () => {
-        validationBubble = new ValidationBubble(win, 'amp-validation-bubble');
         installSubmissionHandlers(win);
       });
     }

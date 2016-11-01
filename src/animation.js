@@ -36,7 +36,7 @@ export class Animation {
    * object that can be used to monitor or control animation.
    *
    * @param {!Node} contextNode The context node.
-   * @param {!./transition.TransitionDef<?>} transition Transition to animate.
+   * @param {!TransitionDef<?>} transition Transition to animate.
    * @param {./time.timeDef} duration Duration in milliseconds.
    * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for animation.
    *   Default is the linear animation.
@@ -73,11 +73,13 @@ export class Animation {
    * Sets the default curve for the animation. Each segment is allowed to have
    * its own curve, but this curve will be used if a segment doesn't specify
    * its own.
-   * @param {!./curve.CurveDef|string} curve
+   * @param {!./curve.CurveDef|string|undefined} curve
    * @return {!Animation}
    */
   setCurve(curve) {
-    this.curve_ = getCurve(curve);
+    if (curve) {
+      this.curve_ = getCurve(curve);
+    }
     return this;
   }
 
@@ -90,7 +92,7 @@ export class Animation {
    * animated over the specified duration from 0 to 1.
    *
    * @param {./time.normtimeDef} delay
-   * @param {!./transition.TransitionDef<?>} transition
+   * @param {!TransitionDef<?>} transition
    * @param {./time.normtimeDef} duration
    * @param {(!./curve.CurveDef|string)=} opt_curve
    * @return {!Animation}
@@ -127,7 +129,8 @@ export class Animation {
  * semantics of a Promise and signal when the animation completed or failed.
  * Additionally, it exposes the method "halt" which allows to stop/reset the
  * animation.
- * @implements {IThenable}
+ * // TODO(@cramforce) Actually fully implement.
+ * implements {IThenable}
  */
 class AnimationPlayer {
 
@@ -372,7 +375,7 @@ class AnimationPlayer {
 /**
  * @typedef {{
  *   delay: ./time.normtimeDef,
- *   func: !./transition.TransitionDef,
+ *   func: !TransitionDef,
  *   duration: ./time.normtimeDef,
  *   curve: ?./curve.CurveDef
  * }}
@@ -383,7 +386,7 @@ let SegmentDef;
 /**
  * @typedef {{
  *   delay: ./time.normtimeDef,
- *   func: !./transition.TransitionDef,
+ *   func: !TransitionDef,
  *   duration: ./time.normtimeDef,
  *   curve: ?./curve.CurveDef,
  *   started: boolean,

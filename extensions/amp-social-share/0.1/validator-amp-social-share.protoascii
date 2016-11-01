@@ -16,7 +16,7 @@
 
 tags: {  # amp-social-share
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-social-share extension .js script"
   mandatory_parent: "HEAD"
@@ -38,7 +38,7 @@ tags: {  # amp-social-share
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -50,7 +50,7 @@ tags: {  # amp-social-share
 }
 tags: {  # <amp-social-share>
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "AMP-SOCIAL-SHARE"
   also_requires_tag: "amp-social-share extension .js script"
   attrs: {
@@ -67,14 +67,18 @@ tags: {  # <amp-social-share>
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       allowed_protocol: "fb-messenger"
+      allowed_protocol: "intent"
       allowed_protocol: "skype"
-      allowed_protocol: "snapchat"
       allowed_protocol: "sms"
+      allowed_protocol: "snapchat"
       allowed_protocol: "tel"
+      allowed_protocol: "tg"
+      allowed_protocol: "threema"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
       allow_relative: false
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"

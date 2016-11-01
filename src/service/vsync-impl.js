@@ -15,17 +15,20 @@
  */
 
 import {Pass} from '../pass';
+import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
+import {dev, rethrowAsync} from '../log';
+import {documentStateFor} from '../document-state';
 import {getService} from '../service';
-import {dev} from '../log';
-import {installViewerService} from './viewer-impl';
+import {installTimerService} from './timer-impl';
+import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
 
 
 /** @const {time} */
 const FRAME_TIME = 16;
 
 /**
- * @typedef {Object<string, *>}
+ * @typedef {!Object<string, *>}
  */
 let VsyncStateDef;
 
@@ -51,14 +54,16 @@ export class Vsync {
 
   /**
    * @param {!Window} win
-   * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, viewer) {
+  constructor(win) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!./viewer-impl.Viewer} */
-    this.viewer_ = viewer;
+    /** @private @const {!./ampdoc-impl.AmpDocService} */
+    this.ampdocService_ = ampdocServiceFor(this.win);
+
+    /** @private @const {!../document-state.DocumentState} */
+    this.docState_ = documentStateFor(this.win);
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -93,14 +98,10 @@ export class Vsync {
      */
     this.scheduled_ = false;
 
-    /**
-     * @private {?Promise}
-     */
+    /** @private {?Promise} */
     this.nextFramePromise_ = null;
 
-    /**
-     * @private {?function()}
-     */
+    /** @private {?function()} */
     this.nextFrameResolver_ = null;
 
     /** @const {!Function} */
@@ -109,13 +110,31 @@ export class Vsync {
     /** @const {!Pass} */
     this.pass_ = new Pass(this.win, this.boundRunScheduledTasks_, FRAME_TIME);
 
+    /** @private {?./viewer-impl.Viewer} */
+    this.singleDocViewer_ = null;
+
     // When the document changes visibility, vsync has to reschedule the queue
     // processing.
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.scheduled_) {
-        this.forceSchedule_();
-      }
-    });
+    const boundOnVisibilityChanged = this.onVisibilityChanged_.bind(this);
+    if (this.ampdocService_.isSingleDoc()) {
+      // In a single-doc mode, the visibility of the doc == global visibility.
+      // Thus, it's more efficient to only listen to it once.
+      viewerPromiseForDoc(this.ampdocService_.getAmpDoc()).then(viewer => {
+        this.singleDocViewer_ = viewer;
+        viewer.onVisibilityChanged(boundOnVisibilityChanged);
+      });
+    } else {
+      // In multi-doc mode, we track separately the global visibility and
+      // per-doc visibility when necessary.
+      this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
+    }
+  }
+
+  /** @private */
+  onVisibilityChanged_() {
+    if (this.scheduled_) {
+      this.forceSchedule_();
+    }
   }
 
   /**
@@ -125,11 +144,11 @@ export class Vsync {
    * will be undefined.
    *
    * @param {!VsyncTaskSpecDef} task
-   * @param {VsyncStateDef=} opt_state
+   * @param {!VsyncStateDef=} opt_state
    */
   run(task, opt_state) {
     this.tasks_.push(task);
-    this.states_.push(opt_state);
+    this.states_.push(opt_state || undefined);
     this.schedule_();
   }
 
@@ -160,9 +179,9 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return opt_state => {
+    return /** @type {function(!VsyncStateDef=)} */ (opt_state => {
       this.run(task, opt_state);
-    };
+    });
   }
 
   /**
@@ -223,13 +242,28 @@ export class Vsync {
   }
 
   /**
-   * @param {!Node=} unusedOptContextNode
+   * @param {!Node=} opt_contextNode
    * @return {boolean}
    * @private
    */
-  canAnimate_(unusedOptContextNode) {
-    // TODO(dvoytenko, #3742): Use opt_node -> ampdoc.
-    return this.viewer_.isVisible();
+  canAnimate_(opt_contextNode) {
+    // Window level: animations allowed only when global window is visible.
+    if (this.docState_.isHidden()) {
+      return false;
+    }
+
+    // Single doc: animations allowed when single doc is visible.
+    if (this.singleDocViewer_) {
+      return this.singleDocViewer_.isVisible();
+    }
+
+    // Multi-doc: animations depend on the state of the relevant doc.
+    if (opt_contextNode) {
+      const ampdoc = this.ampdocService_.getAmpDoc(opt_contextNode);
+      return viewerForDoc(ampdoc).isVisible();
+    }
+
+    return true;
   }
 
   /**
@@ -259,9 +293,10 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return opt_state => {
-      return this.runAnim(contextNode, task, opt_state);
-    };
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+        opt_state => {
+          return this.runAnim(contextNode, task, opt_state);
+        });
   }
 
   /**
@@ -340,12 +375,15 @@ export class Vsync {
     this.states_ = this.nextStates_;
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].measure) {
-        tasks[i].measure(states[i]);
+        if (!callTaskNoInline(tasks[i].measure, states[i])) {
+          // Ensure that the mutate is not executed when measure fails.
+          tasks[i].mutate = undefined;
+        }
       }
     }
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
-        tasks[i].mutate(states[i]);
+        callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
     // Swap last arrays into double buffer.
@@ -381,11 +419,29 @@ export class Vsync {
 
 
 /**
+ * For optimization reasons to stop try/catch from blocking optimization.
+ * @param {function(!VsyncStateDef)|undefined} callback
+ * @param {!VsyncStateDef} state
+ */
+function callTaskNoInline(callback, state) {
+  dev().assert(callback);
+  try {
+    callback(state);
+  } catch (e) {
+    rethrowAsync(e);
+    return false;
+  }
+  return true;
+}
+
+
+/**
  * @param {!Window} window
  * @return {!Vsync}
  */
 export function installVsyncService(window) {
-  return getService(window, 'vsync', () => {
-    return new Vsync(window, installViewerService(window));
-  });
+  return /** @type {!Vsync} */ (getService(window, 'vsync', () => {
+    installTimerService(window);
+    return new Vsync(window);
+  }));
 };

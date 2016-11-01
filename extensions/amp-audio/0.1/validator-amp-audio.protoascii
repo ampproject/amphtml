@@ -15,7 +15,7 @@
 #
 tags: {  # amp-audio
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-audio extension .js script"
   mandatory_parent: "HEAD"
@@ -37,7 +37,7 @@ tags: {  # amp-audio
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -59,6 +59,7 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
 }
 tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
@@ -86,7 +87,7 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   }
 }
 tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "AMP-AUDIO"
   spec_name: "amp-audio (A4A)"
   disallowed_ancestor: "AMP-SIDEBAR"

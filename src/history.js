@@ -15,14 +15,15 @@
  */
 
 
-import {getExistingServiceForWindow} from './service';
+import {getExistingServiceForDoc} from './service';
 
 
 /**
  * Returns service implemented in service/history-impl.
- * @param {!Window} window
- * @return {!History}
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/history-impl.History}
  */
-export function historyFor(window) {
-  return getExistingServiceForWindow(window, 'history');
-};
+export function historyForDoc(nodeOrDoc) {
+  return /** @type {!./service/history-impl.History} */ (
+      getExistingServiceForDoc(nodeOrDoc, 'history'));
+}

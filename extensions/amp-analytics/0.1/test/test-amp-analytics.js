@@ -27,12 +27,9 @@ import {getService, resetServiceForTesting} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {installViewerService} from '../../../../src/service/viewer-impl';
-import {installViewportService} from '../../../../src/service/viewport-impl';
-import {
-  installUrlReplacementsService,
-} from '../../../../src/service/url-replacements-impl';
+import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
+
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -65,10 +62,7 @@ describe('amp-analytics', function() {
       iframe.doc.title = 'Test Title';
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-      installViewerService(iframe.win);
-      installViewportService(iframe.win);
       installCidService(iframe.win);
-      installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
 
       resetServiceForTesting(iframe.win, 'xhr');
@@ -183,11 +177,11 @@ describe('amp-analytics', function() {
             const analytics = getAnalyticsTag(clearIframePing(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = installUrlReplacementsService(
-                analytics.win);
+            const urlReplacements = urlReplacementsForDoc(
+                analytics.win.document);
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
-              return '_' + name.toLowerCase() + '_';
+              return {sync: '_' + name.toLowerCase() + '_'};
             });
             const encodeVars = analytics.encodeVars_;
             sandbox.stub(analytics, 'encodeVars_', function(val, name) {
@@ -480,7 +474,9 @@ describe('amp-analytics', function() {
 
   it('expands element level vars with higher precedence than trigger vars',
     () => {
+      const analytics = getAnalyticsTag();
       const ins = instrumentationServiceFor(windowApi);
+      sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
       const el1 = windowApi.document.createElement('div');
       el1.className = 'x';
       el1.dataset.varsTest = 'foo';
@@ -488,7 +484,7 @@ describe('amp-analytics', function() {
         {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
         function(arg) {
           expect(arg.vars.test).to.equal('foo');
-        });
+        }, analytics.element);
       ins.onClick_({target: el1});
     });
 
@@ -563,8 +559,8 @@ describe('amp-analytics', function() {
 
   it('expands url-replacements vars', () => {
     const analytics = getAnalyticsTag({
-      'requests': {'pageview':
-        'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
+      'requests': {
+        'pageview': 'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
@@ -579,6 +575,31 @@ describe('amp-analytics', function() {
           'https://example.com/test1=x&' +
           'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
           '&title=Test%20Title');
+    });
+  });
+
+  it('expands complex vars', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'pageview': 'https://example.com/test1=${qp_foo}'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'qp_foo': '${queryParam(foo)}',
+        },
+      }]});
+    const urlReplacements = urlReplacementsForDoc(analytics.win.document);
+    sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
+      return {sync: param => {
+        return '_' + name.toLowerCase() + '_' + param + '_';
+      }};
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/test1=_query_param_foo_');
     });
   });
 
@@ -714,6 +735,15 @@ describe('amp-analytics', function() {
             '&foofoo=baz&a=b');
       });
     });
+
+    it('work when the value is an array', () => {
+      config.extraUrlParams = {'foo': ['0']};
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?a=b&foo=0');
+      });
+    });
   });
 
   it('fetches and merges remote config', () => {
@@ -807,8 +837,7 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = installUrlReplacementsService(
-                analytics.win);
+      const urlReplacements = urlReplacementsForDoc(analytics.win.document);
       sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
@@ -890,20 +919,35 @@ describe('amp-analytics', function() {
   describe('expandTemplate_', () => {
     const vars = {
       'vars': {'1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}'}};
+    let analytics;
+
+    beforeEach(() => {
+      analytics = getAnalyticsTag(trivialConfig);
+    });
 
     it('expands nested vars', () => {
-      const analytics = getAnalyticsTag(trivialConfig);
       const actual = analytics.expandTemplate_('${1}', vars);
       expect(actual).to.equal('123%252524%25257B4%25257D');
     });
 
     it('limits the recursion to n', () => {
-      const analytics = getAnalyticsTag(trivialConfig);
       let actual = analytics.expandTemplate_('${1}', vars, {}, 3);
       expect(actual).to.equal('1234%25252524%2525257B1%2525257D');
 
       actual = analytics.expandTemplate_('${1}', vars, {}, 5);
       expect(actual).to.equal('123412%252525252524%25252525257B3%25252525257D');
+    });
+
+    it('works with complex params (1)', () => {
+      const vars = {'vars': {'fooParam': 'QUERY_PARAM(foo,bar)'}};
+      const actual = analytics.expandTemplate_('${fooParam}', vars);
+      expect(actual).to.equal('QUERY_PARAM(foo,bar)');
+    });
+
+    it('works with complex params (2)', () => {
+      const vars = {'vars': {'fooParam': 'QUERY_PARAM'}};
+      const actual = analytics.expandTemplate_('${fooParam(foo,bar)}', vars);
+      expect(actual).to.equal('QUERY_PARAM(foo,bar)');
     });
   });
 

@@ -55,8 +55,10 @@ describe('AmpDocService', () => {
 
     it('should always yield the single document', () => {
       expect(service.getAmpDoc(null)).to.equal(service.singleDoc_);
-      expect(service.getAmpDoc(document.createElement('div')))
-          .to.equal(service.singleDoc_);
+      expect(service.getAmpDoc(document)).to.equal(service.singleDoc_);
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
     });
   });
 
@@ -73,6 +75,13 @@ describe('AmpDocService', () => {
         shadowRoot = host.createShadowRoot();
         shadowRoot.appendChild(content);
       }
+      document.body.appendChild(host);
+    });
+
+    afterEach(() => {
+      if (host.parentNode) {
+        host.parentNode.removeChild(host);
+      }
     });
 
     it('should initialize as single-doc', () => {
@@ -82,7 +91,8 @@ describe('AmpDocService', () => {
 
     it('should yield custom-element shadow-doc when exists', () => {
       const ampDoc = {};
-      content.getAmpDoc = () => ampDoc;
+      content.ampdoc_ = ampDoc;
+      host.appendChild(content);
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
@@ -97,11 +107,11 @@ describe('AmpDocService', () => {
 
       // Override via custom element.
       const ampDoc2 = {};
-      content.getAmpDoc = () => ampDoc2;
+      content.ampdoc_ = ampDoc2;
       expect(service.getAmpDoc(content)).to.equal(ampDoc2);
 
       // Fallback to cached version when custom element returns null.
-      content.getAmpDoc = () => null;
+      content.ampdoc_ = null;
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
@@ -242,7 +252,7 @@ describe('AmpDocSingle', () => {
     const bodyPromise = ampdoc.whenBodyAvailable();
     const readyPromise = ampdoc.whenReady();
 
-    doc.body = {};
+    doc.body = {nodeType: 1};
     bodyCallback();
     ready = true;
     readyCallback();
@@ -317,7 +327,7 @@ describe('AmpDocShadow', () => {
 
     // Set body.
     const bodyPromise = ampdoc.whenBodyAvailable();
-    const body = {};
+    const body = {nodeType: 1};
     shadowDocHasBody(ampdoc, body);
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.getBody()).to.equal(body);
@@ -330,7 +340,7 @@ describe('AmpDocShadow', () => {
   });
 
   it('should only allow one body update', () => {
-    const body = {};
+    const body = {nodeType: 1};
     shadowDocHasBody(ampdoc, body);
     expect(() => {
       shadowDocHasBody(ampdoc, body);

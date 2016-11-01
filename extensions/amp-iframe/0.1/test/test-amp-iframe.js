@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import {
   AmpIframe,
   isAdLike,
@@ -25,7 +25,7 @@ import {
   createIframePromise,
   poll,
 } from '../../../../testing/iframe';
-import {viewportFor} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/viewport';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -37,7 +37,7 @@ describe('amp-iframe', () => {
   const clickableIframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-clicktoplay.html';
 
-  const timer = new Timer(window);
+  const timer = timerFor(window);
   let ranJs = 0;
   let sandbox;
 
@@ -72,7 +72,7 @@ describe('amp-iframe', () => {
         iframe.iframe.style.height = opt_height;
       }
       const top = opt_top || '600px';
-      const viewport = viewportFor(iframe.win);
+      const viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
       i.style.position = 'absolute';
       if (attributes.position) {
@@ -171,6 +171,16 @@ describe('amp-iframe', () => {
       // unsupproted attributes
       expect(amp.iframe.getAttribute('longdesc')).to.be.null;
       expect(amp.iframe.getAttribute('marginwidth')).to.be.null;
+    });
+  });
+
+  it('should default frameborder to 0 if not set', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      width: 100,
+      height: 100,
+    }).then(amp => {
+      expect(amp.iframe.getAttribute('frameborder')).to.equal('0');
     });
   });
 
@@ -405,10 +415,8 @@ describe('amp-iframe', () => {
     }).then(amp => {
       const impl = amp.container.implementation_;
       const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
-      impl.updateSize_(217, 114);
-      expect(attemptChangeSize.callCount).to.equal(1);
-      expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
-      expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
+      impl.updateSize_(217, '114' /* be tolerant to string number */);
+      expect(attemptChangeSize).to.be.calledWith(217, 114);
     });
   });
 
@@ -460,7 +468,7 @@ describe('amp-iframe', () => {
 
   it('should listen for embed-ready event', () => {
     const activateIframeSpy_ =
-        sandbox.spy(AmpIframe.prototype, 'activateIframe_');
+        sandbox./*OK*/spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({
       src: clickableIframeSrc,
       sandbox: 'allow-scripts allow-same-origin',
@@ -506,9 +514,13 @@ describe('amp-iframe', () => {
       // appended amp-iframe 10x10
       expect(iframes[0].implementation_
           .looksLikeTrackingIframe_()).to.be.true;
+      expect(iframes[0].implementation_
+          .getPriority()).to.equal(1);
       // appended amp-iframe 100x100
       expect(iframes[1].implementation_
           .looksLikeTrackingIframe_()).to.be.false;
+      expect(iframes[1].implementation_
+          .getPriority()).to.equal(0);
       // amp-iframe 5x5
       expect(iframes[2].implementation_
           .looksLikeTrackingIframe_()).to.be.true;

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
@@ -66,47 +67,129 @@
             align-items: center;
             color: white;
         }
+
+
+        #poll1 li {
+            position: relative;
+            padding: 1em;
+            list-style: none;
+            margin: 0;
+            display: block;
+            height: 20px;
+        }
+
+        #poll1.amp-form-submit-success fieldset {
+            display: none;
+        }
+
+        .percentage-container {
+            z-index: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .one-pc {
+            width: 1%;
+            height: 100%;
+            display: inline-block;
+        }
+        .Wekas .one-pc {
+            background: #dc4e41;
+        }
+        .Penguins .one-pc {
+            background: #3f51b5;
+        }
+        .Ostriches .one-pc {
+            background: #4CAF50;
+        }
+        .Kiwis .one-pc {
+            background: #00ffff;
+        }
+        .poll1-results .title {
+            z-index: 1;
+            color: black;
+            position: absolute;
+        }
     </style>
 </head>
 <body>
 
-<h2>Subscribe to our weekly Newsletter (non-xhr)</h2>
-
-<form method="post" action="/form/html/post" target="_blank">
+<h4>Search (GET non-xhr same origin)</h4>
+<form method="get" action="/form/search-html/get" target="_blank">
     <fieldset>
         <label>
-            <span>Your name</span>
-            <input type="text" name="name" required>
+            <span>Search for</span>
+            <input type="search" name="term" required>
         </label>
+        <input type="submit" value="Search">
+    </fieldset>
+</form>
+
+<h4>Search (GET non-xhr cross origin - current host > httpbin.org)</h4>
+<form method="get" action="https://httpbin.org/html" target="_blank">
+    <fieldset>
         <label>
-            <span>Your email</span>
-            <input type="email" name="email" required>
+            <span>Search for</span>
+            <input type="search" name="term" required>
         </label>
-        <input type="submit" value="Subscribe">
+        <input type="submit" value="Search">
+    </fieldset>
+</form>
+
+<h4>Search (GET xhr same origin)</h4>
+<form method="get" action="/form/search-html/get" action-xhr="/form/search-json/get" target="_blank">
+    <fieldset>
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
     </fieldset>
 
-    <div class="form-message invalid-message">
-        There are some input that needs fixing. Please fix them.
-    </div>
-    <div class="form-message valid-message">
-        Everything looks good, you can submit now!
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are the results for the search:</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
     </div>
 </form>
 
-<h2>Subscribe to our weekly Newsletter (xhr)</h2>
+<h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
+<form method="get"
+      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      target="_blank">
+    <fieldset>
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
 
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>You searched for: {{term}}</h1>
+        </template>
+    </div>
+</form>
+
+<h4>Subscribe to our weekly Newsletter (POST xhr same origin)</h4>
 <form method="post"
-      action="/form/html/post"
       action-xhr="/form/echo-json/post"
       target="_blank">
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="name1" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email1" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -124,21 +207,50 @@
     </div>
 </form>
 
-<h2>Subscribe to our weekly Newsletter (xhr + submit events)</h2>
+
+<h4>Subscribe to our weekly Newsletter (xhr POST cross origin - current host > amp.localhost:8000)</h4>
+<form method="post"
+      action-xhr="http://amp.localhost:8000/form/echo-json/post"
+      target="_blank">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name2" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email2" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+<h4>Subscribe to our weekly Newsletter (xhr + submit events)</h4>
 
 <form method="post"
-      action="/form/html/post"
       action-xhr="/form/echo-json/post"
       target="_blank"
       on="submit-success:success-lightbox;submit-error:error-lightbox">
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="name3" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email3" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -177,13 +289,188 @@
         <h1>Oops! Kittens!</h1>
         <amp-anim
                 src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
-                width="400" height="300" on="tap:error-lightbox.close">
+                width="400" height="300" on="tap:error-lightbox.close"
+                tabindex="2" role="img">
             <amp-img placeholder
                      src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no-k"
                      width="400" height="300"></amp-img>
         </amp-anim>
     </div>
 </amp-lightbox>
+
+<h4>NOT ALLOWED (POST non-xhr - submission prevented)</h4>
+<form method="post" action="/regardless" target="_blank">
+    <fieldset>
+        <label>
+            <span>Subscribe</span>
+            <input type="email" name="email" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h1>Custom Validations</h1>
+<h4>Show First Validation On Submit</h4>
+
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-first-on-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name4" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name4"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name4">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email4" required>
+            <span visible-when-invalid="valueMissing" validation-for="email4"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email4"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show All Invalid Messages On Submit</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-all-on-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name5" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name5"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name5">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email5" required>
+            <span visible-when-invalid="valueMissing" validation-for="email5"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email5"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show All Invalid Messages On Submit (Summary)</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-all-on-submit">
+    <div>
+        <ol>
+            <li visible-when-invalid="valueMissing" validation-for="name51">
+                Name is a required field. Please fill it out.
+            </li>
+            <li visible-when-invalid="patternMismatch" validation-for="name51">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </li>
+            <li visible-when-invalid="valueMissing" validation-for="email51">
+                We need your email to send you coolness!
+            </li>
+            <li visible-when-invalid="typeMismatch" validation-for="email51">
+                That doesn't look like an email. Please fix it.
+            </li>
+        </ol>
+    </div>
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name51" required pattern="\w+\s\w+">
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email51" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show As You Go Messages On Submit</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="as-you-go">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name6" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name6"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name6">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email6" required>
+            <span visible-when-invalid="valueMissing" validation-for="email6"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email6"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4 id="header1">on=change and form.submit examples</h4>
+<button on="tap:header1.submit">Wrong Action - should throw an error</button>
+<form method="post"
+      id="poll1"
+      action-xhr="/form/json/poll1"
+      target="_blank"
+      custom-validation-reporting="as-you-go">
+    <fieldset>
+        <p>What is your favorite flightless bird?</p>
+        <ul>
+            <li>
+                <label>
+                    <input name="question1" value="Penguins" type="radio" on="change:poll1.submit">
+                    Penguins
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Ostriches" type="radio" on="change:poll1.submit">
+                    Ostriches
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Kiwis" type="radio" on="change:poll1.submit">
+                    Kiwis
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Wekas" type="radio" on="change:poll1.submit">
+                    Wekas
+                </label>
+            </li>
+        </ul>
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Thanks for answering the poll! Here are the results!
+            <ul class="poll1-results">
+            {{#result}}
+                <li>
+                    <div class="percentage-container {{answer}}">
+                        {{#percentage}}<span class="one-pc"></span>{{/percentage}}
+                    </div>
+                    <span class="title">{{answer}}</span>
+                </li>
+            {{/result}}
+            </ul>
+        </template>
+    </div>
+</form>
+
 
 </body>
 </html>

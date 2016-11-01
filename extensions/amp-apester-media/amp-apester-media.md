@@ -34,12 +34,8 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>
-    FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE
+    fill, fixed, fixed-height, flex-item, nodisplay, responsive
     </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-apester-media/">amp-apester-media.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/apester.amp.html">apester.amp.html</a></td>
   </tr>
 </table>
 
@@ -72,14 +68,6 @@ The ID of the media, an integer.
 **data-apester-channel-token**
 
 The token of the channel, an integer.
-
-
-## Optional attributes
-
-<!--**width and height**-->
-
-<!--Layout is `container` and the amp-iframe size will be determine based on the data on Apester servers. -->
-
 
 ## Validation
 

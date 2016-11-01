@@ -80,11 +80,11 @@ const HtmlStructureElements = {
 };
 
 /**
-* The set of HTML tags which are legal in the HTML document <head> and
-* the 'HEAD' tag itself.
-* @type {Object<string,?>}
-* @private
-*/
+ * The set of HTML tags which are legal in the HTML document <head> and
+ * the 'HEAD' tag itself.
+ * @type {Object<string,?>}
+ * @private
+ */
 const HeadElements = {
   'HEAD': 0,
   // See https://www.w3.org/TR/html5/document-metadata.html
@@ -96,6 +96,41 @@ const HeadElements = {
   // Also legal in the document <head>, though not per spec.
   'NOSCRIPT': 0,
   'SCRIPT': 0,
+};
+
+/**
+ * The set of HTML tags whose presence will implicitly close a <p> element.
+ * For example '<p>foo<h1>bar</h1>' should parse the same as
+ * '<p>foo</p><h1>bar</h1>'. See https://www.w3.org/TR/html-markup/p.html
+ * @type {Object<string,?>}
+ * @private
+ */
+const ElementsWhichClosePTag = {
+  'ADDRESS': 0,
+  'ARTICLE': 0,
+  'ASIDE': 0,
+  'BLOCKQUOTE': 0,
+  'DIR': 0,
+  'DL': 0,
+  'FIELDSET': 0,
+  'FOOTER': 0,
+  'FORM': 0,
+  'H1': 0,
+  'H2': 0,
+  'H3': 0,
+  'H4': 0,
+  'H5': 0,
+  'H6': 0,
+  'HEADER': 0,
+  'HR': 0,
+  'MENU': 0,
+  'NAV': 0,
+  'OL': 0,
+  'P': 0,
+  'PRE': 0,
+  'SECTION': 0,
+  'TABLE': 0,
+  'UL': 0,
 };
 
 /**
@@ -215,6 +250,25 @@ class TagNameStack {
         if (tagName === 'BODY') {
           // If we've manufactured a body, then ignore the later body.
           return;
+        }
+        // Check implicit tag closing due to opening tags.
+        if (this.stack_.length > 0) {
+          const parentTagName = this.stack_[this.stack_.length - 1];
+          // <p> tags can be implicitly closed by certain other start tags.
+          // See https://www.w3.org/TR/html-markup/p.html
+          if (parentTagName === 'P' &&
+              ElementsWhichClosePTag.hasOwnProperty(tagName)) {
+            this.endTag('P');
+          // <dd> and <dt> tags can be implicitly closed by other <dd> and <dt>
+          // tags. See https://www.w3.org/TR/html-markup/dd.html
+          } else if ((tagName == 'DD' || tagName == 'DT') &&
+                     (parentTagName == 'DD' || parentTagName == 'DT')) {
+            this.endTag(parentTagName);
+          // <li> tags can be implicitly closed by other <li> tags.
+          // See https://www.w3.org/TR/html-markup/li.html
+          } else if (tagName == 'LI' && parentTagName == 'LI') {
+            this.endTag('LI');
+          }
         }
         break;
       default:
@@ -810,7 +864,7 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
            // An unquoted value that is not an attribute name.
            // We know it is not an attribute name because the previous
            // zero-width match would've eliminated that possibility.
-           '|[^>\"\'\\s]*' +
+           '|[^>\\s]*' +
            ')') +
           ')') +
          '?' +
@@ -967,4 +1021,5 @@ function unusedHtmlParser() {
   console./*OK*/log(ElementsWithNoEndElements['']);
   console./*OK*/log(HtmlStructureElements['']);
   console./*OK*/log(HeadElements['']);
+  console./*OK*/log(ElementsWhichClosePTag['']);
 }

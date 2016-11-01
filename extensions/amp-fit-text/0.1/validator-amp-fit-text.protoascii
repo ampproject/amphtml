@@ -16,7 +16,7 @@
 
 tags: {  # amp-fit-text
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-fit-text extension .js script"
   mandatory_parent: "HEAD"
@@ -38,7 +38,7 @@ tags: {  # amp-fit-text
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -52,7 +52,7 @@ tags: {  # amp-fit-text
 # out now that the spec is available.
 tags: {  # <amp-fit-text>
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "AMP-FIT-TEXT"
   # <amp-fit-text> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "AMP-SIDEBAR"

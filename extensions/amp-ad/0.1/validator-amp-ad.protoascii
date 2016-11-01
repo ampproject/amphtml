@@ -39,7 +39,7 @@ tags: {  # amp-ad
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -53,9 +53,10 @@ tags: {  # <amp-ad>
   html_format: AMP  # Ads are not allowed inside ads
   tag_name: "AMP-AD"
   # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded.
-  # TODO(gregable): Make the lack of the extension a deprecation warning.
-  # also_requires_tag: "amp-ad extension .js script"
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
+  also_requires_tag_warning: "amp-ad extension .js script"
+  disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "json" }
@@ -65,6 +66,7 @@ tags: {  # <amp-ad>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
@@ -82,9 +84,9 @@ tags: {  # <amp-embed>
   html_format: AMP
   tag_name: "AMP-EMBED"
   # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded.
-  # TODO(gregable): Make the lack of the extension a deprecation warning.
-  # also_requires_tag: "amp-ad extension .js script"
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
+  also_requires_tag_warning: "amp-ad extension .js script"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "json" }
@@ -94,6 +96,7 @@ tags: {  # <amp-embed>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"

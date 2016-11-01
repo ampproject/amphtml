@@ -15,19 +15,15 @@
  */
 
 
-import {getLengthNumeral} from '../src/layout';
-import {getService} from './service';
+import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
+import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-import {getIntersectionChangeEntry} from './intersection-observer';
-import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {user} from './log';
-import {viewportFor} from './viewport';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {urls} from './config';
 
 
@@ -42,18 +38,18 @@ let overrideBootstrapBaseUrl;
  * @param {!Window} parentWindow
  * @param {!Element} element
  * @param {string=} opt_type
+ * @param {Object=} opt_context
  * @return {!Object} Contains
  *     - type, width, height, src attributes of <amp-ad> tag. These have
  *       precedence over the data- attributes.
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
-function getFrameAttributes(parentWindow, element, opt_type) {
+function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
-  const container = element.getAttribute('amp-container-element');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const attributes = {};
   // Do these first, as the other attributes have precedence.
@@ -62,10 +58,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
   const docInfo = documentInfoForDoc(element);
-  if (container) {
-    attributes.container = container;
-  }
-  const viewer = viewerFor(parentWindow);
+  const viewer = viewerForDoc(element);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
@@ -77,20 +70,18 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
-    clientId: element.getAttribute('ampcid'),
     location: {
       href: locationHref,
     },
     tagName: element.tagName,
     mode: getModeObject(),
+    canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
-    initialIntersection: getIntersectionChangeEntry(
-        Date.now(),
-        viewportFor(parentWindow).getRect(),
-        element.getLayoutBox()),
+    initialIntersection: element.getIntersectionChangeEntry(),
     startTime,
   };
+  Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes.src = adSrc;
@@ -102,12 +93,20 @@ function getFrameAttributes(parentWindow, element, opt_type) {
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!Element} parentElement
  * @param {string=} opt_type
+ * @param {Object=} opt_context
  * @return {!Element} The iframe.
  */
-export function getIframe(parentWindow, element, opt_type) {
-  const attributes = getFrameAttributes(parentWindow, element, opt_type);
+export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
+  // Check that the parentElement is already in DOM. This code uses a new and
+  // fast `isConnected` API and thus only used when it's available.
+  dev().assert(
+      parentElement['isConnected'] === undefined ||
+      parentElement['isConnected'] === true,
+      'Parent element must be in DOM');
+  const attributes =
+      getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
@@ -170,11 +169,10 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
- * @return {string}
+ * @param {!./preconnect.Preconnect} preconnect
  */
-export function preloadBootstrap(window) {
+export function preloadBootstrap(window, preconnect) {
   const url = getBootstrapBaseUrl(window);
-  const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
@@ -193,14 +191,22 @@ export function preloadBootstrap(window) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  return getService(self, 'bootstrapBaseUrl', () => {
-    return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
-      getDefaultBootstrapBaseUrl(parentWindow);
-  });
+  // The value is cached in a global variable called `bootstrapBaseUrl`;
+  const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
+  if (bootstrapBaseUrl) {
+    return bootstrapBaseUrl;
+  }
+  return parentWindow.bootstrapBaseUrl =
+      getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest)
+          || getDefaultBootstrapBaseUrl(parentWindow);
 }
 
 export function setDefaultBootstrapBaseUrlForTesting(url) {
   overrideBootstrapBaseUrl = url;
+}
+
+export function resetBootstrapBaseUrlForTesting(win) {
+  win.bootstrapBaseUrl = undefined;
 }
 
 /**

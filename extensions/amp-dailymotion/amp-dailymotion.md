@@ -31,11 +31,11 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-dailymotion/">amp-dailymotion.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/dailymotion.amp.html">dailymotion.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-dailymotion/">Annotated code example for amp-dailymotion</a></td>
   </tr>
 </table>
 

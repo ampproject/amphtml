@@ -15,24 +15,26 @@
  */
 
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
-import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
 describe('amp-live-list', () => {
   let sandbox;
+  let ampdoc;
   let liveList;
   let elem;
   let dftAttrs;
   let itemsSlot;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-live-list', true);
     sandbox = sinon.sandbox.create();
+    ampdoc = new AmpDocSingle(window);
     elem = document.createElement('amp-live-list');
+    elem.getAmpDoc = () => ampdoc;
     const updateSlot = document.createElement('button');
     itemsSlot = document.createElement('div');
     updateSlot.setAttribute('update', '');
@@ -48,7 +50,6 @@ describe('amp-live-list', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-live-list', false);
     sandbox.restore();
   });
 
@@ -273,6 +274,17 @@ describe('amp-live-list', () => {
         liveList.update(update);
       }).to.throw();
       expect(stub.callCount).to.equal(1);
+    });
+
+    it('should call updateFixedLayer on update with inserts', () => {
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+      const spy = sandbox.spy(liveList.viewport_, 'updateFixedLayer');
+      expect(liveList.itemsSlot_.childElementCount).to.equal(0);
+      const fromServer1 = createFromServer([{id: 'id0'}]);
+      expect(spy).to.have.not.been.called;
+      liveList.update(fromServer1);
+      expect(spy).to.have.been.calledOnce;
     });
 
     it('no items slot on update should be a no op update', () => {

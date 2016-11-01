@@ -69,22 +69,40 @@ describe('AccessServerJwtAdapter', () => {
           .equal('https://acme.com/p?rid=READER_ID');
       expect(adapter.keyUrl_).to
           .equal('https://acme.com/pk');
+      expect(adapter.key_).to.be.null;
       expect(adapter.serverState_).to.equal('STATE1');
       expect(adapter.isProxyOrigin_).to.be.false;
+      expect(adapter.isAuthorizationEnabled()).to.be.true;
+      expect(adapter.isPingbackEnabled()).to.be.true;
     });
 
-    it('should fail if config is invalid', () => {
+    it('should fail if config is invalid: authorization', () => {
       delete validConfig['authorization'];
       expect(() => {
         new AccessServerJwtAdapter(window, validConfig, context);
       }).to.throw(/"authorization" URL must be specified/);
     });
 
-    it('should fail if config is invalid', () => {
+    it('should fail if config is invalid: publicKeyUrl', () => {
       delete validConfig['publicKeyUrl'];
       expect(() => {
         new AccessServerJwtAdapter(window, validConfig, context);
-      }).to.throw(/"publicKeyUrl" URL must be specified/);
+      }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/);
+    });
+
+    it('should fail if config is invalid: http publicKeyUrl', () => {
+      validConfig['publicKeyUrl'] = 'http://acme.com/pk';
+      expect(() => {
+        new AccessServerJwtAdapter(window, validConfig, context);
+      }).to.throw(/https/);
+    });
+
+    it('should support either publicKey or publicKeyUrl', () => {
+      delete validConfig['publicKeyUrl'];
+      validConfig['publicKey'] = 'key1';
+      const adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      expect(adapter.key_).to.equal('key1');
+      expect(adapter.keyUrl_).to.be.null;
     });
 
     it('should tolerate when i-amp-access-state is missing', () => {
@@ -112,6 +130,7 @@ describe('AccessServerJwtAdapter', () => {
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
         isAuthorizationEnabled: () => true,
+        isPingbackEnabled: () => true,
         authorize: () => Promise.resolve({}),
         pingback: () => Promise.resolve(),
       };
@@ -405,6 +424,8 @@ describe('AccessServerJwtAdapter', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
+        const pem = 'pEm';
+        const pemPromise = Promise.resolve(pem);
         contextMock.expects('buildUrl')
             .withExactArgs(
                 'https://acme.com/a?rid=READER_ID',
@@ -418,6 +439,10 @@ describe('AccessServerJwtAdapter', () => {
             })
             .returns(Promise.resolve(encoded))
             .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/pk')
+            .returns(pemPromise)
+            .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
             .returns(jwt)
@@ -426,7 +451,7 @@ describe('AccessServerJwtAdapter', () => {
             .returns(true)
             .once();
         jwtMock.expects('decodeAndVerify')
-            .withExactArgs(encoded, 'https://acme.com/pk')
+            .withExactArgs(encoded, pemPromise)
             .returns(Promise.resolve(jwt))
             .once();
         sandbox.stub(adapter, 'shouldBeValidated_', () => true);
@@ -435,6 +460,55 @@ describe('AccessServerJwtAdapter', () => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
           expect(validateStub.callCount).to.equal(1);
+        });
+      });
+
+      it('should verified JWT after fetch when supported with PEM', () => {
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        const encoded = 'rAnDoM';
+        const pem = 'pEm';
+        adapter.key_ = pem;
+        contextMock.expects('buildUrl')
+            .withExactArgs(
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
+            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+            .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/a?rid=r1', {
+              credentials: 'include',
+              requireAmpResponseSourceOrigin: true,
+            })
+            .returns(Promise.resolve(encoded))
+            .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/pk')
+            .never();
+        jwtMock.expects('decode')
+            .withExactArgs(encoded)
+            .returns(jwt)
+            .once();
+        jwtMock.expects('isVerificationSupported')
+            .returns(true)
+            .once();
+        let pemPromise;
+        jwtMock.expects('decodeAndVerify')
+            .withExactArgs(encoded, sinon.match(arg => {
+              pemPromise = arg;
+              return true;
+            }))
+            .returns(Promise.resolve(jwt))
+            .once();
+        sandbox.stub(adapter, 'shouldBeValidated_', () => true);
+        const validateStub = sandbox.stub(adapter, 'validateJwt_');
+        return adapter.fetchJwt_().then(resp => {
+          expect(resp.encoded).to.equal(encoded);
+          expect(resp.jwt).to.equal(jwt);
+          expect(validateStub.callCount).to.equal(1);
+          return pemPromise;
+        }).then(pemValue => {
+          expect(pemValue).to.equal(pem);
         });
       });
 

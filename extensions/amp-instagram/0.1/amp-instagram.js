@@ -36,21 +36,38 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 
 class AmpInstagram extends AMP.BaseElement {
-  /** @override */
-  preconnectCallback(onLayout) {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.iframePromise_ = null;
+
+    /** @private {?string} */
+    this.shortcode_ = '';
+  }
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
-    this.preconnect.url('https://www.instagram.com', onLayout);
+    this.preconnect.url('https://www.instagram.com', opt_onLayout);
     // Host instagram used for image serving. While the host name is
     // funky this appears to be stable in the post-domain sharding era.
-    this.preconnect.url('https://instagram.fsnc1-1.fna.fbcdn.net', onLayout);
+    this.preconnect.url('https://instagram.fsnc1-1.fna.fbcdn.net',
+        opt_onLayout);
   }
 
   /** @override */
@@ -60,17 +77,6 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /**
-     * @private {?Element}
-     */
-    this.iframe_ = null;
-    /**
-     * @private {?Promise}
-     */
-    this.iframePromise_ = null;
-    /**
-     * @private @const
-     */
     this.shortcode_ = user().assert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
@@ -83,6 +89,7 @@ class AmpInstagram extends AMP.BaseElement {
     const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
     const image = this.win.document.createElement('amp-img');
+    image.setAttribute('noprerender', '');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
     image.setAttribute('src', 'https://www.instagram.com/p/' +
@@ -125,7 +132,7 @@ class AmpInstagram extends AMP.BaseElement {
     setStyles(iframe, {
       'opacity': 0,
     });
-    return this.iframePromise_ = loadPromise(iframe).then(() => {
+    return this.iframePromise_ = this.loadPromise(iframe).then(() => {
       this.getVsync().mutate(() => {
         setStyles(iframe, {
           'opacity': 1,

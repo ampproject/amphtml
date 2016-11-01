@@ -15,15 +15,22 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
   /** @override */
-  createdCallback() {
+  preconnectCallback() {
     this.preconnect.url('https://players.brightcove.net');
   }
 
@@ -34,7 +41,6 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {?Element} */
     this.iframe_ = null;
   }
 
@@ -66,9 +72,8 @@ class AmpBrightcove extends AMP.BaseElement {
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @private */

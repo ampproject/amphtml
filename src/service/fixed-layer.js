@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {documentContains} from '../dom';
 import {dev, user} from '../log';
 import {platformFor} from '../platform';
 import {setStyle, setStyles} from '../style';
@@ -37,14 +36,14 @@ const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
  */
 export class FixedLayer {
   /**
-   * @param {!Document} doc
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!./vsync-impl.Vsync} vsync
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
-  constructor(doc, vsync, paddingTop, transfer) {
-    /** @const {!Document} */
-    this.doc = doc;
+  constructor(ampdoc, vsync, paddingTop, transfer) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private @const */
     this.vsync_ = vsync;
@@ -52,8 +51,11 @@ export class FixedLayer {
     /** @private {number} */
     this.paddingTop_ = paddingTop;
 
+    /** @private {number} */
+    this.committedPaddingTop_ = paddingTop;
+
     /** @private @const {boolean} */
-    this.transfer_ = transfer;
+    this.transfer_ = transfer && ampdoc.isSingleDoc();
 
     /** @private {?Element} */
     this.fixedLayer_ = null;
@@ -81,7 +83,7 @@ export class FixedLayer {
    * Must be always called after DOMReady.
    */
   setup() {
-    const stylesheets = this.doc.styleSheets;
+    const stylesheets = this.ampdoc.getRootNode().styleSheets;
     if (!stylesheets) {
       return;
     }
@@ -106,7 +108,7 @@ export class FixedLayer {
     // Sort in document order.
     this.sortInDomOrder_();
 
-    const platform = platformFor(this.doc.defaultView);
+    const platform = platformFor(this.ampdoc.win);
     if (this.fixedElements_.length > 0 && !this.transfer_ &&
             platform.isIos()) {
       user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
@@ -119,12 +121,51 @@ export class FixedLayer {
 
   /**
    * Updates the viewer's padding-top position and recalculates offsets of
-   * all elements.
+   * all elements. The padding update can be transient, in which case the
+   * UI itself is not updated leaving the blank space up top, which is invisible
+   * due to scroll position. This mode saves significant resources. However,
+   * eventhough layout is not updated, the fixed coordinates still need to be
+   * recalculated.
    * @param {number} paddingTop
+   * @param {boolean} opt_transient
    */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_transient) {
     this.paddingTop_ = paddingTop;
+    if (!opt_transient) {
+      this.committedPaddingTop_ = paddingTop;
+    }
     this.update();
+  }
+
+  /**
+   * Apply or reset transform style to fixed elements. The existing transition,
+   * if any, is disabled when custom transform is supplied.
+   * @param {?string} transform
+   */
+  transformMutate(transform) {
+    if (transform) {
+      // Apply transform style to all fixed elements
+      this.fixedElements_.forEach(e => {
+        if (e.fixedNow && e.top) {
+          setStyle(e.element, 'transition', 'none');
+          if (e.transform && e.transform != 'none') {
+            setStyle(e.element, 'transform', e.transform + ' ' + transform);
+          } else {
+            setStyle(e.element, 'transform', transform);
+          }
+        }
+      });
+    } else {
+      // Reset transform style to all fixed elements
+      this.fixedElements_.forEach(e => {
+        if (e.fixedNow && e.top) {
+          setStyles(e.element, {
+            transform: '',
+            transition: '',
+          });
+        }
+      });
+    }
   }
 
   /**
@@ -142,10 +183,10 @@ export class FixedLayer {
    * @param {!Element} element
    */
   removeElement(element) {
-    this.removeFixedElement_(element);
-    if (this.fixedLayer_) {
+    const fe = this.removeFixedElement_(element);
+    if (fe && this.fixedLayer_) {
       this.vsync_.mutate(() => {
-        this.returnFromFixedLayer_(element);
+        this.returnFromFixedLayer_(/** @type {FixedElementDef} */ (fe));
       });
     }
   }
@@ -175,7 +216,7 @@ export class FixedLayer {
     // Some of the elements may no longer be in DOM.
     /** @type {!Array<!FixedElementDef>} */
     const toRemove = this.fixedElements_.filter(
-        fe => !documentContains(this.doc, fe.element));
+        fe => !this.ampdoc.contains(fe.element));
     toRemove.forEach(fe => this.removeFixedElement_(fe.element));
 
     // Next, the positioning-related properties will be measured. If a
@@ -208,7 +249,7 @@ export class FixedLayer {
         // 3. Calculated fixed info.
         this.fixedElements_.forEach(fe => {
           const element = fe.element;
-          const styles = this.doc.defaultView./*OK*/getComputedStyle(
+          const styles = this.ampdoc.win./*OK*/getComputedStyle(
               element, null);
           if (!styles) {
             // Notice that `styles` can be `null`, courtesy of long-standing
@@ -248,10 +289,11 @@ export class FixedLayer {
           let top = styles.getPropertyValue('top');
           const currentOffsetTop = element./*OK*/offsetTop;
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
-          if ((top == 'auto' || isImplicitAuto) &&
-                  top != '0px' &&
-                  currentOffsetTop != 0) {
+          if ((top == 'auto' || isImplicitAuto) && top != '0px') {
             top = '';
+            if (currentOffsetTop == this.committedPaddingTop_) {
+              top = '0px';
+            }
           }
 
           const bottom = styles.getPropertyValue('bottom');
@@ -278,14 +320,15 @@ export class FixedLayer {
             transferrable: isTransferrable,
             top,
             zIndex: styles.getPropertyValue('z-index'),
+            transform: styles.getPropertyValue('transform'),
           };
         });
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
           const fixedLayer = this.getFixedLayer_();
-          if (fixedLayer.className != this.doc.body.className) {
-            fixedLayer.className = this.doc.body.className;
+          if (fixedLayer.className != this.ampdoc.getBody().className) {
+            fixedLayer.className = this.ampdoc.getBody().className;
           }
         }
         this.fixedElements_.forEach((fe, i) => {
@@ -337,7 +380,8 @@ export class FixedLayer {
   setupFixedSelectors_(fixedSelectors) {
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
-      const elements = this.doc.querySelectorAll(fixedSelector);
+      const elements = this.ampdoc.getRootNode().querySelectorAll(
+          fixedSelector);
       for (let j = 0; j < elements.length; j++) {
         if (j > 10) {
           // We shouldn't have too many of `fixed` elements.
@@ -386,6 +430,7 @@ export class FixedLayer {
    * Removes element from the fixed layer.
    *
    * @param {!Element} element
+   * @return {FixedElementDef|undefined} [description]
    * @private
    */
   removeFixedElement_(element) {
@@ -394,10 +439,12 @@ export class FixedLayer {
         this.vsync_.mutate(() => {
           element.style.top = '';
         });
+        const fe = this.fixedElements_[i];
         this.fixedElements_.splice(i, 1);
-        break;
+        return fe;
       }
     }
+    return undefined;
   }
 
   /** @private */
@@ -429,6 +476,8 @@ export class FixedLayer {
     const oldFixed = fe.fixedNow;
 
     fe.fixedNow = state.fixed;
+    fe.top = state.fixed ? state.top : '';
+    fe.transform = state.transform;
     if (state.fixed) {
       // Update `top`. This is necessary to adjust position to the viewer's
       // paddingTop.
@@ -474,7 +523,7 @@ export class FixedLayer {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      fe.placeholder = this.doc.createElement('i-amp-fp');
+      fe.placeholder = this.ampdoc.win.document.createElement('i-amp-fp');
       fe.placeholder.setAttribute('i-amp-fixedid', fe.id);
       setStyle(fe.placeholder, 'display', 'none');
     }
@@ -525,11 +574,11 @@ export class FixedLayer {
    * @private
    */
   returnFromFixedLayer_(fe) {
-    if (!fe.placeholder || !documentContains(this.doc, fe.placeholder)) {
+    if (!fe.placeholder || !this.ampdoc.contains(fe.placeholder)) {
       return;
     }
     dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
-    if (documentContains(this.doc, fe.element)) {
+    if (this.ampdoc.contains(fe.element)) {
       if (fe.element.style.zIndex) {
         fe.element.style.zIndex = '';
       }
@@ -543,10 +592,11 @@ export class FixedLayer {
    * @return {?Element}
    */
   getFixedLayer_() {
+    // This mode is only allowed for a single-doc case.
     if (!this.transfer_ || this.fixedLayer_) {
       return this.fixedLayer_;
     }
-    this.fixedLayer_ = this.doc.createElement('body');
+    this.fixedLayer_ = this.ampdoc.win.document.createElement('body');
     this.fixedLayer_.id = '-amp-fixedlayer';
     setStyles(this.fixedLayer_, {
       position: 'absolute',
@@ -574,7 +624,7 @@ export class FixedLayer {
       transition: 'none',
       visibility: 'visible',
     });
-    this.doc.documentElement.appendChild(this.fixedLayer_);
+    this.ampdoc.win.document.documentElement.appendChild(this.fixedLayer_);
     // TODO(erwinm, #4097): Remove this when safari technology preview has merged
     // the fix for https://github.com/ampproject/amphtml/issues/4047
     // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
@@ -613,8 +663,10 @@ export class FixedLayer {
  *   id: string,
  *   selectors: !Array,
  *   element: !Element,
- *   placeholder: ?Element,
- *   fixedNow: boolean,
+ *   placeholder: (?Element|undefined),
+ *   fixedNow: (boolean|undefined),
+ *   top: (string|undefined),
+ *   transform: (string|undefined),
  * }}
  */
 let FixedElementDef;

@@ -26,11 +26,8 @@ import {isGoogleAdsA4AValidEnvironment} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
-
-/** @typedef {{string: {branches: !Branches}}} */
-export let Branches;
 
 /** @typedef {{control: string, experiment: string}} */
 export let ExperimentInfo;
@@ -54,10 +51,10 @@ const MANUAL_EXPERIMENT_ID = '117152632';
  * @param {!Window} win  Host window for the ad.
  * @param {!Element} element Ad tag Element.
  * @param {string} experimentName Overall name for the experiment.
- * @param {!Branches} externalBranches experiment and control branch IDs to use
+ * @param {!ExperimentInfo} externalBranches experiment and control branch IDs to use
  *   when experiment is triggered externally (e.g., via Google Search
  *   results page).
- * @param {!Branches} internalBranches experiment and control branch IDs to
+ * @param {!ExperimentInfo} internalBranches experiment and control branch IDs to
  *   use when experiment is triggered internally (i.e., via client-side
  *   selection).
  * @return {boolean}  Whether Google Ads should attempt to render via the A4A
@@ -65,8 +62,9 @@ const MANUAL_EXPERIMENT_ID = '117152632';
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
-  if (isGoogleAdsA4AValidEnvironment(win)) {
-    maybeSetExperimentFromUrl(win, experimentName, externalBranches.control,
+  if (isGoogleAdsA4AValidEnvironment(win, element)) {
+    maybeSetExperimentFromUrl(win, element,
+        experimentName, externalBranches.control,
         externalBranches.experiment, MANUAL_EXPERIMENT_ID);
     const experimentInfo = {};
     experimentInfo[experimentName] = internalBranches;
@@ -113,6 +111,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *     request and (possibly) early rendering in shadow DOM or iframe.
  *
  * @param {!Window} win  Window.
+ * @param {!Element} element Ad tag Element.
  * @param {!string} experimentName  Name of the overall experiment.
  * @param {!string} controlBranchId  Experiment ID string for control branch of
  *   the overall experiment.
@@ -120,15 +119,15 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   (i.e., a4a) branch of the overall experiment.
  * @param {!string} manualId  ID of the manual experiment.
  */
-function maybeSetExperimentFromUrl(win, experimentName,
+function maybeSetExperimentFromUrl(win, element, experimentName,
     controlBranchId, treatmentBranchId, manualId) {
-  const expParam = viewerFor(win).getParam('exp') ||
+  const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return;
   }
-  const a4aParam = expParam.split(',').find(
-      x => { return x.indexOf('a4a:') == 0; });
+  const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
+  const a4aParam = match && match[2];
   if (!a4aParam) {
     return;
   }
@@ -144,7 +143,7 @@ function maybeSetExperimentFromUrl(win, experimentName,
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
   } else {
-    dev().warn('a4a-config', 'Unknown a4a URL parameter: ', a4aParam,
+    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
         'branch), or 2 (a4a experiment branch)');
   }
@@ -203,9 +202,9 @@ function selectRandomProperty(obj) {
  * win.pageExperimentBranches[experimentName].
  *
  * @param {!Window} win Window context on which to save experiment
- * selection state.
- * @param {ExperimentInfo} experiments  Set of experiments to
- * configure for this page load.
+ *     selection state.
+ * @param {!Object<string,!ExperimentInfo>} experiments  Set of experiments to
+ *     configure for this page load.
  * @visibleForTesting
  */
 export function randomlySelectUnsetPageExperiments(win, experiments) {

@@ -15,11 +15,25 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {srcsetFromElement} from '../../../src/srcset';
+import {user} from '../../../src/log';
 import * as st from '../../../src/style';
 
-class AmpAnim extends AMP.BaseElement {
+export class AmpAnim extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {!Element} */
+    this.img_ = new Image();
+
+    /** @private {?../../../src/srcset.Srcset} */
+    this.srcset_ = null;
+
+    /** @private {?Promise} */
+    this.loadPromise_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -28,21 +42,25 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {!Element} */
-    this.img_ = new Image();
-    this.propagateAttributes(['alt'], this.img_);
+    this.propagateAttributes(['alt', 'aria-label',
+      'aria-describedby', 'aria-labelledby'], this.img_);
     this.applyFillContent(this.img_, true);
+
+    // Remove role=img otherwise this breaks screen-readers focus and
+    // only read "Graphic" when using only 'alt'.
+    if (this.element.getAttribute('role') == 'img') {
+      this.element.removeAttribute('role');
+      user().error('Setting role=img on amp-anim elements breaks screen ' +
+          'readers please just set alt or ARIA attributes, they will be ' +
+          'correctly propagated for the underlying <img> element.');
+    }
 
     // The image is initially hidden if a placeholder is available.
     st.toggle(this.img_, !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
 
-    /** @private @const {!Srcset} */
     this.srcset_ = srcsetFromElement(this.element);
-
-    /** @private {?Promise} */
-    this.loadPromise_ = null;
   }
 
   /** @override */
@@ -97,7 +115,7 @@ class AmpAnim extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.img_.setAttribute('src', src);
-    this.loadPromise_ = loadPromise(this.img_)
+    this.loadPromise_ = this.loadPromise(this.img_)
         .catch(error => {
           if (!this.img_.getAttribute('src')) {
             return;

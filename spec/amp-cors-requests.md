@@ -37,11 +37,13 @@ by default.
 
 ## CORS Security in AMP
 
-This security protocol consists of two components: CORS origin and source origin restrictions.
+This security protocol consists of three components: `AMP-Same-Origin`, CORS origin and source origin restrictions.
 
 CORS endpoints receive requesting origin via "Origin" HTTP header. This header has to be restricted to only allow the following origins:
  - *.ampproject.org
  - The Publisher’s own origins
+
+If `Origin` header is missing, AMP will set `AMP-Same-Origin: true` custom header. If this header is set it indicates the request is coming from same origin. And should, as rule, be allowed.
 
 Source origin restrictions has to be implemented by requiring "__amp_source_origin" URL parameter to be within a set of the Publisher's own origins. The "__amp_source_origin" parameter is passed from AMP Runtime in all fetch requests and contains the source origin, e.g. "https://publisher1.com".
 
@@ -50,10 +52,19 @@ The resulting HTTP response has to also contain the following headers:
  - `AMP-Access-Control-Allow-Source-Origin: <source-origin>`. Here "source-origin" indicates the source origin that is allowed to read the authorization response as was verified via "__amp_source_origin" URL parameter. Ex: "https://publisher1.com".
  - `Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin`. This header simply allows CORS response to contain the "AMP-Access-Control-Allow-Source-Origin" header.
 
-#### Note on non-idempotent Requests
-When making CORS requests that would change the state of your system (e.g. uer subscribes to or unsubscribes from a mailing list) the first two steps you need to make sure to do:
+#### Note on State Changing Requests
+When making requests that would change the state of your system (e.g. user subscribes to or unsubscribes from a mailing list), make sure to check the following:
 
-1. Check the `Origin` header. If the origin was not `*.ampproject.org` or the publisher's origin, stop and return an error response.
+If `Origin` header is set:
+
+1. If the origin was not `*.ampproject.org` or the publisher's (aka your) origin, stop and return an error response.
 2. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
+3. If both checks pass, proceed to process the request.
 
-It's very important that these are done first before processing the request, this provides protection against CSRF attacks and avoids processing untrusted sources requests.
+Otherwise, if `Origin` header is NOT set:
+
+1. Check if the request has `AMP-Same-Origin: true` header. If not, stop and return an error response.
+    * This custom request header is sent by AMP runtime when making an XHR request on sameorigin (document served from non-cache URL).
+2. Otherwise proceed to process the request.
+
+It's very important that these all are done first before processing the request, this provides protection against CSRF attacks and avoids processing untrusted sources requests.

@@ -31,11 +31,11 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-youtube">amp-youtube.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
   </tr>
 </table>
 
@@ -52,6 +52,11 @@ With responsive layout the width and height from the example should yield correc
 
 ## Attributes
 
+**autoplay**
+
+If present, the video will automatically start playback once rendered (if autoplay is supported by the browser).
+Autoplay, when supported, will automatically mute the video before auto playing.
+
 **data-videoid**
 
 The Youtube video id found in every Youtube video page URL
@@ -67,8 +72,6 @@ Keys and values will be URI encoded. Keys will be camel cased.
 - `data-param-controls=1` becomes `&controls=1`
 
 See [Youtube Embedded Player Parameters](https://developers.google.com/youtube/player_parameters) for more parameter options for youtube.
-
-Because of limitations in mobile browsers, the `autoplay` param is currently not supported. Follow [this issue](https://github.com/ampproject/amphtml/issues/3799) for updates on autoplay support in AMP.
 
 ## Validation
 

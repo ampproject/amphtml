@@ -44,6 +44,7 @@ Current list of extended components by category:
 | Component | Description |
 | --------- | ----------- |
 | [`amp-analytics`](amp-analytics/amp-analytics.md) | Captures analytics data from an AMP document. |
+| [`amp-experiment`](amp-experiment/amp-experiment.md) | Conducts user experience experiments on an AMP document. |
 
 ### Audio/Video
 
@@ -54,6 +55,7 @@ Current list of extended components by category:
 | [`amp-brid-player`](amp-brid-player/amp-brid-player.md) | Displays a Brid.tv player. |
 | [`amp-brightcove`](amp-brightcove/amp-brightcove.md) | Displays a Brightcove Video Cloud or Perform player. |
 | [`amp-dailymotion`](amp-dailymotion/amp-dailymotion.md) | Displays a [Dailymotion](https://www.dailymotion.com) video. |
+| [`amp-gfycat`](amp-gfycat/amp-gfycat.md) | Displays a [Gfycat](https://gfycat.com) video GIF. |
 | [`amp-jwplayer`](amp-jwplayer/amp-jwplayer.md) | Displays a cloud-hosted [JW Player](https://www.jwplayer.com/). |
 | [`amp-kaltura-player`](amp-kaltura-player/amp-kaltura-player.md) | Displays the Kaltura Player as used in [Kaltura's Video Platform](https://corp.kaltura.com/). |
 | [`amp-reach-player`](amp-reach-player/amp-reach-player.md) | Displays a [Beachfront Reach](https://beachfrontreach.com/) video player. |
@@ -111,8 +113,10 @@ Current list of extended components by category:
 | Component | Description |
 | --------- | ----------- |
 | [`amp-facebook`](amp-facebook/amp-facebook.md) | Displays a Facebook post or video. |
+| [`amp-gfycat`](amp-gfycat/amp-gfycat.md) | Displays a [Gfycat](https://gfycat.com) video GIF. |
 | [`amp-instagram`](amp-instagram/amp-instagram.md) | Displays an Instagram embed. |
 | [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
+| [`amp-reddit`](amp-reddit/amp-reddit.md) | Displays a Reddit post or comment. |
 | [`amp-social-share`](amp-social-share/amp-social-share.md) | Displays a social share button. |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-vine`](amp-vine/amp-vine.md) | Displays a Vine simple embed. |

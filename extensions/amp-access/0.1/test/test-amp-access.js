@@ -18,6 +18,7 @@ import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
+import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
 import {installActionServiceForDoc,} from
@@ -130,7 +131,7 @@ describe('AccessService', () => {
   });
 
   it('should parse type', () => {
-    const config = {
+    let config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
@@ -173,6 +174,21 @@ describe('AccessService', () => {
     expect(new AccessService(window).type_).to.equal('other');
     expect(new AccessService(window).adapter_).to.be
         .instanceOf(AccessOtherAdapter);
+
+    config = {};
+    config['type'] = 'vendor';
+    config['vendor'] = 'vendor1';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('vendor');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessVendorAdapter);
+
+    delete config['type'];
+    config['vendor'] = 'vendor1';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('vendor');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessVendorAdapter);
   });
 
   it('should parse type for JWT w/o experiment', () => {
@@ -298,6 +314,35 @@ describe('AccessService', () => {
     const service = new AccessService(window);
     expect(service.authorizationFallbackResponse_).to.deep.equal(
         {'error': true});
+  });
+
+  it('should register vendor', () => {
+    const config = {
+      'vendor': 'vendor1',
+    };
+    element.textContent = JSON.stringify(config);
+    const accessService = new AccessService(window);
+    class Vendor1 {};
+    const vendor1 = new Vendor1();
+    accessService.registerVendor('vendor1', vendor1);
+    return accessService.adapter_.vendorPromise_.then(vendor => {
+      expect(vendor).to.equal(vendor1);
+    });
+  });
+
+  it('should prohibit vendor registration for non-vendor config', () => {
+    const config = {
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l',
+    };
+    element.textContent = JSON.stringify(config);
+    const accessService = new AccessService(window);
+    class Vendor1 {};
+    const vendor1 = new Vendor1();
+    expect(() => {
+      accessService.registerVendor('vendor1', vendor1);
+    }).to.throw(/can only be used for "type=vendor"/);
   });
 });
 
@@ -462,6 +507,7 @@ describe('AccessService authorization', () => {
     const adapter = {
       getConfig: () => {},
       isAuthorizationEnabled: () => true,
+      isPingbackEnabled: () => true,
       authorize: () => {},
     };
     service.adapter_ = adapter;
@@ -905,7 +951,8 @@ describe('AccessService pingback', () => {
     service = new AccessService(window);
 
     const adapter = {
-      pingback: () => {},
+      isPingbackEnabled: () => true,
+      pingback: () => Promise.resolve(),
     };
     service.adapter_ = adapter;
     adapterMock = sandbox.mock(adapter);
@@ -1034,7 +1081,8 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
       expect(triggerEventStub.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
-      return service.firstAuthorizationPromise_;
+      return Promise.all([service.firstAuthorizationPromise_,
+          service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
@@ -1060,7 +1108,8 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
       expect(triggerEventStub.callCount).to.equal(triggerStart);
       lastAuthorizationResolver();
-      return service.lastAuthorizationPromise_;
+      return Promise.all([service.lastAuthorizationPromise_,
+          service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
@@ -1100,6 +1149,19 @@ describe('AccessService pingback', () => {
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
     });
+  });
+
+  it('should ignore "viewed" monitoring when pingback is disabled', () => {
+    adapterMock.expects('isPingbackEnabled').returns(false);
+
+    service.reportWhenViewed_ = sandbox.spy();
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+
+    service.scheduleView_(/* timeToView */ 2000);
+
+    expect(service.reportWhenViewed_.callCount).to.equal(0);
+    expect(service.reportViewPromise_).to.be.null;
+    expect(broadcastStub.callCount).to.equal(0);
   });
 
   it('should re-schedule "viewed" monitoring after visibility change', () => {

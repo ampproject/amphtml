@@ -17,6 +17,7 @@
 import {Observable} from './observable';
 import {fromClass} from './service';
 import {getVendorJsPropertyName} from './style';
+import {waitForChild} from './dom';
 
 
 /**
@@ -32,23 +33,23 @@ export class DocumentState {
     /** @private @const {!Document} */
     this.document_ = win.document;
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.hiddenProp_ = getVendorJsPropertyName(this.document_, 'hidden', true);
     if (this.document_[this.hiddenProp_] === undefined) {
       this.hiddenProp_ = null;
     }
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.visibilityStateProp_ = getVendorJsPropertyName(this.document_,
         'visibilityState', true);
     if (this.document_[this.visibilityStateProp_] === undefined) {
       this.visibilityStateProp_ = null;
     }
 
-    /** @private @const */
+    /** @private @const {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.visibilityChangeEvent_ = null;
     if (this.hiddenProp_) {
       this.visibilityChangeEvent_ = 'visibilitychange';
@@ -65,6 +66,9 @@ export class DocumentState {
       this.document_.addEventListener(this.visibilityChangeEvent_,
           this.boundOnVisibilityChanged_);
     }
+
+    /** @private {?Observable} */
+    this.bodyAvailableObservable_ = null;
   }
 
   /** @private */
@@ -112,6 +116,33 @@ export class DocumentState {
   onVisibilityChanged_() {
     this.visibilityObservable_.fire();
   }
+
+  /**
+   * If body is already available, callback is called synchronously and null
+   * is returned.
+   * @param {function()} handler
+   * @return {?UnlistenDef}
+   */
+  onBodyAvailable(handler) {
+    const doc = this.document_;
+    if (doc.body) {
+      handler();
+      return null;
+    }
+    if (!this.bodyAvailableObservable_) {
+      this.bodyAvailableObservable_ = new Observable();
+      waitForChild(doc.documentElement, () => !!doc.body,
+          this.onBodyAvailable_.bind(this));
+    }
+    return this.bodyAvailableObservable_.add(handler);
+  }
+
+  /** @private */
+  onBodyAvailable_() {
+    this.bodyAvailableObservable_.fire();
+    this.bodyAvailableObservable_.removeAll();
+    this.bodyAvailableObservable_ = null;
+  }
 }
 
 
@@ -121,4 +152,4 @@ export class DocumentState {
  */
 export function documentStateFor(window) {
   return fromClass(window, 'documentState', DocumentState);
-};
+}

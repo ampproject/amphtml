@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 /** @type {Object<string, string>} */
@@ -37,7 +36,7 @@ export function camelCaseToTitleCase(camelCase) {
  * Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {!CSSStyleDeclaration} style
+ * @param {!CSSStyleDeclaration|!HTMLDocument} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
@@ -56,7 +55,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
  * @export
- * @param {!CSSStyleDeclaration} style
+ * @param {!CSSStyleDeclaration|!HTMLDocument} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
@@ -87,7 +86,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {!Element} element
+ * @param {Element} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
@@ -195,4 +194,16 @@ export function translate(x, opt_y) {
  */
 export function scale(value) {
   return `scale(${value})`;
+}
+
+/**
+ * Remove alpha value from a rgba color value.
+ * Return the new color property with alpha equals if has the alpha value.
+ * Caller needs to make sure the input color value is a valid rgba/rgb value
+ * @param {string} rgbaColor
+ * @return {string}
+ */
+export function removeAlphaFromColor(rgbaColor) {
+  return rgbaColor.replace(
+      /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g, '($1,$2,$3, 1)');
 }

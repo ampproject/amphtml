@@ -37,7 +37,7 @@ tags: {  # amp-install-serviceworker
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -59,6 +59,7 @@ tags: {  # <amp-install-serviceworker>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
   amp_layout: {

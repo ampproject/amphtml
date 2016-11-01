@@ -17,7 +17,6 @@
 
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {user, dev} from '../../../src/log';
-import {loadPromise} from '../../../src/event-helper';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
@@ -73,12 +72,12 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.height_ = getLengthNumeral(height);
 
     /**
-     * @const @private {?string}
+     * @const @private {string}
      */
     this.rendererBaseUrl_ = 'https://renderer.qmerce.com';
 
     /**
-     * @const @private {?string}
+     * @const @private {string}
      */
     this.displayBaseUrl_ = 'https://display.apester.com';
 
@@ -88,7 +87,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.random_ = false;
 
     /**
-     * @const @private {?string}
+     * @const @private {string}
      */
     this.mediaAttribute_ = user().assert(
         (this.element.getAttribute('data-apester-media-id') ||
@@ -158,7 +157,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     iframe.src = src;
     iframe.height = this.height_;
     iframe.width = this.width_;
-    iframe.classList.add('iframe');
+    iframe.classList.add('amp-apester-iframe');
     this.applyFillContent(iframe);
     return iframe;
   }
@@ -169,9 +168,8 @@ class AmpApesterMedia extends AMP.BaseElement {
   constructOverflow_() {
     const overflow = this.element.ownerDocument.createElement('div');
     overflow.setAttribute('overflow', '');
-    overflow.className = 'overflow-container';
+    overflow.className = 'amp-apester-overflow';
     const overflowButton = this.element.ownerDocument.createElement('button');
-    overflowButton.className = 'overflow-button';
     overflowButton.textContent = 'Full Size';
     overflow.appendChild(overflowButton);
     return overflow;
@@ -179,7 +177,7 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.element.classList.add('container');
+    this.element.classList.add('amp-apester-container');
     return this.queryMedia_()
         .then(response => {
           const media = response.payload;
@@ -188,7 +186,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           const iframe = this.constructIframe_(src);
           const overflow = this.constructOverflow_();
           const mutate = state => {
-            state.element.classList.add('iframe-ready');
+            state.element.classList.add('-amp-apester-iframe-ready');
           };
           const state = {
             element: iframe, mutator: mutate,
@@ -196,7 +194,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           this.iframe_ = iframe;
           this.element.appendChild(overflow);
           this.element.appendChild(iframe);
-          return this.iframePromise_ = loadPromise(iframe).then(() => {
+          return this.iframePromise_ = this.loadPromise(iframe).then(() => {
             vsyncFor(this.win).runPromise({mutate}, state);
             return media;
           });
@@ -206,7 +204,14 @@ class AmpApesterMedia extends AMP.BaseElement {
         }).then(media => {
           this.togglePlaceholder(false);
           const height = 0 || media.data.size.height;
-          this./*OK*/changeHeight(height);
+          if (height != this.height_) {
+            this.height_ = height;
+            if (this.random_) {
+              this./*OK*/attemptChangeHeight(height);
+            } else {
+              this./*OK*/changeHeight(height);
+            }
+          }
         });
   }
 

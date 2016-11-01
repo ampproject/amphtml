@@ -15,7 +15,7 @@
 #
 tags: {  # amp-accordion
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-accordion extension .js script"
   mandatory_parent: "HEAD"
@@ -37,7 +37,7 @@ tags: {  # amp-accordion
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -49,7 +49,7 @@ tags: {  # amp-accordion
 }
 tags: {  # <amp-accordion>
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "AMP-ACCORDION"
   also_requires_tag: "amp-accordion extension .js script"
   attrs: { name: "animate" value: "" }
@@ -63,7 +63,7 @@ tags: {  # <amp-accordion>
 }
 tags: {  # <amp-accordion> > <section>
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SECTION"
   spec_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"

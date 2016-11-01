@@ -30,6 +30,44 @@ const EXPERIMENT = 'amp-viz-vega';
 
 export class AmpVizVega extends AMP.BaseElement {
 
+/** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?JSONType} */
+    this.data_ = null;
+
+    /** @private {?string} */
+    this.inlineData_ = null;
+
+    /** @private {?string} */
+    this.src_ = null;
+
+    /** @private {boolean} */
+    this.useDataWidth_ = false;
+
+    /** @private {boolean} */
+    this.useDataHeight_ = false;
+
+    /** @private {number} */
+    this.measuredWidth_ = 0;
+
+    /** @private {number} */
+    this.measuredHeight_ = 0;
+
+    /** @private {?VegaObject} */
+    this.vega_ = null;
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    /**
+     * @private {Object}
+     * Instance of Vega chart object. https://goo.gl/laszHL
+     */
+    this.chart_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
@@ -40,39 +78,15 @@ export class AmpVizVega extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, EXPERIMENT),
         `Experiment ${EXPERIMENT} disabled`);
 
-    /** @private {?JSONType} */
-    this.data_ = null;
-
-    /** @const @private {?string} */
-    this.inlineData_ = this.getInlineData_();
-
-    /** @const @private {?string} */
-    this.src_ = this.element.getAttribute('src');
-
-    /** @const @private {boolean} */
-    this.useDataWidth_ = this.element.hasAttribute('use-data-width');
-
-    /** @const @private {boolean} */
-    this.useDataHeight_ = this.element.hasAttribute('use-data-height');
-
-    /** @private {number} */
-    this.measuredWidth_ = 0;
-
-    /** @private {number} */
-    this.measuredHeight_ = 0;
-
     /**
-     * @const @private {!Object}
      * Global vg (and implicitly d3) are required and they are created by
      * appending vega and d3 minified files during the build process.
      */
     this.vega_ = this.win.vg;
-
-    /**
-     * @private {Object}
-     * Instance of Vega chart object. https://goo.gl/laszHL
-     */
-    this.chart_ = null;
+    this.inlineData_ = this.getInlineData_();
+    this.src_ = this.element.getAttribute('src');
+    this.useDataWidth_ = this.element.hasAttribute('use-data-width');
+    this.useDataHeight_ = this.element.hasAttribute('use-data-height');
 
     user().assert(this.inlineData_ || this.src_,
         '%s: neither `src` attribute nor a ' +
@@ -98,7 +112,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    const box = this.element.getLayoutBox();
+    const box = this.getLayoutBox();
     if (this.measuredWidth_ == box.width &&
         this.measuredHeight_ == box.height) {
       return;
@@ -115,7 +129,6 @@ export class AmpVizVega extends AMP.BaseElement {
    * Called lazily in the first `#layoutCallback`.
    */
   initialize_() {
-    /** @private {?Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
 
     this.applyFillContent(this.container_, true);
@@ -144,7 +157,9 @@ export class AmpVizVega extends AMP.BaseElement {
       // point to other Vega specs) an they don't include credentials on those
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
-      return xhrFor(this.win).fetchJson(this.src_).then(data => {
+
+      return xhrFor(this.win).fetchJson(dev().assertString(this.src_))
+      .then(data => {
         this.data_ = data;
       });
     }
@@ -186,7 +201,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
     return parsePromise.then(chartFactory => {
       return vsyncFor(this.win).mutatePromise(() => {
-        dom.removeChildren(this.container_);
+        dom.removeChildren(dev().assertElement(this.container_));
         this.chart_ = chartFactory({el: this.container_});
         if (!this.useDataWidth_) {
           const w = this.measuredWidth_ - this.getDataPadding_('width');
@@ -206,7 +221,7 @@ export class AmpVizVega extends AMP.BaseElement {
   /**
    * Gets the padding defined in the Vega data for either width or height.
    * @param {!string} widthOrHeight One of 'width' or 'height' string values.
-   * @return {!Number}
+   * @return {!number}
    * @private
    */
   getDataPadding_(widthOrHeight) {

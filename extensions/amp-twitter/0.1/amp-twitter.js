@@ -18,20 +18,32 @@
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
+import {removeElement} from '../../../src/dom';
 
 
 class AmpTwitter extends AMP.BaseElement {
-  /** @override */
-  preconnectCallback(onLayout) {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
     // This domain serves the actual tweets as JSONP.
-    this.preconnect.url('https://syndication.twitter.com', onLayout);
+    this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
     // All images
-    this.preconnect.url('https://pbs.twimg.com', onLayout);
+    this.preconnect.url('https://pbs.twimg.com', opt_onLayout);
     // Hosts the script that renders tweets.
     this.preconnect.preload(
         'https://platform.twitter.com/widgets.js', 'script');
-    preloadBootstrap(this.win);
+    preloadBootstrap(this.win, this.preconnect);
   }
 
   /** @override */
@@ -55,7 +67,22 @@ class AmpTwitter extends AMP.BaseElement {
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
-    return loadPromise(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 };
 

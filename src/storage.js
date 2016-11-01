@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {getServicePromiseForDoc} from './service';
 
 
 /**
- * @param {!Window} window
- * @return {!Promise<!Storage>}
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<!./service/storage-impl.Storage>}
  */
-export function storageFor(window) {
-  return getElementService(window, 'storage', 'amp-analytics');
-};
+export function storageForDoc(nodeOrDoc) {
+  return /** @type {!Promise<!./service/storage-impl.Storage>} */ (
+      getServicePromiseForDoc(nodeOrDoc, 'storage'));
+}
