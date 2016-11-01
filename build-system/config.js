@@ -89,7 +89,7 @@ var karma = {
     browsers: [
       'SL_Chrome_android',
       'SL_Chrome_latest',
-      'SL_Chrome_37',
+      'SL_Chrome_45',
       'SL_Firefox_latest',
       'SL_Safari_8',
       'SL_Safari_9',

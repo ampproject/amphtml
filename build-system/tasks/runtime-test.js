@@ -50,7 +50,7 @@ function getConfig() {
     }
     const c = extend(obj, karmaConfig.saucelabs);
     if (argv.oldchrome) {
-      c.browsers = ['SL_Chrome_37']
+      c.browsers = ['SL_Chrome_45'];
     }
   }
 

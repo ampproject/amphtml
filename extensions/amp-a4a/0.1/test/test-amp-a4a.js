@@ -730,7 +730,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
-        a4a.adUrl_ = 'http://foo.com';
+        a4a.adUrl_ = 'https://nowhere.org';
         a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
         return a4a.maybeRenderAmpAd_().then(rendered => {
           // Force vsync system to run all queued tasks, so that DOM mutations
@@ -747,7 +747,7 @@ describe('amp-a4a', () => {
             expect(a4aElement.children.length).to.equal(1);
             const iframe = a4aElement.children[0];
             expect(iframe.tagName).to.equal('IFRAME');
-            expect(iframe.src.indexOf('http://foo.com')).to.equal(0);
+            expect(iframe.src.indexOf('https://nowhere.org')).to.equal(0);
             expect(iframe.style.visibility).to.equal('');
           });
         });

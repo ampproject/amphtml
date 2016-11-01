@@ -136,7 +136,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       };
       let timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
-      }, 1000);
+      }, 2000);
       // Declare the test ready to run when the document was fully parsed.
       window.afterLoad = function() {
         resolve({
