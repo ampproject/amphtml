@@ -25,6 +25,7 @@
  *   test: boolean,
  *   log: (string|undefined),
  *   version: string,
+ *   rtvVersion: string,
  * }}
  */
 export let ModeDef;
