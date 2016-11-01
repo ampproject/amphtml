@@ -727,7 +727,7 @@ describe('amp-a4a', () => {
                 .contentDocument.querySelector('body');
             let clickHandlerCalled = 0;
 
-            adBody.onclick = function (e) {
+            adBody.onclick = function(e) {
               expect(e.defaultPrevented).to.be.false;
               e.preventDefault();  // Make the test not actually navigate.
               clickHandlerCalled++;

@@ -103,14 +103,14 @@ describe('integration test: a4a', () => {
   });
 
   it('should render a single AMP ad in a friendly iframe', () => {
-    return fixture.addElement(a4aElement).then(element => {
+    return fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     });
   });
 
   it('should fall back to 3p when no signature is present', () => {
     mockResponse.headers.delete(SIGNATURE_HEADER);
-    return fixture.addElement(a4aElement).then(element => {
+    return fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });
@@ -150,7 +150,7 @@ describe('integration test: a4a', () => {
         })
         .onSecondCall().throws(new Error(
             'Testing extractCreativeAndSignature should not occur error'));
-    return fixture.addElement(a4aElement).then(element => {
+    return fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });

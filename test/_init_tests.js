@@ -264,7 +264,8 @@ chai.Assertion.addProperty('visible', function() {
       'expected element \'' +
       tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
       'expected element \'' +
-      tagName + '\' not to be #{exp}, got #{act}. with classes: ' + obj.className,
+      tagName + '\' not to be #{exp}, got #{act}. with classes: ' +
+      obj.className,
       'visible and opaque',
       `visibility = ${visibility} and opacity = ${opacity}`
   );
