@@ -15,9 +15,9 @@
  */
 
 import {dev, rethrowAsync} from './log';
+import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
 import {extensionsFor} from './extensions';
-import {getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './resources';
@@ -77,9 +77,11 @@ function isSrcdocSupported() {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
+ * @param {function(!Window)=} opt_preinstallCallback
  * @return {!Promise<FriendlyIframeEmbed>}
  */
-export function installFriendlyIframeEmbed(iframe, container, spec) {
+export function installFriendlyIframeEmbed(iframe, container, spec,
+    opt_preinstallCallback) {
   /** @const {!Window} */
   const win = getTopWindow(iframe.ownerDocument.defaultView);
   /** @const {!./service/extensions-impl.Extensions} */
@@ -152,7 +154,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        childWin, spec.extensionIds || []);
+        childWin, spec.extensionIds || [], opt_preinstallCallback);
     // Ready to be shown.
     iframe.style.visibility = '';
     if (childWin.document && childWin.document.body) {
@@ -293,5 +295,6 @@ export class FriendlyIframeEmbed {
    */
   destroy() {
     resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    disposeServicesForEmbed(this.win);
   }
 }

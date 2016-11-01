@@ -21,6 +21,7 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {getStyle} from '../../src/style';
 import {extensionsFor} from '../../src/extensions';
+import {installServiceInEmbedScope} from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
 import {resourcesForDoc} from '../../src/resources';
 import * as sinon from 'sinon';
@@ -132,7 +133,7 @@ describe('friendly-iframe-embed', () => {
         .withExactArgs(sinon.match(arg => {
           installExtWin = arg;
           return true;
-        }), ['amp-test'])
+        }), ['amp-test'], /* preinstallCallback */ undefined)
         .once();
 
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
@@ -143,6 +144,22 @@ describe('friendly-iframe-embed', () => {
     return embedPromise.then(embed => {
       expect(installExtWin).to.equal(embed.win);
     });
+  });
+
+  it('should pass pre-install callback', () => {
+
+    const preinstallCallback = function() {};
+
+    // Extensions are installed.
+    extensionsMock.expects('installExtensionsInChildWindow')
+        .withExactArgs(sinon.match(() => true), [], preinstallCallback)
+        .once();
+
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+    }, preinstallCallback);
+    return embedPromise;
   });
 
   it('should uninstall all resources', () => {
@@ -158,6 +175,25 @@ describe('friendly-iframe-embed', () => {
           .withExactArgs(embed.win)
           .once();
       embed.destroy();
+    });
+  });
+
+  it('should install and dispose services', () => {
+    const disposeSpy = sandbox.spy();
+    const embedService = {
+      dispose: disposeSpy,
+    };
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+    }, embedWin => {
+      installServiceInEmbedScope(embedWin, 'c', embedService);
+    });
+    return embedPromise.then(embed => {
+      expect(embed.win.services['c'].obj).to.equal(embedService);
+      expect(disposeSpy).to.not.be.called;
+      embed.destroy();
+      expect(disposeSpy).to.be.calledOnce;
     });
   });
 
