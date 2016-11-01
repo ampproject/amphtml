@@ -34,68 +34,29 @@ import {
 } from '../../../../src/custom-element';
 import * as sinon from 'sinon';
 
-chai.Assertion.addMethod('renderedInFriendlyIframe', function(srcdoc) {
-  const obj = this._obj;
-  this.assert(obj,
-      'amp ad element should be #{exp}, got #{act}',  // if true message
-      'amp ad element should not be #{exp}, got #{act}',  // if negated message
-      'truthy',  // expected
-      obj);      // actual
-  const elementName = obj.tagName.toLowerCase();
-  const child = obj.querySelector('iframe[srcdoc]');
-  this.assert(child,
-      `child of amp ad element ${elementName} should be #{exp}, got #{act}`,
-      `child of amp ad element ${elementName} should not be #{exp}, got #{act}`,
-      'truthy',
-      child);
-  this.assert(child.getAttribute('srcdoc').indexOf(srcdoc) >= 0,
-      `iframe child of amp ad element ${elementName} should contain #{exp}, ` +
-      'was #{act}',
-      `iframe child of amp ad element ${elementName} should not contain ` +
-      '#{exp}, was #{act}',
-      srcdoc,
-      child.getAttribute('srcdoc'));
+function expectRenderedInFriendlyIframe(element, srcdoc) {
+  expect(element, 'ad element').to.be.ok;
+  const child = element.querySelector('iframe[srcdoc]');
+  expect(child, 'iframe child').to.be.ok;
+  expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
   const childBody = child.contentDocument.body;
-  this.assert(childBody,
-      `iframe child of amp ad element ${elementName} should have #{exp}`,
-      `iframe child of amp ad element ${elementName} should have #{exp}, ` +
-      'got #{act}',
-      'body tag',
-      childBody);
-  [obj, child, childBody].forEach(toTest => {
+  expect(childBody, 'body of iframe doc').to.be.ok;
+  [element, child, childBody].forEach(toTest => {
     expect(toTest).to.be.visible;
   });
-});
+}
 
-chai.Assertion.addMethod('renderedInXDomainIframe', function(src) {
-  const obj = this._obj;
-  this.assert(obj,
-      'amp ad element should be #{exp}, got #{act}',  // if true message
-      'amp ad element should not be #{exp}, got #{act}',  // if negated message
-      'truthy',  // expected
-      obj);      // actual
-  const elementName = obj.tagName.toLowerCase();
-  const friendlyChild = obj.querySelector('iframe[srcdoc]');
-  this.assert(!friendlyChild,
-      `child of amp ad element ${elementName} should not be cross-domain`,
-      `child of amp ad element ${elementName} should be cross-domain`);
-  const child = obj.querySelector('iframe[src]');
-  this.assert(child,
-      `child of amp ad element ${elementName} should be #{exp}, got #{act}`,
-      `child of amp ad element ${elementName} should not be #{exp}, got #{act}`,
-      'truthy',
-      child);
-  this.assert(child.getAttribute('src').indexOf(src) >= 0,
-      `iframe child of amp ad element ${elementName} src should contain ` +
-      '#{exp}, was #{act}',
-      `iframe child of amp ad element ${elementName} src should not contain ` +
-      '#{exp}, was #{act}',
-      src,
-      child.getAttribute('src'));
-  [obj, child].forEach(toTest => {
+function expectRenderedInXDomainIframe(element, src) {
+  expect(element, 'ad element').to.be.ok;
+  expect(element.querySelector('iframe[srcdoc]'),
+      'does not have a friendly iframe child').to.not.be.ok;
+  const child = element.querySelector('iframe[src]');
+  expect(child, 'iframe child').to.be.ok;
+  expect(child.getAttribute('src')).to.contain.string(src);
+  [element, child].forEach(toTest => {
     expect(toTest).to.be.visible;
   });
-});
+}
 
 describe('integration test: a4a', () => {
   let sandbox;
@@ -143,14 +104,14 @@ describe('integration test: a4a', () => {
 
   it('should render a single AMP ad in a friendly iframe', () => {
     return fixture.addElement(a4aElement).then(element => {
-      expect(element).to.be.renderedInFriendlyIframe('Hello, world.');
+      expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     });
   });
 
   it('should fall back to 3p when no signature is present', () => {
     mockResponse.headers.delete(SIGNATURE_HEADER);
     return fixture.addElement(a4aElement).then(element => {
-      expect(element).to.be.renderedInXDomainIframe(TEST_URL);
+      expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });
 
@@ -163,7 +124,7 @@ describe('integration test: a4a', () => {
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('amp-a4a:');
-      expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
+      expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });
 
@@ -177,7 +138,7 @@ describe('integration test: a4a', () => {
       expect(error.message).to.contain.string(
           'Testing extractCreativeAndSignature error');
       expect(error.message).to.contain.string('amp-a4a:');
-      expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
+      expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });
 
@@ -190,7 +151,7 @@ describe('integration test: a4a', () => {
         .onSecondCall().throws(new Error(
             'Testing extractCreativeAndSignature should not occur error'));
     return fixture.addElement(a4aElement).then(element => {
-      expect(element).to.be.renderedInXDomainIframe(TEST_URL);
+      expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });
 
@@ -209,7 +170,7 @@ describe('integration test: a4a', () => {
         return fixture.addElement(a4aElement).catch(error => {
           expect(error.message).to.contain.string('Key failed to validate');
           expect(error.message).to.contain.string('amp-a4a:');
-          expect(a4aElement).to.be.renderedInXDomainIframe(TEST_URL);
+          expectRenderedInXDomainIframe(a4aElement, TEST_URL);
         });
       });
 });
