@@ -187,7 +187,7 @@ that is not on the first page.
 
 ## Server Side filtering
 
-See the documentation for [Server side filtering](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
+See the documentation for [Server side filtering](../amp-live-list/amp-live-list-server-side-filtering.md).
 
 ## Attributes
 
