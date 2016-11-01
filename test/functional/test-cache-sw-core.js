@@ -136,7 +136,8 @@ runner.run('Cache SW', () => {
             'https://cdn.ampproject.org/rtv/123/v0.js');
       });
 
-      it('rewrites versioned v1 to other version', () => {
+      // When we finally release AMP v1
+      it.skip('rewrites versioned v1 to other version', () => {
         expect(sw.urlWithVersion(v1, '123')).to.equal(
             'https://cdn.ampproject.org/rtv/123/v1.js');
       });
@@ -146,7 +147,8 @@ runner.run('Cache SW', () => {
             'https://cdn.ampproject.org/rtv/123/v0/amp-comp.js');
       });
 
-      it('rewrites versioned v1 comp to other version', () => {
+      // When we finally release AMP v1
+      it.skip('rewrites versioned v1 comp to other version', () => {
         expect(sw.urlWithVersion(v1comp, '123')).to.equal(
             'https://cdn.ampproject.org/rtv/123/v1/amp-comp.js');
       });
@@ -230,7 +232,7 @@ runner.run('Cache SW', () => {
       });
 
       it('fetches the request', () => {
-        return sw.fetchAndCache(cache, request, 'v0.js', rtv).then(resp => {
+        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(resp => {
           expect(fetch).to.have.been.called;
           expect(resp).to.equal(response);
         });
@@ -239,14 +241,14 @@ runner.run('Cache SW', () => {
       it('stores response into cache', () => {
         const cloned = {};
         sandbox.stub(response, 'clone', () => cloned);
-        return sw.fetchAndCache(cache, request, 'v0.js', rtv).then(() => {
+        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
           expect(put).to.have.been.calledWith(request, cloned);
         });
       });
 
       it('prunes previous cached responses for file', () => {
         const deleter = sandbox.stub(cache, 'delete');
-        return sw.fetchAndCache(cache, request, 'v0.js', rtv).then(() => {
+        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
           expect(deleter).to.have.been.calledWith(cache.cached[0][0]);
           expect(deleter).to.not.have.been.calledWith(cache.cached[1][0]);
         });
@@ -259,20 +261,20 @@ runner.run('Cache SW', () => {
       });
 
       it('fetches the request', () => {
-        return sw.fetchAndCache(cache, request, 'v0.js', rtv).then(resp => {
+        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(resp => {
           expect(resp).to.equal(response);
         });
       });
 
       it('does not store response into cache', () => {
-        return sw.fetchAndCache(cache, request, 'v0.js', rtv).then(() => {
+        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
           expect(put).to.not.have.been.called;
         });
       });
 
       it('does not prune requests for file', () => {
         const deleter = sandbox.stub(cache, 'delete');
-        return sw.fetchAndCache(cache, request, 'v0.js', rtv).then(() => {
+        return sw.fetchAndCache(cache, request, '/v0.js', rtv).then(() => {
           expect(deleter).to.not.have.been.called;
         });
       });
@@ -286,13 +288,13 @@ runner.run('Cache SW', () => {
       });
     });
     it('returns cached rtv version, if file is cached', () => {
-      return sw.getCachedVersion(cache, 'v0.js').then(version => {
+      return sw.getCachedVersion(cache, '/v0.js').then(version => {
         expect(version).to.equal(rtv);
       });
     });
 
     it('returns empty string, if file is not cached', () => {
-      return sw.getCachedVersion(cache, 'amp-comp.js').then(version => {
+      return sw.getCachedVersion(cache, '/amp-comp.js').then(version => {
         expect(version).to.equal('');
       });
     });
