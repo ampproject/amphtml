@@ -207,6 +207,10 @@ data.enablemraid;
 data.jsplayer;
 var sas;
 sas.callAmpAd;
+data.uuid;
+data.embedcreated;
+data.embedparent
+data.embedlive
 var ZGTag;
 var geckoTag;
 var placement;

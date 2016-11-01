@@ -34,6 +34,7 @@ import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
+import {reddit} from './reddit';
 import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
@@ -199,6 +200,7 @@ register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
+register('reddit', reddit);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
