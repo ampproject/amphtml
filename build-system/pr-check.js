@@ -154,7 +154,7 @@ function main(argv) {
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    execOrDie(`${gulp} test --saucelabs --oldchrome`);
+    execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   }
 
   if (buildTargets.has('VALIDATOR_WEBUI')) {
