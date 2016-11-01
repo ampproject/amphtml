@@ -165,6 +165,10 @@ describe('3p-frame', () => {
         '"test":false,"version":"$internalRuntimeVersion$"}' +
         ',"canary":true' +
         ',"hidden":false' +
+        // Note that DOM fingerprint will change if the document DOM changes
+        // Also, DOM structure for gulp test --files seems to be different from
+        // structure for gulp test. So use .only instead of --files here.
+        ',"domFingerprint":"932357496"' +
         ',"startTime":1234567888' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
