@@ -129,7 +129,7 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Set iframe initially hidden which will be removed on load event +
-    // post message depending on if A4A flow.
+    // post message.
     this.iframe.style.visibility = 'hidden';
 
     this.element_.appendChild(this.iframe);
