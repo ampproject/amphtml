@@ -20,10 +20,11 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe.configure().retryOnSaucelabs().run('error page', () => {
+describe.configure().retryOnSaucelabs().run('error page', function() {
+  this.timeout(5000);
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/errors.html', 500, win => {
+    return createFixtureIframe('test/fixtures/errors.html', 1000, win => {
       // Trigger dev mode.
       try {
         win.history.pushState({}, '', 'test2.html#development=1');

@@ -28,7 +28,8 @@ import {
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
   const TIMEOUT = 20000;
-  it('should override the video interface methods', function() {
+  it.configure().retryOnSaucelabs()
+  .run('should override the video interface methods', function() {
     this.timeout(TIMEOUT);
     return getVideoPlayer(/* opt_outsideView */ false)
     .then(v => {
