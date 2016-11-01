@@ -19,6 +19,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
 import {data as minimumAmp} from './testdata/minimum_valid_amp.reserialized';
@@ -30,7 +31,6 @@ import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
 const XHR_URL = 'http://iframe.localhost:' + location.port +
@@ -82,6 +82,7 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let xhrMockJson;
+  let getSigningServiceNamesMock;
   let viewerWhenVisibleMock;
   let mockResponse;
 
@@ -89,6 +90,9 @@ describe('amp-a4a', () => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
+    getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
+        'getSigningServiceNames');
+    getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         {mode: 'cors', method: 'GET'})
@@ -111,7 +115,7 @@ describe('amp-a4a', () => {
   });
 
   function stringToArrayBuffer(str) {
-    return new TextEncoder('utf-8').encode(str);
+    return utf8Encode(str);
   }
 
   function createA4aElement(doc) {
@@ -520,10 +524,13 @@ describe('amp-a4a', () => {
         // statement and verify that test fails, with full response spliced in
         // to shadow doc.
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-            Promise.resolve({
-              creative: stringToArrayBuffer(validCSSAmp.reserialized),
+          stringToArrayBuffer(validCSSAmp.reserialized).then(buffer => {
+            return {
+              creative: buffer,
               signature: base64UrlDecodeToBytes(validCSSAmp.signature),
-            }));
+            };
+          })
+        );
         a4a.onLayoutMeasure();
         let onAmpCreativeRenderFired = false;
         a4a.onAmpCreativeRender = () => {
@@ -704,10 +711,11 @@ describe('amp-a4a', () => {
         ],
       };
       const splicePoint = offsets.bodyUtf16CharOffsets[1];
-      return stringToArrayBuffer(baseTestDoc.slice(0, splicePoint) +
-          '<script type="application/json" amp-ad-metadata>' +
-          JSON.stringify(offsets) + '</script>' +
-          baseTestDoc.slice(splicePoint));
+      const val = baseTestDoc.slice(0, splicePoint) +
+        '<script type="application/json" amp-ad-metadata>' +
+        JSON.stringify(offsets) + '</script>' +
+        baseTestDoc.slice(splicePoint);
+      return stringToArrayBuffer(val);
     }
     it('should not render AMP natively', () => {
       return createAdTestingIframePromise().then(fixture => {
@@ -744,8 +752,9 @@ describe('amp-a4a', () => {
         doc.body.appendChild(a4aElement);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
-        const bytes = buildCreativeArrayBuffer();
-        return a4a.maybeRenderAmpAd_(bytes).then(rendered => {
+        return buildCreativeArrayBuffer().then(bytes => {
+          return a4a.maybeRenderAmpAd_(bytes);
+        }).then(rendered => {
           expect(rendered).to.be.true;
           // Verify iframe presence.
           expect(a4aElement.children.length).to.equal(1);
@@ -770,8 +779,9 @@ describe('amp-a4a', () => {
         doc.body.appendChild(a4aElement);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
-        const bytes = buildCreativeArrayBuffer();
-        return a4a.maybeRenderAmpAd_(bytes).then(() => {
+        return buildCreativeArrayBuffer().then(bytes => {
+          return a4a.maybeRenderAmpAd_(bytes);
+        }).then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();

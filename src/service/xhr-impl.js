@@ -162,7 +162,6 @@ export class Xhr {
     const init = opt_init || {};
     init.method = normalizeMethod_(init.method);
     setupJson_(init);
-
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response);
     }).then(response => response.json());

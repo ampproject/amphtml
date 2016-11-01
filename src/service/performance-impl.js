@@ -194,8 +194,7 @@ export class Performance {
   whenViewportLayoutComplete_() {
     return this.whenReadyToRetrieveResources_().then(() => {
       return Promise.all(this.resources_.getResourcesInViewport().map(r => {
-        // We're ok with the layout failing and still reporting.
-        return r.loadedOnce().catch(function() {});
+        return r.loadedOnce();
       }));
     });
   }

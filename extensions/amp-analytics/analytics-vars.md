@@ -429,11 +429,11 @@ Provides the width of the element specified by `visibilitySpec`.
 
 ### elementX
 
-Provides the X coordinate of the left edge of the element specified by `visibilitySpec`.
+Provides the absolute X coordinate of the left edge of the element specified by `visibilitySpec`.
 
 ### elementY
 
-Provides the Y coordinate of the top edge of the element specified by `visibilitySpec`.
+Provides the absolute Y coordinate of the top edge of the element specified by `visibilitySpec`.
 
 ### firstSeenTime
 
@@ -473,4 +473,11 @@ Provides the total time from the time page was loaded to the time a ping was sen
 
 Provides the total time for which the element has met the visiblitySpec conditions at time this ping is sent.
 
+### fromSlide
+
+Provides the slide from which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+
+### toSlide
+
+Provides the slide to which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
 

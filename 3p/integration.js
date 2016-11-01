@@ -34,6 +34,7 @@ import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
+import {reddit} from './reddit';
 import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
@@ -52,6 +53,7 @@ import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
+import {adverline} from '../ads/adverline';
 import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
@@ -153,6 +155,7 @@ register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
+register('adverline', adverline);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);
@@ -197,6 +200,7 @@ register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
+register('reddit', reddit);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);

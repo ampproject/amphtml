@@ -260,9 +260,11 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = (
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME ||
-        this.isWebviewEmbedded_ ||
-        !ampdoc.isSingleDoc());
+        // Checking param "origin", as we expect all viewers to provide it.
+        // See https://github.com/ampproject/amphtml/issues/4183
+        this.isIframed_ && !this.win.AMP_TEST_IFRAME && this.params_['origin']
+        || this.isWebviewEmbedded_
+        || !ampdoc.isSingleDoc());
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
