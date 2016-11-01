@@ -208,6 +208,11 @@ export const adConfig = {
 
   improvedigital: {},
 
+  ix: {
+    prefetch: 'https://js-sec.indexww.com/indexJTag.js',
+    preconnect: 'https://as-sec.casalemedia.com',
+  },
+
   industrybrains: {
     prefetch: 'https://web.industrybrains.com/js/ads/async/show.js',
     preconnect: [
