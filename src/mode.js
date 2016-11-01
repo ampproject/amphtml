@@ -21,6 +21,7 @@
  *   development: boolean,
  *   filter: (string|undefined),
  *   minified: boolean,
+ *   lite: boolean,
  *   test: boolean,
  *   log: (string|undefined),
  *   version: string,
@@ -28,7 +29,7 @@
  */
 export let ModeDef;
 
-/** @typedef {string} */
+/** @type {string} */
 const version = '$internalRuntimeVersion$';
 
 /**
@@ -68,20 +69,26 @@ function getMode_(win) {
     return win.context.mode;
   }
 
+  // Magic constants that are replaced by closure compiler.
+  // IS_MINIFIED is always replaced with true when closure compiler is used
+  // while IS_DEV is only replaced when the --fortesting flag is NOT used.
   const IS_DEV = true;
+  const IS_MINIFIED = false;
 
-  const isLocalDev = IS_DEV && !!(location.hostname == 'localhost' ||
-      (location.ancestorOrigins && location.ancestorOrigins[0] &&
-        location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
+  const isLocalDev = IS_DEV && !!(win.location.hostname == 'localhost' ||
+      (win.location.ancestorOrigins && win.location.ancestorOrigins[0] &&
+        win.location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
       // occur during local dev.
       (!win.document || !!win.document.querySelector(developmentScriptQuery));
 
-  const developmentQuery = parseQueryString_(
+  const hashQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
-      location.originalHash || location.hash);
+      win.location.originalHash || win.location.hash);
+
+  const searchQuery = parseQueryString_(win.location.search);
 
   if (!fullVersion) {
     fullVersion = getFullVersion_(win, isLocalDev);
@@ -94,15 +101,17 @@ function getMode_(win) {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: !!(developmentQuery['development'] == '1' ||
+    development: !!(hashQuery['development'] == '1' ||
         win.AMP_DEV_MODE),
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
-    filter: developmentQuery['filter'],
-    /* global process: false */
-    minified: !IS_DEV || process.env.NODE_ENV == 'production',
+    filter: hashQuery['filter'],
+    minified: IS_MINIFIED,
+    // Whether document is in an amp-lite viewer. It signal that the user
+    // would prefer to use less bandwidth.
+    lite: searchQuery['amp_lite'] != undefined,
     test: IS_DEV && !!(win.AMP_TEST || win.__karma__),
-    log: developmentQuery['log'],
+    log: hashQuery['log'],
     version: fullVersion,
   };
 }

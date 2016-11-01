@@ -17,7 +17,7 @@
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-analytics
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .js script"
   mandatory_parent: "HEAD"
@@ -39,7 +39,7 @@ tags: {  # amp-analytics
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -51,14 +51,14 @@ tags: {  # amp-analytics
 }
 tags: {  # amp-analytics (json)
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   mandatory_parent: "AMP-ANALYTICS"
   attrs: {
     name: "type"
     mandatory: true
-    value: "application/json"
+    value_casei: "application/json"
     dispatch_key: true
   }
   cdata: {
@@ -73,14 +73,14 @@ tags: {  # amp-analytics (json)
 # emitted by the AMP cache.
 tags: {  # amp-ad-metadata (json)
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-ad-metadata .json script"
   mandatory_parent: "BODY"
   attrs: {
     name: "type"
     mandatory: true
-    value: "application/json"
+    value_casei: "application/json"
   }
   attrs: {
     name: "amp-ad-metadata"
@@ -98,7 +98,7 @@ tags: {  # amp-ad-metadata (json)
 }
 tags: {  # <amp-analytics>
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "AMP-ANALYTICS"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-analytics extension .js script"

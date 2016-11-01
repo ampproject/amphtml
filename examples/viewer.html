@@ -85,11 +85,15 @@
       bottom: 0;
       overflow-x: hidden;
       visibility: hidden;
+      -webkit-transform: translateX(-100%);
+      -ms-transform: translateX(-100%);
       transform: translateX(-100%);
     }
 
     viewer[data-show-container="1"] #container1 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -99,6 +103,8 @@
 
     viewer[data-show-container="2"] #container2 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -108,6 +114,8 @@
 
     viewer[data-show-container="3"] #container3 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -117,6 +125,8 @@
 
     viewer[data-show-container="4"] #container4 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -126,6 +136,8 @@
 
     viewer[data-show-container="5"] #container5 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -180,13 +192,12 @@
       //     ' allow-popups-to-escape-sandbox allow-same-origin');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
-      this.visibilityToggle_.onclick = function() {
-        this.toggleVisibility(this.visibilityState_ != 'visible');
-      }.bind(this);
-      if (visible) {
-        this.updateVisibilityToggle_();
-      }
-
+      this.visibilityToggle_.addEventListener('click', function() {
+        var activeId = this.viewer.getAttribute('data-show-container');
+        if (activeId == this.id) {
+          this.toggleVisibility(this.visibilityState_ != 'visible', true);
+        }
+      }.bind(this));
       this.viewer.classList.add(this.viewportType_);
 
       if (this.viewportType_ == 'natural' && !this.isIos_) {
@@ -268,14 +279,14 @@
     };
 
 
-    Viewer.prototype.toggleVisibility = function(visible) {
+    Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.sendRequest_('visibilitychange', {
         state: this.visibilityState_,
         prerenderSize: this.prerenderSize
       }, true);
-      if (visible) {
+      if (updateToggle) {
         this.updateVisibilityToggle_();
       }
     };
@@ -514,7 +525,7 @@
       new Viewer(
           'container4',
           '4',
-          'http://localhost:8000/examples/alp.amp.max.html',
+          './alp.amp.max.html',
           false).start();
       addShowContainer('4');
 
@@ -540,7 +551,7 @@
       var viewerEl = document.querySelector('viewer');
       viewerEl.setAttribute('data-show-container', id);
       allViewers.forEach(function(viewer) {
-        viewer.toggleVisibility(viewer.id == id);
+        viewer.toggleVisibility(viewer.id == id, viewer.id == id);
       });
     }
 

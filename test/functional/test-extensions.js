@@ -25,47 +25,21 @@ import {
   installExtensionsService,
   registerExtension,
 } from '../../src/service/extensions-impl';
-import {adopt} from '../../src/runtime';
 import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../testing/iframe';
-import * as cust from '../../src/custom-element';
-import * as sinon from 'sinon';
+  initLogConstructor,
+  resetLogConstructorForTesting,
+} from '../../src/log';
+import {resetScheduledElementForTesting} from '../../src/custom-element';
+import {loadPromise} from '../../src/event-helper';
 
 
-describe('Extensions', () => {
-
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  describe('registerExtension', () => {
+describes.sandboxed('Extensions', {}, () => {
+  describes.fakeWin('registerExtension', {}, env => {
     let windowApi;
     let extensions;
 
     beforeEach(() => {
-      const documentElement = document.createElement('div');
-      const body = document.createElement('div');
-      const head = document.createElement('head');
-
-      const doc = {
-        documentElement,
-        body,
-        head,
-      };
-
-      windowApi = {
-        document: doc,
-      };
-      doc.defaultView = windowApi;
-
+      windowApi = env.win;
       extensions = new Extensions(windowApi);
     });
 
@@ -321,137 +295,187 @@ describe('Extensions', () => {
     });
   });
 
-  describe('loadExtension', () => {
+  describes.realWin('loadExtension', {
+    amp: true,
+    fakeRegisterElement: true,
+  }, env => {
+    let win, doc, extensions;
+
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      extensions = env.extensions;
+    });
 
     it('should insert extension script correctly', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
-        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
-
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(0);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.undefined;
-
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.true;
-        expect(stub.callCount).to.equal(1);
-      });
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(1);
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-test']).to.exist;
+      expect(win.ampExtendedElements['amp-test']).to.be.true;
     });
 
     it('should only insert script once', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
 
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(0);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.undefined;
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(1);
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
 
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.true;
-
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(1);
-      });
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(1);
     });
 
     it('should not insert when script exists in head', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
-        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
+      const ampTestScript = doc.createElement('script');
+      ampTestScript.setAttribute('custom-element', 'amp-test');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      doc.head.appendChild(ampTestScript);
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(1);
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
 
-        const ampTestScript = doc.createElement('script');
-        ampTestScript.setAttribute('custom-element', 'amp-analytics');
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(0);
-        doc.head.appendChild(ampTestScript);
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.undefined;
-
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll(
-            '[custom-element="amp-analytics"]')).to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
-            .to.be.true;
-        expect(stub.callCount).to.equal(0);
-      });
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(1);
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-test']).to.not.exist;
+      expect(win.ampExtendedElements['amp-test']).to.be.undefined;
     });
 
     it('should give script correct attributes', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(0);
+      extensions.loadExtension('amp-test');
+      expect(doc.head.querySelectorAll('[custom-element="amp-test"]'))
+          .to.have.length(1);
 
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(0);
-        extensions.loadExtension('amp-analytics');
-        expect(doc.head.querySelectorAll('[custom-element="amp-analytics"]'))
-            .to.have.length(1);
-
-        const script = doc.head.querySelector(
-            '[custom-element="amp-analytics"]');
-        expect(script.getAttribute('data-script')).to.equal('amp-analytics');
-        expect(script.getAttribute('async')).to.equal('');
-      });
+      const script = doc.head.querySelector(
+          '[custom-element="amp-test"]');
+      expect(script.getAttribute('data-script')).to.equal('amp-test');
+      expect(script.getAttribute('async')).to.equal('');
     });
 
     it('should insert special-case for amp-embed script', () => {
-      return createIframePromise().then(f => {
-        const win = f.win;
-        const doc = win.document;
-        doNotLoadExternalResourcesInTest(win);
-        adopt(win);
-        const extensions = installExtensionsService(win);
+      expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+          .to.have.length(0);
 
-        expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
-            .to.have.length(0);
+      extensions.loadExtension('amp-embed');
+      expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+          .to.have.length(1);
+      expect(extensions.extensions_['amp-ad'].scriptPresent).to.be.true;
 
-        extensions.loadExtension('amp-embed');
-        expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-            .to.have.length(1);
-        expect(extensions.getExtensionHolder_('amp-ad').scriptPresent)
-            .to.be.true;
+      // The amp-embed module has never been created.
+      expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+          .to.have.length(0);
+      expect(extensions.extensions_['amp-embed']).to.be.undefined;
+    });
+  });
 
-        // The amp-embed module has never been created.
-        expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
-            .to.have.length(0);
-        expect(extensions.extensions_['amp-embed']).to.be.undefined;
+  describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
+    let parentWin;
+    let extensions;
+    let extensionsMock;
+    let iframe;
+    let iframeWin;
+
+    beforeEach(() => {
+      parentWin = env.win;
+      resetScheduledElementForTesting(parentWin, 'amp-test');
+      extensions = installExtensionsService(parentWin);
+      extensionsMock = sandbox.mock(extensions);
+
+      iframe = parentWin.document.createElement('iframe');
+      const promise = loadPromise(iframe);
+      const html = '<div id="one"></div>';
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = html;
+      } else {
+        iframe.src = 'about:blank';
+        const childDoc = iframe.contentWindow.document;
+        childDoc.open();
+        childDoc.write(html);
+        childDoc.close();
+      }
+      parentWin.document.body.appendChild(iframe);
+      return promise.then(() => {
+        iframeWin = iframe.contentWindow;
+      });
+    });
+
+    afterEach(() => {
+      if (iframe.parentElement) {
+        iframe.parentElement.removeChild(iframe);
+      }
+      extensionsMock.verify();
+    });
+
+    it('should set window hierarchy', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.__AMP_PARENT).to.equal(parentWin);
+      expect(iframeWin.__AMP_TOP).to.equal(parentWin);
+    });
+
+    it('should install runtime styles', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.document.querySelector('style[amp-runtime]'))
+          .to.exist;
+    });
+
+    it('should install built-ins', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.ampExtendedElements).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-video']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-pixel']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-ad']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-embed']).to.be.true;
+    });
+
+    it('should install extensions', () => {
+      extensionsMock.expects('loadExtension')
+          .withExactArgs('amp-test')
+          .returns(Promise.resolve({
+            elements: {'amp-test': {css: 'a{}'}},
+          }))
+          .once();
+      const promise = extensions.installExtensionsInChildWindow(
+          iframeWin, ['amp-test']);
+      return promise.then(() => {
+        expect(parentWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(iframeWin.document
+            .querySelector('style[amp-extension=amp-test]')).to.exist;
       });
     });
   });
 
   describe('get correct script source', () => {
+
+    beforeEach(() => {
+      // These functions must not rely on log for cases in SW.
+      resetLogConstructorForTesting();
+    });
+
+    afterEach(() => {
+      initLogConstructor();
+    });
+
     it('with local mode for testing with compiled js', () => {
       const script = calculateExtensionScriptUrl({
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', '123', true, true, true);
+      }, 'amp-ad', true, true, true);
       expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
     });
 
@@ -460,7 +484,7 @@ describe('Extensions', () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:80',
         protocol: 'https:',
-      }, 'amp-ad', '123', true, true, false);
+      }, 'amp-ad', true, true, false);
       expect(script).to.equal('https://localhost:80/dist/v0/amp-ad-0.1.max.js');
     });
 
@@ -469,7 +493,7 @@ describe('Extensions', () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'https:',
-      }, 'amp-ad', '123', true);
+      }, 'amp-ad', true);
       expect(script).to.equal('https://cdn.ampproject.org/v0/amp-ad-0.1.js');
     });
 
@@ -478,7 +502,7 @@ describe('Extensions', () => {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', '123', true);
+      }, 'amp-ad', true);
       expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
     });
 
@@ -487,16 +511,17 @@ describe('Extensions', () => {
         pathname: 'examples/ads.amp.max.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', '123', true);
+      }, 'amp-ad', true);
       expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with remote mode', () => {
+      window.AMP_MODE = {version: '123'};
       const script = calculateExtensionScriptUrl({
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', '123', false);
+      }, 'amp-ad', false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
     });
@@ -506,7 +531,7 @@ describe('Extensions', () => {
         pathname: '/max/output.jsbin.com/pegizoq/quiet',
         host: 'localhost:80',
         protocol: 'http:',
-      }, 'amp-ad', '123', true);
+      }, 'amp-ad', true);
       expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.max.js');
     });
 
@@ -515,7 +540,7 @@ describe('Extensions', () => {
         pathname: '/min/output.jsbin.com/pegizoq/quiet',
         host: 'localhost:80',
         protocol: 'http:',
-      }, 'amp-ad', '123', true);
+      }, 'amp-ad', true);
       expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.js');
     });
   });

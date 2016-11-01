@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-lightbox">amp-lightbox.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-lightbox/">Annotated code example for amp-lightbox</a></td>
   </tr>
 </table>
 
@@ -45,7 +45,7 @@ The `amp-lightbox` component defines the child elements that will be displayed i
 
 ### Closing the lightbox
 Pressing the escape key on the keyboard will close the lightbox.
-Alternatively setting the `on` attribute on one or more elements within the lightbox and setting it's method to `close` will close the lightbox when the element is tapped or clicked.
+Alternatively setting the `on` attribute on one or more elements within the lightbox and setting its method to `close` will close the lightbox when the element is tapped or clicked.
 
 Example:
 ```html
@@ -61,6 +61,34 @@ Example:
 ## Styling
 
 The `amp-lightbox` component can be styled with standard CSS.
+
+## Actions
+The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>open (default)</td>
+    <td>Opens the lightbox</td>
+  </tr>
+  <tr>
+    <td>close</td>
+    <td>Closes the lightbox</td>
+  </tr>
+</table>
+
+### Examples
+
+```html
+<button on="tap:tweets-lb.open">See Quote</button>
+<amp-lightbox id="tweets-lb" layout="nodisplay">
+    <blockquote>"Don't talk to me about JavaScript fatigue" - Horse JS</blockquote>
+    <button on="tap:tweets-lb.close">Nice!</button>
+</amp-lightbox>
+```
 
 ## Validation
 

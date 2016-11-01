@@ -1,10 +1,10 @@
 # <a name="amp-analytics"></a> Variables supported in `amp-analytics`
 
-Use the format `${varName}` in a request string for a page or platform-defined variable. `amp-analytics` tag will replace the template with its actual value at the time of construction of the analytics request.
+Use the format `${varName}` in a request string for a page or platform-defined variable. The `amp-analytics` tag will replace the template with its actual value at the time of construction of the analytics request.
 
 Since the request that is constructed is sent over HTTP, the request needs to be encoded. To achieve this, the `var` values are url-encoded using [`encodeUrlComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) before being inserted into the request.
 
-##Variable definitions
+## Variable definitions
 Vars can be defined by the platform, in the config at the top level, inside the triggers or in a remote config, as shown in this example.
 
 ```html
@@ -32,7 +32,7 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 </amp-analytics>
 ```
 
-##Variables as data attribute
+## Variables as data attribute
 For the following event types, variables can be passed as part of the element level data attribute
 
 * visible
@@ -395,6 +395,13 @@ Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
 
+
+### backgroundState
+
+When used, will provide the current backgrounded state of the page.
+
+Possible values are 0, the page is visible, or 1, the page is backgrounded.
+
 ## Visibility Variables
 
 ### backgrounded
@@ -422,11 +429,11 @@ Provides the width of the element specified by `visibilitySpec`.
 
 ### elementX
 
-Provides the X coordinate of the left edge of the element specified by `visibilitySpec`.
+Provides the absolute X coordinate of the left edge of the element specified by `visibilitySpec`.
 
 ### elementY
 
-Provides the Y coordinate of the top edge of the element specified by `visibilitySpec`.
+Provides the absolute Y coordinate of the top edge of the element specified by `visibilitySpec`.
 
 ### firstSeenTime
 
@@ -466,4 +473,11 @@ Provides the total time from the time page was loaded to the time a ping was sen
 
 Provides the total time for which the element has met the visiblitySpec conditions at time this ping is sent.
 
+### fromSlide
+
+Provides the slide from which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+
+### toSlide
+
+Provides the slide to which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
 

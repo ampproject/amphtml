@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {layoutRectLtwh, rectIntersection} from './layout-rect';
+import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './timer';
 
@@ -83,7 +83,7 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 
   let intersectionRect = element;
   if (owner) {
-    intersectionRect = rectIntersection(owner, intersectionRect) ||
+    intersectionRect = rectIntersection(owner, element) ||
         // No intersection.
         layoutRectLtwh(0, 0, 0, 0);
   }
@@ -91,10 +91,20 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
       // No intersection.
       layoutRectLtwh(0, 0, 0, 0);
 
+  // The element is relative to (0, 0), while the viewport moves. So, we must
+  // adjust.
+  // TODO(jridgewell, #5149): Fixed position elements must be recalculated.
+  const boundingClientRect = moveLayoutRect(element, -viewport.left,
+      -viewport.top);
+  intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
+      -viewport.top);
+  // Now, move the viewport to (0, 0)
+  const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
+
   return /** @type {!IntersectionObserverEntry} */ ({
     time: Date.now(),
-    rootBounds: DomRectFromLayoutRect(viewport),
-    boundingClientRect: DomRectFromLayoutRect(element),
+    rootBounds: DomRectFromLayoutRect(rootBounds),
+    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
     intersectionRect: DomRectFromLayoutRect(intersectionRect),
     intersectionRatio: intersectionRatio(intersectionRect, element),
   });
@@ -122,15 +132,15 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
  */
 export class IntersectionObserver {
   /**
-   * @param {!BaseElement} element.
-   * @param {!HTMLIFrameElement} iframe Iframe element which requested the
+   * @param {!AMP.BaseElement} element.
+   * @param {!Element} iframe Iframe element which requested the
    *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    */
   constructor(baseElement, iframe, opt_is3p) {
-    /** @private @const */
+    /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
-    /** @private @const {!./timer.Timer} */
+    /** @private @const {!./service/timer-impl.Timer} */
     this.timer_ = timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;

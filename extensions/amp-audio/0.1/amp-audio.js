@@ -16,12 +16,20 @@
 
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {loadPromise} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
 
 /**
  * Visible for testing only.
  */
 export class AmpAudio extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.audio_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -43,20 +51,21 @@ export class AmpAudio extends AMP.BaseElement {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
     }
     this.propagateAttributes(
-        ['src', 'autoplay', 'muted', 'loop'],
+        ['src', 'autoplay', 'muted', 'loop', 'aria-label',
+            'aria-describedby', 'aria-labelledby'],
         audio);
 
     this.applyFillContent(audio);
     this.getRealChildNodes().forEach(child => {
       if (child.getAttribute && child.getAttribute('src')) {
-        assertHttpsUrl(child.getAttribute('src'), child);
+        assertHttpsUrl(child.getAttribute('src'),
+            dev().assertElement(child));
       }
       audio.appendChild(child);
     });
     this.element.appendChild(audio);
-    /** @private {?HTMLAudioElement} */
     this.audio_ = audio;
-    return loadPromise(audio);
+    return this.loadPromise(audio);
   }
 
   /** @override */

@@ -17,7 +17,6 @@
 
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {user, dev} from '../../../src/log';
-import {loadPromise} from '../../../src/event-helper';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
@@ -51,6 +50,9 @@ class AmpApesterMedia extends AMP.BaseElement {
         this.seen_ = true;
         this.iframe_.contentWindow./*OK*/postMessage('interaction seen', '*');
       }
+    }
+    if (this.getPlaceholder() && !this.ready_) {
+      this.togglePlaceholder(inViewport);
     }
   }
 
@@ -117,6 +119,11 @@ class AmpApesterMedia extends AMP.BaseElement {
      * @private {boolean}
      */
     this.seen_ = false;
+
+    /**
+     * @private {boolean}
+     */
+    this.ready_ = false;
   }
 
   /** @override */
@@ -200,7 +207,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           this.iframe_ = iframe;
           this.element.appendChild(overflow);
           this.element.appendChild(iframe);
-          return this.iframePromise_ = loadPromise(iframe).then(() => {
+          return this.iframePromise_ = this.loadPromise(iframe).then(() => {
             vsyncFor(this.win).runPromise({mutate}, state);
             return media;
           });
@@ -209,6 +216,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           return undefined;
         }).then(media => {
           this.togglePlaceholder(false);
+          this.ready_ = true;
           const height = 0 || media.data.size.height;
           if (height != this.height_) {
             this.height_ = height;

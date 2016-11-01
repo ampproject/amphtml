@@ -19,7 +19,7 @@ import {documentInfoForDoc} from '../../../src/document-info';
 import {getMode} from '../../../src/mode';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -29,7 +29,15 @@ const TAG = 'amp-install-serviceworker';
  * for installation of ServiceWorkers owned by the publisher
  * of the current page.
  */
-class AmpInstallServiceWorker extends AMP.BaseElement {
+export class AmpInstallServiceWorker extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?string}  */
+    this.iframeSrc_ = null;
+  }
   /** @override */
   buildCallback() {
     const win = this.win;
@@ -38,9 +46,6 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
     }
     const src = this.element.getAttribute('src');
     assertHttpsUrl(src, this.element);
-
-    /** @private {?string}  */
-    this.iframeSrc_ = null;
 
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
@@ -63,7 +68,9 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      install(this.win, src);
+      this.loadPromise(this.win).then(() => {
+        install(this.win, src);
+      });
     } else {
       user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
@@ -73,7 +80,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @private */
   scheduleIframeLoad_() {
-    viewerFor(this.win).whenFirstVisible().then(() => {
+    viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       // If the user is longer than 20 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
@@ -88,10 +95,9 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
   insertIframe_() {
     // If we are no longer visible, we will not do a SW registration on this
     // page view.
-    if (!viewerFor(this.win).isVisible()) {
+    if (!viewerForDoc(this.getAmpDoc()).isVisible()) {
       return;
     }
-    this.insertedIframe_ = true;
     // The iframe will stil be loaded.
     this.element.style.display = 'none';
     const iframe = /*OK*/document.createElement('iframe');

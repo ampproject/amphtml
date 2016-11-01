@@ -20,14 +20,31 @@ import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {platformFor} from '../../../src/platform';
 
-/** @const */
-const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {?string} */
+    this.shareEndpoint_ = null;
+
+    /** @private {!Object} */
+    this.params_ = {};
+
+    /** @private {?../../../src/service/platform-impl.Platform} */
+    this.platform_ = null;
+
+    /** @private {?string} */
+    this.href_ = null;
+
+    /** @private {?string} */
+    this.target_ = null;
+  }
 
   /** @override */
   isLayoutSupported() {
@@ -42,34 +59,22 @@ class AmpSocialShare extends AMP.BaseElement {
         'Space characters are not allowed in type attribute value. %s',
         this.element);
     const typeConfig = getSocialConfig(typeAttr) || {};
-
-    /** @private @const {string} */
     this.shareEndpoint_ = user().assert(
         this.element.getAttribute('data-share-endpoint') ||
         typeConfig.shareEndpoint,
         'The data-share-endpoint attribute is required. %s', this.element);
-
-    /** @private @const {!Object} */
     this.params_ = Object.assign({}, typeConfig.defaultParams,
         getDataParamsFromAttributes(this.element));
-
-    /** @private @const {!../../../src/platform.Platform} */
     this.platform_ = platformFor(this.win);
 
-    /** @private {string} */
-    this.href_ = null;
-
-    /** @private {string} */
-    this.target_ = null;
-
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = urlReplacementsFor(this.win);
-    urlReplacements.expand(hrefWithVars).then(href => {
+    const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
+    urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
       // mailto: protocol breaks when opened in _blank on iOS Safari.
       const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && isMailTo) ? '_self' : '_blank';
+      this.target_ = (isIosSafari && isMailTo) ? '_top' : '_blank';
     });
 
     this.element.setAttribute('role', 'link');
@@ -79,13 +84,11 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @private */
   handleClick_() {
-    if (!this.href_) {
-      dev().error(TAG, 'Clicked before href is set.');
-      return;
-    }
+    user().assert(this.href_ && this.target_, 'Clicked before href is set.');
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-
-    openWindowDialog(this.win, this.href_, this.target_, windowFeatures);
+    const href = dev().assertString(this.href_);
+    const target = dev().assertString(this.target_);
+    openWindowDialog(this.win, href, target, windowFeatures);
   }
 
 };

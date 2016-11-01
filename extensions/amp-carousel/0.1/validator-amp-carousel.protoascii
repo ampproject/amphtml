@@ -16,7 +16,7 @@
 
 tags: {  # amp-carousel
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-carousel extension .js script"
   mandatory_parent: "HEAD"
@@ -38,7 +38,7 @@ tags: {  # amp-carousel
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -50,7 +50,7 @@ tags: {  # amp-carousel
 }
 tags: {  # <amp-carousel>
   html_format: AMP
-  html_format: A4A
+  html_format: AMP4ADS
   tag_name: "AMP-CAROUSEL"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-carousel extension .js script"

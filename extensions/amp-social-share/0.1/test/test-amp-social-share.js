@@ -40,7 +40,7 @@ describe('amp-social-share', () => {
 
   function getShare(type, opt_endpoint, opt_params) {
     return getCustomShare(iframe => {
-      sandbox.stub(iframe.win, 'open').returns(true);
+      sandbox./*OK*/stub(iframe.win, 'open').returns(true);
       const share = iframe.doc.createElement('amp-social-share');
       share.addEventListener = sandbox.spy();
       if (opt_endpoint) {
@@ -187,7 +187,7 @@ describe('amp-social-share', () => {
     });
   });
 
-  it('opens mailto: window in _self on iOS Safari', () => {
+  it('opens mailto: window in _top on iOS Safari', () => {
     isIos = true;
     isSafari = true;
     return getShare('email').then(el => {
@@ -196,7 +196,7 @@ describe('amp-social-share', () => {
       expect(el.implementation_.win.open).to.be.calledWith(
           'mailto:?subject=doc%20title&' +
             'body=https%3A%2F%2Fcanonicalexample.com%2F',
-          '_self', 'resizable,scrollbars,width=640,height=480'
+          '_top', 'resizable,scrollbars,width=640,height=480'
       );
     });
   });

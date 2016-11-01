@@ -19,8 +19,9 @@ import {getExistingServiceForDoc} from './service';
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Action}
+ * @return {!./service/action-impl.ActionService}
  */
 export function actionServiceForDoc(nodeOrDoc) {
-  return getExistingServiceForDoc(nodeOrDoc, 'action');
+  return /** @type {!./service/action-impl.ActionService} */ (
+      getExistingServiceForDoc(nodeOrDoc, 'action'));
 }

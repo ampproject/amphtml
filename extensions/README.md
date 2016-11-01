@@ -44,6 +44,7 @@ Current list of extended components by category:
 | Component | Description |
 | --------- | ----------- |
 | [`amp-analytics`](amp-analytics/amp-analytics.md) | Captures analytics data from an AMP document. |
+| [`amp-experiment`](amp-experiment/amp-experiment.md) | Conducts user experience experiments on an AMP document. |
 
 ### Audio/Video
 
@@ -115,6 +116,7 @@ Current list of extended components by category:
 | [`amp-gfycat`](amp-gfycat/amp-gfycat.md) | Displays a [Gfycat](https://gfycat.com) video GIF. |
 | [`amp-instagram`](amp-instagram/amp-instagram.md) | Displays an Instagram embed. |
 | [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
+| [`amp-reddit`](amp-reddit/amp-reddit.md) | Displays a Reddit post or comment. |
 | [`amp-social-share`](amp-social-share/amp-social-share.md) | Displays a social share button. |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-vine`](amp-vine/amp-vine.md) | Displays a Vine simple embed. |

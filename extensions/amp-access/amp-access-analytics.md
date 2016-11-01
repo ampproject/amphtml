@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Access analytics triggers
 
-Access service issues events for major states in the access flow. These events can be reported via an analytics package using triggers.
+Access service issues events for major states in the access flow. These events can be reported through the analytics configuration by using triggers.
 
 See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
 
@@ -149,7 +149,7 @@ When only one Login URL is configured, the event is `access-login[-type]-failed`
 
 ## Access analytics variables
 
-Access contributes the following URL substitutions to the [amp-var-substitutions.md](spec/amp-var-substitutions.md).
+Access contributes the following URL substitutions to the [amp-var-substitutions.md](/spec/amp-var-substitutions.md).
 
 ### ACCESS_READER_ID
 

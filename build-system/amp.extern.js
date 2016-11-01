@@ -25,6 +25,9 @@ window.context.amp3pSentinel;
 window.context.clientId;
 window.context.initialIntersection;
 
+// Service Holder
+window.services;
+
 // Exposed to custom ad iframes.
 /* @type {!Function} */
 window.draw3p;
@@ -42,42 +45,21 @@ window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
 
+// amp-viz-vega related externs.
+/**
+ * @typedef {{spec: function(!JSONType, function())}}
+ */
+let VegaParser;
+/**
+ * @typedef {{parse: VegaParser}}
+ */
+let VegaObject;
+/* @type {VegaObject} */
+window.vg;
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
-
-// Externed explicitly because we do not export Class shaped names
-// by default.
-/**
- * @constructor
- */
-window.AMP.BaseElement = function(element) {};
-
-/*
-     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
- \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
-  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
-   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
-    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
-
-  Any private property for BaseElement should be declared in
-  build-system/amp.extern.js, this is so closure compiler doesn't rename
-  the private properties of BaseElement since if it did there is a
-  possibility that the private property's new symbol in the core compilation
-  unit would collide with a renamed private property in the inheriting class
-  in extensions.
- */
-window.AMP.BaseElement.prototype.layout_;
-
-/** @type {number} */
-window.AMP.BaseElement.prototype.layoutWidth_;
-
-/** @type {boolean} */
-window.AMP.BaseElement.prototype.inViewport_;
-
-window.AMP.BaseElement.prototype.actionMap_;
-
-window.AMP.BaseTemplate;
 
 // Externed explicitly because this private property is read across
 // binaries.
@@ -109,8 +91,6 @@ UserNotificationManager.prototype.get;
 var Cid = function() {};
 /** @constructor */
 var Activity = function() {};
-
-
 
 // data
 var data;
@@ -182,3 +162,74 @@ var Cid;
  */
 Cid.prototype.get = function(
     externalCidScope, consent, opt_persistenceConsent) {}
+
+var AMP = {};
+window.AMP;
+// Externed explicitly because we do not export Class shaped names
+// by default.
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor
+ * @extends {BaseElement$$module$src$base_element}
+ */
+AMP.BaseElement = class {
+  /** @param {!AmpElement} element */
+  constructor(element) {}
+};
+
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor
+ * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
+ */
+AMP.AmpAdXOriginIframeHandler = class {
+  /**
+   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
+   */
+  constructor(baseInstance) {}
+};
+
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor
+ * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
+ */
+AMP.AmpAdUIHandler = class {
+  /**
+   * @param {!AMP.BaseElement} baseInstance
+   */
+  constructor(baseInstance) {}
+};
+
+/*
+     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+ \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+
+  Any private property for BaseElement should be declared in
+  build-system/amp.extern.js, this is so closure compiler doesn't rename
+  the private properties of BaseElement since if it did there is a
+  possibility that the private property's new symbol in the core compilation
+  unit would collide with a renamed private property in the inheriting class
+  in extensions.
+ */
+var SomeBaseElementLikeClass;
+SomeBaseElementLikeClass.prototype.layout_;
+
+/** @type {number} */
+SomeBaseElementLikeClass.prototype.layoutWidth_;
+
+/** @type {boolean} */
+SomeBaseElementLikeClass.prototype.inViewport_;
+
+SomeBaseElementLikeClass.prototype.actionMap_;
+
+AMP.BaseTemplate;

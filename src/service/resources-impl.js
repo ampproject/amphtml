@@ -25,8 +25,8 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
-import {installViewerService} from './viewer-impl';
-import {installViewportService} from './viewport-impl';
+import {installViewerServiceForDoc} from './viewer-impl';
+import {installViewportServiceForDoc} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
@@ -71,7 +71,7 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerService(this.win);
+    this.viewer_ = installViewerServiceForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -84,6 +84,9 @@ export class Resources {
 
     /** @private @const {!Array<!Resource>} */
     this.resources_ = [];
+
+    /** @private {number} */
+    this.addCount_ = 0;
 
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
@@ -128,7 +131,7 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = task => this.calcTaskScore_(task);
 
    /**
@@ -146,7 +149,7 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = installViewportService(this.win);
+    this.viewport_ = installViewportServiceForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = installVsyncService(this.win);
@@ -331,6 +334,13 @@ export class Resources {
    * @param {!AmpElement} element
    */
   add(element) {
+    // Ensure the viewport is ready to accept the first element.
+    this.addCount_++;
+    if (this.addCount_ == 1) {
+      this.viewport_.ensureReadyForElements();
+    }
+
+    // Create and add the resource.
     const resource = new Resource((++this.resourceIdCounter_), element, this);
     if (!element.id) {
       element.id = 'AMP_' + resource.getId();
@@ -344,20 +354,26 @@ export class Resources {
    * Builds the element if ready to be built, otherwise adds it to pending resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
+   * @param {boolean=} scheduleWhenBuilt
    * @private
    */
-  buildOrScheduleBuildForResource_(resource, checkForDupes = false) {
+  buildOrScheduleBuildForResource_(resource, checkForDupes = false,
+      scheduleWhenBuilt = true) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
-        this.schedulePass();
+        if (scheduleWhenBuilt && !resource.isBlacklisted()) {
+          // TODO(dvoytenko): Consider removing "blacklisted" resources
+          // altogether from the list of resources.
+          this.schedulePass();
+        }
       } else if (!resource.element.isBuilt()) {
         if (!checkForDupes ||
             this.pendingBuildResources_.indexOf(resource) == -1) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
-          this.buildReadyResources_();
+          this.buildReadyResources_(scheduleWhenBuilt);
         }
       }
     }
@@ -365,9 +381,10 @@ export class Resources {
 
   /**
    * Builds resources that are ready to be built.
+   * @param {boolean=} scheduleWhenBuilt
    * @private
    */
-  buildReadyResources_() {
+  buildReadyResources_(scheduleWhenBuilt = true) {
     // Avoid cases where elements add more elements inside of them
     // and cause an infinite loop of building - see #3354 for details.
     if (this.isCurrentlyBuildingPendingResources_) {
@@ -375,14 +392,17 @@ export class Resources {
     }
     try {
       this.isCurrentlyBuildingPendingResources_ = true;
-      this.buildReadyResourcesUnsafe_();
+      this.buildReadyResourcesUnsafe_(scheduleWhenBuilt);
     } finally {
       this.isCurrentlyBuildingPendingResources_ = false;
     }
   }
 
-  /** @private */
-  buildReadyResourcesUnsafe_() {
+  /**
+   * @param {boolean=} scheduleWhenBuilt
+   * @private
+   */
+  buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
     let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
@@ -394,12 +414,14 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        builtElementsCount++;
         resource.build();
+        if (!resource.isBlacklisted()) {
+          builtElementsCount++;
+        }
       }
     }
 
-    if (builtElementsCount > 0) {
+    if (scheduleWhenBuilt && builtElementsCount > 0) {
       this.schedulePass();
     }
   }
@@ -414,6 +436,14 @@ export class Resources {
     if (!resource) {
       return;
     }
+    this.removeResource_(resource);
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  removeResource_(resource) {
     const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
@@ -421,6 +451,15 @@ export class Resources {
     resource.pauseOnRemove();
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
+  }
+
+  /**
+   * Removes all resources belonging to the specified child window.
+   * @param {!Window} childWin
+   */
+  removeForChildWindow(childWin) {
+    const toRemove = this.resources_.filter(r => r.hostWin == childWin);
+    toRemove.forEach(r => this.removeResource_(r));
   }
 
   /**
@@ -678,9 +717,13 @@ export class Resources {
   /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
+   * @param {boolean=} opt_relayoutAll
    * @return {boolean}
    */
-  schedulePass(opt_delay) {
+  schedulePass(opt_delay, opt_relayoutAll) {
+    if (opt_relayoutAll) {
+      this.relayoutAll_ = true;
+    }
     return this.pass_.schedule(opt_delay);
   }
 
@@ -784,6 +827,7 @@ export class Resources {
       const scrollAdjSet = [];
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
+        /** @const {!Resource} */
         const resource = request.resource;
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
@@ -946,8 +990,9 @@ export class Resources {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT) {
-        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
+      if (r.getState() == ResourceState.NOT_BUILT && !r.isBlacklisted()) {
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
+            /* scheduleWhenBuilt */ false);
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -1025,7 +1070,7 @@ export class Resources {
       // layers. This is currently a short-term fix to the problem that
       // the fixed elements get incorrect top coord.
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          (r.isFixed() || r.overlaps(visibleRect)));
+          r.overlaps(visibleRect));
       r.setInViewport(shouldBeInViewport);
     }
 
@@ -1040,7 +1085,7 @@ export class Resources {
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
         // layers. This is currently a short-term fix to the problem that
         // the fixed elements get incorrect top coord.
-        if (r.isDisplayed() && (r.isFixed() || r.overlaps(loadRect))) {
+        if (r.isDisplayed() && r.overlaps(loadRect)) {
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
       }
@@ -1155,18 +1200,13 @@ export class Resources {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
+   * @return {number}
    * @private
    */
   calcTaskScore_(task) {
-    let posPriority = 0;
-    // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-    // layers. This is currently a short-term fix to the problem that
-    // the fixed elements get incorrect top coord.
-    if (!task.resource.isFixed()) {
-      const viewport = this.viewport_.getRect();
-      const box = task.resource.getLayoutBox();
-      posPriority = Math.floor((box.top - viewport.top) / viewport.height);
-    }
+    const viewport = this.viewport_.getRect();
+    const box = task.resource.getLayoutBox();
+    let posPriority = Math.floor((box.top - viewport.top) / viewport.height);
     if (Math.sign(posPriority) != this.getScrollDirection()) {
       posPriority *= 2;
     }
@@ -1239,7 +1279,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev().error(TAG_, 'task failed:',
+      dev().info(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1255,6 +1295,31 @@ export class Resources {
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
+      opt_callback) {
+    if (resource.hasBeenMeasured()) {
+      this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+          opt_callback);
+    } else {
+      // This is a rare case since most of times the element itself schedules
+      // resize requests. However, this case is possible when another element
+      // requests resize of a controlled element.
+      this.vsync_.measure(() => {
+        resource.measure();
+        this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+            opt_callback);
+      });
+    }
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @param {boolean} force
+   * @param {function(boolean)=} opt_callback A callback function
+   * @private
+   */
+  completeScheduleChangeSize_(resource, newHeight, newWidth, force,
       opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();

@@ -15,11 +15,10 @@
  */
 
 import {documentInfoForDoc} from '../document-info';
-import {whenDocumentReady} from '../document-ready';
+import {whenDocumentReady, whenDocumentComplete} from '../document-ready';
 import {fromClass} from '../service';
-import {loadPromise} from '../event-helper';
 import {resourcesForDoc} from '../resources';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 
 
 /**
@@ -97,7 +96,7 @@ export class Performance {
         });
 
     // Tick window.onload event.
-    loadPromise(win).then(() => {
+    whenDocumentComplete(win.document).then(() => {
       this.tick('ol');
       this.flush();
     });
@@ -108,7 +107,7 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerForDoc(this.win.document);
     this.resources_ = resourcesForDoc(this.win.document);
 
     // This is for redundancy. Call flush on any visibility change.
@@ -195,8 +194,7 @@ export class Performance {
   whenViewportLayoutComplete_() {
     return this.whenReadyToRetrieveResources_().then(() => {
       return Promise.all(this.resources_.getResourcesInViewport().map(r => {
-        // We're ok with the layout failing and still reporting.
-        return r.loadedOnce().catch(function() {});
+        return r.loadedOnce();
       }));
     });
   }

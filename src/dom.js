@@ -18,6 +18,16 @@ import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
 
+const HTML_ESCAPE_CHARS = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '`': '&#x60;',
+};
+const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -31,8 +41,10 @@ export function waitForChild(parent, checkFunc, callback) {
     callback();
     return;
   }
+  /** @const {!Window} */
   const win = parent.ownerDocument.defaultView;
   if (win.MutationObserver) {
+    /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -41,6 +53,7 @@ export function waitForChild(parent, checkFunc, callback) {
     });
     observer.observe(parent, {childList: true});
   } else {
+    /** @const {number} */
     const interval = win.setInterval(() => {
       if (checkFunc(parent)) {
         win.clearInterval(interval);
@@ -50,9 +63,23 @@ export function waitForChild(parent, checkFunc, callback) {
   }
 }
 
+/**
+ * Waits until the child element is constructed. Once the child is found, the
+ * promise is resolved.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @return {!Promise}
+ */
+export function waitForChildPromise(parent, checkFunc) {
+  return new Promise(resolve => {
+    waitForChild(parent, checkFunc, resolve);
+  });
+}
 
 /**
  * Waits for document's body to be available.
+ * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
+ * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
@@ -70,39 +97,6 @@ export function waitForBodyPromise(doc) {
   return new Promise(resolve => {
     waitForBody(doc, resolve);
   });
-}
-
-
-/**
- * Whether the element is currently contained in the DOM. Polyfills
- * `document.contains()` method when necessary. Notice that according to spec
- * `document.contains` is inclusionary.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- */
-export function documentContains(doc, element) {
-  if (!doc.contains) {
-    return documentContainsPolyfillInternal_(doc, element);
-  }
-  return doc.contains(element);
-}
-
-
-/**
- * Polyfill for `document.contains()` method.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
- * @param {!Document} doc
- * @param {!Element} element
- * @return {boolean}
- * @private Visible for testing only.
- */
-export function documentContainsPolyfillInternal_(doc, element) {
-  // Per spec, "contains" method is inclusionary
-  // i.e. `node.contains(node) == true`. However, we still need to test
-  // equality to the document itself.
-  return element == doc || doc.documentElement.contains(element);
 }
 
 
@@ -294,13 +288,13 @@ export function childNodes(parent, callback) {
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let scopeSelectorSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setScopeSelectorSupportedForTesting(val) {
   scopeSelectorSupported = val;
@@ -414,9 +408,9 @@ export function childElementsByTag(parent, tagName) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
- * @param {string=} opt_paramPattern Regex pattern to match data attributes.
+ * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
@@ -507,7 +501,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev().error('dom', 'Failed to open url on target: ', target, e);
+    dev().error('DOM', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.
@@ -543,4 +537,38 @@ export function escapeCssSelectorIdent(win, ident) {
   }
   // Polyfill.
   return cssEscape(ident);
+}
+
+
+/**
+ * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
+ * @param {string} text
+ * @return {string}
+ */
+export function escapeHtml(text) {
+  if (!text) {
+    return text;
+  }
+  return text.replace(HTML_ESCAPE_REGEX, escapeHtmlChar);
+}
+
+/**
+ * @param {string} c
+ * @return string
+ */
+function escapeHtmlChar(c) {
+  return HTML_ESCAPE_CHARS[c];
+}
+
+/**
+ * Tries to focus on the given element; fails silently if browser throws an
+ * exception.
+ * @param {!Element} element
+ */
+export function tryFocus(element) {
+  try {
+    element./*OK*/focus();
+  } catch (e) {
+    // IE <= 7 may throw exceptions when focusing on hidden items.
+  }
 }

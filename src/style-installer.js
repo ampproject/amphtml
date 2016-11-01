@@ -15,11 +15,12 @@
  */
 
 import {dev} from './log';
+import {documentStateFor} from './document-state';
 import {performanceFor} from './performance';
 import {platformFor} from './platform';
 import {setStyles} from './style';
-import {waitForBody} from './dom';
-import {waitForExtensions} from './render-delaying-extensions';
+import {waitForServices} from './render-delaying-services';
+import {resourcesForDoc} from './resources';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
@@ -105,10 +106,10 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
  * @param {!Document} doc The document who's body we should make visible.
- * @param {boolean=} opt_waitForExtensions Whether the body visibility should
- *     be blocked on key extensions being loaded.
+ * @param {boolean=} opt_waitForServices Whether the body visibility should
+ *     be blocked on key services being loaded.
  */
-export function makeBodyVisible(doc, opt_waitForExtensions) {
+export function makeBodyVisible(doc, opt_waitForServices) {
   const set = () => {
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
@@ -126,24 +127,26 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
         doc.body.style['WebkitAnimation'] = 'none';
       }
     }
-
-    if (opt_waitForExtensions) {
-      try {
-        const perf = performanceFor(doc.defaultView);
-        perf.tick('mbv');
-        perf.flush();
-      } catch (e) {}
-    }
   };
-  waitForBody(doc, () => {
-    if (doc.defaultView[bodyVisibleSentinel]) {
+  /** @const {!Window} */
+  const win = doc.defaultView;
+  documentStateFor(win).onBodyAvailable(() => {
+    if (win[bodyVisibleSentinel]) {
       return;
     }
-    doc.defaultView[bodyVisibleSentinel] = true;
-    const extensionsPromise = opt_waitForExtensions ?
-        waitForExtensions(doc.defaultView) : null;
-    if (extensionsPromise) {
-      extensionsPromise.then(set, set);
+    win[bodyVisibleSentinel] = true;
+    if (opt_waitForServices) {
+      waitForServices(win).catch(() => []).then(services => {
+        set();
+        if (services.length > 0) {
+          resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+        }
+        try {
+          const perf = performanceFor(win);
+          perf.tick('mbv');
+          perf.flush();
+        } catch (e) {}
+      });
     } else {
       set();
     }

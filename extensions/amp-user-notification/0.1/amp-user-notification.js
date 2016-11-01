@@ -19,9 +19,9 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
 import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {storageFor} from '../../../src/storage';
-import {urlReplacementsFor} from '../../../src/url-replacements';
-import {viewerFor} from '../../../src/viewer';
+import {storageForDoc} from '../../../src/storage';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 
@@ -81,25 +81,34 @@ class NotificationInterface {
  */
 export class AmpUserNotification extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {?UrlReplacements} */
+    this.urlReplacements_ = null;
+
+    /** @private @const {?UserNotificationManager} */
+    this.userNotificationManager_ = null;
+
+    /** @const @private {?Promise<!Storage>} */
+    this.storagePromise_ = null;
+  }
+
   /** @override */
   isAlwaysFixed() {
     return true;
   }
 
   /** @override */
-  createdCallback() {
-    /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
-
-    /** @private @const {!UserNotificationManager} */
-    this.userNotificationManager_ = getUserNotificationManager_(this.win);
-
-    /** @const @private {!Promise<!Storage>} */
-    this.storagePromise_ = storageFor(this.win);
-  }
-
-  /** @override */
   buildCallback() {
+    const ampdoc = this.getAmpDoc();
+    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
+    this.storagePromise_ = storageForDoc(ampdoc);
+    if (!this.userNotificationManager_) {
+      this.userNotificationManager_ = getUserNotificationManager_(this.win);
+    }
+
     /** @private {?string} */
     this.ampUserId_ = null;
 
@@ -129,6 +138,12 @@ export class AmpUserNotification extends AMP.BaseElement {
       assertHttpsUrl(this.dismissHref_, this.element);
     }
 
+    // Default to alert role if unspecified.
+    const roleAttribute = this.element.getAttribute('role');
+    if (!roleAttribute) {
+      this.element.setAttribute('role', 'alert');
+    }
+
     const persistDismissal = this.element.getAttribute(
         'data-persist-dismissal');
     /** @private @const {boolean} */
@@ -150,7 +165,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   buildGetHref_(ampUserId) {
     const showIfHref = dev().assert(this.showIfHref_);
-    return this.urlReplacements_.expand(showIfHref).then(href => {
+    return this.urlReplacements_.expandAsync(showIfHref).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
         ampUserId,
@@ -280,6 +295,11 @@ export class AmpUserNotification extends AMP.BaseElement {
         });
   }
 
+  /** @override */
+  activate() {
+    this.dismiss();
+  }
+
   /**
    * Hides the current user notification and invokes the `dialogResolve_`
    * method. Removes the `.amp-active` class from the element.
@@ -324,7 +344,7 @@ export class UserNotificationManager {
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerForDoc(this.win.document);
 
     /** @private @const {!Promise} */
     this.documentReadyPromise_ = whenDocumentReady(this.win.document);

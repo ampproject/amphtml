@@ -21,11 +21,37 @@ import {Layout} from '../../../src/layout';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
+import {dev} from '../../../src/log';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
 
 export class AmpCarousel extends BaseCarousel {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {number} */
+    this.pos_ = 0;
+
+    /** @private {?Array<!Element>} */
+    this.cells_ = null;
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    /** @private {number} */
+    this.startPos_ = 0;
+    /** @private {number} */
+    this.minPos_ = 0;
+    /** @private {number} */
+    this.maxPos_ = 0;
+    /** @private {number} */
+    this.extent_ = 0;
+    /** @private {?../../../src/motion.Motion} */
+    this.motion_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -34,13 +60,8 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    /** @private {number} */
-    this.pos_ = 0;
-
-    /** @private {!Array<!Element>} */
     this.cells_ = this.getRealChildren();
 
-    /** @private {!Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
       whiteSpace: 'nowrap',
@@ -79,6 +100,8 @@ export class AmpCarousel extends BaseCarousel {
   /** @override */
   goCallback(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
+    /** @const {!Element} */
+    const container = dev().assertElement(this.container_);
     if (newPos != this.pos_) {
       const oldPos = this.pos_;
       this.pos_ = newPos;
@@ -86,7 +109,7 @@ export class AmpCarousel extends BaseCarousel {
       if (!animate) {
         this.commitSwitch_(oldPos, newPos);
       } else {
-        Animation.animate(this.element, tr.setStyles(this.container_, {
+        Animation.animate(this.element, tr.setStyles(container, {
           transform: tr.translateX(tr.numeric(-oldPos, -newPos)),
         }), 200, 'ease-out').thenAlways(() => {
           this.commitSwitch_(oldPos, newPos);
@@ -101,7 +124,9 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(oldPos, newPos) {
-    st.setStyles(this.container_, {
+    /** @const {!Element} */
+    const container = dev().assertElement(this.container_);
+    st.setStyles(container, {
       transform: st.translateX(-newPos),
     });
     this.updateInViewport_(newPos, oldPos);
@@ -113,6 +138,7 @@ export class AmpCarousel extends BaseCarousel {
   /**
    * @param {number} pos
    * @param {number} dir
+   * @return {number}
    * @private
    */
   nextPos_(pos, dir) {
@@ -131,7 +157,7 @@ export class AmpCarousel extends BaseCarousel {
 
   /**
    * @param {number} pos
-   * @param {function()} callback
+   * @param {function(!Element)} callback
    * @private
    */
   withinWindow_(pos, callback) {
@@ -193,17 +219,6 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @override */
   setupGestures() {
-    /** @private {number} */
-    this.startPos_ = 0;
-    /** @private {number} */
-    this.minPos_ = 0;
-    /** @private {number} */
-    this.maxPos_ = 0;
-    /** @private {number} */
-    this.extent_ = 0;
-    /** @private {?Motion} */
-    this.motion_ = null;
-
     const gestures = Gestures.get(this.element);
     gestures.onGesture(SwipeXRecognizer, e => {
       if (e.data.first) {
@@ -223,7 +238,7 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!Swipe} unusedSwipe
+   * @param {!../../../src/gesture-recognizers.SwipeDef} unusedSwipe
    * @private
    */
   onSwipeStart_(unusedSwipe) {
@@ -233,12 +248,14 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!Swipe} swipe
+   * @param {!../../../src/gesture-recognizers.SwipeDef} swipe
    * @private
    */
   onSwipe_(swipe) {
+     /** @const {!Element} */
+    const container = dev().assertElement(this.container_);
     this.pos_ = this.boundPos_(this.startPos_ - swipe.deltaX, true);
-    st.setStyles(this.container_, {
+    st.setStyles(container, {
       transform: st.translateX(-this.pos_),
     });
     if (Math.abs(swipe.velocityX) < 0.05) {
@@ -247,12 +264,14 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!Swipe} swipe
+   * @param {!../../../src/gesture-recognizers.SwipeDef} swipe
    * @return {!Promise}
    * @private
    */
   onSwipeEnd_(swipe) {
     let promise;
+    /** @const {!Element} */
+    const container = dev().assertElement(this.container_);
     if (Math.abs(swipe.velocityX) > 0.1) {
       this.motion_ = continueMotion(this.element,
           this.pos_, 0, -swipe.velocityX, 0,
@@ -264,7 +283,7 @@ export class AmpCarousel extends BaseCarousel {
               return false;
             }
             this.pos_ = newPos;
-            st.setStyles(this.container_, {
+            st.setStyles(container, {
               transform: st.translateX(-this.pos_),
             });
             return true;
@@ -278,10 +297,11 @@ export class AmpCarousel extends BaseCarousel {
       if (Math.abs(newPos - this.pos_) < 1) {
         return undefined;
       }
+      /** @const {!TransitionDef<number>} */
       const posFunc = tr.numeric(this.pos_, newPos);
       return Animation.animate(this.element, time => {
         this.pos_ = posFunc(time);
-        st.setStyles(this.container_, {
+        st.setStyles(container, {
           transform: st.translateX(-this.pos_),
         });
       }, 250, bezierCurve(0.4, 0, 0.2, 1.4)).thenAlways();

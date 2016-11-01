@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   History,
   HistoryBindingNatural_,
   HistoryBindingVirtual_,
+  installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
+import {installTimerService} from '../../src/service/timer-impl';
+import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
 
@@ -45,7 +49,7 @@ describe('History', () => {
     };
     bindingMock = sandbox.mock(binding);
 
-    history = new History(window, binding);
+    history = new History(new AmpDocSingle(window), binding);
   });
 
   afterEach(() => {
@@ -109,15 +113,61 @@ describe('History', () => {
 });
 
 
-describe('HistoryBindingNatural', () => {
+describes.sandboxed('History install', {}, () => {
+  let win;
+  let ampdoc;
+  let viewer;
 
-  let sandbox;
+  beforeEach(() => {
+    viewer = {
+      isOvertakeHistory: () => false,
+      onHistoryPoppedEvent: () => function() {},
+    };
+
+    win = {
+      services: {
+        'viewer': {obj: viewer},
+        'timer': {obj: installTimerService(window)},
+      },
+      history: {
+        length: 0,
+      },
+      document: {
+        body: {},
+        querySelector: () => null,
+      },
+      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
+      addEventListener: () => null,
+    };
+    ampdoc = new AmpDocSingle(win);
+  });
+
+  it('should create natural binding and make it singleton', () => {
+    const history = installHistoryServiceForDoc(ampdoc);
+    expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
+    expect(win.services.history.obj).to.equal(history);
+    // Ensure that binding is installed as a singleton.
+    expect(win.services['global-history-binding'].obj)
+        .to.equal(history.binding_);
+  });
+
+  it('should create virtual binding', () => {
+    viewer.isOvertakeHistory = () => true;
+    const history = installHistoryServiceForDoc(ampdoc);
+    expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
+    expect(win.services.history.obj).to.equal(history);
+    // Ensure that the global singleton has not been created.
+    expect(win.services['global-history-binding']).to.not.exist;
+  });
+});
+
+
+describes.sandboxed('HistoryBindingNatural', {}, () => {
   let clock;
   let onStackIndexUpdated;
   let history;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     onStackIndexUpdated = sandbox.spy();
     history = new HistoryBindingNatural_(window);
@@ -126,7 +176,6 @@ describe('HistoryBindingNatural', () => {
 
   afterEach(() => {
     history.cleanup_();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
@@ -185,6 +234,7 @@ describe('HistoryBindingNatural', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
     };
+    installTimerService(windowStub);
     new HistoryBindingNatural_(windowStub);
     expect(replaceStateSpy.callCount).to.be.greaterThan(0);
     expect(replaceStateSpy.lastCall.args.length).to.equal(2);

@@ -16,6 +16,8 @@
 
 
 import {Timer} from '../src/timer';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {
@@ -23,6 +25,7 @@ import {
   installRuntimeServices,
   registerForUnitTest,
 } from '../src/runtime';
+import {installStyles} from '../src/style-installer';
 import {cssText} from '../build/css';
 
 let iframeCount = 0;
@@ -61,7 +64,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:attached': 0,
       'amp:error': 0,
       'amp:stubbed': 0,
-      'amp:load:start': 0
+      'amp:load:start': 0,
     };
     const messages = [];
     let html = __html__[fixture];
@@ -185,6 +188,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
+ *   ampdoc: !../src/service/ampdoc-impl.AmpDoc,
  *   iframe: !Element,
  *   addElement: function(!Element):!Promise
  * }>}
@@ -194,8 +198,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
-        '<style>.-amp-element {display: block;}</style>' +
-        '<body style="margin:0"><div id=parent></div>';
+        '<body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST_IFRAME = true;
@@ -206,40 +209,42 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
+      installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
-      resolve({
-        win: iframe.contentWindow,
-        doc: iframe.contentWindow.document,
-        iframe: iframe,
-        addElement: function(element) {
-          const iWin = iframe.contentWindow;
-          const p = onInsert(iWin).then(() => {
-            // Make sure it has dimensions since no styles are available.
-            element.style.display = 'block';
-            element.build(true);
-            if (!element.getPlaceholder()) {
-              const placeholder = element.createPlaceholder();
-              if (placeholder) {
-                element.appendChild(placeholder);
+      installStyles(iframe.contentWindow.document, cssText, () => {
+        resolve({
+          win: iframe.contentWindow,
+          doc: iframe.contentWindow.document,
+          ampdoc: ampdoc,
+          iframe: iframe,
+          addElement: function(element) {
+            const iWin = iframe.contentWindow;
+            const p = onInsert(iWin).then(() => {
+              element.build(true);
+              if (!element.getPlaceholder()) {
+                const placeholder = element.createPlaceholder();
+                if (placeholder) {
+                  element.appendChild(placeholder);
+                }
               }
-            }
-            if (element.layoutCount_ == 0) {
-              if (opt_beforeLayoutCallback) {
-                opt_beforeLayoutCallback(element);
+              if (element.layoutCount_ == 0) {
+                if (opt_beforeLayoutCallback) {
+                  opt_beforeLayoutCallback(element);
+                }
+                return element.layoutCallback().then(() => {
+                  return element;
+                });
               }
-              return element.layoutCallback().then(() => {
-                return element;
-              });
-            }
-            return element;
-          });
-          iWin.document.getElementById('parent')
-              .appendChild(element);
-          return p;
-        }
+              return element;
+            });
+            iWin.document.getElementById('parent')
+                .appendChild(element);
+            return p;
+          },
+        });
       });
     };
     iframe.onerror = reject;
@@ -283,16 +288,11 @@ const IFRAME_STUB_URL =
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
  * @param win {!Window}
- * @param opt_beforeAttachToDom {function(!HTMLIFrameElement)=}
- * @returns {!Promise<!HTMLIFrameElement>}
+ * @returns {!HTMLIFrameElement}
  */
-export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
+export function createIframeWithMessageStub(win) {
   const element = win.document.createElement('iframe');
   element.src = IFRAME_STUB_URL;
-  if (opt_beforeAttachToDom) {
-    opt_beforeAttachToDom(element);
-  }
-  win.document.body.appendChild(element);
 
   /**
    * Instructs the iframe to send a message to parent window.
@@ -324,12 +324,7 @@ export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
       win.addEventListener('message', listener);
     });
   };
-
-  return new Promise(resolve => {
-    element.onload = () => {
-      resolve(element);
-    };
-  });
+  return element;
 }
 
 /**
@@ -422,7 +417,7 @@ export function expectBodyToBecomeVisible(win) {
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  });
+  }, undefined, 5000);
 }
 
 /**

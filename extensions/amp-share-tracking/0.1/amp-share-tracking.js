@@ -16,7 +16,7 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {xhrFor} from '../../../src/xhr';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
@@ -33,6 +33,21 @@ const SHARE_TRACKING_NUMBER_OF_BYTES = 6;
  * @visibleForTesting
  */
 export class AmpShareTracking extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.vendorHref_ = '';
+
+    /** @private {?Promise<!Object<string, string>>} */
+    this.shareTrackingFragments_ = null;
+
+    /** @private {string} */
+    this.originalViewerFragment_ = '';
+  }
+
   /**
     * @return {boolean}
     * @private
@@ -54,21 +69,24 @@ export class AmpShareTracking extends AMP.BaseElement {
       user().assert(false, `${TAG} experiment is disabled`);
     }
 
-    /** @private {string} */
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    /** @private {!Promise<!Object<string, string>>} */
-    this.shareTrackingFragments_ = Promise.all([
-      this.getIncomingFragment_(),
-      this.getOutgoingFragment_()]).then(results => {
-        dev().fine(TAG, 'incomingFragment: ', results[0]);
-        dev().fine(TAG, 'outgoingFragment: ', results[1]);
-        return {
-          incomingFragment: results[0],
-          outgoingFragment: results[1],
-        };
-      });
+    this.shareTrackingFragments_ = Promise.all(
+      [this.getIncomingFragment_(), this.getOutgoingFragment_()]
+    ).then(results => {
+      const incomingFragment = results[0];
+      const outgoingFragment = results[1];
+      dev().fine(TAG, 'incomingFragment: ', incomingFragment);
+      dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
+      if (outgoingFragment) {
+        const newFragment = this.getNewViewerFragment_(incomingFragment,
+            outgoingFragment);
+        // Update the viewer fragment with leading '#'
+        viewerForDoc(this.getAmpDoc()).updateFragment('#' + newFragment);
+      }
+      return {incomingFragment, outgoingFragment};
+    });
 
     getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);
   }
@@ -79,12 +97,26 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getIncomingFragment_() {
-    dev().fine(TAG, 'getting incoming fragment');
-    return viewerFor(this.win).getFragment().then(fragment => {
-      const match = fragment.match(/\.([^&]*)/);
+    return this.getOriginalViewerFragment_().then(fragment => {
+      // The share tracking fragment should be the first parameter and start
+      // with dot in the url fragment
+      const match = fragment.match(/^\.([^&]*)/);
       return match ? match[1] : '';
     });
   }
+
+  /**
+   * Get the original url fragment from the viewer
+   * @return {!Promise<string>}
+   * @private
+   */
+  getOriginalViewerFragment_() {
+    return viewerForDoc(this.getAmpDoc()).getFragment().then(fragment => {
+      this.originalViewerFragment_ = fragment;
+      return fragment;
+    });
+  }
+
 
   /**
    * Get an outgoing share-tracking fragment
@@ -92,7 +124,6 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getOutgoingFragment_() {
-    dev().fine(TAG, 'getting outgoing fragment');
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
@@ -131,7 +162,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * Get a random bytes array that has 48 bits (6 bytes).
    * Use win.crypto.getRandomValues if it is available.
    * Otherwise, use Math.random as fallback.
-   * @return {!Promise<string>}
+   * @return {!Uint8Array}
    * @private
    */
   getShareTrackingRandomBytes_() {
@@ -151,6 +182,34 @@ export class AmpShareTracking extends AMP.BaseElement {
     }
     return bytes;
   }
+
+  /**
+   * Generate the new url fragment by replacing incoming share tracking fragment
+   * with outgoing share tracking fragment.
+   * The original fragment is not modified.
+   * @param {string} incomingFragment
+   * @param {string} outgoingFragment
+   * @return {string}
+   * @private
+   */
+  getNewViewerFragment_(incomingFragment, outgoingFragment) {
+    const fragmentResidual = incomingFragment ?
+        this.originalViewerFragment_.substr(incomingFragment.length + 1) :
+        this.originalViewerFragment_;
+    let result = '.' + outgoingFragment;
+    if (fragmentResidual) {
+      if (fragmentResidual[0] != '&') {
+        result += '&';
+      }
+      result += fragmentResidual;
+    }
+    return result;
+  }
+
 }
 
-AMP.registerElement('amp-share-tracking', AmpShareTracking);
+
+// Install the extension.
+AMP.extension('amp-share-tracking', AMP => {
+  AMP.registerElement('amp-share-tracking', AmpShareTracking);
+});

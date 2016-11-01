@@ -15,10 +15,12 @@
  */
 
 import {Layout} from './layout';
-import {preconnectFor} from './preconnect';
-import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {loadPromise} from './event-helper';
+import {preconnectForElement} from './preconnect';
+import {isArray} from './types';
+import {viewportForDoc} from './viewport';
 import {vsyncFor} from './vsync';
+import {user} from './log';
 
 
 /**
@@ -113,10 +115,10 @@ import {vsyncFor} from './vsync';
 export class BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-    /** @public @const */
+    /** @public @const {!Element} */
     this.element = element;
     /*
-         \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+    \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
       \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
@@ -137,14 +139,17 @@ export class BaseElement {
     /** @package {boolean} */
     this.inViewport_ = false;
 
-    /** @public @const {!Window}  */
+    /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
-    this.actionMap_ = this.win.Object.create(null);
+    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectFor(this.win);
+    this.preconnect = preconnectForElement(this.element);
+
+    /** @public {?Object} For use by sub classes */
+    this.config = null;
   }
 
   /**
@@ -163,11 +168,28 @@ export class BaseElement {
   }
 
   /**
+   * Returns a previously measured layout box of the element.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getLayoutBox() {
+    return this.element.getLayoutBox();
+  }
+
+  /**
    * DO NOT CALL. Retained for backward compat during rollout.
    * @public @return {!Window}
    */
   getWin() {
     return this.win;
+  }
+
+  /**
+   * Returns the associated ampdoc. Only available when `buildCallback` and
+   * going forward. It throws an exception before `buildCallback`.
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   */
+  getAmpDoc() {
+    return this.element.getAmpDoc();
   }
 
   /** @public @return {!./service/vsync-impl.Vsync} */
@@ -418,12 +440,33 @@ export class BaseElement {
   }
 
   /**
+   * Returns a promise that will resolve or fail based on the element's 'load'
+   * and 'error' events. Optionally this method takes a timeout, which will reject
+   * the promise if the resource has not loaded by then.
+   * @param {T} element
+   * @param {number=} opt_timeout
+   * @return {!Promise<T>}
+   * @template T
+   * @final
+   */
+  loadPromise(element, opt_timeout) {
+    return loadPromise(element, opt_timeout);
+  }
+
+  initActionMap_() {
+    if (!this.actionMap_) {
+      this.actionMap_ = this.win.Object.create(null);
+    }
+  }
+
+  /**
    * Registers the action handler for the method with the specified name.
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @public
    */
   registerAction(method, handler) {
+    this.initActionMap_();
     this.actionMap_[method] = handler;
   }
 
@@ -441,10 +484,10 @@ export class BaseElement {
     if (invocation.method == 'activate') {
       this.activate(invocation);
     } else {
+      this.initActionMap_();
       const handler = this.actionMap_[invocation.method];
-      if (!handler) {
-        throw new Error(`Method not found: ${invocation.method}`);
-      }
+      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+          this);
       handler(invocation);
     }
   }
@@ -468,17 +511,34 @@ export class BaseElement {
   /**
    * Utility method that propagates attributes from this element
    * to the given element.
-   * @param  {!Array<string>} attributes
+   * @param  {string|!Array<string>} attributes
    * @param  {!Element} element
    * @public @final
    */
   propagateAttributes(attributes, element) {
+    attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
       if (!this.element.hasAttribute(attr)) {
         continue;
       }
       element.setAttribute(attr, this.element.getAttribute(attr));
+    }
+  }
+
+  /**
+   * Utility method that forwards the given list of non-bubbling events
+   * from the given element to this element as custom events with the same name.
+   * @param  {string|!Array<string>} events
+   * @param  {!Element} element
+   * @public @final
+   */
+  forwardEvents(events, element) {
+    events = isArray(events) ? events : [events];
+    for (let i = 0; i < events.length; i++) {
+      element.addEventListener(events[i], event => {
+        this.element.dispatchCustomEvent(events[i], event.data || {});
+      });
     }
   }
 
@@ -573,16 +633,16 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportFor(this.win);
+    return viewportForDoc(this.getAmpDoc());
   }
 
- /**
-  * Returns a previously measured layout box of the element.
-  * @return {!./layout-rect.LayoutRectDef}
-  */
+  /**
+   * Returns the layout rectangle of the element used for reporting this
+   * element's intersection with the viewport.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
   getIntersectionElementLayoutBox() {
-    return this.element.getResources().getResourceForElement(
-        this.element).getLayoutBox();
+    return this.getLayoutBox();
   }
 
   /**
@@ -721,26 +781,6 @@ export class BaseElement {
    */
   deferMutate(callback) {
     this.element.getResources().deferMutate(this.element, callback);
-  }
-
-  /**
-   * Requests full overlay mode from the viewer.
-   * @public
-   * @deprecated Use `Viewport.enterLightboxMode`.
-   * TODO(dvoytenko, #3406): Remove as deprecated.
-   */
-  requestFullOverlay() {
-    viewerFor(this.win).requestFullOverlay();
-  }
-
-  /**
-   * Requests to cancel full overlay mode from the viewer.
-   * @public
-   * @deprecated Use `Viewport.leaveLightboxMode`.
-   * TODO(dvoytenko, #3406): Remove as deprecated.
-   */
-  cancelFullOverlay() {
-    viewerFor(this.win).cancelFullOverlay();
   }
 
   /**

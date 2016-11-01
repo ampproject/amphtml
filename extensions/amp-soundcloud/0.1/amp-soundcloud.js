@@ -29,15 +29,25 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 
 class AmpSoundcloud extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://api.soundcloud.com/', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://api.soundcloud.com/', opt_onLayout);
   }
 
   /** @override */
@@ -81,10 +91,9 @@ class AmpSoundcloud extends AMP.BaseElement {
     iframe.height = height;
     this.element.appendChild(iframe);
 
-    /** @private {?Element} */
     this.iframe_ = iframe;
 
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

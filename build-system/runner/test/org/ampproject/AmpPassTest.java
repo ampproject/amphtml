@@ -2,6 +2,8 @@
 package org.ampproject;
 
 
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
@@ -16,47 +18,27 @@ import com.google.javascript.rhino.Node;
  */
 public class AmpPassTest extends Es6CompilerTestCase {
 
-  ImmutableSet<String> suffixTypes = ImmutableSet.of(
-      "dev.fine");
+  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
+      "module$src$log.dev",
+          ImmutableSet.of("assert", "fine", "assertElement", "assertString", "assertNumber"),
+      "module$src$log.user", ImmutableSet.of("fine"));
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
+      "IS_MINIFIED",
+      IR.trueNode());
+
+  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
       "IS_DEV",
       IR.falseNode());
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements);
+    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements,
+        prodAssignmentReplacements);
   }
 
   @Override protected int getNumRepetitions() {
     // This pass only runs once.
     return 1;
-  }
-
-  public void testDevFineRemovalDeprecated() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
-             "  log.dev.fine('hello world');",
-             "  console.log('this is preserved');",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
-             "  console.log('this is preserved');",
-            "})()"));
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
-             "  log.dev.fine();",
-             "  console.log('this is preserved');",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { fine: function() {} } };",
-             "  console.log('this is preserved');",
-            "})()"));
   }
 
   public void testDevFineRemoval() throws Exception {
@@ -103,35 +85,6 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testDevAssertExpressionRemovalDeprecated() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  log.dev.assert('hello world');",
-             "  console.log('this is preserved');",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "\"hello world\";",
-             "  console.log('this is preserved');",
-            "})()"));
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert();",
-             "  console.log('this is preserved', someValue);",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue;",
-             "  console.log('this is preserved', someValue);",
-            "})()"));
-  }
-
   public void testDevAssertExpressionRemoval() throws Exception {
     test(
         LINE_JOINER.join(
@@ -161,22 +114,6 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testDevAssertPreserveFirstArgDeprecated() throws Exception {
-    test(
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert(true, 'This is an error');",
-             "  console.log('this is preserved', someValue);",
-            "})()"),
-        LINE_JOINER.join(
-             "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = true;",
-             "  console.log('this is preserved', someValue);",
-            "})()"));
-  }
-
   public void testDevAssertPreserveFirstArg() throws Exception {
     test(
         LINE_JOINER.join(
@@ -191,21 +128,20 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "  var someValue = true;",
              "  console.log('this is preserved', someValue);",
             "})()"));
-  }
 
-  public void testShouldPreserveNoneCallsDeprecated() throws Exception {
     test(
-        // Does reliasing
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert;",
+             "  function add(a, b) { return a + b; }",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = add(module$src$log.dev().assert(3), module$src$log.dev().assert(3));",
              "  console.log('this is preserved', someValue);",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "  var log = { dev: { assert: function() {} } };",
-             "  var someValue = log.dev.assert;",
+             "  function add(a, b) { return a + b; }",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = add(3, 3);",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }
@@ -373,12 +309,50 @@ public class AmpPassTest extends Es6CompilerTestCase {
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = true;",
+             "const IS_MINIFIED = false;",
              "const IS_SOMETHING = true;",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = false;",
+             "const IS_MINIFIED = true;",
              "const IS_SOMETHING = true;",
             "})()"));
+  }
+
+  public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
+    testEs6(
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "self.AMP.extension('hello', function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "});",
+            "console.log(a);"),
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "(function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "})(self.AMP);",
+            "console.log(a);"));
+  }
+
+  public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
+    testEs6(
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "AMP.extension('hello', function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "});",
+            "console.log(a);"),
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "(function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "})(self.AMP);",
+            "console.log(a);"));
   }
 }
