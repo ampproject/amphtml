@@ -24,7 +24,7 @@
 const env = self.AMP_CONFIG || {};
 
 const thirdPartyFrameRegex = typeof env['thirdPartyFrameRegex'] == 'string' ?
-    new RegExp(env['thirdPartyFrameRegex']) : '';
+    new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex'];
 
 /** @type {!Object<string, string|boolean|RegExp>} */
 export const urls = {
@@ -34,5 +34,5 @@ export const urls = {
   cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
   errorReporting: env['errorReportingUrl'] ||
       'https://amp-error-reporting.appspot.com/r',
-  localDev: env['localDev'] || false
+  localDev: env['localDev'] || false,
 };
