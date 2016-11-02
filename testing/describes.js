@@ -27,7 +27,7 @@ import {
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-  registerForUnitTest,
+  registerElementForTesting,
 } from '../src/runtime';
 import {cssText} from '../build/css';
 import {installDocService} from '../src/service/ampdoc-impl';
@@ -162,6 +162,7 @@ function describeEnv(factory) {
       const env = Object.create(null);
 
       beforeEach(() => {
+        console.log('beforeEach hook');
         let totalPromise = undefined;
         // Set up all fixtures.
         fixtures.forEach((fixture, index) => {
@@ -430,13 +431,14 @@ class AmpFixture {
     if (spec.extensions) {
       spec.extensions.forEach(extensionId => {
         const installer = extensionsBuffer[extensionId];
-        if (!installer) {
-          throw new Error('extension not found: ', extensionId);
+        if (installer) {
+          installer(win.AMP);
+        } else {
+          resetScheduledElementForTesting(win, extensionId);
+          registerElementForTesting(win, extensionId);
         }
-        installer(win.AMP);
       });
     }
-
     return completePromise;
   }
 
@@ -447,6 +449,11 @@ class AmpFixture {
       for (const k in win.customElements.elements) {
         resetScheduledElementForTesting(win, k);
       }
+    }
+    if (this.spec.amp.extensions) {
+      this.spec.amp.extensions.forEach(extensionId => {
+        resetScheduledElementForTesting(win, extensionId);
+      });
     }
   }
 }

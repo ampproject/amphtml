@@ -840,3 +840,19 @@ export function registerForUnitTest(win) {
     }
   }
 }
+
+
+/**
+ * Registers a specific element for testing.
+ * @param {!Window} win
+ * @param {string} elementName
+ * @visibleForTesting
+ */
+export function registerElementForTesting(win, elementName) {
+  const element = elementsForTesting[elementName];
+  if (!element) {
+    throw new Error('test element not found: ' + elementName);
+  }
+  win.AMP.registerElement(element.name, element.implementationClass,
+      element.css);
+}
