@@ -25,7 +25,7 @@
   opacity: 1 !important;
 }
 
-.amp-apester-loader {
+.amp-apester-loader amp-img {
   height: 100px;
   width: 100px;
   top: 50%;
@@ -34,7 +34,7 @@
   margin-top: -22px;
 }
 
-.amp-apester-loader-container {
+.amp-apester-loader {
   background-color: white;
 }
 
