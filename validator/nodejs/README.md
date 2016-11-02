@@ -57,3 +57,7 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.13
 * Added newInstance method, a simple API that's not async.
+
+### 1.0.15
+* Added support for installing on Windows.
+  `npm install -g amphtml-validator` should now just work.
