@@ -201,7 +201,10 @@ export const adConfig = {
 
   holder: {
     prefetch: 'https://i.banner.mi6/banners/amp/holderamp.js',
-    preconnect: 'https://h.holder.com.ua',
+    preconnect: [
+	  'https://h.holder.com.ua',
+	  'https://i.holder.com.ua',
+	],
   },  
   
   ibillboard: {},
