@@ -54,6 +54,7 @@ export const adConfig = {
       'https://staticd.cdn.adblade.com',
       'https://static.adblade.com',
     ],
+    renderStartImplemented: true,
   },
 
   adform: {},
@@ -214,6 +215,7 @@ export const adConfig = {
       'https://staticd.cdn.industrybrains.com',
       'https://static.industrybrains.com',
     ],
+    renderStartImplemented: true,
   },
 
   inmobi: {
