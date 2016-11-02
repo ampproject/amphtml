@@ -153,6 +153,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
     html += '<script>parent.afterLoad(window);</script>';
     let iframe = document.createElement('iframe');
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      iframe.setAttribute('scrolling', 'no');
+    }
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
       reject(event.error);
