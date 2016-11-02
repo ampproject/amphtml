@@ -101,8 +101,8 @@ runner.run('Cache SW', () => {
     describe('with RTVless file', () => {
       const v0 = 'https://cdn.ampproject.org/v0.js';
       const v1 = 'https://cdn.ampproject.org/v1.js';
-      const comp = 'https://cdn.ampproject.org/v0/amp-comp.js';
-      const v1comp = 'https://cdn.ampproject.org/v1/amp-comp.js';
+      const comp = 'https://cdn.ampproject.org/v0/amp-comp-0.1.js';
+      const v1comp = 'https://cdn.ampproject.org/v1/amp-comp-0.1.js';
 
       it('rewrites v0 to versioned v0', () => {
         expect(sw.urlWithVersion(v0, '123')).to.equal(
@@ -116,20 +116,20 @@ runner.run('Cache SW', () => {
 
       it('rewrites comp to versioned comp', () => {
         expect(sw.urlWithVersion(comp, '123')).to.equal(
-            'https://cdn.ampproject.org/rtv/123/v0/amp-comp.js');
+            'https://cdn.ampproject.org/rtv/123/v0/amp-comp-0.1.js');
       });
 
       it('rewrites v1 comp to versioned v1 comp', () => {
         expect(sw.urlWithVersion(v1comp, '123')).to.equal(
-            'https://cdn.ampproject.org/rtv/123/v1/amp-comp.js');
+            'https://cdn.ampproject.org/rtv/123/v1/amp-comp-0.1.js');
       });
     });
 
     describe('with RTV versioned file', () => {
       const v0 = `https://cdn.ampproject.org/rtv/${rtv}/v0.js`;
       const v1 = `https://cdn.ampproject.org/rtv/${rtv}/v1.js`;
-      const comp = `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp.js`;
-      const v1comp = `https://cdn.ampproject.org/rtv/${rtv}/v1/amp-comp.js`;
+      const comp = `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp-0.1.js`;
+      const v1comp = `https://cdn.ampproject.org/rtv/${rtv}/v1/amp-comp-0.1.js`;
 
       it('rewrites versioned v0 to other version', () => {
         expect(sw.urlWithVersion(v0, '123')).to.equal(
@@ -144,13 +144,13 @@ runner.run('Cache SW', () => {
 
       it('rewrites versioned comp to other version', () => {
         expect(sw.urlWithVersion(comp, '123')).to.equal(
-            'https://cdn.ampproject.org/rtv/123/v0/amp-comp.js');
+            'https://cdn.ampproject.org/rtv/123/v0/amp-comp-0.1.js');
       });
 
       // When we finally release AMP v1
       it.skip('rewrites versioned v1 comp to other version', () => {
         expect(sw.urlWithVersion(v1comp, '123')).to.equal(
-            'https://cdn.ampproject.org/rtv/123/v1/amp-comp.js');
+            'https://cdn.ampproject.org/rtv/123/v1/amp-comp-0.1.js');
       });
     });
   });
@@ -163,10 +163,14 @@ runner.run('Cache SW', () => {
     });
 
     it('matches for CDN JS extension files', () => {
-      const url = `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp.js`;
-      const rtvless = `https://cdn.ampproject.org/v0/amp-comp.js`;
+      const url = `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp-0.1.js`;
+      const rtvless = `https://cdn.ampproject.org/v0/amp-comp-0.1.js`;
+      const versioned = `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp-0.1.js`;
+      const rtvlessVersioned = `https://cdn.ampproject.org/v0/amp-comp-0.1.js`;
       expect(sw.isCdnJsFile(url)).to.be.true;
       expect(sw.isCdnJsFile(rtvless)).to.be.true;
+      expect(sw.isCdnJsFile(versioned)).to.be.true;
+      expect(sw.isCdnJsFile(rtvlessVersioned)).to.be.true;
     });
 
     it('does not match for experiments.js', () => {
@@ -218,7 +222,7 @@ runner.run('Cache SW', () => {
       cache.cached.push(
         [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, null],
         // A different file
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp.js`}, null]
+        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, null]
       );
       fetch = sandbox.stub(window, 'fetch', () => {
         return Promise.resolve(response);
@@ -322,9 +326,9 @@ runner.run('Cache SW', () => {
 
     beforeEach(() => {
       request = new Request(url);
-      compRequest = new Request(`https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp.js`);
-      prevRequest = new Request(`https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp.js`);
-      blacklistedRequest = new Request(`https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0/amp-comp.js`);
+      compRequest = new Request(`https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp-0.1.js`);
+      prevRequest = new Request(`https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`);
+      blacklistedRequest = new Request(`https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0/amp-comp-0.1.js`);
 
       clientId++;
       fetch = sandbox.stub(window, 'fetch', req => {
@@ -449,7 +453,7 @@ runner.run('Cache SW', () => {
 
         it('updates cached file if new one is the latest RTV', () => {
           const prodRequest = new Request(
-              `https://cdn.ampproject.org/rtv/${prodRtv}/v0/amp-comp.js`);
+              `https://cdn.ampproject.org/rtv/${prodRtv}/v0/amp-comp-0.1.js`);
           return sw.handleFetch(prodRequest, clientId).then(() => {
             return new Promise(resolve => {
               // Update is out of band with response.
