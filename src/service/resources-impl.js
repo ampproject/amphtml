@@ -345,7 +345,6 @@ export class Resources {
     if (!element.id) {
       element.id = 'AMP_' + resource.getId();
     }
-    element.ampResourceId = resource.getId();
 
     this.resources_.push(resource);
     this.buildOrScheduleBuildForResource_(resource);

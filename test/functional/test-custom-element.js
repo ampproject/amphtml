@@ -275,6 +275,9 @@ describe('CustomElement', () => {
     expect(testElementCreatedCallback.callCount).to.equal(1);
     expect(element.isUpgraded()).to.equal(true);
     expect(build.calledOnce);
+
+    expect(element.getResourceId())
+        .to.equal(resources.getResourceForElement(element).getId());
   });
 
   it('StubElement - createdCallback', () => {
