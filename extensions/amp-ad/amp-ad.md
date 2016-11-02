@@ -93,6 +93,8 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdStir](../../ads/adstir.md)
 - [AdTech](../../ads/adtech.md)
 - [Ad Up Technology](../../ads/aduptech.md)
+- [Adverline](../../ads/adverline.md)
+- [AdvertServe](../../ads/advertserve.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
@@ -110,10 +112,13 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [GenieeSSP](../../ads/genieessp.md)
 - [GMOSSP](../../ads/gmossp.md)
 - [I-Mobile](../../ads/imobile.md)
+- [iBillboard](../../ads/ibillboard.md)
 - [Improve Digital](../../ads/improvedigital.md)
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
 - [Kargo](../../ads/kargo.md)
+- [Kixer](../../ads/kixer.md)
+- [Ligatus](../../ads/ligatus.md)
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
@@ -123,16 +128,19 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Mixpo](../../ads/mixpo.md)
 - [Nativo](../../ads/nativo.md)
 - [Nend](../../ads/nend.md)
+- [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [plista](../../ads/plista.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)
+- [Purch](../../ads/purch.md)
 - [Revcontent](../../ads/revcontent.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Smart AdServer](../../ads/smartadserver.md)
+- [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
 - [Teads](../../ads/teads.md)
@@ -140,10 +148,13 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)
+- [Xlift](../../ads/xlift.md)
+- [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
 
 ## Supported embed types
@@ -203,6 +214,17 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 
 - If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
+
+## Serving video ads
+AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here] (../README.md#audiovideo).
+
+If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+
+When using `amp-iframe` approach:
+ - Make sure there is a poster if loading the player in the first viewport. [Details](../amp-iframe/amp-iframe.md#iframe-with-placeholder).
+ - Video and poster have to be served over HTTPS.
+
+
 ## Running ads from a custom domain
 
 AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
@@ -213,7 +235,7 @@ To enable this, copy the file [remote.html](../../3p/remote.html) to your web se
 <meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
 ```
 
-The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK. See the doc ["Iframe origin policy"](../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but e.g. `something-else.example.com` is OK. See the doc ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
 ### Security
 

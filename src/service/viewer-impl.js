@@ -16,11 +16,14 @@
 
 import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
-import {getMode} from '../mode';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
-import {parseQueryString, parseUrl, removeFragment} from '../url';
-import {platformFor} from '../platform';
+import {
+  getSourceUrl,
+  parseQueryString,
+  parseUrl,
+  removeFragment,
+} from '../url';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
@@ -39,29 +42,6 @@ const SENTINEL_ = '__AMP__';
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
 
 /**
- * The type of the viewport.
- * @enum {string}
- */
-export const ViewportType = {
-
-  /**
-   * Viewer leaves sizing and scrolling up to the AMP document's window.
-   */
-  NATURAL: 'natural',
-
-  /**
-   * This is AMP-specific type and doesn't come from viewer. This is the type
-   * that AMP sets when Viewer has requested "natural" viewport on a iOS
-   * device.
-   * See:
-   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
-   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
-   */
-  NATURAL_IOS_EMBED: 'natural-ios-embed',
-};
-
-
-/**
  * These domains are trusted with more sensitive viewer operations such as
  * propagating the referrer. If you believe your domain should be here,
  * file the issue on GitHub to discuss. The process will be similar
@@ -70,7 +50,7 @@ export const ViewportType = {
  *
  * @export {!Array<!RegExp>}
  */
-export const TRUSTED_VIEWER_HOSTS = [
+const TRUSTED_VIEWER_HOSTS = [
   /**
    * Google domains, including country-codes and subdomains:
    * - google.com
@@ -78,13 +58,15 @@ export const TRUSTED_VIEWER_HOSTS = [
    * - google.co
    * - www.google.co
    * - google.az
-   * - www.google..az
+   * - www.google.az
    * - google.com.az
    * - www.google.com.az
    * - google.co.az
    * - www.google.co.az
+   * - google.cat
+   * - www.google.cat
    */
-  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2})$/,
+  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
 
 
@@ -128,9 +110,6 @@ export class Viewer {
 
     /** @private {number} */
     this.prerenderSize_ = 1;
-
-    /** @private {!ViewportType} */
-    this.viewportType_ = ViewportType.NATURAL;
 
     /** @private {number} */
     this.paddingTop_ = 0;
@@ -216,22 +195,6 @@ export class Viewer {
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
-    this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
-    // Configure scrolling parameters when AMP is iframed on iOS.
-    const platform = platformFor(this.win);
-    if (this.viewportType_ == ViewportType.NATURAL && this.isIframed_ &&
-            platform.isIos()) {
-      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
-    }
-    // Enable iOS Embedded mode so that it's easy to test against a more
-    // realistic iOS environment.
-    if (platform.isIos() &&
-            this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
-            (getMode(this.win).localDev || getMode(this.win).development)) {
-      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
-    }
-    dev().fine(TAG_, '- viewportType:', this.viewportType_);
-
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
     dev().fine(TAG_, '- padding-top:', this.paddingTop_);
@@ -241,12 +204,23 @@ export class Viewer {
     dev().fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
     /**
-     * Whether the AMP document is embedded in a viewer, such as an iframe or
-     * a web view.
+     * Whether the AMP document is embedded in a webview.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = (this.isIframed_ || this.params_['webview'] === '1') &&
-        !this.win.AMP_TEST_IFRAME;
+    this.isWebviewEmbedded_ = !this.isIframed_ &&
+        this.params_['webview'] == '1';
+
+    /**
+     * Whether the AMP document is embedded in a viewer, such as an iframe, or
+     * a web view, or a shadow doc in PWA.
+     * @private @const {boolean}
+     */
+    this.isEmbedded_ = (
+        // Checking param "origin", as we expect all viewers to provide it.
+        // See https://github.com/ampproject/amphtml/issues/4183
+        this.isIframed_ && !this.win.AMP_TEST_IFRAME && this.params_['origin']
+        || this.isWebviewEmbedded_
+        || !ampdoc.isSingleDoc());
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -293,7 +267,7 @@ export class Viewer {
       // Not embedded in IFrame - can't trust the viewer.
       trustedViewerResolved = false;
       trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins) {
+    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
@@ -628,15 +602,6 @@ export class Viewer {
   }
 
   /**
-   * See `ViewportType` enum for the set of allowed values.
-   * See {@link Viewport} and {@link ViewportBinding} for more details.
-   * @return {!ViewportType}
-   */
-  getViewportType() {
-    return this.viewportType_;
-  }
-
-  /**
    * Returns the top padding requested by the viewer.
    * @return {number}
    */
@@ -761,6 +726,7 @@ export class Viewer {
   postDocumentReady() {
     this.sendMessageUnreliable_('documentLoaded', {
       title: this.win.document.title,
+      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
     }, false);
   }
 
@@ -861,8 +827,38 @@ export class Viewer {
       return Promise.resolve('');
     }
     return this.sendMessageUnreliable_('fragment', undefined, true).then(
-      hash => hash || ''
-    );
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
+              'should start with #');
+          /* Strip leading '#' */
+          return hash.substr(1);
+        });
+  }
+
+  /**
+   * Update the fragment of the viewer if embedded in a viewer,
+   * otherwise update the page url fragment
+   * The fragment variable should contain leading '#'
+   * @param {string} fragment
+   * @return {!Promise}
+   */
+  updateFragment(fragment) {
+    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
+        'should start with #');
+    if (!this.isEmbedded_) {
+      if (this.win.history.replaceState) {
+        this.win.history.replaceState({}, '', fragment);
+      }
+      return Promise.resolve();
+    }
+    if (!this.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'fragment', {fragment}, true));
   }
 
   /**

@@ -114,12 +114,14 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Element Y](#element-y) | N/A | `${elementY}` |
 | [First Seen Time](#first-seen-time) | N/A | `${firstSeenTime}` |
 | [First Visible Time](#first-visible-time) | N/A | `${firstVisibleTime}` |
+| [From Slide](#from-slide) | N/A | `${fromSlide}` |
 | [Last Seen Time](#last-seen-time) | N/A | `${lastSeenTime}` |
 | [Last Visible Time](#last-visible-time) | N/A | `${lastVisibleTime}` |
 | [Load Time Visibility](#load-time-visibility) | N/A | `${loadTimeVisibility}` |
 | [Max Continuous Visible Time](#max-continuous-visible-time) | N/A | `${maxContinuousVisibleTime}` |
 | [Max Visible Percentage](#max-visible-percentage) | N/A | `${maxVisiblePercentage}` |
 | [Min Visible Percentage](#min-visible-percentage) | N/A | `${minVisiblePercentage}` |
+| [To Slide](#to-slide) | N/A | `${toSlide}` |
 | [Total Time](#total-time) | N/A | `${totalTime}` |
 | [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
 
@@ -409,14 +411,14 @@ Provides the width of the element specified by `visibilitySpec`.
 
 #### Element X
 
-Provides the X coordinate of the left edge of the element specified by `visibilitySpec`.
+Provides the absolute X coordinate of the left edge of the element specified by `visibilitySpec`.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${elementX}`
 
 #### Element Y
 
-Provides the Y coordinate of the top edge of the element specified by `visibilitySpec`.
+Provides the absolute Y coordinate of the top edge of the element specified by `visibilitySpec`.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${elementY}`
@@ -442,6 +444,13 @@ Provides the time when the element met visibility conditions for the first time 
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstVisibleTime}`
+
+#### From Slide
+
+Provides the slide from which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${fromSlide}`
 
 #### Horizontal Scroll Boundary
 
@@ -829,6 +838,13 @@ Provides the user's time-zone offset from UTC, in minutes.
   ```
 * **amp-analytics variable**: `${timezone}`
   * Example value: `480` for [Pacific Standard Time](https://en.wikipedia.org/wiki/Pacific_Time_Zone).
+
+#### To Slide
+
+Provides the slide to which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${toSlide}`
 
 #### Total Engaged Time
 

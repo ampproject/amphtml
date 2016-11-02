@@ -39,8 +39,8 @@ export class AmpList extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
-    if (!this.element.hasAttribute('role')) {
-      this.element.setAttribute('role', 'list');
+    if (!this.container_.hasAttribute('role')) {
+      this.container_.setAttribute('role', 'list');
     }
 
     /** @private @const {!UrlReplacements} */
@@ -60,7 +60,9 @@ export class AmpList extends AMP.BaseElement {
           }
           return xhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
-          user().assert(typeof data == 'object' && Array.isArray(data['items']),
+          user().assert(data != null
+              && typeof data == 'object'
+              && Array.isArray(data['items']),
               'Response must be {items: []} object %s %s',
               this.element, data);
           const items = data['items'];

@@ -19,6 +19,7 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/platform';
 import {timerFor} from '../../../../src/timer';
+import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
 
@@ -97,6 +98,21 @@ describe('amp-sidebar', () => {
     });
   });
 
+  it('should create an invisible close button for screen readers only', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const impl = sidebarElement.implementation_;
+      impl.close_ = sandbox.spy();
+      const closeButton = sidebarElement.lastElementChild;
+      expect(closeButton).to.exist;
+      expect(closeButton.tagName).to.equal('BUTTON');
+      assertScreenReaderElement(closeButton);
+      expect(impl.close_.callCount).to.equal(0);
+      closeButton.click();
+      expect(impl.close_.callCount).to.equal(1);
+    });
+  });
+
   it('should open sidebar on button click', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
@@ -127,6 +143,8 @@ describe('amp-sidebar', () => {
       impl.open_();
       expect(sidebarElement.hasAttribute('open')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.getAttribute('role')).to.equal('menu');
+      expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
       expect(sidebarElement.style.display).to.equal('');
       expect(impl.scheduleLayout.callCount).to.equal(1);
       expect(historyPushSpy.callCount).to.equal(1);
@@ -202,9 +220,12 @@ describe('amp-sidebar', () => {
       });
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+      expect(sidebarElement.getAttribute('role')).to.equal('menu');
+      expect(obj.iframe.doc.activeElement).to.not.equal(sidebarElement);
       impl.toggle_();
       expect(sidebarElement.hasAttribute('open')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
       expect(sidebarElement.style.display).to.equal('');
       expect(impl.scheduleLayout.callCount).to.equal(1);
       impl.toggle_();

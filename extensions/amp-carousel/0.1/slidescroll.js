@@ -21,6 +21,7 @@ import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
+import {platformFor} from '../../../src/platform';
 import {timerFor} from '../../../src/timer';
 import {dev} from '../../../src/log';
 
@@ -94,6 +95,11 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
     this.analyticsPromise_ = null;
+
+    const platform = platformFor(this.win);
+
+    /** @private @const {boolean} */
+    this.isAndroidFF_ = platform.isAndroid() && platform.isFirefox();
   }
 
   /** @override */
@@ -116,6 +122,10 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.slidesContainer_ = this.win.document.createElement('div');
     this.slidesContainer_.classList.add('-amp-slides-container');
+    // Let screen reader know that this is a live area and changes
+    // to it (such after pressing next) should be announced to the
+    // user.
+    this.slidesContainer_.setAttribute('aria-live', 'polite');
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
@@ -270,9 +280,6 @@ export class AmpSlideScroll extends BaseSlides {
       timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
-    // TODO (sriram): clear autoplay timer on user scroll.
-    //    event.isTarget is set on non-user scrolls as well.
-
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
     if (!this.hasNativeSnapPoints_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
@@ -408,13 +415,19 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      // Make the container non scrollable to stop scroll events.
-      this.slidesContainer_.classList.add('-amp-no-scroll');
+      //TODO (camelburrito): Identify more platforms that dont require
+      // -amp-no-scroll.
+      if (!this.isAndroidFF_) {
+        // Make the container non scrollable to stop scroll events.
+        this.slidesContainer_.classList.add('-amp-no-scroll');
+      }
       // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlide_(newIndex);
       this.vsync_.mutate(() => {
-        // Make the container scrollable again to enable user swiping.
-        this.slidesContainer_.classList.remove('-amp-no-scroll');
+        if (!this.isAndroidFF_) {
+          // Make the container scrollable again to enable user swiping.
+          this.slidesContainer_.classList.remove('-amp-no-scroll');
+        }
         this.snappingInProgress_ = false;
       });
     });

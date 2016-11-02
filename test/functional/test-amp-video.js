@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
 import {installVideo} from '../../builtins/amp-video';
-import {VideoEvents} from '../../src/video-interface';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
@@ -275,19 +273,6 @@ describe('amp-video', () => {
     });
   });
 
-  it('should dispatch VideoEvents.USER_TAP event when tapped', () => {
-    return getVideo({
-      src: 'video.mp4',
-      width: 160,
-      height: 90,
-    }).then(v => {
-      const video = v.querySelector('video');
-      const p = listenOncePromise(v, VideoEvents.USER_TAP);
-      video.dispatchEvent(new Event('click'));
-      return p;
-    });
-  });
-
   it('should fallback if video element is not supported', () => {
     return getVideo({
       src: 'video.mp4',
@@ -301,6 +286,22 @@ describe('amp-video', () => {
       const impl = v.implementation_;
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback.calledWith(true)).to.be.true;
+    });
+  });
+
+  it('should propagate ARIA attributes', () => {
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+      'aria-label': 'Hello',
+      'aria-labelledby': 'id2',
+      'aria-describedby': 'id3',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.getAttribute('aria-label')).to.equal('Hello');
+      expect(video.getAttribute('aria-labelledby')).to.equal('id2');
+      expect(video.getAttribute('aria-describedby')).to.equal('id3');
     });
   });
 });

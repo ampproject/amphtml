@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-import {FakeCustomElements, FakeWindow} from './fake-dom';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
+import {
+  FakeCustomElements,
+  FakeWindow,
+  interceptEventListeners,
+} from './fake-dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   adopt,
+  adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-  registerForUnitTest,
+  registerElementForTesting,
 } from '../src/runtime';
+import {cssText} from '../build/css';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
@@ -36,8 +44,23 @@ let iframeCount = 0;
 
 
 /**
+ * @const {!Object<string, function(!Object)>}
+ */
+const extensionsBuffer = {};
+
+
+/**
+ * @param {string} name
+ * @param {function(!Object)} installer
+ * @const
+ */
+export function bufferExtension(name, installer) {
+  extensionsBuffer[name] = installer;
+}
+
+
+/**
  * @typedef {{
- *   fakeClock: (boolean|undefined),
  *   fakeRegisterElement: (boolean|undefined),
  * }}
  */
@@ -49,7 +72,9 @@ export let TestSpec;
  *
  * @typedef {{
  *   runtimeOn: (boolean|undefined),
- *   ampdoc: (string),
+ *   extensions: (!Array<string>|undefined),
+ *   canonicalUrl: (string|undefined),
+ *   ampdoc: (string|undefined),
  *   params: (!Object<string, string>|undefined),
  * }}
  */
@@ -74,9 +99,7 @@ export let AmpTestEnv;
  * @param {!TestSpec} spec
  * @param {function()} fn
  */
-export function sandboxed(name, spec, fn) {
-  return describeEnv(name, fn, [new SandboxFixture(spec)]);
-}
+export const sandboxed = describeEnv(spec => []);
 
 
 /**
@@ -91,13 +114,10 @@ export function sandboxed(name, spec, fn) {
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export function fakeWin(name, spec, fn) {
-  return describeEnv(name, fn, [
-      new SandboxFixture(spec),
+export const fakeWin = describeEnv(spec => [
       new FakeWinFixture(spec),
       new AmpFixture(spec),
     ]);
-}
 
 
 /**
@@ -113,64 +133,87 @@ export function fakeWin(name, spec, fn) {
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export function realWin(name, spec, fn) {
-  return describeEnv(name, fn, [
-      new SandboxFixture(spec),
+export const realWin = describeEnv(spec => [
       new RealWinFixture(spec),
       new AmpFixture(spec),
     ]);
-}
 
 
 /**
  * A test with in a described environment.
- * @param {string} name
- * @param {function(!Object)} fn
- * @param {!Array<?Fixture>} fixtures
+ * @param {function(!Object):!Array<?Fixture>} factory
  */
-function describeEnv(name, fn, fixtures) {
-  return describe(name, function() {
-
-    const env = Object.create(null);
-
-    beforeEach(() => {
-      let totalPromise = undefined;
-      // Set up all fixtures.
-      fixtures.forEach((fixture, index) => {
-        if (!fixture || !fixture.isOn()) {
-          return;
-        }
-        if (totalPromise) {
-          totalPromise = totalPromise.then(() => fixture.setup(env));
-        } else {
-          const res = fixture.setup(env);
-          if (res && typeof res.then == 'function') {
-            totalPromise = res;
-          }
-        }
-      });
-      return totalPromise;
-    });
-
-    afterEach(() => {
-      // Tear down all fixtures.
-      fixtures.forEach(fixture => {
-        if (!fixture || !fixture.isOn()) {
-          return;
-        }
-        fixture.teardown(env);
-      });
-
-      // Delete all other keys.
-      for (const key in env) {
-        delete env[key];
+function describeEnv(factory) {
+  /**
+   * @param {string} name
+   * @param {!Object} spec
+   * @param {function(!Object)} fn
+   * @param {function(string, function())} describeFunc
+   */
+  const templateFunc = function(name, spec, fn, describeFunc) {
+    const fixtures = [new SandboxFixture(spec)];
+    factory(spec).forEach(fixture => {
+      if (fixture && fixture.isOn()) {
+        fixtures.push(fixture);
       }
     });
+    return describeFunc(name, function() {
 
-    describe(SUB, function() {
-      fn.call(this, env);
+      const env = Object.create(null);
+
+      beforeEach(() => {
+        let totalPromise = undefined;
+        // Set up all fixtures.
+        fixtures.forEach((fixture, index) => {
+          if (totalPromise) {
+            totalPromise = totalPromise.then(() => fixture.setup(env));
+          } else {
+            const res = fixture.setup(env);
+            if (res && typeof res.then == 'function') {
+              totalPromise = res;
+            }
+          }
+        });
+        return totalPromise;
+      });
+
+      afterEach(() => {
+        // Tear down all fixtures.
+        fixtures.forEach(fixture => {
+          fixture.teardown(env);
+        });
+
+        // Delete all other keys.
+        for (const key in env) {
+          delete env[key];
+        }
+      });
+
+      describe(SUB, function() {
+        fn.call(this, env);
+      });
     });
-  });
+  };
+
+  /**
+   * @param {string} name
+   * @param {!Object} spec
+   * @param {function(!Object)} fn
+   */
+  const mainFunc = function(name, spec, fn) {
+    return templateFunc(name, spec, fn, describe);
+  };
+
+  /**
+   * @param {string} name
+   * @param {!Object} spec
+   * @param {function(!Object)} fn
+   */
+  mainFunc.only = function(name, spec, fn) {
+    return templateFunc(name, spec, fn, describe./*OK*/only);
+  };
+
+  return mainFunc;
 }
 
 
@@ -203,9 +246,6 @@ class SandboxFixture {
 
     /** @private {boolean} */
     this.sandboxOwner_ = false;
-
-    /** @private {boolean} */
-    this.clockOwner_ = false;
   }
 
   /** @override */
@@ -224,16 +264,6 @@ class SandboxFixture {
       this.sandboxOwner_ = true;
     }
     env.sandbox = sandbox;
-
-    // Clock.
-    if (spec.fakeClock) {
-      let clock = global.clock;
-      if (!clock) {
-        clock = global.clock = sandbox.useFakeTimers();
-        this.clockOwner_ = true;
-      }
-      env.clock = clock;
-    }
   }
 
   /** @override */
@@ -243,12 +273,6 @@ class SandboxFixture {
       env.sandbox.restore();
       delete global.sandbox;
       this.sandboxOwner_ = false;
-    }
-
-    // Clock.
-    if (this.clockOwner_) {
-      delete global.clock;
-      this.clockOwner_ = false;
     }
   }
 }
@@ -282,7 +306,7 @@ class FakeWinFixture {
 /** @implements {Fixture} */
 class RealWinFixture {
 
-  /** @param {!{fakeRegisterElement: boolean}} spec */
+  /** @param {!{fakeRegisterElement: boolean, ampCss: boolean}} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
@@ -312,9 +336,26 @@ class RealWinFixture {
 
         doNotLoadExternalResourcesInTest(win);
 
-        if (spec.fakeRegisterElement) {
-          win.customElements = new FakeCustomElements(win);
+        // Install AMP CSS if requested.
+        if (spec.ampCss) {
+          installRuntimeStylesPromise(win);
         }
+
+        if (spec.fakeRegisterElement) {
+          const customElements = new FakeCustomElements(win);
+          Object.defineProperty(win, 'customElements', {
+            get: () => customElements,
+          });
+        } else {
+          installCustomElements(win);
+        }
+
+        // Intercept event listeners
+        interceptEventListeners(win);
+        interceptEventListeners(win.document);
+        interceptEventListeners(win.document.documentElement);
+        interceptEventListeners(win.document.body);
+        env.interceptEventListeners = interceptEventListeners;
 
         resolve();
       };
@@ -353,6 +394,13 @@ class AmpFixture {
   setup(env) {
     const spec = this.spec.amp;
     const win = env.win;
+    let completePromise;
+
+    // AMP requires canonical URL.
+    const link = win.document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', spec.canonicalUrl || window.location.href);
+    win.document.head.appendChild(link);
 
     win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
@@ -368,11 +416,29 @@ class AmpFixture {
       win.services.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
+      // Install AMP CSS for main runtime, if it hasn't been installed yet.
+      completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
+    } else if (ampdocType == 'multi') {
+      adoptShadowMode(win);
+      // Notice that ampdoc's themselves install runtime styles in shadow roots.
+      // Thus, not changes needed here.
     }
+    if (spec.extensions) {
+      spec.extensions.forEach(extensionId => {
+        const installer = extensionsBuffer[extensionId];
+        if (installer) {
+          installer(win.AMP);
+        } else {
+          resetScheduledElementForTesting(win, extensionId);
+          registerElementForTesting(win, extensionId);
+        }
+      });
+    }
+    return completePromise;
   }
 
   /** @override */
@@ -383,5 +449,25 @@ class AmpFixture {
         resetScheduledElementForTesting(win, k);
       }
     }
+    if (this.spec.amp.extensions) {
+      this.spec.amp.extensions.forEach(extensionId => {
+        resetScheduledElementForTesting(win, extensionId);
+      });
+    }
   }
+}
+
+
+/**
+ * @param {!Window} win
+ */
+function installRuntimeStylesPromise(win) {
+  if (win.document.querySelector('style[amp-runtime]')) {
+    // Already installed.
+    return;
+  }
+  const style = document.createElement('style');
+  style.setAttribute('amp-runtime', '');
+  style.textContent = cssText;
+  win.document.head.appendChild(style);
 }

@@ -187,7 +187,7 @@ that is not on the first page.
 
 ## Server Side filtering
 
-See the documentation for [Server side filtering](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
+See the documentation for [Server side filtering](../amp-live-list/amp-live-list-server-side-filtering.md).
 
 ## Attributes
 
@@ -299,6 +299,20 @@ amp-live-list > [items] > [data-tombstone] {
 An `.amp-hidden` and `.amp-active` class is added to the `update`
 reference point, and you can hook into this class to add transitions.
 (see Examples below)
+
+## Actions
+The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>update (default)</td>
+    <td>Updates DOM elements with new discovered updates</td>
+  </tr>
+</table>
 
 ## Examples
 

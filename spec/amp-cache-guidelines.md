@@ -4,6 +4,14 @@
 
 Provide guidelines to external parties for implementing their own AMP Caches.
 
+## Preamble
+
+In the AMP ecosystem, the platform that links to content may freely choose which AMP Cache (if any) to use. It is an inversion of the typical model where content delivery is the responsibility of the publisher. 
+
+This allows platforms to provide their users with predictable load performance and among other things allows them to ensure required security and privacy invariants during AMP’s pre-rendering phase.
+
+AMP is an open ecosystem and the AMP Project actively encourages the development of more AMP Caches.
+
 ## Guidelines: Core
 
 1. An AMP Cache only serves [valid AMP input documents](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
@@ -36,11 +44,11 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
     1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
 
-9. Provides a faithful visual and UX reproduction of source document, although visually imperceptible changes in image resolution or compression rate are acceptable.  
+9. Provides a faithful visual and UX reproduction of source document. E.g. changes in image resolution or compression rate may be acceptable if they provide strong benefits in terms of bandwidth usage and load time.
 
-10. No obstruction of the contents of the original AMP document. 
+10. No obstruction of the contents, branding or attribution of the original AMP document. 
 
-11. No changes to ads, access, analytics, or similar.
+11. No changes to ads, monetization, access (paywall monetization and similar), analytics, or similar.
 
 12. Respects all resource deletions within a reasonable timeframe.
 

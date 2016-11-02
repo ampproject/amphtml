@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {listen, listenOnce, listenOncePromise} from '../event-helper';
+import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
+import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {setStyles} from '../style';
 import {VideoEvents, VideoAttributes} from '../video-interface';
@@ -123,6 +124,9 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
+    /** @private {?Element} */
+    this.autoplayAnimation_ = null;
+
     /** @private {boolean} */
     this.loaded_ = false;
 
@@ -136,7 +140,7 @@ class VideoEntry {
     this.vsync_ = vsyncFor(ampdoc.win);
 
     /** @private @const {function(): !Promise<boolean>} */
-    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc,
+    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
         getMode(ampdoc.win).lite);
 
     const element = dev().assert(video.element);
@@ -156,6 +160,7 @@ class VideoEntry {
    * @private
    */
   videoBuilt_() {
+    this.updateVisibility();
     if (this.hasAutoplay_) {
       this.autoplayVideoBuilt_();
     }
@@ -166,6 +171,7 @@ class VideoEntry {
    * @private
    */
   videoLoaded_() {
+    this.updateVisibility();
     this.loaded_ = true;
     if (this.isVisible_) {
       // Handles the case when the video becomes visible before loading
@@ -204,10 +210,12 @@ class VideoEntry {
     // Hide controls until we know if autoplay is supported, otherwise hiding
     // and showing the controls quickly becomes a bad user experience for the
     // common case where autoplay is supported.
-    this.video.hideControls();
+    if (this.video.isInteractive()) {
+      this.video.hideControls();
+    }
 
     this.boundSupportsAutoplay_().then(supportsAutoplay => {
-      if (!supportsAutoplay) {
+      if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
         this.video.showControls();
@@ -217,18 +225,55 @@ class VideoEntry {
       // Only muted videos are allowed to autoplay
       this.video.mute();
 
-      // If autoplay video has controls, hide them and only show them on
-      // user interaction.
-      if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
-        this.video.hideControls();
-
-        listenOnce(this.video.element, VideoEvents.USER_TAP, () => {
-          this.userInteracted_ = true;
-          this.video.showControls();
-          this.video.unmute();
-        });
+      if (this.video.isInteractive()) {
+        this.autoplayInteractiveVideoBuilt_();
       }
     });
+  }
+
+  /**
+   * Called by autoplayVideoBuilt_ when an interactive autoplay video is built.
+   * It handles hiding controls, installing autoplay animation and handling
+   * user interaction by unmuting and showing controls.
+   * @private
+   */
+  autoplayInteractiveVideoBuilt_() {
+    const toggleAnimation = playing => {
+      this.vsync_.mutate(() => {
+        animation.classList.toggle('amp-video-eq-play', playing);
+      });
+    };
+
+    // Hide the controls.
+    this.video.hideControls();
+
+    // Create autoplay animation and the mask to detect user interaction.
+    const animation = this.createAutoplayAnimation_();
+    const mask = this.createAutoplayMask_();
+    this.vsync_.mutate(() => {
+      this.video.element.appendChild(animation);
+      this.video.element.appendChild(mask);
+    });
+
+    // Listen to pause, play and user interaction events.
+    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
+
+    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false));
+
+    const unlistenPlay = listen(this.video.element, VideoEvents.PLAY,
+        toggleAnimation.bind(this, /*playing*/ true));
+
+    function onInteraction() {
+      this.userInteracted_ = true;
+      this.video.showControls();
+      this.video.unmute();
+      unlistenInteraction();
+      unlistenPause();
+      unlistenPlay();
+      animation.remove();
+      mask.remove();
+    }
   }
 
   /**
@@ -252,6 +297,55 @@ class VideoEntry {
       }
 
     });
+  }
+
+  /**
+   * Creates a pure CSS animated equalizer icon.
+   * @private
+   * @return {!Element}
+   */
+  createAutoplayAnimation_() {
+    const doc = this.ampdoc_.win.document;
+    const anim = doc.createElement('i-amp-video-eq');
+    anim.classList.add('amp-video-eq');
+    // Four columns for the equalizer.
+    for (let i = 1; i <= 4; i++) {
+      const column = doc.createElement('div');
+      column.classList.add('amp-video-eq-col');
+      // Two overlapping filler divs that animate at different rates creating
+      // randomness illusion.
+      for (let j = 1; j <= 2; j++) {
+        const filler = doc.createElement('div');
+        filler.classList.add(`amp-video-eq-${i}-${j}`);
+        column.appendChild(filler);
+      }
+      anim.appendChild(column);
+    }
+    const platform = platformFor(this.ampdoc_.win);
+    if (platform.isSafari() && platform.isIos()) {
+      // iOS Safari can not pause hardware accelerated animations.
+      anim.setAttribute('unpausable', '');
+    }
+    return anim;
+  }
+
+  /**
+   * Creates a mask to overlay on top of an autoplay video to detect the first
+   * user tap.
+   * We have to do this since many players are iframe-based and we can not get
+   * the click event from the iframe.
+   * We also can not rely on hacks such as constantly checking doc.activeElement
+   * to know if user has tapped on the iframe since they won't be a trusted
+   * event that would allow us to unmuted the video as only trusted
+   * user-initiated events can be used to interact with the video.
+   * @private
+   * @return {!Element}
+   */
+  createAutoplayMask_() {
+    const doc = this.ampdoc_.win.document;
+    const mask = doc.createElement('i-amp-video-mask');
+    mask.classList.add('-amp-fill-content');
+    return mask;
   }
 
   /**
@@ -305,11 +399,11 @@ let supportsAutoplayCache_ = null;
  * Service dependencies are taken explicitly for testability.
  *
  * @private visible for testing.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} win
  * @param {boolean} isLiteViewer
  * @return {!Promise<boolean>}
  */
-export function supportsAutoplay(ampdoc, isLiteViewer) {
+export function supportsAutoplay(win, isLiteViewer) {
 
   // Use cached result if available.
   if (supportsAutoplayCache_) {
@@ -325,7 +419,7 @@ export function supportsAutoplay(ampdoc, isLiteViewer) {
   // `paused` is true after `play()` call, autoplay is supported. Although
   // this is unintuitive, it works across browsers and is currently the lightest
   // way to detect autoplay without using a data source.
-  const detectionElement = ampdoc.win.document.createElement('video');
+  const detectionElement = win.document.createElement('video');
   // NOTE(aghassemi): We need both attributes and properties due to Chrome and
   // Safari differences when dealing with non-attached elements.
   detectionElement.setAttribute('muted', '');

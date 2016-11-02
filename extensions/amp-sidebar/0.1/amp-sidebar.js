@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
@@ -93,13 +94,31 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('aria-hidden', 'true');
     }
 
+    if (!this.element.hasAttribute('role')) {
+      this.element.setAttribute('role', 'menu');
+    }
+    // Make sidebar programmatically focusable and focus on `open` for a11y.
+    this.element.tabIndex = -1;
+
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.keyCode == 27) {
         this.close_();
       }
     });
-    //TODO (skrish, #2712) Add history support on back button.
+
+    // Invisible close button at the end of sidebar for screen-readers.
+    const screenReaderCloseButton = this.document_.createElement('button');
+    // TODO(aghassemi, #4146) i18n
+    screenReaderCloseButton.textContent = 'Close the sidebar';
+    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    // This is for screen-readers only, should not get a tab stop.
+    screenReaderCloseButton.tabIndex = -1;
+    screenReaderCloseButton.addEventListener('click', () => {
+      this.close_();
+    });
+    this.element.appendChild(screenReaderCloseButton);
+
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
@@ -153,6 +172,8 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
+        // Focus on the sidebar for a11y.
+        tryFocus(this.element);
         timerFor(this.win).delay(() => {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
