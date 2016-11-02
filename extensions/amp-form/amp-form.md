@@ -48,7 +48,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
 
 Example:
 ```html
-<form method="post" action="https://example.com/subscribe" target="_blank">
+<form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -60,6 +60,16 @@ Example:
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            Subscription successful!
+        </template>
+    </div>
+    <div submit-failed>
+        <template type="amp-mustache">
+            Subscription failed!
+        </template>
+    </div>
 </form>
 ```
 
