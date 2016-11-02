@@ -93,6 +93,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdStir](../../ads/adstir.md)
 - [AdTech](../../ads/adtech.md)
 - [Ad Up Technology](../../ads/aduptech.md)
+- [Adverline](../../ads/adverline.md)
 - [AdvertServe](../../ads/advertserve.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
@@ -140,6 +141,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Smart AdServer](../../ads/smartadserver.md)
+- [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
 - [Teads](../../ads/teads.md)
@@ -147,11 +149,13 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
 - [Widespace](../../ads/widespace.md)
+- [Xlift](../../ads/xlift.md)
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
 
 ## Supported embed types
@@ -232,7 +236,7 @@ To enable this, copy the file [remote.html](../../3p/remote.html) to your web se
 <meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
 ```
 
-The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK. See the doc ["Iframe origin policy"](../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but e.g. `something-else.example.com` is OK. See the doc ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
 ### Security
 

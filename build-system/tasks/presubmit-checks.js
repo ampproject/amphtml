@@ -129,6 +129,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-form/0.1/amp-form.js',
     ],
   },
   'installActivityService': {
@@ -588,10 +589,13 @@ var forbiddenTermsSrcInclusive = {
       'src/friendly-iframe-embed.js',
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
-      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
     ]
+  },
+  '\\.getTime\\(\\)': {
+    message: 'Unless you do weird date math (whitelist), use Date.now().',
   },
 };
 
