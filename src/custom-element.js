@@ -135,7 +135,7 @@ function tryUpgradeElementNoInline(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {
-    reportError(e, this);
+    reportError(e, element);
   }
 }
 
@@ -596,7 +596,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.createdCallback();
       if (this.layout_ != Layout.NODISPLAY &&
         !this.implementation_.isLayoutSupported(this.layout_)) {
-        throw new Error('Layout not supported: ' + this.layout_);
+        throw user().createError('Layout not supported: ' + this.layout_);
       }
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
@@ -849,7 +849,8 @@ function createBaseCustomElementClass(win) {
           this.layout_ = applyLayout_(this);
           if (this.layout_ != Layout.NODISPLAY &&
             !this.implementation_.isLayoutSupported(this.layout_)) {
-            throw new Error('Layout not supported for: ' + this.layout_);
+            throw user().createError('Layout not supported: ' +
+                this.layout_);
           }
           this.implementation_.layout_ = this.layout_;
           this.implementation_.firstAttachedCallback();
