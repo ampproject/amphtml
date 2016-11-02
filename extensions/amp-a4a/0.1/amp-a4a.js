@@ -508,7 +508,6 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
-    this.emitLifecycleEvent('preAdThrottle');
     return this.adPromise_.then(rendered => {
       if (rendered instanceof Error || !rendered) {
         this.emitLifecycleEvent('preAdThrottle');
@@ -795,14 +794,7 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     this.rendered_ = true;
-    // Set opt_defaultVisible to true as 3p draw code never executed causing
-    // render-start event never to fire which will remove visiblity hidden.
-    const handlerPromise = this.xOriginIframeHandler_.init(
-      iframe, /* opt_isA4A */ true);
-    if (getMode().localDev || getMode().test) {
-      this.onCrossDomainIframeCreated(iframe);
-    }
-    return handlerPromise;
+    return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
   }
 
   /**
