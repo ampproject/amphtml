@@ -113,7 +113,7 @@ class AmpAccordion extends AMP.BaseElement {
       return /** @type {!Object} */ (
           JSON.parse(dev().assertString(sessionStr)));
     } catch (e) {
-      dev().error('AMP-ACCORDION', e.message, e.stack);
+      dev().fine('AMP-ACCORDION', e.message, e.stack);
       return null;
     }
   }
@@ -128,7 +128,7 @@ class AmpAccordion extends AMP.BaseElement {
       this.win./*OK*/sessionStorage.setItem(
           dev().assertString(this.id_), sessionStr);
     } catch (e) {
-      dev().error('AMP-ACCORDION', e.message, e.stack);
+      dev().fine('AMP-ACCORDION', e.message, e.stack);
     }
   }
 
