@@ -21,13 +21,10 @@ import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
-import {data as minimumAmp} from './testdata/minimum_valid_amp.reserialized';
-import {data as regexpsAmpData} from './testdata/regexps.reserialized';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
-import {data as expectations} from './testdata/expectations';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -119,6 +116,24 @@ describe('amp-a4a', () => {
     };
     doc.body.appendChild(element);
     return element;
+  }
+
+  function buildCreativeString(opt_additionalInfo) {
+    const baseTestDoc = testFragments.minimalDocOneStyle;
+    const offsets = opt_additionalInfo || {};
+    offsets.ampRuntimeUtf16CharOffsets = [
+      baseTestDoc.indexOf('<style amp4ads-boilerplate'),
+      baseTestDoc.lastIndexOf('</script>') + '</script>'.length,
+    ];
+    const splicePoint = baseTestDoc.indexOf('</body>');
+    return baseTestDoc.slice(0, splicePoint) +
+        '<script type="application/json" amp-ad-metadata>' +
+        JSON.stringify(offsets) + '</script>' +
+        baseTestDoc.slice(splicePoint);
+  }
+
+  function buildCreativeArrayBuffer() {
+    return stringToArrayBuffer(buildCreativeString());
   }
 
   /**
@@ -609,47 +624,16 @@ describe('amp-a4a', () => {
   });
 
   describe('#getAmpAdMetadata_', () => {
-    function getAmpAdMetadata(metaDataObj) {
-      return AmpA4A.prototype.getAmpAdMetadata_(
-        '<script type="application/json" amp-ad-metadata>' +
-        JSON.stringify(metaDataObj) + '</script>');
-    }
-    it('Invalid/missing body offsets', () => {
-      expect(getAmpAdMetadata({})).to.be.null;
-      expect(getAmpAdMetadata({bodyUtf16CharOffsets: []})).to.be.null;
-      expect(getAmpAdMetadata({bodyUtf16CharOffsets: [123, 'def']})).to.be.null;
-      expect(getAmpAdMetadata(
-        {bodyUtf16CharOffsets: [123, 345, 'def']})).to.be.null;
-    });
-    it('Invalid css offsets', () => {
-      expect(getAmpAdMetadata(
-        {bodyUtf16CharOffsets: [123, 345]})).to.not.be.null;
-      expect(getAmpAdMetadata(
-        {bodyUtf16CharOffsets: [123, 345],
-         cssUtf16CharOffsets: []})).to.be.null;
-      expect(getAmpAdMetadata(
-        {bodyUtf16CharOffsets: [123, 345],
-        cssUtf16CharOffsets: ['def', 123]})).to.be.null;
-      expect(getAmpAdMetadata(
-        {bodyUtf16CharOffsets: [123, 345],
-        cssUtf16CharOffsets: [123, 123, 'def']})).to.be.null;
-    });
-    // TODO: more tests!
-    it('should parse metadata out of regexpsAmpData', () => {
-      const actual = getAmpAdMetadata({
-        bodyUtf16CharOffsets: [1393, 1860],
-        cssUtf16CharOffsets: [135, 579],
+    it('should parse metadata', () => {
+      const actual = AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
         customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
-        bodyAttributes: 'style=\'border:1;display:block\'',
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
         ],
-      });
+      }));
       const expected = {
-        bodyUtf16CharOffsets: [1393, 1860],
-        cssUtf16CharOffsets: [135, 579],
-        bodyAttributes: 'style=\'border:1;display:block\'',
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
         customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
@@ -658,27 +642,42 @@ describe('amp-a4a', () => {
       };
       expect(actual).to.deep.equal(expected);
     });
+    it('should return null if missing ampRuntimeUtf16CharOffsets', () => {
+      const baseTestDoc = testFragments.minimalDocOneStyle;
+      const splicePoint = baseTestDoc.indexOf('</body>');
+      expect(AmpA4A.prototype.getAmpAdMetadata_(
+        baseTestDoc.slice(0, splicePoint) +
+        '<script type="application/json" amp-ad-metadata></script>' +
+        baseTestDoc.slice(splicePoint))).to.be.null;
+    });
+    it('should return null if invalid extensions', () => {
+      expect(AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
+        customElementExtensions: 'amp-vine',
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {href: 'https://fonts.com/css?helloworld'},
+        ],
+      }))).to.be.null;
+    });
+    it('should return null if non-array stylesheets', () => {
+      expect(AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: 'https://fonts.googleapis.com/css?foobar',
+      }))).to.be.null;
+    });
+    it('should return null if invalid stylesheet object', () => {
+      expect(AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {foo: 'https://fonts.com/css?helloworld'},
+        ],
+      }))).to.be.null;
+    });
+    // FAILURE cases here
   });
 
   describe('#maybeRenderAmpAd_', () => {
-    function buildCreativeArrayBuffer() {
-      const baseTestDoc = testFragments.minimalDocOneStyle;
-      const offsets = {
-        cssUtf16CharOffsets: [
-          baseTestDoc.indexOf('<style>') + '<style>'.length,
-          baseTestDoc.indexOf('</style>'),
-        ],
-        bodyUtf16CharOffsets: [
-          baseTestDoc.indexOf('<body>') + '<body>'.length,
-          baseTestDoc.indexOf('</body>'),
-        ],
-      };
-      const splicePoint = offsets.bodyUtf16CharOffsets[1];
-      return stringToArrayBuffer(baseTestDoc.slice(0, splicePoint) +
-          '<script type="application/json" amp-ad-metadata>' +
-          JSON.stringify(offsets) + '</script>' +
-          baseTestDoc.slice(splicePoint));
-    }
     it('should not render AMP natively', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;

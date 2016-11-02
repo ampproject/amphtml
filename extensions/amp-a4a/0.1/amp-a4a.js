@@ -881,7 +881,7 @@ export class AmpA4A extends AMP.BaseElement {
       metaData.minifiedCreative =
         creative.slice(0, ampRuntimeUtf16CharOffsets[0]) +
         creative.slice(ampRuntimeUtf16CharOffsets[1], metadataStart) +
-        creative.slice(metadataEnd, creative.length);
+        creative.slice(metadataEnd + '</script>'.length);
       return metaData;
     } catch (err) {
       dev().warn('A4A', 'Invalid amp metadata: %s',
