@@ -355,13 +355,17 @@ export class Extensions {
   }
 
   /**
-   * Install extensions in the child window (friendly iframe).
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
    * @param {!Window} childWin
    * @param {!Array<string>} extensionIds
+   * @param {function(!Window)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
-  installExtensionsInChildWindow(childWin, extensionIds) {
+  installExtensionsInChildWindow(childWin, extensionIds,
+      opt_preinstallCallback) {
     const topWin = this.win;
     const parentWin = childWin.frameElement.ownerDocument.defaultView;
     setParentWindow(childWin, parentWin);
@@ -372,6 +376,11 @@ export class Extensions {
     // Install runtime styles.
     installStyles(childWin.document, cssText, () => {},
         /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+
+    // Run pre-install callback.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(childWin);
+    }
 
     // Install built-ins.
     copyBuiltinElementsToChildWindow(childWin);
@@ -553,7 +562,7 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
     }
     return `${base}/v0/${extensionId}-0.1.js`;
   }
-  return `${base}/rtv/${getMode().version}/v0/${extensionId}-0.1.js`;
+  return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
 }
 
 
