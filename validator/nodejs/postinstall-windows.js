@@ -21,7 +21,8 @@ var path = require('path');
 var fs = require('fs');
 
 if (process.env.OS !== 'Windows_NT') {
-  console.error('postinstall-windows.js: This script is for Windows only.');
+  console./*OK*/ error(
+      'postinstall-windows.js: This script is for Windows only.');
   process.exit(1);
 }
 
@@ -34,7 +35,7 @@ var validatorShimPath =
     path.join(process.env.npm_config_prefix, 'amphtml-validator.cmd');
 var stats = fs.statSync(validatorShimPath);
 if (!stats.isFile()) {
-  console.error('postinstall-windows.js: amphtml-validator not found.');
+  console./*OK*/ error('postinstall-windows.js: amphtml-validator not found.');
   process.exit(1);
 }
 
@@ -46,7 +47,8 @@ if (!stats.isFile()) {
 var contents = fs.readFileSync(validatorShimPath, 'utf8');
 if (contents.indexOf('"%~dp0\\node_modules\\amphtml-validator\\index.sh"') ===
     -1) {
-  console.error('postinstall-windows.js: amphtml-validator not matched.');
+  console./*OK*/ error(
+      'postinstall-windows.js: amphtml-validator not matched.');
   process.exit(1);
 }
 
@@ -57,4 +59,5 @@ if (contents.indexOf('"%~dp0\\node_modules\\amphtml-validator\\index.sh"') ===
 fs.writeFileSync(
     validatorShimPath, '@ECHO OFF\r\n' +
         'node "%~dp0\\node_modules\\amphtml-validator\\index.js" %*');
-console.log('postinstall-windows.js: Modified amphtml-validator for Windows.');
+console./*OK*/ log(
+    'postinstall-windows.js: Modified amphtml-validator for Windows.');
