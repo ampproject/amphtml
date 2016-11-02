@@ -24,10 +24,6 @@ import {
   setStyle,
   removeAlphaFromColor,
 } from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
-
-/** @private @const {string} */
-const UX_EXPERIMENT = 'amp-sticky-ad-better-ux';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -89,7 +85,6 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.viewport_.updatePaddingBottom(0);
-    this.element.classList.remove('amp-sticky-ad-loaded');
     return true;
   }
 
@@ -175,7 +170,6 @@ class AmpStickyAd extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
-        this.element.classList.add('amp-sticky-ad-loaded');
         this.forceOpacity_();
       });
     });
@@ -216,13 +210,6 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   forceOpacity_() {
-    if (!isExperimentOn(this.win, UX_EXPERIMENT)) {
-      return;
-    }
-    // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
-    // Note: Use setStyle because we will remove this line later.
-    setStyle(this.element, 'opacity', '1 !important');
-    setStyle(this.element, 'background-image', 'none');
     const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
         .getPropertyValue('background-color');
     const newBackgroundColor = removeAlphaFromColor(backgroundColor);
@@ -235,6 +222,6 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-sticky-ad', AMP => {
+AMP.extension('amp-sticky-ad:1.0', AMP => {
   AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
 });

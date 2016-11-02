@@ -451,6 +451,9 @@ class AmpFixture {
     }
     if (this.spec.amp.extensions) {
       this.spec.amp.extensions.forEach(extensionId => {
+        if (extensionId.indexOf(':') != -1) {
+          extensionId = extensionId.substring(0, extensionId.indexOf(':'));
+        }
         resetScheduledElementForTesting(win, extensionId);
       });
     }
