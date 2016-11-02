@@ -48,6 +48,8 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private final Map<String, Node> prodAssignmentReplacements;
   final boolean isProd;
 
+  final Integer ampExtensionCallbackPosition = 4;
+
   public AmpPass(AbstractCompiler compiler, boolean isProd,
         Map<String, Set<String>> stripTypeSuffixes,
         Map<String, Node> assignmentReplacements, Map<String, Node> prodAssignmentReplacements) {
@@ -99,12 +101,12 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    *         NAME self 3 [length: 4] [source_file: input0]
    *         STRING someproperty 3 [length: 15] [source_file: input0]
    *       STRING AMP 3 [length: 3] [source_file: input0]
-   *     STRING etension 3 [length: 12] [source_file: input0]
+   *     STRING extension 3 [length: 12] [source_file: input0]
    *   STRING some-string 3 [length: 9] [source_file: input0]
    *   FUNCTION  3 [length: 46] [source_file: input0]
    */
   private boolean isAmpExtensionCall(Node n) {
-    if (n != null && n.isCall() && n.getChildCount() == 3) {
+    if (n != null && n.isCall() && n.getChildCount() == ampExtensionCallbackPosition) {
       Node getprop = n.getFirstChild();
 
       // The AST has the last getprop higher in the hierarchy.
@@ -115,7 +117,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
                firstChild.getString() == "AMP") ||
             isGetPropName(firstChild, "AMP")) {
           // Child at index 1 should be the "string" value (first argument)
-          Node func = n.getChildAtIndex(2);
+          Node func = getAmpExtensionCallback(n);
           return func != null && func.isFunction();
         }
       }
@@ -136,7 +138,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    * This operation should be guarded stringently by `isAmpExtensionCall`
    * predicate.
    *
-   * AMP.extension('some-name', function(AMP) {
+   * AMP.extension('some-name', '0.1', function(AMP) {
    *   // BODY...
    * });
    *
@@ -149,7 +151,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     if (expr == null || !expr.isExprResult()) {
       return;
     }
-    Node func = n.getChildAtIndex(2);
+    Node func = getAmpExtensionCallback(n);
     func.detachFromParent();
     Node arg1 = IR.getprop(IR.name("self"), IR.string("AMP"));
     arg1.setLength("self.AMP".length());
@@ -159,6 +161,11 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     newcall.addChildToBack(arg1);
     expr.replaceChild(n, newcall);
     compiler.reportCodeChange();
+  }
+
+  private Node getAmpExtensionCallback(Node n) {
+    // 0 index based
+    return n.getChildAtIndex(ampExtensionCallbackPosition - 1);
   }
 
   /**

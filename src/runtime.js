@@ -179,10 +179,11 @@ function adoptShared(global, opts, callback) {
   if (!global.AMP.extension) {
     /**
      * @param {string} unusedName
+     * @param {string} unusedVersion
      * @param {function(!Object)} installer
      * @const
      */
-    global.AMP.extension = function(unusedName, installer) {
+    global.AMP.extension = function(unusedName, unusedVersion, installer) {
       installer(global.AMP);
     };
   }

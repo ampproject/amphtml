@@ -222,6 +222,6 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-sticky-ad:1.0', AMP => {
+AMP.extension('amp-sticky-ad', '1.0', AMP => {
   AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
 });
