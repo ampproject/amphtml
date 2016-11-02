@@ -108,20 +108,20 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |----------------|--------------------|------------------------|
 | [Backgrounded](#backgrounded) | N/A | `${backgrounded}` |
 | [Backgrounded At Start](#backgrounded-at-start) | N/A | `${backgroundedAtStart}` |
+| [Carousel From Slide](#carousel-from-slide) | N/A | `${fromSlide}` |
+| [Carousel To Slide](#carousel-to-slide) | N/A | `${toSlide}` |
 | [Element Height](#element-height) | N/A | `${elementHeight}` |
 | [Element Width](#element-width) | N/A | `${elementWidth}` |
 | [Element X](#element-x) | N/A | `${elementX}` |
 | [Element Y](#element-y) | N/A | `${elementY}` |
 | [First Seen Time](#first-seen-time) | N/A | `${firstSeenTime}` |
 | [First Visible Time](#first-visible-time) | N/A | `${firstVisibleTime}` |
-| [From Slide](#from-slide) | N/A | `${fromSlide}` |
 | [Last Seen Time](#last-seen-time) | N/A | `${lastSeenTime}` |
 | [Last Visible Time](#last-visible-time) | N/A | `${lastVisibleTime}` |
 | [Load Time Visibility](#load-time-visibility) | N/A | `${loadTimeVisibility}` |
 | [Max Continuous Visible Time](#max-continuous-visible-time) | N/A | `${maxContinuousVisibleTime}` |
 | [Max Visible Percentage](#max-visible-percentage) | N/A | `${maxVisiblePercentage}` |
 | [Min Visible Percentage](#min-visible-percentage) | N/A | `${minVisiblePercentage}` |
-| [To Slide](#to-slide) | N/A | `${toSlide}` |
 | [Total Time](#total-time) | N/A | `${totalTime}` |
 | [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
 
@@ -301,6 +301,24 @@ Provides the canonical document's URL.
 * **amp-analytics variable**: `${canonicalUrl}`
   * Example value: `http%3A%2F%2Fexample.com%3A8000%2Fanalytics.html`
 
+#### Carousel From Slide
+
+Provides the `amp-carousel` slide from which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${fromSlide}`
+
+For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../extensions/amp-carousel/amp-carousel-analytics.md).
+
+#### Carousel To Slide
+
+Provides the `amp-carousel` slide to which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${toSlide}`
+
+For more information on analytics for `amp-carousel`, see [AMP Carousel and Analytics](../extensions/amp-carousel/amp-carousel-analytics.md).
+
 #### Client ID
 
 Provides a per document-source-origin (the origin of the website where you publish your AMP doc) and user identifier. The client ID will be the same for the same user if they visit again within one year. The client ID should behave roughly similar to a cookie storing a session ID for one year. If the AMP document is not served through the Google AMP Cache, the client ID is replaced with a cookie of the name of the `cid scope` argument (see below). If it is not present, a cookie will be set with the same name. These cookies will always have the prefix "amp-" followed by a random base64 encoded string.
@@ -444,13 +462,6 @@ Provides the time when the element met visibility conditions for the first time 
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstVisibleTime}`
-
-#### From Slide
-
-Provides the slide from which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
-
-* **platform variable**: N/A
-* **amp-analytics variable**: `${fromSlide}`
 
 #### Horizontal Scroll Boundary
 
@@ -838,13 +849,6 @@ Provides the user's time-zone offset from UTC, in minutes.
   ```
 * **amp-analytics variable**: `${timezone}`
   * Example value: `480` for [Pacific Standard Time](https://en.wikipedia.org/wiki/Pacific_Time_Zone).
-
-#### To Slide
-
-Provides the slide to which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
-
-* **platform variable**: N/A
-* **amp-analytics variable**: `${toSlide}`
 
 #### Total Engaged Time
 
