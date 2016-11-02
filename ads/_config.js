@@ -200,7 +200,7 @@ export const adConfig = {
   },
 
   holder: {
-    prefetch: 'https://i.banner.mi6/banners/amp/holderamp.js',
+    prefetch: 'https://dl.dropboxusercontent.com/u/17485301/holderamp.js',
     preconnect: [
 	  'https://h.holder.com.ua',
 	  'https://i.holder.com.ua',
