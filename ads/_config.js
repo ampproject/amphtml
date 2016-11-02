@@ -203,11 +203,11 @@ export const adConfig = {
   holder: {
     prefetch: 'https://dl.dropboxusercontent.com/u/17485301/holderamp.js',
     preconnect: [
-	  'https://h.holder.com.ua',
-	  'https://i.holder.com.ua',
-	],
-  },  
-  
+      'https://h.holder.com.ua',
+      'https://i.holder.com.ua',
+    ],
+  },
+
   ibillboard: {},
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
