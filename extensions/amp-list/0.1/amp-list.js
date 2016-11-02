@@ -60,7 +60,9 @@ export class AmpList extends AMP.BaseElement {
           }
           return xhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
-          user().assert(typeof data == 'object' && Array.isArray(data['items']),
+          user().assert(data != null
+              && typeof data == 'object'
+              && Array.isArray(data['items']),
               'Response must be {items: []} object %s %s',
               this.element, data);
           const items = data['items'];
