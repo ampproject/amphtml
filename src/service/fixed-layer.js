@@ -51,6 +51,9 @@ export class FixedLayer {
     /** @private {number} */
     this.paddingTop_ = paddingTop;
 
+    /** @private {number} */
+    this.committedPaddingTop_ = paddingTop;
+
     /** @private @const {boolean} */
     this.transfer_ = transfer && ampdoc.isSingleDoc();
 
@@ -118,11 +121,19 @@ export class FixedLayer {
 
   /**
    * Updates the viewer's padding-top position and recalculates offsets of
-   * all elements.
+   * all elements. The padding update can be transient, in which case the
+   * UI itself is not updated leaving the blank space up top, which is invisible
+   * due to scroll position. This mode saves significant resources. However,
+   * eventhough layout is not updated, the fixed coordinates still need to be
+   * recalculated.
    * @param {number} paddingTop
+   * @param {boolean} opt_transient
    */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_transient) {
     this.paddingTop_ = paddingTop;
+    if (!opt_transient) {
+      this.committedPaddingTop_ = paddingTop;
+    }
     this.update();
   }
 
@@ -280,7 +291,7 @@ export class FixedLayer {
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
           if ((top == 'auto' || isImplicitAuto) && top != '0px') {
             top = '';
-            if (currentOffsetTop == this.paddingTop_) {
+            if (currentOffsetTop == this.committedPaddingTop_) {
               top = '0px';
             }
           }

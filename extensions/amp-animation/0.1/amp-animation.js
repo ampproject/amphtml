@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDocInEmbedScope} from './service';
+import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-animation';
 
 
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!./service/url-replacements-impl.UrlReplacements}
- */
-export function urlReplacementsForDoc(nodeOrDoc) {
-  return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'url-replace'));
+export class AmpAnimation extends AMP.BaseElement {
+
+  /** @override */
+  buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment "${TAG}" is disabled.`);
+  }
 }
+
+AMP.registerElement(TAG, AmpAnimation);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDocInEmbedScope} from './service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!./service/url-replacements-impl.UrlReplacements}
- */
-export function urlReplacementsForDoc(nodeOrDoc) {
-  return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'url-replace'));
-}
+describes.sandboxed('AmpAnimation', {}, () => {
+
+  beforeEach(() => {
+    toggleExperiment(window, 'amp-animation', true);
+  });
+
+  afterEach(() => {
+    toggleExperiment(window, 'amp-animation', false);
+  });
+
+  it('should work', () => {
+    // TODO
+  });
+});
