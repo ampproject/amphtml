@@ -849,7 +849,7 @@ function createBaseCustomElementClass(win) {
           this.layout_ = applyLayout_(this);
           if (this.layout_ != Layout.NODISPLAY &&
             !this.implementation_.isLayoutSupported(this.layout_)) {
-            throw user().createError('Layout not supported for: ' +
+            throw user().createError('Layout not supported: ' +
                 this.layout_);
           }
           this.implementation_.layout_ = this.layout_;
