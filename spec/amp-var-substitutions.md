@@ -325,7 +325,7 @@ Provides a per document-source-origin (the origin of the website where you publi
   * Example usage: `${clientId(foo)}`
   * Example value: `U6XEpUs3yaeQyR2DKATQH1pTZ6kg140fvuLbtl5nynbUWtIodJxP5TEIYBic4qcV`
 
-**Arguments**
+##### Client ID arguments
 
 You can pass the following arguments into the Client ID variable like a function. Spaces between arguments and values are not allowed.
 
@@ -519,7 +519,7 @@ Provides access to metrics from the browser's PerformanceTiming interface. See t
   * Example 1: `${navTiming(navigationStart)}` results in value: `1451606400000`
   * Example 2: `${navTiming(navigationStart,responseStart)}` results in value: `10`
 
-**Arguments**
+##### Navigation Timing arguments
 
 You can pass the following arguments into the Navigation Timing variable like a function. Spaces between arguments and values are not allowed.
 
@@ -565,7 +565,7 @@ Provides the time taken to load the whole page. The value is calculated from the
 * **amp-analytics variable**: `${pageLoadTime}`
   * Example value: `220`
 
-### Page View ID
+#### Page View ID
 
 Provides a string that is intended to be random and likely to be unique per URL, user and day.
 
@@ -591,7 +591,7 @@ Pulls a value from the provided query string parameter.
   * Example 1: `${queryParam(foo)}`: If `foo` is available, its associated value is returned; otherwise, an empty string is returned.
   * Example 2: `${queryParam(foo,bar)}`: if `foo` is available, its associated value is returned, otherwise `bar` is returned.
 
-**Arguments**
+##### Query Parameter arguments
 
 You can pass the following arguments into the Query Parameter variable like a function. Spaces between arguments and values are not allowed.
 
