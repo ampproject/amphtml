@@ -15,7 +15,6 @@
  */
 
 import {removeElement} from '../../../src/dom';
-import {loadPromise} from '../../../src/event-helper';
 import {
   SubscriptionApi,
   listenFor,
@@ -69,7 +68,7 @@ export class AmpAdXOriginIframeHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
-   * @return {!Promise} awaiting load event for ad frame
+   * @return {!Promise} awaiting render complete promise
    * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
   init(iframe, opt_isA4A) {
@@ -96,10 +95,19 @@ export class AmpAdXOriginIframeHandler {
           this.updateSize_(data.height, data.width, source, origin);
         }, true, true));
 
-    // Install API that listen to ad response
+    this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
+      this.sendEmbedInfo_(this.baseInstance_.isInViewport());
+    }));
+
     if (opt_isA4A) {
-      this.adResponsePromise_ = Promise.resolve();
-    } else if (this.baseInstance_.config
+      // A4A writes creative frame directly to page therefore does not expect
+      // post message to unset visibility hidden
+      this.element_.appendChild(this.iframe);
+      return Promise.resolve();
+    }
+
+    // Install API that listen to ad response
+    if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe,
@@ -121,26 +129,20 @@ export class AmpAdXOriginIframeHandler {
     }
 
     // Set iframe initially hidden which will be removed on load event +
-    // post message depending on if A4A flow.
+    // post message.
     this.iframe.style.visibility = 'hidden';
 
-    this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
-      this.sendEmbedInfo_(this.baseInstance_.isInViewport());
-    }));
-
     this.element_.appendChild(this.iframe);
-    return loadPromise(this.iframe).then(() => {
-      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-          this.adResponsePromise_,
-          'timeout waiting for ad response').catch(e => {
-            this.noContent_();
-            user().warn('AMP-AD', e);
-          }).then(() => {
-            if (this.iframe) {
-              this.iframe.style.visibility = '';
-            }
-          });
-    });
+    return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+        this.adResponsePromise_,
+        'timeout waiting for ad response').catch(e => {
+          this.noContent_();
+          user().warn('AMP-AD', e);
+        }).then(() => {
+          if (this.iframe) {
+            this.iframe.style.visibility = '';
+          }
+        });
   }
 
   /**
