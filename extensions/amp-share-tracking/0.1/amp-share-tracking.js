@@ -210,6 +210,4 @@ export class AmpShareTracking extends AMP.BaseElement {
 
 
 // Install the extension.
-AMP.extension('amp-share-tracking', AMP => {
-  AMP.registerElement('amp-share-tracking', AmpShareTracking);
-});
+AMP.registerElement('amp-share-tracking', AmpShareTracking);

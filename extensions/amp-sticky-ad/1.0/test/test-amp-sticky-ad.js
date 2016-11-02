@@ -18,7 +18,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 
-describes.realWin('amp-sticky-ad container 0.1', {
+describes.realWin('amp-sticky-ad container 1.0', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
@@ -286,7 +286,7 @@ describes.realWin('amp-sticky-ad container 0.1', {
 });
 
 
-describes.realWin('amp-sticky-ad 0.1 with real ad child', {
+describes.realWin('amp-sticky-ad 1.0 with real ad child', {
   win: { /* window spec */
     location: '...',
     historyOff: false,

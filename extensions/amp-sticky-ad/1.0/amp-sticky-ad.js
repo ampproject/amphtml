@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
+import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
@@ -219,19 +219,16 @@ class AmpStickyAd extends AMP.BaseElement {
     if (!isExperimentOn(this.win, UX_EXPERIMENT)) {
       return;
     }
-
     // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
     // Note: Use setStyle because we will remove this line later.
     setStyle(this.element, 'opacity', '1 !important');
     setStyle(this.element, 'background-image', 'none');
-
     const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
         .getPropertyValue('background-color');
     const newBackgroundColor = removeAlphaFromColor(backgroundColor);
     if (backgroundColor == newBackgroundColor) {
       return;
     }
-
     user().warn('AMP-STICKY-AD',
         'Do not allow container to be semitransparent');
     setStyle(this.element, 'background-color', newBackgroundColor);

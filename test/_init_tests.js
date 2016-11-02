@@ -41,6 +41,17 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 beforeTest();
 adopt(window);
 
+// Override AMP.extension to buffer extension installers.
+/**
+ * @param {string} name
+ * @param {function(!Object)} installer
+ * @const
+ */
+global.AMP.extension = function(name, installer) {
+  describes.bufferExtension(name, installer);
+};
+
+
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
