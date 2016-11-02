@@ -23,6 +23,9 @@ amp-sticky-ad {
   z-index: 11;
   max-height: 100px !important;
   box-sizing: border-box;
+  opacity: 1 !important;
+  background-image: none !important;
+  background-color: #fff;
 }
 
 .-amp-sticky-ad-layout {
@@ -37,10 +40,6 @@ amp-sticky-ad {
 
 amp-sticky-ad[visible] {
   visibility: visible !important;
-}
-
-.amp-sticky-ad-loaded {
-  background-color: #fff;
 }
 
 .-amp-sticky-ad-layout > amp-ad {
