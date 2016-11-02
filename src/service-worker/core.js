@@ -72,7 +72,7 @@ const CDN_JS_REGEX = new RegExp(
     `(/v0` +
       // Allow, but don't require, an extension under the v0 directory.
       // We explicitly forbid the `experiments` "extension".
-      `(?:/(?!experiments)[^.]+)?` +
+      `(?:/(?!experiments).+)?` +
     // Require text ".js" at the end.
     `\\.js)$`);
 
