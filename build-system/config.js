@@ -94,8 +94,9 @@ var karma = {
       'SL_Safari_8',
       'SL_Safari_9',
       'SL_Edge_latest',
-      // TODO(#895) Enable these.
-      //'SL_iOS_9_1',
+      'SL_iOS_8_4',
+      'SL_iOS_9_1',
+      'SL_iOS_10_0',
       //'SL_IE_11',
     ],
   })
