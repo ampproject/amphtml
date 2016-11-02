@@ -162,7 +162,6 @@ function describeEnv(factory) {
       const env = Object.create(null);
 
       beforeEach(() => {
-        console.log('beforeEach hook');
         let totalPromise = undefined;
         // Set up all fixtures.
         fixtures.forEach((fixture, index) => {
