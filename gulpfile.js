@@ -54,6 +54,7 @@ declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
+declareExtension('amp-animation', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
@@ -84,11 +85,13 @@ declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false);
+declareExtension('amp-reddit', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
+declareExtension('amp-sticky-ad', '1.0', true);
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -161,8 +164,8 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: true,
     include3pDirectories: true,
+    includePolyfills: true,
   });
 
   // For compilation with babel we start with the amp-babel entry point,
@@ -401,8 +404,8 @@ function checkTypes() {
   closureCompile(['./3p/integration.js'],  './dist',
       'integration-check-types.js', {
         externs: ['ads/ads.extern.js',],
-        includeBasicPolyfills: true,
         include3pDirectories: true,
+        includePolyfills: true,
         checkTypes: true,
       });
 }

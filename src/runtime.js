@@ -44,6 +44,7 @@ import {
 } from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryServiceForDoc} from './service/history-impl';
@@ -107,6 +108,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
@@ -174,14 +176,16 @@ function adoptShared(global, opts, callback) {
   // as `AMP.push()` in production.
   // TODO(dvoytenko, #5507): Only expose this method for `!getMode().minified`
   // once the compile-time inlining is done.
-  /**
-   * @param {string} unusedName
-   * @param {function(!Object)} installer
-   * @const
-   */
-  global.AMP.extension = function(unusedName, installer) {
-    installer(global.AMP);
-  };
+  if (!global.AMP.extension) {
+    /**
+     * @param {string} unusedName
+     * @param {function(!Object)} installer
+     * @const
+     */
+    global.AMP.extension = function(unusedName, installer) {
+      installer(global.AMP);
+    };
+  }
 
   /** @const */
   global.AMP.config = config;
@@ -835,4 +839,20 @@ export function registerForUnitTest(win) {
       registerElement(win, element.name, element.implementationClass);
     }
   }
+}
+
+
+/**
+ * Registers a specific element for testing.
+ * @param {!Window} win
+ * @param {string} elementName
+ * @visibleForTesting
+ */
+export function registerElementForTesting(win, elementName) {
+  const element = elementsForTesting[elementName];
+  if (!element) {
+    throw new Error('test element not found: ' + elementName);
+  }
+  win.AMP.registerElement(element.name, element.implementationClass,
+      element.css);
 }

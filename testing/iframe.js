@@ -64,7 +64,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:attached': 0,
       'amp:error': 0,
       'amp:stubbed': 0,
-      'amp:load:start': 0
+      'amp:load:start': 0,
     };
     const messages = [];
     let html = __html__[fixture];
@@ -136,7 +136,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       };
       let timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
-      }, 1000);
+      }, 2000);
       // Declare the test ready to run when the document was fully parsed.
       window.afterLoad = function() {
         resolve({
@@ -153,6 +153,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
     html += '<script>parent.afterLoad(window);</script>';
     let iframe = document.createElement('iframe');
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      iframe.setAttribute('scrolling', 'no');
+    }
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
       reject(event.error);
@@ -417,7 +420,7 @@ export function expectBodyToBecomeVisible(win) {
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  });
+  }, undefined, 5000);
 }
 
 /**

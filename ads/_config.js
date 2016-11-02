@@ -54,6 +54,7 @@ export const adConfig = {
       'https://staticd.cdn.adblade.com',
       'https://static.adblade.com',
     ],
+    renderStartImplemented: true,
   },
 
   adform: {},
@@ -96,6 +97,14 @@ export const adConfig = {
 
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
+  },
+
+  adverline: {
+    prefetch: 'https://ads.adverline.com/richmedias/amp.js',
+    preconnect: [
+      'https://adnext.fr',
+    ],
+    renderStartImplemented: true,
   },
 
   advertserve: {
@@ -206,6 +215,7 @@ export const adConfig = {
       'https://staticd.cdn.industrybrains.com',
       'https://static.industrybrains.com',
     ],
+    renderStartImplemented: true,
   },
 
   inmobi: {
@@ -403,6 +413,11 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  xlift: {
+    prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+    renderStartImplemented: true,
+  },
 
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',

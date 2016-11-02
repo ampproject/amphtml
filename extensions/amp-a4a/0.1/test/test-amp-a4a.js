@@ -19,6 +19,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -30,9 +31,12 @@ import {a4aRegistry} from '../../../../ads/_a4a-config';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
+const XHR_URL = 'http://iframe.localhost:' + location.port +
+      '/test/fixtures/served/iframe.html?args';
+
 class MockA4AImpl extends AmpA4A {
   getAdUrl() {
-    return Promise.resolve('https://test.location.org/ad/012345?args');
+    return Promise.resolve(XHR_URL);
   }
 
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
@@ -76,6 +80,7 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let xhrMockJson;
+  let getSigningServiceNamesMock;
   let viewerWhenVisibleMock;
   let mockResponse;
 
@@ -83,6 +88,9 @@ describe('amp-a4a', () => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
+    getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
+        'getSigningServiceNames');
+    getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         {mode: 'cors', method: 'GET'})
@@ -105,7 +113,7 @@ describe('amp-a4a', () => {
   });
 
   function stringToArrayBuffer(str) {
-    return new TextEncoder('utf-8').encode(str);
+    return utf8Encode(str);
   }
 
   function createA4aElement(doc) {
@@ -136,6 +144,12 @@ describe('amp-a4a', () => {
     return stringToArrayBuffer(buildCreativeString());
   }
 
+  function verifyNonAMPRender(a4a) {
+    a4a.onAmpCreativeRender = () => {
+      assert.fail('AMP creative should never have rendered!');
+    };
+  }
+
   /**
    *
    * @param {!Window} win
@@ -151,7 +165,7 @@ describe('amp-a4a', () => {
     let a4a;
     let fixture;
     beforeEach(() => {
-      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+      xhrMock.withArgs(XHR_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -169,6 +183,7 @@ describe('amp-a4a', () => {
     });
 
     it('for SafeFrame rendering case', () => {
+      verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
       mockResponse.headers.delete('X-Google-header');
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
@@ -186,6 +201,7 @@ describe('amp-a4a', () => {
     });
 
     it('for cached content iframe rendering case', () => {
+      verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
       mockResponse.headers.delete('X-Google-header');
       fixture.doc.body.appendChild(a4aElement);
@@ -223,7 +239,7 @@ describe('amp-a4a', () => {
     // fixture.addElement() step fails with a 'element.build does not exist'
     // error.  Skip this until we sort out how to properly do an E2E.
     it.skip('should render a single AMP ad in a friendly iframe', () => {
-      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+      xhrMock.withArgs(XHR_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -259,7 +275,7 @@ describe('amp-a4a', () => {
       mockResponse.headers.delete('X-Google-header');
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
-      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+      xhrMock.withArgs(XHR_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -272,6 +288,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
+        verifyNonAMPRender(a4a);
         doc.body.appendChild(a4aElement);
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
@@ -293,7 +310,7 @@ describe('amp-a4a', () => {
         // If rendering type is anything but safeframe, we SHOULD NOT attach a
         // SafeFrame.
         mockResponse.headers.append(RENDERING_TYPE_HEADER, headerVal);
-        xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        xhrMock.withArgs(XHR_URL, {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
@@ -306,6 +323,7 @@ describe('amp-a4a', () => {
           a4aElement.setAttribute('height', 50);
           a4aElement.setAttribute('type', 'adsense');
           const a4a = new MockA4AImpl(a4aElement);
+          verifyNonAMPRender(a4a);
           doc.body.appendChild(a4aElement);
           a4a.onLayoutMeasure();
           return a4a.layoutCallback().then(() => {
@@ -317,7 +335,7 @@ describe('amp-a4a', () => {
             const unsafeChild = a4aElement.querySelector('iframe');
             expect(unsafeChild).to.be.ok;
             expect(unsafeChild.getAttribute('src')).to.have.string(
-                'https://test.location.org/ad/012345?args');
+                XHR_URL);
           });
         });
       });
@@ -327,7 +345,7 @@ describe('amp-a4a', () => {
       // Set safeframe header, but it should be ignored when a signature
       // exists and validates.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
-      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+      xhrMock.withArgs(XHR_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -361,7 +379,7 @@ describe('amp-a4a', () => {
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in friendly iframe', () => {
-      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+      xhrMock.withArgs(XHR_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -374,6 +392,10 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
+        let onAmpCreativeRenderFired = false;
+        a4a.onAmpCreativeRender = () => {
+          onAmpCreativeRenderFired = true;
+        };
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const extractCreativeAndSignatureSpy = sandbox.spy(
             a4a, 'extractCreativeAndSignature');
@@ -415,6 +437,7 @@ describe('amp-a4a', () => {
             'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
             .to.be.ok;
           expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
+          expect(onAmpCreativeRenderFired).to.be.true;
         });
       });
     });
@@ -436,7 +459,7 @@ describe('amp-a4a', () => {
       });
     });
     it('#layoutCallback not valid AMP', () => {
-      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+      xhrMock.withArgs(XHR_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -449,6 +472,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
+        verifyNonAMPRender(a4a);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
           Promise.resolve({creative: mockResponse.arrayBuffer()}));
@@ -470,7 +494,7 @@ describe('amp-a4a', () => {
             const iframe = a4aElement.getElementsByTagName('iframe')[0];
             expect(iframe.getAttribute('srcdoc')).to.be.null;
             expect(iframe.src, 'verify iframe src w/ origin').to
-                .equal('https://test.location.org/ad/012345?args' +
+                .equal(XHR_URL +
                        '&__amp_source_origin=about%3Asrcdoc');
             expect(a4a.rendered_).to.be.true;
           });
@@ -478,7 +502,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should not leak full response to rendered dom', () => {
-      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+      xhrMock.withArgs(XHR_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -516,11 +540,18 @@ describe('amp-a4a', () => {
         // statement and verify that test fails, with full response spliced in
         // to shadow doc.
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-            Promise.resolve({
-              creative: stringToArrayBuffer(validCSSAmp.reserialized),
+          stringToArrayBuffer(validCSSAmp.reserialized).then(buffer => {
+            return {
+              creative: buffer,
               signature: base64UrlDecodeToBytes(validCSSAmp.signature),
-            }));
+            };
+          })
+        );
         a4a.onLayoutMeasure();
+        let onAmpCreativeRenderFired = false;
+        a4a.onAmpCreativeRender = () => {
+          onAmpCreativeRenderFired = true;
+        };
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
           const friendlyIframe = a4aElement.getElementsByTagName('iframe')[0];
@@ -533,6 +564,7 @@ describe('amp-a4a', () => {
           expect(frameDoc.querySelector('style[amp-custom]')).to.be.ok;
           expect(frameDoc.body.innerHTML, 'body content')
               .to.contain('Hello, world.');
+          expect(onAmpCreativeRenderFired).to.be.true;
         });
       });
     });
@@ -546,6 +578,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        verifyNonAMPRender(a4a);
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
@@ -556,8 +589,8 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.querySelector('iframe[src]');
           expect(iframe).to.be.ok;
-          expect(iframe.src.indexOf('https://test.location.org')).to.equal(0);
-          expect(iframe.style.visibility).to.equal('');
+          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
+          expect(isStyleVisible(fixture.win, iframe)).to.be.true;
         });
       });
     });
@@ -567,6 +600,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        verifyNonAMPRender(a4a);
         a4a.onLayoutMeasure();
         return a4a.adPromise_.then(() => a4a.layoutCallback().then(() => {
           a4a.vsync_.runScheduledTasks_();
@@ -574,8 +608,8 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.children[0];
           expect(iframe.tagName).to.equal('IFRAME');
-          expect(iframe.src.indexOf('https://test.location.org')).to.equal(0);
-          expect(iframe.style.visibility).to.equal('');
+          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
+          expect(isStyleVisible(fixture.win, iframe)).to.be.true;
         }));
       });
     });
@@ -588,6 +622,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        verifyNonAMPRender(a4a);
         a4a.onLayoutMeasure();
         const layoutCallbackPromise = a4a.layoutCallback();
         rejectXhr(new Error('XHR Error'));
@@ -597,7 +632,7 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.children[0];
           expect(iframe.tagName).to.equal('IFRAME');
-          expect(iframe.src.indexOf('https://test.location.org')).to.equal(0);
+          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
           expect(iframe.style.visibility).to.equal('');
         });
       });
@@ -613,11 +648,14 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new AmpA4A(a4aElement);
+        //a4a.config = {};
         a4a.buildCallback();
         a4a.preconnectCallback(false);
         const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-        expect(preconnects.length).to.not.equal(0);
+        expect(preconnects.length).to.equal(2);
         expect(preconnects[0].getAttribute('href')).to
+            .equal('https://tpc.googlesyndication.com');
+        expect(preconnects[1].getAttribute('href')).to
             .equal('https://googleads.g.doubleclick.net');
       });
     });
@@ -683,7 +721,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
-        a4a.adUrl_ = 'http://foo.com';
+        a4a.adUrl_ = 'https://nowhere.org';
         a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
         return a4a.maybeRenderAmpAd_().then(rendered => {
           // Force vsync system to run all queued tasks, so that DOM mutations
@@ -700,7 +738,7 @@ describe('amp-a4a', () => {
             expect(a4aElement.children.length).to.equal(1);
             const iframe = a4aElement.children[0];
             expect(iframe.tagName).to.equal('IFRAME');
-            expect(iframe.src.indexOf('http://foo.com')).to.equal(0);
+            expect(iframe.src.indexOf('https://nowhere.org')).to.equal(0);
             expect(iframe.style.visibility).to.equal('');
           });
         });
@@ -713,8 +751,9 @@ describe('amp-a4a', () => {
         doc.body.appendChild(a4aElement);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
-        const bytes = buildCreativeArrayBuffer();
-        return a4a.maybeRenderAmpAd_(bytes).then(rendered => {
+        return buildCreativeArrayBuffer().then(bytes => {
+          return a4a.maybeRenderAmpAd_(bytes);
+        }).then(rendered => {
           expect(rendered).to.be.true;
           // Verify iframe presence.
           expect(a4aElement.children.length).to.equal(1);
@@ -739,8 +778,9 @@ describe('amp-a4a', () => {
         doc.body.appendChild(a4aElement);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
-        const bytes = buildCreativeArrayBuffer();
-        return a4a.maybeRenderAmpAd_(bytes).then(() => {
+        return buildCreativeArrayBuffer().then(bytes => {
+          return a4a.maybeRenderAmpAd_(bytes);
+        }).then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
@@ -801,7 +841,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         doc.body.appendChild(a4aElement);
         const a4a = new MockA4AImpl(a4aElement);
-        xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        xhrMock.withArgs(XHR_URL, {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',

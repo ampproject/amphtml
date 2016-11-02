@@ -173,6 +173,28 @@ app.use('/form/echo-json/post', function(req, res) {
   });
 });
 
+app.use('/form/json/poll1', function(req, res) {
+  assertCors(req, res, ['POST']);
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      result: [{
+        answer: 'Penguins',
+        percentage: new Array(77),
+      }, {
+        answer: 'Ostriches',
+        percentage: new Array(8),
+      }, {
+        answer: 'Kiwis',
+        percentage: new Array(14),
+      }, {
+        answer: 'Wekas',
+        percentage: new Array(1),
+      },]
+    }));
+  });
+});
 
 app.use('/form/search-html/get', function(req, res) {
   res.setHeader('Content-Type', 'text/html');
@@ -402,6 +424,21 @@ app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
       return;
     }
     next();
+});
+
+
+app.use('/impression-proxy/', function(req, res) {
+  assertCors(req, res, ['GET']);
+  // Fake response with the following optional fields:
+  // location: The Url the that server would have sent redirect to w/o ALP
+  // tracking_url: URL that should be requested to track click
+  // gclid: The conversion tracking value
+  const body = {
+    'location': 'localhost:8000/examples/?gclid=1234&foo=bar&example=123',
+    'tracking_url': 'tracking_url',
+    'gclid': '1234',
+  };
+  res.send(body);
 });
 
 // Proxy with unminified JS.
