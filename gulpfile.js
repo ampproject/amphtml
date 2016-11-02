@@ -204,6 +204,30 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     wrapper: '<%= contents %>'
   });
 
+  // Entry point for inabox runtime.
+  compileJs('./src/inabox/', 'amp-inabox-babel.js', './dist', {
+    toName: 'amp-inabox.js',
+    minifiedName: 'inabox-v0.js',
+    includePolyfills: true,
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    minify: shouldMinify,
+    wrapper: '<%= contents %>',
+  });
+
+  // inabox-host
+  compileJs('./ads/inabox/', 'inabox-host-babel.js', './dist', {
+    toName: 'amp-inabox-host.js',
+    minifiedName: 'inabox-host-v0.js',
+    includePolyfills: false,
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    minify: shouldMinify,
+    wrapper: '<%= contents %>',
+  });
+
   var frameHtml = '3p/frame.max.html';
   thirdPartyBootstrap(frameHtml, shouldMinify);
   if (watch) {

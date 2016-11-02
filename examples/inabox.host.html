@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <title>amp-inabox-host example</title>
+</head>
+<body>
+  <div style="height: 120vh"></div>
+  <iframe
+      src="http://ads.localhost:8000/examples/inabox.amp.max.html"
+      scrolling="no"
+      width="300" height="200">
+  </iframe>
+  <div style="height: 120vh"></div>
+
+  <script>
+    initInaboxHost(window);
+
+    function initInaboxHost(win) {
+      const hostScriptUrl = 'http://localhost:8000/dist/amp-inabox-host.js';
+      preloadScript(win, hostScriptUrl);
+
+      // Keep all iframes that potentially can render AMP content in this array
+      win.ampInaboxIframes = [];
+      // Keep all amp-inabox post-messages in this array.
+      win.ampInaboxPendingMessages = [];
+
+      let hostScriptRequested = false;
+
+      const listener = event => {
+        if (!isInaboxMessage(event.data)) {
+          return;
+        }
+        win.ampInaboxPendingMessages.push(event);
+        console.log(event.data);
+
+        // Load and execute host script once.
+        if (hostScriptRequested) {
+          return;
+        }
+        hostScriptRequested = true;
+        loadScript(win, hostScriptUrl, () => {
+          win.removeEventListener('message', listener);
+          delete win.ampInaboxIframes;
+          delete win.ampInaboxPendingMessages;
+          console.log('inabox-host.js loaded.');
+        });
+      };
+      win.addEventListener('message', listener);
+    }
+
+    function isInaboxMessage(message) {
+      return typeof message === 'string' && message.indexOf('amp-inabox:') == 0;
+    }
+
+    function preloadScript(win, url) {
+      const link = win.document.createElement('link');
+      link.rel = 'preload';
+      link.href = url;
+      link.as = 'script';
+      win.document.head.appendChild(link);
+    }
+
+    function loadScript(win, url, callback) {
+      const script = win.document.createElement('script');
+      script.src = url;
+      script.onload = callback;
+      win.document.body.appendChild(script);
+    }
+  </script>
+</body>
+</html>
