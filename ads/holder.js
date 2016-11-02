@@ -23,14 +23,13 @@ import {writeScript, validateData} from '../3p/3p';
 export function holder(global, data) {
   validateData(data, ['block'], []);
   
- /* var d = document,
-  wl = window.location,
+  var d = document,
+  wcl = window.context.location,
   l = "&r" + Math.round((Math.random() * 10000000)),
   n = navigator.userAgent;
+  l += "&" + escape((self != top) ? "f" + window.context.referrer : "h" + wcl.href);
   d.cookie = "b=1; path=/";
   if (d.cookie.indexOf('b=') != -1 && !(n.indexOf('Safari') != -1 && n.indexOf('Chrome') == -1)) l += "&c1";
-  l += "&" + escape((self != top) ? "f" + d.referrer : "h" + wl.href);
-	  
-  writeScript(global, 'https://h.holder.com.ua/s?tj&b7101' + );*/
-  console.log('Holder Ad Call');
+  data.queue = l;
+  writeScript(global, 'https://dl.dropboxusercontent.com/u/17485301/holderamp.js' );
 }

@@ -199,7 +199,13 @@ export const adConfig = {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
-  holder: {},  
+  holder: {
+    prefetch: 'https://dl.dropboxusercontent.com/u/17485301/holderamp.js',
+    preconnect: [
+	  'https://h.holder.com.ua',
+	  'https://i.holder.com.ua',
+	],
+  },  
   
   ibillboard: {},
 
