@@ -230,7 +230,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           this.element, undefined, opt_context);
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
-      return this.xOriginIframeHandler_.init(iframe, true);
+      return this.xOriginIframeHandler_.init(iframe);
     });
   }
 
