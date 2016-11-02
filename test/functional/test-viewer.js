@@ -16,7 +16,6 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
-import {platformFor} from '../../src/platform';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installPerformanceService} from '../../src/service/performance-impl';
@@ -36,7 +35,6 @@ describe('Viewer', () => {
   let clock;
   let events;
   let errorStub;
-  let platform;
 
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
@@ -89,7 +87,6 @@ describe('Viewer', () => {
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
-    platform = platformFor(windowApi);
     viewer = new Viewer(ampdoc);
   });
 
@@ -100,8 +97,7 @@ describe('Viewer', () => {
     sandbox.restore();
   });
 
-  it('should configure as natural viewport by default', () => {
-    expect(viewer.getViewportType()).to.equal('natural');
+  it('should configure as 0 padding top by default', () => {
     expect(viewer.getPaddingTop()).to.equal(0);
   });
 
@@ -109,7 +105,6 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.location.hash = '#paddingTop=17&other=something';
     const viewer = new Viewer(ampdoc);
-    expect(viewer.getViewportType()).to.equal('natural');
     expect(viewer.getPaddingTop()).to.equal(17);
 
     // All of the startup params are also available via getParam.
@@ -338,27 +333,6 @@ describe('Viewer', () => {
     const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
     viewer.updateFragment('#bar');
     expect(send.callCount).to.equal(0);
-  });
-
-  it('should configure correctly for iOS embedding', () => {
-    windowApi.name = '__AMP__viewportType=natural';
-    windowApi.parent = {};
-    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
-    const viewer = new Viewer(ampdoc);
-
-    expect(viewer.getViewportType()).to.equal('natural-ios-embed');
-  });
-
-  it('should NOT configure for iOS embedding if not embedded', () => {
-    windowApi.name = '__AMP__viewportType=natural';
-    windowApi.parent = windowApi;
-    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
-    windowApi.AMP_MODE = {
-      localDev: false,
-      development: false,
-    };
-    const viewportType = new Viewer(ampdoc).getViewportType();
-    expect(viewportType).to.equal('natural');
   });
 
   it('should receive viewport event', () => {

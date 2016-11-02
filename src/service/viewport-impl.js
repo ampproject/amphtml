@@ -34,7 +34,7 @@ import {installVsyncService} from './vsync-impl';
 import {installViewerServiceForDoc} from './viewer-impl';
 import {isExperimentOn} from '../experiments';
 import {waitForBody} from '../dom';
-
+import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
 
@@ -1688,7 +1688,7 @@ function createViewport(ampdoc) {
   const viewer = installViewerServiceForDoc(ampdoc);
   let binding;
   if (ampdoc.isSingleDoc() &&
-          viewer.getViewportType() == 'natural-ios-embed') {
+      getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
         // The overriding of document.body fails in iOS7.
         && platformFor(ampdoc.win).getMajorVersion() > 7) {
@@ -1702,6 +1702,46 @@ function createViewport(ampdoc) {
   return new Viewport(ampdoc, binding, viewer);
 }
 
+/**
+ * The type of the viewport.
+ * @enum {string}
+ */
+const ViewportType = {
+
+  /**
+   * Viewer leaves sizing and scrolling up to the AMP document's window.
+   */
+  NATURAL: 'natural',
+
+  /**
+   * This is AMP-specific type and doesn't come from viewer. This is the type
+   * that AMP sets when Viewer has requested "natural" viewport on a iOS
+   * device.
+   * See:
+   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
+   */
+  NATURAL_IOS_EMBED: 'natural-ios-embed',
+};
+
+/**
+ * @param {!Window} win
+ * @param {!./viewer-impl.Viewer} viewer
+ * @return {string}
+ */
+function getViewportType(win, viewer) {
+  let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
+  if (platformFor(win).isIos()
+      && ((viewportType == ViewportType.NATURAL && viewer.isIframed())
+          // Enable iOS Embedded mode so that it's easy to test against a more
+          // realistic iOS environment.
+          || getMode(win).localDev
+          || getMode(win).development)) {
+    viewportType = ViewportType.NATURAL_IOS_EMBED;
+  }
+  dev().fine(TAG_, '- viewportType:', viewportType);
+  return viewportType;
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
@@ -1710,4 +1750,4 @@ function createViewport(ampdoc) {
 export function installViewportServiceForDoc(ampdoc) {
   return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
       ampdoc => createViewport(ampdoc)));
-};
+}
