@@ -562,7 +562,7 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
     }
     return `${base}/v0/${extensionId}-0.1.js`;
   }
-  return `${base}/rtv/${getMode().version}/v0/${extensionId}-0.1.js`;
+  return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
 }
 
 
