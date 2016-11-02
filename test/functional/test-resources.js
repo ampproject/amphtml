@@ -1575,7 +1575,6 @@ describe('Resources.add', () => {
       dispatchCustomEvent() {
         return;
       },
-      setAttribute() {},
     };
     element.build = sandbox.spy();
     return element;
