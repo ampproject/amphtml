@@ -16,7 +16,7 @@
 
 import {makeCorrelator} from './correlator';
 import {validateData, loadScript} from '../../3p/3p';
-import {user} from '../../src/log';
+import {dev, user} from '../../src/log';
 import {setStyles} from '../../src/style';
 
 /**
@@ -56,15 +56,13 @@ export function doubleclick(global, data) {
 
   // Center the ad in the container.
   const container = global.document.querySelector('#c');
-  if (container) {
-    setStyles(container, {
-      top: '50%',
-      left: '50%',
-      bottom: '',
-      right: '',
-      transform: 'translate(-50%, -50%)',
-    });
-  }
+  setStyles(dev().assertElement(container), {
+    top: '50%',
+    left: '50%',
+    bottom: '',
+    right: '',
+    transform: 'translate(-50%, -50%)',
+  });
 
   if (data.useSameDomainRenderingUntilDeprecated != undefined ||
       data.multiSize) {
