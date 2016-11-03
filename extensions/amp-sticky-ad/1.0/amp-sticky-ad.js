@@ -64,6 +64,10 @@ class AmpStickyAd extends AMP.BaseElement {
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
 
+    const paddingBar = this.win.document.createElement(
+         'i-amp-sticky-ad-top-padding');
+    this.element.appendChild(paddingBar);
+
     // On viewport scroll, check requirements for amp-stick-ad to display.
     this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.displayAfterScroll_());
