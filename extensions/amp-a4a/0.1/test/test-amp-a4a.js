@@ -30,7 +30,9 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {utf8Encode} from '../../../../src/utils/bytes';
+import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
@@ -123,7 +125,7 @@ describe('amp-a4a', () => {
   }
 
   function buildCreativeArrayBuffer() {
-    return stringToArrayBuffer(buildCreativeString());
+    return utf8Encode(buildCreativeString());
   }
 
   function verifyNonAMPRender(a4a) {
