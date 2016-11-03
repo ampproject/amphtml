@@ -79,7 +79,7 @@ In most implementations for live blogs, content is either pushed by the server
 to the client instance of a page, or the client polls a JSON endpoint to receive
 updates. The implementation for this component is different, in that the client
 instance of the page polls the server copy of the document for updates to the
-`items` reference point.
+`items` reference point. For instance: if the user is viewing a document served from an AMP cache, the client will poll that document hosted on that AMP cache for updates; if the user is viewing a document served from a web publisher's origin domain (e.g. "example.com"), then the client will poll the document hosted on that origin domain for updates.
 
 This means that publishers of content do not need to set up a JSON endpoint or
 push mechanism for this component to work. New content just needs to be
