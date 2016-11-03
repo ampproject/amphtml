@@ -103,7 +103,8 @@ export class AmpFreshManager {
    * @private
    */
   onFetchDocumentFailure_() {
-    user().error('Failed fetching fresh document through amp-fresh');
+    user().error('AMP-FRESH', 'Failed fetching fresh document through ' +
+        'amp-fresh');
     return this.ampdoc.whenReady().then(() => {
       Object.keys(this.ampFreshInstances_).forEach(id => {
         this.ampFreshInstances_[id].setFreshReady();

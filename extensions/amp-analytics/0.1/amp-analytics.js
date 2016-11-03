@@ -483,8 +483,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
     opt_encode = opt_encode === undefined ? true : opt_encode;
     if (opt_iterations < 0) {
-      user().error('Maximum depth reached while expanding variables. Please ' +
-          'ensure that the variables are not recursive.');
+      user().error('AMP-ANALYTICS', 'Maximum depth reached while expanding ' +
+          'variables. Please ensure that the variables are not recursive.');
       return template;
     }
 
