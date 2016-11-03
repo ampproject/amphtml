@@ -799,11 +799,6 @@ describe('Viewer', () => {
 
   describe('isTrustedViewer', () => {
 
-    function test(origin, toBeTrusted) {
-      const viewer = new Viewer(ampdoc);
-      expect(viewer.isTrustedViewerOrigin_(origin)).to.equal(toBeTrusted);
-    }
-
     it('should consider non-trusted when not iframed', () => {
       windowApi.parent = windowApi;
       windowApi.location.ancestorOrigins = ['https://google.com'];
@@ -992,7 +987,15 @@ describe('Viewer', () => {
       });
     });
 
-    it('should trust domain variations', () => {
+    function test(origin, toBeTrusted, opt_inWebView) {
+      it('testing ' + origin, () => {
+        const viewer = new Viewer(ampdoc);
+        viewer.isWebviewEmbedded_ = !!opt_inWebView;
+        expect(viewer.isTrustedViewerOrigin_(origin)).to.equal(toBeTrusted);
+      });
+    }
+
+    describe('should trust domain variations', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
@@ -1011,18 +1014,30 @@ describe('Viewer', () => {
       test('https://www.google.cat', true);
     });
 
-    it('should not trust host as referrer with http', () => {
+    describe('should not trust host as referrer with http', () => {
       test('http://google.com', false);
     });
 
-    it('should NOT trust wrong or non-whitelisted domain variations', () => {
-      test('https://google.net', false);
-      test('https://google.other.com', false);
-      test('https://www.google.other.com', false);
-      test('https://withgoogle.com', false);
-      test('https://acme.com', false);
-      test('https://google', false);
-      test('https://www.google', false);
+    describe('should NOT trust wrong or non-whitelisted domain variations',
+      () => {
+        test('https://google.net', false);
+        test('https://google.other.com', false);
+        test('https://www.google.other.com', false);
+        test('https://withgoogle.com', false);
+        test('https://acme.com', false);
+        test('https://google', false);
+        test('https://www.google', false);
+      });
+
+    describe('tests for b/32626673', () => {
+      test('www.google.com', true, true);
+      test('www.google.com', false, /* not in webview */ false);
+      test('www.google.de', true, true);
+      test('www.google.co.uk', true, true);
+      test(':www.google.de', false, true);
+      test('news.google.de', false, true);
+      test('www.google.de/', false, true);
+      test('www.acme.com', false, true);
     });
   });
 

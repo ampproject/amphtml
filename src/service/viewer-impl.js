@@ -682,6 +682,12 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
+    // TEMPORARY HACK due to a misbehaving native app. See b/32626673
+    // In native apps all security bets are off anyway, and in browser
+    // origins never take the form that is matched here.
+    if (this.isWebviewEmbedded_ && /^www\.[.a-z]+$/.test(urlString)) {
+      return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
+    }
     /** @const {!Location} */
     const url = parseUrl(urlString);
     if (url.protocol != 'https:') {
