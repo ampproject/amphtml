@@ -372,8 +372,12 @@ describe('amp-analytics.visibility', () => {
   });
 
   describe('getElement', () => {
-    let div, img1, img2, analytics;
+    let div, img1, img2, analytics, iframe, ampEl;
     beforeEach(() => {
+      ampEl = document.createElement('span');
+      ampEl.className = '-amp-element';
+      ampEl.id = 'ampEl';
+      iframe = document.createElement('iframe');
       div = document.createElement('div');
       div.id = 'div';
       img1 = document.createElement('amp-img');
@@ -382,18 +386,20 @@ describe('amp-analytics.visibility', () => {
       img2.id = 'img2';
       analytics = document.createElement('amp-analytics');
       analytics.id = 'analytics';
+      ampEl.appendChild(iframe);
+      iframe.srcdoc = div.outerHTML;
       div.appendChild(img1);
       img1.appendChild(analytics);
       img1.appendChild(img2);
-      document.body.appendChild(div);
+      document.body.appendChild(ampEl);
     });
 
     afterEach(() => {
-      document.body.removeChild(div);
+      document.body.removeChild(ampEl);
     });
 
     it('finds element by id', () => {
-      expect(getElement('#div', analytics, undefined)).to.equal(div);
+      expect(getElement('#ampEl', analytics, undefined)).to.equal(ampEl);
     });
 
     // In the following tests, getElement returns non-amp elements. Those are
@@ -411,6 +417,11 @@ describe('amp-analytics.visibility', () => {
     it('finds element by tagname, selectionMethod=scope', () => {
       expect(getElement('div', analytics, 'scope')).to.equal(null);
       expect(getElement('amp-img', analytics, 'scope')).to.equal(img2);
+    });
+
+    it.skip('finds element for selectionMethod=host', () => {
+      expect(getElement(undefined, analytics, 'host')).to.equal(ampEl);
+      expect(getElement('amp-img', analytics, 'host')).to.equal(ampEl);
     });
   });
 });

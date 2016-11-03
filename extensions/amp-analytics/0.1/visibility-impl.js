@@ -164,7 +164,9 @@ export function getElement(selector, el, selectionMethod) {
   } else if (selectionMethod == 'host') {
     const elWin = el.ownerDocument.defaultView;
     const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
-    return closestBySelector(parentEl, '.-amp-element');
+    if (parentEl) {
+      return closestBySelector(parentEl, '.-amp-element');
+    }
   } else if (selector[0] == '#') {
     return el.ownerDocument.getElementById(selector.slice(1));
   }

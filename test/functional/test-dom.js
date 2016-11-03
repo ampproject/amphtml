@@ -112,7 +112,35 @@ describe('DOM', () => {
     expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
-  it('closest should find first match', () => {
+  it('closestBySelector should find first match', () => {
+    const parent = document.createElement('parent');
+    parent.className = 'parent';
+    parent.id = 'parent';
+
+    const element = document.createElement('element');
+    element.id = 'element';
+    element.className = 'element';
+    parent.appendChild(element);
+
+    const child = document.createElement('child');
+    child.id = 'child';
+    child.className = 'child';
+    element.appendChild(child);
+
+    expect(dom.closestBySelector(child, 'child')).to.equal(child);
+    expect(dom.closestBySelector(child, '.child')).to.equal(child);
+    expect(dom.closestBySelector(child, '#child')).to.equal(child);
+
+    expect(dom.closestBySelector(child, 'element')).to.equal(element);
+    expect(dom.closestBySelector(child, '.element')).to.equal(element);
+    expect(dom.closestBySelector(child, '#element')).to.equal(element);
+
+    expect(dom.closestBySelector(child, 'parent')).to.equal(parent);
+    expect(dom.closestBySelector(child, '.parent')).to.equal(parent);
+    expect(dom.closestBySelector(child, '#parent')).to.equal(parent);
+  });
+
+  it('elementByTag should find first match', () => {
     const parent = document.createElement('parent');
 
     const element1 = document.createElement('element');
@@ -695,6 +723,54 @@ describe('DOM', () => {
       dom.tryFocus(element);
       expect(focusSpy).to.have.been.called;
       expect(focusSpy).to.not.throw;
+    });
+  });
+
+  describe('matches', () => {
+    let div, img1, iframe, ampEl;
+    beforeEach(() => {
+      ampEl = document.createElement('amp-ad');
+      ampEl.className = '-amp-element';
+      ampEl.id = 'ampEl';
+      iframe = document.createElement('iframe');
+      div = document.createElement('div');
+      div.id = 'div';
+      img1 = document.createElement('amp-img');
+      img1.id = 'img1';
+      ampEl.appendChild(iframe);
+      iframe.srcdoc = div.outerHTML;
+      div.appendChild(img1);
+      document.body.appendChild(ampEl);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(ampEl);
+    });
+
+    it('finds element by id', () => {
+      expect(dom.matches(ampEl, '#ampEl')).to.be.true;
+      [div, img1, iframe].map(el => {
+        expect(dom.matches(el, '#ampEl')).to.be.false;
+      });
+    });
+
+    it('finds element by tagname', () => {
+      expect(dom.matches(div, 'div')).to.be.true;
+      [ampEl, img1, iframe].map(el => {
+        expect(dom.matches(el, 'div')).to.be.false;
+      });
+    });
+
+    it('finds element by using callback', () => {
+      div.matches  = div.webkitMatchesSelector = div.mozMatchesSelector =
+          div.msMatchesSelector = div.oMatchesSelector= undefined;
+      expect(dom.matches(div, 'span')).to.be.false;
+      expect(dom.matches(div, 'span', () => {
+        return true;
+      })).to.be.true;
+      expect(dom.matches(div, 'span', () => {
+        return false;
+      })).to.be.false;
     });
   });
 });
