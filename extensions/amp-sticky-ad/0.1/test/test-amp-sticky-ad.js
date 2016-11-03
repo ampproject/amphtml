@@ -18,20 +18,20 @@ import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 
-describes.realWin('amp-sticky-ad container 0.1', {
+describes.realWin('amp-sticky-ad 0.1 version', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
   },
   amp: { /* amp spec */
     runtimeOn: false,
-    extensions: ['amp-sticky-ad'],
+    extensions: ['amp-sticky-ad:0.1'],
   },
 }, env => {
   let win;
   let ampStickyAd;
   let impl;
-  describe('with valid child', () => {
+  describe('with valid child 0.1', () => {
     beforeEach(() => {
       win = env.win;
       ampStickyAd = win.document.createElement('amp-sticky-ad');
@@ -240,7 +240,7 @@ describes.realWin('amp-sticky-ad container 0.1', {
   });
 
 
-  describe('with unvalid child', () => {
+  describe('with unvalid child 0.1', () => {
     let ampImg;
     let ampAd1;
     let ampAd2;
@@ -293,7 +293,7 @@ describes.realWin('amp-sticky-ad 0.1 with real ad child', {
   },
   amp: { /* amp spec */
     runtimeOn: false,
-    extensions: ['amp-sticky-ad', 'amp-ad'],
+    extensions: ['amp-sticky-ad:0.1', 'amp-ad'],
   },
 }, env => {
   let win;

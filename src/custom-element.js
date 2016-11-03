@@ -1008,6 +1008,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the resource ID of the element.
+     * @return {number}
+     */
+    getResourceId() {
+      return this.getResources().getResourceForElement(this).getId();
+    }
+
+    /**
      * The runtime calls this method to determine if {@link layoutCallback}
      * should be called again when layout changes.
      * @return {boolean}
