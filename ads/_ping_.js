@@ -49,7 +49,7 @@ export function _ping_(global, data) {
     }
     global.context.observeIntersection(function(changes) {
       changes.forEach(function(c) {
-        dev().info('Intersection: (WxH)' +
+        dev().info('AMP-AD', 'Intersection: (WxH)' +
             `${c.intersectionRect.width}x${c.intersectionRect.height}`);
       });
     });

@@ -121,8 +121,8 @@ export function isVisibilitySpecValid(config) {
   }
 
   if (ctMax < ctMin || ttMax < ttMin) {
-    user().warn('Max value in timing conditions should be more ' +
-        'than the min value.');
+    user().warn('AMP-ANALYTICS', 'Max value in timing conditions should be ' +
+        'more than the min value.');
     return false;
   }
 
