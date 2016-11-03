@@ -87,9 +87,7 @@ const SHARED_IFRAME_PROPERTIES = {
 export let AdResponseDef;
 
 /** @typedef {{
-      cssUtf16CharOffsets: Array<number>,
-      bodyUtf16CharOffsets: !Array<number>,
-      bodyAttributes: ?string,
+      minifiedCreative: string,
       customElementExtensions: Array<string>,
       customStylesheets: Array<string>
     }} */
@@ -733,11 +731,6 @@ export class AmpA4A extends AMP.BaseElement {
                 'frameborder': '0', 'allowfullscreen': '',
                 'allowtransparency': '', 'scrolling': 'no'}));
           this.applyFillContent(iframe);
-
-          const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
-          const bodyBlock = this.formatBody_(creative, creativeMetaData);
-          const bodyAttrString = creativeMetaData.bodyAttributes ?
-                  ' ' + creativeMetaData.bodyAttributes : '';
           const fontsArray = [];
           if (creativeMetaData.customStylesheets) {
             creativeMetaData.customStylesheets.forEach(s => {
@@ -747,17 +740,10 @@ export class AmpA4A extends AMP.BaseElement {
               }
             });
           }
-          const modifiedCreative =
-            `<!doctype html><html ⚡4ads>
-            <head>
-              <style amp-custom>${cssBlock}</style>
-              </head>
-            <body ${bodyAttrString}>${bodyBlock}</body>
-            </html>`;
           return installFriendlyIframeEmbed(
             iframe, this.element, {
               url: this.adUrl_,
-              html: modifiedCreative,
+              html: creativeMetaData.minifiedCreative,
               extensionIds: creativeMetaData.customElementExtensions || [],
               fonts: fontsArray,
             }, unusedEmbedWin => {
@@ -765,6 +751,10 @@ export class AmpA4A extends AMP.BaseElement {
               // services using `installServiceInEmbedScope(embedWin, id, ...)`.
               // See `url-replacements.js` `installUrlReplacementsForEmbed`.
             }).then(friendlyIframeEmbed => {
+              // Ensure visibility hidden has been removed (set by boilerplate).
+              const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
+                friendlyIframeEmbed.win.document;
+              frameDoc.body.style.visibility = 'visible';
               // Capture phase click handlers on the ad.
               this.registerExpandUrlParams_(friendlyIframeEmbed.win);
               // Bubble phase click handlers on the ad.
@@ -774,6 +764,7 @@ export class AmpA4A extends AMP.BaseElement {
               return true;
             });
         } catch (e) {
+          dev().error('Error injecting creative in friendly frame', e);
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
           // TODO: report!
@@ -879,93 +870,50 @@ export class AmpA4A extends AMP.BaseElement {
       return null;
     }
     try {
-      return this.buildCreativeMetaData_(/** @type {!Object} */ (JSON.parse(
-        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd))));
+      const metaDataObj = JSON.parse(
+        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
+      const ampRuntimeUtf16CharOffsets =
+        metaDataObj['ampRuntimeUtf16CharOffsets'];
+      if (!isValidOffsetArray(ampRuntimeUtf16CharOffsets)) {
+        throw new Error('Invalid runtime offsets');
+      }
+      const metaData = {};
+      if (metaDataObj['customElementExtensions']) {
+        metaData.customElementExtensions =
+          metaDataObj['customElementExtensions'];
+        if (!isArray(metaData.customElementExtensions)) {
+          throw new Error('Invalid extensions');
+        }
+      }
+      if (metaDataObj['customStylesheets']) {
+        // Expect array of objects with at least one key being 'href' whose value
+        // is URL.
+        metaData.customStylesheets = metaDataObj['customStylesheets'];
+        const errorMsg = 'Invalid custom stylesheets';
+        if (!isArray(metaData.customStylesheets)) {
+          throw new Error(errorMsg);
+        }
+        metaData.customStylesheets.forEach(stylesheet => {
+          if (!isObject(stylesheet) || !stylesheet['href'] ||
+              typeof stylesheet['href'] !== 'string' ||
+              !/^https:\/\//i.test(stylesheet['href'])) {
+            throw new Error(errorMsg);
+          }
+        });
+      }
+      // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
+      // metadata as its in the head?
+      metaData.minifiedCreative =
+        creative.slice(0, ampRuntimeUtf16CharOffsets[0]) +
+        creative.slice(ampRuntimeUtf16CharOffsets[1], metadataStart) +
+        creative.slice(metadataEnd + '</script>'.length);
+      return metaData;
     } catch (err) {
       dev().warn('A4A', 'Invalid amp metadata: %s',
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }
   }
-
-  /**
-   * @param {!Object} metaDataObj JSON extraced from creative
-   * @return {!CreativeMetaDataDef} if valid, null otherwise
-   * @private
-   */
-  buildCreativeMetaData_(metaDataObj) {
-    const metaData = {};
-    metaData.bodyUtf16CharOffsets = metaDataObj['bodyUtf16CharOffsets'];
-    if (!isValidOffsetArray(metaData.bodyUtf16CharOffsets)) {
-      // Invalid/Missing body offsets array.
-      throw new Error('Invalid/missing body offsets');
-    }
-    if (metaDataObj['cssUtf16CharOffsets']) {
-      metaData.cssUtf16CharOffsets = metaDataObj['cssUtf16CharOffsets'];
-      if (!isValidOffsetArray(metaData.cssUtf16CharOffsets)) {
-        throw new Error('Invalid CSS offsets');
-      }
-    }
-    if (metaDataObj['bodyAttributes']) {
-      metaData.bodyAttributes = metaDataObj['bodyAttributes'];
-      if (typeof metaData.bodyAttributes !== 'string') {
-        throw new Error('Invalid body attributes');
-      }
-    }
-    if (metaDataObj['customElementExtensions']) {
-      metaData.customElementExtensions = metaDataObj['customElementExtensions'];
-      if (!isArray(metaData.customElementExtensions)) {
-        throw new Error('Invalid extensions');
-      }
-    }
-    if (metaDataObj['customStylesheets']) {
-      // Expect array of objects with at least one key being 'href' whose value
-      // is URL.
-      metaData.customStylesheets = metaDataObj['customStylesheets'];
-      const errorMsg = 'Invalid custom stylesheets';
-      if (!isArray(metaData.customStylesheets)) {
-        throw new Error(errorMsg);
-      }
-      metaData.customStylesheets.forEach(stylesheet => {
-        if (!isObject(stylesheet) || !stylesheet['href'] ||
-            typeof stylesheet['href'] !== 'string' ||
-            !/^https:\/\//i.test(stylesheet['href'])) {
-          throw new Error(errorMsg);
-        }
-      });
-    }
-    return metaData;
-  }
-
- /**
-  * Extracts the body portion of the creative, according to directions in the
-  * metaData, and formats it for insertion into Shadow DOM.
-  * @param {string} creative from which CSS is extracted
-  * @param {!CreativeMetaDataDef} metaData Metadata object extracted from the
-  *    reserialized creative.
-  * @returns {string}  Body of AMP creative, surrounded by {@code
-  *     <amp-ad-body>} tags, and suitable for injection into Shadow DOM.
-  * @private
-  */
- formatBody_(creative, metaData) {
-   return creative.substring(metaData.bodyUtf16CharOffsets[0],
-       metaData.bodyUtf16CharOffsets[1]);
- }
-
- /**
-  * Note: destructively reverses the {@code offsets} list as a side effect.
-  * @param {string} creative from which CSS is extracted
-  * @param {!CreativeMetaDataDef} metaData from creative.
-  * @returns {string} CSS to be added to page.
-  */
- formatCSSBlock_(creative, metaData) {
-   if (!metaData.cssUtf16CharOffsets) {
-     return '';
-   }
-   return creative.substring(
-       metaData.cssUtf16CharOffsets[0],
-       metaData.cssUtf16CharOffsets[1]);
- }
 
   /**
    * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
