@@ -988,7 +988,7 @@ describe('Viewer', () => {
     });
 
     function test(origin, toBeTrusted, opt_inWebView) {
-      it ('testing ' + origin, () => {
+      it('testing ' + origin, () => {
         const viewer = new Viewer(ampdoc);
         viewer.isWebviewEmbedded_ = !!opt_inWebView;
         expect(viewer.isTrustedViewerOrigin_(origin)).to.equal(toBeTrusted);
@@ -1020,14 +1020,14 @@ describe('Viewer', () => {
 
     describe('should NOT trust wrong or non-whitelisted domain variations',
       () => {
-      test('https://google.net', false);
-      test('https://google.other.com', false);
-      test('https://www.google.other.com', false);
-      test('https://withgoogle.com', false);
-      test('https://acme.com', false);
-      test('https://google', false);
-      test('https://www.google', false);
-    });
+        test('https://google.net', false);
+        test('https://google.other.com', false);
+        test('https://www.google.other.com', false);
+        test('https://withgoogle.com', false);
+        test('https://acme.com', false);
+        test('https://google', false);
+        test('https://www.google', false);
+      });
 
     describe('tests for b/32626673', () => {
       test('www.google.com', true, true);
@@ -1038,7 +1038,7 @@ describe('Viewer', () => {
       test('news.google.de', false, true);
       test('www.google.de/', false, true);
       test('www.acme.com', false, true);
-    })
+    });
   });
 
   describe('referrer', () => {
