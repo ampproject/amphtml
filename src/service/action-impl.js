@@ -19,7 +19,7 @@ import {fromClassForDoc} from '../service';
 import {getMode} from '../mode';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
-import {isArray} from '../types';
+import {isArray, map} from '../types';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -98,7 +98,7 @@ export class ActionService {
     this.ampdoc = ampdoc;
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
-    this.globalMethodHandlers_ = {};
+    this.globalMethodHandlers_ = map();
 
     /** @private {!./vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
@@ -395,7 +395,7 @@ export function parseActionMap(s, context) {
                   assertToken(toks.next(/* convertValue */ true),
                       TokenType.LITERAL).value;
               if (!args) {
-                args = Object.create(null);
+                args = map();
               }
               args[argKey] = argValue;
               peek = toks.peek();
@@ -420,7 +420,7 @@ export function parseActionMap(s, context) {
         str: s,
       };
       if (!actionMap) {
-        actionMap = {};
+        actionMap = map();
       }
       actionMap[action.event] = action;
     } else {
