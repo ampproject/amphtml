@@ -343,6 +343,18 @@ function buildExtensionJs(path, name, version, options) {
  * Main Build
  */
 function build() {
+  var TESTING_HOST = process.env.AMP_TESTING_HOST;
+  if (argv.fortesting && typeof TESTING_HOST == 'string') {
+    var AMP_CONFIG = {
+      thirdPartyFrameHost: TESTING_HOST,
+      thirdPartyFrameRegex: TESTING_HOST,
+      localDev: true,
+    };
+    console.log($$.util.colors.green('trying to write AMP_CONFIG.'));
+    fs.writeFileSync('node_modules/AMP_CONFIG.json',
+        JSON.stringify(AMP_CONFIG));
+    console.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+  }
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();

@@ -75,8 +75,12 @@ function getMode_(win) {
   // while IS_DEV is only replaced when the --fortesting flag is NOT used.
   const IS_DEV = true;
   const IS_MINIFIED = false;
+  const FORCE_LOCALDEV = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
+  const AMP_CONFIG_3P_FRAME_HOST = self.AMP_CONFIG &&
+      self.AMP_CONFIG.thirdPartyFrameHost;
 
   const isLocalDev = IS_DEV && !!(win.location.hostname == 'localhost' ||
+      (FORCE_LOCALDEV && win.location.hostname == AMP_CONFIG_3P_FRAME_HOST) ||
       (win.location.ancestorOrigins && win.location.ancestorOrigins[0] &&
         win.location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.

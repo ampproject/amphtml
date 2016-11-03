@@ -42,6 +42,9 @@ function sanityCheck(str) {
  * @return {!Promise}
  */
 function checkoutBranchConfigs(filename, opt_branch) {
+  if (argv.local) {
+    return Promise.resolve();
+  }
   var branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
   return exec(`git checkout ${branch} ${filename}`)
@@ -61,7 +64,7 @@ function checkoutBranchConfigs(filename, opt_branch) {
  * @return {string}
  */
 function prependConfig(configString, fileString) {
-  return `window.AMP_CONFIG||(window.AMP_CONFIG=${configString});` +
+  return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});` +
     `/*AMP_CONFIG*/${fileString}`;
 }
 
@@ -93,7 +96,10 @@ function valueOrDefault(value, defaultValue) {
 }
 
 function main() {
-  if (!argv.target) {
+  var TESTING_HOST = process.env.AMP_TESTING_HOST;
+  var target = argv.target || TESTING_HOST;
+
+  if (!target) {
     util.log(util.colors.red('Missing --target.'));
     return;
   }
@@ -105,7 +111,6 @@ function main() {
 
   var globs = [].concat(argv.files).filter(x => typeof x == 'string');
   var branch = argv.branch;
-  var target = argv.target;
   var filename = '';
 
   // Prod by default.
@@ -152,6 +157,7 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
         'Takes in an optional value for a custom prod config source.',
     'branch': '  Switch to a git branch to get config source from. ' +
         'Uses master by default.',
+    'local': '  Don\'t switch branches and use local config',
   }
 });
 

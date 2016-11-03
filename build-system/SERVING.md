@@ -52,6 +52,7 @@ rm /path/to/cdn/production/alp.js.bak
 # make sure and prepend the global production config to main binaries
 gulp prepend-global --target /path/to/cdn/production/v0.js --prod
 gulp prepend-global --target /path/to/cdn/production/alp.js --prod
+gulp prepend-global --target /path/to/3p/cdn/production/f.js --prod
 
 # The following commands below are optional if you want to host a similar
 # experiments page like https://cdn.ampproject.org/experiments.html
