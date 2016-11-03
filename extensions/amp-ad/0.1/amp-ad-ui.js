@@ -65,9 +65,6 @@ export class AmpAdUIHandler {
     this.state = AdDisplayState.NOT_LAID_OUT;;
 
     /** {?Element} */
-    this.placeholder_ = baseInstance.getPlaceholder();
-
-    /** {?Element} */
     this.fallback_ = baseInstance.getFallback();
 
     /** {?Element} */
@@ -91,6 +88,7 @@ export class AmpAdUIHandler {
 
     //Apply default placeholder + fallback div
     this.holder_ = document.createElement('div');
+    this.holder_.setAttribute('fallback', '');
     this.holder_.classList.add('-amp-ad-holder');
     this.baseInstance_.element.appendChild(this.holder_);
   }
@@ -130,7 +128,7 @@ export class AmpAdUIHandler {
    */
   displayLoadingUI_() {
     this.state = AdDisplayState.LOADING;
-    this.togglePlaceholder_(true);
+    this.baseInstance_.togglePlaceholder(true);
   }
 
   /**
@@ -139,7 +137,7 @@ export class AmpAdUIHandler {
    */
   displayRenderStartUI_() {
     this.state = AdDisplayState.LOADED_RENDER_START;
-    this.togglePlaceholder_(false);
+    this.baseInstance_.togglePlaceholder(false);
   }
 
   /**
@@ -150,13 +148,13 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    if (this.baseInstance_.getFallback()) {
+    if (this.fallback_) {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
           // If already unlaid out, do not replace current placeholder then.
           return;
         }
-        this.togglePlaceholder_(false);
+        this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
@@ -165,8 +163,8 @@ export class AmpAdUIHandler {
         this.baseInstance_./*OK*/collapse();
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       }, () => {
-        this.togglePlaceholder_(false);
-        this.toggleFallback_(true);
+        this.baseInstance_.togglePlaceholder(false);
+        this.baseInstance_.toggleFallback(true);
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
     }
@@ -188,38 +186,6 @@ export class AmpAdUIHandler {
       this.togglePlaceholder_(true);
       this.baseInstance_.toggleFallback(false);
     });
-  }
-
-  /**
-   * togglePlaceholder, if use default placeholder, hide it.
-   * @param {boolean} state
-   * @private
-   */
-  togglePlaceholder_(state) {
-    if (this.placeholder_) {
-      this.baseInstance_.togglePlaceholder(state);
-      return;
-    }
-  }
-
-  /**
-   * toggleFallback, if use default fallback, hide it.
-   * @param {boolean} state
-   * @private
-   */
-  toggleFallback_(state) {
-    if (this.fallback_) {
-      this.baseInstance_.toggleFallback(state);
-      return;
-    }
-    if (!this.isExperimentOn_) {
-      return;
-    }
-    if (state) {
-      this.holder_.setAttribute('visible', '');
-    } else {
-      this.holder_.removeAttribute('visible');
-    }
   }
 }
 

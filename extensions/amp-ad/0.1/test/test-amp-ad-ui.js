@@ -71,7 +71,7 @@ describe('amp-ad-ui handler', () => {
       return Promise.resolve().then(() => {
         const holder = adImpl.element.querySelector('.-amp-ad-holder');
         expect(holder).to.not.be.null;
-        expect(holder).to.have.attribute('visible');
+        expect(holder).to.have.attribute('fallback');
       });
     });
   });
