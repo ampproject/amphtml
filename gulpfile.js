@@ -48,7 +48,7 @@ var extensions = {};
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-access-laterpay', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true);
-declareExtension('amp-ad', '0.1', false);
+declareExtension('amp-ad', '0.1', true);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
@@ -343,6 +343,18 @@ function buildExtensionJs(path, name, version, options) {
  * Main Build
  */
 function build() {
+  var TESTING_HOST = process.env.AMP_TESTING_HOST;
+  if (argv.fortesting && typeof TESTING_HOST == 'string') {
+    var AMP_CONFIG = {
+      thirdPartyFrameHost: TESTING_HOST,
+      thirdPartyFrameRegex: TESTING_HOST,
+      localDev: true,
+    };
+    console.log($$.util.colors.green('trying to write AMP_CONFIG.'));
+    fs.writeFileSync('node_modules/AMP_CONFIG.json',
+        JSON.stringify(AMP_CONFIG));
+    console.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+  }
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();

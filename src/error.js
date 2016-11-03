@@ -21,6 +21,7 @@ import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
+import {startsWith} from './string';
 
 const CANCELLED = 'CANCELLED';
 
@@ -124,7 +125,20 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
-  const url = getErrorReportUrl(message, filename, line, col, error);
+  let hasNonAmpJs = false;
+  try {
+    hasNonAmpJs = detectNonAmpJs(self);
+  } catch (ignore) {
+    // Ignore errors during error report generation.
+  }
+  if (hasNonAmpJs && Math.random() > 0.01) {
+    // Only report 1% of errors on pages with non-AMP JS.
+    // These errors can almost never be acted upon, but spikes such as
+    // due to buggy browser extensions may be helpful to notify authors.
+    return;
+  }
+  const url = getErrorReportUrl(message, filename, line, col, error,
+      hasNonAmpJs);
   globalExponentialBackoff(() => {
     if (url) {
       new Image().src = url;
@@ -139,10 +153,12 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {*|undefined} error
+ * @param {boolean} hasNonAmpJs
  * @return {string|undefined} The URL
  * visibleForTesting
  */
-export function getErrorReportUrl(message, filename, line, col, error) {
+export function getErrorReportUrl(message, filename, line, col, error,
+    hasNonAmpJs) {
   message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
     return;
@@ -163,6 +179,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = urls.errorReporting +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);
   if (self.context && self.context.location) {
@@ -209,4 +226,20 @@ export function getErrorReportUrl(message, filename, line, col, error) {
 
   // Shorten URLs to a value all browsers will send.
   return url.substr(0, 2000);
+}
+
+/**
+ * Returns true if it appears like there is non-AMP JS on the
+ * current page.
+ * @param {!Window} win
+ * @visibleForTesting
+ */
+export function detectNonAmpJs(win) {
+  const scripts = win.document.querySelectorAll('script[src]');
+  for (let i = 0; i < scripts.length; i++) {
+    if (!startsWith(scripts[i].src.toLowerCase(), urls.cdn)) {
+      return true;
+    }
+  }
+  return false;
 }

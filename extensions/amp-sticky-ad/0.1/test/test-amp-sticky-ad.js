@@ -31,7 +31,7 @@ describes.realWin('amp-sticky-ad 0.1 version', {
   let win;
   let ampStickyAd;
   let impl;
-  describe('with valid child', () => {
+  describe('with valid child 0.1', () => {
     beforeEach(() => {
       win = env.win;
       ampStickyAd = win.document.createElement('amp-sticky-ad');
@@ -240,7 +240,7 @@ describes.realWin('amp-sticky-ad 0.1 version', {
   });
 
 
-  describe('with unvalid child', () => {
+  describe('with unvalid child 0.1', () => {
     let ampImg;
     let ampAd1;
     let ampAd2;

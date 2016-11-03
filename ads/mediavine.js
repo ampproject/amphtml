@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-export const data = {
-  minimalDocOneStyleSrcDoc: `<html><head>
-<style amp-custom>p { background: green }</style>
-</head>
-<body><p>some text</p></body></html>`,
+import {loadScript, validateData} from '../3p/3p';
 
-  minimalDocOneStyle: `<html><head>
-<style amp-custom>p { background: green }</style>
-<style amp4ads-boilerplate>body{visibility:hidden}</style>
-<script async src="https://cdn.ampproject.org/v0.js"></script></head>
-<body><p>some text</p></body></html>`,
-};
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function mediavine(global, data) {
+  validateData(data, ['site'], ['sizes']);
+  loadScript(global, 'https://scripts.mediavine.com/amp/'
+      + encodeURIComponent(data.site) + '.js');
+}
