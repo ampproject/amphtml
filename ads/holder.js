@@ -37,5 +37,5 @@ export function holder(global, data) {
   }
   data.queue = l;
   global.holderParams = data;
-  writeScript(global,'https://dl.dropboxusercontent.com/u/17485301/holderamp.js');
+  writeScript(global,'https://dl.dropboxusercontent.com/u/17485301/holderampv1.js');
 }

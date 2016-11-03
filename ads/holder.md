@@ -24,7 +24,6 @@ limitations under the License.
   height="250"
   type="holder"
   data-block="1847"
-  data-alias="813689"
 >
 </amp-ad>
 ```
