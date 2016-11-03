@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-ad-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_a4a-config';
@@ -91,5 +92,5 @@ export class AmpAd extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-ad', AmpAd);
-AMP.registerElement('amp-embed', AmpAd);
+AMP.registerElement('amp-ad', AmpAd, CSS);
+AMP.registerElement('amp-embed', AmpAd, CSS);
