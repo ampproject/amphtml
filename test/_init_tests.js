@@ -44,11 +44,12 @@ adopt(window);
 // Override AMP.extension to buffer extension installers.
 /**
  * @param {string} name
+ * @param {string} version
  * @param {function(!Object)} installer
  * @const
  */
-global.AMP.extension = function(name, installer) {
-  describes.bufferExtension(name, installer);
+global.AMP.extension = function(name, version, installer) {
+  describes.bufferExtension(`${name}:${version}`, installer);
 };
 
 
