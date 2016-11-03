@@ -60,16 +60,13 @@ export function fontStylesheetTimeout(win) {
     // Alright we timed out.
     // Find all stylesheets.
     const styleLinkElements = win.document.querySelectorAll(
-        'link[rel~="stylesheet"]');
+        'link[rel~="stylesheet" i]');
     for (let i = 0; i < styleLinkElements.length; i++) {
       const existingLink = styleLinkElements[i];
-      const media = existingLink.media || 'all';
-      // Make a new link tag, copying the href from the original.
-      const newLink = win.document.createElement('link');
-      newLink.rel = existingLink.rel;
-      newLink.href = existingLink.href;
+      const newLink = existingLink.cloneNode(/* not deep */ false);
       // To avoid blocking the render, we assign a non-matching media
       // attribute first…
+      const media = existingLink.media || 'all';
       newLink.media = 'not-matching';
       // And then switch it back to the original after the stylesheet
       // loaded.

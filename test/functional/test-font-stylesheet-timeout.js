@@ -48,7 +48,7 @@ describes.realWin('font-stylesheet-timeout', {
   function addLink(opt_content) {
     const link = document.createElement('link');
     link.href = 'data:text/css;charset=utf-8,' + (opt_content || '');
-    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('rel', 'stylesHEet');
     win.document.head.appendChild(link);
     return link;
   }
