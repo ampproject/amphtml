@@ -30,7 +30,7 @@ export function adspirit(global, data) {
   i.setAttribute('class', 'asm_async_creative');
   setStyles(i, {
     display: 'inline-block',
-    'text-align':'left',
+    'text-align': 'left',
   });
   global.document.getElementById('c').appendChild(i);
   const s = global.document.createElement('script');

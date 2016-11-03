@@ -529,7 +529,8 @@ export class FixedLayer {
     }
 
     // Calculate z-index based on the declared z-index and DOM position.
-    setStyle(element, 'zIndex', `calc(${10000 + index} + ${state.zIndex || 0})`);
+    setStyle(element, 'zIndex',
+        `calc(${10000 + index} + ${state.zIndex || 0})`);
 
     element.parentElement.replaceChild(fe.placeholder, element);
     this.getFixedLayer_().appendChild(element);
