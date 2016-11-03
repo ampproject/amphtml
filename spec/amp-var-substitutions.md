@@ -51,6 +51,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Canonical Hostname](#canonical-hostname)  | `CANONICAL_HOSTNAME` | `${canonicalHostname}` |
 | [Canonical Path](#canonical-path)     | `CANONICAL_PATH` | `${canonicalPath}` |
 | [Canonical URL](#canonical-url)       | `CANONICAL_URL`    | `${canonicalUrl}` |
+| [Counter](#counter) | `COUNTER` | `${counter}` |
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
 | [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
@@ -364,6 +365,13 @@ Provides the time the page takes to fire the `DOMContentLoaded` event from the t
   ```
 * **amp-analytics variable**: `${contentLoadTime}`
   * Example value: `40`
+
+#### Counter 
+
+Use `COUNTER(name)` to generate an index for the given request. Counts start at 1 and are per given `name`.
+
+* **platform variable**: `COUNTER`
+* **amp-analytics variable**: `${counter}`
 
 #### Document Charset
 
