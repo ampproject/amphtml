@@ -280,7 +280,7 @@ export class AmpA4A extends AMP.BaseElement {
     // its element ancestry.
     if (!this.isValidElement()) {
       // TODO(kjwright): collapse?
-      user().warn('Amp Ad', 'Amp ad element ignored as invalid', this.element);
+      user().warn('AMP-A4A', 'Amp ad element ignored as invalid', this.element);
       return;
     }
 
@@ -454,7 +454,7 @@ export class AmpA4A extends AMP.BaseElement {
                       'Key failed to validate creative\'s signature.');
                 },
                 err => {
-                  user().error('Amp Ad', err, this.element);
+                  user().error('AMP-A4A', err, this.element);
                 });
           });
         }))
@@ -670,21 +670,20 @@ export class AmpA4A extends AMP.BaseElement {
                   jwkSetObj.keys.every(isObject)) {
                 return jwkSetObj.keys;
               } else {
-                user().error(
-                    'Amp Ad',
+                user().error('AMP-A4A',
                     'Invalid response from signing server.',
                     this.element);
                 return [];
               }
             }).catch(err => {
-              user().error('Amp Ad', err, this.element);
+              user().error('AMP-A4A', err, this.element);
               return [];
             });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
         const reason = `Signing service '${serviceName}' does not exist.`;
-        user().error('Amp Ad', reason, this.element);
+        user().error('AMP-A4A', reason, this.element);
         return [];
       }
     });
@@ -692,7 +691,7 @@ export class AmpA4A extends AMP.BaseElement {
         jwkSetPromise.then(jwkSet =>
           jwkSet.map(jwk =>
             importPublicKey(jwk).catch(err => {
-              user().error('Amp Ad', err, this.element);
+              user().error('AMP-A4A', err, this.element);
               return null;
             }))));
   }
@@ -764,7 +763,8 @@ export class AmpA4A extends AMP.BaseElement {
               return true;
             });
         } catch (e) {
-          dev().error('Error injecting creative in friendly frame', e);
+          dev().error('AMP-A4A', 'Error injecting creative in friendly frame',
+              e);
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
           // TODO: report!
