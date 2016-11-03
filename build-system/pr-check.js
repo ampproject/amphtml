@@ -26,7 +26,6 @@
 const child_process = require('child_process');
 const path = require('path');
 const minimist = require('minimist');
-const argv = minimist(process.argv.slice(2));
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 
@@ -178,8 +177,7 @@ function runAllCommands() {
  * @returns {number}
  */
 function main(argv) {
-  console.log('branch', argv.branch);
-  const travisCommitRange = `master...${argv.branch}`;
+  const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   const files = filesInPr(travisCommitRange);
   console.log('files in pr');
   console.log(files);
@@ -224,4 +222,4 @@ function main(argv) {
   return 0;
 }
 
-process.exit(main(argv));
+process.exit(main());

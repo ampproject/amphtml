@@ -29,7 +29,7 @@ script: |
   echo "sha ${TRAVIS_PULL_REQUEST_SHA}"
   echo "commit ${TRAVIS_COMMIT}"
   echo "repo slug ${TRAVIS_REPO_SLUG}"
-  node build-system/pr-check.js --branch $TRAVIS_PULL_REQUEST_BRANCH
+  node build-system/pr-check.js
 branches:
   only:
     - master
