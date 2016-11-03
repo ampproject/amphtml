@@ -148,6 +148,14 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace COUNTER', () => {
+    return expandAsync(
+        'COUNTER(foo),COUNTER(bar),COUNTER(foo),COUNTER(bar),COUNTER(bar)')
+            .then(res => {
+              expect(res).to.equal('1,1,2,2,3');
+            });
+  });
+
   it('should replace CANONICAL_URL', () => {
     return expandAsync('?href=CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');

@@ -109,6 +109,18 @@ export class UrlReplacements {
       return Math.random();
     });
 
+    // Provides a counter starting at 1 per given scope.
+    let counterStore = null;
+    this.set_('COUNTER', scope => {
+      if (!counterStore) {
+        counterStore = Object.create(null);
+      }
+      if (!counterStore[scope]) {
+        counterStore[scope] = 0;
+      }
+      return ++counterStore[scope];
+    });
+
     // Returns the canonical URL for this AMP document.
     this.set_('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
       return info.canonicalUrl;

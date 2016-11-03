@@ -104,6 +104,11 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
 
+
+### COUNTER
+
+Use `COUNTER(name)` to generate an index for the given request. Counts start at 1 and are per given `name`.
+
 ### SOURCE_URL
 
 Use the special string `SOURCE_URL` to add the source URL of the current document to the URL.
