@@ -86,10 +86,14 @@ describe('amp-analytics.visibility', () => {
   function makeIntersectionEntry(boundingClientRect, rootBounds) {
     boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
     rootBounds = layoutRectLtwh.apply(null, rootBounds);
+    const intersect = rectIntersection(boundingClientRect, rootBounds);
+    const ratio = (intersect.width * intersect.height)
+        / (boundingClientRect.width * boundingClientRect.height);
     return {
-      intersectionRect: rectIntersection(boundingClientRect, rootBounds),
+      intersectionRect: intersect,
       boundingClientRect,
       rootBounds,
+      intersectionRatio: ratio,
     };
   }
 

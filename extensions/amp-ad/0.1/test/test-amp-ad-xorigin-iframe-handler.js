@@ -61,7 +61,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
       let noContentSpy;
 
-      beforeEach(done => {
+      beforeEach(() => {
         adImpl.config = {renderStartImplemented: true};
         sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
           expect(height).to.equal(217);
@@ -72,9 +72,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
 
         initPromise = iframeHandler.init(iframe);
-        iframe.onload = () => {
-          done();
-        };
       });
 
       it('should resolve on message "render-start"', () => {
@@ -191,17 +188,15 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
       iframe.name = 'test_master';
       initPromise = iframeHandler.init(iframe);
-      iframe.onload = () => {
-        clock.tick(9999);
-        expect(noContentSpy).to.not.be.called;
-        clock.tick(1);
-        initPromise.then(() => {
-          expect(iframe.style.visibility).to.equal('');
-          expect(noContentSpy).to.be.calledOnce;
-          expect(noContentSpy).to.be.calledWith(true);
-          done();
-        });
-      };
+      clock.tick(9999);
+      expect(noContentSpy).to.not.be.called;
+      clock.tick(1);
+      initPromise.then(() => {
+        expect(iframe.style.visibility).to.equal('');
+        expect(noContentSpy).to.be.calledOnce;
+        expect(noContentSpy).to.be.calledWith(true);
+        done();
+      });
     });
 
     it('should resolve directly if it is A4A', () => {
@@ -213,11 +208,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
   describe('Initialized iframe', () => {
 
-    beforeEach(done => {
+    beforeEach(() => {
       iframeHandler.init(iframe);
-      iframe.onload = () => {
-        done();
-      };
     });
 
     it('should be able to use embed-state API', () => {

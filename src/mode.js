@@ -25,6 +25,7 @@
  *   test: boolean,
  *   log: (string|undefined),
  *   version: string,
+ *   rtvVersion: string,
  * }}
  */
 export let ModeDef;
@@ -33,11 +34,11 @@ export let ModeDef;
 const version = '$internalRuntimeVersion$';
 
 /**
- * `fullVersion` is the prefixed version we serve off of the cdn.
+ * `rtvVersion` is the prefixed version we serve off of the cdn.
  * The prefix denotes canary(00) or prod(01) or an experiment version ( > 01).
  * @type {string}
  */
-let fullVersion = '';
+let rtvVersion = '';
 
 /**
  * A #querySelector query to see if we have any scripts with development paths.
@@ -90,8 +91,8 @@ function getMode_(win) {
 
   const searchQuery = parseQueryString_(win.location.search);
 
-  if (!fullVersion) {
-    fullVersion = getFullVersion_(win, isLocalDev);
+  if (!rtvVersion) {
+    rtvVersion = getRtvVersion(win, isLocalDev);
   }
 
   // The `minified`, `test` and `localDev` properties are replaced
@@ -112,7 +113,8 @@ function getMode_(win) {
     lite: searchQuery['amp_lite'] != undefined,
     test: IS_DEV && !!(win.AMP_TEST || win.__karma__),
     log: hashQuery['log'],
-    version: fullVersion,
+    version,
+    rtvVersion,
   };
 }
 
@@ -152,17 +154,16 @@ function parseQueryString_(queryString) {
   return params;
 }
 
+
 /**
- * Retrieve the `fullVersion` which will have a numeric prefix
+ * Retrieve the `rtvVersion` which will have a numeric prefix
  * denoting canary/prod/experiment.
  *
  * @param {!Window} win
  * @param {boolean} isLocalDev
  * @return {string}
- * @private
- * @visibleForTesting
  */
-export function getFullVersion_(win, isLocalDev) {
+function getRtvVersion(win, isLocalDev) {
   // If it's local dev then we won't actually have a full version so
   // just use the version.
   if (isLocalDev) {
@@ -173,5 +174,27 @@ export function getFullVersion_(win, isLocalDev) {
     return win.AMP_CONFIG.v;
   }
 
-  return version;
+  // Currently `$internalRuntimeVersion$` and thus `mode.version` contain only
+  // major version. The full version however must also carry the minor version.
+  // We will default to production default `01` minor version for now.
+  // TODO(erwinmombay): decide whether $internalRuntimeVersion$ should contain
+  // minor version.
+  return `01${version}`;
+}
+
+
+/**
+ * @param {!Window} win
+ * @param {boolean} isLocalDev
+ * @return {string}
+ * @visibleForTesting
+ */
+export function getRtvVersionForTesting(win, isLocalDev) {
+  return getRtvVersion(win, isLocalDev);
+}
+
+
+/** @visibleForTesting */
+export function resetRtvVersionForTesting() {
+  rtvVersion = '';
 }

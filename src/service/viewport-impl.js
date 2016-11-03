@@ -1689,7 +1689,9 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')) {
+    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
+        // The overriding of document.body fails in iOS7.
+        && platformFor(ampdoc.win).getMajorVersion() > 7) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);

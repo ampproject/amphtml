@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,25 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Industrybrains
+# Xlift
 
 ## Example
 
 ```html
-<amp-ad width=300 height=250
-    type="industrybrains"
-    data-width="300"
-    data-height="250"
-    data-cid="19626-3798936394">
+<amp-ad width="300" height="250"
+    type="xlift"
+    data-mediaid="mamaster">
 </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://www.industrybrains.com/doc/publisher-solutions).
+For configuration details and to generate your tags, please contact https://www.x-lift.jp/#contact
 
 Supported parameters:
 
-- data-cid
-- data-width
-- data-height
+- data-mediaid: For loading javascripts each media. This parameter is required.
+

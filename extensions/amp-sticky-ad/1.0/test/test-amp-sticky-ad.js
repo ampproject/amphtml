@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
 
-describes.realWin('amp-sticky-ad 0.1 version', {
+describes.realWin('amp-sticky-ad 1.0 version', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
   },
   amp: { /* amp spec */
     runtimeOn: false,
-    extensions: ['amp-sticky-ad:0.1'],
+    extensions: ['amp-sticky-ad:1.0'],
   },
 }, env => {
   let win;
@@ -206,12 +205,9 @@ describes.realWin('amp-sticky-ad 0.1 version', {
       expect(layoutAdSpy).to.be.called;
       impl.ad_.dispatchEvent(new Event('amp:load:end'));
       expect(ampStickyAd).to.have.attribute('visible');
-      expect(ampStickyAd.classList.contains('amp-sticky-ad-loaded'))
-          .to.be.true;
     });
 
     it('should not allow container to be set semi-transparent', () => {
-      toggleExperiment(window, 'amp-sticky-ad-better-ux', true);
       ampStickyAd.setAttribute('style',
           'background-color: rgba(55, 55, 55, 0.55) !important');
       impl.vsync_.mutate = function(callback) {
@@ -221,11 +217,9 @@ describes.realWin('amp-sticky-ad 0.1 version', {
       impl.ad_.dispatchEvent(new Event('amp:load:end'));
       expect(window.getComputedStyle(ampStickyAd)
           .getPropertyValue('background-color')).to.equal('rgb(55, 55, 55)');
-      toggleExperiment(window, 'amp-sticky-ad-better-ux', false);
     });
 
     it('should not allow container to be set to transparent', () => {
-      toggleExperiment(window, 'amp-sticky-ad-better-ux', true);
       ampStickyAd.setAttribute('style',
           'background-color: transparent !important');
       impl.vsync_.mutate = function(callback) {
@@ -235,7 +229,6 @@ describes.realWin('amp-sticky-ad 0.1 version', {
       impl.ad_.dispatchEvent(new Event('amp:load:end'));
       expect(window.getComputedStyle(ampStickyAd)
           .getPropertyValue('background-color')).to.equal('rgb(0, 0, 0)');
-      toggleExperiment(window, 'amp-sticky-ad-better-ux', false);
     });
   });
 
@@ -286,14 +279,14 @@ describes.realWin('amp-sticky-ad 0.1 version', {
 });
 
 
-describes.realWin('amp-sticky-ad 0.1 with real ad child', {
+describes.realWin('amp-sticky-ad 1.0 with real ad child', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
   },
   amp: { /* amp spec */
     runtimeOn: false,
-    extensions: ['amp-sticky-ad:0.1', 'amp-ad'],
+    extensions: ['amp-sticky-ad:1.0', 'amp-ad'],
   },
 }, env => {
   let win;
