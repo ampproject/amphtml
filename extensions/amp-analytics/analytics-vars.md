@@ -61,6 +61,7 @@ The remainder of this doc lists and describes the variables supported in `amp-an
 
 | Table of Contents  |
 |---|
+| [amp-carousel](#amp-carousel) |
 | [Device and Browser](#device-and-browser) |
 | [Interaction](#interaction) |
 | [Miscellaneous](#miscellaneous) |
@@ -472,6 +473,8 @@ Provides the total time from the time page was loaded to the time a ping was sen
 ### totalVisibleTime
 
 Provides the total time for which the element has met the visiblitySpec conditions at time this ping is sent.
+
+## `<amp-carousel>`
 
 ### fromSlide
 

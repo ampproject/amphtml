@@ -61,6 +61,14 @@ The `amp-carousel-next` event is issued when there is a travesal to the previous
 }
 ```
 
-### Vars
+## Carousel analytics variables
 
-Description of the variables can be found in the [analytics-vars.md](/extensions/amp-analytics/analytics-vars.md#fromslide) file.
+`<amp-carousel>` contributes the following variables, which can also be found in [analytics-vars.md](/extensions/amp-analytics/analytics-vars.md#fromslide).
+
+### fromSlide
+
+Provides the slide from which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
+
+### toSlide
+
+Provides the slide to which the traversal happens. The value is either taken from the `data-slide-id` attribute of the slide when present, else it represents the index of the slide (starting from 0).
