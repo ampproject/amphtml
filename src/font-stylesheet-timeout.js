@@ -60,7 +60,7 @@ export function fontStylesheetTimeout(win) {
     // Alright we timed out.
     // Find all stylesheets.
     const styleLinkElements = win.document.querySelectorAll(
-        'link[rel~="stylesheet" i]');
+        'link[rel~="stylesheet"]');
     for (let i = 0; i < styleLinkElements.length; i++) {
       const existingLink = styleLinkElements[i];
       const newLink = existingLink.cloneNode(/* not deep */ false);
