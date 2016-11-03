@@ -125,7 +125,7 @@ describe('amp-a4a', () => {
   }
 
   function buildCreativeArrayBuffer() {
-    return stringToArrayBuffer(buildCreativeString());
+    return utf8Encode(buildCreativeString());
   }
 
   function verifyNonAMPRender(a4a) {
