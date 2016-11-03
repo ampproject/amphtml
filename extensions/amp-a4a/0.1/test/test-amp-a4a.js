@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import {
+  MockA4AImpl,
+  TEST_URL,
+  SIGNATURE_HEADER,
+} from './utils';
 import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -27,27 +30,11 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {utf8Encode} from '../../../../src/utils/bytes';
+import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
-
-const XHR_URL = 'http://iframe.localhost:' + location.port +
-      '/test/fixtures/served/iframe.html?args';
-
-class MockA4AImpl extends AmpA4A {
-  getAdUrl() {
-    return Promise.resolve(XHR_URL);
-  }
-
-  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
-    return Promise.resolve({
-      creative: responseArrayBuffer,
-      signature: responseHeaders.has('X-Google-header') ?
-          base64UrlDecodeToBytes(responseHeaders.get('X-Google-header')) : null,
-    });
-  }
-}
-
 
 /**
  * Create a promise for an iframe that has a super-minimal mock AMP environment
@@ -99,22 +86,19 @@ describe('amp-a4a', () => {
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
       arrayBuffer: function() {
-        return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
+        return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
       headers: new Headers(),
       catch: callback => callback(),
     };
-    mockResponse.headers.append('X-Google-header', validCSSAmp.signature);
+    mockResponse.headers.append(SIGNATURE_HEADER, validCSSAmp.signature);
   });
 
   afterEach(() => {
     sandbox.restore();
+    resetScheduledElementForTesting(window, 'amp-a4a');
   });
-
-  function stringToArrayBuffer(str) {
-    return utf8Encode(str);
-  }
 
   function createA4aElement(doc) {
     const element = doc.createElement('amp-a4a');
@@ -141,7 +125,7 @@ describe('amp-a4a', () => {
   }
 
   function buildCreativeArrayBuffer() {
-    return stringToArrayBuffer(buildCreativeString());
+    return utf8Encode(buildCreativeString());
   }
 
   function verifyNonAMPRender(a4a) {
@@ -150,22 +134,12 @@ describe('amp-a4a', () => {
     };
   }
 
-  /**
-   *
-   * @param {!Window} win
-   * @param {!Element} element
-   */
-  function isStyleVisible(win, element) {
-    return win.getComputedStyle(element).getPropertyValue('visibility') ==
-        'visible';
-  }
-
   describe('ads are visible', () => {
     let a4aElement;
     let a4a;
     let fixture;
     beforeEach(() => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -185,7 +159,7 @@ describe('amp-a4a', () => {
     it('for SafeFrame rendering case', () => {
       verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete('X-Google-header');
+      mockResponse.headers.delete(SIGNATURE_HEADER);
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
       fixture.doc.body.appendChild(a4aElement);
@@ -196,14 +170,14 @@ describe('amp-a4a', () => {
         a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
-        expect(isStyleVisible(fixture.win, child)).to.be.true;
+        expect(child).to.be.visible;
       });
     });
 
     it('for cached content iframe rendering case', () => {
       verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete('X-Google-header');
+      mockResponse.headers.delete(SIGNATURE_HEADER);
       fixture.doc.body.appendChild(a4aElement);
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -212,7 +186,7 @@ describe('amp-a4a', () => {
         a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[src]');
         expect(child).to.be.ok;
-        expect(isStyleVisible(fixture.win, child)).to.be.true;
+        expect(child).to.be.visible;
       });
     });
 
@@ -225,57 +199,22 @@ describe('amp-a4a', () => {
         a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[srcdoc]');
         expect(child).to.be.ok;
-        expect(isStyleVisible(fixture.win, child)).to.be.true;
+        expect(child).to.be.visible;
         const a4aBody = child.contentDocument.body;
         expect(a4aBody).to.be.ok;
-        expect(isStyleVisible(fixture.win, a4aBody)).to.be.true;
+        expect(a4aBody).to.be.visible;
       });
     });
   });
 
   describe('#renderViaSafeFrame', () => {
-    // This is supposed to be an end-to-end test, but there seems to be an
-    // AMP initialization or upgrade issue somewhere, so the
-    // fixture.addElement() step fails with a 'element.build does not exist'
-    // error.  Skip this until we sort out how to properly do an E2E.
-    it.skip('should render a single AMP ad in a friendly iframe', () => {
-      xhrMock.withArgs(XHR_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createAdTestingIframePromise().then(fixture => {
-        const doc = fixture.doc;
-        a4aRegistry['mock'] = () => {return true;};
-        // const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
-        // extensionsMock.expects('loadElementClass')
-        //     .withExactArgs('amp-ad-network-mock-impl')
-        //     .returns(Promise.resolve(MockA4AImpl))
-        //     .once();
-        const ampAdElement = doc.createElement('amp-a4a');
-        ampAdElement.setAttribute('width', 200);
-        ampAdElement.setAttribute('height', 50);
-        ampAdElement.setAttribute('type', 'mock');
-        // const ampAd = new MockA4AImpl(ampAdElement);
-        return fixture.addElement(ampAdElement);
-        // return ampAd.upgradeCallback().then(baseElement => {
-        //   extensionsMock.verify();
-        //   expect(ampAdElement.getAttribute('data-a4a-upgrade-type')).to.equal(
-        //       'amp-ad-network-mock-impl');
-        //   return fixture.addElement(ampAdElement).then(element => {
-        //     expect(element).to.not.be.null;
-        //   });
-        // });
-      });
-    });
 
     it('should attach a SafeFrame when header is set', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete('X-Google-header');
+      mockResponse.headers.delete(SIGNATURE_HEADER);
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -306,11 +245,11 @@ describe('amp-a4a', () => {
     ['', 'client_cache', 'some_random_thing'].forEach(headerVal => {
       it(`should not attach a SafeFrame when header is ${headerVal}`, () => {
         // Make sure there's no signature, so that we go down the 3p iframe path.
-        mockResponse.headers.delete('X-Google-header');
+        mockResponse.headers.delete(SIGNATURE_HEADER);
         // If rendering type is anything but safeframe, we SHOULD NOT attach a
         // SafeFrame.
         mockResponse.headers.append(RENDERING_TYPE_HEADER, headerVal);
-        xhrMock.withArgs(XHR_URL, {
+        xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
@@ -335,7 +274,7 @@ describe('amp-a4a', () => {
             const unsafeChild = a4aElement.querySelector('iframe');
             expect(unsafeChild).to.be.ok;
             expect(unsafeChild.getAttribute('src')).to.have.string(
-                XHR_URL);
+                TEST_URL);
           });
         });
       });
@@ -345,7 +284,7 @@ describe('amp-a4a', () => {
       // Set safeframe header, but it should be ignored when a signature
       // exists and validates.
       mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -379,7 +318,7 @@ describe('amp-a4a', () => {
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in friendly iframe', () => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -459,7 +398,7 @@ describe('amp-a4a', () => {
       });
     });
     it('#layoutCallback not valid AMP', () => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -494,7 +433,7 @@ describe('amp-a4a', () => {
             const iframe = a4aElement.getElementsByTagName('iframe')[0];
             expect(iframe.getAttribute('srcdoc')).to.be.null;
             expect(iframe.src, 'verify iframe src w/ origin').to
-                .equal(XHR_URL +
+                .equal(TEST_URL +
                        '&__amp_source_origin=about%3Asrcdoc');
             expect(a4a.rendered_).to.be.true;
           });
@@ -502,7 +441,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should not leak full response to rendered dom', () => {
-      xhrMock.withArgs(XHR_URL, {
+      xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
         credentials: 'include',
@@ -533,20 +472,19 @@ describe('amp-a4a', () => {
             </script>
             </body></html>`;
         mockResponse.arrayBuffer = () => {
-          return Promise.resolve(stringToArrayBuffer(fullResponse));
+          return utf8Encode(fullResponse);
         };
         // Return value from `#extractCreativeAndSignature` is a sub-doc of
         // the full response.  To validate this test, comment out the following
         // statement and verify that test fails, with full response spliced in
         // to shadow doc.
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-          stringToArrayBuffer(validCSSAmp.reserialized).then(buffer => {
-            return {
-              creative: buffer,
-              signature: base64UrlDecodeToBytes(validCSSAmp.signature),
-            };
-          })
-        );
+            utf8Encode(validCSSAmp.reserialized).then(c => {
+              return {
+                creative: c,
+                signature: base64UrlDecodeToBytes(validCSSAmp.signature),
+              };
+            }));
         a4a.onLayoutMeasure();
         let onAmpCreativeRenderFired = false;
         a4a.onAmpCreativeRender = () => {
@@ -589,8 +527,8 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.querySelector('iframe[src]');
           expect(iframe).to.be.ok;
-          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
-          expect(isStyleVisible(fixture.win, iframe)).to.be.true;
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+          expect(iframe).to.be.visible;
         });
       });
     });
@@ -608,8 +546,8 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.children[0];
           expect(iframe.tagName).to.equal('IFRAME');
-          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
-          expect(isStyleVisible(fixture.win, iframe)).to.be.true;
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
+          expect(iframe).to.be.visible;
         }));
       });
     });
@@ -632,7 +570,7 @@ describe('amp-a4a', () => {
           expect(a4aElement.children.length).to.equal(1);
           const iframe = a4aElement.children[0];
           expect(iframe.tagName).to.equal('IFRAME');
-          expect(iframe.src.indexOf(XHR_URL)).to.equal(0);
+          expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe.style.visibility).to.equal('');
         });
       });
@@ -752,21 +690,23 @@ describe('amp-a4a', () => {
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         return buildCreativeArrayBuffer().then(bytes => {
-          return a4a.maybeRenderAmpAd_(bytes);
-        }).then(rendered => {
-          expect(rendered).to.be.true;
-          // Verify iframe presence.
-          expect(a4aElement.children.length).to.equal(1);
-          const friendlyIframe = a4aElement.children[0];
-          expect(friendlyIframe.tagName).to.equal('IFRAME');
-          expect(friendlyIframe.src).to.not.be.ok;
-          expect(friendlyIframe.srcdoc).to.be.ok;
-          const frameDoc = friendlyIframe.contentDocument;
-          const styles = frameDoc.querySelectorAll('style[amp-custom]');
-          expect(Array.prototype.some.call(styles,
-              s => { return s.innerHTML == 'p { background: green }'; }),
-              'Some style is "background: green"').to.be.true;
-          expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+          return a4a.maybeRenderAmpAd_(bytes).then(rendered => {
+            expect(rendered).to.be.true;
+            // Verify iframe presence.
+            expect(a4aElement.children.length).to.equal(1);
+            const friendlyIframe = a4aElement.children[0];
+            expect(friendlyIframe.tagName).to.equal('IFRAME');
+            expect(friendlyIframe.src).to.not.be.ok;
+            expect(friendlyIframe.srcdoc).to.be.ok;
+            const frameDoc = friendlyIframe.contentDocument;
+            const styles = frameDoc.querySelectorAll('style[amp-custom]');
+            expect(Array.prototype.some.call(styles,
+                s => {
+                  return s.innerHTML == 'p { background: green }';
+                }),
+                'Some style is "background: green"').to.be.true;
+            expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+          });
         });
       });
     });
@@ -779,47 +719,47 @@ describe('amp-a4a', () => {
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         return buildCreativeArrayBuffer().then(bytes => {
-          return a4a.maybeRenderAmpAd_(bytes);
-        }).then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
-          const adBody = a4aElement.querySelector('iframe')
-              .contentDocument.querySelector('body');
-          let clickHandlerCalled = 0;
+          return a4a.maybeRenderAmpAd_(bytes).then(() => {
+            // Force vsync system to run all queued tasks, so that DOM mutations
+            // are actually completed before testing.
+            a4a.vsync_.runScheduledTasks_();
+            const adBody = a4aElement.querySelector('iframe')
+                .contentDocument.querySelector('body');
+            let clickHandlerCalled = 0;
 
-          adBody.onclick = function(e) {
-            expect(e.defaultPrevented).to.be.false;
-            e.preventDefault();  // Make the test not actually navigate.
-            clickHandlerCalled++;
-          };
-          adBody.innerHTML = '<a ' +
-              'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
-              '<button id="target"><button></div>';
-          const button = adBody.querySelector('#target');
-          const a = adBody.querySelector('a');
-          const ev1 = new Event('click', {bubbles: true});
-          ev1.pageX = 10;
-          ev1.pageY = 20;
-          button.dispatchEvent(ev1);
-          expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
-          expect(clickHandlerCalled).to.equal(1);
+            adBody.onclick = function(e) {
+              expect(e.defaultPrevented).to.be.false;
+              e.preventDefault();  // Make the test not actually navigate.
+              clickHandlerCalled++;
+            };
+            adBody.innerHTML = '<a ' +
+                'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+                '<button id="target"><button></div>';
+            const button = adBody.querySelector('#target');
+            const a = adBody.querySelector('a');
+            const ev1 = new Event('click', {bubbles: true});
+            ev1.pageX = 10;
+            ev1.pageY = 20;
+            button.dispatchEvent(ev1);
+            expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+            expect(clickHandlerCalled).to.equal(1);
 
-          const ev2 = new Event('click', {bubbles: true});
-          ev2.pageX = 111;
-          ev2.pageY = 222;
-          a.dispatchEvent(ev2);
-          expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-          expect(clickHandlerCalled).to.equal(2);
+            const ev2 = new Event('click', {bubbles: true});
+            ev2.pageX = 111;
+            ev2.pageY = 222;
+            a.dispatchEvent(ev2);
+            expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
+            expect(clickHandlerCalled).to.equal(2);
 
-          const ev3 = new Event('click', {bubbles: true});
-          ev3.pageX = 666;
-          ev3.pageY = 666;
-          // Click parent of a tag.
-          a.parentElement.dispatchEvent(ev3);
-          // Had no effect, because actual link wasn't clicked.
-          expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-          expect(clickHandlerCalled).to.equal(3);
+            const ev3 = new Event('click', {bubbles: true});
+            ev3.pageX = 666;
+            ev3.pageY = 666;
+            // Click parent of a tag.
+            a.parentElement.dispatchEvent(ev3);
+            // Had no effect, because actual link wasn't clicked.
+            expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
+            expect(clickHandlerCalled).to.equal(3);
+          });
         });
       });
     });
@@ -841,7 +781,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         doc.body.appendChild(a4aElement);
         const a4a = new MockA4AImpl(a4aElement);
-        xhrMock.withArgs(XHR_URL, {
+        xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
