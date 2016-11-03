@@ -21,6 +21,7 @@ import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
+import {startsWith} from './string';
 
 const CANCELLED = 'CANCELLED';
 
@@ -236,7 +237,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
 export function detectNonAmpJs(win) {
   const scripts = win.document.querySelectorAll('script[src]');
   for (let i = 0; i < scripts.length; i++) {
-    if (scripts[i].src.toLowerCase().indexOf(urls.cdn) != 0) {
+    if (!startsWith(scripts[i].src.toLowerCase(), urls.cdn)) {
       return true;
     }
   }
