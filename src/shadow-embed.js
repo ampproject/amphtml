@@ -187,7 +187,7 @@ export function importShadowBody(shadowRoot, body) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
   if (isShadowDomSupported()) {
-    resultBody = doc.importNode(body, true);
+    resultBody = dev().assertElement(doc.importNode(body, true));
   } else {
     resultBody = doc.createElement('amp-body');
     for (let n = body.firstChild; !!n; n = n.nextSibling) {
@@ -197,7 +197,7 @@ export function importShadowBody(shadowRoot, body) {
   }
   setStyle(resultBody, 'position', 'relative');
   shadowRoot.appendChild(resultBody);
-  return dev().assertElement(resultBody);
+  return resultBody;
 }
 
 

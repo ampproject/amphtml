@@ -888,13 +888,14 @@ export class ViewportBindingNatural_ {
 
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
+        const body = dev().assertElement(this.win.document.body);
         // Override a user-supplied `body{overflow}` to be always visible. This
         // style is set in runtime vs css to avoid conflicts with ios-embedded
         // mode and fixed transfer layer.
-        setStyle(this.win.document.body, 'overflow', 'visible');
+        setStyle(body, 'overflow', 'visible');
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
-          setStyles(this.win.document.body, {
+          setStyles(body, {
             overflowX: 'hidden',
             overflowY: 'visible',
           });
@@ -904,7 +905,7 @@ export class ViewportBindingNatural_ {
         // TODO(dvoytenko, #5660): cleanup "make-body-relative" experiment by
         // merging this style into `amp.css`.
         if (isExperimentOn(this.win, 'make-body-relative')) {
-          setStyles(this.win.document.body, {
+          setStyles(body, {
             display: 'block',
             position: 'relative',
             overflowX: 'hidden',
@@ -1219,7 +1220,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       onDocumentReady(this.win.document, doc => {
         const existingPaddingTop =
             this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-        setStyles(doc.body, {
+        setStyles(dev().assertElement(doc.body), {
           paddingTop: `calc(${existingPaddingTop} + ${lastPaddingTop}px)`,
           borderTop: '',
         });
@@ -1242,7 +1243,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
-      setStyles(doc.body, {
+      setStyles(dev().assertElement(doc.body), {
         borderTop: `${paddingTop}px solid transparent`,
         paddingTop: '',
       });
