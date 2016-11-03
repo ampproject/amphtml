@@ -17,10 +17,8 @@
 import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {toggleExperiment} from '../../../../src/experiments';
+import {UX_EXPERIMENT} from '../../../../src/layout';
 import * as sinon from 'sinon';
-
-/** @private @const {string} */
-const UX_EXPERIMENT = 'amp-ad-loading-ux';
 
 describe('amp-ad-ui handler', () => {
   let sandbox;

@@ -24,8 +24,8 @@ import {isFiniteNumber} from './types';
 import {setStyles} from './style';
 import {isExperimentOn} from './experiments';
 
-/** @private @const {string} */
-const UX_EXPERIMENT = 'amp-ad-loading-ux';
+/** @const {string} */
+export const UX_EXPERIMENT = 'amp-ad-loading-ux';
 
 /**
  * @enum {string}

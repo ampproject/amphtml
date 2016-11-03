@@ -15,12 +15,11 @@
  */
 
 import {dev} from '../../../src/log';
+import {createElementWithAttributes} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {UX_EXPERIMENT} from '../../../src/layout';
 
 const TAG = 'AmpAdUIHandler';
-
-/** @private @const {string} */
-const UX_EXPERIMENT = 'amp-ad-loading-ux';
 
 /**
  * Ad display state.
@@ -79,10 +78,11 @@ export class AmpAdUIHandler {
     if (this.fallback_) {
       return;
     }
-
     //Apply default fallback div when there's no default one
-    const holder = document.createElement('div');
-    holder.setAttribute('fallback', '');
+    const holder = createElementWithAttributes(document, 'div', {
+      'fallback': '',
+      'layout': 'fill',
+    });
     holder.classList.add('-amp-ad-holder');
     this.baseInstance_.element.appendChild(holder);
   }
