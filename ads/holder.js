@@ -21,14 +21,13 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function holder(global, data) {
-  validateData(data, ['block'], []);
+  validateData(data, ['block'], ['ampSlotIndex']);
   const d = document,
-    wcl = window.context.location,
+    wcl = global.context.location,
     n = navigator.userAgent;
   let l = '&r' + Math.round((Math.random() * 10000000));
-  l += '&' + escape((self != top) ?
-  'f' + window.context.referrer :
-  'h' + wcl.href);
+  l += '&' +
+  'h' + wcl.href;
   d.cookie = 'b=1; path=/';
   if (d.cookie.indexOf('b=') != -1 &&
   !(n.indexOf('Safari') != -1 &&
@@ -36,6 +35,5 @@ export function holder(global, data) {
     l += '&c1';
   }
   data.queue = l;
-  global.holderParams = data;
   writeScript(global,'https://dl.dropboxusercontent.com/u/17485301/holderampv1.js');
 }

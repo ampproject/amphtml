@@ -206,6 +206,7 @@ export const adConfig = {
       'https://h.holder.com.ua',
       'https://i.holder.com.ua',
     ],
+    renderStartImplemented: true,
   },
 
   ibillboard: {},
