@@ -46,9 +46,9 @@ function expectRenderedInFriendlyIframe(element, srcdoc) {
   expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
   const childBody = child.contentDocument.body;
   expect(childBody, 'body of iframe doc').to.be.ok;
-  [element, child, childBody].forEach(toTest => {
-    expect(toTest).to.be.visible;
-  });
+  expect(element, 'ad tag').to.be.visible;
+  expect(child, 'iframe child').to.be.visible;
+  expect(childBody, 'ad creative content body').to.be.visible;
 }
 
 function expectRenderedInXDomainIframe(element, src) {
@@ -58,9 +58,8 @@ function expectRenderedInXDomainIframe(element, src) {
   const child = element.querySelector('iframe[src]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('src')).to.contain.string(src);
-  [element, child].forEach(toTest => {
-    expect(toTest).to.be.visible;
-  });
+  expect(element, 'ad tag').to.be.visible;
+  expect(child, 'iframe child').to.be.visible;
 }
 
 describe('integration test: a4a', () => {
@@ -148,14 +147,14 @@ describe('integration test: a4a', () => {
   });
 
   it('should fall back to 3p when extractCreative returns empty sig', () => {
-    sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
-        .onFirstCall().returns({
-          creative: utf8Encode(validCSSAmp.reserialized),
-          signature: null,
-        })
-        .onSecondCall().throws(new Error(
-            'Testing extractCreativeAndSignature should not occur error'));
+    const extractCreativeAndSignatureStub =
+        sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature');
+    extractCreativeAndSignatureStub.onFirstCall().returns({
+      creative: utf8Encode(validCSSAmp.reserialized),
+      signature: null,
+    });
     return fixture.addElement(a4aElement).then(unusedElement => {
+      expect(extractCreativeAndSignatureStub).to.be.calledOnce;
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });
@@ -178,10 +177,15 @@ describe('integration test: a4a', () => {
           expectRenderedInXDomainIframe(a4aElement, TEST_URL);
         });
       });
+
+  // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
+  // are propagated out and printed to console and/or sent upstream to error
+  // logging systems.  This is a bit tricky, because it's handled by the AMP
+  // runtime and can't be done within the context of a
+  // fixture.addElement().then() or .catch().  This should be integrated into
+  // all tests, so that we know precisely when errors are being reported and
+  // to whom.
+  it('should propagate errors out and report them to upstream error log');
 });
 
-// TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
-// are propagated out and printed to console and/or sent upstream to error
-// logging systems.  This is a bit tricky, because it's handled by the AMP
-// runtime and can't be done within the context of a
-// fixture.addElement().then() or .catch().
+
