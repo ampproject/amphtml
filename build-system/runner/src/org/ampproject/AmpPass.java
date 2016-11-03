@@ -48,8 +48,6 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private final Map<String, Node> prodAssignmentReplacements;
   final boolean isProd;
 
-  final Integer ampExtensionCallbackPosition = 4;
-
   public AmpPass(AbstractCompiler compiler, boolean isProd,
         Map<String, Set<String>> stripTypeSuffixes,
         Map<String, Node> assignmentReplacements, Map<String, Node> prodAssignmentReplacements) {
@@ -106,7 +104,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    *   FUNCTION  3 [length: 46] [source_file: input0]
    */
   private boolean isAmpExtensionCall(Node n) {
-    if (n != null && n.isCall() && n.getChildCount() == ampExtensionCallbackPosition) {
+    if (n != null && n.isCall()) {
       Node getprop = n.getFirstChild();
 
       // The AST has the last getprop higher in the hierarchy.
@@ -164,8 +162,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   private Node getAmpExtensionCallback(Node n) {
-    // 0 index based
-    return n.getChildAtIndex(ampExtensionCallbackPosition - 1);
+    return n.getLastChild();
   }
 
   /**

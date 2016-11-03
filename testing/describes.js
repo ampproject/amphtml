@@ -428,14 +428,12 @@ class AmpFixture {
       // Thus, not changes needed here.
     }
     if (spec.extensions) {
-      spec.extensions.forEach(extensionId => {
-        let bufferId = extensionId;
-        if (extensionId.indexOf(':') == -1) {
-          // We default to 0.1 if the user did not give an explicit
-          // version.
-          bufferId = `${extensionId}:0.1`;
-        }
-        const installer = extensionsBuffer[bufferId];
+      spec.extensions.forEach(extensionIdWithVersion => {
+        const tuple = extensionIdWithVersion.split(':');
+        const extensionId = tuple[0];
+        // Default to 0.1 if no version was provided.
+        const version = tuple[1] || '0.1';
+        const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
           installer(win.AMP);
         } else {
