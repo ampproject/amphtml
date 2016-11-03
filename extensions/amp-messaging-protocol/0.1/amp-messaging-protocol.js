@@ -14,45 +14,19 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
 
-/** @const */
-Const EXPERIMENT = ‘amp-messaging-protocol’;
-
-
-/** @const */
-Const TAG = ‘amp-messaging-protocol’;
+const TAG = 'amp-messaging-protocol';
 
 
 export class AmpMessagingProtocol extends AMP.BaseElement {
 
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-
-    // declare instance variables with type annotations.
-  }
-
-
-  /** @override */
-  isLayoutSupported(layout) {
-     return layout == LAYOUT.FIXED;
-  }
-
-
   /** @override */
   buildCallback() {
-    // get attributes, assertions of values, assign instance variables.
-    // build lightweight dom and append to this.element.
-  }
-
-
-  /** @override */
-  layoutCallback() {
-    // actually load your resource or render more expensive resources.
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment "${TAG}" is disabled.`);
   }
 }
 
-
-AMP.registerElement(‘amp-messaging-protocol’, AmpMessagingProtocol, CSS);
+AMP.registerElement(TAG, AmpMessagingProtocol);
