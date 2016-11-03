@@ -223,6 +223,11 @@ const EXPERIMENTS = [
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
+  {
+    id: 'amp-messaging-protocol',
+    name: 'New messaging protocol between AMP and the Viewer',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6013',
+  },
 ];
 
 if (getMode().localDev) {
