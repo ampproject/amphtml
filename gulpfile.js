@@ -48,7 +48,7 @@ var extensions = {};
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-access-laterpay', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true);
-declareExtension('amp-ad', '0.1', false);
+declareExtension('amp-ad', '0.1', true);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
