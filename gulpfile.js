@@ -205,7 +205,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   });
 
   // Entry point for inabox runtime.
-  compileJs('./src/inabox/', 'amp-inabox-babel.js', './dist', {
+  compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
     toName: 'amp-inabox.js',
     minifiedName: 'inabox-v0.js',
     includePolyfills: true,
@@ -217,7 +217,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   });
 
   // inabox-host
-  compileJs('./ads/inabox/', 'inabox-host-babel.js', './dist', {
+  compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
     toName: 'amp-inabox-host.js',
     minifiedName: 'inabox-host-v0.js',
     includePolyfills: false,
@@ -408,7 +408,9 @@ function checkTypes() {
   var compileSrcs = [
     './src/amp-babel.js',
     './src/amp-shadow.js',
+    './src/inabox/amp-inabox.js',
     './ads/alp/install-alp.js',
+    './ads/inabox/inabox-host.js',
     './src/service-worker/shell.js',
     './src/service-worker/core.js',
     './src/service-worker/kill.js',
@@ -419,15 +421,15 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
-  closureCompile(compileSrcs.concat(extensionSrcs),  './dist',
+  closureCompile(compileSrcs.concat(extensionSrcs), './dist',
       'check-types.js', {
         includePolyfills: true,
         checkTypes: true,
       });
   // Type check 3p/ads code.
-  closureCompile(['./3p/integration.js'],  './dist',
+  closureCompile(['./3p/integration.js'], './dist',
       'integration-check-types.js', {
-        externs: ['ads/ads.extern.js',],
+        externs: ['ads/ads.extern.js'],
         include3pDirectories: true,
         includePolyfills: true,
         checkTypes: true,

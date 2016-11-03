@@ -14,34 +14,45 @@
  * limitations under the License.
  */
 
-export class InaboxHost {
+/**
+ * Inabox host script is installed on a non-AMP host page to provide APIs for
+ * its embed AMP content (such as an ad created in AMP).
+ */
 
-  constructor(win) {
-    this.win_ = win;
+import '../../third_party/babel/custom-babel-helpers';
+
+run(self);
+
+function run(win) {
+  win['ampInaboxPendingMessages'].forEach(message => {
+    processMessage(win, message);
+  });
+
+  win.addEventListener('message', processMessage.bind(null, win));
+}
+
+function processMessage(win, message) {
+  if (!isInaboxMessage(message.data)) {
+    return;
+  }
+  const iframeElement =
+      getFrameElement(win, win['ampInaboxIframes'], message.source);
+  // TODO: build a map from source to iframeElement.
+  console.log('[' + iframeElement.id + '] ' + message.data);
+}
+
+function getFrameElement(win, iframes, source) {
+  while (source.parent !== win && source !== win.top) {
+    source = source.parent;
   }
 
-  init() {
-    this.processPendingMessages_();
-  }
-
-  processPendingMessages_() {
-    // TODO: do something
-    console.log('ampInaboxPendingMessages:');
-    console.log(this.win_['ampInaboxPendingMessages']);
-    console.log('ampInaboxIframes:');
-    console.log(this.win_['ampInaboxIframes']);
-
-    const listener = event => {
-      if (this.isInaboxMessage_(event.data)) {
-        console.log(event.data);
-      }
-    };
-    this.win_.addEventListener('message', listener);
-  }
-
-  isInaboxMessage_(message) {
-    return typeof message === 'string' && message.indexOf('amp-inabox:') == 0;
+  for (let i = 0; i < iframes.length; i++) {
+    if (iframes[i].contentWindow === source) {
+      return iframes[i];
+    }
   }
 }
 
-new InaboxHost(self).init();
+function isInaboxMessage(message) {
+  return typeof message === 'string' && message.indexOf('amp-inabox:') == 0;
+}

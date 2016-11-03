@@ -15,9 +15,10 @@
  */
 
 /**
- * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
+ * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
+import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
 import {chunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
@@ -45,7 +46,7 @@ new Inabox(self).init();
 
 // TODO(lannka): only install the necessary services.
 
-/** @type {!./service/ampdoc-impl.AmpDocService} */
+/** @type {!../service/ampdoc-impl.AmpDocService} */
 let ampdocService;
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -63,9 +64,9 @@ try {
   throw e;
 }
 chunk(self.document, function initial() {
-  /** @const {!./service/ampdoc-impl.AmpDoc} */
+  /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
-  /** @const {!./service/performance-impl.Performance} */
+  /** @const {!../service/performance-impl.Performance} */
   const perf = installPerformanceService(self);
   perf.tick('is');
   installStyles(self.document, cssText, () => {
