@@ -23,7 +23,7 @@ import {dev} from '../log';
  * @return {!Promise<string>}
  */
 export function utf8Decode(bytes) {
-  if (TextDecoder) {
+  if (self.TextDecoder) {
     return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
   }
   return new Promise((resolve, reject) => {
@@ -44,7 +44,7 @@ export function utf8Decode(bytes) {
  * @return {!Promise<!Uint8Array>}
  */
 export function utf8Encode(string) {
-  if (TextEncoder) {
+  if (self.TextEncoder) {
     return Promise.resolve(new TextEncoder('utf-8').encode(string));
   }
   return new Promise((resolve, reject) => {

@@ -764,7 +764,8 @@ export class AmpA4A extends AMP.BaseElement {
               return true;
             });
         } catch (e) {
-          dev().error('Error injecting creative in friendly frame', e);
+          dev().error(
+            'Amp Ad', 'Error injecting creative in friendly frame', e);
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
           // TODO: report!
