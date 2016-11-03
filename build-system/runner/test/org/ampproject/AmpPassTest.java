@@ -324,7 +324,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
     testEs6(
         LINE_JOINER.join(
             "var a = 'hello';",
-            "self.AMP.extension('hello', function(AMP) {",
+            "self.AMP.extension('hello', '0.1', function(AMP) {",
             "  var a = 'world';",
             "  console.log(a);",
             "});",
@@ -342,7 +342,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
     testEs6(
         LINE_JOINER.join(
             "var a = 'hello';",
-            "AMP.extension('hello', function(AMP) {",
+            "AMP.extension('hello', '0.1', function(AMP) {",
             "  var a = 'world';",
             "  console.log(a);",
             "});",
