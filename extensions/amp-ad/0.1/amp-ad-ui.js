@@ -69,16 +69,13 @@ export class AmpAdUIHandler {
 
     /** {?Element} */
     this.holder_ = null;
-
-    /** {!boolean} */
-    this.isExperimentOn_ = isExperimentOn(baseInstance.win, UX_EXPERIMENT);
   }
 
   /**
    * TODO(@zhouyx): Add ad tag to the ad.
    */
   init() {
-    if (!this.isExperimentOn_) {
+    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
       return;
     }
 
@@ -183,7 +180,7 @@ export class AmpAdUIHandler {
       if (this.state != AdDisplayState.NOT_LAID_OUT) {
         return;
       }
-      this.togglePlaceholder_(true);
+      this.baseInstance_.togglePlaceholder(true);
       this.baseInstance_.toggleFallback(false);
     });
   }
