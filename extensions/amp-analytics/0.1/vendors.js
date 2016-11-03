@@ -411,22 +411,22 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'requests': {
       'conversion': 'https://www.googleadservices.com/pagead/conversion/' +
           '${google_conversion_id}/?' +
-          'cv=amp1&'+  // Increment when making changes.
+          'cv=amp1&' +  // Increment when making changes.
           'value=${google_conversion_value}&' +
           'currency_code=${google_conversion_currency}&' +
-          'label=${google_conversion_label}&'+
-          'random=${random}&'+
-          'url=${sourceUrl}&'+
-          'fst=${pageViewId}&'+
-          'num=${counter(googleconversion)}&'+
-          'fmt=3&'+
-          'async=3&'+
-          'bg=${google_conversion_color}&'+
-          'u_h=${screenHeight}&u_w=${screenWidth}&'+
-          'u_ah=${viewportHeight}&u_aw=${viewportWidth}&'+
-          'u_cd=${screenColorDepth}&'+
-          'u_tz=${timezone}&'+
-          'tiba=${title}&'+
+          'label=${google_conversion_label}&' +
+          'random=${random}&' +
+          'url=${sourceUrl}&' +
+          'fst=${pageViewId}&' +
+          'num=${counter(googleconversion)}&' +
+          'fmt=3&' +
+          'async=3&' +
+          'bg=${google_conversion_color}&' +
+          'u_h=${screenHeight}&u_w=${screenWidth}&' +
+          'u_ah=${viewportHeight}&u_aw=${viewportWidth}&' +
+          'u_cd=${screenColorDepth}&' +
+          'u_tz=${timezone}&' +
+          'tiba=${title}&' +
           'guid=ON&script=0',
     },
     'transport': {
