@@ -66,9 +66,6 @@ export class AmpAdUIHandler {
 
     /** {?Element} */
     this.fallback_ = baseInstance.getFallback();
-
-    /** {?Element} */
-    this.holder_ = null;
   }
 
   /**
@@ -83,11 +80,11 @@ export class AmpAdUIHandler {
       return;
     }
 
-    //Apply default placeholder + fallback div
-    this.holder_ = document.createElement('div');
-    this.holder_.setAttribute('fallback', '');
-    this.holder_.classList.add('-amp-ad-holder');
-    this.baseInstance_.element.appendChild(this.holder_);
+    //Apply default fallback div when there's no default one
+    const holder = document.createElement('div');
+    holder.setAttribute('fallback', '');
+    holder.classList.add('-amp-ad-holder');
+    this.baseInstance_.element.appendChild(holder);
   }
 
   /**
@@ -145,6 +142,7 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
+    // The order here is user provided fallback > collapse > default fallback
     if (this.fallback_) {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {

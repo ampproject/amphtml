@@ -74,21 +74,23 @@ describe('amp-ad-ui handler', () => {
         expect(holder).to.have.attribute('fallback');
       });
     });
-  });
 
-  it('should NOT continue with display state UN_LAID_OUT', () => {
-    sandbox.stub(adImpl, 'getFallback', () => {
-      return true;
+    it('should NOT continue with display state UN_LAID_OUT', () => {
+      sandbox.stub(adImpl, 'getFallback', () => {
+        return document.createElement('div');
+      });
+      uiHandler = new AmpAdUIHandler(adImpl);
+      uiHandler.setDisplayState(AdDisplayState.LOADING);
+      const spy = sandbox.stub(adImpl, 'deferMutate', callback => {
+        uiHandler.state = AdDisplayState.NOT_LAID_OUT;
+        callback();
+      });
+      const placeHolderSpy = sandbox.stub(adImpl, 'togglePlaceholder');
+      uiHandler.init();
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      expect(spy).to.be.called;
+      expect(placeHolderSpy).to.not.be.called;
+      expect(uiHandler.state).to.equal(AdDisplayState.NOT_LAID_OUT);
     });
-    const spy = sandbox.stub(adImpl, 'deferMutate', callback => {
-      uiHandler.state = 0;
-      callback();
-    });
-    const placeHolderSpy = sandbox.stub(adImpl, 'togglePlaceholder');
-    uiHandler.init();
-    uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-    expect(spy).to.be.called;
-    expect(placeHolderSpy).to.not.be.called;
-    expect(uiHandler.state).to.equal(0);
   });
 });
