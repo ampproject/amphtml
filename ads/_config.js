@@ -271,6 +271,16 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  mediavine: {
+    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://securepubads.g.doubleclick.net',
+      'https://tpc.googlesyndication.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   meg: {
     renderStartImplemented: true,
   },
