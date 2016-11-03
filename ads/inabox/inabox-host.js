@@ -20,6 +20,11 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
+import {dev, initLogConstructor} from '../../src/log';
+
+initLogConstructor();
+
+const TAG = 'inabox-host';
 
 run(self);
 
@@ -38,7 +43,7 @@ function processMessage(win, message) {
   const iframeElement =
       getFrameElement(win, win['ampInaboxIframes'], message.source);
   // TODO: build a map from source to iframeElement.
-  console.log('[' + iframeElement.id + '] ' + message.data);
+  dev().info(TAG, '[' + iframeElement.id + '] ' + message.data);
 }
 
 function getFrameElement(win, iframes, source) {

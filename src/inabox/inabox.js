@@ -29,7 +29,7 @@ export class Inabox {
   }
 
   init() {
-    this.win_.top.postMessage('amp-inabox:hello world', '*');
+    this.win_.top./*OK*/postMessage('amp-inabox:hello world', '*');
   }
 }
 
