@@ -23,13 +23,16 @@
  */
 const env = self.AMP_CONFIG || {};
 
-/** @type {!Object<string, string>} */
+const thirdPartyFrameRegex = typeof env['thirdPartyFrameRegex'] == 'string' ?
+    new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex'];
+
+/** @type {!Object<string, string|boolean|RegExp>} */
 export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
-  thirdPartyFrameRegex: env['thirdPartyFrameRegex'] ||
-      /^d-\d+\.ampproject\.net$/,
+  thirdPartyFrameRegex: thirdPartyFrameRegex || /^d-\d+\.ampproject\.net$/,
   cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
   errorReporting: env['errorReportingUrl'] ||
       'https://amp-error-reporting.appspot.com/r',
+  localDev: env['localDev'] || false,
 };
