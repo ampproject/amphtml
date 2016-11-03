@@ -24,7 +24,9 @@ module.exports = function(context) {
               .map(function(declarator) {
                 return declarator.init
               }).filter(function(init) {
-                return init && /(?:Call|New)Expression/.test(init.type);
+                return init && /(?:Call|New)Expression/.test(init.type)
+                    // Special case creating a map object from a literal.
+                    && init.callee.name != 'map';
               }).forEach(function(init) {
                 context.report(init, 'Cannot export side-effect');
               });
