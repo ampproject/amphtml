@@ -30,7 +30,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
   let win;
   let ampStickyAd;
   let impl;
-  describe('with valid child', () => {
+  describe('with valid child 1.0', () => {
     beforeEach(() => {
       win = env.win;
       ampStickyAd = win.document.createElement('amp-sticky-ad');
@@ -188,7 +188,10 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.displayAfterScroll_();
       expect(addCloseButtonSpy).to.be.called;
       expect(impl.element.children[1]).to.be.not.null;
-      expect(impl.element.children[1].tagName).to.equal('BUTTON');
+      expect(impl.element.children[1].tagName).to.equal(
+          'I-AMP-STICKY-AD-TOP-PADDING');
+      expect(impl.element.children[2]).to.be.not.null;
+      expect(impl.element.children[2].tagName).to.equal('BUTTON');
     });
 
     it('should listen to amp:built, amp:load:end', () => {
@@ -233,7 +236,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
   });
 
 
-  describe('with unvalid child', () => {
+  describe('with unvalid child 1.0', () => {
     let ampImg;
     let ampAd1;
     let ampAd2;
@@ -333,9 +336,9 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');
-      expect(borderWidth).to.equal('50px');
-      expect(impl.element.children[1]).to.be.not.null;
-      impl.element.children[1].dispatchEvent(new Event('click'));
+      expect(borderWidth).to.equal('54px');
+      expect(impl.element.children[2]).to.be.not.null;
+      impl.element.children[2].dispatchEvent(new Event('click'));
       return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
         borderWidth = win.getComputedStyle(win.document.body, null)
             .getPropertyValue('border-bottom-width');
@@ -368,7 +371,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');
-      expect(borderWidth).to.equal('50px');
+      expect(borderWidth).to.equal('54px');
       impl.collapsedCallback();
       return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
         borderWidth = win.getComputedStyle(win.document.body, null)
