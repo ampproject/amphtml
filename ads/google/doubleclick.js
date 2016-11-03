@@ -55,13 +55,16 @@ export function doubleclick(global, data) {
   }
 
   // Center the ad in the container.
-  setStyles(global.document.querySelector('#c'), {
-    top: '50%',
-    left: '50%',
-    bottom: '',
-    right: '',
-    webkitTransform: 'translate(-50%, -50%)',
-  });
+  const container = global.document.querySelector('#c');
+  if (container) {
+    setStyles(container, {
+      top: '50%',
+      left: '50%',
+      bottom: '',
+      right: '',
+      transform: 'translate(-50%, -50%)',
+    });
+  }
 
   if (data.useSameDomainRenderingUntilDeprecated != undefined ||
       data.multiSize) {
