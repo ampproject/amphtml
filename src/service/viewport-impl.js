@@ -266,7 +266,7 @@ export class Viewport {
    */
   updatePaddingBottom(paddingBottom) {
     this.ampdoc.whenBodyAvailable().then(body => {
-      body.style.borderBottom = `${paddingBottom}px solid transparent`;
+      setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }
 
@@ -891,7 +891,7 @@ export class ViewportBindingNatural_ {
         // Override a user-supplied `body{overflow}` to be always visible. This
         // style is set in runtime vs css to avoid conflicts with ios-embedded
         // mode and fixed transfer layer.
-        this.win.document.body.style.overflow = 'visible';
+        setStyle(this.win.document.body, 'overflow', 'visible');
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
           setStyles(this.win.document.body, {
@@ -951,7 +951,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.win.document.documentElement.style.paddingTop = px(paddingTop);
+    setStyle(this.win.document.documentElement, 'paddingTop', px(paddingTop));
   }
 
   /** @override */
@@ -1219,9 +1219,10 @@ export class ViewportBindingNaturalIosEmbed_ {
       onDocumentReady(this.win.document, doc => {
         const existingPaddingTop =
             this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-        doc.body.style.paddingTop =
-            `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
-        doc.body.style.borderTop = '';
+        setStyles(doc.body, {
+          paddingTop: `calc(${existingPaddingTop} + ${lastPaddingTop}px)`,
+          borderTop: '',
+        });
       });
     } else {
       this.updatePaddingTop(0);
@@ -1241,8 +1242,10 @@ export class ViewportBindingNaturalIosEmbed_ {
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
-      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
-      doc.body.style.paddingTop = '';
+      setStyles(doc.body, {
+        borderTop: `${paddingTop}px solid transparent`,
+        paddingTop: '',
+      });
     });
   }
 
@@ -1251,7 +1254,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
     onDocumentReady(this.win.document, doc => {
-      doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
+      setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
     });
   }
 
@@ -1496,7 +1499,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.wrapper_.style.paddingTop = px(paddingTop);
+    setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
   }
 
   /** @override */
