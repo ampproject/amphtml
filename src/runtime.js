@@ -174,8 +174,6 @@ function adoptShared(global, opts, callback) {
   // `AMP.extension()` function is only installed in a non-minified mode.
   // This function is meant to play the same role for development and testing
   // as `AMP.push()` in production.
-  // TODO(dvoytenko, #5507): Only expose this method for `!getMode().minified`
-  // once the compile-time inlining is done.
   if (!getMode().minified) {
     /**
      * @param {string} unusedName
