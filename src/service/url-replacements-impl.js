@@ -21,7 +21,7 @@ import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
 import {whenDocumentComplete} from '../document-ready';
-import {fromClassForDoc} from '../service';
+import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../viewer';
@@ -29,6 +29,7 @@ import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
 import {isExperimentOn} from '../experiments';
+import {getTrackImpressionPromise} from '../impression.js';
 
 
 /** @private @const {string} */
@@ -108,6 +109,18 @@ export class UrlReplacements {
       return Math.random();
     });
 
+    // Provides a counter starting at 1 per given scope.
+    let counterStore = null;
+    this.set_('COUNTER', scope => {
+      if (!counterStore) {
+        counterStore = Object.create(null);
+      }
+      if (!counterStore[scope]) {
+        counterStore[scope] = 0;
+      }
+      return ++counterStore[scope];
+    });
+
     // Returns the canonical URL for this AMP document.
     this.set_('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
       return info.canonicalUrl;
@@ -163,6 +176,14 @@ export class UrlReplacements {
       return removeFragment(info.sourceUrl);
     }));
 
+    this.setAsync_('SOURCE_URL', () => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getDocInfoValue_(info => {
+          return removeFragment(info.sourceUrl);
+        });
+      });
+    });
+
     // Returns the host of the Source URL for this AMP document.
     this.set_('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
       return parseUrl(info.sourceUrl).host;
@@ -186,15 +207,13 @@ export class UrlReplacements {
     }));
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      user().assert(param,
-          'The first argument to QUERY_PARAM, the query string ' +
-          'param is required');
-      const url = parseUrl(this.ampdoc.win.location.href);
-      const params = parseQueryString(url.search);
+      return this.getQueryParamData_(param, defaultValue);
+    });
 
-      return (typeof params[param] !== 'undefined') ?
-        params[param] :
-        defaultValue;
+    this.setAsync_('QUERY_PARAM', (param, defaultValue = '') => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getQueryParamData_(param, defaultValue);
+      });
     });
 
     /**
@@ -441,7 +460,7 @@ export class UrlReplacements {
 
   /**
    * Resolves the value via document info.
-   * @param {function(!../document-info.DocumentInfoDef):T} getter
+   * @param {function(!./document-info-impl.DocumentInfoDef):T} getter
    * @return {T}
    * @template T
    */
@@ -538,6 +557,23 @@ export class UrlReplacements {
     }
 
     return navigationInfo[attribute];
+  }
+
+  /**
+   * Return the QUERY_PARAM from the current location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @return {string}
+   */
+  getQueryParamData_(param, defaultValue) {
+    user().assert(param,
+        'The first argument to QUERY_PARAM, the query string ' +
+        'param is required');
+    user().assert(typeof param == 'string', 'param should be a string');
+    const url = parseUrl(this.ampdoc.win.location.href);
+    const params = parseQueryString(url.search);
+    return (typeof params[param] !== 'undefined')
+        ? params[param] : defaultValue;
   }
 
   /**
@@ -859,10 +895,21 @@ export class UrlReplacements {
   }
 }
 
+
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!UrlReplacements}
  */
 export function installUrlReplacementsServiceForDoc(ampdoc) {
   return fromClassForDoc(ampdoc, 'url-replace', UrlReplacements);
+}
+
+
+/**
+ * @param {!Window} embedWin
+ * @param {*} varSource
+ */
+export function installUrlReplacementsForEmbed(embedWin, varSource) {
+  // TODO(avimehta): Implement.
+  installServiceInEmbedScope(embedWin, 'url-replace', {varSource});
 }

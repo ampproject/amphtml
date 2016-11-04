@@ -46,13 +46,15 @@ var extensions = {};
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-access-laterpay', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true);
-declareExtension('amp-ad', '0.1', false);
+declareExtension('amp-ad', '0.1', true);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
+declareExtension('amp-animation', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
@@ -83,11 +85,13 @@ declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false);
+declareExtension('amp-reddit', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
+declareExtension('amp-sticky-ad', '1.0', true);
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -160,8 +164,8 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: true,
     include3pDirectories: true,
+    includePolyfills: true,
   });
 
   // For compilation with babel we start with the amp-babel entry point,
@@ -339,6 +343,18 @@ function buildExtensionJs(path, name, version, options) {
  * Main Build
  */
 function build() {
+  var TESTING_HOST = process.env.AMP_TESTING_HOST;
+  if (argv.fortesting && typeof TESTING_HOST == 'string') {
+    var AMP_CONFIG = {
+      thirdPartyFrameHost: TESTING_HOST,
+      thirdPartyFrameRegex: TESTING_HOST,
+      localDev: true,
+    };
+    console.log($$.util.colors.green('trying to write AMP_CONFIG.'));
+    fs.writeFileSync('node_modules/AMP_CONFIG.json',
+        JSON.stringify(AMP_CONFIG));
+    console.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+  }
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();
@@ -400,8 +416,8 @@ function checkTypes() {
   closureCompile(['./3p/integration.js'],  './dist',
       'integration-check-types.js', {
         externs: ['ads/ads.extern.js',],
-        includeBasicPolyfills: true,
         include3pDirectories: true,
+        includePolyfills: true,
         checkTypes: true,
       });
 }

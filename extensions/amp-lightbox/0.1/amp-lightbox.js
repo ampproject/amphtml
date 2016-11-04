@@ -47,8 +47,15 @@ class AmpLightbox extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
-  /** @override */
-  buildCallback() {
+  /**
+   * Lazily builds the lightbox DOM on the first open.
+   * @private
+   */
+  initialize_() {
+    if (this.container_) {
+      return;
+    }
+
     st.setStyles(this.element, {
       position: 'fixed',
       zIndex: 1000,
@@ -86,6 +93,7 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
+    this.initialize_();
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);

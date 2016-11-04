@@ -409,16 +409,6 @@ amp-pixel {
 }
 
 /**
- * Force the layout box of the ad iframe to be exactly as big as the actual
- * iframe. The `amp-ad` tag itself can be freely styled.
- */
-amp-ad iframe {
-  border: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/**
  * Instagram wraps the standard image into a fixed size container.
  * With these offsets, users can simply specify the the size of the
  * instagram images and things have the right size.

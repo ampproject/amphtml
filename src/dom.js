@@ -501,7 +501,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev().error('dom', 'Failed to open url on target: ', target, e);
+    dev().error('DOM', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.
@@ -558,4 +558,17 @@ export function escapeHtml(text) {
  */
 function escapeHtmlChar(c) {
   return HTML_ESCAPE_CHARS[c];
+}
+
+/**
+ * Tries to focus on the given element; fails silently if browser throws an
+ * exception.
+ * @param {!Element} element
+ */
+export function tryFocus(element) {
+  try {
+    element./*OK*/focus();
+  } catch (e) {
+    // IE <= 7 may throw exceptions when focusing on hidden items.
+  }
 }

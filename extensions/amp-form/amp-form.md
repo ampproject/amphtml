@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td>Stable (Custom Validation still experimental - See below)</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -48,7 +48,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
 
 Example:
 ```html
-<form method="post" action="https://example.com/subscribe" target="_blank">
+<form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -60,6 +60,16 @@ Example:
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            Subscription successful!
+        </template>
+    </div>
+    <div submit-failed>
+        <template type="amp-mustache">
+            Subscription failed!
+        </template>
+    </div>
 </form>
 ```
 
@@ -93,7 +103,7 @@ This attribute can be the same or a different endpoint than `action` and has the
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
 **custom-validation-reporting**
-__(optional)__
+__(optional)__ __(experimental)__
 Enables and selects a custom validation reporting strategy, valid values are one of `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
 See [Custom Validation](#custom-validations) section for more details on this.
@@ -202,6 +212,7 @@ One of the main differences between `:invalid` and `:user-invalid` is when are t
 See the [full example here](../../examples/forms.amp.html) on using these.
 
 ## Custom Validations
+__(experimental)__
 `amp-form` provides a way for you to build your own custom validation UI with few validation reporting strategies available to choose from `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
 The general usage of this is you first set `custom-validation-reporting` attribute on your `form` to one of the validation reporting strategies and then provide your own validation UI marked up with special attributes, AMP will discover these and report them at the right time depending on the strategy selected.

@@ -54,6 +54,7 @@ export const adConfig = {
       'https://staticd.cdn.adblade.com',
       'https://static.adblade.com',
     ],
+    renderStartImplemented: true,
   },
 
   adform: {},
@@ -96,6 +97,14 @@ export const adConfig = {
 
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
+  },
+
+  adverline: {
+    prefetch: 'https://ads.adverline.com/richmedias/amp.js',
+    preconnect: [
+      'https://adnext.fr',
+    ],
+    renderStartImplemented: true,
   },
 
   advertserve: {
@@ -179,6 +188,8 @@ export const adConfig = {
     ],
   },
 
+  fake: {},
+
   flite: {},
 
   genieessp: {
@@ -204,6 +215,7 @@ export const adConfig = {
       'https://staticd.cdn.industrybrains.com',
       'https://static.industrybrains.com',
     ],
+    renderStartImplemented: true,
   },
 
   inmobi: {
@@ -212,6 +224,13 @@ export const adConfig = {
   },
 
   kargo: {},
+
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+    renderStartImplemented: true,
+  },
+
+  ligatus: {},
 
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
@@ -248,6 +267,16 @@ export const adConfig = {
     preconnect: [
       'https://ww251.smartadserver.com',
       'https://static.sascdn.com/',
+    ],
+    renderStartImplemented: true,
+  },
+
+  mediavine: {
+    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://securepubads.g.doubleclick.net',
+      'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
   },
@@ -344,6 +373,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  smartclip: {
+    prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
+    preconnect: 'https://des.smartclip.net',
+    renderStartImplemented: true,
+  },
+
   sortable: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
@@ -389,6 +424,11 @@ export const adConfig = {
 
   widespace: {},
 
+  xlift: {
+    prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+    renderStartImplemented: true,
+  },
+
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
@@ -421,6 +461,11 @@ export const adConfig = {
 
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
+  },
+
+  zedo: {
+    prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
   },
 
   zergnet: {},
