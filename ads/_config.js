@@ -202,9 +202,7 @@ export const adConfig = {
 
   holder: {
     prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
-    preconnect: [
-      'https://h.holder.com.ua',
-    ],
+    preconnect: 'https://h.holder.com.ua',
     renderStartImplemented: true,
   },
 
