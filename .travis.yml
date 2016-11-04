@@ -25,11 +25,7 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 before_script:
   - pip install --user protobuf
-script: |
-  echo "sha ${TRAVIS_PULL_REQUEST_SHA}"
-  echo "commit ${TRAVIS_COMMIT}"
-  echo "repo slug ${TRAVIS_REPO_SLUG}"
-  node build-system/pr-check.js
+script: node build-system/pr-check.js
 branches:
   only:
     - master

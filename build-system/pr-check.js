@@ -79,7 +79,7 @@ function isValidatorWebuiFile(filePath) {
  * @param {string} filePath
  * @return {boolean}
  */
-function isBuildSystem(filePath) {
+function isBuildSystemFile(filePath) {
   return filePath.startsWith('build-system');
 }
 
@@ -101,6 +101,10 @@ function isValidatorFile(filePath) {
        name.endsWith('.protoascii'));
 }
 
+function isDocFile(filePath) {
+  return path.extname(filePath) == '.md';
+}
+
 /**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
@@ -109,16 +113,19 @@ function isValidatorFile(filePath) {
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
-    return new Set(['BUILD_SYSTEM', 'VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME']);
+    return new Set(['BUILD_SYSTEM', 'VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME',
+        'DOCS']);
   }
   const targetSet = new Set();
   for (p of filePaths) {
-    if (isBuildSystem(p)) {
+    if (isBuildSystemFile(p)) {
       targetSet.add('BUILD_SYSTEM');
     } else if (isValidatorWebuiFile(p)) {
       targetSet.add('VALIDATOR_WEBUI');
     } else if (isValidatorFile(p)) {
       targetSet.add('VALIDATOR');
+    } else if (isDocFile(p)) {
+      targetSet.add('DOCS');
     } else {
       targetSet.add('RUNTIME');
     }
@@ -177,11 +184,20 @@ function runAllCommands() {
  * @returns {number}
  */
 function main(argv) {
+  // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
+  if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
+    console.log('Running all commands on push build.');
+    runAllCommands();
+    return 0;
+  }
   const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   const files = filesInPr(travisCommitRange);
-  console.log('files in pr');
-  console.log(files);
   const buildTargets = determineBuildTargets(files);
+
+  if (buildTargets.length == 1 && buildTargets[0] == 'DOCS') {
+    console.log('Only docs were updated, stopping build process.');
+    return 0;
+  }
 
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
