@@ -145,7 +145,7 @@ describe('SignInProtocol', () => {
       viewerMock.expects('sendMessage')
           .withExactArgs('getAccessTokenPassive', {
             origin: ORIGIN,
-          })
+          }, /* awaitResponse */ true)
           .returns(Promise.resolve('access token'))
           .once();
       return signin.getAccessTokenPassive().then(token => {
@@ -158,7 +158,7 @@ describe('SignInProtocol', () => {
       viewerMock.expects('sendMessage')
           .withExactArgs('getAccessTokenPassive', {
             origin: ORIGIN,
-          })
+          }, /* awaitResponse */ true)
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.getAccessTokenPassive().then(token => {
@@ -180,7 +180,7 @@ describe('SignInProtocol', () => {
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
             authorizationCode: 'X',
-          })
+          }, /* awaitResponse */ true)
           .returns(Promise.resolve('access token X'))
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
@@ -199,7 +199,7 @@ describe('SignInProtocol', () => {
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
             authorizationCode: 'X',
-          })
+          }, /* awaitResponse */ true)
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
@@ -218,7 +218,7 @@ describe('SignInProtocol', () => {
           .withExactArgs('requestSignIn', {
             origin: ORIGIN,
             url: loginUrl,
-          })
+          }, /* awaitResponse */ true)
           .returns(Promise.resolve('access token X'))
           .once();
       return signin.requestSignIn(loginUrl).then(result => {
@@ -236,7 +236,7 @@ describe('SignInProtocol', () => {
           .withExactArgs('requestSignIn', {
             origin: ORIGIN,
             url: loginUrl,
-          })
+          }, /* awaitResponse */ true)
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.requestSignIn(loginUrl).then(() => {
