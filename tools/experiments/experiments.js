@@ -62,13 +62,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-experiment',
-    name: 'AMP Experiment',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-experiment/amp-experiment.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4004',
-  },
-  {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
@@ -217,6 +210,18 @@ const EXPERIMENTS = [
     id: 'chunked-amp',
     name: 'Split AMP\'s loading phase into chunks',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
+  },
+  {
+    id: 'amp-sticky-ad-better-ux',
+    name: 'New breaking UX changes make to amp-sticky-ad',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
+  },
+  {
+    id: 'amp-animation',
+    name: 'High-performing keyframe animations in AMP.',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-animation/amp-animation.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
 ];
 

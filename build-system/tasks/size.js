@@ -211,7 +211,7 @@ function sizeTask() {
   gulp.src([
       'dist/**/*.js',
       '!dist/**/*-latest.js',
-      '!dist/**/check-types.js',
+      '!dist/**/*check-types.js',
       'dist.3p/{current,current-min}/**/*.js',
     ])
     .pipe(sizer())

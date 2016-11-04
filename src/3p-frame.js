@@ -18,7 +18,6 @@
 import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
 import {getLengthNumeral} from '../src/layout';
-import {getService} from './service';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
@@ -192,14 +191,22 @@ export function preloadBootstrap(window, preconnect) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  return getService(self, 'bootstrapBaseUrl', () => {
-    return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
-      getDefaultBootstrapBaseUrl(parentWindow);
-  });
+  // The value is cached in a global variable called `bootstrapBaseUrl`;
+  const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
+  if (bootstrapBaseUrl) {
+    return bootstrapBaseUrl;
+  }
+  return parentWindow.bootstrapBaseUrl =
+      getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest)
+          || getDefaultBootstrapBaseUrl(parentWindow);
 }
 
 export function setDefaultBootstrapBaseUrlForTesting(url) {
   overrideBootstrapBaseUrl = url;
+}
+
+export function resetBootstrapBaseUrlForTesting(win) {
+  win.bootstrapBaseUrl = undefined;
 }
 
 /**
@@ -213,8 +220,9 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
       return overrideBootstrapBaseUrl;
     }
     return getAdsLocalhost(parentWindow)
-        + '/dist.3p/current'
-        + (getMode().minified ? '-min/frame' : '/frame.max')
+        + '/dist.3p/'
+        + (getMode().minified ? '$internalRuntimeVersion$/frame'
+            : 'current/frame.max')
         + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
@@ -222,6 +230,9 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
 }
 
 function getAdsLocalhost(win) {
+  if (urls.localDev) {
+    return `http://${urls.thirdPartyFrameHost}`;
+  }
   return 'http://ads.localhost:'
       + (win.location.port || win.parent.location.port);
 }

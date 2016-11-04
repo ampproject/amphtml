@@ -19,6 +19,8 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
+import {installDocumentInfoServiceForDoc,} from
+    '../../src/service/document-info-impl';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../src/experiments';
 
@@ -95,6 +97,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       push: () => {},
     };
     installTimerService(win);
+    installDocumentInfoServiceForDoc(ampdoc);
     installUrlReplacementsServiceForDoc(ampdoc);
   });
 

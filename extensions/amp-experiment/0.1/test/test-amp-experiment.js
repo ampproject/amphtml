@@ -18,7 +18,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';
 import {variantForOrNull} from '../../../../src/variant-service';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('amp-experiment', () => {
@@ -53,7 +52,6 @@ describe('amp-experiment', () => {
       sandbox = sinon.sandbox.create();
       win = iframe.win;
       ampdoc = iframe.ampdoc;
-      toggleExperiment(win, 'amp-experiment', true);
       const el = win.document.createElement('amp-experiment');
       el.ampdoc_ = ampdoc;
       experiment = new AmpExperiment(el);
@@ -61,7 +59,6 @@ describe('amp-experiment', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(win, 'amp-experiment', false);
     sandbox.restore();
   });
 

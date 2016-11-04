@@ -15,7 +15,6 @@
  */
 
 import {removeElement} from '../../../src/dom';
-import {loadPromise} from '../../../src/event-helper';
 import {
   SubscriptionApi,
   listenFor,
@@ -55,9 +54,6 @@ export class AmpAdXOriginIframeHandler {
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
-    /** @private {boolean} */
-    this.is3p_ = false;
-
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
@@ -71,28 +67,24 @@ export class AmpAdXOriginIframeHandler {
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
-   * @param {boolean} is3p whether iframe was loaded via 3p.
-   * @param {boolean=} opt_defaultVisible when true, visibility hidden is NOT
-   *    set on the iframe element (remains visible
    * @param {boolean=} opt_isA4A when true do not listen to ad response
-   * @return {!Promise} awaiting load event for ad frame
+   * @return {!Promise} awaiting render complete promise
    * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
-  init(iframe, is3p, opt_defaultVisible, opt_isA4A) {
+  init(iframe, opt_isA4A) {
     dev().assert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
-    this.is3p_ = is3p;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
     this.intersectionObserver_ = new IntersectionObserver(
-        this.baseInstance_, this.iframe, is3p);
+        this.baseInstance_, this.iframe, true);
     this.embedStateApi_ = new SubscriptionApi(
-        this.iframe, 'send-embed-state', is3p,
+        this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOncePromise(this.iframe, 'entity-id', this.is3p_)
+    listenForOncePromise(this.iframe, 'entity-id', true)
         .then(info => {
           this.element_.creativeId = info.data.id;
         });
@@ -101,16 +93,25 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
           this.updateSize_(data.height, data.width, source, origin);
-        }, this.is3p_, this.is3p_));
+        }, true, true));
+
+    this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
+      this.sendEmbedInfo_(this.baseInstance_.isInViewport());
+    }));
+
+    if (opt_isA4A) {
+      // A4A writes creative frame directly to page therefore does not expect
+      // post message to unset visibility hidden
+      this.element_.appendChild(this.iframe);
+      return Promise.resolve();
+    }
 
     // Install API that listen to ad response
-    if (opt_isA4A) {
-      this.adResponsePromise_ = Promise.resolve();
-    } else if (this.baseInstance_.config
+    if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe,
-        ['render-start', 'no-content'], this.is3p_).then(info => {
+        ['render-start', 'no-content'], true).then(info => {
           const data = info.data;
           if (data.type == 'render-start') {
             this.renderStart_(info);
@@ -122,34 +123,26 @@ export class AmpAdXOriginIframeHandler {
       // If NOT support render-start, listen to bootstrap-loaded no-content
       // respectively
       this.adResponsePromise_ = listenForOncePromise(this.iframe,
-        'bootstrap-loaded', this.is3p_);
-      listenForOncePromise(this.iframe, 'no-content', this.is3p_)
+        'bootstrap-loaded', true);
+      listenForOncePromise(this.iframe, 'no-content', true)
           .then(() => this.noContent_());
     }
 
-    if (!opt_defaultVisible) {
-      // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
-      // creative as it will not expect having to send the render-start message.
-      this.iframe.style.visibility = 'hidden';
-    }
-
-    this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
-      this.sendEmbedInfo_(this.baseInstance_.isInViewport());
-    }));
+    // Set iframe initially hidden which will be removed on load event +
+    // post message.
+    this.iframe.style.visibility = 'hidden';
 
     this.element_.appendChild(this.iframe);
-    return loadPromise(this.iframe).then(() => {
-      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-          this.adResponsePromise_,
-          'timeout waiting for ad response').catch(e => {
-            this.noContent_();
-            user().warn('AMP-AD', e);
-          }).then(() => {
-            if (this.iframe) {
-              this.iframe.style.visibility = '';
-            }
-          });
-    });
+    return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+        this.adResponsePromise_,
+        'timeout waiting for ad response').catch(e => {
+          this.noContent_();
+          user().warn('AMP-AD', e);
+        }).then(() => {
+          if (this.iframe) {
+            this.iframe.style.visibility = '';
+          }
+        });
   }
 
   /**
@@ -269,7 +262,7 @@ export class AmpAdXOriginIframeHandler {
         [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
         {requestedWidth, requestedHeight},
-        this.is3p_);
+        true);
   }
 
   /**

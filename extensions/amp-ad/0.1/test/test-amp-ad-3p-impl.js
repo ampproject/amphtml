@@ -116,12 +116,6 @@ describe('amp-ad-3p-impl', () => {
       });
     });
 
-    it('should reject if no canonical URL provided', () => {
-      win.document.head.innerHTML = '';
-      return expect(ad3p.layoutCallback())
-          .to.eventually.be.rejectedWith('canonical');
-    });
-
     it('should reject if no type attribute provided', () => {
       ad3p.element.removeAttribute('type');
       return expect(ad3p.layoutCallback())
