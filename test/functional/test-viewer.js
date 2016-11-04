@@ -781,7 +781,13 @@ describe('Viewer', () => {
     it('should be embedded when iframed w/ "origin" in URL hash', () => {
       windowApi.parent = {};
       windowApi.location.hash = '#origin=g.com';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.ok;
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded when iframed w/ "visibilityState"', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#visibilityState=hidden';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
 
     it('should NOT be embedded when iframed w/o "origin" in URL hash', () => {
@@ -793,7 +799,7 @@ describe('Viewer', () => {
     it('should be embedded with "webview=1" param', () => {
       windowApi.parent = windowApi;
       windowApi.location.hash = '#webview=1';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.ok;
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
   });
 
