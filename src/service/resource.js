@@ -21,6 +21,7 @@ import {
 } from '../layout-rect';
 import {dev} from '../log';
 import {toggle} from '../style';
+import {childElements} from '../dom';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -103,6 +104,15 @@ export class Resource {
       Resource.forElementOptional(element).updateOwner(owner);
     }
     element[OWNER_PROP_] = owner;
+    // Need to clear owner cache for all child elements
+    const cachedElements = childElements(element, ele => {
+      return !ele[OWNER_PROP_];
+    });
+    cachedElements.forEach(element => {
+      if (Resource.forElementOptional(element)) {
+        Resource.forElementOptional(element).updateOwner(undefined);
+      }
+    });
   }
 
   /**
@@ -190,7 +200,7 @@ export class Resource {
 
   /**
    * Update owner element
-   * @param {!AmpElement} owner
+   * @param {AmpElement|undefined} owner
    */
   updateOwner(owner) {
     this.owner_ = owner;
