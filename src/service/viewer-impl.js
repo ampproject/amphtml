@@ -215,10 +215,15 @@ export class Viewer {
      * a web view, or a shadow doc in PWA.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = (
+    this.isEmbedded_ = !!(
+        this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME && this.params_['origin']
+        // There appears to be a bug under investigation where the
+        // origin is sometimes failed to be detected. Since failure mode
+        // if we fail to initialize communication is very bad, we also check
+        // for visibilityState.
+        && (this.params_['origin'] || this.params_['visibilityState'])
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
