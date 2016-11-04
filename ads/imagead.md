@@ -33,6 +33,11 @@ template will be used consisting only of a link and
     data-slot="1"
     data-url="https://mysite/my-ad-server"
 >
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}">
+        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
 </amp-ad>
 <!-- The ad server will be called with the URL https://mysite/my-ad-server?s=1 -->
 ```
@@ -45,12 +50,22 @@ template will be used consisting only of a link and
     data-slot="1"
     data-url="https://mysite/my-ad-server"
 >
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}">
+        <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
 </amp-ad>
 <amp-ad width=400 height=300
     type="adimage"
     data-slot="2"
     data-url="https://mysite/my-ad-server"
 >
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}">
+        <amp-img layout='fixed' height="400" width="300" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
 </amp-ad>
 <!-- The ad server will be called with the URL https://mysite/my-ad-server?s=1,2 -->
 ```
@@ -62,37 +77,38 @@ template will be used consisting only of a link and
     data-slot="slot-name-a"
     data-url="https://mysite/my-ad-server"
 >
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}">
+        <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
 </amp-ad>
 <amp-ad width=400 height=300
     type="adimage"
     data-slot="slot-name-b"
     data-url="https://mysite/my-ad-server"
 >
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}">
+        <amp-img layout='fixed' height="400" width="300" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
 </amp-ad>
 <amp-ad width=300 height=250
     type="adimage"
     data-slot="123"
     data-url="https://my-other-site/my-other-ad-server"
 >
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}">
+        <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
 </amp-ad>
 <!-- Two ad server calls will be made: -->
 <!-- The first:  https://mysite/my-ad-server?s=slot-name-a,slot-name-b -->
 <!-- The second: https://my-other-site/my-other-ad-server?s=123 -->
 ```
-
-### Ad using a mustache template
-```html
- <amp-ad type="imagead" width="200" height="200"
-    data-url="https://my-site/my-ad-server"
-    data-slot='2'>
-    <template type="amp-mustache" id="amp-template-id">
-      <a href="{{href}}">
-        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
-      </a>
-    </template>
-  </amp-ad>
-```
-
 
 ## Supported parameters
 
@@ -101,16 +117,10 @@ template will be used consisting only of a link and
 This must be starting with `https://`, and it must be the address of an ad
 server returning json in the format defined below.
 
-### data-slot (mandatory)
+### data-slot (optional)
 
 On the assumption that most pages have multiple ad slots, this is passed to the
-ad server to tell it which slot is being fetched. It is generally a number, but it 
-can be some arbitrary string as long as it does not contain the characters "?" and "&".
-
-### data-target (optional)
-
-Can be one of `_blank` or `_self` to indicate where the target URL should open when
-the ad is clicked on.
+ad server to tell it which slot is being fetched. This can be any alphanumeric string.
 
 ## Ad server
 

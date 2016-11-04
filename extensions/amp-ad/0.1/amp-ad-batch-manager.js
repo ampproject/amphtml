@@ -43,7 +43,6 @@ export function getBatchManager(e, url, selector) {
     // For performance reasons, we only do the scan once, the first time that a batch manager is constructed.
     e.win.imageadElements = {};
     const elements = document.querySelectorAll(selector);
-    console.log(elements);
     for (let i = 0; i < elements.length; i++) {
       const el = elements[i];
       const url = el.getAttribute('data-url');

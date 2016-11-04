@@ -34,21 +34,13 @@ export class AmpAdImage extends AMP.BaseElement {
 
     /** @private {string} A string identifying this ad slot: the server's responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
+    if (!this.slot_.match(/^[0-9a-z]+$/)) {
+      user().error(TAG_AD_IMAGE, 'imagead slot should be alphanumeric: ' +
+            this.slot_);
+    }
 
     /** @private {Object} Data passed back from the ad server, via the batch manager */
     this.jsondata_ = null;
-
-    /** @private {string} Target specifier for the ad's anchor tag: default to "_blank", accept "_top" */
-    this.target_ = '_blank';
-    const t = element.getAttribute('data-target');
-    if (t) {
-      if (t === '_blank' || t === '_self') {
-        this.target_ = t;
-      } else {
-        user().error(TAG_AD_IMAGE,
-        "Invalid data-target: only '_blank' and '_self' are permitted");
-      }
-    }
 
     /** @private {AmpAdBatchManager} This will batch up the display of this ad together with others of the same URL */
     this.batchManager_ = getBatchManager(this, this.url_,
@@ -88,20 +80,7 @@ export class AmpAdImage extends AMP.BaseElement {
             t.element.appendChild(x);
           });
     } else {
-      // We have no template. Fall back to a simple default image ad.
-      const a = document.createElement('a');
-      a.setAttribute('target', this.target_);
-      a.setAttribute('href', d.href);
-      a.style.width = '100%';
-      // If the server sent back some info for analytics purposes, put it where analytics can get at it
-      if (d.hasOwnProperty('info')) {
-        a.setAttribute('data-info', d.info);
-      }
-      this.element.appendChild(a);
-      const i = document.createElement('img');
-      i.setAttribute('src', d.src);
-      i.style.width = '100%';
-      a.appendChild(i);
+      user().error(TAG_AD_IMAGE, 'Missing template in imagead');
     }
   }
   /** @override */
