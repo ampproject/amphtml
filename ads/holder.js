@@ -22,8 +22,7 @@ import {writeScript, validateData} from '../3p/3p';
  */
 export function holder(global, data) {
   validateData(data, ['block'], ['ampSlotIndex']);
-  const d = document,
-    wcl = global.context.location,
+  const wcl = global.context.location,
     n = navigator.userAgent;
   let l = '&r' + Math.round((Math.random() * 10000000));
   l += '&' +
