@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
-
-const TAG = 'amp-messaging-protocol';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
-export class AmpMessagingProtocol extends AMP.BaseElement {
+describes.sandboxed('AmpViewerIntegration', {}, () => {
 
-  /** @override */
-  buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
-  }
-}
+  beforeEach(() => {
+    toggleExperiment(window, 'amp-viewer-integration', true);
+  });
 
-AMP.registerElement(TAG, AmpMessagingProtocol);
+  afterEach(() => {
+    toggleExperiment(window, 'amp-viewer-integration', false);
+  });
+
+  it('should work', () => {
+    // TODO
+  });
+});

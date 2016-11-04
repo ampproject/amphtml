@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-messaging-protocol"></a> `amp-messaging-protocol`
+# <a name="amp-viewer-integration"></a> `amp-viewer-integration`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Messaging Protocol component</td>
+    <td>AMP Viewer Integration component</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-messaging-protocol" src="https://cdn.ampproject.org/v0/amp-messaging-protocol-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-viewer-integration" src="https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>

@@ -224,7 +224,7 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'amp-messaging-protocol',
+    id: 'amp-viewer-integration',
     name: 'New messaging protocol between AMP and the Viewer',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6013',
   },
