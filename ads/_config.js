@@ -159,6 +159,11 @@ export const adConfig = {
     preconnect: 'https://cas.criteo.com',
   },
 
+  csa: {
+    prefetch: 'https://www.google.com/adsense/search/ads.js',
+    preconnect: 'https://www.google.com',
+  },
+
   dotandads: {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
