@@ -63,7 +63,7 @@ For example:
 
 **src**
 
-Required if no &lt;source&gt; children are present. Must be HTTPS.
+Required if no `<source>` children are present. Must be HTTPS.
 
 **poster**
 
@@ -72,8 +72,13 @@ default the first frame is displayed.
 
 **autoplay**
 
-If present, the video will automatically start playback once rendered (if autoplay is supported by the browser).
-Autoplay, when supported, will automatically mute the video before auto playing.
+If this attribute is present, and the browser supports autoplay:
+
+* the video is automatically muted before autoplay starts
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* when the user taps the video, the video is unmuted
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
 
 **controls**
 
