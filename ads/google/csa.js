@@ -157,7 +157,9 @@ window.addEventListener('orientationchange', function() {
   setTimeout(function(){
 
     // Force DOM reflow and repaint
-    document.body.offsetHeight;
+    /** eslint no-unused-vars: 0 */
+    const throwAway = document.body.offsetHeight;
+    /** eslint no-unused-vars: 2 */
 
     // Capture new height
     var container = document.getElementById('csacontainer');
