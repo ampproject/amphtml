@@ -19,44 +19,60 @@ amp-app-banner {
   bottom: 0 !important;
   left: 0;
   width: 100%;
-  max-height: 150px !important;
+  max-height: 100px !important;
   box-sizing: border-box;
-  background: #fefefe;
-  z-index: 12 !important;
-  height: 100px !important;
+  background: #fff;
+  z-index: 13 !important;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+}
+
+i-amp-app-banner-top-padding {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  height: 4px;
+  /** Must be above the dismiss button to cover bottom shadow */
+  z-index: 15 !important;
 }
 
 .amp-app-banner-dismiss-button {
   position: absolute;
-  width: 32px;
-  height: 32px;
-  top: -32px;
+  width: 28px;
+  height: 28px;
+  top: -28px;
   right: 0;
-  background-image: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23000000%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20width%3D%2224%22%3E%3Cpath%20d%3D%22M19%206.41L17.59%205%2012%2010.59%206.41%205%205%206.41%2010.59%2012%205%2017.59%206.41%2019%2012%2013.41%2017.59%2019%2019%2017.59%2013.41%2012z%22%2F%3E%3Cpath%20d%3D%22M0%200h24v24H0z%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E');
-  background-size: 26px 26px;
-  background-position: center;
+  background-image: url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2213px%22%20height%3D%2213px%22%20viewBox%3D%22341%208%2013%2013%22%20version%3D%221.1%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20xmlns%3Axlink%3D%22http%3A//www.w3.org/1999/xlink%22%3E%3Cg%20id%3D%22ic_close_black_24dp%22%20stroke%3D%22none%22%20stroke-width%3D%221%22%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%20transform%3D%22translate%28341.000000%2C%208.000000%29%22%3E%3Cpolygon%20id%3D%22Shape%22%20fill%3D%22%234F4F4F%22%20points%3D%2213%201.30928571%2011.6907143%200%206.5%205.19071429%201.30928571%200%200%201.30928571%205.19071429%206.5%200%2011.6907143%201.30928571%2013%206.5%207.80928571%2011.6907143%2013%2013%2011.6907143%207.80928571%206.5%22%3E%3C/polygon%3E%3C/g%3E%3C/svg%3E');
+  background-size: 13px 13px;
+  background-position: 9px center;
   background-color: #fff;
-  border: 1px solid #c8c8c8;
-  z-index: 13;
+  background-repeat: no-repeat;
+  z-index: 14 !important;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2);
+  border: none;
+  border-top-left-radius: 12px;
 }
 
 /* Increase tapping area of the dismiss button */
 .amp-app-banner-dismiss-button:before {
   position: absolute;
   content: '';
-  top: -18px;
+  top: -20px;
   right: 0;
-  left: -18px;
+  left: -20px;
   bottom: 0;
 }
 
 [dir=rtl] .amp-app-banner-dismiss-button {
   right: auto;
   left: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 12px;
+  background-position: 6px center;
 }
 
 [dir=rtl] .amp-app-banner-dismiss-button:before {
-  top: -18px;
-  right: -18px;
+  right: -20px;
   left: 0;
 }

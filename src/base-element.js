@@ -172,8 +172,7 @@ export class BaseElement {
    * @return {!./layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
-    return this.element.getResources().getResourceForElement(
-        this.element).getLayoutBox();
+    return this.element.getLayoutBox();
   }
 
   /**

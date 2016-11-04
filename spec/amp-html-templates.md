@@ -68,4 +68,8 @@ a specific AMP element how `templateElement` and `data` are provided.
 
 ## Templates
 
-None yet. Coming soon.
+Here's a list of available extended templates:
+
+| Template  | Description |
+| --------- | ----------- |
+| [`amp-mustache`](../extensions/amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |

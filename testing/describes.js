@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-import {FakeCustomElements, FakeWindow} from './fake-dom';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
+import {
+  FakeCustomElements,
+  FakeWindow,
+  interceptEventListeners,
+} from './fake-dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   adopt,
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-  registerForUnitTest,
+  registerElementForTesting,
 } from '../src/runtime';
+import {cssText} from '../build/css';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
@@ -34,6 +41,22 @@ const SUB = ' ';
 
 /** @type {number} */
 let iframeCount = 0;
+
+
+/**
+ * @const {!Object<string, function(!Object)>}
+ */
+const extensionsBuffer = {};
+
+
+/**
+ * @param {string} name
+ * @param {function(!Object)} installer
+ * @const
+ */
+export function bufferExtension(name, installer) {
+  extensionsBuffer[name] = installer;
+}
 
 
 /**
@@ -49,7 +72,9 @@ export let TestSpec;
  *
  * @typedef {{
  *   runtimeOn: (boolean|undefined),
- *   ampdoc: (string),
+ *   extensions: (!Array<string>|undefined),
+ *   canonicalUrl: (string|undefined),
+ *   ampdoc: (string|undefined),
  *   params: (!Object<string, string>|undefined),
  * }}
  */
@@ -281,7 +306,7 @@ class FakeWinFixture {
 /** @implements {Fixture} */
 class RealWinFixture {
 
-  /** @param {!{fakeRegisterElement: boolean}} spec */
+  /** @param {!{fakeRegisterElement: boolean, ampCss: boolean}} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
@@ -311,9 +336,26 @@ class RealWinFixture {
 
         doNotLoadExternalResourcesInTest(win);
 
-        if (spec.fakeRegisterElement) {
-          win.customElements = new FakeCustomElements(win);
+        // Install AMP CSS if requested.
+        if (spec.ampCss) {
+          installRuntimeStylesPromise(win);
         }
+
+        if (spec.fakeRegisterElement) {
+          const customElements = new FakeCustomElements(win);
+          Object.defineProperty(win, 'customElements', {
+            get: () => customElements,
+          });
+        } else {
+          installCustomElements(win);
+        }
+
+        // Intercept event listeners
+        interceptEventListeners(win);
+        interceptEventListeners(win.document);
+        interceptEventListeners(win.document.documentElement);
+        interceptEventListeners(win.document.body);
+        env.interceptEventListeners = interceptEventListeners;
 
         resolve();
       };
@@ -352,6 +394,13 @@ class AmpFixture {
   setup(env) {
     const spec = this.spec.amp;
     const win = env.win;
+    let completePromise;
+
+    // AMP requires canonical URL.
+    const link = win.document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', spec.canonicalUrl || window.location.href);
+    win.document.head.appendChild(link);
 
     win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
@@ -367,13 +416,33 @@ class AmpFixture {
       win.services.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
+      // Install AMP CSS for main runtime, if it hasn't been installed yet.
+      completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
     } else if (ampdocType == 'multi') {
       adoptShadowMode(win);
+      // Notice that ampdoc's themselves install runtime styles in shadow roots.
+      // Thus, not changes needed here.
     }
+    if (spec.extensions) {
+      spec.extensions.forEach(extensionIdWithVersion => {
+        const tuple = extensionIdWithVersion.split(':');
+        const extensionId = tuple[0];
+        // Default to 0.1 if no version was provided.
+        const version = tuple[1] || '0.1';
+        const installer = extensionsBuffer[`${extensionId}:${version}`];
+        if (installer) {
+          installer(win.AMP);
+        } else {
+          resetScheduledElementForTesting(win, extensionId);
+          registerElementForTesting(win, extensionId);
+        }
+      });
+    }
+    return completePromise;
   }
 
   /** @override */
@@ -384,5 +453,28 @@ class AmpFixture {
         resetScheduledElementForTesting(win, k);
       }
     }
+    if (this.spec.amp.extensions) {
+      this.spec.amp.extensions.forEach(extensionId => {
+        if (extensionId.indexOf(':') != -1) {
+          extensionId = extensionId.substring(0, extensionId.indexOf(':'));
+        }
+        resetScheduledElementForTesting(win, extensionId);
+      });
+    }
   }
+}
+
+
+/**
+ * @param {!Window} win
+ */
+function installRuntimeStylesPromise(win) {
+  if (win.document.querySelector('style[amp-runtime]')) {
+    // Already installed.
+    return;
+  }
+  const style = document.createElement('style');
+  style.setAttribute('amp-runtime', '');
+  style.textContent = cssText;
+  win.document.head.appendChild(style);
 }

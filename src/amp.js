@@ -19,6 +19,8 @@
  */
 
 import './polyfills';
+import {chunk} from './chunk';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListenerForDoc} from './document-click';
@@ -37,6 +39,8 @@ import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
 
+/** @type {!./service/ampdoc-impl.AmpDocService} */
+let ampdocService;
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
 // a completely blank page.
@@ -46,57 +50,62 @@ try {
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  /** @const {!./service/ampdoc-impl.AmpDocService} */
-  const ampdocService = installDocService(self, /* isSingleDoc */ true);
+  ampdocService = installDocService(self, /* isSingleDoc */ true);
+} catch (e) {
+  // In case of an error call this.
+  makeBodyVisible(self.document);
+  throw e;
+}
+chunk(self.document, function initial() {
   /** @const {!./service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
   /** @const {!./service/performance-impl.Performance} */
   const perf = installPerformanceService(self);
   perf.tick('is');
   installStyles(self.document, cssText, () => {
-    try {
+    chunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
+      fontStylesheetTimeout(self);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
-
+    });
+    chunk(self.document, function builtins() {
       // Builtins.
       installBuiltins(self);
-
-      // Final configuration and stubbing.
+    });
+    chunk(self.document, function adoptWindow() {
       adopt(self);
+    });
+    chunk(self.document, function stub() {
       stubElements(self);
-
+    });
+    chunk(self.document, function final() {
       installPullToRefreshBlocker(self);
       installGlobalClickListenerForDoc(ampdoc);
 
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);
-    } catch (e) {
-      makeBodyVisible(self.document);
-      throw e;
-    } finally {
+    });
+    chunk(self.document, function finalTick() {
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();
-    }
+    });
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
-} catch (e) {
-  // In case of an error call this.
-  makeBodyVisible(self.document);
-  throw e;
-}
+});
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
+      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$',
+      self.location.href);
 }
 self.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');

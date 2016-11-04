@@ -51,6 +51,9 @@ export class FixedLayer {
     /** @private {number} */
     this.paddingTop_ = paddingTop;
 
+    /** @private {number} */
+    this.committedPaddingTop_ = paddingTop;
+
     /** @private @const {boolean} */
     this.transfer_ = transfer && ampdoc.isSingleDoc();
 
@@ -118,16 +121,25 @@ export class FixedLayer {
 
   /**
    * Updates the viewer's padding-top position and recalculates offsets of
-   * all elements.
+   * all elements. The padding update can be transient, in which case the
+   * UI itself is not updated leaving the blank space up top, which is invisible
+   * due to scroll position. This mode saves significant resources. However,
+   * eventhough layout is not updated, the fixed coordinates still need to be
+   * recalculated.
    * @param {number} paddingTop
+   * @param {boolean} opt_transient
    */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_transient) {
     this.paddingTop_ = paddingTop;
+    if (!opt_transient) {
+      this.committedPaddingTop_ = paddingTop;
+    }
     this.update();
   }
 
   /**
-   * Apply or reset transform style to fixed elements
+   * Apply or reset transform style to fixed elements. The existing transition,
+   * if any, is disabled when custom transform is supplied.
    * @param {?string} transform
    */
   transformMutate(transform) {
@@ -135,6 +147,7 @@ export class FixedLayer {
       // Apply transform style to all fixed elements
       this.fixedElements_.forEach(e => {
         if (e.fixedNow && e.top) {
+          setStyle(e.element, 'transition', 'none');
           if (e.transform && e.transform != 'none') {
             setStyle(e.element, 'transform', e.transform + ' ' + transform);
           } else {
@@ -146,7 +159,10 @@ export class FixedLayer {
       // Reset transform style to all fixed elements
       this.fixedElements_.forEach(e => {
         if (e.fixedNow && e.top) {
-          setStyle(e.element, 'transform', '');
+          setStyles(e.element, {
+            transform: '',
+            transition: '',
+          });
         }
       });
     }
@@ -273,10 +289,11 @@ export class FixedLayer {
           let top = styles.getPropertyValue('top');
           const currentOffsetTop = element./*OK*/offsetTop;
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
-          if ((top == 'auto' || isImplicitAuto) &&
-                  top != '0px' &&
-                  currentOffsetTop != 0) {
+          if ((top == 'auto' || isImplicitAuto) && top != '0px') {
             top = '';
+            if (currentOffsetTop == this.committedPaddingTop_) {
+              top = '0px';
+            }
           }
 
           const bottom = styles.getPropertyValue('bottom');

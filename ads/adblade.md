@@ -21,8 +21,8 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=250
     type="adblade"
-    width="300"
-    height="250"
+    data-width="300"
+    data-height="250"
     data-cid="19626-3798936394">
 </amp-ad>
 ```
@@ -34,5 +34,5 @@ For semantics of configuration, please see [ad network documentation](https://ww
 Supported parameters:
 
 - data-cid
-- width
-- height
+- data-width
+- data-height

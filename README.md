@@ -15,8 +15,8 @@ limitations under the License.
 -->
 
 [![Build Status](https://travis-ci.org/ampproject/amphtml.svg?branch=master)](https://travis-ci.org/ampproject/amphtml)
-[![Issue Stats](http://issuestats.com/github/ampproject/amphtml/badge/pr)](http://issuestats.com/github/ampproject/amphtml)
-[![Issue Stats](http://issuestats.com/github/ampproject/amphtml/badge/issue)](http://issuestats.com/github/ampproject/amphtml)
+[![Issue Stats](http://issuestats.com/github/ampproject/amphtml/badge/pr?style=flat)](http://issuestats.com/github/ampproject/amphtml)
+[![Issue Stats](http://issuestats.com/github/ampproject/amphtml/badge/issue?style=flat)](http://issuestats.com/github/ampproject/amphtml)
 
 # AMP HTML ⚡
 

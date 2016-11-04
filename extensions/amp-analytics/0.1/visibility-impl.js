@@ -121,8 +121,8 @@ export function isVisibilitySpecValid(config) {
   }
 
   if (ctMax < ctMin || ttMax < ttMin) {
-    user().warn('Max value in timing conditions should be more ' +
-        'than the min value.');
+    user().warn('AMP-ANALYTICS', 'Max value in timing conditions should be ' +
+        'more than the min value.');
     return false;
   }
 
@@ -331,8 +331,8 @@ export class Visibility {
       const change = res.element.getIntersectionChangeEntry();
       const ir = change.intersectionRect;
       const br = change.boundingClientRect;
-      const visible = br.height * br.width == 0 ? 0 :
-          ir.width * ir.height * 100 / (br.height * br.width);
+      const visible =
+          isNaN(change.intersectionRatio) ? 0 : change.intersectionRatio * 100;
 
       const listeners = this.listeners_[res.getId()];
       for (let c = listeners.length - 1; c >= 0; c--) {
@@ -491,8 +491,10 @@ export class Visibility {
    */
   prepareStateForCallback_(state, rb, br, ir) {
     const perf = this.win_.performance;
-    state[ELEMENT_X] = rb.left + br.left;
-    state[ELEMENT_Y] = rb.top + br.top;
+    const viewport = viewportForDoc(this.win_.document);
+
+    state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
+    state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
     state[ELEMENT_WIDTH] = br.width;
     state[ELEMENT_HEIGHT] = br.height;
     state[TOTAL_TIME] = perf && perf.timing && perf.timing.domInteractive
@@ -510,10 +512,14 @@ export class Visibility {
         ? Math.round(intersection.width * intersection.height * 10000
               / (br.width * br.height)) / 100
         : 0;
-    state[MIN_VISIBLE] = Math.round(
-        dev().assertNumber(state[MIN_VISIBLE]) * 100) / 100;
-    state[MAX_VISIBLE] = Math.round(
-        dev().assertNumber(state[MAX_VISIBLE]) * 100) / 100;
+    if (state[MIN_VISIBLE] !== undefined) {
+      state[MIN_VISIBLE] =
+          Math.round(dev().assertNumber(state[MIN_VISIBLE]) * 100) / 100;
+    }
+    if (state[MAX_VISIBLE] !== undefined) {
+      state[MAX_VISIBLE] =
+          Math.round(dev().assertNumber(state[MAX_VISIBLE]) * 100) / 100;
+    }
     state[BACKGROUNDED] = this.backgrounded_ ? '1' : '0';
     state[BACKGROUNDED_AT_START] = this.backgroundedAtStart_ ? '1' : '0';
 

@@ -135,7 +135,7 @@ function tryUpgradeElementNoInline(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {
-    reportError(e, this);
+    reportError(e, element);
   }
 }
 
@@ -573,7 +573,14 @@ function createBaseCustomElementClass(win) {
       if (this.isInTemplate_) {
         return;
       }
-      this.tryUpgrade_(new newImplClass(this));
+      if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
+        // Already upgraded or in progress or failed.
+        return;
+      }
+      this.implementation_ = new newImplClass(this);
+      if (this.everAttached) {
+        this.tryUpgrade_();
+      }
     }
 
     /**
@@ -589,7 +596,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.createdCallback();
       if (this.layout_ != Layout.NODISPLAY &&
         !this.implementation_.isLayoutSupported(this.layout_)) {
-        throw new Error('Layout not supported: ' + this.layout_);
+        throw user().createError('Layout not supported: ' + this.layout_);
       }
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
@@ -707,6 +714,7 @@ function createBaseCustomElementClass(win) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
       // TODO(malteubl): Forward for stubbed elements.
+      // TODO(jridgewell): We should pass the layoutBox down.
       this.implementation_.onLayoutMeasure();
 
       if (this.isLoadingEnabled_()) {
@@ -831,7 +839,7 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.everAttached) {
         if (!isStub(this.implementation_)) {
-          this.tryUpgrade_(this.implementation_);
+          this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
@@ -841,7 +849,8 @@ function createBaseCustomElementClass(win) {
           this.layout_ = applyLayout_(this);
           if (this.layout_ != Layout.NODISPLAY &&
             !this.implementation_.isLayoutSupported(this.layout_)) {
-            throw new Error('Layout not supported for: ' + this.layout_);
+            throw user().createError('Layout not supported: ' +
+                this.layout_);
           }
           this.implementation_.layout_ = this.layout_;
           this.implementation_.firstAttachedCallback();
@@ -870,11 +879,10 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Try to upgrade the element with the provided implementation.
-     * @param {!./base-element.BaseElement=} opt_impl
      * @private @final @this {!Element}
      */
-    tryUpgrade_(opt_impl) {
-      const impl = opt_impl || this.implementation_;
+    tryUpgrade_() {
+      const impl = this.implementation_;
       dev().assert(!isStub(impl), 'Implementation must not be a stub');
       if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
@@ -997,6 +1005,14 @@ function createBaseCustomElementClass(win) {
       // TODO(jridgewell, #4826): We may need to make this recursive.
       const ownerBox = owner && owner.getLayoutBox();
       return getIntersectionChangeEntry(box, ownerBox, viewportBox);
+    }
+
+    /**
+     * Returns the resource ID of the element.
+     * @return {number}
+     */
+    getResourceId() {
+      return this.getResources().getResourceForElement(this).getId();
     }
 
     /**

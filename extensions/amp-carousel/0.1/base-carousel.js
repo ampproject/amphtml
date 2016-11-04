@@ -155,7 +155,7 @@ export class BaseCarousel extends AMP.BaseElement {
       this.element.classList.add(className);
       timerFor(this.win).delay(() => {
         this.deferMutate(() => this.element.classList.remove(className));
-      }, 1000);
+      }, 4000);
     });
   }
 
