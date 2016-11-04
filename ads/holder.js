@@ -28,9 +28,7 @@ export function holder(global, data) {
   let l = '&r' + Math.round((Math.random() * 10000000));
   l += '&' +
   'h' + wcl.href;
-  d.cookie = 'b=1; path=/';
-  if (d.cookie.indexOf('b=') != -1 &&
-  !(n.indexOf('Safari') != -1 &&
+  if (!(n.indexOf('Safari') != -1 &&
   n.indexOf('Chrome') == -1)) {
     l += '&c1';
   }
