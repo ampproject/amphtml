@@ -62,6 +62,7 @@ describe('Viewer', () => {
       hash: '#origin=g.com',
       href: '/test/viewer',
       ancestorOrigins: null,
+      search: '',
     };
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
@@ -799,6 +800,12 @@ describe('Viewer', () => {
     it('should be embedded with "webview=1" param', () => {
       windowApi.parent = windowApi;
       windowApi.location.hash = '#webview=1';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded with query param', () => {
+      windowApi.parent = {};
+      windowApi.location.search = '?amp_js_v=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
   });
