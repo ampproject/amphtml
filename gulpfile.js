@@ -104,6 +104,7 @@ declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-vine', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-viz-vega', '0.1', true);
 declareExtension('amp-google-vrview-image', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-viewer-integration', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 
 /**
