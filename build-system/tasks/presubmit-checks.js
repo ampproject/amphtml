@@ -159,6 +159,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp.js',
       'src/amp-shadow.js',
+      'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -168,6 +169,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
+      'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
     ],
   },
@@ -247,6 +249,7 @@ var forbiddenTerms = {
     whitelist: [
       '3p/integration.js',
       'ads/alp/install-alp.js',
+      'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'src/runtime.js',
@@ -471,6 +474,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp.js',
       'src/chunk.js',
+      'src/inabox/amp-inabox.js',
       'src/runtime.js',
     ],
   },
