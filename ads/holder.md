@@ -30,9 +30,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact inquiry@holder.com.ua
+For configuration details and to generate your tags, please contact techinfo@holder.com.ua
 
 Supported parameters:
 
 - data-block
-- data-alias

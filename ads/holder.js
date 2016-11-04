@@ -35,5 +35,5 @@ export function holder(global, data) {
     l += '&c1';
   }
   data.queue = l;
-  writeScript(global,'https://dl.dropboxusercontent.com/u/17485301/holderampv1.js');
+  writeScript(global,'https://i.holder.com.ua/js2/holder/ajax/ampv1.js');
 }
