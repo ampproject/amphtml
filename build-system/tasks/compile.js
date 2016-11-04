@@ -119,6 +119,7 @@ function compile(entryModuleFilenames, outputDir,
       'ads/_*.js',
       'ads/alp/**/*.js',
       'ads/google/**/*.js',
+      'ads/inabox/**/*.js',
       // Files under build/. Should be sparse.
       'build/css.js',
       'build/*.css.js',
