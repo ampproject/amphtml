@@ -16,8 +16,8 @@
 import {validateData} from '../../3p/3p';
 
 // Global variables to store backfill options
-var backfill_afs_page_options = null;
-var backfill_afs_adblock_options = null;
+let backfillAfsPageOptions = null;
+let backfillAfsAdblockOptions = null;
 
 /**
  * CSA callback function to resize the iframe and/or request backfill
@@ -30,37 +30,36 @@ function resizeIframe(containerName, adsLoaded) {
     try {
 
       // Get actual height and width of container
-      var container = document.querySelector('#' + containerName);
-      var height = container.offsetHeight;
-      var width = container.offsetWidth;
-      var amp_height =
+      const container = document.querySelector('#' + containerName);
+      const height = container.offsetHeight;
+      const ampHeight =
           window.context.initialIntersection.boundingClientRect.height;
-      var touchTarget = 40;
+      const touchTarget = 40;
 
       // If the height of the container is larger than the height of the
       // initially requested AMP tag, add the overflow element
-      if (height > amp_height) {
+      if (height > ampHeight) {
 
         // Create the overflow
-        var overflow = global.document.createElement('div');
+        const overflow = document.createElement('div');
         overflow.id = 'overflow';
         overflow.style.position = 'absolute';
         overflow.style.height = touchTarget + 'px';
         overflow.style.width = '100%';
 
         // Create the line
-        var line = global.document.createElement('div');
+        const line = document.createElement('div');
         line.style.background = 'rgba(0,0,0,.16)';
         line.style.height = '1px';
         overflow.appendChild(line);
 
         // SVG element (chevron) with styling
-        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
             'height="36px" viewBox="0 0 48 48" fill="#757575"><path d="M14.83' +
             ' 16.42L24 25.59l9.17-9.17L36 19.25l-12 12-12-12z"/>' +
             '<path d="M0-.75h48v48H0z" fill="none"/> </svg>';
 
-        var chevron = global.document.createElement('div');
+        const chevron = document.createElement('div');
         chevron.style.width = '36px';
         chevron.style.height = '36px';
         chevron.style.marginLeft = 'auto';
@@ -76,10 +75,10 @@ function resizeIframe(containerName, adsLoaded) {
           window.context.requestResize('auto', height);
         };
 
-        global.document.body.appendChild(overflow);
+        document.body.appendChild(overflow);
 
         // Resize the CSA iframe and container
-        var newHeight = amp_height - touchTarget;
+        const newHeight = ampHeight - touchTarget;
         container.firstChild.style.height = newHeight + 'px';
         container.style.height = newHeight + 'px';
       }
@@ -88,10 +87,9 @@ function resizeIframe(containerName, adsLoaded) {
       window.context.requestResize('auto', height);
 
       // Listen for success
-      var unlisten = window.context.onResizeSuccess(function(requestedHeight,
-          requestedWidth) {
+      window.context.onResizeSuccess(function(requestedHeight) {
 
-        var overflow = document.getElementById('overflow');
+        const overflow = document.getElementById('overflow');
 
         // Hide overflow and resize container to full height
         if (overflow) {
@@ -102,15 +100,14 @@ function resizeIframe(containerName, adsLoaded) {
 
       });
 
-      var unlisten = window.context.onResizeDenied(function(requestedHeight,
-          requestedWidth) {
+      window.context.onResizeDenied(function() {
 
-        var overflow = document.getElementById('overflow');
+        const overflow = document.getElementById('overflow');
 
         // Show overflow element and resize container to include overflow
         if (overflow) {
           overflow.style.display = '';
-          var newHeight = amp_height - touchTarget;
+          const newHeight = ampHeight - touchTarget;
           container.firstChild.style.height = newHeight + 'px';
           container.style.height = newHeight + 'px';
         }
@@ -122,18 +119,18 @@ function resizeIframe(containerName, adsLoaded) {
   } else {
 
     // If we need to backfill, make the call
-    if (backfill_afs_page_options != null &&
-        backfill_afs_adblock_options != null) {
+    if (backfillAfsPageOptions != null &&
+        backfillAfsAdblockOptions != null) {
 
       // We don't want to backfill again, so set global variables to null
-      tmp_backfill_afs_page_options = backfill_afs_page_options;
-      tmp_backfill_afs_adblock_options = backfill_afs_adblock_options;
-      backfill_afs_page_options = null;
-      backfill_afs_adblock_options = null;
+      const tmpBackfillAfsPageOptions = backfillAfsPageOptions;
+      const tmpBackfillAfsAdblockOptions = backfillAfsAdblockOptions;
+      backfillAfsPageOptions = null;
+      backfillAfsAdblockOptions = null;
 
       // Call AFS
-      _googCsa('ads', tmp_backfill_afs_page_options,
-          tmp_backfill_afs_adblock_options);
+      global._googCsa('ads', tmpBackfillAfsPageOptions,
+        tmpBackfillAfsAdblockOptions);
 
     } else {
 
@@ -152,37 +149,36 @@ function resizeIframe(containerName, adsLoaded) {
 window.addEventListener('orientationchange', function() {
 
   // Save the height of the container before the event listener triggers
-  var old_height = document.getElementById('csacontainer').style.height;
+  const oldHeight = document.getElementById('csacontainer').style.height;
 
-  setTimeout(function(){
+  setTimeout(function() {
 
     // Force DOM reflow and repaint
-    /** eslint no-unused-vars: 0 */
-    const throwAway = document.body.offsetHeight;
-    /** eslint no-unused-vars: 2 */
+    /*eslint-disable no-unused-vars*/
+    const ignore = document.body.offsetHeight;
+    /*eslint-enable no-unused-vars*/
 
     // Capture new height
-    var container = document.getElementById('csacontainer');
-    var new_height = container.style.height;
-    var new_width = container.style.width;
+    const container = document.getElementById('csacontainer');
+    let newHeight = container.style.height;
 
     // In older versions of iOS, this height will be different because the
     // container height is resized.
     // In Chrome and iOS 10.0.2 the height is the same because
     // the container isn't resized.
-    if (old_height != new_height) {
+    if (oldHeight != newHeight) {
 
       // style.height returns "60px" (for example), so turn this into an int
-      new_height = parseInt(new_height);
+      newHeight = parseInt(newHeight, 10);
 
       // Resize the container to the correct height
-      window.context.requestResize('auto', new_height);
+      window.context.requestResize('auto', newHeight);
 
       // Also update the onclick function to resize to the right height.
-      var overflow = document.getElementById('overflow');
+      const overflow = document.getElementById('overflow');
       if (overflow) {
         overflow.onclick = function() {
-          window.context.requestResize('auto', new_height);
+          window.context.requestResize('auto', newHeight);
         };
       }
     }
@@ -200,7 +196,7 @@ window.addEventListener('orientationchange', function() {
 export function csa(global, data) {
 
   // Get parent width in case we want to override
-  var width = global.document.body.clientWidth;
+  const width = global.document.body.clientWidth;
 
   validateData(data, [], ['afshPageOptions',
                           'afshAdblockOptions',
@@ -227,55 +223,55 @@ export function csa(global, data) {
 
 
   // Parse AFSh page options
-  let afsh_page_options = {};
+  let afshPageOptions = {};
   if (data.afshPageOptions != null) {
     try {
-      afsh_page_options = JSON.parse(data.afshPageOptions);
-      afsh_page_options['source'] = 'amp';
-      afsh_page_options['referer'] = window.context.referrer;
+      afshPageOptions = JSON.parse(data.afshPageOptions);
+      afshPageOptions['source'] = 'amp';
+      afshPageOptions['referer'] = window.context.referrer;
     } catch (e) {}
   }
 
   // Parse AFSh adblock options
-  let afsh_adblock_options = {};
+  let afshAdblockOptions = {};
   if (data.afshAdblockOptions != null) {
     try {
-      afsh_adblock_options = JSON.parse(data.afshAdblockOptions);
+      afshAdblockOptions = JSON.parse(data.afshAdblockOptions);
 
       // Set container to the container we just created
-      afsh_adblock_options['container'] = 'csacontainer';
+      afshAdblockOptions['container'] = 'csacontainer';
 
       // Set to our resize iframe callback
-      afsh_adblock_options['adLoadedCallback'] = resizeIframe;
+      afshAdblockOptions['adLoadedCallback'] = resizeIframe;
 
       // Set the width to the width of the screen if necessary
-      if (afsh_adblock_options['width'] == 'auto') {
-        afsh_adblock_options['width'] = width;
+      if (afshAdblockOptions['width'] == 'auto') {
+        afshAdblockOptions['width'] = width;
       }
     } catch (e) {}
   }
 
   // Parse AFS page options
-  let afs_page_options = {};
+  let afsPageOptions = {};
   if (data.afsPageOptions != null) {
     try {
-      afs_page_options = JSON.parse(data.afsPageOptions);
-      afs_page_options['source'] = 'amp';
-      afs_page_options['referrer'] = window.context.referrer;
+      afsPageOptions = JSON.parse(data.afsPageOptions);
+      afsPageOptions['source'] = 'amp';
+      afsPageOptions['referrer'] = window.context.referrer;
     } catch (e) {}
   }
 
   // Parse AFS adblock options
-  let afs_adblock_options = {};
+  let afsAdblockOptions = {};
   if (data.afsAdblockOptions != null) {
     try {
-      afs_adblock_options = JSON.parse(data.afsAdblockOptions);
+      afsAdblockOptions = JSON.parse(data.afsAdblockOptions);
 
       // Set the container to the container we just created
-      afs_adblock_options['container'] = 'csacontainer';
+      afsAdblockOptions['container'] = 'csacontainer';
 
       // Set to our resize iframe callback
-      afs_adblock_options['adLoadedCallback'] = resizeIframe;
+      afsAdblockOptions['adLoadedCallback'] = resizeIframe;
 
     } catch (e) {}
   }
@@ -285,24 +281,24 @@ export function csa(global, data) {
   if (data.afsPageOptions != null && data.afshPageOptions == null) {
 
     // AFS only
-    _googCsa('ads', afs_page_options, afs_adblock_options);
+    global._googCsa('ads', afsPageOptions, afsAdblockOptions);
 
   } else if (data.afsPageOptions == null && data.afshPageOptions != null) {
 
     // AFSH only
-    _googCsa('plas', afsh_page_options, afsh_adblock_options);
+    global._googCsa('plas', afshPageOptions, afshAdblockOptions);
 
   } else if (data.afsPageOptions != null && data.afshPageOptions != null) {
 
     // AFSh backfilled with AFS
     // Set global variables so the callback function knows the AFS params
-    backfill_afs_page_options = afs_page_options;
-    backfill_afs_adblock_options = afs_adblock_options;
-    _googCsa('plas', afsh_page_options, afsh_adblock_options);
+    backfillAfsPageOptions = afsPageOptions;
+    backfillAfsAdblockOptions = afsAdblockOptions;
+    global._googCsa('plas', afshPageOptions, afshAdblockOptions);
   }
 
   // Ping viewability
-  var unlisten = window.context.observeIntersection(function(changes) {
+  const unlisten = window.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       if (c.intersectionRect.height > 0) {
         // TODO: ping that ad was viewed
