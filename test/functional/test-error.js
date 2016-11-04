@@ -58,6 +58,7 @@ describe('reportErrorToServer', () => {
     expect(e.message).to.contain('_reported_');
     expect(query.or).to.contain('http://localhost');
     expect(query.vs).to.be.undefined;
+    expect(query.ae).to.equal('');
     expect(query.r).to.contain('http://localhost');
     expect(query.noAmp).to.equal('1');
   });
@@ -151,6 +152,21 @@ describe('reportErrorToServer', () => {
     expect(query.f).to.equal('foo.js');
     expect(query.l).to.equal('11');
     expect(query.c).to.equal('22');
+  });
+
+  it('should accumulate errors', () => {
+    parseUrl(getErrorReportUrl(undefined, undefined, undefined, undefined,
+        new Error('1'),true));
+    parseUrl(getErrorReportUrl(undefined, undefined, undefined, undefined,
+        new Error('2'),true));
+    const url = parseUrl(getErrorReportUrl(undefined, undefined, undefined,
+        undefined, new Error('3'),true));
+    const query = parseQueryString(url.search);
+    expect(url.href.indexOf(
+        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
+
+    expect(query.m).to.equal('3');
+    expect(query.ae).to.equal('1,2');
   });
 
   it('should not double report', () => {
