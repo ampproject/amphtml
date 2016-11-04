@@ -191,7 +191,8 @@ function main(argv) {
     return 0;
   }
   const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const files = filesInPr(travisCommitRange);
+  let files = filesInPr(travisCommitRange);
+  files = ['README.md'];
   const buildTargets = determineBuildTargets(files);
 
   if (buildTargets.length == 1 && buildTargets[0] == 'DOCS') {
