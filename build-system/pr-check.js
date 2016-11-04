@@ -195,11 +195,10 @@ function main(argv) {
     return 0;
   }
   const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  let files = filesInPr(travisCommitRange);
-  files = ['examples/somefile.amp.html'];
+  const files = filesInPr(travisCommitRange);
   const buildTargets = determineBuildTargets(files);
 
-  if (buildTargets.length == 1 && buildTargets[0] == 'DOCS') {
+  if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
     console.log('Only docs were updated, stopping build process.');
     return 0;
   }
