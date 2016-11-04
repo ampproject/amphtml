@@ -27,6 +27,7 @@ import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
 import * as describes from '../testing/describes';
 
 
@@ -227,6 +228,7 @@ afterEach(function() {
         '(installed via sandbox.useFakeTimers).');
   }
   setDefaultBootstrapBaseUrlForTesting(null);
+  resetAccumulatedErrorMessagesForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

@@ -26,6 +26,14 @@ import {startsWith} from './string';
 const CANCELLED = 'CANCELLED';
 
 /**
+ * Collects error messages, so they can be included in subsequent reports.
+ * That allows identifying errors that might be caused by previous errors.
+ */
+let accumulatedErrorMessages = self.AMPErrors || [];
+// Use a true global, to avoid multi-module inclusion issues.
+self.AMPErrors = accumulatedErrorMessages;
+
+/**
  * A wrapper around our exponentialBackoff, to lazy initialize it to avoid an
  * un-DCE'able side-effect.
  * @param {function()} work the function to execute after backoff
@@ -223,9 +231,11 @@ export function getErrorReportUrl(message, filename, line, col, error,
         '&c=' + encodeURIComponent(col || '');
   }
   url += '&r=' + encodeURIComponent(self.document.referrer);
+  url += '&ae=' + encodeURIComponent(accumulatedErrorMessages.join(','));
+  accumulatedErrorMessages.push(message);
+  url += '&fr=' + encodeURIComponent(self.location.hash);
 
-  // Shorten URLs to a value all browsers will send.
-  return url.substr(0, 2000);
+  return url;
 }
 
 /**
@@ -242,4 +252,8 @@ export function detectNonAmpJs(win) {
     }
   }
   return false;
+}
+
+export function resetAccumulatedErrorMessagesForTesting() {
+  accumulatedErrorMessages = [];
 }
