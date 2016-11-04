@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.sandboxed('AmpViewerIntegration', {}, () => {
-
-  beforeEach(() => {
-    toggleExperiment(window, 'amp-viewer-integration', true);
-  });
-
-  afterEach(() => {
-    toggleExperiment(window, 'amp-viewer-integration', false);
-  });
-
   it('should work', () => {
     // TODO
   });
