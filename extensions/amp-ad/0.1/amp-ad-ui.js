@@ -64,7 +64,7 @@ export class AmpAdUIHandler {
     this.state = AdDisplayState.NOT_LAID_OUT;;
 
     /** {?Element} */
-    this.fallback_ = baseInstance.getFallback();
+    this.pageProvidedFallback_ = baseInstance.getFallback();
   }
 
   /**
@@ -75,15 +75,15 @@ export class AmpAdUIHandler {
       return;
     }
 
-    if (this.fallback_) {
+    if (this.pageProvidedFallback_) {
       return;
     }
-    //Apply default fallback div when there's no default one
+    // Apply default fallback div when there's no default one
     const holder = createElementWithAttributes(document, 'div', {
       'fallback': '',
       'layout': 'fill',
     });
-    holder.classList.add('-amp-ad-holder');
+    holder.classList.add('amp-ad-default-fallback');
     this.baseInstance_.element.appendChild(holder);
   }
 
@@ -143,7 +143,7 @@ export class AmpAdUIHandler {
    */
   displayNoContentUI_() {
     // The order here is user provided fallback > collapse > default fallback
-    if (this.fallback_) {
+    if (this.pageProvidedFallback_) {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
           // If already unlaid out, do not replace current placeholder then.
@@ -158,6 +158,7 @@ export class AmpAdUIHandler {
         this.baseInstance_./*OK*/collapse();
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       }, () => {
+        // Apply default fallback when resize fail.
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
         this.state = AdDisplayState.LOADED_NO_CONTENT;

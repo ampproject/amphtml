@@ -67,7 +67,7 @@ describe('amp-ad-ui handler', () => {
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
       return Promise.resolve().then(() => {
-        const holder = adImpl.element.querySelector('.-amp-ad-holder');
+        const holder = adImpl.element.querySelector('.amp-ad-default-fallback');
         expect(holder).to.not.be.null;
         expect(holder).to.have.attribute('fallback');
       });
