@@ -223,7 +223,10 @@ export class Viewer {
         // origin is sometimes failed to be detected. Since failure mode
         // if we fail to initialize communication is very bad, we also check
         // for visibilityState.
-        && (this.params_['origin'] || this.params_['visibilityState'])
+        && (this.params_['origin']
+            || this.params_['visibilityState']
+            // Parent asked for viewer JS. We must be embedded.
+            || (this.win.location.search.indexOf('amp_js_v') != -1))
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
