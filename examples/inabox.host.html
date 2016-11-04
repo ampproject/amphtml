@@ -26,9 +26,9 @@
      * @param {!Window} win
      */
     function initInaboxHost(win) {
-      const hostScriptUrl = 'http://localhost:8000/dist/amp-inabox-host.js';
+      const hostScriptUrl = 'http://localhost:8000/dist/a4a-host.js';
       preloadScript(win, hostScriptUrl);
-      // Optional: preload inabox-v0.js as well.
+      // Optional: preload a4a-v0.js as well.
 
       // Keep all iframes that potentially can render AMP content in this array
       win.ampInaboxIframes = win.ampInaboxIframes || [];
@@ -51,11 +51,11 @@
         // Load inabox-host.js when the 1st inabox message is received.
         loadScript(win, hostScriptUrl, () => {
           win.removeEventListener('message', listener);
-          console.log('inabox-host.js loaded.');
+          console.log('a4a-host.js loaded.');
         });
       };
       win.addEventListener('message', listener);
-      console.log('Inabox bootstrapped.');
+      console.log('A4A host bootstrapped.');
     }
 
     function isInaboxMessage(message) {
