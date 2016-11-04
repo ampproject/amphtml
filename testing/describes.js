@@ -428,8 +428,12 @@ class AmpFixture {
       // Thus, not changes needed here.
     }
     if (spec.extensions) {
-      spec.extensions.forEach(extensionId => {
-        const installer = extensionsBuffer[extensionId];
+      spec.extensions.forEach(extensionIdWithVersion => {
+        const tuple = extensionIdWithVersion.split(':');
+        const extensionId = tuple[0];
+        // Default to 0.1 if no version was provided.
+        const version = tuple[1] || '0.1';
+        const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
           installer(win.AMP);
         } else {
