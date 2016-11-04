@@ -14,17 +14,5 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
-
-const TAG = 'amp-viewer-integration';
-
-
-export class AmpViewerIntegration extends AMP.BaseElement {
-
-  /** @override */
-  buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
-  }
+export class AmpViewerIntegration {
 }
