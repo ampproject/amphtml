@@ -141,7 +141,7 @@ export class SignInProtocol {
       this.accessTokenPromise_ = this.viewer_.sendMessage(
           'getAccessTokenPassive', {
             origin: this.pubOrigin_,
-          }).then(resp => {
+          }, /* awaitResponse */ true).then(resp => {
             return /** @type {?string} */ (resp);
           }).catch(reason => {
             user().error(TAG, 'Failed to retrieve access token: ', reason);
@@ -188,7 +188,7 @@ export class SignInProtocol {
     return this.viewer_.sendMessage('storeAccessToken', {
       origin: this.pubOrigin_,
       authorizationCode,
-    }).then(resp => {
+    }, /* awaitResponse */ true).then(resp => {
       const accessToken = /** @type {?string} */ (resp);
       this.updateAccessToken_(accessToken);
       return accessToken;
@@ -221,7 +221,7 @@ export class SignInProtocol {
     return this.viewer_.sendMessage('requestSignIn', {
       origin: this.pubOrigin_,
       url,
-    }).then(resp => {
+    }, /* awaitResponse */ true).then(resp => {
       const accessToken = /** @type {?string} */ (resp);
       this.updateAccessToken_(accessToken);
       // Return empty dialog result.
