@@ -101,6 +101,10 @@ function isValidatorFile(filePath) {
        name.endsWith('.protoascii'));
 }
 
+/**
+ * @param {string} filePath
+ * @return {boolean}
+ */
 function isDocFile(filePath) {
   return path.extname(filePath) == '.md';
 }
@@ -192,7 +196,7 @@ function main(argv) {
   }
   const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   let files = filesInPr(travisCommitRange);
-  files = ['README.md'];
+  files = ['examples/somefile.amp.html'];
   const buildTargets = determineBuildTargets(files);
 
   if (buildTargets.length == 1 && buildTargets[0] == 'DOCS') {
