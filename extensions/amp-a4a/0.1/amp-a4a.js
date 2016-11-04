@@ -81,6 +81,8 @@ const SHARED_IFRAME_PROPERTIES = {
   allowfullscreen: '',
   allowtransparency: '',
   scrolling: 'no',
+  marginwidth: '0',
+  marginheight: '0',
 };
 
 /** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
