@@ -233,7 +233,8 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += '&r=' + encodeURIComponent(self.document.referrer);
   url += '&ae=' + encodeURIComponent(accumulatedErrorMessages.join(','));
   accumulatedErrorMessages.push(message);
-  url += '&fr=' + encodeURIComponent(self.location.hash);
+  url += '&fr=' + encodeURIComponent(self.location.originalHash
+      || self.location.hash);
 
   return url;
 }
