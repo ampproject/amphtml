@@ -81,7 +81,6 @@ export class AmpAdUIHandler {
     // Apply default fallback div when there's no default one
     const holder = createElementWithAttributes(document, 'div', {
       'fallback': '',
-      'layout': 'fill',
     });
     holder.classList.add('amp-ad-default-fallback');
     this.baseInstance_.element.appendChild(holder);
