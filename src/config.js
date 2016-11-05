@@ -19,16 +19,20 @@
  * use the src/config.js module for various constants. We can use the
  * AMP_CONFIG global to translate user-defined configurations to this
  * module.
- * @type {Object}
+ * @type {!Object<string, string>}
  */
-const env = window.AMP_CONFIG || {};
+const env = self.AMP_CONFIG || {};
 
+const thirdPartyFrameRegex = typeof env['thirdPartyFrameRegex'] == 'string' ?
+    new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex'];
+
+/** @type {!Object<string, string|boolean|RegExp>} */
 export const urls = {
-  thirdParty: env.thirdPartyUrl || 'https://3p.ampproject.net',
-  thirdPartyFrameHost: env.thirdPartyFrameHost || 'ampproject.net',
-  thirdPartyFrameRegex: env.thirdPartyFrameRegex ||
-                        /^d-\d+\.ampproject\.net$/,
-  cdn: env.cdnUrl || 'https://cdn.ampproject.org',
-  errorReporting: env.errorReportingUrl ||
-                  'https://amp-error-reporting.appspot.com/r',
+  thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
+  thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
+  thirdPartyFrameRegex: thirdPartyFrameRegex || /^d-\d+\.ampproject\.net$/,
+  cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
+  errorReporting: env['errorReportingUrl'] ||
+      'https://amp-error-reporting.appspot.com/r',
+  localDev: env['localDev'] || false,
 };

@@ -27,7 +27,9 @@
     "assert": false,
     "sinon": true,
     "sandbox": true,
-    "context": false
+    "context": false,
+    "global": false,
+    "describes": true
   },
   "rules": {
     "array-bracket-spacing": [2, "never"],
@@ -37,6 +39,7 @@
     "computed-property-spacing": [2, "never"],
     "curly": 2,
     "dot-location": [2, "property"],
+    "enforce-private-props": 2,
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1 }],
@@ -50,7 +53,10 @@
     "no-array-destructuring": 2,
     "no-debugger": 2,
     "no-div-regex": 2,
+    "no-dupe-keys": 2,
+    "no-es2015-number-props": 2,
     "no-eval": 2,
+    "no-export-side-effect": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
     "no-for-of-statement": 2,

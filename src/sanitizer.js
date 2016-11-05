@@ -20,6 +20,7 @@ import {
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
+  checkCorsUrl,
 } from './url';
 import {parseSrcset} from './srcset';
 import {user} from './log';
@@ -44,7 +45,6 @@ const BLACKLISTED_TAGS = {
   'frameset': true,
   'iframe': true,
   'img': true,
-  'input': true,
   'link': true,
   'meta': true,
   'object': true,
@@ -54,7 +54,6 @@ const BLACKLISTED_TAGS = {
   // intention to keep this block for any longer than we have to.
   'svg': true,
   'template': true,
-  'textarea': true,
   'video': true,
 };
 
@@ -65,9 +64,18 @@ const SELF_CLOSING_TAGS = {
   'col': true,
   'hr': true,
   'img': true,
+  'input': true,
   'source': true,
   'track': true,
   'wbr': true,
+  'area': true,
+  'base': true,
+  'command': true,
+  'embed': true,
+  'keygen': true,
+  'link': true,
+  'meta': true,
+  'param': true,
 };
 
 
@@ -101,6 +109,13 @@ const WHITELISTED_ATTRS = [
 ];
 
 
+/** @const {!RegExp} */
+const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
+
+
+/** @const {!Array<string>} */
+const WHITELISTED_TARGETS = ['_top', '_blank'];
+
 /** @const {!Array<string>} */
 const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ 'javascript:',
@@ -109,6 +124,37 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '<script',
   /*eslint no-script-url: 0*/ '</script',
 ];
+
+
+/** @const {!Object<string, !Object<string, !RegExp>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
+  'input': {
+    'type': /(?:image|file|password|button)/i,
+  },
+};
+
+
+/** @const {!Array<string>} */
+const BLACKLISTED_FIELDS_ATTR = [
+  // TODO(#5539): Consider allowing these, the only reason to strip these is to be
+  // more inline with the validator rules. Consider allowing these if/when
+  // allowed in validator. Even without this blacklist, Caja or Mustache is
+  // removing the values for these attributes.
+  'form',
+  'formaction',
+  'formmethod',
+  'formtarget',
+  'formnovalidate',
+  'formenctype',
+];
+
+
+/** @const {!Object<string, !Array<string>>} */
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = {
+  'input': BLACKLISTED_FIELDS_ATTR,
+  'textarea': BLACKLISTED_FIELDS_ATTR,
+  'select': BLACKLISTED_FIELDS_ATTR,
+};
 
 
 /**
@@ -156,7 +202,37 @@ export function sanitizeHtml(html) {
           for (let i = 0; i < attribs.length; i += 2) {
             if (WHITELISTED_ATTRS.indexOf(attribs[i]) != -1) {
               attribs[i + 1] = savedAttribs[i + 1];
+            } else if (attribs[i].search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+              attribs[i + 1] = savedAttribs[i + 1];
             }
+          }
+        }
+        // `<A>` has special target rules:
+        // - Default target is "_top";
+        // - Allowed targets are "_blank", "_top";
+        // - All other targets are rewritted to "_top".
+        if (tagName == 'a') {
+          let index = -1;
+          let hasHref = false;
+          for (let i = 0; i < savedAttribs.length; i += 2) {
+            if (savedAttribs[i] == 'target') {
+              index = i + 1;
+            } else if (savedAttribs[i] == 'href') {
+              // Only allow valid `href` values.
+              hasHref = attribs[i + 1] != null;
+            }
+          }
+          let origTarget = index != -1 ? savedAttribs[index] : null;
+          if (origTarget != null) {
+            origTarget = origTarget.toLowerCase();
+            if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
+              attribs[index] = origTarget;
+            } else {
+              attribs[index] = '_top';
+            }
+          } else if (hasHref) {
+            attribs.push('target');
+            attribs.push('_top');
           }
         }
       }
@@ -171,7 +247,7 @@ export function sanitizeHtml(html) {
       for (let i = 0; i < attribs.length; i += 2) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
-        if (!isValidAttr(attrName, attrValue)) {
+        if (!isValidAttr(tagName, attrName, attrValue)) {
           continue;
         }
         emit(' ');
@@ -227,11 +303,12 @@ export function sanitizeFormattingHtml(html) {
 
 /**
  * Whether the attribute/value are valid.
+ * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
  * @return {boolean}
  */
-export function isValidAttr(attrName, attrValue) {
+export function isValidAttr(tagName, attrName, attrValue) {
 
   // "on*" attributes are not allowed.
   if (attrName.indexOf('on') == 0 && attrName != 'on') {
@@ -253,6 +330,22 @@ export function isValidAttr(attrName, attrValue) {
     }
   }
 
+  // Remove blacklisted attributes from specific tags e.g. input[formaction].
+  const attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  if (attrNameBlacklist && attrNameBlacklist.indexOf(attrName) != -1) {
+    return false;
+  }
+
+  // Remove blacklisted values for specific attributes e.g. input[type=image].
+  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  if (attrBlacklist) {
+    const blacklistedValuesRegex = attrBlacklist[attrName];
+    if (blacklistedValuesRegex &&
+        attrValue.search(blacklistedValuesRegex) != -1) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -266,7 +359,7 @@ export function isValidAttr(attrName, attrValue) {
  */
 function resolveAttrValue(tagName, attrName, attrValue) {
   if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
-    return resolveUrlAttr(tagName, attrName, attrValue, window.location);
+    return resolveUrlAttr(tagName, attrName, attrValue, self.location);
   }
   return attrValue;
 }
@@ -286,6 +379,7 @@ function resolveAttrValue(tagName, attrName, attrValue) {
  * @private Visible for testing.
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 
@@ -307,7 +401,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
     } catch (e) {
       // Do not fail the whole template just because one srcset is broken.
       // An AMP element will pick it up and report properly.
-      user.error(TAG, 'Failed to parse srcset: ', e);
+      user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
     const sources = srcset.getSources();

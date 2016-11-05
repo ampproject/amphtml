@@ -16,7 +16,6 @@
 
 import {GestureRecognizer} from './gesture';
 import {calcVelocity} from './motion';
-import {timer} from './timer';
 
 
 /**
@@ -35,7 +34,7 @@ let TapDef;
  */
 export class TapRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('tap', manager);
@@ -110,7 +109,7 @@ let DoubletapDef;
  */
 export class DoubletapRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('doubletap', manager);
@@ -198,7 +197,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let SwipeDef;
+export let SwipeDef;
 
 
 /**
@@ -208,7 +207,7 @@ let SwipeDef;
  */
 class SwipeRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(type, manager, horiz, vert) {
     super(type, manager);
@@ -262,7 +261,7 @@ class SwipeRecognizer extends GestureRecognizer {
     if (!touches || touches.length != 1) {
       return false;
     }
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
     this.startX_ = touches[0].clientX;
     this.startY_ = touches[0].clientY;
     return true;
@@ -338,7 +337,7 @@ class SwipeRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     const deltaTime = this.lastTime_ - this.prevTime_;
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
@@ -384,7 +383,7 @@ class SwipeRecognizer extends GestureRecognizer {
  */
 export class SwipeXYRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-xy', manager, true, true);
@@ -397,7 +396,7 @@ export class SwipeXYRecognizer extends SwipeRecognizer {
  */
 export class SwipeXRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-x', manager, true, false);
@@ -410,7 +409,7 @@ export class SwipeXRecognizer extends SwipeRecognizer {
  */
 export class SwipeYRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-y', manager, false, true);
@@ -443,7 +442,7 @@ let TapzoomDef;
  */
 export class TapzoomRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('tapzoom', manager);
@@ -570,7 +569,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     if (first) {
       this.startTime_ = this.lastTime_;
       this.velocityX_ = this.velocityY_ = 0;
@@ -636,7 +635,7 @@ let PinchDef;
  */
 export class PinchRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('pinch', manager);
@@ -693,7 +692,7 @@ export class PinchRecognizer extends GestureRecognizer {
     if (!touches || touches.length != 2) {
       return false;
     }
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
     this.startX1_ = touches[0].clientX;
     this.startY1_ = touches[0].clientY;
     this.startX2_ = touches[1].clientX;
@@ -759,7 +758,7 @@ export class PinchRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     const deltaTime = this.lastTime_ - this.prevTime_;
     const deltaX = this.deltaX_();
     const deltaY = this.deltaY_();

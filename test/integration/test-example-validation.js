@@ -53,6 +53,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'analytics-notification.amp.html',
     'everything.amp.html',
     'facebook.amp.html',
+    'gfycat.amp.html',
     'instagram.amp.html',
     'released.amp.html',
     'soundcloud.amp.html',
@@ -84,7 +85,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
 
   examples.forEach(filename => {
     it(filename + ' should validate', () => {
-      const url = '/base/examples/' + filename;
+      const url = '/examples/' + filename;
       return get(url).then(html => {
         /* global amp: false */
         const validationResult = amp.validator.validateString(html);

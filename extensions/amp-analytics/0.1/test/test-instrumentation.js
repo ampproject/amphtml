@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {InstrumentationService} from '../instrumentation.js';
+import {
+  InstrumentationService,
+  AnalyticsEventType,
+} from '../instrumentation.js';
 import {adopt} from '../../../../src/runtime';
+import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -41,108 +45,127 @@ describe('amp-analytics.instrumentation', function() {
       'onChanged': sandbox.stub(),
     };
     ins.viewport_ = fakeViewport;
+    sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('always fires click listeners when selector is set to *', () => {
-    const el1 = document.createElement('test');
-    const fn1 = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': '*'}, fn1);
-    ins.onClick_({target: el1});
-    expect(fn1.calledOnce).to.be.true;
-
-    const el2 = document.createElement('test2');
-    const fn2 = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': '*'}, fn2);
-    ins.onClick_({target: el2});
-    expect(fn1.calledTwice).to.be.true;
-    expect(fn2.calledOnce).to.be.true;
+  it('works for visible event', () => {
+    const fn = sandbox.stub();
+    ins.addListener({'on': 'visible'}, fn);
+    expect(fn.calledOnce).to.be.true;
   });
 
-  it('never fires click listeners when the selector is empty', () => {
-    const el1 = document.createElement('test');
-    const fn1 = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': ''}, fn1);
-    ins.onClick_({target: el1});
-    expect(fn1.callCount).to.equal(0);
-
-    const el2 = document.createElement('test2');
-    const fn2 = sandbox.stub();
-    ins.addListener({'on': 'click'}, fn2);
-    ins.onClick_({target: el2});
-    expect(fn1.callCount).to.equal(0);
-    expect(fn2.callCount).to.equal(0);
+  it('works for hidden event', () => {
+    const fn = sandbox.stub();
+    ins.addListener({'on': 'hidden'}, fn);
+    ins.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
+    expect(fn.calledOnce).to.be.true;
   });
 
-  it('only fires on matching elements', () => {
-    const el1 = document.createElement('div');
+  describe('click listeners', () => {
+    let el1, el2, fn1, fn2, ampAnalytics;
+    beforeEach(() => {
+      el1 = document.createElement('test');
+      fn1 = sandbox.stub();
+      el2 = document.createElement('test2');
+      fn2 = sandbox.stub();
+      ampAnalytics = document.createElement('amp-analytics');
+      document.body.appendChild(ampAnalytics);
+      document.body.appendChild(el1);
+      document.body.appendChild(el2);
+    });
 
-    const el2 = document.createElement('div');
-    el2.className = 'x';
+    it('always fires click listeners when selector is set to *', () => {
+      ins.addListener({'on': 'click', 'selector': '*'}, fn1, ampAnalytics);
+      ins.onClick_({target: el1});
+      expect(fn1.calledOnce).to.be.true;
 
-    const el3 = document.createElement('div');
-    el3.className = 'x';
-    el3.id = 'y';
+      ins.addListener({'on': 'click', 'selector': '*'}, fn2, ampAnalytics);
+      ins.onClick_({target: el2});
+      expect(fn1.calledTwice).to.be.true;
+      expect(fn2.calledOnce).to.be.true;
+    });
 
-    const fnClassX = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': '.x'}, fnClassX);
+    it('never fires click listeners when the selector is empty', () => {
+      ins.addListener({'on': 'click', 'selector': ''}, fn1, ampAnalytics);
+      ins.onClick_({target: el1});
+      expect(fn1.callCount).to.equal(0);
 
-    const fnIdY = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': '#y'}, fnIdY);
+      ins.addListener({'on': 'click'}, fn2, ampAnalytics);
+      ins.onClick_({target: el2});
+      expect(fn1.callCount).to.equal(0);
+      expect(fn2.callCount).to.equal(0);
+    });
 
-    ins.onClick_({target: el1});
-    expect(fnClassX.callCount).to.equal(0);
-    expect(fnIdY.callCount).to.equal(0);
+    it('only fires on matching elements', () => {
 
-    ins.onClick_({target: el2});
-    expect(fnClassX.callCount).to.equal(1);
-    expect(fnIdY.callCount).to.equal(0);
+      el2.className = 'x';
 
-    ins.onClick_({target: el3});
-    expect(fnClassX.callCount).to.equal(2);
-    expect(fnIdY.callCount).to.equal(1);
-  });
+      const el3 = document.createElement('div');
+      el3.className = 'x';
+      el3.id = 'y';
 
-  it('fires for events on child elements', () => {
-    const el1 = document.createElement('div');
-    const el2 = document.createElement('div');
+      const fnClassX = sandbox.stub();
+      ins.addListener({'on': 'click', 'selector': '.x'}, fnClassX,
+          ampAnalytics);
 
-    const el3 = document.createElement('div');
-    el3.className = 'x z';
-    el3.appendChild(el1);
+      const fnIdY = sandbox.stub();
+      ins.addListener({'on': 'click', 'selector': '#y'}, fnIdY, ampAnalytics);
 
-    const el4 = document.createElement('div');
-    el4.className = 'x';
-    el4.id = 'y';
-    el4.appendChild(el3);
-    el4.appendChild(el2);
+      ins.onClick_({target: el1});
+      expect(fnClassX.callCount).to.equal(0);
+      expect(fnIdY.callCount).to.equal(0);
 
-    const fnClassX = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': '.x'}, fnClassX);
+      ins.onClick_({target: el2});
+      expect(fnClassX.callCount).to.equal(1);
+      expect(fnIdY.callCount).to.equal(0);
 
-    const fnIdY = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': '#y'}, fnIdY);
+      ins.onClick_({target: el3});
+      expect(fnClassX.callCount).to.equal(2);
+      expect(fnIdY.callCount).to.equal(1);
+    });
 
-    const fnClassZ = sandbox.stub();
-    ins.addListener({'on': 'click', 'selector': '.z'}, fnClassZ);
+    it('fires for events on child elements', () => {
 
-    ins.onClick_({target: el1});
-    expect(fnClassX.callCount).to.equal(1);
-    expect(fnIdY.callCount).to.equal(1);
-    expect(fnClassZ.callCount).to.equal(1);
+      const el3 = document.createElement('div');
+      el3.className = 'x z';
+      el3.appendChild(el1);
 
-    ins.onClick_({target: el2});
-    expect(fnClassX.callCount).to.equal(2);
-    expect(fnIdY.callCount).to.equal(2);
-    expect(fnClassZ.callCount).to.equal(1);
+      const el4 = document.createElement('div');
+      el4.className = 'x';
+      el4.id = 'y';
+      el4.appendChild(el3);
+      el4.appendChild(el2);
 
-    ins.onClick_({target: el3});
-    expect(fnClassX.callCount).to.equal(3);
-    expect(fnIdY.callCount).to.equal(3);
-    expect(fnClassZ.callCount).to.equal(2);
+      const fnClassX = sandbox.stub();
+      ins.addListener({'on': 'click', 'selector': '.x'}, fnClassX,
+          ampAnalytics);
+
+      const fnIdY = sandbox.stub();
+      ins.addListener({'on': 'click', 'selector': '#y'}, fnIdY, ampAnalytics);
+
+      const fnClassZ = sandbox.stub();
+      ins.addListener({'on': 'click', 'selector': '.z'}, fnClassZ,
+          ampAnalytics);
+
+      ins.onClick_({target: el1});
+      expect(fnClassX.callCount).to.equal(1);
+      expect(fnIdY.callCount).to.equal(1);
+      expect(fnClassZ.callCount).to.equal(1);
+
+      ins.onClick_({target: el2});
+      expect(fnClassX.callCount).to.equal(2);
+      expect(fnIdY.callCount).to.equal(2);
+      expect(fnClassZ.callCount).to.equal(1);
+
+      ins.onClick_({target: el3});
+      expect(fnClassX.callCount).to.equal(3);
+      expect(fnIdY.callCount).to.equal(3);
+      expect(fnClassZ.callCount).to.equal(2);
+    });
   });
 
   it('should listen on custom events', () => {
@@ -269,17 +292,35 @@ describe('amp-analytics.instrumentation', function() {
     ins.addListener({'on': 'timer', 'timerSpec': {'interval': 15}}, fn2);
     expect(fn2.callCount).to.equal(1);
 
+    const fn3 = sandbox.stub();
+    ins.addListener({
+      'on': 'timer', 'timerSpec': {'interval': 10, 'immediate': false},
+    }, fn3);
+    expect(fn3.callCount).to.equal(0);
+
+    const fn4 = sandbox.stub();
+    ins.addListener({
+      'on': 'timer', 'timerSpec': {'interval': 15, 'immediate': false},
+    }, fn4);
+    expect(fn4.callCount).to.equal(0);
+
     clock.tick(10 * 1000); // 10 seconds
     expect(fn1.callCount).to.equal(2);
     expect(fn2.callCount).to.equal(1);
+    expect(fn3.callCount).to.equal(1);
+    expect(fn4.callCount).to.equal(0);
 
     clock.tick(10 * 1000); // 20 seconds
     expect(fn1.callCount).to.equal(3);
     expect(fn2.callCount).to.equal(2);
+    expect(fn3.callCount).to.equal(2);
+    expect(fn4.callCount).to.equal(1);
 
     clock.tick(10 * 1000); // 30 seconds
     expect(fn1.callCount).to.equal(4);
     expect(fn2.callCount).to.equal(3);
+    expect(fn3.callCount).to.equal(3);
+    expect(fn4.callCount).to.equal(2);
   });
 
   it('stops firing after the maxTimerLength is exceeded', () => {
@@ -428,5 +469,60 @@ describe('amp-analytics.instrumentation', function() {
         {'on': 'scroll', 'scrollSpec': {'verticalBoundaries': [4]}},
         fn2);
     expect(fn2.callCount).to.equal(1);
+  });
+
+
+  it('extract element level vars from data attribute with prefix vars.',
+    () => {
+      const el1 = document.createElement('div');
+      const ampAnalytics = document.createElement('amp-analytics');
+      document.body.appendChild(ampAnalytics);
+      el1.className = 'x';
+      el1.dataset.varsTest = 'foo';
+      ins.addListener({'on': 'click', 'selector': '.x'},
+        function(arg) {
+          expect(arg.vars.test).to.equal('foo');
+        }, ampAnalytics);
+      ins.onClick_({target: el1});
+    });
+
+  describe('isTriggerAllowed_', () => {
+    let el;
+    beforeEach(() => {
+      ins.isTriggerAllowed_.restore();
+    });
+
+    it('allows all triggers for top level window', () => {
+      el = document.createElement('amp-analytics');
+      document.body.appendChild(el);
+
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.VISIBLE, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.CLICK, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.TIMER, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.SCROLL, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.HIDDEN, el)).to.be.true;
+    });
+
+    it('allows some trigger', () => {
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
+      iframe.contentWindow.document.body.appendChild(el);
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.VISIBLE, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.CLICK, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.TIMER, el)).to.be.true;
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.HIDDEN, el)).to.be.true;
+    });
+
+
+    it('disallows scroll trigger', () => {
+      const iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
+      iframe.contentWindow.document.body.appendChild(el);
+
+      expect(ins.isTriggerAllowed_(AnalyticsEventType.SCROLL, el)).to.be.false;
+      expect(ins.isTriggerAllowed_('custom-trigger', el)).to.be.false;
+    });
   });
 });

@@ -21,6 +21,12 @@ import {
   doubleclickIsA4AEnabled,
 } from
 '../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
+import {
+  fakeIsA4AEnabled,
+} from
+'../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
+import {getMode} from '../src/mode';
+import {map} from '../src/types';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -35,9 +41,29 @@ import {
  *
  * @type {!Object<!string, !function(!Window, !Element): boolean>}
  */
-// TODO(bobcassels): look into moving this to a different file with fewer
-// dependency restrictions
-export const a4aRegistry = {
+export const a4aRegistry = map({
   'adsense': adsenseIsA4AEnabled,
   'doubleclick': doubleclickIsA4AEnabled,
+  // TODO: Add new ad network implementation "is enabled" functions here.  Note:
+  // if you add a function here that requires a new "import", above, you'll
+  // probably also need to add a whitelist exception to
+  // build-system/dep-check-config.js in the "filesMatching: 'ads/**/*.js' rule.
+});
+
+// Note: the 'fake' ad network implementation is only for local testing.
+// Normally, ad networks should add their *IsA4AEnabled callback directly
+// to the a4aRegistry, above.  Ad network implementations should NOT use
+// getMode() in this file.  If they need to check getMode() state, they
+// should do so inside their *IsA4AEnabled callback.
+if (getMode().localDev || getMode().test) {
+  a4aRegistry['fake'] = fakeIsA4AEnabled;
+}
+
+/**
+ * An object mapping signing server names to their corresponding URLs.
+ * @type {!Object<string, string>}
+ */
+export const signingServerURLs = {
+  'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+  'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
 };

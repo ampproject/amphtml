@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 class AmpVimeo extends AMP.BaseElement {
@@ -36,10 +35,7 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    // The video-id is supported only for backward compatibility.
-    const videoid = user.assert(
+    const videoid = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         this.element);
@@ -51,12 +47,10 @@ class AmpVimeo extends AMP.BaseElement {
     iframe.src = 'https://player.vimeo.com/video/' + encodeURIComponent(
         videoid);
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

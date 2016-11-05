@@ -60,36 +60,43 @@ describe('Types', () => {
     });
   });
 
-  describe('isShadowRoot', () => {
+  describe('isFiniteNumber', () => {
 
-    it('should yield false for non-nodes', () => {
-      expect(types.isShadowRoot(null)).to.be.false;
-      expect(types.isShadowRoot(undefined)).to.be.false;
-      expect(types.isShadowRoot('')).to.be.false;
-      expect(types.isShadowRoot(11)).to.be.false;
+    it('should yield false for non-numbers', () => {
+      expect(types.isFiniteNumber(null)).to.be.false;
+      expect(types.isFiniteNumber(undefined)).to.be.false;
+      expect(types.isFiniteNumber('')).to.be.false;
+      expect(types.isFiniteNumber('2')).to.be.false;
+      expect(types.isFiniteNumber([])).to.be.false;
+      expect(types.isFiniteNumber([2])).to.be.false;
+      expect(types.isFiniteNumber({})).to.be.false;
+      expect(types.isFiniteNumber({'a': 2})).to.be.false;
+      expect(types.isFiniteNumber(true)).to.be.false;
+      expect(types.isFiniteNumber(NaN)).to.be.false;
     });
 
-    it('should yield false for other types of nodes', () => {
-      expect(types.isShadowRoot(document.createElement('div'))).to.be.false;
-      expect(types.isShadowRoot(document.createTextNode('abc'))).to.be.false;
+    it('should yield true for numbers', () => {
+      expect(types.isFiniteNumber(3)).to.be.true;
+      expect(types.isFiniteNumber(3.2)).to.be.true;
+      expect(types.isFiniteNumber(123e5)).to.be.true;
+    });
+  });
+
+  describe('map', () => {
+    it('should make map like objects', () => {
+      expect(types.map().prototype).to.be.undefined;
+      expect(types.map().__proto__).to.be.undefined;
+      expect(types.map().toString).to.be.undefined;
     });
 
-    it('should yield true for natively-supported createShadowRoot API', () => {
-      const element = document.createElement('div');
-      if (element.createShadowRoot) {
-        const shadowRoot = element.createShadowRoot();
-        expect(types.isShadowRoot(shadowRoot)).to.be.true;
-      }
-    });
-
-    it('should yield false for non-document-fragment shadow root', () => {
-      const element = document.createElement('div');
-      expect(types.isShadowRoot(element)).to.be.false;
-    });
-
-    it('should yield false for document-fragment shadow root', () => {
-      const fragment = document.createDocumentFragment();
-      expect(types.isShadowRoot(fragment)).to.be.false;
+    it('should make map like objects from objects', () => {
+      expect(types.map({}).prototype).to.be.undefined;
+      expect(types.map({}).__proto__).to.be.undefined;
+      expect(types.map({}).toString).to.be.undefined;
+      expect(types.map({foo: 'bar'}).foo).to.equal('bar');
+      const obj = {foo: 'bar', test: 1};
+      expect(types.map(obj).test).to.equal(1);
+      expect(types.map(obj)).to.not.equal(obj);
     });
   });
 });

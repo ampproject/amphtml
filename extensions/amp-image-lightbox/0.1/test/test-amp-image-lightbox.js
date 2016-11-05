@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
 import {
@@ -34,7 +34,7 @@ describe('amp-image-lightbox component', () => {
       const el = iframe.doc.createElement('amp-image-lightbox');
       el.setAttribute('layout', 'nodisplay');
       iframe.doc.body.appendChild(el);
-      return new Timer(window).promise(16).then(() => {
+      return timerFor(window).promise(16).then(() => {
         el.implementation_.buildCallback();
         return el;
       });
@@ -183,6 +183,7 @@ describe('amp-image-lightbox image viewer', () => {
   let lightbox;
   let lightboxMock;
   let imageViewer;
+  let loadPromiseStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -195,8 +196,10 @@ describe('amp-image-lightbox image viewer', () => {
       },
     };
     lightboxMock = sandbox.mock(lightbox);
+    loadPromiseStub = sandbox.stub().returns(Promise.resolve());
 
-    imageViewer = new ImageViewer(lightbox);
+    sandbox.stub(timerFor(window), 'promise').returns(Promise.resolve());
+    imageViewer = new ImageViewer(lightbox, window, loadPromiseStub);
     document.body.appendChild(imageViewer.getElement());
   });
 
@@ -350,6 +353,18 @@ describe('amp-image-lightbox image viewer', () => {
     expect(imageViewer.imageBox_.left).to.be.closeTo(10, 1);
     expect(imageViewer.imageBox_.top).to.equal(0);
   });
+
+  it('should use the load function passed in when switching images', () => {
+    expect(loadPromiseStub.callCount).to.equal(0);
+    imageViewer.getElement().style.width = '100px';
+    imageViewer.getElement().style.height = '200px';
+    imageViewer.srcset_ = parseSrcset('image1');
+    imageViewer.sourceWidth_ = 80;
+    imageViewer.sourceHeight_ = 60;
+    return imageViewer.measure().then(() => {
+      expect(loadPromiseStub.callCount).to.equal(1);
+    });
+  });
 });
 
 
@@ -373,7 +388,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
     };
     lightboxMock = sandbox.mock(lightbox);
 
-    imageViewer = new ImageViewer(lightbox);
+    imageViewer = new ImageViewer(lightbox, window);
     document.body.appendChild(imageViewer.getElement());
 
     imageViewer.getElement().style.width = '100px';

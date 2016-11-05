@@ -17,7 +17,7 @@
 /**
  * @const {!JSONType}
  */
-export const ANALYTICS_CONFIG = {
+export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
@@ -25,17 +25,21 @@ export const ANALYTICS_CONFIG = {
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
       'ampdocHost': 'AMPDOC_HOST',
+      'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
       'ampVersion': 'AMP_VERSION',
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
+      'backgroundState': 'BACKGROUND_STATE',
       'browserLanguage': 'BROWSER_LANGUAGE',
       'canonicalHost': 'CANONICAL_HOST',
+      'canonicalHostname': 'CANONICAL_HOSTNAME',
       'canonicalPath': 'CANONICAL_PATH',
       'canonicalUrl': 'CANONICAL_URL',
       'clientId': 'CLIENT_ID',
       'contentLoadTime': 'CONTENT_LOAD_TIME',
+      'counter': 'COUNTER',
       'documentCharset': 'DOCUMENT_CHARSET',
       'documentReferrer': 'DOCUMENT_REFERRER',
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
@@ -59,6 +63,7 @@ export const ANALYTICS_CONFIG = {
       'serverResponseTime': 'SERVER_RESPONSE_TIME',
       'sourceUrl': 'SOURCE_URL',
       'sourceHost': 'SOURCE_HOST',
+      'sourceHostname': 'SOURCE_HOSTNAME',
       'sourcePath': 'SOURCE_PATH',
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
@@ -68,6 +73,38 @@ export const ANALYTICS_CONFIG = {
       'viewer': 'VIEWER',
       'viewportHeight': 'VIEWPORT_HEIGHT',
       'viewportWidth': 'VIEWPORT_WIDTH',
+    },
+  },
+
+  'afsanalytics': {
+    'vars': {
+      'server': 'www',
+      'websiteid': 'xxxxxxxx',
+      'event': 'click',
+      'clicklabel': 'clicked from AMP page',
+    },
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'host': '//${server}.afsanalytics.com',
+      'base': '${host}/cgi_bin/',
+      'pageview': '${base}connect.cgi?usr=${websiteid}Pauto' +
+        '&js=1' +
+        '&amp=1' +
+        '&title=${title}' +
+        '&url=${canonicalUrl}' +
+        '&refer=${documentReferrer}' +
+        '&resolution=${screenWidth}x${screenHeight}' +
+        '&color=${screenColorDepth}' +
+        '&Tips=${random}',
+      'click': '${base}click.cgi?usr=${websiteid}' +
+        '&event=${event}' +
+        '&exit=${clicklabel}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
   },
 
@@ -130,7 +167,7 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 15,
-          'max-timer-length': 1200,
+          'maxTimerLength': 1200,
         },
         'request': 'pageping',
       },
@@ -239,7 +276,7 @@ export const ANALYTICS_CONFIG = {
     },
     'transport': {
       'beacon': false,
-      'xhrpost': true,
+      'xhrpost': false,
       'image': true,
     },
   },
@@ -310,7 +347,7 @@ export const ANALYTICS_CONFIG = {
           'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
           'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
           'bln=${browserLanguage}&chs=${documentCharset}&' +
-          'col=${screenColorDepth}&tzo=${timezone}',
+          'col=${screenColorDepth}&tzo=${timezone}&cp_cx_channel=amp',
     },
     'triggers': {
       'defaultPageview': {
@@ -368,6 +405,35 @@ export const ANALYTICS_CONFIG = {
       'metric': 'cm',
     },
     'optout': '_gaUserPrefs.ioo',
+  },
+
+  'googleconversion': {
+    'requests': {
+      'conversion': 'https://www.googleadservices.com/pagead/conversion/' +
+          '${google_conversion_id}/?' +
+          'cv=amp1&' +  // Increment when making changes.
+          'value=${google_conversion_value}&' +
+          'currency_code=${google_conversion_currency}&' +
+          'label=${google_conversion_label}&' +
+          'random=${random}&' +
+          'url=${sourceUrl}&' +
+          'fst=${pageViewId}&' +
+          'num=${counter(googleconversion)}&' +
+          'fmt=3&' +
+          'async=3&' +
+          'bg=${google_conversion_color}&' +
+          'u_h=${screenHeight}&u_w=${screenWidth}&' +
+          'u_ah=${viewportHeight}&u_aw=${viewportWidth}&' +
+          'u_cd=${screenColorDepth}&' +
+          'u_tz=${timezone}&' +
+          'tiba=${title}&' +
+          'guid=ON&script=0',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
   },
 
   'krux': {
@@ -453,6 +519,50 @@ export const ANALYTICS_CONFIG = {
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'metrika': {
+    'transport': {'beacon': true, 'xhrpost': true, 'image': false},
+    'requests': {
+      'pageview': '${_watch}?browser-info=${_brInfo}&${_siteInfo}&${_suffix}',
+      'notBounce': '${_watch}?browser-info=ar%3A1%3Anb%3A1%3A${_brInfo}' +
+        '&${_suffix}',
+      'externalLink': '${_watch}?browser-info=ln%3A1%3A${_brInfo}&${_suffix}',
+      'reachGoal': '${_watch}?browser-info=ar%3A1%3A${_brInfo}&${_siteInfo}' +
+        '&${_goalSuffix}',
+      '_domain': 'https://mc.yandex.ru',
+      '_watch': '${_domain}/watch/${counterId}',
+      '_suffix': 'page-url=${canonicalUrl}&page-ref=${documentReferrer}',
+      '_goalSuffix': 'page-url=goal%3A%2F%2F${canonicalHost}/${goalId}' +
+        '&page-ref=${canonicalUrl}',
+      '_techInfo': [
+        'amp%3A1%3Az%3A${timezone}%3Ai%3A${timestamp}%3Arn%3A${random}',
+        'la%3A${browserLanguage}%3Aen%3A${documentCharset}',
+        'rqn%3A${requestCount}',
+        's%3A${screenWidth}x${screenHeight}x${screenColorDepth}',
+        'w%3A${availableScreenWidth}x${availableScreenHeight}',
+        'ds%3A${_timings}%3Auid%3A${clientId(_ym_uid)}%3Apvid%3A${pageViewId}',
+      ].join('%3A'),
+      '_timings': [
+        '${domainLookupTime}%2C${tcpConnectTime}',
+        '${serverResponseTime}%2C${pageDownloadTime}',
+        '${redirectTime}%2C${navTiming(redirectStart,redirectEnd)}',
+        '${navRedirectCount}%2C${navTiming(domLoading,domInteractive)}',
+        '${navTiming(domContentLoadedEventStart,domContentLoadedEventEnd)}',
+        '${navTiming(navigationStart,domComplete)}',
+        '${pageLoadTime}%2C${navTiming(loadEventStart,loadEventEnd)}',
+        '${contentLoadTime}',
+      ].join('%2C'),
+      '_brInfo': '${_techInfo}%3A${_title}',
+      '_title': 't%3A${title}',
+      '_siteInfo': 'site-info=${yaParams}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
   },
 
@@ -692,7 +802,7 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 5,
-          'max-timer-length': 1200,
+          'maxTimerLength': 1200,
         },
         'request': 'timer',
       },
@@ -711,6 +821,7 @@ export const ANALYTICS_CONFIG = {
     'requests': {
       'host': 'https://api.segment.io/v1/pixel',
       'base': '?writeKey=${writeKey}' +
+        '&context.library.name=amp' +
         '&anonymousId=${anonymousId}' +
         '&context.locale=${browserLanguage}' +
         '&context.page.path=${canonicalPath}' +
@@ -919,7 +1030,7 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
-};
+});
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 

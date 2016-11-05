@@ -53,8 +53,8 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<audio></audio>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<applet></applet>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<form></form>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<link></link>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<meta></meta>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<link>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<meta>c')).to.be.equal('ac');
   });
 
   it('should NOT output security-sensitive markup when nested', () => {
@@ -78,15 +78,50 @@ describe('sanitizeHtml', () => {
 
   it('should output "href" attribute', () => {
     expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
-        'a<a href="http://acme.com/">b</a>');
+        'a<a href="http://acme.com/" target="_top">b</a>');
   });
 
-  it('sanitizes out the "target" attribute', () => {
-    // TODO(dvoytenko, #1572): Confirm if the target actually needs to be
-    // sanitized.
-    // See https://github.com/google/caja/issues/1991.
-    expect(sanitizeHtml('a<a target="_blank">b</a>')).to.be.equal(
-        'a<a target="">b</a>');
+  it('should default target to _top with href', () => {
+    expect(sanitizeHtml(
+        '<a href="">a</a>'
+        + '<a href="" target="">c</a>'
+        )).to.equal(
+        '<a href="" target="_top">a</a>'
+        + '<a href="" target="_top">c</a>');
+  });
+
+  it('should NOT default target to _top w/o href', () => {
+    expect(sanitizeHtml(
+        '<a>b</a>'
+        + '<a target="">d</a>'
+        )).to.equal(
+        '<a>b</a>'
+        + '<a target="_top">d</a>');
+  });
+
+  it('should output a valid target', () => {
+    expect(sanitizeHtml('<a target="_top">a</a><a target="_blank">b</a>'))
+        .to.equal('<a target="_top">a</a><a target="_blank">b</a>');
+  });
+
+  it('should output a valid target in different case', () => {
+    expect(sanitizeHtml('<a target="_TOP">a</a><a target="_BLANK">b</a>'))
+        .to.equal('<a target="_top">a</a><a target="_blank">b</a>');
+  });
+
+  it('should override a unallowed target', () => {
+    expect(sanitizeHtml(
+        '<a target="_self">_self</a>'
+        + '<a target="_parent">_parent</a>'
+        + '<a target="_other">_other</a>'
+        + '<a target="_OTHER">_OTHER</a>'
+        + '<a target="other">other</a>'
+        )).to.equal(
+        '<a target="_top">_self</a>'
+        + '<a target="_top">_parent</a>'
+        + '<a target="_top">_other</a>'
+        + '<a target="_top">_OTHER</a>'
+        + '<a target="_top">other</a>');
   });
 
   it('should NOT output security-sensitive attributes', () => {
@@ -96,26 +131,26 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<a STYLE="color: red;">b</a>')).to.be.equal(
         'a<a>b</a>');
     expect(sanitizeHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="vbscript:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="data:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="DATA:alert">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="<script">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a href="</script">b</a>')).to.be.equal(
-        'a<a>b</a>');
+        'a<a target="_top">b</a>');
   });
 
   it('should catch attribute value whitespace variations', () => {
     expect(sanitizeHtml('a<a href=" j\na\tv\ra s&#00;cript:alert">b</a>'))
-        .to.be.equal('a<a>b</a>');
+        .to.be.equal('a<a target="_top">b</a>');
   });
 
   it('should NOT output security-sensitive attributes', () => {
@@ -132,6 +167,13 @@ describe('sanitizeHtml', () => {
 
 
 describe('resolveUrlAttr', () => {
+
+  it('should throw if __amp_source_origin is set', () => {
+    expect(() => resolveUrlAttr('a', 'href',
+        '/doc2?__amp_source_origin=https://google.com',
+        'http://acme.org/doc1'))
+            .to.throw(/Source origin is not allowed in/);
+  });
 
   it('should be called by sanitizer', () => {
     expect(sanitizeHtml('<a href="/path"></a>')).to.match(/http/);

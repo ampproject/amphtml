@@ -51,6 +51,16 @@ module.exports = function(config) {
 
     colors: true,
 
+    proxies: {
+      '/ads/': '/base/ads/',
+      '/dist/': '/base/dist/',
+      '/dist.3p/': '/base/dist.3p/',
+      '/examples/': '/base/examples/',
+      '/extensions/': '/base/extensions/',
+      '/src/': '/base/src/',
+      '/test/': '/base/test/',
+    },
+
     logLevel: config.LOG_WARN,
 
     autoWatch: true,
@@ -79,15 +89,25 @@ module.exports = function(config) {
         base: 'SauceLabs',
         browserName: 'chrome',
       },
-      SL_Chrome_37: {
+      SL_Chrome_45: {
         base: 'SauceLabs',
         browserName: 'chrome',
-        version: 37,
+        version: '45',
+      },
+      SL_iOS_8_4: {
+        base: 'SauceLabs',
+        browserName: 'iphone',
+        version: '8.4',
       },
       SL_iOS_9_1: {
         base: 'SauceLabs',
         browserName: 'iphone',
-        version: '9.1'
+        version: '9.1',
+      },
+      SL_iOS_10_0: {
+        base: 'SauceLabs',
+        browserName: 'iphone',
+        version: '10.0',
       },
       SL_Firefox_latest: {
         base: 'SauceLabs',

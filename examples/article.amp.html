@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <title>Lorem Ipsum | PublisherName</title>
-  <link rel="canonical" href="amps.html" >
+  <link rel="canonical" href="https://medium.com/p/cb7f223fad86" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
   <style amp-custom>
     body {
       margin: 0;
@@ -145,6 +146,16 @@
       margin: 0;
     }
 
+    amp-app-banner {
+      padding: 10px;
+    }
+
+    amp-app-banner .content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     amp-img {
       background-color: #f4f4f4;
     }
@@ -152,6 +163,37 @@
     .slot-fallback {
       padding: 16px;
       background: yellow;
+    }
+
+    amp-app-banner amp-img {
+      background-color: transparent;
+      margin-right: 15px
+    }
+
+    amp-app-banner .description {
+      margin-right: 20px;
+    }
+
+    amp-app-banner h5 {
+      margin: 0;
+    }
+
+    amp-app-banner p {
+      font-size: 10px;
+      margin: 3px 0;
+    }
+
+    amp-app-banner .actions button {
+      padding: 5px;
+      width: 70px;
+      border: 1px solid #aaa;
+      font-size: 8px;
+      background: #fff;
+    }
+    }
+    amp-app-banner .actions {
+      text-align: right;
+      font-size: 14px;
     }
 
     amp-sidebar {
@@ -169,10 +211,15 @@
     }
 
   </style>
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-app-banner" src="https://cdn.ampproject.org/v0/amp-app-banner-0.1.js" data-amp-report-test="amp-app-banner.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/cb7f223fad86">
+  <link rel="amp-manifest" href="medium-manifest.json">
+  <script async src="./viewer-integr.js" data-amp-report-test="viewer-integr.js"></script>
 </head>
 <body>
   <amp-sidebar id="sidebar" layout="nodisplay">
@@ -188,9 +235,25 @@
         <li><a href="#">Link 2</a></li>
         <li><a href="#">Link 3</a></li>
         <li><a href="#">Link 4</a></li>
+        <li><a href="#section1">Section 1</a></li>
+        <li><a href="#section2">Section 2</a></li>
+        <li><a href="#section3">Section 3</a></li>
       </ul>
     </nav>
   </amp-sidebar>
+  <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
+    <div class="content">
+      <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
+               width="40" height="34"></amp-img>
+      <div class="description">
+        <h5>Medium App</h5>
+        <p>Experience a richer experience on our mobile app!</p>
+      </div>
+      <div class="actions">
+        <button open-button>Open In App</button>
+      </div>
+    </div>
+  </amp-app-banner>
 
   <header>
     <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
@@ -218,8 +281,10 @@
             src="img/hero@1x.jpg"
             srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
-            alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="216" on="tap:headline-img-lightbox" role="img" tabindex="0">
+            alt="Picture of two chairs on a lake shore with big pine trees"
+            title="Opens image in a lightbox"
+            role="button" on="tap:headline-img-lightbox"
+            height="216" tabindex="0">
         </amp-img>
       </figure>
 
@@ -230,6 +295,7 @@
           <amp-img id="floating-headline-img"
               src="img/hero@1x.jpg"
               srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
+              alt="Two chairs on a lake shore with big pine trees"
               placeholder
               width="360" height="216" layout="responsive">
           </amp-img>
@@ -240,6 +306,10 @@
       </amp-lightbox>
 
       <div class="content-container">
+        <ul>
+          <li><a href="#section1">Section 1</a></li>
+          <li><a href="#section2">Section 2</a></li>
+        </ul>
         <header>
           <h1 itemprop="headline">Lorem Ipsum</h1>
           <time class="header-time" itemprop="datePublished"
@@ -308,7 +378,7 @@
             ac molestie nulla porttitor ac. Donec porta risus ut enim
             pellentesque, id placerat elit ornare.
           </p>
-          <p>
+          <p id="section1">
             Curabitur convallis, urna quis pulvinar feugiat, purus diam
             posuere turpis, sit amet tincidunt purus justo et mi. Donec
             sapien urna, aliquam ut lacinia quis, varius vitae ex.
@@ -358,7 +428,7 @@
             </amp-ad>
           </div>
 
-          <p>
+          <p id="section2">
             Morbi at velit vitae eros congue congue venenatis non dui.
             Sed lacus sem, feugiat sed elementum sed, maximus sed lacus.
             Integer accumsan magna in sagittis pharetra. Class aptent taciti

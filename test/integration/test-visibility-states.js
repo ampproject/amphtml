@@ -20,8 +20,8 @@ import {
 } from '../../testing/iframe.js';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
-import {viewerFor} from '../../src/viewer';
-import {resourcesFor} from '../../src/resources';
+import {viewerForDoc} from '../../src/viewer';
+import {resourcesForDoc} from '../../src/resources';
 import {VisibilityState} from '../../src/visibility-state';
 import * as sinon from 'sinon';
 
@@ -124,7 +124,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         fixture.win.name = '__AMP__visibilityState=prerender';
         return expectBodyToBecomeVisible(fixture.win);
       }).then(() => {
-        viewer = viewerFor(fixture.win);
+        viewer = viewerForDoc(fixture.win.document);
         docHidden = sandbox.stub(viewer.docState_, 'isHidden').returns(false);
 
         protoElement = createAmpElementProto(
@@ -136,7 +136,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         fixture.doc.registerElement('amp-test', {
           prototype: protoElement,
         });
-        resources = resourcesFor(fixture.win);
+        resources = resourcesForDoc(fixture.win.document);
         doPass_ = resources.doPass_;
         sandbox.stub(resources, 'doPass_', doPass);
       });
@@ -319,24 +319,24 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         }).then(setupSpys);
       });
 
-      it('calls layout when going to VISIBLE', () => {
+      it('calls layout and resume when going to VISIBLE', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
-          expect(resumeCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
       });
 
-      it('does not call callbacks when going to HIDDEN', () => {
+      it('calls resume when going to HIDDEN', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         changeVisibility('hidden');
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
-          expect(resumeCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
       });
 

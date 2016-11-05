@@ -17,9 +17,8 @@
 import {dev, user} from '../log';
 import {fromClass} from '../service';
 import {
-  addParamToUrl,
   getSourceOrigin,
-  parseQueryString,
+  getCorsUrl,
   parseUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
@@ -55,9 +54,6 @@ const allowedFetchTypes_ = {
 };
 
 /** @private @const {string} */
-const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
-
-/** @private @const {string} */
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
 
@@ -82,23 +78,23 @@ export class Xhr {
    * be either the native fetch or our polyfill.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!FetchResponse>}
+   * @param {!FetchInitDef=} opt_init
+   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
    * @private
    */
   fetch_(input, opt_init) {
-    dev.assert(typeof input == 'string', 'Only URL supported: %s', input);
+    dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     if (opt_init && opt_init.credentials !== undefined) {
       // In particular, Firefox does not tolerate `null` values for
       // `credentials`.
-      dev.assert(opt_init.credentials == 'include',
+      dev().assert(opt_init.credentials == 'include',
           'Only credentials=include support: %s', opt_init.credentials);
     }
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
     if (opt_init && opt_init.responseType == 'document') {
-      return fetchPolyfill.apply(null, arguments);
+      return fetchPolyfill(input, opt_init);
     }
     return (this.win.fetch || fetchPolyfill).apply(null, arguments);
   }
@@ -112,33 +108,42 @@ export class Xhr {
    * if the `init.requireAmpResponseSourceOrigin = true`.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} opt_init
    * @return {!Promise<!FetchResponse>}
    * @private
    */
   fetchAmpCors_(input, opt_init) {
+    const init = opt_init || {};
     input = this.getCorsUrl(this.win, input);
-    return this.fetch_(input, opt_init).catch(reason => {
-      user.assert(false, 'Fetch failed %s: %s', input,
-          reason && reason.message);
-    }).then(response => {
+    // For some same origin requests, add AMP-Same-Origin: true header to allow
+    // publishers to validate that this request came from their own origin.
+    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const targetOrigin = parseUrl(input).origin;
+    if (currentOrigin == targetOrigin) {
+      init['headers'] = init['headers'] || {};
+      init['headers']['AMP-Same-Origin'] = 'true';
+    }
+    return this.fetch_(input, init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
         const sourceOrigin = getSourceOrigin(this.win.location.href);
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
-        user.assert(allowSourceOriginHeader == sourceOrigin,
+        user().assert(allowSourceOriginHeader == sourceOrigin,
               `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
-      } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
+      } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        user.assert(false, `Response must contain the` +
+        user().assert(false, `Response must contain the` +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
+    }, reason => {
+      user().assert(false, 'Fetch failed %s: %s', input,
+          reason && reason.message);
     });
   }
 
@@ -157,10 +162,30 @@ export class Xhr {
     const init = opt_init || {};
     init.method = normalizeMethod_(init.method);
     setupJson_(init);
-
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response);
     }).then(response => response.json());
+  }
+
+  /**
+   * Fetches text based on the fetch polyfill.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+   *
+   * See `fetchAmpCors_` for more detail.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<string>}
+   */
+  fetchText(input, opt_init) {
+    const init = opt_init || {};
+    init.method = normalizeMethod_(init.method);
+    init.headers = init.headers || {};
+    init.headers['Accept'] = 'text/plain';
+    return this.fetchAmpCors_(input, init).then(response => {
+      return assertSuccess(response);
+    }).then(response => response.text());
   }
 
   /**
@@ -209,7 +234,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} opt_init
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
@@ -227,12 +252,7 @@ export class Xhr {
    * @return {string}
    */
   getCorsUrl(win, url) {
-    const sourceOrigin = getSourceOrigin(win.location.href);
-    const parsedUrl = parseUrl(url);
-    const query = parseQueryString(parsedUrl.search);
-    user.assert(!(SOURCE_ORIGIN_PARAM in query),
-        'Source origin is not allowed in %s', url);
-    return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+    return getCorsUrl(win, url);
   }
 
 }
@@ -250,7 +270,7 @@ export function normalizeMethod_(method) {
   }
   method = method.toUpperCase();
 
-  dev.assert(
+  dev().assert(
     allowedMethods_.indexOf(method) > -1,
     'Only one of %s is currently allowed. Got %s',
     allowedMethods_.join(', '),
@@ -272,7 +292,7 @@ function setupJson_(init) {
   if (init.method == 'POST' && !isFormData(init.body)) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
-    dev.assert(
+    dev().assert(
       allowedJsonBodyTypes_.some(test => test(init.body)),
       'body must be of type object or array. %s',
       init.body
@@ -387,7 +407,8 @@ function isRetriable(status) {
 export function assertSuccess(response) {
   return new Promise((resolve, reject) => {
     if (response.status < 200 || response.status >= 300) {
-      const err = user.createError(`HTTP error ${response.status}`);
+      /** @const {!Error} */
+      const err = user().createError(`HTTP error ${response.status}`);
       if (isRetriable(response.status)) {
         err.retriable = true;
       }
@@ -426,7 +447,7 @@ export class FetchResponse {
     /** @type {number} */
     this.status = this.xhr_.status;
 
-    /** @private @const {!FetchResponseHeaders} */
+    /** @const {!FetchResponseHeaders} */
     this.headers = new FetchResponseHeaders(xhr);
 
     /** @type {boolean} */
@@ -439,7 +460,7 @@ export class FetchResponse {
    * @private
    */
   drainText_() {
-    dev.assert(!this.bodyUsed, 'Body already used');
+    dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.xhr_.responseText);
   }
@@ -458,7 +479,8 @@ export class FetchResponse {
    * @return {!Promise<!JSONType>}
    */
   json() {
-    return this.drainText_().then(JSON.parse);
+    return /** @type {!Promise<!JSONType>} */ (
+        this.drainText_().then(JSON.parse.bind(JSON)));
   }
 
   /**
@@ -467,25 +489,28 @@ export class FetchResponse {
    * @private
    */
   document_() {
-    dev.assert(!this.bodyUsed, 'Body already used');
+    dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    user.assert(this.xhr_.responseXML,
+    user().assert(this.xhr_.responseXML,
         'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.');
-    return Promise.resolve(this.xhr_.responseXML);
+    return /** @type {!Promise<!Document>} */ (
+        Promise.resolve(dev().assert(this.xhr_.responseXML)));
   }
 
   /**
    * Drains the response and returns a promise that resolves with the response
    * ArrayBuffer.
-   * @return {!Promise<ArrayBuffer>}
+   * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    dev.assert(this.xhr_.responseType == 'arraybuffer',
+    user().assert(this.xhr_.response, 'arrayBuffer response should exist.');
+    dev().assert(this.xhr_.responseType == 'arraybuffer',
                'responseType was not "arraybuffer"');
-    dev.assert(!this.bodyUsed, 'Body already used');
+    dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    return Promise.resolve(this.xhr_.response);
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+        Promise.resolve(this.xhr_.response));
   }
 }
 

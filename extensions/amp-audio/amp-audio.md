@@ -31,11 +31,11 @@ limitations under the License.
   </tr>
    <tr>
      <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-     <td>FIXED, FIXED_HEIGHT, NODISPLAY</td>
+     <td>fixed, fixed-height, nodisplay</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-audio/">amp-audio.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-audio/">Annotated code example for amp-audio</a></td>
   </tr>
 </table>
 

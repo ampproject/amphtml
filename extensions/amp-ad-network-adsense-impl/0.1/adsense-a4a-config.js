@@ -24,13 +24,40 @@ import {
   googleAdsIsA4AEnabled,
 } from '../../../ads/google/a4a/traffic-experiments';
 
-/** @const {string} */
-const ADSENSE_A4A_EXPERIMENT_ID = 'expAdsenseA4A';
+/** @const {!string}  @private */
+const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-/** @const {!Branches} */
-const ADSENSE_A4A_EXPERIMENT_BRANCHES = {
-  control: '117152630',
-  experiment: '117152632',
+// The following experiment IDs are used by Google-side servers to
+// understand what experiment is running and what mode the A4A code is
+// running in.  In this experiment phase, we're testing 8 different
+// configurations, resulting from the Cartesian product of the following:
+//   - Traditional 3p iframe ad rendering (control) vs A4A rendering
+//     (experiment)
+//   - Experiment triggered by an external page, such as the Google Search
+//     page vs. triggered internally in the client code.
+//   - Doubleclick vs Adsense
+// The following two objects contain experiment IDs for the first two
+// categories for Adsense ads.  They are attached to the ad request by
+// ads/google/a4a/traffic-experiments.js#googleAdsIsA4AEnabled when it works
+// out whether a given ad request is in the overall experiment and, if so,
+// which branch it's on.
+
+// We would prefer the following constants to remain private, but we need to
+// refer to them directly in amp-ad-3p-impl.js and amp-a4a.js in order to check
+// whether we're in the experiment or not, for the purposes of enabling
+// debug traffic profiling.  Once we have debugged the a4a implementation and
+// can disable profiling again, we can return these constants to being
+// private to this file.
+/** const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
+export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
+  control: '117152650',
+  experiment: '117152651',
+};
+
+/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
+export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
+  control: '117152670',
+  experiment: '117152671',
 };
 
 /**
@@ -40,5 +67,7 @@ const ADSENSE_A4A_EXPERIMENT_BRANCHES = {
  */
 export function adsenseIsA4AEnabled(win, element) {
   return googleAdsIsA4AEnabled(
-      win, element, ADSENSE_A4A_EXPERIMENT_ID, ADSENSE_A4A_EXPERIMENT_BRANCHES);
+      win, element, ADSENSE_A4A_EXPERIMENT_NAME,
+      ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+      ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
 }

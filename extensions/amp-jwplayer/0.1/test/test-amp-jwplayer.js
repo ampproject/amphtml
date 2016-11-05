@@ -35,9 +35,7 @@ describe('amp-jwplayer', () => {
       jw.setAttribute('width', '320');
       jw.setAttribute('height', '180');
       jw.setAttribute('layout', 'responsive');
-      iframe.doc.body.appendChild(jw);
-      jw.implementation_.layoutCallback();
-      return jw;
+      return iframe.addElement(jw);
     });
   }
 
@@ -51,8 +49,7 @@ describe('amp-jwplayer', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
-      expect(iframe.getAttribute('width')).to.equal('320');
-      expect(iframe.getAttribute('height')).to.equal('180');
+      expect(iframe.className).to.match(/-amp-fill-content/);
     });
   });
 
@@ -69,9 +66,6 @@ describe('amp-jwplayer', () => {
     });
   });
 
-  // These tests fail if the corresponding errors occur in buildCallback instead of
-  // layoutCallback.  Commenting them out for now.
-  /*
   it('fails if no media is specified', () => {
     return getjwplayer({
       'data-player-id': 'sDZEo0ea',
@@ -87,7 +81,6 @@ describe('amp-jwplayer', () => {
       /The data-player-id attribute is required for/
     );
   });
-  */
 
   it('renders with a bad playlist', () => {
     return getjwplayer({
@@ -99,6 +92,33 @@ describe('amp-jwplayer', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://content.jwplatform.com/players/zzz-sDZEo0ea.html');
+    });
+  });
+
+  describe('createPlaceholderCallback', () => {
+    it('should create a placeholder image', () => {
+      return getjwplayer({
+        'data-media-id': 'Wferorsv',
+        'data-player-id': 'sDZEo0ea',
+      }).then(jwp => {
+        const img = jwp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('src')).to.equal(
+            'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg');
+        expect(img.getAttribute('layout')).to.equal('fill');
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      });
+    });
+
+    it('should not create a placeholder for playlists', () => {
+      return getjwplayer({
+        'data-playlist-id': 'Wferorsv',
+        'data-player-id': 'sDZEo0ea',
+      }).then(jwp => {
+        const img = jwp.querySelector('amp-img');
+        expect(img).to.be.null;
+      });
     });
   });
 

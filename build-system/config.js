@@ -20,7 +20,13 @@ var karmaConf = path.resolve('karma.conf.js');
 
 var commonTestPaths = [
   'test/_init_tests.js',
-  'test/fixtures/**/*.html',
+  'test/fixtures/*.html',
+  {
+    pattern: 'test/fixtures/served/*.html',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
   {
     pattern: 'dist/**/*.js',
     included: false,
@@ -83,13 +89,14 @@ var karma = {
     browsers: [
       'SL_Chrome_android',
       'SL_Chrome_latest',
-      'SL_Chrome_37',
+      'SL_Chrome_45',
       'SL_Firefox_latest',
       'SL_Safari_8',
       'SL_Safari_9',
       'SL_Edge_latest',
-      // TODO(#895) Enable these.
-      //'SL_iOS_9_1',
+      'SL_iOS_8_4',
+      'SL_iOS_9_1',
+      'SL_iOS_10_0',
       //'SL_IE_11',
     ],
   })
@@ -106,7 +113,7 @@ module.exports = {
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
-    '!{testing,examples,examples.build}/**/*.*',
+    '!{testing,examples}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
     '!eslint-rules/**/*.*',
@@ -120,7 +127,7 @@ module.exports = {
     // This does match dist.3p/current, so we run presubmit checks on the
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
-    '!{node_modules,build,examples.build,dist,dist.tools,' +
+    '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
     '!validator/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',

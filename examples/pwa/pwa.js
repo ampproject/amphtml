@@ -182,7 +182,7 @@ class AmpViewer {
     /** @private @const {?Element} */
     this.host_ = null;
     /** @private @const {...} */
-    this.viewer_ = null;
+    this.amp_ = null;
 
     // Immediately install amp-shadow.js.
     this.installScript_('/dist/amp-shadow.js');
@@ -191,6 +191,10 @@ class AmpViewer {
   /**
    */
   clear() {
+    if (this.amp_) {
+      this.amp_.close();
+      this.amp_ = null;
+    }
     this.container.textContent = '';
   }
 
@@ -200,7 +204,9 @@ class AmpViewer {
    */
   show(doc, url) {
     log('Show document:', doc, url);
-    this.container.textContent = '';
+
+    // Cleanup the existing document if any.
+    this.clear();
 
     this.baseUrl_ = url;
 
@@ -215,13 +221,10 @@ class AmpViewer {
     this.container.appendChild(this.host_);
 
     this.ampReadyPromise_.then(AMP => {
-      const amp = AMP.attachShadowDoc(this.host_, doc, url);
-      this.win.document.title = amp.title || '';
-      this.viewer_ = amp.viewer;
-      /* TODO(dvoytenko): enable message deliverer as soon as viewer is provided
-      this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
-          this.getOrigin_(this.win.location.href));
-      */
+      this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
+      this.win.document.title = this.amp_.title || '';
+      this.amp_.onMessage(this.onMessage_.bind(this));
+      this.amp_.setVisibilityState('visible');
     });
   }
 
@@ -287,7 +290,6 @@ function fetchDocument(url) {
     xhr.open('GET', url, true);
     xhr.responseType = 'document';
     xhr.setRequestHeader('Accept', 'text/html');
-    xhr.setRequestHeader('AMP-Direct-Fetch', '1');
     xhr.onreadystatechange = () => {
       if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
         return;

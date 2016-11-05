@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -35,23 +35,14 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>CONTAINER, FIXED_HEIGHT</td>
+    <td>container, fixed-height</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li>
-          <a
-          href="https://github.com/ampproject/amphtml/blob/master/examples/live-blog.amp.html">live-blog.amp.html</a>
-        </li>
-        <li>
-          <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list.amp.html">live-list.amp.html</a>
-        </li>
-        <li>
-          <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list-update.amp.html">live-list-update.amp.html</a> (this requires a server, run `gulp` on the project repo)
-        </li>
-      </ul>
+    <td><ul>
+    <li><a href="https://ampbyexample.com/components/amp-live-list/">Annotated code example for amp-live-list</a></li>
+    <li><a href="https://ampbyexample.com/samples_templates/live_blog/">Annotated code example with amp-live-list for a live blog</a></li>
+    </ul>
     </td>
   </tr>
 </table>
@@ -88,7 +79,7 @@ In most implementations for live blogs, content is either pushed by the server
 to the client instance of a page, or the client polls a JSON endpoint to receive
 updates. The implementation for this component is different, in that the client
 instance of the page polls the server copy of the document for updates to the
-`items` reference point.
+`items` reference point. For instance: if the user is viewing a document served from an AMP cache, the client will poll that document hosted on that AMP cache for updates; if the user is viewing a document served from a web publisher's origin domain (e.g. "example.com"), then the client will poll the document hosted on that origin domain for updates.
 
 This means that publishers of content do not need to set up a JSON endpoint or
 push mechanism for this component to work. New content just needs to be
@@ -194,9 +185,9 @@ should be applied to all `amp-live-list` components since the component
 will still try to insert new items if it identifies any and has no notion
 that is not on the first page.
 
-## How Server Side filtering works
+## Server Side filtering
 
-Work in Progress
+See the documentation for [Server side filtering](../amp-live-list/amp-live-list-server-side-filtering.md).
 
 ## Attributes
 
@@ -213,10 +204,11 @@ attribute requirements.
 To uniquely identify an amp-live-list (since multiple are allowed on a single
 page).
 
-**data-poll-interval** (Required)
+**data-poll-interval** (Optional)
 
 Time (in milliseconds) interval between checks for new content (15000 ms minimum is
-enforced).
+enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
+minimum.
 
 **data-max-items-per-page** (Required)
 
@@ -307,6 +299,20 @@ amp-live-list > [items] > [data-tombstone] {
 An `.amp-hidden` and `.amp-active` class is added to the `update`
 reference point, and you can hook into this class to add transitions.
 (see Examples below)
+
+## Actions
+The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>update (default)</td>
+    <td>Updates DOM elements with new discovered updates</td>
+  </tr>
+</table>
 
 ## Examples
 

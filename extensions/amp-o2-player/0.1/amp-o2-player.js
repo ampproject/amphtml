@@ -15,14 +15,33 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback() {
-    this.preconnect.url(this.domain_);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+
+    /** @private {string} */
+    this.pid_ = '';
+
+    /** @private {string} */
+    this.bcid_ = '';
+
+    /** @private {string} */
+    this.domain_ = '';
+
+    /** @private {string} */
+    this.src_ = '';
+  }
+
+    /** @override */
+  preconnectCallback(onLayout) {
+    this.preconnect.url(this.domain_, onLayout);
   }
 
   /** @override */
@@ -31,36 +50,33 @@ class AmpO2Player extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const pid = this.element.getAttribute('data-pid');
-    const bcid = this.element.getAttribute('data-bcid');
+  buildCallback() {
+    this.pid_ = user().assert(
+        this.element.getAttribute('data-pid'),
+        'Data-pid attribute is required for <amp-o2-player> %s',
+        this.element);
+
+    this.bcid_ = user().assert(
+        this.element.getAttribute('data-bcid'),
+        'Data-bcid attribute is required for <amp-o2-player> %s',
+        this.element);
+
     const bid = this.element.getAttribute('data-bid');
     const vid = this.element.getAttribute('data-vid');
     const macros = this.element.getAttribute('data-macros');
     const env = this.element.getAttribute('data-env');
-    user.assert(
-        (pid && bcid) || vid,
-        'Either data-pid and data-bcid or data-vid attribute is required ' +
-        'for <amp-o2-player> %s',
-        this.element);
-    /** @private {string} */
+
     this.domain_ = 'https://delivery.' +
-      (env != 'stage' ? '' : 'dev.') + 'vidible.tv';
+        (env != 'stage' ? '' : 'dev.') + 'vidible.tv';
     let src = `${this.domain_}/htmlembed/`;
     const queryParams = [];
-    if (pid && bcid) {
-      src += 'pid=' + encodeURIComponent(pid) + '/'
-        + encodeURIComponent(bcid) + '.html';
-      if (bid) {
-        queryParams.push('bid=' + encodeURIComponent(bid));
-      }
-      if (vid) {
-        queryParams.push('vid=' + encodeURIComponent(vid));
-      }
-    } else if (vid) {
-      src += encodeURIComponent(vid) + '.html';
+    src += 'pid=' + encodeURIComponent(this.pid_) + '/'
+        + encodeURIComponent(this.bcid_) + '.html';
+    if (bid) {
+      queryParams.push('bid=' + encodeURIComponent(bid));
+    }
+    if (vid) {
+      queryParams.push('vid=' + encodeURIComponent(vid));
     }
     if (macros) {
       queryParams.push(macros);
@@ -68,17 +84,28 @@ class AmpO2Player extends AMP.BaseElement {
     if (queryParams.length > 0) {
       src += '?' + queryParams.join('&');
     }
+    this.src_ = src;
+  }
+
+  /** @override */
+  layoutCallback() {
+    user().assert(
+        this.pid_,
+        'Data-pid attribute is required for <amp-o2-player> %s',
+        this.element);
+    user().assert(
+        this.bcid_,
+        'Data-bcid attribute is required for <amp-o2-player> %s',
+        this.element);
+
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
-    this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
-    this.element.appendChild(iframe);
-    /** @private {?Element} */
+    iframe.src = this.src_;
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

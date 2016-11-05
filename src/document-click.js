@@ -14,66 +14,61 @@
  * limitations under the License.
  */
 
-import {closestByTag} from './dom';
-import {fromClass} from './service';
+import {
+  closestByTag,
+  openWindowDialog,
+  escapeCssSelectorIdent,
+} from './dom';
+import {fromClassForDoc} from './service';
 import {dev} from './log';
-import {historyFor} from './history';
-import {openWindowDialog} from './dom';
+import {historyForDoc} from './history';
 import {parseUrl} from './url';
-import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
-import {platform} from './platform';
+import {viewerForDoc} from './viewer';
+import {viewportForDoc} from './viewport';
+import {platformFor} from './platform';
+import {timerFor} from './timer';
+import {urlReplacementsForDoc} from './url-replacements';
 
 
 /**
- * @param {!Window} window
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installGlobalClickListener(window) {
-  clickHandlerFor(window);
+export function installGlobalClickListenerForDoc(ampdoc) {
+  fromClassForDoc(ampdoc, 'clickhandler', ClickHandler);
 }
 
-/**
- * @param {!Window} window
- */
-export function uninstallGlobalClickListener(window) {
-  clickHandlerFor(window).cleanup();
-}
-
-/**
- * @param {!Window} window
- */
-function clickHandlerFor(window) {
-  return fromClass(window, 'clickhandler', ClickHandler);
-}
 
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * visibleForTesting
+ * @visibleForTesting
  */
 export class ClickHandler {
   /**
-   * @param {!Window} window
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
-    /** @private @const {!Window} */
-    this.win = window;
+  constructor(ampdoc) {
+    /** @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!./service/viewport-impl.Viewport} */
-    this.viewport_ = viewportFor(this.win);
+    this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private @const {!./service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerForDoc(this.ampdoc);
 
     /** @private @const {!./service/history-impl.History} */
-    this.history_ = historyFor(this.win);
+    this.history_ = historyForDoc(this.ampdoc);
+
+    const platform = platformFor(this.ampdoc.win);
+    /** @private @const {boolean} */
+    this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
     // Only intercept clicks when iframed.
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
       /** @private @const {!function(!Event)|undefined} */
       this.boundHandle_ = this.handle_.bind(this);
-      this.win.document.documentElement.addEventListener(
-          'click', this.boundHandle_);
+      this.ampdoc.getRootNode().addEventListener('click', this.boundHandle_);
     }
   }
 
@@ -82,18 +77,19 @@ export class ClickHandler {
    */
   cleanup() {
     if (this.boundHandle_) {
-      this.win.document.documentElement.removeEventListener(
-          'click', this.boundHandle_);
+      this.ampdoc.getRootNode().removeEventListener('click', this.boundHandle_);
     }
   }
 
   /**
-   * Intercept any click on the current document and prevent any
-   * linking to an identifier from pushing into the history stack.
+   * Click event handler which on bubble propagation intercepts any click on the
+   * current document and prevent any linking to an identifier from pushing into
+   * the history stack.
    * @param {!Event} e
    */
   handle_(e) {
-    onDocumentElementClick_(e, this.viewport_, this.history_);
+    onDocumentElementClick_(
+        e, this.ampdoc, this.viewport_, this.history_, this.isIosSafari_);
   }
 }
 
@@ -106,29 +102,30 @@ export class ClickHandler {
  * on iOS Safari.
  *
  * @param {!Event} e
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
+ * @param {boolean} isIosSafari
  */
-export function onDocumentElementClick_(e, viewport, history) {
+export function onDocumentElementClick_(
+    e, ampdoc, viewport, history, isIosSafari) {
   if (e.defaultPrevented) {
     return;
   }
 
-  const target = closestByTag(e.target, 'A');
-  if (!target) {
+  const target = closestByTag(dev().assertElement(e.target), 'A');
+  if (!target || !target.href) {
     return;
   }
+  urlReplacementsForDoc(ampdoc).maybeExpandLink(target);
 
-  const docElement = e.currentTarget;
-  const doc = docElement.ownerDocument;
-  const win = doc.defaultView;
-
+  /** @const {!Window} */
+  const win = ampdoc.win;
   const tgtLoc = parseUrl(target.href);
 
   // On Safari iOS, custom protocol links will fail to open apps when the
   // document is iframed - in order to go around this, we set the top.location
   // to the custom protocol href.
-  const isSafariIOS = platform.isIos() && platform.isSafari();
   const isFTP = tgtLoc.protocol == 'ftp:';
 
   // In case of FTP Links in embedded documents always open then in _blank.
@@ -138,7 +135,7 @@ export function onDocumentElementClick_(e, viewport, history) {
   }
 
   const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
-  if (isSafariIOS && !isNormalProtocol) {
+  if (isIosSafari && !isNormalProtocol) {
     openWindowDialog(win, target.href, '_top');
     // Without preventing default the page would should an alert error twice
     // in the case where there's no app to handle the custom protocol.
@@ -149,6 +146,7 @@ export function onDocumentElementClick_(e, viewport, history) {
     return;
   }
 
+  /** @const {!Location} */
   const curLoc = parseUrl(win.location.href);
   const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
   const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
@@ -160,11 +158,6 @@ export function onDocumentElementClick_(e, viewport, history) {
     return;
   }
 
-  // Has the fragment actually changed?
-  if (tgtLoc.hash == curLoc.hash) {
-    return;
-  }
-
   // We prevent default so that the current click does not push
   // into the history stack as this messes up the external documents
   // history which contains the amp document.
@@ -173,13 +166,13 @@ export function onDocumentElementClick_(e, viewport, history) {
   // Look for the referenced element.
   const hash = tgtLoc.hash.slice(1);
   let elem = null;
+
   if (hash) {
-    elem = doc.getElementById(hash);
-    if (!elem) {
-      // Fallback to anchor[name] if element with id is not found.
-      // Linking to an anchor element with name is obsolete in html5.
-      elem = doc.querySelector(`a[name=${hash}]`);
-    }
+    const escapedHash = escapeCssSelectorIdent(ampdoc.win, hash);
+    elem = (ampdoc.getRootNode().getElementById(hash) ||
+        // Fallback to anchor[name] if element with id is not found.
+        // Linking to an anchor element with name is obsolete in html5.
+        ampdoc.getRootNode().querySelector(`a[name="${escapedHash}"]`));
   }
 
   // If possible do update the URL with the hash. As explained above
@@ -187,19 +180,34 @@ export function onDocumentElementClick_(e, viewport, history) {
   // The choice of `location.replace` vs `history.replaceState` is important.
   // Due to bugs, not every browser triggers `:target` pseudo-class when
   // `replaceState` is called. See http://www.zachleat.com/web/moving-target/
-  // for more details.
-  win.location.replace(`#${hash}`);
+  // for more details. Do this only if fragment has changed.
+  if (tgtLoc.hash != curLoc.hash) {
+    win.location.replace(`#${hash}`);
+  }
 
   // Scroll to the element if found.
   if (elem) {
+    // The first call to scrollIntoView overrides browsers' default
+    // scrolling behavior. The second call insides setTimeout allows us to
+    // scroll to that element properly.
+    // Without doing this, the viewport will not catch the updated scroll
+    // position on iOS Safari and hence calculate the wrong scrollTop for
+    // the scrollbar jumping the user back to the top for failing to calculate
+    // the new jumped offset.
+    // Without the first call there will be a visual jump due to browser scroll.
+    // See https://github.com/ampproject/amphtml/issues/5334 for more details.
     viewport./*OK*/scrollIntoView(elem);
+    timerFor(win).delay(() => viewport./*OK*/scrollIntoView(
+        dev().assertElement(elem)), 1);
   } else {
-    dev.warn('documentElement',
+    dev().warn('HTML',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 
-  // Push/pop history.
-  history.push(() => {
-    win.location.replace(`${curLoc.hash || '#'}`);
-  });
-};
+  if (tgtLoc.hash != curLoc.hash) {
+    // Push/pop history.
+    history.push(() => {
+      win.location.replace(`${curLoc.hash || '#'}`);
+    });
+  }
+}

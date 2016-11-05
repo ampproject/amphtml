@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body onhashchange="postMessageToParent()" style="background-color:red">
+<script>
+
+  /**
+   * Reads JSON format message data from the URL fragment, and then post it to
+   * parent window.
+   */
+  function postMessageToParent() {
+    if (location.hash.length > 1) {
+      const data = JSON.parse(decodeURIComponent(location.hash.substr(1)));
+      window.parent.postMessage(data, '*');
+      console.log('posted message to parent window: ' + JSON.stringify(data));
+    }
+  }
+
+  postMessageToParent();
+
+  // Echo back a message received from parent window with a marker field
+  // 'testStubEcho'.
+  window.addEventListener('message', function(event) {
+    if (event.source == window.parent && !event.data.testStubEcho) {
+      const data = {
+        testStubEcho: true,
+        receivedMessage: event.data,
+      };
+      window.parent.postMessage(data, '*');
+      console.log('echoed message to parent window: ' + JSON.stringify(data));
+    }
+  });
+</script>
+</body>
+</html>

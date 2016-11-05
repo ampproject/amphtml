@@ -160,8 +160,21 @@ describe('amp-audio', () => {
     const promise = audio.layoutCallback();
     document.createElement = savedCreateElement;
     return promise.then(() => {
-      expect(audio.audio_).to.be.undefined;
       expect(element.toggleFallback.callCount).to.equal(1);
+    });
+  });
+
+  it('should propagate ARIA attributes', () => {
+    return attachAndRun({
+      src: 'https://origin.com/audio.mp3',
+      'aria-label': 'Hello',
+      'aria-labelledby': 'id2',
+      'aria-describedby': 'id3',
+    }).then(a => {
+      const audio = a.querySelector('audio');
+      expect(audio.getAttribute('aria-label')).to.equal('Hello');
+      expect(audio.getAttribute('aria-labelledby')).to.equal('id2');
+      expect(audio.getAttribute('aria-describedby')).to.equal('id3');
     });
   });
 });

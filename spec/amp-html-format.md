@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -96,9 +96,9 @@ AMP HTML documents MUST
 - <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
-- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommend to include `initial-scale=1` (1). [🔗](#vprt)
+- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommended to include `initial-scale=1` (1). [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
-- <a name="boilerplate"></a>contain the [AMP boilerplate code ('head > style[amp-boilerplate]' and 'noscript > style[amp-boilerplate]')](amp-boilerplate.md) in their head tag. [🔗](#boilerplate)
+- <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) (`head > style[amp-boilerplate]` and `noscript > style[amp-boilerplate]`) in their head tag. [🔗](#boilerplate)
 
 (1) `width=device-width,minimum-scale=1` is required to ensure [GPU rasterization](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization) is enabled.
 
@@ -127,19 +127,20 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">img</td>
-    <td>Replaced with amp-img.</td>
+    <td>Replaced with `amp-img`.<br>
+        Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
   <tr>
     <td width="30%">video</td>
-    <td>Replaced with amp-video.</td>
+    <td>Replaced with `amp-video`.</td>
   </tr>
   <tr>
     <td width="30%">audio</td>
-    <td>Replaced with amp-audio.</td>
+    <td>Replaced with `amp-audio`.</td>
   </tr>
   <tr>
     <td width="30%">iframe</td>
-    <td>Replaced with amp-iframe.</td>
+    <td>Replaced with `amp-iframe`.</td>
   </tr>
     <tr>
     <td width="30%">frame</td>
@@ -167,11 +168,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Prohibited. <a href="https://github.com/ampproject/amphtml/issues/1286">Support coming in the future</a>.</td>
+    <td>Allowed. Require including [amp-form extension](../extensions/amp-form/amp-form.md).</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Prohibited. Includes <code>input</code>, <code>textarea</code>, <code>select</code>, <code>option</code>. Notably, the <code>button</code> element is allowed.</td>
+    <td>Mostly Allowed with [exception of some input types](../extensions/amp-form/amp-form.md#inputs), namely, `input[type=image]`, `input[type=button]`, `input[type=password]`, `input[type=file]` are invalid. Related tags are also allowed: `fieldset`, `label`</td>
   </tr>
   <tr>
     <td width="30%">button</td>
@@ -349,7 +350,7 @@ The `on` attribute is used to install event handlers on elements. The events tha
 
 The value for the syntax is a simple domain specific language of the form:
 
-```
+```javascript
 eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 ```
 
@@ -367,6 +368,8 @@ Some actions, if documented, may accept arguments. The arguments are defined bet
 You can listen to multiple events on an element by separating the two events with a semicolon `;`.
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
+
+Read more about [AMP Actions and Events](./amp-actions-and-events.md).
 
 ### Extended components
 
@@ -388,7 +391,7 @@ The script URL must start with "https://cdn.ampproject.org" and must follow a ve
 
 The URL for extended components is of the form:
 
-```
+```html
 https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 ```
 
@@ -431,13 +434,13 @@ The `id` attribute is optional. Individual AMP elements discover their own templ
 
 The syntax within the template element depends on the specific template language. However, the template language could be restricted within AMP. For instance, in accordance with the "template" element, all productions have to be over a valid well-formed DOM. All of the template outputs are also subject to sanitizing to ensure AMP-valid output.
 
-See the documentation for a specific extended template on the syntax and restrictions.
+To learn about the syntax and restrictions for an extended template, visit the [extended template's documentation](./amp-html-templates.md#templates). 
 
 ##### URL
 
 The URL for extended components is of the form:
 
-```
+```html
 https://cdn.ampproject.org/$RUNTIME_VERSION/$TEMPLATE_TYPE-$TEMPLATE_VERSION.js
 ```
 

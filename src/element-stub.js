@@ -32,14 +32,14 @@ export class ElementStub extends BaseElement {
     const name = element.tagName.toLowerCase();
     if (!loadingChecked[name]) {
       loadingChecked[name] = true;
-      extensionsFor(this.win).loadExtension(name);
+      extensionsFor(this.win).loadExtension(name, /* stubElement */ false);
     }
     stubbedElements.push(this);
   }
 
   /** @override */
   getPriority() {
-    return dev.assert(0, 'Cannot get priority of stubbed element');
+    return dev().assert(0, 'Cannot get priority of stubbed element');
   }
 
   /** @override */

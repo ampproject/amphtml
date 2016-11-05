@@ -29,8 +29,8 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
-import {timer} from '../../../src/timer';
-import {viewerFor} from '../../../src/viewer';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
+import {viewerForDoc} from '../../../src/viewer';
 import {cryptoFor} from '../../../src/crypto';
 import {user} from '../../../src/log';
 
@@ -112,11 +112,11 @@ class Cid {
     } else {
       getCidStruct = /** @type {!GetCidDef} */ (externalCidScope);
     }
-    user.assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
+    user().assert(/^[a-zA-Z0-9-_.]+$/.test(getCidStruct.scope),
         'The client id name must only use the characters ' +
-        '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
+        '[a-zA-Z0-9-_.]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
-      return viewerFor(this.win).whenFirstVisible();
+      return viewerForDoc(this.win.document).whenFirstVisible();
     }).then(() => {
       return getExternalCid(this, getCidStruct,
           opt_persistenceConsent || consent);
@@ -134,6 +134,7 @@ class Cid {
  * @return {!Promise<?string>}
  */
 function getExternalCid(cid, getCidStruct, persistenceConsent) {
+  /** @const {!Location} */
   const url = parseUrl(cid.win.location.href);
   if (!isProxyOrigin(url)) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
@@ -154,7 +155,7 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
  * @param {string} cookie
  */
 function setCidCookie(win, scope, cookie) {
-  const expiration = timer.now() + BASE_CID_MAX_AGE_MILLIS;
+  const expiration = Date.now() + BASE_CID_MAX_AGE_MILLIS;
   setCookie(win, scope, cookie, expiration, {
     highestAvailableDomain: true,
   });
@@ -175,11 +176,11 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   const existingCookie = getCookie(win, scope);
 
   if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
-    return Promise.resolve(null);
+    return /** @type {!Promise<?string>} */ (Promise.resolve(null));
   }
 
   if (cid.externalCidCache_[scope]) {
-    return cid.externalCidCache_[scope];
+    return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
   }
 
   if (existingCookie) {
@@ -187,7 +188,8 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     if (/^amp-/.test(existingCookie)) {
       setCidCookie(win, scope, existingCookie);
     }
-    return Promise.resolve(existingCookie);
+    return /** @type {!Promise<?string>} */ (
+        Promise.resolve(existingCookie));
   }
 
   const newCookiePromise = cryptoFor(win)
@@ -219,12 +221,12 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  user.assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 
 /**
- * Returns the base cid for the current user. This string must not
+ * Returns the base cid for the current user(). This string must not
  * be exposed to users without hashing with the current source origin
  * and the externalCidScope.
  * On a proxy this value is the same for a user across all source
@@ -238,74 +240,83 @@ function getBaseCid(cid, persistenceConsent) {
     return cid.baseCid_;
   }
   const win = cid.win;
-  const stored = read(win);
-  // See if we have a stored base cid and whether it is still valid
-  // in terms of expiration.
-  if (stored && !isExpired(stored)) {
-    if (shouldUpdateStoredTime(stored)) {
-      // Once per interval we mark the cid as used.
-      store(win, stored.cid);
-    }
-    return cid.baseCid_ = Promise.resolve(stored.cid);
-  }
-  // If we are being embedded, try to get the base cid from the viewer.
-  // Note, that we never try to persist to localStorage in this case.
-  const viewer = viewerFor(win);
-  if (viewer.isIframed()) {
-    return cid.baseCid_ = viewer.getBaseCid().then(cidValue => {
-      if (!cidValue) {
-        throw new Error('No CID');
+
+  return cid.baseCid_ = read(win).then(stored => {
+    let needsToStore = false;
+    let baseCid;
+
+    // See if we have a stored base cid and whether it is still valid
+    // in terms of expiration.
+    if (stored && !isExpired(stored)) {
+      baseCid = Promise.resolve(stored.cid);
+      if (shouldUpdateStoredTime(stored)) {
+        needsToStore = true;
       }
-      return cidValue;
-    });
-  }
+    } else {
+      // We need to make a new one.
+      baseCid = cryptoFor(win)
+          .then(crypto => crypto.sha384Base64(getEntropy(win)));
+      needsToStore = true;
+    }
 
-  // We need to make a new one.
-  cid.baseCid_ = cryptoFor(win)
-      .then(crypto => crypto.sha384Base64(getEntropy(win)));
-
-  // Storing the value may require consent. We wait for the respective
-  // promise.
-  Promise.all([cid.baseCid_, persistenceConsent])
-      .then(results => {
-        // The initial CID generation is inherently racy. First one that gets
-        // consent wins.
-        const newVal = results[0];
-        const relookup = read(win);
-        if (!relookup) {
-          store(win, newVal);
-        }
+    if (needsToStore) {
+      baseCid.then(baseCid => {
+        store(win, persistenceConsent, baseCid);
       });
-  return cid.baseCid_;
+    }
+
+    return baseCid;
+  });
 }
 
 /**
  * Stores a new cidString in localStorage. Adds the current time to the
  * stored value.
  * @param {!Window} win
+ * @param {!Promise} persistenceConsent
  * @param {string} cidString Actual cid string to store.
  */
-function store(win, cidString) {
-  try {
-    const item = {
-      time: timer.now(),
-      cid: cidString,
-    };
-    const data = JSON.stringify(item);
-    win.localStorage.setItem('amp-cid', data);
-  } catch (ignore) {
-    // Setting localStorage may fail. In practice we don't expect that to
-    // happen a lot (since we don't go anywhere near the quota, but
-    // in particular in Safari private browsing mode it always fails.
-    // In that case we just don't store anything, which is just fine.
+function store(win, persistenceConsent, cidString) {
+  const viewer = viewerForDoc(win.document);
+  // TODO(lannka, #4457): ideally, we should check if viewer has the capability
+  // of CID storage, rather than if it is iframed.
+  if (viewer.isIframed()) {
+    // If we are being embedded, try to save the base cid to the viewer.
+    viewer.baseCid(createCidData(cidString));
+  } else {
+    // To use local storage, we need user's consent.
+    persistenceConsent.then(() => {
+      try {
+        win.localStorage.setItem('amp-cid', createCidData(cidString));
+      } catch (ignore) {
+        // Setting localStorage may fail. In practice we don't expect that to
+        // happen a lot (since we don't go anywhere near the quota, but
+        // in particular in Safari private browsing mode it always fails.
+        // In that case we just don't store anything, which is just fine.
+      }
+    });
   }
 }
 
 /**
- * Retrieves a stored cid item from localStorage. Returns undefined if
- * none was found
+ * Creates a JSON object that contains the given CID and the current time as
+ * a timestamp.
+ * @param {string} cidString
+ * @return {string}
+ */
+function createCidData(cidString) {
+  return JSON.stringify({
+    time: Date.now(),
+    cid: cidString,
+  });
+}
+
+/**
+ * Gets the persisted CID data as a promise. It tries to read from
+ * localStorage first then from viewer if it is in embedded mode.
+ * Returns null if none was found.
  * @param {!Window} win
- * @return {!BaseCidInfoDef|undefined}
+ * @return {!Promise<?BaseCidInfoDef>}
  */
 function read(win) {
   let data;
@@ -314,14 +325,22 @@ function read(win) {
   } catch (ignore) {
     // If reading from localStorage fails, we assume it is empty.
   }
-  if (!data) {
-    return undefined;
+  const viewer = viewerForDoc(win.document);
+  let dataPromise = Promise.resolve(data);
+  if (!data && viewer.isIframed()) {
+    // If we are being embedded, try to get the base cid from the viewer.
+    dataPromise = viewer.baseCid();
   }
-  const item = JSON.parse(data);
-  return {
-    time: item['time'],
-    cid: item['cid'],
-  };
+  return dataPromise.then(data => {
+    if (!data) {
+      return null;
+    }
+    const item = JSON.parse(data);
+    return {
+      time: item['time'],
+      cid: item['cid'],
+    };
+  });
 }
 
 /**
@@ -331,7 +350,7 @@ function read(win) {
  */
 function isExpired(storedCidInfo) {
   const createdTime = storedCidInfo.time;
-  const now = timer.now();
+  const now = Date.now();
   return createdTime + BASE_CID_MAX_AGE_MILLIS < now;
 }
 
@@ -344,7 +363,7 @@ function isExpired(storedCidInfo) {
  */
 function shouldUpdateStoredTime(storedCidInfo) {
   const createdTime = storedCidInfo.time;
-  const now = timer.now();
+  const now = Date.now();
   return createdTime + ONE_DAY_MILLIS < now;
 }
 
@@ -357,15 +376,14 @@ function shouldUpdateStoredTime(storedCidInfo) {
  * @return {!Uint8Array|string} Entropy.
  */
 function getEntropy(win) {
-  // Widely available in browsers we support:
-  // http://caniuse.com/#search=getRandomValues
-  if (win.crypto && win.crypto.getRandomValues) {
-    const uint8array = new Uint8Array(16);  // 128 bit
-    win.crypto.getRandomValues(uint8array);
+  // Use win.crypto.getRandomValues to get 128 bits of random value
+  const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
+  if (uint8array) {
     return uint8array;
   }
+
   // Support for legacy browsers.
-  return String(win.location.href + timer.now() +
+  return String(win.location.href + Date.now() +
       win.Math.random() + win.screen.width + win.screen.height);
 }
 

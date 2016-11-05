@@ -14,15 +14,37 @@
  * limitations under the License.
  */
 
-import {urls} from '../config';
+import {
+  copyElementToChildWindow,
+  stubElementIfNotKnown,
+} from '../custom-element';
+import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import {fromClass} from '../service';
-import {stubElementIfNotKnown} from '../custom-element';
+import {fromClass, setParentWindow} from '../service';
+import installCustomElements from
+    'document-register-element/build/document-register-element.node';
+import {install as installDocContains} from '../polyfills/document-contains';
+import {installImg} from '../../builtins/amp-img';
+import {installPixel} from '../../builtins/amp-pixel';
+import {installStyles} from '../style-installer';
+import {installVideo} from '../../builtins/amp-video';
+import {urls} from '../config';
 
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
+
+/**
+ * The structure that contains the declaration of a custom element.
+ *
+ * @typedef {{
+ *   implementationClass:
+ *       function(new:../base-element.BaseElement, !Element),
+ *   css: (?string|undefined),
+ * }}
+ */
+let ExtensionElementDef;
 
 
 /**
@@ -30,8 +52,7 @@ const UNKNOWN_EXTENSION = '_UNKNOWN_';
  * Currently only limitted to elements.
  *
  * @typedef {{
- *   elements: !Array<!{implementationClass:
- *       function(new:../base-element.BaseElement, !Element)}>,
+ *   elements: !Object<string, !ExtensionElementDef>,
  * }}
  */
 let ExtensionDef;
@@ -59,6 +80,7 @@ let ExtensionHolderDef;
 /**
  * Install extensions service.
  * @param {!Window} window
+ * @return {!Extensions}
  * @restricted
  */
 export function installExtensionsService(window) {
@@ -102,10 +124,12 @@ export function installExtensionsInShadowDoc(extensions, ampdoc, extensionIds) {
  * @param {string} name
  * @param {function(new:../base-element.BaseElement, !Element)}
  *     implementationClass
+ * @param {?string|undefined} css
  * @restricted
  */
-export function addElementToExtension(extensions, name, implementationClass) {
-  extensions.addElement_(name, implementationClass);
+export function addElementToExtension(
+    extensions, name, implementationClass, css) {
+  extensions.addElement_(name, implementationClass, css);
 }
 
 
@@ -148,7 +172,7 @@ export class Extensions {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = win;
 
     /** @private @const {!Object<string, !ExtensionHolderDef>} */
@@ -208,14 +232,15 @@ export class Extensions {
    * Returns the promise that will be resolved when the extension has been
    * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
+   * @param {boolean=} stubElement
    * @return {!Promise<!ExtensionDef>}
    */
-  loadExtension(extensionId) {
+  loadExtension(extensionId, stubElement = true) {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId);
-    this.insertExtensionScriptIfNeeded_(extensionId, holder);
+    this.insertExtensionScriptIfNeeded_(extensionId, holder, stubElement);
     return this.waitFor_(holder);
   }
 
@@ -228,7 +253,7 @@ export class Extensions {
    */
   loadElementClass(elementName) {
     return this.loadExtension(elementName).then(extension => {
-      const element = dev.assert(extension.elements[elementName],
+      const element = dev().assert(extension.elements[elementName],
           'Element not found: %s', elementName);
       return element.implementationClass;
     });
@@ -238,12 +263,13 @@ export class Extensions {
    * Registers the element implementation with the current extension.
    * @param {string} name
    * @param {!Function} implementationClass
+   * @param {?string|undefined} css
    * @private
    * @restricted
    */
-  addElement_(name, implementationClass) {
+  addElement_(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
-    holder.extension.elements[name] = {implementationClass};
+    holder.extension.elements[name] = {implementationClass, css};
   }
 
   /**
@@ -286,7 +312,7 @@ export class Extensions {
       promises.push(this.waitFor_(holder).then(() => {
         holder.shadowRootFactories.forEach(factory => {
           try {
-            factory(ampdoc.getRootNode());
+            factory(/** @type {!ShadowRoot} */ (ampdoc.getRootNode()));
           } catch (e) {
             rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
           }
@@ -318,12 +344,63 @@ export class Extensions {
       promises.push(this.waitFor_(holder).then(() => {
         holder.shadowRootFactories.forEach(factory => {
           try {
-            factory(shadowRoot);
+            factory(/** @type {!ShadowRoot} */ (shadowRoot));
           } catch (e) {
             rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
           }
         });
       }));
+    });
+    return Promise.all(promises);
+  }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
+   * @param {!Window} childWin
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @restricted
+   */
+  installExtensionsInChildWindow(childWin, extensionIds,
+      opt_preinstallCallback) {
+    const topWin = this.win;
+    const parentWin = childWin.frameElement.ownerDocument.defaultView;
+    setParentWindow(childWin, parentWin);
+
+    // Install necessary polyfills.
+    installPolyfillsInChildWindow(childWin);
+
+    // Install runtime styles.
+    installStyles(childWin.document, cssText, () => {},
+        /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+
+    // Run pre-install callback.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(childWin);
+    }
+
+    // Install built-ins.
+    copyBuiltinElementsToChildWindow(childWin);
+
+    const promises = [];
+    extensionIds.forEach(extensionId => {
+      // This will extend automatic upgrade of custom elements from top
+      // window to the child window.
+      stubElementIfNotKnown(topWin, extensionId);
+      copyElementToChildWindow(childWin, extensionId);
+
+      // Install CSS.
+      const promise = this.loadExtension(extensionId).then(extension => {
+        const elementDef = extension.elements[extensionId];
+        if (elementDef && elementDef.css) {
+          installStyles(childWin.document, elementDef.css, () => {},
+              /* isRuntime */ false, extensionId);
+        }
+      });
+      promises.push(promise);
     });
     return Promise.all(promises);
   }
@@ -340,7 +417,7 @@ export class Extensions {
       const extension = {
         elements: {},
       };
-      holder = {
+      holder = /** @type {ExtensionHolderDef} */ ({
         extension,
         docFactories: [],
         shadowRootFactories: [],
@@ -350,7 +427,7 @@ export class Extensions {
         loaded: undefined,
         error: undefined,
         scriptPresent: undefined,
-      };
+      });
       this.extensions_[extensionId] = holder;
     }
     return holder;
@@ -364,7 +441,7 @@ export class Extensions {
    */
   getCurrentExtensionHolder_(opt_forName) {
     if (!this.currentExtensionId_ && !getMode().test) {
-      dev.error(TAG, 'unknown extension for ', opt_forName);
+      dev().error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
         this.currentExtensionId_ || UNKNOWN_EXTENSION);
@@ -397,15 +474,17 @@ export class Extensions {
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
-   * @return {boolean}
+   * @param {boolean} stubElement
    * @private
    */
-  insertExtensionScriptIfNeeded_(extensionId, holder) {
+  insertExtensionScriptIfNeeded_(extensionId, holder, stubElement) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
       const scriptElement = this.createExtensionScript_(extensionId);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
-      stubElementIfNotKnown(this.win, extensionId);
+      if (stubElement) {
+        stubElementIfNotKnown(this.win, extensionId);
+      }
     }
   }
 
@@ -431,7 +510,7 @@ export class Extensions {
   /**
    * Create the missing amp extension HTML script element.
    * @param {string} extensionId
-   * @return {!HTMLScriptElement} Script object
+   * @return {!Element} Script object
    * @private
    */
   createExtensionScript_(extensionId) {
@@ -439,10 +518,10 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
-    const pathStr = this.win.location.pathname;
+    const loc = this.win.location;
     const useCompiledJs = shouldUseCompiledJs();
-    const scriptSrc = calculateExtensionScriptUrl(pathStr, extensionId,
-        getMode().test, useCompiledJs);
+    const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
+        getMode().localDev, getMode().test, useCompiledJs);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
@@ -450,35 +529,61 @@ export class Extensions {
 
 
 /**
+ * Calculate the base url for any scripts.
+ * @param {!Location} location The window's location
+ * @param {boolean=} isLocalDev
+ * @param {boolean=} isTest
+ * @return {string}
+ */
+export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
+  if (isLocalDev) {
+    if (isTest || isMax(location) || isMin(location)) {
+      return `${location.protocol}//${location.host}/dist`;
+    }
+  }
+  return urls.cdn;
+}
+
+/**
  * Calculate script url for amp-ad.
- * @visibleForTesting
- * @param {string} path Location path of the window
+ * @param {!Location} location The window's location
  * @param {string} extensionId
+ * @param {boolean=} isLocalDev
  * @param {boolean=} isTest
  * @param {boolean=} isUsingCompiledJs
  * @return {string}
- * @visibleForTesting
  */
-export function calculateExtensionScriptUrl(path, extensionId, isTest,
-    isUsingCompiledJs) {
-  if (getMode().localDev) {
-    if (isTest) {
-      if (isUsingCompiledJs) {
-        return `/base/dist/v0/${extensionId}-0.1.js`;
-      }
-      return `/base/dist/v0/${extensionId}-0.1.max.js`;
+export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
+    isTest, isUsingCompiledJs) {
+  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
+  if (isLocalDev) {
+    if ((isTest && !isUsingCompiledJs) || isMax(location)) {
+      return `${base}/v0/${extensionId}-0.1.max.js`;
     }
-    if (path.indexOf('.max') >= 0) {
-      return `http://localhost:8000/dist/v0/${extensionId}-0.1.max.js`;
-    }
-    if (path.indexOf('.min') >= 0) {
-      return `http://localhost:8000/dist/v0/${extensionId}-0.1.js`;
-    }
-    return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
+    return `${base}/v0/${extensionId}-0.1.js`;
   }
-  const folderPath = getMode().version == '$internalRuntimeVersion$' ?
-      '' : `rtv/${getMode().version}/`;
-  return `${urls.cdn}/${folderPath}v0/${extensionId}-0.1.js`;
+  return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
+}
+
+
+/**
+ * Is this path to a max (unminified) version?
+ * @param {!Location} location
+ * @return {boolean}
+ */
+function isMax(location) {
+  const path = location.pathname;
+  return path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/';
+}
+
+/**
+ * Is this path to a minified version?
+ * @param {!Location} location
+ * @return {boolean}
+ */
+function isMin(location) {
+  const path = location.pathname;
+  return path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/';
 }
 
 
@@ -486,6 +591,37 @@ export function calculateExtensionScriptUrl(path, extensionId, isTest,
  * @return {boolean}
  */
 function shouldUseCompiledJs() {
-  return getMode().test && window.ampTestRuntimeConfig &&
-      window.ampTestRuntimeConfig.useCompiledJs;
+  return getMode().test && self.ampTestRuntimeConfig &&
+      self.ampTestRuntimeConfig.useCompiledJs;
+}
+
+
+/**
+ * Install builtins.
+ * @param {!Window} win
+ * @restricted
+ */
+export function installBuiltinElements(win) {
+  installImg(win);
+  installPixel(win);
+  installVideo(win);
+}
+
+/**
+ * Copy builtins to a child window.
+ * @param {!Window} childWin
+ */
+function copyBuiltinElementsToChildWindow(childWin) {
+  copyElementToChildWindow(childWin, 'amp-img');
+  copyElementToChildWindow(childWin, 'amp-pixel');
+  copyElementToChildWindow(childWin, 'amp-video');
+}
+
+/**
+ * Install polyfills in the child window (friendly iframe).
+ * @param {!Window} childWin
+ */
+function installPolyfillsInChildWindow(childWin) {
+  installDocContains(childWin);
+  installCustomElements(childWin);
 }

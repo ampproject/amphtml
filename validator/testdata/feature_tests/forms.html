@@ -26,14 +26,17 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 </head>
 <body>
   <!-- Valid form -->
-  <form method="post" action="https://example.com/subscribe" target="_blank">
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
     <fieldset>
       <label>
         <span>Your name</span>
-        <input type="text" name="name" required>
+        <input id="name" type="text" name="name" required>
+        <span visible-when-invalid="valueMissing" validation-for="name"></span>
       </label>
       <label>
         <span>Your email</span>
@@ -41,21 +44,50 @@
       </label>
       <input type="submit" value="Subscribe">
     </fieldset>
+    <div submit-success><template type="amp-mustache">Success</template></div>
+    <div submit-error><template type="amp-mustache">Error</template></div>
+  </form>
+  <!-- More valid tags (datalist and optgroup) -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <label>Choose a browser from this list:
+    <input list="browsers" name="myBrowser" /></label>
+    <datalist id="browsers">
+      <option value="Chrome">
+      <option value="Firefox">
+      <option value="Internet Explorer">
+      <option value="Opera">
+      <option value="Safari">
+      <option value="Microsoft Edge">
+    </datalist>
+    <select>
+      <optgroup label="Group 1">
+        <option>Option 1.1</option>
+      </optgroup>
+      <optgroup label="Group 2">
+        <option>Option 2.1</option>
+        <option>Option 2.2</option>
+      </optgroup>
+      <optgroup label="Group 3" disabled>
+        <option>Option 3.1</option>
+        <option>Option 3.2</option>
+        <option>Option 3.3</option>
+      </optgroup>
+    </select>
   </form>
   <!-- Invalid form action must not be a relative url -->
-  <form method="post" action="/subscribe" target="_blank">
+  <form method="post" action-xhr="/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: form action must be https. -->
-  <form method="post" action="http://example.com/subscribe" target="_blank">
+  <form method="post" action-xhr="http://example.com/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: form action must be a non-cdn link. -->
-  <form method="post" action="https://cdn.ampproject.org/subscribe" target="_blank">
+  <form method="post" action-xhr="https://cdn.ampproject.org/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: form target must be _blank or _top -->
-  <form method="post" action="https://example/subscribe" target="_new">
+  <form method="post" action-xhr="https://example/subscribe" target="_new">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: input, select, option and textarea must be children of form. -->
@@ -65,11 +97,39 @@
   </select>
   <textarea name="comment"></textarea>
   <!-- Invalid: input can not be type="button|file|image|password". -->
-  <form method="post" action="https://example.com/subscribe" target="_blank">
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="button" name="button">
     <input type="file" name="file">
     <input type="image" name="image">
     <input type="password" name="password">
+  </form>
+  <!-- Invalid: if validation-for is set on an element, then -->
+  <!-- visible-when-invalid must also be set and vice versa. -->
+  <form action="/foo" target="_blank">
+    <div validation-for="bar"></div>
+    <div visibile-when-invalid="valueMissing"></div>
+  </form>
+  <!-- Invalid: template child missing from submit-success and submit-error,
+       misplaced submit-error -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <input submit-error type="submit" value="Subscribe">
+    <div submit-success></div>
+    <div submit-error></div>
+  </form>
+  <!-- Invalid: submit-success must be a div -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <span submit-success><template type="amp-mustache">Success</template></span>
+  </form>
+  <!-- Invalid: post implies action-xhr -->
+  <form method="post" action="https://example.com/subscribe" target="_top">
+  </form>
+  <!-- Invalid: get implies action -->
+  <form method="get" action-xhr="https://example.com/subscribe" target="_top">
+  </form>
+  <!-- Invalid: get implies action, default method is get -->
+  <form action-xhr="https://example.com/subscribe" target="_top">
   </form>
 </body>
 </html>

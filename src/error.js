@@ -17,14 +17,33 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
-import {makeBodyVisible} from './styles';
+import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
-
-const globalExponentialBackoff = exponentialBackoff(1.5);
+import {startsWith} from './string';
 
 const CANCELLED = 'CANCELLED';
 
+/**
+ * Collects error messages, so they can be included in subsequent reports.
+ * That allows identifying errors that might be caused by previous errors.
+ */
+let accumulatedErrorMessages = self.AMPErrors || [];
+// Use a true global, to avoid multi-module inclusion issues.
+self.AMPErrors = accumulatedErrorMessages;
+
+/**
+ * A wrapper around our exponentialBackoff, to lazy initialize it to avoid an
+ * un-DCE'able side-effect.
+ * @param {function()} work the function to execute after backoff
+ * @return {number} the setTimeout id
+ */
+let globalExponentialBackoff = function(work) {
+  // Set globalExponentialBackoff as the lazy-created function. JS Vooodoooo.
+  globalExponentialBackoff = exponentialBackoff(1.5);
+  return globalExponentialBackoff(work);
+};
 
 /**
  * Reports an error. If the error has an "associatedElement" property
@@ -33,11 +52,11 @@ const CANCELLED = 'CANCELLED';
  * If the error has a "messageArray" property, that array is logged.
  * This way one gets the native fidelity of the console for things like
  * elements instead of stringification.
- * @param {!Error} error
+ * @param {*} error
  * @param {!Element=} opt_associatedElement
  */
 export function reportError(error, opt_associatedElement) {
-  if (!window.console) {
+  if (!self.console) {
     return;
   }
   if (!error) {
@@ -62,17 +81,20 @@ export function reportError(error, opt_associatedElement) {
     if (element) {
       (console.error || console.log).call(console,
           element.tagName + '#' + element.id, error.message);
+    } else if (!getMode().minified) {
+      (console.error || console.log).call(console, error.stack);
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!getMode().minified) {
-      (console.error || console.log).call(console, error.stack);
-    }
+
   }
-  if (element && element.dispatchCustomEvent) {
-    element.dispatchCustomEvent('amp:error', error.message);
+  if (element && element.dispatchCustomEventForTesting) {
+    element.dispatchCustomEventForTesting('amp:error', error.message);
   }
-  reportErrorToServer(undefined, undefined, undefined, undefined, error);
+  // 'call' to make linter happy. And .call to make compiler happy
+  // that expects some @this.
+  reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+      undefined, error);
 }
 
 /**
@@ -88,7 +110,7 @@ export function cancellation() {
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
-  win.onerror = reportErrorToServer;
+  win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
     reportError(event.reason || new Error('rejected promise ' + event));
   });
@@ -100,7 +122,7 @@ export function installErrorReporting(win) {
  * @param {string|undefined} filename
  * @param {string|undefined} line
  * @param {string|undefined} col
- * @param {!Error|undefined} error
+ * @param {*|undefined} error
  * @this {!Window|undefined}
  */
 function reportErrorToServer(message, filename, line, col, error) {
@@ -111,7 +133,20 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
-  const url = getErrorReportUrl(message, filename, line, col, error);
+  let hasNonAmpJs = false;
+  try {
+    hasNonAmpJs = detectNonAmpJs(self);
+  } catch (ignore) {
+    // Ignore errors during error report generation.
+  }
+  if (hasNonAmpJs && Math.random() > 0.01) {
+    // Only report 1% of errors on pages with non-AMP JS.
+    // These errors can almost never be acted upon, but spikes such as
+    // due to buggy browser extensions may be helpful to notify authors.
+    return;
+  }
+  const url = getErrorReportUrl(message, filename, line, col, error,
+      hasNonAmpJs);
   globalExponentialBackoff(() => {
     if (url) {
       new Image().src = url;
@@ -125,11 +160,13 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} filename
  * @param {string|undefined} line
  * @param {string|undefined} col
- * @param {!Error|undefined} error
+ * @param {*|undefined} error
+ * @param {boolean} hasNonAmpJs
  * @return {string|undefined} The URL
  * visibleForTesting
  */
-export function getErrorReportUrl(message, filename, line, col, error) {
+export function getErrorReportUrl(message, filename, line, col, error,
+    hasNonAmpJs) {
   message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
     return;
@@ -140,6 +177,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   if (!message) {
     message = 'Unknown error';
   }
+  if (isLoadErrorMessage(message)) {
+    return;
+  }
 
   // This is the App Engine app in
   // ../tools/errortracker
@@ -147,28 +187,29 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = urls.errorReporting +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);
-  if (window.context && window.context.location) {
+  if (self.context && self.context.location) {
     url += '&3p=1';
   }
-  if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
+  if (self.AMP_CONFIG && self.AMP_CONFIG.canary) {
     url += '&ca=1';
   }
-  if (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) {
-    url += '&or=' + encodeURIComponent(window.location.ancestorOrigins[0]);
+  if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {
+    url += '&or=' + encodeURIComponent(self.location.ancestorOrigins[0]);
   }
-  if (window.viewerState) {
-    url += '&vs=' + encodeURIComponent(window.viewerState);
+  if (self.viewerState) {
+    url += '&vs=' + encodeURIComponent(self.viewerState);
   }
   // Is embedded?
-  if (window.parent && window.parent != window) {
+  if (self.parent && self.parent != self) {
     url += '&iem=1';
   }
 
-  if (window.AMP.viewer) {
-    const resolvedViewerUrl = window.AMP.viewer.getResolvedViewerUrl();
-    const messagingOrigin = window.AMP.viewer.maybeGetMessagingOrigin();
+  if (self.AMP.viewer) {
+    const resolvedViewerUrl = self.AMP.viewer.getResolvedViewerUrl();
+    const messagingOrigin = self.AMP.viewer.maybeGetMessagingOrigin();
     if (resolvedViewerUrl) {
       url += `&rvu=${encodeURIComponent(resolvedViewerUrl)}`;
     }
@@ -185,12 +226,35 @@ export function getErrorReportUrl(message, filename, line, col, error) {
         '&s=' + encodeURIComponent(error.stack || '');
     error.message += ' _reported_';
   } else {
-    url += '&f=' + encodeURIComponent(filename) +
-        '&l=' + encodeURIComponent(line) +
+    url += '&f=' + encodeURIComponent(filename || '') +
+        '&l=' + encodeURIComponent(line || '') +
         '&c=' + encodeURIComponent(col || '');
   }
-  url += '&r=' + encodeURIComponent(document.referrer);
+  url += '&r=' + encodeURIComponent(self.document.referrer);
+  url += '&ae=' + encodeURIComponent(accumulatedErrorMessages.join(','));
+  accumulatedErrorMessages.push(message);
+  url += '&fr=' + encodeURIComponent(self.location.originalHash
+      || self.location.hash);
 
-  // Shorten URLs to a value all browsers will send.
-  return url.substr(0, 2000);
+  return url;
+}
+
+/**
+ * Returns true if it appears like there is non-AMP JS on the
+ * current page.
+ * @param {!Window} win
+ * @visibleForTesting
+ */
+export function detectNonAmpJs(win) {
+  const scripts = win.document.querySelectorAll('script[src]');
+  for (let i = 0; i < scripts.length; i++) {
+    if (!startsWith(scripts[i].src.toLowerCase(), urls.cdn)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function resetAccumulatedErrorMessagesForTesting() {
+  accumulatedErrorMessages = [];
 }

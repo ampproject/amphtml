@@ -1,5 +1,7 @@
 {
   "canary": false,
-  "no-auth-in-prerender": 1,
-  "amp-sticky-ad": 1
+  "amp-ios-overflow-x": 1,
+  "a4aProfilingRate": 1,
+  "amp-scrollable-carousel": 1,
+  "amp-fx-flying-carpet": 1
 }

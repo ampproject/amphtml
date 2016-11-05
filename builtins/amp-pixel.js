@@ -16,7 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
-import {urlReplacementsFor} from '../src/url-replacements';
+import {urlReplacementsForDoc} from '../src/url-replacements';
 import {registerElement} from '../src/custom-element';
 import {toggle} from '../src/style';
 import {user} from '../src/log';
@@ -52,7 +52,8 @@ export function installPixel(win) {
       // resource consumption.
       toggle(this.element, false);
       const src = this.element.getAttribute('src');
-      return urlReplacementsFor(this.win).expand(this.assertSource(src))
+      return urlReplacementsForDoc(this.getAmpDoc())
+          .expandAsync(this.assertSource(src))
           .then(src => {
             const image = new Image();
             image.src = src;
@@ -61,7 +62,7 @@ export function installPixel(win) {
     }
 
     assertSource(src) {
-      user.assert(
+      user().assert(
           /^(https\:\/\/|\/\/)/i.test(src),
           'The <amp-pixel> src attribute must start with ' +
           '"https://" or "//". Invalid value: ' + src);

@@ -25,7 +25,7 @@ adopt(window);
 const FONT_FACE_ = `
   @font-face {
     font-family: 'Comic AMP';
-    src: url(/base/examples/fonts/ComicAMP.ttf) format('truetype');
+    src: url(/examples/fonts/ComicAMP.ttf) format('truetype');
   }
 `;
 
@@ -87,8 +87,8 @@ describe('FontLoader', () => {
       textEl.textContent =
           'Neque porro quisquam est qui dolorem ipsum quia dolor';
       iframe.doc.body.appendChild(textEl);
-      setupFontCheckSpy = sandbox.spy(iframe.doc.fonts, 'check');
-      setupFontLoadSpy = sandbox.spy(iframe.doc.fonts, 'load');
+      setupFontCheckSpy = sandbox./*OK*/spy(iframe.doc.fonts, 'check');
+      setupFontLoadSpy = sandbox./*OK*/spy(iframe.doc.fonts, 'load');
       fontloader = new FontLoader(iframe.win);
       return Promise.resolve(iframe);
     });

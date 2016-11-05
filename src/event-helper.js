@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {timer} from './timer';
-import {dev, user} from './log';
+import {timerFor} from './timer';
+import {user} from './log';
+
+/** @const {string}  */
+const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
 
 /**
@@ -101,9 +104,10 @@ export function isLoaded(element) {
  * Returns a promise that will resolve or fail based on the element's 'load'
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
- * @param {!Element} element
+ * @param {T} element
  * @param {number=} opt_timeout
- * @return {!Promise<!Element>}
+ * @return {!Promise<T>}
+ * @template T
  */
 export function loadPromise(element, opt_timeout) {
   let unlistenLoad;
@@ -121,18 +125,9 @@ export function loadPromise(element, opt_timeout) {
     }
     unlistenError = listenOnce(element, 'error', reject);
   });
-  loadingPromise = loadingPromise.then(getTarget, failedToLoad);
+  loadingPromise = loadingPromise.then(() => element, failedToLoad);
   return racePromise_(loadingPromise, unlistenLoad, unlistenError,
       opt_timeout);
-}
-
-/**
- * @param {!Event} event
- * @return {!Element} The target of the event.
- */
-function getTarget(event) {
-  return dev.assert(event.target || event.testTarget,
-      'No target present %s', event);
 }
 
 /**
@@ -142,7 +137,20 @@ function getTarget(event) {
 function failedToLoad(event) {
   // Report failed loads as user errors so that they automatically go
   // into the "document error" bucket.
-  throw user.createError('Failed HTTP request for %s.', event.target);
+  let target = event.target;
+  if (target && target.src) {
+    target = target.src;
+  }
+  throw user().createError(LOAD_FAILURE_PREFIX, target);
+}
+
+/**
+ * Returns true if this error message is was created for a load error.
+ * @param {string} message An error message
+ * @return {boolean}
+ */
+export function isLoadErrorMessage(message) {
+  return message.indexOf(LOAD_FAILURE_PREFIX) != -1;
 }
 
 /**
@@ -160,7 +168,7 @@ function racePromise_(promise, unlisten1, unlisten2, timeout) {
     racePromise = promise;
   } else {
     // Timeout has been specified: add a timeout condition.
-    racePromise = timer.timeoutPromise(timeout || 0, promise);
+    racePromise = timerFor(self).timeoutPromise(timeout || 0, promise);
   }
   if (unlisten1) {
     racePromise.then(unlisten1, unlisten1);

@@ -20,9 +20,9 @@ import {generateSentinel} from '../../src/3p-frame.js';
 
 describe('iframe-helper', function() {
   const iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-intersection.html';
+      '/test/fixtures/served/iframe-intersection.html';
   const nestedIframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-intersection-outer.html';
+      '/test/fixtures/served/iframe-intersection-outer.html';
 
   let testIframe;
   let sandbox;
@@ -134,13 +134,16 @@ describe('iframe-helper', function() {
     });
   });
 
-  it('should un-listen after first hit', () => {
+  it('should un-listen and resolve promise after first hit', () => {
     let calls = 0;
     return new Promise(resolve => {
-      IframeHelper.listenForOnce(testIframe, 'send-intersections', () => {
-        calls++;
-        resolve();
-      });
+      IframeHelper.listenForOncePromise(testIframe,
+          ['no-msg', 'send-intersections'])
+          .then(obj => {
+            expect(obj.message = 'send-intersections');
+            calls++;
+            resolve();
+          });
       insert(testIframe);
     }).then(() => {
       const total = calls;
@@ -148,6 +151,7 @@ describe('iframe-helper', function() {
         setTimeout(resolve, 50);
       }).then(() => {
         expect(calls).to.equal(total);
+        expect(total).to.equal(1);
       });
     });
   });

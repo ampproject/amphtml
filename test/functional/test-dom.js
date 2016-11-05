@@ -318,58 +318,33 @@ describe('DOM', () => {
     expect(dom.lastChildElementByAttr(parent, 'on-child')).to.be.null;
   });
 
-  describe('contains', () => {
-    let connectedElement;
-    let connectedChild;
-    let disconnectedElement;
-    let disconnectedChild;
+  it('ancestorElements should find all matches', () => {
+    const parent = document.createElement('parent');
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+    const element2 = document.createElement('element2');
+    element1.appendChild(element2);
+    expect(dom.ancestorElements(element2, () => true).length).to.equal(2);
+    expect(dom.ancestorElements(element2, e => e.tagName == 'ELEMENT1').length)
+        .to.equal(1);
+    expect(dom.ancestorElements(element1, e => e.tagName == 'PARENT').length)
+        .to.equal(1);
+    expect(dom.ancestorElements(parent, e => e.tagName == 'ELEMENT3').length)
+        .to.be.equal(0);
+  });
 
-    beforeEach(() => {
-      connectedElement = document.createElement('div');
-      connectedChild = document.createElement('div');
-      disconnectedElement = document.createElement('div');
-      disconnectedChild = document.createElement('div');
-
-      connectedElement.appendChild(connectedChild);
-      disconnectedElement.appendChild(disconnectedChild);
-      document.body.appendChild(connectedElement);
-    });
-
-    afterEach(() => {
-      dom.removeElement(connectedElement);
-    });
-
-    it('should use document.contains or fallback as available', () => {
-      expect(dom.documentContains(document, connectedElement)).to.be.true;
-      expect(dom.documentContains(document, connectedChild)).to.be.true;
-      expect(dom.documentContains(document, disconnectedElement)).to.be.false;
-      expect(dom.documentContains(document, disconnectedChild)).to.be.false;
-    });
-
-    it('should polyfill document.contains', () => {
-      expect(dom.documentContainsPolyfillInternal_(
-          document, connectedElement)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, connectedChild)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, disconnectedElement)).to.be.false;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, disconnectedChild)).to.be.false;
-    });
-
-    it('should be inclusionary for documentElement', () => {
-      expect(dom.documentContains(
-          document, document.documentElement)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, document.documentElement)).to.be.true;
-    });
-
-    it('should be inclusionary for document itself', () => {
-      expect(dom.documentContains(
-          document, document)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, document)).to.be.true;
-    });
+  it('ancestorElementsByTag should find all matches', () => {
+    const parent = document.createElement('parent');
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+    const element2 = document.createElement('element2');
+    element1.appendChild(element2);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT1').length)
+        .to.equal(1);
+    expect(dom.ancestorElementsByTag(element1, 'PARENT').length)
+        .to.equal(1);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT3').length)
+        .to.be.equal(0);
   });
 
   describe('waitFor', () => {
@@ -501,6 +476,14 @@ describe('DOM', () => {
       expect(params.hello).to.be.equal('2');
       expect(params.fromTheOtherSide).to.be.equal('3');
       expect(params.attr1).to.be.undefined;
+    });
+
+    it('should return key-value for custom data attributes', () => {
+      const element = document.createElement('element');
+      element.setAttribute('data-vars-event-name', 'click');
+      const params = dom.getDataParamsFromAttributes(element, null,
+        /^vars(.+)/);
+      expect(params.eventName).to.be.equal('click');
     });
   });
 
@@ -663,6 +646,55 @@ describe('DOM', () => {
       const element = document.createElement('div');
       element.setAttribute('type', 'application/json');
       expect(dom.isJsonScriptTag(element)).to.be.false;
+    });
+  });
+
+  describe('escapeCssSelectorIdent', () => {
+
+    it('should escape natively', () => {
+      expect(dom.escapeCssSelectorIdent(window, 'a b')).to.equal('a\\ b');
+    });
+
+    it('should polyfill escape', () => {
+      expect(dom.escapeCssSelectorIdent({}, 'a b')).to.equal('a\\ b');
+    });
+  });
+
+  describe('escapeHtml', () => {
+    it('should tolerate empty string', () => {
+      expect(dom.escapeHtml('')).to.equal('');
+    });
+
+    it('should ignore non-escapes', () => {
+      expect(dom.escapeHtml('abc')).to.equal('abc');
+    });
+
+    it('should subsctitute escapes', () => {
+      expect(dom.escapeHtml('a<b>&c"d\'e\`f')).to.equal(
+          'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f');
+    });
+  });
+
+  describe('tryFocus', () => {
+    it('should call focus on the element', () => {
+      const element = {
+        focus() {},
+      };
+      const focusSpy = sandbox.spy(element, 'focus');
+      dom.tryFocus(element);
+      expect(focusSpy).to.have.been.called;
+    });
+
+    it('should not throw exception if element focus throws exception', () => {
+      const element = {
+        focus() {
+          throw new Error('Cannot focus');
+        },
+      };
+      const focusSpy = sandbox.spy(element, 'focus');
+      dom.tryFocus(element);
+      expect(focusSpy).to.have.been.called;
+      expect(focusSpy).to.not.throw;
     });
   });
 });

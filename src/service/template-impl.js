@@ -16,7 +16,7 @@
 
 import {childElementByTag} from '../dom';
 import {fromClass} from '../service';
-import {user} from '../log';
+import {dev, user} from '../log';
 
 
 /**
@@ -29,7 +29,7 @@ import {user} from '../log';
 /**
  * @typedef {function(new:BaseTemplate, !Element)}
  */
-const TemplateClassDef = {};
+let TemplateClassDef;
 
 /** @private @const {string} */
 const PROP_ = '__AMP_IMPL_';
@@ -48,7 +48,7 @@ export class BaseTemplate {
     /** @public @const */
     this.element = element;
 
-    /** @public @const */
+    /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
     this.compileCallback();
@@ -92,7 +92,7 @@ export class BaseTemplate {
         // Ignore comments.
       } else if (n.nodeType == /* ELEMENT */ 1) {
         if (!singleElement) {
-          singleElement = /** @type {!Element} */ (n);
+          singleElement = dev().assertElement(n);
         } else {
           // This is not the first element - can't unwrap.
           singleElement = null;
@@ -205,8 +205,8 @@ export class Templates {
     } else {
       templateElement = childElementByTag(parent, 'template');
     }
-    user.assert(templateElement, 'Template not found for %s', parent);
-    user.assert(templateElement.tagName == 'TEMPLATE',
+    user().assert(templateElement, 'Template not found for %s', parent);
+    user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
     return templateElement;
   }
@@ -219,12 +219,13 @@ export class Templates {
    * @private
    */
   getImplementation_(element) {
+    /** @const {!BaseTemplate} */
     const impl = element[PROP_];
     if (impl) {
       return Promise.resolve(impl);
     }
 
-    const type = user.assert(element.getAttribute('type'),
+    const type = user().assert(element.getAttribute('type'),
         'Type must be specified: %s', element);
 
     let promise = element[PROP_PROMISE_];
@@ -282,7 +283,7 @@ export class Templates {
             'custom-template')] = true;
       }
     }
-    user.assert(this.declaredTemplates_[type],
+    user().assert(this.declaredTemplates_[type],
         'Template must be declared for %s as <script custom-template=%s>',
         element, type);
   }
@@ -299,7 +300,7 @@ export class Templates {
       this.templateClassMap_[type] = Promise.resolve(templateClass);
     } else {
       const resolver = this.templateClassResolvers_[type];
-      user.assert(resolver, 'Duplicate template type: %s', type);
+      user().assert(resolver, 'Duplicate template type: %s', type);
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }
@@ -311,20 +312,7 @@ export class Templates {
    * @private
    */
   render_(impl, data) {
-    const root = impl.render(data);
-    const anchors = root.getElementsByTagName('a');
-    for (let i = 0; i < anchors.length; i++) {
-      const anchor = anchors[i];
-      if (!anchor.hasAttribute('href')) {
-        // Ignore anchors without href.
-        continue;
-      }
-
-      // TODO(dvoytenko, #1572): This code should be unnecessary after
-      // sanitization issue has been addressed.
-      anchor.setAttribute('target', '_blank');
-    }
-    return root;
+    return impl.render(data);
   }
 }
 

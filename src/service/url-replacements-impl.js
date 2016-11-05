@@ -17,22 +17,50 @@
 import {accessServiceForOrNull} from '../access-service';
 import {cidFor} from '../cid';
 import {variantForOrNull} from '../variant-service';
+import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
-import {documentInfoFor} from '../document-info';
-import {fromClass} from '../service';
-import {loadPromise} from '../event-helper';
-import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from '../url';
-import {viewerFor} from '../viewer';
-import {viewportFor} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {documentInfoForDoc} from '../document-info';
+import {whenDocumentComplete} from '../document-ready';
+import {fromClassForDoc, installServiceInEmbedScope} from '../service';
+import {isFiniteNumber} from '../types';
+import {parseUrl, removeFragment, parseQueryString} from '../url';
+import {viewerForDoc} from '../viewer';
+import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
+import {isExperimentOn} from '../experiments';
+import {getTrackImpressionPromise} from '../impression.js';
 
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
+const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
+
+/** @typedef {string|number|boolean|undefined|null} */
+let ResolverReturnDef;
+
+/** @typedef {function(...*):ResolverReturnDef} */
+let SyncResolverDef;
+
+/** @typedef {function(...*):!Promise<ResolverReturnDef>} */
+let AsyncResolverDef;
+
+/** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
+let ReplacementDef;
+
+/**
+ * Returns a encoded URI Component, or an empty string if the value is nullish.
+ * @param {*} val
+ * @return {string}
+ */
+function encodeValue(val) {
+  if (val == null) {
+    return '';
+  }
+  return encodeURIComponent(/** @type {string} */(val));
+};
 
 /**
  * This class replaces substitution variables with their values.
@@ -40,22 +68,28 @@ const VARIANT_DELIMITER = '.';
  * @package For export.
  */
 export class UrlReplacements {
-  /** @param {!Window} win */
-  constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
-    /** @private @const {!Object<string, function(*):*>} */
-    this.replacements_ = this.win_.Object.create(null);
+    /** @private @const {!Object<string, !ReplacementDef>} */
+    this.replacements_ = this.ampdoc.win.Object.create(null);
 
-    /** @private @const {function():!Promise<?AccessService>} */
+    /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
     /** @private @const {!Promise<?Object<string, string>>} */
-    this.variants_ = variantForOrNull(win);
+    this.variants_ = variantForOrNull(this.ampdoc.win);
+
+    /**
+     * @private @const {
+     *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
+     */
+    this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
 
     /** @private {boolean} */
     this.initialized_ = false;
@@ -66,138 +100,181 @@ export class UrlReplacements {
    */
   initialize_() {
     this.initialized_ = true;
+
+    /** @const {!./viewport-impl.Viewport} */
+    const viewport = viewportForDoc(this.ampdoc);
+
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
       return Math.random();
     });
 
-    // Returns the canonical URL for this AMP document.
-    this.set_('CANONICAL_URL', () => {
-      return documentInfoFor(this.win_).canonicalUrl;
+    // Provides a counter starting at 1 per given scope.
+    let counterStore = null;
+    this.set_('COUNTER', scope => {
+      if (!counterStore) {
+        counterStore = Object.create(null);
+      }
+      if (!counterStore[scope]) {
+        counterStore[scope] = 0;
+      }
+      return ++counterStore[scope];
     });
+
+    // Returns the canonical URL for this AMP document.
+    this.set_('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
+      return info.canonicalUrl;
+    }));
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set_('CANONICAL_HOST', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_HOST', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.host;
-    });
+    }));
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set_('CANONICAL_HOSTNAME', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.hostname;
-    });
+    }));
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set_('CANONICAL_PATH', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_PATH', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.pathname;
-    });
+    }));
 
     // Returns the referrer URL.
-    this.set_('DOCUMENT_REFERRER', () => {
-      return viewerFor(this.win_).getReferrerUrl();
-    });
+    this.setAsync_('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
+      return viewerForDoc(this.ampdoc).getReferrerUrl();
+    }));
 
     // Returns the title of this AMP document.
     this.set_('TITLE', () => {
-      return this.win_.document.title;
+      return this.ampdoc.win.document.title;
     });
 
     // Returns the URL for this AMP document.
     this.set_('AMPDOC_URL', () => {
-      return removeFragment(this.win_.location.href);
+      return removeFragment(this.ampdoc.win.location.href);
     });
 
     // Returns the host of the URL for this AMP document.
     this.set_('AMPDOC_HOST', () => {
-      const url = parseUrl(this.win_.location.href);
+      const url = parseUrl(this.ampdoc.win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set_('AMPDOC_HOSTNAME', () => {
-      const url = parseUrl(this.win_.location.href);
+      const url = parseUrl(this.ampdoc.win.location.href);
       return url && url.hostname;
     });
 
     // Returns the Source URL for this AMP document.
-    this.set_('SOURCE_URL', () => {
-      return removeFragment(getSourceUrl(this.win_.location.href));
+    this.set_('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
+      return removeFragment(info.sourceUrl);
+    }));
+
+    this.setAsync_('SOURCE_URL', () => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getDocInfoValue_(info => {
+          return removeFragment(info.sourceUrl);
+        });
+      });
     });
 
     // Returns the host of the Source URL for this AMP document.
-    this.set_('SOURCE_HOST', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).host;
-    });
+    this.set_('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).host;
+    }));
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set_('SOURCE_HOSTNAME', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
-    });
+    this.set_('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).hostname;
+    }));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set_('SOURCE_PATH', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).pathname;
-    });
+    this.set_('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).pathname;
+    }));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set_('PAGE_VIEW_ID', () => {
-      return documentInfoFor(this.win_).pageViewId;
-    });
+    this.set_('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
+      return info.pageViewId;
+    }));
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      user.assert(param,
-          'The first argument to QUERY_PARAM, the query string ' +
-          'param is required');
-      const url = parseUrl(this.win_.location.href);
-      const params = parseQueryString(url.search);
-
-      return (typeof params[param] !== 'undefined') ?
-        params[param] :
-        defaultValue;
+      return this.getQueryParamData_(param, defaultValue);
     });
 
-    this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
-      user.assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+    this.setAsync_('QUERY_PARAM', (param, defaultValue = '') => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getQueryParamData_(param, defaultValue);
+      });
+    });
+
+    /**
+     * Stores client ids that were generated during this page view
+     * indexed by scope.
+     * @type {?Object<string, string>}
+     */
+    let clientIds = null;
+    this.setAsync_('CLIENT_ID', (scope, opt_userNotificationId) => {
+      user().assertString(scope,
+          'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
       // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = userNotificationManagerFor(this.win_).then(service => {
+        consent = userNotificationManagerFor(this.ampdoc.win).then(service => {
           return service.get(opt_userNotificationId);
         });
       }
-      return cidFor(this.win_).then(cid => {
+      return cidFor(this.ampdoc.win).then(cid => {
         return cid.get({
-          scope,
+          scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
         }, consent);
+      }).then(cid => {
+        if (!clientIds) {
+          clientIds = Object.create(null);
+        }
+        clientIds[scope] = cid;
+        return cid;
       });
+    });
+    // Synchronous alternative. Only works for scopes that were previously
+    // requested using the async method.
+    this.set_('CLIENT_ID', scope => {
+      if (!clientIds) {
+        return null;
+      }
+      return clientIds[dev().assertString(scope)];
     });
 
     // Returns assigned variant name for the given experiment.
-    this.set_('VARIANT', experiment => {
+    this.setAsync_('VARIANT', experiment => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
-        user.assert(variants[experiment] !== undefined,
+        const variant = variants[/** @type {string} */(experiment)];
+        user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
-        const variant = variants[experiment];
         // When no variant assigned, use reserved keyword 'none'.
-        return variant === null ? 'none' : variant;
+        return variant === null ? 'none' : /** @type {string} */(variant);
       });
     });
 
     // Returns all assigned experiment variants in a serialized form.
-    this.set_('VARIANTS', () => {
+    this.setAsync_('VARIANTS', () => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANTS, amp-experiment should be configured');
 
         const experiments = [];
@@ -211,9 +288,27 @@ export class UrlReplacements {
       });
     });
 
+    // Returns incoming share tracking fragment.
+    this.setAsync_('SHARE_TRACKING_INCOMING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.incomingFragment;
+      });
+    });
+
+    // Returns outgoing share tracking fragment.
+    this.setAsync_('SHARE_TRACKING_OUTGOING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.outgoingFragment;
+      });
+    });
+
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set_('TIMESTAMP', () => {
-      return new Date().getTime();
+      return Date.now();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
@@ -222,154 +317,129 @@ export class UrlReplacements {
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set_('SCROLL_TOP', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollTop());
-    });
+    this.set_('SCROLL_TOP', () => viewport.getScrollTop());
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set_('SCROLL_LEFT', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollLeft());
-    });
+    this.set_('SCROLL_LEFT', () => viewport.getScrollLeft());
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set_('SCROLL_HEIGHT', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollHeight());
-    });
+    this.set_('SCROLL_HEIGHT', () => viewport.getScrollHeight());
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set_('SCROLL_WIDTH', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollWidth());
-    });
-
-    // Returns screen.width.
-    this.set_('SCREEN_WIDTH', () => {
-      return this.win_.screen.width;
-    });
-
-    // Returns screen.height.
-    this.set_('SCREEN_HEIGHT', () => {
-      return this.win_.screen.height;
-    });
-
-    // Returns screen.availHeight.
-    this.set_('AVAILABLE_SCREEN_HEIGHT', () => {
-      return this.win_.screen.availHeight;
-    });
-
-    // Returns screen.availWidth.
-    this.set_('AVAILABLE_SCREEN_WIDTH', () => {
-      return this.win_.screen.availWidth;
-    });
-
-    // Returns screen.ColorDepth.
-    this.set_('SCREEN_COLOR_DEPTH', () => {
-      return this.win_.screen.colorDepth;
-    });
+    this.set_('SCROLL_WIDTH', () => viewport.getScrollWidth());
 
     // Returns the viewport height.
-    this.set_('VIEWPORT_HEIGHT', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().height);
-    });
+    this.set_('VIEWPORT_HEIGHT', () => viewport.getSize().height);
 
     // Returns the viewport width.
-    this.set_('VIEWPORT_WIDTH', () => {
-      return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().width);
-    });
+    this.set_('VIEWPORT_WIDTH', () => viewport.getSize().width);
+
+    // Returns screen.width.
+    this.set_('SCREEN_WIDTH', () => this.ampdoc.win.screen.width);
+
+    // Returns screen.height.
+    this.set_('SCREEN_HEIGHT', () => this.ampdoc.win.screen.height);
+
+    // Returns screen.availHeight.
+    this.set_('AVAILABLE_SCREEN_HEIGHT',
+        () => this.ampdoc.win.screen.availHeight);
+
+    // Returns screen.availWidth.
+    this.set_('AVAILABLE_SCREEN_WIDTH',
+        () => this.ampdoc.win.screen.availWidth);
+
+    // Returns screen.ColorDepth.
+    this.set_('SCREEN_COLOR_DEPTH',
+        () => this.ampdoc.win.screen.colorDepth);
 
     // Returns document characterset.
     this.set_('DOCUMENT_CHARSET', () => {
-      const doc = this.win_.document;
+      const doc = this.ampdoc.win.document;
       return doc.characterSet || doc.charset;
     });
 
     // Returns the browser language.
     this.set_('BROWSER_LANGUAGE', () => {
-      const nav = this.win_.navigator;
+      const nav = this.ampdoc.win.navigator;
       return (nav.language || nav.userLanguage || nav.browserLanguage || '')
           .toLowerCase();
     });
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
-    this.set_('PAGE_LOAD_TIME', () => {
-      return this.getTimingData_('navigationStart', 'loadEventStart');
-    });
+    this.setTimingResolver_(
+      'PAGE_LOAD_TIME', 'navigationStart', 'loadEventStart');
 
     // Returns the time it took to perform DNS lookup for the domain.
-    this.set_('DOMAIN_LOOKUP_TIME', () => {
-      return this.getTimingData_('domainLookupStart', 'domainLookupEnd');
-    });
+    this.setTimingResolver_(
+      'DOMAIN_LOOKUP_TIME', 'domainLookupStart', 'domainLookupEnd');
 
     // Returns the time it took to connet to the server.
-    this.set_('TCP_CONNECT_TIME', () => {
-      return this.getTimingData_('connectStart', 'connectEnd');
-    });
+    this.setTimingResolver_(
+      'TCP_CONNECT_TIME', 'connectStart', 'connectEnd');
 
     // Returns the time it took for server to start sending a response to the
     // request.
-    this.set_('SERVER_RESPONSE_TIME', () => {
-      return this.getTimingData_('requestStart', 'responseStart');
-    });
+    this.setTimingResolver_(
+      'SERVER_RESPONSE_TIME', 'requestStart', 'responseStart');
 
     // Returns the time it took to download the page.
-    this.set_('PAGE_DOWNLOAD_TIME', () => {
-      return this.getTimingData_('responseStart', 'responseEnd');
-    });
+    this.setTimingResolver_(
+      'PAGE_DOWNLOAD_TIME', 'responseStart', 'responseEnd');
 
     // Returns the time it took for redirects to complete.
-    this.set_('REDIRECT_TIME', () => {
-      return this.getTimingData_('navigationStart', 'fetchStart');
-    });
+    this.setTimingResolver_(
+      'REDIRECT_TIME', 'navigationStart', 'fetchStart');
 
     // Returns the time it took for DOM to become interactive.
-    this.set_('DOM_INTERACTIVE_TIME', () => {
-      return this.getTimingData_('navigationStart', 'domInteractive');
-    });
+    this.setTimingResolver_(
+      'DOM_INTERACTIVE_TIME', 'navigationStart', 'domInteractive');
 
     // Returns the time it took for content to load.
-    this.set_('CONTENT_LOAD_TIME', () => {
-      return this.getTimingData_('navigationStart',
-          'domContentLoadedEventStart');
-    });
+    this.setTimingResolver_(
+      'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
 
     // Access: Reader ID.
-    this.set_('ACCESS_READER_ID', () => {
+    this.setAsync_('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
       return this.getAccessValue_(accessService => {
         return accessService.getAccessReaderId();
       }, 'ACCESS_READER_ID');
-    });
+    }));
 
     // Access: data from the authorization response.
-    this.set_('AUTHDATA', field => {
-      user.assert(field,
+    this.setAsync_('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
+      user().assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
       }, 'AUTHDATA');
-    });
+    }));
 
     // Returns an identifier for the viewer.
-    this.set_('VIEWER', () => {
-      return viewerFor(this.win_).getViewerOrigin();
+    this.setAsync_('VIEWER', () => {
+      return viewerForDoc(this.ampdoc).getViewerOrigin().then(viewer => {
+        return viewer == undefined ? '' : viewer;
+      });
     });
 
     // Returns the total engaged time since the content became viewable.
-    this.set_('TOTAL_ENGAGED_TIME', () => {
-      return activityFor(this.win_).then(activity => {
+    this.setAsync_('TOTAL_ENGAGED_TIME', () => {
+      return activityFor(this.ampdoc.win).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
 
     this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
-      user.assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
-      return this.getTimingData_(startAttribute, endAttribute);
+      return this.getTimingDataSync_(/**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
+    });
+    this.setAsync_('NAV_TIMING', (startAttribute, endAttribute) => {
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+          'start attribute name, is required');
+      return this.getTimingDataAsync_(/**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
     });
 
     this.set_('NAV_TYPE', () => {
@@ -382,20 +452,35 @@ export class UrlReplacements {
 
     // returns the AMP version number
     this.set_('AMP_VERSION', () => '$internalRuntimeVersion$');
+
+    this.set_('BACKGROUND_STATE', () => {
+      return viewerForDoc(this.ampdoc.win.document).isVisible() ? '0' : '1';
+    });
+  }
+
+  /**
+   * Resolves the value via document info.
+   * @param {function(!./document-info-impl.DocumentInfoDef):T} getter
+   * @return {T}
+   * @template T
+   */
+  getDocInfoValue_(getter) {
+    return getter(documentInfoForDoc(this.ampdoc));
   }
 
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!AccessService):*} getter
+   * @param {function(!AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {*|null}
+   * @return {T|null}
+   * @template T
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_(this.win_).then(accessService => {
+    return this.getAccessService_(this.ampdoc.win).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
-        user.error(TAG, 'Access service is not installed to access: ', expr);
+        user().error(TAG, 'Access service is not installed to access: ', expr);
         return null;
       }
       return getter(accessService);
@@ -409,69 +494,161 @@ export class UrlReplacements {
    * If only start event is given, the result is the timing value at start event.
    * @param {string} startEvent
    * @param {string=} endEvent
-   * @return {!Promise<string|undefined>}
+   * @return {!Promise<ResolverReturnDef>}
    * @private
    */
-  getTimingData_(startEvent, endEvent) {
-    const timingInfo = this.win_['performance']
-        && this.win_['performance']['timing'];
+  getTimingDataAsync_(startEvent, endEvent) {
+    const metric = this.getTimingDataSync_(startEvent, endEvent);
+    if (metric === '') {
+      // Metric is not yet available. Retry after a delay.
+      return whenDocumentComplete(this.ampdoc.win.document).then(() => {
+        return this.getTimingDataSync_(startEvent, endEvent);
+      });
+    }
+    return Promise.resolve(metric);
+  }
+
+  /**
+   * Returns navigation timing information based on the start and end events.
+   * The data for the timing events is retrieved from performance.timing API.
+   * If start and end events are both given, the result is the difference between the two.
+   * If only start event is given, the result is the timing value at start event.
+   * Enforces synchronous evaluation.
+   * @param {string} startEvent
+   * @param {string=} endEvent
+   * @return {ResolverReturnDef} undefined if API is not available, empty string
+   *    if it is not yet available, or value as string
+   */
+  getTimingDataSync_(startEvent, endEvent) {
+    const win = this.ampdoc.win;
+    const timingInfo = win['performance'] && win['performance']['timing'];
     if (!timingInfo || timingInfo['navigationStart'] == 0) {
       // Navigation timing API is not supported.
-      return Promise.resolve();
+      return;
     }
 
-    let metric = (endEvent === undefined)
+    const metric = (endEvent === undefined)
         ? timingInfo[startEvent]
         : timingInfo[endEvent] - timingInfo[startEvent];
 
-    if (isNaN(metric) || metric == Infinity) {
+    if (!isFiniteNumber(metric)) {
       // The metric is not supported.
-      return Promise.resolve();
-    } else if (metric < 0) {
-      // Metric is not yet available. Retry after a delay.
-      return loadPromise(this.win_).then(() => {
-        metric = (endEvent === undefined)
-            ? timingInfo[startEvent]
-            : timingInfo[endEvent] - timingInfo[startEvent];
-        return (isNaN(metric) || metric == Infinity || metric < 0)
-            ? undefined
-            : String(metric);
-      });
+      return;
+    } else if (metric < 0) {;
+      return '';
     } else {
-      return Promise.resolve(String(metric));
+      return metric;
     }
   }
 
   /**
    * Returns navigation information from the current browsing context.
    * @param {string} attribute
-   * @return {!Promise<string|undefined>}
+   * @return {ResolverReturnDef}
    * @private
    */
   getNavigationData_(attribute) {
-    const navigationInfo = this.win_['performance']
-        && this.win_['performance']['navigation'];
+    const win = this.ampdoc.win;
+    const navigationInfo = win['performance']
+        && win['performance']['navigation'];
     if (!navigationInfo || navigationInfo[attribute] === undefined) {
       // PerformanceNavigation interface is not supported or attribute is not implemented.
-      return Promise.resolve();
+      return;
     }
 
-    return String(navigationInfo[attribute]);
+    return navigationInfo[attribute];
   }
 
   /**
-   * Sets the value resolver for the variable with the specified name. The
-   * value resolver may optionally take an extra parameter.
+   * Return the QUERY_PARAM from the current location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @return {string}
+   */
+  getQueryParamData_(param, defaultValue) {
+    user().assert(param,
+        'The first argument to QUERY_PARAM, the query string ' +
+        'param is required');
+    user().assert(typeof param == 'string', 'param should be a string');
+    const url = parseUrl(this.ampdoc.win.location.href);
+    const params = parseQueryString(url.search);
+    return (typeof params[param] !== 'undefined')
+        ? params[param] : defaultValue;
+  }
+
+  /**
+   *
+   * Sets a synchronous value resolver for the variable with the specified name.
+   * The value resolver may optionally take an extra parameter.
+   * Can be called in conjuction with setAsync to allow for additional
+   * asynchronous resolver where expand will use async and expandSync the sync
+   * version.
    * @param {string} varName
-   * @param {function(*):*} resolver
+   * @param {!SyncResolverDef} syncResolver
    * @return {!UrlReplacements}
    * @private
    */
-  set_(varName, resolver) {
-    dev.assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] = resolver;
+  set_(varName, syncResolver) {
+    dev().assert(varName.indexOf('RETURN') == -1);
+    this.replacements_[varName] =
+        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName].sync = syncResolver;
     this.replacementExpr_ = undefined;
     return this;
+  }
+
+  /**
+   * Sets an async value resolver for the variable with the specified name.
+   * The value resolver may optionally take an extra parameter.
+   * Can be called in conjuction with setAsync to allow for additional
+   * asynchronous resolver where expand will use async and expandSync the sync
+   * version.
+   * @param {string} varName
+   * @param {!AsyncResolverDef} asyncResolver
+   * @return {!UrlReplacements}
+   * @private
+   */
+  setAsync_(varName, asyncResolver) {
+    dev().assert(varName.indexOf('RETURN') == -1);
+    this.replacements_[varName] =
+        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName].async = asyncResolver;
+    this.replacementExpr_ = undefined;
+    return this;
+  }
+
+  /**
+   * Utility function for setting resolver for timing data that supports
+   * sync and async.
+   * @param {string} varName
+   * @param {string} startEvent
+   * @param {string=} endEvent
+   * @return {!UrlReplacements}
+   * @private
+   */
+  setTimingResolver_(varName, startEvent, endEvent) {
+    return this.set_(varName, () => {
+      return this.getTimingDataSync_(startEvent, endEvent);
+    }).setAsync_(varName, () => {
+      return this.getTimingDataAsync_(startEvent, endEvent);
+    });
+  }
+
+  /**
+   * Synchronously expands the provided URL by replacing all known variables with
+   * their resolved values. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.  Any async bindings are ignored.
+   * @param {string} url
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
+   * @return {string}
+   */
+  expandSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
+    return /** @type {string} */(
+        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+            opt_whiteList));
   }
 
   /**
@@ -482,36 +659,103 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @return {!Promise<string>}
    */
-  expand(url, opt_bindings) {
-    return this.expand_(url, opt_bindings);
+  expandAsync(url, opt_bindings) {
+    return /** @type {!Promise<string>} */(this.expand_(url, opt_bindings));
+  }
+
+  /**
+   * Replaces values in the link of an anchor tag if
+   * - the link opts into it (via data-amp-replace argument)
+   * - the destination is the source or canonical origin of this doc.
+   * @param {!Element} element An anchor element.
+   * @return {string|undefined} Replaced string for testing
+   */
+  maybeExpandLink(element) {
+    if (!isExperimentOn(this.ampdoc.win, 'link-url-replace')) {
+      return;
+    }
+    dev().assert(element.tagName == 'A');
+    const whitelist = element.getAttribute('data-amp-replace');
+    if (!whitelist) {
+      return;
+    }
+    const docInfo = documentInfoForDoc(this.ampdoc);
+    // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
+    // We set this to the original value before doing any work and use it
+    // on subsequent replacements, so that each run gets a fresh value.
+    const href = dev().assertString(
+        element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
+    const url = parseUrl(href);
+    if (url.origin != parseUrl(docInfo.canonicalUrl).origin &&
+        url.origin != parseUrl(docInfo.sourceUrl).origin) {
+      user().warn('URL', 'Ignoring link replacement', href,
+          ' because the link does not go to the document\'s' +
+          ' source or canonical origin.');
+      return;
+    }
+    if (element[ORIGINAL_HREF_PROPERTY] == null) {
+      element[ORIGINAL_HREF_PROPERTY] = href;
+    }
+    const supportedReplacements = {
+      'CLIENT_ID': true,
+      'QUERY_PARAM': true,
+    };
+    const requestedReplacements = {};
+    whitelist.trim().split(/\s*,\s*/).forEach(replacement => {
+      if (supportedReplacements.hasOwnProperty(replacement)) {
+        requestedReplacements[replacement] = true;
+      } else {
+        user().warn('URL', 'Ignoring unsupported link replacement',
+            replacement);
+      }
+    });
+    return element.href = this.expandSync(
+        href,
+        /* opt_bindings */ undefined,
+        /* opt_collectVars */ undefined,
+        requestedReplacements);
   }
 
   /**
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, *>=} opt_collectVars
-   * @return {!Promise<string>}
+   * @param {boolean=} opt_sync
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
+   * @return {!Promise<string>|string}
    * @private
    */
-  expand_(url, opt_bindings, opt_collectVars) {
+  expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
-    const encodeValue = val => {
-      if (val == null) {
-        val = '';
-      }
-      return encodeURIComponent(val);
-    };
-    url = url.replace(expr, (match, name, opt_strargs) => {
+    let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
       }
-      const binding = (opt_bindings && (name in opt_bindings)) ?
-          opt_bindings[name] : this.getReplacement_(name);
+      if (opt_whiteList && !opt_whiteList[name]) {
+        // Do not perform substitution and just return back the original
+        // match, so that the string doesn't change.
+        return match;
+      }
+      let binding;
+      if (opt_bindings && (name in opt_bindings)) {
+        binding = opt_bindings[name];
+      } else if ((binding = this.getReplacement_(name))) {
+        if (opt_sync) {
+          binding = binding.sync;
+          if (!binding) {
+            user().error(TAG, 'ignoring async replacement key: ', name);
+            return '';
+          }
+        } else {
+          binding = binding.async || binding.sync;
+        }
+      }
       let val;
       try {
         val = (typeof binding == 'function') ?
@@ -519,17 +763,25 @@ export class UrlReplacements {
       } catch (e) {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.
+        if (opt_sync) {
+          val = '';
+        }
         rethrowAsync(e);
       }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
+        if (opt_sync) {
+          user().error(TAG, 'ignoring promise value for key: ', name);
+          return '';
+        }
+        /** @const {Promise<string>} */
         const p = val.catch(err => {
           // Report error, but do not disrupt URL replacement. This will
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          url = url.replace(match, encodeValue(v));
+          replacement = replacement.replace(match, encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -548,10 +800,14 @@ export class UrlReplacements {
     });
 
     if (replacementPromise) {
-      replacementPromise = replacementPromise.then(() => url);
+      replacementPromise = replacementPromise.then(() => replacement);
     }
 
-    return replacementPromise || Promise.resolve(url);
+    if (opt_sync) {
+      return this.ensureProtocolMatches_(url, replacement);
+    }
+    return (replacementPromise || Promise.resolve(replacement))
+        .then(replacement => this.ensureProtocolMatches_(url, replacement));
   }
 
   /**
@@ -570,7 +826,7 @@ export class UrlReplacements {
   /**
    * Method exists to assist stubbing in tests.
    * @param {string} name
-   * @return {function(*):*}
+   * @return {!ReplacementDef}
    */
   getReplacement_(name) {
     return this.replacements_[name];
@@ -586,7 +842,7 @@ export class UrlReplacements {
     if (additionalKeys && additionalKeys.length > 0) {
       const allKeys = Object.keys(this.replacements_);
       additionalKeys.forEach(key => {
-        if (allKeys[key] === undefined) {
+        if (this.replacements_[key] === undefined) {
           allKeys.push(key);
         }
       });
@@ -616,12 +872,44 @@ export class UrlReplacements {
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
   }
+
+  /**
+   * Ensures that the protocol of the original url matches the protocol of the
+   * replacement url. Returns the replacement if they do, the original if they
+   * do not.
+   * @param {string} url
+   * @param {string} replacement
+   * @return {string}
+   */
+  ensureProtocolMatches_(url, replacement) {
+    const newProtocol = parseUrl(replacement, /* opt_nocache */ true).protocol;
+    const oldProtocol = parseUrl(url, /* opt_nocache */ true).protocol;
+    if (newProtocol != oldProtocol) {
+      user().error(TAG, 'Illegal replacement of the protocol: ', url);
+      return url;
+    }
+    user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
+        'protocol: %s', url);
+
+    return replacement;
+  }
 }
 
+
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!UrlReplacements}
  */
-export function installUrlReplacementsService(window) {
-  return fromClass(window, 'url-replace', UrlReplacements);
-};
+export function installUrlReplacementsServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'url-replace', UrlReplacements);
+}
+
+
+/**
+ * @param {!Window} embedWin
+ * @param {*} varSource
+ */
+export function installUrlReplacementsForEmbed(embedWin, varSource) {
+  // TODO(avimehta): Implement.
+  installServiceInEmbedScope(embedWin, 'url-replace', {varSource});
+}

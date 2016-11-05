@@ -31,14 +31,12 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>NODISPLAY</td>
+    <td>nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <a href="https://ampbyexample.com/components/amp-sidebar/">
-        amp-sidebar.html
-      </a>
+      <a href="https://ampbyexample.com/components/amp-sidebar/">Annotated code example for amp-sidebar</a>
     </td>
   </tr>
 </table>
@@ -48,7 +46,13 @@ limitations under the License.
 - There can be only one `<amp-sidebar>` in an AMP document. The `<amp-sidebar>` should be a direct child of the `<body>`.
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
-- The `<amp-sidebar>` may not contain any AMP Elements except for `amp-accordion`, `amp-img` and `amp-fit-text`.
+- The `<amp-sidebar>` may not contain any AMP Elements except for:
+    - `<amp-accordion>`
+    - `<amp-img>`
+    - `<amp-fit-text>`
+    - `<amp-list>`
+    - `<amp-live-list>`
+    - `<amp-social-share>`
 - The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vw in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted between 45px and 80vw using CSS.
 - Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
@@ -105,6 +109,41 @@ The `amp-sidebar` component can be styled with standard CSS.
 - The `width` of the `amp-sidebar` may be set to adjust the width of the sidebar between the pre-set min(45px) and max(80vw) values.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar if required. If the height exceeds 100vw then the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
+
+## Actions
+The `amp-sidebar` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>open (default)</td>
+    <td>Opens the sidebar</td>
+  </tr>
+  <tr>
+    <td>close</td>
+    <td>Closes the sidebar</td>
+  </tr>
+  <tr>
+    <td>toggle</td>
+    <td>Toggles the sidebar state</td>
+  </tr>
+</table>
+
+
+### Examples
+
+```html
+<button on="tap:sidebar.open"> = </button>
+<amp-sidebar id="sidebar" layout="nodisplay">
+  <ul>
+    <li on="tap:sidebar.toggle">Toggle</li>
+    <li on="tap:sidebar.close">Close</li>
+  </ul>
+</amp-sidebar>
+```
 
 ## UX considerations
 

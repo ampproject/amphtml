@@ -18,14 +18,41 @@
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
-import {adopt} from '../src/runtime';
+import {
+  adopt,
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/runtime';
+import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platform} from '../src/platform';
+import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import * as describes from '../testing/describes';
+
+
+// All exposed describes.
+global.describes = describes;
+
+// Increase the before/after each timeout since certain times they have timedout
+// during the normal 2000 allowance.
+const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
 adopt(window);
+
+// Override AMP.extension to buffer extension installers.
+/**
+ * @param {string} name
+ * @param {string} version
+ * @param {function(!Object)} installer
+ * @const
+ */
+global.AMP.extension = function(name, version, installer) {
+  describes.bufferExtension(`${name}:${version}`, installer);
+};
+
 
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
@@ -43,36 +70,42 @@ class TestConfig {
 
   constructor(runner) {
     this.runner = runner;
-    this.skippedUserAgents = [];
+    /**
+     * List of predicate functions that are called before running each test
+     * suite to check whether the suite should be skipped or not.
+     * If any of the functions return 'true', the suite will be skipped.
+     * @type {!Array<function():boolean>}
+     */
+    this.skipMatchers = [];
     /**
      * Called for each test suite (things created by `describe`).
      * @type {!Array<function(!TestSuite)>}
      */
     this.configTasks = [];
-  }
-
-  skipOnTravis() {
-    this.skippedUserAgents.push('Chromium');
-    return this;
+    this.platform_ = platformFor(window);
   }
 
   skipChrome() {
-    this.skippedUserAgents.push('Chrome');
-    return this;
+    return this.skip(this.platform_.isChrome.bind(this.platform_));
   }
 
   skipEdge() {
-    this.skippedUserAgents.push('Edge');
-    return this;
+    return this.skip(this.platform_.isEdge.bind(this.platform_));
   }
 
   skipFirefox() {
-    this.skippedUserAgents.push('Firefox');
-    return this;
+    return this.skip(this.platform_.isFirefox.bind(this.platform_));
   }
 
   skipSafari() {
-    this.skippedUserAgents.push('Safari');
+    return this.skip(this.platform_.isSafari.bind(this.platform_));
+  }
+
+  /**
+   * @param {function():boolean} fn
+   */
+  skip(fn) {
+    this.skipMatchers.push(fn);
     return this;
   }
 
@@ -91,8 +124,8 @@ class TestConfig {
    * @param {function()} fn
    */
   run(desc, fn) {
-    for (let i = 0; i < this.skippedUserAgents.length; i++) {
-      if (navigator.userAgent.indexOf(this.skippedUserAgents[i]) >= 0) {
+    for (let i = 0; i < this.skipMatchers.length; i++) {
+      if (this.skipMatchers[i]()) {
         this.runner.skip(desc, fn);
         return;
       }
@@ -134,19 +167,31 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
-beforeEach(beforeTest);
+beforeEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
+  beforeTest();
+});
 
 function beforeTest() {
+  activateChunkingForTesting();
   window.AMP_MODE = null;
+  window.AMP_CONFIG = {
+    canary: 'testSentinel',
+  };
   window.AMP_TEST = true;
-  installDocService(window, true);
+  window.ampExtendedElements = {};
+  const ampdocService = installDocService(window, true);
+  const ampdoc = ampdocService.getAmpDoc(window.document);
+  installRuntimeServices(window);
+  installAmpdocServices(ampdoc);
 }
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
-afterEach(() => {
+afterEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
-  if (!platform.isSafari()) {
+  if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.
     cleanupTagNames.push('iframe');
   }
@@ -165,15 +210,25 @@ afterEach(() => {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+  const forgotGlobal = !!global.sandbox;
+  if (forgotGlobal) {
+    // The error will be thrown later to give possibly other sandboxes a
+    // chance to restore themselves.
+    delete global.sandbox;
+  }
   if (sandboxes.length > 0) {
     sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
     throw new Error('You forgot to restore your sandbox!');
+  }
+  if (forgotGlobal) {
+    throw new Error('You forgot to clear global sandbox!');
   }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
   }
   setDefaultBootstrapBaseUrlForTesting(null);
+  resetAccumulatedErrorMessagesForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
@@ -205,15 +260,17 @@ chai.Assertion.addProperty('visible', function() {
   const computedStyle = window.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
+  const isOpaque = parseInt(opacity, 10) > 0;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-    visibility === 'visible' || parseInt(opacity, 10) > 0,
-    'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-    'expected element \'' +
-        tagName + '\' not to be #{act}. with classes: ' + obj.className,
-    'visible',
-    visibility
+      visibility === 'visible' && isOpaque,
+      'expected element \'' +
+      tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+      'expected element \'' +
+      tagName + '\' not to be #{exp}, got #{act}. with classes: ' +
+      obj.className,
+      'visible and opaque',
+      `visibility = ${visibility} and opacity = ${opacity}`
   );
 });
 

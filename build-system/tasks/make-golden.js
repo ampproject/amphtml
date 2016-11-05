@@ -64,7 +64,7 @@ function doScreenshot(host, path, output, device, verbose, cb) {
 /**
  * Make a golden image of the url.
  * Ex:
- * `gulp make-golden --path=examples.build/everything.amp.max.html \
+ * `gulp make-golden --path=examples/everything.amp.max.html \
  *     --host=http://localhost:8000`
  *  @param {function} cb callback function
  */

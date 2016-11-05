@@ -15,7 +15,7 @@
  */
 
 import {Crypto} from '../crypto-impl';
-import {Platform} from '../../../../src/platform';
+import {Platform} from '../../../../src/service/platform-impl';
 import * as lib from '../../../../third_party/closure-library/sha384-generated';
 import * as sinon from 'sinon';
 
@@ -82,7 +82,7 @@ describe('crypto-impl', () => {
 
   function isModernChrome() {
     const platform = new Platform(window);
-    return platform.isChrome() && platform.getMajorVersion() >= 45;
+    return platform.isChrome() && platform.getMajorVersion() >= 37;
   }
 
   beforeEach(() => {

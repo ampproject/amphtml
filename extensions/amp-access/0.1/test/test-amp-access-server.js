@@ -66,6 +66,8 @@ describe('AccessServerAdapter', () => {
           .equal('https://acme.com/p?rid=READER_ID');
       expect(adapter.serverState_).to.equal('STATE1');
       expect(adapter.isProxyOrigin_).to.be.false;
+      expect(adapter.isAuthorizationEnabled()).to.be.true;
+      expect(adapter.isPingbackEnabled()).to.be.true;
     });
 
     it('should fail if config is invalid', () => {
@@ -97,7 +99,9 @@ describe('AccessServerAdapter', () => {
 
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
+        getAuthorizationTimeout: () => 3000,
         isAuthorizationEnabled: () => true,
+        isPingbackEnabled: () => true,
         authorize: () => Promise.resolve({}),
         pingback: () => Promise.resolve(),
       };

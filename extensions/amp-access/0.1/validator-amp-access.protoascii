@@ -14,6 +14,7 @@
 # limitations under the license.
 #
 tags: {  # amp-access
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-access extension .js script"
   mandatory_parent: "HEAD"
@@ -35,7 +36,7 @@ tags: {  # amp-access
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -46,6 +47,7 @@ tags: {  # amp-access
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access.html"
 }
 tags: {  # amp-access (json)
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-access extension .json script"
   mandatory_parent: "HEAD"
@@ -60,7 +62,7 @@ tags: {  # amp-access (json)
   attrs: {
     name: "type"
     mandatory: true
-    value: "application/json"
+    value_casei: "application/json"
   }
   # TODO(gregable): Validate the cdata contents of this script tag.
   cdata: {

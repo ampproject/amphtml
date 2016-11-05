@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/analytics.amp.html">analytics.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-analytics/">Annotated code example for amp-analytics</a></td>
   </tr>
 </table>
 
@@ -88,6 +88,12 @@ Here's an example of usage of `type` for a provider called XYZ:
 Type attribute value: `adobeanalytics`
 
 Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [marketing.adobe.com](https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html).
+
+### AFS Analytics
+
+Type attribute value: `afsanalytics`
+
+Adds support for AFS Analytics. Additionally, the `websiteid` and `server` variables must be specified. More details for adding AFS Analytics support can be found at [afsanalytics.com](https://www.afsanalytics.com/articles/developers/).
 
 ### AT Internet
 
@@ -220,7 +226,7 @@ Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
-## Segment
+### Segment
 
 Type attribute value: `segment`
 
@@ -251,14 +257,19 @@ Type attribute value: `webtrekk`
 
 Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
 
+### Yandex Metrica
+
+Type attribute value: `metrika`
+
+Adds support for Yandex Metrica.
+
 ## <a name="attributes"></a>Attributes
 
   - `type` See [Analytics vendors](#analytics-vendors)
   - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md).
 
-    ```
-    <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
-    ```
+    `<amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>`
+
     The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
   - `data-credentials` Optional attribute. If set to `include` turns on the ability to read and write cookies on the request specified via `config` above.
   - `data-consent-notification-id` Optional attribute. If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
@@ -329,7 +340,7 @@ The `triggers` attribute describes when an analytics request should be sent. It 
  trigger-configuration. Trigger name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a
  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
-  - `on` (required) The event to listener for. Valid values are `click`, `scroll`, `timer`, and `visible`.
+  - `on` (required) The event to listener for. Valid values are `click`, `scroll`, `timer`, `visible`, and `hidden`.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify
     vars unique to this trigger.
@@ -341,7 +352,7 @@ The `triggers` attribute describes when an analytics request should be sent. It 
     - `threshold` This configuration is used to filter out requests that do not meet particular criteria: For a request to go through to the analytics vendor, the following logic should be true `HASH(sampleOn) < threshold`.
 
   As an example, following configuration can be used to sample 50% of the requests based on random input or at 1% based on client id.
-  ```
+  ```javascript
   'triggers': {
     'sampledOnRandom': {
       'on': 'visible',
@@ -363,10 +374,29 @@ The `triggers` attribute describes when an analytics request should be sent. It 
   ```
 
 #### Page visible trigger (`"on": "visible"`)
-Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
-  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply. The selector needs to be an css id that points to an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags).
-  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. Due to semantic restrictions, `continuousTimeMax` only works when the page is being hidden. Hence `continuousTimeMax` is not yet supported.
-  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. Due to semantic restrictions, `totalTimeMax` only works when the page is being hidden. Hence `totalTimeMax` is not yet supported.
+Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
+
+```javascript
+"triggers": {
+  "defaultPageview": {
+    "on": "visible",
+    "request": "pageview",
+  }
+}
+```
+
+##### Visibility Spec
+Visibility spec is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
+  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply. The selector needs to point to an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags). In addition, the semantics of how the element is selected can be changed using `selectionMethod`. The value of this property can be one of:
+    - a css id without `selectionMethod`
+    - a css id or tag name with `selectionMethod="scope"`
+    - a tag name with `selectionMethod="closest"`
+  - `selectionMethod` This property can have one of two values: `scope` and
+    `closest`. `scope` allows selection of element within the parent element of
+    `amp-analytics` tag. `closest` searches for the closest ancestor of
+    `amp-analytics` tag that satisfies the given selector.
+  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
+  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
   - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted.
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
@@ -386,19 +416,21 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
 }
 ```
 
+In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
+
 #### Click trigger (`"on": "click"`)
 Use this configuration to fire a request when a specified element is clicked. Use `selector` to control which elements will cause this request to fire:
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.  The value of `selector` can include variables that are defined in inline or remote config. The variables will be expanded to determine the elements to be tracked.
+  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements. The value of `selector` can include variables that are defined in inline or remote config. The variables will be expanded to determine the elements to be tracked.
 
     ```javascript
     "vars": {
-      "id1": "socialButtonId",
-      "id2": "shareButtonClass"
+      "id1": "#socialButtonId",
+      "id2": ".shareButtonClass"
     },
     "triggers": {
       "anchorClicks": {
         "on": "click",
-        "selector": "a, #${id1}, .${id2}",
+        "selector": "a, ${id1}, ${id2}",
         "request": "event",
         "vars": {
           "eventId": 128
@@ -406,6 +438,7 @@ Use this configuration to fire a request when a specified element is clicked. Us
       }
     }
     ```
+In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
 
 #### Scroll trigger (`"on": "scroll"`)
 Use this configuration to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
@@ -427,9 +460,10 @@ Use this configuration to fire a request under certain conditions when the page 
 
 #### Timer trigger (`"on": "timer"`)
 Use this configuration to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
+    - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
     ```javascript
     "triggers": {
@@ -443,6 +477,18 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
       }
     }
     ```
+
+#### Hidden trigger (`"on": "hidden"`)
+Use this configuration to fire a request when the page becomes is hidden.  The firing of this trigger can be configured using [`visibilitySpec`](#visibility-spec).
+
+```javascript
+"triggers": {
+  "defaultPageview": {
+    "on": "hidden",
+    "request": "pagehide",
+  }
+}
+```
 
 #### Access triggers (`"on": "amp-access-*"`)
 

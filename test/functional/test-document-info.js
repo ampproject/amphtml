@@ -15,9 +15,23 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {documentInfoFor} from '../../src/document-info';
+import {documentInfoForDoc} from '../../src/document-info';
+import {installDocumentInfoServiceForDoc,} from
+    '../../src/service/document-info-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
+import * as sinon from 'sinon';
 
 describe('document-info', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   function getWin(canonical) {
     return createIframePromise().then(iframe => {
       if (canonical) {
@@ -26,13 +40,17 @@ describe('document-info', () => {
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);
       }
+      const win = iframe.win;
+      installDocService(win, true);
+      sandbox.stub(win.Math, 'random', () => 0.123456789);
+      installDocumentInfoServiceForDoc(win.document);
       return iframe.win;
     });
   }
 
   it('should provide the canonicalUrl', () => {
     return getWin('https://twitter.com/').then(win => {
-      expect(documentInfoFor(win).canonicalUrl).to.equal(
+      expect(documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'https://twitter.com/');
     });
   });
@@ -40,6 +58,7 @@ describe('document-info', () => {
   it('should provide the sourceUrl', () => {
     const win = {
       document: {
+        nodeType: /* document */ 9,
         querySelector() { return 'http://www.origin.com/foo/?f=0'; },
       },
       Math: {random() { return 0.123456789; }},
@@ -47,32 +66,45 @@ describe('document-info', () => {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
     };
-    expect(documentInfoFor(win).sourceUrl).to.equal(
+    win.document.defaultView = win;
+    installDocService(win, true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
         'http://www.origin.com/foo/?f=0');
+  });
+
+  it('should provide the updated sourceUrl', () => {
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
+        'http://www.origin.com/foo/?f=0');
+    win.location.href = 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=1';
+    expect(documentInfoForDoc(win.document).sourceUrl).to.equal(
+        'http://www.origin.com/foo/?f=1');
   });
 
   it('should provide the pageViewId', () => {
     return getWin('https://twitter.com/').then(win => {
-      win.Math.random = () => {
-        return 0.123456789;
-      };
-      expect(documentInfoFor(win).pageViewId).to.equal('1234');
-      expect(documentInfoFor(win).pageViewId).to.equal('1234');
+      expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
+      expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
     });
   });
 
   it('should provide the relative canonicalUrl as absolute', () => {
     return getWin('./foo.html').then(win => {
-      expect(documentInfoFor(win).canonicalUrl).to.equal(
+      expect(documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'http://localhost:' + location.port + '/foo.html');
-    });
-  });
-
-  it('should throw if no canonical is available.', () => {
-    return getWin(null).then(win => {
-      expect(() => {
-        documentInfoFor(win).canonicalUrl;
-      }).to.throw(/AMP files are required to have a/);
     });
   });
 });

@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-user-notification
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-user-notification extension .js script"
   mandatory_parent: "HEAD"
@@ -36,7 +37,7 @@ tags: {  # amp-user-notification
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -47,6 +48,7 @@ tags: {  # amp-user-notification
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
 }
 tags: {  # <amp-user-notification>
+  html_format: AMP
   tag_name: "AMP-USER-NOTIFICATION"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-analytics extension .js script"
@@ -56,4 +58,23 @@ tags: {  # <amp-user-notification>
   amp_layout: {
     supported_layouts: NODISPLAY
   }
+  # These attributes are allowed implicitly as data-* attributes,
+  # but we make additional constraints on validating URLs.
+  attrs: {
+    name: "data-show-if-href"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+  attrs: {
+    name: "data-dismiss-href"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+
 }

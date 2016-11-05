@@ -15,17 +15,19 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {preconnectFor, Preconnect} from '../../src/preconnect';
+import {preconnectForElement, setPreconnectFeaturesForTesting,} from
+    '../../src/preconnect';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 describe('preconnect', () => {
 
   let sandbox;
+  let iframeClock;
   let clock;
   let preconnect;
   let preloadSupported;
   let preconnectSupported;
-  let detectFeatures;
   let isSafari;
   let visible;
 
@@ -33,28 +35,36 @@ describe('preconnect', () => {
   // bare javascript URLs.
   const javascriptUrlPrefix = 'javascript';
 
-  function getPreconnectIframe() {
+  function getPreconnectIframe(detectFeatures = false) {
     return createIframePromise().then(iframe => {
-      if (!detectFeatures) {
-        sandbox.stub(Preconnect.prototype, 'detectFeatures_', () => {
-          return {
-            preload: preloadSupported,
-            preconnect: preconnectSupported,
-          };
+      iframeClock = lolex.install(iframe.win);
+      if (detectFeatures) {
+        setPreconnectFeaturesForTesting(null);
+      } else {
+        setPreconnectFeaturesForTesting({
+          preload: preloadSupported,
+          preconnect: preconnectSupported,
         });
       }
-      preconnect = preconnectFor(iframe.win);
-      if (isSafari !== undefined) {
-        sandbox.stub(preconnect.platform_, 'isSafari', () => {
-          return isSafari;
-        });
-      }
+
+      const platform = {
+        isSafari: () => !!isSafari,
+      };
+      iframe.win.services['platform'] = {obj: platform};
+
+      const element = document.createElement('div');
+      iframe.win.document.body.appendChild(element);
+      preconnect = preconnectForElement(element);
+      preconnect.viewer_ = {
+        whenFirstVisible: () => {},
+      };
       sandbox.stub(preconnect.viewer_, 'whenFirstVisible', () => {
         return visible;
       });
       return iframe;
     });
   }
+
   beforeEach(() => {
     visible = Promise.resolve();
     isSafari = undefined;
@@ -62,7 +72,6 @@ describe('preconnect', () => {
     // to test for preload/preconnect support.
     preloadSupported = false;
     preconnectSupported = false;
-    detectFeatures = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
   });
@@ -70,6 +79,7 @@ describe('preconnect', () => {
   afterEach(() => {
     clock.tick(200000);
     sandbox.restore();
+    setPreconnectFeaturesForTesting(null);
   });
 
   it('should preconnect', () => {
@@ -160,12 +170,12 @@ describe('preconnect', () => {
           .to.have.length(1);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(9000);
+      iframeClock.tick(9000);
       expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
           .to.have.length(1);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(1000);
+      iframeClock.tick(1000);
       expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
           .to.have.length(0);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
@@ -194,14 +204,15 @@ describe('preconnect', () => {
       preconnect.url('https://x.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(9000);
+      iframeClock.tick(9000);
       preconnect.url('https://x.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(1000);
+      iframeClock.tick(1000);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(0);
       // After timeout preconnect creates a new tag.
+      clock.tick(10000);
       preconnect.url('https://x.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
@@ -214,9 +225,10 @@ describe('preconnect', () => {
           /* opt_alsoConnecting */ true);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(1);
-      clock.tick(10000);
+      iframeClock.tick(10000);
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(0);
+      clock.tick(10000);
       preconnect.url('https://y.preconnect.com/foo/bar');
       expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
           .to.have.length(0);
@@ -260,8 +272,7 @@ describe('preconnect', () => {
   it('should add links (prefetch or preload)', () => {
     // Don't stub preload support allow the test to run through the browser
     // default regardless of support or not.
-    detectFeatures = true;
-    return getPreconnectIframe().then(iframe => {
+    return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
       preconnect.preload('https://a.prefetch.com/foo/bar', 'script');
       preconnect.preload('https://a.prefetch.com/foo/bar');
       preconnect.preload('https://a.prefetch.com/other', 'style');

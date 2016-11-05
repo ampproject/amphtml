@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-brightcove
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-brightcove extension .js script"
   mandatory_parent: "HEAD"
@@ -36,7 +38,7 @@ tags: {  # amp-brightcove
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -47,6 +49,8 @@ tags: {  # amp-brightcove
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
 }
 tags: {  # <amp-brightcove>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-BRIGHTCOVE"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-brightcove extension .js script"

@@ -17,13 +17,12 @@
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
-import {documentInfoFor} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
 import {isProxyOrigin} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewerForDoc} from '../../../src/viewer';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -44,33 +43,36 @@ const AmpAdImplementation = {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
+ * @param {!Element} element The AMP tag element.
  * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
-export function isGoogleAdsA4AValidEnvironment(win) {
+export function isGoogleAdsA4AValidEnvironment(win, element) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
+  const multiSizeRequest = element.dataset && element.dataset.multiSize;
   // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
   // will be kept up to date with known proxies.  However, it doesn't seem to
   // be compatible with loading the example files from localhost.  To hack
   // around that, just say that we're A4A eligible if we're in local dev
   // mode, regardless of origin path.
-  return supportsNativeCrypto &&
-      (isProxyOrigin(win.location) || getMode().localDev);
+  return supportsNativeCrypto && !multiSizeRequest &&
+      (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
 }
 
 /**
- * @param {!AmpA4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {number} slotNumber
- * @param {!Array<!QueryParameter>} queryParams
- * @param {!Array<!QueryParameter>} unboundedQueryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams) {
-  const referrerPromise = viewerFor(a4a.win).getReferrerUrl();
+  /** @const {!Promise<string>} */
+  const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
       buildAdUrl(
           a4a, baseUrl, startTime, slotNumber, queryParams,
@@ -79,44 +81,33 @@ export function googleAdUrl(
 
 
 /**
- * @param {string} str
- * @return {!Uint8Array}
- * @visibleForTesting
- */
-export function base64ToByteArray(str) {
-  const bytesAsString = atob(str);
-  const len = bytesAsString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bytesAsString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-/**
  * @param {!ArrayBuffer} creative
  * @param {!Headers} responseHeaders
- * @return {!Promise<!AdResponseDef>}
+ * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
  */
 export function extractGoogleAdCreativeAndSignature(
     creative, responseHeaders) {
   let signature = null;
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature = base64ToByteArray(responseHeaders.get(AMP_SIGNATURE_HEADER));
+      signature =
+        base64UrlDecodeToBytes(dev().assertString(
+            responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
   } finally {
-    return Promise.resolve({creative, signature});
+    return Promise.resolve(/** @type {
+          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
+          {creative, signature}));
   }
 }
 
 /**
- * @param {!AmpA4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {number} slotNumber
- * @param {!Array<!QueryParameter>} queryParams
- * @param {!Array<!QueryParameter>} unboundedQueryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
  * @param {(string|undefined)} clientId
  * @param {string} referrer
  * @return {string}
@@ -125,7 +116,7 @@ function buildAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams,
     clientId, referrer) {
   const global = a4a.win;
-  const documentInfo = documentInfoFor(global);
+  const documentInfo = documentInfoForDoc(a4a.element);
   if (!global.gaGlobal) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
@@ -134,16 +125,14 @@ function buildAdUrl(
     };
   }
   const slotRect = a4a.getIntersectionElementLayoutBox();
-  const viewportRect = viewportFor(global).getRect();
+  const viewportRect = a4a.getViewport().getRect();
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const allQueryParams = queryParams.concat(
     [
       {
         name: 'is_amp',
-        value: a4a.supportsShadowDom() ?
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME,
+        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
       },
       {name: 'amp_v', value: '$internalRuntimeVersion$'},
       {name: 'dt', value: startTime},
@@ -171,7 +160,7 @@ function buildAdUrl(
       {name: 'ref', value: referrer},
     ]
   );
-  dtdParam.value = elapsedTimeWithCeiling(timer.now(), startTime);
+  dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
   return buildUrl(
       baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
 }
@@ -214,14 +203,14 @@ function iframeNestingDepth(global) {
     win = win.parent;
     depth++;
   }
-  dev.assert(win == global.top);
+  dev().assert(win == global.top);
   return depth;
 }
 
 /**
  * @param {number} slotNumber
- * @param {!LayoutRectDef} slotRect
- * @param {!LayoutRectDef} viewportRect
+ * @param {!../../../src/layout-rect.LayoutRectDef} slotRect
+ * @param {!../../../src/layout-rect.LayoutRectDef} viewportRect
  * @return {string}
  */
 function adKey(slotNumber, slotRect, viewportRect) {
@@ -299,7 +288,7 @@ function secondWindowFromTop(global) {
   while (secondFromTop.parent != secondFromTop.parent.parent) {
     secondFromTop = secondFromTop.parent;
   }
-  dev.assert(secondFromTop.parent == global.top);
+  dev().assert(secondFromTop.parent == global.top);
   return secondFromTop;
 }
 
@@ -316,4 +305,17 @@ function elapsedTimeWithCeiling(time, start) {
     return duration;
   }
   return '-M';
+}
+
+/**
+ * @param {!Window} win
+ * @param {string=} opt_cid
+ * @return {number} The correlator.
+ */
+export function getCorrelator(win, opt_cid) {
+  if (!win.ampAdPageCorrelator) {
+    win.ampAdPageCorrelator = makeCorrelator(
+        opt_cid, documentInfoForDoc(win.document).pageViewId);
+  }
+  return win.ampAdPageCorrelator;
 }

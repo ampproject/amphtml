@@ -62,9 +62,10 @@ def CheckPrereqs():
 
   # Ensure source files are available.
   for f in ['validator-main.protoascii', 'validator.proto',
-            'validator_gen_js.py', 'package.json', 'validator.js',
-            'validator_test.js', 'validator-in-browser.js', 'tokenize-css.js',
-            'parse-css.js', 'parse-srcset.js']:
+            'validator_gen_js.py', 'package.json', 'engine/validator.js',
+            'engine/validator_test.js', 'engine/validator-in-browser.js',
+            'engine/tokenize-css.js', 'engine/parse-css.js',
+            'engine/parse-srcset.js', 'engine/parse-url.js']:
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
@@ -130,8 +131,6 @@ def InstallNodeDependencies():
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(['npm', 'install'])
-  logging.info('installing AMP Validator webui dependencies ...')
-  subprocess.check_call(['npm', 'install'], cwd='webui')
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(['npm', 'install'], cwd='nodejs')
   logging.info('... done')
@@ -147,8 +146,8 @@ def GenValidatorPb2Py(out_dir):
   logging.info('entering ...')
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
-  subprocess.check_call(['protoc', 'validator.proto', '--python_out=%s' %
-                         out_dir])
+  subprocess.check_call(['protoc', 'validator.proto',
+                         '--python_out=%s' % out_dir])
   open('%s/__init__.py' % out_dir, 'w').close()
   logging.info('... done')
 
@@ -267,10 +266,13 @@ def CompileValidatorMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
-                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator-full.js',
-                'htmlparser-interface.js'],
+      js_files=['engine/htmlparser.js', 'engine/parse-css.js',
+                'engine/parse-srcset.js', 'engine/parse-url.js',
+                'engine/tokenize-css.js',
+                '%s/validator-generated.js' % out_dir,
+                'engine/validator-in-browser.js', 'engine/validator.js',
+                'engine/amp4ads-parse-css.js', 'engine/dom-walker.js',
+                'engine/htmlparser-interface.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
                             'amp.validator.renderErrorMessage'],
@@ -294,8 +296,8 @@ def RunSmokeTest(out_dir, nodejs_cmd):
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
-  if ('testdata/feature_tests/minimum_valid_amp.html: PASS\n', '',
-      p.returncode) != (stdout, stderr, 0):
+  if ('testdata/feature_tests/minimum_valid_amp.html: PASS\n', '', p.returncode
+     ) != (stdout, stderr, 0):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
         (p.returncode, stdout, stderr))
 
@@ -322,9 +324,11 @@ def RunIndexTest(nodejs_cmd):
     nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
-  p = subprocess.Popen([nodejs_cmd, './index_test.js'],
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE, cwd='nodejs')
+  p = subprocess.Popen(
+      [nodejs_cmd, './index_test.js'],
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      cwd='nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
@@ -341,10 +345,13 @@ def CompileValidatorTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
-                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator-full.js',
-                'htmlparser-interface.js', 'validator_test.js'],
+      js_files=['engine/htmlparser.js', 'engine/parse-css.js',
+                'engine/parse-srcset.js', 'engine/parse-url.js',
+                'engine/tokenize-css.js',
+                '%s/validator-generated.js' % out_dir,
+                'engine/validator-in-browser.js', 'engine/validator.js',
+                'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
+                'engine/dom-walker.js', 'engine/validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
@@ -359,11 +366,12 @@ def CompileValidatorLightTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
-                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator-light.js',
-                'htmlparser-interface.js', 'dom-walker.js',
-                'validator-light_test.js'],
+      js_files=['engine/htmlparser.js', 'engine/parse-css.js',
+                'engine/parse-srcset.js', 'engine/parse-url.js',
+                'engine/tokenize-css.js', '%s/validator-generated.js' % out_dir,
+                'engine/validator-in-browser.js', 'engine/validator.js',
+                'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
+                'engine/dom-walker.js', 'engine/validator-light_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator-light_test_minified.js' % out_dir)
   logging.info('... success')
@@ -377,10 +385,11 @@ def CompileHtmlparserTestMinified(out_dir):
       dots, etc.
   """
   logging.info('entering ...')
-  CompileWithClosure(js_files=['htmlparser.js', 'htmlparser-interface.js',
-                               'htmlparser_test.js'],
-                     closure_entry_points=['amp.htmlparser.HtmlParserTest'],
-                     output_file='%s/htmlparser_test_minified.js' % out_dir)
+  CompileWithClosure(
+      js_files=['engine/htmlparser.js', 'engine/htmlparser-interface.js',
+                'engine/htmlparser_test.js'],
+      closure_entry_points=['amp.htmlparser.HtmlParserTest'],
+      output_file='%s/htmlparser_test_minified.js' % out_dir)
   logging.info('... success')
 
 
@@ -393,11 +402,49 @@ def CompileParseCssTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['parse-css.js', 'tokenize-css.js', 'css-selectors.js',
-                'json-testutil.js', 'parse-css_test.js',
+      js_files=['engine/parse-css.js', 'engine/parse-url.js',
+                'engine/tokenize-css.js', 'engine/css-selectors.js',
+                'engine/json-testutil.js', 'engine/parse-css_test.js',
                 '%s/validator-generated.js' % out_dir],
       closure_entry_points=['parse_css.ParseCssTest'],
       output_file='%s/parse-css_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
+def CompileParseUrlTestMinified(out_dir):
+  """Runs closure compiler for parse-url_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['engine/parse-url.js', 'engine/parse-css.js',
+                'engine/tokenize-css.js', 'engine/css-selectors.js',
+                'engine/json-testutil.js', 'engine/parse-url_test.js',
+                '%s/validator-generated.js' % out_dir],
+      closure_entry_points=['parse_url.ParseURLTest'],
+      output_file='%s/parse-url_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
+def CompileAmp4AdsParseCssTestMinified(out_dir):
+  """Runs closure compiler for amp4ads-parse-css_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['engine/amp4ads-parse-css_test.js', 'engine/parse-css.js',
+                'engine/parse-url.js', 'engine/amp4ads-parse-css.js',
+                'engine/tokenize-css.js', 'engine/css-selectors.js',
+                'engine/json-testutil.js',
+                '%s/validator-generated.js' % out_dir],
+      closure_entry_points=['parse_css.Amp4AdsParseCssTest'],
+      output_file='%s/amp4ads-parse-css_test_minified.js' % out_dir)
   logging.info('... success')
 
 
@@ -410,7 +457,8 @@ def CompileParseSrcsetTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['parse-srcset.js', 'json-testutil.js', 'parse-srcset_test.js',
+      js_files=['engine/parse-srcset.js', 'engine/json-testutil.js',
+                'engine/parse-srcset_test.js',
                 '%s/validator-generated.js' % out_dir],
       closure_entry_points=['parse_srcset.ParseSrcsetTest'],
       output_file='%s/parse-srcset_test_minified.js' % out_dir)
@@ -442,6 +490,8 @@ def GenerateTestRunner(out_dir):
              require('./validator-light_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
+             require('./parse-url_test_minified');
+             require('./amp4ads-parse-css_test_minified');
              require('./parse-srcset_test_minified');
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
@@ -465,51 +515,10 @@ def RunTests(out_dir, nodejs_cmd):
   logging.info('... success')
 
 
-def CreateWebuiAppengineDist(out_dir):
-  """Creates the webui vulcanized directory to deploy to Appengine.
-
-  Args:
-    out_dir: directory name of the output directory. Must not have slashes,
-      dots, etc.
-  """
-  logging.info('entering ...')
-  try:
-    tempdir = tempfile.mkdtemp()
-    # Merge the contents of webui with the installed node_modules into a
-    # common root (a temp directory). This lets us use the vulcanize tool.
-    for entry in os.listdir('webui'):
-      if entry != 'node_modules':
-        if os.path.isfile(os.path.join('webui', entry)):
-          shutil.copyfile(os.path.join('webui', entry),
-                          os.path.join(tempdir, entry))
-        else:
-          shutil.copytree(os.path.join('webui', entry),
-                          os.path.join(tempdir, entry))
-    for entry in os.listdir('webui/node_modules'):
-      if entry != '@polymer':
-        shutil.copytree(os.path.join('webui/node_modules', entry),
-                        os.path.join(tempdir, entry))
-    for entry in os.listdir('webui/node_modules/@polymer'):
-      shutil.copytree(os.path.join('webui/node_modules/@polymer', entry),
-                      os.path.join(tempdir, '@polymer', entry))
-    vulcanized_index_html = subprocess.check_output([
-        'webui/node_modules/vulcanize/bin/vulcanize',
-        '--inline-scripts', '--inline-css',
-        '-p', tempdir, 'index.html'])
-  finally:
-    shutil.rmtree(tempdir)
-  webui_out = os.path.join(out_dir, 'webui_appengine')
-  shutil.copytree('webui', webui_out)
-  f = open(os.path.join(webui_out, 'index.html'), 'w')
-  f.write(vulcanized_index_html)
-  f.close()
-  logging.info('... success')
-
-
 def Main():
   """The main method, which executes all build steps and runs the tests."""
-  logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
-                      level=logging.INFO)
+  logging.basicConfig(
+      format='[[%(filename)s %(funcName)s]] - %(message)s', level=logging.INFO)
   nodejs_cmd = GetNodeJsCmd()
   CheckPrereqs()
   InstallNodeDependencies()
@@ -526,10 +535,11 @@ def Main():
   CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
+  CompileParseUrlTestMinified(out_dir='dist')
+  CompileAmp4AdsParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
-  CreateWebuiAppengineDist(out_dir='dist')
 
 
 if __name__ == '__main__':

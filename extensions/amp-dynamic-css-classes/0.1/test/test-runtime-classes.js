@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {installViewerService} from '../../../../src/service/viewer-impl';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {installVsyncService} from '../../../../src/service/vsync-impl';
-import {installDynamicClassesService} from '../amp-dynamic-css-classes';
+import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
 const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
@@ -35,31 +37,39 @@ describe('dynamic classes are inserted at runtime', () => {
       return this.indexOf(c) > -1;
     };
     body = {
+      nodeType: /* ELEMENT */ 1,
       tagName: 'BODY',
       classList,
     };
     mockWin = {
       document: {
+        nodeType: /* DOCUMENT */ 9,
         referrer: 'http://localhost/',
         body,
       },
       navigator: {
         userAgent: '',
       },
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
     };
+    mockWin.document.defaultView = mockWin;
   });
 
   function setup(embeded, userAgent, referrer) {
-    viewer = installViewerService(mockWin);
-    const vsync = installVsyncService(mockWin);
+    const ampdocService = installDocService(mockWin, /* isSingleDoc */ true);
+    const ampdoc = ampdocService.getAmpDoc();
+    installPlatformService(mockWin);
 
+    const vsync = installVsyncService(mockWin);
     vsync.schedule_ = () => {
       vsync.runScheduledTasks_();
     };
 
+    viewer = installViewerServiceForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
 
     if (userAgent !== undefined) {
@@ -68,7 +78,7 @@ describe('dynamic classes are inserted at runtime', () => {
     if (referrer !== undefined) {
       viewer.getUnconfirmedReferrerUrl = () => referrer;
     }
-    installDynamicClassesService(mockWin);
+    installDynamicClassesForTesting(ampdoc);
   }
 
   describe('when embedded', () => {

@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-dynamic-css-classes
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-dynamic-css-classes extension .js script"
   mandatory_parent: "HEAD"
@@ -36,7 +37,7 @@ tags: {  # amp-dynamic-css-classes
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {

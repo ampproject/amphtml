@@ -17,7 +17,7 @@
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
-import {viewportFor} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/viewport';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
@@ -44,9 +44,13 @@ describe('amp-fx-flying-carpet', () => {
       iframe = i;
       toggleExperiment(iframe.win, 'amp-fx-flying-carpet', true);
 
-      iframe.doc.body.style.height = '400vh';
+      const bodyResizer = iframe.doc.createElement('div');
+      bodyResizer.style.height = '400vh';
+      bodyResizer.style.width = '1px';
+      iframe.doc.body.appendChild(bodyResizer);
+
       iframe.doc.body.style.position = 'relative';
-      viewport = viewportFor(iframe.win);
+      viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
 
       const parent = iframe.doc.querySelector('#parent');
@@ -76,7 +80,7 @@ describe('amp-fx-flying-carpet', () => {
     return getAmpFlyingCarpet(iframe => {
       installImg(iframe.win);
       img = iframe.doc.createElement('amp-img');
-      img.setAttribute('src', '/base/examples/img/sample.jpg');
+      img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       return [img];
@@ -117,7 +121,7 @@ describe('amp-fx-flying-carpet', () => {
       const container = flyingCarpet.firstChild.firstChild;
       let width = 10;
 
-      impl.vsync_.mutate = function(callback) {
+      impl.getVsync().mutate = function(callback) {
         callback();
       };
       impl.getLayoutWidth = () => width;
@@ -160,7 +164,7 @@ describe('amp-fx-flying-carpet', () => {
       // Usually, the children appear on a new line with indentation
       const pretext = iframe.doc.createTextNode('\n  ');
       img = iframe.doc.createElement('amp-img');
-      img.setAttribute('src', '/base/examples/img/sample.jpg');
+      img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       // Usually, the closing node appears on a new line
