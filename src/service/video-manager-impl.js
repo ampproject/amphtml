@@ -20,6 +20,7 @@ import {getMode} from '../mode';
 import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {setStyles} from '../style';
+import {isFiniteNumber} from '../types';
 import {VideoEvents, VideoAttributes} from '../video-interface';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
@@ -365,10 +366,8 @@ class VideoEntry {
 
       // Calculate what percentage of the video is in viewport.
       const change = this.video.element.getIntersectionChangeEntry();
-      const ir = change.intersectionRect;
-      const br = change.boundingClientRect;
-      const visiblePercent = br.height * br.width == 0 ? 0 :
-        ir.width * ir.height * 100 / (br.height * br.width);
+      const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
+          : change.intersectionRatio * 100;
 
       this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
     };
