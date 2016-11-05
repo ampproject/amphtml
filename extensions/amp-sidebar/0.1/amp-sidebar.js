@@ -181,7 +181,7 @@ export class AmpSidebar extends AMP.BaseElement {
         // Focus on the sidebar for a11y.
         tryFocus(this.element);
         if (this.openOrCloseTimeOut_) {
-          this.timer_.clear(this.openOrCloseTimeOut_);
+          this.timer_.cancel(this.openOrCloseTimeOut_);
         }
         this.openOrCloseTimeOut_ = this.timer_.delay(() => {
           const children = this.getRealChildren();
@@ -209,7 +209,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
       if (this.openOrCloseTimeOut_) {
-        this.timer_.clear(this.openOrCloseTimeOut_);
+        this.timer_.cancel(this.openOrCloseTimeOut_);
       }
       this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {

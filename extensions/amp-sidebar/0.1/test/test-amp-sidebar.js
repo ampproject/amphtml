@@ -25,7 +25,7 @@ import '../amp-sidebar';
 
 adopt(window);
 
-describe.only('amp-sidebar', () => {
+describe('amp-sidebar', () => {
   let sandbox;
   let platform;
   let timer;
@@ -140,7 +140,7 @@ describe.only('amp-sidebar', () => {
       sandbox.stub(timer, 'delay', function(callback) {
         callback();
       });
-      timer.clear = sandbox.spy();
+      timer.cancel = sandbox.spy();
       impl.openOrCloseTimeOut_ = 10;
 
       impl.open_();
@@ -149,7 +149,7 @@ describe.only('amp-sidebar', () => {
       expect(sidebarElement.getAttribute('role')).to.equal('menu');
       expect(obj.iframe.doc.activeElement).to.equal(sidebarElement);
       expect(sidebarElement.style.display).to.equal('');
-      expect(timer.clear.callCount).to.equal(1);
+      expect(timer.cancel.callCount).to.equal(1);
       expect(impl.scheduleLayout.callCount).to.equal(1);
       expect(historyPushSpy.callCount).to.equal(1);
       expect(historyPopSpy.callCount).to.equal(0);
@@ -194,13 +194,13 @@ describe.only('amp-sidebar', () => {
         callback();
       });
 
-      timer.clear = sandbox.spy();
+      timer.cancel = sandbox.spy();
       impl.openOrCloseTimeOut_ = 10;
       impl.close_();
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
       expect(sidebarElement.style.display).to.equal('none');
-      expect(timer.clear.callCount).to.equal(1);
+      expect(timer.cancel.callCount).to.equal(1);
       expect(impl.schedulePause.callCount).to.equal(1);
       expect(historyPopSpy.callCount).to.equal(1);
       expect(impl.historyId_).to.equal(-1);
