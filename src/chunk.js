@@ -151,8 +151,8 @@ class Chunks {
       t();
     } catch (e) {
       // We run early in init. All errors should show the doc.
-      makeBodyVisible(self.document);
       rethrowAsync(e);
+      makeBodyVisible(self.document);
     } finally {
       if (this.tasks_.length) {
         this.schedule_();
