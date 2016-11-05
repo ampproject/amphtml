@@ -219,6 +219,7 @@ export class AmpForm {
         requireAmpResponseSourceOrigin: true,
       }).then(response => {
         this.actions_.trigger(this.form_, 'submit-success', null);
+        // TODO(mkhatib, #6032): Update docs to reflect analytics events.
         this.analyticsEvent_('amp-form-submit-success');
         this.setState_(FormState_.SUBMIT_SUCCESS);
         this.renderTemplate_(response || {});
