@@ -128,8 +128,10 @@ function resizeIframe(containerName, adsLoaded) {
       backfillAfsPageOptions = null;
       backfillAfsAdblockOptions = null;
 
+      const _googCsa = window['_googCsa'];
+
       // Call AFS
-      global._googCsa('ads', tmpBackfillAfsPageOptions,
+      _googCsa('ads', tmpBackfillAfsPageOptions,
         tmpBackfillAfsAdblockOptions);
 
     } else {
