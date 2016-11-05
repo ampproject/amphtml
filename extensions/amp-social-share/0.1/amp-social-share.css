@@ -56,6 +56,11 @@ amp-social-share {
   background-color: #dc4e41;
 }
 
+/* Tumblr Styling */
+.amp-social-share-tumblr {
+  background-color: #3c5a77;
+}
+
 /* Email Styling */
 .amp-social-share-email {
   background-color: #000000;
