@@ -104,6 +104,9 @@ The element provides [some pre-configured providers](0.1/amp-social-share-config
     - url `optional` (defaults: `rel=canonical` URL)
 - gplus
     - url `optional` (defaults: `rel=canonical` URL)
+- tumblr
+    - url `optional` (defaults: `rel=canonical` URL)
+    - name `optional` (defaults: Current page title)
 - email
     - subject `optional` (defaults: Crrent page title)
     - body `optional` (defaults: `rel=canonical` URL)
