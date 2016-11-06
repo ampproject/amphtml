@@ -29,7 +29,7 @@
     "promise-pjs": "1.1.2"
   },
   "devDependencies": {
-    "autoprefixer": "6.1.1",
+    "autoprefixer": "6.5.2",
     "ava": "0.15.2",
     "babel-core": "5.8.35",
     "babel-eslint": "6.1.2",
