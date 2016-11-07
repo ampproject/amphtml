@@ -207,6 +207,7 @@ export const adConfig = {
   },
 
   ibillboard: {},
+
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',

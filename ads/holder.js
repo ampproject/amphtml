@@ -22,13 +22,10 @@ import {writeScript, validateData} from '../3p/3p';
  */
 export function holder(global, data) {
   validateData(data, ['block'], ['ampSlotIndex']);
-  const wcl = global.context.location,
-    n = navigator.userAgent;
-  let l = '&r' + Math.round((Math.random() * 10000000));
-  l += '&' +
-  'h' + wcl.href;
-  if (!(n.indexOf('Safari') != -1 &&
-  n.indexOf('Chrome') == -1)) {
+  const wcl = global.context.location;
+  const n = navigator.userAgent;
+  let l = '&r' + Math.round((Math.random() * 10000000)) + '&h' + wcl.href;
+  if (!(n.indexOf('Safari') != -1 && n.indexOf('Chrome') == -1)) {
     l += '&c1';
   }
   data.queue = l;
