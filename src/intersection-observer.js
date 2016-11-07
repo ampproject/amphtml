@@ -19,6 +19,9 @@ import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './timer';
 
+const DEFAULT_THRESHOLDS = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
+    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+
 /**
  * The structure that defines the rectangle used in intersection observers.
  *
@@ -171,6 +174,19 @@ export class IntersectionObserver {
 
     /** @private {?Function} */
     this.unlistenViewportChanges_ = null;
+
+    /**
+     * A list of thresholds, sorted in increasing numeric order
+     * @private {!Array}
+     */
+    this.thresholds_ = DEFAULT_THRESHOLDS;
+
+    /**
+     * The prev threshold slot which the previous ratio fills
+     * Range [0, this.thresholds_.length]
+     * @private {number}
+     */
+    this.prevThresholdSlot_ = 0;
   }
 
   fire() {
@@ -252,6 +268,15 @@ export class IntersectionObserver {
         == change.time) {
       return;
     }
+
+    // Find the new slot number:
+    const newThresholdSlot =
+        this.getThresholdSlot_(change.intersectionRatio);
+    if (this.prevThresholdSlot_ == newThresholdSlot) {
+      return;
+    }
+
+    this.prevThresholdSlot_ = newThresholdSlot;
     this.pendingChanges_.push(change);
     if (!this.flushTimeout_) {
       // Send one immediately, …
@@ -282,5 +307,32 @@ export class IntersectionObserver {
     this.timer_.cancel(this.flushTimeout_);
     this.unlistenOnOutViewport_();
     this.postMessageApi_.destroy();
+  }
+
+  /**
+   * Returns the slot number that the current ratio fills in.
+   * @param {number} ratio Range from [0, 1]
+   * @return {number} Range from [0, thresholds.length]
+   * @private
+   */
+  getThresholdSlot_(ratio) {
+    let startIdx = 0;
+    let endIdx = this.thresholds_.length;
+    // 0 is a special case that does not fit into [small, large) range
+    if (ratio == 0) {
+      return 0;
+    }
+    let mid = Math.floor((startIdx + endIdx) / 2);
+    while (startIdx < mid) {
+      const midValue = this.thresholds_[mid];
+      // In the range of [small, large)
+      if (ratio < midValue) {
+        endIdx = mid;
+      } else {
+        startIdx = mid;
+      }
+      mid = Math.floor((startIdx + endIdx) / 2);
+    }
+    return endIdx;
   }
 }
