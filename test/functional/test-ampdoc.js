@@ -24,6 +24,7 @@ import {
 } from '../../src/service/ampdoc-impl';
 import * as dom from '../../src/dom';
 import * as docready from '../../src/document-ready';
+import {createShadowRoot} from '../../src/shadow-embed';
 import * as sinon from 'sinon';
 
 
@@ -281,11 +282,9 @@ describe('AmpDocShadow', () => {
     sandbox = sinon.sandbox.create();
     content = document.createElement('div');
     host = document.createElement('div');
-    if (host.createShadowRoot) {
-      shadowRoot = host.createShadowRoot();
-      shadowRoot.appendChild(content);
-      ampdoc = new AmpDocShadow(window, URL, shadowRoot);
-    }
+    shadowRoot = createShadowRoot(host);
+    shadowRoot.appendChild(content);
+    ampdoc = new AmpDocShadow(window, URL, shadowRoot);
   });
 
   afterEach(() => {
