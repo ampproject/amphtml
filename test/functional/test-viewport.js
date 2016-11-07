@@ -1424,6 +1424,9 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     const wrapperCss = win.getComputedStyle(binding.wrapper_);
     const bodyCss = win.getComputedStyle(win.document.body);
 
+    // `<html>` must have `position: static` or layout is broken.
+    expect(htmlCss.position).to.equal('static');
+
     // `<html>` and `<i-amp-html-wrapper>` must be scrollable, but not `body`.
     // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
     expect(htmlCss.overflowY).to.equal('auto');
