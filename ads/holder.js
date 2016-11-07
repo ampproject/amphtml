@@ -21,7 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function holder(global, data) {
-  validateData(data, ['block'], ['ampSlotIndex']);
+  validateData(data, ['block'], []);
   const wcl = global.context.location;
   const n = navigator.userAgent;
   let l = '&r' + Math.round((Math.random() * 10000000)) + '&h' + wcl.href;
