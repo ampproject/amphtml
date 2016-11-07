@@ -63,8 +63,8 @@ export class AmpAdUIHandler {
     /** {number} */
     this.state = AdDisplayState.NOT_LAID_OUT;;
 
-    /** {?Element} */
-    this.pageProvidedFallback_ = baseInstance.getFallback();
+    /** {!boolean} */
+    this.hasPageProvidedFallback_ = !!baseInstance.getFallback();
   }
 
   /**
@@ -75,9 +75,10 @@ export class AmpAdUIHandler {
       return;
     }
 
-    if (this.pageProvidedFallback_) {
+    if (this.hasPageProvidedFallback_) {
       return;
     }
+
     // Apply default fallback div when there's no default one
     const holder = createElementWithAttributes(document, 'div', {
       'fallback': '',
@@ -142,7 +143,7 @@ export class AmpAdUIHandler {
    */
   displayNoContentUI_() {
     // The order here is user provided fallback > collapse > default fallback
-    if (this.pageProvidedFallback_) {
+    if (this.hasPageProvidedFallback_) {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
           // If already unlaid out, do not replace current placeholder then.
