@@ -37,7 +37,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Encode, utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
@@ -463,6 +463,10 @@ export class AmpA4A extends AMP.BaseElement {
         });
   }
 
+  verifyCreativeSignatureFake_(creative, signature) {
+    return Promise.resolve(creative);
+  }
+
   /**
    * Attempts to validate the creative signature against every key currently in
    * our possession. This should never be called before at least one key fetch
@@ -670,6 +674,42 @@ export class AmpA4A extends AMP.BaseElement {
   onCrossDomainIframeCreated(iframe) {
     dev().info(TAG, this.element.getAttribute('type'),
         `onCrossDomainIframeCreated ${iframe}`);
+  }
+
+  sendXhrRequestFake_(adUrl) {
+    const mockResponse = {
+      arrayBuffer: function() {
+        return utf8Encode(`<!doctype html>
+<html ⚡4ads>
+<head><meta charset=utf-8><script async src=https://cdn.ampproject.org/v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style><meta name=viewport content=width=device-width,minimum-scale=1></head>
+<body>Hello, world.
+
+<script type="application/json" amp-ad-metadata>
+{
+   "ampRuntimeUtf16CharOffsets" : [ 55, 212 ],
+   "bodyAttributes" : "",
+   "bodyUtf16CharOffsets" : [ 529, 544 ],
+   "cssUtf16CharOffsets" : [ 320, 386 ],
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ]
+}
+</script>
+</body></html>`);
+      },
+      bodyUsed: false,
+      headers: new Headers(),
+      catch: callback => callback(),
+    };
+    mockResponse.headers.append('X-TestSignatureHeader', `ACWMjZEOeJKFek0b9LAGVFDsXPuGI8c1lFSUf+yVgVyswH0gBCoY9jaeNZnyWrKbSn2fNGp7F/tu5XGqkazkPatPRsUIRAII0aIbouiiRK/KUd+fX+gMiOssJH5yLBEukAMY5Te4pNSSOO27s0tzf/fhx9okOW2/23NkhazV9cGKAX6jxlMKSKgTQuZ3phynC3zyy1Tzn2r3jj1G9wvZXWqnexesOcbcX9BQYGvk5wGTjLUElA1QXqvhdzSQgyyX+ajvWBUNwVFHDQaQsV+2WGx0DhHaXmtgEBVnFSjzahELBPwH2SxrHzIfEZC4TP86VquNuAwetXulhwn5VjkbTOQoAeuw`);
+    return Promise.resolve(mockResponse);
   }
 
   /**
