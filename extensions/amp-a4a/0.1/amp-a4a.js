@@ -33,7 +33,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Encode, utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
@@ -373,7 +373,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
         /** @return {!Promise<?string>} */
-        .then(creativeParts => {
+        .then(creativeParts => { debugger;
           checkStillCurrent(promiseId);
           // Keep a handle to the creative body so that we can render into
           // SafeFrame later, if necessary.  TODO(tdrl): Temporary, while we
@@ -381,12 +381,11 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
-              creativeParts && creativeParts.creative) {
+          if (creativeParts && creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
           }
           if (!creativeParts || !creativeParts.signature) {
-            return /** @type {!Promise<?string>} */ (Promise.resolve(null));
+//            return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
           this.emitLifecycleEvent('adResponseValidateStart', creativeParts);
           return this.verifyCreativeSignature_(
@@ -411,13 +410,13 @@ export class AmpA4A extends AMP.BaseElement {
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
-
-          // TODO(levitzky) If creative comes back null, we should consider re-
-          // fetching the signing server public keys and try the verification
-          // step again.
           return creative && this.maybeRenderAmpAd_(creative);
         })
         .catch(error => this.promiseErrorHandler_(error));
+  }
+
+  verifyCreativeSignatureFake_(creative, signature) {
+    return Promise.resolve(creative);
   }
 
   /**
@@ -525,6 +524,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.experimentalNonAmpCreativeRenderMethod_ = null;
           return renderPromise;
         } else if (this.adUrl_) {
+          const creativeStr = utf8Decode(this.creativeBody_);
           return this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
           throw new Error('No creative or URL available -- A4A can\'t render' +
@@ -619,6 +619,42 @@ export class AmpA4A extends AMP.BaseElement {
    */
   onCrossDomainIframeCreated(iframe) {
     dev().info('A4A', `onCrossDomainIframeCreated ${iframe}`);
+  }
+
+  sendXhrRequestFake_(adUrl) {
+    const mockResponse = {
+      arrayBuffer: function() {
+        return utf8Encode(`<!doctype html>
+<html ⚡4ads>
+<head><meta charset=utf-8><script async src=https://cdn.ampproject.org/v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style><meta name=viewport content=width=device-width,minimum-scale=1></head>
+<body>Hello, world.
+
+<script type="application/json" amp-ad-metadata>
+{
+   "ampRuntimeUtf16CharOffsets" : [ 55, 212 ],
+   "bodyAttributes" : "",
+   "bodyUtf16CharOffsets" : [ 529, 544 ],
+   "cssUtf16CharOffsets" : [ 320, 386 ],
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ]
+}
+</script>
+</body></html>`);
+      },
+      bodyUsed: false,
+      headers: new Headers(),
+      catch: callback => callback(),
+    };
+    mockResponse.headers.append('X-TestSignatureHeader', `ACWMjZEOeJKFek0b9LAGVFDsXPuGI8c1lFSUf+yVgVyswH0gBCoY9jaeNZnyWrKbSn2fNGp7F/tu5XGqkazkPatPRsUIRAII0aIbouiiRK/KUd+fX+gMiOssJH5yLBEukAMY5Te4pNSSOO27s0tzf/fhx9okOW2/23NkhazV9cGKAX6jxlMKSKgTQuZ3phynC3zyy1Tzn2r3jj1G9wvZXWqnexesOcbcX9BQYGvk5wGTjLUElA1QXqvhdzSQgyyX+ajvWBUNwVFHDQaQsV+2WGx0DhHaXmtgEBVnFSjzahELBPwH2SxrHzIfEZC4TP86VquNuAwetXulhwn5VjkbTOQoAeuw`);
+    return Promise.resolve(mockResponse);
   }
 
   /**
