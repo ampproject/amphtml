@@ -49,12 +49,13 @@ body {
 
 
 /**
- * iOS-Embed Wrapper mode. The `body` is wrapper into `i-amp-html-wrapper`
+ * iOS-Embed Wrapper mode. The `body` is wrapped into `i-amp-html-wrapper`
  * element.
  */
 html.-amp-ios-embed {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
+  position: static;
 }
 
 /** Wrapper for iOS-Embed-Wrapper mode. */
