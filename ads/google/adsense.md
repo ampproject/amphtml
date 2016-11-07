@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/181960?hl=en&ref_topic=1307438).
+For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/7183212?hl=en).
 
 Supported parameters:
 
