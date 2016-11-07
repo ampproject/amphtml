@@ -41,3 +41,18 @@ export function analyticsForOrNull(window) {
           >} */ (getElementServiceIfAvailable(
                 window, 'amp-analytics-instrumentation', 'amp-analytics')));
 };
+
+/**
+ * Helper method to trigger analytics event if amp-analytics is available.
+ * @param {!Window} window
+ * @param {string} eventType
+ * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ */
+export function triggerAnalyticsEvent(window, eventType, opt_vars) {
+  analyticsForOrNull(window).then(analytics => {
+    if (!analytics) {
+      return;
+    }
+    analytics.triggerEvent(eventType, opt_vars);
+  });
+}
