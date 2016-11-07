@@ -10,6 +10,7 @@
     <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
@@ -115,6 +116,32 @@
     </style>
 </head>
 <body>
+
+<amp-analytics>
+    <script type="application/json">
+        {
+            "requests": {
+                "event": "https://www.ampproject.org/static/img/logo-blue.svg?eid=${eventId}"
+            },
+            "triggers": {
+                "formSubmitSuccess": {
+                    "on": "amp-form-submit-success",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-success"
+                    }
+                },
+                "formSubmitError": {
+                    "on": "amp-form-submit-error",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-error"
+                    }
+                }
+            }
+        }
+    </script>
+</amp-analytics>
 
 <h4>Search (GET non-xhr same origin)</h4>
 <form method="get" action="/form/search-html/get" target="_blank">

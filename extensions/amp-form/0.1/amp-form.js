@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
@@ -218,10 +219,13 @@ export class AmpForm {
         requireAmpResponseSourceOrigin: true,
       }).then(response => {
         this.actions_.trigger(this.form_, 'submit-success', null);
+        // TODO(mkhatib, #6032): Update docs to reflect analytics events.
+        this.analyticsEvent_('amp-form-submit-success');
         this.setState_(FormState_.SUBMIT_SUCCESS);
         this.renderTemplate_(response || {});
       }).catch(error => {
         this.actions_.trigger(this.form_, 'submit-error', null);
+        this.analyticsEvent_('amp-form-submit-error');
         this.setState_(FormState_.SUBMIT_ERROR);
         this.renderTemplate_(error.responseJson || {});
         rethrowAsync('Form submission failed:', error);
@@ -235,6 +239,15 @@ export class AmpForm {
           'for POST requests. %s',
           this.form_);
     }
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, opt_vars) {
+    triggerAnalyticsEvent(this.win_, eventType, opt_vars);
   }
 
   /**
