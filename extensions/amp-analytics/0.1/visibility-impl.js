@@ -24,6 +24,7 @@ import {user} from '../../../src/log';
 import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
+import {startsWith} from '../../../src/string';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -102,8 +103,10 @@ export function isVisibilitySpecValid(config) {
 
   const spec = config['visibilitySpec'];
   const selector = spec['selector'];
-  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0 &&
-      selector != ':root' && selector != ':host')) {
+  if (!selector || (!startsWith(selector, '#') &&
+                    !startsWith(selector, 'amp-') &&
+                    selector != ':root' &&
+                    selector != ':host')) {
     user().error(TAG_, 'Visibility spec requires an id selector, a tag ' +
         'name starting with "amp-" or ":root"');
     return false;
@@ -162,11 +165,7 @@ export function getElement(selector, el, selectionMethod) {
     const elWin = el.ownerDocument.defaultView;
     const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
     if (parentEl) {
-      try {
-        return closestBySelector(parentEl, '.-amp-element');
-      } catch (selectorError) {
-        dev().error('VISIBILITY', 'AMP element not found', selectorError);
-      }
+      return closestBySelector(parentEl, '.-amp-element');
     }
   }
 

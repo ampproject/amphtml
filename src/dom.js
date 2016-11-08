@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev,user} from './log';
+import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
 
@@ -224,11 +224,11 @@ export function closestBySelector(element, selector) {
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
  * @param  {!string} selector The selector to check against
- * @param  {!function(!Element, string):boolean=} opt_callback Function to call
+ * @param  {!function(!Element, string):boolean=} opt_fallback Function to call
  *  when 'matches' API is unavailable
  * @return {boolean} True if the element matched the selector. False otherwise
  */
-export function matches(el, selector, opt_callback) {
+export function matches(el, selector, opt_fallback) {
   const matcher = el.matches ||
       el.webkitMatchesSelector ||
       el.mozMatchesSelector ||
@@ -237,8 +237,8 @@ export function matches(el, selector, opt_callback) {
   if (matcher) {
     return matcher.call(el, selector);
   }
-  if (opt_callback) {
-    return opt_callback(el, selector);
+  if (opt_fallback) {
+    return opt_fallback(el, selector);
   }
   // Out of luck.
   return false;
