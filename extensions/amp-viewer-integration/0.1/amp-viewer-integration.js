@@ -17,6 +17,7 @@
 import {Messaging} from './messaging.js';
 import {listen, unlisten} from '../../../src/event-helper';
 import {viewerPromiseForDoc} from '../../../src/viewer';
+import {user} from '../../../src/log';
 
 
 class AmpViewerIntegration {
@@ -62,9 +63,8 @@ class AmpViewerIntegration {
 
     return new Promise(function(resolve) {
       const unconfirmedViewerOrigin = viewer.getParam('viewerorigin');
-      if (!unconfirmedViewerOrigin) {
-        throw new Error('Expected viewer origin must be specified!');
-      }
+      user().assert(unconfirmedViewerOrigin,
+              'Expected viewer origin must be specified!');
 
       const listener = function(event) {
         if (event.origin == unconfirmedViewerOrigin &&

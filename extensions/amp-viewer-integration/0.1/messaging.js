@@ -16,40 +16,39 @@
 
 
 import {listen} from '../../../src/event-helper';
+import {user} from '../../../src/log';
 
 
 export class Messaging {
-    /**
-     * Messaging protocol between viewer and viewer client.
-     * @param {!Window} target
-     * @param {string} targetOrigin
-     * @param {function(string, *, boolean):(!Promise<*>|undefined)}
-     *    requestProcessor
-     * @param {string=} opt_targetId
-     */
-    constructor(target, targetOrigin, requestProcessor, opt_targetId) {
-      this.sentinel_ = '__AMP__';
-      this.requestSentinel_ = this.sentinel_ + 'REQUEST';
-      this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
+  /**
+   * Messaging protocol between viewer and viewer client.
+   * @param {!Window} target
+   * @param {string} targetOrigin
+   * @param {function(string, *, boolean):(!Promise<*>|undefined)}
+   *    requestProcessor
+   * @param {string=} opt_targetId
+   */
+  constructor(target, targetOrigin, requestProcessor, opt_targetId) {
+    this.sentinel_ = '__AMP__';
+    this.requestSentinel_ = this.sentinel_ + 'REQUEST';
+    this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
 
-      this.requestIdCounter_ = 0;
-      this.waitingForResponse_ = {};
+    this.requestIdCounter_ = 0;
+    this.waitingForResponse_ = {};
 
-      /** @const @private {!Window} */
-      this.target_ = target;
-      /** @const @private {string|undefined} */
-      this.targetId_ = opt_targetId;
-      /** @const @private {string} */
-      this.targetOrigin_ = targetOrigin;
-      /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
-      this.requestProcessor_ = requestProcessor;
+    /** @const @private {!Window} */
+    this.target_ = target;
+    /** @const @private {string|undefined} */
+    this.targetId_ = opt_targetId;
+    /** @const @private {string} */
+    this.targetOrigin_ = targetOrigin;
+    /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
+    this.requestProcessor_ = requestProcessor;
 
-      if (!this.targetOrigin_) {
-        throw new Error('Target origin must be specified');
-      }
+    user().assert(this.targetOrigin_, 'Target origin must be specified!');
 
-      listen(this.target_, 'message', (this.onMessage_.bind(this)));
-    }
+    listen(this.target_, 'message', (this.onMessage_.bind(this)));
+  }
 }
 
 
