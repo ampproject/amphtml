@@ -397,10 +397,7 @@ https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 
 ##### Versioning
 
-Extended components are versioned via [semver](http://semver.org/). The version is referenced explicitly (See $ELEMENT_VERSION above) when loading the component in the URL. It may have the value “latest”.
-Changes to the PATCH version component (x in 1.1.x) must strictly maintain backward compatibility or fix urgent security issues.
-
-AMP documents may only reference versions with one or two components. Version “1” states “I accept every version of this component with major version 1”. Version “1.1” states “I accept every PATCH level of 1.1”. It is not allowed to explicitly reference the PATCH level in the version string.
+See the [AMP versioning policy](amp-versioning-policy.md).
 
 
 ### Extended templates
@@ -434,7 +431,7 @@ The `id` attribute is optional. Individual AMP elements discover their own templ
 
 The syntax within the template element depends on the specific template language. However, the template language could be restricted within AMP. For instance, in accordance with the "template" element, all productions have to be over a valid well-formed DOM. All of the template outputs are also subject to sanitizing to ensure AMP-valid output.
 
-To learn about the syntax and restrictions for an extended template, visit the [extended template's documentation](./amp-html-templates.md#templates). 
+To learn about the syntax and restrictions for an extended template, visit the [extended template's documentation](./amp-html-templates.md#templates).
 
 ##### URL
 
