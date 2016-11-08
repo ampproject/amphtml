@@ -226,9 +226,9 @@ export function csa(global, data) {
 
   // Parse AFSh page options
   let afshPageOptions = {};
-  if (data.afshPageOptions != null) {
+  if (data['afshPageOptions'] != null) {
     try {
-      afshPageOptions = JSON.parse(data.afshPageOptions);
+      afshPageOptions = JSON.parse(data['afshPageOptions']);
       afshPageOptions['source'] = 'amp';
       afshPageOptions['referer'] = window.context.referrer;
     } catch (e) {}
@@ -236,9 +236,9 @@ export function csa(global, data) {
 
   // Parse AFSh adblock options
   let afshAdblockOptions = {};
-  if (data.afshAdblockOptions != null) {
+  if (data['afshAdblockOptions'] != null) {
     try {
-      afshAdblockOptions = JSON.parse(data.afshAdblockOptions);
+      afshAdblockOptions = JSON.parse(data['afshAdblockOptions']);
 
       // Set container to the container we just created
       afshAdblockOptions['container'] = 'csacontainer';
@@ -255,9 +255,9 @@ export function csa(global, data) {
 
   // Parse AFS page options
   let afsPageOptions = {};
-  if (data.afsPageOptions != null) {
+  if (data['afsPageOptions'] != null) {
     try {
-      afsPageOptions = JSON.parse(data.afsPageOptions);
+      afsPageOptions = JSON.parse(data['afsPageOptions']);
       afsPageOptions['source'] = 'amp';
       afsPageOptions['referrer'] = window.context.referrer;
     } catch (e) {}
@@ -265,9 +265,9 @@ export function csa(global, data) {
 
   // Parse AFS adblock options
   let afsAdblockOptions = {};
-  if (data.afsAdblockOptions != null) {
+  if (data['afsAdblockOptions'] != null) {
     try {
-      afsAdblockOptions = JSON.parse(data.afsAdblockOptions);
+      afsAdblockOptions = JSON.parse(data['afsAdblockOptions']);
 
       // Set the container to the container we just created
       afsAdblockOptions['container'] = 'csacontainer';
@@ -280,17 +280,19 @@ export function csa(global, data) {
 
   // Make the call for CSA ads
   // Call the right product based on arguments passed
-  if (data.afsPageOptions != null && data.afshPageOptions == null) {
+  if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
 
     // AFS only
     global._googCsa('ads', afsPageOptions, afsAdblockOptions);
 
-  } else if (data.afsPageOptions == null && data.afshPageOptions != null) {
+  } else if (data['afsPageOptions'] == null
+    && data['afshPageOptions'] != null) {
 
     // AFSH only
     global._googCsa('plas', afshPageOptions, afshAdblockOptions);
 
-  } else if (data.afsPageOptions != null && data.afshPageOptions != null) {
+  } else if (data['afsPageOptions'] != null
+    && data['afshPageOptions'] != null) {
 
     // AFSh backfilled with AFS
     // Set global variables so the callback function knows the AFS params
