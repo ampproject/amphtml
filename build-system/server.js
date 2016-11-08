@@ -514,7 +514,7 @@ function replaceUrls(mode, file) {
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.max.js', '/dist/amp-inabox.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '/dist/v0/');
     file = file.replace('https://cdn1.ampproject.org/viewer/google/v5.js', 'https://cdn.ampproject.org/viewer/google/v5.js');
-    file = file.replace(/https:\/\/3p.ampproject.net\/(.+)\.html/,
+    file = file.replace(/https:\/\/3p.ampproject.net\/(?:\d+\/)?(.+)\.html/,
         '/dist.3p/current/$1.max.html');
   }
   if (mode == 'min') {
