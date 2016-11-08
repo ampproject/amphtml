@@ -79,9 +79,7 @@ describe('chunk', () => {
     beforeEach(() => {
       installDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
-      Object.defineProperty(env.win.document, 'hidden', {
-        get: () => false,
-      });
+      env.win.document.hidden = false;
     });
 
     basicTests(env);
@@ -93,10 +91,7 @@ describe('chunk', () => {
 
     beforeEach(() => {
       expect(env.win.services.viewer).to.not.be.undefined;
-      Object.defineProperty(env.win.document, 'hidden', {
-        get: () => false,
-        configurable: true,
-      });
+      env.win.document.hidden = false;
     });
 
     describe('visible', () => {
@@ -204,9 +199,7 @@ describe('chunk', () => {
         env.sandbox.stub(resolved, 'then', () => {
           throw new Error('No calls expected');
         });
-        Object.defineProperty(env.win.document, 'hidden', {
-          get: () => true,
-        });
+        env.win.document.hidden = true;
       });
 
       basicTests(env);

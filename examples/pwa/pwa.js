@@ -42,8 +42,15 @@ class Shell {
 
     log('Shell created');
 
-    if (this.currentPage_) {
+    if (this.currentPage_ && !isShellUrl(this.currentPage_)) {
       this.navigateTo(this.currentPage_);
+    } else if (this.win.location.hash) {
+      const hashParams = parseQueryString(this.win.location.hash);
+      const href = hashParams['href'];
+      if (href) {
+        this.currentPage_ = href;
+        this.navigateTo(href);
+      }
     }
 
     // Install service worker
@@ -317,6 +324,40 @@ function fetchDocument(url) {
   });
 }
 
+
+/**
+ * Parses the query string of an URL. This method returns a simple key/value
+ * map. If there are duplicate keys the latest value is returned.
+ * @param {string} queryString
+ * @return {!Object<string>}
+ */
+function parseQueryString(queryString) {
+  const params = Object.create(null);
+  if (!queryString) {
+    return params;
+  }
+  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
+    queryString = queryString.substr(1);
+  }
+  const pairs = queryString.split('&');
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i];
+    const eqIndex = pair.indexOf('=');
+    let name;
+    let value;
+    if (eqIndex != -1) {
+      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+    } else {
+      name = decodeURIComponent(pair).trim();
+      value = '';
+    }
+    if (name) {
+      params[name] = value;
+    }
+  }
+  return params;
+}
 
 
 var shell = new Shell(window);

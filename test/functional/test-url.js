@@ -22,6 +22,7 @@ import {
   getSourceOrigin,
   getSourceUrl,
   isProxyOrigin,
+  isSecureUrl,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -246,7 +247,7 @@ describe('serializeQueryString', () => {
 });
 
 
-describe('assertHttpsUrl', () => {
+describe('assertHttpsUrl/isSecureUrl', () => {
   const referenceElement = document.createElement('div');
   it('should NOT allow null or undefined, but allow empty string', () => {
     expect(() => {
@@ -259,26 +260,34 @@ describe('assertHttpsUrl', () => {
   });
   it('should allow https', () => {
     assertHttpsUrl('https://twitter.com', referenceElement);
+    expect(isSecureUrl('https://twitter.com')).to.be.true;
   });
   it('should allow protocol relative', () => {
     assertHttpsUrl('//twitter.com', referenceElement);
+    // `isSecureUrl` always resolves relative URLs.
+    expect(isSecureUrl('//twitter.com'))
+        .to.be.equal(window.location.protocol == 'https:');
   });
   it('should allow localhost with http', () => {
     assertHttpsUrl('http://localhost:8000/sfasd', referenceElement);
+    expect(isSecureUrl('http://localhost:8000/sfasd')).to.be.true;
   });
   it('should allow localhost with http suffix', () => {
     assertHttpsUrl('http://iframe.localhost:8000/sfasd', referenceElement);
+    expect(isSecureUrl('http://iframe.localhost:8000/sfasd')).to.be.true;
   });
 
   it('should fail on http', () => {
     expect(() => {
       assertHttpsUrl('http://twitter.com', referenceElement);
     }).to.throw(/source must start with/);
+    expect(isSecureUrl('http://twitter.com')).to.be.false;
   });
   it('should fail on http with localhost in the name', () => {
     expect(() => {
       assertHttpsUrl('http://foolocalhost', referenceElement);
     }).to.throw(/source must start with/);
+    expect(isSecureUrl('http://foolocalhost')).to.be.false;
   });
 });
 
