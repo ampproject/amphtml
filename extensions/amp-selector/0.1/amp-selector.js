@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {closest} from '../../../src/dom';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 
-export class AmpSelect extends AMP.BaseElement {
+export class AmpSelector extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -30,7 +31,6 @@ export class AmpSelect extends AMP.BaseElement {
 
     /** @private {Element} */
     this.inputWrapper_ = null;
-
   }
 
   /** @override */
@@ -42,12 +42,10 @@ export class AmpSelect extends AMP.BaseElement {
   buildCallback() {
     this.isMultiple_ = this.element.hasAttribute('multiple');
     const isDisabled = this.element.hasAttribute('disabled');
-    const formId = this.element.getAttribute('form');
-    const doc = this.win.document;
-
-    this.setState_();
-
-    this.element.addEventListener('click', this.clickHandler_.bind(this));
+    if (!isDisabled) {
+      this.setState_();
+      this.element.addEventListener('click', this.clickHandler_.bind(this));
+    }
   }
 
   /**
@@ -64,7 +62,7 @@ export class AmpSelect extends AMP.BaseElement {
       for (let i=0; i < len; i++) {
         const el = selectedElements_[i];
         if (opt_element && el !== opt_element) {
-          elem.removeAttribute('selected');
+          el.removeAttribute('selected');
         } else {
           if (this.selectedElements_.length > 0) {
             // We need to have only one selected element for a single selector.
@@ -83,6 +81,7 @@ export class AmpSelect extends AMP.BaseElement {
 
   setInputs_() {
     const elementName = this.element.getAttribute('name');
+    const formId = this.element.getAttribute('form');
     if (!elementName) {
       return;
     }
@@ -104,9 +103,12 @@ export class AmpSelect extends AMP.BaseElement {
       hidden.setAttribute('type', 'hidden');
       hidden.setAttribute('name', elementName);
       hidden.setAttribute('value', selectedElement.getAttribute('option'));
+      if (formId) {
+        hidden.setAttribute('form', formId);
+      }
       fragment.appendChild(hidden);
     });
-    this.element.appendChild(fragment);
+    this.inputWrapper_.appendChild(fragment);
   }
 
   /**
@@ -114,13 +116,22 @@ export class AmpSelect extends AMP.BaseElement {
    * @param {!Event} event
    */
   clickHandler_(event) {
-    const el = event.target;
+    let el = event.target;
     if (!el || !el.hasAttribute('option')) {
-      return;
+      el = closest(el, element => {
+        return element.hasAttribute('option');
+      }, this.element);
+      if (!el || el.hasAttribute('disabled')) {
+        return;
+      }
     }
-    el.setAttribute('selected');
+    if (el.hasAttribute('selected')) {
+      el.removeAttribute('selected');
+    } else {
+      el.setAttribute('selected', '');
+    }
     this.setState_(el);
   }
 }
 
-AMP.registerElement('amp-select', AmpSelect);
+AMP.registerElement('amp-selector', AmpSelector);
