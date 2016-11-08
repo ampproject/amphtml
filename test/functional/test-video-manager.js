@@ -47,7 +47,7 @@ describe('Supports Autoplay', () => {
 
   let createElementSpy;
   let setAttributeSpy;
-  let playSpy;
+  let playStub;
 
   it('should create an invisible test video element', () => {
     return supportsAutoplay(win, isLite).then(() => {
@@ -75,7 +75,7 @@ describe('Supports Autoplay', () => {
     video.paused = true;
     return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.false;
-      expect(playSpy.called).to.be.true;
+      expect(playStub.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
     });
   });
@@ -84,7 +84,32 @@ describe('Supports Autoplay', () => {
     video.paused = false;
     return supportsAutoplay(win, isLite).then(supportsAutoplay => {
       expect(supportsAutoplay).to.be.true;
-      expect(playSpy.called).to.be.true;
+      expect(playStub.called).to.be.true;
+      expect(createElementSpy.called).to.be.true;
+    });
+  });
+
+  it('should suppress errors if detection play call throws', () => {
+    playStub.throws();
+    video.paused = true;
+    expect(supportsAutoplay(win, isLite)).not.to.throw;
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
+      expect(supportsAutoplay).to.be.false;
+      expect(playStub.called).to.be.true;
+      expect(createElementSpy.called).to.be.true;
+    });
+  });
+
+  it('should suppress errors if detection play call rejects a promise', () => {
+    const p = Promise.reject('play() can only be initiated by a user gesture.');
+    const promiseCatchSpy = sandbox.spy(p, 'catch');
+    playStub.returns(p);
+    video.paused = true;
+    expect(supportsAutoplay(win, isLite)).not.to.throw;
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
+      expect(promiseCatchSpy.called).to.be.true;
+      expect(supportsAutoplay).to.be.false;
+      expect(playStub.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
     });
   });
@@ -142,7 +167,7 @@ describe('Supports Autoplay', () => {
 
     createElementSpy = sandbox.spy(doc, 'createElement');
     setAttributeSpy = sandbox.spy(video, 'setAttribute');
-    playSpy = sandbox.spy(video, 'play');
+    playStub = sandbox.stub(video, 'play');
   });
 
   afterEach(() => {
