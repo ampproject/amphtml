@@ -17,6 +17,7 @@
 import {platformFor} from '../platform';
 import {viewerForDoc} from '../viewer';
 import {vsyncFor} from '../vsync';
+import {setStyle} from '../style';
 
 
 /**
@@ -54,9 +55,9 @@ export function checkAndFix(ampdoc, opt_platform, opt_viewer, opt_vsync) {
   return new Promise(resolve => {
     // Reset `bottom` CSS. This will force the major relayout.
     vsync.mutate(() => {
-      win.document.body.style.bottom = '';
+      setStyle(win.document.body, 'bottom', '');
       vsync.mutate(() => {
-        win.document.body.style.bottom = '0px';
+        setStyle(win.document.body, 'bottom', '0px');
         resolve();
       });
     });

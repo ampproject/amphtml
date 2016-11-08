@@ -176,7 +176,10 @@ describe('amp-install-serviceworker', () => {
         },
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
-        document: {nodeType: /* document */ 9},
+        document: {
+          nodeType: /* document */ 9,
+          createElement: document.createElement.bind(document),
+        },
       };
       installTimerService(win);
       win.document.defaultView = win;

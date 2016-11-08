@@ -74,7 +74,7 @@ export class LoginDoneDialog {
   setStyles_() {
     const doc = this.win.document;
     const style = doc.createElement('style');
-    style.textContent = this.buildStyles_();
+    style./*OK*/textContent = this.buildStyles_();
     doc.head.appendChild(style);
   }
 

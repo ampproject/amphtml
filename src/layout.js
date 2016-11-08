@@ -21,6 +21,7 @@
 
 import {dev, user} from './log';
 import {isFiniteNumber} from './types';
+import {setStyles} from './style';
 
 
 /**
@@ -247,8 +248,10 @@ export function getNaturalDimensions(element) {
     const temp = doc.createElement(naturalTagName);
     // For audio, should no-op elsewhere.
     temp.controls = true;
-    temp.style.position = 'absolute';
-    temp.style.visibility = 'hidden';
+    setStyles(temp, {
+      position: 'absolute',
+      visibility: 'hidden',
+    });
     doc.body.appendChild(temp);
     naturalDimensions_[tagName] = {
       width: (temp./*OK*/offsetWidth || 1) + 'px',

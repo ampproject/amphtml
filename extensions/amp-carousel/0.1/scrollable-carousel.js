@@ -69,10 +69,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.cells_.forEach(cell => {
       this.setAsOwner(cell);
       cell.classList.add('amp-carousel-slide');
-      cell.style.display = 'inline-block';
+      st.setStyle(cell, 'display', 'inline-block');
       if (cell != this.cells_[0]) {
         // TODO(dvoytenko): this has to be customizable
-        cell.style.marginLeft = '8px';
+        st.setStyle(cell, 'marginLeft', '8px');
       }
       this.container_.appendChild(cell);
     });

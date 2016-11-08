@@ -15,6 +15,7 @@
  */
 
 import {validateData} from '../../3p/3p';
+import {setStyles} from '../../src/style';
 
 /**
  * Make an adsense iframe.
@@ -54,7 +55,11 @@ export function adsense(global, data) {
   }
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
-  i.style.cssText = 'display:inline-block;width:100%;height:100%;';
+  setStyles(i, {
+    display: 'inline-block',
+    width: '100%',
+    height: '100%',
+  });
   const initializer = {};
   if (data['experimentId']) {
     const experimentIdList = data['experimentId'].split(',');

@@ -478,6 +478,12 @@ var forbiddenTerms = {
       'src/runtime.js',
     ],
   },
+  'style\\.\\w+ = ': {
+    message: 'Use setStyle instead!',
+    whitelist: [
+      'testing/iframe.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
