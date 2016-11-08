@@ -109,6 +109,39 @@ describe('chunk', () => {
       basicTests(env);
     });
 
+    describe('error handling', () => {
+      let fakeWin;
+      let done;
+
+      function onReject(event) {
+        expect(event.reason.message).to.match(/test async/);
+        done();
+      }
+
+      beforeEach(() => {
+        toggleExperiment(env.win, 'chunked-amp', experimentOn);
+        fakeWin = env.win;
+        const viewer = viewerForDoc(env.win.document);
+        env.sandbox.stub(viewer, 'isVisible', () => {
+          return true;
+        });
+        window.addEventListener('unhandledrejection', onReject);
+      });
+
+      afterEach(() => {
+        window.removeEventListener('unhandledrejection', onReject);
+      });
+
+      it('should proceed on error and rethrowAsync', d => {
+        chunk(fakeWin.document, () => {
+          throw new Error('test async');
+        });
+        chunk(fakeWin.document, () => {
+          done = d;
+        });
+      });
+    });
+
     describe('invisible experiment off', () => {
       beforeEach(() => {
         experimentOn = false;
