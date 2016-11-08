@@ -25,14 +25,14 @@ const mandatoryParams = ['tagtype', 'cid'],
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation',
+    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
   ],
   dfpParams = [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation',
+    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
   ],
   dfpDefaultTimeout = 1000;
 
@@ -80,7 +80,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
 
     global.advBidxc = global.context.master.advBidxc;
     if (global.advBidxc && typeof global.advBidxc.renderAmpAd === 'function') {
-      global.addEventListener('message', function(event) {
+      global.addEventListener('message', event => {
         global.advBidxc.renderAmpAd(event, global);
       });
     }
@@ -107,20 +107,18 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     }
   }
 
-  global.setTimeout(function() {
+  global.setTimeout(() => {
     loadDFP();
   }, data.timeout || dfpDefaultTimeout);
 
-  computeInMasterFrame(global, 'medianet-hb-load', function(done) {
+  computeInMasterFrame(global, 'medianet-hb-load', done => {
     /*eslint "google-camelcase/google-camelcase": 0*/
     global.advBidxc_requrl = publisherUrl;
     global.advBidxc_refurl = referrerUrl;
-    global.advBidxc = {};
-    global.advBidxc.registerAmpSlot = () => {
-    };
-    global.advBidxc.setAmpTargeting = () => {
-    };
-    global.advBidxc.renderAmpAd = () => {
+    global.advBidxc = {
+      registerAmpSlot: () => {},
+      setAmpTargeting: () => {},
+      renderAmpAd: () => {},
     };
     writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid), () => {
       done(null);
