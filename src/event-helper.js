@@ -72,6 +72,23 @@ export function listenOnce(element, eventType, listener, opt_capture) {
 
 
 /**
+ * Unlistens for the specified event on the element.
+ * @param {?EventTarget} element
+ * @param {string} eventType
+ * @param {?function(Event)} listener
+ * @param {boolean=} opt_capture
+ */
+export function unlisten(element, eventType, listener, opt_capture) {
+  const capture = opt_capture || false;
+  if (element) {
+    element.removeEventListener(eventType, listener, capture);
+  }
+  element = null;
+  listener = null;
+}
+
+
+/**
  * Returns  a promise that will resolve as soon as the specified event has
  * fired on the element. Optionally, opt_timeout can be specified that will
  * reject the promise if the event has not fired by then.
