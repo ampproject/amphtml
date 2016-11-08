@@ -329,19 +329,15 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    const eventPass = new Pass(this.win, this.onHistoryEvent_.bind(this), 50);
     this.popstateHandler_ = e => {
+      if (this.ignoreUpcomingPopstate_) {
+        return;
+      }
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
-      eventPass.schedule();
-    };
-    this.hashchangeHandler_ = () => {
-      dev().fine(TAG_, 'hashchange event: ' + this.win.history.length + ', ' +
-          this.win.location.hash);
-      eventPass.schedule();
+      this.onHistoryEvent_();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
-    this.win.addEventListener('hashchange', this.hashchangeHandler_);
   }
 
   /** @override */
@@ -408,7 +404,7 @@ export class HistoryBindingNatural_ {
     }
 
     if (stackIndex == undefined) {
-      // A new navigation forward by the user().
+      // A new navigation forward by the user.
       newStackIndex = newStackIndex + 1;
     } else if (stackIndex < this.win.history.length) {
       // A simple trip back.
@@ -531,14 +527,26 @@ export class HistoryBindingNatural_ {
    * @private
    */
   historyReplaceState_(state, title, url) {
-    this.assertReady_();
-    if (!state) {
-      state = {};
-    }
-    const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
-    state[HISTORY_PROP_] = stackIndex;
-    this.replaceState_(state, title, url);
-    this.updateStackIndex_(stackIndex);
+    this.whenReady_(() => {
+      if (!state) {
+        state = {};
+      }
+      // If this is a hash update the choice of `location.replace` vs
+      // `history.replaceState` is important. Due to bugs, not every browser
+      // triggers `:target` pseudo-class when `replaceState` is called.
+      // See http://www.zachleat.com/web/moving-target/ for more details.
+      if (url.indexOf('#') == 0) {
+        // location.replace will trigger a `popstate` event, we temporarily
+        // disable handling it.
+        this.ignoreUpcomingPopstate_ = true;
+        this.win.location.replace(url);
+        this.ignoreUpcomingPopstate_ = false;
+      }
+      const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
+      state[HISTORY_PROP_] = stackIndex;
+      this.replaceState_(state, title, url);
+      this.updateStackIndex_(stackIndex);
+    });
   }
 
   /**
@@ -572,10 +580,14 @@ export class HistoryBindingNatural_ {
 export class HistoryBindingVirtual_ {
 
   /**
+   * @param {!Window} win
    * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(viewer) {
-    /** @private @const */
+  constructor(win, viewer) {
+    /** @private @const {!Window} */
+    this.win = win;
+
+    /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /** @private {number} */
@@ -587,11 +599,40 @@ export class HistoryBindingVirtual_ {
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
         this.onHistoryPopped_.bind(this));
+
+    const history = this.win.history;
+
+    /** @private @const {function(*, string=, string=)|undefined} */
+    this.origReplaceState_ = history.replaceState.bind(history);
+    history.replaceState = this.historyReplaceState_.bind(this);
+  }
+
+  /**
+   * Overrides default history.replaceState to handle updating the hash using
+   * location.replace instead to trigger re-evaluation of :target selector. Falls back
+   * to the original history.replaceState if this is not a hash update.
+   *
+   * @param {!Object=} data
+   * @param {string=} title
+   * @param {string=} url
+   * @private
+   */
+  historyReplaceState_(data, title, url) {
+    if (url.indexOf('#') == 0) {
+      // location.replace will trigger a `popstate` event, we temporarily
+      // disable handling it.
+      this.win.location.replace(url);
+    } else {
+      this.origReplaceState_(data, title, url);
+    }
   }
 
   /** @override */
   cleanup_() {
     this.unlistenOnHistoryPopped_();
+    if (this.origReplaceState_) {
+      this.win.history.replaceState = this.origReplaceState_;
+    }
   }
 
   /** @override */
@@ -603,8 +644,9 @@ export class HistoryBindingVirtual_ {
   push() {
     // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
-    this.viewer_.postPushHistory(this.stackIndex_);
-    return Promise.resolve(this.stackIndex_);
+    return this.viewer_.postPushHistory(this.stackIndex_).then(() => {
+      return this.stackIndex_;
+    });
   }
 
   /** @override */
@@ -612,9 +654,10 @@ export class HistoryBindingVirtual_ {
     if (stackIndex > this.stackIndex_) {
       return Promise.resolve(this.stackIndex_);
     }
-    this.viewer_.postPopHistory(stackIndex);
-    this.updateStackIndex_(stackIndex - 1);
-    return Promise.resolve(this.stackIndex_);
+    return this.viewer_.postPopHistory(stackIndex).then(() => {
+      this.updateStackIndex_(stackIndex - 1);
+      return this.stackIndex_;
+    });
   }
 
   /**
@@ -652,7 +695,7 @@ function createHistory(ampdoc) {
   let binding;
   if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
           ampdoc.win.AMP_TEST_IFRAME) {
-    binding = new HistoryBindingVirtual_(viewer);
+    binding = new HistoryBindingVirtual_(ampdoc.win, viewer);
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.

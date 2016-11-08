@@ -94,7 +94,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       scrollIntoView: scrollIntoViewSpy,
     };
     history = {
-      push: () => {},
+      push: () => Promise.resolve(),
     };
     installTimerService(win);
     installDocumentInfoServiceForDoc(ampdoc);
@@ -290,7 +290,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       });
 
       // Click -> push.
-      onDocumentElementClick_(evt, ampdoc, viewport, history);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ false);
       expect(historyPushStub.callCount).to.equal(1);
       expect(replaceLocSpy.callCount).to.equal(1);
       expect(replaceLocSpy.args[0][0]).to.equal('#test');
@@ -315,11 +316,19 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should always open in _blank when embedded', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(win.open.called).to.be.true;
-      expect(win.open.calledWith(
-          'ftp://example.com/a', '_blank')).to.be.true;
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari */ false, /* isIframed */ true);
+      expect(win.open).to.be.called;
+      expect(win.open).to.be.calledWith('ftp://example.com/a', '_blank');
       expect(preventDefaultSpy.callCount).to.equal(1);
+    });
+
+    it('should not do anything not embedded', () => {
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari */ false, /* isIframed */ false);
+      expect(win.open).to.not.be.called;
+      expect(win.open).to.not.be.calledWith('ftp://example.com/a', '_blank');
+      expect(preventDefaultSpy.callCount).to.equal(0);
     });
   });
 
@@ -336,28 +345,41 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should open link in _top on Safari iOS when embedded', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history, true);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ true);
       expect(win.open.called).to.be.true;
       expect(win.open.calledWith(
           'whatsapp://send?text=hello', '_top')).to.be.true;
       expect(preventDefaultSpy.callCount).to.equal(1);
     });
 
+    it('should not do anything on when not embedded', () => {
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ false);
+      expect(win.open).to.not.be.called;
+      expect(win.open).to.not.be.calledWith(
+          'whatsapp://send?text=hello', '_top');
+      expect(preventDefaultSpy.callCount).to.equal(0);
+    });
+
     it('should not do anything for mailto: protocol', () => {
       tgt.href = 'mailto:hello@example.com';
-      onDocumentElementClick_(evt, ampdoc, viewport, history, true);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ true);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other non-safari iOS', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history, false);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ false, /* isIframed */ true);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other platforms', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history, false);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ false, /* isIframed */ true);
       expect(win.top.location.href).to.equal('https://google.com');
       expect(preventDefaultSpy.callCount).to.equal(0);
     });

@@ -210,14 +210,31 @@ function handleHashClick_(e, tgtLoc, ampdoc, viewport, history) {
 
   // If possible do update the URL with the hash. As explained above
   // we do `replace` to avoid messing with the container's history.
-  // The choice of `location.replace` vs `history.replaceState` is important.
-  // Due to bugs, not every browser triggers `:target` pseudo-class when
-  // `replaceState` is called. See http://www.zachleat.com/web/moving-target/
-  // for more details. Do this only if fragment has changed.
   if (tgtLoc.hash != curLoc.hash) {
-    win.location.replace(`#${hash}`);
+    // Push a new state to history that would take us back to the current
+    // hash when users hit back.
+    history.push(() => {
+      win.location.replace(`${curLoc.hash || '#'}`);
+    }).then(() => {
+      // Replace the newly pushed state with the actual hash.
+      win.history.replaceState(null, null, `#${hash}`);
+      scrollToElement(elem, win, viewport, hash);
+    });
+  } else {
+    // If the hash did not update just scroll to the element.
+    scrollToElement(elem, win, viewport, hash);
   }
+}
 
+
+/**
+ * Scrolls the page to the given element.
+ * @param {?Element} elem
+ * @param {!Window} win
+ * @param {!./service/viewer-impl.Viewer} viewer
+ * @param {string} hash
+ */
+function scrollToElement(elem, win, viewport, hash) {
   // Scroll to the element if found.
   if (elem) {
     // The first call to scrollIntoView overrides browsers' default
@@ -235,12 +252,5 @@ function handleHashClick_(e, tgtLoc, ampdoc, viewport, history) {
   } else {
     dev().warn('HTML',
         `failed to find element with id=${hash} or a[name=${hash}]`);
-  }
-
-  if (tgtLoc.hash != curLoc.hash) {
-    // Push/pop history.
-    history.push(() => {
-      win.location.replace(`${curLoc.hash || '#'}`);
-    });
   }
 }
