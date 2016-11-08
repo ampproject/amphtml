@@ -223,6 +223,8 @@ export class Viewer {
         // origin is sometimes failed to be detected. Since failure mode
         // if we fail to initialize communication is very bad, we also check
         // for visibilityState.
+        // After https://github.com/ampproject/amphtml/issues/6070
+        // is fixed we should probably only keep the amp_js_v check here.
         && (this.params_['origin']
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
@@ -371,7 +373,9 @@ export class Viewer {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used my mode.js to infer development mode.
         this.win.location.originalHash = this.win.location.hash;
-        this.win.history.replaceState({}, '', newUrl);
+        // Using #- to falsify a theory that could lead to
+        // https://github.com/ampproject/amphtml/issues/6070
+        this.win.history.replaceState({}, '', newUrl + '#-');
         dev().fine(TAG_, 'replace url:' + this.win.location.href);
       }
     }
