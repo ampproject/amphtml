@@ -465,12 +465,17 @@ export class InstrumentationService {
    * @private
    */
   matchesSelector_(el, selector) {
-    return matches(el, selector, () => {
-      const matches = el.ownerDocument.querySelectorAll(selector);
-      let i = matches.length;
-      while (i-- > 0 && matches.item(i) != el) {};
-      return i > -1;
-    });
+    try {
+      return matches(el, selector, () => {
+        const matches = el.ownerDocument.querySelectorAll(selector);
+        let i = matches.length;
+        while (i-- > 0 && matches.item(i) != el) {};
+        return i > -1;
+      });
+    } catch (selectorError) {
+      user().error(TAG, 'Bad query selector.', selector, selectorError);
+    }
+    return false;
   }
 
   /**

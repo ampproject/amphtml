@@ -162,7 +162,11 @@ export function getElement(selector, el, selectionMethod) {
     const elWin = el.ownerDocument.defaultView;
     const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
     if (parentEl) {
-      return closestBySelector(parentEl, '.-amp-element');
+      try {
+        return closestBySelector(parentEl, '.-amp-element');
+      } catch (selectorError) {
+        dev().error('VISIBILITY', 'AMP element not found', selectorError);
+      }
     }
   }
 

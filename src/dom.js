@@ -229,20 +229,16 @@ export function closestBySelector(element, selector) {
  * @return {boolean} True if the element matched the selector. False otherwise
  */
 export function matches(el, selector, opt_callback) {
-  try {
-    const matcher = el.matches ||
-        el.webkitMatchesSelector ||
-        el.mozMatchesSelector ||
-        el.msMatchesSelector ||
-        el.oMatchesSelector;
-    if (matcher) {
-      return matcher.call(el, selector);
-    }
-    if (opt_callback) {
-      return opt_callback(el, selector);
-    }
-  } catch (selectorError) {
-    user().error('DOM', 'Bad query selector.', selector, selectorError);
+  const matcher = el.matches ||
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
+  if (matcher) {
+    return matcher.call(el, selector);
+  }
+  if (opt_callback) {
+    return opt_callback(el, selector);
   }
   // Out of luck.
   return false;
