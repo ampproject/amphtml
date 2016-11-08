@@ -110,8 +110,8 @@ attributes as following:
 ```
 
 Here:
- - `data-no-service-worker-fallback-url-match` specifies the link for AMP+PWA shell. It's required to be on the source origin as the AMP document.
- - `data-no-service-worker-fallback-url-match` is a regular expression that describes how to match “in-shell” links vs non-in-shell links.
+ - `data-no-service-worker-fallback-shell-url` specifies the link for AMP+PWA shell. It's required to be on the source origin as the AMP document.
+ - `data-no-service-worker-fallback-url-match` is a JavaScript regular expression that describes how to match “in-shell” links vs non-in-shell links.
  - Both of these attributes must be present to trigger URL rewrite.
 
 URL rewrite works as following:
@@ -128,13 +128,14 @@ https://pub.com/doc.amp.html
 -->
 
 https://pub.com/shell?href=%2Fdoc.amp.html
-
 ```
 
 Besides rewriting URLs, `amp-install-serviceworker` also will try to preload the shell. This is done by creating an iframe with `#preload` fragment:
 ```
 <iframe src="https://pub.com/shell#preload" hidden sandbox="allow-scripts allow-same-origin"></iframe>
 ```
+
+For the preload to be effective, of course, the shell response must have appropriate HTTP cache headers.
 
 ## Validation
 
