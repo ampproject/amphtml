@@ -161,7 +161,6 @@ export const adConfig = {
 
   csa: {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
-    preconnect: 'https://www.google.com',
   },
 
   dotandads: {
