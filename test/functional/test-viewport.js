@@ -1570,6 +1570,7 @@ describe('createViewport', () => {
         it('should bind to "natural" when not iframed', () => {
           win.parent = win;
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
         });
@@ -1577,6 +1578,7 @@ describe('createViewport', () => {
         it('should bind to "naturual" when iframed', () => {
           win.parent = {};
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
         });
@@ -1595,6 +1597,7 @@ describe('createViewport', () => {
         it('should bind to "natural" when not iframed', () => {
           win.parent = win;
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
         });
@@ -1602,6 +1605,7 @@ describe('createViewport', () => {
         it('should bind to "natural iOS embed" when iframed', () => {
           win.parent = {};
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to
               .be.instanceof(ViewportBindingNaturalIosEmbed_);
