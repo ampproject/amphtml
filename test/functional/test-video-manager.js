@@ -102,7 +102,7 @@ describe('Supports Autoplay', () => {
 
   it('should suppress errors if detection play call rejects a promise', () => {
     const p = Promise.reject('play() can only be initiated by a user gesture.');
-    const promiseCatchSpy = sinon.spy(p, 'catch');
+    const promiseCatchSpy = sandbox.spy(p, 'catch');
     playStub.returns(p);
     video.paused = true;
     expect(supportsAutoplay(win, isLite)).not.to.throw;
