@@ -140,7 +140,7 @@ function buildAdUrl(
       {name: 'dt', value: startTime},
       {name: 'adf', value: domFingerprint(adElement)},
       {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
-      {name: 'output', value: 'html'},
+      {name: 'output', value: 'json_html'},
       {name: 'nhd', value: iframeDepth},
       {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
       {name: 'biw', value: viewportRect.width},

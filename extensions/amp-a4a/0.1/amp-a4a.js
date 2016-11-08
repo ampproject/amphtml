@@ -404,7 +404,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
         /** @return {!Promise<!boolean>} */
-        .then(creative => {
+        .then(creative => { debugger;
           checkStillCurrent(promiseId);
           // Note: It's critical that #maybeRenderAmpAd_ be called
           // on precisely the same creative that was validated
