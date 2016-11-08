@@ -102,10 +102,10 @@ export function isVisibilitySpecValid(config) {
 
   const spec = config['visibilitySpec'];
   const selector = spec['selector'];
-  if (spec['selectionMethod'] != 'host' &&
-      (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0))) {
-    user().error(TAG_, 'Visibility spec requires an id selector or a tag ' +
-        'name starting with "amp-"');
+  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0 &&
+      selector != ':root' && selector != ':host')) {
+    user().error(TAG_, 'Visibility spec requires an id selector, a tag ' +
+        'name starting with "amp-" or ":root"');
     return false;
   }
 
@@ -156,17 +156,21 @@ export function getElement(selector, el, selectionMethod) {
   if (!el) {
     return null;
   }
-  if (selectionMethod == 'closest') {
-    // Only tag names are supported currently.
-    return closestByTag(el, selector);
-  } else if (selectionMethod == 'scope') {
-    return el.parentElement.querySelector(selector);
-  } else if (selectionMethod == 'host') {
+
+  // Special case for root selector.
+  if (selector == ':host' || selector == ':root') {
     const elWin = el.ownerDocument.defaultView;
     const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
     if (parentEl) {
       return closestBySelector(parentEl, '.-amp-element');
     }
+  }
+
+  if (selectionMethod == 'closest') {
+    // Only tag names are supported currently.
+    return closestByTag(el, selector);
+  } else if (selectionMethod == 'scope') {
+    return el.parentElement.querySelector(selector);
   } else if (selector[0] == '#') {
     return el.ownerDocument.getElementById(selector.slice(1));
   }

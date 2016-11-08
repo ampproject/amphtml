@@ -762,8 +762,8 @@ describe('DOM', () => {
     });
 
     it('finds element by using callback', () => {
-      div.matches  = div.webkitMatchesSelector = div.mozMatchesSelector =
-          div.msMatchesSelector = div.oMatchesSelector= undefined;
+      div.matches = div.webkitMatchesSelector = div.mozMatchesSelector =
+          div.msMatchesSelector = div.oMatchesSelector = undefined;
       expect(dom.matches(div, 'span')).to.be.false;
       expect(dom.matches(div, 'span', () => {
         return true;

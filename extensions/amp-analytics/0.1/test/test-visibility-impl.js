@@ -420,8 +420,8 @@ describe('amp-analytics.visibility', () => {
     });
 
     it.skip('finds element for selectionMethod=host', () => {
-      expect(getElement(undefined, analytics, 'host')).to.equal(ampEl);
-      expect(getElement('amp-img', analytics, 'host')).to.equal(ampEl);
+      expect(getElement(':host', analytics)).to.equal(ampEl);
+      expect(getElement(':root', analytics, 'something')).to.equal(ampEl);
     });
   });
 });
