@@ -109,6 +109,32 @@ describe('chunk', () => {
       basicTests(env);
     });
 
+    describe('error handling', () => {
+      let fakeWin;
+      let clock;
+
+      beforeEach(() => {
+        toggleExperiment(env.win, 'chunked-amp', experimentOn);
+        fakeWin = env.win;
+        const viewer = viewerForDoc(env.win.document);
+        env.sandbox.stub(viewer, 'isVisible', () => {
+          return true;
+        });
+        clock = env.sandbox.useFakeTimers();
+      });
+      it('should proceed on error and rethrowAsync', done => {
+        chunk(fakeWin.document, () => {
+          throw new Error('test async');
+        });
+        chunk(fakeWin.document, () => {
+          expect(() => {
+            clock.tick();
+          }).to.throw(/test async/);
+          done();
+        });
+      });
+    });
+
     describe('invisible experiment off', () => {
       beforeEach(() => {
         experimentOn = false;

@@ -18,6 +18,7 @@ import {dev} from './log';
 import {fromClassForDoc} from './service';
 import {isExperimentOnAllowUrlOverride} from './experiments';
 import {makeBodyVisible} from './style-installer';
+import {rethrowAsync} from './log';
 import {viewerPromiseForDoc} from './viewer';
 
 /**
@@ -150,8 +151,8 @@ class Chunks {
       t();
     } catch (e) {
       // We run early in init. All errors should show the doc.
+      rethrowAsync(e);
       makeBodyVisible(self.document);
-      throw e;
     } finally {
       if (this.tasks_.length) {
         this.schedule_();
