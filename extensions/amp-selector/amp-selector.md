@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-accordion"></a> `amp-accordion`
+# <a name="amp-selector"></a> `amp-selector`
 
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>AMP select represents a control that presents a menu of options and lets the user choose from it.</td>
+    <td>AMP selector represents a control that presents a menu of options and lets the user choose from it.</td>
   </tr>
   <tr>
     <td class="col-fourty" width="40%"><strong>Availability</strong></td>
@@ -32,24 +32,58 @@ limitations under the License.
 </table>
 
 ## Behavior
-AMP select represents a control that presents a menu of options and lets the user choose from it.The options within the menu are represented by <option> elements. Options can be pre-selected for the user.
+AMP select is a control that presents a list of options and lets the user choose one or many.
 
-- An `amp-select` can contain one or more `<option>`s as its direct children.
-- `<option>`s can contain any HTML,Text,or AMP component.
-- The list will not be a dropdown style list.
-**- If you have a need for a select box with text-only options please use the HTML `select` tag**
+- An `amp-selector` can contain any arbitrary HTML elements or AMP components.
+- Selectable options are marked by setting an `option` attribute on the element and assign a value to it.
+- - Example <li option='value'></li>
+- One or more options can be disabled by marking them with the `disabled` attribute.
+- The entire amp-selector could be disabled by adding the `disabled` attribute on the `amp-selector` element itself.
+- The selector by default allows one selection at a time, when the `multiple` attribute is added to the `amp-selector` element it enables multiple options to be selected at the same time.
+- Options can be pre-selected by adding the `selected` attribute to one or more options.
+- When an `amp-selector` has a `name` attribute and is put inside a `form` tag and a submit event occurs on the corresonding form the selector behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the selector.
 
+Example:
+
+```html
+<form action="/" method="get" target="_blank" id="form1">
+  <amp-selector layout="container" name="single_image_select">
+    <ul>
+      <li><amp-img src="/img1.png" width=50 height=50 option="1"></amp-img></li>
+      <li><amp-img src="/img2.png" width=50 height=50 option="2"></amp-img></li>
+      <li option="na" selected>None of the Above</li>
+    </ul>
+  </amp-selector>
+  <amp-selector layout="container" name="multi_image_select" multiple>
+    <amp-img src="/img1.png" width=50 height=50 option="1"></amp-img>
+    <amp-img src="/img2.png" width=50 height=50 option="2"></amp-img>
+    <amp-img src="/img3.png" width=50 height=50 option="3"></amp-img>
+  </amp-selector>
+  <amp-selector layout="container" name="multi_image_select_1" multiple>
+    <amp-carousel id="carousel-1" width=200 height=60 controls>
+      <amp-img src="/img1.png" width=80 height=60 option="a"></amp-img>
+      <amp-img src="/img2.png" width=80 height=60 option="b" selected></amp-img>
+      <amp-img src="/img3.png" width=80 height=60 option="c"></amp-img>
+      <amp-img src="/img4.png" width=80 height=60 option="d" disabled></amp-img>
+    </amp-carousel>
+  </amp-selector>
+</form>
+<amp-selector layout="container" name="multi_image_select_2" multiple form="form1">
+  <amp-carousel id="carousel-1" width=400 height=300 type=slides controls>
+    <amp-img src="/img1.png" width=80 height=60 option="a"></amp-img>
+    <amp-img src="/img2.png" width=80 height=60 option="b" selected></amp-img>
+    <amp-img src="/img3.png" width=80 height=60 option="c"></amp-img>
+    <amp-img src="/img4.png" width=80 height=60 option="d"></amp-img>
+  </amp-carousel>
+</amp-selector>
+```
 
 ##Attributes
 ### disabled, form, multiple, name
 
-The attributes above should all behave like they do on standard iframes.
+The attributes above should all behave like they do on standard HTML select.
 
-###Attributes on `<option>`
-#### disabled, selected, value
+###Attributes on the options
+#### disabled, selected
 
-The attributes above should all behave like they do on standard iframes.
-
-
-## Styling
-You should not use the `<option>` tag to style the options , instead give it a class name or an id to target it.
+The attributes above should all behave like they do on standard HTML option.
