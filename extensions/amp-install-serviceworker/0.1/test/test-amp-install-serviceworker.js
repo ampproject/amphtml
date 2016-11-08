@@ -470,6 +470,15 @@ describes.fakeWin('url rewriter', {
       expect(stub).to.be.calledOnce;
     });
 
+    it('should not preload non-HTTPS shell', () => {
+      win.location.resetHref('http://example.com/thisdoc.amp.html');
+      element.setAttribute('data-no-service-worker-fallback-shell-url',
+          'http://example.com/shell');
+      const stub = sandbox.stub(implementation, 'waitToPreloadShell_');
+      implementation.maybeInstallUrlRewrite_();
+      expect(stub).to.not.be.called;
+    });
+
     it('should run preload when visible', () => {
       implementation.waitToPreloadShell_('https://example.com/shell');
       expect(preloadStub).to.not.be.called;

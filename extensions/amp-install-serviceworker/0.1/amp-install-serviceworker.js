@@ -17,6 +17,7 @@
 import {
   assertHttpsUrl,
   isProxyOrigin,
+  isSecureUrl,
   parseUrl,
   removeFragment,
 } from '../../../src/url';
@@ -169,7 +170,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
 
     // Cache shell.
-    this.waitToPreloadShell_(shellUrl);
+    if (isSecureUrl(shellUrl)) {
+      this.waitToPreloadShell_(shellUrl);
+    }
   }
 
   /**
