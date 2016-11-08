@@ -28,12 +28,6 @@ class AmpViewerIntegration {
   constructor(win) {
     /** @const @private {!Window} win */
     this.win_ = win;
-    /** @const @private {string} */
-    this.handshakeRequest_ = 'amp-handshake-request';
-    /** @const @private {string} */
-    this.handshakeResponse_ = 'amp-handshake-response';
-    /** @const @private {string} */
-    this.eventTypeMessage_ = 'message';
   }
 
   init() {
