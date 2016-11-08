@@ -48,6 +48,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
 import {A4AVariableSource} from './a4a-variable-source';
@@ -78,8 +79,17 @@ const SAFEFRAME_VERSION = '1-0-4';
 const SAFEFRAME_IMPL_PATH =
     'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
     '/html/container.html';
+
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+
+/** @enum {string} */
+export const CROSS_ORIGIN_RENDERING_MODE = {
+  CLIENT_CACHE: 'client_cache',
+  SAFEFRAME: 'safeframe',
+  NAMEFRAME: 'nameframe',
+};
+
 /** @type {!Object} @private */
 const SHARED_IFRAME_PROPERTIES = {
   frameborder: '0',
@@ -178,7 +188,8 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?string}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-      platformFor(this.win).isIos() ? 'safeframe' : null;
+      platformFor(this.win).isIos() ?
+          CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME : null;
 
     this.emitLifecycleEvent('adSlotBuilt');
   }
@@ -383,13 +394,16 @@ export class AmpA4A extends AMP.BaseElement {
         .then(creativeParts => {
           checkStillCurrent(promiseId);
           // Keep a handle to the creative body so that we can render into
-          // SafeFrame later, if necessary.  TODO(tdrl): Temporary, while we
+          // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
+          // while we
           // assess whether this is the right solution to the Safari+iOS iframe
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
-              creativeParts && creativeParts.creative) {
+          if (this.experimentalNonAmpCreativeRenderMethod_ !=
+              CROSS_ORIGIN_RENDERING_MODE.CLIENT_CACHE &&
+              creativeParts &&
+              creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
           }
           if (!creativeParts || !creativeParts.signature) {
@@ -525,20 +539,23 @@ export class AmpA4A extends AMP.BaseElement {
         incrementLoadingAds(this.win);
         // Haven't rendered yet, so try rendering via one of our
         // cross-domain iframe solutions.
-        if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
-            this.creativeBody_) {
-          const renderPromise = this.renderViaSafeFrame_(this.creativeBody_);
-          this.creativeBody_ = null;  // Free resources.
-          return renderPromise;
+        let renderPromise;
+        if (this.experimentalNonAmpCreativeRenderMethod_ ==
+            CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME && this.creativeBody_) {
+          renderPromise = this.renderViaSafeFrame_(this.creativeBody_);
+        } else if (this.experimentalNonAmpCreativeRenderMethod_ ==
+            CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME && this.creativeBody_) {
+          renderPromise = this.renderViaNameframe_(this.creativeBody_);
         } else if (this.adUrl_) {
-          return this.renderViaCachedContentIframe_(this.adUrl_);
+          renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
           throw new Error('No creative or URL available -- A4A can\'t render' +
               ' any ad');
         }
-      }
-      if (rendered instanceof Error) {
-        throw rendered;
+        this.creativeBody_ = null;  // Free resources.
+        this.experimentalNonAmpCreativeRenderMethod_ =
+            CROSS_ORIGIN_RENDERING_MODE.CLIENT_CACHE;
+        return renderPromise;
       }
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
   }
@@ -849,6 +866,24 @@ export class AmpA4A extends AMP.BaseElement {
             'width': this.element.getAttribute('width'),
             'src': SAFEFRAME_IMPL_PATH + '?n=0',
             'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
+          }, SHARED_IFRAME_PROPERTIES));
+      return this.iframeRenderHelper_(iframe);
+    });
+  }
+
+  renderViaNameframe_(creativeBody) {
+    this.emitLifecycleEvent('renderSafeFrameStart');
+    return utf8Decode(creativeBody).then(creative => {
+      /** @const {!Element} */
+      const name_data = Object.create(null);
+      name_data['creative'] = creative;
+      const iframe = createElementWithAttributes(
+          /** @type {!Document} */(this.element.ownerDocument),
+          'iframe', Object.assign({
+            'height': this.element.getAttribute('height'),
+            'width': this.element.getAttribute('width'),
+            'src': getDefaultBootstrapBaseUrl(this.win, 'nameframe'),
+            'name': JSON.stringify(name_data),
           }, SHARED_IFRAME_PROPERTIES));
       return this.iframeRenderHelper_(iframe);
     });
