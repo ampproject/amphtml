@@ -370,8 +370,9 @@ describes.fakeWin('url rewriter', {
     viewer = win.services.viewer.obj;
     element = win.document.createElement('amp-install-serviceworker');
     element.setAttribute('src', 'https://example.com/sw.js');
+    // This is a RegExp string.
     element.setAttribute('data-no-service-worker-fallback-url-match',
-        '.amp.html');
+        '\\.amp\\.html');
     element.setAttribute('data-no-service-worker-fallback-shell-url',
         'https://example.com/shell');
     element.getAmpDoc = () => ampdoc;
@@ -387,7 +388,7 @@ describes.fakeWin('url rewriter', {
       implementation.maybeInstallUrlRewrite_();
       expect(implementation.urlRewriter_).to.be.ok;
       expect(implementation.urlRewriter_.urlMatchExpr_.source)
-          .to.equal('.amp.html');
+          .to.equal('\\.amp\\.html');
       expect(implementation.urlRewriter_.shellUrl_)
           .to.equal('https://example.com/shell');
     });

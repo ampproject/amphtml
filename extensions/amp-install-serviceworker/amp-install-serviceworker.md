@@ -78,7 +78,11 @@ Must have the value `nodisplay`.
 A regular expression that matches URLs to be rewritten to navigate via shell for no-service-worker fallback.
 See [Shell URL rewrite](#shell-url-rewrite) section for more details.
 
-The value must be a valid JavaScript RegExp string.
+The value must be a valid JavaScript RegExp string, for instance:
+ - `amp.html`
+ - `.*amp`
+ - `.*\.amp\.html`
+ - `.*\/amp$`
 
 ### `data-no-service-worker-fallback-shell-url`
 
