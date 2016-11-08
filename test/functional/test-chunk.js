@@ -104,7 +104,8 @@ describe('chunk', () => {
       basicTests(env);
     });
 
-    describe('error handling', () => {
+    describe.configure().skip(() => !('onunhandledrejection' in window))
+    .run('error handling', () => {
       let fakeWin;
       let done;
 
