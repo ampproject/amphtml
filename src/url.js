@@ -216,12 +216,14 @@ export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
-  user().assert(isSecureUrl(urlString) || /^(\/\/)/.test(urlString),
+  // (erwinm, #4560): type cast necessary until #4560 is fixed.
+  const theUrlString = /** @type {string} */ (urlString);
+  user().assert(isSecureUrl(theUrlString) || /^(\/\/)/.test(theUrlString),
       '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
-      elementContext, sourceName, urlString);
-  return /** @type {string} */ (urlString);
+      elementContext, sourceName, theUrlString);
+  return theUrlString;
 }
 
 /**

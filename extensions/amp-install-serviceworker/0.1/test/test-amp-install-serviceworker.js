@@ -32,8 +32,7 @@ describe('amp-install-serviceworker', () => {
   let sandbox;
   let container;
   let ampdoc;
-  let maybeInstallUrlRewrite;
-  let maybeInstallUrlRewritePromise;
+  let maybeInstallUrlRewriteStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -41,14 +40,9 @@ describe('amp-install-serviceworker', () => {
     ampdoc = ampdocServiceFor(window).getAmpDoc();
     container = document.createElement('div');
     document.body.appendChild(container);
-    let maybeInstallUrlRewriteResolve;
-    maybeInstallUrlRewritePromise = new Promise(resolve => {
-      maybeInstallUrlRewriteResolve = resolve;
-    });
-    maybeInstallUrlRewrite = sandbox.stub(
+    maybeInstallUrlRewriteStub = sandbox.stub(
         AmpInstallServiceWorker.prototype,
-        'maybeInstallUrlRewrite_',
-        maybeInstallUrlRewriteResolve);
+        'maybeInstallUrlRewrite_');
   });
 
   afterEach(() => {
@@ -85,7 +79,7 @@ describe('amp-install-serviceworker', () => {
     return loadPromise(implementation.win).then(() => {
       expect(calledSrc).to.equal('https://example.com/sw.js');
       // Should not be called before `register` resolves.
-      expect(maybeInstallUrlRewrite).to.not.be.called;
+      expect(maybeInstallUrlRewriteStub).to.not.be.called;
     });
   });
 
@@ -102,7 +96,7 @@ describe('amp-install-serviceworker', () => {
       },
     };
     implementation.buildCallback();
-    expect(maybeInstallUrlRewrite).to.be.calledOnce;
+    expect(maybeInstallUrlRewriteStub).to.be.calledOnce;
   });
 
   it('should do nothing with non-matching origins', () => {
@@ -150,90 +144,6 @@ describe('amp-install-serviceworker', () => {
     implementation.buildCallback();
     expect(calledSrc).to.undefined;
     expect(install.children).to.have.length(0);
-  });
-
-  it('should try to install url rewriter when register fails', () => {
-    const install = document.createElement('div');
-    container.appendChild(install);
-    install.setAttribute('src', 'https://example.com/sw.js');
-    const implementation = new AmpInstallServiceWorker(install);
-    const p = Promise.reject(new Error('intentional'));
-    implementation.win = {
-      complete: true,
-      location: {
-        href: 'https://example.com/some/path',
-      },
-      navigator: {
-        serviceWorker: {register: () => p},
-      },
-    };
-    implementation.buildCallback();
-    // Test `maybeInstallUrlRewrite` is called.
-    return maybeInstallUrlRewritePromise;
-  });
-
-  it('should try to install url rewriter without active SW', () => {
-    const install = document.createElement('div');
-    container.appendChild(install);
-    install.setAttribute('src', 'https://example.com/sw.js');
-    const implementation = new AmpInstallServiceWorker(install);
-    const p = Promise.resolve({});
-    implementation.win = {
-      complete: true,
-      location: {
-        href: 'https://example.com/some/path',
-      },
-      navigator: {
-        serviceWorker: {register: () => p},
-      },
-    };
-    implementation.buildCallback();
-    // Test `maybeInstallUrlRewrite` is called.
-    return maybeInstallUrlRewritePromise;
-  });
-
-  it('should try to install url rewriter when SW not-yet-activated', () => {
-    const install = document.createElement('div');
-    container.appendChild(install);
-    install.setAttribute('src', 'https://example.com/sw.js');
-    const implementation = new AmpInstallServiceWorker(install);
-    const p = Promise.resolve({active: {state: 'activating'}});
-    implementation.win = {
-      complete: true,
-      location: {
-        href: 'https://example.com/some/path',
-      },
-      navigator: {
-        serviceWorker: {register: () => p},
-      },
-    };
-    implementation.buildCallback();
-    // Test `maybeInstallUrlRewrite` is called.
-    return maybeInstallUrlRewritePromise;
-  });
-
-  it('should NOT try to install url rewriter when SW activated', () => {
-    const install = document.createElement('div');
-    container.appendChild(install);
-    install.setAttribute('src', 'https://example.com/sw.js');
-    const implementation = new AmpInstallServiceWorker(install);
-    const p = Promise.resolve({active: {state: 'activated'}});
-    implementation.win = {
-      complete: true,
-      location: {
-        href: 'https://example.com/some/path',
-      },
-      navigator: {
-        serviceWorker: {register: () => p},
-      },
-    };
-    implementation.buildCallback();
-    // Test `maybeInstallUrlRewrite` is not called.
-    return loadPromise(implementation.win).then(() => {
-      return p;
-    }).then(() => {
-      expect(maybeInstallUrlRewrite).to.not.be.called;
-    });
   });
 
   describe('proxy iframe injection', () => {
@@ -497,7 +407,6 @@ describes.fakeWin('url rewriter', {
       const iframe = element.querySelector('iframe');
       expect(iframe).to.exist;
       expect(iframe.src).to.equal('https://example.com/shell#preload');
-      expect(iframe).to.have.attribute('hidden');
       expect(iframe.style.display).to.equal('none');
       expect(iframe.getAttribute('sandbox'))
           .to.equal('allow-scripts allow-same-origin');

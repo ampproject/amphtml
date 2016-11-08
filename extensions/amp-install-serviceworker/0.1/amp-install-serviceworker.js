@@ -84,10 +84,6 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
       this.loadPromise(this.win).then(() => {
         return install(this.win, src);
-      }).then(reg => {
-        if (!reg || !reg.active || reg.active.state != 'activated') {
-          this.maybeInstallUrlRewrite_();
-        }
       });
     } else {
       user().error(TAG,
@@ -202,7 +198,6 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     iframe.setAttribute('src', shellUrl + '#preload');
 
     // Make the iframe hidden.
-    iframe.setAttribute('hidden', 'true');
     toggle(iframe, false);
 
     // Restrict what this iframe can do: not much beyond precaching the
