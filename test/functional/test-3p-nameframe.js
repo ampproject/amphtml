@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
+import {getBootstrapBaseUrl} from '../../src/3p-frame';
+import {createIframePromise} from '../../testing/iframe';
+import {listenForOncePromise} from '../../src/iframe-helper';
+
 describes.sandboxed('nameframe', {}, () => {
-  describes.realWin('frame load', {}, env => {
-    let win;
-    let doc;
+  let fixture;
+  let win;
+  let doc;
+  beforeEach(() => {
+    return createIframePromise(/* runtimeOff */ true).then(f => {
+      fixture = f;
+      win = fixture.win;
+      doc = fixture.doc;
+    })
+  });
 
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
-    });
-
-    it('should load from ampproject.net', () => {
-      win.addEventListener('message', event => {
-        console.log('Got message', event);
-      }, false);
-      const domain = win.location.origin;
-      const iframe = doc.createElement('iframe');
-      iframe.src = 'https://3p.ampproject.net/nameframe.html';
-      iframe.name = `<html>
+  it('should load from ampproject.net', () => {
+    const iframe = doc.createElement('iframe');
+    iframe.src = getBootstrapBaseUrl(win).replace('frame.max.html', 'nameframe.max.html');
+    iframe.name = `<html>
 <body>
 <script>
-window.parent.postMessage('creative rendered', ${domain});
 console.log('sending message');
+window.postMessage('creative rendered', '*');
+console.log('message sent');
 </script>
 </body>
 </html>`;
-      doc.body.appendChild(iframe);
-    });
-
+    const resultPromise = listenForOncePromise(iframe, 'message');
+    doc.body.appendChild(iframe);
+    return expect(resultPromise).to.eventually.be.ok;
   });
+
 });
