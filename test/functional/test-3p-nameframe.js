@@ -14,37 +14,65 @@
  * limitations under the License.
  */
 
-import {getBootstrapBaseUrl} from '../../src/3p-frame';
+import {getDefaultBootstrapBaseUrl} from '../../src/3p-frame';
 import {createIframePromise} from '../../testing/iframe';
-import {listenForOncePromise} from '../../src/iframe-helper';
+
+function expectNoContent(win, done) {
+  win.addEventListener('message', content => {
+    expect(content.data).to.have.property('type');
+    expect(content.data.type).to.equal('no-content');
+    done();
+  });
+}
 
 describes.sandboxed('nameframe', {}, () => {
   let fixture;
   let win;
   let doc;
+  let iframe;
   beforeEach(() => {
     return createIframePromise(/* runtimeOff */ true).then(f => {
       fixture = f;
       win = fixture.win;
       doc = fixture.doc;
-    })
+      iframe = doc.createElement('iframe');
+      iframe.src = getDefaultBootstrapBaseUrl(win, 'nameframe');
+    });
   });
 
-  it('should load from ampproject.net', () => {
-    const iframe = doc.createElement('iframe');
-    iframe.src = getBootstrapBaseUrl(win).replace('frame.max.html', 'nameframe.max.html');
-    iframe.name = `<html>
+  it('should load remote nameframe and succeed with valid JSON input', done => {
+    iframe.name = JSON.stringify({
+      creative: `<html>
 <body>
 <script>
-console.log('sending message');
-window.postMessage('creative rendered', '*');
-console.log('message sent');
+window.parent.postMessage({type: 'creative rendered'}, '*');
 </script>
 </body>
-</html>`;
-    const resultPromise = listenForOncePromise(iframe, 'message');
+</html>`
+    });
+    win.addEventListener('message', content => {
+      expect(content.data.type).to.equal('creative rendered');
+      done();
+    });
     doc.body.appendChild(iframe);
-    return expect(resultPromise).to.eventually.be.ok;
+  });
+
+  it('should fail if JSON is not paresable', done => {
+    iframe.name = 'not valid JSON';
+    expectNoContent(win, done);
+    doc.body.appendChild(iframe);
+  });
+
+  it('should fail if JSON is valid, but missing creative field', done => {
+    iframe.name = JSON.stringify({fnord: 'some meaningless data'});
+    expectNoContent(win, done);
+    doc.body.appendChild(iframe);
+  });
+
+  it('should fail if JSON is missing altogether', done => {
+    iframe.name = null;
+    expectNoContent(win, done);
+    doc.body.appendChild(iframe);
   });
 
 });

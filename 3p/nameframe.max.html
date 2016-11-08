@@ -4,10 +4,19 @@
     <meta charset="UTF-8">
     <script>
         window.onload = function() {
-            document.open();
-            document.write(window.name);
-            document.close();
-            console.log('Nameframe loaded content successfully');
+            try {
+                var name_data = JSON.parse(window.name);
+                if (!name_data || !name_data['creative']) {
+                    throw new Error('Missing or incorrectly formatted JSON ' +
+                        'input to nameframe');
+                }
+                document.open();
+                document.write(name_data['creative']);
+                document.close();
+            } catch (err) {
+                window.parent.postMessage(
+                        {type: 'no-content', error: err.message}, '*');
+            }
         };
     </script>
 </head>
