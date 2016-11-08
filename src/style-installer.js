@@ -81,7 +81,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
  */
 export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   const style = doc.createElement('style');
-  style.textContent = cssText;
+  style./*OK*/textContent = cssText;
   let afterElement = null;
   // Make sure that we place style tags after the main runtime CSS. Otherwise
   // the order is random.
