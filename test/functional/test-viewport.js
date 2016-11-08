@@ -935,6 +935,7 @@ describe('ViewportBindingNatural', () => {
       style: {},
     };
     documentBody = {
+      nodeType: 1,
       style: {},
     };
     windowApi.document = {
@@ -1224,7 +1225,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border on BODY', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1233,7 +1237,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border in lightbox mode', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to

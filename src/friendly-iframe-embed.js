@@ -21,7 +21,7 @@ import {extensionsFor} from './extensions';
 import {isDocumentReady} from './document-ready';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './resources';
-import {setStyles} from './style';
+import {setStyle, setStyles} from './style';
 
 
 /**
@@ -87,7 +87,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = extensionsFor(win);
 
-  iframe.style.visibility = 'hidden';
+  setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
 
   // Pre-load extensions.
@@ -156,7 +156,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     extensions.installExtensionsInChildWindow(
         childWin, spec.extensionIds || [], opt_preinstallCallback);
     // Ready to be shown.
-    iframe.style.visibility = '';
+    setStyle(iframe, 'visibility', '');
     if (childWin.document && childWin.document.body) {
       setStyles(dev().assertElement(childWin.document.body), {
         opacity: 1,

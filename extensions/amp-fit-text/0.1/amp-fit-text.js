@@ -94,7 +94,7 @@ class AmpFitText extends AMP.BaseElement {
     const maxWidth = this.element./*OK*/offsetWidth;
     const fontSize = calculateFontSize_(this.measurer_, maxHeight, maxWidth,
         this.minFontSize_, this.maxFontSize_);
-    this.contentWrapper_.style.fontSize = st.px(fontSize);
+    st.setStyle(this.contentWrapper_, 'fontSize', st.px(fontSize));
     updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
         fontSize);
   }
@@ -115,7 +115,7 @@ export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
   // Binomial search for the best font size.
   while (maxFontSize - minFontSize > 1) {
     const mid = Math.floor((minFontSize + maxFontSize) / 2);
-    measurer.style.fontSize = st.px(mid);
+    st.setStyle(measurer, 'fontSize', st.px(mid));
     const height = measurer./*OK*/offsetHeight;
     const width = measurer./*OK*/offsetWidth;
     if (height > expectedHeight || width > expectedWidth) {
@@ -136,7 +136,7 @@ export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
  * @private  Visible for testing only!
  */
 export function updateOverflow_(content, measurer, maxHeight, fontSize) {
-  measurer.style.fontSize = st.px(fontSize);
+  st.setStyle(measurer, 'fontSize', st.px(fontSize));
   const overflown = measurer./*OK*/offsetHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);

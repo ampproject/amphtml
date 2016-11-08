@@ -31,6 +31,7 @@ import {resourcesForDoc} from './resources';
 import {timerFor} from './timer';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
+import {setStyle, setStyles} from './style';
 
 
 const TAG_ = 'CustomElement';
@@ -295,17 +296,21 @@ export function applyLayout_(element) {
     element.classList.add('-amp-layout-size-defined');
   }
   if (layout == Layout.NODISPLAY) {
-    element.style.display = 'none';
+    setStyle(element, 'display', 'none');
   } else if (layout == Layout.FIXED) {
-    element.style.width = dev().assertString(width);
-    element.style.height = dev().assertString(height);
+    setStyles(element, {
+      width: dev().assertString(width),
+      height: dev().assertString(height),
+    });
   } else if (layout == Layout.FIXED_HEIGHT) {
-    element.style.height = dev().assertString(height);
+    setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amp-sizer');
-    sizer.style.display = 'block';
-    sizer.style.paddingTop =
-        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
+    setStyles(sizer, {
+      display: 'block',
+      paddingTop:
+        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
+    });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement_ = sizer;
   } else if (layout == Layout.FILL) {
@@ -318,10 +323,10 @@ export function applyLayout_(element) {
     // Set height and width to a flex item if they exist.
     // The size set to a flex item could be overridden by `display: flex` later.
     if (width) {
-      element.style.width = width;
+      setStyle(element, 'width', width);
     }
     if (height) {
-      element.style.height = height;
+      setStyle(element, 'height', height);
     }
   }
   return layout;
@@ -767,8 +772,8 @@ function createBaseCustomElementClass(win) {
         this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
       }
       if (this.sizeList_) {
-        this.style.width =
-            this.sizeList_.select(this.ownerDocument.defaultView);
+        setStyle(this, 'width', this.sizeList_.select(
+            this.ownerDocument.defaultView));
       }
       // Heights.
       if (this.heightsList_ === undefined) {
@@ -779,8 +784,8 @@ function createBaseCustomElementClass(win) {
 
       if (this.heightsList_ && this.layout_ ===
         Layout.RESPONSIVE && this.sizerElement_) {
-        this.sizerElement_.style.paddingTop = this.heightsList_.select(
-          this.ownerDocument.defaultView);
+        setStyle(this.sizerElement_, 'paddingTop', this.heightsList_.select(
+            this.ownerDocument.defaultView));
       }
     }
 
@@ -800,13 +805,13 @@ function createBaseCustomElementClass(win) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        this.sizerElement_.style.paddingTop = '0';
+        setStyle(this.sizerElement_, 'paddingTop', '0');
       }
       if (newHeight !== undefined) {
-        this.style.height = newHeight + 'px';
+        setStyle(this, 'height', newHeight, 'px');
       }
       if (newWidth !== undefined) {
-        this.style.width = newWidth + 'px';
+        setStyle(this, 'width', newWidth, 'px');
       }
     }
 
