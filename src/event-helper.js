@@ -92,15 +92,16 @@ export function listenOncePromise(element, eventType, opt_capture,
 
 
 /**
- * Whether the specified element has been loaded already.
- * @param {!Element|!Window} element
+ * Whether the specified element/window has been loaded already.
+ * @param {!Element|!Window} eleOrWindow
  * @return {boolean}
  */
-export function isLoaded(element) {
-  return !!(element.complete || element.readyState == 'complete'
+export function isLoaded(eleOrWindow) {
+  return !!(eleOrWindow.complete || eleOrWindow.readyState == 'complete'
       // If the passed in thing is a Window, infer loaded state from
       //
-      || (element.document && element.document.readyState == 'complete'));
+      || (eleOrWindow.document
+          && eleOrWindow.document.readyState == 'complete'));
 }
 
 /**
@@ -127,7 +128,7 @@ export function loadPromise(eleOrWindow, opt_timeout) {
     } else {
       unlistenLoad = listenOnce(eleOrWindow, 'load', resolve);
     }
-    // For eleOrWindows, unlisten on error (don't for Windows)
+    // For elements, unlisten on error (don't for Windows).
     if (tagName) {
       unlistenError = listenOnce(eleOrWindow, 'error', reject);
     }
