@@ -125,7 +125,10 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       }
       win[bodyVisibleSentinel] = true;
       if (opt_waitForServices) {
-        waitForServices(win).catch(() => []).then(services => {
+        waitForServices(win).catch(reason => {
+          rethrowAsync(reason);
+          return [];
+        }).then(services => {
           set();
           if (services.length > 0) {
             resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
