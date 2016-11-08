@@ -34,13 +34,10 @@ export class AmpAdImage extends AMP.BaseElement {
 
     /** @private {string} A string identifying this ad slot: the server's responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
-    if (!this.slot_.match(/^[0-9a-z]+$/)) {
+    if (this.slot_ && !this.slot_.match(/^[0-9a-z]+$/)) {
       user().error(TAG_AD_IMAGE, 'imagead slot should be alphanumeric: ' +
             this.slot_);
     }
-
-    /** @private {Object} Data passed back from the ad server, via the batch manager */
-    this.jsondata_ = null;
 
     /** @private {AmpAdBatchManager} This will batch up the display of this ad together with others of the same URL */
     this.batchManager_ = getBatchManager(this, this.url_,
@@ -58,7 +55,7 @@ export class AmpAdImage extends AMP.BaseElement {
 
   /** @override **/
   isLayoutSupported(layout) {
-    /** @todo Add proper support for more layouts, and figure out which ones we're permitting */
+    /** @TODO Add proper support for more layouts, and figure out which ones we're permitting */
     return isLayoutSizeDefined(layout);
   }
 
@@ -67,28 +64,27 @@ export class AmpAdImage extends AMP.BaseElement {
    * The response data can be found in the batch manager's responseData variable, indexed by slot.
    */
   showImageAd() {
-    const d = this.batchManager_.responseData[this.slot_];
+    const response = this.batchManager_.responseData[this.slot_];
     // See if there are any templates in this ad
     const templates = this.element.querySelectorAll('template');
-    if (templates.length) {
-      // We have a template. Use it to do the rendering.
-      const t = this;
-      templatesFor(this.win).findAndRenderTemplate(this.element, d)
-          .then(function(x) {
-            // Clear out the template and replace it by the rendered version
-            t.element.innerHTML = '';
-            t.element.appendChild(x);
-          });
-    } else {
+    if (templates.length == 0) {
       user().error(TAG_AD_IMAGE, 'Missing template in imagead');
+      return;
     }
+    const element = this.element;
+    templatesFor(this.win).findAndRenderTemplate(element, response)
+        .then(renderedElement => {
+          // Clear out the template and replace it by the rendered version
+          element.innerHTML = '';
+          element.appendChild(renderedElement);
+        });
   }
   /** @override */
   layoutCallback() {
-    const t = this;
     // Call the batch manager to do the layout
-    return t.batchManager_.doLayout(t).then(function() {
-      t.showImageAd();
+    return this.batchManager_.doLayout(this).then(element => {
+      // When the batch manager has fetched the batch of ads safely, it can now tell us to show this one.
+      element.showImageAd();
     });
   }
 }

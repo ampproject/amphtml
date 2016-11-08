@@ -20,7 +20,7 @@ import {xhrFor} from '../../../src/xhr';
 const AD_BATCH_TICK_LENGTH = 50;
 
 /** @const {number} The number of ticks to wait for a response from the ad server before timing out */
-const AD_BATCH_TIMEOUT = 100;
+const AD_BATCH_RETRIES = 100;
 
 /** @const {!string} Tag name for ad batch manager implementation. */
 export const TAG_AD_BATCH_MANAGER = 'amp-ad-batch-manager';
@@ -71,57 +71,43 @@ export class AmpAdBatchManager {
     this.url_ = element.url_;
 
     /** @private {string} The full URL of the ad server, including any slot ids */
-    this.fullurl_ = this.url_;
+    this.fullUrl_ = this.url_;
 
-    /** @private {string} The number of timer ticks remaining before we give up waiting for an ad server response */
-    this.timeout_ = AD_BATCH_TIMEOUT;
+    /** @private {number} The number of timer ticks remaining before we give up waiting for an ad server response */
+    this.retries_ = AD_BATCH_RETRIES;
 
     /** @public {Object} responseData Map of JSON responses indexed by slot */
     this.responseData = null;
 
     // Get a list of slots that are in use for this URL
-    const slots = [];
     const elements = element.win.imageadElements[this.url_];
-    for (let i = 0; i < elements.length; i++) {
-      const e = elements[i];
-
-      // If a slot is defined, add it to the list if it isn't there already
-      let s = e.getAttribute('data-slot');
-      if (s === null) {
-        s = 0;
-      }
-      let done = false;
-      for (const x in slots) {
-        if (slots[x] == s) {
-          done = true;
-        }
-      }
-      if (!done) {
-        slots.push(s);
-      }
-    }
+    const slots = elements.map(element => {
+      const slotId = element.getAttribute('data-slot');
+      // Use a slot id of 0 if the element didn't provide one.
+      return slotId ? slotId : 0;
+    });
     // If any slots were defined, add them to the URL
     if (slots.length) {
-      this.fullurl_ += '?s=' + slots.join(',');
+      this.fullUrl_ += '?s=' + slots.join(',');
     }
   }
 
   /**
    * Call this to instruct the batch manager to do the layout for an element. Prior to doing the layout, the batch manager
    * will fetch the data (if this is the batch master) or wait for it to be ready (if not the batch master).
-   * @param {Element} e The element for which the layout is to be done
+   * @param {Element} elem The element for which the layout is to be done
    * @returns {Promise} The element's "jsondata_" variable will be filled its with the data from the ad server before this is
-   *     resolved.
+   *     resolved. If resolved OK, the element is returned by the promise
    */
-  doLayout(e) {
+  doLayout(elem) {
     const t = this;
     return new Promise(function(resolve) {
-      if (e.isBatchMaster_) {
+      if (elem.isBatchMaster_) {
         // This is the master. We're going to do the layout for all ads in the batch
         // Gather the parameters to be added to the URL. First, make a list of the slot ids for all ads on this page with this URL
-        xhrFor(e.win).fetchJson(t.fullurl_).then(function(data) {
+        xhrFor(elem.win).fetchJson(t.fullUrl_).then(function(data) {
           t.responseData = data;
-          resolve('OK');
+          resolve(elem);
         }, function(err) {
           user().error(TAG_AD_BATCH_MANAGER, err);
         });
@@ -130,7 +116,7 @@ export class AmpAdBatchManager {
         // This is not the master. We need to wait for the master to have fetched the response for the ad server; when this is done,
         // it's OK to proceed
         t.getResponseWhenReady().then(function() {
-          resolve('OK');
+          resolve(elem);
         }, function(err) {
           user().error(TAG_AD_BATCH_MANAGER, err);
         });
@@ -148,7 +134,7 @@ export class AmpAdBatchManager {
     return new Promise(function(resolve, reject) {
       if (t.responseData === null) {
         // The response data is not ready. Let's wait 50 ms and try again
-        if (--t.timeout_) {
+        if (--t.retries_) {
           setTimeout(function() {
             t.getResponseWhenReady().then(function() {
               resolve('OK');
