@@ -26,7 +26,6 @@ export class Messaging {
      * @param {function(string, *, boolean):(!Promise<*>|undefined)}
      *    requestProcessor
      * @param {string=} opt_targetId
-     * @constructor
      */
     constructor(target, targetOrigin, requestProcessor, opt_targetId) {
       this.sentinel_ = '__AMP__';
@@ -49,13 +48,13 @@ export class Messaging {
         throw new Error('Target origin must be specified');
       }
 
-      listen(this.target_, 'message', this.onMessage_.bind(this));
+      listen(this.target_, 'message', (this.onMessage_.bind(this)));
     }
 }
 
 
 /**
- * @param {!Event} event
+ * @param {Event|null} event
  * @private
  */
 Messaging.prototype.onMessage_ = function(event) {
@@ -78,7 +77,7 @@ Messaging.prototype.onMessage_ = function(event) {
 Messaging.prototype.onRequest_ = function(message) {
   //TODO: Remove console.log before merge to prod.
   console.log('here @ messaging.js -> onRequest_');
-  const requestId = message.requestId;
+  const requestId = message.requestId.toString();
   const promise = this.requestProcessor_(message.type, message.payload,
       message.rsvp);
   if (message.rsvp) {
@@ -124,7 +123,7 @@ Messaging.prototype.sendRequest = function(eventType, payload,
     awaitResponse) {
   //TODO: Remove console.log before merge to prod.
   console.log('here @ messaging.js -> sendRequest');
-  const requestId = ++this.requestIdCounter_;
+  const requestId = (++this.requestIdCounter_).toString();
   if (awaitResponse) {
     const promise = new Promise(function(resolve, reject) {
       this.waitingForResponse_[requestId] = {resolve, reject};
@@ -147,14 +146,15 @@ Messaging.prototype.sendRequest = function(eventType, payload,
 Messaging.prototype.sendResponse_ = function(requestId, payload) {
   //TODO: Remove console.log before merge to prod.
   console.log('here @ messaging.js -> sendResponse_');
-  this.sendMessage_(this.responseSentinel_, requestId, null, payload, false);
+  this.sendMessage_(
+    this.responseSentinel_, requestId.toString(), null, payload, false);
 };
 
 
 /**
  * @param {string} sentinel
  * @param {string} requestId
- * @param {string} eventType
+ * @param {string|null} eventType
  * @param {*} payload
  * @param {boolean} awaitResponse
  * @private
@@ -178,5 +178,6 @@ Messaging.prototype.sendMessage_ = function(sentinel, requestId,
  * @private
  */
 Messaging.prototype.sendResponseError_ = function(requestId, reason) {
-  this.sendMessage_(this.responseSentinel_, requestId, 'ERROR', reason, false);
+  this.sendMessage_(
+    this.responseSentinel_, requestId.toString(), 'ERROR', reason, false);
 };

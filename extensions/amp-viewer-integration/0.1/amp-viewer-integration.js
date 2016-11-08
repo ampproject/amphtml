@@ -23,7 +23,6 @@ class AmpViewerIntegration {
 
   /**
    * @param {!Window} win
-   * @constructor
    */
   constructor(win) {
     /** @const @private {!Window} win */
@@ -49,14 +48,14 @@ class AmpViewerIntegration {
   }
 
   /**
-   * @return {!Promise<!./service/viewer-impl.Viewer>}
+   * @return {!Promise<!../../../src/service/viewer-impl.Viewer>}
    */
   getViewer() {
     return viewerPromiseForDoc(this.win_.document);
   }
 
   /**
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-impl.Viewer} viewer
    */
   getHandshakePromise(viewer) {
     const win = this.win_;
