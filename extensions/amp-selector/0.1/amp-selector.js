@@ -15,6 +15,7 @@
  */
 
 import {closest} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 
@@ -98,8 +99,9 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.appendChild(this.inputWrapper_);
       setStyle(this.inputWrapper_, 'display', 'none');
     }
-
-    this.inputWrapper_.innerHTML = '';
+    // This should be okay because the innerHTML is only hidden inputs and the
+    // wrapper is display none.
+    this.inputWrapper_./*REVIEW*/innerHTML = '';
     const fragment = doc.createDocumentFragment();
 
     this.selectedElements_.forEach(selectedElement => {
@@ -120,13 +122,16 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   clickHandler_(event) {
-    let el = event.target;
-    if (!el || !el.hasAttribute('option')) {
+    let el = dev().assertElement(event.target);
+    if (!el) {
+      return;
+    }
+    if (!el.hasAttribute('option')) {
       el = closest(el, element => {
         return element.hasAttribute('option');
       }, this.element);
     }
-    if (!el || el.hasAttribute('disabled')) {
+    if (el.hasAttribute('disabled')) {
       return;
     }
     if (el.hasAttribute('selected')) {
