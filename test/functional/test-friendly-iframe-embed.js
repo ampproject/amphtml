@@ -367,6 +367,7 @@ describe('friendly-iframe-embed', () => {
 
       loadListener = undefined;
       iframe = {
+        tagName: 'IFRAME',
         ownerDocument: {defaultView: win},
         style: {},
         setAttribute: () => {},
