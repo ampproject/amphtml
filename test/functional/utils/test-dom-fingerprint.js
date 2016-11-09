@@ -15,7 +15,7 @@
  */
 
 import {
-  domFingerprintString,
+  domFingerprintPlain,
   domFingerprint,
   stringHash32,
 } from '../../../src/utils/dom-fingerprint';
@@ -53,30 +53,29 @@ describe('domFingerprint', () => {
      */
     div1 = document.createElement('div');
     div1.id = 'id1';
+    div1.innerHTML =
+      `<div id='id2'>
+         <table>
+           <tr>
+             <td></td>
+             <td>
+               <amp-ad name="this one" type="adsense"></amp-ad>
+             </td>
+           </tr>
+           <tr></tr>
+         </table>
+      </div>`;
+
     body.appendChild(div1);
-    const div2 = document.createElement('div');
-    div2.id = 'id2';
-    div1.appendChild(div2);
-    const table = document.createElement('table');
-    div2.appendChild(table);
-    const tr1 = document.createElement('tr');
-    table.appendChild(tr1);
-    const tr2 = document.createElement('tr');
-    table.appendChild(tr2);
-    const td1 = document.createElement('td');
-    tr1.appendChild(td1);
-    const td2 = document.createElement('td');
-    tr1.appendChild(td2);
-    ampAd = document.createElement('amp-ad');
-    td2.appendChild(ampAd);
+    ampAd = document.getElementsByTagName('amp-ad')[0];
   });
 
   it('should map a sample DOM structure to the right string', () => {
-    expect(domFingerprintString(ampAd)).to.equal(
-      'amp-ad.0,td.1,tr.0,table.0,div/id2.0,div/id1.0,body.0,html');
+    expect(domFingerprintPlain(ampAd)).to.equal(
+      'amp-ad.0,td.1,tr.0,tbody.0,table.0,div/id2.0,div/id1.0,body.0,html.0');
   });
   it('should map a sample DOM structure to the right hashed value', () => {
-    expect(domFingerprint(ampAd)).to.equal('491975076');
+    expect(domFingerprint(ampAd)).to.equal('2437661740');
   });
 
   afterEach(() => {

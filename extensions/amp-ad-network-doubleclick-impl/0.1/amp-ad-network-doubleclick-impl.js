@@ -32,7 +32,7 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {
-  domFingerprintString,
+  domFingerprintPlain,
   stringHash32,
 } from '../../../src/utils/dom-fingerprint';
 
@@ -159,7 +159,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   adKey_(size) {
     const element = this.element;
-    const domFingerprint = domFingerprintString(element);
+    const domFingerprint = domFingerprintPlain(element);
     const slot = element.getAttribute('data-slot') || '';
     const multiSize = element.getAttribute('data-multi-size') || '';
     const string = `${slot}:${size}:${multiSize}:${domFingerprint}`;

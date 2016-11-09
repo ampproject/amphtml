@@ -17,43 +17,9 @@
 
 
 /**
- * Gets a string showing the index of an element within
- * the children of its parent, counting only nodes with the same tag.
- * Stop at 25, just to have a limit.
- * @param {?Element} element DOM node to get index of.
- * @return {string} '.<index>' or ''.
- */
-function indexWithinParent(element) {
-  if (element && element.nodeName && element.parentElement) {
-    const elementParent = element.parentElement;
-    const nodeName = element.nodeName.toString().toLowerCase();
-    // Find my index within my parent's children
-    const children = elementParent.childNodes;
-    // Choose a limit that we hope will allow getting to 25
-    // matching nodes.
-    const limit = Math.min(children.length, 100);
-    let matchingNodeCount = 0;
-    for (let i = 0; i < limit && matchingNodeCount < 25; i++) {
-      const child = children[i];
-      // Some browsers treat childNodes differently.
-      // So we'll only count nodes with the same tag.
-      if (child.nodeName &&
-          child.nodeName.toString().toLowerCase() === nodeName) {
-        if (element === child) {
-          return '.' + matchingNodeCount;
-        }
-        ++matchingNodeCount;
-      }
-    }
-  }
-  return '';
-};
-
-
-/**
  * Gets a string of concatenated element names and relative positions
  * of the DOM element and its parentElement's (up to 25).  Relative position
- * is the index of nodes with this tag within the parent's childNodes.
+ * is the index of nodes with this tag within the parent's children.
  * The order is from the inner to outer nodes in DOM hierarchy.
  *
  * If a DOM hierarchy is the following:
@@ -80,19 +46,20 @@ function indexWithinParent(element) {
  * @param {?Element} element DOM node from which to get fingerprint.
  * @return {string} Concatenated element ids.
  */
-export function domFingerprintString(element) {
+export function domFingerprintPlain(element) {
   const ids = [];
-  for (let level = 0; element && element.nodeType == /* element */ 1 &&
-           level < 25; ++level) {
-    // Skip generated id on amp-ad.
-    const id = level > 0 && element.id;
-    const nodeName = element.nodeName &&
-          element.nodeName.toString().toLowerCase();
-    ids.push(nodeName + (id ? '/' + id : '') +
-             indexWithinParent(element));
+  let level = 0;
+  while (element && element.nodeType == /* element */ 1 && level < 25) {
+    const id = element.id &&
+               // Skip AMP generated ids.
+               !(element.getResourceId &&
+                 element.id == 'AMP_' + element.getResourceId()) ?
+      `/${element.id}` : '';
+    const nodeName = String(element.nodeName).toLowerCase();
+    ids.push(`${nodeName}${id}${indexWithinParent(element)}`);
+    level++;
     element = element.parentElement;
   }
-
   return ids.join();
 };
 
@@ -107,11 +74,13 @@ export function domFingerprintString(element) {
  * @return {string} The ad unit hash key string.
  */
 export function domFingerprint(element) {
-  return stringHash32(domFingerprintString(element)).toString();
+  return String(stringHash32(domFingerprintPlain(element)));
 };
 
 /**
  * Hash function djb2a
+ * This is intended to be a simple, fast hashing function using minimal code.
+ * It does *not* have good cryptographic properties.
  * @param {string} str
  * @return {number} 32-bit unsigned hash of the string
  */
@@ -123,4 +92,29 @@ export function stringHash32(str) {
   }
   // Convert from 32-bit signed to unsigned.
   return hash >>> 0;
+};
+
+
+/**
+ * Gets a string showing the index of an element within
+ * the children of its parent, counting only nodes with the same tag.
+ * Stop at 25, just to have a limit.
+ * @param {!Element} element DOM node to get index of.
+ * @return {string} '.<index>' or ''.
+ */
+function indexWithinParent(element) {
+  // Note that some older browsers return an object for nodeName,
+  // so explicitly coerce to String.
+  const nodeName = String(element.nodeName);
+  // Find my index within my parent's children
+  let count = 0;
+  let sibling = element.previousElementSibling;
+  while (sibling && count < 25) {
+    if (String(sibling.nodeName) == nodeName) {
+      count++;
+    }
+    sibling = sibling.previousElementSibling;
+  }
+  // If we got to the end, then the count is accurate; otherwise skip count.
+  return !sibling ? `.${count}` : '';
 };

@@ -34,7 +34,7 @@ import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
 import {
-  domFingerprintString,
+  domFingerprintPlain,
   stringHash32,
 } from '../../../src/utils/dom-fingerprint';
 
@@ -125,7 +125,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   adKey_(format) {
     const element = this.element;
     const slot = element.getAttribute('data-ad-slot') || '';
-    const string = `${slot}:${format}:${domFingerprintString(element)}`;
+    const string = `${slot}:${format}:${domFingerprintPlain(element)}`;
     return stringHash32(string).toString();
   }
 

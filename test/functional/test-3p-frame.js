@@ -166,9 +166,7 @@ describe('3p-frame', () => {
         ',"canary":true' +
         ',"hidden":false' +
         // Note that DOM fingerprint will change if the document DOM changes
-        // Also, DOM structure for gulp test --files seems to be different from
-        // structure for gulp test. So use .only instead of --files here.
-        ',"domFingerprint":"932357496"' +
+        ',"domFingerprint":"258846393"' +
         ',"startTime":1234567888' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
@@ -181,6 +179,7 @@ describe('3p-frame', () => {
     const srcParts = src.split('#');
     expect(srcParts[0]).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+    console.log(srcParts[1]);
     expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
 
     // Switch to same origin for inner tests.
