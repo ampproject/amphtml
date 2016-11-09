@@ -23,3 +23,8 @@ amp-ad iframe {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+.amp-ad-default-fallback {
+  /* TODO(zhouyx): Confirm on the background-color value */
+  background-color: #d3d3d3;
+}
