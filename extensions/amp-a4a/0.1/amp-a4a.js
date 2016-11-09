@@ -177,9 +177,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
     }
 
-    // TODO(tdrl): Temporary, while we're verifying whether this is an
-    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src
-    // from cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
     /**
@@ -187,6 +184,7 @@ export class AmpA4A extends AMP.BaseElement {
      * uses safeframe when response header is not specified.
      * @private {?string}
      */
+    /** @type {!CROSS_ORIGIN_RENDERING_MODE} @visibleForTesting */
     this.experimentalNonAmpCreativeRenderMethod_ =
       platformFor(this.win).isIos() ?
           CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME : null;
@@ -553,8 +551,6 @@ export class AmpA4A extends AMP.BaseElement {
               'No creative or URL available -- A4A can\'t render any ad');
         }
         this.creativeBody_ = null;  // Free resources.
-        this.nonAmpCreativeRenderMethod_ =
-            CROSS_ORIGIN_RENDERING_MODE.CLIENT_CACHE;
         return renderPromise;
       }
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
@@ -868,19 +864,23 @@ export class AmpA4A extends AMP.BaseElement {
     return utf8Decode(creativeBody).then(creative => {
       let srcPath;
       let nameData;
-      if (method == CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME) {
-        srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
-        nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
-      } else if (method == CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME) {
-        srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-        nameData = JSON.stringify({creative});
-      } else {
-        // Shouldn't be able to get here, but...  Because of the assert, above,
-        // we can only get here in non-dev mode, so give user feedback.
-        user().error('A4A', 'A4A received unrecognized cross-domain name'
-            + ' attribute iframe rendering mode request: %s.  Unable to'
-            + ' render a creative for'
-            + ' slot %s.', method, this.element.getAttribute('id'));
+      switch (method) {
+        case CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME:
+          srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
+          nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
+          break;
+        case CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME:
+          srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
+          nameData = JSON.stringify({creative});
+          break;
+        default:
+          // Shouldn't be able to get here, but...  Because of the assert, above,
+          // we can only get here in non-dev mode, so give user feedback.
+          user().error('A4A', 'A4A received unrecognized cross-domain name'
+              + ' attribute iframe rendering mode request: %s.  Unable to'
+              + ' render a creative for'
+              + ' slot %s.', method, this.element.getAttribute('id'));
+          return Promise.reject();
       }
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
