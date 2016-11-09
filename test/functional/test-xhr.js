@@ -267,7 +267,7 @@ describe('XHR', function() {
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
-          if (test.desc == 'Native') {
+          if (test.desc == 'Native' && 'Response' in Window) {
             return new Response(body, init);
           } else {
             init.responseText = body;
