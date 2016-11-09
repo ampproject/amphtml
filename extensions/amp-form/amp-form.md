@@ -146,6 +146,8 @@ Using `submit-success` and `submit-error` special marker attributes, publishers 
 
 The response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 
+Both success and error responses should have a `Content-Type: application/json` header. `submit-success` will render for all responses that has a status of `2XX`, all other statuses will render `submit-error`.
+
 **Success Response**
 ```json
 {
