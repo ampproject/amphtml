@@ -238,19 +238,6 @@ Authors may add custom styles to a document using a single `<style amp-custom>` 
 
 The following restrictions apply to selectors in author style sheets:
 
-##### Universal selector
-The universal selector `*` may not be used in author stylesheets. This is because it can have negative performance implications and could be used to circumvent the rules set out in the following paragraph.
-
-##### not selector
-`:not()` may not be used in selectors because it can be used to simulate the universal selector.
-
-##### Pseudo-selectors, pseudo-classes and pseudo-elements
-Pseudo-selectors, pseudo-classes and pseudo-elements are only allowed in selectors that contain tag names and those tag names must not start with `amp-`.
-
-Example OK: `a:hover`, `div:last-of-type`
-
-Example not OK:  `amp-img:hover`, `amp-img:last-of-type`
-
 ##### Class and tag names
 Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
 
@@ -434,7 +421,7 @@ The `id` attribute is optional. Individual AMP elements discover their own templ
 
 The syntax within the template element depends on the specific template language. However, the template language could be restricted within AMP. For instance, in accordance with the "template" element, all productions have to be over a valid well-formed DOM. All of the template outputs are also subject to sanitizing to ensure AMP-valid output.
 
-To learn about the syntax and restrictions for an extended template, visit the [extended template's documentation](./amp-html-templates.md#templates). 
+To learn about the syntax and restrictions for an extended template, visit the [extended template's documentation](./amp-html-templates.md#templates).
 
 ##### URL
 
