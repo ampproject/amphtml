@@ -211,13 +211,7 @@ function handleHashClick_(e, tgtLoc, ampdoc, viewport, history) {
   // If possible do update the URL with the hash. As explained above
   // we do `replace` to avoid messing with the container's history.
   if (tgtLoc.hash != curLoc.hash) {
-    // Push a new state to history that would take us back to the current
-    // hash when users hit back.
-    history.push(() => {
-      win.location.replace(`${curLoc.hash || '#'}`);
-    }).then(() => {
-      // Replace the newly pushed state with the actual hash.
-      win.history.replaceState(null, null, `#${hash}`);
+    history.replaceStateForTarget(tgtLoc.hash, curLoc.hash).then(() => {
       scrollToElement(elem, win, viewport, hash);
     });
   } else {

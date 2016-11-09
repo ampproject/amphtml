@@ -52,6 +52,9 @@ export class History {
    * @param {!HistoryBindingInterface} binding
    */
   constructor(ampdoc, binding) {
+    /** @private @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private @const {!../service/timer-impl.Timer} */
     this.timer_ = timerFor(ampdoc.win);
 
@@ -105,6 +108,20 @@ export class History {
       return this.binding_.pop(stateId).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
+    });
+  }
+
+  /**
+   *
+   * @param {string} target
+   * @param {string} previousTarget
+   * @returns {Promise.<T>}
+   */
+  replaceStateForTarget(target, previousTarget) {
+    return this.push(() => {
+      this.ampdoc_.win.location.replace(previousTarget || '#');
+    }).then(() => {
+      this.binding_.replaceStateForTarget(target);
     });
   }
 
@@ -224,6 +241,12 @@ class HistoryBindingInterface {
    * @return {!Promise<number>}
    */
   pop(unusedStackIndex) {}
+
+  /**
+   * Replaces the state for local target navigation.
+   * @param target
+   */
+  replaceStateForTarget(target) {}
 }
 
 
@@ -349,7 +372,6 @@ export class HistoryBindingNatural_ {
       this.win.history.replaceState = this.origReplaceState_;
     }
     this.win.removeEventListener('popstate', this.popstateHandler_);
-    this.win.removeEventListener('hashchange', this.hashchangeHandler_);
   }
 
   /** @override */
@@ -521,32 +543,40 @@ export class HistoryBindingNatural_ {
   }
 
   /**
+   * If this is a hash update the choice of `location.replace` vs
+   * `history.replaceState` is important. Due to bugs, not every browser
+   * triggers `:target` pseudo-class when `replaceState` is called.
+   * See http://www.zachleat.com/web/moving-target/ for more details.
+   * location.replace will trigger a `popstate` event, we temporarily
+   * disable handling it.
+   * @param {string} target
+   *
+   * @override
+   */
+  replaceStateForTarget(target) {
+    this.whenReady_(() => {
+      this.ignoreUpcomingPopstate_ = true;
+      // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
+      this.win.location.replace(target);
+      this.ignoreUpcomingPopstate_ = false;
+      this.historyReplaceState_();
+    });
+  }
+
+  /**
    * @param {*=} state
    * @param {(string|undefined)=} title
    * @param {(string|undefined)=} url
    * @private
    */
   historyReplaceState_(state, title, url) {
-    this.whenReady_(() => {
-      if (!state) {
-        state = {};
-      }
-      // If this is a hash update the choice of `location.replace` vs
-      // `history.replaceState` is important. Due to bugs, not every browser
-      // triggers `:target` pseudo-class when `replaceState` is called.
-      // See http://www.zachleat.com/web/moving-target/ for more details.
-      if (url.indexOf('#') == 0) {
-        // location.replace will trigger a `popstate` event, we temporarily
-        // disable handling it.
-        this.ignoreUpcomingPopstate_ = true;
-        this.win.location.replace(url);
-        this.ignoreUpcomingPopstate_ = false;
-      }
-      const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
-      state[HISTORY_PROP_] = stackIndex;
-      this.replaceState_(state, title, url);
-      this.updateStackIndex_(stackIndex);
-    });
+    if (!state) {
+      state = {};
+    }
+    const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
+    state[HISTORY_PROP_] = stackIndex;
+    this.replaceState_(state, title, url);
+    this.updateStackIndex_(stackIndex);
   }
 
   /**
@@ -599,32 +629,14 @@ export class HistoryBindingVirtual_ {
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
         this.onHistoryPopped_.bind(this));
-
-    const history = this.win.history;
-
-    /** @private @const {function(*, string=, string=)|undefined} */
-    this.origReplaceState_ = history.replaceState.bind(history);
-    history.replaceState = this.historyReplaceState_.bind(this);
   }
 
   /**
-   * Overrides default history.replaceState to handle updating the hash using
-   * location.replace instead to trigger re-evaluation of :target selector. Falls back
-   * to the original history.replaceState if this is not a hash update.
-   *
-   * @param {!Object=} data
-   * @param {string=} title
-   * @param {string=} url
-   * @private
+   * @param {string} target
+   * @override
    */
-  historyReplaceState_(data, title, url) {
-    if (url.indexOf('#') == 0) {
-      // location.replace will trigger a `popstate` event, we temporarily
-      // disable handling it.
-      this.win.location.replace(url);
-    } else {
-      this.origReplaceState_(data, title, url);
-    }
+  replaceStateForTarget(target) {
+    this.win.location.replace(target);
   }
 
   /** @override */
