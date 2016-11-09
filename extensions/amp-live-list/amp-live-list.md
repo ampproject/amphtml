@@ -56,6 +56,10 @@ is live blogs: coverage for breaking news or live events where the user can stay
 on or keep returning to the same page to see new updates as they come in. Common
 examples are award shows, sporting events, and elections.
 
+## How it works
+
+In the background, while an AMP page using `<amp-live-list>` is displayed on the client, the AMP runtime polls the origin document on the host for updates. When the client receives a response, it then [filters](#server-side-filtering) and dynamically inserts those updates back into the page on the client. Publishers can customize the polling rate in order to control the number of incoming requests, and AMP caches like the Google AMP Cache can perform optimizations to reduce the server response payload, saving client bandwidth and CPU cycles.
+
 The `amp-live-list` component has 3 sections. We'll refer to these sections as
 "reference points" and they are denoted by an attribute. The 3 reference points are
 `update`, `items` and `pagination` and must be a direct child of the `amp-live-list`
