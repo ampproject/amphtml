@@ -127,7 +127,7 @@ https://pub.com/doc.amp.html
 
 -->
 
-https://pub.com/shell?href=%2Fdoc.amp.html
+https://pub.com/shell#href=%2Fdoc.amp.html
 ```
 
 Besides rewriting URLs, `amp-install-serviceworker` also will try to preload the shell. This is done by creating an iframe with `#preload` fragment:
