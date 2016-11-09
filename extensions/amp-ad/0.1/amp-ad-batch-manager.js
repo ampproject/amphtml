@@ -33,11 +33,11 @@ let imageadElements = null;
 /**
   * Get a batch manager that will be used to batch together elements with the same data-url
   * Note a side effect: the first ad with a given data-url to be processed will have its isBatchMaster_ variable set to true
-  * @param {Element} e The element which is to be batched
+  * @param {Element} elem The element which is to be batched
   * @param {string} url The URL identifying which batch
   * @returns {AmpAdBatchManager}
   */
-export function getBatchManager(e, url) {
+export function getBatchManager(elem, url) {
   // If this is our first imagead, create a map of responses for each value of 'data-url'
   // This allows ads from multiple ad servers on the same page
   if (imageadBatchManagers === null) {
@@ -57,19 +57,19 @@ export function getBatchManager(e, url) {
   }
   if (!(url in imageadBatchManagers)) {
     // This is the first time we've seen this URL, so this will be the master for this batch
-    e.batchMaster(true);
-    imageadBatchManagers[url] = new AmpAdBatchManager(e);
+    elem.batchMaster(true);
+    imageadBatchManagers[url] = new AmpAdBatchManager(url);
   }
   return imageadBatchManagers[url];
 }
 
 export class AmpAdBatchManager {
 
-  /** @param {!Element} element */
-  constructor(element) {
+  /** @param {string} url The base URL of the ad server */
+  constructor(url) {
 
     /** @private {string} The base URL of the ad server */
-    this.url_ = element.url_;
+    this.url_ = url;
 
     /** @private {string} The full URL of the ad server, including any slot ids */
     this.fullUrl_ = this.url_;
