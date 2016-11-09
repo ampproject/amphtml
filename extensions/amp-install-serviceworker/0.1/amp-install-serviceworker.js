@@ -273,8 +273,7 @@ class UrlRewriter_ {
     // Only rewrite URLs to a different location to avoid breaking fragment
     // navigation.
     const win = this.win;
-    const curLoc = parseUrl(win.location.href);
-    if (removeFragment(tgtLoc.href) == removeFragment(curLoc.href)) {
+    if (removeFragment(tgtLoc.href) == removeFragment(win.location.href)) {
       return;
     }
 
