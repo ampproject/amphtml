@@ -79,6 +79,8 @@ Learn more about
 [validating your AMP pages](https://www.ampproject.org/docs/guides/validate.html).
 Also see [additional choices to invoke the validator](validator/README.md).
 
+Tutorial on [how to validate AMP pages](https://asknoypi.com/accelerated-mobile-pages-validator/).
+
 ## AMP HTML Components
 
 AMP HTML Components are a series of extended custom elements that supplement
