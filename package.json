@@ -87,7 +87,7 @@
     "mocha": "2.5.3",
     "morgan": "1.7.0",
     "path": "0.12.7",
-    "postcss": "5.0.14",
+    "postcss": "5.0.20",
     "postcss-import": "8.0.2",
     "pretty-bytes": "2.0.1",
     "request": "2.73.0",
