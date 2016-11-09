@@ -195,7 +195,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   }
   // Entry point for shadow runtime.
   compileJs('./src/', 'amp-shadow-babel.js', './dist', {
-    toName: 'amp-shadow.js',
+    toName: 'amp-shadow.max.js',
     minifiedName: 'shadow-v0.js',
     includePolyfills: true,
     checkTypes: opt_checkTypes,
