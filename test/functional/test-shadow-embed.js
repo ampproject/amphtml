@@ -53,15 +53,17 @@ describe('shadow-embed', () => {
     const parentRoot = document.createElement('div');
     const style = document.createElement('style');
     style.setAttribute('amp-runtime', '');
-    style.textContent = '/*runtime*/';
+    style.textContent = '.cssClass{}';
     parentRoot.appendChild(style);
+    const hostElement = document.createElement('div');
+    const shadowRoot = createShadowRoot(hostElement);
     const ampdoc = new AmpDocShadow(window, 'https://a.org/', parentRoot);
-    const shadowRoot = document.createElement('div');
+
     copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
 
     const copy = shadowRoot.querySelector('style[amp-runtime]');
     expect(copy).to.exist;
-    expect(copy.textContent).to.equal('/*runtime*/');
+    expect(copy.textContent).to.contain('.cssClass');
     expect(copy).to.not.equal(style);
   });
 
@@ -69,10 +71,13 @@ describe('shadow-embed', () => {
     describe('shadow APIs ' + scenario, () => {
       let hostElement;
 
-      beforeEach(() => {
+      beforeEach(function() {
         hostElement = document.createElement('div');
         if (scenario == 'polyfill') {
           setShadowDomSupportedForTesting(false);
+        }
+        if (scenario == 'native' && !isShadowDomSupported()) {
+          this.skip();
         }
       });
 
