@@ -200,6 +200,12 @@ export const adConfig = {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  holder: {
+    prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
+    preconnect: 'https://h.holder.com.ua',
+    renderStartImplemented: true,
+  },
+
   ibillboard: {},
 
   imobile: {
