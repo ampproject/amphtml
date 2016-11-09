@@ -25,6 +25,6 @@ amp-ad iframe {
 }
 
 .amp-ad-default-fallback {
-  /* TODO(zhouyx): Confirm on the background-color value*/
+  /* TODO(zhouyx): Confirm on the background-color value */
   background-color: #d3d3d3;
 }
