@@ -15,6 +15,9 @@
  */
 
 import {dev} from '../../../src/log';
+import {createElementWithAttributes} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
+import {UX_EXPERIMENT} from '../../../src/layout';
 
 const TAG = 'AmpAdUIHandler';
 
@@ -59,12 +62,29 @@ export class AmpAdUIHandler {
 
     /** {number} */
     this.state = AdDisplayState.NOT_LAID_OUT;;
+
+    /** {!boolean} */
+    this.hasPageProvidedFallback_ = !!baseInstance.getFallback();
   }
 
   /**
    * TODO(@zhouyx): Add ad tag to the ad.
    */
   init() {
+    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
+      return;
+    }
+
+    if (this.hasPageProvidedFallback_) {
+      return;
+    }
+
+    // Apply default fallback div when there's no default one
+    const holder = createElementWithAttributes(document, 'div', {
+      'fallback': '',
+    });
+    holder.classList.add('amp-ad-default-fallback');
+    this.baseInstance_.element.appendChild(holder);
   }
 
   /**
@@ -102,6 +122,7 @@ export class AmpAdUIHandler {
    */
   displayLoadingUI_() {
     this.state = AdDisplayState.LOADING;
+    this.baseInstance_.togglePlaceholder(true);
   }
 
   /**
@@ -110,6 +131,7 @@ export class AmpAdUIHandler {
    */
   displayRenderStartUI_() {
     this.state = AdDisplayState.LOADED_RENDER_START;
+    this.baseInstance_.togglePlaceholder(false);
   }
 
   /**
@@ -120,7 +142,8 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    if (this.baseInstance_.getFallback()) {
+    // The order here is user provided fallback > collapse > default fallback
+    if (this.hasPageProvidedFallback_) {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
           // If already unlaid out, do not replace current placeholder then.
@@ -135,6 +158,9 @@ export class AmpAdUIHandler {
         this.baseInstance_./*OK*/collapse();
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       }, () => {
+        // Apply default fallback when resize fail.
+        this.baseInstance_.togglePlaceholder(false);
+        this.baseInstance_.toggleFallback(true);
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
     }

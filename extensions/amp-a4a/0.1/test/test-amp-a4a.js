@@ -585,7 +585,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('type', 'adsense');
-        const a4a = new AmpA4A(a4aElement);
+        const a4a = new MockA4AImpl(a4aElement);
         //a4a.config = {};
         a4a.buildCallback();
         a4a.preconnectCallback(false);

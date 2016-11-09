@@ -36,5 +36,9 @@ export class MockA4AImpl extends AmpA4A {
           base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
     });
   }
+
+  getFallback() {
+    return null;
+  }
 }
 
