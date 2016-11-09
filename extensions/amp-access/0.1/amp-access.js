@@ -22,7 +22,7 @@ import {AccessVendorAdapter} from './amp-access-vendor';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
 import {actionServiceForDoc} from '../../../src/action';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {analyticsFor} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
@@ -178,6 +178,9 @@ export class AccessService {
     /** @private {time} */
     this.loginStartTime_ = 0;
 
+    /** @private {!Promise<!InstrumentationService>} */
+    this.analyticsPromise_ = analyticsFor(win);
+
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
       this.performance_.tick('aaa');
@@ -293,7 +296,9 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.win, eventType);
+    this.analyticsPromise_.then(analytics => {
+      analytics.triggerEvent(eventType);
+    });
   }
 
   /**

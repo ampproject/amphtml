@@ -25,7 +25,6 @@ import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -274,7 +273,7 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
-      setStyle(iframe, 'zIndex', -1);
+      iframe.style.zIndex = -1;
     }
 
     this.propagateAttributes(
@@ -385,7 +384,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.placeholder_) {
       this.getVsync().mutate(() => {
         if (this.iframe_) {
-          setStyle(this.iframe_, 'zIndex', 0);
+          this.iframe_.style.zIndex = 0;
           this.togglePlaceholder(false);
         }
       });

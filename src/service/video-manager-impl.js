@@ -437,17 +437,7 @@ export function supportsAutoplay(win, isLiteViewer) {
     opacity: '0',
   });
 
-  try {
-    const playPromise = detectionElement.play();
-    if (playPromise && playPromise.catch) {
-      playPromise.catch(() => {
-        // Suppress any errors, useless to report as they are expected.
-      });
-    }
-  } catch (e) {
-    // Suppress any errors, useless to report as they are expected.
-  }
-
+  detectionElement.play();
   const supportsAutoplay = !detectionElement.paused;
   return supportsAutoplayCache_ = Promise.resolve(supportsAutoplay);
 }

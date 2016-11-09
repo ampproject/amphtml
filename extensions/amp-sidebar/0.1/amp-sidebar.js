@@ -62,12 +62,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
-
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win);
-
-    /** @private {number|string|null} */
-    this.openOrCloseTimeOut_ = null;
   }
 
   /** @override */
@@ -180,10 +174,7 @@ export class AmpSidebar extends AMP.BaseElement {
         this.element.setAttribute('aria-hidden', 'false');
         // Focus on the sidebar for a11y.
         tryFocus(this.element);
-        if (this.openOrCloseTimeOut_) {
-          this.timer_.cancel(this.openOrCloseTimeOut_);
-        }
-        this.openOrCloseTimeOut_ = this.timer_.delay(() => {
+        timerFor(this.win).delay(() => {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
           this.scheduleResume(children);
@@ -208,10 +199,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      if (this.openOrCloseTimeOut_) {
-        this.timer_.cancel(this.openOrCloseTimeOut_);
-      }
-      this.openOrCloseTimeOut_ = this.timer_.delay(() => {
+      timerFor(this.win).delay(() => {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {

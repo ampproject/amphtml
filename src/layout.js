@@ -21,11 +21,7 @@
 
 import {dev, user} from './log';
 import {isFiniteNumber} from './types';
-import {setStyles} from './style';
-import {isExperimentOn} from './experiments';
 
-/** @const {string} */
-export const UX_EXPERIMENT = 'amp-ad-loading-ux';
 
 /**
  * @enum {string}
@@ -251,10 +247,8 @@ export function getNaturalDimensions(element) {
     const temp = doc.createElement(naturalTagName);
     // For audio, should no-op elsewhere.
     temp.controls = true;
-    setStyles(temp, {
-      position: 'absolute',
-      visibility: 'hidden',
-    });
+    temp.style.position = 'absolute';
+    temp.style.visibility = 'hidden';
     doc.body.appendChild(temp);
     naturalDimensions_[tagName] = {
       width: (temp./*OK*/offsetWidth || 1) + 'px',
@@ -270,16 +264,9 @@ export function getNaturalDimensions(element) {
  * Whether the loading can be shown for the specified elemeent. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
- * @param {!Element} element.
+ * @param {string} tagName The element tag name.
  * @return {boolean}
  */
-export function isLoadingAllowed(element) {
-  const tagName = element.tagName.toUpperCase();
-  if (tagName == 'AMP-AD' || tagName == 'AMP-EMBED') {
-    const win = element.ownerDocument.defaultView;
-    if (isExperimentOn(win, UX_EXPERIMENT)) {
-      return true;
-    }
-  }
-  return LOADING_ELEMENTS_[tagName] || false;
+export function isLoadingAllowed(tagName) {
+  return LOADING_ELEMENTS_[tagName.toUpperCase()] || false;
 }

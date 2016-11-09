@@ -462,6 +462,7 @@ describe('AccessService authorization', () => {
   let clock;
   let configElement, elementOn, elementOff, elementError;
   let cidMock;
+  let analyticsMock;
   let adapterMock;
   let performanceMock;
   let service;
@@ -532,7 +533,12 @@ describe('AccessService authorization', () => {
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
-    service.analyticsEvent_ = sandbox.spy();
+    const analytics = {
+      triggerEvent: () => {},
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+
     performanceMock = sandbox.mock(service.performance_);
   });
 
@@ -550,6 +556,7 @@ describe('AccessService authorization', () => {
       elementError.parentElement.removeChild(elementError);
     }
     adapterMock.verify();
+    analyticsMock.verify();
     performanceMock.verify();
     sandbox.restore();
   });
@@ -699,6 +706,9 @@ describe('AccessService authorization', () => {
         .withExactArgs()
         .returns(Promise.resolve({access: true}))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-received')
+        .once();
     performanceMock.expects('tick')
         .withExactArgs('aaa')
         .once();
@@ -707,11 +717,7 @@ describe('AccessService authorization', () => {
         .once();
     expect(service.firstAuthorizationPromise_).to.exist;
     return service.runAuthorization_().then(() => {
-      return service.whenFirstAuthorized().then(() => {
-        expect(service.analyticsEvent_).to.have.been.calledOnce;
-        expect(service.analyticsEvent_).to.have.been.calledWith(
-            'access-authorization-received');
-      });
+      return service.whenFirstAuthorized();
     });
   });
 
@@ -721,6 +727,12 @@ describe('AccessService authorization', () => {
         .withExactArgs()
         .returns(Promise.reject('intentional'))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-received')
+        .never();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-failed')
+        .once();
     return service.runAuthorization_().then(() => {
       expect(service.firstAuthorizationPromise_).to.exist;
       let resolved = false;
@@ -729,11 +741,6 @@ describe('AccessService authorization', () => {
       });
       return Promise.resolve().then(() => {
         expect(resolved).to.be.false;
-        expect(service.analyticsEvent_).to.have.been.calledOnce;
-        expect(service.analyticsEvent_).to.not.have.been.calledWith(
-            'access-authorization-received');
-        expect(service.analyticsEvent_).to.have.been.calledWith(
-            'access-authorization-failed');
       });
     });
   });
@@ -914,6 +921,8 @@ describe('AccessService pingback', () => {
   let configElement;
   let adapterMock;
   let cidMock;
+  let analytics;
+  let analyticsMock;
   let visibilityChanged;
   let scrolled;
   let service;
@@ -954,7 +963,12 @@ describe('AccessService pingback', () => {
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
-    service.analyticsEvent_ = sandbox.spy();
+    analytics = {
+      triggerEvent: () => {},
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+
     this.docState_ = {
       onReady: callback => callback(),
     };
@@ -981,6 +995,7 @@ describe('AccessService pingback', () => {
       configElement.parentElement.removeChild(configElement);
     }
     adapterMock.verify();
+    analyticsMock.verify();
     sandbox.restore();
   });
 
@@ -995,6 +1010,9 @@ describe('AccessService pingback', () => {
 
   it('should register "viewed" signal after timeout', () => {
     service.reportViewToServer_ = sandbox.spy();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
     const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       clock.tick(2001);
@@ -1003,12 +1021,14 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(visibilityChanged.getHandlerCount()).to.equal(0);
       expect(scrolled.getHandlerCount()).to.equal(0);
-      expect(service.analyticsEvent_).to.have.been.calledWith('access-viewed');
     });
   });
 
   it('should register "viewed" signal after scroll', () => {
     service.reportViewToServer_ = sandbox.spy();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
     const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       scrolled.fire();
@@ -1017,12 +1037,14 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(visibilityChanged.getHandlerCount()).to.equal(0);
       expect(scrolled.getHandlerCount()).to.equal(0);
-      expect(service.analyticsEvent_).to.have.been.calledWith('access-viewed');
     });
   });
 
   it('should register "viewed" signal after click', () => {
     service.reportViewToServer_ = sandbox.spy();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
     const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       let clickEvent;
@@ -1039,7 +1061,6 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(visibilityChanged.getHandlerCount()).to.equal(0);
       expect(scrolled.getHandlerCount()).to.equal(0);
-      expect(service.analyticsEvent_).to.have.been.calledWith('access-viewed');
     });
   });
 
@@ -1049,6 +1070,7 @@ describe('AccessService pingback', () => {
     service.firstAuthorizationPromise_ = new Promise(resolve => {
       firstAuthorizationResolver = resolve;
     });
+    const triggerEventStub = sandbox.stub(analytics, 'triggerEvent');
     const triggerStart = 1;  // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
@@ -1057,14 +1079,14 @@ describe('AccessService pingback', () => {
       return Promise.resolve();
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
-      expect(service.analyticsEvent_.callCount).to.equal(triggerStart);
+      expect(triggerEventStub.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
       return Promise.all([service.firstAuthorizationPromise_,
           service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
-      expect(service.analyticsEvent_.callCount).to.equal(triggerStart + 1);
-      expect(service.analyticsEvent_.getCall(triggerStart).args[0])
+      expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
+      expect(triggerEventStub.getCall(triggerStart).args[0])
           .to.equal('access-viewed');
     });
   });
@@ -1075,6 +1097,7 @@ describe('AccessService pingback', () => {
     service.lastAuthorizationPromise_ = new Promise(resolve => {
       lastAuthorizationResolver = resolve;
     });
+    const triggerEventStub = sandbox.stub(analytics, 'triggerEvent');
     const triggerStart = 1;  // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
@@ -1083,14 +1106,14 @@ describe('AccessService pingback', () => {
       return Promise.resolve();
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
-      expect(service.analyticsEvent_.callCount).to.equal(triggerStart);
+      expect(triggerEventStub.callCount).to.equal(triggerStart);
       lastAuthorizationResolver();
       return Promise.all([service.lastAuthorizationPromise_,
           service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
-      expect(service.analyticsEvent_.callCount).to.equal(triggerStart + 1);
-      expect(service.analyticsEvent_.getCall(triggerStart).args[0])
+      expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
+      expect(triggerEventStub.getCall(triggerStart).args[0])
           .to.equal('access-viewed');
     });
   });
@@ -1196,14 +1219,15 @@ describe('AccessService pingback', () => {
         .withExactArgs()
         .returns(Promise.resolve())
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-sent')
+        .once();
     return service.reportViewToServer_().then(() => {
       return 'SUCCESS';
     }, error => {
       return 'ERROR ' + error;
     }).then(result => {
       expect(result).to.equal('SUCCESS');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-pingback-sent');
     });
   });
 
@@ -1213,16 +1237,18 @@ describe('AccessService pingback', () => {
         .withExactArgs()
         .returns(Promise.reject('intentional'))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-sent')
+        .never();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-failed')
+        .once();
     return service.reportViewToServer_().then(() => {
       return 'SUCCESS';
     }, error => {
       return 'ERROR ' + error;
     }).then(result => {
       expect(result).to.match(/ERROR/);
-      expect(service.analyticsEvent_).to.have.not.been.calledWith(
-          'access-pingback-sent');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-pingback-failed');
     });
   });
 
@@ -1251,6 +1277,7 @@ describe('AccessService login', () => {
   let clock;
   let configElement;
   let cidMock;
+  let analyticsMock;
   let serviceMock;
   let service;
 
@@ -1283,7 +1310,12 @@ describe('AccessService login', () => {
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
-    service.analyticsEvent_ = sandbox.spy();
+    const analytics = {
+      triggerEvent: () => {},
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+
     service.openLoginDialog_ = () => {};
     serviceMock = sandbox.mock(service);
 
@@ -1390,12 +1422,13 @@ describe('AccessService login', () => {
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
     service.openLoginDialog_.returns(new Promise(() => {}));
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
     service.login('');
     expect(service.openLoginDialog_.callCount).to.equal(1);
     expect(service.openLoginDialog_.firstCall.args[0])
         .to.equal('https://acme.com/l?rid=R');
-    expect(service.analyticsEvent_).to.have.been.calledWith(
-        'access-login-started');
   });
 
   it('should fail to open dialog if loginUrl is not built yet', () => {
@@ -1412,6 +1445,12 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-success')
+        .once();
     return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(authorizationStub.callCount).to.equal(1);
@@ -1424,11 +1463,6 @@ describe('AccessService login', () => {
         'type': 'amp-access-reauthorize',
         'origin': service.pubOrigin_,
       });
-
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-success');
     });
   });
 
@@ -1438,13 +1472,15 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=no'))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-rejected')
+        .once();
     return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-rejected');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
     });
   });
 
@@ -1457,6 +1493,12 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve(''))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-rejected')
+        .once();
     return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(authorizationStub.callCount).to.equal(1);
@@ -1469,10 +1511,6 @@ describe('AccessService login', () => {
         'type': 'amp-access-reauthorize',
         'origin': service.pubOrigin_,
       });
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-rejected');
     });
   });
 
@@ -1482,14 +1520,16 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.reject('abort'))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-failed')
+        .once();
     return service.login('').then(() => 'S', () => 'ERROR').then(result => {
       expect(result).to.equal('ERROR');
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-failed');
     });
   });
 
@@ -1509,6 +1549,18 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l2?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-login2-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-success')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-login2-success')
+        .once();
     return service.login('login2').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(authorizationStub.callCount).to.equal(1);
@@ -1517,14 +1569,6 @@ describe('AccessService login', () => {
         'type': 'amp-access-reauthorize',
         'origin': service.pubOrigin_,
       });
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-login2-started');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-success');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-login2-success');
     });
   });
 

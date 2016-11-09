@@ -79,7 +79,9 @@ describe('chunk', () => {
     beforeEach(() => {
       installDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
-      env.win.document.hidden = false;
+      Object.defineProperty(env.win.document, 'hidden', {
+        get: () => false,
+      });
     });
 
     basicTests(env);
@@ -91,7 +93,10 @@ describe('chunk', () => {
 
     beforeEach(() => {
       expect(env.win.services.viewer).to.not.be.undefined;
-      env.win.document.hidden = false;
+      Object.defineProperty(env.win.document, 'hidden', {
+        get: () => false,
+        configurable: true,
+      });
     });
 
     describe('visible', () => {
@@ -102,40 +107,6 @@ describe('chunk', () => {
         });
       });
       basicTests(env);
-    });
-
-    describe.configure().skip(() => !('onunhandledrejection' in window))
-    .run('error handling', () => {
-      let fakeWin;
-      let done;
-
-      function onReject(event) {
-        expect(event.reason.message).to.match(/test async/);
-        done();
-      }
-
-      beforeEach(() => {
-        toggleExperiment(env.win, 'chunked-amp', experimentOn);
-        fakeWin = env.win;
-        const viewer = viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
-          return true;
-        });
-        window.addEventListener('unhandledrejection', onReject);
-      });
-
-      afterEach(() => {
-        window.removeEventListener('unhandledrejection', onReject);
-      });
-
-      it('should proceed on error and rethrowAsync', d => {
-        chunk(fakeWin.document, () => {
-          throw new Error('test async');
-        });
-        chunk(fakeWin.document, () => {
-          done = d;
-        });
-      });
     });
 
     describe('invisible experiment off', () => {
@@ -200,7 +171,9 @@ describe('chunk', () => {
         env.sandbox.stub(resolved, 'then', () => {
           throw new Error('No calls expected');
         });
-        env.win.document.hidden = true;
+        Object.defineProperty(env.win.document, 'hidden', {
+          get: () => true,
+        });
       });
 
       basicTests(env);

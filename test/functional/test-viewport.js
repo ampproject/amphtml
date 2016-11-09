@@ -935,7 +935,6 @@ describe('ViewportBindingNatural', () => {
       style: {},
     };
     documentBody = {
-      nodeType: 1,
       style: {},
     };
     windowApi.document = {
@@ -1225,10 +1224,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border on BODY', () => {
     windowApi.document = {
-      body: {
-        nodeType: 1,
-        style: {},
-      },
+      body: {style: {}},
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1237,10 +1233,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border in lightbox mode', () => {
     windowApi.document = {
-      body: {
-        nodeType: 1,
-        style: {},
-      },
+      body: {style: {}},
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1430,9 +1423,6 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     const htmlCss = win.getComputedStyle(win.document.documentElement);
     const wrapperCss = win.getComputedStyle(binding.wrapper_);
     const bodyCss = win.getComputedStyle(win.document.body);
-
-    // `<html>` must have `position: static` or layout is broken.
-    expect(htmlCss.position).to.equal('static');
 
     // `<html>` and `<i-amp-html-wrapper>` must be scrollable, but not `body`.
     // Unfortunately, we can't test here `-webkit-overflow-scrolling`.

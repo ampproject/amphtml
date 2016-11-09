@@ -16,7 +16,7 @@
 
 import {dev, user} from '../log';
 import {platformFor} from '../platform';
-import {getStyle, setStyle, setStyles} from '../style';
+import {setStyle, setStyles} from '../style';
 
 const TAG = 'FixedLayer';
 
@@ -235,7 +235,7 @@ export class FixedLayer {
 
         // 1. Set all style top to `auto` and calculate the auto-offset.
         this.fixedElements_.forEach(fe => {
-          setStyle(fe.element, 'top', 'auto');
+          fe.element.style.top = 'auto';
         });
         this.fixedElements_.forEach(fe => {
           autoTopMap[fe.id] = fe.element./*OK*/offsetTop;
@@ -243,7 +243,7 @@ export class FixedLayer {
 
         // 2. Reset style top.
         this.fixedElements_.forEach(fe => {
-          setStyle(fe.element, 'top', '');
+          fe.element.style.top = '';
         });
 
         // 3. Calculated fixed info.
@@ -437,7 +437,7 @@ export class FixedLayer {
     for (let i = 0; i < this.fixedElements_.length; i++) {
       if (this.fixedElements_[i].element == element) {
         this.vsync_.mutate(() => {
-          setStyle(element, 'top', '');
+          element.style.top = '';
         });
         const fe = this.fixedElements_[i];
         this.fixedElements_.splice(i, 1);
@@ -481,9 +481,9 @@ export class FixedLayer {
     if (state.fixed) {
       // Update `top`. This is necessary to adjust position to the viewer's
       // paddingTop.
-      setStyle(element, 'top', state.top ?
+      element.style.top = state.top ?
           `calc(${state.top} + ${this.paddingTop_}px)` :
-          '');
+          '';
 
       // Move element to the fixed layer.
       if (!oldFixed && this.transfer_) {
@@ -495,8 +495,8 @@ export class FixedLayer {
       }
     } else if (oldFixed) {
       // Reset `top` which was assigned above.
-      if (getStyle(element, 'top')) {
-        setStyle(element, 'top', '');
+      if (element.style.top) {
+        element.style.top = '';
       }
 
       // Move back to the BODY layer and reset transfer z-index.
@@ -529,8 +529,7 @@ export class FixedLayer {
     }
 
     // Calculate z-index based on the declared z-index and DOM position.
-    setStyle(element, 'zIndex',
-        `calc(${10000 + index} + ${state.zIndex || 0})`);
+    element.style.zIndex = `calc(${10000 + index} + ${state.zIndex || 0})`;
 
     element.parentElement.replaceChild(fe.placeholder, element);
     this.getFixedLayer_().appendChild(element);
@@ -580,8 +579,8 @@ export class FixedLayer {
     }
     dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
     if (this.ampdoc.contains(fe.element)) {
-      if (getStyle(fe.element, 'zIndex')) {
-        setStyle(fe.element, 'zIndex', '');
+      if (fe.element.style.zIndex) {
+        fe.element.style.zIndex = '';
       }
       fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
     } else {

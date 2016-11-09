@@ -20,7 +20,6 @@ import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
 import {insertStyleElement} from './style-installer';
-import {setStyle} from './style';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -187,17 +186,17 @@ export function importShadowBody(shadowRoot, body) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
   if (isShadowDomSupported()) {
-    resultBody = dev().assertElement(doc.importNode(body, true));
+    resultBody = doc.importNode(body, true);
   } else {
     resultBody = doc.createElement('amp-body');
     for (let n = body.firstChild; !!n; n = n.nextSibling) {
       resultBody.appendChild(doc.importNode(n, true));
     }
-    setStyle(resultBody, 'display', 'block');
+    resultBody.style.display = 'block';
   }
-  setStyle(resultBody, 'position', 'relative');
+  resultBody.style.position = 'relative';
   shadowRoot.appendChild(resultBody);
-  return resultBody;
+  return dev().assertElement(resultBody);
 }
 
 
@@ -338,7 +337,7 @@ function rootSelectorPrefixer(match, name, pos, selector) {
  */
 function getStylesheetRules(doc, css) {
   const style = doc.createElement('style');
-  style./*OK*/textContent = css;
+  style.textContent = css;
   try {
     (doc.head || doc.documentElement).appendChild(style);
     if (style.sheet) {

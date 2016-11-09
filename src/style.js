@@ -138,9 +138,9 @@ export function setStyles(element, styles) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = getStyle(element, 'display') == 'none';
+    opt_display = !(element.style.display != 'none');
   }
-  setStyle(element, 'display', opt_display ? '' : 'none');
+  element.style.display = opt_display ? '' : 'none';
 }
 
 

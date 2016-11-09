@@ -57,7 +57,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.cells_ = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.add('-amp-scrollable-carousel-container');
     st.setStyles(this.container_, {
       'white-space': 'nowrap',
       'overflow-x': 'auto',
@@ -69,10 +68,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.cells_.forEach(cell => {
       this.setAsOwner(cell);
       cell.classList.add('amp-carousel-slide');
-      st.setStyle(cell, 'display', 'inline-block');
+      cell.style.display = 'inline-block';
       if (cell != this.cells_[0]) {
         // TODO(dvoytenko): this has to be customizable
-        st.setStyle(cell, 'marginLeft', '8px');
+        cell.style.marginLeft = '8px';
       }
       this.container_.appendChild(cell);
     });
@@ -155,8 +154,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /**
-   * Update the slides need to be loaded given current position.
-   * Preload next slides and update control button state.
    * @param {number} pos
    * @private
    */
@@ -165,9 +162,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.updateInViewport_(pos, this.oldPos_);
     this.doLayout_(pos);
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
+    this.setControlsState();
     this.oldPos_ = pos;
     this.pos_ = pos;
-    this.setControlsState();
   }
 
   /**

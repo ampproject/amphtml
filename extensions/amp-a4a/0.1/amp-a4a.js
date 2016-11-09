@@ -44,7 +44,6 @@ import {
   PublicKeyInfoDef,
 } from './crypto-verifier';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 
@@ -756,7 +755,7 @@ export class AmpA4A extends AMP.BaseElement {
               // Ensure visibility hidden has been removed (set by boilerplate).
               const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
                 friendlyIframeEmbed.win.document;
-              setStyle(frameDoc.body, 'visibility', 'visible');
+              frameDoc.body.style.visibility = 'visible';
               // Capture phase click handlers on the ad.
               this.registerExpandUrlParams_(friendlyIframeEmbed.win);
               // Bubble phase click handlers on the ad.

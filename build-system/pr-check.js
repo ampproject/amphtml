@@ -25,7 +25,6 @@
  */
 const child_process = require('child_process');
 const path = require('path');
-const minimist = require('minimist');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 
@@ -74,16 +73,6 @@ function isValidatorWebuiFile(filePath) {
 }
 
 /**
- * Determines whether the given file belongs to the Validator webui,
- * that is, the 'BUILD_SYSTEM' target.
- * @param {string} filePath
- * @return {boolean}
- */
-function isBuildSystemFile(filePath) {
-  return filePath.startsWith('build-system');
-}
-
-/**
  * Determines whether the given file belongs to the validator,
  * that is, the 'VALIDATOR' target. This assumes (but does not
  * check) that the file is not part of 'VALIDATOR_WEBUI'.
@@ -102,14 +91,6 @@ function isValidatorFile(filePath) {
 }
 
 /**
- * @param {string} filePath
- * @return {boolean}
- */
-function isDocFile(filePath) {
-  return path.extname(filePath) == '.md';
-}
-
-/**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
@@ -117,68 +98,19 @@ function isDocFile(filePath) {
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
-    return new Set(['BUILD_SYSTEM', 'VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME',
-        'DOCS']);
+    return new Set(['VALIDATOR_WEBUI', 'VALIDATOR', 'RUNTIME']);
   }
   const targetSet = new Set();
   for (p of filePaths) {
-    if (isBuildSystemFile(p)) {
-      targetSet.add('BUILD_SYSTEM');
-    } else if (isValidatorWebuiFile(p)) {
+    if (isValidatorWebuiFile(p)) {
       targetSet.add('VALIDATOR_WEBUI');
     } else if (isValidatorFile(p)) {
       targetSet.add('VALIDATOR');
-    } else if (isDocFile(p)) {
-      targetSet.add('DOCS');
     } else {
       targetSet.add('RUNTIME');
     }
   }
   return targetSet;
-}
-
-
-const command = {
-  testBuildSystem: function() {
-    execOrDie('npm run ava');
-  },
-  buildRuntime: function() {
-    execOrDie(`${gulp} lint`);
-    execOrDie(`${gulp} build --css-only`);
-    execOrDie(`${gulp} check-types`);
-    execOrDie(`${gulp} dist --fortesting`);
-  },
-  testRuntime: function() {
-    // dep-check needs to occur after build since we rely on build to generate
-    // the css files into js files.
-    execOrDie(`${gulp} dep-check`);
-    // Unit tests with Travis' default chromium
-    execOrDie(`${gulp} test --nobuild --compiled`);
-    // Integration tests with all saucelabs browsers
-    execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
-    // All unit tests with an old chrome (best we can do right now to pass tests
-    // and not start relying on new features).
-    // Disabled because it regressed. Better to run the other saucelabs tests.
-    execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
-  },
-  presubmit: function() {
-    execOrDie(`${gulp} presubmit`);
-  },
-  buildValidatorWebUI: function() {
-    execOrDie('cd validator/webui && python build.py');
-  },
-  buildValidator: function() {
-    execOrDie('cd validator && python build.py');
-  },
-};
-
-function runAllCommands() {
-  command.testBuildSystem();
-  command.buildRuntime();
-  command.presubmit();
-  command.testRuntime();
-  command.buildValidatorWebUI();
-  command.buildValidator();
 }
 
 /**
@@ -188,20 +120,8 @@ function runAllCommands() {
  * @returns {number}
  */
 function main(argv) {
-  // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
-  if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
-    console.log('Running all commands on push build.');
-    runAllCommands();
-    return 0;
-  }
-  const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const files = filesInPr(travisCommitRange);
-  const buildTargets = determineBuildTargets(files);
-
-  if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
-    console.log('Only docs were updated, stopping build process.');
-    return 0;
-  }
+  const travisCommitRange = argv[2] || '';
+  const buildTargets = determineBuildTargets(filesInPr(travisCommitRange));
 
   const sortedBuildTargets = [];
   for (const t of buildTargets) {
@@ -213,33 +133,39 @@ function main(argv) {
       '\npr-check.js: detected build targets: ' +
       sortedBuildTargets.join(', ') + '\n');
 
-  if (buildTargets.has('BUILD_SYSTEM')) {
-    command.testBuildSystem();
+  if (buildTargets.has('RUNTIME')) {
+    execOrDie('npm run ava');
+    execOrDie(`${gulp} lint`);
+    execOrDie(`${gulp} build --css-only`);
+    execOrDie(`${gulp} check-types`);
+    execOrDie(`${gulp} dist --fortesting`);
   }
 
-  if (buildTargets.has('RUNTIME')) {
-    command.buildRuntime();
-  }
-
-  // Presubmit needs to run after `gulp dist` as some checks runs through the
-  // dist/ folder.
-  // Also presubmit always needs to run even for just docs to check for
-  // copyright at the top.
-  command.presubmit();
+  execOrDie(`${gulp} presubmit`);
 
   if (buildTargets.has('RUNTIME')) {
-    command.testRuntime();
+    // dep-check needs to occur after build since we rely on build to generate
+    // the css files into js files.
+    execOrDie(`${gulp} dep-check`);
+    // Unit tests with Travis' default chromium
+    execOrDie(`${gulp} test --nobuild --compiled`);
+    // Integration tests with all saucelabs browsers
+    execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
+    // All unit tests with an old chrome (best we can do right now to pass tests
+    // and not start relying on new features).
+    // Disabled because it regressed. Better to run the other saucelabs tests.
+    execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   }
 
   if (buildTargets.has('VALIDATOR_WEBUI')) {
-    command.buildValidatorWebUI();
+    execOrDie('cd validator/webui && python build.py');
   }
 
   if (buildTargets.has('VALIDATOR')) {
-    command.buildValidator();
+    execOrDie('cd validator && python build.py');
   }
 
   return 0;
 }
 
-process.exit(main());
+process.exit(main(process.argv));

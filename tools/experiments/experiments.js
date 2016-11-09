@@ -223,11 +223,6 @@ const EXPERIMENTS = [
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
-  {
-    id: 'amp-ad-loading-ux',
-    name: 'New default loading UX to amp-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
-  },
 ];
 
 if (getMode().localDev) {
