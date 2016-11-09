@@ -257,7 +257,8 @@ https://publisher.com/amp-access.json?
 ```
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
  - The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
- - The property values can only be one of the types: string, number or boolean.
+ - The property values can only be one of the types: string, number, boolean.
+ - Values can also be nested as objects with values of the same types: string, number, boolean.
  - The total size of the serialized authorization response cannot exceed 500 bytes.
  - Please ensure that the response does not include any personally identifiable information (PII) or personal data.
 
