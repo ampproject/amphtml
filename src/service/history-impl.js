@@ -19,7 +19,7 @@ import {fromClass, getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {timerFor} from '../timer';
-import {installViewerServiceForDoc} from './viewer-impl';
+import {viewerForDoc} from '../viewer';
 
 
 /** @private @const */
@@ -648,7 +648,7 @@ export class HistoryBindingVirtual_ {
  * @private
  */
 function createHistory(ampdoc) {
-  const viewer = installViewerServiceForDoc(ampdoc);
+  const viewer = viewerForDoc(ampdoc);
   let binding;
   if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
           ampdoc.win.AMP_TEST_IFRAME) {
