@@ -75,8 +75,8 @@ const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
 const SAFEFRAME_VERSION = '1-0-4';
-/** @type {string} */
-const SAFEFRAME_IMPL_PATH =
+/** @type {string} @visibleForTesting */
+export const SAFEFRAME_IMPL_PATH =
     'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
     '/html/container.html';
 
@@ -545,7 +545,7 @@ export class AmpA4A extends AMP.BaseElement {
           renderPromise = this.renderViaSafeFrame_(this.creativeBody_);
         } else if (this.experimentalNonAmpCreativeRenderMethod_ ==
             CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME && this.creativeBody_) {
-          renderPromise = this.renderViaNameframe_(this.creativeBody_);
+          renderPromise = this.renderViaNameFrame_(this.creativeBody_);
         } else if (this.adUrl_) {
           renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
@@ -871,7 +871,7 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 
-  renderViaNameframe_(creativeBody) {
+  renderViaNameFrame_(creativeBody) {
     this.emitLifecycleEvent('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */

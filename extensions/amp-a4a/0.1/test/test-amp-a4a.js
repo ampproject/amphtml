@@ -19,7 +19,11 @@ import {
   TEST_URL,
   SIGNATURE_HEADER,
 } from './utils';
-import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
+import {
+  AmpA4A,
+  RENDERING_TYPE_HEADER,
+  SAFEFRAME_IMPL_PATH,
+} from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
@@ -138,10 +142,50 @@ describe('amp-a4a', () => {
     return utf8Encode(buildCreativeString());
   }
 
+  // Fails if onAmpCreativeRender is ever called.
   function verifyNonAMPRender(a4a) {
     a4a.onAmpCreativeRender = () => {
       assert.fail('AMP creative should never have rendered!');
     };
+  }
+
+  // Checks that element is an amp-ad that is rendered via A4A.
+  function verifyA4ARender(element) {
+    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
+    expect(element.querySelector('iframe[name]')).to.not.be.ok;
+    expect(element.querySelector('iframe[src]')).to.not.be.ok;
+    const friendlyChild = element.querySelector('iframe[srcdoc]');
+    expect(friendlyChild).to.be.ok;
+    expect(friendlyChild.getAttribute('srcdoc')).to.have.string(
+        '<html ⚡4ads>');
+    expect(element).to.be.visible;
+    expect(friendlyChild).to.be.visible;
+  }
+
+  // Checks that element is an amp-ad that is rendered via SafeFrame.
+  function verifySafeFrameRender(element) {
+    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element).to.be.visible;
+    expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
+    const child = element.querySelector(
+        `iframe[src^="${SAFEFRAME_IMPL_PATH}"][name]`);
+    expect(child).to.be.ok;
+    expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
+    expect(child).to.be.visible;
+  }
+
+  // Checks that element is an amp-ad that is rendered via nameframe.
+  function verifyNameFrameRender(element) {
+    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element).to.be.visible;
+    expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
+    const child = element.querySelector('iframe[src][name]');
+    expect(child).to.be.ok;
+    expect(child.src).to.match(/^https?:[^?#]+nameframe(\.max)?\.html/);
+    const name_data = child.getAttribute('name');
+    expect(JSON.parse.bind(null, name_data), name_data).not.to.throw(Error);
+    expect(child).to.be.visible;
   }
 
   describe('ads are visible', () => {
@@ -239,9 +283,10 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('#renderViaSafeFrame', () => {
-
-    it('should attach a SafeFrame when header is set', () => {
+  describe('cross-domain rendering', () => {
+    let a4aElement;
+    let a4a;
+    beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
@@ -254,68 +299,137 @@ describe('amp-a4a', () => {
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = createA4aElement(doc);
+        a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
-        const a4a = new MockA4AImpl(a4aElement);
+        a4a = new MockA4AImpl(a4aElement);
         verifyNonAMPRender(a4a);
         doc.body.appendChild(a4aElement);
+      });
+    });
+
+    afterEach(() => {
+      expect(xhrMock).to.be.calledOnce;
+    });
+
+    describe('#renderViaNameFrame', () => {
+      beforeEach(() => {
+        // If rendering type is nameframe, we SHOULD attach a NameFrame.
+        mockResponse.headers.set(RENDERING_TYPE_HEADER, 'nameframe');
+        a4a.onLayoutMeasure();
+      });
+
+      it('should attach a NameFrame when header is set', () => {
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifyNameFrameRender(a4aElement);
+        });
+      });
+
+      it('should make only one NameFrame even if onLayoutMeasure called ' +
+          'multiple times', () => {
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          const child = a4aElement.querySelector('iframe[name]');
-          expect(child).to.be.ok;
-          expect(child.getAttribute('src')).to.have.string('safeframe');
-          expect(child.getAttribute('name')).to.match(/[^;]+;\d+;[\s\S]+/);
+          verifyNameFrameRender(a4aElement);
         });
       });
-    });
 
-    ['', 'client_cache', 'some_random_thing'].forEach(headerVal => {
-      it(`should not attach a SafeFrame when header is ${headerVal}`, () => {
-        // Make sure there's no signature, so that we go down the 3p iframe path.
-        delete headers[SIGNATURE_HEADER];
-        // If rendering type is anything but safeframe, we SHOULD NOT attach a
-        // SafeFrame.
-        headers[RENDERING_TYPE_HEADER] = headerVal;
-        xhrMock.withArgs(TEST_URL, {
-          mode: 'cors',
-          method: 'GET',
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
-        }).onFirstCall().returns(Promise.resolve(mockResponse));
-        return createAdTestingIframePromise().then(fixture => {
-          const doc = fixture.doc;
-          const a4aElement = createA4aElement(doc);
-          a4aElement.setAttribute('width', 200);
-          a4aElement.setAttribute('height', 50);
-          a4aElement.setAttribute('type', 'adsense');
-          const a4a = new MockA4AImpl(a4aElement);
-          verifyNonAMPRender(a4a);
-          doc.body.appendChild(a4aElement);
-          a4a.onLayoutMeasure();
-          return a4a.layoutCallback().then(() => {
-            // Force vsync system to run all queued tasks, so that DOM mutations
-            // are actually completed before testing.
-            a4a.vsync_.runScheduledTasks_();
-            const safeChild = a4aElement.querySelector('iframe[name]');
-            expect(safeChild).to.not.be.ok;
-            const unsafeChild = a4aElement.querySelector('iframe');
-            expect(unsafeChild).to.be.ok;
-            expect(unsafeChild.getAttribute('src')).to.have.string(
-                TEST_URL);
+      ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
+          headerVal => {
+            it(`should not attach a NameFrame when header is ${headerVal}`,
+                () => {
+                  // Make sure there's no signature, so that we go down the 3p iframe path.
+                  delete headers[SIGNATURE_HEADER];
+                  // If rendering type is anything but nameframe, we SHOULD NOT
+                  // attach a NameFrame.
+                  headers[RENDERING_TYPE_HEADER] = headerVal;
+                  a4a.onLayoutMeasure();
+                  return a4a.layoutCallback().then(() => {
+                    // Force vsync system to run all queued tasks, so that
+                    // DOM mutations are actually completed before testing.
+                    a4a.vsync_.runScheduledTasks_();
+                    const nameChild = a4aElement.querySelector(
+                        `iframe[src^="nameframe"]`);
+                    expect(nameChild).to.not.be.ok;
+                    if (headerVal != 'safeframe') {
+                      const unsafeChild = a4aElement.querySelector('iframe');
+                      expect(unsafeChild).to.be.ok;
+                      expect(unsafeChild.getAttribute('src')).to.have.string(
+                          TEST_URL);
+                    }
+                  });
+                });
           });
-        });
-      });
     });
 
-    it('should not use SafeFrame if creative is A4A', () => {
-      // Set safeframe header, but it should be ignored when a signature
-      // exists and validates.
-      headers[RENDERING_TYPE_HEADER] = 'safeframe';
+    describe('#renderViaSafeFrame', () => {
+      beforeEach(() => {
+        // If rendering type is safeframe, we SHOULD attach a SafeFrame.
+        mockResponse.headers.set(RENDERING_TYPE_HEADER, 'safeframe');
+        a4a.onLayoutMeasure();
+      });
+
+      it('should attach a SafeFrame when header is set', () => {
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifySafeFrameRender(a4aElement);
+        });
+      });
+
+      it('should make only one SafeFrame even if onLayoutMeasure called ' +
+          'multiple times', () => {
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifySafeFrameRender(a4aElement);
+        });
+      });
+
+      ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
+          headerVal => {
+            it(`should not attach a SafeFrame when header is ${headerVal}`,
+                () => {
+                  // If rendering type is anything but safeframe, we SHOULD NOT attach a
+                  // SafeFrame.
+                  mockResponse.headers.set(RENDERING_TYPE_HEADER, headerVal);
+                  a4a.onLayoutMeasure();
+                  return a4a.layoutCallback().then(() => {
+                    // Force vsync system to run all queued tasks, so that
+                    // DOM mutations are actually completed before testing.
+                    a4a.vsync_.runScheduledTasks_();
+                    const safeChild = a4aElement.querySelector(
+                        `iframe[src^="${SAFEFRAME_IMPL_PATH}]"`);
+                    expect(safeChild).to.not.be.ok;
+                    if (headerVal != 'nameframe') {
+                      const unsafeChild = a4aElement.querySelector('iframe');
+                      expect(unsafeChild).to.be.ok;
+                      expect(unsafeChild.getAttribute('src')).to.have.string(
+                          TEST_URL);
+                    }
+                  });
+                });
+          });
+    });
+  });
+
+  describe('cross-domain vs A4A', () => {
+    beforeEach(() => {
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
@@ -324,25 +438,42 @@ describe('amp-a4a', () => {
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = createA4aElement(doc);
+        a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
-        const a4a = new MockA4AImpl(a4aElement);
+        a4a = new MockA4AImpl(a4aElement);
         doc.body.appendChild(a4aElement);
+      });
+    });
+    afterEach(() => {
+      expect(xhrMock).to.be.calledOnce;
+    });
+
+    ['nameframe', 'safeframe'].forEach(renderType => {
+      it(`should not use ${renderType} if creative is A4A`, () => {
+        mockResponse.headers.set(RENDERING_TYPE_HEADER, renderType);
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          const safeChild = a4aElement.querySelector('iframe[name]');
-          expect(safeChild).to.not.be.ok;
-          const crossDomainChild = a4aElement.querySelector('iframe[src]');
-          expect(crossDomainChild).to.not.be.okay;
-          const friendlyChild = a4aElement.querySelector('iframe[srcdoc]');
-          expect(friendlyChild).to.be.ok;
-          expect(friendlyChild.getAttribute('srcdoc')).to.have.string(
-              '<html ⚡4ads>');
+          verifyA4ARender(a4aElement);
+        });
+      });
+
+      it(`should not use ${renderType} even if onLayoutMeasure called ` +
+          'multiple times', () => {
+        mockResponse.headers.set(RENDERING_TYPE_HEADER, renderType);
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifyA4ARender(a4aElement);
         });
       });
     });
