@@ -1,9 +1,5 @@
 /**
-<<<<<<< 6b38d9e1075f5b86c802e73dd39c5234f83a70e8
  * Copyright 2016 The AMP HTML Authors.
-=======
- * Copyright 2015 The AMP HTML Authors.
->>>>>>> Initial implementation of <amp-apester-media>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
