@@ -40,8 +40,7 @@ export class AmpAdImage extends AMP.BaseElement {
     }
 
     /** @private {AmpAdBatchManager} This will batch up the display of this ad together with others of the same URL */
-    this.batchManager_ = getBatchManager(this, this.url_,
-        'amp-ad[type=imagead]');
+    this.batchManager_ = getBatchManager(this, this.url_);
 
     this.lifecycleReporter_ = getLifecycleReporter(this, 'amp');
     this.lifecycleReporter_.sendPing('adSlotBuilt');

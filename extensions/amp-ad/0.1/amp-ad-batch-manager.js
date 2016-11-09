@@ -17,23 +17,22 @@ import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 
 /** @const {number} The number of milliseconds between checks to see if the response has arrived */
-const AD_BATCH_TICK_LENGTH = 50;
+const AD_BATCH_TICK_INTERVAL = 50;
 
 /** @const {number} The number of ticks to wait for a response from the ad server before timing out */
 const AD_BATCH_RETRIES = 100;
 
 /** @const {!string} Tag name for ad batch manager implementation. */
-export const TAG_AD_BATCH_MANAGER = 'amp-ad-batch-manager';
+export const TAG = 'amp-ad-batch-manager';
 
 /**
   * Get a batch manager that will be used to batch together elements with the same data-url
   * Note a side effect: the first ad with a given data-url to be processed will have its isBatchMaster_ variable set to true
   * @param {Element} e The element which is to be batched
   * @param {string} url The URL identifying which batch
-  * @param {string} selector The selector to choose the things to be batched (e.g. 'amp-ad[type=imagead]')
   * @returns {AmpAdBatchManager}
   */
-export function getBatchManager(e, url, selector) {
+export function getBatchManager(e, url) {
   // If this is our first imagead, create a map of responses for each value of 'data-url'
   // This allows ads from multiple ad servers on the same page
   if (!(e.win.hasOwnProperty('imageadBatchManagers'))) {
@@ -42,7 +41,7 @@ export function getBatchManager(e, url, selector) {
     // Scan the page to get a list of all image ads on this page, indexed by url.
     // For performance reasons, we only do the scan once, the first time that a batch manager is constructed.
     e.win.imageadElements = {};
-    const elements = document.querySelectorAll(selector);
+    const elements = document.querySelectorAll('amp-ad[type=imagead]');
     for (let i = 0; i < elements.length; i++) {
       const el = elements[i];
       const url = el.getAttribute('data-url');
@@ -100,25 +99,24 @@ export class AmpAdBatchManager {
    *     resolved. If resolved OK, the element is returned by the promise
    */
   doLayout(elem) {
-    const t = this;
-    return new Promise(function(resolve) {
-      if (elem.isBatchMaster_) {
+      return new Promise(resolve => {
+        if (elem.isBatchMaster_) {
         // This is the master. We're going to do the layout for all ads in the batch
         // Gather the parameters to be added to the URL. First, make a list of the slot ids for all ads on this page with this URL
-        xhrFor(elem.win).fetchJson(t.fullUrl_).then(function(data) {
-          t.responseData = data;
+        xhrFor(elem.win).fetchJson(this.fullUrl_).then(data => {
+          this.responseData = data;
           resolve(elem);
         }, function(err) {
-          user().error(TAG_AD_BATCH_MANAGER, err);
+          user().error(TAG, err);
         });
 
       } else {
         // This is not the master. We need to wait for the master to have fetched the response for the ad server; when this is done,
         // it's OK to proceed
-        t.getResponseWhenReady().then(function() {
+        this.getResponseWhenReady().then(function() {
           resolve(elem);
         }, function(err) {
-          user().error(TAG_AD_BATCH_MANAGER, err);
+          user().error(TAG, err);
         });
       }
     });
@@ -139,7 +137,7 @@ export class AmpAdBatchManager {
             t.getResponseWhenReady().then(function() {
               resolve('OK');
             });
-          }, AD_BATCH_TICK_LENGTH);
+          }, AD_BATCH_TICK_INTERVAL);
         } else {
           reject('Timed out waiting for server');
         }
