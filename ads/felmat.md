@@ -24,7 +24,7 @@ limitations under the License.
     data-host="felmat.net"
     data-fmt="banner"
     data-fmk="U12473_n2cJD"
-    data-fmp="">
+    data-fmp="0">
 </amp-ad>
 ```
 
