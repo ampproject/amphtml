@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable (Custom Validation still experimental - See below)</td>
+    <td>Stable<br>(<a href="#custom-validations">Custom Validation still experimental - See below</a>)</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -212,7 +212,7 @@ One of the main differences between `:invalid` and `:user-invalid` is when are t
 See the [full example here](../../examples/forms.amp.html) on using these.
 
 ## Custom Validations
-__(experimental)__
+__(<a href="https://www.ampproject.org/docs/reference/experimental.html">experimental</a>)__
 `amp-form` provides a way for you to build your own custom validation UI with few validation reporting strategies available to choose from `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
 The general usage of this is you first set `custom-validation-reporting` attribute on your `form` to one of the validation reporting strategies and then provide your own validation UI marked up with special attributes, AMP will discover these and report them at the right time depending on the strategy selected.
