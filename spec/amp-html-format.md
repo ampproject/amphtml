@@ -239,10 +239,12 @@ Authors may add custom styles to a document using a single `<style amp-custom>` 
 The following restrictions apply to selectors in author style sheets:
 
 ##### Universal selector
-The universal selector `*` may not be used in author stylesheets. This is because it can have negative performance implications and could be used to circumvent the rules set out in the following paragraph.
+The universal selector `*` may not be used in author stylesheets. This is because it can have negative performance implications and could be used to circumvent the rules set out by the AMP developers.
 
 ##### not selector
 `:not()` may not be used in selectors because it can be used to simulate the universal selector.
+Similary `:nth-child(1n), :nth-child(n)` also should not be used. Though other forms of `:nth-child()` may be used but all forms of `:not()` are forbidden.
+
 
 ##### Pseudo-selectors, pseudo-classes and pseudo-elements
 Pseudo-selectors, pseudo-classes and pseudo-elements are only allowed in selectors that contain tag names and those tag names must not start with `amp-`.
