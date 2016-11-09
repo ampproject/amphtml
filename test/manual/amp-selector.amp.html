@@ -51,16 +51,17 @@
 <body>
   <form action="/test/manual/amp-selector.amp.html" method="get" target="_blank" id="form1">
   <amp-selector layout="container" name="single_image_select">
-    <div option="xyz"></div>
+    <div option="xyz" selected>Select me</div>
     <ul>
-      <li option="abc"></li>
-      <li><amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=50 height=50 option="12"></amp-img></li>
-      <li><amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=50 height=50 option="32"></amp-img></li>
+      <li option="abc" selected> ME ME ME ME</li>
+      <li><amp-img selected src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=50 height=50 option="12"></amp-img></li>
+      <li><amp-img selected src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=50 height=50 option="32"></amp-img></li>
     </ul>
     <p>
-      <span option="134">Select</span> one of us
+      <span option="134">Select one of us</span>
     </p>
     <p option="3221">
+      How about me
     </p>
   </amp-selector>
 

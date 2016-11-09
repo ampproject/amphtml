@@ -51,6 +51,7 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Sets the state of the options based on the state of the current inputs
    *    or based on the vaules array if one is passed.
+   * @param {Element=} opt_element element that was selected/unselected.
    */
   setState_(opt_element) {
     this.selectedElements_ = [];
@@ -66,8 +67,8 @@ export class AmpSelector extends AMP.BaseElement {
         } else {
           if (this.selectedElements_.length > 0) {
             // We need to have only one selected element for a single selector.
-            // So pop the last element (only element in the arr) and remove the
-            // selected attr.
+            // So pop the previous element (only element in the arr) and remove
+            // the selected attr.
             this.selectedElements_.pop().removeAttribute('selected');
           }
           this.selectedElements_.push(el);
@@ -121,9 +122,9 @@ export class AmpSelector extends AMP.BaseElement {
       el = closest(el, element => {
         return element.hasAttribute('option');
       }, this.element);
-      if (!el || el.hasAttribute('disabled')) {
-        return;
-      }
+    }
+    if (!el || el.hasAttribute('disabled')) {
+      return;
     }
     if (el.hasAttribute('selected')) {
       el.removeAttribute('selected');
