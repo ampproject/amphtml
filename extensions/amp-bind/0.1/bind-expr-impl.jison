@@ -1,40 +1,37 @@
 %{
 
-var functionWhitelist =
-{
-  '[object Array]':
-    [
-      Array.prototype.concat,
-      Array.prototype.includes,
-      Array.prototype.indexOf,
-      Array.prototype.join,
-      Array.prototype.lastIndexOf,
-      Array.prototype.slice,
-    ],
-  '[object String]':
-    [
-      String.prototype.charAt,
-      String.prototype.charCodeAt,
-      String.prototype.concat,
-      String.prototype.endsWith,
-      String.prototype.includes,
-      String.prototype.indexOf,
-      String.prototype.lastIndexOf,
-      String.prototype.repeat,
-      String.prototype.slice,
-      String.prototype.split,
-      String.prototype.startsWith,
-      String.prototype.substr,
-      String.prototype.substring,
-      String.prototype.toLowerCase,
-      String.prototype.toUpperCase,
-    ],
+var functionWhitelist = {
+  '[object Array]': [
+    Array.prototype.concat,
+    Array.prototype.includes,
+    Array.prototype.indexOf,
+    Array.prototype.join,
+    Array.prototype.lastIndexOf,
+    Array.prototype.slice,
+  ],
+  '[object String]': [
+    String.prototype.charAt,
+    String.prototype.charCodeAt,
+    String.prototype.codePointAt,
+    String.prototype.concat,
+    String.prototype.endsWith,
+    String.prototype.includes,
+    String.prototype.indexOf,
+    String.prototype.lastIndexOf,
+    String.prototype.localeCompare,
+    String.prototype.repeat,
+    String.prototype.replace,
+    String.prototype.slice,
+    String.prototype.split,
+    String.prototype.startsWith,
+    String.prototype.substr,
+    String.prototype.substring,
+    String.prototype.toLocaleLowerCase,
+    String.prototype.toLocaleUpperCase,
+    String.prototype.toLowerCase,
+    String.prototype.toUpperCase,
+  ],
 };
-
-function isObject(obj) { return Object.prototype.toString.call(obj) === '[object Object]'; }
-function isArray(obj)  { return Object.prototype.toString.call(obj) === '[object Array]'; }
-function isNumber(obj) { return Object.prototype.toString.call(obj) === '[object Number]'; }
-function isString(obj) { return Object.prototype.toString.call(obj) === '[object String]'; }
 
 %}
 
@@ -43,8 +40,9 @@ function isString(obj) { return Object.prototype.toString.call(obj) === '[object
 
 %%
 \s+                       /* skip whitespace */
-"+"                       return '+'
+"!"                       return '!'
 "-"                       return '-'
+"+"                       return '+'
 "*"                       return '*'
 "/"                       return '/'
 "%"                       return '%'
@@ -66,7 +64,6 @@ function isString(obj) { return Object.prototype.toString.call(obj) === '[object
 \.                        return '.'
 ":"                       return ':'
 "?"                       return '?'
-"!"                       return '!'
 "null"                    return 'NULL'
 "NULL"                    return 'NULL'
 "TRUE"                    return 'TRUE'
@@ -96,15 +93,14 @@ function isString(obj) { return Object.prototype.toString.call(obj) === '[object
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
  */
 
-%right '?' ':'
+%left '?' ':'
 %left '||'
 %left '&&'
 %left '==' '!='
 %left '<' '<=' '>' '>='
 %left '+' '-'
 %left '*' '/' '%'
-%right '!' UMINUS UPLUS
-%left '(' ')'
+%left '!' UMINUS
 %left '.' '[' ']'
 
 %%
@@ -135,11 +131,9 @@ expr:
 
 operation:
     '!' expr
-      {$$ = !$2;}
+      {$$ = !$1;}
   | '-' expr %prec UMINUS
-      {$$ = -$2;}
-  | '+' expr %prec UPLUS
-      {$$ = +$2;}
+      {$$ = -$1;}
   |  expr '+' expr
       {$$ = $1 + $3;}
   | expr '-' expr
@@ -173,16 +167,16 @@ operation:
 invocation:
     expr '.' NAME args
       %{
-        $$ = null;
-
         var obj = Object.prototype.toString.call($1);
         var whitelist = functionWhitelist[obj];
         if (whitelist) {
           var fn = $1[$3];
           if (whitelist.indexOf(fn) >= 0) {
-            $$ = fn.apply($1, $4);
+            $$ = fn.call($1, $4);
+            return;
           }
         }
+        $$ = null;
       %}
   ;
 
@@ -196,23 +190,14 @@ args:
 member_access:
     expr member
       %{
-        $$ = null;
-
         var obj = Object.prototype.toString.call($1);
-        var prop = Object.prototype.toString.call($2);
-
-        if (obj === '[object Array]') {
-          if (prop === '[object Number]' && Number.isInteger($2)) {
-            if ($2 >= 0 && $2 < $1.length) {
-              $$ = $1[$2];
-            }
-          }
-        }
-
-        if (prop === '[object String]') {
-          if (Object.prototype.hasOwnProperty.call($1, $2)) {
-            $$ = $1[$2];
-          }
+        var member = Object.prototype.toString.call($2);
+        if (obj === '[object Array]' && member === '[object Number]') {
+          $$ = $1[$2];
+        } else if (obj === '[object Object]') {
+          $$ = Object.prototype.hasOwnProperty.call($1, $2) ? $1[$2] : null;
+        } else {
+          $$ = null;
         }
       %}
   ;
@@ -220,7 +205,7 @@ member_access:
 member:
     '.' NAME
       {$$ = $2;}
-  | '[' expr ']'
+  | '[' NAME ']'
       {$$ = $2;}
   ;
 
@@ -235,11 +220,11 @@ literal:
   | NUMBER
       {$$ = Number(yytext);}
   | TRUE
-      {$$ = true;}
+      {$$ = true}
   | FALSE
-      {$$ = false;}
+      {$$ = false}
   | NULL
-      {$$ = null;}
+      {$$ = null}
   | object_literal
       {$$ = $1;}
   | array_literal
@@ -256,7 +241,7 @@ array_literal:
 array:
     expr
       {$$ = [$1];}
-  | array ',' expr
+  | arg_list ',' expr
       {$$ = $1; Array.prototype.push.call($1, $3);}
   ;
 
