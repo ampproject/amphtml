@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// foo
 
 import {loadPromise} from '../../src/event-helper';
 
