@@ -84,7 +84,7 @@ export const SAFEFRAME_IMPL_PATH =
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
 /** @enum {string} */
-export const CROSS_ORIGIN_RENDERING_MODE = {
+export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
   SAFEFRAME: 'safeframe',
   NAMEFRAME: 'nameframe',
@@ -182,9 +182,8 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
-     * @private {?string}
+     * @private {?CROSS_ORIGIN_RENDERING_MODE}
      */
-    /** @type {!CROSS_ORIGIN_RENDERING_MODE} @visibleForTesting */
     this.experimentalNonAmpCreativeRenderMethod_ =
       platformFor(this.win).isIos() ?
           CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME : null;
@@ -397,7 +396,7 @@ export class AmpA4A extends AMP.BaseElement {
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
           if (this.nonAmpCreativeRenderMethod_ !=
-              CROSS_ORIGIN_RENDERING_MODE.CLIENT_CACHE &&
+              XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts &&
               creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
@@ -537,8 +536,8 @@ export class AmpA4A extends AMP.BaseElement {
         // cross-domain iframe solutions.
         let renderPromise;
         const method = this.nonAmpCreativeRenderMethod_;
-        if ((method == CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME ||
-             method == CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME) &&
+        if ((method == XORIGIN_MODE.SAFEFRAME ||
+             method == XORIGIN_MODE.NAMEFRAME) &&
             this.creativeBody_) {
           renderPromise = this.renderViaNameAttrOfXDomIframe_(
               this.creativeBody_);
@@ -855,19 +854,19 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaNameAttrOfXDomIframe_(creativeBody) {
     const method = this.nonAmpCreativeRenderMethod_;
-    dev().assert(method == CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME ||
-        method == CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME,
+    dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
+        method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.emitLifecycleEvent('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
       let srcPath;
       let nameData;
       switch (method) {
-        case CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME:
+        case XORIGIN_MODE.SAFEFRAME:
           srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
           nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
           break;
-        case CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME:
+        case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
           nameData = JSON.stringify({creative});
           break;

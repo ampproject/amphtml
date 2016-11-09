@@ -14,16 +14,7 @@
  * limitations under the License.
  */
 
-import {getDefaultBootstrapBaseUrl} from '../../src/3p-frame';
 import {createIframePromise} from '../../testing/iframe';
-
-function expectNoContent(win, done) {
-  win.addEventListener('message', content => {
-    expect(content.data).to.have.property('type');
-    expect(content.data.type).to.equal('no-content');
-    done();
-  });
-}
 
 describes.sandboxed('nameframe', {}, () => {
   let fixture;
@@ -36,19 +27,20 @@ describes.sandboxed('nameframe', {}, () => {
       win = fixture.win;
       doc = fixture.doc;
       iframe = doc.createElement('iframe');
-      iframe.src = getDefaultBootstrapBaseUrl(win, 'nameframe');
+      iframe.src = 'http://localhost:9876/dist.3p/current/nameframe.max.html';
     });
   });
 
   it('should load remote nameframe and succeed with valid JSON input', done => {
     iframe.name = JSON.stringify({
       creative: `<html>
-<body>
-<script>
-window.parent.postMessage({type: 'creative rendered'}, '*');
-</script>
-</body>
-</html>`,
+                 <body>
+                   <script>
+                     window.parent.postMessage(
+                             {type: 'creative rendered'}, '*');
+                   </script>
+                 </body>
+                 </html>`,
     });
     win.addEventListener('message', content => {
       expect(content.data.type).to.equal('creative rendered');
@@ -76,3 +68,11 @@ window.parent.postMessage({type: 'creative rendered'}, '*');
   });
 
 });
+
+function expectNoContent(win, done) {
+  win.addEventListener('message', content => {
+    expect(content.data).to.have.property('type');
+    expect(content.data.type).to.equal('no-content');
+    done();
+  });
+}
