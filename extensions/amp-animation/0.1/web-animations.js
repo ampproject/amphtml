@@ -272,7 +272,7 @@ export class MeasureScanner extends Scanner {
     const index = this.targets_.indexOf(target);
     if (!this.computedStyleCache_[index]) {
       this.computedStyleCache_[index] = /** @type {!CSSStyleDeclaration} */ (
-          this.win.getComputedStyle(target));
+          this.win./*OK*/getComputedStyle(target));
     }
     const vendorName = getVendorJsPropertyName(
         this.computedStyleCache_[index], prop);
