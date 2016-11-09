@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
