@@ -312,7 +312,7 @@ HTML5 compatible.
 
 #### 4.1 The root element
 4.1.1 `<html>`
-  - Must use types `<html a4⚡>` or `<html a4amp>`
+  - Must use types `<html ⚡4ads>` or `<html amp4ads>`
 
 #### 4.2 Document metadata
 4.2.1 `<head>`
