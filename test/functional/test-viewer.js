@@ -153,7 +153,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('test')).to.equal('1');
   });
 
@@ -164,7 +164,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('click')).to.equal('abc');
   });
 

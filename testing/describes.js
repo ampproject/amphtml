@@ -475,6 +475,6 @@ function installRuntimeStylesPromise(win) {
   }
   const style = document.createElement('style');
   style.setAttribute('amp-runtime', '');
-  style.textContent = cssText;
+  style./*OK*/textContent = cssText;
   win.document.head.appendChild(style);
 }

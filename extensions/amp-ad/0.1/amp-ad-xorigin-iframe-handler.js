@@ -25,6 +25,7 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
+import {setStyle} from '../../../src/style';
 import {AdDisplayState} from './amp-ad-ui';
 
 const TIMEOUT_VALUE = 10000;
@@ -130,7 +131,7 @@ export class AmpAdXOriginIframeHandler {
 
     // Set iframe initially hidden which will be removed on load event +
     // post message.
-    this.iframe.style.visibility = 'hidden';
+    setStyle(this.iframe, 'visibility', 'hidden');
 
     this.element_.appendChild(this.iframe);
     return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
@@ -140,7 +141,7 @@ export class AmpAdXOriginIframeHandler {
           user().warn('AMP-AD', e);
         }).then(() => {
           if (this.iframe) {
-            this.iframe.style.visibility = '';
+            setStyle(this.iframe, 'visibility', '');
           }
         });
   }
