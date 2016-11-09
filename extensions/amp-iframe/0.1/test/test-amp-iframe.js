@@ -39,14 +39,22 @@ describe('amp-iframe', () => {
 
   const timer = timerFor(window);
   let ranJs = 0;
+  let content = '';
   let sandbox;
 
   beforeEach(() => {
     ranJs = 0;
     sandbox = sinon.sandbox.create();
     window.onmessage = function(message) {
+      if (!message.data) {
+        return;
+      }
       if (message.data == 'loaded-iframe') {
         ranJs++;
+      }
+
+      if (message.data.indexOf('content-iframe:') == 0) {
+        content = message.data.replace('content-iframe:', '');
       }
     };
     setTrackingIframeTimeoutForTesting(20);
@@ -275,9 +283,12 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100,
       sandbox: 'allow-scripts',
-      srcdoc: '<script>try{parent.location.href}catch(e){' +
-          'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
-          '</script>',
+      srcdoc: '<div id="content"><p>௵Z加䅌ਇ☎Èʘغޝ</p></div>' +
+        '<script>try{parent.location.href}catch(e){' +
+        'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');' +
+        'var c = document.querySelector(\'#content\').innerHTML;' +
+        'parent.parent./*OK*/postMessage(\'content-iframe:\' + c, \'*\');' +
+        '}</script>',
     }).then(amp => {
       expect(amp.iframe.src).to.match(
           /^data\:text\/html;charset=utf-8;base64,/);
@@ -287,6 +298,7 @@ describe('amp-iframe', () => {
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
       return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
+        expect(content).to.equal('<p>௵Z加䅌ਇ☎Èʘغޝ</p>');
       });
     });
   });
