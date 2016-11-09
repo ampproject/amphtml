@@ -31,16 +31,18 @@ export class AmpAdImage extends AMP.BaseElement {
 
     /** @private {string} The base URL of the ad server for this ad */
     this.url_ = element.getAttribute('data-url');
-    
+
     /** @private {boolean} Whether this is the batch master */
     this.isBatchMaster_ = false;
 
     /** @private {string} A string identifying this ad slot: the server's responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
-    if (this.slot_ && !this.slot_.match(/^[0-9a-z]+$/)) {
-      user().error(TAG_AD_IMAGE, 'imagead slot should be alphanumeric: ' +
-            this.slot_);
-    }
+    user().assert(!this.slot_ || this.slot_.match(/^[0-9a-z]+$/),
+        'imagead slot should be alphanumeric: ' + this.slot_);
+
+    // Ensure that there are templates in this ad
+    const templates = element.querySelectorAll('template');
+    user().assert(templates.length > 0, 'Missing template in imagead');
 
     /** @private {AmpAdBatchManager} This will batch up the display of this ad together with others of the same URL */
     this.batchManager_ = getBatchManager(this, this.url_);
@@ -53,12 +55,12 @@ export class AmpAdImage extends AMP.BaseElement {
    * Get or Set whether this is a batch master
    * @param {boolean} val If true or false, set the value. If absent, just get the existing value
    * @returns {boolean} True if this is the batch master, else false
-   */  
+   */
   batchMaster(val) {
-      if (val === false || val === true) {
-          this.isBatchMaster_ = val;
-      }
-      return this.isBatchMaster_;
+    if (val === false || val === true) {
+      this.isBatchMaster_ = val;
+    }
+    return this.isBatchMaster_;
   }
 
   /** @override */
@@ -79,12 +81,6 @@ export class AmpAdImage extends AMP.BaseElement {
    */
   showImageAd() {
     const response = this.batchManager_.responseData[this.slot_];
-    // See if there are any templates in this ad
-    const templates = this.element.querySelectorAll('template');
-    if (templates.length == 0) {
-      user().error(TAG_AD_IMAGE, 'Missing template in imagead');
-      return;
-    }
     const element = this.element;
     templatesFor(this.win).findAndRenderTemplate(element, response)
         .then(renderedElement => {
@@ -98,7 +94,8 @@ export class AmpAdImage extends AMP.BaseElement {
     // Call the batch manager to do the layout
     return this.batchManager_.doLayout(this).then(element => {
       // When the batch manager has fetched the batch of ads safely, it can now tell us to show this one.
-      element.showImageAd();
+      element > 0; // Dump lint warning
+      this.showImageAd();
     });
   }
 }

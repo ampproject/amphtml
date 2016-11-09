@@ -25,7 +25,7 @@ const AD_BATCH_RETRIES = 100;
 /** @const {!string} Tag name for ad batch manager implementation. */
 export const TAG = 'amp-ad-batch-manager';
 
-/** @const {Object} A map of AmpAdBatchManager objects, one for each value of data-url on the page */ 
+/** @const {Object} A map of AmpAdBatchManager objects, one for each value of data-url on the page */
 let imageadBatchManagers = null;
 
 /** @const {Object} A map of arrays of imagead Elements, keyed by data-url */
@@ -58,15 +58,18 @@ export function getBatchManager(elem, url) {
   if (!(url in imageadBatchManagers)) {
     // This is the first time we've seen this URL, so this will be the master for this batch
     elem.batchMaster(true);
-    imageadBatchManagers[url] = new AmpAdBatchManager(url);
+    imageadBatchManagers[url] = new AmpAdBatchManager(url,
+        imageadElements[url]);
   }
   return imageadBatchManagers[url];
 }
 
 export class AmpAdBatchManager {
 
-  /** @param {string} url The base URL of the ad server */
-  constructor(url) {
+  /**
+   * @param {string} url The base URL of the ad server
+   * @param {Array} elements An array of imagead Element objects to be batched together */
+  constructor(url, elements) {
 
     /** @private {string} The base URL of the ad server */
     this.url_ = url;
@@ -81,7 +84,6 @@ export class AmpAdBatchManager {
     this.responseData = null;
 
     // Get a list of slots that are in use for this URL
-    const elements = imageadElements[this.url_];
     const slots = elements.map(element => {
       const slotId = element.getAttribute('data-slot');
       // Use a slot id of 0 if the element didn't provide one.
@@ -101,8 +103,8 @@ export class AmpAdBatchManager {
    *     resolved. If resolved OK, the element is returned by the promise
    */
   doLayout(elem) {
-      return new Promise(resolve => {
-        if (elem.batchMaster()) {
+    return new Promise(resolve => {
+      if (elem.batchMaster()) {
         // This is the master. We're going to do the layout for all ads in the batch
         // Gather the parameters to be added to the URL. First, make a list of the slot ids for all ads on this page with this URL
         xhrFor(elem.win).fetchJson(this.fullUrl_).then(data => {
@@ -111,10 +113,9 @@ export class AmpAdBatchManager {
         }, function(err) {
           user().error(TAG, err);
         });
-
       } else {
-        // This is not the master. We need to wait for the master to have fetched the response for the ad server; when this is done,
-        // it's OK to proceed
+        // This is not the master. We need to wait for the master to have fetched the response for the ad server;
+        //  when this is done,it's OK to proceed
         this.getResponseWhenReady().then(function() {
           resolve(elem);
         }, function(err) {
@@ -131,17 +132,15 @@ export class AmpAdBatchManager {
    */
   getResponseWhenReady() {
     const t = this;
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       if (t.responseData === null) {
         // The response data is not ready. Let's wait 50 ms and try again
         if (--t.retries_) {
           setTimeout(function() {
-            t.getResponseWhenReady().then(function() {
-              resolve('OK');
-            });
+            resolve(t.getResponseWhenReady());
           }, AD_BATCH_TICK_INTERVAL);
         } else {
-          reject('Timed out waiting for server');
+          user().error(TAG, 'Timed out waiting for server');
         }
       } else {
         resolve('OK');
