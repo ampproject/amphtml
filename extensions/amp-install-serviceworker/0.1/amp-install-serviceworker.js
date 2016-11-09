@@ -274,9 +274,7 @@ class UrlRewriter_ {
     // navigation.
     const win = this.win;
     const curLoc = parseUrl(win.location.href);
-    const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
-    const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
-    if (tgtHref == curHref) {
+    if (removeFragment(tgtLoc.href) == removeFragment(curLoc.href)) {
       return;
     }
 
