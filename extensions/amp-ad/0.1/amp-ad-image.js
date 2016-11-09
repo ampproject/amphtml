@@ -31,6 +31,9 @@ export class AmpAdImage extends AMP.BaseElement {
 
     /** @private {string} The base URL of the ad server for this ad */
     this.url_ = element.getAttribute('data-url');
+    
+    /** @private {boolean} Whether this is the batch master */
+    this.isBatchMaster_ = false;
 
     /** @private {string} A string identifying this ad slot: the server's responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
@@ -44,6 +47,18 @@ export class AmpAdImage extends AMP.BaseElement {
 
     this.lifecycleReporter_ = getLifecycleReporter(this, 'amp');
     this.lifecycleReporter_.sendPing('adSlotBuilt');
+  }
+
+  /**
+   * Get or Set whether this is a batch master
+   * @param {boolean} val If true or false, set the value. If absent, just get the existing value
+   * @returns {boolean} True if this is the batch master, else false
+   */  
+  batchMaster(val) {
+      if (val === false || val === true) {
+          this.isBatchMaster_ = val;
+      }
+      return this.isBatchMaster_;
   }
 
   /** @override */

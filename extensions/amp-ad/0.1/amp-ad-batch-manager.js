@@ -25,6 +25,11 @@ const AD_BATCH_RETRIES = 100;
 /** @const {!string} Tag name for ad batch manager implementation. */
 export const TAG = 'amp-ad-batch-manager';
 
+/** @const {Object} A map of AmpAdBatchManager objects, one for each value of data-url on the page */ 
+let imageadBatchManagers = null;
+
+/** @const {Object} A map of arrays of imagead Elements, keyed by data-url */
+let imageadElements = null;
 /**
   * Get a batch manager that will be used to batch together elements with the same data-url
   * Note a side effect: the first ad with a given data-url to be processed will have its isBatchMaster_ variable set to true
@@ -35,30 +40,27 @@ export const TAG = 'amp-ad-batch-manager';
 export function getBatchManager(e, url) {
   // If this is our first imagead, create a map of responses for each value of 'data-url'
   // This allows ads from multiple ad servers on the same page
-  if (!(e.win.hasOwnProperty('imageadBatchManagers'))) {
-    // Create an array of batch mangers. There will be one for each URL.
-    e.win.imageadBatchManagers = {};
+  if (imageadBatchManagers === null) {
     // Scan the page to get a list of all image ads on this page, indexed by url.
     // For performance reasons, we only do the scan once, the first time that a batch manager is constructed.
-    e.win.imageadElements = {};
+    imageadBatchManagers = {};
+    imageadElements = {};
     const elements = document.querySelectorAll('amp-ad[type=imagead]');
-    for (let i = 0; i < elements.length; i++) {
-      const el = elements[i];
+    for (let ind = 0; ind < elements.length; ind++) {
+      const el = elements[ind];
       const url = el.getAttribute('data-url');
-      if (!(url in e.win.imageadElements)) {
-        e.win.imageadElements[url] = [];
+      if (!(url in imageadElements)) {
+        imageadElements[url] = [];
       }
-      e.win.imageadElements[url].push(el);
+      imageadElements[url].push(el);
     }
   }
-  if (!(url in e.win.imageadBatchManagers)) {
+  if (!(url in imageadBatchManagers)) {
     // This is the first time we've seen this URL, so this will be the master for this batch
-    e.isBatchMaster_ = true;
-    e.win.imageadBatchManagers[url] = new AmpAdBatchManager(e);
-  } else {
-    e.isBatchMaster_ = false;
+    e.batchMaster(true);
+    imageadBatchManagers[url] = new AmpAdBatchManager(e);
   }
-  return e.win.imageadBatchManagers[url];
+  return imageadBatchManagers[url];
 }
 
 export class AmpAdBatchManager {
@@ -79,7 +81,7 @@ export class AmpAdBatchManager {
     this.responseData = null;
 
     // Get a list of slots that are in use for this URL
-    const elements = element.win.imageadElements[this.url_];
+    const elements = imageadElements[this.url_];
     const slots = elements.map(element => {
       const slotId = element.getAttribute('data-slot');
       // Use a slot id of 0 if the element didn't provide one.
@@ -100,7 +102,7 @@ export class AmpAdBatchManager {
    */
   doLayout(elem) {
       return new Promise(resolve => {
-        if (elem.isBatchMaster_) {
+        if (elem.batchMaster()) {
         // This is the master. We're going to do the layout for all ads in the batch
         // Gather the parameters to be added to the URL. First, make a list of the slot ids for all ads on this page with this URL
         xhrFor(elem.win).fetchJson(this.fullUrl_).then(data => {
