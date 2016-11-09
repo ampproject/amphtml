@@ -880,7 +880,7 @@ export class AmpA4A extends AMP.BaseElement {
               + ' attribute iframe rendering mode request: %s.  Unable to'
               + ' render a creative for'
               + ' slot %s.', method, this.element.getAttribute('id'));
-          return Promise.reject();
+          return Promise.reject('Unrecognized rendering mode request');
       }
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
