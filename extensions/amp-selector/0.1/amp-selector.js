@@ -27,7 +27,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.isMultiple_ = false;
 
     /** @private {!Array<!Element>} */
-    this.selectedElements_  = [];
+    this.selectedElements_ = [];
 
     /** @private {Element} */
     this.inputWrapper_ = null;
@@ -60,7 +60,7 @@ export class AmpSelector extends AMP.BaseElement {
     const len = selectedElements_.length;
     if (!this.isMultiple_ && len > 1) {
       // There are multiple selected elements in a single selector.
-      for (let i=0; i < len; i++) {
+      for (let i = 0; i < len; i++) {
         const el = selectedElements_[i];
         if (opt_element && el !== opt_element) {
           el.removeAttribute('selected');
@@ -80,6 +80,9 @@ export class AmpSelector extends AMP.BaseElement {
     this.setInputs_();
   }
 
+  /**
+   * Creates inputs for the currently selected elements.
+   */
   setInputs_() {
     const elementName = this.element.getAttribute('name');
     const formId = this.element.getAttribute('form');
@@ -113,7 +116,7 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * Handles the change event for the inputs.
+   * Handles the change event for the selectables.
    * @param {!Event} event
    */
   clickHandler_(event) {
@@ -127,7 +130,11 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
     if (el.hasAttribute('selected')) {
-      el.removeAttribute('selected');
+      if (this.isMultiple_) {
+        el.removeAttribute('selected');
+      } else {
+        return;
+      }
     } else {
       el.setAttribute('selected', '');
     }

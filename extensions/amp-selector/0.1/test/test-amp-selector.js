@@ -27,14 +27,12 @@ describes.realWin('amp-selector', {
   },
 }, env => {
   let win;
-  let ampSelector;
-  let selectables = [];
   describe('test extension', () => {
 
     function getSelector(options) {
       win = env.win;
       const attributes = options.attributes || {};
-      ampSelector = win.document.createElement('amp-selector');
+      const ampSelector = win.document.createElement('amp-selector');
       ampSelector.setAttribute('layout', 'container');
       if (attributes) {
         Object.keys(attributes).forEach(key => {
@@ -56,13 +54,13 @@ describes.realWin('amp-selector', {
         const img = win.document.createElement('div');
         img.setAttribute('width', '10');
         img.setAttribute('height', '10');
-        img.setAttribute('option', i)
+        img.setAttribute('option', i);
         if (selectedCount > 0) {
           img.setAttribute('selected', '');
-          selectedCount --;
+          selectedCount--;
         } else if (disabledCount > 0) {
           img.setAttribute('disabled', '');
-          disabledCount --;
+          disabledCount--;
         }
         ampSelector.appendChild(img);
       }
@@ -70,17 +68,13 @@ describes.realWin('amp-selector', {
       return ampSelector;
     }
 
-
-    beforeEach(() => {
-
-    });
     it('should build properly', () => {
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
       let setStateSpy = sandbox.spy(impl, 'setState_');
       ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
-      expect(impl.setState_).to.be.calledOnce;
+      expect(setStateSpy).to.be.calledOnce;
 
 
       ampSelector = getSelector({
@@ -89,14 +83,14 @@ describes.realWin('amp-selector', {
         },
         config: {
           count: 4,
-          selectedCount : 2,
-        }
+          selectedCount: 2,
+        },
       });
       impl = ampSelector.implementation_;
       setStateSpy = sandbox.spy(impl, 'setState_');
       ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
-      expect(impl.setState_).to.be.calledOnce;
+      expect(setStateSpy).to.be.calledOnce;
 
       ampSelector = getSelector({
         attributes: {
@@ -105,14 +99,14 @@ describes.realWin('amp-selector', {
         },
         config: {
           count: 4,
-          selectedCount : 2,
-        }
+          selectedCount: 2,
+        },
       });
       impl = ampSelector.implementation_;
       setStateSpy = sandbox.spy(impl, 'setState_');
       ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
-      expect(impl.setState_).to.be.not.have.been.called;
+      expect(setStateSpy).to.be.not.have.been.called;
 
 
 
@@ -126,7 +120,7 @@ describes.realWin('amp-selector', {
       let setStateSpy = sandbox.spy(impl, 'setState_');
       ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
-      expect(impl.setState_).to.be.calledOnce;
+      expect(setStateSpy).to.have.been.calledOnce;
       expect(impl.selectedElements_.length).to.equal(0);
       expect(setInputsSpy).to.have.been.calledOnce;
 
@@ -137,15 +131,15 @@ describes.realWin('amp-selector', {
         },
         config: {
           count: 4,
-          selectedCount : 2,
-        }
+          selectedCount: 2,
+        },
       });
       impl = ampSelector.implementation_;
       setStateSpy = sandbox.spy(impl, 'setState_');
       setInputsSpy = sandbox.spy(impl, 'setInputs_');
       ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
-      expect(impl.setState_).to.be.calledOnce;
+      expect(setStateSpy).to.have.been.calledOnce;
       expect(impl.selectedElements_.length).to.equal(2);
       expect(setInputsSpy).to.have.been.calledOnce;
 
@@ -163,15 +157,15 @@ describes.realWin('amp-selector', {
       ampSelector = getSelector({
         config: {
           count: 4,
-          selectedCount : 2,
-        }
+          selectedCount: 2,
+        },
       });
       impl = ampSelector.implementation_;
       setStateSpy = sandbox.spy(impl, 'setState_');
       setInputsSpy = sandbox.spy(impl, 'setInputs_');
       ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
-      expect(impl.setState_).to.be.calledOnce;
+      expect(setStateSpy).to.have.been.calledOnce;
       expect(impl.selectedElements_.length).to.equal(1);
       expect(setInputsSpy).to.have.been.calledOnce;
 
@@ -194,8 +188,8 @@ describes.realWin('amp-selector', {
 
       ampSelector = getSelector({
         attributes: {
-          name: 'single_select'
-        }
+          name: 'single_select',
+        },
       });
 
       impl = ampSelector.implementation_;
@@ -207,12 +201,12 @@ describes.realWin('amp-selector', {
 
       ampSelector = getSelector({
         attributes: {
-          name: 'single_select'
+          name: 'single_select',
         },
         config: {
           count: 4,
-          selectedCount : 0,
-        }
+          selectedCount: 0,
+        },
       });
       impl = ampSelector.implementation_;
       ampSelector.build();
@@ -222,12 +216,12 @@ describes.realWin('amp-selector', {
 
       ampSelector = getSelector({
         attributes: {
-          name: 'single_select'
+          name: 'single_select',
         },
         config: {
           count: 4,
-          selectedCount : 2,
-        }
+          selectedCount: 2,
+        },
       });
       impl = ampSelector.implementation_;
       ampSelector.build();
@@ -245,12 +239,12 @@ describes.realWin('amp-selector', {
       ampSelector = getSelector({
         attributes: {
           name: 'muti_select',
-          multiple: true
+          multiple: true,
         },
         config: {
           count: 4,
-          selectedCount : 2,
-        }
+          selectedCount: 2,
+        },
       });
       impl = ampSelector.implementation_;
       ampSelector.build();
@@ -263,71 +257,74 @@ describes.realWin('amp-selector', {
       inputs = [].slice.call(impl.element.querySelectorAll('input'));
       expect(inputs.length).to.equal(3);
     });
-  });
+    it('should handle clicks', () => {
+      let ampSelector = getSelector({
+        attributes: {
+          name: 'single_select',
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+        },
+      });
+      let impl = ampSelector.implementation_;
+      let setStateSpy = sandbox.spy(impl, 'setState_');
+      ampSelector.build();
 
-  it('should handle clicks', () => {
-    let ampSelector = getSelector({
-      attributes: {
-        name: 'single_select'
-      },
-      config: {
-        count: 4,
-        selectedCount : 2,
-      }
+      let e = {
+        target: impl.element.children[3],
+      };
+      impl.clickHandler_(e);
+
+      expect(impl.element.children[3].hasAttribute('selected')).to.be.true;
+      expect(setStateSpy).to.have.been.calledTwice;
+
+      e = {
+        target: document.body,
+      };
+
+      impl.clickHandler_(e);
+      expect(setStateSpy).to.have.been.calledTwice;
+
+      e = {
+        target: impl.element.children[3],
+      };
+      impl.clickHandler_(e);
+      expect(setStateSpy).to.have.been.calledTwice;
+
+      ampSelector = getSelector({
+        attributes: {
+          name: 'muti_select',
+          multiple: true,
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+          disabledCount: 1,
+        },
+      });
+
+      impl = ampSelector.implementation_;
+      setStateSpy = sandbox.spy(impl, 'setState_');
+      ampSelector.build();
+
+      e = {
+        target: impl.element.children[3],
+      };
+
+      impl.clickHandler_(e);
+      expect(impl.element.children[3].hasAttribute('selected')).to.be.true;
+      expect(setStateSpy).to.have.been.calledTwice;
+
+      impl.clickHandler_(e);
+      expect(impl.element.children[3].hasAttribute('selected')).to.be.false;
+      expect(setStateSpy).to.have.been.calledThrice;
+
+      e = {
+        target: impl.element.children[2],
+      };
+      impl.clickHandler_(e);
+      expect(setStateSpy).to.have.been.calledThrice;
     });
-    let impl = ampSelector.implementation_;
-    let setStateSpy = sandbox.spy(impl, 'setState_');
-    ampSelector.build();
-
-    let e = {
-      target: impl.element.children[3]
-    };
-    impl.clickHandler_(e);
-
-    expect(impl.element.children[3].hasAttribute('selected')).to.be.true;
-    expect(setStateSpy).to.have.been.calledOnce;
-
-    e = {
-      target: document.body
-    };
-
-    impl.clickHandler_(e);
-    expect(setStateSpy).to.have.been.calledOnce;
-
-    e = {
-      target: impl.element.children[3]
-    };
-    impl.clickHandler_(e);
-    expect(setStateSpy).to.have.been.calledOnce;
-
-    ampSelector = getSelector({
-      attributes: {
-        name: 'muti_select',
-        multiple: true
-      },
-      config: {
-        count: 4,
-        selectedCount : 2,
-        disabledCount : 1
-      }
-    });
-
-    e = {
-      target: impl.element.children[3]
-    };
-
-    impl.clickHandler_(e);
-    expect(impl.element.children[3].hasAttribute('selected')).to.be.true;
-    expect(setStateSpy).to.have.been.calledTwice;
-
-    impl.clickHandler_(e);
-    expect(impl.element.children[3].hasAttribute('selected')).to.be.false;
-    expect(setStateSpy).to.have.been.calledThrice;
-
-    e = {
-      target: impl.element.children[2]
-    };
-    impl.clickHandler_(e);
-    expect(setStateSpy).to.not.have.been.called;
   });
 });
