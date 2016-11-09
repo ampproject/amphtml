@@ -105,7 +105,14 @@ export class AmpIframe extends AMP.BaseElement {
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
-    return 'data:text/html;charset=utf-8;base64,' + btoa(srcdoc);
+
+    // srcdoc is a DOMString and requires special handling for base64 encoding.
+    // See https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
+    const encodedSrcdoc = btoa(encodeURIComponent(srcdoc)
+      .replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+      }));
+    return 'data:text/html;charset=utf-8;base64,' + encodedSrcdoc;
   }
 
   /** @override */
