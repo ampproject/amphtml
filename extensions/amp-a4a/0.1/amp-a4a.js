@@ -540,17 +540,17 @@ export class AmpA4A extends AMP.BaseElement {
         // Haven't rendered yet, so try rendering via one of our
         // cross-domain iframe solutions.
         let renderPromise;
-        if (this.nonAmpCreativeRenderMethod_ ==
-            CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME && this.creativeBody_) {
-          renderPromise = this.renderViaSafeFrame_(this.creativeBody_);
-        } else if (this.nonAmpCreativeRenderMethod_ ==
-            CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME && this.creativeBody_) {
-          renderPromise = this.renderViaNameFrame_(this.creativeBody_);
+        const method = this.nonAmpCreativeRenderMethod_;
+        if ((method == CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME ||
+             method == CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME) &&
+            this.creativeBody_) {
+          renderPromise = this.renderViaNameAttrOfXDomIframe_(
+              this.creativeBody_);
         } else if (this.adUrl_) {
           renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
-          throw new Error('No creative or URL available -- A4A can\'t render' +
-              ' any ad');
+          throw new Error(
+              'No creative or URL available -- A4A can\'t render any ad');
         }
         this.creativeBody_ = null;  // Free resources.
         this.nonAmpCreativeRenderMethod_ =
@@ -851,40 +851,45 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Render creative via SafeFrame.
-   * @param {!ArrayBuffer} creativeBody  The creative, as raw bytes.
+   * Render the creative via some "cross domain iframe that accepts the creative
+   * in the name attribute".  This could be SafeFrame or the AMP-native
+   * NameFrame.
+   *
+   * @param {!ArrayBuffer} creativeBody
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  renderViaSafeFrame_(creativeBody) {
+  renderViaNameAttrOfXDomIframe_(creativeBody) {
+    const method = this.nonAmpCreativeRenderMethod_;
+    dev().assert(method == CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME ||
+        method == CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME,
+        'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.emitLifecycleEvent('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
+      let srcPath;
+      let nameData;
+      if (method == CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME) {
+        srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
+        nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
+      } else if (method == CROSS_ORIGIN_RENDERING_MODE.NAMEFRAME) {
+        srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
+        nameData = JSON.stringify({creative});
+      } else {
+        // Shouldn't be able to get here, but...  Because of the assert, above,
+        // we can only get here in non-dev mode, so give user feedback.
+        user().error('A4A', 'A4A received unrecognized cross-domain name'
+            + ' attribute iframe rendering mode request: %s.  Unable to'
+            + ' render a creative for'
+            + ' slot %s.', method, this.element.getAttribute('id'));
+      }
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument),
           'iframe', Object.assign({
             'height': this.element.getAttribute('height'),
             'width': this.element.getAttribute('width'),
-            'src': SAFEFRAME_IMPL_PATH + '?n=0',
-            'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
-          }, SHARED_IFRAME_PROPERTIES));
-      return this.iframeRenderHelper_(iframe);
-    });
-  }
-
-  renderViaNameFrame_(creativeBody) {
-    this.emitLifecycleEvent('renderSafeFrameStart');
-    return utf8Decode(creativeBody).then(creative => {
-      /** @const {!Element} */
-      const nameData = Object.create(null);
-      nameData['creative'] = creative;
-      const iframe = createElementWithAttributes(
-          /** @type {!Document} */(this.element.ownerDocument),
-          'iframe', Object.assign({
-            'height': this.element.getAttribute('height'),
-            'width': this.element.getAttribute('width'),
-            'src': getDefaultBootstrapBaseUrl(this.win, 'nameframe'),
-            'name': JSON.stringify(nameData),
+            'src': srcPath,
+            'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
       return this.iframeRenderHelper_(iframe);
     });

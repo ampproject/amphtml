@@ -215,7 +215,7 @@ export function resetBootstrapBaseUrlForTesting(win) {
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
- * @param {?string} opt_srcFileBasename
+ * @param {string=} opt_srcFileBasename
  * @return {string}
  */
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
