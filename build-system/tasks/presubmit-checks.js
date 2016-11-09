@@ -198,11 +198,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/history-impl.js',
-      'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
-      'src/service/viewport-impl.js',
-      'src/service/vsync-impl.js',
     ],
   },
   'setViewerVisibilityState': {
@@ -216,7 +212,6 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
   },
