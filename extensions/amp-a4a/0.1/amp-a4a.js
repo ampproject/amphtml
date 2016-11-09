@@ -257,10 +257,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
-    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
-    // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
     this.preconnect.url(SAFEFRAME_IMPL_PATH);
+    this.preconnect.url(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     if (!this.config) {
       return;
     }
