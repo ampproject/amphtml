@@ -1,36 +1,39 @@
 %{
 
-var functionWhitelist = {
-  '[object Array]': [
-    Array.prototype.concat,
-    Array.prototype.includes,
-    Array.prototype.indexOf,
-    Array.prototype.join,
-    Array.prototype.lastIndexOf,
-    Array.prototype.slice,
-  ],
-  '[object String]': [
-    String.prototype.charAt,
-    String.prototype.charCodeAt,
-    String.prototype.codePointAt,
-    String.prototype.concat,
-    String.prototype.endsWith,
-    String.prototype.includes,
-    String.prototype.indexOf,
-    String.prototype.lastIndexOf,
-    String.prototype.localeCompare,
-    String.prototype.repeat,
-    String.prototype.replace,
-    String.prototype.slice,
-    String.prototype.split,
-    String.prototype.startsWith,
-    String.prototype.substr,
-    String.prototype.substring,
-    String.prototype.toLocaleLowerCase,
-    String.prototype.toLocaleUpperCase,
-    String.prototype.toLowerCase,
-    String.prototype.toUpperCase,
-  ],
+var functionWhitelist =
+{
+  '[object Array]':
+    [
+      Array.prototype.concat,
+      Array.prototype.includes,
+      Array.prototype.indexOf,
+      Array.prototype.join,
+      Array.prototype.lastIndexOf,
+      Array.prototype.slice,
+    ],
+  '[object String]':
+    [
+      String.prototype.charAt,
+      String.prototype.charCodeAt,
+      String.prototype.codePointAt,
+      String.prototype.concat,
+      String.prototype.endsWith,
+      String.prototype.includes,
+      String.prototype.indexOf,
+      String.prototype.lastIndexOf,
+      String.prototype.localeCompare,
+      String.prototype.repeat,
+      String.prototype.replace,
+      String.prototype.slice,
+      String.prototype.split,
+      String.prototype.startsWith,
+      String.prototype.substr,
+      String.prototype.substring,
+      String.prototype.toLocaleLowerCase,
+      String.prototype.toLocaleUpperCase,
+      String.prototype.toLowerCase,
+      String.prototype.toUpperCase,
+    ],
 };
 
 %}
@@ -131,9 +134,9 @@ expr:
 
 operation:
     '!' expr
-      {$$ = !$1;}
+      {$$ = !$2;}
   | '-' expr %prec UMINUS
-      {$$ = -$1;}
+      {$$ = -$2;}
   |  expr '+' expr
       {$$ = $1 + $3;}
   | expr '-' expr
