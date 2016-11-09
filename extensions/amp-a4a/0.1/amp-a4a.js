@@ -875,15 +875,15 @@ export class AmpA4A extends AMP.BaseElement {
     this.emitLifecycleEvent('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
       /** @const {!Element} */
-      const name_data = Object.create(null);
-      name_data['creative'] = creative;
+      const nameData = Object.create(null);
+      nameData['creative'] = creative;
       const iframe = createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument),
           'iframe', Object.assign({
             'height': this.element.getAttribute('height'),
             'width': this.element.getAttribute('width'),
             'src': getDefaultBootstrapBaseUrl(this.win, 'nameframe'),
-            'name': JSON.stringify(name_data),
+            'name': JSON.stringify(nameData),
           }, SHARED_IFRAME_PROPERTIES));
       return this.iframeRenderHelper_(iframe);
     });

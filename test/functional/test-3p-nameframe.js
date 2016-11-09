@@ -48,7 +48,7 @@ describes.sandboxed('nameframe', {}, () => {
 window.parent.postMessage({type: 'creative rendered'}, '*');
 </script>
 </body>
-</html>`
+</html>`,
     });
     win.addEventListener('message', content => {
       expect(content.data.type).to.equal('creative rendered');
