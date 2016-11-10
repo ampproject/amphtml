@@ -19,6 +19,10 @@ import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 
+/**
+ * @fileoverview This is the communication protocol between AMP and the viewer.
+ * It is used in the amp-viewer-integration.js file.
+ */
 export class Messaging {
   /**
    * Messaging protocol between viewer and viewer client.

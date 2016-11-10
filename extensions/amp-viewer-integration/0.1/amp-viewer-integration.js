@@ -15,8 +15,8 @@
  */
 
 import {Messaging} from './messaging.js';
-import {listen, unlisten} from '../../../src/event-helper';
-import {viewerPromiseForDoc} from '../../../src/viewer';
+import {listen} from '../../../src/event-helper';
+import {viewerForDoc} from '../../../src/viewer';
 import {user} from '../../../src/log';
 
 
@@ -30,40 +30,36 @@ export class AmpViewerIntegration {
     this.win_ = win;
   }
 
+  /**
+   * @return {!Promise}
+   */
   init() {
-    let viewer;
-    this.getViewer_()
-    .then(viewerParam => {
-      viewer = viewerParam;
-      return this.getHandshakePromise_(viewer);
-    })
-    .then(viewerOrigin => {
-      const messaging = new Messaging(this.win_.parent, viewerOrigin,
-          function(type, payload, awaitResponse) {
-            return viewer.receiveMessage(type, payload, awaitResponse);
-          });
-      viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
-        return messaging.sendRequest(type, payload, awaitResponse);
-      }, viewerOrigin);
+    return new Promise(resolve => {
+      const viewer = viewerForDoc(this.win_.document);
+      this.getHandshakePromise_(viewer)
+      .then(viewerOrigin => {
+        const messaging = new Messaging(this.win_.parent, viewerOrigin,
+            (type, payload, awaitResponse) => {
+              return viewer.receiveMessage(
+                type, /** @type {!JSONType} */ (payload), awaitResponse);
+            });
+        viewer.setMessageDeliverer((type, payload, awaitResponse) => {
+          return messaging.sendRequest(type, payload, awaitResponse);
+        }, viewerOrigin);
+        resolve();
+      });
     });
   }
 
   /**
-   * @return {!Promise<!../../../src/service/viewer-impl.Viewer>}
-   * @private
-   */
-  getViewer_() {
-    return viewerPromiseForDoc(this.win_.document);
-  }
-
-  /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @return {!Promise}
    * @private
    */
   getHandshakePromise_(viewer) {
     const win = this.win_;
 
-    return new Promise(function(resolve) {
+    return new Promise(resolve => {
       const unconfirmedViewerOrigin = viewer.getParam('viewerorigin');
       user().assert(unconfirmedViewerOrigin,
               'Expected viewer origin must be specified!');
@@ -72,12 +68,12 @@ export class AmpViewerIntegration {
         if (event.origin == unconfirmedViewerOrigin &&
                 event.data == 'amp-handshake-response' &&
                 (!event.source || event.source == win.parent)) {
-          unlisten(win, 'message', listener);
+          unlisten();
           resolve(event.origin);
         }
       };
 
-      listen(win, 'message', listener);
+      const unlisten = listen(win, 'message', listener);
 
       win.parent./*OK*/postMessage('amp-handshake-request',
           unconfirmedViewerOrigin);
