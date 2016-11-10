@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {tryFocus} from '../../../src/dom';
+import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
 import {historyForDoc} from '../../../src/history';
@@ -125,11 +125,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('close', this.close_.bind(this));
 
     this.element.addEventListener('click', e => {
-      const target = dev().assertElement(e.target);
-      if (!target) {
-        return;
-      }
-      if (target.tagName == 'A' && target.href) {
+      const target = closestByTag(dev().assertElement(e.target), 'A');
+      if (target && target.href) {
         this.close_();
       }
     }, true);
