@@ -108,8 +108,6 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc) {
   installDocumentInfoServiceForDoc(ampdoc);
-  // installViewerServiceForDoc(ampdoc);
-  // installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
