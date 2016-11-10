@@ -25,14 +25,14 @@ const mandatoryParams = ['tagtype', 'cid'],
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
+    'experimentId', 'multiSize', 'multiSizeValidation',
   ],
   dfpParams = [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
+    'experimentId', 'multiSize', 'multiSizeValidation',
   ],
   dfpDefaultTimeout = 1000;
 
