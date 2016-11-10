@@ -993,6 +993,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?./layout-rect.LayoutRectDef}
+     * @final @this {!Element}
+     */
+    getOwnerLayoutBox() {
+      const owner = this.getResources().getResourceForElement(this).getOwner();
+      return owner && owner.getLayoutBox();
+    }
+
+    /**
      * Returns a change entry for that should be compatible with
      * IntersectionObserverEntry.
      * @return {!IntersectionObserverEntry} A change entry.

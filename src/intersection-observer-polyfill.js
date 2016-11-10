@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
+import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-
-const DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -36,64 +34,13 @@ const DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
 export let DOMRect;
 
 /**
- * Transforms a LayoutRect into a DOMRect for use in intersection observers.
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!DOMRect}
- */
-function DomRectFromLayoutRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-    x: rect.left,
-    y: rect.top,
-  };
-}
-
-/**
- * Transforms a DOMRect into a LayoutRect for use in intersection observers.
- * @param {!DOMRect} rect
- * @return {!./layout-rect.LayoutRectDef}
- */
-function LayoutRectFromDomRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-  };
-}
-
-
-/**
- * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!./layout-rect.LayoutRectDef} smaller
- * @param {!./layout-rect.LayoutRectDef} larger
- * @return {number}
- */
-function intersectionRatio(smaller, larger) {
-  return (smaller.width * smaller.height) / (larger.width * larger.height);
-}
-
-/**
  * The IntersectionObserverPolyfill class lets any element receive its
- * intersection data with the viewport. The IntersectionObserverPolyfill acts
- * like native browser supported IntersectionObserver.
- * IntersectionObserverPolyfill will
- * create a PositionObserver class (Not implemented yet) to track the
- * intersection between element and viewport.
+ * intersection data with the viewport. It acts like native browser supported
+ * IntersectionObserver.
  * The IntersectionObserver receives a callback function and an optional option
- * as params. If option is not provided, the default thresholds value will be
- * used. Whenever the element intersection ratio cross a threshold value,
- * IntersectionObserverPolyfill will call the callback function.
- * Note: To share the IntersectionObserverEntry to an iframe, whoever create the
- * IntersectionObserverPolyfill needs to handle postMessageApi and takes care of
- * sending messages rate etc outside the IntersectionObserverPolyfill.
+ * as params. Whenever the element intersection ratio cross a threshold value,
+ * IntersectionObserverPolyfill will call the provided callback function with
+ * the change entry.
  */
 export class IntersectionObserverPolyfill {
   /**
@@ -108,13 +55,13 @@ export class IntersectionObserverPolyfill {
      * A list of threshold, sorted in increasing numeric order
      * @private @const {!Array}
      */
-    this.threshold_ = opt_option ? opt_option.threshold : DEFAULT_THRESHOLD;
+    this.threshold_ = opt_option ? opt_option.threshold : [0];
+    this.threshold_ = this.threshold_.sort();
+    dev().assert(this.threshold_[0] >= 0 &&
+        this.threshold_[this.threshold_.length - 1] <= 1,
+        'Threshold should only contain value range from 0 to 1');
 
-    /**
-     * TODO: Need to support multiple observed elements.
-     * If support multiple elements, will they share the callback and threshold
-     * @private {?Element}
-     */
+    /** @private {?Element} */
     this.element_ = null;
 
     /** @private {boolean} */
@@ -143,11 +90,18 @@ export class IntersectionObserverPolyfill {
 
   /**
    * Provide a way to observer the intersection change for a specific element
+   * Please note that the IntersectionObserverPolyfill only allow to observe one
+   * element at a time.
+   * TODO: Support observing multiple elements.
    * @param {!Element} element
    */
   observe(element) {
+    // Reset cached value for a new element
+    this.isAmpElement_ = false;
+    this.elementRectForNonAMP_ = null;
+    this.prevThresholdSlot_ = 0;
     // TODO: Need a good way to check if an element is AMP element
-    if (element.isBuilt && element.isBuilt() && element.getLayoutBox) {
+    if (element.isBuilt && element.isBuilt()) {
       this.isAmpElement_ = true;
     }
     this.element_ = element;
@@ -165,30 +119,36 @@ export class IntersectionObserverPolyfill {
       opt_container =
           moveLayoutRect(opt_container, viewport.left, viewport.top);
     }
-    let elementRectNorm;
+    let elementRect;
+    let ownerRect = null;
 
     if (this.isAmpElement_) {
       // If calls with container, always assume getLayoutBox() return relative
       // LayoutRect to container
-      const elementRect = this.element_.getLayoutBox();
-      elementRectNorm = opt_container
-          ? moveLayoutRect(elementRect, opt_container.left, opt_container.top)
-          : elementRect;
+      elementRect = this.element_.getLayoutBox();
+      ownerRect = this.element_.getOwnerLayoutBox();
+      if (opt_container) {
+        elementRect = moveLayoutRect(elementRect, opt_container.left,
+            opt_container.top);
+        if (ownerRect) {
+          ownerRect = moveLayoutRect(ownerRect, opt_container.left,
+              opt_container.top);
+        }
+      }
     } else {
       // If the element is not an AMP element, always assume its position to
       // the page won't change.
       if (!this.elementRectForNonAMP_) {
-        const elementRect = LayoutRectFromDomRect(
-            this.element_./*OK*/getBoundingClientRect());
+        elementRect = this.element_./*OK*/getBoundingClientRect();
         this.elementRectForNonAMP_ =
             moveLayoutRect(elementRect, opt_container.left, opt_container.top);
       }
-      elementRectNorm = this.elementRectForNonAMP_;
+      elementRect = this.elementRectForNonAMP_;
     }
 
     // Normalize container element
     const changeEntry = this.getValidIntersectionChangeEntry_(
-        elementRectNorm, viewport, opt_container);
+        elementRect, ownerRect, viewport, opt_container);
     if (changeEntry) {
       this.callback_(changeEntry);
     }
@@ -201,17 +161,24 @@ export class IntersectionObserverPolyfill {
    * Mutates passed in rootBounds to have x and y according to spec.
    *
    * @param {!./layout-rect.LayoutRectDef} element element's rect
+   * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
    * @param {!./layout-rect.LayoutRectDef} viewport viewport's rect.
+   * @param {./layout-rect.LayoutRectDef=} opt_container.
    * @return {?IntersectionObserverEntry} A valid change entry.
    * @private
    */
-  getValidIntersectionChangeEntry_(element, viewport, opt_container) {
+  getValidIntersectionChangeEntry_(element, owner, viewport, opt_container) {
     // TODO: need to include owner LayoutRect info
 
     // Building an IntersectionObserverEntry.
     let intersectionRect = element;
+    if (owner) {
+      intersectionRect = rectIntersection(owner, element) ||
+          // No intersection.
+          layoutRectLtwh(0, 0, 0, 0);
+    }
     if (opt_container) {
-      intersectionRect = rectIntersection(opt_container, element) ||
+      intersectionRect = rectIntersection(opt_container, intersectionRect) ||
           // No intersection.
           layoutRectLtwh(0, 0, 0, 0);
     }
@@ -223,7 +190,7 @@ export class IntersectionObserverPolyfill {
         -viewport.top);
 
     const ratio = intersectionRatio(intersectionRect, element);
-    const newThresholdSlot = this.getThresholdSlot_(ratio);
+    const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
     if (newThresholdSlot == this.prevThresholdSlot_) {
       return null;
     }
@@ -236,7 +203,6 @@ export class IntersectionObserverPolyfill {
 
     // Now, move the viewport to (0, 0)
     const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
-
     return /** @type {!IntersectionObserverEntry} */ ({
       time: performance.now(),
       rootBounds: DomRectFromLayoutRect(rootBounds),
@@ -245,31 +211,60 @@ export class IntersectionObserverPolyfill {
       intersectionRatio: ratio,
     });
   }
+}
 
-  /**
-   * Returns the slot number that the current ratio fills in.
-   * @param {number} ratio Range from [0, 1]
-   * @return {number} Range from [0, threshold.length]
-   * @private
-   */
-  getThresholdSlot_(ratio) {
-    let startIdx = 0;
-    let endIdx = this.threshold_.length;
-    // 0 is a special case that does not fit into [small, large) range
-    if (ratio == 0) {
-      return 0;
-    }
-    let mid = ((startIdx + endIdx) / 2) | 0;
-    while (startIdx < mid) {
-      const midValue = this.threshold_[mid];
-      // In the range of [small, large)
-      if (ratio < midValue) {
-        endIdx = mid;
-      } else {
-        startIdx = mid;
-      }
-      mid = ((startIdx + endIdx) / 2) | 0;
-    }
-    return endIdx;
+/**
+ * Transforms a LayoutRect into a DOMRect for use in intersection observers.
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!DOMRect}
+ */
+function DomRectFromLayoutRect(rect) {
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    bottom: rect.bottom,
+    right: rect.right,
+    x: rect.left,
+    y: rect.top,
+  };
+}
+
+/**
+ * Returns the ratio of the smaller box's area to the larger box's area.
+ * @param {!./layout-rect.LayoutRectDef} smaller
+ * @param {!./layout-rect.LayoutRectDef} larger
+ * @return {number}
+ */
+function intersectionRatio(smaller, larger) {
+  return (smaller.width * smaller.height) / (larger.width * larger.height);
+}
+
+/**
+ * Returns the slot number that the current ratio fills in.
+ * @param {!Array} sortedThreshold valid sorted IoB threshold
+ * @param {number} ratio Range from [0, 1]
+ * @return {number} Range from [0, threshold.length]
+ * @visibleForTesting
+ */
+export function getThresholdSlot(sortedThreshold, ratio) {
+  let startIdx = 0;
+  let endIdx = sortedThreshold.length;
+  // 0 is a special case that does not fit into [small, large) range
+  if (ratio == 0) {
+    return 0;
   }
+  let mid = ((startIdx + endIdx) / 2) | 0;
+  while (startIdx < mid) {
+    const midValue = sortedThreshold[mid];
+    // In the range of [small, large)
+    if (ratio < midValue) {
+      endIdx = mid;
+    } else {
+      startIdx = mid;
+    }
+    mid = ((startIdx + endIdx) / 2) | 0;
+  }
+  return endIdx;
 }

@@ -14,431 +14,371 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill,
+import {IntersectionObserverPolyfill, getThresholdSlot,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
+
+const DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
+    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+
+/**
+ * Creates a DOM rect based on the left, top, width and height parameters
+ * in that order.
+ * @param {number} left
+ * @param {number} top
+ * @param {number} width
+ * @param {number} height
+ * @return {!DOMRect}
+ */
+function DomRectLtwh(left, top, width, height) {
+  const res = layoutRectLtwh(left, top, width, height);
+  res.x = left;
+  res.y = top;
+  return res;
+}
 
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    sandbox.stub(performance, 'now', () => {
+      return 100;
+    });
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('getThresholdSlot_', () => {
-    // default threshold
-    let ioInstance = new IntersectionObserverPolyfill(() => {});
-    expect(ioInstance.getThresholdSlot_(0)).to.equal(0);
-    expect(ioInstance.getThresholdSlot_(0.67)).to.equal(14);
-    expect(ioInstance.getThresholdSlot_(0.65)).to.equal(14);
-    expect(ioInstance.getThresholdSlot_(1)).to.equal(21);
-    let options = {threshold: [0.01, 0.25, 0.5, 1]};
-    ioInstance = new IntersectionObserverPolyfill(() => {}, options);
-    ioInstance.threshold_ = [0.01, 0.25, 0.5, 1];
-    expect(ioInstance.getThresholdSlot_(0)).to.equal(0);
-    options = {threshold: [0, 0.25, 0.5, 1]};
-    ioInstance = new IntersectionObserverPolyfill(() => {}, options);
-    expect(ioInstance.getThresholdSlot_(0)).to.equal(0);
-    expect(ioInstance.getThresholdSlot_(0.1)).to.equal(1);
-    expect(ioInstance.getThresholdSlot_(0.4)).to.equal(2);
-    expect(ioInstance.getThresholdSlot_(0.25)).to.equal(2);
-    expect(ioInstance.getThresholdSlot_(0.5)).to.equal(3);
-    expect(ioInstance.getThresholdSlot_(1)).to.equal(4);
-    options = {threshold: [0.5]};
-    ioInstance = new IntersectionObserverPolyfill(() => {}, options);
-    ioInstance.threshold_ = [0.5];
-    expect(ioInstance.getThresholdSlot_(1)).to.equal(1);
+  describe('threshold', () => {
+    it('will be sorted', () => {
+      const io1 = new IntersectionObserverPolyfill(() => {}, {
+        threshold: [0, 0.9, 0.3, 1, 0.02],
+      });
+      const io2 = new IntersectionObserverPolyfill(() => {}, {
+        threshold: [0, 0.02, 0.3, 0.9, 1],
+      });
+      expect(io1.threshold_).to.deep.equal(io2.threshold_);
+    });
+
+    it('should NOT contain value less than 0 or greater than 1', () => {
+      const io1 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: [0, -2, 0.3, 1, 0.02],
+        });
+      };
+      const io2 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: [0, 1.1, 0.3, 1, 0.02],
+        });
+      };
+      expect(io1).to.throw(
+          'Threshold should only contain value range from 0 to 1');
+      expect(io2).to.throw(
+          'Threshold should only contain value range from 0 to 1');
+    });
+
+    it('getThresholdSlot function', () => {
+      let threshold = DEFAULT_THRESHOLD;
+      expect(getThresholdSlot(threshold, 0)).to.equal(0);
+      expect(getThresholdSlot(threshold, 0.67)).to.equal(14);
+      expect(getThresholdSlot(threshold, 0.65)).to.equal(14);
+      expect(getThresholdSlot(threshold, 1)).to.equal(21);
+      threshold = [0.01, 0.25, 0.5, 1];
+      expect(getThresholdSlot(threshold, 0)).to.equal(0);
+      threshold = [0, 0.25, 0.5, 1];
+      expect(getThresholdSlot(threshold, 0)).to.equal(0);
+      expect(getThresholdSlot(threshold, 0.1)).to.equal(1);
+      expect(getThresholdSlot(threshold, 0.4)).to.equal(2);
+      expect(getThresholdSlot(threshold, 0.25)).to.equal(2);
+      expect(getThresholdSlot(threshold, 0.5)).to.equal(3);
+      expect(getThresholdSlot(threshold, 1)).to.equal(4);
+      threshold = [0.5];
+      expect(getThresholdSlot(threshold, 1)).to.equal(1);
+    });
+
   });
 
   describe('tick function', () => {
     let element;
-    element = {
-      isBuilt: () => {return true;},
-    };
+    let callbackSpy;
+
+    let io;
+    beforeEach(() => {
+      callbackSpy = sandbox.spy();
+      io = new IntersectionObserverPolyfill(callbackSpy);
+      element = {
+        isBuilt: () => {return true;},
+        getOwnerLayoutBox: () => {return null;},
+      };
+    });
+
+    afterEach(() => {
+      element = null;
+    });
+
 
     describe('w/o container should get IntersectionChangeEntry when', () => {
-      it('intersect correctly base', done => {
-        sandbox.stub(performance, 'now', () => {
-          return 100;
-        });
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change).to.be.object;
-          expect(change.time).to.equal(100);
-          expect(change.rootBounds).to.deep.equal({
-            'left': 0,
-            'top': 0,
-            'width': 100,
-            'height': 100,
-            'bottom': 100,
-            'right': 100,
-            'x': 0,
-            'y': 0,
-          });
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 50,
-            'top': -50,
-            'width': 150,
-            'height': 200,
-            'bottom': 150,
-            'right': 200,
-            'x': 50,
-            'y': -50,
-          });
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 50,
-            'top': 0,
-            'width': 50,
-            'height': 100,
-            'bottom': 100,
-            'right': 100,
-            'x': 50,
-            'y': 0,
-          });
-          expect(change.intersectionRatio).to.be.closeTo(0.1666666, .0001);
-          done();
-        });
+      it('intersect correctly base', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 50, 150, 200);
         };
-        ioInstance.observe(element);
+        io.observe(element);
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-        ioInstance.tick(rootBounds);
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, -50, 150, 200),
+          intersectionRect: DomRectLtwh(50, 0, 50, 100),
+          intersectionRatio: 1/6,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('intersects on the edge', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change).to.be.object;
-          expect(change.rootBounds).to.deep.equal({
-            'left': 0,
-            'top': 0,
-            'width': 100,
-            'height': 100,
-            'bottom': 100,
-            'right': 100,
-            'x': 0,
-            'y': 0,
-          });
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 50,
-            'top': 100,
-            'width': 150,
-            'height': 200,
-            'bottom': 300,
-            'right': 200,
-            'x': 50,
-            'y': 100,
-          });
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 50,
-            'top': 100,
-            'width': 50,
-            'height': 0,
-            'bottom': 100,
-            'right': 100,
-            'x': 50,
-            'y': 100,
-          });
-          expect(change.intersectionRatio).to.equal(0);
-          done();
-        });
+      it('intersects on the edge', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 200, 150, 200);
         };
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, 100, 150, 200),
+          intersectionRect: DomRectLtwh(50, 100, 50, 0),
+          intersectionRatio: 0,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('intersect correctly 2', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 50,
-            'top': 99,
-            'width': 50,
-            'height': 1,
-            'bottom': 100,
-            'right': 100,
-            'x': 50,
-            'y': 99,
-          });
-          done();
-        });
+      it('intersect correctly 2', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 199, 150, 200);
         };
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds);
+        io.observe(element);
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, 99, 150, 200),
+          intersectionRect: DomRectLtwh(50, 99, 50, 1),
+          intersectionRatio: 1/600,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('intersect correctly 3', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change.intersectionRect.height).to.equal(1);
-          expect(change.intersectionRect.width).to.equal(2);
-          done();
-        });
+      it('intersect correctly 3', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 100, 150, 200);
         };
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds);
+        io.observe(element);
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(-148, -199, 150, 200),
+          intersectionRect: DomRectLtwh(0, 0, 2, 1),
+          intersectionRatio: 2/30000,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('intersect correctly 4', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change.intersectionRect.height).to.equal(0);
-          expect(change.intersectionRect.width).to.equal(0);
-          done();
-        });
+      it('intersect correctly 4', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 100, 150, 200);
         };
         const rootBounds = layoutRectLtwh(202, 299, 100, 100);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(-152, -199, 150, 200),
+          intersectionRect: DomRectLtwh(0, 0, 0, 0),
+          intersectionRatio: 0,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('does not intersect with an element out of viewport', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change).to.be.object;
-          expect(change.rootBounds).to.deep.equal({
-            'left': 0,
-            'top': 0,
-            'width': 100,
-            'height': 100,
-            'bottom': 100,
-            'right': 100,
-            'x': 0,
-            'y': 0,
-          });
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 50,
-            'top': 125,
-            'width': 100,
-            'height': 100,
-            'bottom': 225,
-            'right': 150,
-            'x': 50,
-            'y': 125,
-          });
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 0,
-            'top': 0,
-            'width': 0,
-            'height': 0,
-            'bottom': 0,
-            'right': 0,
-            'x': 0,
-            'y': 0,
-          });
-          expect(change.intersectionRatio).to.equal(0);
-          done();
-        });
+      it('does not intersect with an element out of viewport', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 225, 100, 100);
         };
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, 125, 100, 100),
+          intersectionRect: DomRectLtwh(0, 0, 0, 0),
+          intersectionRatio: 0,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
+      });
+
+      it('element has owner', () => {
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(50, 50, 150, 200);
+        };
+        element.getOwnerLayoutBox = () => {
+          return layoutRectLtwh(0, 50, 100, 100);
+        };
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, -50, 150, 200),
+          intersectionRect: DomRectLtwh(50, 0, 50, 50),
+          intersectionRatio: 1/12,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
     });
 
     describe('w/ container should get IntersectionChangeEntry when', () => {
-      it('nested element in container in viewport', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 11,
-            'top': 12,
-            'width': 10,
-            'height': 10,
-            'bottom': 22,
-            'right': 21,
-            'x': 11,
-            'y': 12,
-          });
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 11,
-            'top': 12,
-            'width': 10,
-            'height': 10,
-            'bottom': 22,
-            'right': 21,
-            'x': 11,
-            'y': 12,
-          });
-          expect(change.intersectionRatio).to.be.equal(1);
-          done();
-        });
+      it('nested element in container in viewport', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(10, 10, 10, 10);
         };
         const rootBounds = layoutRectLtwh(1, 100, 200, 200);
         const containerBounds = layoutRectLtwh(1, 2, 50, 50);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds, containerBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds, containerBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 200, 200),
+          boundingClientRect: DomRectLtwh(11, 12, 10, 10),
+          intersectionRect: DomRectLtwh(11, 12, 10, 10),
+          intersectionRatio: 1,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('nested element in container, container intersect viewport', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 175,
-            'top': 0,
-            'width': 50,
-            'height': 50,
-            'bottom': 50,
-            'right': 225,
-            'x': 175,
-            'y': 0,
-          });
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 175,
-            'top': 0,
-            'width': 25,
-            'height': 50,
-            'bottom': 50,
-            'right': 200,
-            'x': 175,
-            'y': 0,
-          });
-          expect(change.intersectionRatio).to.be.equal(0.5);
-          done();
-        });
+      it('nested element in container, container intersect viewport', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(75, 0, 50, 50);
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
         const containerBounds = layoutRectLtwh(100, 0, 200, 200);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds, containerBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds, containerBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 200, 200),
+          boundingClientRect: DomRectLtwh(175, 0, 50, 50),
+          intersectionRect: DomRectLtwh(175, 0, 25, 50),
+          intersectionRatio: 0.5,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('nested element in container, container not in viewport', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 0,
-            'top': 200,
-            'width': 50,
-            'height': 50,
-            'bottom': 250,
-            'right': 50,
-            'x': 0,
-            'y': 200,
-          });
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 0,
-            'top': 200,
-            'width': 50,
-            'height': 0,
-            'bottom': 200,
-            'right': 50,
-            'x': 0,
-            'y': 200,
-          });
-          expect(change.intersectionRatio).to.be.equal(0);
-          done();
-        });
+      it('nested element in container, container not in viewport', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, 0, 50, 50);
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
         const containerBounds = layoutRectLtwh(0, 200, 100, 100);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds, containerBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds, containerBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 200, 200),
+          boundingClientRect: DomRectLtwh(0, 200, 50, 50),
+          intersectionRect: DomRectLtwh(0, 200, 50, 0),
+          intersectionRatio: 0,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
 
-      it('nested element outside container but in viewport', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 0,
-            'top': 100,
-            'width': 50,
-            'height': 50,
-            'bottom': 150,
-            'right': 50,
-            'x': 0,
-            'y': 100,
-          });
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 0,
-            'top': 0,
-            'width': 0,
-            'height': 0,
-            'bottom': 0,
-            'right': 0,
-            'x': 0,
-            'y': 0,
-          });
-          expect(change.intersectionRatio).to.be.equal(0);
-          done();
-        });
+      it('nested element outside container but in viewport', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, -101, 50, 50);
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
         const containerBounds = layoutRectLtwh(0, 201, 100, 100);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds, containerBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds, containerBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 200, 200),
+          boundingClientRect: DomRectLtwh(0, 100, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 0, 0),
+          intersectionRatio: 0,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
+      });
+
+      it('element has an owner', () => {
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(75, 0, 50, 50);
+        };
+        element.getOwnerLayoutBox = () => {
+          return layoutRectLtwh(0, 25, 200, 25);
+        };
+        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
+        const containerBounds = layoutRectLtwh(100, 0, 200, 200);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds, containerBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 200, 200),
+          boundingClientRect: DomRectLtwh(175, 0, 50, 50),
+          intersectionRect: DomRectLtwh(175, 25, 25, 25),
+          intersectionRatio: 0.25,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
     });
 
     describe('with non AMP element', () => {
-      it('with container', done => {
-        const ioInstance = new IntersectionObserverPolyfill(change => {
-          console.log(change.boundingClientRect);
-          expect(change.boundingClientRect).to.deep.equal({
-            'left': 0,
-            'top': 0,
-            'width': 50,
-            'height': 50,
-            'bottom': 50,
-            'right': 50,
-            'x': 0,
-            'y': 0,
-          });
-          console.log(change.intersectionRect);
-          expect(change.intersectionRect).to.deep.equal({
-            'left': 0,
-            'top': 0,
-            'width': 50,
-            'height': 50,
-            'bottom': 50,
-            'right': 50,
-            'x': 0,
-            'y': 0,
-          });
-          expect(change.intersectionRatio).to.be.equal(1);
-          done();
-        });
+      it('with container', () => {
         element.isBuilt = null;
         element.getBoundingClientRect = () => {
-          return {
-            'left': 0,
-            'top': 0,
-            'width': 50,
-            'height': 50,
-            'bottom': 50,
-            'right': 50,
-            'x': 0,
-            'y': 0,
-          };
+          return DomRectLtwh(0, 0, 50, 50);
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
         const containerBounds = layoutRectLtwh(0, 0, 100, 100);
-        ioInstance.prevThresholdSlot_ = -1;
-        ioInstance.observe(element);
-        ioInstance.tick(rootBounds, containerBounds);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds, containerBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 200, 200),
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRatio: 1,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
       });
     });
 
