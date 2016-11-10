@@ -52,11 +52,7 @@ export function domFingerprintPlain(element) {
   let level = 0;
   while (element && element.nodeType == /* element */ 1 && level < 25) {
     let id = '';
-    if (element.id &&
-        // Skip AMP generated ids.
-        // TODO: Remove when issue #6000 removes generated ids.
-        !(element.getResourceId &&
-          (element.id == `AMP_${element.getResourceId()}`))) {
+    if (element.id) {
       id = `/${element.id}`;
     }
     const nodeName = element.nodeName.toLowerCase();
