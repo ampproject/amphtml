@@ -82,6 +82,7 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
       'ads/**->src/utils/base64.js',
+      'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
