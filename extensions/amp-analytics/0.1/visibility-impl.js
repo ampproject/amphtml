@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {closestByTag} from '../../../src/dom';
+import {closestByTag, closestBySelector} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
@@ -25,6 +25,7 @@ import {user} from '../../../src/log';
 import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
+import {startsWith} from '../../../src/string';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -103,9 +104,12 @@ export function isVisibilitySpecValid(config) {
 
   const spec = config['visibilitySpec'];
   const selector = spec['selector'];
-  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0)) {
-    user().error(TAG_, 'Visibility spec requires an id selector or a tag ' +
-        'name starting with "amp-"');
+  if (!selector || (!startsWith(selector, '#') &&
+                    !startsWith(selector, 'amp-') &&
+                    selector != ':root' &&
+                    selector != ':host')) {
+    user().error(TAG_, 'Visibility spec requires an id selector, a tag ' +
+        'name starting with "amp-" or ":root"');
     return false;
   }
 
@@ -156,6 +160,16 @@ export function getElement(selector, el, selectionMethod) {
   if (!el) {
     return null;
   }
+
+  // Special case for root selector.
+  if (selector == ':host' || selector == ':root') {
+    const elWin = el.ownerDocument.defaultView;
+    const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
+    if (parentEl) {
+      return closestBySelector(parentEl, '.-amp-element');
+    }
+  }
+
   if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     return closestByTag(el, selector);
