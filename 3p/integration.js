@@ -93,6 +93,7 @@ import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {plista} from '../ads/plista';
+import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
