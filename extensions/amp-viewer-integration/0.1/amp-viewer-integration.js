@@ -81,4 +81,4 @@ export class AmpViewerIntegration {
   }
 }
 
-new AmpViewerIntegration(AMP.win).init();
+AMP.extension(new AmpViewerIntegration(AMP.win).init());
