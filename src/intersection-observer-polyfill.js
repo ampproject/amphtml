@@ -54,6 +54,23 @@ function DomRectFromLayoutRect(rect) {
 }
 
 /**
+ * Transforms a DOMRect into a LayoutRect for use in intersection observers.
+ * @param {!DOMRect} rect
+ * @return {!./layout-rect.LayoutRectDef}
+ */
+function LayoutRectFromDomRect(rect) {
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    bottom: rect.bottom,
+    right: rect.right,
+  };
+}
+
+
+/**
  * Returns the ratio of the smaller box's area to the larger box's area.
  * @param {!./layout-rect.LayoutRectDef} smaller
  * @param {!./layout-rect.LayoutRectDef} larger
@@ -84,23 +101,31 @@ export class IntersectionObserverPolyfill {
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {
-    /**
-     * @private @const {function()}
-     */
+    /** @private @const {function()} */
     this.callback_ = callback;
 
     /**
-     * TODO: Need to polyfill root/rootMargin?
      * A list of threshold, sorted in increasing numeric order
      * @private @const {!Array}
      */
     this.threshold_ = opt_option ? opt_option.threshold : DEFAULT_THRESHOLD;
 
-    /** @private {?Element} */
+    /**
+     * TODO: Need to support multiple observed elements.
+     * If support multiple elements, will they share the callback and threshold
+     * @private {?Element}
+     */
     this.element_ = null;
 
-    /** @private @const {number} */
-    this.prevTime_ = -1;
+    /** @private {boolean} */
+    this.isAmpElement_ = false;
+
+    /**
+     * A cached value to store getBoundingClientRect() value
+     * if element is not an AMP element
+     * @private {?DOMRect}
+     */
+    this.elementRectForNonAMP_ = null;
 
     /**
      * The prev threshold slot which the previous ratio fills
@@ -110,7 +135,8 @@ export class IntersectionObserverPolyfill {
      */
     this.prevThresholdSlot_ = 0;
 
-    // TODO: Add the PositionObserver here.
+    // TODO: create the PositionObserver class, or create listener for position
+    // info if inside an iframe
 
     // TODO: Add the postMessageApi logic outside IntersectionObserverPolyfill.
   }
@@ -120,20 +146,49 @@ export class IntersectionObserverPolyfill {
    * @param {!Element} element
    */
   observe(element) {
-    // TODO: create the PositionObserver class, or create the listener for
-    // position info if inside an iframe.
+    // TODO: Need a good way to check if an element is AMP element
+    if (element.isBuilt && element.isBuilt() && element.getLayoutBox) {
+      this.isAmpElement_ = true;
+    }
     this.element_ = element;
   }
 
   /**
-   * Tick function that PositionObserver can tell the class to calculate
-   * intersection.
-   * @param {!./layout-rect.LayoutRectDef} element element's rect
-   * @param {!./layout-rect.LayoutRectDef} viewport viewport's rect.
+   * Tick function that update the DOMRect of the root of observed element.
+   * Caller needs to make sure to pass in the correct container.
+   * @param {!./layout-rect.LayoutRectDef} viewport.
+   * @param {./layout-rect.LayoutRectDef=} opt_container. relative to viewport
    */
-  tick(element, viewport) {
-    const changeEntry =
-        this.getValidIntersectionChangeEntry_(element, viewport);
+  tick(viewport, opt_container) {
+    // Normalize container LayoutRect to be relative to page
+    if (opt_container) {
+      opt_container =
+          moveLayoutRect(opt_container, viewport.left, viewport.top);
+    }
+    let elementRectNorm;
+
+    if (this.isAmpElement_) {
+      // If calls with container, always assume getLayoutBox() return relative
+      // LayoutRect to container
+      const elementRect = this.element_.getLayoutBox();
+      elementRectNorm = opt_container
+          ? moveLayoutRect(elementRect, opt_container.left, opt_container.top)
+          : elementRect;
+    } else {
+      // If the element is not an AMP element, always assume its position to
+      // the page won't change.
+      if (!this.elementRectForNonAMP_) {
+        const elementRect = LayoutRectFromDomRect(
+            this.element_./*OK*/getBoundingClientRect());
+        this.elementRectForNonAMP_ =
+            moveLayoutRect(elementRect, opt_container.left, opt_container.top);
+      }
+      elementRectNorm = this.elementRectForNonAMP_;
+    }
+
+    // Normalize container element
+    const changeEntry = this.getValidIntersectionChangeEntry_(
+        elementRectNorm, viewport, opt_container);
     if (changeEntry) {
       this.callback_(changeEntry);
     }
@@ -150,19 +205,20 @@ export class IntersectionObserverPolyfill {
    * @return {?IntersectionObserverEntry} A valid change entry.
    * @private
    */
-  getValidIntersectionChangeEntry_(element, viewport) {
-    // Building an IntersectionObserverEntry.
+  getValidIntersectionChangeEntry_(element, viewport, opt_container) {
+    // TODO: need to include owner LayoutRect info
 
+    // Building an IntersectionObserverEntry.
     let intersectionRect = element;
+    if (opt_container) {
+      intersectionRect = rectIntersection(opt_container, element) ||
+          // No intersection.
+          layoutRectLtwh(0, 0, 0, 0);
+    }
     intersectionRect = rectIntersection(viewport, intersectionRect) ||
         // No intersection.
         layoutRectLtwh(0, 0, 0, 0);
 
-    // The element is relative to (0, 0), while the viewport moves. So, we must
-    // adjust.
-    // TODO(jridgewell, #5149): Fixed position elements must be recalculated.
-    const boundingClientRect = moveLayoutRect(element, -viewport.left,
-        -viewport.top);
     intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
         -viewport.top);
 
@@ -173,16 +229,16 @@ export class IntersectionObserverPolyfill {
     }
     this.prevThresholdSlot_ = newThresholdSlot;
 
+    // The element is relative to (0, 0), while the viewport moves. So, we must
+    // adjust.
+    const boundingClientRect = moveLayoutRect(element, -viewport.left,
+        -viewport.top);
+
     // Now, move the viewport to (0, 0)
     const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
 
-    if (Date.now() == this.prevTime_) {
-      // TODO: Is this really needed?
-      return null;
-    }
-    this.prevTime_ = Date.now();
     return /** @type {!IntersectionObserverEntry} */ ({
-      time: Date.now(),
+      time: performance.now(),
       rootBounds: DomRectFromLayoutRect(rootBounds),
       boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
       intersectionRect: DomRectFromLayoutRect(intersectionRect),
@@ -203,7 +259,7 @@ export class IntersectionObserverPolyfill {
     if (ratio == 0) {
       return 0;
     }
-    let mid = Math.floor((startIdx + endIdx) / 2);
+    let mid = ((startIdx + endIdx) / 2) | 0;
     while (startIdx < mid) {
       const midValue = this.threshold_[mid];
       // In the range of [small, large)
@@ -212,7 +268,7 @@ export class IntersectionObserverPolyfill {
       } else {
         startIdx = mid;
       }
-      mid = Math.floor((startIdx + endIdx) / 2);
+      mid = ((startIdx + endIdx) / 2) | 0;
     }
     return endIdx;
   }
