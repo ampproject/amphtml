@@ -64,4 +64,34 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('false || false == true')).to.be.false;
     expect(evaluateBindExpr('false == !true')).to.be.true;
   });
+
+  it('should support array literals and whitelisted methods', () => {
+    expect(evaluateBindExpr('[]')).to.deep.equal([]);
+    expect(evaluateBindExpr('[1, "a", [], {}]')).to.deep.equal([1, 'a', [], {}]);
+    expect(evaluateBindExpr('["a", "b"].length')).to.equal(2);
+    expect(evaluateBindExpr('["a", "b"].concat(["c", "d"])')).to.deep.equal(['a', 'b', 'c', 'd']);
+    expect(evaluateBindExpr('["a"].includes("a")')).to.be.true;
+    expect(evaluateBindExpr('["a", "a"].indexOf("a")')).to.equal(0);
+    expect(evaluateBindExpr('["a", "b", "c"].join("-")')).to.equal('a-b-c');
+    expect(evaluateBindExpr('["a", "a"].lastIndexOf("a")')).to.equal(1);
+    expect(evaluateBindExpr('["a", "b", "c"].slice(1, 2)')).to.deep.equal(['b']);
+  });
+
+  it('should NOT allow array properties (except length) or non-whitelisted methods', () => {
+    expect(evaluateBindExpr('[].constructor')).to.be.null;
+    expect(evaluateBindExpr('[].prototype')).to.be.null;
+    expect(evaluateBindExpr('[].__proto__')).to.be.null;
+
+    expect(evaluateBindExpr('foo.constructor', {foo: []})).to.be.null;
+    expect(evaluateBindExpr('foo.prototype', {foo: []})).to.be.null;
+    expect(evaluateBindExpr('foo.__proto__', {foo: []})).to.be.null;
+
+    expect(evaluateBindExpr('["a", "b", "c"].find()')).to.be.null;
+    expect(evaluateBindExpr('["a", "b", "c"].forEach()')).to.be.null;
+    expect(evaluateBindExpr('["a", "b", "c"].splice(1, 1)')).to.be.null;
+
+    expect(evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']})).to.be.null;
+    expect(evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']})).to.be.null;
+    expect(evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']})).to.be.null;
+  });
 });

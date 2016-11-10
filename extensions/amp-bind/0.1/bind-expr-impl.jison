@@ -36,6 +36,11 @@ var functionWhitelist =
     ],
 };
 
+function isObject(obj) { return Object.prototype.toString.call(obj) === '[object Object]'; }
+function isArray(obj)  { return Object.prototype.toString.call(obj) === '[object Array]'; }
+function isNumber(obj) { return Object.prototype.toString.call(obj) === '[object Number]'; }
+function isString(obj) { return Object.prototype.toString.call(obj) === '[object String]'; }
+
 %}
 
 /* Lexical grammar */
@@ -175,7 +180,7 @@ invocation:
         if (whitelist) {
           var fn = $1[$3];
           if (whitelist.indexOf(fn) >= 0) {
-            $$ = fn.call($1, $4);
+            $$ = fn.apply($1, $4);
             return;
           }
         }
@@ -195,8 +200,8 @@ member_access:
       %{
         var obj = Object.prototype.toString.call($1);
         var member = Object.prototype.toString.call($2);
-        if (obj === '[object Array]' && member === '[object Number]') {
-          $$ = $1[$2];
+        if (obj === '[object Array]') {
+          $$ = (member === '[object Number]' || $2 === 'length') ? $1[$2] : null;
         } else if (obj === '[object Object]') {
           $$ = Object.prototype.hasOwnProperty.call($1, $2) ? $1[$2] : null;
         } else {
@@ -244,7 +249,7 @@ array_literal:
 array:
     expr
       {$$ = [$1];}
-  | arg_list ',' expr
+  | array ',' expr
       {$$ = $1; Array.prototype.push.call($1, $3);}
   ;
 
