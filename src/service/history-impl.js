@@ -112,14 +112,16 @@ export class History {
   }
 
   /**
+   * Helper method to handle navigation to a local target, e.g. When a user clicks an
+   * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
    *
    * @param {string} target
-   * @param {string} previousTarget
-   * @returns {Promise.<T>}
+   * @return {!Promise}
    */
-  replaceStateForTarget(target, previousTarget) {
+  replaceStateForTarget(target) {
+    const previousHash = this.ampdoc_.win.location.hash;
     return this.push(() => {
-      this.ampdoc_.win.location.replace(previousTarget || '#');
+      this.ampdoc_.win.location.replace(previousHash || '#');
     }).then(() => {
       this.binding_.replaceStateForTarget(target);
     });
@@ -555,9 +557,10 @@ export class HistoryBindingNatural_ {
    */
   replaceStateForTarget(target) {
     this.whenReady_(() => {
+      let hash = target.indexOf('#') == 0 ? target : `#${target}`;
       this.ignoreUpcomingPopstate_ = true;
       // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
-      this.win.location.replace(target);
+      this.win.location.replace(hash);
       this.ignoreUpcomingPopstate_ = false;
       this.historyReplaceState_();
     });
@@ -570,6 +573,7 @@ export class HistoryBindingNatural_ {
    * @private
    */
   historyReplaceState_(state, title, url) {
+    this.assertReady_();
     if (!state) {
       state = {};
     }
@@ -631,20 +635,15 @@ export class HistoryBindingVirtual_ {
         this.onHistoryPopped_.bind(this));
   }
 
-  /**
-   * @param {string} target
-   * @override
-   */
+  /** @override */
   replaceStateForTarget(target) {
-    this.win.location.replace(target);
+    let hash = target.indexOf('#') == 0 ? target : `#${target}`;
+    this.win.location.replace(hash);
   }
 
   /** @override */
   cleanup_() {
     this.unlistenOnHistoryPopped_();
-    if (this.origReplaceState_) {
-      this.win.history.replaceState = this.origReplaceState_;
-    }
   }
 
   /** @override */
