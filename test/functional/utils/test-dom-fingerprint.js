@@ -29,33 +29,18 @@ describe('domFingerprint', () => {
     while (body.firstChild) {
       body.removeChild(body.firstChild);
     }
-    /*
-      <div id='id1' ...>
-        <div id='id2' ...>
-          <table ...>       // table:0
-            <tr>            // tr:0
-              <td>...</td>  // td:0
-              <td>          // td:1
-                <amp-ad ...></amp-ad>
-              </td>
-            </tr>
-            <tr>...</tr>    // tr:1
-          </table>
-        </div>
-      </div>
-     */
     div1 = document.createElement('div');
     div1.id = 'id1';
     div1.innerHTML =
       `<div id='id2'>
-         <table>
-           <tr>
-             <td></td>
-             <td>
-               <amp-ad name="this one" type="adsense"></amp-ad>
+         <table>                <!-- table:0 -->
+           <tr>                 <!-- tr:0 -->
+             <td></td>          <!-- td:0 -->
+             <td>               <!-- td:1 -->
+               <amp-ad type="adsense"></amp-ad>
              </td>
            </tr>
-           <tr></tr>
+           <tr></tr>            <!-- tr:1 -->
          </table>
       </div>`;
 
