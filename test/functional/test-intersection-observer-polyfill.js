@@ -132,7 +132,7 @@ describe('IntersectionObserverPolyfill', () => {
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(50, -50, 150, 200),
           intersectionRect: DomRectLtwh(50, 0, 50, 100),
-          intersectionRatio: 1/6,
+          intersectionRatio: 1 / 6,
         };
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith(change);
@@ -169,7 +169,7 @@ describe('IntersectionObserverPolyfill', () => {
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(50, 99, 150, 200),
           intersectionRect: DomRectLtwh(50, 99, 50, 1),
-          intersectionRatio: 1/600,
+          intersectionRatio: 1 / 600,
         };
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith(change);
@@ -187,7 +187,7 @@ describe('IntersectionObserverPolyfill', () => {
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(-148, -199, 150, 200),
           intersectionRect: DomRectLtwh(0, 0, 2, 1),
-          intersectionRatio: 2/30000,
+          intersectionRatio: 2 / 30000,
         };
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith(change);
@@ -247,7 +247,7 @@ describe('IntersectionObserverPolyfill', () => {
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(50, -50, 150, 200),
           intersectionRect: DomRectLtwh(50, 0, 50, 50),
-          intersectionRatio: 1/12,
+          intersectionRatio: 1 / 12,
         };
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith(change);
@@ -384,16 +384,12 @@ describe('IntersectionObserverPolyfill', () => {
 
     describe('should NOT call callback with', () => {
       it('same threshold value', () => {
-        const callbackSpy = sandbox.spy();
-        const ioInstance = new IntersectionObserverPolyfill(() => {
-          callbackSpy();
-        });
-        ioInstance.observe(document.createElement('div'));
+        io.observe(document.createElement('div'));
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         const layoutBox = layoutRectLtwh(50, 50, 150, 200);
-        ioInstance.tick(layoutBox, rootBounds);
+        io.tick(layoutBox, rootBounds);
         expect(callbackSpy).to.be.calledOnce;
-        ioInstance.tick(layoutBox, rootBounds);
+        io.tick(layoutBox, rootBounds);
         expect(callbackSpy).to.be.calledOnce;
       });
     });
