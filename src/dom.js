@@ -224,11 +224,9 @@ export function closestBySelector(element, selector) {
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
  * @param  {!string} selector The selector to check against
- * @param  {!function(!Element, string):boolean=} opt_fallback Function to call
- *  when 'matches' API is unavailable
- * @return {boolean} True if the element matched the selector. False otherwise
+y * @return {boolean} True if the element matched the selector. False otherwise
  */
-export function matches(el, selector, opt_fallback) {
+export function matches(el, selector) {
   const matcher = el.matches ||
       el.webkitMatchesSelector ||
       el.mozMatchesSelector ||
@@ -237,11 +235,7 @@ export function matches(el, selector, opt_fallback) {
   if (matcher) {
     return matcher.call(el, selector);
   }
-  if (opt_fallback) {
-    return opt_fallback(el, selector);
-  }
-  // Out of luck.
-  return false;
+  return false;  // IE8 always returns false.
 }
 
 /**

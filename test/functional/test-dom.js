@@ -16,6 +16,8 @@
 
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
+import {loadPromise} from '../../src/event-helper';
+
 
 
 describe('DOM', () => {
@@ -737,10 +739,14 @@ describe('DOM', () => {
       div.id = 'div';
       img1 = document.createElement('amp-img');
       img1.id = 'img1';
-      ampEl.appendChild(iframe);
-      iframe.srcdoc = div.outerHTML;
       div.appendChild(img1);
+      iframe.srcdoc = div.outerHTML;
       document.body.appendChild(ampEl);
+
+      const loaded = loadPromise(iframe);
+      ampEl.appendChild(iframe);
+      return loaded;
+
     });
 
     afterEach(() => {
@@ -759,18 +765,6 @@ describe('DOM', () => {
       [ampEl, img1, iframe].map(el => {
         expect(dom.matches(el, 'div')).to.be.false;
       });
-    });
-
-    it('finds element by using callback', () => {
-      div.matches = div.webkitMatchesSelector = div.mozMatchesSelector =
-          div.msMatchesSelector = div.oMatchesSelector = undefined;
-      expect(dom.matches(div, 'span')).to.be.false;
-      expect(dom.matches(div, 'span', () => {
-        return true;
-      })).to.be.true;
-      expect(dom.matches(div, 'span', () => {
-        return false;
-      })).to.be.false;
     });
   });
 });

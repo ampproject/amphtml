@@ -27,6 +27,7 @@ import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
 import {viewportForDoc} from '../../../../src/viewport';
+import {loadPromise} from '../../../../src/event-helper';
 
 import * as sinon from 'sinon';
 
@@ -386,12 +387,15 @@ describe('amp-analytics.visibility', () => {
       img2.id = 'img2';
       analytics = document.createElement('amp-analytics');
       analytics.id = 'analytics';
-      ampEl.appendChild(iframe);
-      iframe.srcdoc = div.outerHTML;
-      div.appendChild(img1);
       img1.appendChild(analytics);
       img1.appendChild(img2);
+      div.appendChild(img1);
+      iframe.srcdoc = div.outerHTML;
       document.body.appendChild(ampEl);
+
+      const loaded = loadPromise(iframe);
+      ampEl.appendChild(iframe);
+      return loaded;
     });
 
     afterEach(() => {
@@ -419,9 +423,11 @@ describe('amp-analytics.visibility', () => {
       expect(getElement('amp-img', analytics, 'scope')).to.equal(img2);
     });
 
-    it.skip('finds element for selectionMethod=host', () => {
-      expect(getElement(':host', analytics)).to.equal(ampEl);
-      expect(getElement(':root', analytics, 'something')).to.equal(ampEl);
+    it('finds element for selectionMethod=host', () => {
+      const iframeAnalytics = iframe.contentDocument.querySelector(
+          'amp-analytics');
+      expect(getElement(':host', iframeAnalytics)).to.equal(ampEl);
+      expect(getElement(':root', iframeAnalytics, 'something')).to.equal(ampEl);
     });
   });
 });
