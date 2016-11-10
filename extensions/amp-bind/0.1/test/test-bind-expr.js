@@ -79,22 +79,6 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('false == !true')).to.be.true;
   });
 
-      // String.prototype.charAt,
-      // String.prototype.charCodeAt,
-      // String.prototype.concat,
-      // String.prototype.endsWith,
-      // String.prototype.includes,
-      // String.prototype.indexOf,
-      // String.prototype.lastIndexOf,
-      // String.prototype.repeat,
-      // String.prototype.slice,
-      // String.prototype.split,
-      // String.prototype.startsWith,
-      // String.prototype.substr,
-      // String.prototype.substring,
-      // String.prototype.toLowerCase,
-      // String.prototype.toUpperCase,
-
   it('should support strings', () => {
     expect(evaluateBindExpr('"a"')).to.equal('a');
     expect(evaluateBindExpr('"a".length')).to.equal(1);
