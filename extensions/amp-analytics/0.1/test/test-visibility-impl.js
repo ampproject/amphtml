@@ -27,6 +27,7 @@ import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
 import {viewportForDoc} from '../../../../src/viewport';
+import {loadPromise} from '../../../../src/event-helper';
 
 import * as sinon from 'sinon';
 
@@ -376,8 +377,12 @@ describe('amp-analytics.visibility', () => {
   });
 
   describe('getElement', () => {
-    let div, img1, img2, analytics;
+    let div, img1, img2, analytics, iframe, ampEl;
     beforeEach(() => {
+      ampEl = document.createElement('span');
+      ampEl.className = '-amp-element';
+      ampEl.id = 'ampEl';
+      iframe = document.createElement('iframe');
       div = document.createElement('div');
       div.id = 'div';
       img1 = document.createElement('amp-img');
@@ -386,18 +391,23 @@ describe('amp-analytics.visibility', () => {
       img2.id = 'img2';
       analytics = document.createElement('amp-analytics');
       analytics.id = 'analytics';
-      div.appendChild(img1);
       img1.appendChild(analytics);
       img1.appendChild(img2);
-      document.body.appendChild(div);
+      div.appendChild(img1);
+      iframe.srcdoc = div.outerHTML;
+      document.body.appendChild(ampEl);
+
+      const loaded = loadPromise(iframe);
+      ampEl.appendChild(iframe);
+      return loaded;
     });
 
     afterEach(() => {
-      document.body.removeChild(div);
+      document.body.removeChild(ampEl);
     });
 
     it('finds element by id', () => {
-      expect(getElement('#div', analytics, undefined)).to.equal(div);
+      expect(getElement('#ampEl', analytics, undefined)).to.equal(ampEl);
     });
 
     // In the following tests, getElement returns non-amp elements. Those are
@@ -415,6 +425,13 @@ describe('amp-analytics.visibility', () => {
     it('finds element by tagname, selectionMethod=scope', () => {
       expect(getElement('div', analytics, 'scope')).to.equal(null);
       expect(getElement('amp-img', analytics, 'scope')).to.equal(img2);
+    });
+
+    it('finds element for selectionMethod=host', () => {
+      const iframeAnalytics = iframe.contentDocument.querySelector(
+          'amp-analytics');
+      expect(getElement(':host', iframeAnalytics)).to.equal(ampEl);
+      expect(getElement(':root', iframeAnalytics, 'something')).to.equal(ampEl);
     });
   });
 });
