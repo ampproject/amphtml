@@ -277,6 +277,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  medianet: {
+    preconnect: 'https://contextual.media.net',
+    renderStartImplemented: true,
+  },
+
   mediavine: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
