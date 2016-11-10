@@ -23,6 +23,8 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
+import {installViewerServiceForDoc} from '../src/service/viewer-impl';
+import {installViewportServiceForDoc} from '../src/service/viewport-impl';
 import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
@@ -183,6 +185,8 @@ function beforeTest() {
   const ampdocService = installDocService(window, true);
   const ampdoc = ampdocService.getAmpDoc(window.document);
   installRuntimeServices(window);
+  installViewerServiceForDoc(ampdoc);
+  installViewportServiceForDoc(ampdoc);
   installAmpdocServices(ampdoc);
 }
 

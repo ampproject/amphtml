@@ -25,6 +25,8 @@ import {
   installRuntimeServices,
   registerForUnitTest,
 } from '../src/runtime';
+import {installViewerServiceForDoc} from '../src/service/viewer-impl';
+import {installViewportServiceForDoc} from '../src/service/viewport-impl';
 import {installStyles} from '../src/style-installer';
 import {cssText} from '../build/css';
 
@@ -213,6 +215,8 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
+      installViewerServiceForDoc(ampdoc);
+      installViewportServiceForDoc(ampdoc);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.

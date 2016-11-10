@@ -29,6 +29,8 @@ import {
   installRuntimeServices,
   registerElementForTesting,
 } from '../src/runtime';
+import {installViewerServiceForDoc} from '../src/service/viewer-impl';
+import {installViewportServiceForDoc} from '../src/service/viewport-impl';
 import {cssText} from '../build/css';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
@@ -420,7 +422,9 @@ class AmpFixture {
       completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
-      installAmpdocServices(ampdoc, spec.params);
+      installViewerServiceForDoc(ampdoc, spec.params);
+      installViewportServiceForDoc(ampdoc);
+      installAmpdocServices(ampdoc);
       adopt(win);
     } else if (ampdocType == 'multi') {
       adoptShadowMode(win);

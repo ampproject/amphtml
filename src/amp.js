@@ -35,6 +35,8 @@ import {
   installRuntimeServices,
   adopt,
 } from './runtime';
+import {installViewerServiceForDoc} from './service/viewer-impl';
+import {installViewportServiceForDoc} from './service/viewport-impl';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
@@ -67,6 +69,8 @@ chunk(self.document, function initial() {
       // Core services.
       installRuntimeServices(self);
       fontStylesheetTimeout(self);
+      installViewerServiceForDoc(ampdoc);
+      installViewportServiceForDoc(ampdoc);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
