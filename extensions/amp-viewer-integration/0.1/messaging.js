@@ -16,7 +16,7 @@
 
 
 import {listen} from '../../../src/event-helper';
-import {user} from '../../../src/log';
+import {dev} from '../../../src/log';
 
 
 export class Messaging {
@@ -26,9 +26,8 @@ export class Messaging {
    * @param {string} targetOrigin
    * @param {function(string, *, boolean):(!Promise<*>|undefined)}
    *    requestProcessor
-   * @param {string=} opt_targetId
    */
-  constructor(target, targetOrigin, requestProcessor, opt_targetId) {
+  constructor(target, targetOrigin, requestProcessor) {
     this.sentinel_ = '__AMP__';
     this.requestSentinel_ = this.sentinel_ + 'REQUEST';
     this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
@@ -38,145 +37,138 @@ export class Messaging {
 
     /** @const @private {!Window} */
     this.target_ = target;
-    /** @const @private {string|undefined} */
-    this.targetId_ = opt_targetId;
     /** @const @private {string} */
     this.targetOrigin_ = targetOrigin;
     /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
     this.requestProcessor_ = requestProcessor;
 
-    user().assert(this.targetOrigin_, 'Target origin must be specified!');
+    dev().assert(this.targetOrigin_, 'Target origin must be specified!');
 
     listen(this.target_, 'message', (this.onMessage_.bind(this)));
   }
-}
 
 
-/**
- * @param {Event|null} event
- * @private
- */
-Messaging.prototype.onMessage_ = function(event) {
-  if (event.source != this.target_ || event.origin != this.targetOrigin_) {
-    return;
-  }
-  const message = event.data;
-  if (message.sentinel == this.requestSentinel_) {
-    this.onRequest_(message);
-  } else if (message.sentinel == this.responseSentinel_) {
-    this.onResponse_(message);
-  }
-};
-
-
-/**
- * @param {*} message
- * @private
- */
-Messaging.prototype.onRequest_ = function(message) {
-  //TODO: Remove console.log before merge to prod.
-  console.log('here @ messaging.js -> onRequest_');
-  const requestId = message.requestId.toString();
-  const promise = this.requestProcessor_(message.type, message.payload,
-      message.rsvp);
-  if (message.rsvp) {
-    if (!promise) {
-      this.sendResponseError_(requestId, 'no response');
-      throw new Error('expected response but none given: ' + message.type);
+  /**
+   * @param {Event|null} event
+   * @private
+   */
+  onMessage_(event) {
+    if (!event || event.source != this.target_ ||
+      event.origin != this.targetOrigin_) {
+      return;
     }
-    promise.then(function(payload) {
-      this.sendResponse_(requestId, payload);
-    }.bind(this), function(reason) {
-      this.sendResponseError_(requestId, reason);
-    }.bind(this));
-  }
-};
-
-
-/**
- * @param {*} message
- * @private
- */
-Messaging.prototype.onResponse_ = function(message) {
-  //TODO: Remove console.log before merge to prod.
-  console.log('here @ messaging.js -> onResponse_');
-  const requestId = message.requestId;
-  const pending = this.waitingForResponse_[requestId];
-  if (pending) {
-    delete this.waitingForResponse_[requestId];
-    if (message.type == 'ERROR') {
-      pending.reject(message.payload);
-    } else {
-      pending.resolve(message.payload);
+    const message = event.data;
+    if (message.sentinel == this.requestSentinel_) {
+      this.onRequest_(message);
+    } else if (message.sentinel == this.responseSentinel_) {
+      this.onResponse_(message);
     }
-  }
-};
-
-/**
- * @param {string} eventType
- * @param {*} payload
- * @param {boolean} awaitResponse
- * @return {!Promise<*>|undefined}
- */
-Messaging.prototype.sendRequest = function(eventType, payload,
-    awaitResponse) {
-  //TODO: Remove console.log before merge to prod.
-  console.log('here @ messaging.js -> sendRequest');
-  const requestId = (++this.requestIdCounter_).toString();
-  if (awaitResponse) {
-    const promise = new Promise(function(resolve, reject) {
-      this.waitingForResponse_[requestId] = {resolve, reject};
-    }.bind(this));
-    this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
-        true);
-    return promise;
-  }
-  this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
-      false);
-  return undefined;
-};
-
-
-/**
- * @param {number} requestId
- * @param {*} payload
- * @private
- */
-Messaging.prototype.sendResponse_ = function(requestId, payload) {
-  //TODO: Remove console.log before merge to prod.
-  console.log('here @ messaging.js -> sendResponse_');
-  this.sendMessage_(
-    this.responseSentinel_, requestId.toString(), null, payload, false);
-};
-
-
-/**
- * @param {string} sentinel
- * @param {string} requestId
- * @param {string|null} eventType
- * @param {*} payload
- * @param {boolean} awaitResponse
- * @private
- */
-Messaging.prototype.sendMessage_ = function(sentinel, requestId,
-      eventType, payload, awaitResponse) {
-  const message = {
-    sentinel,
-    requestId,
-    type: eventType,
-    payload,
-    rsvp: awaitResponse,
   };
-  this.target_./*OK*/postMessage(message, this.targetOrigin_);
-};
 
 
-/**
- * @param {number} requestId
- * @param {*} reason
- * @private
- */
-Messaging.prototype.sendResponseError_ = function(requestId, reason) {
-  this.sendMessage_(
-    this.responseSentinel_, requestId.toString(), 'ERROR', reason, false);
-};
+  /**
+   * @param {string} eventType
+   * @param {*} payload
+   * @param {boolean} awaitResponse
+   */
+  sendRequest(eventType, payload, awaitResponse) {
+    //TODO: Remove console.log before merge to prod.
+    console.log('here @ messaging.js -> sendRequest');
+    const requestId = (++this.requestIdCounter_).toString();
+    if (awaitResponse) {
+      new Promise(function(resolve, reject) {
+        this.waitingForResponse_[requestId] = {resolve, reject};
+      }.bind(this));
+    }
+    this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
+        awaitResponse);
+  };
+
+
+  /**
+   * @param {*} message
+   * @private
+   */
+  onRequest_(message) {
+    //TODO: Remove console.log before merge to prod.
+    console.log('here @ messaging.js -> onRequest_');
+    const requestId = message.requestId.toString();
+    const promise = this.requestProcessor_(message.type, message.payload,
+        message.rsvp);
+    if (message.rsvp) {
+      if (!promise) {
+        this.sendResponseError_(requestId, 'no response');
+        throw new Error('expected response but none given: ' + message.type);
+      }
+      promise.then(function(payload) {
+        this.sendResponse_(requestId, payload);
+      }.bind(this), function(reason) {
+        this.sendResponseError_(requestId, reason);
+      }.bind(this));
+    }
+  };
+
+
+  /**
+   * @param {*} message
+   * @private
+   */
+  onResponse_(message) {
+    //TODO: Remove console.log before merge to prod.
+    console.log('here @ messaging.js -> onResponse_');
+    const requestId = message.requestId;
+    const pending = this.waitingForResponse_[requestId];
+    if (pending) {
+      delete this.waitingForResponse_[requestId];
+      if (message.type == 'ERROR') {
+        pending.reject(message.payload);
+      } else {
+        pending.resolve(message.payload);
+      }
+    }
+  };
+
+
+  /**
+   * @param {number} requestId
+   * @param {*} payload
+   * @private
+   */
+  sendResponse_(requestId, payload) {
+    //TODO: Remove console.log before merge to prod.
+    console.log('here @ messaging.js -> sendResponse_');
+    this.sendMessage_(
+      this.responseSentinel_, requestId.toString(), null, payload, false);
+  };
+
+
+  /**
+   * @param {string} sentinel
+   * @param {string} requestId
+   * @param {string|null} eventType
+   * @param {*} payload
+   * @param {boolean} awaitResponse
+   * @private
+   */
+  sendMessage_(sentinel, requestId, eventType, payload, awaitResponse) {
+    const message = {
+      sentinel,
+      requestId,
+      type: eventType,
+      payload,
+      rsvp: awaitResponse,
+    };
+    this.target_./*OK*/postMessage(message, this.targetOrigin_);
+  };
+
+
+  /**
+   * @param {number} requestId
+   * @param {*} reason
+   * @private
+   */
+  sendResponseError_(requestId, reason) {
+    this.sendMessage_(
+      this.responseSentinel_, requestId.toString(), 'ERROR', reason, false);
+  };
+}

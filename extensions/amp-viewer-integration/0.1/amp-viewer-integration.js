@@ -20,7 +20,7 @@ import {viewerPromiseForDoc} from '../../../src/viewer';
 import {user} from '../../../src/log';
 
 
-class AmpViewerIntegration {
+export class AmpViewerIntegration {
 
   /**
    * @param {!Window} win
@@ -32,16 +32,16 @@ class AmpViewerIntegration {
 
   init() {
     let viewer;
-    this.getViewer()
+    this.getViewer_()
     .then(viewerParam => {
       viewer = viewerParam;
-      return this.getHandshakePromise(viewer);
+      return this.getHandshakePromise_(viewer);
     })
     .then(viewerOrigin => {
       const messaging = new Messaging(this.win_.parent, viewerOrigin,
           function(type, payload, awaitResponse) {
             return viewer.receiveMessage(type, payload, awaitResponse);
-          }, this.win_.location.href);
+          });
       viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
         return messaging.sendRequest(type, payload, awaitResponse);
       }, viewerOrigin);
@@ -50,15 +50,17 @@ class AmpViewerIntegration {
 
   /**
    * @return {!Promise<!../../../src/service/viewer-impl.Viewer>}
+   * @private
    */
-  getViewer() {
+  getViewer_() {
     return viewerPromiseForDoc(this.win_.document);
   }
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @private
    */
-  getHandshakePromise(viewer) {
+  getHandshakePromise_(viewer) {
     const win = this.win_;
 
     return new Promise(function(resolve) {
