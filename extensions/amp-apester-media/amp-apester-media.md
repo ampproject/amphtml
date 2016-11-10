@@ -23,9 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>
-    experimental
-    </td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -36,10 +34,6 @@ limitations under the License.
     <td>
     fill, fixed, fixed-height, flex-item, nodisplay, responsive
     </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-apester-media/">amp-apester-media.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/apester.amp.html">apester.amp.html</a></td>
   </tr>
 </table>
 

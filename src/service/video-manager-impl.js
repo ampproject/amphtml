@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {listen, listenOnce, listenOncePromise} from '../event-helper';
+import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
+import {setStyles} from '../style';
+import {isFiniteNumber} from '../types';
 import {VideoEvents, VideoAttributes} from '../video-interface';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {vsyncFor} from '../vsync';
 
@@ -43,11 +45,9 @@ export class VideoManager {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
 
-    /** @private @const {!Window} */
-    this.win_ = ampdoc.win;
+    /** @private @const {!./ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = ampdoc;
 
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
@@ -65,8 +65,7 @@ export class VideoManager {
 
     // TODO(aghassemi): Remove this later. For now, VideoManager only matters
     // for autoplay videos so no point in registering arbitrary videos yet.
-    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY) ||
-        !platformSupportsAutoplay(this.win_)) {
+    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
       return;
     }
 
@@ -75,12 +74,8 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this.win_, video);
-
-    if (entry.needsVisibilityObserver()) {
-      this.maybeInstallVisibilityObserver_(entry);
-    }
-
+    const entry = new VideoEntry(this.ampdoc_, video);
+    this.maybeInstallVisibilityObserver_(entry);
     this.entries_.push(entry);
   }
 
@@ -106,7 +101,7 @@ export class VideoManager {
           this.entries_[i].updateVisibility();
         }
       };
-      const viewport = viewportForDoc(this.ampdoc);
+      const viewport = viewportForDoc(this.ampdoc_);
       viewport.onScroll(scrollListener);
       viewport.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;
@@ -119,16 +114,19 @@ export class VideoManager {
  */
 class VideoEntry {
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!../video-interface.VideoInterface} video
    */
-  constructor(win, video) {
+  constructor(ampdoc, video) {
 
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @private @const {!./ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = ampdoc;
 
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
+
+    /** @private {?Element} */
+    this.autoplayAnimation_ = null;
 
     /** @private {boolean} */
     this.loaded_ = false;
@@ -140,13 +138,16 @@ class VideoEntry {
     this.userInteracted_ = false;
 
     /** @private @const {!../service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = vsyncFor(ampdoc.win);
 
-    /** @private {boolean} */
-    this.canAutoplay_ = video.element.hasAttribute(VideoAttributes.AUTOPLAY) &&
-        platformSupportsAutoplay(win);
+    /** @private @const {function(): !Promise<boolean>} */
+    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
+        getMode(ampdoc.win).lite);
 
     const element = dev().assert(video.element);
+
+    /** @private {boolean} */
+    this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     listenOncePromise(element, VideoEvents.LOAD)
       .then(() => this.videoLoaded_());
@@ -160,7 +161,8 @@ class VideoEntry {
    * @private
    */
   videoBuilt_() {
-    if (this.canAutoplay_) {
+    this.updateVisibility();
+    if (this.hasAutoplay_) {
       this.autoplayVideoBuilt_();
     }
   }
@@ -170,6 +172,7 @@ class VideoEntry {
    * @private
    */
   videoLoaded_() {
+    this.updateVisibility();
     this.loaded_ = true;
     if (this.isVisible_) {
       // Handles the case when the video becomes visible before loading
@@ -192,18 +195,9 @@ class VideoEntry {
    * @private
    */
   loadedVideoVisibilityChanged_() {
-    if (this.canAutoplay_) {
+    if (this.hasAutoplay_) {
       this.autoplayLoadedVideoVisibilityChanged_();
     }
-  }
-
-  /**
-   * Whether there is a need to monitor visibility of this video.
-   * @return {boolean}
-   * @package
-   */
-  needsVisibilityObserver() {
-    return this.canAutoplay_;
   }
 
   /* Autoplay Behaviour */
@@ -213,19 +207,73 @@ class VideoEntry {
    * @private
    */
   autoplayVideoBuilt_() {
-    this.video.mute();
 
-    // If autoplay video has controls, hide them and only show them on
-    // user-ineraction.
-    if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
+    // Hide controls until we know if autoplay is supported, otherwise hiding
+    // and showing the controls quickly becomes a bad user experience for the
+    // common case where autoplay is supported.
+    if (this.video.isInteractive()) {
       this.video.hideControls();
+    }
 
-      // TODO(aghassemi): This won't work for iframes, needs a transparent shim
-      listenOnce(this.video.element, 'click', () => {
-        this.userInteracted_ = true;
+    this.boundSupportsAutoplay_().then(supportsAutoplay => {
+      if (!supportsAutoplay && this.video.isInteractive()) {
+        // Autoplay is not supported, show the controls so user can manually
+        // initiate playback.
         this.video.showControls();
-        this.video.unmute();
+        return;
+      }
+
+      // Only muted videos are allowed to autoplay
+      this.video.mute();
+
+      if (this.video.isInteractive()) {
+        this.autoplayInteractiveVideoBuilt_();
+      }
+    });
+  }
+
+  /**
+   * Called by autoplayVideoBuilt_ when an interactive autoplay video is built.
+   * It handles hiding controls, installing autoplay animation and handling
+   * user interaction by unmuting and showing controls.
+   * @private
+   */
+  autoplayInteractiveVideoBuilt_() {
+    const toggleAnimation = playing => {
+      this.vsync_.mutate(() => {
+        animation.classList.toggle('amp-video-eq-play', playing);
       });
+    };
+
+    // Hide the controls.
+    this.video.hideControls();
+
+    // Create autoplay animation and the mask to detect user interaction.
+    const animation = this.createAutoplayAnimation_();
+    const mask = this.createAutoplayMask_();
+    this.vsync_.mutate(() => {
+      this.video.element.appendChild(animation);
+      this.video.element.appendChild(mask);
+    });
+
+    // Listen to pause, play and user interaction events.
+    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
+
+    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false));
+
+    const unlistenPlay = listen(this.video.element, VideoEvents.PLAY,
+        toggleAnimation.bind(this, /*playing*/ true));
+
+    function onInteraction() {
+      this.userInteracted_ = true;
+      this.video.showControls();
+      this.video.unmute();
+      unlistenInteraction();
+      unlistenPause();
+      unlistenPlay();
+      animation.remove();
+      mask.remove();
     }
   }
 
@@ -234,15 +282,71 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteracted_ || !viewerFor(this.win_).isVisible()) {
+    if (this.userInteracted_ || !viewerForDoc(this.ampdoc_).isVisible()) {
       return;
     }
 
-    if (this.isVisible_) {
-      this.video.play(/*autoplay*/ true);
-    } else {
-      this.video.pause();
+    this.boundSupportsAutoplay_().then(supportsAutoplay => {
+      if (!supportsAutoplay) {
+        return;
+      }
+
+      if (this.isVisible_) {
+        this.video.play(/*autoplay*/ true);
+      } else {
+        this.video.pause();
+      }
+
+    });
+  }
+
+  /**
+   * Creates a pure CSS animated equalizer icon.
+   * @private
+   * @return {!Element}
+   */
+  createAutoplayAnimation_() {
+    const doc = this.ampdoc_.win.document;
+    const anim = doc.createElement('i-amp-video-eq');
+    anim.classList.add('amp-video-eq');
+    // Four columns for the equalizer.
+    for (let i = 1; i <= 4; i++) {
+      const column = doc.createElement('div');
+      column.classList.add('amp-video-eq-col');
+      // Two overlapping filler divs that animate at different rates creating
+      // randomness illusion.
+      for (let j = 1; j <= 2; j++) {
+        const filler = doc.createElement('div');
+        filler.classList.add(`amp-video-eq-${i}-${j}`);
+        column.appendChild(filler);
+      }
+      anim.appendChild(column);
     }
+    const platform = platformFor(this.ampdoc_.win);
+    if (platform.isSafari() && platform.isIos()) {
+      // iOS Safari can not pause hardware accelerated animations.
+      anim.setAttribute('unpausable', '');
+    }
+    return anim;
+  }
+
+  /**
+   * Creates a mask to overlay on top of an autoplay video to detect the first
+   * user tap.
+   * We have to do this since many players are iframe-based and we can not get
+   * the click event from the iframe.
+   * We also can not rely on hacks such as constantly checking doc.activeElement
+   * to know if user has tapped on the iframe since they won't be a trusted
+   * event that would allow us to unmuted the video as only trusted
+   * user-initiated events can be used to interact with the video.
+   * @private
+   * @return {!Element}
+   */
+  createAutoplayMask_() {
+    const doc = this.ampdoc_.win.document;
+    const mask = doc.createElement('i-amp-video-mask');
+    mask.classList.add('-amp-fill-content');
+    return mask;
   }
 
   /**
@@ -253,19 +357,17 @@ class VideoEntry {
   updateVisibility() {
     const wasVisible = this.isVisible_;
 
-    // Measure if video is now in viewport and what percentage of it is visible
+    // Measure if video is now in viewport and what percentage of it is visible.
     const measure = () => {
       if (!this.video.isInViewport()) {
         this.isVisible_ = false;
         return;
       }
 
-      // Calculate what percentage of the video is in viewport
+      // Calculate what percentage of the video is in viewport.
       const change = this.video.element.getIntersectionChangeEntry();
-      const ir = change.intersectionRect;
-      const br = change.boundingClientRect;
-      const visiblePercent = br.height * br.width == 0 ? 0 :
-        ir.width * ir.height * 100 / (br.height * br.width);
+      const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
+          : change.intersectionRatio * 100;
 
       this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
     };
@@ -284,43 +386,79 @@ class VideoEntry {
   }
 }
 
+/* @type {?Promise<boolean>} */
+let supportsAutoplayCache_ = null;
+
 /**
- * Detects whether the platform even supports autoplay videos.
+ * Detects whether autoplay is supported.
+ * Note that even if platfrom supports autoplay, users or browsers can disable
+ * autoplay to save data / battery. This function detects both platfrom support
+ * and when autoplay is disabled.
+ *
+ * Service dependencies are taken explicitly for testability.
+ *
+ * @private visible for testing.
  * @param {!Window} win
- * @return {boolean}
+ * @param {boolean} isLiteViewer
+ * @return {!Promise<boolean>}
  */
-function platformSupportsAutoplay(win) {
-  // Do not support autoplay in amp-lite viewer
-  if (getMode(win).lite) {
-    return false;
+export function supportsAutoplay(win, isLiteViewer) {
+
+  // Use cached result if available.
+  if (supportsAutoplayCache_) {
+    return supportsAutoplayCache_;
   }
 
-  const platform = platformFor(win);
-  // non-mobile platforms always supported autoplay
-  if (!platform.isAndroid() && !platform.isIos()) {
-    return true;
+  // We do not support autoplay in amp-lite viewer regardless of platform.
+  if (isLiteViewer) {
+    return supportsAutoplayCache_ = Promise.resolve(false);
   }
 
-  const version = platform.getMajorVersion();
-  if (platform.isAndroid()) {
-    if (platform.isFirefox() && version >= 37) {
-      return true;
+  // To detect autoplay, we create a video element and call play on it, if
+  // `paused` is true after `play()` call, autoplay is supported. Although
+  // this is unintuitive, it works across browsers and is currently the lightest
+  // way to detect autoplay without using a data source.
+  const detectionElement = win.document.createElement('video');
+  // NOTE(aghassemi): We need both attributes and properties due to Chrome and
+  // Safari differences when dealing with non-attached elements.
+  detectionElement.setAttribute('muted', '');
+  detectionElement.setAttribute('playsinline', '');
+  detectionElement.setAttribute('webkit-playsinline', '');
+  detectionElement.muted = true;
+  detectionElement.playsinline = true;
+  detectionElement.webkitPlaysinline = true;
+  detectionElement.setAttribute('height', '0');
+  detectionElement.setAttribute('width', '0');
+  setStyles(detectionElement, {
+    position: 'fixed',
+    top: '0',
+    width: '0',
+    height: '0',
+    opacity: '0',
+  });
+
+  try {
+    const playPromise = detectionElement.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(() => {
+        // Suppress any errors, useless to report as they are expected.
+      });
     }
-    if (platform.isChrome() && version >= 53) {
-      return true;
-    }
+  } catch (e) {
+    // Suppress any errors, useless to report as they are expected.
   }
 
-  if (platform.isIos()) {
-    if (platform.isSafari() && version >= 10) {
-      return true;
-    }
-  }
+  const supportsAutoplay = !detectionElement.paused;
+  return supportsAutoplayCache_ = Promise.resolve(supportsAutoplay);
+}
 
-  // TODO(aghassemi): Test other combinations and add support.
-  // TODO(aghassemi): Is there a way to detect that autoplay has been disabled
-  // in the user preferences of the browser?
-  return false;
+/**
+ * Clears the cache used by supportsAutoplay method.
+ *
+ * @private visible for testing.
+ */
+export function clearSupportsAutoplayCacheForTesting() {
+  supportsAutoplayCache_ = null;
 }
 
 /**

@@ -19,11 +19,12 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
 import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {storageFor} from '../../../src/storage';
-import {urlReplacementsFor} from '../../../src/url-replacements';
-import {viewerFor} from '../../../src/viewer';
+import {storageForDoc} from '../../../src/storage';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
+import {setStyle} from '../../../src/style';
 
 
 /** @private @const {string} */
@@ -81,25 +82,34 @@ class NotificationInterface {
  */
 export class AmpUserNotification extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {?UrlReplacements} */
+    this.urlReplacements_ = null;
+
+    /** @private @const {?UserNotificationManager} */
+    this.userNotificationManager_ = null;
+
+    /** @const @private {?Promise<!Storage>} */
+    this.storagePromise_ = null;
+  }
+
   /** @override */
   isAlwaysFixed() {
     return true;
   }
 
   /** @override */
-  createdCallback() {
-    /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
-
-    /** @private @const {!UserNotificationManager} */
-    this.userNotificationManager_ = getUserNotificationManager_(this.win);
-
-    /** @const @private {!Promise<!Storage>} */
-    this.storagePromise_ = storageFor(this.win);
-  }
-
-  /** @override */
   buildCallback() {
+    const ampdoc = this.getAmpDoc();
+    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
+    this.storagePromise_ = storageForDoc(ampdoc);
+    if (!this.userNotificationManager_) {
+      this.userNotificationManager_ = getUserNotificationManager_(this.win);
+    }
+
     /** @private {?string} */
     this.ampUserId_ = null;
 
@@ -127,6 +137,12 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
     if (this.dismissHref_) {
       assertHttpsUrl(this.dismissHref_, this.element);
+    }
+
+    // Default to alert role if unspecified.
+    const roleAttribute = this.element.getAttribute('role');
+    if (!roleAttribute) {
+      this.element.setAttribute('role', 'alert');
     }
 
     const persistDismissal = this.element.getAttribute(
@@ -261,7 +277,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   show() {
-    this.element.style.display = '';
+    setStyle(this.element, 'display', '');
     this.element.classList.add('amp-active');
     this.getViewport().addToFixedLayer(this.element);
     return this.dialogPromise_;
@@ -278,6 +294,11 @@ export class AmpUserNotification extends AMP.BaseElement {
           dev().error(TAG, 'Failed to read storage', reason);
           return false;
         });
+  }
+
+  /** @override */
+  activate() {
+    this.dismiss();
   }
 
   /**
@@ -324,7 +345,7 @@ export class UserNotificationManager {
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerForDoc(this.win.document);
 
     /** @private @const {!Promise} */
     this.documentReadyPromise_ = whenDocumentReady(this.win.document);

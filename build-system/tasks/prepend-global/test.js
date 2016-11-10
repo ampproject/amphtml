@@ -25,7 +25,7 @@ var targetFile = 'target-file.js';
 test('sync - prepends global config', t => {
   t.plan(1);
   var res = m.prependConfig('{"hello":"world"}', 'var x = 1 + 1;');
-  t.is(res, 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"});' +
+  t.is(res, 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"});' +
       '/*AMP_CONFIG*/var x = 1 + 1;');
 });
 
@@ -39,13 +39,13 @@ test('sync - valueOrDefault', t => {
 
 test('sync - sanityCheck', t => {
   t.plan(3);
-  var badStr = 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+  var badStr = 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
       '/*AMP_CONFIG*/' +
-      'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+      'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
       '/*AMP_CONFIG*/' +
       'var x = 1 + 1;';
   var badStr2 = 'var x = 1 + 1;';
-  var goodStr = 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+  var goodStr = 'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"})' +
       '/*AMP_CONFIG*/' +
       'var x = 1 + 1;';
   t.false(m.sanityCheck(badStr));

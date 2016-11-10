@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {dev, rethrowAsync} from './log';
+import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
 import {extensionsFor} from './extensions';
-import {getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './resources';
-import {rethrowAsync} from './log';
+import {setStyle, setStyles} from './style';
 
 
 /**
@@ -76,13 +77,17 @@ function isSrcdocSupported() {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
+ * @param {function(!Window)=} opt_preinstallCallback
  * @return {!Promise<FriendlyIframeEmbed>}
  */
-export function installFriendlyIframeEmbed(iframe, container, spec) {
+export function installFriendlyIframeEmbed(iframe, container, spec,
+    opt_preinstallCallback) {
+  /** @const {!Window} */
   const win = getTopWindow(iframe.ownerDocument.defaultView);
+  /** @const {!./service/extensions-impl.Extensions} */
   const extensions = extensionsFor(win);
 
-  iframe.style.visibility = 'hidden';
+  setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
 
   // Pre-load extensions.
@@ -126,6 +131,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
     readyPromise = Promise.resolve();
   } else {
     readyPromise = new Promise(resolve => {
+      /** @const {number} */
       const interval = win.setInterval(() => {
         if (isIframeReady(iframe)) {
           resolve();
@@ -145,11 +151,19 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
   }
 
   return readyPromise.then(() => {
+    const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        iframe.contentWindow, spec.extensionIds || []);
+        childWin, spec.extensionIds || [], opt_preinstallCallback);
     // Ready to be shown.
-    iframe.style.visibility = '';
+    setStyle(iframe, 'visibility', '');
+    if (childWin.document && childWin.document.body) {
+      setStyles(dev().assertElement(childWin.document.body), {
+        opacity: 1,
+        visibility: 'visible',
+        animation: 'none',
+      });
+    }
     return new FriendlyIframeEmbed(iframe, spec, loadedPromise);
   });
 }
@@ -167,7 +181,7 @@ function isIframeReady(iframe) {
   // no other reliable signal for `readyState` in a child window and thus
   // the best way to check is to see the contents of the body.
   const childDoc = iframe.contentWindow && iframe.contentWindow.document;
-  return (childDoc &&
+  return !!(childDoc &&
       isDocumentReady(childDoc) &&
       childDoc.body &&
       childDoc.body.firstChild);
@@ -258,7 +272,7 @@ export class FriendlyIframeEmbed {
     this.iframe = iframe;
 
     /** @const {!Window} */
-    this.win = iframe.contentWindow;
+    this.win = /** @type{!Window} */(iframe.contentWindow);
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
@@ -281,5 +295,6 @@ export class FriendlyIframeEmbed {
    */
   destroy() {
     resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    disposeServicesForEmbed(this.win);
   }
 }

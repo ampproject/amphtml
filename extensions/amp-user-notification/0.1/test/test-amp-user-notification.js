@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   AmpUserNotification,
   UserNotificationManager,
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
-import {
-  installUrlReplacementsService,
-} from '../../../../src/service/url-replacements-impl';
+import {getExistingServiceForDoc} from '../../../../src/service';
+import * as sinon from 'sinon';
 
 
 describe('amp-user-notification', () => {
@@ -34,11 +32,6 @@ describe('amp-user-notification', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    storage = {
-      get: () => {},
-      set: () => {},
-    };
-    storageMock = sandbox.mock(storage);
     dftAttrs = {
       id: 'n1',
       'data-show-if-href': 'https://www.ampproject.org/get/here',
@@ -48,7 +41,9 @@ describe('amp-user-notification', () => {
   });
 
   afterEach(() => {
-    storageMock.verify();
+    if (storageMock) {
+      storageMock.verify();
+    }
     sandbox.restore();
   });
 
@@ -56,7 +51,8 @@ describe('amp-user-notification', () => {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
       iframe.win.ampExtendedElements = {};
-      installUrlReplacementsService(iframe.win);
+      storage = getExistingServiceForDoc(iframe.ampdoc, 'storage');
+      storageMock = sandbox.mock(storage);
       return buildElement(iframe.doc, iframe.ampdoc, attrs);
     });
   }
@@ -480,6 +476,22 @@ describe('amp-user-notification', () => {
         expect(removeFromFixedLayerStub.callCount).to.equal(1);
         expect(removeFromFixedLayerStub.getCall(0).args[0]).to.equal(el);
       });
+    });
+  });
+
+  it('should have a default `role` if unspecified', () => {
+    return getUserNotification({id: 'n1'}).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(el.getAttribute('role')).to.equal('alert');
+    });
+  });
+
+  it('should not override `role` if specified', () => {
+    return getUserNotification({id: 'n1', role: 'status'}).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(el.getAttribute('role')).to.equal('status');
     });
   });
 

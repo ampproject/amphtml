@@ -17,6 +17,7 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
 import {loadScript} from './3p';
+import {setStyles} from '../src/style';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -50,10 +51,12 @@ function getTwttr(global, cb) {
 export function twitter(global, data) {
   const tweet = global.document.createElement('div');
   tweet.id = 'tweet';
-  tweet.style.width = '100%';
-  tweet.style.display = 'flex';
-  tweet.style.alignItems = 'center';
-  tweet.style.justifyContent = 'center';
+  setStyles(tweet, {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  });
   global.document.getElementById('c').appendChild(tweet);
   getTwttr(global, function(twttr) {
     // Dimensions are given by the parent frame.

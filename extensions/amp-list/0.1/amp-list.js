@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {assertHttpsUrl} from '../../../src/url';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {templatesFor} from '../../../src/template';
@@ -39,12 +39,12 @@ export class AmpList extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
-    if (!this.element.hasAttribute('role')) {
-      this.element.setAttribute('role', 'list');
+    if (!this.container_.hasAttribute('role')) {
+      this.container_.setAttribute('role', 'list');
     }
 
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
+    this.urlReplacements_ = urlReplacementsForDoc(this.getAmpDoc());
   }
 
   /** @override */
@@ -60,7 +60,9 @@ export class AmpList extends AMP.BaseElement {
           }
           return xhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
-          user().assert(typeof data == 'object' && Array.isArray(data['items']),
+          user().assert(data != null
+              && typeof data == 'object'
+              && Array.isArray(data['items']),
               'Response must be {items: []} object %s %s',
               this.element, data);
           const items = data['items'];

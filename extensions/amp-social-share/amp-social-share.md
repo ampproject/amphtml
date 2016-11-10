@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-social-share"></a> `amp-social-share`
+# <a name="amp-social-share"></a>`amp-social-share`
 
 <table>
   <tr>
@@ -41,7 +41,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/social-share.amp.html">social-share.amp.html</a>
+    <td><a href="https://ampbyexample.com/components/amp-social-share/">Annotated code example for amp-social-share</a>
     </td>
   </tr>
 </table>
@@ -104,6 +104,9 @@ The element provides [some pre-configured providers](0.1/amp-social-share-config
     - url `optional` (defaults: `rel=canonical` URL)
 - gplus
     - url `optional` (defaults: `rel=canonical` URL)
+- tumblr
+    - url `optional` (defaults: `rel=canonical` URL)
+    - name `optional` (defaults: Current page title)
 - email
     - subject `optional` (defaults: Crrent page title)
     - body `optional` (defaults: `rel=canonical` URL)

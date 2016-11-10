@@ -21,33 +21,40 @@ import {
   getSubDomain,
   preloadBootstrap,
   resetCountForTesting,
+  resetBootstrapBaseUrlForTesting,
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
-import {resetServiceForTesting} from '../../src/service';
+import {preconnectForElement} from '../../src/preconnect';
 import {validateData} from '../../3p/3p';
-import {viewerFor} from '../../src/viewer';
+import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 describe('3p-frame', () => {
 
   let clock;
   let sandbox;
+  let container;
+  let preconnect;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    preconnect = preconnectForElement(container);
   });
 
   afterEach(() => {
+    resetBootstrapBaseUrlForTesting(window);
     sandbox.restore();
-    resetServiceForTesting(window, 'bootstrapBaseUrl');
     resetCountForTesting();
     const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
     if (m) {
       m.parentElement.removeChild(m);
     }
+    document.body.removeChild(container);
   });
 
   function addCustomBootstrap(url) {
@@ -133,12 +140,13 @@ describe('3p-frame', () => {
       };
     };
 
-    const viewer = viewerFor(window);
+    const viewer = viewerForDoc(window.document);
     const viewerMock = sandbox.mock(viewer);
     viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/')
         .once();
 
+    container.appendChild(div);
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
     const locationHref = location.href;
@@ -235,7 +243,7 @@ describe('3p-frame', () => {
 
   it('should prefetch bootstrap frame and JS', () => {
     window.AMP_MODE = {localDev: true};
-    preloadBootstrap(window);
+    preloadBootstrap(window, preconnect);
     // Wait for visible promise
     return Promise.resolve().then(() => {
       const fetches = document.querySelectorAll(
@@ -284,7 +292,7 @@ describe('3p-frame', () => {
   });
 
   it('uses a unique name based on domain', () => {
-    const viewerMock = sandbox.mock(viewerFor(window));
+    const viewerMock = sandbox.mock(viewerForDoc(window.document));
     viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/').twice();
 
@@ -311,8 +319,9 @@ describe('3p-frame', () => {
       };
     };
 
+    container.appendChild(div);
     const name = getIframe(window, div).name;
-    resetServiceForTesting(window, 'bootstrapBaseUrl');
+    resetBootstrapBaseUrlForTesting(window);
     resetCountForTesting();
     const newName = getIframe(window, div).name;
     expect(name).to.match(/d-\d+.ampproject.net__ping__0/);

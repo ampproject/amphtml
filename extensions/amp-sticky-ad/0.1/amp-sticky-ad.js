@@ -18,9 +18,16 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
-import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
+import {listenOnce} from '../../../src/event-helper';
+import {
+  setStyle,
+  removeAlphaFromColor,
+} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 
+/** @private @const {string} */
+const UX_EXPERIMENT = 'amp-sticky-ad-better-ux';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -82,6 +89,7 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.viewport_.updatePaddingBottom(0);
+    this.element.classList.remove('amp-sticky-ad-loaded');
     return true;
   }
 
@@ -129,25 +137,48 @@ class AmpStickyAd extends AMP.BaseElement {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
         this.visible_ = true;
-        this.element.classList.add('-amp-sticky-ad-visible');
         this.viewport_.addToFixedLayer(this.element);
-        this.updateInViewport(dev().assertElement(this.ad_), true);
-        this.scheduleLayout(dev().assertElement(this.ad_));
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
         this.addCloseButton_();
-        timerFor(this.win).delay(() => {
-          // Unfortunately we don't really have a good way to measure how long it
-          // takes to load an ad, so we'll just pretend it takes 1 second for
-          // now.
-          this.vsync_.mutate(() => {
-            this.element.classList.add('amp-sticky-ad-loaded');
-          });
-        }, 1000);
+        this.scheduleLayoutForAd_();
       });
     }
+  }
+
+  /**
+   * Function that check if ad has been built
+   * If not, wait for the amp:built event
+   * otherwise schedule layout for ad.
+   * @private
+   */
+  scheduleLayoutForAd_() {
+    if (this.ad_.isBuilt()) {
+      this.layoutAd_();
+    } else {
+      listenOnce(this.ad_, 'amp:built', () => {
+        this.layoutAd_();
+      });
+    }
+  }
+
+  /**
+   * Layout ad, and display sticky-ad container after layout complete.
+   * @private
+   */
+  layoutAd_() {
+    this.updateInViewport(dev().assertElement(this.ad_), true);
+    this.scheduleLayout(dev().assertElement(this.ad_));
+    listenOnce(this.ad_, 'amp:load:end', () => {
+      this.vsync_.mutate(() => {
+        // Set sticky-ad to visible and change container style
+        this.element.setAttribute('visible', '');
+        this.element.classList.add('amp-sticky-ad-loaded');
+        this.forceOpacity_();
+      });
+    });
   }
 
   /**
@@ -158,7 +189,8 @@ class AmpStickyAd extends AMP.BaseElement {
     const closeButton = this.win.document.createElement('button');
     closeButton.classList.add('amp-sticky-ad-close-button');
     closeButton.setAttribute('aria-label',
-        this.element.getAttribute('data-close-button-aria-label') || 'Close');
+        this.element.getAttribute('data-close-button-aria-label')
+            || 'Close this ad');
     const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
     closeButton.addEventListener('click', boundOnCloseButtonClick);
     this.element.appendChild(closeButton);
@@ -177,6 +209,35 @@ class AmpStickyAd extends AMP.BaseElement {
       this.viewport_.updatePaddingBottom(0);
     });
   }
+
+  /**
+   * To check for background-color alpha and force it to be 1.
+   * Whoever calls this needs to make sure it's in a vsync.
+   * @private
+   */
+  forceOpacity_() {
+    if (!isExperimentOn(this.win, UX_EXPERIMENT)) {
+      return;
+    }
+
+    // TODO(@zhouyx): Move the opacity style to CSS after remove experiments
+    // Note: Use setStyle because we will remove this line later.
+    setStyle(this.element, 'opacity', '1 !important');
+    setStyle(this.element, 'background-image', 'none');
+
+    const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
+        .getPropertyValue('background-color');
+    const newBackgroundColor = removeAlphaFromColor(backgroundColor);
+    if (backgroundColor == newBackgroundColor) {
+      return;
+    }
+
+    user().warn('AMP-STICKY-AD',
+        'Do not allow container to be semitransparent');
+    setStyle(this.element, 'background-color', newBackgroundColor);
+  }
 }
 
-AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
+AMP.extension('amp-sticky-ad', '0.1', AMP => {
+  AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
+});

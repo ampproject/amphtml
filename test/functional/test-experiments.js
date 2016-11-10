@@ -15,9 +15,13 @@
  */
 
 import {
-  isDevChannel, isDevChannelVersionDoNotUse_,
-  isExperimentOn, toggleExperiment,
-  resetExperimentToggles_} from '../../src/experiments';
+  isDevChannel,
+  isDevChannelVersionDoNotUse_,
+  isExperimentOn,
+  isExperimentOnAllowUrlOverride,
+  toggleExperiment,
+  resetExperimentToggles_,
+} from '../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('isExperimentOn', () => {
@@ -26,7 +30,15 @@ describe('isExperimentOn', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {document: {}, AMP_CONFIG: {}};
+    win = {
+      document: {
+        cookie: '',
+      },
+      AMP_CONFIG: {},
+      location: {
+        hash: '',
+      },
+    };
   });
 
   afterEach(() => {
@@ -124,6 +136,25 @@ describe('isExperimentOn', () => {
 
       expect(Math.random()).to.equal(0.9);
       expectExperiment('', 'e2').to.be.false;
+    });
+  });
+
+  describe('isExperimentOnAllowUrlOverride', () => {
+
+    function expectUrlExperiment(hashOverride, cookieString, experimentId) {
+      win.document.cookie = cookieString;
+      win.location.hash = hashOverride;
+      return expect(isExperimentOnAllowUrlOverride(win, experimentId));
+    }
+
+    it('should accept override', () => {
+      const cookie = 'AMP_EXP=e2,e4';
+      const url = '#e-e1=1&e-e2=0&e-complexName=1';
+      expectUrlExperiment(url, cookie, 'e1').to.be.true;
+      expectUrlExperiment(url, cookie, 'e2').to.be.false;
+      expectUrlExperiment(url, cookie, 'e4').to.be.true;
+      expectUrlExperiment(url, cookie, 'unknown').to.be.false;
+      expectUrlExperiment(url, cookie, 'complexName').to.be.true;
     });
   });
 });

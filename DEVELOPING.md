@@ -51,6 +51,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
+| `gulp build --fortesting`<sup>[[1]](#footnote-1)</sup>                  | Builds the AMP library and will read the AMP_TESTING_HOST environment variable to write out an override AMP_CONFIG. |
 | `gulp build --css-only`<sup>[[1]](#footnote-1)</sup>                    | Builds only the embedded css into js files for the AMP library.       |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`                                                              | Recompile css to build directory.                                     |
@@ -86,6 +87,8 @@ If your pull request contains JS or CSS changes and it does not change the build
 If a test flaked on a pull request you can ask a project owner to restart the tests for you. Use [`this.retries(x)`](https://mochajs.org/#retry-tests) as the last resort.
 
 ### Manual testing
+
+The below assume you ran `gulp` in a terminal.
 
 #### Examples
 
@@ -125,6 +128,11 @@ For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) 
 
 Meantime, you can also use our automatic build on Heroku [link](http://amphtml-nightly.herokuapp.com/), which is normally built with latest head on master branch (please allow delay). The first time load is normally slow due to Heroku's free account throttling policy.
 
+To correctly get ads and third party working when testing on hosted services
+you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
+is done through
+`heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
+
 ## Repository Layout
 <pre>
   3p/             - Implementation of third party sandbox iframes.
@@ -161,6 +169,7 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 - [Design Principles](DESIGN_PRINCIPLES.md)
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
 - [AMP Layout system](spec/amp-html-layout.md)
+- [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
 
 We also recommend scanning the [spec](spec/). The non-element part should help understand some of the design aspects.
 

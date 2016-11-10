@@ -31,6 +31,7 @@ describe('amp-fresh', () => {
     toggleExperiment(window, 'amp-fresh', true);
     elem = document.createElement('div');
     elem.setAttribute('id', 'amp-fresh-1');
+    document.body.appendChild(elem);
     const span = document.createElement('span');
     span.textContent = 'hello';
     elem.appendChild(span);
@@ -46,6 +47,9 @@ describe('amp-fresh', () => {
     toggleExperiment(window, 'amp-fresh', false);
     resetServiceForTesting(window, 'ampFreshManager');
     sandbox.restore();
+    if (elem.parentNode) {
+      elem.parentNode.removeChild(elem);
+    }
   });
 
   it('should register to manager', () => {

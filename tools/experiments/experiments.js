@@ -62,13 +62,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-experiment',
-    name: 'AMP Experiment',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-experiment/amp-experiment.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4004',
-  },
-  {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
@@ -94,12 +87,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
-    id: 'amp-slidescroll',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
-  },
-  {
     id: 'amp-scrollable-carousel',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
@@ -116,6 +103,12 @@ const EXPERIMENTS = [
     name: 'AMP Form Extension',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
+  },
+  {
+    id: 'amp-form-custom-validations',
+    name: 'AMP Form Custom Validations',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
   },
   {
     id: 'amp-google-vrview-image',
@@ -177,11 +170,63 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
   {
+    id: 'make-body-block',
+    name: 'Sets the body to display:block.',
+    spec: 'https://github.com/ampproject/amphtml/issues/5310',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
+  },
+  {
+    id: 'make-body-relative',
+    name: 'Sets the body to position:relative.',
+    spec: 'https://github.com/ampproject/amphtml/issues/5667',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
+  },
+  {
+    id: 'link-url-replace',
+    name: 'Enables replacing variables in URLs of outgoing links.',
+    spec: 'https://github.com/ampproject/amphtml/issues/4078',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
+  },
+  {
     id: 'pan-y',
     name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
         ' touch handlers',
     spec: 'https://github.com/ampproject/amphtml/issues/4820',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
+  },
+  {
+    id: 'alp-for-a4a',
+    name: 'Enable redirect to landing page directly for A4A',
+    spec: 'https://github.com/ampproject/amphtml/issues/5212',
+  },
+  {
+    id: 'ios-embed-wrapper',
+    name: 'A new iOS embedded viewport model that wraps the body into' +
+        ' a synthetic root',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
+  },
+  {
+    id: 'chunked-amp',
+    name: 'Split AMP\'s loading phase into chunks',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
+  },
+  {
+    id: 'amp-sticky-ad-better-ux',
+    name: 'New breaking UX changes make to amp-sticky-ad',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
+  },
+  {
+    id: 'amp-animation',
+    name: 'High-performing keyframe animations in AMP.',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-animation/amp-animation.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
+  },
+  {
+    id: 'amp-ad-loading-ux',
+    name: 'New default loading UX to amp-ad',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
   },
 ];
 

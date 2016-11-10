@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
-import {viewerFor} from '../../src/viewer';
+import {viewerForDoc} from '../../src/viewer';
 
 
 describe('performance', () => {
@@ -138,7 +138,7 @@ describe('performance', () => {
     let viewer;
 
     beforeEach(() => {
-      viewer = viewerFor(window);
+      viewer = viewerForDoc(window.document);
       tickSpy = sandbox.stub(viewer, 'tick');
       flushTicksSpy = sandbox.stub(viewer, 'flushTicks');
     });
@@ -386,7 +386,7 @@ describe('performance', () => {
     }
 
     beforeEach(() => {
-      viewer = viewerFor(window);
+      viewer = viewerForDoc(window.document);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
 
@@ -527,16 +527,20 @@ describe('performance', () => {
   });
 
   it('should setFlushParams', () => {
-    const viewer = viewerFor(window);
+    const viewer = viewerForDoc(window.document);
     sandbox.stub(perf, 'whenViewportLayoutComplete_')
         .returns(Promise.resolve());
     const setFlushParamsSpy = sandbox.stub(viewer, 'setFlushParams');
     perf.coreServicesAvailable();
     resetServiceForTesting(window, 'documentInfo');
     const info = {
-      canonicalUrl: 'https://foo.bar/baz',
-      pageViewId: 12345,
-      sourceUrl: 'https://hello.world/baz/#development',
+      get: () => {
+        return {
+          canonicalUrl: 'https://foo.bar/baz',
+          pageViewId: 12345,
+          sourceUrl: 'https://hello.world/baz/#development',
+        };
+      },
     };
     getService(window, 'documentInfo', () => info);
 

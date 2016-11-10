@@ -41,8 +41,10 @@ export function waitForChild(parent, checkFunc, callback) {
     callback();
     return;
   }
+  /** @const {!Window} */
   const win = parent.ownerDocument.defaultView;
   if (win.MutationObserver) {
+    /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -51,6 +53,7 @@ export function waitForChild(parent, checkFunc, callback) {
     });
     observer.observe(parent, {childList: true});
   } else {
+    /** @const {number} */
     const interval = win.setInterval(() => {
       if (checkFunc(parent)) {
         win.clearInterval(interval);
@@ -60,6 +63,18 @@ export function waitForChild(parent, checkFunc, callback) {
   }
 }
 
+/**
+ * Waits until the child element is constructed. Once the child is found, the
+ * promise is resolved.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @return {!Promise}
+ */
+export function waitForChildPromise(parent, checkFunc) {
+  return new Promise(resolve => {
+    waitForChild(parent, checkFunc, resolve);
+  });
+}
 
 /**
  * Waits for document's body to be available.
@@ -395,7 +410,7 @@ export function childElementsByTag(parent, tagName) {
  * @param {!Element} element
  * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
- * @param {string=} opt_paramPattern Regex pattern to match data attributes.
+ * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
@@ -486,7 +501,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev().error('dom', 'Failed to open url on target: ', target, e);
+    dev().error('DOM', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.
@@ -543,4 +558,17 @@ export function escapeHtml(text) {
  */
 function escapeHtmlChar(c) {
   return HTML_ESCAPE_CHARS[c];
+}
+
+/**
+ * Tries to focus on the given element; fails silently if browser throws an
+ * exception.
+ * @param {!Element} element
+ */
+export function tryFocus(element) {
+  try {
+    element./*OK*/focus();
+  } catch (e) {
+    // IE <= 7 may throw exceptions when focusing on hidden items.
+  }
 }

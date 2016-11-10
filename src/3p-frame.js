@@ -15,18 +15,17 @@
  */
 
 
-import {getLengthNumeral} from '../src/layout';
-import {getService} from './service';
+import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
+import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {user} from './log';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {urls} from './config';
+import {setStyle} from './style';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -60,7 +59,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
   const docInfo = documentInfoForDoc(element);
-  const viewer = viewerFor(parentWindow);
+  const viewer = viewerForDoc(element);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
@@ -95,14 +94,20 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!Element} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
  * @return {!Element} The iframe.
  */
-export function getIframe(parentWindow, element, opt_type, opt_context) {
+export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
+  // Check that the parentElement is already in DOM. This code uses a new and
+  // fast `isConnected` API and thus only used when it's available.
+  dev().assert(
+      parentElement['isConnected'] === undefined ||
+      parentElement['isConnected'] === true,
+      'Parent element must be in DOM');
   const attributes =
-      getFrameAttributes(parentWindow, element, opt_type, opt_context);
+      getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
@@ -119,8 +124,8 @@ export function getIframe(parentWindow, element, opt_type, opt_context) {
   iframe.ampLocation = parseUrl(src);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
-  iframe.style.border = 'none';
   iframe.setAttribute('scrolling', 'no');
+  setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
   iframe.onload = function() {
     // Chrome does not reflect the iframe readystate.
@@ -165,10 +170,10 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
+ * @param {!./preconnect.Preconnect} preconnect
  */
-export function preloadBootstrap(window) {
+export function preloadBootstrap(window, preconnect) {
   const url = getBootstrapBaseUrl(window);
-  const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
@@ -187,14 +192,22 @@ export function preloadBootstrap(window) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  return getService(self, 'bootstrapBaseUrl', () => {
-    return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
-      getDefaultBootstrapBaseUrl(parentWindow);
-  });
+  // The value is cached in a global variable called `bootstrapBaseUrl`;
+  const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
+  if (bootstrapBaseUrl) {
+    return bootstrapBaseUrl;
+  }
+  return parentWindow.bootstrapBaseUrl =
+      getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest)
+          || getDefaultBootstrapBaseUrl(parentWindow);
 }
 
 export function setDefaultBootstrapBaseUrlForTesting(url) {
   overrideBootstrapBaseUrl = url;
+}
+
+export function resetBootstrapBaseUrlForTesting(win) {
+  win.bootstrapBaseUrl = undefined;
 }
 
 /**
@@ -208,8 +221,9 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
       return overrideBootstrapBaseUrl;
     }
     return getAdsLocalhost(parentWindow)
-        + '/dist.3p/current'
-        + (getMode().minified ? '-min/frame' : '/frame.max')
+        + '/dist.3p/'
+        + (getMode().minified ? '$internalRuntimeVersion$/frame'
+            : 'current/frame.max')
         + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
@@ -217,6 +231,9 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
 }
 
 function getAdsLocalhost(win) {
+  if (urls.localDev) {
+    return `http://${urls.thirdPartyFrameHost}`;
+  }
   return 'http://ads.localhost:'
       + (win.location.port || win.parent.location.port);
 }

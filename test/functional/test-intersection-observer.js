@@ -416,10 +416,10 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
+    };
     clock.tick(33);
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
@@ -435,10 +435,10 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
+    };
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();

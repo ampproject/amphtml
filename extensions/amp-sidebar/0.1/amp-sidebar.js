@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
@@ -29,32 +30,30 @@ const ANIMATION_TIMEOUT = 550;
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
 
 export class AmpSidebar extends AMP.BaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NOLAYOUT;
-  }
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  /** @override */
-  buildCallback() {
+    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(this.win);
+
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private @const {!Document} */
     this.document_ = this.win.document;
 
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
 
-    /** @private @const {string} */
-    this.side_ = this.element.getAttribute('side');
-
-    /** @private @const {!Viewport} */
-    this.viewport_ = this.getViewport();
-
-    /** @private @const {!Element} */
-    this.maskElement_ = false;
-
-    /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    /** @private {?string} */
+    this.side_ = null;
 
     const platform = platformFor(this.win);
+
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -63,6 +62,24 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = timerFor(this.win);
+
+    /** @private {number|string|null} */
+    this.openOrCloseTimeOut_ = null;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+  buildCallback() {
+    this.side_ = this.element.getAttribute('side');
+
+    this.viewport_ = this.getViewport();
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -83,13 +100,31 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('aria-hidden', 'true');
     }
 
+    if (!this.element.hasAttribute('role')) {
+      this.element.setAttribute('role', 'menu');
+    }
+    // Make sidebar programmatically focusable and focus on `open` for a11y.
+    this.element.tabIndex = -1;
+
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.keyCode == 27) {
         this.close_();
       }
     });
-    //TODO (skrish, #2712) Add history support on back button.
+
+    // Invisible close button at the end of sidebar for screen-readers.
+    const screenReaderCloseButton = this.document_.createElement('button');
+    // TODO(aghassemi, #4146) i18n
+    screenReaderCloseButton.textContent = 'Close the sidebar';
+    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    // This is for screen-readers only, should not get a tab stop.
+    screenReaderCloseButton.tabIndex = -1;
+    screenReaderCloseButton.addEventListener('click', () => {
+      this.close_();
+    });
+    this.element.appendChild(screenReaderCloseButton);
+
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
@@ -143,7 +178,12 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
-        timerFor(this.win).delay(() => {
+        // Focus on the sidebar for a11y.
+        tryFocus(this.element);
+        if (this.openOrCloseTimeOut_) {
+          this.timer_.cancel(this.openOrCloseTimeOut_);
+        }
+        this.openOrCloseTimeOut_ = this.timer_.delay(() => {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
           this.scheduleResume(children);
@@ -168,7 +208,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      timerFor(this.win).delay(() => {
+      if (this.openOrCloseTimeOut_) {
+        this.timer_.cancel(this.openOrCloseTimeOut_);
+      }
+      this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
@@ -250,7 +293,7 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * @private @return {!History}
+   * @private @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
     return historyForDoc(this.getAmpDoc());

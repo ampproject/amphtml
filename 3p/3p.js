@@ -24,6 +24,7 @@
 
 import {dev, user} from '../src/log';
 import {isArray} from '../src/types';
+import {map} from '../src/types';
 import {rethrowAsync} from '../src/log';
 
 
@@ -35,7 +36,7 @@ let ThirdPartyFunctionDef;
  * @const {!Object<ThirdPartyFunctionDef>}
  * @visibleForTesting
  */
-export const registrations = {};
+export const registrations = map();
 
 /** @type {number} */
 let syncScriptLoads = 0;
@@ -87,6 +88,7 @@ export function writeScript(win, url, opt_cb) {
  * @param {function()=} opt_errorCb
  */
 export function loadScript(win, url, opt_cb, opt_errorCb) {
+  /** @const {!Element} */
   const s = win.document.createElement('script');
   s.src = url;
   if (opt_cb) {
@@ -268,7 +270,7 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
-    container: true,
+    ampSlotIndex: true,
   };
 
   for (const field in data) {

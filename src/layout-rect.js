@@ -55,7 +55,7 @@ export function layoutRectLtwh(left, top, width, height) {
 /**
  * Creates a layout rect based on the DOMRect, e.g. obtained from calling
  * getBoundingClientRect.
- * @param {!Rect} rect
+ * @param {!ClientRect} rect
  * @return {!LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {

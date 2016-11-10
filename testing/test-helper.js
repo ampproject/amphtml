@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from '../src/service';
+import {getService, getServiceForDoc} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
   const stub = sandbox.stub();
@@ -24,4 +24,37 @@ export function stubService(sandbox, win, serviceId, method) {
     return service;
   });
   return stub;
+}
+
+export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
+  const stub = sandbox.stub();
+  getServiceForDoc(ampdoc, serviceId, () => {
+    const service = {};
+    service[method] = stub;
+    return service;
+  });
+  return stub;
+}
+
+/**
+ * Asserts that the given element is only visible to screen readers.
+ * @param {!Element} node
+ */
+export function assertScreenReaderElement(element) {
+  expect(element).to.exist;
+  expect(element.classList.contains('-amp-screen-reader')).to.be.true;
+  const win = element.ownerDocument.defaultView;
+  const computedStyle = win.getComputedStyle(element);
+  expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
+  expect(computedStyle.getPropertyValue('top')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('left')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('width')).to.equal('2px');
+  expect(computedStyle.getPropertyValue('height')).to.equal('2px');
+  expect(computedStyle.getPropertyValue('opacity')).to.equal('0');
+  expect(computedStyle.getPropertyValue('overflow')).to.equal('hidden');
+  expect(computedStyle.getPropertyValue('border')).to.contain('none');
+  expect(computedStyle.getPropertyValue('margin')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('padding')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('display')).to.equal('block');
+  expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
