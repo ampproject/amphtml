@@ -15,22 +15,17 @@ var functionWhitelist =
     [
       String.prototype.charAt,
       String.prototype.charCodeAt,
-      String.prototype.codePointAt,
       String.prototype.concat,
       String.prototype.endsWith,
       String.prototype.includes,
       String.prototype.indexOf,
       String.prototype.lastIndexOf,
-      String.prototype.localeCompare,
       String.prototype.repeat,
-      String.prototype.replace,
       String.prototype.slice,
       String.prototype.split,
       String.prototype.startsWith,
       String.prototype.substr,
       String.prototype.substring,
-      String.prototype.toLocaleLowerCase,
-      String.prototype.toLocaleUpperCase,
       String.prototype.toLowerCase,
       String.prototype.toUpperCase,
     ],
@@ -48,9 +43,8 @@ function isString(obj) { return Object.prototype.toString.call(obj) === '[object
 
 %%
 \s+                       /* skip whitespace */
-"!"                       return '!'
-"-"                       return '-'
 "+"                       return '+'
+"-"                       return '-'
 "*"                       return '*'
 "/"                       return '/'
 "%"                       return '%'
@@ -72,6 +66,7 @@ function isString(obj) { return Object.prototype.toString.call(obj) === '[object
 \.                        return '.'
 ":"                       return ':'
 "?"                       return '?'
+"!"                       return '!'
 "null"                    return 'NULL'
 "NULL"                    return 'NULL'
 "TRUE"                    return 'TRUE'
@@ -101,14 +96,15 @@ function isString(obj) { return Object.prototype.toString.call(obj) === '[object
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
  */
 
-%left '?' ':'
+%right '?' ':'
 %left '||'
 %left '&&'
 %left '==' '!='
 %left '<' '<=' '>' '>='
 %left '+' '-'
 %left '*' '/' '%'
-%left '!' UMINUS
+%right '!' UMINUS UPLUS
+%left '(' ')'
 %left '.' '[' ']'
 
 %%
@@ -142,6 +138,8 @@ operation:
       {$$ = !$2;}
   | '-' expr %prec UMINUS
       {$$ = -$2;}
+  | '+' expr %prec UPLUS
+      {$$ = +$2;}
   |  expr '+' expr
       {$$ = $1 + $3;}
   | expr '-' expr
@@ -202,19 +200,18 @@ member_access:
 
         var obj = Object.prototype.toString.call($1);
         var prop = Object.prototype.toString.call($2);
+
         if (obj === '[object Array]') {
           if (prop === '[object Number]' && Number.isInteger($2)) {
             if ($2 >= 0 && $2 < $1.length) {
               $$ = $1[$2];
             }
-          } else if ($2 === 'length') {
-            $$ = $1.length;
           }
-        } else if (obj === '[object Object]') {
-          if (prop === '[object String]') {
-            if (Object.prototype.hasOwnProperty.call($1, $2)) {
-              $$ = 1[$2];
-            }
+        }
+
+        if (prop === '[object String]') {
+          if (Object.prototype.hasOwnProperty.call($1, $2)) {
+            $$ = $1[$2];
           }
         }
       %}
