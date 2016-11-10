@@ -22,7 +22,6 @@ import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
 import {chunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {installGlobalClickListenerForDoc} from '../document-click';
 import {installStyles, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
 import {installDocService} from '../service/ampdoc-impl';
@@ -87,8 +86,6 @@ chunk(self.document, function initial() {
       stubElements(self);
     });
     chunk(self.document, function final() {
-      installGlobalClickListenerForDoc(ampdoc);
-
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
     });
