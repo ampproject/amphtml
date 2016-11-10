@@ -175,16 +175,16 @@ operation:
 invocation:
     expr '.' NAME args
       %{
+        $$ = null;
+
         var obj = Object.prototype.toString.call($1);
         var whitelist = functionWhitelist[obj];
         if (whitelist) {
           var fn = $1[$3];
           if (whitelist.indexOf(fn) >= 0) {
             $$ = fn.apply($1, $4);
-            return;
           }
         }
-        $$ = null;
       %}
   ;
 
@@ -198,14 +198,24 @@ args:
 member_access:
     expr member
       %{
+        $$ = null;
+
         var obj = Object.prototype.toString.call($1);
-        var member = Object.prototype.toString.call($2);
+        var prop = Object.prototype.toString.call($2);
         if (obj === '[object Array]') {
-          $$ = (member === '[object Number]' || $2 === 'length') ? $1[$2] : null;
+          if (prop === '[object Number]' && Number.isInteger($2)) {
+            if ($2 >= 0 && $2 < $1.length) {
+              $$ = $1[$2];
+            }
+          } else if ($2 === 'length') {
+            $$ = $1.length;
+          }
         } else if (obj === '[object Object]') {
-          $$ = Object.prototype.hasOwnProperty.call($1, $2) ? $1[$2] : null;
-        } else {
-          $$ = null;
+          if (prop === '[object String]') {
+            if (Object.prototype.hasOwnProperty.call($1, $2)) {
+              $$ = 1[$2];
+            }
+          }
         }
       %}
   ;
@@ -213,7 +223,7 @@ member_access:
 member:
     '.' NAME
       {$$ = $2;}
-  | '[' NAME ']'
+  | '[' expr ']'
       {$$ = $2;}
   ;
 
@@ -228,11 +238,11 @@ literal:
   | NUMBER
       {$$ = Number(yytext);}
   | TRUE
-      {$$ = true}
+      {$$ = true;}
   | FALSE
-      {$$ = false}
+      {$$ = false;}
   | NULL
-      {$$ = null}
+      {$$ = null;}
   | object_literal
       {$$ = $1;}
   | array_literal

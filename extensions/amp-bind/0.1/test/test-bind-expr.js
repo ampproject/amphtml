@@ -17,7 +17,7 @@
 import {evaluateBindExpr} from '../bind-expr';
 
 describe('evaluateBindExpr', () => {
-  it('should evaluate simple number operations', () => {
+  it('should evaluate simple arithmetic operations', () => {
     expect(evaluateBindExpr('-1')).to.equal(-1);
     expect(evaluateBindExpr('1 + 2')).to.equal(3);
     expect(evaluateBindExpr('2 - 3.5')).to.equal(-1.5);
@@ -65,9 +65,24 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('false == !true')).to.be.true;
   });
 
-  it('should support array literals and whitelisted methods', () => {
+  it('should support array literals', () => {
     expect(evaluateBindExpr('[]')).to.deep.equal([]);
     expect(evaluateBindExpr('[1, "a", [], {}]')).to.deep.equal([1, 'a', [], {}]);
+    expect(evaluateBindExpr('["a", "b"][1]')).to.equal('b');
+    expect(evaluateBindExpr('["a", foo][1]', {foo: 'b'})).to.equal('b');
+    expect(evaluateBindExpr('foo[1]', {foo: ['b', 'c']})).to.equal('c');
+  });
+
+  it ('should NOT allow invalid array access', () => {
+    expect(evaluateBindExpr('["a", "b"][-1]')).to.be.null;
+    expect(evaluateBindExpr('["a", "b"][2]')).to.be.null;
+    expect(evaluateBindExpr('["a", "b"][0.5]')).to.be.null;
+    expect(evaluateBindExpr('["a", "b"]["a"]')).to.be.null;
+    expect(evaluateBindExpr('["a", []][[]]')).to.be.null;
+    expect(evaluateBindExpr('["a", {}][{}]')).to.be.null;
+  })
+
+  it('should support array length and whitelisted methods', () => {
     expect(evaluateBindExpr('["a", "b"].length')).to.equal(2);
     expect(evaluateBindExpr('["a", "b"].concat(["c", "d"])')).to.deep.equal(['a', 'b', 'c', 'd']);
     expect(evaluateBindExpr('["a"].includes("a")')).to.be.true;
@@ -93,5 +108,13 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']})).to.be.null;
     expect(evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']})).to.be.null;
     expect(evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']})).to.be.null;
+  });
+
+  it('should support object literals', () => {
+    expect(evaluateBindExpr('{}')).to.deep.equal({});
+    expect(evaluateBindExpr('{}["a"]')).to.be.null;
+    expect(evaluateBindExpr('{}[{}]')).to.be.null;
+    expect(evaluateBindExpr('{"a": "b"}')).to.deep.equal({'a': 'b'});
+    expect(evaluateBindExpr('{foo: "b"}', {foo: 'a'})).to.deep.equal({'a': 'b'});
   });
 });
