@@ -17,15 +17,8 @@
 import {
   domFingerprintPlain,
   domFingerprint,
-  stringHash32,
 } from '../../../src/utils/dom-fingerprint';
 
-
-describe('stringHash32', () => {
-  it('should map a sample string appropriately', () => {
-    expect(stringHash32('')).to.equal(5381);
-  });
-});
 
 describe('domFingerprint', () => {
   let div1;

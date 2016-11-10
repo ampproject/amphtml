@@ -33,10 +33,8 @@ import {
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
-import {
-  domFingerprintPlain,
-  stringHash32,
-} from '../../../src/utils/dom-fingerprint';
+import {stringHash32} from '../../../src/crypto';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -126,7 +124,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const element = this.element;
     const slot = element.getAttribute('data-ad-slot') || '';
     const string = `${slot}:${format}:${domFingerprintPlain(element)}`;
-    return stringHash32(string).toString();
+    return stringHash32(string);
   }
 
   /**

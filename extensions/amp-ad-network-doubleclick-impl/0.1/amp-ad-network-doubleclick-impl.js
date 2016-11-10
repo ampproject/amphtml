@@ -31,10 +31,8 @@ import {
   getCorrelator,
 } from '../../../ads/google/a4a/utils';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
-import {
-  domFingerprintPlain,
-  stringHash32,
-} from '../../../src/utils/dom-fingerprint';
+import {stringHash32} from '../../../src/crypto';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -163,7 +161,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const slot = element.getAttribute('data-slot') || '';
     const multiSize = element.getAttribute('data-multi-size') || '';
     const string = `${slot}:${size}:${multiSize}:${domFingerprint}`;
-    return stringHash32(string).toString();
+    return stringHash32(string);
   }
 }
 

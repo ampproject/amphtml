@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {stringHash32} from '../crypto';
 
 
 /**
@@ -50,12 +51,15 @@ export function domFingerprintPlain(element) {
   const ids = [];
   let level = 0;
   while (element && element.nodeType == /* element */ 1 && level < 25) {
-    const id = element.id &&
-               // Skip AMP generated ids.
-               !(element.getResourceId &&
-                 element.id == 'AMP_' + element.getResourceId()) ?
-      `/${element.id}` : '';
-    const nodeName = String(element.nodeName).toLowerCase();
+    let id = '';
+    if (element.id &&
+        // Skip AMP generated ids.
+        // TODO: Remove when issue #6000 removes generated ids.
+        !(element.getResourceId &&
+          (element.id == `AMP_${element.getResourceId()}`))) {
+      id = `/${element.id}`;
+    }
+    const nodeName = element.nodeName.toLowerCase();
     ids.push(`${nodeName}${id}${indexWithinParent(element)}`);
     level++;
     element = element.parentElement;
@@ -74,24 +78,7 @@ export function domFingerprintPlain(element) {
  * @return {string} The ad unit hash key string.
  */
 export function domFingerprint(element) {
-  return String(stringHash32(domFingerprintPlain(element)));
-};
-
-/**
- * Hash function djb2a
- * This is intended to be a simple, fast hashing function using minimal code.
- * It does *not* have good cryptographic properties.
- * @param {string} str
- * @return {number} 32-bit unsigned hash of the string
- */
-export function stringHash32(str) {
-  const length = str.length;
-  let hash = 5381;
-  for (let i = 0; i < length; i++) {
-    hash = hash * 33 ^ str.charCodeAt(i);
-  }
-  // Convert from 32-bit signed to unsigned.
-  return hash >>> 0;
+  return stringHash32(domFingerprintPlain(element));
 };
 
 
@@ -103,16 +90,20 @@ export function stringHash32(str) {
  * @return {string} '.<index>' or ''.
  */
 function indexWithinParent(element) {
-  // Note that some older browsers return an object for nodeName,
-  // so explicitly coerce to String.
-  const nodeName = String(element.nodeName);
+  const nodeName = element.nodeName;
   // Find my index within my parent's children
+  let i = 0;
   let count = 0;
   let sibling = element.previousElementSibling;
-  while (sibling && count < 25) {
-    if (String(sibling.nodeName) == nodeName) {
+  // Different browsers have different children.
+  // So count only nodes with the same tag.
+  // Use a limit for the tags, so that different browsers get the same
+  // count. So 25 and higher all return no index.
+  while (sibling && count < 25 && i < 100) {
+    if (sibling.nodeName == nodeName) {
       count++;
     }
+    i++;
     sibling = sibling.previousElementSibling;
   }
   // If we got to the end, then the count is accurate; otherwise skip count.
