@@ -342,9 +342,6 @@ export class Resources {
 
     // Create and add the resource.
     const resource = new Resource((++this.resourceIdCounter_), element, this);
-    if (!element.id) {
-      element.id = 'AMP_' + resource.getId();
-    }
     this.resources_.push(resource);
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element added:', resource.debugid);
