@@ -64,12 +64,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     const startTime = Date.now();
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
     const global = this.win;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(global, slotId);
-    const slotRect = this.getIntersectionElementLayoutBox();
-    const size = `${slotRect.width}x${slotRect.height}`;
+    const size = `${width}x${height}`;
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];

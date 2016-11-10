@@ -74,21 +74,22 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     const startTime = Date.now();
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
     const global = this.win;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
-    const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = viewerForDoc(this.getAmpDoc()).getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    const format = `${slotRect.width}x${slotRect.height}`;
+    const format = `${width}x${height}`;
     return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotIdNumber, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
       {name: 'format', value: format},
-      {name: 'w', value: slotRect.width},
-      {name: 'h', value: slotRect.height},
+      {name: 'w', value: width},
+      {name: 'h', value: height},
       {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
       {name: 'adk', value: this.adKey_(format)},
