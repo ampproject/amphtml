@@ -202,6 +202,7 @@ register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
 register('plista', plista);
+register('popin', popin);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
