@@ -25,3 +25,20 @@ export function cryptoFor(window) {
       !../extensions/amp-analytics/0.1/crypto-impl.Crypto>} */ (
       getElementService(window, 'crypto', 'amp-analytics')));
 }
+
+/**
+ * Hash function djb2a
+ * This is intended to be a simple, fast hashing function using minimal code.
+ * It does *not* have good cryptographic properties.
+ * @param {string} str
+ * @return {string} 32-bit unsigned hash of the string
+ */
+export function stringHash32(str) {
+  const length = str.length;
+  let hash = 5381;
+  for (let i = 0; i < length; i++) {
+    hash = hash * 33 ^ str.charCodeAt(i);
+  }
+  // Convert from 32-bit signed to unsigned.
+  return String(hash >>> 0);
+};
