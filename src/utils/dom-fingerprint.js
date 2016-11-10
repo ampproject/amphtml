@@ -107,5 +107,5 @@ function indexWithinParent(element) {
     sibling = sibling.previousElementSibling;
   }
   // If we got to the end, then the count is accurate; otherwise skip count.
-  return !sibling ? `.${count}` : '';
+  return count < 25 && i < 100 ? `.${count}` : '';
 };
