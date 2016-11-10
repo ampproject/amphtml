@@ -219,7 +219,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 
   // inabox-host
   compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-    toName: 'a4a-host.js',
+    toName: 'amp-inabox-host.js',
     minifiedName: 'a4a-host-v0.js',
     includePolyfills: false,
     checkTypes: opt_checkTypes,
