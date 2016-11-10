@@ -158,8 +158,7 @@ Here is an example response, assuming two slots named simply 1 and 2:
 
 ## To do
 
-Add support for json variables - and perhaps other variable substitutions in the way amp-list does - but ensure that 
-we don't mess things up by adding a ?s= to a URL that already has a ?
+Add support for json variables - and perhaps other variable substitutions in the way amp-list does
 
 Give some advice for how to use amp-analytics
 

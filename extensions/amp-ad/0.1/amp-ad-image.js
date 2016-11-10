@@ -15,52 +15,41 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {user} from '../../../src/log';
-import {getBatchManager} from './amp-ad-batch-manager.js';
 import {templatesFor} from '../../../src/template';
+import {xhrFor} from '../../../src/xhr';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_AD_IMAGE = 'amp-ad-image';
+
+/** @var {Object} A map of promises for each value of data-url. The promise
+ *  will fetch data for the URL for the ad server, and return it as a map of
+ *  objects, keyed by slot; each object contains the variables to be
+ *   substituted into the mustache template. */
+const ampImageadXhrPromises = {};
+
+/** @var {Object} a map of ad slot ids for each value of data-url.
+ *  Each entry in the map is an array of slot ids. */
+const ampImageadSlots = {};
 
 export class AmpAdImage extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
     /** @private {string} The base URL of the ad server for this ad */
     this.url_ = element.getAttribute('data-url');
 
-    /** @private {boolean} Whether this is the batch master */
-    this.isBatchMaster_ = false;
-
-    /** @private {string} A string identifying this ad slot: the server's responses will be keyed by slot */
+    /** @private {string} A string identifying this ad slot: the server's
+     *  responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
-    user().assert(!this.slot_ || this.slot_.match(/^[0-9a-z]+$/),
-        'imagead slot should be alphanumeric: ' + this.slot_);
-
-    // Ensure that there are templates in this ad
-    const templates = element.querySelectorAll('template');
-    user().assert(templates.length > 0, 'Missing template in imagead');
-
-    /** @private {AmpAdBatchManager} This will batch up the display of this ad together with others of the same URL */
-    this.batchManager_ = getBatchManager(this, this.url_);
-
-    this.lifecycleReporter_ = getLifecycleReporter(this, 'amp');
-    this.lifecycleReporter_.sendPing('adSlotBuilt');
-  }
-
-  /**
-   * Get or Set whether this is a batch master
-   * @param {boolean} val If true or false, set the value. If absent, just get the existing value
-   * @returns {boolean} True if this is the batch master, else false
-   */
-  batchMaster(val) {
-    if (val === false || val === true) {
-      this.isBatchMaster_ = val;
+    if (!this.slot_) {
+      // If a slot wasn't specified, set it to zero. For use in pages
+      // with only a single ad.
+      this.slot_ = 0;
     }
-    return this.isBatchMaster_;
+    user().assert(this.slot_.match(/^[0-9a-z]+$/),
+        'imagead slot should be alphanumeric: ' + this.slot_);
   }
 
   /** @override */
@@ -71,31 +60,63 @@ export class AmpAdImage extends AMP.BaseElement {
 
   /** @override **/
   isLayoutSupported(layout) {
-    /** @TODO Add proper support for more layouts, and figure out which ones we're permitting */
+    /** @TODO Add proper support for more layouts, and figure out which ones
+     *  we're permitting */
     return isLayoutSizeDefined(layout);
   }
 
-  /**
-   * Display an ad in this element. Call this only when we know that the responses have been fetched from the ad server.
-   * The response data can be found in the batch manager's responseData variable, indexed by slot.
-   */
-  showImageAd() {
-    const response = this.batchManager_.responseData[this.slot_];
-    const element = this.element;
-    templatesFor(this.win).findAndRenderTemplate(element, response)
-        .then(renderedElement => {
-          // Clear out the template and replace it by the rendered version
-          element.innerHTML = '';
-          element.appendChild(renderedElement);
-        });
+  buildCallback() {
+    // Ensure that there are templates in this ad
+    const templates = this.element.querySelectorAll('template');
+    user().assert(templates.length > 0, 'Missing template in imagead');
   }
+
+  /**
+   * Get a URL which includes a parameter indicating all slots to be fetched
+   * from this web server URL
+   * @returns {String} The URL with the "ampslots" parameter appended
+   */
+  getFullUrl() {
+    if (!ampImageadSlots.length) {
+      // The array of ad slots has not yet been build do so now.
+      const elements = document.querySelectorAll('amp-ad[type=imagead]');
+      for (let index = 0; index < elements.length; index++) {
+        const elem = elements[index];
+        const url = elem.getAttribute('data-url');
+        if (!(url in ampImageadSlots)) {
+          ampImageadSlots[url] = [];
+        }
+        const slotId = elem.getAttribute('data-slot');
+        ampImageadSlots[url].push(slotId ? slotId : 0);
+      }
+    }
+    return this.url_ + (this.url_.match(/\?/) ? '&' : '?') + 'ampslots=' +
+            (ampImageadSlots[this.url_]).join(',');
+  }
+
   /** @override */
   layoutCallback() {
-    // Call the batch manager to do the layout
-    return this.batchManager_.doLayout(this).then(element => {
-      // When the batch manager has fetched the batch of ads safely, it can now tell us to show this one.
-      element > 0; // Dump lint warning
-      this.showImageAd();
+    // If this promise has no URL yet, create one for it.
+    if (!(this.url_ in ampImageadXhrPromises)) {
+      // Here is a promise that will return the data for this URL
+      ampImageadXhrPromises[this.url_] = new Promise(resolve => {
+        // Fetch the data for this URL...
+        xhrFor(this.win).fetchJson(this.getFullUrl(this.url_)).then(data => {
+          resolve(data);
+        });
+      });
+    }
+    return ampImageadXhrPromises[this.url_].then(data => {
+      const element = this.element;
+      // We will get here when the data has been fetched from the server
+      templatesFor(this.win).findAndRenderTemplate(element, data[this.slot_])
+        .then(renderedElement => {
+        // Get here when the template has been rendered
+        // Clear out the template and replace it by the rendered version
+          element.innerHTML = '';
+          element.appendChild(renderedElement);
+          return this;
+        });
     });
   }
 }
