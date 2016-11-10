@@ -18,6 +18,7 @@ import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
+import {isIframed} from '../dom';
 import {
   getSourceUrl,
   parseQueryString,
@@ -89,9 +90,6 @@ export class Viewer {
 
     /** @const {!Window} */
     this.win = ampdoc.win;
-
-    /** @private @const {boolean} */
-    this.isIframed_ = (this.win.parent && this.win.parent != this.win);
 
     /** @const {!../document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
@@ -207,7 +205,7 @@ export class Viewer {
      * Whether the AMP document is embedded in a webview.
      * @private @const {boolean}
      */
-    this.isWebviewEmbedded_ = !this.isIframed_ &&
+    this.isWebviewEmbedded_ = !isIframed(this.win) &&
         this.params_['webview'] == '1';
 
     /**
@@ -216,7 +214,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = !!(
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME
+        isIframed(this.win) && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -419,6 +417,12 @@ export class Viewer {
    * @return {boolean}
    */
   hasCapability(name) {
+    // TODO(lannka, #4457): ideally, we should check if viewer has the capability
+    // of CID storage, rather than if it is embedded.
+    if (name == 'cid') {
+      return isIframed(this.win);
+    }
+
     const capabilities = this.params_['cap'];
     if (!capabilities) {
       return false;
@@ -450,15 +454,11 @@ export class Viewer {
   }
 
   /**
-   * Whether the document is embedded in a iframe.
-   * @return {boolean}
-   */
-  isIframed() {
-    return this.isIframed_;
-  }
-
-  /**
-   * Whether the document is embedded in a viewer.
+   * A document considered as "embedded" when it is
+   * 1) iframed in a viewer, or
+   * 2) embedded in a webview, or
+   * 3) not a single doc
+   *
    * @return {boolean}
    */
   isEmbedded() {

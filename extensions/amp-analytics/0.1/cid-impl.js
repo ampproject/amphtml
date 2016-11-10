@@ -278,9 +278,7 @@ function getBaseCid(cid, persistenceConsent) {
  */
 function store(win, persistenceConsent, cidString) {
   const viewer = viewerForDoc(win.document);
-  // TODO(lannka, #4457): ideally, we should check if viewer has the capability
-  // of CID storage, rather than if it is iframed.
-  if (viewer.isIframed()) {
+  if (viewer.hasCapability('cid')) {
     // If we are being embedded, try to save the base cid to the viewer.
     viewer.baseCid(createCidData(cidString));
   } else {
@@ -327,7 +325,7 @@ function read(win) {
   }
   const viewer = viewerForDoc(win.document);
   let dataPromise = Promise.resolve(data);
-  if (!data && viewer.isIframed()) {
+  if (!data && viewer.hasCapability('cid')) {
     // If we are being embedded, try to get the base cid from the viewer.
     dataPromise = viewer.baseCid();
   }
