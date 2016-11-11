@@ -462,7 +462,9 @@ As well as these attributes:
 
 ## AMP document discovery
 
-If AMP documents are alternative representations of a canonical document, then the canonical document should point to the AMP document via a `link` tag with the [relation "amphtml"](http://microformats.org/wiki/existing-rel-values#HTML5_link_type_extensions).
+The mechanism described below provides a standardized way for software to discover whether an AMP version exists for a canonical document.
+
+If AMP an document is an alternative representation of a canonical document, then the canonical document should point to the AMP document via a `link` tag with the [relation "amphtml"](http://microformats.org/wiki/existing-rel-values#HTML5_link_type_extensions).
 
 Example:
 
@@ -472,4 +474,12 @@ Example:
 
 The AMP document itself is expected to point back with its canonical relation to a document that has the "amphtml" relation.
 
-Note, that AMP document may also be linked to directly. The mechanism described here provides a standardized way for software to discover whether an AMP version exists for a canonical document.
+Example:
+
+```html
+<link rel="canonical" href="https://www.example.com/url/to/canonical/document.html">
+```
+
+(If a single resource is simultaneously the AMP *and* the canonical document, the canonical relation should point to itself--no "amphtml" relation is required.)
+
+Note that for widest compatibility with AMP-consuming systems, it should be possible to read the "amphtml" relation without executing JavaScript. (That is, the tag should be present in the raw HTML, and not injected via JavaScript.)
