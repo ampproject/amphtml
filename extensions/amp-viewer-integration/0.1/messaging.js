@@ -20,8 +20,8 @@ import {dev} from '../../../src/log';
 
 
 /**
- * @fileoverview This is the communication protocol between AMP and the viewer.
- * It is used in the amp-viewer-integration.js file.
+ * @fileoverview This is a used in amp-viewer-integration.js for the
+ * communication protocol between AMP and the viewer.
  */
 export class Messaging {
   /**
@@ -32,7 +32,7 @@ export class Messaging {
    *    requestProcessor
    */
   constructor(target, targetOrigin, requestProcessor) {
-    this.sentinel_ = '__AMP__';
+    this.sentinel_ = '__AMPHTML__';
     this.requestSentinel_ = this.sentinel_ + 'REQUEST';
     this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
 
@@ -48,7 +48,7 @@ export class Messaging {
 
     dev().assert(this.targetOrigin_, 'Target origin must be specified!');
 
-    listen(this.target_, 'message', (this.onMessage_.bind(this)));
+    listen(this.target_, 'message', this.handleMessage_.bind(this));
   }
 
 
@@ -56,16 +56,16 @@ export class Messaging {
    * @param {Event|null} event
    * @private
    */
-  onMessage_(event) {
+  handleMessage_(event) {
     if (!event || event.source != this.target_ ||
       event.origin != this.targetOrigin_) {
       return;
     }
     const message = event.data;
     if (message.sentinel == this.requestSentinel_) {
-      this.onRequest_(message);
+      this.handleRequest_(message);
     } else if (message.sentinel == this.responseSentinel_) {
-      this.onResponse_(message);
+      this.handleResponse_(message);
     }
   };
 
@@ -80,56 +80,12 @@ export class Messaging {
     console.log('here @ messaging.js -> sendRequest');
     const requestId = (++this.requestIdCounter_).toString();
     if (awaitResponse) {
-      new Promise(function(resolve, reject) {
+      new Promise((resolve, reject) => {
         this.waitingForResponse_[requestId] = {resolve, reject};
-      }.bind(this));
+      });
     }
     this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
         awaitResponse);
-  };
-
-
-  /**
-   * @param {*} message
-   * @private
-   */
-  onRequest_(message) {
-    //TODO: Remove console.log before merge to prod.
-    console.log('here @ messaging.js -> onRequest_');
-    const requestId = message.requestId.toString();
-    const promise = this.requestProcessor_(message.type, message.payload,
-        message.rsvp);
-    if (message.rsvp) {
-      if (!promise) {
-        this.sendResponseError_(requestId, 'no response');
-        throw new Error('expected response but none given: ' + message.type);
-      }
-      promise.then(function(payload) {
-        this.sendResponse_(requestId, payload);
-      }.bind(this), function(reason) {
-        this.sendResponseError_(requestId, reason);
-      }.bind(this));
-    }
-  };
-
-
-  /**
-   * @param {*} message
-   * @private
-   */
-  onResponse_(message) {
-    //TODO: Remove console.log before merge to prod.
-    console.log('here @ messaging.js -> onResponse_');
-    const requestId = message.requestId;
-    const pending = this.waitingForResponse_[requestId];
-    if (pending) {
-      delete this.waitingForResponse_[requestId];
-      if (message.type == 'ERROR') {
-        pending.reject(message.payload);
-      } else {
-        pending.resolve(message.payload);
-      }
-    }
   };
 
 
@@ -174,5 +130,49 @@ export class Messaging {
   sendResponseError_(requestId, reason) {
     this.sendMessage_(
       this.responseSentinel_, requestId.toString(), 'ERROR', reason, false);
+  };
+
+
+  /**
+   * @param {*} message
+   * @private
+   */
+  handleRequest_(message) {
+    //TODO: Remove console.log before merge to prod.
+    console.log('here @ messaging.js -> handleRequest_');
+    const requestId = message.requestId.toString();
+    const promise = this.requestProcessor_(message.type, message.payload,
+        message.rsvp);
+    if (message.rsvp) {
+      if (!promise) {
+        this.sendResponseError_(requestId, 'no response');
+        throw new Error('expected response but none given: ' + message.type);
+      }
+      promise.then(function(payload) {
+        this.sendResponse_(requestId, payload);
+      }.bind(this), function(reason) {
+        this.sendResponseError_(requestId, reason);
+      }.bind(this));
+    }
+  };
+
+
+  /**
+   * @param {*} message
+   * @private
+   */
+  handleResponse_(message) {
+    //TODO: Remove console.log before merge to prod.
+    console.log('here @ messaging.js -> handleResponse_');
+    const requestId = message.requestId;
+    const pending = this.waitingForResponse_[requestId];
+    if (pending) {
+      delete this.waitingForResponse_[requestId];
+      if (message.type == 'ERROR') {
+        pending.reject(message.payload);
+      } else {
+        pending.resolve(message.payload);
+      }
+    }
   };
 }

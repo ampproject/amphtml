@@ -20,6 +20,10 @@ import {viewerForDoc} from '../../../src/viewer';
 import {user} from '../../../src/log';
 
 
+/**
+ * @fileoverview This is the communication protocol between AMP and the viewer.
+ * This should be included in an AMP html file to communicate with the viewer.
+ */
 export class AmpViewerIntegration {
 
   /**
