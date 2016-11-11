@@ -97,20 +97,32 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('"aaa".lastIndexOf("a")')).to.equal(2);
     expect(evaluateBindExpr('"ab".repeat(2)')).to.equal('abab');
     expect(evaluateBindExpr('"abc".slice(0, 2)')).to.equal('ab');
-    expect(evaluateBindExpr('"a-b-c".split("-")').to.deep.equal(['a', 'b', 'c']);
-    expect(evaluateBindExpr('"abc".startsWith("ab")').to.equal(true);
-    expect(evaluateBindExpr('"abc".substr(1)').to.equal('bc');
-    expect(evaluateBindExpr('"abc".substring(0, 2)').to.equal('ab');
-    expect(evaluateBindExpr('"ABC".toLowerCase()').to.equal('abc');
-    expect(evaluateBindExpr('"abc".toUpperCase()').to.equal('ABC');
+    expect(evaluateBindExpr('"a-b-c".split("-")')).to.deep.equal(['a', 'b', 'c']);
+    expect(evaluateBindExpr('"abc".startsWith("ab")')).to.equal(true);
+    expect(evaluateBindExpr('"abc".substr(1)')).to.equal('bc');
+    expect(evaluateBindExpr('"abc".substring(0, 2)')).to.equal('ab');
+    expect(evaluateBindExpr('"ABC".toLowerCase()')).to.equal('abc');
+    expect(evaluateBindExpr('"abc".toUpperCase()')).to.equal('ABC');
   });
 
   it('should NOT allow access to non-whitelisted string methods', () => {
-    // TODO
+    expect(() => { evaluateBindExpr('"abc".anchor()'); }).to.throw();
+    expect(() => { evaluateBindExpr('"abc".link()'); }).to.throw();
+    expect(() => { evaluateBindExpr('"abc".replace("bc", "xy")'); }).to.throw();
+    expect(() => { evaluateBindExpr('"abc".search()'); }).to.throw();
+    expect(() => { evaluateBindExpr('"  abc  ".trim()'); }).to.throw();
+    expect(() => { evaluateBindExpr('"abc  ".trimRight()'); }).to.throw();
+    expect(() => { evaluateBindExpr('"  abc".trimLeft()'); }).to.throw();
   });
 
   it('should support variables', () => {
-    // TODO
+    expect(evaluateBindExpr('foo', {foo: 'bar'})).to.equal('bar');
+    expect(evaluateBindExpr('foo', {foo: 1})).to.equal(1);
+    expect(evaluateBindExpr('foo', {foo: [1, 2, 3]})).to.deep.equal([1, 2, 3]);
+    expect(evaluateBindExpr('foo', {foo: {'bar' : 'qux'}})).to.deep.equal({bar: 'qux'});
+    expect(evaluateBindExpr('{foo: "bar"}', {foo: 'qux'})).to.deep.equal({qux: 'bar'});
+    expect(evaluateBindExpr('{"foo": bar}', {bar: 'qux'})).to.deep.equal({foo: 'qux'});
+    expect(evaluateBindExpr('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
   });
 
   it('should support array literals', () => {
@@ -149,13 +161,13 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('foo.prototype', {foo: []})).to.be.null;
     expect(evaluateBindExpr('foo.__proto__', {foo: []})).to.be.null;
 
-    expect(evaluateBindExpr('["a", "b", "c"].find()')).to.be.null;
-    expect(evaluateBindExpr('["a", "b", "c"].forEach()')).to.be.null;
-    expect(evaluateBindExpr('["a", "b", "c"].splice(1, 1)')).to.be.null;
+    expect(() => { evaluateBindExpr('["a", "b", "c"].find()'); }).to.throw();
+    expect(() => { evaluateBindExpr('["a", "b", "c"].forEach()'); }).to.throw();
+    expect(() => { evaluateBindExpr('["a", "b", "c"].splice(1, 1)'); }).to.throw();
 
-    expect(evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']})).to.be.null;
-    expect(evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']})).to.be.null;
-    expect(evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']})).to.be.null;
+    expect(() => { evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']}); }).to.throw();
+    expect(() => { evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']}); }).to.throw();
+    expect(() => { evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']}); }).to.throw();
   });
 
   it('should support object literals', () => {
@@ -164,6 +176,10 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('{}[{}]')).to.be.null;
     expect(evaluateBindExpr('{"a": "b"}')).to.deep.equal({'a': 'b'});
     expect(evaluateBindExpr('{foo: "b"}', {foo: 'a'})).to.deep.equal({'a': 'b'});
+  });
+
+  it('should evaluate undefined vars and properties to null', () => {
+    expect(evaluateBindExpr('foo.bar')).to.be.null;
   });
 
   it('should NOT allow access to object built-in properties', () => {
@@ -213,6 +229,7 @@ describe('evaluateBindExpr', () => {
   it('should NOT allow function declarations', () => {
     expect(() => { evaluateBindExpr('function() {}'); }).to.throw();
     expect(() => { evaluateBindExpr('function foo() {}'); }).to.throw();
+    expect(() => { evaluateBindExpr('new Function()'); }).to.throw();
     expect(() => { evaluateBindExpr('() => {}'); }).to.throw();
     expect(() => { evaluateBindExpr('class Foo {}'); }).to.throw();
   });
@@ -223,6 +240,101 @@ describe('evaluateBindExpr', () => {
         bar: () => { 'qux'; }
       }
     };
-    expect(evaluateBindExpr('foo.bar()', scope)).to.be.null;
+    expect(() => { evaluateBindExpr('foo.bar()', scope); }).to.throw();
+  });
+
+  /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects */
+  it('should NOT allow access to globals', () => {
+    expect(evaluateBindExpr('window')).to.be.null;
+    expect(evaluateBindExpr('arguments')).to.be.null;
+
+    expect(evaluateBindExpr('Infinity')).to.be.null;
+    expect(evaluateBindExpr('NaN')).to.be.null;
+    expect(evaluateBindExpr('undefined')).to.be.null;
+
+    expect(() => { evaluateBindExpr('eval()'); }).to.throw();
+    expect(() => { evaluateBindExpr('uneval()'); }).to.throw();
+    expect(() => { evaluateBindExpr('isFinite()'); }).to.throw();
+    expect(() => { evaluateBindExpr('isNaN()'); }).to.throw();
+    expect(() => { evaluateBindExpr('parseFloat()'); }).to.throw();
+    expect(() => { evaluateBindExpr('parseInt()'); }).to.throw();
+    expect(() => { evaluateBindExpr('decodeURI()'); }).to.throw();
+    expect(() => { evaluateBindExpr('decodeURIComponent()'); }).to.throw();
+    expect(() => { evaluateBindExpr('encodeURI()'); }).to.throw();
+    expect(() => { evaluateBindExpr('encodeURIComponent()'); }).to.throw();
+    expect(() => { evaluateBindExpr('escape()'); }).to.throw();
+    expect(() => { evaluateBindExpr('unescape()'); }).to.throw();
+
+    expect(evaluateBindExpr('Object')).to.be.null;
+    expect(evaluateBindExpr('Function')).to.be.null;
+    expect(evaluateBindExpr('Boolean')).to.be.null;
+    expect(evaluateBindExpr('Symbol')).to.be.null;
+    expect(evaluateBindExpr('Error')).to.be.null;
+    expect(evaluateBindExpr('EvalError')).to.be.null;
+    expect(evaluateBindExpr('InternalError')).to.be.null;
+    expect(evaluateBindExpr('RangeError')).to.be.null;
+    expect(evaluateBindExpr('ReferenceError')).to.be.null;
+    expect(evaluateBindExpr('SyntaxError')).to.be.null;
+    expect(evaluateBindExpr('TypeError')).to.be.null;
+    expect(evaluateBindExpr('URIError')).to.be.null;
+
+    expect(evaluateBindExpr('Number')).to.be.null;
+    expect(evaluateBindExpr('Math')).to.be.null;
+    expect(evaluateBindExpr('Date')).to.be.null;
+    
+    expect(evaluateBindExpr('String')).to.be.null;
+    expect(evaluateBindExpr('RegExp')).to.be.null;
+
+    expect(evaluateBindExpr('Array')).to.be.null;
+    expect(evaluateBindExpr('Int8Array')).to.be.null;
+    expect(evaluateBindExpr('Uint8Array')).to.be.null;
+    expect(evaluateBindExpr('Uint8ClampedArray')).to.be.null;
+    expect(evaluateBindExpr('Int16Array')).to.be.null;
+    expect(evaluateBindExpr('Uint16Array')).to.be.null;
+    expect(evaluateBindExpr('Int32Array')).to.be.null;
+    expect(evaluateBindExpr('Uint32Array')).to.be.null;
+    expect(evaluateBindExpr('Float32Array')).to.be.null;
+    expect(evaluateBindExpr('Float64Array')).to.be.null;
+
+    expect(evaluateBindExpr('Map')).to.be.null;
+    expect(evaluateBindExpr('Set')).to.be.null;
+    expect(evaluateBindExpr('WeakMap')).to.be.null;
+    expect(evaluateBindExpr('WeakSet')).to.be.null;
+
+    expect(evaluateBindExpr('ArrayBuffer')).to.be.null;
+    expect(evaluateBindExpr('SharedArrayBuffer')).to.be.null;
+    expect(evaluateBindExpr('Atomics')).to.be.null;
+    expect(evaluateBindExpr('DataView')).to.be.null;
+    expect(evaluateBindExpr('JSON')).to.be.null;
+
+    expect(evaluateBindExpr('Promise')).to.be.null;
+    expect(evaluateBindExpr('Generator')).to.be.null;
+    expect(evaluateBindExpr('GeneratorFunction')).to.be.null;
+    expect(evaluateBindExpr('AsyncFunction')).to.be.null;
+
+    expect(evaluateBindExpr('Reflect')).to.be.null;
+    expect(evaluateBindExpr('Proxy')).to.be.null;
+
+    expect(evaluateBindExpr('Intl')).to.be.null;
+
+    expect(evaluateBindExpr('Iterator')).to.be.null;
+    expect(evaluateBindExpr('ParallelArray')).to.be.null;
+    expect(evaluateBindExpr('StopIteration')).to.be.null;
+  });
+
+  /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators */
+  it('should NOT allow access to non-whitelisted operators', () => {
+    expect(evaluateBindExpr('this')).to.be.null;
+    expect(evaluateBindExpr('function')).to.be.null;
+    expect(evaluateBindExpr('class')).to.be.null;
+    expect(evaluateBindExpr('yield')).to.be.null;
+    expect(evaluateBindExpr('await')).to.be.null;
+    expect(evaluateBindExpr('new')).to.be.null;
+    expect(evaluateBindExpr('super')).to.be.null;
+
+    expect(() => { evaluateBindExpr('function*'); }).to.throw();
+    expect(() => { evaluateBindExpr('/ab+c/i'); }).to.throw();
+    expect(() => { evaluateBindExpr('yield*'); }).to.throw();
+    expect(() => { evaluateBindExpr('async function*'); }).to.throw();
   });
 });

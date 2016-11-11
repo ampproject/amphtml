@@ -1,5 +1,5 @@
+/** shared vars and functions */
 %{
-
 var functionWhitelist =
 {
   '[object Array]':
@@ -30,15 +30,9 @@ var functionWhitelist =
       String.prototype.toUpperCase,
     ],
 };
-
-function isObject(obj) { return Object.prototype.toString.call(obj) === '[object Object]'; }
-function isArray(obj)  { return Object.prototype.toString.call(obj) === '[object Array]'; }
-function isNumber(obj) { return Object.prototype.toString.call(obj) === '[object Number]'; }
-function isString(obj) { return Object.prototype.toString.call(obj) === '[object String]'; }
-
 %}
 
-/* Lexical grammar */
+/* lexical grammar */
 %lex
 
 %%
@@ -181,8 +175,11 @@ invocation:
           var fn = $1[$3];
           if (whitelist.indexOf(fn) >= 0) {
             $$ = fn.apply($1, $4);
+            return;
           }
         }
+
+        throw new Error($3 + '() is not a supported function.');
       %}
   ;
 
@@ -197,6 +194,10 @@ member_access:
     expr member
       %{
         $$ = null;
+
+        if ($1 === null || $2 === null) {
+          return;
+        }
 
         var obj = Object.prototype.toString.call($1);
         var prop = Object.prototype.toString.call($2);
