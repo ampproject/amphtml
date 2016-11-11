@@ -48,7 +48,7 @@ export function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
-  const asciiString = bytesToString(new Uint8Array(bytes));
+  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
   return decodeURIComponent(escape(asciiString));
 }
 
