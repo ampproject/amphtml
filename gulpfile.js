@@ -359,7 +359,7 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: options.noWrapper ? '' : ('(window.AMP = window.AMP || [])' +
+    wrapper: options.noWrapper ? '' : ('(self.AMP = self.AMP || [])' +
         '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
   });
 }
