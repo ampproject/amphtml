@@ -59,7 +59,7 @@ export class IntersectionObserverPolyfill {
     this.threshold_ = this.threshold_.sort();
     dev().assert(this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,
-        'Threshold should only contain value range from 0 to 1');
+        'Threshold should be in the range from "[0, 1]"');
 
     /** @private {?Element} */
     this.element_ = null;
@@ -97,13 +97,9 @@ export class IntersectionObserverPolyfill {
    */
   observe(element) {
     // Reset cached value for a new element
-    this.isAmpElement_ = false;
     this.elementRectForNonAMP_ = null;
     this.prevThresholdSlot_ = 0;
-    // TODO: Need a good way to check if an element is AMP element
-    if (element.isBuilt && element.isBuilt()) {
-      this.isAmpElement_ = true;
-    }
+    this.isAmpElement_ = !!element.isBuilt && element.isBuilt();
     this.element_ = element;
   }
 
@@ -126,7 +122,8 @@ export class IntersectionObserverPolyfill {
       // If calls with container, always assume getLayoutBox() return relative
       // LayoutRect to container
       elementRect = this.element_.getLayoutBox();
-      ownerRect = this.element_.getOwnerLayoutBox();
+      const owner = this.element_.getOwner();
+      ownerRect = owner && owner.getLayoutBox();
       if (opt_container) {
         elementRect = moveLayoutRect(elementRect, opt_container.left,
             opt_container.top);
@@ -140,8 +137,9 @@ export class IntersectionObserverPolyfill {
       // the page won't change.
       if (!this.elementRectForNonAMP_) {
         elementRect = this.element_./*OK*/getBoundingClientRect();
+        const normRect = opt_container || viewport;
         this.elementRectForNonAMP_ =
-            moveLayoutRect(elementRect, opt_container.left, opt_container.top);
+            moveLayoutRect(elementRect, normRect.left, normRect.top);
       }
       elementRect = this.elementRectForNonAMP_;
     }
@@ -172,19 +170,16 @@ export class IntersectionObserverPolyfill {
 
     // Building an IntersectionObserverEntry.
     let intersectionRect = element;
+    const nonIntersectRect = layoutRectLtwh(0, 0, 0, 0);
     if (owner) {
-      intersectionRect = rectIntersection(owner, element) ||
-          // No intersection.
-          layoutRectLtwh(0, 0, 0, 0);
+      intersectionRect = rectIntersection(owner, element) || nonIntersectRect;
     }
     if (opt_container) {
       intersectionRect = rectIntersection(opt_container, intersectionRect) ||
-          // No intersection.
-          layoutRectLtwh(0, 0, 0, 0);
+          nonIntersectRect;
     }
     intersectionRect = rectIntersection(viewport, intersectionRect) ||
-        // No intersection.
-        layoutRectLtwh(0, 0, 0, 0);
+        nonIntersectRect;
 
     intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
         -viewport.top);

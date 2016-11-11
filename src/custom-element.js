@@ -993,12 +993,11 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * @return {?./layout-rect.LayoutRectDef}
+     * @return {?Element}
      * @final @this {!Element}
      */
-    getOwnerLayoutBox() {
-      const owner = this.getResources().getResourceForElement(this).getOwner();
-      return owner && owner.getLayoutBox();
+    getOwner() {
+      return this.getResources().getResourceForElement(this).getOwner();
     }
 
     /**

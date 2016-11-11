@@ -74,9 +74,9 @@ describe('IntersectionObserverPolyfill', () => {
         });
       };
       expect(io1).to.throw(
-          'Threshold should only contain value range from 0 to 1');
+          'Threshold should be in the range from "[0, 1]"');
       expect(io2).to.throw(
-          'Threshold should only contain value range from 0 to 1');
+          'Threshold should be in the range from "[0, 1]"');
     });
 
     it('getThresholdSlot function', () => {
@@ -110,7 +110,7 @@ describe('IntersectionObserverPolyfill', () => {
       io = new IntersectionObserverPolyfill(callbackSpy);
       element = {
         isBuilt: () => {return true;},
-        getOwnerLayoutBox: () => {return null;},
+        getOwner: () => {return null;},
       };
     });
 
@@ -235,8 +235,12 @@ describe('IntersectionObserverPolyfill', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 50, 150, 200);
         };
-        element.getOwnerLayoutBox = () => {
-          return layoutRectLtwh(0, 50, 100, 100);
+        element.getOwner = () => {
+          return {
+            getLayoutBox: () => {
+              return layoutRectLtwh(0, 50, 100, 100);
+            },
+          };
         };
         io.observe(element);
         io.prevThresholdSlot_ = -1;
@@ -339,8 +343,12 @@ describe('IntersectionObserverPolyfill', () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(75, 0, 50, 50);
         };
-        element.getOwnerLayoutBox = () => {
-          return layoutRectLtwh(0, 25, 200, 25);
+        element.getOwner = () => {
+          return {
+            getLayoutBox: () => {
+              return layoutRectLtwh(0, 25, 200, 25);
+            },
+          };
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
         const containerBounds = layoutRectLtwh(100, 0, 200, 200);
@@ -360,6 +368,26 @@ describe('IntersectionObserverPolyfill', () => {
     });
 
     describe('with non AMP element', () => {
+      it('without container', () => {
+        element.isBuilt = null;
+        element.getBoundingClientRect = () => {
+          return DomRectLtwh(0, 0, 50, 50);
+        };
+        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
+        io.observe(element);
+        io.prevThresholdSlot_ = -1;
+        io.tick(rootBounds);
+        const change = {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 200, 200),
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRatio: 1,
+        };
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith(change);
+      });
+
       it('with container', () => {
         element.isBuilt = null;
         element.getBoundingClientRect = () => {
