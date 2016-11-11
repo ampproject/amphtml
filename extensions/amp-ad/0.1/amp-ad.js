@@ -15,7 +15,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
-import {AmpAdImage} from './amp-ad-image';
+import {AmpAdCustom} from './amp-ad-custom';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev, user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
@@ -54,9 +54,9 @@ export class AmpAd extends AMP.BaseElement {
         // Unspecified or empty type.  Nothing to do here except bail out.
         return null;
       }
-      // Check for the simplified Image Ad type
-      if (type === 'imagead' && isExperimentOn(this.win, 'ad-type-imagead')) {
-        return new AmpAdImage(this.element);
+      // Check for the custom ad type (no ad network, self-service)
+      if (type === 'custom' && isExperimentOn(this.win, 'ad-type-custom')) {
+        return new AmpAdCustom(this.element);
       }
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||

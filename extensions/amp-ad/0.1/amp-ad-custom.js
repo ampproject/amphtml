@@ -19,20 +19,20 @@ import {user} from '../../../src/log';
 import {templatesFor} from '../../../src/template';
 import {xhrFor} from '../../../src/xhr';
 
-/** @const {!string} Tag name for 3P AD implementation. */
-export const TAG_AD_IMAGE = 'amp-ad-image';
+/** @const {!string} Tag name for custom ad implementation. */
+export const TAG_AD_CUSTOM = 'amp-ad-custom';
 
 /** @var {Object} A map of promises for each value of data-url. The promise
  *  will fetch data for the URL for the ad server, and return it as a map of
  *  objects, keyed by slot; each object contains the variables to be
  *   substituted into the mustache template. */
-const ampImageadXhrPromises = {};
+const ampCustomadXhrPromises = {};
 
 /** @var {Object} a map of ad slot ids for each value of data-url.
  *  Each entry in the map is an array of slot ids. */
-let ampImageadSlots = null;
+let ampCustomadSlots = null;
 
-export class AmpAdImage extends AMP.BaseElement {
+export class AmpAdCustom extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -66,10 +66,10 @@ export class AmpAdImage extends AMP.BaseElement {
   buildCallback() {
     // Ensure that there are templates in this ad
     const templates = this.element.querySelectorAll('template');
-    user().assert(templates.length > 0, 'Missing template in imagead');
+    user().assert(templates.length > 0, 'Missing template in custom ad');
     // And ensure that the slot value is legal
     user().assert(this.slot_.match(/^[0-9a-z]+$/),
-        'imagead slot should be alphanumeric: ' + this.slot_);
+        'custom ad slot should be alphanumeric: ' + this.slot_);
   }
 
   /**
@@ -78,35 +78,33 @@ export class AmpAdImage extends AMP.BaseElement {
    * @returns {String} The URL with the "ampslots" parameter appended
    */
   getFullUrl() {
-    console.log("Get URL");
-    if (ampImageadSlots === null) {
+    if (ampCustomadSlots === null) {
       // The array of ad slots has not yet been built, do so now.
-      console.log("Build array");
-      ampImageadSlots = {};
-      const elements = document.querySelectorAll('amp-ad[type=imagead]');
+      ampCustomadSlots = {};
+      const elements = document.querySelectorAll('amp-ad[type=custom]');
       for (let index = 0; index < elements.length; index++) {
         const elem = elements[index];
         const url = elem.getAttribute('data-url');
-        if (!(url in ampImageadSlots)) {
-          ampImageadSlots[url] = [];
+        if (!(url in ampCustomadSlots)) {
+          ampCustomadSlots[url] = [];
         }
         const slotId = elem.getAttribute('data-slot');
-        ampImageadSlots[url].push(slotId ? slotId : 0);
+        ampCustomadSlots[url].push(slotId ? slotId : 0);
       }
     }
     return this.url_ + (this.url_.match(/\?/) ? '&' : '?') + 'ampslots=' +
-            (ampImageadSlots[this.url_]).join(',');
+            (ampCustomadSlots[this.url_]).join(',');
   }
 
   /** @override */
   layoutCallback() {
     // If this promise has no URL yet, create one for it.
-    if (!(this.url_ in ampImageadXhrPromises)) {
+    if (!(this.url_ in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampImageadXhrPromises[this.url_] = xhrFor(this.win).fetchJson(
+      ampCustomadXhrPromises[this.url_] = xhrFor(this.win).fetchJson(
           this.getFullUrl(this.url_));
     }
-    return ampImageadXhrPromises[this.url_].then(data => {
+    return ampCustomadXhrPromises[this.url_].then(data => {
       const element = this.element;
       // We will get here when the data has been fetched from the server
       templatesFor(this.win).findAndRenderTemplate(element, data[this.slot_])

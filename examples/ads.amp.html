@@ -101,6 +101,7 @@
     <a href="#colombia" class="broken">Colombia ad</a> |
     <a href="#contentad">Content.ad</a> |
     <a href="#criteo">Criteo</a> |
+    <a href="#custom">Custom</a>|
     <a href="#dotandads">DotAndAds</a> |
     <a href="#doubleclick">Doubleclick</a> |
     <a href="#eplanning">E-Planning</a> |
@@ -109,7 +110,6 @@
     <a href="#genieessp"></a> |
     <a href="#gmossp" class="broken"></a> |
     <a href="#ibillboard">iBILLBOARD</a> 
-    <a href="#imagead">Imagead (self-serve)</a>|
     <a href="#imobile">I-Mobile</a> |
     <a href="#industrybrains">Industrybrains</a> |
     <a href="#inmobi">InMobi</a> |
@@ -453,6 +453,35 @@
     <div fallback></div>
   </amp-ad>
 
+  
+  <h2 id="custom">Custom leaderboard</h2>
+  <amp-ad width=500 height=60
+    type="custom"
+    data-slot="1"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id-leader">
+      <a href="{{href}}" target='_blank'>
+        <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+ 
+  <h2 id="custom2">Custom square</h2>
+  <amp-ad width="200" height="200"
+    type="custom"
+    data-slot="2"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
   <h2 id="dotandads">DotAndAds masthead</h2>
   <amp-ad width=980 height=250
       type="dotandads"
@@ -573,35 +602,7 @@
       type="ibillboard"
       src="https://go.eu.bbelements.com/please/code?j-21414.1.5.6.0.0._blank">
   </amp-ad>
-  
-  <h2 id="imagead">Image ad leaderboard</h2>
-  <amp-ad width=500 height=60
-    type="imagead"
-    data-slot="1"
-    data-url="/examples/imagead.example.json">
-    <template type="amp-mustache" id="amp-template-id-leader">
-      <a href="{{href}}" target='_blank'>
-        <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
-      </a>
-    </template>  
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
  
-  <h2 id="imagead2">Image ad square</h2>
-  <amp-ad width="200" height="200"
-    type="imagead"
-    data-slot="2"
-    data-url="/examples/imagead.example.json">
-    <template type="amp-mustache" id="amp-template-id">
-      <a href="{{href}}" target="_blank">
-        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
-      </a>
-    </template>  
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
-
   <h2 id="imobile">I-Mobile 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="imobile"
