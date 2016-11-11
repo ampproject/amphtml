@@ -357,6 +357,7 @@ describe('CustomElement', () => {
     element.setAttribute('layout', 'fill');
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
     container.appendChild(element);
+    element.attachedCallback();
     resourcesMock.expects('upgraded').withExactArgs(element).once();
 
     element.upgrade(TestElement);
@@ -711,6 +712,7 @@ describe('CustomElement', () => {
 
     resourcesMock.expects('upgraded').withExactArgs(element).once();
     container.appendChild(element);
+    element.attachedCallback();
     element.upgrade(TestElement);
 
     expect(element.isUpgraded()).to.equal(true);
@@ -1129,6 +1131,7 @@ describe('CustomElement', () => {
       element.setAttribute('layout', 'fill');
       resourcesMock.expects('upgraded').withExactArgs(element).once();
       container.appendChild(element);
+      element.attachedCallback();
       element.upgrade(TestElement);
       element.build();
       expect(element.isUpgraded()).to.equal(true);

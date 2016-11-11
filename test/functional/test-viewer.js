@@ -62,6 +62,7 @@ describe('Viewer', () => {
       hash: '#origin=g.com',
       href: '/test/viewer',
       ancestorOrigins: null,
+      search: '',
     };
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
@@ -152,7 +153,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('test')).to.equal('1');
   });
 
@@ -163,7 +164,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
@@ -799,6 +800,12 @@ describe('Viewer', () => {
     it('should be embedded with "webview=1" param', () => {
       windowApi.parent = windowApi;
       windowApi.location.hash = '#webview=1';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded with query param', () => {
+      windowApi.parent = {};
+      windowApi.location.search = '?amp_js_v=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
   });

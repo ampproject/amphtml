@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {dev, rethrowAsync} from './log';
 import {documentStateFor} from './document-state';
 import {performanceFor} from './performance';
-import {platformFor} from './platform';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
 import {resourcesForDoc} from './resources';
@@ -82,7 +81,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
  */
 export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   const style = doc.createElement('style');
-  style.textContent = cssText;
+  style./*OK*/textContent = cssText;
   let afterElement = null;
   // Make sure that we place style tags after the main runtime CSS. Otherwise
   // the order is random.
@@ -116,41 +115,42 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       visibility: 'visible',
       animation: 'none',
     });
-
-    // TODO(erwinm, #4097): Remove this when safari technology preview has merged
-    // the fix for https://github.com/ampproject/amphtml/issues/4047
-    // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
-    if (platformFor(doc.defaultView).isSafari()) {
-      if (doc.body.style['webkitAnimation'] !== undefined) {
-        doc.body.style['webkitAnimation'] = 'none';
-      } else if (doc.body.style['WebkitAnimation'] !== undefined) {
-        doc.body.style['WebkitAnimation'] = 'none';
-      }
-    }
   };
-  /** @const {!Window} */
-  const win = doc.defaultView;
-  documentStateFor(win).onBodyAvailable(() => {
-    if (win[bodyVisibleSentinel]) {
-      return;
-    }
-    win[bodyVisibleSentinel] = true;
-    if (opt_waitForServices) {
-      waitForServices(win).catch(() => []).then(services => {
+  try {
+    /** @const {!Window} */
+    const win = doc.defaultView;
+    documentStateFor(win).onBodyAvailable(() => {
+      if (win[bodyVisibleSentinel]) {
+        return;
+      }
+      win[bodyVisibleSentinel] = true;
+      if (opt_waitForServices) {
+        waitForServices(win).catch(reason => {
+          rethrowAsync(reason);
+          return [];
+        }).then(services => {
+          set();
+          if (services.length > 0) {
+            resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+          }
+          try {
+            const perf = performanceFor(win);
+            perf.tick('mbv');
+            perf.flush();
+          } catch (e) {}
+        });
+      } else {
         set();
-        if (services.length > 0) {
-          resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
-        }
-        try {
-          const perf = performanceFor(win);
-          perf.tick('mbv');
-          perf.flush();
-        } catch (e) {}
-      });
-    } else {
-      set();
-    }
-  });
+      }
+    });
+  } catch (e) {
+    // If there was an error during the logic above (such as service not
+    // yet installed, definitely try to make the body visible.
+    set();
+    // Avoid errors in the function to break execution flow as this is
+    // often called as a last resort.
+    rethrowAsync(e);
+  }
 }
 
 /**

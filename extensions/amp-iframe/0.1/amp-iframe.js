@@ -25,6 +25,7 @@ import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -104,7 +105,14 @@ export class AmpIframe extends AMP.BaseElement {
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
-    return 'data:text/html;charset=utf-8;base64,' + btoa(srcdoc);
+
+    // srcdoc is a DOMString and requires special handling for base64 encoding.
+    // See https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
+    const encodedSrcdoc = btoa(encodeURIComponent(srcdoc)
+      .replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+      }));
+    return 'data:text/html;charset=utf-8;base64,' + encodedSrcdoc;
   }
 
   /** @override */
@@ -273,7 +281,7 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
-      iframe.style.zIndex = -1;
+      setStyle(iframe, 'zIndex', -1);
     }
 
     this.propagateAttributes(
@@ -384,7 +392,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.placeholder_) {
       this.getVsync().mutate(() => {
         if (this.iframe_) {
-          this.iframe_.style.zIndex = 0;
+          setStyle(this.iframe_, 'zIndex', 0);
           this.togglePlaceholder(false);
         }
       });

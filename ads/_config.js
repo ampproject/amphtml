@@ -200,6 +200,12 @@ export const adConfig = {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  holder: {
+    prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
+    preconnect: 'https://h.holder.com.ua',
+    renderStartImplemented: true,
+  },
+
   ibillboard: {},
 
   imobile: {
@@ -268,6 +274,11 @@ export const adConfig = {
       'https://ww251.smartadserver.com',
       'https://static.sascdn.com/',
     ],
+    renderStartImplemented: true,
+  },
+
+  medianet: {
+    preconnect: 'https://contextual.media.net',
     renderStartImplemented: true,
   },
 
