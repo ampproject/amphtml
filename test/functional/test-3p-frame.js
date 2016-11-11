@@ -165,6 +165,9 @@ describe('3p-frame', () => {
         '"test":false,"version":"$internalRuntimeVersion$"}' +
         ',"canary":true' +
         ',"hidden":false' +
+        // Note that DOM fingerprint will change if the document DOM changes
+        // Note also that running it using --files uses different DOM.
+        ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +

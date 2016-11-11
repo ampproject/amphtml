@@ -29,6 +29,7 @@ import {listen} from '../../../src/event-helper';
 import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 import {viewerForDoc} from '../../../src/viewer';
+import {setStyle} from '../../../src/style';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -113,8 +114,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       return;
     }
     // The iframe will stil be loaded.
-    this.element.style.display = 'none';
-    const iframe = /*OK*/document.createElement('iframe');
+    setStyle(this.element, 'display', 'none');
+    const iframe = this.win.document.createElement('iframe');
     iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
     iframe.src = this.iframeSrc_;
     this.element.appendChild(iframe);
@@ -272,10 +273,7 @@ class UrlRewriter_ {
     // Only rewrite URLs to a different location to avoid breaking fragment
     // navigation.
     const win = this.win;
-    const curLoc = parseUrl(win.location.href);
-    const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
-    const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
-    if (tgtHref == curHref) {
+    if (removeFragment(tgtLoc.href) == removeFragment(win.location.href)) {
       return;
     }
 

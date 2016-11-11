@@ -935,6 +935,7 @@ describe('ViewportBindingNatural', () => {
       style: {},
     };
     documentBody = {
+      nodeType: 1,
       style: {},
     };
     windowApi.document = {
@@ -1224,7 +1225,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border on BODY', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1233,7 +1237,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border in lightbox mode', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1570,6 +1577,7 @@ describe('createViewport', () => {
         it('should bind to "natural" when not iframed', () => {
           win.parent = win;
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
         });
@@ -1577,6 +1585,7 @@ describe('createViewport', () => {
         it('should bind to "naturual" when iframed', () => {
           win.parent = {};
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
         });
@@ -1595,6 +1604,7 @@ describe('createViewport', () => {
         it('should bind to "natural" when not iframed', () => {
           win.parent = win;
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
         });
@@ -1602,6 +1612,7 @@ describe('createViewport', () => {
         it('should bind to "natural iOS embed" when iframed', () => {
           win.parent = {};
           const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
           const viewport = installViewportServiceForDoc(ampDoc);
           expect(viewport.binding_).to
               .be.instanceof(ViewportBindingNaturalIosEmbed_);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -23,8 +24,10 @@ import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
+import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -104,7 +107,9 @@ export class AmpIframe extends AMP.BaseElement {
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
-    return 'data:text/html;charset=utf-8;base64,' + btoa(srcdoc);
+
+    return 'data:text/html;charset=utf-8;base64,' +
+        base64EncodeFromBytes(utf8EncodeSync(srcdoc));
   }
 
   /** @override */
@@ -273,7 +278,7 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
-      iframe.style.zIndex = -1;
+      setStyle(iframe, 'zIndex', -1);
     }
 
     this.propagateAttributes(
@@ -384,7 +389,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.placeholder_) {
       this.getVsync().mutate(() => {
         if (this.iframe_) {
-          this.iframe_.style.zIndex = 0;
+          setStyle(this.iframe_, 'zIndex', 0);
           this.togglePlaceholder(false);
         }
       });
