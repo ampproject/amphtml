@@ -3,6 +3,7 @@
 ## Basics
 
 - We use [semver](http://semver.org/) terminology, but see below for changes from simple semver.
+- AMP and its extensions are versioned. There is also an **AMP release** that corresponds to the precise code. Each major and minor version may correspond to many AMP releases.
 - The AMP JS library is distributed via its major version only. The major version is expected to change rarely if ever (on the order of less than once per year).
 - Each AMP extension is versioned independently. Publishers of AMP documents can choose the major and minor version of an extension. They cannot choose the patch version.
 - AMP is **released** about once per weak and each release has a unique version number. With each release, AMP pages are rendered with the latest code for the respective major/minor versions of the AMP JS library and extensions.
@@ -28,12 +29,32 @@ Breaking changes are:
 
 The following special cases are not considered breaking changes:
 
-- Changes to elements and their children if the element name starts with `i-`.
-- Changes to attribute names starting with `-`.
+- Changes to elements and their children including their CSS if the element name starts with `i-`.
+- Changes to attribute and class names starting with `-`. But this doesn't mean, CSS backward compatibility may be broken with this mechanism, where it would otherwise be considered a breaking change.
 - Changes required to maintain the security of AMP pages.
 - Changes that break fewer than 0.1% of crawler accessible AMP pages.
 
 For breaking changes the major version of an extension (or more rarely) the main AMP JS library should be increased.
+
+## Deprecation process
+
+In rare cases the AMP project may decide to deprecate existing functionality. Such changes must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
+
+The process is
+
+- Create "Intent to change" issue.
+- Allow for at least 2 weeks of open discussion.
+- Wait for 3 LGTMs from core committers.
+- (Announce)[#Announcements] change on the mailing list.
+- Start warning for pages that might break via the developer console.
+- Give developers 6 weeks to apply changes.
+- Apply new behavior to old content in a way that minimizes breakage.
+
+## Announcements
+
+Changes that may break existing pages (including those where the number of broken pages is assumed to be very small) should be announced via the [amphtml-announce@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list. Sometimes such changes are not anticipated upfront in which case announcements should still be sent to let websites know.
+
+Security fixes may in some cases only be announced after the change was rolled out.
 
 ## Removing old versions
 
