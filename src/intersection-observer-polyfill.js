@@ -155,6 +155,8 @@ export class IntersectionObserverPolyfill {
   /**
    * Return a change entry for that should be compatible with
    * IntersectionObserverEntry if it's valid with current config.
+   * When the new intersection ratio doesn't cross one of a threshold value,
+   * the function will return null.
    *
    * Mutates passed in rootBounds to have x and y according to spec.
    *
@@ -162,7 +164,8 @@ export class IntersectionObserverPolyfill {
    * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
    * @param {!./layout-rect.LayoutRectDef} viewport viewport's rect.
    * @param {./layout-rect.LayoutRectDef=} opt_container.
-   * @return {?IntersectionObserverEntry} A valid change entry.
+   * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
+   * does not fill in a new threshold bucket.
    * @private
    */
   getValidIntersectionChangeEntry_(element, owner, viewport, opt_container) {
@@ -181,15 +184,15 @@ export class IntersectionObserverPolyfill {
     intersectionRect = rectIntersection(viewport, intersectionRect) ||
         nonIntersectRect;
 
-    intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
-        -viewport.top);
-
     const ratio = intersectionRatio(intersectionRect, element);
     const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
     if (newThresholdSlot == this.prevThresholdSlot_) {
       return null;
     }
     this.prevThresholdSlot_ = newThresholdSlot;
+
+    intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
+        -viewport.top);
 
     // The element is relative to (0, 0), while the viewport moves. So, we must
     // adjust.
