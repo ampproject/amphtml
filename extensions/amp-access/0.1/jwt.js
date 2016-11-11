@@ -15,10 +15,9 @@
  */
 
 import {
-  base64UrlDecode,
   base64UrlDecodeToBytes,
 } from '../../../src/utils/base64';
-import {stringToBytes} from '../../../src/utils/bytes';
+import {stringToBytes, utf8DecodeSync} from '../../../src/utils/bytes';
 import {pemToBytes} from '../../../src/utils/pem';
 import {tryParseJson} from '../../../src/json';
 
@@ -125,9 +124,11 @@ export class JwtHelper {
     if (parts.length != 3) {
       invalidToken();
     }
+    const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
+    const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
     return {
-      header: tryParseJson(base64UrlDecode(parts[0]), invalidToken),
-      payload: tryParseJson(base64UrlDecode(parts[1]), invalidToken),
+      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
+      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
       verifiable: `${parts[0]}.${parts[1]}`,
       sig: parts[2],
     };
