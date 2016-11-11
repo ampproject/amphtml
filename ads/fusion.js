@@ -22,9 +22,9 @@ import {writeScript, validateData} from '../3p/3p';
  */
 export function fusion(global, data) {
   validateData(data, [], ['mediaZone', 'layout', 'adServer', 'space']);
-  
-  var container = global.document.getElementById('c');
-  var ad = global.document.createElement('div');
+ 
+  const container = global.document.getElementById('c');
+  const ad = global.document.createElement('div');
   ad.setAttribute('data-fusion-space', data.space);
   container.appendChild(ad);
 
