@@ -49,6 +49,11 @@ access to a limited set of allowed tags, capabilities, and extensions.
    _Rationale_: Allows validators to identify a creative document as either a 
    general AMP doc or a restricted A4A doc and to dispatch appropriately.
 
+1. The creative must include `<script async src="https://cdn.ampproject.org/a4a-v0.js"></script>`
+   as the runtime script instead of `https://cdn.ampproject.org/v0.js`.
+
+   _Rationale_: Allows different runtime behaviors taylored to A4A.
+
 1. Unlike in general AMP, the creative must not include a `<link 
 rel="canonical">` tag.
 
