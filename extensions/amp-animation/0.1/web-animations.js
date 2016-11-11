@@ -25,6 +25,7 @@ import {
   WebKeyframeAnimationDef,
   WebKeyframesDef,
   WebMultiAnimationDef,
+  isWhitelistedProp,
 } from './web-animation-types';
 
 
@@ -69,6 +70,7 @@ export class WebAnimationRunner {
 /**
  * The scanner for the `WebAnimationDef` format. It calls the appropriate
  * callbacks based on the discovered animation types.
+ * @abstract
  */
 class Scanner {
 
@@ -91,12 +93,18 @@ class Scanner {
     }
   }
 
-  /** @param {!WebMultiAnimationDef} unusedSpec */
+  /**
+   * @param {!WebMultiAnimationDef} unusedSpec
+   * @abstract
+   */
   onMultiAnimation(unusedSpec) {
     dev().assert(null, 'not implemented');
   }
 
-  /** @param {!WebKeyframeAnimationDef} unusedSpec */
+  /**
+   * @param {!WebKeyframeAnimationDef} unusedSpec
+   * @abstract
+   */
   onKeyframeAnimation(unusedSpec) {
     dev().assert(null, 'not implemented');
   }
@@ -178,9 +186,13 @@ export class MeasureScanner extends Scanner {
 
     if (isObject(spec.keyframes)) {
       // Property -> keyframes form.
+      // The object is cloned, while properties are verified to be
+      // whitelisted. Additionally, the `offset:0` frames are inserted
+      // to polyfill partial keyframes.
       const object = /** {!Object<string, *>} */ (spec.keyframes);
       keyframes = {};
       for (const prop in object) {
+        this.validateProperty_(prop);
         const value = object[prop];
         let preparedValue;
         if (!isArray(value) || value.length == 1) {
@@ -194,10 +206,12 @@ export class MeasureScanner extends Scanner {
       }
     } else if (isArray(spec.keyframes) && spec.keyframes.length > 0) {
       // Keyframes -> property form.
+      // The array is cloned, while properties are verified to be whitelisted.
+      // Additionally, if the `offset:0` properties are inserted when absent
+      // to polyfill partial keyframes.
+      // See https://github.com/web-animations/web-animations-js/issues/14
       const array = /** {!Array<!Object<string, *>>} */ (spec.keyframes);
       keyframes = [];
-      // Fill-in partial key-frames.
-      // See https://github.com/web-animations/web-animations-js/issues/14
       const addStartFrame = array.length == 1 || array[0].offset > 0;
       const startFrame = addStartFrame ? {} : clone(array[0]);
       keyframes.push(startFrame);
@@ -205,6 +219,7 @@ export class MeasureScanner extends Scanner {
       for (let i = start; i < array.length; i++) {
         const frame = array[i];
         for (const prop in frame) {
+          this.validateProperty_(prop);
           if (!startFrame[prop]) {
             // Missing "from" value. Measure and add to start frame.
             startFrame[prop] = this.measure_(target, prop);
@@ -213,7 +228,7 @@ export class MeasureScanner extends Scanner {
         keyframes.push(clone(frame));
       }
     } else {
-      // No a known form of keyframes spec.
+      // Unknown form of keyframes spec.
       if (this.validate_) {
         throw user().createError('keyframes not found', spec.keyframes);
       }
@@ -229,6 +244,20 @@ export class MeasureScanner extends Scanner {
           ' must have "animations" or "keyframes" field');
     } else {
       super.onUnknownAnimation(spec);
+    }
+  }
+
+  /**
+   * @param {string} prop
+   * @private
+   */
+  validateProperty_(prop) {
+    if (this.validate_) {
+      user().assert(isWhitelistedProp(prop),
+          'Property is not whitelisted for animation: %s', prop)
+    } else {
+      dev().assert(isWhitelistedProp(prop),
+          'Property is not whitelisted for animation: %s', prop)
     }
   }
 
@@ -306,15 +335,15 @@ export class MeasureScanner extends Scanner {
 
     // Validate.
     if (this.validate_) {
-      user().assert(!isNaN(duration),
+      user().assert(duration >= 0,
           '"duration" is invalid: %s', newTiming.duration);
-      user().assert(!isNaN(delay),
+      user().assert(delay >= 0,
           '"delay" is invalid: %s', newTiming.delay);
-      user().assert(!isNaN(endDelay),
+      user().assert(endDelay >= 0,
           '"endDelay" is invalid: %s', newTiming.endDelay);
-      user().assert(!isNaN(iterations),
+      user().assert(iterations >= 0,
           '"iterations" is invalid: %s', newTiming.iterations);
-      user().assert(!isNaN(iterationStart),
+      user().assert(iterationStart >= 0,
           '"iterationStart" is invalid: %s', newTiming.iterationStart);
       user().assertEnumValue(WebAnimationTimingDirection,
           /** @type {string} */ (direction), 'direction');
@@ -345,19 +374,5 @@ function clone(x) {
   if (!x) {
     return x;
   }
-  if (isObject(x)) {
-    const r = {};
-    for (const k in x) {
-      r[k] = clone(x[k]);
-    }
-    return r;
-  }
-  if (isArray(x)) {
-    const r = [];
-    for (let i = 0; i < x.length; i++) {
-      r.push(clone(x[i]));
-    }
-    return r;
-  }
-  return x;
+  return JSON.parse(JSON.stringify(x));
 }

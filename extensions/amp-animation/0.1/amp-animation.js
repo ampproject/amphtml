@@ -40,18 +40,18 @@ export class AmpAnimation extends AMP.BaseElement {
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment "${TAG}" is disabled.`);
+
+    // Parse config.
+    const scriptElement = user().assert(
+        childElementByTag(this.element, 'script'),
+        '"<script type=application/json>" must be present');
+    this.configJson_ = tryParseJson(scriptElement.textContent, error => {
+      throw user().createError('failed to parse animation script', error);
+    });
   }
 
   /** @override */
   activate() {
-    if (!this.configJson_) {
-      const scriptElement = user().assert(
-          childElementByTag(this.element, 'script'),
-          '"<script type=application/json>" must be present');
-      this.configJson_ = tryParseJson(scriptElement.textContent, error => {
-        throw user().createError('failed to parse animation script', error);
-      });
-    }
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (

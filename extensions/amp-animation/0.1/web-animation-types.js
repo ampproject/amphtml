@@ -87,3 +87,20 @@ export const WebAnimationTimingFill = {
   BOTH: 'both',
   AUTO: 'auto',
 };
+
+
+/** @const {!Object<string, boolean>} */
+const WHITELISTED_RPOPS = {
+  'opacity': true,
+  'transform': true,
+  'visibility': true,
+};
+
+
+/**
+ * @param {string} prop
+ * @return {boolean}
+ */
+export function isWhitelistedProp(prop) {
+  return WHITELISTED_RPOPS[prop] || false;
+}
