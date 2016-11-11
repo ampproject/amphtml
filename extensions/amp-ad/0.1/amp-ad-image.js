@@ -30,7 +30,7 @@ const ampImageadXhrPromises = {};
 
 /** @var {Object} a map of ad slot ids for each value of data-url.
  *  Each entry in the map is an array of slot ids. */
-const ampImageadSlots = {};
+let ampImageadSlots = null;
 
 export class AmpAdImage extends AMP.BaseElement {
 
@@ -48,8 +48,6 @@ export class AmpAdImage extends AMP.BaseElement {
       // with only a single ad.
       this.slot_ = 0;
     }
-    user().assert(this.slot_.match(/^[0-9a-z]+$/),
-        'imagead slot should be alphanumeric: ' + this.slot_);
   }
 
   /** @override */
@@ -69,6 +67,9 @@ export class AmpAdImage extends AMP.BaseElement {
     // Ensure that there are templates in this ad
     const templates = this.element.querySelectorAll('template');
     user().assert(templates.length > 0, 'Missing template in imagead');
+    // And ensure that the slot value is legal
+    user().assert(this.slot_.match(/^[0-9a-z]+$/),
+        'imagead slot should be alphanumeric: ' + this.slot_);
   }
 
   /**
@@ -77,8 +78,11 @@ export class AmpAdImage extends AMP.BaseElement {
    * @returns {String} The URL with the "ampslots" parameter appended
    */
   getFullUrl() {
-    if (!ampImageadSlots.length) {
-      // The array of ad slots has not yet been build do so now.
+    console.log("Get URL");
+    if (ampImageadSlots === null) {
+      // The array of ad slots has not yet been built, do so now.
+      console.log("Build array");
+      ampImageadSlots = {};
       const elements = document.querySelectorAll('amp-ad[type=imagead]');
       for (let index = 0; index < elements.length; index++) {
         const elem = elements[index];
@@ -99,12 +103,8 @@ export class AmpAdImage extends AMP.BaseElement {
     // If this promise has no URL yet, create one for it.
     if (!(this.url_ in ampImageadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampImageadXhrPromises[this.url_] = new Promise(resolve => {
-        // Fetch the data for this URL...
-        xhrFor(this.win).fetchJson(this.getFullUrl(this.url_)).then(data => {
-          resolve(data);
-        });
-      });
+      ampImageadXhrPromises[this.url_] = xhrFor(this.win).fetchJson(
+          this.getFullUrl(this.url_));
     }
     return ampImageadXhrPromises[this.url_].then(data => {
       const element = this.element;
