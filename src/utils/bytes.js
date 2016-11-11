@@ -48,8 +48,8 @@ export function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
-  const binaryString = bytesToString(bytes);
-  return decodeURIComponent(escape(atob(binaryString)));
+  const asciiString = bytesToString(/** @type{!Uint8Array} */(bytes));
+  return decodeURIComponent(escape(asciiString));
 }
 
 /**
@@ -84,8 +84,7 @@ export function utf8EncodeSync(string) {
   if (typeof TextEncoder !== 'undefined') {
     return new TextEncoder('utf-8').encode(string);
   }
-
-  return btoa(unescape(encodeURIComponent(string)));
+  return stringToBytes(unescape(encodeURIComponent(string)));
 }
 
 /**
