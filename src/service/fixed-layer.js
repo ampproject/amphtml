@@ -171,9 +171,11 @@ export class FixedLayer {
   /**
    * Adds the element directly into the fixed layer, bypassing discovery.
    * @param {!Element} element
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the fixed layer.
    */
-  addElement(element) {
-    this.setupFixedElement_(element, /* selector */ '*');
+  addElement(element, opt_forceTransfer) {
+    this.setupFixedElement_(element, /* selector */ '*', opt_forceTransfer);
     this.sortInDomOrder_();
     this.update();
   }
@@ -205,7 +207,7 @@ export class FixedLayer {
    * Performs fixed actions.
    * 1. Updates `top` styling if necessary.
    * 2. On iOS/Iframe moves elements between fixed layer and BODY depending on
-   * whether they are currently visible and fixed.
+   * whether they are currently visible and fixed
    * @return {!Promise}
    */
   update() {
@@ -307,7 +309,7 @@ export class FixedLayer {
           // `height` is constrained to at most 300px. This is to avoid
           // transfering of more substantial sections for now. Likely to be
           // relaxed in the future.
-          const isTransferrable = (
+          const isTransferrable = fe.forceTransfer || (
               isFixed &&
               opacity > 0 &&
               element./*OK*/offsetHeight < 300 &&
@@ -399,9 +401,11 @@ export class FixedLayer {
    *
    * @param {!Element} element
    * @param {string} selector
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the fixed layer.
    * @private
    */
-  setupFixedElement_(element, selector) {
+  setupFixedElement_(element, selector, opt_forceTransfer) {
     let fe = null;
     for (let i = 0; i < this.fixedElements_.length; i++) {
       if (this.fixedElements_[i].element == element) {
@@ -424,6 +428,8 @@ export class FixedLayer {
       };
       this.fixedElements_.push(fe);
     }
+
+    fe.forceTransfer = !!opt_forceTransfer;
   }
 
   /**
@@ -668,6 +674,7 @@ export class FixedLayer {
  *   fixedNow: (boolean|undefined),
  *   top: (string|undefined),
  *   transform: (string|undefined),
+ *   forceTransfer: (boolean|undefined),
  * }}
  */
 let FixedElementDef;

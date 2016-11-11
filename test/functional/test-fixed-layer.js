@@ -319,6 +319,22 @@ describe('FixedLayer', () => {
       expect(fe.element).to.equal(element3);
       expect(fe.selectors).to.deep.equal(['*']);
 
+
+
+      // Remove.
+      fixedLayer.removeElement(element3);
+      expect(fixedLayer.fixedElements_).to.have.length(2);
+
+      //Add with forceTransfer
+      fixedLayer.addElement(element3, '*', true);
+      expect(updateStub.callCount).to.equal(2);
+      expect(fixedLayer.fixedElements_).to.have.length(3);
+      const fe1 = fixedLayer.fixedElements_[2];
+      expect(fe1.id).to.equal('F3');
+      expect(fe1.element).to.equal(element3);
+      expect(fe1.selectors).to.deep.equal(['*']);
+      expect(fe1.forceTransfer).to.be.true;
+
       // Remove.
       fixedLayer.removeElement(element3);
       expect(fixedLayer.fixedElements_).to.have.length(2);
