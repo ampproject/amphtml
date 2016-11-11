@@ -44,7 +44,7 @@ limitations under the License.
 - The max-height of the sticky-ad is 100px, if the height exceeds 100px then the height would be 100px and overflow content will be hidden.
 - The width of the sticky-ad is set to 100% using CSS and cannot be overridden.
 - The opacity of the sticky-ad is set to 1 using CSS and cannot be overridden.
-- The background color of the sticky-ad can be customized to match page style. However the customized background color must has alpha value 1. Any semi-transparent or transparent background will not be allowed and will be changed to a non-transparent color.
+- The background color of the sticky-ad can be customized to match page style. However any semi-transparent or transparent background will not be allowed and will be changed to a non-transparent color.
 - The sticky ad will display after scroll one viewport height from top provided there is at least one more viewport of content available.
 - When scrolled to the bottom of the page, the viewport is automatically padded with the additional height of the sticky ad, so that no content is ever hidden.
 - The sticky adjust to landscape mode, will center align ad.
@@ -71,5 +71,5 @@ The only permissible value for the `layout` attribute in `amp-sticky-ad` is `nod
 
 The `amp-sticky-ad` component can be styled with standard CSS.
 
-- The container style can be set through css class `amp-sticky-ad`.
+- Sticky ad container style can be set through css class `amp-sticky-ad`.
 - Close button style can be set through css class `amp-sticky-ad-close-button`.
