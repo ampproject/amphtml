@@ -214,6 +214,10 @@ export const adConfig = {
 
   flite: {},
 
+  fusion: {
+    prefetch: 'https://assets.adtomafusion.net/fusion/0.9/latest/fusion-default.js',
+  },
+
   genieessp: {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
