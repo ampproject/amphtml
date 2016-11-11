@@ -22,22 +22,6 @@ import * as sinon from 'sinon';
 const DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
     0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
-/**
- * Creates a DOM rect based on the left, top, width and height parameters
- * in that order.
- * @param {number} left
- * @param {number} top
- * @param {number} width
- * @param {number} height
- * @return {!DOMRect}
- */
-function DomRectLtwh(left, top, width, height) {
-  const res = layoutRectLtwh(left, top, width, height);
-  res.x = left;
-  res.y = top;
-  return res;
-}
-
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
@@ -436,3 +420,19 @@ describe('IntersectionObserverPolyfill', () => {
     });
   });
 });
+
+/**
+ * Creates a DOM rect based on the left, top, width and height parameters
+ * in that order.
+ * @param {number} left
+ * @param {number} top
+ * @param {number} width
+ * @param {number} height
+ * @return {!DOMRect}
+ */
+function DomRectLtwh(left, top, width, height) {
+  const res = layoutRectLtwh(left, top, width, height);
+  res.x = left;
+  res.y = top;
+  return res;
+}
