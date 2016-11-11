@@ -123,6 +123,9 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('{foo: "bar"}', {foo: 'qux'})).to.deep.equal({qux: 'bar'});
     expect(evaluateBindExpr('{"foo": bar}', {bar: 'qux'})).to.deep.equal({foo: 'qux'});
     expect(evaluateBindExpr('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
+    expect(evaluateBindExpr('foo[1]', {foo: ['b', 'c']})).to.equal('c');
+    expect(evaluateBindExpr('foo.length', {foo: [1, 2, 3]})).to.equal(3);
+    expect(evaluateBindExpr('"abc".charAt(foo)', {foo: 1})).to.equal('b');
   });
 
   it('should support array literals', () => {
@@ -131,7 +134,6 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('[1, "a", [], {}]')).to.deep.equal([1, 'a', [], {}]);
     expect(evaluateBindExpr('["a", "b"][1]')).to.equal('b');
     expect(evaluateBindExpr('["a", foo][1]', {foo: 'b'})).to.equal('b');
-    expect(evaluateBindExpr('foo[1]', {foo: ['b', 'c']})).to.equal('c');
   });
 
   it ('should NOT allow invalid array access', () => {
@@ -152,15 +154,7 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('["a", "b", "c"].slice(1, 2)')).to.deep.equal(['b']);
   });
 
-  it('should NOT allow access to array properties (except length) or non-whitelisted methods', () => {
-    expect(evaluateBindExpr('[].constructor')).to.be.null;
-    expect(evaluateBindExpr('[].prototype')).to.be.null;
-    expect(evaluateBindExpr('[].__proto__')).to.be.null;
-
-    expect(evaluateBindExpr('foo.constructor', {foo: []})).to.be.null;
-    expect(evaluateBindExpr('foo.prototype', {foo: []})).to.be.null;
-    expect(evaluateBindExpr('foo.__proto__', {foo: []})).to.be.null;
-
+  it('should NOT allow access to array non-whitelisted methods', () => {
     expect(() => { evaluateBindExpr('["a", "b", "c"].find()'); }).to.throw();
     expect(() => { evaluateBindExpr('["a", "b", "c"].forEach()'); }).to.throw();
     expect(() => { evaluateBindExpr('["a", "b", "c"].splice(1, 1)'); }).to.throw();
@@ -182,14 +176,45 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('foo.bar')).to.be.null;
   });
 
-  it('should NOT allow access to object built-in properties', () => {
+  it('should NOT allow access to prototype properties', () => {
+    const scope = {
+      foo: {},
+      bar: [],
+      baz: "abc",
+      qux: 123,
+    };
+
     expect(evaluateBindExpr('{}.constructor')).to.be.null;
     expect(evaluateBindExpr('{}.prototype')).to.be.null;
     expect(evaluateBindExpr('{}.__proto__')).to.be.null;
 
-    expect(evaluateBindExpr('foo.constructor', {foo: {}})).to.be.null;
-    expect(evaluateBindExpr('foo.prototype', {foo: {}})).to.be.null;
-    expect(evaluateBindExpr('foo.__proto__', {foo: {}})).to.be.null;
+    expect(evaluateBindExpr('foo.constructor', scope)).to.be.null;
+    expect(evaluateBindExpr('foo.prototype', scope)).to.be.null;
+    expect(evaluateBindExpr('foo.__proto__', scope)).to.be.null;
+
+    expect(evaluateBindExpr('[].constructor')).to.be.null;
+    expect(evaluateBindExpr('[].prototype')).to.be.null;
+    expect(evaluateBindExpr('[].__proto__')).to.be.null;
+
+    expect(evaluateBindExpr('bar.constructor', scope)).to.be.null;
+    expect(evaluateBindExpr('bar.prototype', scope)).to.be.null;
+    expect(evaluateBindExpr('bar.__proto__', scope)).to.be.null;
+
+    expect(evaluateBindExpr('"abc".constructor')).to.be.null;
+    expect(evaluateBindExpr('"abc".prototype')).to.be.null;
+    expect(evaluateBindExpr('"abc".__proto__')).to.be.null;
+
+    expect(evaluateBindExpr('baz.constructor', scope)).to.be.null;
+    expect(evaluateBindExpr('baz.prototype', scope)).to.be.null;
+    expect(evaluateBindExpr('baz.__proto__', scope)).to.be.null;
+
+    expect(evaluateBindExpr('123.constructor')).to.be.null;
+    expect(evaluateBindExpr('123.prototype')).to.be.null;
+    expect(evaluateBindExpr('123.__proto__')).to.be.null;
+
+    expect(evaluateBindExpr('qux.constructor', scope)).to.be.null;
+    expect(evaluateBindExpr('qux.prototype', scope)).to.be.null;
+    expect(evaluateBindExpr('qux.__proto__', scope)).to.be.null;
   });
 
   it('should NOT allow operators with side effects', () => {
@@ -237,9 +262,11 @@ describe('evaluateBindExpr', () => {
   it('should NOT allow invocation of custom functions in scope', () => {
     const scope = {
       foo: {
-        bar: () => { 'qux'; }
-      }
+        bar: () => { 'bar'; }
+      },
+      baz: () => { 'baz' }
     };
+    expect(() => { evaluateBindExpr('baz()', scope); }).to.throw();
     expect(() => { evaluateBindExpr('foo.bar()', scope); }).to.throw();
   });
 
