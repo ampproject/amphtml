@@ -13,15 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {validateData} from '../../3p/3p';
+import {validateData, loadScript} from '../../3p/3p';
 
 // Global variables to store backfill options
 let backfillAfsPageOptions = null;
 let backfillAfsAdblockOptions = null;
 
 /**
+ * Helper function to resize the height of a CSA container and its child iframe
+ * @param {Object} container HTML element of the CSA container
+ * @param {string} height Height to resize, in pixels (i.e. '300px')
+ */
+function resizeCsa(container, height) {
+  container.firstChild.style.height = height;
+  container.style.height = height;
+}
+
+/**
  * CSA callback function to resize the iframe and/or request backfill
- * @param {string} containerName
+ * @param {string} containerName The div id of the container of the ad block
  * @param {boolean} adsLoaded
  */
 function resizeIframe(containerName, adsLoaded) {
@@ -34,7 +44,7 @@ function resizeIframe(containerName, adsLoaded) {
       const height = container.offsetHeight;
       const ampHeight =
           window.context.initialIntersection.boundingClientRect.height;
-      const touchTarget = 40;
+      const overflowHeight = 40;
 
       // If the height of the container is larger than the height of the
       // initially requested AMP tag, add the overflow element
@@ -44,7 +54,7 @@ function resizeIframe(containerName, adsLoaded) {
         const overflow = document.createElement('div');
         overflow.id = 'overflow';
         overflow.style.position = 'absolute';
-        overflow.style.height = touchTarget + 'px';
+        overflow.style.height = overflowHeight + 'px';
         overflow.style.width = '100%';
 
         // Create the line
@@ -78,9 +88,8 @@ function resizeIframe(containerName, adsLoaded) {
         document.body.appendChild(overflow);
 
         // Resize the CSA iframe and container
-        const newHeight = ampHeight - touchTarget;
-        container.firstChild.style.height = newHeight + 'px';
-        container.style.height = newHeight + 'px';
+        const newHeight = (ampHeight - overflowHeight) + 'px';
+        resizeCsa(container, newHeight);
       }
 
       // Attempt to resize to actual CSA container height
@@ -94,8 +103,8 @@ function resizeIframe(containerName, adsLoaded) {
         // Hide overflow and resize container to full height
         if (overflow) {
           overflow.style.display = 'none';
-          container.firstChild.style.height = requestedHeight + 'px';
-          container.style.height = requestedHeight + 'px';
+          requestedHeight = requestedHeight + 'px';
+          resizeCsa(container, requestedHeight);
         }
 
       });
@@ -107,9 +116,8 @@ function resizeIframe(containerName, adsLoaded) {
         // Show overflow element and resize container to include overflow
         if (overflow) {
           overflow.style.display = '';
-          const newHeight = ampHeight - touchTarget;
-          container.firstChild.style.height = newHeight + 'px';
-          container.style.height = newHeight + 'px';
+          const newHeight = (ampHeight - overflowHeight) + 'px';
+          resizeCsa(container, newHeight);
         }
       });
 
@@ -142,6 +150,9 @@ function resizeIframe(containerName, adsLoaded) {
     }
   }
 }
+
+/* Time in ms to wait before executing orientation change function logic */
+const orientationChangeTimeout = 250;
 
 /**
  * Resize the AMP iframe if the CSA container changes in size upon rotation.
@@ -185,14 +196,14 @@ window.addEventListener('orientationchange', function() {
       }
     }
 
-  }, 250);
+  }, orientationChangeTimeout);
 
 }, false);
 
 
 /**
  * Request Custom Search Ads (Adsense for Search or AdSense for Shopping).
- * @param {!Window} global
+ * @param {!Window} global The window object of the iframe
  * @param {!Object} data
  */
 export function csa(global, data) {
@@ -206,23 +217,10 @@ export function csa(global, data) {
                           'afsAdblockOptions',
                           'ampSlotIndex']);
 
-  // Add the scripts
-  const s = global.document.createElement('script');
-  s.src = 'https://www.google.com/adsense/search/ads.js';
-  global.document.body.appendChild(s);
-  s.async = true;
-
-  const f = global.document.createElement('script');
-  f.text = '(function(g,o){g[o]=g[o]||' +
-      'function(){(g[o][\'q\']=g[o][\'q\']||[]).' +
-      'push(arguments)},g[o][\'t\']=1*new Date})(window,\'_googCsa\');';
-  global.document.body.appendChild(f);
-
-  // Add the ad container
+  // Add the ad container to the document
   const d = global.document.createElement('div');
   d.id = 'csacontainer';
   global.document.body.appendChild(d);
-
 
   // Parse AFSh page options
   let afshPageOptions = {};
@@ -278,37 +276,31 @@ export function csa(global, data) {
     } catch (e) {}
   }
 
-  // Make the call for CSA ads
-  // Call the right product based on arguments passed
-  if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
+  // Only call for ads once the script has loaded
+  loadScript(global, 'https://www.google.com/adsense/search/ads.js', () => {
 
-    // AFS only
-    global._googCsa('ads', afsPageOptions, afsAdblockOptions);
+    // Make the call for CSA ads
+    // Call the right product based on arguments passed
+    if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
 
-  } else if (data['afsPageOptions'] == null
-    && data['afshPageOptions'] != null) {
+      // AFS only
+      global._googCsa('ads', afsPageOptions, afsAdblockOptions);
 
-    // AFSH only
-    global._googCsa('plas', afshPageOptions, afshAdblockOptions);
+    } else if (data['afsPageOptions'] == null
+      && data['afshPageOptions'] != null) {
 
-  } else if (data['afsPageOptions'] != null
-    && data['afshPageOptions'] != null) {
+      // AFSH only
+      global._googCsa('plas', afshPageOptions, afshAdblockOptions);
 
-    // AFSh backfilled with AFS
-    // Set global variables so the callback function knows the AFS params
-    backfillAfsPageOptions = afsPageOptions;
-    backfillAfsAdblockOptions = afsAdblockOptions;
-    global._googCsa('plas', afshPageOptions, afshAdblockOptions);
-  }
+    } else if (data['afsPageOptions'] != null
+      && data['afshPageOptions'] != null) {
 
-  // Ping viewability
-  const unlisten = window.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
-      if (c.intersectionRect.height > 0) {
-        // TODO: ping that ad was viewed
-        unlisten();
-      }
-    });
+      // AFSh backfilled with AFS
+      // Set global variables so the callback function knows the AFS params
+      backfillAfsPageOptions = afsPageOptions;
+      backfillAfsAdblockOptions = afsAdblockOptions;
+      global._googCsa('plas', afshPageOptions, afshAdblockOptions);
+    }
   });
 
 }
