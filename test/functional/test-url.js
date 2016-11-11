@@ -421,22 +421,43 @@ describe('isProxyOrigin', () => {
     });
   }
 
+  // CDN
+  testProxyOrigin(
+      'https://cdn.ampproject.org/', true);
+  testProxyOrigin(
+      'http://cdn.ampproject.org/', false);
   testProxyOrigin(
       'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
+      'https://cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
+
+  // Prefixed CDN
+  testProxyOrigin(
+      'https://xyz.cdn.ampproject.org/', true);
+  testProxyOrigin(
+      'http://xyz.cdn.ampproject.org/', false);
+  testProxyOrigin(
+      'https://xyz-123.cdn.ampproject.org/', true);
+  testProxyOrigin(
       'https://xyz.cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
-      'https://cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
-  testProxyOrigin(
       'https://xyz.cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
+
+  // Localhost
   testProxyOrigin(
       'http://localhost:123', false);
-  testProxyOrigin(
-      'http://localhost:123/cba/www.origin.com/foo/?f=0', false);
   testProxyOrigin(
       'http://localhost:123/c/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
       'http://localhost:123/v/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'https://localhost:123/c/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'https://localhost:123/c/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'http://localhost:123/cba/www.origin.com/foo/?f=0', false);
+
+  // Others
   testProxyOrigin(
       'https://cdn.ampproject.net/v/www.origin.com/foo/?f=0', false);
   testProxyOrigin(

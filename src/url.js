@@ -298,8 +298,8 @@ export function isProxyOrigin(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  return !!url.href.match(urls.cdnProxyRegex) ||
-      !!url.href.match(urls.localhostProxyRegex);
+  return urls.cdnProxyRegex.test(url.origin) ||
+      urls.localhostProxyRegex.test(url.href);
 }
 
 /**
