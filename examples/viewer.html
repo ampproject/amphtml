@@ -253,6 +253,7 @@
 
 
     Viewer.prototype.awaitHandshake_ = function() {
+      console.log('here @ Viewer.prototype.awaitHandshake_');
       var targetId = this.iframe.id;
       var target = this.iframe.contentWindow;
       var targetOrigin = this.frameOrigin_;
@@ -322,6 +323,7 @@
 
 
     Viewer.prototype.onScroll_ = function() {
+      console.log('here @ Viewer.prototype.onScroll_');
       this.sendRequest_('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
@@ -408,6 +410,7 @@
 
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
+      console.log('here @ Viewer.prototype.processRequest_');
       if (type == 'documentLoaded') {
         return this.documentReady_();
       }
@@ -452,6 +455,7 @@
 
 
     Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
+      console.log('here @ Viewer.prototype.sendRequest_');
       if (!this.messaging_) {
         return;
       }

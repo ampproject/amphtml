@@ -78,7 +78,7 @@ export class Messaging {
   sendRequest(eventType, payload, awaitResponse) {
     //TODO: Remove console.log before merge to prod.
     console.log('here @ messaging.js -> sendRequest');
-    const requestId = (++this.requestIdCounter_).toString();
+    const requestId = String(++this.requestIdCounter_);
     if (awaitResponse) {
       new Promise((resolve, reject) => {
         this.waitingForResponse_[requestId] = {resolve, reject};

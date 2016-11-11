@@ -38,20 +38,17 @@ export class AmpViewerIntegration {
    * @return {!Promise}
    */
   init() {
-    return new Promise(resolve => {
-      const viewer = viewerForDoc(this.win_.document);
-      this.getHandshakePromise_(viewer)
-      .then(viewerOrigin => {
-        const messaging = new Messaging(this.win_.parent, viewerOrigin,
-            (type, payload, awaitResponse) => {
-              return viewer.receiveMessage(
-                type, /** @type {!JSONType} */ (payload), awaitResponse);
-            });
-        viewer.setMessageDeliverer((type, payload, awaitResponse) => {
-          return messaging.sendRequest(type, payload, awaitResponse);
-        }, viewerOrigin);
-        resolve();
-      });
+    const viewer = viewerForDoc(this.win_.document);
+    return this.getHandshakePromise_(viewer)
+    .then(viewerOrigin => {
+      const messaging = new Messaging(this.win_.parent, viewerOrigin,
+          (type, payload, awaitResponse) => {
+            return viewer.receiveMessage(
+              type, /** @type {!JSONType} */ (payload), awaitResponse);
+          });
+      viewer.setMessageDeliverer((type, payload, awaitResponse) => {
+        return messaging.sendRequest(type, payload, awaitResponse);
+      }, viewerOrigin);
     });
   }
 
@@ -68,16 +65,15 @@ export class AmpViewerIntegration {
       user().assert(unconfirmedViewerOrigin,
               'Expected viewer origin must be specified!');
 
-      const listener = function(event) {
+      const unlisten = listen(win, 'message', listener);
+      function listener(event) {
         if (event.origin == unconfirmedViewerOrigin &&
-                event.data == 'amp-handshake-response' &&
-                (!event.source || event.source == win.parent)) {
+            event.data == 'amp-handshake-response' &&
+            event.source == win.parent) {
           unlisten();
           resolve(event.origin);
         }
       };
-
-      const unlisten = listen(win, 'message', listener);
 
       win.parent./*OK*/postMessage('amp-handshake-request',
           unconfirmedViewerOrigin);
