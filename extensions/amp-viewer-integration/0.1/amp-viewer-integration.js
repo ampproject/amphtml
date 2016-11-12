@@ -41,7 +41,8 @@ export class AmpViewerIntegration {
     const viewer = viewerForDoc(this.win_.document);
     return this.getHandshakePromise_(viewer)
     .then(viewerOrigin => {
-      const messaging = new Messaging(this.win_.parent, viewerOrigin,
+      const messaging =
+        new Messaging(this.win_, this.win_.parent, viewerOrigin,
           (type, payload, awaitResponse) => {
             return viewer.receiveMessage(
               type, /** @type {!JSONType} */ (payload), awaitResponse);

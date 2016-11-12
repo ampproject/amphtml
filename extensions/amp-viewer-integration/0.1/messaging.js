@@ -26,12 +26,13 @@ import {dev} from '../../../src/log';
 export class Messaging {
   /**
    * Messaging protocol between viewer and viewer client.
+   * @param {!Window} source
    * @param {!Window} target
    * @param {string} targetOrigin
    * @param {function(string, *, boolean):(!Promise<*>|undefined)}
    *    requestProcessor
    */
-  constructor(target, targetOrigin, requestProcessor) {
+  constructor(source, target, targetOrigin, requestProcessor) {
     this.sentinel_ = '__AMPHTML__';
     this.requestSentinel_ = this.sentinel_ + 'REQUEST';
     this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
@@ -48,7 +49,7 @@ export class Messaging {
 
     dev().assert(this.targetOrigin_, 'Target origin must be specified!');
 
-    listen(this.target_, 'message', this.handleMessage_.bind(this));
+    listen(source, 'message', this.handleMessage_.bind(this));
   }
 
 
