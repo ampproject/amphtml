@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -43,10 +43,11 @@ limitations under the License.
 - The height of the sticky-ad is whatever its child needs up to its max-height.
 - The max-height of the sticky-ad is 100px, if the height exceeds 100px then the height would be 100px and overflow content will be hidden.
 - The width of the sticky-ad is set to 100% using CSS and cannot be overridden.
+- The opacity of the sticky-ad is set to 1 using CSS and cannot be overridden.
+- The background color of the sticky-ad can be customized to match page style. However any semi-transparent or transparent background will not be allowed and will be changed to a non-transparent color.
 - The sticky ad will display after scroll one viewport height from top provided there is at least one more viewport of content available.
 - When scrolled to the bottom of the page, the viewport is automatically padded with the additional height of the sticky ad, so that no content is ever hidden.
-- The sticky adjust to landscape mode, will center align ad.
-- There is an intermediate state for sticky-ad, after it is set to visible and before ad is expected to load. Background can be set to transparent to enhance user experience.
+- When in landscape mode, the sticky ad will be center aligned.
 - The sticky ad can be dismissed and removed by a close button.
 
 Example:
@@ -70,5 +71,5 @@ The only permissible value for the `layout` attribute in `amp-sticky-ad` is `nod
 
 The `amp-sticky-ad` component can be styled with standard CSS.
 
-- If different styles need to be applied to intermediate state and final state. The intermediate state style can be set through css class `amp-sticky-ad` and final state style can set through css class `amp-sticky-ad-loaded`. For example different `background-color` for these two states.
+- Sticky ad container style can be set through css class `amp-sticky-ad`.
 - Close button style can be set through css class `amp-sticky-ad-close-button`.
