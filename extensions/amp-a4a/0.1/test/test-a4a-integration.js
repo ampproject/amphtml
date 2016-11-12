@@ -25,6 +25,7 @@ import {
     data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {
@@ -68,6 +69,7 @@ describe('integration test: a4a', () => {
   let fixture;
   let mockResponse;
   let a4aElement;
+  let headers;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
@@ -76,9 +78,14 @@ describe('integration test: a4a', () => {
         return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
-      headers: new Headers(),
+      headers: new FetchResponseHeaders({
+        getResponseHeader(name) {
+          return headers[name];
+        },
+      }),
     };
-    mockResponse.headers.append(SIGNATURE_HEADER, validCSSAmp.signature);
+    headers = {};
+    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
     xhrMock.withArgs(TEST_URL, {
       mode: 'cors',
       method: 'GET',
@@ -113,7 +120,7 @@ describe('integration test: a4a', () => {
   });
 
   it('should fall back to 3p when no signature is present', () => {
-    mockResponse.headers.delete(SIGNATURE_HEADER);
+    delete headers[SIGNATURE_HEADER];
     return fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
@@ -187,5 +194,3 @@ describe('integration test: a4a', () => {
   // to whom.
   it('should propagate errors out and report them to upstream error log');
 });
-
-

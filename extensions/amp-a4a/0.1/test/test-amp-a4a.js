@@ -30,6 +30,7 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
@@ -70,6 +71,7 @@ describe('amp-a4a', () => {
   let getSigningServiceNamesMock;
   let viewerWhenVisibleMock;
   let mockResponse;
+  let headers;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -89,10 +91,15 @@ describe('amp-a4a', () => {
         return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
-      headers: new Headers(),
+      headers: new FetchResponseHeaders({
+        getResponseHeader(name) {
+          return headers[name];
+        },
+      }),
       catch: callback => callback(),
     };
-    mockResponse.headers.append(SIGNATURE_HEADER, validCSSAmp.signature);
+    headers = {};
+    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
   });
 
   afterEach(() => {
@@ -159,9 +166,9 @@ describe('amp-a4a', () => {
     it('for SafeFrame rendering case', () => {
       verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete(SIGNATURE_HEADER);
+      delete headers[SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-      mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
+      headers[RENDERING_TYPE_HEADER] = 'safeframe';
       fixture.doc.body.appendChild(a4aElement);
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -177,7 +184,7 @@ describe('amp-a4a', () => {
     it('for cached content iframe rendering case', () => {
       verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete(SIGNATURE_HEADER);
+      delete headers[SIGNATURE_HEADER];
       fixture.doc.body.appendChild(a4aElement);
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -211,9 +218,9 @@ describe('amp-a4a', () => {
 
     it('should attach a SafeFrame when header is set', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      mockResponse.headers.delete(SIGNATURE_HEADER);
+      delete headers[SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-      mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
+      headers[RENDERING_TYPE_HEADER] = 'safeframe';
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
@@ -245,10 +252,10 @@ describe('amp-a4a', () => {
     ['', 'client_cache', 'some_random_thing'].forEach(headerVal => {
       it(`should not attach a SafeFrame when header is ${headerVal}`, () => {
         // Make sure there's no signature, so that we go down the 3p iframe path.
-        mockResponse.headers.delete(SIGNATURE_HEADER);
+        delete headers[SIGNATURE_HEADER];
         // If rendering type is anything but safeframe, we SHOULD NOT attach a
         // SafeFrame.
-        mockResponse.headers.append(RENDERING_TYPE_HEADER, headerVal);
+        headers[RENDERING_TYPE_HEADER] = headerVal;
         xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
@@ -283,7 +290,7 @@ describe('amp-a4a', () => {
     it('should not use SafeFrame if creative is A4A', () => {
       // Set safeframe header, but it should be ignored when a signature
       // exists and validates.
-      mockResponse.headers.append(RENDERING_TYPE_HEADER, 'safeframe');
+      headers[RENDERING_TYPE_HEADER] = 'safeframe';
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
         method: 'GET',
