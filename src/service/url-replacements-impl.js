@@ -20,7 +20,7 @@ import {variantForOrNull} from '../variant-service';
 import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
-import {getServiceForDoc} from '../service';
+import {getServiceForDoc, installServiceInEmbedScope} from '../service';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
@@ -36,7 +36,7 @@ import {
   getNavigationData,
   getTimingDataSync,
   getTimingDataAsync,
-} from '../variable-source';
+} from './variable-source';
 
 
 /** @private @const {string} */
@@ -91,9 +91,9 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   setTimingResolver_(varName, startEvent, endEvent) {
-    return this.set(varName, () => {
+    return this.setBoth(varName, () => {
       return getTimingDataSync(this.ampdoc.win, startEvent, endEvent);
-    }).setAsync(varName, () => {
+    }, () => {
       return getTimingDataAsync(this.ampdoc.win, startEvent, endEvent);
     });
   }
@@ -222,18 +222,26 @@ export class GlobalVariableSource extends VariableSource {
      * @type {?Object<string, string>}
      */
     let clientIds = null;
-    this.setAsync('CLIENT_ID', (scope, opt_userNotificationId) => {
+    // Synchronous alternative. Only works for scopes that were previously
+    // requested using the async method.
+    this.setBoth('CLIENT_ID', scope => {
+      if (!clientIds) {
+        return null;
+      }
+      return clientIds[dev().assertString(scope)];
+    }, (scope, opt_userNotificationId) => {
       user().assertString(scope,
-          'The first argument to CLIENT_ID, the fallback c' +
-          /*OK*/'ookie name, is required');
+            'The first argument to CLIENT_ID, the fallback c' +
+            /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
-      // If no `opt_userNotificationId` argument is provided then
-      // assume consent is given by default.
+        // If no `opt_userNotificationId` argument is provided then
+        // assume consent is given by default.
       if (opt_userNotificationId) {
-        consent = userNotificationManagerFor(this.ampdoc.win).then(service => {
-          return service.get(opt_userNotificationId);
-        });
+        consent = userNotificationManagerFor(this.ampdoc.win)
+              .then(service => {
+                return service.get(opt_userNotificationId);
+              });
       }
       return cidFor(this.ampdoc.win).then(cid => {
         return cid.get({
@@ -247,14 +255,6 @@ export class GlobalVariableSource extends VariableSource {
         clientIds[scope] = cid;
         return cid;
       });
-    });
-    // Synchronous alternative. Only works for scopes that were previously
-    // requested using the async method.
-    this.set('CLIENT_ID', scope => {
-      if (!clientIds) {
-        return null;
-      }
-      return clientIds[dev().assertString(scope)];
     });
 
     // Returns assigned variant name for the given experiment.
@@ -512,6 +512,7 @@ export class GlobalVariableSource extends VariableSource {
 /**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
+ * @package For export
  */
 export class UrlReplacements {
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
@@ -521,9 +522,6 @@ export class UrlReplacements {
 
     /** @type {VariableSource} */
     this.variableSource_ = variableSource;
-
-    /** @private {boolean} */
-    this.initialized_ = false;
   }
 
   /**
@@ -634,7 +632,7 @@ export class UrlReplacements {
       let binding;
       if (opt_bindings && (name in opt_bindings)) {
         binding = opt_bindings[name];
-      } else if ((binding = this.variableSource_.getReplacement(name))) {
+      } else if ((binding = this.variableSource_.get(name))) {
         if (opt_sync) {
           binding = binding.sync;
           if (!binding) {
@@ -751,4 +749,14 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
   return getServiceForDoc(ampdoc, 'url-replace', doc => {
     return new UrlReplacements(doc, new GlobalVariableSource(doc));
   });
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} embedWin
+ * @param {*} varSource
+ */
+export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
+  installServiceInEmbedScope(embedWin, 'url-replace',
+    new UrlReplacements(ampdoc, varSource));
 }

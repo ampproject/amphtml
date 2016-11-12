@@ -20,7 +20,7 @@ import {
   getNavigationData,
   getTimingDataSync,
   getTimingDataAsync,
-} from '../../../src/variable-source';
+} from '../../../src/service/variable-source';
 import {user} from '../../../src/log';
 
 
@@ -69,11 +69,18 @@ const WHITELISTED_VARIABLES = [
 
 /** Provides A4A specific variable substitution. */
 export class A4AVariableSource extends VariableSource {
-  constructor(ampdoc, window) {
+  /**
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!Window} embedWin
+   */
+  constructor(ampdoc, embedWin) {
     super();
+    /** @private {VariableSource} global variable source for fallback. */
     this.globalVariableSource_ = urlReplacementsForDoc(ampdoc)
-      .getVariableSource();
-    this.win_ = window;
+        .getVariableSource();
+
+    /** @private {!Window} */
+    this.win_ = embedWin;
   }
 
   /** @override */
@@ -104,7 +111,7 @@ export class A4AVariableSource extends VariableSource {
 
     for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
       const varName = WHITELISTED_VARIABLES[v];
-      const resolvers = this.globalVariableSource_.getReplacement(varName);
+      const resolvers = this.globalVariableSource_.get(varName);
       this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
     }
   }

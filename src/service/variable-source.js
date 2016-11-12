@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from './log';
-import {whenDocumentComplete} from './document-ready';
-import {isFiniteNumber} from './types';
+import {dev} from '../log';
+import {whenDocumentComplete} from '../document-ready';
+import {isFiniteNumber} from '../types';
 
 /** @typedef {string|number|boolean|undefined|null} */
 let ResolverReturnDef;
@@ -141,7 +141,7 @@ export class VariableSource {
    * @param {string} name
    * @return {!ReplacementDef}
    */
-  getReplacement(name) {
+  get(name) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -185,6 +185,17 @@ export class VariableSource {
     this.replacements_[varName].async = asyncResolver;
     this.replacementExpr_ = undefined;
     return this;
+  }
+
+  /**
+   * Helper method to set both sync and async resolvers.
+   * @param {string} varName
+   * @param {!SyncResolverDef} syncResolver
+   * @param {!AsyncResolverDef} asyncResolver
+   * @return {!VariableSource}
+   */
+  setBoth(varName, syncResolver, asyncResolver) {
+    return this.set(varName, syncResolver).setAsync(varName, asyncResolver);
   }
 
   /**

@@ -47,7 +47,8 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
-import {installUrlReplacementsForEmbed} from '../../../src/url-replacements';
+import {installUrlReplacementsForEmbed,}
+    from '../../../src/service/url-replacements-impl';
 import {A4AVariableSource} from './a4a-variable-source';
 
 /** @private @const {string} */

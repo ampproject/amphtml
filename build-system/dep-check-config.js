@@ -56,14 +56,6 @@ exports.rules = [
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
     ]
   },
-  // Rules for URL Replacements.
-  {
-    filesMatching: '**/*.js',
-    mustNotDependOn: 'src/service/url-replacement-impl.js',
-    whitelist: [
-      'src/url-replacement.js->src/service/url-replacement-impl.js',
-    ],
-  },
   // Rules for 3p
   {
     filesMatching: '3p/**/*.js',
@@ -139,6 +131,12 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
+    whitelist: [
+      'extensions/amp-a4a/0.1/a4a-variable-source.js->' +
+          'src/service/variable-source.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+          'src/service/url-replacements-impl.js',
+    ],
   },
   {
     filesMatching: 'extensions/**/*.js',
