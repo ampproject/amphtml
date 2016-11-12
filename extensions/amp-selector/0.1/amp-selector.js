@@ -134,13 +134,12 @@ export class AmpSelector extends AMP.BaseElement {
     if (el.hasAttribute('selected')) {
       if (this.isMultiple_) {
         this.clearSelection_(el);
-      } else {
-        return;
+        this.setInputs_();
       }
     } else {
       this.setSelection_(el);
+      this.setInputs_();
     }
-    this.setInputs_();
   }
 
   clearSelection_(element) {
