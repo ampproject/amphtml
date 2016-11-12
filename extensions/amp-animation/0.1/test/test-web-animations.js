@@ -16,7 +16,9 @@
 
 import {
   MeasureScanner,
+  WebAnimationRunner,
 } from '../web-animations';
+import {isArray, isObject} from '../../../../src/types';
 
 
 describes.sandboxed('MeasureScanner', {}, () => {
@@ -25,6 +27,13 @@ describes.sandboxed('MeasureScanner', {}, () => {
   beforeEach(() => {
     target1 = document.createElement('div');
     target2 = document.createElement('div');
+    document.body.appendChild(target1);
+    document.body.appendChild(target2);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(target1);
+    document.body.removeChild(target2);
   });
 
   function scan(spec) {
@@ -140,8 +149,190 @@ describes.sandboxed('MeasureScanner', {}, () => {
       duration: 500,
       animations: [
         {target: target1, keyframes: {}},
+        {target: target2, duration: 300, keyframes: {}},
       ],
     });
+    expect(requests).to.have.length(2);
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(500);
+    expect(requests[1].target).to.equal(target2);
+    expect(requests[1].timing.duration).to.equal(300);
+  });
+
+  it('should accept multi-animation array', () => {
+    const requests = scan([
+      {target: target1, keyframes: {}},
+      {target: target2, duration: 300, keyframes: {}},
+    ]);
+    expect(requests).to.have.length(2);
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(0);
+    expect(requests[1].target).to.equal(target2);
+    expect(requests[1].timing.duration).to.equal(300);
+  });
+
+  it('should accept keyframe animation', () => {
+    const requests = scan({
+      target: target1,
+      duration: 300,
+      keyframes: {},
+    });
     expect(requests).to.have.length(1);
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(300);
+  });
+
+  it('should parse object keyframe', () => {
+    const keyframes = scan({
+      target: target1,
+      keyframes: {
+        opacity: [0, 1],
+      },
+    })[0].keyframes;
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes.opacity)).to.be.true;
+    expect(keyframes.opacity).to.deep.equal([0, 1]);
+  });
+
+  it('should parse object keyframe w/partial offsets', () => {
+    target1.style.opacity = 0;
+    const keyframes = scan({
+      target: target1,
+      keyframes: {
+        opacity: '1',
+      },
+    })[0].keyframes;
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes.opacity)).to.be.true;
+    expect(keyframes.opacity).to.deep.equal(['0', '1']);
+  });
+
+  it('should passthrough service props in a partial object keyframe', () => {
+    const keyframes = scan({
+      target: target1,
+      keyframes: {
+        easing: 'ease-in',
+      },
+    })[0].keyframes;
+    expect(isObject(keyframes)).to.be.true;
+    expect(keyframes.easing).to.equal('ease-in');
+  });
+
+  it('should parse array keyframe', () => {
+    const keyframes = scan({
+      target: target1,
+      keyframes: [
+        {opacity: '0'},
+        {opacity: '1'},
+      ],
+    })[0].keyframes;
+    expect(isArray(keyframes)).to.be.true;
+    expect(keyframes).to.deep.equal([
+      {opacity: '0'},
+      {opacity: '1'},
+    ]);
+  });
+
+  it('should parse array keyframe w/partial offsets', () => {
+    target1.style.opacity = 0;
+    const keyframes = scan({
+      target: target1,
+      keyframes: [
+        {opacity: '1'},
+      ],
+    })[0].keyframes;
+    expect(keyframes).to.deep.equal([
+      {opacity: '0'},
+      {opacity: '1'},
+    ]);
+  });
+
+  it('should parse array keyframe w/non-zero offset', () => {
+    target1.style.opacity = 0;
+    const keyframes = scan({
+      target: target1,
+      keyframes: [
+        {offset: 0.1, opacity: '0.1'},
+        {opacity: '1', easing: 'ease-in'},
+      ],
+    })[0].keyframes;
+    expect(keyframes).to.deep.equal([
+      {opacity: '0'},
+      {offset: 0.1, opacity: '0.1'},
+      {opacity: '1', easing: 'ease-in'},
+    ]);
+  });
+
+  it('should propagate partial properties into implicit 0-offset', () => {
+    target1.style.opacity = 0;
+    const keyframes = scan({
+      target: target1,
+      keyframes: [
+        {easing: 'ease-in'},
+        {opacity: '1'},
+      ],
+    })[0].keyframes;
+    expect(keyframes).to.deep.equal([
+      {easing: 'ease-in', opacity: '0'},
+      {opacity: '1'},
+    ]);
+  });
+
+  it('should propagate partial properties into explicit 0-offset', () => {
+    target1.style.opacity = 0;
+    const keyframes = scan({
+      target: target1,
+      keyframes: [
+        {offset: 0, easing: 'ease-in'},
+        {opacity: '1'},
+      ],
+    })[0].keyframes;
+    expect(keyframes).to.deep.equal([
+      {offset: 0, easing: 'ease-in', opacity: '0'},
+      {opacity: '1'},
+    ]);
+  });
+});
+
+
+describes.sandboxed('WebAnimationRunner', {}, () => {
+  let target1, target2;
+  let target1Mock, target2Mock;
+
+  beforeEach(() => {
+    target1 = {animate: () => {}};
+    target1Mock = sandbox.mock(target1);
+    target2 = {animate: () => {}};
+    target2Mock = sandbox.mock(target2);
+  });
+
+  afterEach(() => {
+    target1Mock.verify();
+    target2Mock.verify();
+  });
+
+  it('should call start on all animatons', () => {
+    const keyframes1 = {};
+    const keyframes2 = {};
+    const timing1 = {};
+    const timing2 = {};
+    const anim1 = {};
+    const anim2 = {};
+    target1Mock.expects('animate')
+        .withExactArgs(keyframes1, timing1)
+        .returns(anim1)
+        .once();
+    target2Mock.expects('animate')
+        .withExactArgs(keyframes2, timing2)
+        .returns(anim2)
+        .once();
+    const runner = new WebAnimationRunner([
+      {target: target1, keyframes: keyframes1, timing: timing1},
+      {target: target2, keyframes: keyframes2, timing: timing2},
+    ]);
+    runner.play();
+    expect(runner.players_).to.have.length(2);
+    expect(runner.players_[0]).equal(anim1);
+    expect(runner.players_[1]).equal(anim2);
   });
 });

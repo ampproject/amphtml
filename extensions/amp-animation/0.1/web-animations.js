@@ -43,6 +43,15 @@ let InternalWebAnimationRequestDef;
 
 
 /**
+ * @const {!Object<string, boolean>}
+ */
+const SERVICE_PROPS = {
+  'offset': true,
+  'easing': true,
+};
+
+
+/**
  */
 export class WebAnimationRunner {
 
@@ -195,7 +204,9 @@ export class MeasureScanner extends Scanner {
         this.validateProperty_(prop);
         const value = object[prop];
         let preparedValue;
-        if (!isArray(value) || value.length == 1) {
+        if (SERVICE_PROPS[prop]) {
+          preparedValue = value;
+        } else if (!isArray(value) || value.length == 1) {
           // Missing "from" value. Measure and add.
           const fromValue = this.measure_(target, prop);
           preparedValue = [fromValue, clone(isArray(value) ? value[0] : value)];
@@ -219,6 +230,9 @@ export class MeasureScanner extends Scanner {
       for (let i = start; i < array.length; i++) {
         const frame = array[i];
         for (const prop in frame) {
+          if (SERVICE_PROPS[prop]) {
+            continue;
+          }
           this.validateProperty_(prop);
           if (!startFrame[prop]) {
             // Missing "from" value. Measure and add to start frame.
@@ -252,6 +266,9 @@ export class MeasureScanner extends Scanner {
    * @private
    */
   validateProperty_(prop) {
+    if (SERVICE_PROPS[prop]) {
+      return;
+    }
     if (this.validate_) {
       user().assert(isWhitelistedProp(prop),
           'Property is not whitelisted for animation: %s', prop)
