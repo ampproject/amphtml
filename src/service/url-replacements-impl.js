@@ -172,11 +172,9 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the Source URL for this AMP document.
-    this.set('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
+    this.setBoth('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
       return removeFragment(info.sourceUrl);
-    }));
-
-    this.setAsync('SOURCE_URL', () => {
+    }), () => {
       return getTrackImpressionPromise().then(() => {
         return this.getDocInfoValue_(info => {
           return removeFragment(info.sourceUrl);
@@ -206,11 +204,9 @@ export class GlobalVariableSource extends VariableSource {
       return info.pageViewId;
     }));
 
-    this.set('QUERY_PARAM', (param, defaultValue = '') => {
+    this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
-    });
-
-    this.setAsync('QUERY_PARAM', (param, defaultValue = '') => {
+    }, (param, defaultValue = '') => {
       return getTrackImpressionPromise().then(() => {
         return this.getQueryParamData_(param, defaultValue);
       });

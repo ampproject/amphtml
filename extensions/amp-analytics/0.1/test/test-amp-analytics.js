@@ -179,7 +179,7 @@ describe('amp-analytics', function() {
             analytics.buildCallback();
             const urlReplacements = urlReplacementsForDoc(
                 analytics.win.document);
-            sandbox.stub(urlReplacements.variableSource_, 'get',
+            sandbox.stub(urlReplacements.getVariableSource(), 'get',
               function(name) {
                 expect(this.replacements_).to.have.property(name);
                 return {sync: '_' + name.toLowerCase() + '_'};
@@ -591,7 +591,7 @@ describe('amp-analytics', function() {
         },
       }]});
     const urlReplacements = urlReplacementsForDoc(analytics.win.document);
-    sandbox.stub(urlReplacements.variableSource_, 'get',
+    sandbox.stub(urlReplacements.getVariableSource(), 'get',
       function(name) {
         return {sync: param => {
           return '_' + name.toLowerCase() + '_' + param + '_';
@@ -840,8 +840,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = urlReplacementsForDoc(analytics.win.document);
-      sandbox.stub(urlReplacements.variableSource_,
-        'get').returns(0);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
