@@ -175,8 +175,8 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
-      toggle(this.element, /* display */true);
       this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+      toggle(this.element, /* display */true);
       this.openMask_();
       if (this.isIosSafari_) {
         this.compensateIosBottombar_();
