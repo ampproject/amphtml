@@ -106,17 +106,13 @@ class Scanner {
    * @param {!WebMultiAnimationDef} unusedSpec
    * @abstract
    */
-  onMultiAnimation(unusedSpec) {
-    dev().assert(null, 'not implemented');
-  }
+  onMultiAnimation(unusedSpec) {}
 
   /**
    * @param {!WebKeyframeAnimationDef} unusedSpec
    * @abstract
    */
-  onKeyframeAnimation(unusedSpec) {
-    dev().assert(null, 'not implemented');
-  }
+  onKeyframeAnimation(unusedSpec) {}
 
   /** @param {!Object} unusedSpec */
   onUnknownAnimation(unusedSpec) {
@@ -271,10 +267,10 @@ export class MeasureScanner extends Scanner {
     }
     if (this.validate_) {
       user().assert(isWhitelistedProp(prop),
-          'Property is not whitelisted for animation: %s', prop)
+          'Property is not whitelisted for animation: %s', prop);
     } else {
       dev().assert(isWhitelistedProp(prop),
-          'Property is not whitelisted for animation: %s', prop)
+          'Property is not whitelisted for animation: %s', prop);
     }
   }
 
