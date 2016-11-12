@@ -28,6 +28,9 @@ import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
+/** @const {string} */
+const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+
 /** @const {number} */
 const MAX_URL_LENGTH = 4096;
 
@@ -88,16 +91,23 @@ export function googleAdUrl(
 export function extractGoogleAdCreativeAndSignature(
     creative, responseHeaders) {
   let signature = null;
+  let size = null;
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
       signature =
         base64UrlDecodeToBytes(dev().assertString(
             responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
+    if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
+      const sizeStr = responseHeaders.get(CREATIVE_SIZE_HEADER);
+      // We should trust that the server returns the size information in the
+      // form of a WxH string.
+      size = sizeStr.split('x').map(dim => Number(dim));
+    }
   } finally {
     return Promise.resolve(/** @type {
           !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature}));
+          {creative, signature, size}));
   }
 }
 
@@ -140,7 +150,7 @@ function buildAdUrl(
       {name: 'dt', value: startTime},
       {name: 'adf', value: domFingerprint(adElement)},
       {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
-      {name: 'output', value: 'json_html'},
+      {name: 'output', value: 'html'},
       {name: 'nhd', value: iframeDepth},
       {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
       {name: 'biw', value: viewportRect.width},

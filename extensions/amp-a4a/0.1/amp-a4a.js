@@ -89,7 +89,11 @@ const SHARED_IFRAME_PROPERTIES = {
   marginheight: '0',
 };
 
-/** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
+/** @typedef {{
+ *    creative: ArrayBuffer,
+ *    signature: ?Uint8Array,
+ *    size: ?Array<string>
+ *  }} */
 export let AdResponseDef;
 
 /** @typedef {{
@@ -117,6 +121,34 @@ export const LIFECYCLE_STAGES = {
   renderSafeFrameStart: '11',
   adSlotCleared: '20',
 };
+
+
+
+// FOR DEVELOPMENT ONLY
+// REMOVE BEFORE SUBMITTING
+function newResponse(res, headerFn) {
+
+  function cloneHeaders() {
+    var headers = new Headers();
+    for (var kv of res.headers.entries()) {
+      headers.append(kv[0], kv[1]);
+    }
+    return headers;
+  }
+
+  var headers = headerFn ? headerFn(cloneHeaders()) : res.headers;
+
+  return new Promise(function (resolve) {
+    return res.blob().then(function (blob) {
+      resolve(new Response(blob, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: headers
+      }));
+    });
+  });
+
+}
 
 
 export class AmpA4A extends AMP.BaseElement {
@@ -331,6 +363,11 @@ export class AmpA4A extends AMP.BaseElement {
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
+        // \/\/\/ THIS CODE IS FOR TESTING FRONTEND LOGIC ONLY \/\/\/
+        .then(fetchResponse => newResponse(fetchResponse, headers => {
+          headers.set('X-CreativeSize', '320x50');
+          return headers;}))
+          // /\/\/\ THIS CODE IS FOR TESTING FRONTEND LOGIC ONLY /\/\/\
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
@@ -373,7 +410,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
         /** @return {!Promise<?string>} */
-        .then(creativeParts => { debugger;
+        .then(creativeParts => {
           checkStillCurrent(promiseId);
           // Keep a handle to the creative body so that we can render into
           // SafeFrame later, if necessary.  TODO(tdrl): Temporary, while we
@@ -384,8 +421,12 @@ export class AmpA4A extends AMP.BaseElement {
           if (creativeParts && creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
           }
+          if (creativeParts && creativeParts.size
+              && creativeParts.size.length == 2) {
+            this.handleResize(creativeParts.size);
+          }
           if (!creativeParts || !creativeParts.signature) {
-//            return /** @type {!Promise<?string>} */ (Promise.resolve(null));
+            return /** @type {!Promise<?string>} */ (Promise.resolve(null));
           }
           this.emitLifecycleEvent('adResponseValidateStart', creativeParts);
           return this.verifyCreativeSignature_(
@@ -404,7 +445,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
         /** @return {!Promise<!boolean>} */
-        .then(creative => { debugger;
+        .then(creative => {
           checkStillCurrent(promiseId);
           // Note: It's critical that #maybeRenderAmpAd_ be called
           // on precisely the same creative that was validated
@@ -603,6 +644,18 @@ export class AmpA4A extends AMP.BaseElement {
       unusedResponseHeaders) {
     throw new Error('extractCreativeAndSignature not implemented!');
   }
+
+  /**
+   * This function is called if the ad response contains a creative size header
+   * indicating the size of the header. It provides an opportunity to resize the
+   * creative, if desired, before it is rendered.
+   *
+   * To be implemented by network.
+   *
+   * @param {!Array<string>} size An array containing two elements, the first
+   *     being the width and the second the height.
+   */
+  handleResize(size) {}
 
   /**
    * Callback executed when AMP creative has successfully rendered within the
