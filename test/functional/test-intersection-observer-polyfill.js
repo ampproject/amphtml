@@ -280,15 +280,15 @@ describe('IntersectionObserverPolyfill', () => {
           return layoutRectLtwh(10, 10, 10, 10);
         };
         const rootBounds = layoutRectLtwh(1, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(1, 2, 50, 50);
+        const containerBounds = layoutRectLtwh(2, 102, 50, 50);
         io.observe(element);
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith({
           time: 100,
-          rootBounds: DomRectLtwh(0, 0, 200, 200),
-          boundingClientRect: DomRectLtwh(11, 12, 10, 10),
-          intersectionRect: DomRectLtwh(11, 12, 10, 10),
+          rootBounds: null,
+          boundingClientRect: DomRectLtwh(10, 10, 10, 10),
+          intersectionRect: DomRectLtwh(10, 10, 10, 10),
           intersectionRatio: 1,
         });
       });
@@ -298,15 +298,15 @@ describe('IntersectionObserverPolyfill', () => {
           return layoutRectLtwh(75, 0, 50, 50);
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(100, 0, 200, 200);
+        const containerBounds = layoutRectLtwh(100, 100, 200, 200);
         io.observe(element);
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith({
           time: 100,
-          rootBounds: DomRectLtwh(0, 0, 200, 200),
-          boundingClientRect: DomRectLtwh(175, 0, 50, 50),
-          intersectionRect: DomRectLtwh(175, 0, 25, 50),
+          rootBounds: null,
+          boundingClientRect: DomRectLtwh(75, 0, 50, 50),
+          intersectionRect: DomRectLtwh(75, 0, 25, 50),
           intersectionRatio: 0.5,
         });
       });
@@ -316,30 +316,30 @@ describe('IntersectionObserverPolyfill', () => {
           return layoutRectLtwh(0, 0, 50, 50);
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(0, 200, 100, 100);
+        const containerBounds = layoutRectLtwh(0, 300, 100, 100);
         io.observe(element);
         // Tick once before to set threshold to value other than 0;
-        io.tick(rootBounds, layoutRectLtwh(0, 100, 200, 200));
+        io.tick(rootBounds, layoutRectLtwh(0, 200, 200, 200));
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith({
           time: 100,
-          rootBounds: DomRectLtwh(0, 0, 200, 200),
-          boundingClientRect: DomRectLtwh(0, 200, 50, 50),
-          intersectionRect: DomRectLtwh(0, 200, 50, 0),
+          rootBounds: null,
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 0),
           intersectionRatio: 0,
         });
       });
 
       it('nested element outside container but in viewport', () => {
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(0, 201, 100, 100);
+        const containerBounds = layoutRectLtwh(0, 301, 100, 100);
         // Tick once before to set threshold to value other than 0;
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, 0, 50, 50);
         };
         io.observe(element);
-        io.tick(rootBounds, layoutRectLtwh(0, 100, 200, 200));
+        io.tick(rootBounds, layoutRectLtwh(0, 200, 200, 200));
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, -101, 50, 50);
         };
@@ -347,8 +347,8 @@ describe('IntersectionObserverPolyfill', () => {
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith({
           time: 100,
-          rootBounds: DomRectLtwh(0, 0, 200, 200),
-          boundingClientRect: DomRectLtwh(0, 100, 50, 50),
+          rootBounds: null,
+          boundingClientRect: DomRectLtwh(0, -101, 50, 50),
           intersectionRect: DomRectLtwh(0, 0, 0, 0),
           intersectionRatio: 0,
         });
@@ -366,55 +366,16 @@ describe('IntersectionObserverPolyfill', () => {
           };
         };
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(100, 0, 200, 200);
+        const containerBounds = layoutRectLtwh(100, 100, 200, 200);
         io.observe(element);
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith({
           time: 100,
-          rootBounds: DomRectLtwh(0, 0, 200, 200),
-          boundingClientRect: DomRectLtwh(175, 0, 50, 50),
-          intersectionRect: DomRectLtwh(175, 25, 25, 25),
+          rootBounds: null,
+          boundingClientRect: DomRectLtwh(75, 0, 50, 50),
+          intersectionRect: DomRectLtwh(75, 25, 25, 25),
           intersectionRatio: 0.25,
-        });
-      });
-    });
-
-    describe('with non AMP element', () => {
-      it('without container', () => {
-        element.isBuilt = null;
-        element.getBoundingClientRect = () => {
-          return DomRectLtwh(0, 0, 50, 50);
-        };
-        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        io.observe(element);
-        io.tick(rootBounds);
-        expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
-          time: 100,
-          rootBounds: DomRectLtwh(0, 0, 200, 200),
-          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
-          intersectionRect: DomRectLtwh(0, 0, 50, 50),
-          intersectionRatio: 1,
-        });
-      });
-
-      it('with container', () => {
-        element.isBuilt = null;
-        element.getBoundingClientRect = () => {
-          return DomRectLtwh(0, 0, 50, 50);
-        };
-        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(0, 0, 100, 100);
-        io.observe(element);
-        io.tick(rootBounds, containerBounds);
-        expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
-          time: 100,
-          rootBounds: DomRectLtwh(0, 0, 200, 200),
-          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
-          intersectionRect: DomRectLtwh(0, 0, 50, 50),
-          intersectionRatio: 1,
         });
       });
     });
