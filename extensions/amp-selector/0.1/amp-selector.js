@@ -16,7 +16,6 @@
 
 import {closest} from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 
 export class AmpSelector extends AMP.BaseElement {
@@ -28,61 +27,65 @@ export class AmpSelector extends AMP.BaseElement {
     this.isMultiple_ = false;
 
     /** @private {!Array<!Element>} */
-    this.selectedElements_ = [];
+    this.selectedOptions_ = [];
 
-    /** @private {Element} */
-    this.inputWrapper_ = null;
+    /** @private {!Array<!Element>} */
+    this.options_ = [];
+
+    /** @private {!Array<!Element>} */
+    this.inputs_ = [];
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || Layout.CONTAINER;
+    return true;
   }
 
   /** @override */
   buildCallback() {
     this.isMultiple_ = this.element.hasAttribute('multiple');
     const isDisabled = this.element.hasAttribute('disabled');
+
+    this.element.setAttribute('role', 'listbox');
+
+    if (this.isMultiple_) {
+      this.element.setAttribute('aria-multiselectable', 'true');
+    }
+
+    if (isDisabled) {
+      this.element.setAttribute('aria-disabled', 'true');
+    }
+
     if (!isDisabled) {
-      this.setState_();
+      this.init_();
       this.element.addEventListener('click', this.clickHandler_.bind(this));
     }
   }
 
   /**
-   * Sets the state of the options based on the state of the current inputs
-   *    or based on the vaules array if one is passed.
-   * @param {Element=} opt_element element that was selected/unselected.
+   * @private
    */
-  setState_(opt_element) {
-    this.selectedElements_ = [];
-    const selectedElements_ =
-        this.element.querySelectorAll('*[option][selected]:not([disabled])');
-    const len = selectedElements_.length;
-    if (!this.isMultiple_ && len > 1) {
-      // There are multiple selected elements in a single selector.
-      for (let i = 0; i < len; i++) {
-        const el = selectedElements_[i];
-        if (opt_element && el !== opt_element) {
-          el.removeAttribute('selected');
+  init_() {
+    const options = [].slice.call(this.element.querySelectorAll('[option]'));
+    options.forEach(option => {
+      if (option.hasAttribute('disabled')) {
+        option.setAttribute('aria-disabled', 'true');
+      } else {
+        if (option.hasAttribute('selected')) {
+          this.setSelection_(option);
         } else {
-          if (this.selectedElements_.length > 0) {
-            // We need to have only one selected element for a single selector.
-            // So pop the previous element (only element in the arr) and remove
-            // the selected attr.
-            this.selectedElements_.pop().removeAttribute('selected');
-          }
-          this.selectedElements_.push(el);
+          this.clearSelection_(option);
         }
+        option.setAttribute('tabindex', '0');
+        this.options_.push(option);
       }
-    } else {
-      this.selectedElements_ = [].slice.call(selectedElements_);
-    }
+    });
     this.setInputs_();
   }
 
   /**
    * Creates inputs for the currently selected elements.
+   * @private
    */
   setInputs_() {
     const elementName = this.element.getAttribute('name');
@@ -91,30 +94,24 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
 
+    this.inputs_.forEach(input => {
+      this.element.removeChild(input);
+    });
+    this.inputs_ = [];
     const doc = this.win.document;
-    if (!this.inputWrapper_) {
-      this.inputWrapper_ = doc.createElement('div');
-      this.inputWrapper_.setAttribute(
-          'class', '-amp-selector-inputs-container');
-      this.element.appendChild(this.inputWrapper_);
-      setStyle(this.inputWrapper_, 'display', 'none');
-    }
-    // This should be okay because the innerHTML is only hidden inputs and the
-    // wrapper is display none.
-    this.inputWrapper_./*REVIEW*/innerHTML = '';
     const fragment = doc.createDocumentFragment();
-
-    this.selectedElements_.forEach(selectedElement => {
+    this.selectedOptions_.forEach(option => {
       const hidden = doc.createElement('input');
       hidden.setAttribute('type', 'hidden');
       hidden.setAttribute('name', elementName);
-      hidden.setAttribute('value', selectedElement.getAttribute('option'));
+      hidden.setAttribute('value', option.getAttribute('option'));
       if (formId) {
         hidden.setAttribute('form', formId);
       }
+      this.inputs_.push(hidden);
       fragment.appendChild(hidden);
     });
-    this.inputWrapper_.appendChild(fragment);
+    this.element.appendChild(fragment);
   }
 
   /**
@@ -131,19 +128,41 @@ export class AmpSelector extends AMP.BaseElement {
         return element.hasAttribute('option');
       }, this.element);
     }
-    if (el.hasAttribute('disabled')) {
+    if (!el || el.hasAttribute('disabled')) {
       return;
     }
     if (el.hasAttribute('selected')) {
       if (this.isMultiple_) {
-        el.removeAttribute('selected');
+        this.clearSelection_(el);
       } else {
         return;
       }
     } else {
-      el.setAttribute('selected', '');
+      this.setSelection_(el);
     }
-    this.setState_(el);
+    this.setInputs_();
+  }
+
+  clearSelection_(element) {
+    element.removeAttribute('selected');
+    element.setAttribute('aria-selected', 'false');
+    const selIndex = this.selectedOptions_.indexOf(element);
+    if (selIndex !== -1) {
+      this.selectedOptions_.splice(selIndex, 1);
+    }
+  }
+
+  setSelection_(element) {
+    if (!this.isMultiple_) {
+      while(this.selectedOptions_.length > 0) {
+        // Clear selected options for single select.
+        const el = this.selectedOptions_.pop();
+        this.clearSelection_(el)
+      }
+    }
+    element.setAttribute('selected', '');
+    element.setAttribute('aria-selected', 'true');
+    this.selectedOptions_.push(element);
   }
 }
 
