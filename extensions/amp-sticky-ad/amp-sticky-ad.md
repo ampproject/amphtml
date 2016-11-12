@@ -47,7 +47,7 @@ limitations under the License.
 - The background color of the sticky-ad can be customized to match page style. However any semi-transparent or transparent background will not be allowed and will be changed to a non-transparent color.
 - The sticky ad will display after scroll one viewport height from top provided there is at least one more viewport of content available.
 - When scrolled to the bottom of the page, the viewport is automatically padded with the additional height of the sticky ad, so that no content is ever hidden.
-- The sticky adjust to landscape mode, will center align ad.
+- When in landscape mode, the sticky ad will be center aligned.
 - The sticky ad can be dismissed and removed by a close button.
 
 Example:
