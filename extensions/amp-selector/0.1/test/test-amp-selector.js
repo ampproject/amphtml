@@ -365,17 +365,17 @@ describes.realWin('amp-selector', {
       ampSelector.build();
       expect(impl.inputs_.length).to.equal(2);
       expect(impl.selectedOptions_).to.include.members([
-          impl.options_[0],
-          impl.options_[1],
+        impl.options_[0],
+        impl.options_[1],
       ]);
 
       impl.setSelection_(impl.options_[2]);
       impl.setInputs_();
       expect(impl.inputs_.length).to.equal(3);
       expect(impl.selectedOptions_).to.include.members([
-          impl.options_[0],
-          impl.options_[1],
-          impl.options_[2],
+        impl.options_[0],
+        impl.options_[1],
+        impl.options_[2],
       ]);
     });
     it('should handle clicks', () => {

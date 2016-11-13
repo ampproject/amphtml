@@ -16,7 +16,6 @@
 
 import {closest} from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {setStyle} from '../../../src/style';
 
 export class AmpSelector extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -37,7 +36,7 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported() {
     return true;
   }
 
@@ -165,10 +164,10 @@ export class AmpSelector extends AMP.BaseElement {
    */
   setSelection_(element) {
     if (!this.isMultiple_) {
-      while(this.selectedOptions_.length > 0) {
+      while (this.selectedOptions_.length > 0) {
         // Clear selected options for single select.
         const el = this.selectedOptions_.pop();
-        this.clearSelection_(el)
+        this.clearSelection_(el);
       }
     }
     element.setAttribute('selected', '');
