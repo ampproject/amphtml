@@ -15,6 +15,7 @@
  */
 
 import '../amp-selector';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-selector', {
   win: { /* window spec */
@@ -29,6 +30,13 @@ describes.realWin('amp-selector', {
   let win;
   describe('test extension', () => {
 
+    beforeEach(() => {
+      toggleExperiment(window, 'amp-selector', true);
+    });
+
+    afterEach(() => {
+      toggleExperiment(window, 'amp-selector', false);
+    });
     function getSelector(options) {
       win = env.win;
       const attributes = options.attributes || {};

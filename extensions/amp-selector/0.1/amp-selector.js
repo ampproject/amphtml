@@ -15,7 +15,7 @@
  */
 
 import {closest} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 export class AmpSelector extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -42,6 +42,8 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, 'amp-selector'),
+        `Experiment amp-selector is disabled.`);
     this.isMultiple_ = this.element.hasAttribute('multiple');
     const isDisabled = this.element.hasAttribute('disabled');
 
