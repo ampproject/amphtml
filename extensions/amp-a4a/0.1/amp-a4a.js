@@ -356,6 +356,13 @@ export class AmpA4A extends AMP.BaseElement {
           this.experimentalNonAmpCreativeRenderMethod_ =
               fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
               this.experimentalNonAmpCreativeRenderMethod_;
+          try {
+            dev().assertEnumValue(XORIGIN_MODE,
+                                  this.experimentalNonAmpCreativeRenderMethod_,
+                                  'cross-origin render mode header');
+          } catch (err) {
+            dev().error('AMP-A4A', err.message);
+          }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -539,7 +546,7 @@ export class AmpA4A extends AMP.BaseElement {
         if ((method == XORIGIN_MODE.SAFEFRAME ||
              method == XORIGIN_MODE.NAMEFRAME) &&
             this.creativeBody_) {
-          renderPromise = this.renderViaNameAttrOfXDomIframe_(
+          renderPromise = this.renderViaNameAttrOfXOriginIframe_(
               this.creativeBody_);
         } else if (this.adUrl_) {
           renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
@@ -852,7 +859,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  renderViaNameAttrOfXDomIframe_(creativeBody) {
+  renderViaNameAttrOfXOriginIframe_(creativeBody) {
     const method = this.nonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,

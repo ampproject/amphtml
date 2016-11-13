@@ -41,6 +41,7 @@ import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
 /**
@@ -188,6 +189,17 @@ describe('amp-a4a', () => {
     expect(child).to.be.visible;
   }
 
+  function verifyCachedContentIframeRender(element, srcUrl) {
+    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element).to.be.visible;
+    expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
+    const child = element.querySelector('iframe[src]');
+    expect(child).to.be.ok;
+    expect(child.src).to.have.string(srcUrl);
+    expect(child.getAttribute('name')).not.to.be.ok;
+    expect(child).to.be.visible;
+  }
+
   describe('ads are visible', () => {
     let a4aElement;
     let a4a;
@@ -314,6 +326,30 @@ describe('amp-a4a', () => {
 
     afterEach(() => {
       expect(xhrMock).to.be.calledOnce;
+    });
+
+    describe('illegal render mode value', () => {
+      let devErrLogSpy;
+      beforeEach(() => {
+        devErrLogSpy = sandbox.spy(dev(), 'error');
+        // If rendering type is unknown, should fall back to cached content
+        // iframe and generate an error.
+        mockResponse.headers.set(RENDERING_TYPE_HEADER, 'random illegal value');
+        a4a.onLayoutMeasure();
+      });
+
+      it('should render via cached iframe', () => {
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifyCachedContentIframeRender(a4aElement, TEST_URL);
+          // Should have reported an error.
+          expect(devErrLogSpy).to.be.calledOnce;
+          expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
+            'random illegal value');
+        });
+      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -773,10 +809,15 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.preconnectCallback(false);
         const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-        expect(preconnects.length).to.equal(2);
+        expect(preconnects.length).to.equal(3);
+        // SafeFrame origin.
         expect(preconnects[0].getAttribute('href')).to
             .equal('https://tpc.googlesyndication.com');
+        // NameFrame origin (in testing mode).
         expect(preconnects[1].getAttribute('href')).to
+            .have.string('http://ads.localhost');
+        // AdSense origin.
+        expect(preconnects[2].getAttribute('href')).to
             .equal('https://googleads.g.doubleclick.net');
       });
     });

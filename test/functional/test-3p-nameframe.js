@@ -16,6 +16,45 @@
 
 import {createIframePromise} from '../../testing/iframe';
 
+// Is there a way to mark this .skip?  Neither describes.skip.sandboxed
+// nor describes.sandboxed.skip works.
+describes.sandboxed('alt nameframe', {}, () => {
+  describes.realWin('nameframe', {}, env => {
+    let fixture;
+    let win;
+    let doc;
+    let iframe;
+    beforeEach(() => {
+      fixture = env;
+      win = fixture.win;
+      doc = win.document;
+      iframe = doc.createElement('iframe');
+      iframe.src = 'http://localhost:9876/dist.3p/current/nameframe.max.html';
+      // Fails here.  srcdoc is not empty, so this iframe doesn't behave like a
+      // cross-origin iframe.
+      expect(iframe.getAttribute('srcdoc')).not.to.be.ok;
+    });
+
+    it('should load remote nameframe and succeed', done => {
+      iframe.name = JSON.stringify({
+        creative: `<html>
+                   <body>
+                     <script>
+                       window.parent.postMessage(
+                               {type: 'creative rendered'}, '*');
+                     </script>
+                   </body>
+                   </html>`,
+      });
+      win.addEventListener('message', content => {
+        expect(content.data.type).to.equal('creative rendered');
+        done();
+      });
+      doc.body.appendChild(iframe);
+    });
+  });
+});
+
 describes.sandboxed('nameframe', {}, () => {
   let fixture;
   let win;
