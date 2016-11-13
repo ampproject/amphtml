@@ -68,8 +68,10 @@ export class AmpSelector extends AMP.BaseElement {
   init_() {
     const options = [].slice.call(this.element.querySelectorAll('[option]'));
     options.forEach(option => {
+      option.setAttribute('role', 'option');
       if (option.hasAttribute('disabled')) {
         option.setAttribute('aria-disabled', 'true');
+        option.removeAttribute('selected');
       } else {
         if (option.hasAttribute('selected')) {
           this.setSelection_(option);
@@ -142,6 +144,11 @@ export class AmpSelector extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Clears a given element from the list of selected options.
+   * @param {!Element} element.
+   * @private
+   */
   clearSelection_(element) {
     element.removeAttribute('selected');
     element.setAttribute('aria-selected', 'false');
@@ -151,6 +158,11 @@ export class AmpSelector extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Marks a given element as selected and clears the others if required.
+   * @param {!Element} element.
+   * @private
+   */
   setSelection_(element) {
     if (!this.isMultiple_) {
       while(this.selectedOptions_.length > 0) {
