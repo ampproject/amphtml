@@ -92,7 +92,7 @@ export class AmpAd extends AMP.BaseElement {
     // upgrade element fell through.
     dev().assert(this.element.getAttribute('type'), 'Required attribute type');
   }
-};
+}
 
 AMP.registerElement('amp-ad', AmpAd);
 AMP.registerElement('amp-embed', AmpAd);

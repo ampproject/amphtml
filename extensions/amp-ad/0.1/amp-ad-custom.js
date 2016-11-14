@@ -75,9 +75,10 @@ export class AmpAdCustom extends AMP.BaseElement {
   /**
    * Get a URL which includes a parameter indicating all slots to be fetched
    * from this web server URL
+   * @private getFullUrl_
    * @returns {String} The URL with the "ampslots" parameter appended
    */
-  getFullUrl() {
+  getFullUrl_() {
     if (ampCustomadSlots === null) {
       // The array of ad slots has not yet been built, do so now.
       ampCustomadSlots = {};
@@ -102,7 +103,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     if (!(this.url_ in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
       ampCustomadXhrPromises[this.url_] = xhrFor(this.win).fetchJson(
-          this.getFullUrl(this.url_));
+          this.getFullUrl_(this.url_));
     }
     return ampCustomadXhrPromises[this.url_].then(data => {
       const element = this.element;

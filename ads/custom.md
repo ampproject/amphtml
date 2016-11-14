@@ -20,7 +20,8 @@ Custom does not represent a specific network. Rather, it provides a way for
 a site to display simple ads on a self-service basis. You must provide
 your own ad server to deliver the ads in json format as shown below.
 
-Each ad must contain a mustache template (see mustache.js).
+Each ad must contain a [mustache](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md)
+template.
 
 Each ad must contain the URL that will be used to fetch data from the server.
 
@@ -29,7 +30,7 @@ is to give all the ads the same ad server URL and give each ad a different slot 
 this will result in a single call to the ad server.
 
 An alternative is to use a different URL for each ad, according to some format
-understood by the ad server.
+understood by the ad server(s) which you are calling.
 
 ## Examples
 
@@ -38,7 +39,6 @@ understood by the ad server.
 ```html
 <amp-ad width=300 height=250
     type="custom"
-    data-slot="1"
     data-url="https://mysite/my-ad-server"
 >
     <template type="amp-mustache" id="amp-template-id">
@@ -47,7 +47,7 @@ understood by the ad server.
       </a>
     </template>
 </amp-ad>
-<!-- The ad server will be called with the URL https://mysite/my-ad-server?s=1 -->
+<!-- The ad server will be called with the URL https://mysite/my-ad-server?ampslots=0 -->
 ```
 
 ### Two ads with different slots
@@ -56,7 +56,7 @@ understood by the ad server.
 <amp-ad width=300 height=250
     type="custom"
     data-slot="1"
-    data-url="https://mysite/my-ad-server"
+    data-url="https://mysite/my-ad-server?someparam=somevalue"
 >
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
@@ -67,7 +67,7 @@ understood by the ad server.
 <amp-ad width=400 height=300
     type="custom"
     data-slot="2"
-    data-url="https://mysite/my-ad-server"
+    data-url="https://mysite/my-ad-server?someparam=somevalue"
 >
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
@@ -75,7 +75,7 @@ understood by the ad server.
       </a>
     </template>
 </amp-ad>
-<!-- The ad server will be called with the URL https://mysite/my-ad-server?s=1,2 -->
+<!-- The ad server will be called with the URL https://mysite/my-ad-server?someparam=somevalue&ampslots=1,2 -->
 ```
 
 ### Ads from different ad servers
@@ -114,8 +114,8 @@ understood by the ad server.
     </template>
 </amp-ad>
 <!-- Two ad server calls will be made: -->
-<!-- The first:  https://mysite/my-ad-server?s=slot-name-a,slot-name-b -->
-<!-- The second: https://my-other-site/my-other-ad-server?s=123 -->
+<!-- The first:  https://mysite/my-ad-server?ampslots=slot-name-a,slot-name-b -->
+<!-- The second: https://my-other-site/my-other-ad-server?ampslots=123 -->
 ```
 
 ## Supported parameters
@@ -139,8 +139,9 @@ called only once.
 A parameter like `?ampslots=1,2` will be appended to the URL specified by `data-url` in order
 to specify the slots being fetched. See the examples above for details.
 
-The ad server should return a json object containing a record for each slot in the request.
-The record format is defined by your template. For the examples above, the record contains three fields:
+The ad server should return a json object containing a record for each slot in the request, keyed by the
+slot id in `data-slot`. The record format is defined by your template. For the examples above,
+the record contains three fields:
 
 * src - string to go into the source parameter of the image to be displayed. This can be a 
 web reference (in which case it must be `https:` or a `data:` URI including the base64-encoded image.
@@ -151,18 +152,30 @@ Here is an example response, assuming two slots named simply 1 and 2:
 
 ```json
 {
-    "1":{
+    "1": {
         "src":"https:\/\/my-ad-server.com\/my-advertisement.gif",
         "href":"https:\/\/bachtrack.com",
         "info":"Info1"
     },
-    "2":{
+    "2": {
         "src":"data:image/gif;base64,R0lGODlhyAAiALM...DfD0QAADs=",
         "href":"http:\/\/onestoparts.com",
-        "info":"Info2"}
+        "info":"Info2"
     }
+}
 ```
+Here is an example if you only specified one ad and didn't bother specifying the slot number: it simply
+defaults to zero:
 
+```json
+{
+    "0": {
+        "src":"https:\/\/my-ad-server.com\/my-advertisement.gif",
+        "href":"https:\/\/bachtrack.com",
+        "info":"Info1"
+    }
+}
+```
 ## To do
 
 Add support for json variables - and perhaps other variable substitutions in the way amp-list does
