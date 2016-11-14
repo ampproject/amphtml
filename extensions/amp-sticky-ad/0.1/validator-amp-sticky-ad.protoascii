@@ -18,6 +18,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
   tag_name: "SCRIPT"
   spec_name: "amp-sticky-ad extension .js script"
   mandatory_parent: "HEAD"
+  unique: true
   attrs: {
     name: "async"
     mandatory: true
@@ -32,7 +33,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-sticky-ad-(latest|0\\.1)\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-sticky-ad-(latest|0\\.1||1\\.0)\\.js"
   }
   attrs: {
     name: "type"

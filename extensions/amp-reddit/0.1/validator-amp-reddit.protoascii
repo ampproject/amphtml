@@ -21,6 +21,7 @@ tags: {  # amp-reddit
   spec_name: "amp-reddit extension .js script"
   also_requires_tag: "amp-reddit"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -47,7 +48,7 @@ tags: {  # amp-reddit
       error_message: "contents"
     }
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/amp-reddit.md"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reddit"
 }
 tags: {  # <amp-reddit>
   html_format: AMP
@@ -73,7 +74,7 @@ tags: {  # <amp-reddit>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/amp-reddit.md"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reddit"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

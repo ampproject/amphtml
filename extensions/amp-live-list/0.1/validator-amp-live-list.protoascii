@@ -19,6 +19,7 @@ tags: {  # amp-live-list
   tag_name: "SCRIPT"
   spec_name: "amp-live-list extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -92,7 +93,7 @@ tags: {
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [update]"
   attrs: { name: "update" mandatory: true }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list.md#update"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#update"
 }
 tags: {
   html_format: AMP
@@ -103,7 +104,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-LIVE-LIST [items] item"
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list.md#items"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
 }
 tags: {
   html_format: AMP

@@ -264,10 +264,17 @@ describe('parse_url', () => {
     assertStrictEqual('⚡.com', url.host);
   });
 
-  it ('accepts http:/// (empty host)', () => {
-    let urlString = 'http:///example.com/';
+  it ('rejects http://', () => {
+    let urlString = 'http://';
     let url = new parse_url.URL(urlString);
-    assertStrictEqual(true, url.isValid);
+    assertStrictEqual(false, url.isValid);
+    assertStrictEqual('', url.host);
+  });
+
+  it ('rejects http:/// (empty host)', () => {
+    let urlString = 'http:///';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(false, url.isValid);
     assertStrictEqual('', url.host);
   });
 });
