@@ -75,18 +75,21 @@ export class Messaging {
    * @param {string} eventType
    * @param {*} payload
    * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
    */
   sendRequest(eventType, payload, awaitResponse) {
     //TODO: Remove console.log before merge to prod.
     console.log('here @ messaging.js -> sendRequest');
     const requestId = String(++this.requestIdCounter_);
+    let promise = undefined;
     if (awaitResponse) {
-      new Promise((resolve, reject) => {
+      promise = new Promise((resolve, reject) => {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
     this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
         awaitResponse);
+    return promise;
   };
 
 
