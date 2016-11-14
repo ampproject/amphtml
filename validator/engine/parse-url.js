@@ -181,8 +181,7 @@ parse_url.URL = class {
         this./*OK*/ startsWithDoubleSlash = true;
       }
       unparsed = unparsed.substr(2);
-      if (unparsed.length !== 0)
-        unparsed = this.parseAuthority_(unparsed);
+      unparsed = this.parseAuthority_(unparsed);
     }
 
     this.unparsed_url = unparsed;
@@ -289,7 +288,7 @@ parse_url.URL = class {
     // See if this could be an IPv6 address literal. If so, we skip colons
     // until we see a matching ']'.
     let skipColons = false;
-    if (unparsed.charCodeAt(0) === /* '[' */ 0x5B) {
+    if (unparsed !== '' && unparsed.charCodeAt(0) === /* '[' */ 0x5B) {
       skipColons = true;
       idx++;  // skip over the '['
     }
@@ -371,6 +370,8 @@ parse_url.URL = class {
       host = this.unescapeAndCheckHost_(host);
     }
     this.host = this.processHostDots_(host);
+    if (this.host === '')
+      this.isValid = false;
 
     // Extract the port, if present.
     if (portIdx !== -1) {

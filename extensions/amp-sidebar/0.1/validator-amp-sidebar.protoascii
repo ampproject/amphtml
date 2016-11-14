@@ -19,6 +19,7 @@ tags: {  # amp-sidebar
   tag_name: "SCRIPT"
   mandatory_parent: "HEAD"
   spec_name: "amp-sidebar extension .js script"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true

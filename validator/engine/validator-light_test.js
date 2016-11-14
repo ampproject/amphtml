@@ -16,7 +16,7 @@
  */
 goog.provide('amp.validator.ValidatorTest');
 goog.require('amp.htmlparser.HtmlParser');
-goog.require('amp.validator.CssLengthAndUnit');
+goog.require('amp.validator.CssLength');
 goog.require('amp.validator.ValidationHandler');
 
 /**
@@ -219,12 +219,13 @@ describe('ValidatorCssLengthValidation', () => {
   });
 });
 
-describe('CssLengthAndUnit', () => {
+describe('CssLength', () => {
   it('parses a basic example', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit('10.1em', /* allowAuto */ false);
+        new amp.validator.CssLength('10.1em', /* allowAuto */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
+    expect(parsed.numeral).toEqual(10.1);
     expect(parsed.unit).toEqual('em');
     expect(parsed.isAuto).toBe(false);
   });
@@ -233,9 +234,10 @@ describe('CssLengthAndUnit', () => {
     for (const allowedUnit of ['px', 'em', 'rem', 'vh', 'vmin', 'vmax']) {
       const example = '10' + allowedUnit;
       const parsed =
-          new amp.validator.CssLengthAndUnit(example, /* allowAuto */ false);
+          new amp.validator.CssLength(example, /* allowAuto */ false);
       expect(parsed.isSet).toBe(true);
       expect(parsed.isValid).toBe(true);
+      expect(parsed.numeral).toEqual(10);
       expect(parsed.unit).toEqual(allowedUnit);
       expect(parsed.isAuto).toBe(false);
     }
@@ -243,16 +245,17 @@ describe('CssLengthAndUnit', () => {
 
   it('understands empty unit as "px"', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit('10', /* allowAuto */ false);
+        new amp.validator.CssLength('10', /* allowAuto */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
+    expect(parsed.numeral).toEqual(10);
     expect(parsed.unit).toEqual('px');
     expect(parsed.isAuto).toBe(false);
   });
 
   it('understands undefined input as valid (means attr is not set)', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit(undefined, /* allowAuto */ false);
+        new amp.validator.CssLength(undefined, /* allowAuto */ false);
     expect(parsed.isSet).toBe(false);
     expect(parsed.isValid).toBe(true);
     expect(parsed.unit).toEqual('px');
@@ -261,33 +264,33 @@ describe('CssLengthAndUnit', () => {
 
   it('understands empty string as invalid (means attr value is empty)', () => {
     const parsed =
-        new amp.validator.CssLengthAndUnit('', /* allowAuto */ false);
+        new amp.validator.CssLength('', /* allowAuto */ false);
     expect(parsed.isValid).toBe(false);
   });
 
   it('considers other garbage as invalid', () => {
-    expect(new amp.validator.CssLengthAndUnit('100%', /* allowAuto */ false)
+    expect(new amp.validator.CssLength('100%', /* allowAuto */ false)
                .isValid)
         .toBe(false);
     expect(new amp.validator
-               .CssLengthAndUnit('not a number', /* allowAuto */ false)
+               .CssLength('not a number', /* allowAuto */ false)
                .isValid)
         .toBe(false);
-    expect(new amp.validator.CssLengthAndUnit('1.1.1', /* allowAuto */ false)
+    expect(new amp.validator.CssLength('1.1.1', /* allowAuto */ false)
                .isValid)
         .toBe(false);
-    expect(new amp.validator.CssLengthAndUnit('5 inches', /* allowAuto */ false)
+    expect(new amp.validator.CssLength('5 inches', /* allowAuto */ false)
                .isValid)
         .toBe(false);
     expect(
-        new amp.validator.CssLengthAndUnit('fahrenheit', /* allowAuto */ false)
+        new amp.validator.CssLength('fahrenheit', /* allowAuto */ false)
             .isValid)
         .toBe(false);
     expect(
-        new amp.validator.CssLengthAndUnit('px', /* allowAuto */ false).isValid)
+        new amp.validator.CssLength('px', /* allowAuto */ false).isValid)
         .toBe(false);
     expect(new amp.validator
-               .CssLengthAndUnit(  // screen size in ancient Rome.
+               .CssLength(  // screen size in ancient Rome.
                    'ix unciae', /* allowAuto */ false)
                .isValid)
         .toBe(false);
@@ -296,19 +299,19 @@ describe('CssLengthAndUnit', () => {
   it('recongizes auto if allowed', () => {
     {// allow_auto = false with input != auto
      const parsed =
-         new amp.validator.CssLengthAndUnit('1', /* allowAuto */ false);
+         new amp.validator.CssLength('1', /* allowAuto */ false);
      expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
         // allow_auto = true with input == auto
         const parsed =
-            new amp.validator.CssLengthAndUnit('1', /* allowAuto */ true);
+            new amp.validator.CssLength('1', /* allowAuto */ true);
         expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
         // allow_auto = false with input = auto
         const parsed =
-            new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ false);
+            new amp.validator.CssLength('auto', /* allowAuto */ false);
         expect(parsed.isValid).toBe(false);} {
         // allow_auto = true with input = auto
         const parsed =
-            new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ true);
+            new amp.validator.CssLength('auto', /* allowAuto */ true);
         expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(true);}
   });
 });

@@ -19,6 +19,7 @@ tags: {  # amp-accordion
   tag_name: "SCRIPT"
   spec_name: "amp-accordion extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true

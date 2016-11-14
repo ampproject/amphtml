@@ -1,2 +1,2 @@
 FAIL
-amp-reach-player/0.1/test/validator-amp-reach-player.html:39:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. (see https://www.ampproject.org/docs/reference/extended/amp-reach-player.html) [AMP_TAG_PROBLEM]
+amp-reach-player/0.1/test/validator-amp-reach-player.html:38:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. (see https://www.ampproject.org/docs/reference/extended/amp-reach-player.html) [AMP_TAG_PROBLEM]
