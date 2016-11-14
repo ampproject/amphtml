@@ -103,6 +103,10 @@ function normalizeRows(rows) {
   // normalize amp-shadow.js
   normalizeRow(rows, 'shadow-v0.js', 'amp-shadow.js', true);
 
+  normalizeRow(rows, 'a4a-v0.js', 'amp-inabox.js', true);
+
+  normalizeRow(rows, 'a4a-host-v0.js', 'amp-inabox-host.js', true);
+
   // normalize sw.js
   normalizeRow(rows, 'sw.js', 'sw.max.js', true);
   normalizeRow(rows, 'sw-kill.js', 'sw-kill.max.js', true);

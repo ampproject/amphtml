@@ -48,7 +48,7 @@ var extensions = {};
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-access-laterpay', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true);
-declareExtension('amp-ad', '0.1', false);
+declareExtension('amp-ad', '0.1', true);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
@@ -72,6 +72,7 @@ declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-gfycat', '0.1', false);
+declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
@@ -104,6 +105,7 @@ declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-vine', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-viz-vega', '0.1', true);
 declareExtension('amp-google-vrview-image', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-viewer-integration', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 
 /**
@@ -202,6 +204,30 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     wrapper: '<%= contents %>'
+  });
+
+  // Entry point for inabox runtime.
+  compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+    toName: 'amp-inabox.js',
+    minifiedName: 'a4a-v0.js',
+    includePolyfills: true,
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    minify: shouldMinify,
+    wrapper: '<%= contents %>',
+  });
+
+  // inabox-host
+  compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+    toName: 'amp-inabox-host.js',
+    minifiedName: 'a4a-host-v0.js',
+    includePolyfills: false,
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    minify: shouldMinify,
+    wrapper: '<%= contents %>',
   });
 
   var frameHtml = '3p/frame.max.html';
@@ -334,7 +360,7 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: options.noWrapper ? '' : ('(window.AMP = window.AMP || [])' +
+    wrapper: options.noWrapper ? '' : ('(self.AMP = self.AMP || [])' +
         '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
   });
 }
@@ -343,6 +369,18 @@ function buildExtensionJs(path, name, version, options) {
  * Main Build
  */
 function build() {
+  var TESTING_HOST = process.env.AMP_TESTING_HOST;
+  if (argv.fortesting && typeof TESTING_HOST == 'string') {
+    var AMP_CONFIG = {
+      thirdPartyFrameHost: TESTING_HOST,
+      thirdPartyFrameRegex: TESTING_HOST,
+      localDev: true,
+    };
+    console.log($$.util.colors.green('trying to write AMP_CONFIG.'));
+    fs.writeFileSync('node_modules/AMP_CONFIG.json',
+        JSON.stringify(AMP_CONFIG));
+    console.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+  }
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();
@@ -384,7 +422,9 @@ function checkTypes() {
   var compileSrcs = [
     './src/amp-babel.js',
     './src/amp-shadow.js',
+    './src/inabox/amp-inabox.js',
     './ads/alp/install-alp.js',
+    './ads/inabox/inabox-host.js',
     './src/service-worker/shell.js',
     './src/service-worker/core.js',
     './src/service-worker/kill.js',
@@ -395,15 +435,15 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
-  closureCompile(compileSrcs.concat(extensionSrcs),  './dist',
+  closureCompile(compileSrcs.concat(extensionSrcs), './dist',
       'check-types.js', {
         includePolyfills: true,
         checkTypes: true,
       });
   // Type check 3p/ads code.
-  closureCompile(['./3p/integration.js'],  './dist',
+  closureCompile(['./3p/integration.js'], './dist',
       'integration-check-types.js', {
-        externs: ['ads/ads.extern.js',],
+        externs: ['ads/ads.extern.js'],
         include3pDirectories: true,
         includePolyfills: true,
         checkTypes: true,

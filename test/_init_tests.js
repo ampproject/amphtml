@@ -27,6 +27,7 @@ import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
 import * as describes from '../testing/describes';
 
 
@@ -44,11 +45,12 @@ adopt(window);
 // Override AMP.extension to buffer extension installers.
 /**
  * @param {string} name
+ * @param {string} version
  * @param {function(!Object)} installer
  * @const
  */
-global.AMP.extension = function(name, installer) {
-  describes.bufferExtension(name, installer);
+global.AMP.extension = function(name, version, installer) {
+  describes.bufferExtension(`${name}:${version}`, installer);
 };
 
 
@@ -226,6 +228,7 @@ afterEach(function() {
         '(installed via sandbox.useFakeTimers).');
   }
   setDefaultBootstrapBaseUrlForTesting(null);
+  resetAccumulatedErrorMessagesForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
@@ -257,15 +260,17 @@ chai.Assertion.addProperty('visible', function() {
   const computedStyle = window.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
+  const isOpaque = parseInt(opacity, 10) > 0;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-    visibility === 'visible' || parseInt(opacity, 10) > 0,
-    'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-    'expected element \'' +
-        tagName + '\' not to be #{act}. with classes: ' + obj.className,
-    'visible',
-    visibility
+      visibility === 'visible' && isOpaque,
+      'expected element \'' +
+      tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+      'expected element \'' +
+      tagName + '\' not to be #{exp}, got #{act}. with classes: ' +
+      obj.className,
+      'visible and opaque',
+      `visibility = ${visibility} and opacity = ${opacity}`
   );
 });
 

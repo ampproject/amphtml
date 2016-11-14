@@ -100,12 +100,14 @@ class AmpLightbox extends AMP.BaseElement {
     this.getViewport().enterLightboxMode();
 
     this.mutateElement(() => {
-      this.element.style.display = '';
-      this.element.style.opacity = 0;
-      // TODO(dvoytenko): use new animations support instead.
-      this.element.style.transition = 'opacity 0.1s ease-in';
+      st.setStyles(this.element, {
+        display: '',
+        opacity: 0,
+        // TODO(dvoytenko): use new animations support instead.
+        transition: 'opacity 0.1s ease-in',
+      });
       vsyncFor(this.win).mutate(() => {
-        this.element.style.opacity = '';
+        st.setStyle(this.element, 'opacity', '');
       });
     }).then(() => {
       const container = dev().assertElement(this.container_);

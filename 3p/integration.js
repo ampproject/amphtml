@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,7 @@ import {eplanning} from '../ads/eplanning';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
+import {holder} from '../ads/holder';
 import {ibillboard} from '../ads/ibillboard';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
@@ -82,6 +83,8 @@ import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
+import {medianet} from '../ads/medianet';
+import {mediavine} from '../ads/mediavine';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
 import {mixpo} from '../ads/mixpo';
@@ -175,6 +178,7 @@ register('facebook', facebook);
 register('flite', flite);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
+register('holder', holder);
 register('ibillboard', ibillboard);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
@@ -188,6 +192,8 @@ register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
+register('medianet', medianet);
+register('mediavine', mediavine);
 register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);

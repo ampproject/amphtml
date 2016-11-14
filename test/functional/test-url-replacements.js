@@ -148,6 +148,14 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace COUNTER', () => {
+    return expandAsync(
+        'COUNTER(foo),COUNTER(bar),COUNTER(foo),COUNTER(bar),COUNTER(bar)')
+            .then(res => {
+              expect(res).to.equal('1,1,2,2,3');
+            });
+  });
+
   it('should replace CANONICAL_URL', () => {
     return expandAsync('?href=CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
@@ -596,10 +604,10 @@ describe('UrlReplacements', () => {
 
   it('should replace new substitutions', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('ONE', () => 'a');
+    replacements.getVariableSource().set('ONE', () => 'a');
     expect(replacements.expandAsync('?a=ONE')).to.eventually.equal('?a=a');
-    replacements.set_('ONE', () => 'b');
-    replacements.set_('TWO', () => 'b');
+    replacements.getVariableSource().set('ONE', () => 'b');
+    replacements.getVariableSource().set('TWO', () => 'b');
     return expect(replacements.expandAsync('?a=ONE&b=TWO'))
         .to.eventually.equal('?a=b&b=b');
   });
@@ -607,7 +615,7 @@ describe('UrlReplacements', () => {
   it('should report errors & replace them with empty string (sync)', () => {
     const clock = sandbox.useFakeTimers();
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('ONE', () => {
+    replacements.getVariableSource().set('ONE', () => {
       throw new Error('boom');
     });
     const p = expect(replacements.expandAsync('?a=ONE')).to.eventually
@@ -621,7 +629,7 @@ describe('UrlReplacements', () => {
   it('should report errors & replace them with empty string (promise)', () => {
     const clock = sandbox.useFakeTimers();
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('ONE', () => {
+    replacements.getVariableSource().set('ONE', () => {
       return Promise.reject(new Error('boom'));
     });
     return expect(replacements.expandAsync('?a=ONE')).to.eventually.equal('?a=')
@@ -634,14 +642,14 @@ describe('UrlReplacements', () => {
 
   it('should support positional arguments', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('FN', one => one);
+    replacements.getVariableSource().set('FN', one => one);
     return expect(replacements.expandAsync('?a=FN(xyz1)')).to
         .eventually.equal('?a=xyz1');
   });
 
   it('should support multiple positional arguments', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('FN', (one, two) => {
+    replacements.getVariableSource().set('FN', (one, two) => {
       return one + '-' + two;
     });
     return expect(replacements.expandAsync('?a=FN(xyz,abc)')).to
@@ -650,7 +658,7 @@ describe('UrlReplacements', () => {
 
   it('should support multiple positional arguments with dots', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('FN', (one, two) => {
+    replacements.getVariableSource().set('FN', (one, two) => {
       return one + '-' + two;
     });
     return expect(replacements.expandAsync('?a=FN(xy.z,ab.c)')).to
@@ -659,10 +667,10 @@ describe('UrlReplacements', () => {
 
   it('should support promises as replacements', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('P1', () => Promise.resolve('abc '));
-    replacements.set_('P2', () => Promise.resolve('xyz'));
-    replacements.set_('P3', () => Promise.resolve('123'));
-    replacements.set_('OTHER', () => 'foo');
+    replacements.getVariableSource().set('P1', () => Promise.resolve('abc '));
+    replacements.getVariableSource().set('P2', () => Promise.resolve('xyz'));
+    replacements.getVariableSource().set('P3', () => Promise.resolve('123'));
+    replacements.getVariableSource().set('OTHER', () => 'foo');
     return expect(replacements.expandAsync('?a=P1&b=P2&c=P3&d=OTHER'))
         .to.eventually.equal('?a=abc%20&b=xyz&c=123&d=foo');
   });
@@ -922,7 +930,7 @@ describe('UrlReplacements', () => {
         iframe.doc.head.appendChild(link);
 
         const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        replacements.getAccessService_ = () => {
+        replacements.getVariableSource().getAccessService_ = () => {
           if (opt_disabled) {
             return Promise.resolve(null);
           }
