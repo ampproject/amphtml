@@ -91,11 +91,11 @@ class AmpO2Player extends AMP.BaseElement {
   layoutCallback() {
     user().assert(
         this.pid_,
-        'Data-pid attribute is required for <amp-o2-player> %s',
+        'data-pid attribute is required for <amp-o2-player> %s',
         this.element);
     user().assert(
         this.bcid_,
-        'Data-bcid attribute is required for <amp-o2-player> %s',
+        'data-bcid attribute is required for <amp-o2-player> %s',
         this.element);
 
     const iframe = this.element.ownerDocument.createElement('iframe');
