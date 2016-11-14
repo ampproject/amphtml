@@ -517,8 +517,9 @@ export class FetchResponse {
 
 /**
  * Provides access to the response headers as defined in the Fetch API.
+ * @private Visible for testing.
  */
-class FetchResponseHeaders {
+export class FetchResponseHeaders {
   /**
    * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
@@ -533,6 +534,14 @@ class FetchResponseHeaders {
    */
   get(name) {
     return this.xhr_.getResponseHeader(name);
+  }
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  has(name) {
+    return this.xhr_.getResponseHeader(name) != null;
   }
 }
 
