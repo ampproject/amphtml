@@ -72,6 +72,7 @@ declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-gfycat', '0.1', false);
+declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
@@ -359,7 +360,7 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: options.noWrapper ? '' : ('(window.AMP = window.AMP || [])' +
+    wrapper: options.noWrapper ? '' : ('(self.AMP = self.AMP || [])' +
         '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
   });
 }

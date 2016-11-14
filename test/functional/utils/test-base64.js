@@ -20,8 +20,71 @@ import {
   base64UrlEncodeFromBytes,
   base64EncodeFromBytes,
 } from '../../../src/utils/base64';
-import {stringToBytes} from '../../../src/utils/bytes';
+import {
+  stringToBytes,
+  utf8DecodeSync,
+  utf8EncodeSync,
+} from '../../../src/utils/bytes';
 
+describe('base64 <> utf-8 encode/decode', () => {
+  const testCases = [
+    'SimplyFoo',
+    'Unicode௵Z加䅌ਇ☎Èʘغޝ',
+    'Symbols/.,+-_()*&^%$#@!`~:="\'',
+  ];
+  const scenarios = ['NativeTextEncoding', 'PolyfillTextEncoding', 'Mixed'];
+
+  scenarios.forEach(scenario => {
+    describe(scenario, () => {
+      const oldTextEncoder = window.TextEncoder;
+      const oldTextDecoder = window.TextDecoder;
+      beforeEach(() => {
+        // Forces use of the TextEncoding polyfill
+        if (scenario == 'PolyfillTextEncoding') {
+          window.TextEncoder = undefined;
+          window.TextDecoder = undefined;
+        }
+        // Tests a mixture where encoding is done by the polyfill but decoding
+        // is done by the native TextDecoder
+        if (scenario == 'Mixed') {
+          window.TextEncoder = undefined;
+        }
+      });
+
+      afterEach(() => {
+        window.TextEncoder = oldTextEncoder;
+        window.TextDecoder = oldTextDecoder;
+      });
+
+      describe('base64Encode/base64Decode', () => {
+        testCases.forEach(testCase => {
+          it(testCase, () => {
+            const utf8Bytes = utf8EncodeSync(testCase);
+            const encoded = base64EncodeFromBytes(utf8Bytes);
+            expect(encoded).not.to.equal(testCase);
+            const decodedUtf8Bytes = base64DecodeToBytes(encoded);
+            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            expect(decoded).to.equal(testCase);
+          });
+        });
+      });
+
+      describe('base64UrlEncode/base64UrlDecode', () => {
+        testCases.forEach(testCase => {
+          it(testCase, () => {
+            const utf8Bytes = utf8EncodeSync(testCase);
+            const encoded = base64UrlEncodeFromBytes(utf8Bytes);
+            expect(encoded).not.to.equal(testCase);
+            expect(encoded).not.to.match(/[+/=]/g);
+            const decodedUtf8Bytes = base64UrlDecodeToBytes(encoded);
+            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            expect(decoded).to.equal(testCase);
+          });
+        });
+      });
+    });
+  });
+});
 
 describe('base64UrlDecodeToBytes', () => {
   it('should map a sample string appropriately', () => {
