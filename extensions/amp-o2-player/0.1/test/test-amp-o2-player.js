@@ -37,9 +37,7 @@ describe('amp-o2-player', () => {
       if (opt_responsive) {
         o2.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(o2);
-      o2.implementation_.layoutCallback();
-      return o2;
+      return iframe.addElement(o2);
     });
   }
 
