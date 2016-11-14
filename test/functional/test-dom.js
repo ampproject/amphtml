@@ -79,7 +79,7 @@ describe('DOM', () => {
 
   it('closest should stop search at opt_stopAt', () => {
     const cbSpy = sandbox.spy();
-    const cb = (el) => {
+    const cb = el => {
       cbSpy();
       return el.tagName == 'DIV';
     };

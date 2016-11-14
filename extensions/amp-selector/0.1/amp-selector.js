@@ -16,6 +16,7 @@
 
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 
 export class AmpSelector extends AMP.BaseElement {
   /** @param {!AmpElement} element */
