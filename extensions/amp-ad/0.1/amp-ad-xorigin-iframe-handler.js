@@ -244,6 +244,18 @@ export class AmpAdXOriginIframeHandler {
   }
 
   /**
+   * Attempts to resize the element based on the actual size of the returned
+   * multi-size creative. The dimensions will have been validated elsewhere, so
+   * no check is needed here.
+   *
+   * @param {number|string} width
+   * @param {number|string} height
+   */
+  updateSizeForMultisize(width, height) {
+    this.baseInstance_.attemptChangeSize(height, width);
+  }
+
+  /**
    * Sends a response to the window which requested a resize.
    * @param {boolean} success
    * @param {number} requestedWidth
