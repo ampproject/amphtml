@@ -430,7 +430,7 @@ export class FixedLayer {
    * Removes element from the fixed layer.
    *
    * @param {!Element} element
-   * @return {FixedElementDef|undefined} [description]
+   * @return {FixedElementDef|undefined}
    * @private
    */
   removeFixedElement_(element) {

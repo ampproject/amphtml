@@ -33,6 +33,7 @@ import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
+import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
@@ -706,6 +707,8 @@ describe('amp-a4a', () => {
                 }),
                 'Some style is "background: green"').to.be.true;
             expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+            expect(urlReplacementsForDoc(frameDoc))
+                .to.not.equal(urlReplacementsForDoc(a4aElement));
           });
         });
       });
