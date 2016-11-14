@@ -35,9 +35,7 @@ describe('amp-vimeo', () => {
       if (opt_responsive) {
         vimeo.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(vimeo);
-      vimeo.implementation_.layoutCallback();
-      return vimeo;
+      return iframe.addElement(vimeo);
     });
   }
 

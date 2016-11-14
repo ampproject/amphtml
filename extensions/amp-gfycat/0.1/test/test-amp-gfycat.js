@@ -38,9 +38,7 @@ describe('amp-gfycat', () => {
       if (opt_params && opt_params.noautoplay) {
         gfycat.setAttribute('noautoplay', '');
       }
-      iframe.doc.body.appendChild(gfycat);
-      gfycat.implementation_.layoutCallback();
-      return gfycat;
+      return iframe.addElement(gfycat);
     });
   }
 

@@ -34,9 +34,7 @@ describe('amp-vine', () => {
       if (opt_responsive) {
         vine.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(vine);
-      vine.implementation_.layoutCallback();
-      return vine;
+      return iframe.addElement(vine);
     });
   }
 

@@ -31,9 +31,7 @@ describe('amp-hulu', () => {
       if (opt_responsive) {
         hulu.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(hulu);
-      hulu.implementation_.buildCallback();
-      return hulu;
+      return iframe.addElement(hulu);
     });
   }
 

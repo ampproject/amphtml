@@ -36,9 +36,7 @@ describe('amp-kaltura-player', () => {
       if (opt_responsive) {
         kalturaPlayer.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(kalturaPlayer);
-      kalturaPlayer.implementation_.layoutCallback();
-      return kalturaPlayer;
+      return iframe.addElement(kalturaPlayer);
     });
   }
 

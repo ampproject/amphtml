@@ -28,16 +28,14 @@ describe('amp-springboard-player', () => {
   function getSpringboardPlayer(attributes) {
     return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
-      const bc = iframe.doc.createElement('amp-springboard-player');
+      const sp = iframe.doc.createElement('amp-springboard-player');
       for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
+        sp.setAttribute(key, attributes[key]);
       }
-      bc.setAttribute('width', '480');
-      bc.setAttribute('height', '270');
-      bc.setAttribute('layout', 'responsive');
-      iframe.doc.body.appendChild(bc);
-      bc.implementation_.layoutCallback();
-      return bc;
+      sp.setAttribute('width', '480');
+      sp.setAttribute('height', '270');
+      sp.setAttribute('layout', 'responsive');
+      return iframe.addElement(sp);
     });
   }
 
@@ -66,7 +64,7 @@ describe('amp-springboard-player', () => {
       'data-player-id': 'test401',
       'data-domain': 'test.com',
       'data-items': '10',
-    }, true).then(bc => {
+    }).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/-amp-fill-content/);
@@ -74,8 +72,58 @@ describe('amp-springboard-player', () => {
   });
 
   it('requires data-site-id', () => {
-    return getSpringboardPlayer({}).should.eventually.be
+    return getSpringboardPlayer({
+      'data-mode': 'video',
+      'data-content-id': '1578473',
+      'data-player-id': 'test401',
+      'data-domain': 'test.com',
+      'data-items': '10',
+    }).should.eventually.be
         .rejectedWith(/The data-site-id attribute is required for/);
+  });
+
+  it('requires data-mode', () => {
+    return getSpringboardPlayer({
+      'data-site-id': '261',
+      'data-content-id': '1578473',
+      'data-player-id': 'test401',
+      'data-domain': 'test.com',
+      'data-items': '10',
+    }).should.eventually.be
+        .rejectedWith(/The data-mode attribute is required for/);
+  });
+
+  it('requires data-content-id', () => {
+    return getSpringboardPlayer({
+      'data-mode': 'video',
+      'data-site-id': '261',
+      'data-player-id': 'test401',
+      'data-domain': 'test.com',
+      'data-items': '10',
+    }).should.eventually.be
+        .rejectedWith(/The data-content-id attribute is required for/);
+  });
+
+  it('requires data-player-id', () => {
+    return getSpringboardPlayer({
+      'data-mode': 'video',
+      'data-site-id': '261',
+      'data-content-id': '1578473',
+      'data-domain': 'test.com',
+      'data-items': '10',
+    }).should.eventually.be
+        .rejectedWith(/The data-player-id attribute is required for/);
+  });
+
+  it('requires data-domain', () => {
+    return getSpringboardPlayer({
+      'data-mode': 'video',
+      'data-site-id': '261',
+      'data-content-id': '1578473',
+      'data-player-id': 'test401',
+      'data-items': '10',
+    }).should.eventually.be
+        .rejectedWith(/The data-domain attribute is required for/);
   });
 
   describe('createPlaceholderCallback', () => {
