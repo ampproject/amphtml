@@ -55,7 +55,7 @@ export class IntersectionObserverPolyfill {
      * A list of threshold, sorted in increasing numeric order
      * @private @const {!Array}
      */
-    this.threshold_ = opt_option ? opt_option.threshold : [0];
+    this.threshold_ = opt_option && opt_option.threshold || [0];
     this.threshold_ = this.threshold_.sort();
     dev().assert(this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,
@@ -63,9 +63,6 @@ export class IntersectionObserverPolyfill {
 
     /** @private {?Element} */
     this.element_ = null;
-
-    /** @private {boolean} */
-    this.isAmpElement_ = false;
 
     /**
      * The prev threshold slot which the previous ratio fills
@@ -186,8 +183,10 @@ export class IntersectionObserverPolyfill {
     // If element inside an iframe. Every Layoutrect has already adjust their
     // origin according to opt_iframe rect origin.
     if (opt_iframe) {
-      // If element inside an iframe. Every LayoutRect has already adjust their
-      // origin according to opt_iframe rect origin.
+      // If element is inside a non-scrollable iframe. LayoutRect position is
+      // relative to iframe origin, thus relative to iframe's viewport origin,
+      // because the viewport is at the iframe origin.
+      // No need to adjust position here.
       // To get same behavior as native IntersectionObserver set rootBounds null
       rootBounds = null;
     } else {
