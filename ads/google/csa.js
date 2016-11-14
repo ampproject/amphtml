@@ -18,15 +18,63 @@ import {validateData, loadScript} from '../../3p/3p';
 // Global variables to store backfill options
 let backfillAfsPageOptions = null;
 let backfillAfsAdblockOptions = null;
+let currentAmpHeight = null;
 
 /**
  * Helper function to resize the height of a CSA container and its child iframe
  * @param {Object} container HTML element of the CSA container
- * @param {string} height Height to resize, in pixels (i.e. '300px')
+ * @param {number} height Height to resize, in pixels
  */
 function resizeCsa(container, height) {
-  container.firstChild.style.height = height;
-  container.style.height = height;
+  container.firstChild.style.height = height + 'px';
+  container.style.height = height + 'px';
+}
+
+/**
+ * Helper function to create an overflow element
+ * @param {number} overflowH Height of the overflow element
+ * @param {number} fullH Height the iframe should be when overflow is clicked
+ * @param {Object} container HTML element of the CSA container
+ * @param {number} containerH Height to resize the CSA container, in pixels
+ */
+function createOverflow(overflowH, fullH, container, containerH) {
+  const overflow = document.createElement('div');
+  overflow.id = 'overflow';
+  overflow.style.position = 'absolute';
+  overflow.style.height = overflowH + 'px';
+  overflow.style.width = '100%';
+
+  // Create the line
+  const line = document.createElement('div');
+  line.style.background = 'rgba(0,0,0,.16)';
+  line.style.height = '1px';
+  overflow.appendChild(line);
+
+  // SVG element (chevron) with styling
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
+      'height="36px" viewBox="0 0 48 48" fill="#757575"><path d="M14.83' +
+      ' 16.42L24 25.59l9.17-9.17L36 19.25l-12 12-12-12z"/>' +
+      '<path d="M0-.75h48v48H0z" fill="none"/> </svg>';
+
+  const chevron = document.createElement('div');
+  chevron.style.width = '36px';
+  chevron.style.height = '36px';
+  chevron.style.marginLeft = 'auto';
+  chevron.style.marginRight = 'auto';
+  chevron.style.display = 'block';
+  chevron.innerHTML = svg;
+
+  overflow.appendChild(chevron);
+
+  // When the overflow element is clicked, resize the AMP iframe
+  // to what we tried to resize before
+  overflow.onclick = function() {
+    window.context.requestResize('auto', fullH);
+  };
+
+  document.body.appendChild(overflow);
+
+  resizeCsa(container, containerH);
 }
 
 /**
@@ -42,54 +90,18 @@ function resizeIframe(containerName, adsLoaded) {
       // Get actual height and width of container
       const container = document.querySelector('#' + containerName);
       const height = container.offsetHeight;
-      const ampHeight =
+      currentAmpHeight =
           window.context.initialIntersection.boundingClientRect.height;
       const overflowHeight = 40;
 
       // If the height of the container is larger than the height of the
       // initially requested AMP tag, add the overflow element
-      if (height > ampHeight) {
+      if (height > currentAmpHeight) {
 
         // Create the overflow
-        const overflow = document.createElement('div');
-        overflow.id = 'overflow';
-        overflow.style.position = 'absolute';
-        overflow.style.height = overflowHeight + 'px';
-        overflow.style.width = '100%';
+        createOverflow(overflowHeight, height, container,
+          currentAmpHeight - overflowHeight);
 
-        // Create the line
-        const line = document.createElement('div');
-        line.style.background = 'rgba(0,0,0,.16)';
-        line.style.height = '1px';
-        overflow.appendChild(line);
-
-        // SVG element (chevron) with styling
-        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
-            'height="36px" viewBox="0 0 48 48" fill="#757575"><path d="M14.83' +
-            ' 16.42L24 25.59l9.17-9.17L36 19.25l-12 12-12-12z"/>' +
-            '<path d="M0-.75h48v48H0z" fill="none"/> </svg>';
-
-        const chevron = document.createElement('div');
-        chevron.style.width = '36px';
-        chevron.style.height = '36px';
-        chevron.style.marginLeft = 'auto';
-        chevron.style.marginRight = 'auto';
-        chevron.style.display = 'block';
-        chevron.innerHTML = svg;
-
-        overflow.appendChild(chevron);
-
-        // When the overflow element is clicked, resize the AMP iframe
-        // to what we tried to resize before
-        overflow.onclick = function() {
-          window.context.requestResize('auto', height);
-        };
-
-        document.body.appendChild(overflow);
-
-        // Resize the CSA iframe and container
-        const newHeight = (ampHeight - overflowHeight) + 'px';
-        resizeCsa(container, newHeight);
       }
 
       // Attempt to resize to actual CSA container height
@@ -98,26 +110,33 @@ function resizeIframe(containerName, adsLoaded) {
       // Listen for success
       window.context.onResizeSuccess(function(requestedHeight) {
 
+        currentAmpHeight = requestedHeight;
+
         const overflow = document.getElementById('overflow');
 
         // Hide overflow and resize container to full height
         if (overflow) {
           overflow.style.display = 'none';
-          requestedHeight = requestedHeight + 'px';
           resizeCsa(container, requestedHeight);
         }
 
       });
 
-      window.context.onResizeDenied(function() {
-
+      window.context.onResizeDenied(function(requestedHeight) {
         const overflow = document.getElementById('overflow');
+        const containerHeight =
+        parseInt(document.getElementById('csacontainer').style.height, 10);
 
-        // Show overflow element and resize container to include overflow
-        if (overflow) {
-          overflow.style.display = '';
-          const newHeight = (ampHeight - overflowHeight) + 'px';
-          resizeCsa(container, newHeight);
+        if (containerHeight > currentAmpHeight) {
+
+          // Show overflow element and resize container to include overflow
+          if (overflow) {
+            overflow.style.display = '';
+            resizeCsa(container, currentAmpHeight - overflowHeight);
+          } else {
+            createOverflow(overflowHeight, requestedHeight, container,
+              currentAmpHeight - overflowHeight);
+          }
         }
       });
 
@@ -179,13 +198,10 @@ window.addEventListener('orientationchange', function() {
     // container height is resized.
     // In Chrome and iOS 10.0.2 the height is the same because
     // the container isn't resized.
-    if (oldHeight != newHeight) {
+    if (oldHeight != newHeight && newHeight != currentAmpHeight) {
 
       // style.height returns "60px" (for example), so turn this into an int
       newHeight = parseInt(newHeight, 10);
-
-      // Resize the container to the correct height
-      window.context.requestResize('auto', newHeight);
 
       // Also update the onclick function to resize to the right height.
       const overflow = document.getElementById('overflow');
@@ -194,6 +210,9 @@ window.addEventListener('orientationchange', function() {
           window.context.requestResize('auto', newHeight);
         };
       }
+
+      // Resize the container to the correct height
+      window.context.requestResize('auto', newHeight);
     }
 
   }, orientationChangeTimeout);
