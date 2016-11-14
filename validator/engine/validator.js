@@ -2337,7 +2337,7 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * @return {boolean}
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
-  return tag.mandatory || tag.unique ||
+  return tag.mandatory || tag.unique || tag.uniqueWarning ||
       tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
 }
 
@@ -3436,19 +3436,30 @@ function validateTagAgainstSpec(
     const isUnique = context.recordTagspecValidated(parsedSpec.getId());
     // If a duplicate tag is encountered for a spec that's supposed
     // to be unique, we've found an error that we must report.
-    if (spec.unique && !isUnique) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(spec)], spec.specUrl,
-            resultForBestAttempt);
-      } else {
-        resultForBestAttempt.status =
-            amp.validator.ValidationResult.Status.FAIL;
+    if (!isUnique) {
+      if (spec.unique) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              resultForBestAttempt);
+        } else {
+          resultForBestAttempt.status =
+              amp.validator.ValidationResult.Status.FAIL;
+        }
+        return;
+      } else if (spec.uniqueWarning) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.WARNING,
+              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              resultForBestAttempt);
+        }
       }
-      return;
     }
   }
 
@@ -4723,7 +4734,9 @@ amp.validator.categorizeError = function(error) {
   }
   // E.g. "The tag 'boilerplate (noscript) - old variant' appears
   // more than once in the document."
-  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG) {
+  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG ||
+      error.code ===
+          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING) {
     return amp.validator.ErrorCategory.Code
         .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
   }

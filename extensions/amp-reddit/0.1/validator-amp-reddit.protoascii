@@ -21,6 +21,7 @@ tags: {  # amp-reddit
   spec_name: "amp-reddit extension .js script"
   also_requires_tag: "amp-reddit"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true

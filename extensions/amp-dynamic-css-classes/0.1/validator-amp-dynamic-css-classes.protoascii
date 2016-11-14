@@ -19,6 +19,7 @@ tags: {  # amp-dynamic-css-classes
   tag_name: "SCRIPT"
   spec_name: "amp-dynamic-css-classes extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
