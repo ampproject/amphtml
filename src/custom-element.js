@@ -998,6 +998,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Element}
+     * @final @this {!Element}
+     */
+    getOwner() {
+      return this.getResources().getResourceForElement(this).getOwner();
+    }
+
+    /**
      * Returns a change entry for that should be compatible with
      * IntersectionObserverEntry.
      * @return {!IntersectionObserverEntry} A change entry.
