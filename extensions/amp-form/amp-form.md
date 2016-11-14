@@ -65,7 +65,7 @@ Example:
             Subscription successful!
         </template>
     </div>
-    <div submit-failed>
+    <div submit-error>
         <template type="amp-mustache">
             Subscription failed!
         </template>
