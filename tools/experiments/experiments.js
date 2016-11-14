@@ -87,6 +87,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
+    id: 'amp-inabox',
+    name: 'AMP inabox',
+    spec: 'https://github.com/ampproject/amphtml/issues/5700',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
+  },
+  {
     id: 'amp-scrollable-carousel',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
