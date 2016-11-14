@@ -37,9 +37,7 @@ describe('amp-reach-player', () => {
       if (opt_responsive) {
         reach.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(reach);
-      reach.implementation_.layoutCallback();
-      return reach;
+      return iframe.addElement(reach);
     });
   }
 

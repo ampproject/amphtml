@@ -37,9 +37,7 @@ describe('amp-brid-player', () => {
       if (opt_responsive) {
         bc.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(bc);
-      bc.implementation_.layoutCallback();
-      return bc;
+      return iframe.addElement(bc);
     });
   }
 

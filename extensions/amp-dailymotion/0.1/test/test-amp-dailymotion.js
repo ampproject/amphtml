@@ -38,9 +38,7 @@ describe('amp-dailymotion', () => {
       if (optCustomSettings) {
         dailymotion.setAttribute('data-start', 123);
       }
-      iframe.doc.body.appendChild(dailymotion);
-      dailymotion.implementation_.layoutCallback();
-      return dailymotion;
+      return iframe.addElement(dailymotion);
     });
   }
 
