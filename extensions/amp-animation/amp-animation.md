@@ -49,7 +49,7 @@ An `amp-animation` element defines such an animation as a JSON structure.
 The top-level object defines an overall animation process which consists of an arbitrary number of animation components
 defined as an `animations` array:
 ```
-<amp-animation>
+<amp-animation layout="nodisplay">
 <script type="application/json">
 {
   // Timiing properties
@@ -89,6 +89,7 @@ and is comprised of:
 
 Top-level animation and animation components may contain timing properties. These properties are defined in detail in the
 [AnimationEffectTimingProperties](https://www.w3.org/TR/web-animations/#dictdef-animationeffecttimingproperties) of the Web Animation spec. The set of properties allowed here includes:
+
 Property | Type | Default | Description
 -------- | ---- | ------- | -----------
 `duration` | number | 0 | The animation duration in milliseconds
@@ -198,7 +199,7 @@ Notice that the use of vendor prefixed CSS properties is neither needed nor allo
 If the animation only involves a single element and a single keyframes effect is sufficient, the configuration
 can be reduced to this one animation component only. For instance:
 ```
-<amp-animation>
+<amp-animation layout="nodisplay">
 <script type="application/json">
 {
   "target": "target1",
@@ -212,7 +213,7 @@ can be reduced to this one animation component only. For instance:
 If the animation is comprised of a list of components, but doesn't have top-level animation, the configuration
 can be reduced to an array of components. For instance:
 ```
-<amp-animation>
+<amp-animation layout="nodisplay">
 <script type="application/json">
 [
   {
@@ -236,7 +237,7 @@ can be reduced to an array of components. For instance:
 The animation can be triggered via an `on` action. For instance:
 
 ```
-<amp-animation id="anim1"></amp-animation>
+<amp-animation id="anim1" layout="nodisplay"></amp-animation>
 <button on="tap:anim1.activate">Animate</button>
 ```
 
