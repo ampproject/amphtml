@@ -120,22 +120,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pHeight = this.element.getAttribute('height');
     const rWidth = size[0];
     const rHeight = size[1];
-    debugger;
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
     if ((rWidth != pWidth || rHeight != pHeight)
         && (rWidth <= pWidth && rHeight <= pHeight)) {
-      /*this.win.context.onResizeSuccess(() => {
-        debugger;
-        console.log("SUCCESS");
-      });
-      this.win.context.onResizeDenied(() => {
-        debugger;
-        console.log("DENIED");
-      });*/
-      window.context.requestResize(rWidth, rHeight);
-      console.log("HERE");
+      this.attemptChangeSize(rHeight, rWidth);
     }
   }
 
