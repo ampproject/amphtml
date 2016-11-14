@@ -117,6 +117,20 @@ describe('A4A loader', () => {
                 .to.eventually.be.instanceof(AmpAd3PImpl);
           });
         });
+
+        it('falls back to 3p for A4A type if prefer viewability', () => {
+          return iframePromise.then(() => {
+            a4aRegistry['zort'] = function() {
+              return true;
+            };
+            ampAdElement.setAttribute('type', 'zort');
+            ampAdElement.setAttribute(
+              'data-loading-strategy', 'prefer-viewability-over-views');
+            ampAd = new AmpAd(ampAdElement);
+            return expect(ampAd.upgradeCallback())
+                .to.eventually.be.instanceof(AmpAd3PImpl);
+          });
+        });
       });
 
       it('upgrades to registered, A4A type network-specific element', () => {

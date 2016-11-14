@@ -56,8 +56,14 @@ export class AmpAd extends AMP.BaseElement {
       window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
       const slotId = window.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
-      // TODO(tdrl): Check amp-ad registry to see if they have this already.
-      if (!a4aRegistry[type] ||
+      // Disallow A4A if using viewability over views preference given
+      // A4A currently enforces not such constraint on when to send the ad
+      // request.
+      // TODO (keithwrightbos) - support within A4A flow
+      if (this.element.getAttribute('data-loading-strategy') ==
+          'prefer-viewability-over-views' ||
+          // TODO(tdrl): Check amp-ad registry to see if they have this already.
+          !a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
         // Network either has not provided any A4A implementation or the
         // implementation exists, but has explicitly chosen not to handle this
