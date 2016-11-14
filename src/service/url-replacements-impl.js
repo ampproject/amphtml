@@ -754,5 +754,5 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
-    new UrlReplacements(ampdoc, varSource));
+      new UrlReplacements(ampdoc, varSource));
 }
