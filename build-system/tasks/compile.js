@@ -67,6 +67,7 @@ function cleanupBuildDir() {
   rimraf.sync('build/fake-module');
   rimraf.sync('build/patched-module');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
+  fs.mkdirsSync('build/patched-module/web-animations-js/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
 }
@@ -101,6 +102,7 @@ function compile(entryModuleFilenames, outputDir,
     }
     wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
     patchRegisterElement();
+    patchWebAnimations();
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
     }
@@ -150,6 +152,8 @@ function compile(entryModuleFilenames, outputDir,
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.node.js',
+      'build/patched-module/web-animations-js/build/' +
+          'web-animations.js',
       //'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
@@ -354,6 +358,24 @@ function patchRegisterElement() {
     // ran into here https://github.com/Microsoft/TypeScript/issues/2719
     file = file.replace('module.exports = installCustomElements;',
         'exports.default = installCustomElements;');
+    fs.writeFileSync(patchedName, file);
+  }
+}
+
+function patchWebAnimations() {
+  var file;
+  // Copies web-animations-js into a new file that has an export.
+  const patchedName = 'build/patched-module/web-animations-js' +
+      '/build/web-animations.js';
+  if (!fs.existsSync(patchedName)) {
+    file = fs.readFileSync(
+        'node_modules/web-animations-js/' +
+        'web-animations.min.js').toString();
+    // Wrap the contents inside the install function.
+    file = 'export function installWebAnimations(window) {\n' +
+        'var document = window.document;\n' +
+        file + '\n' +
+        '}\n';
     fs.writeFileSync(patchedName, file);
   }
 }
