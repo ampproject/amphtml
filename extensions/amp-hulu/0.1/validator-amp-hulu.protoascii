@@ -20,6 +20,7 @@ tags: {  # amp-hulu
   tag_name: "SCRIPT"
   spec_name: "amp-hulu extension .js script"
   mandatory_parent: "HEAD"
+  unique: true
   attrs: {
     name: "async"
     mandatory: true
