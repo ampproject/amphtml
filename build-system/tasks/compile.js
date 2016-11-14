@@ -201,6 +201,7 @@ function compile(entryModuleFilenames, outputDir,
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
       'third_party/closure-compiler/externs/shadow_dom.js',
+      'third_party/closure-compiler/externs/web_animations.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);

@@ -15,12 +15,25 @@
 
 <amp-animation id="anim1" layout="nodisplay">
 <script type="application/json">
-{
-}
+[
+  {
+    "target": "image1",
+    "duration": 1000,
+    "iterations": 3,
+    "direction": "alternate",
+    "fill": "both",
+    "keyframes": {
+      "transform": "rotate(45deg)"
+    }
+  }
+]
 </script>
 </amp-animation>
 
-<div>TODO</div>
+<amp-img id="image1"
+    src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg"
+    width=527 height=193 layout="responsive"
+    on="tap:anim1.activate"></amp-img>
 
 </body>
 </html>
