@@ -541,7 +541,7 @@ export class FetchResponseHeaders {
    * @return {boolean}
    */
   has(name) {
-    return !!this.xhr_.getResponseHeader(name);
+    return this.xhr_.getResponseHeader(name) != null;
   }
 }
 
