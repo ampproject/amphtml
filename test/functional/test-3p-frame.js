@@ -180,7 +180,14 @@ describe('3p-frame', () => {
     const srcParts = src.split('#');
     expect(srcParts[0]).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
+    const expectedFragment = JSON.parse(srcParts[1]);
+    const parsedFragment = JSON.parse(fragment);
+    // Since DOM fingerprint changes between browsers and documents, to have
+    // stable tests, we can only verify its existence.
+    expect(expectedFragment._context.domFingerprint).to.exist;
+    delete expectedFragment._context.domFingerprint;
+    delete parsedFragment._context.domFingerprint;
+    expect(expectedFragment).to.deep.equal(parsedFragment);
 
     // Switch to same origin for inner tests.
     iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
