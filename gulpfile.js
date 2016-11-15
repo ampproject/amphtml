@@ -844,12 +844,10 @@ function patchWebAnimations() {
       'node_modules/web-animations-js/' +
       'web-animations.min.js').toString();
   // Wrap the contents inside the install function.
-  file = 'function installWebAnimations(window) {\n' +
+  file = 'exports.installWebAnimations = function(window) {\n' +
       'var document = window.document;\n' +
       file + '\n' +
-      '}\n' +
-      'module.exports = installWebAnimations;\n' +
-      'exports.default = installWebAnimations;\n';
+      '}\n';
   fs.writeFileSync(patchedName, file);
 }
 patchWebAnimations();
