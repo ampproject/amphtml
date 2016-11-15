@@ -18,6 +18,7 @@ import {
   closestByTag,
   openWindowDialog,
   escapeCssSelectorIdent,
+  isIframed,
 } from './dom';
 import {fromClassForDoc} from './service';
 import {dev} from './log';
@@ -65,7 +66,7 @@ export class ClickHandler {
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
     // Only intercept clicks when embedded.
-    if (this.viewer_.isEmbedded() && this.viewer_.isOvertakeHistory()) {
+    if (isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory()) {
       /** @private @const {!function(!Event)|undefined} */
       this.boundHandle_ = this.handle_.bind(this);
       this.ampdoc.getRootNode().addEventListener('click', this.boundHandle_);

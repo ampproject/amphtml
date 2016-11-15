@@ -1736,7 +1736,7 @@ const ViewportType = {
 function getViewportType(win, viewer) {
   let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
   if (platformFor(win).isIos()
-      && ((viewportType == ViewportType.NATURAL && viewer.isEmbedded())
+      && ((viewportType == ViewportType.NATURAL && isIframed(win))
           // Enable iOS Embedded mode so that it's easy to test against a more
           // realistic iOS environment.
           || getMode(win).localDev
