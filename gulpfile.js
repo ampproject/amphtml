@@ -833,7 +833,7 @@ function mkdirSync(path) {
 
 /**
  * Patches Web Animations API by wrapping its body into `install` function.
- * This gives us an optional to call polyfill directly on the main window
+ * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
  */
 function patchWebAnimations() {
