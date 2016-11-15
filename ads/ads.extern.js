@@ -230,3 +230,9 @@ data.sz;
 data.extra;
 // _ping_
 data.nativeIntersectionObserver
+var Fusion;
+Fusion.loadAds;
+data.adServer;
+data.mediaZone;
+data.layout;
+data.space;
