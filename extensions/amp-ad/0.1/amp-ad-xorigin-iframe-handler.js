@@ -54,6 +54,12 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?IntersectionObserverApi} */
     this.intersectionObserverApi_ = null;
 
+    /** {?Element} iframe sentinel */
+    this.sentinel = null;
+
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
+
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
@@ -74,32 +80,34 @@ export class AmpAdXOriginIframeHandler {
    * @return {!Promise} awaiting render complete promise
    * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
-  init(iframe, opt_isA4A) {
+  init(iframe, sentinel, opt_isA4A) {
     dev().assert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
+    this.sentinel = sentinel;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
 
     // Init IntersectionObserver service.
     this.intersectionObserverApi_ = new IntersectionObserverApi(
-        this.baseInstance_, this.iframe, true);
+      this.baseInstance_, this.iframe, this.sentinel, true);
 
     this.embedStateApi_ = new SubscriptionApi(
-        this.iframe, 'send-embed-state', true,
+        this.iframe, this.sentinel, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOncePromise(this.iframe, 'entity-id', true)
+    listenForOncePromise(this.iframe, this.sentinel, 'entity-id', true)
         .then(info => {
           this.element_.creativeId = info.data.id;
         });
 
     // Install iframe resize API.
-    this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
-        (data, source, origin) => {
-          this.updateSize_(data.height, data.width, source, origin);
-        }, true, true));
+    this.unlisteners_.push(listenFor(this.iframe, this.sentinel, 'embed-size',
+                                     (data, source, origin) => {
+                                       this.updateSize_(data.height, data.width,
+                                                        source, origin);
+                                     }, true, true));
 
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
@@ -116,7 +124,7 @@ export class AmpAdXOriginIframeHandler {
     if (this.baseInstance_.config
         && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
-      this.adResponsePromise_ = listenForOncePromise(this.iframe,
+      this.adResponsePromise_ = listenForOncePromise(this.iframe, this.sentinel,
         ['render-start', 'no-content'], true).then(info => {
           const data = info.data;
           if (data.type == 'render-start') {
@@ -128,9 +136,9 @@ export class AmpAdXOriginIframeHandler {
     } else {
       // If NOT support render-start, listen to bootstrap-loaded no-content
       // respectively
-      this.adResponsePromise_ = listenForOncePromise(this.iframe,
+      this.adResponsePromise_ = listenForOncePromise(this.iframe, this.sentinel,
         'bootstrap-loaded', true);
-      listenForOncePromise(this.iframe, 'no-content', true)
+      listenForOncePromise(this.iframe, this.sentinel, 'no-content', true)
           .then(() => this.noContent_());
     }
 
@@ -265,6 +273,7 @@ export class AmpAdXOriginIframeHandler {
     }
     postMessageToWindows(
         this.iframe,
+        this.sentinel,
         [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
         {requestedWidth, requestedHeight},
