@@ -49,6 +49,23 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
+  // amp-form extension will add novalidate to all forms to manually trigger
+  // validation. In that case `novalidate` doesn't have the same meaning.
+  const isAmpFormMarked = form.classList.contains('-amp-form');
+  let shouldValidate;
+  if (isAmpFormMarked) {
+    shouldValidate = !form.hasAttribute('amp-novalidate');
+  } else {
+    shouldValidate = !form.hasAttribute('novalidate');
+  }
+
+  // Safari does not trigger validation check on submission, hence we
+  // trigger it manually. In other browsers this would never execute since
+  // the submit event wouldn't be fired if the form is invalid.
+  if (shouldValidate && form.checkValidity && !form.checkValidity()) {
+    e.preventDefault();
+  }
+
   const inputs = form.elements;
   for (let i = 0; i < inputs.length; i++) {
     user().assert(!inputs[i].name ||
@@ -91,23 +108,5 @@ export function onDocumentFormSubmit_(e) {
       'form target=%s is invalid can only be _blank or _top: %s', target, form);
   if (actionXhr) {
     checkCorsUrl(actionXhr);
-  }
-
-  // amp-form extension will add novalidate to all forms to manually trigger
-  // validation. In that case `novalidate` doesn't have the same meaning.
-  const isAmpFormMarked = form.classList.contains('-amp-form');
-  let shouldValidate;
-  if (isAmpFormMarked) {
-    shouldValidate = !form.hasAttribute('amp-novalidate');
-  } else {
-    shouldValidate = !form.hasAttribute('novalidate');
-  }
-
-  // Safari does not trigger validation check on submission, hence we
-  // trigger it manually. In other browsers this would never execute since
-  // the submit event wouldn't be fired if the form is invalid.
-  if (shouldValidate && form.checkValidity && !form.checkValidity()) {
-    e.preventDefault();
-    return;
   }
 }
