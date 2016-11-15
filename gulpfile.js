@@ -209,7 +209,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   // Entry point for inabox runtime.
   compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
     toName: 'amp-inabox.js',
-    minifiedName: 'a4a-v0.js',
+    minifiedName: 'amp4ads-v0.js',
     includePolyfills: true,
     checkTypes: opt_checkTypes,
     watch: watch,
@@ -221,7 +221,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   // inabox-host
   compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
     toName: 'amp-inabox-host.js',
-    minifiedName: 'a4a-host-v0.js',
+    minifiedName: 'amp4ads-host-v0.js',
     includePolyfills: false,
     checkTypes: opt_checkTypes,
     watch: watch,
