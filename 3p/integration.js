@@ -517,6 +517,17 @@ function reportRenderedEntityIdentifier(entityId) {
 }
 
 /**
+ *  Adds the serialized ad attributes to an iframe's name attribute.
+ *  @param {object} iframe A creative iframe that will be added to the
+ *    DOM.
+ */
+function getAddContextToIframe(iframeName){
+  return iframe => {
+    iframe.name = iframeName;
+  };
+}
+
+/**
  * Throws if the current frame's parent origin is not equal to
  * the claimed origin.
  * Only check for browsers that support ancestorOrigins

@@ -85,11 +85,13 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     mode: getModeObject(),
     canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel(parentWindow),
+    sentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     startTime,
   };
+  attributes.ampcontextVersion = (getMode().localDev ? "LOCAL" :
+      $internalRuntimeVersion$ );
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {
