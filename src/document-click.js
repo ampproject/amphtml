@@ -65,7 +65,7 @@ export class ClickHandler {
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
-    // Only intercept clicks when embedded.
+    // Only intercept clicks when iframed.
     if (isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory()) {
       /** @private @const {!function(!Event)|undefined} */
       this.boundHandle_ = this.handle_.bind(this);
