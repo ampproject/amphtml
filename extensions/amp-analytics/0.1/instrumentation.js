@@ -22,6 +22,7 @@ import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
+import {Visibility} from './visibility-impl';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -38,15 +39,15 @@ const CLICK_LISTENER_REGISTERED_ = 'AMP_ANALYTICS_CLICK_LISTENER_REGISTERED';
 let AnalyticsEventListenerDef;
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {!JSONType} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *  fires.
  * @param {!Element} analyticsElement The element associated with the
  *  config.
  */
-export function addListener(ampdoc, config, listener, analyticsElement) {
-  return instrumentationServiceForDoc(ampdoc).addListener(config, listener,
+export function addListener(nodeOrDoc, config, listener, analyticsElement) {
+  return instrumentationServiceForDoc(nodeOrDoc).addListener(config, listener,
       analyticsElement);
 }
 
@@ -102,19 +103,20 @@ export class InstrumentationService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
-    this.ampdoc_ = ampdoc;
-    /** @const {!Window} */
-    this.win_ = this.ampdoc_.win;
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    this.ampdoc = ampdoc;
+
+    /** @const @private {!./visibility-impl.Visibility} */
+    this.visibility_ = new Visibility(this.ampdoc);
 
     /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win_);
+    this.timer_ = timerFor(this.ampdoc.win);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc_);
+    this.viewer_ = viewerForDoc(this.ampdoc);
 
     /** @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc_);
+    this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
@@ -265,20 +267,18 @@ export class InstrumentationService {
         return;
       }
 
-      visibilityForDoc(this.ampdoc_).then(visibility => {
-        visibility.listenOnce(spec, vars => {
-          const el = getElement(this.ampdoc_, spec['selector'],
-              analyticsElement, spec['selectionMethod']);
-          if (el) {
-            const attr = getDataParamsFromAttributes(el, undefined,
-                VARIABLE_DATA_ATTRIBUTE_KEY);
-            for (const key in attr) {
-              vars[key] = attr[key];
-            }
+      this.visibility_.listenOnce(spec, vars => {
+        const el = getElement(this.ampdoc, spec['selector'],
+            analyticsElement, spec['selectionMethod']);
+        if (el) {
+          const attr = getDataParamsFromAttributes(el, undefined,
+              VARIABLE_DATA_ATTRIBUTE_KEY);
+          for (const key in attr) {
+            vars[key] = attr[key];
           }
-          callback(new AnalyticsEvent(eventType, vars));
-        }, shouldBeVisible, analyticsElement);
-      });
+        }
+        callback(new AnalyticsEvent(eventType, vars));
+      }, shouldBeVisible, analyticsElement);
     } else {
       if (this.viewer_.isVisible() == shouldBeVisible) {
         callback(new AnalyticsEvent(eventType));
@@ -304,7 +304,7 @@ export class InstrumentationService {
   ensureClickListener_(analyticsElement) {
     if (!this.clickHandlerRegistered_) {
       this.clickHandlerRegistered_ = true;
-      this.ampdoc_.getRootNode().addEventListener(
+      this.ampdoc.getRootNode().addEventListener(
           'click', this.onClick_.bind(this));
     }
   }
@@ -496,7 +496,7 @@ export class InstrumentationService {
   createTimerListener_(listener, timerSpec) {
     const hasImmediate = timerSpec.hasOwnProperty('immediate');
     const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
-    const intervalId = this.win_.setInterval(
+    const intervalId = this.ampdoc.win.setInterval(
       listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
       timerSpec['interval'] * 1000
     );
@@ -507,7 +507,8 @@ export class InstrumentationService {
 
     const maxTimerLength = timerSpec['maxTimerLength'] ||
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
-    this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
+    this.ampdoc.win.setTimeout(
+        this.ampdoc.win.clearInterval.bind(this.ampdoc.win, intervalId),
         maxTimerLength * 1000);
   }
 
@@ -528,19 +529,10 @@ export class InstrumentationService {
 }
 
 /**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!InstrumentationService}
  */
-export function instrumentationServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'amp-analytics-instrumentation',
+export function instrumentationServiceForDoc(nodeOrDoc) {
+  return fromClassForDoc(nodeOrDoc, 'amp-analytics-instrumentation',
       InstrumentationService);
 }
-
-
-// Register doc-service factory.
-AMP.registerServiceForDoc(
-    'amp-analytics-instrumentation',
-    /* ctor */ undefined,
-    ampdoc => {
-      return instrumentationServiceForDoc(ampdoc);
-    });

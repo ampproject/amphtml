@@ -140,8 +140,7 @@ export function getElementServiceIfAvailableForDoc(
       return getServicePromiseForDoc(nodeOrDoc, id);
     }
     // Wait for HEAD to fully form before denying access to the service.
-    // TODO(mk): DOES THIS NEED TO BE CHANGED?
-    return dom.waitForBodyPromise(ampdoc.getRootNode()).then(() => {
+    return ampdoc.whenBodyAvailable().then(() => {
       if (isElementScheduled(ampdoc.win, providedByElement)) {
         return getServicePromiseForDoc(nodeOrDoc, id);
       }

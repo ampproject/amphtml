@@ -15,7 +15,7 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
-import {addListener} from './instrumentation';
+import {instrumentationServiceForDoc} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
@@ -30,7 +30,14 @@ import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
-import './visibility-impl';
+
+// Register doc-service factory.
+AMP.registerServiceForDoc(
+    'amp-analytics-instrumentation',
+    /* ctor */ undefined,
+    ampdoc => {
+      return instrumentationServiceForDoc(ampdoc);
+    });
 
 installActivityService(AMP.win);
 installCidService(AMP.win);
@@ -81,6 +88,9 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {JSONType}
      */
     this.remoteConfig_ = /** @type {JSONType} */ ({});
+
+    /** @private @const {!./instrumentation.InstrumentationService} */
+    this.instrumentation_ = instrumentationServiceForDoc(this.getAmpDoc());
   }
 
   /** @override */
@@ -178,12 +188,12 @@ export class AmpAnalytics extends AMP.BaseElement {
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
-            addListener(this.win.document, trigger, this.handleEvent_.bind(this,
-                  trigger), this.element);
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
 
           } else {
-            addListener(this.win.document, trigger,
-                this.handleEvent_.bind(this, trigger), this.element);
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
           }
         }));
       }
