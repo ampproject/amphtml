@@ -813,6 +813,19 @@ function createBaseCustomElementClass(win) {
       if (newWidth !== undefined) {
         setStyle(this, 'width', newWidth, 'px');
       }
+
+      let newLayout = this.layout_;
+      if (newHeight !== undefined) {
+        newLayout = Layout.FIXED_HEIGHT;
+        if (newWidth !== undefined) {
+          newLayout = Layout.FIXED;
+        }
+      }
+
+      if (newLayout != this.layout_) {
+        this.classList.remove(getLayoutClass(this.layout_));
+        this.classList.add(getLayoutClass(newLayout));
+      }
     }
 
     /**
