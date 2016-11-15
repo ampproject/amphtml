@@ -501,14 +501,14 @@ function replaceUrls(mode, file) {
     file = file.replace('https://cdn.ampproject.org/viewer/google/v5.js', 'https://cdn1.ampproject.org/viewer/google/v5.js');
     file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
     file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
-    file = file.replace('https://cdn.ampproject.org/a4a-v0.max.js', '/dist/amp-inabox.js');
+    file = file.replace('https://cdn.ampproject.org/amp4ads-v0.max.js', '/dist/amp-inabox.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '/dist/v0/');
     file = file.replace('https://cdn1.ampproject.org/viewer/google/v5.js', 'https://cdn.ampproject.org/viewer/google/v5.js');
   }
   if (mode == 'min') {
     file = file.replace(/\.max\.js/g, '.js');
     file = file.replace('/dist/amp.js', '/dist/v0.js');
-    file = file.replace('/dist/amp-inabox.js', '/dist/a4a-v0.js');
+    file = file.replace('/dist/amp-inabox.js', '/dist/amp4ads-v0.js');
   }
   return file;
 }
