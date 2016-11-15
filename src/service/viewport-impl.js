@@ -33,7 +33,7 @@ import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
-import {waitForBody} from '../dom';
+import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
@@ -561,8 +561,8 @@ export class Viewport {
    * @private
    */
   getViewportMeta_() {
-    if (this.viewer_.isIframed()) {
-      // An embedded document does not control its viewport meta tag.
+    if (isIframed(this.ampdoc.win)) {
+      // An iframed document does not control its viewport meta tag.
       return null;
     }
     if (this.viewportMeta_ === undefined) {
@@ -1736,7 +1736,7 @@ const ViewportType = {
 function getViewportType(win, viewer) {
   let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
   if (platformFor(win).isIos()
-      && ((viewportType == ViewportType.NATURAL && viewer.isIframed())
+      && ((viewportType == ViewportType.NATURAL && isIframed(win))
           // Enable iOS Embedded mode so that it's easy to test against a more
           // realistic iOS environment.
           || getMode(win).localDev
