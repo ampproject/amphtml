@@ -34,7 +34,7 @@ understood by the ad server(s) which you are calling.
 
 ## Examples
 
-### Single ad
+### Single ad with no slot specified
 
 ```html
 <amp-ad width=300 height=250
@@ -47,7 +47,7 @@ understood by the ad server(s) which you are calling.
       </a>
     </template>
 </amp-ad>
-<!-- The ad server will be called with the URL https://mysite/my-ad-server?ampslots=0 -->
+<!-- The ad server will be called with the URL https://mysite/my-ad-server -->
 ```
 
 ### Two ads with different slots
@@ -130,6 +130,10 @@ server returning json in the format defined below.
 On the assumption that most pages have multiple ad slots, this is passed to the
 ad server to tell it which slot is being fetched. This can be any alphanumeric string.
 
+If you have only a single ad for a given value of `data-url`, it's OK not to bother with
+the slot id. However, do not use two ads for the same `data-url` where one has a slot id
+specified and the other does not.
+
 ## Ad server
 
 The ad server will be called once for each value of `data-url` on the page: for the vast 
@@ -164,16 +168,13 @@ Here is an example response, assuming two slots named simply 1 and 2:
     }
 }
 ```
-Here is an example if you only specified one ad and didn't bother specifying the slot number: it simply
-defaults to zero:
+If no slot was specified, the server returns a single template rather than an array.
 
 ```json
 {
-    "0": {
-        "src":"https:\/\/my-ad-server.com\/my-advertisement.gif",
-        "href":"https:\/\/bachtrack.com",
-        "info":"Info1"
-    }
+    "src":"https:\/\/my-ad-server.com\/my-advertisement.gif",
+    "href":"https:\/\/bachtrack.com",
+    "info":"Info1"
 }
 ```
 ## To do

@@ -482,6 +482,19 @@
     <div fallback></div>
   </amp-ad>
   
+  <h2 id="custom2">Custom leaderboard with no slot specified</h2>
+  <amp-ad width="500" height="60"
+    type="custom"
+    data-url="/examples/custom.ad.example.single.json">
+    <template type="amp-mustache" id="amp-template-id-no-slot">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
   <h2 id="dotandads">DotAndAds masthead</h2>
   <amp-ad width=980 height=250
       type="dotandads"

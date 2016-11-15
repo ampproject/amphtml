@@ -18,6 +18,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {templatesFor} from '../../../src/template';
 import {xhrFor} from '../../../src/xhr';
+import {addParamToUrl} from '../../../src/url';
 
 /** @const {!string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -28,9 +29,9 @@ export const TAG_AD_CUSTOM = 'amp-ad-custom';
  *   substituted into the mustache template. */
 const ampCustomadXhrPromises = {};
 
-/** @var {Object} a map of ad slot ids for each value of data-url.
- *  Each entry in the map is an array of slot ids. */
-let ampCustomadSlots = null;
+/** @var {Object} a map of full urls (i.e. including the ampslots parameter)
+ * for each value of data-url */
+let ampCustomadFullUrls = null;
 
 export class AmpAdCustom extends AMP.BaseElement {
 
@@ -43,11 +44,6 @@ export class AmpAdCustom extends AMP.BaseElement {
     /** @private {string} A string identifying this ad slot: the server's
      *  responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
-    if (!this.slot_) {
-      // If a slot wasn't specified, set it to zero. For use in pages
-      // with only a single ad.
-      this.slot_ = 0;
-    }
   }
 
   /** @override */
@@ -68,33 +64,43 @@ export class AmpAdCustom extends AMP.BaseElement {
     const templates = this.element.querySelectorAll('template');
     user().assert(templates.length > 0, 'Missing template in custom ad');
     // And ensure that the slot value is legal
-    user().assert(this.slot_.match(/^[0-9a-z]+$/),
+    user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
   }
 
   /**
-   * Get a URL which includes a parameter indicating all slots to be fetched
-   * from this web server URL
-   * @private getFullUrl_
+   * @private getFullUrl_ Get a URL which includes a parameter indicating
+   * all slots to be fetched from this web server URL
    * @returns {String} The URL with the "ampslots" parameter appended
    */
   getFullUrl_() {
-    if (ampCustomadSlots === null) {
-      // The array of ad slots has not yet been built, do so now.
-      ampCustomadSlots = {};
+    // If this ad doesn't have a slot defined, just return the base URL
+    if (this.slot_ === null) {
+      return this.url_;
+    }
+    if (ampCustomadFullUrls === null) {
+      console.log('build URL cache');
+      // The array of ad urls has not yet been built, do so now.
+      ampCustomadFullUrls = {};
+      const slots = {};
       const elements = document.querySelectorAll('amp-ad[type=custom]');
       for (let index = 0; index < elements.length; index++) {
         const elem = elements[index];
         const url = elem.getAttribute('data-url');
-        if (!(url in ampCustomadSlots)) {
-          ampCustomadSlots[url] = [];
-        }
         const slotId = elem.getAttribute('data-slot');
-        ampCustomadSlots[url].push(slotId ? slotId : 0);
+        if (slotId !== null) {
+          if (!(url in slots)) {
+            slots[url] = [];
+          }
+          slots[url].push(encodeURIComponent(slotId));
+        }
+      }
+      for (const baseUrl in slots) {
+        ampCustomadFullUrls[baseUrl] = addParamToUrl(baseUrl, 'ampslots',
+          slots[baseUrl].join(','));
       }
     }
-    return this.url_ + (this.url_.match(/\?/) ? '&' : '?') + 'ampslots=' +
-            (ampCustomadSlots[this.url_]).join(',');
+    return ampCustomadFullUrls[this.url_];
   }
 
   /** @override */
@@ -103,12 +109,13 @@ export class AmpAdCustom extends AMP.BaseElement {
     if (!(this.url_ in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
       ampCustomadXhrPromises[this.url_] = xhrFor(this.win).fetchJson(
-          this.getFullUrl_(this.url_));
+          this.getFullUrl_());
     }
     return ampCustomadXhrPromises[this.url_].then(data => {
       const element = this.element;
       // We will get here when the data has been fetched from the server
-      templatesFor(this.win).findAndRenderTemplate(element, data[this.slot_])
+      templatesFor(this.win).findAndRenderTemplate(element,
+        this.slot_ === null ? data : data[this.slot_])
         .then(renderedElement => {
         // Get here when the template has been rendered
         // Clear out the template and replace it by the rendered version
