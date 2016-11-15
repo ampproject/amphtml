@@ -372,7 +372,9 @@ export class Viewer {
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used my mode.js to infer development mode.
-        this.win.location.originalHash = this.win.location.hash;
+        if (!this.win.location.originalHash) {
+          this.win.location.originalHash = this.win.location.hash;
+        }
         // Using #- to falsify a theory that could lead to
         // https://github.com/ampproject/amphtml/issues/6070
         this.win.history.replaceState({}, '', newUrl + '#-');
