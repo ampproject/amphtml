@@ -30,7 +30,7 @@ const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
-const CLICK_LISTENER_REGISTERED_ = 'AMP_ANALYTICS_CLICK_LISTENER_REGISTERED';
+
 
 /**
  * Type to define a callback that is called when an instrumented event fires.
@@ -168,7 +168,7 @@ export class InstrumentationService {
         return;
       }
 
-      this.ensureClickListener_(analyticsElement);
+      this.ensureClickListener_();
       this.clickObservable_.add(
           this.createSelectiveListener_(listener, config['selector']));
     } else if (eventType === AnalyticsEventType.SCROLL) {
@@ -301,7 +301,7 @@ export class InstrumentationService {
    * @param {!Element} analyticsElement
    * @private
    */
-  ensureClickListener_(analyticsElement) {
+  ensureClickListener_() {
     if (!this.clickHandlerRegistered_) {
       this.clickHandlerRegistered_ = true;
       this.ampdoc.getRootNode().addEventListener(

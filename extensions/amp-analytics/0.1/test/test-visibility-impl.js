@@ -421,7 +421,8 @@ describe('amp-analytics.visibility', () => {
     });
 
     it('finds element by id', () => {
-      expect(getElement(ampdoc, '#ampEl', analytics, undefined)).to.equal(ampEl);
+      expect(getElement(ampdoc, '#ampEl', analytics, undefined)).to.equal(
+          ampEl);
     });
 
     // In the following tests, getElement returns non-amp elements. Those are

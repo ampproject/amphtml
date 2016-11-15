@@ -16,7 +16,6 @@
 
 import {closestByTag, closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
