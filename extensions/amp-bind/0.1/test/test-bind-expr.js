@@ -91,7 +91,6 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('"abc".charAt(0)')).to.equal('a');
     expect(evaluateBindExpr('"abc".charCodeAt(0)')).to.equal(97);
     expect(evaluateBindExpr('"abc".concat("def")')).to.equal('abcdef');
-    expect(evaluateBindExpr('"abc".endsWith("bc")')).to.equal(true);
     expect(evaluateBindExpr('"abc".includes("ab")')).to.equal(true);
     expect(evaluateBindExpr('"abc".indexOf("b")')).to.equal(1);
     expect(evaluateBindExpr('"aaa".lastIndexOf("a")')).to.equal(2);
@@ -99,7 +98,6 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('"abc".slice(0, 2)')).to.equal('ab');
     expect(evaluateBindExpr('"a-b-c".split("-")'))
         .to.deep.equal(['a', 'b', 'c']);
-    expect(evaluateBindExpr('"abc".startsWith("ab")')).to.equal(true);
     expect(evaluateBindExpr('"abc".substr(1)')).to.equal('bc');
     expect(evaluateBindExpr('"abc".substring(0, 2)')).to.equal('ab');
     expect(evaluateBindExpr('"ABC".toLowerCase()')).to.equal('abc');

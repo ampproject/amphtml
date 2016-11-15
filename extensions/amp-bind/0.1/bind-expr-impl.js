@@ -168,6 +168,7 @@ case 26:
         this.$ = null;
 
         var obj = Object.prototype.toString.call($$[$0-3]);
+
         var whitelist = functionWhitelist[obj];
         if (whitelist) {
           var fn = $$[$0-3][$$[$0-1]];
@@ -394,6 +395,7 @@ parse: function parse(input) {
     return true;
 }};
 
+// For security reasons, must not contain functions that mutate the caller.
 var functionWhitelist =
 {
   '[object Array]':
@@ -410,14 +412,12 @@ var functionWhitelist =
       String.prototype.charAt,
       String.prototype.charCodeAt,
       String.prototype.concat,
-      String.prototype.endsWith,
       String.prototype.includes,
       String.prototype.indexOf,
       String.prototype.lastIndexOf,
       String.prototype.repeat,
       String.prototype.slice,
       String.prototype.split,
-      String.prototype.startsWith,
       String.prototype.substr,
       String.prototype.substring,
       String.prototype.toLowerCase,
