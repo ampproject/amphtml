@@ -17,6 +17,7 @@
 import {childElementByTag} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {installWebAnimations} from 'web-animations-js/web-animations.install';
 import {MeasureScanner} from './web-animations';
 import {tryParseJson} from '../../../src/json';
 
@@ -56,6 +57,11 @@ export class AmpAnimation extends AMP.BaseElement {
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
         this.configJson_);
+
+    // Ensure polyfill is installed.
+    if (!this.win.Element.prototype.animate) {
+      installWebAnimations(this.win);
+    }
 
     const measurer = new MeasureScanner(this.win, {
       resolveTarget: id => this.getAmpDoc().getElementById(id),
