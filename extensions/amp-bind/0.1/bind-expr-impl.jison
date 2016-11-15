@@ -1,5 +1,7 @@
 /** shared vars and functions */
+
 %{
+// For security reasons, must not contain functions that mutate the caller.
 var functionWhitelist =
 {
   '[object Array]':
@@ -33,6 +35,7 @@ var functionWhitelist =
 %}
 
 /* lexical grammar */
+
 %lex
 
 %%
@@ -170,6 +173,7 @@ invocation:
         $$ = null;
 
         var obj = Object.prototype.toString.call($1);
+
         var whitelist = functionWhitelist[obj];
         if (whitelist) {
           var fn = $1[$3];

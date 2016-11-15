@@ -173,10 +173,30 @@ describe('evaluateBindExpr', () => {
   });
 
   it('should evaluate undefined vars and properties to null', () => {
+    expect(evaluateBindExpr('foo')).to.be.null;
     expect(evaluateBindExpr('foo.bar')).to.be.null;
+    expect(evaluateBindExpr('foo["bar"]')).to.be.null;
+    expect(evaluateBindExpr('foo[bar]')).to.be.null;
+    expect(evaluateBindExpr('foo[0]')).to.be.null;
   });
 
   it('should NOT allow access to prototype properties', () => {
+    expect(evaluateBindExpr('{}.constructor')).to.be.null;
+    expect(evaluateBindExpr('{}.prototype')).to.be.null;
+    expect(evaluateBindExpr('{}.__proto__')).to.be.null;
+
+    expect(evaluateBindExpr('[].constructor')).to.be.null;
+    expect(evaluateBindExpr('[].prototype')).to.be.null;
+    expect(evaluateBindExpr('[].__proto__')).to.be.null;
+
+    expect(evaluateBindExpr('"abc".constructor')).to.be.null;
+    expect(evaluateBindExpr('"abc".prototype')).to.be.null;
+    expect(evaluateBindExpr('"abc".__proto__')).to.be.null;
+
+    expect(evaluateBindExpr('123.constructor')).to.be.null;
+    expect(evaluateBindExpr('123.prototype')).to.be.null;
+    expect(evaluateBindExpr('123.__proto__')).to.be.null;
+
     const scope = {
       foo: {},
       bar: [],
@@ -184,33 +204,17 @@ describe('evaluateBindExpr', () => {
       qux: 123,
     };
 
-    expect(evaluateBindExpr('{}.constructor')).to.be.null;
-    expect(evaluateBindExpr('{}.prototype')).to.be.null;
-    expect(evaluateBindExpr('{}.__proto__')).to.be.null;
-
     expect(evaluateBindExpr('foo.constructor', scope)).to.be.null;
     expect(evaluateBindExpr('foo.prototype', scope)).to.be.null;
     expect(evaluateBindExpr('foo.__proto__', scope)).to.be.null;
-
-    expect(evaluateBindExpr('[].constructor')).to.be.null;
-    expect(evaluateBindExpr('[].prototype')).to.be.null;
-    expect(evaluateBindExpr('[].__proto__')).to.be.null;
 
     expect(evaluateBindExpr('bar.constructor', scope)).to.be.null;
     expect(evaluateBindExpr('bar.prototype', scope)).to.be.null;
     expect(evaluateBindExpr('bar.__proto__', scope)).to.be.null;
 
-    expect(evaluateBindExpr('"abc".constructor')).to.be.null;
-    expect(evaluateBindExpr('"abc".prototype')).to.be.null;
-    expect(evaluateBindExpr('"abc".__proto__')).to.be.null;
-
     expect(evaluateBindExpr('baz.constructor', scope)).to.be.null;
     expect(evaluateBindExpr('baz.prototype', scope)).to.be.null;
     expect(evaluateBindExpr('baz.__proto__', scope)).to.be.null;
-
-    expect(evaluateBindExpr('123.constructor')).to.be.null;
-    expect(evaluateBindExpr('123.prototype')).to.be.null;
-    expect(evaluateBindExpr('123.__proto__')).to.be.null;
 
     expect(evaluateBindExpr('qux.constructor', scope)).to.be.null;
     expect(evaluateBindExpr('qux.prototype', scope)).to.be.null;
