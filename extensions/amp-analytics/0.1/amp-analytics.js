@@ -136,7 +136,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
       const TAG = this.getName_();
-      dev().fine(TAG, 'User has opted out. No hits will be sent.');
+      user().fine(TAG, 'User has opted out. No hits will be sent.');
       return Promise.resolve();
     }
 
@@ -354,7 +354,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const requests = {};
     if (!this.config_ || !this.config_['requests']) {
       const TAG = this.getName_();
-      dev().error(TAG, 'No request strings defined. Analytics ' +
+      user().error(TAG, 'No request strings defined. Analytics ' +
           'data will not be sent from this page.');
       return;
     }

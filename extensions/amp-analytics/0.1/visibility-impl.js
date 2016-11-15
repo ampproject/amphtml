@@ -15,13 +15,12 @@
  */
 
 import {closestByTag, closestBySelector} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
 import {isFiniteNumber} from '../../../src/types';
-import {user} from '../../../src/log';
 import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -293,7 +292,7 @@ export class Visibility {
     let res = null;
     try {
       res = this.resourcesService_.getResourceForElement(
-          dev().assertElement(element));
+          user().assertElement(element));
     } catch (e) {
       user().assert(res,
           'Visibility tracking not supported on element: ', element);
