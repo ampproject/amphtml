@@ -136,7 +136,7 @@ export class IntersectionObserver {
    *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    */
-  constructor(baseElement, iframe, opt_is3p) {
+  constructor(baseElement, iframe, sentinel, opt_is3p) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
     /** @private @const {!./service/timer-impl.Timer} */
@@ -163,7 +163,7 @@ export class IntersectionObserver {
      * @private {!SubscriptionApi}
      */
     this.postMessageApi_ = new SubscriptionApi(
-        iframe, 'send-intersections', opt_is3p || false,
+        iframe, sentinel, 'send-intersections', opt_is3p || false,
         // Each time someone subscribes we make sure that they
         // get an update.
         () => this.startSendingIntersectionChanges_());

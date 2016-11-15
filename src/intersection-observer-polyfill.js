@@ -69,7 +69,7 @@ export class IntersectionObserverApi {
    * @param {!Element} iframe
    * @param {boolean=} opt_is3p
    */
-  constructor(baseElement, iframe, opt_is3p) {
+  constructor(baseElement, iframe, sentinel, opt_is3p) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
 
@@ -90,7 +90,7 @@ export class IntersectionObserverApi {
 
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(
-        iframe, 'send-intersections', opt_is3p || false, () => {
+      iframe, sentinel, 'send-intersections', opt_is3p || false, () => {
           this.startSendingIntersection_();
         });
 
