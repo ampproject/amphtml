@@ -24,6 +24,7 @@ export function felmat(global, data) {
   validateData(data, ['host', 'fmt', 'fmk', 'fmp']);
   global.fmParam = data;
   writeScript(global, 'https://t.'+encodeURI(data.host)+'/js/fmamp.js', () => {
-    window.context.renderStart({"width": data.width, "height": data.height});
+    window.context.renderStart({"width" : data.width, "height" : data.height});
   });
 }
+
