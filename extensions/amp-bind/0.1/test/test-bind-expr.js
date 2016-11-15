@@ -39,7 +39,7 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('1 == 1')).to.be.true;
     expect(evaluateBindExpr('0 != 1')).to.be.true;
     expect(evaluateBindExpr('1 != 1')).to.be.false;
-  })
+  });
 
   it('should evaluate logical operations', () => {
     expect(evaluateBindExpr('!false')).to.be.true;
@@ -97,7 +97,8 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('"aaa".lastIndexOf("a")')).to.equal(2);
     expect(evaluateBindExpr('"ab".repeat(2)')).to.equal('abab');
     expect(evaluateBindExpr('"abc".slice(0, 2)')).to.equal('ab');
-    expect(evaluateBindExpr('"a-b-c".split("-")')).to.deep.equal(['a', 'b', 'c']);
+    expect(evaluateBindExpr('"a-b-c".split("-")'))
+        .to.deep.equal(['a', 'b', 'c']);
     expect(evaluateBindExpr('"abc".startsWith("ab")')).to.equal(true);
     expect(evaluateBindExpr('"abc".substr(1)')).to.equal('bc');
     expect(evaluateBindExpr('"abc".substring(0, 2)')).to.equal('ab');
@@ -119,9 +120,12 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('foo', {foo: 'bar'})).to.equal('bar');
     expect(evaluateBindExpr('foo', {foo: 1})).to.equal(1);
     expect(evaluateBindExpr('foo', {foo: [1, 2, 3]})).to.deep.equal([1, 2, 3]);
-    expect(evaluateBindExpr('foo', {foo: {'bar' : 'qux'}})).to.deep.equal({bar: 'qux'});
-    expect(evaluateBindExpr('{foo: "bar"}', {foo: 'qux'})).to.deep.equal({qux: 'bar'});
-    expect(evaluateBindExpr('{"foo": bar}', {bar: 'qux'})).to.deep.equal({foo: 'qux'});
+    expect(evaluateBindExpr('foo', {foo: {'bar': 'qux'}}))
+        .to.deep.equal({bar: 'qux'});
+    expect(evaluateBindExpr('{foo: "bar"}', {foo: 'qux'}))
+        .to.deep.equal({qux: 'bar'});
+    expect(evaluateBindExpr('{"foo": bar}', {bar: 'qux'}))
+        .to.deep.equal({foo: 'qux'});
     expect(evaluateBindExpr('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
     expect(evaluateBindExpr('foo[1]', {foo: ['b', 'c']})).to.equal('c');
     expect(evaluateBindExpr('foo.length', {foo: [1, 2, 3]})).to.equal(3);
@@ -131,37 +135,52 @@ describe('evaluateBindExpr', () => {
   it('should support array literals', () => {
     expect(evaluateBindExpr('[]')).to.deep.equal([]);
     expect(evaluateBindExpr('["a", "b"].length')).to.equal(2);
-    expect(evaluateBindExpr('[1, "a", [], {}]')).to.deep.equal([1, 'a', [], {}]);
+    expect(evaluateBindExpr('[1, "a", [], {}]'))
+        .to.deep.equal([1, 'a', [], {}]);
     expect(evaluateBindExpr('["a", "b"][1]')).to.equal('b');
     expect(evaluateBindExpr('["a", foo][1]', {foo: 'b'})).to.equal('b');
   });
 
-  it ('should NOT allow invalid array access', () => {
+  it('should NOT allow invalid array access', () => {
     expect(evaluateBindExpr('["a", "b"][-1]')).to.be.null;
     expect(evaluateBindExpr('["a", "b"][2]')).to.be.null;
     expect(evaluateBindExpr('["a", "b"][0.5]')).to.be.null;
     expect(evaluateBindExpr('["a", "b"]["a"]')).to.be.null;
     expect(evaluateBindExpr('["a", []][[]]')).to.be.null;
     expect(evaluateBindExpr('["a", {}][{}]')).to.be.null;
-  })
+  });
 
   it('should support array whitelisted methods', () => {
-    expect(evaluateBindExpr('["a", "b"].concat(["c", "d"])')).to.deep.equal(['a', 'b', 'c', 'd']);
+    expect(evaluateBindExpr('["a", "b"].concat(["c", "d"])'))
+        .to.deep.equal(['a', 'b', 'c', 'd']);
     expect(evaluateBindExpr('["a"].includes("a")')).to.be.true;
     expect(evaluateBindExpr('["a", "a"].indexOf("a")')).to.equal(0);
     expect(evaluateBindExpr('["a", "b", "c"].join("-")')).to.equal('a-b-c');
     expect(evaluateBindExpr('["a", "a"].lastIndexOf("a")')).to.equal(1);
-    expect(evaluateBindExpr('["a", "b", "c"].slice(1, 2)')).to.deep.equal(['b']);
+    expect(evaluateBindExpr('["a", "b", "c"].slice(1, 2)'))
+        .to.deep.equal(['b']);
   });
 
   it('should NOT allow access to array non-whitelisted methods', () => {
-    expect(() => { evaluateBindExpr('["a", "b", "c"].find()'); }).to.throw();
-    expect(() => { evaluateBindExpr('["a", "b", "c"].forEach()'); }).to.throw();
-    expect(() => { evaluateBindExpr('["a", "b", "c"].splice(1, 1)'); }).to.throw();
+    expect(() => {
+      evaluateBindExpr('["a", "b", "c"].find()');
+    }).to.throw();
+    expect(() => {
+      evaluateBindExpr('["a", "b", "c"].forEach()');
+    }).to.throw();
+    expect(() => {
+      evaluateBindExpr('["a", "b", "c"].splice(1, 1)');
+    }).to.throw();
 
-    expect(() => { evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']}); }).to.throw();
+    expect(() => {
+      evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']});
+    }).to.throw();
+    expect(() => {
+      evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']});
+    }).to.throw();
+    expect(() => {
+      evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']});
+    }).to.throw();
   });
 
   it('should support object literals', () => {
@@ -169,7 +188,8 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('{}["a"]')).to.be.null;
     expect(evaluateBindExpr('{}[{}]')).to.be.null;
     expect(evaluateBindExpr('{"a": "b"}')).to.deep.equal({'a': 'b'});
-    expect(evaluateBindExpr('{foo: "b"}', {foo: 'a'})).to.deep.equal({'a': 'b'});
+    expect(evaluateBindExpr('{foo: "b"}', {foo: 'a'}))
+        .to.deep.equal({'a': 'b'});
   });
 
   it('should evaluate undefined vars and properties to null', () => {
@@ -200,7 +220,7 @@ describe('evaluateBindExpr', () => {
     const scope = {
       foo: {},
       bar: [],
-      baz: "abc",
+      baz: 'abc',
       qux: 123,
     };
 
@@ -247,12 +267,18 @@ describe('evaluateBindExpr', () => {
 
   it('should NOT allow control flow or loops', () => {
     expect(() => { evaluateBindExpr('if (foo) "bar"', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('switch (foo) { case 0: "bar" }', {foo: 0}); }).to.throw();
+    expect(() => {
+      evaluateBindExpr('switch (foo) { case 0: "bar" }', {foo: 0});
+    }).to.throw();
     expect(() => { evaluateBindExpr('for (;;) {}'); }).to.throw();
     expect(() => { evaluateBindExpr('while (true) {}'); }).to.throw();
     expect(() => { evaluateBindExpr('do {} while (true)'); }).to.throw();
-    expect(() => { evaluateBindExpr('for (var i in foo) {}', {foo: [1, 2, 3]}); }).to.throw();
-    expect(() => { evaluateBindExpr('for (var i of foo) {}', {foo: [1, 2, 3]}); }).to.throw();
+    expect(() => {
+      evaluateBindExpr('for (var i in foo) {}', {foo: [1, 2, 3]});
+    }).to.throw();
+    expect(() => {
+      evaluateBindExpr('for (var i of foo) {}', {foo: [1, 2, 3]});
+    }).to.throw();
   });
 
   it('should NOT allow function declarations', () => {
@@ -266,9 +292,9 @@ describe('evaluateBindExpr', () => {
   it('should NOT allow invocation of custom functions in scope', () => {
     const scope = {
       foo: {
-        bar: () => { 'bar'; }
+        bar: () => { 'bar'; },
       },
-      baz: () => { 'baz' }
+      baz: () => { 'baz'; },
     };
     expect(() => { evaluateBindExpr('baz()', scope); }).to.throw();
     expect(() => { evaluateBindExpr('foo.bar()', scope); }).to.throw();
@@ -312,7 +338,7 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('Number')).to.be.null;
     expect(evaluateBindExpr('Math')).to.be.null;
     expect(evaluateBindExpr('Date')).to.be.null;
-    
+
     expect(evaluateBindExpr('String')).to.be.null;
     expect(evaluateBindExpr('RegExp')).to.be.null;
 
