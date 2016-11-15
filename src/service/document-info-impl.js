@@ -84,6 +84,7 @@ export class DocInfo {
   }
 }
 
+const pageViewIdByWindow = {};
 
 /**
  * Returns a relatively low entropy random string.
@@ -92,6 +93,9 @@ export class DocInfo {
  * @param {!Window} win
  * @return {string}
  */
-function getPageViewId(win) {
-  return String(Math.floor(win.Math.random() * 10000));
+export function getPageViewId(win) {
+  if (!pageViewIdByWindow[win]) {
+    pageViewIdByWindow[win] = String(Math.floor(win.Math.random() * 10000));
+  }
+  return pageViewIdByWindow[win];
 }
