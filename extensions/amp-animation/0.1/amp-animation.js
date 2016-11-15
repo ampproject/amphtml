@@ -17,7 +17,7 @@
 import {childElementByTag} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {installWebAnimations} from 'web-animations-js/build/web-animations';
+import installWebAnimations from 'web-animations-js/web-animations.install';
 import {MeasureScanner} from './web-animations';
 import {tryParseJson} from '../../../src/json';
 
