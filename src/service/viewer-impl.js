@@ -742,7 +742,7 @@ export class Viewer {
    * Triggers "documentLoaded" event for the viewer.
    */
   postDocumentReady() {
-    this.sendMessageUnreliable_('documentLoaded', {
+    this.sendMessageUnreliable('documentLoaded', {
       title: this.win.document.title,
       sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
     }, false);
@@ -753,7 +753,7 @@ export class Viewer {
    * @param {number} scrollTop
    */
   postScroll(scrollTop) {
-    this.sendMessageUnreliable_(
+    this.sendMessageUnreliable(
         'scroll', {scrollTop}, false);
   }
 
@@ -764,7 +764,7 @@ export class Viewer {
    */
   requestFullOverlay() {
     return /** @type {!Promise} */ (
-        this.sendMessageUnreliable_('requestFullOverlay', {}, true));
+        this.sendMessageUnreliable('requestFullOverlay', {}, true));
   }
 
   /**
@@ -774,7 +774,7 @@ export class Viewer {
    */
   cancelFullOverlay() {
     return /** @type {!Promise} */ (
-        this.sendMessageUnreliable_('cancelFullOverlay', {}, true));
+        this.sendMessageUnreliable('cancelFullOverlay', {}, true));
   }
 
   /**
@@ -783,7 +783,7 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+    return /** @type {!Promise} */ (this.sendMessageUnreliable(
         'pushHistory', {stackIndex}, true));
   }
 
@@ -793,7 +793,7 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+    return /** @type {!Promise} */ (this.sendMessageUnreliable(
         'popHistory', {stackIndex}, true));
   }
 
@@ -844,7 +844,7 @@ export class Viewer {
     if (!this.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.sendMessageUnreliable_('fragment', undefined, true).then(
+    return this.sendMessageUnreliable('fragment', undefined, true).then(
         hash => {
           if (!hash) {
             return '';
@@ -875,7 +875,7 @@ export class Viewer {
     if (!this.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+    return /** @type {!Promise} */ (this.sendMessageUnreliable(
         'fragment', {fragment}, true));
   }
 
@@ -884,14 +884,14 @@ export class Viewer {
    * @param {!Object} message
    */
   tick(message) {
-    this.sendMessageUnreliable_('tick', message, false);
+    this.sendMessageUnreliable('tick', message, false);
   }
 
   /**
    * Triggers "sendCsi" event for the viewer.
    */
   flushTicks() {
-    this.sendMessageUnreliable_('sendCsi', undefined, false);
+    this.sendMessageUnreliable('sendCsi', undefined, false);
   }
 
   /**
@@ -899,7 +899,7 @@ export class Viewer {
    * @param {!Object} message
    */
   setFlushParams(message) {
-    this.sendMessageUnreliable_('setFlushParams', message, false);
+    this.sendMessageUnreliable('setFlushParams', message, false);
   }
 
   /**
@@ -907,7 +907,7 @@ export class Viewer {
    * @param {!Object} message
    */
   prerenderComplete(message) {
-    this.sendMessageUnreliable_('prerenderComplete', message, false);
+    this.sendMessageUnreliable('prerenderComplete', message, false);
   }
 
   /**
@@ -1005,7 +1005,7 @@ export class Viewer {
       return Promise.reject(getChannelError());
     }
     return this.messagingReadyPromise_.then(() => {
-      return this.sendMessageUnreliable_(eventType, data, awaitResponse);
+      return this.messageDeliverer_(eventType, data, awaitResponse);
     });
   }
 
@@ -1038,9 +1038,8 @@ export class Viewer {
    * @param {*} data
    * @param {boolean} awaitResponse
    * @return {?Promise<*>|undefined}
-   * @private
    */
-  sendMessageUnreliable_(eventType, data, awaitResponse) {
+  sendMessageUnreliable(eventType, data, awaitResponse) {
     if (this.messageDeliverer_) {
       return this.messageDeliverer_(eventType, data, awaitResponse);
     }
@@ -1078,7 +1077,7 @@ export class Viewer {
     }
     this.messagingMaybePromise_.then(() => {
       if (this.messageDeliverer_) {
-        this.sendMessageUnreliable_(eventType, data, false);
+        this.messageDeliverer_(eventType, data, false);
       }
     });
   }

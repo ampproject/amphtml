@@ -245,7 +245,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable');
     send.onFirstCall().returns(Promise.resolve('#from-viewer'));
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
@@ -259,7 +259,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable');
     send.onFirstCall().returns(Promise.resolve('from-viewer'));
     return viewer.getFragment().then(() => {
       throw new Error('should not happen');
@@ -283,7 +283,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable');
     send.onFirstCall().returns(Promise.resolve());
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.equal('');
@@ -320,7 +320,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable');
     viewer.updateFragment('#bar');
     expect(send.withArgs('fragment', {fragment: '#bar'}, true)).to.be
         .calledOnce;
@@ -331,7 +331,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageUnreliable');
     viewer.updateFragment('#bar');
     expect(send.callCount).to.equal(0);
   });
