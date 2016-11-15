@@ -79,11 +79,13 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     mode: getModeObject(),
     canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel(parentWindow),
+    sentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     startTime,
   };
+  attributes.ampcontextVersion = (getMode().localDev ? "LOCAL" :
+      $internalRuntimeVersion$ );
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -118,8 +120,13 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
   // Pass ad attributes to iframe via the fragment.
-  const src = baseUrl + '#' + JSON.stringify(attributes);
-  const name = host + '_' + attributes.type + '_' + count[attributes.type]++;
+  const src = baseUrl;
+  const name = JSON.stringify({
+    host:host,
+    type:attributes.type,
+    count:count[attributes.type],
+    attributes: attributes
+  });
 
   iframe.src = src;
   iframe.name = name;
