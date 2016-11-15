@@ -16,7 +16,6 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
-import {platformFor} from '../../src/platform';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installPerformanceService} from '../../src/service/performance-impl';
@@ -36,7 +35,6 @@ describe('Viewer', () => {
   let clock;
   let events;
   let errorStub;
-  let platform;
 
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
@@ -64,6 +62,7 @@ describe('Viewer', () => {
       hash: '#origin=g.com',
       href: '/test/viewer',
       ancestorOrigins: null,
+      search: '',
     };
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
@@ -89,7 +88,6 @@ describe('Viewer', () => {
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
-    platform = platformFor(windowApi);
     viewer = new Viewer(ampdoc);
   });
 
@@ -100,8 +98,7 @@ describe('Viewer', () => {
     sandbox.restore();
   });
 
-  it('should configure as natural viewport by default', () => {
-    expect(viewer.getViewportType()).to.equal('natural');
+  it('should configure as 0 padding top by default', () => {
     expect(viewer.getPaddingTop()).to.equal(0);
   });
 
@@ -109,7 +106,6 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.location.hash = '#paddingTop=17&other=something';
     const viewer = new Viewer(ampdoc);
-    expect(viewer.getViewportType()).to.equal('natural');
     expect(viewer.getPaddingTop()).to.equal(17);
 
     // All of the startup params are also available via getParam.
@@ -157,7 +153,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('test')).to.equal('1');
   });
 
@@ -168,7 +164,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
@@ -338,27 +334,6 @@ describe('Viewer', () => {
     const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
     viewer.updateFragment('#bar');
     expect(send.callCount).to.equal(0);
-  });
-
-  it('should configure correctly for iOS embedding', () => {
-    windowApi.name = '__AMP__viewportType=natural';
-    windowApi.parent = {};
-    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
-    const viewer = new Viewer(ampdoc);
-
-    expect(viewer.getViewportType()).to.equal('natural-ios-embed');
-  });
-
-  it('should NOT configure for iOS embedding if not embedded', () => {
-    windowApi.name = '__AMP__viewportType=natural';
-    windowApi.parent = windowApi;
-    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
-    windowApi.AMP_MODE = {
-      localDev: false,
-      development: false,
-    };
-    const viewportType = new Viewer(ampdoc).getViewportType();
-    expect(viewportType).to.equal('natural');
   });
 
   it('should receive viewport event', () => {
@@ -807,7 +782,13 @@ describe('Viewer', () => {
     it('should be embedded when iframed w/ "origin" in URL hash', () => {
       windowApi.parent = {};
       windowApi.location.hash = '#origin=g.com';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.ok;
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded when iframed w/ "visibilityState"', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#visibilityState=hidden';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
 
     it('should NOT be embedded when iframed w/o "origin" in URL hash', () => {
@@ -819,16 +800,17 @@ describe('Viewer', () => {
     it('should be embedded with "webview=1" param', () => {
       windowApi.parent = windowApi;
       windowApi.location.hash = '#webview=1';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.ok;
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded with query param', () => {
+      windowApi.parent = {};
+      windowApi.location.search = '?amp_js_v=1';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
   });
 
   describe('isTrustedViewer', () => {
-
-    function test(origin, toBeTrusted) {
-      const viewer = new Viewer(ampdoc);
-      expect(viewer.isTrustedViewerOrigin_(origin)).to.equal(toBeTrusted);
-    }
 
     it('should consider non-trusted when not iframed', () => {
       windowApi.parent = windowApi;
@@ -1018,7 +1000,15 @@ describe('Viewer', () => {
       });
     });
 
-    it('should trust domain variations', () => {
+    function test(origin, toBeTrusted, opt_inWebView) {
+      it('testing ' + origin, () => {
+        const viewer = new Viewer(ampdoc);
+        viewer.isWebviewEmbedded_ = !!opt_inWebView;
+        expect(viewer.isTrustedViewerOrigin_(origin)).to.equal(toBeTrusted);
+      });
+    }
+
+    describe('should trust domain variations', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
@@ -1037,18 +1027,30 @@ describe('Viewer', () => {
       test('https://www.google.cat', true);
     });
 
-    it('should not trust host as referrer with http', () => {
+    describe('should not trust host as referrer with http', () => {
       test('http://google.com', false);
     });
 
-    it('should NOT trust wrong or non-whitelisted domain variations', () => {
-      test('https://google.net', false);
-      test('https://google.other.com', false);
-      test('https://www.google.other.com', false);
-      test('https://withgoogle.com', false);
-      test('https://acme.com', false);
-      test('https://google', false);
-      test('https://www.google', false);
+    describe('should NOT trust wrong or non-whitelisted domain variations',
+      () => {
+        test('https://google.net', false);
+        test('https://google.other.com', false);
+        test('https://www.google.other.com', false);
+        test('https://withgoogle.com', false);
+        test('https://acme.com', false);
+        test('https://google', false);
+        test('https://www.google', false);
+      });
+
+    describe('tests for b/32626673', () => {
+      test('www.google.com', true, true);
+      test('www.google.com', false, /* not in webview */ false);
+      test('www.google.de', true, true);
+      test('www.google.co.uk', true, true);
+      test(':www.google.de', false, true);
+      test('news.google.de', false, true);
+      test('www.google.de/', false, true);
+      test('www.acme.com', false, true);
     });
   });
 

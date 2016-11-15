@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import {closestByTag} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {closestByTag, closestBySelector} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
+import {isFiniteNumber} from '../../../src/types';
 import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
+import {startsWith} from '../../../src/string';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -102,9 +103,12 @@ export function isVisibilitySpecValid(config) {
 
   const spec = config['visibilitySpec'];
   const selector = spec['selector'];
-  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0)) {
-    user().error(TAG_, 'Visibility spec requires an id selector or a tag ' +
-        'name starting with "amp-"');
+  if (!selector || (!startsWith(selector, '#') &&
+                    !startsWith(selector, 'amp-') &&
+                    selector != ':root' &&
+                    selector != ':host')) {
+    user().error(TAG_, 'Visibility spec requires an id selector, a tag ' +
+        'name starting with "amp-" or ":root"');
     return false;
   }
 
@@ -121,8 +125,8 @@ export function isVisibilitySpecValid(config) {
   }
 
   if (ctMax < ctMin || ttMax < ttMin) {
-    user().warn('Max value in timing conditions should be more ' +
-        'than the min value.');
+    user().warn('AMP-ANALYTICS', 'Max value in timing conditions should be ' +
+        'more than the min value.');
     return false;
   }
 
@@ -155,6 +159,16 @@ export function getElement(selector, el, selectionMethod) {
   if (!el) {
     return null;
   }
+
+  // Special case for root selector.
+  if (selector == ':host' || selector == ':root') {
+    const elWin = el.ownerDocument.defaultView;
+    const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
+    if (parentEl) {
+      return closestBySelector(parentEl, '.-amp-element');
+    }
+  }
+
   if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     return closestByTag(el, selector);
@@ -278,7 +292,7 @@ export class Visibility {
     let res = null;
     try {
       res = this.resourcesService_.getResourceForElement(
-          dev().assertElement(element));
+          user().assertElement(element));
     } catch (e) {
       user().assert(res,
           'Visibility tracking not supported on element: ', element);
@@ -331,8 +345,8 @@ export class Visibility {
       const change = res.element.getIntersectionChangeEntry();
       const ir = change.intersectionRect;
       const br = change.boundingClientRect;
-      const visible = br.height * br.width == 0 ? 0 :
-          ir.width * ir.height * 100 / (br.height * br.width);
+      const visible = !isFiniteNumber(change.intersectionRatio) ? 0
+          : change.intersectionRatio * 100;
 
       const listeners = this.listeners_[res.getId()];
       for (let c = listeners.length - 1; c >= 0; c--) {
@@ -512,10 +526,14 @@ export class Visibility {
         ? Math.round(intersection.width * intersection.height * 10000
               / (br.width * br.height)) / 100
         : 0;
-    state[MIN_VISIBLE] = Math.round(
-        dev().assertNumber(state[MIN_VISIBLE]) * 100) / 100;
-    state[MAX_VISIBLE] = Math.round(
-        dev().assertNumber(state[MAX_VISIBLE]) * 100) / 100;
+    if (state[MIN_VISIBLE] !== undefined) {
+      state[MIN_VISIBLE] =
+          Math.round(dev().assertNumber(state[MIN_VISIBLE]) * 100) / 100;
+    }
+    if (state[MAX_VISIBLE] !== undefined) {
+      state[MAX_VISIBLE] =
+          Math.round(dev().assertNumber(state[MAX_VISIBLE]) * 100) / 100;
+    }
     state[BACKGROUNDED] = this.backgrounded_ ? '1' : '0';
     state[BACKGROUNDED_AT_START] = this.backgroundedAtStart_ ? '1' : '0';
 

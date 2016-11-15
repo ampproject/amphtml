@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -332,39 +331,44 @@ export class InstrumentationService {
    */
   createSelectiveListener_(listener, selector) {
     return e => {
-      let el = e.target;
-      // First do the cheap lookups.
-      if (selector === '*' || this.matchesSelector_(el, selector)) {
-        listener(
-          new AnalyticsEvent(
-            AnalyticsEventType.CLICK,
-            getDataParamsFromAttributes(
-              el,
-              undefined,
-              VARIABLE_DATA_ATTRIBUTE_KEY
-            )
-          )
-        );
-      } else {
-        // More expensive search.
-        while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
-          el = el.parentElement;
-          if (this.matchesSelector_(el, selector)) {
-            listener(
-              new AnalyticsEvent(
-                AnalyticsEventType.CLICK,
-                getDataParamsFromAttributes(
-                  el,
-                  undefined,
-                  VARIABLE_DATA_ATTRIBUTE_KEY
-                )
+      try {
+        let el = e.target;
+        // First do the cheap lookups.
+        if (selector === '*' || matches(el, selector)) {
+          listener(
+            new AnalyticsEvent(
+              AnalyticsEventType.CLICK,
+              getDataParamsFromAttributes(
+                el,
+                undefined,
+                VARIABLE_DATA_ATTRIBUTE_KEY
               )
-            );
-            // Don't fire the event multiple times even if the more than one
-            // ancestor matches the selector.
-            return;
+            )
+          );
+        } else {
+          // More expensive search.
+          while (el.parentElement != null &&
+              el.parentElement.tagName != 'BODY') {
+            el = el.parentElement;
+            if (matches(el, selector)) {
+              listener(
+                new AnalyticsEvent(
+                  AnalyticsEventType.CLICK,
+                  getDataParamsFromAttributes(
+                    el,
+                    undefined,
+                    VARIABLE_DATA_ATTRIBUTE_KEY
+                  )
+                )
+              );
+              // Don't fire the event multiple times even if the more than one
+              // ancestor matches the selector.
+              return;
+            }
           }
         }
+      } catch (selectorError) {
+        user().error(TAG, 'Bad query selector.', selector, selectorError);
       }
     };
   }
@@ -459,32 +463,6 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Element} el
-   * @param {string} selector
-   * @return {boolean} True if the given element matches the given selector.
-   * @private
-   */
-  matchesSelector_(el, selector) {
-    try {
-      const matcher = el.matches ||
-          el.webkitMatchesSelector ||
-          el.mozMatchesSelector ||
-          el.msMatchesSelector ||
-          el.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(el, selector);
-      }
-      const matches = el.ownerDocument.querySelectorAll(selector);
-      let i = matches.length;
-      while (i-- > 0 && matches.item(i) != el) {};
-      return i > -1;
-    } catch (selectorError) {
-      user().error(TAG, 'Bad query selector.', selector, selectorError);
-    }
-    return false;
-  }
-
-  /**
    * @param {JSONType} timerSpec
    * @private
    */
@@ -534,7 +512,7 @@ export class InstrumentationService {
 
   /**
    * Checks to confirm that a given trigger type is allowed for the element.
-   * Specifically, ti confirms that if the element is in the embed, only a
+   * Specifically, it confirms that if the element is in the embed, only a
    * subset of the trigger types are allowed.
    * @param  {!AnalyticsEventType} triggerType
    * @param  {!Element} element

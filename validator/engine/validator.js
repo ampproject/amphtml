@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
+goog.provide('amp.validator.CssLength');  // Only for testing.
 goog.provide('amp.validator.Terminal');
 goog.provide('amp.validator.ValidationHandler');
 goog.provide('amp.validator.annotateWithErrorCategories');
@@ -2204,7 +2204,7 @@ function parseLayout(layout) {
  * Parses a width or height layout attribute, for the determining the layout
  * of AMP tags (e.g. <amp-img width="42px" etc.).
  */
-amp.validator.CssLengthAndUnit = class {
+amp.validator.CssLength = class {
   /**
    * @param {string|undefined} input The input attribute value to be parsed.
    * @param {boolean} allowAuto Whether or not to allow the 'auto' value as
@@ -2230,6 +2230,11 @@ amp.validator.CssLengthAndUnit = class {
      */
     this.isAuto = false;
     /**
+     * The numeric value.
+     * @type {number}
+     */
+    this.numeral = Number.NaN;
+    /**
      * The unit, 'px' being the default in case it's absent.
      * @type {string}
      */
@@ -2245,11 +2250,12 @@ amp.validator.CssLengthAndUnit = class {
       this.isValid = allowAuto;
       return;
     }
-    const re = /^\d+(?:\.\d+)?(px|em|rem|vh|vw|vmin|vmax)?$/;
+    const re = /^(\d+(?:\.\d+)?)(px|em|rem|vh|vw|vmin|vmax)?$/;
     const match = re.exec(input);
     if (match !== null) {
       this.isValid = true;
-      this.unit = match[1] || 'px';
+      this.numeral = parseFloat(match[1]);
+      this.unit = match[2] || 'px';
     }
   }
 }
@@ -2261,14 +2267,14 @@ amp.validator.CssLengthAndUnit = class {
  * defaults for width / height).
  * @param {!amp.validator.AmpLayout} spec
  * @param {!amp.validator.AmpLayout.Layout} inputLayout
- * @param {!amp.validator.CssLengthAndUnit} inputWidth
- * @return {!amp.validator.CssLengthAndUnit}
+ * @param {!amp.validator.CssLength} inputWidth
+ * @return {!amp.validator.CssLength}
  */
 function CalculateWidth(spec, inputLayout, inputWidth) {
   if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED) &&
       !inputWidth.isSet && spec.definesDefaultWidth) {
-    return new amp.validator.CssLengthAndUnit('1px', /* allowAuto */ false);
+    return new amp.validator.CssLength('1px', /* allowAuto */ false);
   }
   return inputWidth;
 }
@@ -2278,15 +2284,15 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
  * Calculates the effective height from input layout and input height.
  * @param {!amp.validator.AmpLayout} spec
  * @param {!amp.validator.AmpLayout.Layout} inputLayout
- * @param {!amp.validator.CssLengthAndUnit} inputHeight
- * @return {!amp.validator.CssLengthAndUnit}
+ * @param {!amp.validator.CssLength} inputHeight
+ * @return {!amp.validator.CssLength}
  */
 function CalculateHeight(spec, inputLayout, inputHeight) {
   if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT) &&
       !inputHeight.isSet && spec.definesDefaultHeight) {
-    return new amp.validator.CssLengthAndUnit('1px', /* allowAuto */ false);
+    return new amp.validator.CssLength('1px', /* allowAuto */ false);
   }
   return inputHeight;
 }
@@ -2297,8 +2303,8 @@ function CalculateHeight(spec, inputLayout, inputHeight) {
  * fixed-sized mocks first and then the layout determines how things
  * will change for different viewports / devices / etc.
  * @param {!amp.validator.AmpLayout.Layout} inputLayout
- * @param {!amp.validator.CssLengthAndUnit} width
- * @param {!amp.validator.CssLengthAndUnit} height
+ * @param {!amp.validator.CssLength} width
+ * @param {!amp.validator.CssLength} height
  * @param {?string} sizesAttr
  * @param {?string} heightsAttr
  * @return {!amp.validator.AmpLayout.Layout}
@@ -2331,7 +2337,7 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * @return {boolean}
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
-  return tag.mandatory || tag.unique ||
+  return tag.mandatory || tag.unique || tag.uniqueWarning ||
       tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
 }
 
@@ -2656,7 +2662,7 @@ class ParsedTagSpec {
       return;
     }
     const inputWidth =
-        new amp.validator.CssLengthAndUnit(widthAttr, /* allowAuto */ true);
+        new amp.validator.CssLength(widthAttr, /* allowAuto */ true);
     if (!inputWidth.isValid) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         context.addError(
@@ -2671,7 +2677,7 @@ class ParsedTagSpec {
       return;
     }
     const inputHeight =
-        new amp.validator.CssLengthAndUnit(heightAttr, /* allowAuto */ true);
+        new amp.validator.CssLength(heightAttr, /* allowAuto */ true);
     if (!inputHeight.isValid) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         context.addError(
@@ -3430,19 +3436,30 @@ function validateTagAgainstSpec(
     const isUnique = context.recordTagspecValidated(parsedSpec.getId());
     // If a duplicate tag is encountered for a spec that's supposed
     // to be unique, we've found an error that we must report.
-    if (spec.unique && !isUnique) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(spec)], spec.specUrl,
-            resultForBestAttempt);
-      } else {
-        resultForBestAttempt.status =
-            amp.validator.ValidationResult.Status.FAIL;
+    if (!isUnique) {
+      if (spec.unique) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              resultForBestAttempt);
+        } else {
+          resultForBestAttempt.status =
+              amp.validator.ValidationResult.Status.FAIL;
+        }
+        return;
+      } else if (spec.uniqueWarning) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.WARNING,
+              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              resultForBestAttempt);
+        }
       }
-      return;
     }
   }
 
@@ -4717,7 +4734,9 @@ amp.validator.categorizeError = function(error) {
   }
   // E.g. "The tag 'boilerplate (noscript) - old variant' appears
   // more than once in the document."
-  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG) {
+  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG ||
+      error.code ===
+          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING) {
     return amp.validator.ErrorCategory.Code
         .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
   }

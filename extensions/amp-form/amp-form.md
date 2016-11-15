@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable (Custom Validation still experimental - See below)</td>
+    <td>Stable<br>(<a href="#custom-validations">Custom Validation still experimental - See below</a>)</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -48,7 +48,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
 
 Example:
 ```html
-<form method="post" action="https://example.com/subscribe" target="_blank">
+<form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -60,6 +60,16 @@ Example:
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            Subscription successful!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Subscription failed!
+        </template>
+    </div>
 </form>
 ```
 
@@ -136,6 +146,8 @@ Using `submit-success` and `submit-error` special marker attributes, publishers 
 
 The response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 
+Both success and error responses should have a `Content-Type: application/json` header. `submit-success` will render for all responses that has a status of `2XX`, all other statuses will render `submit-error`.
+
 **Success Response**
 ```json
 {
@@ -202,7 +214,7 @@ One of the main differences between `:invalid` and `:user-invalid` is when are t
 See the [full example here](../../examples/forms.amp.html) on using these.
 
 ## Custom Validations
-__(experimental)__
+__(<a href="https://www.ampproject.org/docs/reference/experimental.html">experimental</a>)__
 `amp-form` provides a way for you to build your own custom validation UI with few validation reporting strategies available to choose from `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
 The general usage of this is you first set `custom-validation-reporting` attribute on your `form` to one of the validation reporting strategies and then provide your own validation UI marked up with special attributes, AMP will discover these and report them at the right time depending on the strategy selected.

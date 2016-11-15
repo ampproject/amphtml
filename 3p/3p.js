@@ -24,6 +24,7 @@
 
 import {dev, user} from '../src/log';
 import {isArray} from '../src/types';
+import {map} from '../src/types';
 import {rethrowAsync} from '../src/log';
 
 
@@ -35,7 +36,7 @@ let ThirdPartyFunctionDef;
  * @const {!Object<ThirdPartyFunctionDef>}
  * @visibleForTesting
  */
-export const registrations = {};
+export const registrations = map();
 
 /** @type {number} */
 let syncScriptLoads = 0;
@@ -269,7 +270,7 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
-    container: true,
+    ampSlotIndex: true,
   };
 
   for (const field in data) {

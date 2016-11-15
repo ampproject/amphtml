@@ -23,6 +23,7 @@ import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {timerFor} from '../../../src/timer';
 import {removeElement} from '../../../src/dom';
+import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -131,7 +132,7 @@ export function sendRequestUsingIframe(win, request) {
   assertHttpsUrl(request, 'amp-analytics request');
   /** @const {!Element} */
   const iframe = win.document.createElement('iframe');
-  iframe.style.display = 'none';
+  setStyle(iframe, 'display', 'none');
   iframe.onload = iframe.onerror = () => {
     timerFor(win).delay(() => {
       removeElement(iframe);

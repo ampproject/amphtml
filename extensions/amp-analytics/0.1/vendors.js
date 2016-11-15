@@ -24,6 +24,9 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
+      'adNavTiming': 'AD_NAV_TIMING',  // only available in A4A embeds
+      'adNavType': 'AD_NAV_TYPE',  // only available in A4A embeds
+      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT',  // only available in A4A
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
@@ -39,6 +42,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'canonicalUrl': 'CANONICAL_URL',
       'clientId': 'CLIENT_ID',
       'contentLoadTime': 'CONTENT_LOAD_TIME',
+      'counter': 'COUNTER',
       'documentCharset': 'DOCUMENT_CHARSET',
       'documentReferrer': 'DOCUMENT_REFERRER',
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
@@ -370,24 +374,55 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a1&ds=${dataSource}&aip=true&_s=${requestCount}&' +
-          'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
-          'jid=&cid=${clientId}&tid=${account}&dl=${documentLocation}&' +
-          'dr=${documentReferrer}&sd=${screenColorDepth}&' +
-          'ul=${browserLanguage}&de=${documentCharset}' ,
-      'baseSuffix': '&a=${pageViewId}&z=${random}',
-      'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
-          '_r=1${baseSuffix}',
-      'event': '${host}/collect?${basePrefix}&t=event&' +
-          'ec=${eventCategory}&ea=${eventAction}&el=${eventLabel}&' +
-          'ev=${eventValue}${baseSuffix}',
-      'social': '${host}/collect?${basePrefix}&t=social&' +
-          'sa=${socialAction}&sn=${socialNetwork}&st=${socialTarget}' +
+      'basePrefix': 'v=1&' +
+          '_v=a1&' +
+          'ds=${dataSource}&' +
+          'aip=true&' +
+          '_s=${requestCount}&' +
+          'dt=${title}&' +
+          'sr=${screenWidth}x${screenHeight}&' +
+          '_utmht=${timestamp}&' +
+          'cid=${clientId}&' +
+          'tid=${account}&' +
+          'dl=${documentLocation}&' +
+          'dr=${documentReferrer}&' +
+          'sd=${screenColorDepth}&' +
+          'ul=${browserLanguage}&' +
+          'de=${documentCharset}',
+      'baseSuffix': '&a=${pageViewId}&' +
+          'z=${random}',
+      'pageview': '${host}/r/collect?${basePrefix}&' +
+          't=pageview&' +
+          'jid=${random}&' +
+          '_r=1' +
           '${baseSuffix}',
-      'timing': '${host}/collect?${basePrefix}&t=timing&plt=${pageLoadTime}&' +
-          'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
-          'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
-          'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}',
+      'event': '${host}/collect?${basePrefix}&' +
+          't=event&' +
+          'jid=&' +
+          'ec=${eventCategory}&' +
+          'ea=${eventAction}&' +
+          'el=${eventLabel}&' +
+          'ev=${eventValue}' +
+          '${baseSuffix}',
+      'social': '${host}/collect?${basePrefix}&' +
+          't=social&' +
+          'jid=&' +
+          'sa=${socialAction}&' +
+          'sn=${socialNetwork}&' +
+          'st=${socialTarget}' +
+          '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&' +
+          't=timing&' +
+          'jid=&' +
+          'plt=${pageLoadTime}&' +
+          'dns=${domainLookupTime}&' +
+          'tcp=${tcpConnectTime}&' +
+          'rrt=${redirectTime}&' +
+          'srt=${serverResponseTime}&' +
+          'pdt=${pageDownloadTime}&' +
+          'clt=${contentLoadTime}&' +
+          'dit=${domInteractiveTime}' +
+          '${baseSuffix}',
     },
     'triggers': {
       'performanceTiming': {
@@ -404,6 +439,35 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'metric': 'cm',
     },
     'optout': '_gaUserPrefs.ioo',
+  },
+
+  'googleconversion': {
+    'requests': {
+      'conversion': 'https://www.googleadservices.com/pagead/conversion/' +
+          '${google_conversion_id}/?' +
+          'cv=amp1&' +  // Increment when making changes.
+          'value=${google_conversion_value}&' +
+          'currency_code=${google_conversion_currency}&' +
+          'label=${google_conversion_label}&' +
+          'random=${random}&' +
+          'url=${sourceUrl}&' +
+          'fst=${pageViewId}&' +
+          'num=${counter(googleconversion)}&' +
+          'fmt=3&' +
+          'async=3&' +
+          'bg=${google_conversion_color}&' +
+          'u_h=${screenHeight}&u_w=${screenWidth}&' +
+          'u_ah=${viewportHeight}&u_aw=${viewportWidth}&' +
+          'u_cd=${screenColorDepth}&' +
+          'u_tz=${timezone}&' +
+          'tiba=${title}&' +
+          'guid=ON&script=0',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
   },
 
   'krux': {

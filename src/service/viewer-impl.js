@@ -16,7 +16,6 @@
 
 import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
-import {getMode} from '../mode';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
 import {
@@ -25,7 +24,6 @@ import {
   parseUrl,
   removeFragment,
 } from '../url';
-import {platformFor} from '../platform';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
@@ -42,29 +40,6 @@ const SENTINEL_ = '__AMP__';
  * @private {number}
  */
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
-
-/**
- * The type of the viewport.
- * @enum {string}
- */
-export const ViewportType = {
-
-  /**
-   * Viewer leaves sizing and scrolling up to the AMP document's window.
-   */
-  NATURAL: 'natural',
-
-  /**
-   * This is AMP-specific type and doesn't come from viewer. This is the type
-   * that AMP sets when Viewer has requested "natural" viewport on a iOS
-   * device.
-   * See:
-   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
-   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
-   */
-  NATURAL_IOS_EMBED: 'natural-ios-embed',
-};
-
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -135,9 +110,6 @@ export class Viewer {
 
     /** @private {number} */
     this.prerenderSize_ = 1;
-
-    /** @private {!ViewportType} */
-    this.viewportType_ = ViewportType.NATURAL;
 
     /** @private {number} */
     this.paddingTop_ = 0;
@@ -223,22 +195,6 @@ export class Viewer {
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
-    this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
-    // Configure scrolling parameters when AMP is iframed on iOS.
-    const platform = platformFor(this.win);
-    if (this.viewportType_ == ViewportType.NATURAL && this.isIframed_ &&
-            platform.isIos()) {
-      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
-    }
-    // Enable iOS Embedded mode so that it's easy to test against a more
-    // realistic iOS environment.
-    if (platform.isIos() &&
-            this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
-            (getMode(this.win).localDev || getMode(this.win).development)) {
-      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
-    }
-    dev().fine(TAG_, '- viewportType:', this.viewportType_);
-
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
     dev().fine(TAG_, '- padding-top:', this.paddingTop_);
@@ -259,10 +215,20 @@ export class Viewer {
      * a web view, or a shadow doc in PWA.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = (
+    this.isEmbedded_ = !!(
+        this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME && this.params_['origin']
+        // There appears to be a bug under investigation where the
+        // origin is sometimes failed to be detected. Since failure mode
+        // if we fail to initialize communication is very bad, we also check
+        // for visibilityState.
+        // After https://github.com/ampproject/amphtml/issues/6070
+        // is fixed we should probably only keep the amp_js_v check here.
+        && (this.params_['origin']
+            || this.params_['visibilityState']
+            // Parent asked for viewer JS. We must be embedded.
+            || (this.win.location.search.indexOf('amp_js_v') != -1))
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
@@ -407,7 +373,9 @@ export class Viewer {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used my mode.js to infer development mode.
         this.win.location.originalHash = this.win.location.hash;
-        this.win.history.replaceState({}, '', newUrl);
+        // Using #- to falsify a theory that could lead to
+        // https://github.com/ampproject/amphtml/issues/6070
+        this.win.history.replaceState({}, '', newUrl + '#-');
         dev().fine(TAG_, 'replace url:' + this.win.location.href);
       }
     }
@@ -646,15 +614,6 @@ export class Viewer {
   }
 
   /**
-   * See `ViewportType` enum for the set of allowed values.
-   * See {@link Viewport} and {@link ViewportBinding} for more details.
-   * @return {!ViewportType}
-   */
-  getViewportType() {
-    return this.viewportType_;
-  }
-
-  /**
    * Returns the top padding requested by the viewer.
    * @return {number}
    */
@@ -735,6 +694,12 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
+    // TEMPORARY HACK due to a misbehaving native app. See b/32626673
+    // In native apps all security bets are off anyway, and in browser
+    // origins never take the form that is matched here.
+    if (this.isWebviewEmbedded_ && /^www\.[.a-z]+$/.test(urlString)) {
+      return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
+    }
     /** @const {!Location} */
     const url = parseUrl(urlString);
     if (url.protocol != 'https:') {

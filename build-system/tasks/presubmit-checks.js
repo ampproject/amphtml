@@ -159,6 +159,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp.js',
       'src/amp-shadow.js',
+      'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -168,6 +169,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
+      'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
     ],
   },
@@ -196,11 +198,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/history-impl.js',
-      'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
-      'src/service/viewport-impl.js',
-      'src/service/vsync-impl.js',
     ],
   },
   'setViewerVisibilityState': {
@@ -214,7 +212,6 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
   },
@@ -247,6 +244,7 @@ var forbiddenTerms = {
     whitelist: [
       '3p/integration.js',
       'ads/alp/install-alp.js',
+      'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'src/runtime.js',
@@ -438,7 +436,7 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([\'"`])?[A-Z-]+([\'"`])?)[^)]*\\)': {
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
     message: 'Logging message require explicitly `TAG`, or an all uppercase' +
         ' string as the first parameter',
   },
@@ -471,7 +469,14 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp.js',
       'src/chunk.js',
+      'src/inabox/amp-inabox.js',
       'src/runtime.js',
+    ],
+  },
+  'style\\.\\w+ = ': {
+    message: 'Use setStyle instead!',
+    whitelist: [
+      'testing/iframe.js',
     ],
   },
 };

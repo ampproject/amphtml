@@ -92,40 +92,48 @@ export function listenOncePromise(element, eventType, opt_capture,
 
 
 /**
- * Whether the specified element has been loaded already.
- * @param {!Element} element
+ * Whether the specified element/window has been loaded already.
+ * @param {!Element|!Window} eleOrWindow
  * @return {boolean}
  */
-export function isLoaded(element) {
-  return element.complete || element.readyState == 'complete';
+export function isLoaded(eleOrWindow) {
+  return !!(eleOrWindow.complete || eleOrWindow.readyState == 'complete'
+      // If the passed in thing is a Window, infer loaded state from
+      //
+      || (eleOrWindow.document
+          && eleOrWindow.document.readyState == 'complete'));
 }
 
 /**
- * Returns a promise that will resolve or fail based on the element's 'load'
+ * Returns a promise that will resolve or fail based on the eleOrWindow's 'load'
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
- * @param {T} element
+ * @param {T} eleOrWindow Supports both Elements and as a special case Windows.
  * @param {number=} opt_timeout
  * @return {!Promise<T>}
  * @template T
  */
-export function loadPromise(element, opt_timeout) {
+export function loadPromise(eleOrWindow, opt_timeout) {
   let unlistenLoad;
   let unlistenError;
-  if (isLoaded(element)) {
-    return Promise.resolve(element);
+  if (isLoaded(eleOrWindow)) {
+    return Promise.resolve(eleOrWindow);
   }
   let loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
-      unlistenLoad = listenOnce(element, 'loadstart', resolve);
+    const tagName = eleOrWindow.tagName;
+    if (tagName === 'AUDIO' || tagName === 'VIDEO') {
+      unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
     } else {
-      unlistenLoad = listenOnce(element, 'load', resolve);
+      unlistenLoad = listenOnce(eleOrWindow, 'load', resolve);
     }
-    unlistenError = listenOnce(element, 'error', reject);
+    // For elements, unlisten on error (don't for Windows).
+    if (tagName) {
+      unlistenError = listenOnce(eleOrWindow, 'error', reject);
+    }
   });
-  loadingPromise = loadingPromise.then(() => element, failedToLoad);
+  loadingPromise = loadingPromise.then(() => eleOrWindow, failedToLoad);
   return racePromise_(loadingPromise, unlistenLoad, unlistenError,
       opt_timeout);
 }

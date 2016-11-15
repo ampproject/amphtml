@@ -136,7 +136,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
       const TAG = this.getName_();
-      dev().fine(TAG, 'User has opted out. No hits will be sent.');
+      user().fine(TAG, 'User has opted out. No hits will be sent.');
       return Promise.resolve();
     }
 
@@ -354,7 +354,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const requests = {};
     if (!this.config_ || !this.config_['requests']) {
       const TAG = this.getName_();
-      dev().error(TAG, 'No request strings defined. Analytics ' +
+      user().error(TAG, 'No request strings defined. Analytics ' +
           'data will not be sent from this page.');
       return;
     }
@@ -483,8 +483,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
     opt_encode = opt_encode === undefined ? true : opt_encode;
     if (opt_iterations < 0) {
-      user().error('Maximum depth reached while expanding variables. Please ' +
-          'ensure that the variables are not recursive.');
+      user().error('AMP-ANALYTICS', 'Maximum depth reached while expanding ' +
+          'variables. Please ensure that the variables are not recursive.');
       return template;
     }
 

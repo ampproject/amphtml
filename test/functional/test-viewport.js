@@ -16,6 +16,7 @@
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {
+  installViewportServiceForDoc,
   Viewport,
   ViewportBindingDef,
   ViewportBindingIosEmbedWrapper_,
@@ -934,6 +935,7 @@ describe('ViewportBindingNatural', () => {
       style: {},
     };
     documentBody = {
+      nodeType: 1,
       style: {},
     };
     windowApi.document = {
@@ -1223,7 +1225,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border on BODY', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1232,7 +1237,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border in lightbox mode', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1423,6 +1431,9 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     const wrapperCss = win.getComputedStyle(binding.wrapper_);
     const bodyCss = win.getComputedStyle(win.document.body);
 
+    // `<html>` must have `position: static` or layout is broken.
+    expect(htmlCss.position).to.equal('static');
+
     // `<html>` and `<i-amp-html-wrapper>` must be scrollable, but not `body`.
     // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
     expect(htmlCss.overflowY).to.equal('auto');
@@ -1549,4 +1560,62 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
       expect(binding.getScrollTop()).to.equal(11);
     });
   });
+});
+
+describe('createViewport', () => {
+
+  describes.fakeWin('in Android', {win: {navigator: {userAgent: 'Android'}}},
+      env => {
+        let win;
+
+        beforeEach(() => {
+          win = env.win;
+          installPlatformService(win);
+          installTimerService(win);
+        });
+
+        it('should bind to "natural" when not iframed', () => {
+          win.parent = win;
+          const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
+          const viewport = installViewportServiceForDoc(ampDoc);
+          expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+        });
+
+        it('should bind to "naturual" when iframed', () => {
+          win.parent = {};
+          const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
+          const viewport = installViewportServiceForDoc(ampDoc);
+          expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+        });
+      });
+
+  describes.fakeWin('in iOS', {win: {navigator: {userAgent: 'iPhone'}}},
+      env => {
+        let win;
+
+        beforeEach(() => {
+          win = env.win;
+          installPlatformService(win);
+          installTimerService(win);
+        });
+
+        it('should bind to "natural" when not iframed', () => {
+          win.parent = win;
+          const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
+          const viewport = installViewportServiceForDoc(ampDoc);
+          expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+        });
+
+        it('should bind to "natural iOS embed" when iframed', () => {
+          win.parent = {};
+          const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
+          const viewport = installViewportServiceForDoc(ampDoc);
+          expect(viewport.binding_).to
+              .be.instanceof(ViewportBindingNaturalIosEmbed_);
+        });
+      });
 });
