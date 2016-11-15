@@ -831,6 +831,27 @@ function mkdirSync(path) {
   }
 }
 
+/**
+ * Patches Web Animations API by wrapping its body into `install` function.
+ * This gives us an option to call polyfill directly on the main window
+ * or a friendly iframe.
+ */
+function patchWebAnimations() {
+  // Copies web-animations-js into a new file that has an export.
+  const patchedName = 'node_modules/web-animations-js/' +
+      'web-animations.install.js';
+  var file = fs.readFileSync(
+      'node_modules/web-animations-js/' +
+      'web-animations.min.js').toString();
+  // Wrap the contents inside the install function.
+  file = 'exports.installWebAnimations = function(window) {\n' +
+      'var document = window.document;\n' +
+      file + '\n' +
+      '}\n';
+  fs.writeFileSync(patchedName, file);
+}
+patchWebAnimations();
+
 
 /**
  * Gulp tasks

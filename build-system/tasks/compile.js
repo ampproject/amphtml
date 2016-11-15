@@ -148,6 +148,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
+      'node_modules/web-animations-js/web-animations.install.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.node.js',
       //'node_modules/core-js/modules/**.js',
