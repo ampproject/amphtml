@@ -742,7 +742,7 @@ export class Viewer {
    * Triggers "documentLoaded" event for the viewer.
    */
   postDocumentReady() {
-    this.sendMessageUnreliable('documentLoaded', {
+    this.sendMessageCancelUnsent('documentLoaded', {
       title: this.win.document.title,
       sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
     }, false);
@@ -753,7 +753,7 @@ export class Viewer {
    * @param {number} scrollTop
    */
   postScroll(scrollTop) {
-    this.sendMessageUnreliable(
+    this.sendMessageCancelUnsent(
         'scroll', {scrollTop}, false);
   }
 
@@ -764,7 +764,7 @@ export class Viewer {
    */
   requestFullOverlay() {
     return /** @type {!Promise} */ (
-        this.sendMessageUnreliable('requestFullOverlay', {}, true));
+        this.sendMessageCancelUnsent('requestFullOverlay', {}, true));
   }
 
   /**
@@ -774,7 +774,7 @@ export class Viewer {
    */
   cancelFullOverlay() {
     return /** @type {!Promise} */ (
-        this.sendMessageUnreliable('cancelFullOverlay', {}, true));
+        this.sendMessageCancelUnsent('cancelFullOverlay', {}, true));
   }
 
   /**
@@ -783,7 +783,7 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageUnreliable(
+    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
         'pushHistory', {stackIndex}, true));
   }
 
@@ -793,7 +793,7 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageUnreliable(
+    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
         'popHistory', {stackIndex}, true));
   }
 
@@ -844,7 +844,7 @@ export class Viewer {
     if (!this.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.sendMessageUnreliable('fragment', undefined, true).then(
+    return this.sendMessageCancelUnsent('fragment', undefined, true).then(
         hash => {
           if (!hash) {
             return '';
@@ -875,7 +875,7 @@ export class Viewer {
     if (!this.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (this.sendMessageUnreliable(
+    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
         'fragment', {fragment}, true));
   }
 
@@ -884,14 +884,14 @@ export class Viewer {
    * @param {!Object} message
    */
   tick(message) {
-    this.sendMessageUnreliable('tick', message, false);
+    this.sendMessageCancelUnsent('tick', message, false);
   }
 
   /**
    * Triggers "sendCsi" event for the viewer.
    */
   flushTicks() {
-    this.sendMessageUnreliable('sendCsi', undefined, false);
+    this.sendMessageCancelUnsent('sendCsi', undefined, false);
   }
 
   /**
@@ -899,7 +899,7 @@ export class Viewer {
    * @param {!Object} message
    */
   setFlushParams(message) {
-    this.sendMessageUnreliable('setFlushParams', message, false);
+    this.sendMessageCancelUnsent('setFlushParams', message, false);
   }
 
   /**
@@ -907,7 +907,7 @@ export class Viewer {
    * @param {!Object} message
    */
   prerenderComplete(message) {
-    this.sendMessageUnreliable('prerenderComplete', message, false);
+    this.sendMessageCancelUnsent('prerenderComplete', message, false);
   }
 
   /**
@@ -983,7 +983,14 @@ export class Viewer {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
       queue.forEach(message => {
-        this.messageDeliverer_(message.eventType, message.data, false);
+        const responsePromise = this.messageDeliverer_(
+            message.eventType, message.data, message.awaitResponse);
+
+        if (message.awaitResponse) {
+          responsePromise.then(response => message.responseResolver(response));
+        } else {
+          message.responseResolver();
+        }
       });
     }
   }
@@ -998,7 +1005,8 @@ export class Viewer {
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
-   * @return {!Promise<*>|undefined}
+   * @return {!Promise<*>|undefined} the response promise if awaitResponse is
+   *     true, otherwise undefined
    */
   sendMessage(eventType, data, awaitResponse) {
     if (!this.messagingReadyPromise_) {
@@ -1006,6 +1014,67 @@ export class Viewer {
     }
     return this.messagingReadyPromise_.then(() => {
       return this.messageDeliverer_(eventType, data, awaitResponse);
+    });
+  }
+
+  /**
+   * Sends the message to the viewer. This method queues up the message if the
+   * communication channel isn't established yet. The message will replace an
+   * unsent message of the same type if seen in the queue.
+   *
+   * @param {string} eventType
+   * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {?Promise<*>|undefined} the response promise if awaitResponse is
+   *     true, otherwise undefined
+   */
+  sendMessageCancelUnsent(eventType, data, awaitResponse) {
+    if (this.messageDeliverer_) {
+      return this.messageDeliverer_(eventType, data, awaitResponse);
+    }
+
+    let responsePromise;
+    // Store only a last version for an event type.
+    let found = null;
+    for (let i = 0; i < this.messageQueue_.length; i++) {
+      if (this.messageQueue_[i].eventType == eventType) {
+        found = this.messageQueue_[i];
+        break;
+      }
+    }
+    if (found) {
+      found.data = data;
+      responsePromise = found.responsePromise;
+    } else {
+      let responseResolver;
+      responsePromise = new Promise(r => {
+        responseResolver = r;
+      });
+      this.messageQueue_.push({
+        eventType,
+        data,
+        awaitResponse,
+        responsePromise,
+        responseResolver,
+      });
+    }
+    return awaitResponse ? responsePromise : undefined;
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {*} data
+   * @private
+   */
+  maybeSendMessage_(eventType, data) {
+    if (!this.messagingMaybePromise_) {
+      // Messaging is not expected.
+      return;
+    }
+    this.messagingMaybePromise_.then(() => {
+      if (this.messageDeliverer_) {
+        this.messageDeliverer_(eventType, data, false);
+      }
     });
   }
 
@@ -1027,59 +1096,6 @@ export class Viewer {
    */
   onBroadcast(handler) {
     return this.broadcastObservable_.add(handler);
-  }
-
-  /**
-   * This message queues up the message to be sent when communication channel
-   * is established. If the communication channel is not established at
-   * this time, this method responds immediately with a Promise that yields
-   * `undefined` value.
-   * @param {string} eventType
-   * @param {*} data
-   * @param {boolean} awaitResponse
-   * @return {?Promise<*>|undefined}
-   */
-  sendMessageUnreliable(eventType, data, awaitResponse) {
-    if (this.messageDeliverer_) {
-      return this.messageDeliverer_(eventType, data, awaitResponse);
-    }
-
-    // Store only a last version for an event type.
-    let found = null;
-    for (let i = 0; i < this.messageQueue_.length; i++) {
-      if (this.messageQueue_[i].eventType == eventType) {
-        found = this.messageQueue_[i];
-        break;
-      }
-    }
-    if (found) {
-      found.data = data;
-    } else {
-      this.messageQueue_.push({eventType, data});
-    }
-    if (awaitResponse) {
-      // TODO(dvoytenko): This is somewhat questionable. What do we return
-      // when no one is listening?
-      return Promise.resolve();
-    }
-    return undefined;
-  }
-
-  /**
-   * @param {string} eventType
-   * @param {*} data
-   * @private
-   */
-  maybeSendMessage_(eventType, data) {
-    if (!this.messagingMaybePromise_) {
-      // Messaging is not expected.
-      return;
-    }
-    this.messagingMaybePromise_.then(() => {
-      if (this.messageDeliverer_) {
-        this.messageDeliverer_(eventType, data, false);
-      }
-    });
   }
 
   /**
