@@ -79,7 +79,6 @@ export class AmpAdCustom extends AMP.BaseElement {
       return this.url_;
     }
     if (ampCustomadFullUrls === null) {
-      console.log('build URL cache');
       // The array of ad urls has not yet been built, do so now.
       ampCustomadFullUrls = {};
       const slots = {};
