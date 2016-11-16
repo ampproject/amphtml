@@ -35,3 +35,22 @@ export function filterSplice(array, filter) {
   }
   return splice;
 }
+
+/**
+ * Like Array#findIndex.
+ *
+ * @param {!Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {number}
+ * @template T
+ */
+export function findIndex(array, predicate) {
+  let i = 0;
+  while (i < array.length) {
+    if (predicate(array[i], i, array)) {
+      break;
+    }
+    i++;
+  }
+  return i < array.length ? i : -1;
+}

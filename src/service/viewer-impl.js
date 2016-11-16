@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../observable';
+import {findIndex} from '../utils/array';
 import {documentStateFor} from '../document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
@@ -1019,7 +1020,7 @@ export class Viewer {
 
   /**
    * Sends the message to the viewer. This method queues up the message if the
-   * communication channel isn't established yet. The message will replace an
+   * communication channel isn't established yet. The message will cancel an
    * unsent message of the same type if seen in the queue.
    *
    * @param {string} eventType
@@ -1033,32 +1034,30 @@ export class Viewer {
       return this.messageDeliverer_(eventType, data, awaitResponse);
     }
 
-    let responsePromise;
-    // Store only a last version for an event type.
-    let found = null;
-    for (let i = 0; i < this.messageQueue_.length; i++) {
-      if (this.messageQueue_[i].eventType == eventType) {
-        found = this.messageQueue_[i];
-        break;
-      }
-    }
-    if (found) {
-      found.data = data;
-      responsePromise = found.responsePromise;
+    const found = findIndex(this.messageQueue_, message => {
+      return message.eventType == eventType;
+    });
+
+    let message;
+    if (found != -1) {
+      message = this.messageQueue_.splice(found, 1)[0];
+      message.data = data;
+      message.awaitResponse = awaitResponse;
     } else {
       let responseResolver;
-      responsePromise = new Promise(r => {
+      const responsePromise = new Promise(r => {
         responseResolver = r;
       });
-      this.messageQueue_.push({
+      message = {
         eventType,
         data,
         awaitResponse,
         responsePromise,
         responseResolver,
-      });
+      };
     }
-    return awaitResponse ? responsePromise : undefined;
+    this.messageQueue_.push(message);
+    return awaitResponse ? message.responsePromise : undefined;
   }
 
   /**
