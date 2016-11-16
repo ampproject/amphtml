@@ -1034,9 +1034,7 @@ export class Viewer {
       return this.messageDeliverer_(eventType, data, awaitResponse);
     }
 
-    const found = findIndex(this.messageQueue_, message => {
-      return message.eventType == eventType;
-    });
+    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
 
     let message;
     if (found != -1) {
