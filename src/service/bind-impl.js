@@ -138,7 +138,7 @@ export class Bind {
       initialValue = element.getAttribute(attribute);
     }
 
-    if (initialValue !== expectedValue) {
+    if (initialValue != expectedValue) {
       user().error(TAG_,
         `<${element.tagName}> element [${property}] binding's ` +
         `default value (${initialValue}) does not match first expression ` +
