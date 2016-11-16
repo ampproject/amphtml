@@ -21,9 +21,9 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=250
     type="valuecommerce"
-    data-vc_a="99999999"
-    data-vc_p="99999999"
-    data-vc_t="vpc605">
+    data-sid="99999999"
+    data-pid="99999999"
+    data-vcptn="vpc605">
 </amp-ad>
 ```
 
