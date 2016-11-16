@@ -85,6 +85,9 @@ export class Performance {
     /** @private {boolean} */
     this.isMessagingReady_ = false;
 
+    /** @private {boolean} */
+    this.isPerformanceTrackingOn_ = false;
+
     /** @private @const {!Promise} */
     this.whenReadyToRetrieveResourcesPromise_ =
         whenDocumentReady(this.win.document)
@@ -109,6 +112,9 @@ export class Performance {
   coreServicesAvailable() {
     this.viewer_ = viewerForDoc(this.win.document);
     this.resources_ = resourcesForDoc(this.win.document);
+
+    this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
+        this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
@@ -232,7 +238,7 @@ export class Performance {
     opt_from = opt_from == undefined ? null : opt_from;
     opt_value = opt_value == undefined ? Date.now() : opt_value;
 
-    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
+    if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.tick({
         label,
         from: opt_from,
@@ -279,7 +285,7 @@ export class Performance {
    * Calls the "flushTicks" function on the viewer.
    */
   flush() {
-    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
+    if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.flushTicks();
     }
   }
@@ -319,7 +325,7 @@ export class Performance {
       return;
     }
 
-    if (!this.viewer_.isPerformanceTrackingOn()) {
+    if (!this.isPerformanceTrackingOn_) {
       // drop all queued ticks to not leak
       this.events_.length = 0;
       return;
@@ -368,6 +374,16 @@ export class Performance {
         value,
       });
     }
+  }
+
+  /**
+   * Identifies if the viewer is able to track performance.
+   * If the document is not embedded, there is no messaging channel,
+   * so no performance tracking is needed since there is nobody to forward the events.
+   * @return {boolean}
+   */
+  isPerformanceTrackingOn() {
+    return this.isPerformanceTrackingOn_;
   }
 }
 
