@@ -38,18 +38,6 @@ const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
  */
 let AnalyticsEventListenerDef;
 
-/**
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {!JSONType} config Configuration for instrumentation.
- * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
- *  fires.
- * @param {!Element} analyticsElement The element associated with the
- *  config.
- */
-export function addListener(nodeOrDoc, config, listener, analyticsElement) {
-  return instrumentationServiceForDoc(nodeOrDoc).addListener(config, listener,
-      analyticsElement);
-}
 
 /**
  * Events that can result in analytics data to be sent.
