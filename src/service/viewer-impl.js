@@ -741,6 +741,7 @@ export class Viewer {
 
   /**
    * Triggers "documentLoaded" event for the viewer.
+   * TODO: move this to resources-impl, and use sendMessage()
    */
   postDocumentReady() {
     this.sendMessageCancelUnsent('documentLoaded', {
@@ -752,6 +753,7 @@ export class Viewer {
   /**
    * Triggers "scroll" event for the viewer.
    * @param {number} scrollTop
+   * TODO: move this to viewport-impl
    */
   postScroll(scrollTop) {
     this.sendMessageCancelUnsent(
@@ -762,6 +764,7 @@ export class Viewer {
    * Requests full overlay mode from the viewer. Returns a promise that yields
    * when the viewer has switched to full overlay mode.
    * @return {!Promise}
+   * TODO: move this to viewport-impl and use sendMessage()
    */
   requestFullOverlay() {
     return /** @type {!Promise} */ (
@@ -772,6 +775,7 @@ export class Viewer {
    * Requests to cancel full overlay mode from the viewer. Returns a promise
    * that yields when the viewer has switched off full overlay mode.
    * @return {!Promise}
+   * TODO: move this to viewport-impl and use sendMessage()
    */
   cancelFullOverlay() {
     return /** @type {!Promise} */ (
@@ -782,6 +786,7 @@ export class Viewer {
    * Triggers "pushHistory" event for the viewer.
    * @param {number} stackIndex
    * @return {!Promise}
+   * TODO: move this to history-impl and use sendMessage()
    */
   postPushHistory(stackIndex) {
     return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
@@ -792,6 +797,7 @@ export class Viewer {
    * Triggers "popHistory" event for the viewer.
    * @param {number} stackIndex
    * @return {!Promise}
+   * TODO: move this to history-impl and use sendMessage()
    */
   postPopHistory(stackIndex) {
     return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
@@ -802,6 +808,7 @@ export class Viewer {
    * Get/set the Base CID from/to the viewer.
    * @param {string=} opt_data Stringified JSON object {cid, time}.
    * @return {!Promise<string|undefined>}
+   * TODO: move this to cid-impl
    */
   baseCid(opt_data) {
     return this.isTrustedViewer().then(trusted => {
@@ -834,6 +841,7 @@ export class Viewer {
    * Get the fragment from the url or the viewer.
    * Strip leading '#' in the fragment
    * @return {!Promise<string>}
+   * TODO: move this to amp-share-tracking
    */
   getFragment() {
     if (!this.isEmbedded_) {
@@ -863,6 +871,7 @@ export class Viewer {
    * The fragment variable should contain leading '#'
    * @param {string} fragment
    * @return {!Promise}
+   * TODO: move this to amp-share-tracking, and use sendMessage()
    */
   updateFragment(fragment) {
     dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
@@ -883,6 +892,7 @@ export class Viewer {
   /**
    * Triggers "tick" event for the viewer.
    * @param {!Object} message
+   * TODO: move this to performance-impl, and use sendMessage()
    */
   tick(message) {
     this.sendMessageCancelUnsent('tick', message, false);
@@ -890,6 +900,7 @@ export class Viewer {
 
   /**
    * Triggers "sendCsi" event for the viewer.
+   * TODO: move this to performance-impl
    */
   flushTicks() {
     this.sendMessageCancelUnsent('sendCsi', undefined, false);
@@ -898,6 +909,7 @@ export class Viewer {
   /**
    * Triggers "setFlushParams" event for the viewer.
    * @param {!Object} message
+   * TODO: move this to performance-impl
    */
   setFlushParams(message) {
     this.sendMessageCancelUnsent('setFlushParams', message, false);
