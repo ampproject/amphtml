@@ -1061,23 +1061,6 @@ export class Viewer {
   }
 
   /**
-   * @param {string} eventType
-   * @param {*} data
-   * @private
-   */
-  maybeSendMessage_(eventType, data) {
-    if (!this.messagingMaybePromise_) {
-      // Messaging is not expected.
-      return;
-    }
-    this.messagingMaybePromise_.then(() => {
-      if (this.messageDeliverer_) {
-        this.messageDeliverer_(eventType, data, false);
-      }
-    });
-  }
-
-  /**
    * Broadcasts a message to all other AMP documents under the same viewer. It
    * will attempt to deliver messages when the messaging channel has been
    * established, but it will not fail if the channel is timed out.
@@ -1085,7 +1068,15 @@ export class Viewer {
    * @param {!JSONType} message
    */
   broadcast(message) {
-    this.maybeSendMessage_('broadcast', message);
+    if (!this.messagingMaybePromise_) {
+      // Messaging is not expected.
+      return;
+    }
+    this.messagingMaybePromise_.then(() => {
+      if (this.messageDeliverer_) {
+        this.messageDeliverer_('broadcast', message, false);
+      }
+    });
   }
 
   /**

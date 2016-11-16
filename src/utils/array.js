@@ -37,6 +37,7 @@ export function filterSplice(array, filter) {
 }
 
 /**
+ * Returns the index of the first element matching the predicate.
  * Like Array#findIndex.
  *
  * @param {!Array<T>} array
