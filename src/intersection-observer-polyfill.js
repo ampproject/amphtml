@@ -48,15 +48,15 @@ export class IntersectionObserverPolyfill {
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {
-    /** @private @const {function()} */
+    /** @private @const {function(Object)} */
     this.callback_ = callback;
 
     /**
      * A list of threshold, sorted in increasing numeric order
      * @private @const {!Array}
      */
-    this.threshold_ = opt_option && opt_option.threshold || [0];
-    this.threshold_ = this.threshold_.sort();
+    const threshold = opt_option && opt_option.threshold || [0];
+    this.threshold_ = threshold.sort();
     dev().assert(this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,
         'Threshold should be in the range from "[0, 1]"');
@@ -103,7 +103,7 @@ export class IntersectionObserverPolyfill {
    * Note: the opt_iframe param is the iframe position relative to the host doc,
    * The iframe must be a non-scrollable iframe.
    * @param {!./layout-rect.LayoutRectDef} viewport.
-   * @param {./layout-rect.LayoutRectDef=} opt_iframe.
+   * @param {./layout-rect.LayoutRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
     if (opt_iframe) {

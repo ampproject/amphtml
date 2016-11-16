@@ -15,7 +15,10 @@
  */
 
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {IntersectionObserver} from '../../../src/intersection-observer';
+import {
+  IntersectionObserverPolyfill,
+} from '../../../src/intersection-observer-polyfill';
+import {PositionObserver} from '../../../src/position-observer';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
@@ -28,6 +31,7 @@ import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {setStyle} from '../../../src/style';
+import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -182,8 +186,14 @@ export class AmpIframe extends AMP.BaseElement {
       this.element.setAttribute('scrolling', 'no');
     }
 
-    /** @private {!IntersectionObserver} */
+    /** @private {?PositionObserver} */
+    this.positionObserver_ = null;
+
+    /** @private {?IntersectionObserverPolyfill} */
     this.intersectionObserver_ = null;
+
+    /** @private {?SubscriptionApi} */
+    this.intersectionObserverApi_ = null;
 
     if (!this.element.hasAttribute('frameborder')) {
       this.element.setAttribute('frameborder', '0');
@@ -204,10 +214,10 @@ export class AmpIframe extends AMP.BaseElement {
         !isAdPositionAllowed(this.element, this.win);
 
     // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This does nothing
-    // if we aren't currently in view.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    // have changed. Send an intersection record if needed. This can be done by
+    // asking positionObserver_ to tick IntersectionObserver for us.
+    if (this.positionObserver_) {
+      this.positionObserver_.onLayoutMeasure();
     }
   }
 
@@ -289,7 +299,17 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
-      this.intersectionObserver_ = new IntersectionObserver(this, iframe);
+      this.intersectionObserverApi_ = new SubscriptionApi(iframe,
+          'send-intersections', false, () => {
+            this.intersectionObserver_.observe(this.element);
+            this.positionObserver_.startObserving();
+          });
+      this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
+        this.intersectionObserverApi_.send('intersection', {changes: {change}});
+      });
+      this.positionObserver_ = new PositionObserver(this, vp => {
+        this.intersectionObserver_.tick(vp);
+      });
     }
 
     iframe.onload = () => {
@@ -353,11 +373,13 @@ export class AmpIframe extends AMP.BaseElement {
       }
 
       this.iframe_ = null;
-      // IntersectionObserver's listeners were cleaned up by
-      // setInViewport(false) before #unlayoutCallback
+      // Needs to clean up IntersectionObserver's listeners and SubscriptionApi
       if (this.intersectionObserver_) {
-        this.intersectionObserver_.destroy();
         this.intersectionObserver_ = null;
+        this.positionObserver_.destroy();
+        this.positionObserver_ = null;
+        this.intersectionObserverApi_.destroy();
+        this.intersectionObserverApi_ = null;
       }
     }
     return true;
@@ -365,8 +387,8 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
+    if (this.positionObserver_) {
+      this.positionObserver_.onViewportCallback(inViewport);
     }
   }
 
