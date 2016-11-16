@@ -72,6 +72,7 @@ declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-gfycat', '0.1', false);
+declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
@@ -208,7 +209,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   // Entry point for inabox runtime.
   compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
     toName: 'amp-inabox.js',
-    minifiedName: 'a4a-v0.js',
+    minifiedName: 'amp4ads-v0.js',
     includePolyfills: true,
     checkTypes: opt_checkTypes,
     watch: watch,
@@ -219,8 +220,8 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 
   // inabox-host
   compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-    toName: 'a4a-host.js',
-    minifiedName: 'a4a-host-v0.js',
+    toName: 'amp-inabox-host.js',
+    minifiedName: 'amp4ads-host-v0.js',
     includePolyfills: false,
     checkTypes: opt_checkTypes,
     watch: watch,
@@ -359,7 +360,7 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: options.noWrapper ? '' : ('(window.AMP = window.AMP || [])' +
+    wrapper: options.noWrapper ? '' : ('(self.AMP = self.AMP || [])' +
         '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
   });
 }
@@ -829,6 +830,27 @@ function mkdirSync(path) {
     }
   }
 }
+
+/**
+ * Patches Web Animations API by wrapping its body into `install` function.
+ * This gives us an option to call polyfill directly on the main window
+ * or a friendly iframe.
+ */
+function patchWebAnimations() {
+  // Copies web-animations-js into a new file that has an export.
+  const patchedName = 'node_modules/web-animations-js/' +
+      'web-animations.install.js';
+  var file = fs.readFileSync(
+      'node_modules/web-animations-js/' +
+      'web-animations.min.js').toString();
+  // Wrap the contents inside the install function.
+  file = 'exports.installWebAnimations = function(window) {\n' +
+      'var document = window.document;\n' +
+      file + '\n' +
+      '}\n';
+  fs.writeFileSync(patchedName, file);
+}
+patchWebAnimations();
 
 
 /**

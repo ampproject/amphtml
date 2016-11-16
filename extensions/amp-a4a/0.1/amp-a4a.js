@@ -47,6 +47,9 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
+import {installUrlReplacementsForEmbed,}
+    from '../../../src/service/url-replacements-impl';
+import {A4AVariableSource} from './a4a-variable-source';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -748,10 +751,9 @@ export class AmpA4A extends AMP.BaseElement {
               html: creativeMetaData.minifiedCreative,
               extensionIds: creativeMetaData.customElementExtensions || [],
               fonts: fontsArray,
-            }, unusedEmbedWin => {
-              // TODO(avimehta): Install `url-replace` override and other
-              // services using `installServiceInEmbedScope(embedWin, id, ...)`.
-              // See `url-replacements.js` `installUrlReplacementsForEmbed`.
+            }, embedWin => {
+              installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
+                new A4AVariableSource(this.getAmpDoc(), embedWin));
             }).then(friendlyIframeEmbed => {
               // Ensure visibility hidden has been removed (set by boilerplate).
               const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
