@@ -307,10 +307,6 @@ describe('performance', () => {
 
         expect(perf.events_.length).to.equal(2);
 
-        // const promise = perf.coreServicesAvailable();
-        // perf.flushQueuedTicks_();
-        // perf.flush();
-
         return perf.coreServicesAvailable().then(() => {
           perf.flushQueuedTicks_();
           perf.flush();
@@ -322,8 +318,6 @@ describe('performance', () => {
       });
 
       it('should ignore all calls to tick', () => {
-        // const promise = perf.coreServicesAvailable();
-
         perf.tick('start0');
         return perf.coreServicesAvailable().then(() => {
           expect(tickSpy.callCount).to.equal(0);
@@ -331,8 +325,6 @@ describe('performance', () => {
       });
 
       it('should ignore all calls to flush', () => {
-        // const promise = perf.coreServicesAvailable();
-
         perf.tick('start0');
         perf.flush();
         return perf.coreServicesAvailable().then(() => {
