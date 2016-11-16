@@ -108,13 +108,27 @@ describe('evaluateBindExpr', () => {
   });
 
   it('should NOT allow access to non-whitelisted string methods', () => {
-    expect(() => { evaluateBindExpr('"abc".anchor()'); }).to.throw();
-    expect(() => { evaluateBindExpr('"abc".link()'); }).to.throw();
-    expect(() => { evaluateBindExpr('"abc".replace("bc", "xy")'); }).to.throw();
-    expect(() => { evaluateBindExpr('"abc".search()'); }).to.throw();
-    expect(() => { evaluateBindExpr('"  abc  ".trim()'); }).to.throw();
-    expect(() => { evaluateBindExpr('"abc  ".trimRight()'); }).to.throw();
-    expect(() => { evaluateBindExpr('"  abc".trimLeft()'); }).to.throw();
+    expect(() => {
+      evaluateBindExpr('"abc".anchor()');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('"abc".link()');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('"abc".replace("bc", "xy")');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('"abc".search()');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('"  abc  ".trim()');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('"abc  ".trimRight()');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('"  abc".trimLeft()');
+    }).to.throw(Error, unsupportedFunctionError);
   });
 
   it('should support variables', () => {
@@ -165,23 +179,23 @@ describe('evaluateBindExpr', () => {
   it('should NOT allow access to array non-whitelisted methods', () => {
     expect(() => {
       evaluateBindExpr('["a", "b", "c"].find()');
-    }).to.throw();
+    }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluateBindExpr('["a", "b", "c"].forEach()');
-    }).to.throw();
+    }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluateBindExpr('["a", "b", "c"].splice(1, 1)');
-    }).to.throw();
+    }).to.throw(Error, unsupportedFunctionError);
 
     expect(() => {
       evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']});
-    }).to.throw();
+    }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']});
-    }).to.throw();
+    }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']});
-    }).to.throw();
+    }).to.throw(Error, unsupportedFunctionError);
   });
 
   it('should support object literals', () => {
@@ -297,8 +311,11 @@ describe('evaluateBindExpr', () => {
       },
       baz: () => { 'baz'; },
     };
+    // baz() throws a parse error because functions must have a caller.
     expect(() => { evaluateBindExpr('baz()', scope); }).to.throw();
-    expect(() => { evaluateBindExpr('foo.bar()', scope); }).to.throw();
+    expect(() => {
+      evaluateBindExpr('foo.bar()', scope);
+    }).to.throw(Error, unsupportedFunctionError);
   });
 
   it('should NOT allow invocation of whitelisted functions ' +
