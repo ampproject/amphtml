@@ -23,22 +23,18 @@ import {timerFor} from '../../../src/timer';
 const LOADING_ADS_WIN_ID_ = '3pla';
 
 /**
- * @param {!Element} element
  * @param {!Window} win
+ * @return {boolean} Whether 3p is currently throttled.
+ */
+export function is3pThrottled(win) {
+  return !!win[LOADING_ADS_WIN_ID_];
+}
+
+/**
+ * @param {!Element} element
  * @return {number|boolean}
  */
-export function allowRenderOutsideViewport(element, win) {
-  // Store in window Object that serves as a set of timers associated with
-  // waiting elements.
-  const loadingAds = win[LOADING_ADS_WIN_ID_] || {};
-  // If another ad is currently loading we only load ads that are currently
-  // in viewport.
-  for (const key in loadingAds) {
-    if (Object.prototype.hasOwnProperty.call(loadingAds, key)) {
-      return false;
-    }
-  }
-
+export function getAmpAdRenderOutsideViewport(element) {
   // Ad opts into lazier loading strategy where we only load ads that are
   // at closer than 1.25 viewports away.
   if (element.getAttribute('data-loading-strategy') ==
@@ -49,37 +45,20 @@ export function allowRenderOutsideViewport(element, win) {
 }
 
 /**
- * Decrements loading ads count used for throttling.
- * @param {number|string} timerId of timer returned from incrementLoadingAds
- * @param {!Window} win
- */
-export function decrementLoadingAds(timerId, win) {
-  timerFor(win).cancel(timerId);
-  const loadingAds = win[LOADING_ADS_WIN_ID_];
-  if (loadingAds) {
-    delete loadingAds[timerId];
-  }
-}
-
-/**
  * Increments loading ads count for throttling.
  * @param {!Window} win
- * @return {number|string} timer ID for testing
  */
 export function incrementLoadingAds(win) {
   let loadingAds = win[LOADING_ADS_WIN_ID_];
-  if (!loadingAds) {
-    loadingAds = {};
-    win[LOADING_ADS_WIN_ID_] = loadingAds;
+  if (loadingAds === undefined) {
+    win[LOADING_ADS_WIN_ID_] = 0;
   }
+  win[LOADING_ADS_WIN_ID_]++;
 
-  /** @const {number|string} */
-  const timerId = timerFor(win).delay(() => {
+  timerFor(win).delay(() => {
     // Unfortunately we don't really have a good way to measure how long it
     // takes to load an ad, so we'll just pretend it takes 1 second for
     // now.
-    decrementLoadingAds(timerId, win);
+    win[LOADING_ADS_WIN_ID_]--;
   }, 1000);
-  loadingAds[timerId] = 1;
-  return timerId;
 }
