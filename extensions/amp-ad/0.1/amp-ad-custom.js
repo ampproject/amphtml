@@ -19,6 +19,7 @@ import {user} from '../../../src/log';
 import {templatesFor} from '../../../src/template';
 import {xhrFor} from '../../../src/xhr';
 import {addParamToUrl} from '../../../src/url';
+import {ancestorElementsByTag} from '../../../src/dom';
 
 /** @const {!string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -44,6 +45,12 @@ export class AmpAdCustom extends AMP.BaseElement {
     /** @private {string} A string identifying this ad slot: the server's
      *  responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
+
+    /** @private {boolean} True to suppress template checks and rendering:
+     * use this during testing, since our test harness does not yet support
+     * templates.
+     */
+    this.testMode_ = element.getAttribute('data-test');
   }
 
   /** @override */
@@ -62,7 +69,9 @@ export class AmpAdCustom extends AMP.BaseElement {
   buildCallback() {
     // Ensure that there are templates in this ad
     const templates = this.element.querySelectorAll('template');
-    user().assert(templates.length > 0, 'Missing template in custom ad');
+    if (!this.testMode_) {
+      user().assert(templates.length > 0, 'Missing template in custom ad');
+    }
     // And ensure that the slot value is legal
     user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
@@ -82,7 +91,11 @@ export class AmpAdCustom extends AMP.BaseElement {
       // The array of ad urls has not yet been built, do so now.
       ampCustomadFullUrls = {};
       const slots = {};
-      const elements = document.querySelectorAll('amp-ad[type=custom]');
+
+      // Get the parent body of this amp-ad element. It could be the body of
+      // the main document, or it could be an enclosing iframe.
+      const body = ancestorElementsByTag(this.element, 'BODY')[0];
+      const elements = body.querySelectorAll('amp-ad[type=custom]');
       for (let index = 0; index < elements.length; index++) {
         const elem = elements[index];
         const url = elem.getAttribute('data-url');
@@ -104,6 +117,11 @@ export class AmpAdCustom extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.testMode_) {
+      // Our test harness can't currently deal with templates, so don't bother
+      // attempting layout. At some point, it would be good to fix this.
+      return Promise.resolve();
+    }
     // If this promise has no URL yet, create one for it.
     if (!(this.url_ in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
