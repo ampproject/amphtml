@@ -1738,6 +1738,7 @@ function getViewportType(win, viewer) {
   if (platformFor(win).isIos()
       && ((viewportType == ViewportType.NATURAL
               && viewer.isIframed()
+              // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
               && viewer.isEmbedded())
           // Enable iOS Embedded mode so that it's easy to test against a more
           // realistic iOS environment.

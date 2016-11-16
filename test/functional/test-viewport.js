@@ -1592,7 +1592,7 @@ describe('createViewport', () => {
       });
 
   describes.fakeWin('in iOS', {
-    win: {navigator: {userAgent: 'iPhone'}}
+    win: {navigator: {userAgent: 'iPhone'}},
   }, env => {
     let win;
 
