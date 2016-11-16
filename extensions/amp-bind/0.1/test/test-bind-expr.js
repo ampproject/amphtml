@@ -17,6 +17,9 @@
 import {evaluateBindExpr} from '../bind-expr';
 
 describe('evaluateBindExpr', () => {
+  const argumentTypeError = 'Unexpected argument type';
+  const unsupportedFunctionError = 'not a supported function';
+
   it('should evaluate arithmetic operations', () => {
     expect(evaluateBindExpr('-1')).to.equal(-1);
     expect(evaluateBindExpr('1 + 2')).to.equal(3);
@@ -296,6 +299,16 @@ describe('evaluateBindExpr', () => {
     };
     expect(() => { evaluateBindExpr('baz()', scope); }).to.throw();
     expect(() => { evaluateBindExpr('foo.bar()', scope); }).to.throw();
+  });
+
+  it('should NOT allow invocation of whitelisted functions ' +
+      'with invalid argument types', () => {
+    expect(() => {
+      evaluateBindExpr('[1, 2, 3].indexOf({})');
+    }).to.throw(Error, argumentTypeError);
+    expect(() => {
+      evaluateBindExpr('"abc".substr({})');
+    }).to.throw(Error, argumentTypeError);
   });
 
   /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects */

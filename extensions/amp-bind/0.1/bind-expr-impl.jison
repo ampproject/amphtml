@@ -30,6 +30,17 @@ var functionWhitelist =
       String.prototype.toUpperCase,
     ],
 };
+
+/** @return {bool} Returns false if args contains an invalid type. */
+function typeCheckArgs(args) {
+  for (var i = 0; i < args.length; i++) {
+    var arg = args[i];
+    if (Object.prototype.toString.call(arg) === '[object Object]') {
+      return false;
+    }
+  }
+  return true;
+}
 %}
 
 /* lexical grammar */
@@ -176,12 +187,16 @@ invocation:
         if (whitelist) {
           var fn = $1[$3];
           if (whitelist.indexOf(fn) >= 0) {
-            $$ = fn.apply($1, $4);
+            if (typeCheckArgs($4)) {
+              $$ = fn.apply($1, $4);
+            } else {
+              throw new Error(`Unexpected argument type in {$3}()`);
+            }
             return;
           }
         }
 
-        throw new Error($3 + '() is not a supported function.');
+        throw new Error(`{$3}() is not a supported function.`);
       %}
   ;
 
