@@ -18,17 +18,10 @@ import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
 import {createIframePromise} from '../../testing/iframe';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
-import {installPerformanceService,} from
-    '../../src/service/performance-impl';
-
 
 describe('test-element-stub', () => {
 
   let iframe;
-
-  beforeEach(() => {
-    installPerformanceService(window);
-  });
 
   afterEach(() => {
     resetLoadingCheckForTests();

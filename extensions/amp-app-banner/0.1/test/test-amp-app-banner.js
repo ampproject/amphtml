@@ -25,9 +25,6 @@ import {
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
 import {xhrFor} from '../../../../src/xhr';
-import {
-    installPerformanceService,
-} from '../../../../src/service/performance-impl';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-analytics/0.1/amp-analytics';
 import * as sinon from 'sinon';
@@ -72,7 +69,6 @@ describe('amp-app-banner', () => {
 
   function getTestFrame() {
     return createIframePromise(true).then(iframe => {
-      installPerformanceService(iframe.win);
       platform = platformFor(iframe.win);
       sandbox.stub(platform, 'isIos', () => isIos);
       sandbox.stub(platform, 'isAndroid', () => isAndroid);
@@ -162,7 +158,6 @@ describe('amp-app-banner', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    installPerformanceService(window);
     platform = platformFor(window);
     sandbox.stub(platform, 'isIos', () => isIos);
     sandbox.stub(platform, 'isAndroid', () => isAndroid);
