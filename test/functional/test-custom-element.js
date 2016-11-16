@@ -17,7 +17,6 @@
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {installPerformanceService} from '../../src/service/performance-impl';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
@@ -206,7 +205,6 @@ describe('CustomElement', () => {
   let container;
 
   beforeEach(() => {
-    installPerformanceService(window);
     sandbox = sinon.sandbox.create();
     resourcesMock = sandbox.mock(resources);
     clock = sandbox.useFakeTimers();
@@ -228,7 +226,6 @@ describe('CustomElement', () => {
   });
 
   afterEach(() => {
-    resetServiceForTesting(window, 'performance');
     resourcesMock.verify();
     sandbox.restore();
     if (container.parentNode) {

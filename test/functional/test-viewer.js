@@ -18,8 +18,6 @@ import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installPerformanceService} from '../../src/service/performance-impl';
-import {resetServiceForTesting} from '../../src/service';
 import {timerFor} from '../../src/timer';
 import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
@@ -54,8 +52,6 @@ describe('Viewer', () => {
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
-    installPerformanceService(windowApi);
-    installPerformanceService(window);
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
@@ -92,8 +88,6 @@ describe('Viewer', () => {
   });
 
   afterEach(() => {
-    resetServiceForTesting(windowApi, 'performance');
-    resetServiceForTesting(window, 'performance');
     windowMock.verify();
     sandbox.restore();
   });
@@ -202,33 +196,6 @@ describe('Viewer', () => {
     expect(viewer.getVisibilityState()).to.equal('prerender');
     expect(viewer.isVisible()).to.equal(false);
     expect(viewer.getPrerenderSize()).to.equal(3);
-  });
-
-  it('should configure performance tracking', () => {
-    windowApi.location.hash = '';
-    let viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = Promise.resolve();
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
-
-    windowApi.location.hash = '#csi=1';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = Promise.resolve();
-    expect(viewer.isPerformanceTrackingOn()).to.be.true;
-
-    windowApi.location.hash = '#csi=0';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = Promise.resolve();
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
-
-    windowApi.location.hash = '#csi=1';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = null;
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
-
-    windowApi.location.hash = '#csi=0';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = null;
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
   it('should get fragment from the url in non-embedded mode', () => {
