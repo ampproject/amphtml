@@ -28,7 +28,7 @@ const pubmineOptional = ['adsafe', 'section', 'wordads'],
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  global._ipw_custom = {
+  global._ipw_custom = { // eslint-disable-line google-camelcase/google-camelcase
     adSafe: 'adsafe' in data ? data.adsafe : '0',
     amznPay: [],
     domain: getSourceOrigin(global.context.location.href),
