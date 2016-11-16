@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Pass} from '../pass';
 import {fromClass, getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
@@ -246,9 +245,9 @@ class HistoryBindingInterface {
 
   /**
    * Replaces the state for local target navigation.
-   * @param target
+   * @param unusedTarget
    */
-  replaceStateForTarget(target) {}
+  replaceStateForTarget(unusedTarget) {}
 }
 
 
@@ -557,7 +556,7 @@ export class HistoryBindingNatural_ {
    */
   replaceStateForTarget(target) {
     this.whenReady_(() => {
-      let hash = target.indexOf('#') == 0 ? target : `#${target}`;
+      const hash = target[0] == '#' ? target : `#${target}`;
       this.ignoreUpcomingPopstate_ = true;
       // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
       this.win.location.replace(hash);
@@ -618,7 +617,7 @@ export class HistoryBindingVirtual_ {
    * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(win, viewer) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = win;
 
     /** @private @const {!./viewer-impl.Viewer} */
@@ -637,7 +636,7 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   replaceStateForTarget(target) {
-    let hash = target.indexOf('#') == 0 ? target : `#${target}`;
+    const hash = target[0] == '#' ? target : `#${target}`;
     this.win.location.replace(hash);
   }
 
