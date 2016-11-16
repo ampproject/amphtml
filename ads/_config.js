@@ -417,6 +417,11 @@ export const adConfig = {
 
   triplelift: {},
 
+  valuecommerce: {
+    prefetch: 'http://172.17.32.33/amptest/amp.js',
+    renderStartImplemented: true,
+  },
+
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',
     preconnect: [
