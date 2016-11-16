@@ -440,7 +440,9 @@ describes.fakeWin('Local Hash Navigation', {
 
   it('should push a new state and replace it for target on Virtual', () => {
     const viewer = {
-      onHistoryPoppedEvent: () => {},
+      onHistoryPoppedEvent: () => {
+        return () => {};
+      },
       postPushHistory: unusedStackIndex => {},
       postPopHistory: unusedStackIndex => {},
     };

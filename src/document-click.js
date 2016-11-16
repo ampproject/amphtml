@@ -225,7 +225,7 @@ function handleHashClick_(e, tgtLoc, ampdoc, viewport, history) {
  * Scrolls the page to the given element.
  * @param {?Element} elem
  * @param {!Window} win
- * @param {!./service/viewer-impl.Viewer} viewer
+ * @param {!./service/viewport-impl.Viewport} viewport
  * @param {string} hash
  */
 function scrollToElement(elem, win, viewport, hash) {

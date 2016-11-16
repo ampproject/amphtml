@@ -353,6 +353,14 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
+
+    /**
+     * Used to ignore `popstate` handler for cases where we know we don't want it
+     * handled.
+     * @private {boolean}
+     **/
+    this.ignoreUpcomingPopstate_ = false;
+
     this.popstateHandler_ = e => {
       if (this.ignoreUpcomingPopstate_) {
         return;
@@ -562,6 +570,7 @@ export class HistoryBindingNatural_ {
       this.win.location.replace(hash);
       this.ignoreUpcomingPopstate_ = false;
       this.historyReplaceState_();
+      return Promise.resolve();
     });
   }
 
