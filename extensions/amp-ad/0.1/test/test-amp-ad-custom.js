@@ -16,16 +16,19 @@
 
 import {AmpAdCustom} from '../amp-ad-custom';
 import {toggleExperiment} from '../../../../src/experiments';
+import {createElementWithAttributes} from '../../../../src/dom';
 import * as sinon from 'sinon';
 
 describe('Amp custom ad', () => {
   let sandbox;
 
   beforeEach(() => {
+    toggleExperiment(window, 'ad-type-custom', true);
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
+    toggleExperiment(window, 'ad-type-custom', false);
     sandbox.restore();
   });
 
@@ -37,21 +40,22 @@ describe('Amp custom ad', () => {
    *    the current document body.
    */
   function getCustomAd(url, slot) {
-    toggleExperiment(window, 'ad-type-custom', true);
-    const ampAdElement = document.createElement('amp-ad');
-    ampAdElement.setAttribute('type', 'custom');
-    ampAdElement.setAttribute('width', '500');
-    ampAdElement.setAttribute('height', '60');
-    ampAdElement.setAttribute('data-test', 1);
-    ampAdElement.setAttribute('data-url', url);
+    const ampAdElement = createElementWithAttributes(document, 'amp-ad', {
+      type: 'custom',
+      width: '500',
+      height: '60',
+      'data-url': url,
+    });
     if (slot) {
       ampAdElement.setAttribute('data-slot', slot);
     }
+    const template = document.createElement('template');
+    ampAdElement.appendChild(template);
     document.body.appendChild(ampAdElement);
     return ampAdElement;
   }
 
-  it('should get the correct full URLs', done => {
+  it('should get the correct full URLs', () => {
     // Create all the ads *before* calling getFullUrl_() - otherwise, the
     // ads after the first getFullUrl_() call will not be in the cache.
 
@@ -82,7 +86,5 @@ describe('Amp custom ad', () => {
     expect(ad2.getFullUrl_()).to.equal(expected2);
     expect(ad3.getFullUrl_()).to.equal(expected34);
     expect(ad4.getFullUrl_()).to.equal(expected34);
-
-    done();
   });
 });

@@ -20,6 +20,7 @@ import {templatesFor} from '../../../src/template';
 import {xhrFor} from '../../../src/xhr';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
+import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
 
 /** @const {!string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -46,11 +47,8 @@ export class AmpAdCustom extends AMP.BaseElement {
      *  responses will be keyed by slot */
     this.slot_ = element.getAttribute('data-slot');
 
-    /** @private {boolean} True to suppress template checks and rendering:
-     * use this during testing, since our test harness does not yet support
-     * templates.
-     */
-    this.testMode_ = element.getAttribute('data-test');
+    /** {?AmpAdUIHandler} */
+    this.uiHandler = null;
   }
 
   /** @override */
@@ -69,12 +67,51 @@ export class AmpAdCustom extends AMP.BaseElement {
   buildCallback() {
     // Ensure that there are templates in this ad
     const templates = this.element.querySelectorAll('template');
-    if (!this.testMode_) {
-      user().assert(templates.length > 0, 'Missing template in custom ad');
-    }
+    user().assert(templates.length > 0, 'Missing template in custom ad');
     // And ensure that the slot value is legal
     user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
+
+    this.uiHandler = new AmpAdUIHandler(this);
+    this.uiHandler.init();
+  }
+
+  /** @override */
+  layoutCallback() {
+    const fullUrl = this.getFullUrl_();
+    // If this promise has no URL yet, create one for it.
+    if (!(fullUrl in ampCustomadXhrPromises)) {
+      // Here is a promise that will return the data for this URL
+      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl);
+    }
+    return ampCustomadXhrPromises[fullUrl].then(data => {
+      this.uiHandler.setDisplayState(AdDisplayState.LOADING);
+      const element = this.element;
+      // We will get here when the data has been fetched from the server
+      let templateData = data;
+      if (this.slot_ !== null) {
+        templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
+            null;
+      }
+      // Set UI state
+      this.uiHandler.setDisplayState(
+        templateData !== null && typeof templateData == 'object' ?
+        AdDisplayState.LOADED_RENDER_START : AdDisplayState.LOADED_NO_CONTENT);
+      templatesFor(this.win).findAndRenderTemplate(element,
+        this.slot_ === null ? data : data[this.slot_])
+        .then(renderedElement => {
+        // Get here when the template has been rendered
+        // Clear out the template and replace it by the rendered version
+          element.innerHTML = '';
+          element.appendChild(renderedElement);
+          return this;
+        });
+    });
+  }
+
+  /** @override  */
+  unlayoutCallback() {
+    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
   }
 
   /**
@@ -113,33 +150,5 @@ export class AmpAdCustom extends AMP.BaseElement {
       }
     }
     return ampCustomadFullUrls[this.url_];
-  }
-
-  /** @override */
-  layoutCallback() {
-    if (this.testMode_) {
-      // Our test harness can't currently deal with templates, so don't bother
-      // attempting layout. At some point, it would be good to fix this.
-      return Promise.resolve();
-    }
-    // If this promise has no URL yet, create one for it.
-    if (!(this.url_ in ampCustomadXhrPromises)) {
-      // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[this.url_] = xhrFor(this.win).fetchJson(
-          this.getFullUrl_());
-    }
-    return ampCustomadXhrPromises[this.url_].then(data => {
-      const element = this.element;
-      // We will get here when the data has been fetched from the server
-      templatesFor(this.win).findAndRenderTemplate(element,
-        this.slot_ === null ? data : data[this.slot_])
-        .then(renderedElement => {
-        // Get here when the template has been rendered
-        // Clear out the template and replace it by the rendered version
-          element.innerHTML = '';
-          element.appendChild(renderedElement);
-          return this;
-        });
-    });
   }
 }
