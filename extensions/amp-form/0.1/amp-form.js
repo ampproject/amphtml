@@ -20,7 +20,6 @@ import {
   assertHttpsUrl,
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
-  isProxyOrigin,
 } from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
@@ -36,6 +35,7 @@ import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
+import {urls} from '../../../src/config';
 import {getFormValidator} from './form-validators';
 
 /** @type {string} */
@@ -101,7 +101,7 @@ export class AmpForm {
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
       assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user().assert(!isProxyOrigin(this.xhrAction_),
+      user().assert(!urls.cdnProxyRegex.test(this.xhrAction_),
           'form action-xhr should not be on AMP CDN: %s',
           this.form_);
     }
