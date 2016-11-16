@@ -19,7 +19,7 @@ import {fromClassForDoc} from '../service';
 import {getMode} from '../mode';
 import {user} from '../log';
 
-const TAG = 'AMP-BIND';
+const TAG_ = 'AMP-BIND';
 
 export class Bind {
   /**
@@ -84,10 +84,10 @@ export class Bind {
   }
 
   /**
-   * @param onlyVerify {bool}
+   * @param verifyOnly {bool}
    * @private
    */
-  digest_(onlyVerify) {
+  digest_(verifyOnly) {
     for (let i = 0; i < this.bindings_.length; i++) {
       const binding = this.bindings_[i];
 
@@ -95,11 +95,11 @@ export class Bind {
       if (result === null) {
         continue;
       }
-      
-      if (onlyVerify) {
-        this.verify_(binding, result);
+
+      if (verifyOnly) {
+        this.verifyBinding_(binding, result);
       } else {
-        this.apply_(binding, result);
+        this.applyBinding_(binding, result);
       }
     }
   }
@@ -109,9 +109,9 @@ export class Bind {
    * @param newValue {!(Object|string|number)}
    * @private
    */
-  apply_(binding, newValue) {
+  applyBinding_(binding, newValue) {
     const {property, expression, element} = binding;
-    
+
     if (property === 'text') {
       element.textContent = newValue;
     } else if (property === 'class') {
@@ -126,7 +126,7 @@ export class Bind {
    * @param expectedValue {!(Object|string|number)}
    * @private
    */
-  verify_(binding, expectedValue) {
+  verifyBinding_(binding, expectedValue) {
     const {property, expression, element} = binding;
     let initialValue;
 
@@ -139,7 +139,7 @@ export class Bind {
     }
 
     if (initialValue !== expectedValue) {
-      user().error(TAG,
+      user().error(TAG_,
         `<${element.tagName}> element [${property}] binding's ` +
         `default value (${initialValue}) does not match first expression ` +
         `result (${expectedValue}).`);
