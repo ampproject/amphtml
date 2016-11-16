@@ -16,7 +16,10 @@
 
 import {evaluateBindExpr} from '../../extensions/amp-bind/0.1/bind-expr';
 import {fromClassForDoc} from '../service';
+import {getMode} from '../mode';
 import {user} from '../log';
+
+const TAG = 'AMP-BIND';
 
 export class Bind {
   /**
@@ -26,13 +29,19 @@ export class Bind {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    /** @const {!Array} */
     this.bindings_ = [];
 
+    /** @const {!Object} */
     this.scope_ = Object.create(null);
 
     this.ampdoc.whenBodyAvailable().then(body => {
       this.scanForBindings_(body);
-      this.digest_(true);
+
+      // Trigger verify-only digest in development.
+      if (getMode().development) {
+        this.digest_(true);
+      }
     });
   }
 
@@ -88,9 +97,7 @@ export class Bind {
       }
       
       if (onlyVerify) {
-        if (!this.verify_(binding, result)) {
-          user().error(`Inconsistent initial value for [${binding.property}].`);
-        }
+        this.verify_(binding, result);
       } else {
         this.apply_(binding, result);
       }
@@ -99,35 +106,43 @@ export class Bind {
 
   /**
    * @param binding {!Object}
-   * @param result {!(Object|string|number)}
+   * @param newValue {!(Object|string|number)}
    * @private
    */
-  apply_(binding, result) {
+  apply_(binding, newValue) {
     const {property, expression, element} = binding;
     
     if (property === 'text') {
-      element.textContent = result;
+      element.textContent = newValue;
     } else if (property === 'class') {
       throw new Error('Class binding not implemented yet.');
     } else {
-      element.setAttribute(attribute, result);
+      element.setAttribute(attribute, newValue);
     }
   }
 
- /**
-  * @param binding {!Object}
-  * @param result {!(Object|string|number)}
-  * @private
-  */
- verify_(binding, result) {
-   const {property, expression, element} = binding;
-   
-   if (property === 'text') {
-     return element.textContent === result;
-   } else if (property === 'class') {
-     throw new Error('Class binding not implemented yet.');
-   } else {
-     return element.getAttribute(attribute) === result;
-   }
- }
+  /**
+   * @param binding {!Object}
+   * @param expectedValue {!(Object|string|number)}
+   * @private
+   */
+  verify_(binding, expectedValue) {
+    const {property, expression, element} = binding;
+    let initialValue;
+
+    if (property === 'text') {
+      initialValue = element.textContent;
+    } else if (property === 'class') {
+      throw new Error('Class binding not implemented yet.');
+    } else {
+      initialValue = element.getAttribute(attribute);
+    }
+
+    if (initialValue !== expectedValue) {
+      user().error(TAG,
+        `<${element.tagName}> element [${property}] binding's ` +
+        `default value (${initialValue}) does not match first expression ` +
+        `result (${expectedValue}).`);
+    }
+  }
 }
