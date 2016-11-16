@@ -88,9 +88,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {JSONType}
      */
     this.remoteConfig_ = /** @type {JSONType} */ ({});
-
-    /** @private @const {!./instrumentation.InstrumentationService} */
-    this.instrumentation_ = instrumentationServiceForDoc(this.getAmpDoc());
   }
 
   /** @override */
@@ -183,16 +180,18 @@ export class AmpAnalytics extends AMP.BaseElement {
             return;
           }
 
+          const instrumentation_ = instrumentationServiceForDoc(
+              this.getAmpDoc());
           if (trigger['selector']) {
             // Expand the selector using variable expansion.
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
-            this.instrumentation_.addListener(
+            instrumentation_.addListener(
                 trigger, this.handleEvent_.bind(this, trigger), this.element);
 
           } else {
-            this.instrumentation_.addListener(
+            instrumentation_.addListener(
                 trigger, this.handleEvent_.bind(this, trigger), this.element);
           }
         }));

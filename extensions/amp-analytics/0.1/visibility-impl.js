@@ -161,7 +161,7 @@ export function getElement(ampdoc, selector, el, selectionMethod) {
 
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
-    const elWin = el.ownerDocument.defaultView;
+    const elWin = ampdoc.win;
     const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
     if (parentEl) {
       return closestBySelector(parentEl, '.-amp-element');
@@ -510,7 +510,7 @@ export class Visibility {
    */
   prepareStateForCallback_(state, rb, br, ir) {
     const perf = this.ampdoc.win.performance;
-    const viewport = viewportForDoc(this.win_.document);
+    const viewport = viewportForDoc(this.ampdoc);
 
     state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
     state[ELEMENT_Y] = viewport.getScrollTop() + br.top;

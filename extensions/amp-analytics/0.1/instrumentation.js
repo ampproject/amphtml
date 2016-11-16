@@ -521,7 +521,7 @@ export class InstrumentationService {
    * @return {boolean} True if the trigger is allowed. False otherwise.
    */
   isTriggerAllowed_(triggerType, element) {
-    if (element.ownerDocument.defaultView != this.win_) {
+    if (element.ownerDocument.defaultView != this.ampdoc.win) {
       return ALLOWED_IN_EMBED.indexOf(triggerType) > -1;
     }
     return true;

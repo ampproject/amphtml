@@ -391,7 +391,8 @@ describe('amp-analytics.visibility', () => {
   });
 
   describe('getElement', () => {
-    let div, img1, img2, analytics, iframe, ampEl;
+    let div, img1, img2, analytics, iframe, ampEl, iframeAmpDoc,
+      iframeAnalytics;
     beforeEach(() => {
       ampEl = document.createElement('span');
       ampEl.className = '-amp-element';
@@ -410,10 +411,15 @@ describe('amp-analytics.visibility', () => {
       div.appendChild(img1);
       iframe.srcdoc = div.outerHTML;
       document.body.appendChild(ampEl);
+      document.body.appendChild(div);
 
       const loaded = loadPromise(iframe);
       ampEl.appendChild(iframe);
-      return loaded;
+      iframeAmpDoc = new AmpDocSingle(iframe.contentWindow);
+      return loaded.then(() => {
+        iframeAnalytics = iframe.contentDocument.querySelector(
+            'amp-analytics');
+      });
     });
 
     afterEach(() => {
@@ -428,26 +434,36 @@ describe('amp-analytics.visibility', () => {
     // In the following tests, getElement returns non-amp elements. Those are
     // discarded by visibility-impl later in the code.
     it('finds element by tagname, selectionMethod=closest', () => {
-      expect(getElement(ampdoc, 'div', analytics, 'closest')).to.equal(div);
-      expect(getElement(
-          ampdoc, 'amp-img', analytics, 'closest')).to.equal(img1);
+      expect(getElement(ampdoc, 'div', analytics, 'closest'))
+          .to.equal(div);
+      expect(getElement(ampdoc, 'amp-img', analytics, 'closest'))
+          .to.equal(img1);
+      // Should restrict elements to contained ampdoc.
+      expect(getElement(ampdoc, 'amp-img', iframeAnalytics, 'closest'))
+          .to.equal(null);
+      expect(getElement(iframeAmpDoc, 'amp-img', analytics, 'closest'))
+          .to.equal(null);
     });
 
     it('finds element by id, selectionMethod=scope', () => {
-      expect(getElement(ampdoc, '#div', analytics, 'scope')).to.equal(null);
-      expect(getElement(ampdoc, '#img2', analytics, 'scope')).to.equal(img2);
+      expect(getElement(ampdoc, '#div', analytics, 'scope'))
+          .to.equal(null);
+      expect(getElement(ampdoc, '#img2', analytics, 'scope'))
+          .to.equal(img2);
     });
 
     it('finds element by tagname, selectionMethod=scope', () => {
-      expect(getElement(ampdoc, 'div', analytics, 'scope')).to.equal(null);
-      expect(getElement(ampdoc, 'amp-img', analytics, 'scope')).to.equal(img2);
+      expect(getElement(ampdoc, 'div', analytics, 'scope'))
+          .to.equal(null);
+      expect(getElement(ampdoc, 'amp-img', analytics, 'scope'))
+          .to.equal(img2);
     });
 
     it('finds element for selectionMethod=host', () => {
-      const iframeAnalytics = iframe.contentDocument.querySelector(
-          'amp-analytics');
-      expect(getElement(':host', iframeAnalytics)).to.equal(ampEl);
-      expect(getElement(':root', iframeAnalytics, 'something')).to.equal(ampEl);
+      expect(getElement(iframeAmpDoc, ':host', iframeAnalytics))
+          .to.equal(ampEl);
+      expect(getElement(iframeAmpDoc, ':root', iframeAnalytics, 'something'))
+          .to.equal(ampEl);
     });
   });
 });

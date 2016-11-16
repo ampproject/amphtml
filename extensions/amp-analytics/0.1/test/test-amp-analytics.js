@@ -109,6 +109,7 @@ describe('amp-analytics', function() {
     }
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
+    windowApi.document.body.appendChild(el);
     analytics.buildCallback();
     sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
     return analytics;
