@@ -76,23 +76,23 @@ export class Viewer {
     this.iframe.style.display = 'none';
 
     window.addEventListener('message', e => {
-      console.log('message received', e, e.data);
+      this.log('message received', e, e.data);
       // IMPORTANT: There could be many windows with the same origin!
       // IMPORTANT: Event.source might not be available in all browsers!?
       if (e.origin != this.frameOrigin_ ||
           e.source != this.iframe.contentWindow) {
-        console.log('This message is not for us: ', e);
+        this.log('This message is not for us: ', e);
         return;
       }
       if (e.data == 'amp-handshake-request' &&
           this.handshakeReceivedResolve_) {
         // SEND CONFIRMATION!?
-        console.log('handshake request received!');
+        this.log('handshake request received!');
         this.handshakeReceivedResolve_();
         this.handshakeReceivedResolve_ = null;
       }
       if (e.data.type == 'documentLoaded') {
-        console.log('documentLoaded!');
+        this.log('documentLoaded!');
         this.documentLoadedResolve_();
       }
     }, false);
@@ -103,7 +103,7 @@ export class Viewer {
   }
 
   confirmHandshake() {
-    this.iframe.contentWindow.postMessage(
+    this.iframe.contentWindow./*OK*/postMessage(
       'amp-handshake-response', this.frameOrigin_);
   }
 
@@ -112,7 +112,7 @@ export class Viewer {
   }
 
   sendRequest_(type, data, awaitResponse) {
-    console.log('here @ Viewer.prototype.sendRequest_');
+    this.log('here @ Viewer.prototype.sendRequest_');
     if (!this.messaging_) {
       return;
     }
@@ -140,14 +140,8 @@ export class Viewer {
     return Promise.resolve();
   }
 
-  log() {
-    const var_args = Array.prototype.slice.call(arguments, 0);
-    var_args.unshift('[VIEWER]');
-    console/*OK*/.log.apply(console, var_args);
-  }
-
   paramsStr_(params) {
-    console.log('params: ',params);
+    this.log('params: ',params);
     let s = '';
     for (const k in params) {
       const v = params[k];
@@ -159,7 +153,13 @@ export class Viewer {
       }
       s += encodeURIComponent(k) + '=' + encodeURIComponent(v);
     }
-    console.log('s: ',s);
+    this.log('s: ',s);
     return s;
+  }
+
+  log() {
+    const var_args = Array.prototype.slice.call(arguments, 0);
+    var_args.unshift('[VIEWER]');
+    console/*OK*/.log.apply(console, var_args);
   }
 }

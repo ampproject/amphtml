@@ -78,8 +78,8 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(eventType, payload, awaitResponse) {
-    //TODO: Remove console.log before merge to prod.
-    console.log('messaging.js -> sendRequest, eventType: ',eventType);
+    dev().info(
+      'MESSAGING', 'messaging.js -> sendRequest, eventType: ', eventType);
     const requestId = String(++this.requestIdCounter_);
     let promise = undefined;
     if (awaitResponse) {
@@ -87,7 +87,7 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
+    this.sendAMessage_(this.requestSentinel_, requestId, eventType, payload,
         awaitResponse);
     return promise;
   }
@@ -99,9 +99,8 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, payload) {
-    //TODO: Remove console.log before merge to prod.
-    console.log('messaging.js -> sendResponse_');
-    this.sendMessage_(
+    dev().info('MESSAGING', 'messaging.js -> sendResponse_');
+    this.sendAMessage_(
       this.responseSentinel_, requestId.toString(), null, payload, false);
   }
 
@@ -114,7 +113,7 @@ export class Messaging {
    * @param {boolean} awaitResponse
    * @private
    */
-  sendMessage_(sentinel, requestId, eventType, payload, awaitResponse) {
+  sendAMessage_(sentinel, requestId, eventType, payload, awaitResponse) {
     const message = {
       sentinel,
       requestId,
@@ -132,7 +131,7 @@ export class Messaging {
    * @private
    */
   sendResponseError_(requestId, reason) {
-    this.sendMessage_(
+    this.sendAMessage_(
       this.responseSentinel_, requestId.toString(), 'ERROR', reason, false);
   }
 
@@ -142,8 +141,7 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    //TODO: Remove console.log before merge to prod.
-    console.log('messaging.js -> handleRequest_');
+    dev().info('MESSAGING', 'messaging.js -> handleRequest_');
     const requestId = message.requestId.toString();
     const promise = this.requestProcessor_(message.type, message.payload,
         message.rsvp);
@@ -166,8 +164,7 @@ export class Messaging {
    * @private
    */
   handleResponse_(message) {
-    //TODO: Remove console.log before merge to prod.
-    console.log('messaging.js -> handleResponse_');
+    dev().info('MESSAGING', 'messaging.js -> handleResponse_');
     const requestId = message.requestId;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {

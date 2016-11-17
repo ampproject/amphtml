@@ -17,7 +17,7 @@
 import {Messaging} from './messaging.js';
 import {listen} from '../../../src/event-helper';
 import {viewerForDoc} from '../../../src/viewer';
-import {user} from '../../../src/log';
+import {dev,user} from '../../../src/log';
 
 
 /**
@@ -40,11 +40,11 @@ export class AmpViewerIntegration {
    * @return {!Promise}
    */
   init() {
-    console.log('amp-viewer-integration.js => handshake init()');
+    dev().info('AVI', 'amp-viewer-integration.js => handshake init()');
     const viewer = viewerForDoc(this.win_.document);
     return this.getHandshakePromise_(viewer)
     .then(viewerOrigin => {
-      console.log('amp-viewer-integration.js => listening for messages');
+      dev().info('AVI', 'amp-viewer-integration.js => listening for messages');
       const messaging_ =
         new Messaging(this.win_, this.win_.parent, viewerOrigin,
           (type, payload, awaitResponse) => {
@@ -77,7 +77,7 @@ export class AmpViewerIntegration {
         if (event.origin == unconfirmedViewerOrigin &&
             event.data == 'amp-handshake-response' &&
             event.source == win.parent) {
-          console.log('amp-viewer-integration.js => received handshake ' +
+          dev().info('AVI', 'amp-viewer-integration.js => received handshake ' +
             'confirmation');
           unlisten();
           resolve(event.origin);
