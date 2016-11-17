@@ -35,25 +35,31 @@ export class AmpViewerIntegration {
   }
 
   /**
+   * Initiate the handshake. If handshake confirmed, start listening for
+   * messages.
    * @return {!Promise}
    */
   init() {
+    console.log('amp-viewer-integration.js => handshake init()');
     const viewer = viewerForDoc(this.win_.document);
     return this.getHandshakePromise_(viewer)
     .then(viewerOrigin => {
-      const messaging =
+      console.log('amp-viewer-integration.js => listening for messages');
+      const messaging_ =
         new Messaging(this.win_, this.win_.parent, viewerOrigin,
           (type, payload, awaitResponse) => {
             return viewer.receiveMessage(
               type, /** @type {!JSONType} */ (payload), awaitResponse);
           });
       viewer.setMessageDeliverer((type, payload, awaitResponse) => {
-        return messaging.sendRequest(type, payload, awaitResponse);
+        return messaging_.sendRequest(type, payload, awaitResponse);
       }, viewerOrigin);
     });
   }
 
   /**
+   * Send a handshake request, and listen for a handshake response to
+   * confirm the handshake.
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @return {!Promise}
    * @private
@@ -71,6 +77,8 @@ export class AmpViewerIntegration {
         if (event.origin == unconfirmedViewerOrigin &&
             event.data == 'amp-handshake-response' &&
             event.source == win.parent) {
+          console.log('amp-viewer-integration.js => received handshake ' +
+            'confirmation');
           unlisten();
           resolve(event.origin);
         }
@@ -82,4 +90,6 @@ export class AmpViewerIntegration {
   }
 }
 
-AMP.extension(new AmpViewerIntegration(AMP.win).init());
+AMP.extension('amp-viewer-integration', '0.1', function() {
+  new AmpViewerIntegration(AMP.win).init();
+});
