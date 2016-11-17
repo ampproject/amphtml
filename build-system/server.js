@@ -165,7 +165,7 @@ app.use('/form/echo-json/post', function(req, res) {
   assertCors(req, res, ['POST']);
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
     }
