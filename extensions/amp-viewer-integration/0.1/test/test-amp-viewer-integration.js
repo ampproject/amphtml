@@ -127,14 +127,14 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
 
-    it('sendRequest should call sendMessage_ and have correct input', () => {
+    it('sendRequest should call sendAMessage_ and have correct input', () => {
       const message = 'message';
       const awaitResponse = false;
       const payload = {};
       const requestId = '1';
       const requestSentinel = '__AMPHTML__REQUEST';
 
-      const sendMessageSpy = sandbox.spy(messaging, 'sendMessage_');
+      const sendMessageSpy = sandbox.spy(messaging, 'sendAMessage_');
 
       messaging.sendRequest(message, payload, awaitResponse);
 
@@ -147,14 +147,14 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
 
-    it('sendResponse_ should call sendMessage_ and have correct input', () => {
+    it('sendResponse_ should call sendAMessage_ and have correct input', () => {
       const message = null;
       const awaitResponse = false;
       const payload = {};
       const requestId = '1';
       const requestSentinel = '__AMPHTML__RESPONSE';
 
-      const sendMessageSpy = sandbox.spy(messaging, 'sendMessage_');
+      const sendMessageSpy = sandbox.spy(messaging, 'sendAMessage_');
 
       messaging.sendResponse_(requestId, payload);
 
@@ -167,7 +167,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
 
-    it('sendResponseError_ should call sendMessage_ and have correct input',
+    it('sendResponseError_ should call sendAMessage_ and have correct input',
     () => {
       const message = 'ERROR';
       const awaitResponse = false;
@@ -175,7 +175,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       const requestId = '1';
       const requestSentinel = '__AMPHTML__RESPONSE';
 
-      const sendMessageSpy = sandbox.spy(messaging, 'sendMessage_');
+      const sendMessageSpy = sandbox.spy(messaging, 'sendAMessage_');
 
       messaging.sendResponseError_(requestId, reason);
 
@@ -187,7 +187,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       expect(sendMessageSpy.getCall(0).args[4]).to.equal(awaitResponse);
     });
 
-    it('sendMessage_ should call postMessage on this.target_', () => {
+    it('sendAMessage_ should call postMessage on this.target_', () => {
       const sentinel = 'sntnl';
       const awaitResponse = false;
       const payload = null;
@@ -196,7 +196,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
       const postMessageSpy = sandbox.spy(messaging.target_, 'postMessage');
 
-      messaging.sendMessage_(
+      messaging.sendAMessage_(
         sentinel, requestId, eventType, payload, awaitResponse);
       expect(postMessageSpy).to.have.been.called;
     });
