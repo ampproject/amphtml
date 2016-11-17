@@ -26,6 +26,6 @@ export function makeCorrelator(clientId, pageViewId) {
   } else {
     // In this case, pageViewIdNumeric is only 4 digits => too low entropy
     // to be useful as a page correlator.  So synthesize one from scratch.
-    return Math.floor(Math.pow(2, 52) * Math.random());
+    return Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
   }
 }
