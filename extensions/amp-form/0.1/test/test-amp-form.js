@@ -27,7 +27,6 @@ import * as sinon from 'sinon';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
-import {toggleExperiment} from '../../../../src/experiments';
 import {installDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installActionServiceForDoc,} from
@@ -43,7 +42,6 @@ describe('amp-form', () => {
     return createIframePromise().then(iframe => {
       const docService = installDocService(iframe.win, /* isSingleDoc */ true);
       installActionServiceForDoc(docService.getAmpDoc());
-      toggleExperiment(iframe.win, 'amp-form', true);
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
       const form = getForm(iframe.doc, button1, button2);

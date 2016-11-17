@@ -16,7 +16,6 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/platform';
-import {toggleExperiment} from '../../../../src/experiments';
 import {vsyncFor} from '../../../../src/vsync';
 import {
     AmpAppBanner,
@@ -56,7 +55,6 @@ describe('amp-app-banner', () => {
       ],
     },
   };
-  toggleExperiment(window, 'amp-app-banner', true);
 
   function runTask(task, state) {
     if (task.measure) {
@@ -81,7 +79,6 @@ describe('amp-app-banner', () => {
         return Promise.resolve();
       });
       sandbox.stub(vsync, 'run', runTask);
-      toggleExperiment(iframe.win, 'amp-app-banner', true);
       return iframe;
     });
   }

@@ -22,7 +22,6 @@ import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
 import {assertHttpsUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeElement, openWindowDialog} from '../../../src/dom';
 import {storageForDoc} from '../../../src/storage';
 import {timerFor} from '../../../src/timer';
@@ -182,18 +181,10 @@ export class AmpAppBanner extends AbstractAppBanner {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {boolean} */
-    this.isExperimentOn_ = false;
   }
 
   /** @override */
   upgradeCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-    if (!this.isExperimentOn_) {
-      return null;
-    }
-
     const platform = platformFor(this.win);
     if (platform.isIos()) {
       return new AmpIosAppBanner(this.element);
@@ -205,11 +196,6 @@ export class AmpAppBanner extends AbstractAppBanner {
 
   /** @override */
   layoutCallback() {
-    if (!this.isExperimentOn_) {
-      user().warn(TAG, `Experiment ${TAG} disabled`);
-      return Promise.resolve();
-    }
-
     dev().info(TAG, 'Only iOS or Android platforms are currently supported.');
     return this.hide_();
   }
