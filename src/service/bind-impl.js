@@ -97,12 +97,7 @@ export class Bind {
   digest_(opt_verifyOnly) {
     for (let i = 0; i < this.bindings_.length; i++) {
       const binding = this.bindings_[i];
-
       const result = evaluateBindExpr(binding.expression, this.scope_);
-      if (result === null) {
-        continue;
-      }
-
       if (opt_verifyOnly) {
         this.verifyBinding_(binding, result);
       } else {
