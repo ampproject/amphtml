@@ -87,12 +87,8 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
-    this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
-      if (this.postIOMessageApi_) {
-        this.postIOMessageApi_.send('intersection', {changes: change});
-      }
-    });
 
+    // Init IntersectionObserver service.
     this.intersectionObserverApi_ = new SubscriptionApi(
         this.iframe, 'send-intersections', true, () => {
           this.intersectionObserver_.observe(this.element_);

@@ -39,7 +39,7 @@ export let DOMRect;
  * @param {!./layout-rect.LayoutRectDef} element element's rect
  * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
  * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
- * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
+ * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
  */
 export function getIntersectionChangeEntry(
     element, owner, hostViewport, opt_iframe) {
@@ -123,6 +123,10 @@ export class IntersectionObserverPolyfill {
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
+    if (!this.element_) {
+      return;
+    }
+
     if (opt_iframe) {
       // If element inside an iframe. Adjust origin to the iframe.left/top.
       hostViewport =
@@ -243,7 +247,7 @@ export function getThresholdSlot(sortedThreshold, ratio) {
  * @param {!./layout-rect.LayoutRectDef} element element's rect
  * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
  * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
- * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
+ * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
  * @return {!./layout-rect.LayoutRectDef}
  */
 function calculateIntersectionRect(element, owner, hostViewport, opt_iframe) {
@@ -279,11 +283,11 @@ function calculateIntersectionRect(element, owner, hostViewport, opt_iframe) {
  * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
  * @param {!./layout-rect.LayoutRectDef} intersection
  * @param {number} ratio
- * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
+ * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
  * @return {!IntersectionObserverEntry}}
  */
 function calculateChangeEntry(
-    element, hostViewport, intersectionRect, ratio, opt_iframe) {
+    element, hostViewport, intersection, ratio, opt_iframe) {
   // If element not in an iframe.
   // adjust all LayoutRect to hostViewport Origin.
   let boundingClientRect = element;
@@ -300,7 +304,7 @@ function calculateChangeEntry(
   } else {
     // If element not in an iframe.
     // adjust all LayoutRect to hostViewport Origin.
-    intersectionRect = moveLayoutRect(intersectionRect, -hostViewport.left,
+    intersection = moveLayoutRect(intersection, -hostViewport.left,
         -hostViewport.top);
     // The element is relative to (0, 0), while the viewport moves. So, we must
     // adjust.
@@ -314,7 +318,7 @@ function calculateChangeEntry(
     time: performance.now(),
     rootBounds: rootBounds && DomRectFromLayoutRect(rootBounds),
     boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-    intersectionRect: DomRectFromLayoutRect(intersectionRect),
+    intersectionRect: DomRectFromLayoutRect(intersection),
     intersectionRatio: ratio,
   });
 }
