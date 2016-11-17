@@ -34,6 +34,23 @@ import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 export let DOMRect;
 
 /**
+ * A function to get the element's current IntersectionObserverEntry
+ * regardless of the intersetion ratio.
+ * @param {!./layout-rect.LayoutRectDef} element element's rect
+ * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
+ * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+ * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
+ */
+export function getIntersectionChangeEntry(
+    element, owner, hostViewport, opt_iframe) {
+  const intersectionRect = calculateIntersectionRect(
+        element, owner, hostViewport, opt_iframe);
+  const ratio = intersectionRatio(intersectionRect, element);
+  return calculateChangeEntry(
+      element, hostViewport, intersectionRect, ratio, opt_iframe);
+}
+
+/**
  * The IntersectionObserverPolyfill class lets any element receive its
  * intersection data with the viewport. It acts like native browser supported
  * IntersectionObserver.
@@ -148,26 +165,9 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   getValidIntersectionChangeEntry_(element, owner, hostViewport, opt_iframe) {
-    // If opt_iframe is provided, all LayoutRect has position relative to
-    // the iframe.
-    // If opt_iframe is not provided, all LayoutRect has position relative to
-    // the host document.
-
-    // Building an IntersectionObserverEntry.
-    let intersectionRect = element;
-    const nonIntersectRect = layoutRectLtwh(0, 0, 0, 0);
-    // element intersects with its owner.
-    if (owner) {
-      intersectionRect = rectIntersection(owner, element) || nonIntersectRect;
-    }
-    // element intersects with container iframe.
-    if (opt_iframe) {
-      intersectionRect = rectIntersection(opt_iframe, intersectionRect) ||
-          nonIntersectRect;
-    }
-    // element intersects with hostViewport
-    intersectionRect = rectIntersection(hostViewport, intersectionRect) ||
-        nonIntersectRect;
+    // calculate intersectionRect
+    const intersectionRect =
+        calculateIntersectionRect(element, owner, hostViewport, opt_iframe);
 
     // calculate ratio, call callback based on new ratio value.
     const ratio = intersectionRatio(intersectionRect, element);
@@ -177,39 +177,8 @@ export class IntersectionObserverPolyfill {
     }
     this.prevThresholdSlot_ = newThresholdSlot;
 
-    let boundingClientRect = element;
-    let rootBounds = hostViewport;
-
-    // If element inside an iframe. Every Layoutrect has already adjust their
-    // origin according to opt_iframe rect origin.
-    if (opt_iframe) {
-      // If element is inside a non-scrollable iframe. LayoutRect position is
-      // relative to iframe origin, thus relative to iframe's viewport origin,
-      // because the viewport is at the iframe origin.
-      // No need to adjust position here.
-      // To get same behavior as native IntersectionObserver set rootBounds null
-      rootBounds = null;
-    } else {
-      // If element not in an iframe.
-      // adjust all LayoutRect to hostViewport Origin.
-      intersectionRect = moveLayoutRect(intersectionRect, -hostViewport.left,
-          -hostViewport.top);
-      // The element is relative to (0, 0), while the viewport moves. So, we must
-      // adjust.
-      boundingClientRect = moveLayoutRect(boundingClientRect,
-          -hostViewport.left, -hostViewport.top);
-      // Now, move the viewport to (0, 0)
-      rootBounds = moveLayoutRect(rootBounds,
-          -hostViewport.left, -hostViewport.top);
-    }
-
-    return /** @type {!IntersectionObserverEntry} */ ({
-      time: performance.now(),
-      rootBounds: rootBounds && DomRectFromLayoutRect(rootBounds),
-      boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-      intersectionRect: DomRectFromLayoutRect(intersectionRect),
-      intersectionRatio: ratio,
-    });
+    return calculateChangeEntry(
+        element, hostViewport, intersectionRect, ratio, opt_iframe);
   }
 }
 
@@ -267,4 +236,85 @@ export function getThresholdSlot(sortedThreshold, ratio) {
     mid = ((startIdx + endIdx) / 2) | 0;
   }
   return endIdx;
+}
+
+/**
+ * Helper function to calculate the intersectionRect and intersection ration.
+ * @param {!./layout-rect.LayoutRectDef} element element's rect
+ * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
+ * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+ * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
+ * @return {!./layout-rect.LayoutRectDef}
+ */
+function calculateIntersectionRect(element, owner, hostViewport, opt_iframe) {
+  dev().assert(element.width >= 0 && element.height >= 0,
+      'Negative dimensions in element.');
+  // If opt_iframe is provided, all LayoutRect has position relative to
+  // the iframe.
+  // If opt_iframe is not provided, all LayoutRect has position relative to
+  // the host document.
+
+  // Building an IntersectionObserverEntry.
+  let intersectionRect = element;
+  const nonIntersectRect = layoutRectLtwh(0, 0, 0, 0);
+  // element intersects with its owner.
+  if (owner) {
+    intersectionRect = rectIntersection(owner, element) || nonIntersectRect;
+  }
+  // element intersects with container iframe.
+  if (opt_iframe) {
+    intersectionRect = rectIntersection(opt_iframe, intersectionRect) ||
+        nonIntersectRect;
+  }
+  // element intersects with hostViewport
+  intersectionRect = rectIntersection(hostViewport, intersectionRect) ||
+      nonIntersectRect;
+
+  return intersectionRect;
+}
+
+/**
+ * Helper function to calculate the IntersectionObserver change entry.
+ * @param {!./layout-rect.LayoutRectDef} element element's rect
+ * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+ * @param {!./layout-rect.LayoutRectDef} intersection
+ * @param {number} ratio
+ * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
+ * @return {!IntersectionObserverEntry}}
+ */
+function calculateChangeEntry(
+    element, hostViewport, intersectionRect, ratio, opt_iframe) {
+  // If element not in an iframe.
+  // adjust all LayoutRect to hostViewport Origin.
+  let boundingClientRect = element;
+  let rootBounds = hostViewport;
+  // If element inside an iframe. Every Layoutrect has already adjust their
+  // origin according to opt_iframe rect origin.
+  if (opt_iframe) {
+    // If element is inside a non-scrollable iframe. LayoutRect position is
+    // relative to iframe origin, thus relative to iframe's viewport origin,
+    // because the viewport is at the iframe origin.
+    // No need to adjust position here.
+    // To get same behavior as native IntersectionObserver set rootBounds null
+    rootBounds = null;
+  } else {
+    // If element not in an iframe.
+    // adjust all LayoutRect to hostViewport Origin.
+    intersectionRect = moveLayoutRect(intersectionRect, -hostViewport.left,
+        -hostViewport.top);
+    // The element is relative to (0, 0), while the viewport moves. So, we must
+    // adjust.
+    boundingClientRect = moveLayoutRect(boundingClientRect,
+        -hostViewport.left, -hostViewport.top);
+    // Now, move the viewport to (0, 0)
+    rootBounds = moveLayoutRect(rootBounds,
+        -hostViewport.left, -hostViewport.top);
+  }
+  return /** @type {!IntersectionObserverEntry} */ ({
+    time: performance.now(),
+    rootBounds: rootBounds && DomRectFromLayoutRect(rootBounds),
+    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
+    intersectionRect: DomRectFromLayoutRect(intersectionRect),
+    intersectionRatio: ratio,
+  });
 }

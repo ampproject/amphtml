@@ -105,7 +105,6 @@ export class AmpAdXOriginIframeHandler {
     this.positionObserver_ = new PositionObserver(this.baseInstance_, vp => {
       this.intersectionObserver_.tick(vp);
     });
-    console.log(this.positionObserver_);
 
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe, 'send-embed-state', true,
@@ -233,10 +232,8 @@ export class AmpAdXOriginIframeHandler {
     }
     if (this.intersectionObserver_) {
       this.intersectionObserver_ = null;
-      console.log(this.positionObserver_);
       this.positionObserver_.destroy();
       this.positionObserver_ = null;
-      console.log(this.intersectionObserverApi_);
       this.intersectionObserverApi_.destroy();
       this.intersectionObserverApi_ = null;
     }
