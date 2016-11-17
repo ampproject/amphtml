@@ -58,7 +58,6 @@ export const adConfig = {
 
   adbutler: {
     prefetch: 'https://servedbyadbutler.com/app.js',
-    renderStartImplemented: true,
   },
 
   adform: {},
