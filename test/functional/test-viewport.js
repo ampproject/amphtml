@@ -1591,31 +1591,45 @@ describe('createViewport', () => {
         });
       });
 
-  describes.fakeWin('in iOS', {win: {navigator: {userAgent: 'iPhone'}}},
-      env => {
-        let win;
+  describes.fakeWin('in iOS', {
+    win: {navigator: {userAgent: 'iPhone'}},
+  }, env => {
+    let win;
 
-        beforeEach(() => {
-          win = env.win;
-          installPlatformService(win);
-          installTimerService(win);
-        });
+    beforeEach(() => {
+      win = env.win;
+      installPlatformService(win);
+      installTimerService(win);
+    });
 
-        it('should bind to "natural" when not iframed', () => {
-          win.parent = win;
-          const ampDoc = installDocService(win, true).getAmpDoc();
-          installViewerServiceForDoc(ampDoc);
-          const viewport = installViewportServiceForDoc(ampDoc);
-          expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-        });
+    it('should bind to "natural" when not iframed', () => {
+      win.parent = win;
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      installViewerServiceForDoc(ampDoc);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+    });
 
-        it('should bind to "natural iOS embed" when iframed', () => {
-          win.parent = {};
-          const ampDoc = installDocService(win, true).getAmpDoc();
-          installViewerServiceForDoc(ampDoc);
-          const viewport = installViewportServiceForDoc(ampDoc);
-          expect(viewport.binding_).to
-              .be.instanceof(ViewportBindingNaturalIosEmbed_);
-        });
-      });
+    it('should bind to "iOS embed" when iframed', () => {
+      win.parent = {};
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => true);
+      sandbox.stub(viewer, 'isEmbedded', () => true);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+    });
+
+    it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
+      win.parent = {};
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => true);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNatural_);
+    });
+  });
 });

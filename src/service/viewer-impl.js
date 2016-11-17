@@ -199,10 +199,6 @@ export class Viewer {
         this.paddingTop_;
     dev().fine(TAG_, '- padding-top:', this.paddingTop_);
 
-    /** @private @const {boolean} */
-    this.performanceTracking_ = this.params_['csi'] === '1';
-    dev().fine(TAG_, '- performanceTracking:', this.performanceTracking_);
-
     /**
      * Whether the AMP document is embedded in a webview.
      * @private @const {boolean}
@@ -372,7 +368,9 @@ export class Viewer {
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
         // This is currently used my mode.js to infer development mode.
-        this.win.location.originalHash = this.win.location.hash;
+        if (!this.win.location.originalHash) {
+          this.win.location.originalHash = this.win.location.hash;
+        }
         // Using #- to falsify a theory that could lead to
         // https://github.com/ampproject/amphtml/issues/6070
         this.win.history.replaceState({}, '', newUrl + '#-');
@@ -470,19 +468,6 @@ export class Viewer {
    */
   isRuntimeOn() {
     return this.isRuntimeOn_;
-  }
-
-  /**
-   * Identifies if the viewer is recording instrumentation.
-   * Will also return false if no messaging channel is established, this
-   * means the AMP page is not embedded.
-   * @return {boolean}
-   */
-  isPerformanceTrackingOn() {
-    // If there is no messagingMaybePromise_, then document is not
-    // embedded and no performance tracking is needed since there is nobody
-    // to forward the events.
-    return this.performanceTracking_ && !!this.messagingMaybePromise_;
   }
 
   /**

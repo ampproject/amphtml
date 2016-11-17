@@ -1,9 +1,16 @@
 {
   "canary": true,
   "amp-ios-overflow-x": 1,
+  "amp-experiment": 1,
   "expAdsenseA4A": 1,
   "expDoubleclickA4A": 1,
+  "pan-y": 1,
   "a4aProfilingRate": 1,
+  "amp-form": 1,
+  "form-submit": 1,
   "amp-scrollable-carousel": 1,
-  "amp-fx-flying-carpet": 1
+  "amp-fx-flying-carpet": 1,
+  "ios-embed-wrapper": 1,
+  "make-body-relative": 1,
+  "amp-app-banner": 1
 }
