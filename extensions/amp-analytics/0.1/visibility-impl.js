@@ -16,7 +16,6 @@
 
 import {closestByTag, closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
@@ -155,14 +154,14 @@ export function isVisibilitySpecValid(config) {
  * @param {!String} selectionMethod The method to use to find the element..
  * @return {?Element} Element corresponding to the selector if found.
  */
-export function getElement(selector, el, selectionMethod) {
+export function getElement(ampdoc, selector, el, selectionMethod) {
   if (!el) {
     return null;
   }
 
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
-    const elWin = el.ownerDocument.defaultView;
+    const elWin = ampdoc.win;
     const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
     if (parentEl) {
       return closestBySelector(parentEl, '.-amp-element');
@@ -171,11 +170,16 @@ export function getElement(selector, el, selectionMethod) {
 
   if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
-    return closestByTag(el, selector);
+    const closestEl = closestByTag(el, selector);
+    // Restrict result to be contained by ampdoc.
+    if (closestEl && ampdoc.contains(closestEl)) {
+      return closestEl;
+    }
+    return null;
   } else if (selectionMethod == 'scope') {
     return el.parentElement.querySelector(selector);
   } else if (selector[0] == '#') {
-    return el.ownerDocument.getElementById(selector.slice(1));
+    return ampdoc.getElementById(selector.slice(1));
   }
   return null;
 }
@@ -201,9 +205,10 @@ let VisibilityListenerDef;
  */
 export class Visibility {
 
-  /** @param {!Window} win */
-  constructor(win) {
-    this.win_ = win;
+  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    this.ampdoc = ampdoc;
 
     /**
      * key: resource id.
@@ -214,7 +219,7 @@ export class Visibility {
     this.listeners_ = Object.create(null);
 
     /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = timerFor(this.ampdoc.win);
 
     /** @private {Array<!../../../src/service/resource.Resource>} */
     this.resources_ = [];
@@ -232,7 +237,7 @@ export class Visibility {
     this.visibilityListenerRegistered_ = false;
 
     /** @private {!../../../src/service/resources-impl.Resources} */
-    this.resourcesService_ = resourcesForDoc(this.win_.document);
+    this.resourcesService_ = resourcesForDoc(this.ampdoc);
 
     /** @private {number|string|null} */
     this.scheduledRunId_ = null;
@@ -244,7 +249,7 @@ export class Visibility {
     this.scheduledLoadedPromises_ = false;
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.win_.document);
+    this.viewer_ = viewerForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.backgroundedAtStart_ = !this.viewer_.isVisible();
@@ -265,7 +270,7 @@ export class Visibility {
   /** @private */
   registerForViewportEvents_() {
     if (!this.scrollListenerRegistered_) {
-      const viewport = viewportForDoc(this.win_.document);
+      const viewport = viewportForDoc(this.ampdoc);
 
       // Currently unlistens are not being used. In the event that no resources
       // are actively being monitored, the scrollListener should be very cheap.
@@ -285,7 +290,8 @@ export class Visibility {
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
-    const element = getElement(selector, dev().assertElement(analyticsElement),
+    const element = getElement(this.ampdoc, selector,
+        dev().assertElement(analyticsElement),
         config['selectionMethod']);
     user().assert(element, 'Element not found for visibilitySpec: '
         + selector);
@@ -504,8 +510,8 @@ export class Visibility {
    * @private
    */
   prepareStateForCallback_(state, rb, br, ir) {
-    const perf = this.win_.performance;
-    const viewport = viewportForDoc(this.win_.document);
+    const perf = this.ampdoc.win.performance;
+    const viewport = viewportForDoc(this.ampdoc);
 
     state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
     state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
@@ -550,11 +556,3 @@ export class Visibility {
     }
   }
 }
-
-/**
- * @param  {!Window} win
- * @return {!Visibility}
- */
-export function installVisibilityService(win) {
-  return fromClass(win, 'visibility', Visibility);
-};
