@@ -22,6 +22,15 @@ import {adopt} from '../../../../src/runtime';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
 
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {
+    installResourcesServiceForDoc,
+} from '../../../../src/service/resources-impl';
+import {documentStateFor} from '../../../../src/document-state';
+
+
 adopt(window);
 
 describe('amp-analytics.instrumentation', function() {
@@ -30,11 +39,18 @@ describe('amp-analytics.instrumentation', function() {
   let fakeViewport;
   let clock;
   let sandbox;
+  let ampdoc;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    ins = new InstrumentationService(window);
+    const docState = documentStateFor(window);
+    sandbox.stub(docState, 'isHidden', () => false);
+    ampdoc = new AmpDocSingle(window);
+    installResourcesServiceForDoc(ampdoc);
+    installPlatformService(window);
+    installTimerService(window);
+    ins = new InstrumentationService(ampdoc);
     fakeViewport = {
       'getSize': sandbox.stub().returns(
           {top: 0, left: 0, height: 200, width: 200}),
@@ -53,9 +69,10 @@ describe('amp-analytics.instrumentation', function() {
   });
 
   it('works for visible event', () => {
+    ins.viewer_.setVisibilityState_(VisibilityState.VISIBLE);
     const fn = sandbox.stub();
     ins.addListener({'on': 'visible'}, fn);
-    expect(fn.calledOnce).to.be.true;
+    expect(fn).to.be.calledOnce;
   });
 
   it('works for hidden event', () => {
