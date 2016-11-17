@@ -46,12 +46,10 @@ export function filterSplice(array, filter) {
  * @template T
  */
 export function findIndex(array, predicate) {
-  let i = 0;
-  while (i < array.length) {
+  for (let i = 0; i < array.length; i++) {
     if (predicate(array[i], i, array)) {
-      break;
+      return i;
     }
-    i++;
   }
-  return i < array.length ? i : -1;
+  return -1;
 }

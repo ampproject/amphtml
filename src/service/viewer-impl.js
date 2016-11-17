@@ -136,7 +136,15 @@ export class Viewer {
     /** @private {?string} */
     this.messagingOrigin_ = null;
 
-    /** @private {!Array<!{eventType: string, data: *, awaitResponse: boolean, responsePromise: (Promise<*>|undefined), responseResolver: function(*)}>} */
+    /**
+     * @private {!Array<!{
+     *   eventType: string,
+     *   data: *,
+     *   awaitResponse: boolean,
+     *   responsePromise: (Promise<*>|undefined),
+     *   responseResolver: function(*)
+     * }>}
+     */
     this.messageQueue_ = [];
 
     /** @const @private {!Object<string, string>} */
@@ -1001,7 +1009,7 @@ export class Viewer {
             message.eventType, message.data, message.awaitResponse);
 
         if (message.awaitResponse) {
-          responsePromise.then(response => message.responseResolver(response));
+          message.responseResolver(responsePromise);
         }
       });
     }
@@ -1051,7 +1059,7 @@ export class Viewer {
     if (found != -1) {
       message = this.messageQueue_.splice(found, 1)[0];
       message.data = data;
-      message.awaitResponse |= awaitResponse;
+      message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
       let responseResolver;
       const responsePromise = new Promise(r => {
