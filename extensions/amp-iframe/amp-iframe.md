@@ -157,19 +157,19 @@ window.parent.postMessage({
 
 ## Iframe viewability
 
-Iframes can send a  `send-intersection` message to its parent to start receiving IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the iframe's intersection with the parent viewport.
+Iframes can send a  `send-intersections` message to its parent to start receiving IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the iframe's intersection with the parent viewport.
 
-Example of iframe `send-intersection` request:
+Example of iframe `send-intersections` request:
 ```javascript
 window.parent.postMessage({
   sentinel: 'amp',
-  type: 'send-intersection'
+  type: 'send-intersections'
 }, '*');
 ```
 
 The iframe can listen to an `intersection` message from the parent window to receive the intersection data.
 
-Example of iframe `send-intersection` request:
+Example of iframe `send-intersections` request:
 ```javascript
 window.addEventListener('message', function(event) {
   const listener = function(event) {
