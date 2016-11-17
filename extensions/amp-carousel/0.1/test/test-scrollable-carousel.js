@@ -15,7 +15,6 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('ScrollableCarousel', () => {
@@ -32,7 +31,6 @@ describe('ScrollableCarousel', () => {
 
   function getAmpScrollableCarousel() {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-scrollable-carousel', true);
       iframe.width = '300';
       iframe.height = '200';
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
