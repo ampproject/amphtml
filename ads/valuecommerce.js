@@ -23,6 +23,6 @@ import {writeScript, validateData} from '../3p/3p';
 export function valuecommerce(global, data) {
   validateData(data, ['sid','pid','vcptn'], []);
   global.vcParam = data;
-  writeScript(global, '172.17.32.33/amptest/amp.js');
+  writeScript(global, 'https://sbcm1.value-point.jp/amp/amp_ad.js');
 }
 

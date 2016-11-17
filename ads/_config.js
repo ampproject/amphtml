@@ -418,7 +418,7 @@ export const adConfig = {
   triplelift: {},
 
   valuecommerce: {
-    prefetch: 'http://172.17.32.33/amptest/amp.js',
+    prefetch: 'https://sbcm1.value-point.jp/amp/amp_ad.js',
     renderStartImplemented: true,
   },
 
