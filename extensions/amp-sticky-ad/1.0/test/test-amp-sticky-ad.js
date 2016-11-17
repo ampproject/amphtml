@@ -187,9 +187,9 @@ describes.realWin('amp-sticky-ad 1.0 version', {
 
       impl.displayAfterScroll_();
       expect(addCloseButtonSpy).to.be.called;
-      expect(impl.element.children[1]).to.be.not.null;
-      expect(impl.element.children[1].tagName).to.equal(
-          'I-AMP-STICKY-AD-TOP-PADDING');
+      expect(impl.element.children[0]).to.be.not.null;
+      expect(impl.element.children[0].tagName).to.equal(
+          'AMP-STICKY-AD-TOP-PADDING');
       expect(impl.element.children[2]).to.be.not.null;
       expect(impl.element.children[2].tagName).to.equal('BUTTON');
     });

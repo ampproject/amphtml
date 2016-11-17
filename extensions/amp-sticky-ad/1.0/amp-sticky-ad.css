@@ -29,13 +29,12 @@ amp-sticky-ad {
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
-i-amp-sticky-ad-top-padding {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+amp-sticky-ad-top-padding {
+  display: block;
+  width: 100% !important;
   background: #fff;
   height: 4px;
+  max-height: 5px !important;
   /** Must be above the dismiss button to cover bottom shadow */
   z-index: 12 !important;
 }
@@ -56,8 +55,6 @@ amp-sticky-ad[visible] {
 
 .-amp-sticky-ad-layout > amp-ad {
   display: block;
-  /*To cover the space of i-amp-sticky-ad-top-padding*/
-  margin-top: 4px;
 }
 
 
