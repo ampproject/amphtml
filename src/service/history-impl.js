@@ -118,6 +118,7 @@ export class History {
    * @return {!Promise}
    */
   replaceStateForTarget(target) {
+    dev().assert(target[0] == '#', 'target should start with a #');
     const previousHash = this.ampdoc_.win.location.hash;
     return this.push(() => {
       this.ampdoc_.win.location.replace(previousHash || '#');
@@ -563,12 +564,15 @@ export class HistoryBindingNatural_ {
    * @override
    */
   replaceStateForTarget(target) {
+    dev().assert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
-      const hash = target[0] == '#' ? target : `#${target}`;
       this.ignoreUpcomingPopstate_ = true;
       // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
-      this.win.location.replace(hash);
-      this.ignoreUpcomingPopstate_ = false;
+      try {
+        this.win.location.replace(target);
+      } finally {
+        this.ignoreUpcomingPopstate_ = false;
+      }
       this.historyReplaceState_();
       return Promise.resolve();
     });
@@ -645,8 +649,8 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   replaceStateForTarget(target) {
-    const hash = target[0] == '#' ? target : `#${target}`;
-    this.win.location.replace(hash);
+    dev().assert(target[0] == '#', 'target should start with a #');
+    this.win.location.replace(target);
   }
 
   /** @override */
