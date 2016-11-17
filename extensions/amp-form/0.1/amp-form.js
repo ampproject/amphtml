@@ -15,7 +15,6 @@
  */
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
   assertHttpsUrl,
@@ -494,12 +493,10 @@ function installSubmissionHandlers(win) {
  * @private visible for testing.
  */
 export function installAmpForm(win) {
-  return getService(win, 'amp-form', () => {
-    if (isExperimentOn(win, TAG)) {
-      installStyles(win.document, CSS, () => {
-        installSubmissionHandlers(win);
-      });
-    }
+  return getService(win, TAG, () => {
+    installStyles(win.document, CSS, () => {
+      installSubmissionHandlers(win);
+    });
     return {};
   });
 }
