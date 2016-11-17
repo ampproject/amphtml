@@ -77,6 +77,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const adTestOn = isInManualExperiment(this.element);
 
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    let szStr = slotRect.width + 'x' + slotRect.height;
     if (multiSizeDataStr) {
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation');
@@ -88,7 +89,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.element.getAttribute('width') /* Primary width */,
           this.element.getAttribute('height') /* Primary height */,
           multiSizeValidation /* Raw multi-size-validation data attribute */);
-      size += dimensions.map(dimension => dimension.join('x')).join('|');
+      size += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
     }
 
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotIdNumber, [
