@@ -24,6 +24,7 @@ import {
 import {PositionObserver} from '../../../src/position-observer';
 import {
   IntersectionObserverPolyfill,
+  AMP_DEFAULT_THRESHOLD,
 } from '../../../src/intersection-observer-polyfill';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
@@ -97,7 +98,7 @@ export class AmpAdXOriginIframeHandler {
     );
     this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
       this.intersectionObserverApi_.send('intersection', {changes: {change}});
-    });
+    }, {threshold: AMP_DEFAULT_THRESHOLD});
     this.positionObserver_ = new PositionObserver(this.baseInstance_, vp => {
       this.intersectionObserver_.tick(vp);
     });

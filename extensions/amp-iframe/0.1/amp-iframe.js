@@ -17,6 +17,7 @@
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {
   IntersectionObserverPolyfill,
+  AMP_DEFAULT_THRESHOLD,
 } from '../../../src/intersection-observer-polyfill';
 import {PositionObserver} from '../../../src/position-observer';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
@@ -306,7 +307,7 @@ export class AmpIframe extends AMP.BaseElement {
           });
       this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
         this.intersectionObserverApi_.send('intersection', {changes: {change}});
-      });
+      }, {threshold: AMP_DEFAULT_THRESHOLD});
       this.positionObserver_ = new PositionObserver(this, vp => {
         this.intersectionObserver_.tick(vp);
       });

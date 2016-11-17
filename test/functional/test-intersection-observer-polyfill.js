@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill, getThresholdSlot,
+import {IntersectionObserverPolyfill, getThresholdSlot, AMP_DEFAULT_THRESHOLD,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
-
-const DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
@@ -59,7 +56,7 @@ describe('IntersectionObserverPolyfill', () => {
     });
 
     it('getThresholdSlot function', () => {
-      let threshold = DEFAULT_THRESHOLD;
+      let threshold = AMP_DEFAULT_THRESHOLD;
       expect(getThresholdSlot(threshold, 0)).to.equal(0);
       expect(getThresholdSlot(threshold, 0.67)).to.equal(14);
       expect(getThresholdSlot(threshold, 0.65)).to.equal(14);
