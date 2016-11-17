@@ -15,7 +15,10 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
-import {instrumentationServiceForDoc} from './instrumentation';
+import {
+  InstrumentationService,
+  instrumentationServiceForDoc,
+} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
@@ -33,11 +36,7 @@ import {toggle} from '../../../src/style';
 
 // Register doc-service factory.
 AMP.registerServiceForDoc(
-    'amp-analytics-instrumentation',
-    /* ctor */ undefined,
-    ampdoc => {
-      return instrumentationServiceForDoc(ampdoc);
-    });
+    'amp-analytics-instrumentation', InstrumentationService);
 
 installActivityService(AMP.win);
 installCidService(AMP.win);
@@ -88,6 +87,9 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {JSONType}
      */
     this.remoteConfig_ = /** @type {JSONType} */ ({});
+
+    /** @private {?./instrumentation.InstrumentationService} */
+    this.instrumentation_ = null;
   }
 
   /** @override */
@@ -112,6 +114,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.consentNotificationId_ = this.element
         .getAttribute('data-consent-notification-id');
+
+    this.instrumentation_ = instrumentationServiceForDoc(this.getAmpDoc());
 
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = userNotificationManagerFor(this.win)
@@ -180,18 +184,16 @@ export class AmpAnalytics extends AMP.BaseElement {
             return;
           }
 
-          const instrumentation_ = instrumentationServiceForDoc(
-              this.getAmpDoc());
           if (trigger['selector']) {
             // Expand the selector using variable expansion.
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
-            instrumentation_.addListener(
+            this.instrumentation_.addListener(
                 trigger, this.handleEvent_.bind(this, trigger), this.element);
 
           } else {
-            instrumentation_.addListener(
+            this.instrumentation_.addListener(
                 trigger, this.handleEvent_.bind(this, trigger), this.element);
           }
         }));

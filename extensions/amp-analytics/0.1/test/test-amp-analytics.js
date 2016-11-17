@@ -17,13 +17,20 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {Crypto} from '../crypto-impl';
-import {instrumentationServiceForDoc} from '../instrumentation';
+import {
+  InstrumentationService,
+  instrumentationServiceForDoc,
+} from '../instrumentation';
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getService, resetServiceForTesting} from '../../../../src/service';
+import {
+  getService,
+  resetServiceForTesting,
+  fromClassForDoc,
+} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
@@ -81,6 +88,7 @@ describe('amp-analytics', function() {
         }};
       });
 
+
       resetServiceForTesting(iframe.win, 'crypto');
       crypto = new Crypto(iframe.win);
       getService(iframe.win, 'crypto', () => crypto);
@@ -90,6 +98,9 @@ describe('amp-analytics', function() {
       iframe.win.document.head.appendChild(link);
       windowApi = iframe.win;
       ampdoc = new AmpDocSingle(windowApi);
+
+      fromClassForDoc(
+          ampdoc, 'amp-analytics-instrumentation', InstrumentationService);
     });
   });
 
@@ -227,6 +238,7 @@ describe('amp-analytics', function() {
     const el = windowApi.document.createElement('amp-analytics');
     el.textContent = config;
     const analytics = new AmpAnalytics(el);
+    windowApi.document.body.appendChild(el);
     analytics.createdCallback();
     analytics.buildCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
@@ -252,6 +264,7 @@ describe('amp-analytics', function() {
         const script = windowApi.document.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
         el.appendChild(script);
+        windowApi.document.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         analytics.createdCallback();
         analytics.buildCallback();

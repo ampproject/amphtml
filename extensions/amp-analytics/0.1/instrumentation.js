@@ -17,7 +17,7 @@
 import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
-import {fromClassForDoc} from '../../../src/service';
+import {getExistingServiceForDoc} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -125,6 +125,9 @@ export class InstrumentationService {
      * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
      */
     this.customEventBuffer_ = {};
+
+    /** @private {boolean} */
+    this.clickHandlerRegistered_ = false;
 
     // Stop buffering of custom events after 10 seconds. Assumption is that all
     // `amp-analytics` elements will have been instrumented by this time.
@@ -286,7 +289,6 @@ export class InstrumentationService {
   /**
    * Ensure we have a click listener registered on the document that contains
    * the given analytics element.
-   * @param {!Element} analyticsElement
    * @private
    */
   ensureClickListener_() {
@@ -521,6 +523,6 @@ export class InstrumentationService {
  * @return {!InstrumentationService}
  */
 export function instrumentationServiceForDoc(nodeOrDoc) {
-  return fromClassForDoc(nodeOrDoc, 'amp-analytics-instrumentation',
-      InstrumentationService);
+  return /** @type {!InstrumentationService} */ (getExistingServiceForDoc(
+      nodeOrDoc, 'amp-analytics-instrumentation'));
 }

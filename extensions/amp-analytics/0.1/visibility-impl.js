@@ -169,12 +169,13 @@ export function getElement(ampdoc, selector, el, selectionMethod) {
   }
 
   if (selectionMethod == 'closest') {
-    // Restrict result to be contained by ampdoc.
-    if (!ampdoc.contains(el)) {
-      return null;
-    }
     // Only tag names are supported currently.
-    return closestByTag(el, selector);
+    const closestEl = closestByTag(el, selector);
+    // Restrict result to be contained by ampdoc.
+    if (closestEl && ampdoc.contains(closestEl)) {
+      return closestEl;
+    }
+    return null;
   } else if (selectionMethod == 'scope') {
     return el.parentElement.querySelector(selector);
   } else if (selector[0] == '#') {
