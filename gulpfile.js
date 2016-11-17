@@ -209,7 +209,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   // Entry point for inabox runtime.
   compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
     toName: 'amp-inabox.js',
-    minifiedName: 'a4a-v0.js',
+    minifiedName: 'amp4ads-v0.js',
     includePolyfills: true,
     checkTypes: opt_checkTypes,
     watch: watch,
@@ -221,7 +221,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   // inabox-host
   compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
     toName: 'amp-inabox-host.js',
-    minifiedName: 'a4a-host-v0.js',
+    minifiedName: 'amp4ads-host-v0.js',
     includePolyfills: false,
     checkTypes: opt_checkTypes,
     watch: watch,
@@ -830,6 +830,27 @@ function mkdirSync(path) {
     }
   }
 }
+
+/**
+ * Patches Web Animations API by wrapping its body into `install` function.
+ * This gives us an option to call polyfill directly on the main window
+ * or a friendly iframe.
+ */
+function patchWebAnimations() {
+  // Copies web-animations-js into a new file that has an export.
+  const patchedName = 'node_modules/web-animations-js/' +
+      'web-animations.install.js';
+  var file = fs.readFileSync(
+      'node_modules/web-animations-js/' +
+      'web-animations.min.js').toString();
+  // Wrap the contents inside the install function.
+  file = 'exports.installWebAnimations = function(window) {\n' +
+      'var document = window.document;\n' +
+      file + '\n' +
+      '}\n';
+  fs.writeFileSync(patchedName, file);
+}
+patchWebAnimations();
 
 
 /**

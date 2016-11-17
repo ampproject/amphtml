@@ -87,22 +87,16 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
+    id: 'amp-inabox',
+    name: 'AMP inabox',
+    spec: 'https://github.com/ampproject/amphtml/issues/5700',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
+  },
+  {
     id: 'amp-scrollable-carousel',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
-  },
-  {
-    id: 'form-submit',
-    name: 'Global document form submit handler',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3999',
-  },
-  {
-    id: 'amp-form',
-    name: 'AMP Form Extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
   },
   {
     id: 'amp-form-custom-validations',
@@ -140,12 +134,6 @@ const EXPERIMENTS = [
     name: 'AMP extension for Apester media',
     spec: 'https://github.com/ampproject/amphtml/issues/3233',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
-    id: 'amp-app-banner',
-    name: 'Shows a native app install/open banner.',
-    spec: 'https://github.com/ampproject/amphtml/issues/800',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5166',
   },
   {
     id: 'cache-service-worker',

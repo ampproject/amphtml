@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';

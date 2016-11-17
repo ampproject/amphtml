@@ -23,6 +23,7 @@ tags: {  # amp-mustache
   tag_name: "SCRIPT"
   spec_name: "amp-mustache extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true

@@ -40,9 +40,11 @@ import {cssText} from '../../build/css';
 import {maybeValidate} from '../validator-integration';
 import {maybeTrackImpression} from '../impression';
 import {Inabox} from './inabox';
+import {isExperimentOn} from '../experiments';
 
-
-new Inabox(self).init();
+if (isExperimentOn(self, 'amp-inabox')) {
+  new Inabox(self).init();
+}
 
 // TODO(lannka): only install the necessary services.
 
