@@ -118,9 +118,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
   installVideoManagerForDoc(ampdoc);
-  if (isExperimentOn(ampdoc.win, 'form-submit')) {
-    installGlobalSubmitListenerForDoc(ampdoc);
-  }
+  installGlobalSubmitListenerForDoc(ampdoc);
 }
 
 
