@@ -49,12 +49,10 @@ export function getAmpAdRenderOutsideViewport(element) {
  * @param {!Window} win
  */
 export function incrementLoadingAds(win) {
-  let loadingAds = win[LOADING_ADS_WIN_ID_];
-  if (loadingAds === undefined) {
+  if (win[LOADING_ADS_WIN_ID_] === undefined) {
     win[LOADING_ADS_WIN_ID_] = 0;
   }
   win[LOADING_ADS_WIN_ID_]++;
-
   timerFor(win).delay(() => {
     // Unfortunately we don't really have a good way to measure how long it
     // takes to load an ad, so we'll just pretend it takes 1 second for

@@ -48,13 +48,10 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
-<<<<<<< fdaee1357a4126e1dae04cb583e061a96e336ef4
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
 import {A4AVariableSource} from './a4a-variable-source';
-=======
 import {rethrowAsync} from '../../../src/log';
->>>>>>> Initial modifications to move all creative rendering into layoutCallback; tests TBD
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
