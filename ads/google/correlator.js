@@ -26,6 +26,8 @@ export function makeCorrelator(clientId, pageViewId) {
   } else {
     // In this case, pageViewIdNumeric is only 4 digits => too low entropy
     // to be useful as a page correlator.  So synthesize one from scratch.
-    return Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+    // 4503599627370496 == 2^52.  The guaranteed range of JS Number is at least
+    // 2^53 - 1.
+    return Math.floor(4503599627370496 * Math.random());
   }
 }
