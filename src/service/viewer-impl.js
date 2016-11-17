@@ -136,7 +136,7 @@ export class Viewer {
     /** @private {?string} */
     this.messagingOrigin_ = null;
 
-    /** @private {!Array<!{eventType: string, data: *}>} */
+    /** @private {!Array<!{eventType: string, data: *, awaitResponse: boolean, responsePromise: (Promise<*>|undefined), responseResolver: function(*)}>} */
     this.messageQueue_ = [];
 
     /** @const @private {!Object<string, string>} */
@@ -841,7 +841,7 @@ export class Viewer {
    * Get the fragment from the url or the viewer.
    * Strip leading '#' in the fragment
    * @return {!Promise<string>}
-   * TODO: move this to amp-share-tracking
+   * TODO: move this to history-impl
    */
   getFragment() {
     if (!this.isEmbedded_) {
@@ -871,7 +871,7 @@ export class Viewer {
    * The fragment variable should contain leading '#'
    * @param {string} fragment
    * @return {!Promise}
-   * TODO: move this to amp-share-tracking, and use sendMessage()
+   * TODO: move this to history-impl, and use sendMessage()
    */
   updateFragment(fragment) {
     dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
@@ -918,6 +918,7 @@ export class Viewer {
   /**
    * Triggers "prerenderComplete" event for the viewer.
    * @param {!Object} message
+   * TODO: move this to performance-impl
    */
   prerenderComplete(message) {
     this.sendMessageCancelUnsent('prerenderComplete', message, false);
@@ -1001,8 +1002,6 @@ export class Viewer {
 
         if (message.awaitResponse) {
           responsePromise.then(response => message.responseResolver(response));
-        } else {
-          message.responseResolver();
         }
       });
     }
@@ -1052,7 +1051,7 @@ export class Viewer {
     if (found != -1) {
       message = this.messageQueue_.splice(found, 1)[0];
       message.data = data;
-      message.awaitResponse = awaitResponse;
+      message.awaitResponse |= awaitResponse;
     } else {
       let responseResolver;
       const responsePromise = new Promise(r => {
