@@ -45,6 +45,13 @@ export class Bind {
     });
   }
 
+  /** @param state {!Object} */
+  setState(state) {
+    Object.assign(this.scope_, state);
+
+    this.digest_();
+  }
+
   /**
    * @param body {!Element}
    * @private
@@ -84,10 +91,10 @@ export class Bind {
   }
 
   /**
-   * @param verifyOnly {bool}
+   * @param opt_verifyOnly {bool}
    * @private
    */
-  digest_(verifyOnly) {
+  digest_(opt_verifyOnly) {
     for (let i = 0; i < this.bindings_.length; i++) {
       const binding = this.bindings_[i];
 
@@ -96,7 +103,7 @@ export class Bind {
         continue;
       }
 
-      if (verifyOnly) {
+      if (opt_verifyOnly) {
         this.verifyBinding_(binding, result);
       } else {
         this.applyBinding_(binding, result);

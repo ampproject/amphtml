@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {bindServiceForDoc} from '../bind';
 import {dev, user} from '../log';
 import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
@@ -36,6 +37,7 @@ const DEFAULT_METHOD_ = 'activate';
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
+  'amp': ['setState'],
 };
 
 /**
@@ -224,14 +226,20 @@ export class ActionService {
       return;
     }
 
-    const target = this.root_.getElementById(action.actionInfo.target);
-    if (!target) {
-      this.actionInfoError_('target not found', action.actionInfo, target);
-      return;
+    // TODO(choumx): This is hacky.
+    if (action.actionInfo.target === 'AMP') {
+      dev().assert(action.actionInfo.method === 'setState');
+      const bindService = bindServiceForDoc(this.ampdoc);
+      bindService.setState(action.actionInfo.args);
+    } else {
+      const target = this.root_.getElementById(action.actionInfo.target);
+      if (!target) {
+        this.actionInfoError_('target not found', action.actionInfo, target);
+        return;
+      }
+      this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
+          action.node, event, action.actionInfo);
     }
-
-    this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
-        action.node, event, action.actionInfo);
   }
 
   /**

@@ -22,5 +22,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function bindServiceForDoc(nodeOrDoc) {
   return /** @type {!./service/bind-impl.Bind} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'bind'));
+      getExistingServiceForDoc(nodeOrDoc, 'amp-bind'));
 };

@@ -13,6 +13,7 @@
 </head>
 
 <body>
-  <p [text]="1+1">Hello World<p>
+  <p [text]="foo">Hello World<p>
+  <button on="tap:AMP.setState(foo=1)">foo</button>
 </body>
 </html>
