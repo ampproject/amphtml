@@ -25,7 +25,7 @@ import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
-import {activityFor} from '../activity';
+import {activityForDoc} from '../activity';
 import {isExperimentOn} from '../experiments';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
@@ -420,7 +420,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the total engaged time since the content became viewable.
     this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return activityFor(this.ampdoc.win).then(activity => {
+      return activityForDoc(this.ampdoc).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
@@ -454,7 +454,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
 
     this.set('BACKGROUND_STATE', () => {
-      return viewerForDoc(this.ampdoc.win.document).isVisible() ? '0' : '1';
+      return viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
     });
   }
 
