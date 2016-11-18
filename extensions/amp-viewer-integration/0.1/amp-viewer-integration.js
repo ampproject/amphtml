@@ -40,21 +40,26 @@ export class AmpViewerIntegration {
    * @return {!Promise}
    */
   init() {
-    dev().info('AVI', 'amp-viewer-integration.js => handshake init()');
-    const viewer = viewerForDoc(this.win_.document);
-    return this.getHandshakePromise_(viewer)
-    .then(viewerOrigin => {
-      dev().info('AVI', 'amp-viewer-integration.js => listening for messages');
-      const messaging_ =
-        new Messaging(this.win_, this.win_.parent, viewerOrigin,
-          (type, payload, awaitResponse) => {
-            return viewer.receiveMessage(
-              type, /** @type {!JSONType} */ (payload), awaitResponse);
-          });
-      viewer.setMessageDeliverer((type, payload, awaitResponse) => {
-        return messaging_.sendRequest(type, payload, awaitResponse);
-      }, viewerOrigin);
-    });
+    if (window.parent && window.parent != window) {
+      dev().info('AVI', 'amp-viewer-integration.js => handshake init()');
+      const viewer = viewerForDoc(this.win_.document);
+      return this.getHandshakePromise_(viewer)
+      .then(viewerOrigin => {
+        dev().info('AVI',
+          'amp-viewer-integration.js => listening for messages');
+        const messaging_ =
+          new Messaging(this.win_, this.win_.parent, viewerOrigin,
+            (type, payload, awaitResponse) => {
+              return viewer.receiveMessage(
+                type, /** @type {!JSONType} */ (payload), awaitResponse);
+            });
+        viewer.setMessageDeliverer((type, payload, awaitResponse) => {
+          return messaging_.sendRequest(type, payload, awaitResponse);
+        }, viewerOrigin);
+      });
+    } else {
+      return new Promise(resolve => {resolve();});
+    }
   }
 
   /**
