@@ -64,6 +64,7 @@
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 
@@ -102,6 +103,7 @@
     <a href="#colombia" class="broken">Colombia ad</a> |
     <a href="#contentad">Content.ad</a> |
     <a href="#criteo">Criteo</a> |
+    <a href="#custom">Custom</a>|
     <a href="#dotandads">DotAndAds</a> |
     <a href="#doubleclick">Doubleclick</a> |
     <a href="#eplanning">E-Planning</a> |
@@ -481,6 +483,48 @@
     <div fallback></div>
   </amp-ad>
 
+  
+  <h2 id="custom">Custom leaderboard</h2>
+  <amp-ad width=500 height=60
+    type="custom"
+    data-slot="1"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id-leader">
+      <a href="{{href}}" target='_blank'>
+        <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+ 
+  <h2>Custom square</h2>
+  <amp-ad width="200" height="200"
+    type="custom"
+    data-slot="2"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
+  <h2>Custom leaderboard with no slot specified</h2>
+  <amp-ad width="500" height="60"
+    type="custom"
+    data-url="/examples/custom.ad.example.single.json">
+    <template type="amp-mustache" id="amp-template-id-no-slot">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
   <h2 id="dotandads">DotAndAds masthead</h2>
   <amp-ad width=980 height=250
       type="dotandads"
@@ -1128,7 +1172,5 @@
      <div placeholder></div>
      <div fallback></div>
    </amp-ad>
-
-</amp-ad>
 </body>
 </html>
