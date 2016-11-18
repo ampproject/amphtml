@@ -28,7 +28,7 @@ import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {AdDisplayState} from './amp-ad-ui';
 
-const TIMEOUT_VALUE = 10000;
+const TIMEOUT_VALUE = 1000000;
 
 export class AmpAdXOriginIframeHandler {
 

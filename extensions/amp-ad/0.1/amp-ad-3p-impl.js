@@ -104,7 +104,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return false;
     }
     // Otherwise the ad is good to go.
-    return getAmpAdRenderOutsideViewport(this.element);
+    const elementCheck = getAmpAdRenderOutsideViewport(this.element)
+    return typeof elementCheck == 'number' ?
+      elementCheck : super.renderOutsideViewport();
   }
 
   /** @override */
