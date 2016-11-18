@@ -21,10 +21,8 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {PositionObserver} from '../../../src/position-observer';
 import {
-  IntersectionObserverPolyfill,
-  AMP_DEFAULT_THRESHOLD,
+  IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
@@ -53,13 +51,7 @@ export class AmpAdXOriginIframeHandler {
     /** {?Element} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserverPolyfill} */
-    this.intersectionObserver_ = null;
-
-    /** @private {?PositionObserver} */
-    this.positionObserver_ = null;
-
-    /** @private {?SubscriptionApi} */
+    /** @private {?IntersectionObserverApi} */
     this.intersectionObserverApi_ = null;
 
     /** @private {SubscriptionApi} */
@@ -90,18 +82,8 @@ export class AmpAdXOriginIframeHandler {
     this.baseInstance_.applyFillContent(this.iframe);
 
     // Init IntersectionObserver service.
-    this.intersectionObserverApi_ = new SubscriptionApi(
-        this.iframe, 'send-intersections', true, () => {
-          this.intersectionObserver_.observe(this.element_);
-          this.positionObserver_.startObserving();
-        }
-    );
-    this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
-      this.intersectionObserverApi_.send('intersection', {changes: {change}});
-    }, {threshold: AMP_DEFAULT_THRESHOLD});
-    this.positionObserver_ = new PositionObserver(this.baseInstance_, vp => {
-      this.intersectionObserver_.tick(vp);
-    });
+    this.intersectionObserverApi_ = new IntersectionObserverApi(
+        this.baseInstance_, this.iframe, true);
 
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe, 'send-embed-state', true,
@@ -227,10 +209,7 @@ export class AmpAdXOriginIframeHandler {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
     }
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_ = null;
-      this.positionObserver_.destroy();
-      this.positionObserver_ = null;
+    if (this.intersectionObserverApi_) {
       this.intersectionObserverApi_.destroy();
       this.intersectionObserverApi_ = null;
     }
@@ -311,8 +290,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.positionObserver_) {
-      this.positionObserver_.onViewportCallback(inViewport);
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.onViewportCallback(inViewport);
     }
     this.sendEmbedInfo_(inViewport);
   }
@@ -323,10 +302,9 @@ export class AmpAdXOriginIframeHandler {
    */
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This does nothing
-    // if we aren't currently in view.
-    if (this.positionObserver_) {
-      this.positionObserver_.onLayoutMeasure();
+    // have changed. Send an intersection record if needed.
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.onLayoutMeasure();
     }
   }
 }

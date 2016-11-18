@@ -16,6 +16,7 @@
 
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
+import {SubscriptionApi} from './iframe-helper';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -39,20 +40,85 @@ export const AMP_DEFAULT_THRESHOLD =
 
 /**
  * A function to get the element's current IntersectionObserverEntry
- * regardless of the intersetion ratio.
+ * regardless of the intersetion ratio. Only available when element is not
+ * nested in a container iframe.
  * @param {!./layout-rect.LayoutRectDef} element element's rect
  * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
  * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
- * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
  */
 export function getIntersectionChangeEntry(
-    element, owner, hostViewport, opt_iframe) {
-  const intersectionRect = calculateIntersectionRect(
-        element, owner, hostViewport, opt_iframe);
-  const ratio = intersectionRatio(intersectionRect, element);
+    element, owner, hostViewport) {
+  const intersection = calculateIntersectionRect(
+        element, owner, hostViewport);
+  console.log(intersection);
+  const ratio = intersectionRatio(intersection, element);
   return calculateChangeEntry(
-      element, hostViewport, intersectionRect, ratio, opt_iframe);
+      element, hostViewport, intersection, ratio);
 }
+
+/**
+ * A class to help amp-iframe and amp-ad nested iframe listen to intersection
+ * change.
+ */
+export class IntersectionObserverApi {
+  /**
+   * @param {!AMP.BaseElement} baseElement
+   * @param {!Element} iframe
+   * @param {boolean=} opt_is3p
+   */
+  constructor(baseElement, iframe, opt_is3p) {
+    /** @private {?IntersectionObserverPolyfill} */
+    this.intersectionObserver_ = null;
+
+    /** @private {?PositionObserver} */
+    this.positionObserver_ = null;
+
+    /** @private {?SubscriptionApi} */
+    this.subscriptionApi_ = new SubscriptionApi(
+        iframe, 'send-intersections', opt_is3p || false, () => {
+          this.intersectionObserver_.observe(baseElement.element);
+          this.positionObserver_.startObserving();
+        });
+
+    this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
+      this.subscriptionApi_.send('intersection', {changes: {change}});
+    }, {threshold: AMP_DEFAULT_THRESHOLD});
+    this.positionObserver_ = new PositionObserver(baseElement, vp => {
+      this.intersectionObserver_.tick(vp);
+    });
+  }
+
+  /**
+   * Enable to the PositionObserver to listen to viewport events
+   * @param {!boolean} inViewport
+   */
+  onViewportCallback(inViewport) {
+    if (this.positionObserver_) {
+      this.positionObserver_.onViewportCallback(inViewport);
+    }
+  }
+
+  /**
+   * Tick intersectionObserver_ again if element in viewport
+   */
+  onLayoutMeasure() {
+    if (this.positionObserver_) {
+      this.positionObserver_.onLayoutMeasure();
+    }
+  }
+
+  /**
+   * Clean all listenrs
+   */
+  destroy() {
+    this.intersectionObserver_ = null;
+    this.positionObserver_.destroy();
+    this.positionObserver_ = null;
+    this.subscriptionApi_.destroy();
+    this.subscriptionApi_ = null;
+  }
+}
+
 
 /**
  * The IntersectionObserverPolyfill class lets any element receive its
@@ -62,6 +128,7 @@ export function getIntersectionChangeEntry(
  * as params. Whenever the element intersection ratio cross a threshold value,
  * IntersectionObserverPolyfill will call the provided callback function with
  * the change entry.
+ * @visibleForTesting
  */
 export class IntersectionObserverPolyfill {
   /**
@@ -123,7 +190,7 @@ export class IntersectionObserverPolyfill {
    * Caller needs to make sure to pass in the correct container.
    * Note: the opt_iframe param is the iframe position relative to the host doc,
    * The iframe must be a non-scrollable iframe.
-   * @param {!./layout-rect.LayoutRectDef} viewport.
+   * @param {!./layout-rect.LayoutRectDef} hostViewport.
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
@@ -187,6 +254,105 @@ export class IntersectionObserverPolyfill {
 
     return calculateChangeEntry(
         element, hostViewport, intersectionRect, ratio, opt_iframe);
+  }
+}
+
+/**
+ * The PositionObserver class lets an element gets the current viewport info
+ * when it is inside the current viewport.
+ */
+class PositionObserver {
+  /**
+   * @param {!AMP.BaseElement} baseElement
+   * @param {!function(!./layout-rect.LayoutRectDef)} callback
+   */
+  constructor(baseElement, callback) {
+    /** @private {!boolean} */
+    this.shouldObserver_ = false;
+
+    /** @private @const {!AMP.BaseElement} */
+    this.baseElement_ = baseElement;
+
+    /** @private {?function()} */
+    this.unlistenViewportChanges_ = null;
+
+    /** @private {!boolean} */
+    this.inViewport_ = false;
+
+    /** @private @const {!./service/viewport-impl.Viewport} */
+    this.viewport_ = baseElement.getViewport();
+
+    /** @private @const {!function(!./layout-rect.LayoutRectDef)} */
+    this.callback_ = callback;
+  }
+
+  /**
+   * Function to start listening to viewport position.
+   */
+  startObserving() {
+    this.shouldObserver_ = true;
+    this.baseElement_.getVsync().measure(() => {
+      this.onViewportCallback(this.baseElement_.isInViewport());
+    });
+  }
+
+  /**
+   * Function to stop listening to viewport change when element is out viewport
+   * @private
+   */
+  unlistenOnOutViewport_() {
+    if (this.unlistenViewportChanges_) {
+      this.unlistenViewportChanges_();
+      this.unlistenViewportChanges_ = null;
+    }
+  }
+
+  /**
+   * Function that enables element to tell when enter or exit viewport
+   * @param {!boolean} inViewport
+   */
+  onViewportCallback(inViewport) {
+    if (!this.shouldObserver_) {
+      return;
+    }
+    if (this.inViewport_ == inViewport) {
+      return;
+    }
+    this.inViewport_ = inViewport;
+
+    this.callback_(this.viewport_.getRect());
+    if (inViewport) {
+      const unlistenScroll = this.viewport_.onScroll(() => {
+        this.callback_(this.viewport_.getRect());
+      });
+        // Throttled scroll events. Also fires for resize events.
+      const unlistenChanged = this.viewport_.onChanged(() => {
+        this.callback_(this.viewport_.getRect());
+      });
+      this.unlistenViewportChanges_ = () => {
+        unlistenScroll();
+        unlistenChanged();
+      };
+    } else {
+      this.unlistenOnOutViewport_();
+    }
+  }
+
+  /**
+   * Function that enables element to tell when it is measured
+   */
+  onLayoutMeasure() {
+    if (!this.shouldObserver_ || !this.inViewport_) {
+      return;
+    }
+    this.callback_(this.viewport_.getRect());
+  }
+
+  /**
+   * Destroy listener on viewport position
+   */
+  destroy() {
+    this.unlistenOnOutViewport_();
   }
 }
 
@@ -273,6 +439,7 @@ function calculateIntersectionRect(element, owner, hostViewport, opt_iframe) {
   if (opt_iframe) {
     intersectionRect = rectIntersection(opt_iframe, intersectionRect) ||
         nonIntersectRect;
+    console.log(intersectionRect);
   }
   // element intersects with hostViewport
   intersectionRect = rectIntersection(hostViewport, intersectionRect) ||

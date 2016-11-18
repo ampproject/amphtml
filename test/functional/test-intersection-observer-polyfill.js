@@ -19,6 +19,9 @@ import {IntersectionObserverPolyfill, getThresholdSlot, AMP_DEFAULT_THRESHOLD,
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
+// TODO(zhouyx): Add test to IntersectionObserverAPI,
+// and getIntersectionChangeEntry
+
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
