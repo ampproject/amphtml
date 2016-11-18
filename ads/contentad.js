@@ -37,8 +37,8 @@ export function contentad(global, data) {
   const od = (data.url) ? data.url : window.atob(data.d) ;
   let adUrl = window.context.location.href;
   const myreg = new RegExp(':\/\/.*?(?=([a-z0-9\-]+\.?)?' + od + ')', 'i');
-  adUrl = adUrl.replace(myreg, "://");
-  if(data.url || !adUrl.includes(od)) { adUrl = adUrl.replace(h, od); }
+  adUrl = adUrl.replace(myreg, '://');
+  if (data.url || !adUrl.includes(od)) { adUrl = adUrl.replace(h, od); }
 
   /* Build API URL */
   const cadApi = 'https://api.content.ad/Scripts/widget2.aspx'
