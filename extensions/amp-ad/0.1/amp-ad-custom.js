@@ -78,6 +78,7 @@ export class AmpAdCustom extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    /** @const {string} fullUrl */
     const fullUrl = this.getFullUrl_();
     // If this promise has no URL yet, create one for it.
     if (!(fullUrl in ampCustomadXhrPromises)) {
@@ -117,7 +118,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /**
    * @private getFullUrl_ Get a URL which includes a parameter indicating
    * all slots to be fetched from this web server URL
-   * @returns {String} The URL with the "ampslots" parameter appended
+   * @returns {string} The URL with the "ampslots" parameter appended
    */
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL
