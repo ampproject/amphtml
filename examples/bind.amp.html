@@ -14,6 +14,7 @@
 
 <body>
   <p [text]="foo">Hello World<p>
-  <button on="tap:AMP.setState(foo=1)">foo</button>
+  <p id="foo" [text]="foo + 'baz'">Hello World<p>
+  <button [disabled]="bar" on="tap:AMP.setState(foo='foo', bar=true)">foo</button>
 </body>
 </html>
