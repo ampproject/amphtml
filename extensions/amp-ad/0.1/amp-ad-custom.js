@@ -113,6 +113,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    return true;
   }
 
   /**
