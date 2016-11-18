@@ -66,6 +66,7 @@ describe('Activity getTotalEngagedTime', () => {
         },
       },
       body: {
+        nodeType: 1,
         style: {},
       },
     };

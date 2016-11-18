@@ -84,6 +84,8 @@ describe('SlideScroll', () => {
       expect(
           ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)
               .to.equal(5);
+      expect(ampSlideScroll.querySelector('.-amp-slides-container')
+            .getAttribute('aria-live')).to.equal('polite');
       const impl = ampSlideScroll.implementation_;
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;

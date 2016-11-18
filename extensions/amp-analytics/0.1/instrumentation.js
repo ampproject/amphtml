@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -31,6 +30,7 @@ const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
+const CLICK_LISTENER_REGISTERED_ = 'AMP_ANALYTICS_CLICK_LISTENER_REGISTERED';
 
 /**
  * Type to define a callback that is called when an instrumented event fires.
@@ -64,6 +64,21 @@ export const AnalyticsEventType = {
   HIDDEN: 'hidden',
 };
 
+/** @const {string} */
+const TAG = 'Analytics.Instrumentation';
+
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const {Array<AnalyticsEventType>}
+ */
+const ALLOWED_IN_EMBED = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.CLICK,
+  AnalyticsEventType.TIMER,
+  AnalyticsEventType.HIDDEN,
+];
+
 /**
  * Ignore Most of this class as it has not been thought through yet. It will
  * change completely.
@@ -91,9 +106,6 @@ export class InstrumentationService {
     /** @const {!Window} */
     this.win_ = window;
 
-    /** @const {string} */
-    this.TAG_ = 'Analytics.Instrumentation';
-
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(window);
 
@@ -102,9 +114,6 @@ export class InstrumentationService {
 
     /** @const {!../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = viewportForDoc(window.document);
-
-    /** @private {boolean} */
-    this.clickHandlerRegistered_ = false;
 
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
@@ -142,21 +151,26 @@ export class InstrumentationService {
    */
   addListener(config, listener, analyticsElement) {
     const eventType = config['on'];
+    if (!this.isTriggerAllowed_(eventType, analyticsElement)) {
+      user().error(TAG, 'Trigger type "' + eventType + '" is not ' +
+        'allowed in the embed.');
+      return;
+    }
     if (eventType === AnalyticsEventType.VISIBLE) {
       this.createVisibilityListener_(listener, config,
           AnalyticsEventType.VISIBLE, analyticsElement);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
-        user().error(this.TAG_, 'Missing required selector on click trigger');
+        user().error(TAG, 'Missing required selector on click trigger');
         return;
       }
 
-      this.ensureClickListener_();
+      this.ensureClickListener_(analyticsElement);
       this.clickObservable_.add(
           this.createSelectiveListener_(listener, config['selector']));
     } else if (eventType === AnalyticsEventType.SCROLL) {
       if (!config['scrollSpec']) {
-        user().error(this.TAG_, 'Missing scrollSpec on scroll trigger.');
+        user().error(TAG, 'Missing scrollSpec on scroll trigger.');
         return;
       }
       this.registerScrollTrigger_(config['scrollSpec'], listener);
@@ -281,14 +295,16 @@ export class InstrumentationService {
   }
 
   /**
-   * Ensure we have a click listener registered on the document.
+   * Ensure we have a click listener registered on the document that contains
+   * the given analytics element.
+   * @param {!Element} analyticsElement
    * @private
    */
-  ensureClickListener_() {
-    if (!this.clickHandlerRegistered_) {
-      this.clickHandlerRegistered_ = true;
-      this.win_.document.documentElement.addEventListener(
-          'click', this.onClick_.bind(this));
+  ensureClickListener_(analyticsElement) {
+    const doc = analyticsElement.ownerDocument;
+    if (!doc[CLICK_LISTENER_REGISTERED_]) {
+      doc[CLICK_LISTENER_REGISTERED_] = true;
+      doc.documentElement.addEventListener('click', this.onClick_.bind(this));
     }
   }
 
@@ -315,39 +331,44 @@ export class InstrumentationService {
    */
   createSelectiveListener_(listener, selector) {
     return e => {
-      let el = e.target;
-      // First do the cheap lookups.
-      if (selector === '*' || this.matchesSelector_(el, selector)) {
-        listener(
-          new AnalyticsEvent(
-            AnalyticsEventType.CLICK,
-            getDataParamsFromAttributes(
-              el,
-              undefined,
-              VARIABLE_DATA_ATTRIBUTE_KEY
-            )
-          )
-        );
-      } else {
-        // More expensive search.
-        while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
-          el = el.parentElement;
-          if (this.matchesSelector_(el, selector)) {
-            listener(
-              new AnalyticsEvent(
-                AnalyticsEventType.CLICK,
-                getDataParamsFromAttributes(
-                  el,
-                  undefined,
-                  VARIABLE_DATA_ATTRIBUTE_KEY
-                )
+      try {
+        let el = e.target;
+        // First do the cheap lookups.
+        if (selector === '*' || matches(el, selector)) {
+          listener(
+            new AnalyticsEvent(
+              AnalyticsEventType.CLICK,
+              getDataParamsFromAttributes(
+                el,
+                undefined,
+                VARIABLE_DATA_ATTRIBUTE_KEY
               )
-            );
-            // Don't fire the event multiple times even if the more than one
-            // ancestor matches the selector.
-            return;
+            )
+          );
+        } else {
+          // More expensive search.
+          while (el.parentElement != null &&
+              el.parentElement.tagName != 'BODY') {
+            el = el.parentElement;
+            if (matches(el, selector)) {
+              listener(
+                new AnalyticsEvent(
+                  AnalyticsEventType.CLICK,
+                  getDataParamsFromAttributes(
+                    el,
+                    undefined,
+                    VARIABLE_DATA_ATTRIBUTE_KEY
+                  )
+                )
+              );
+              // Don't fire the event multiple times even if the more than one
+              // ancestor matches the selector.
+              return;
+            }
           }
         }
+      } catch (selectorError) {
+        user().error(TAG, 'Bad query selector.', selector, selectorError);
       }
     };
   }
@@ -362,7 +383,7 @@ export class InstrumentationService {
   registerScrollTrigger_(config, listener) {
     if (!Array.isArray(config['verticalBoundaries']) &&
         !Array.isArray(config['horizontalBoundaries'])) {
-      user().error(this.TAG_, 'Boundaries are required for the scroll ' +
+      user().error(TAG, 'Boundaries are required for the scroll ' +
           'trigger to work.');
       return;
     }
@@ -430,7 +451,7 @@ export class InstrumentationService {
     for (let b = 0; b < bounds.length; b++) {
       let bound = bounds[b];
       if (typeof bound !== 'number' || !isFinite(bound)) {
-        user().error(this.TAG_, 'Scroll trigger boundaries must be finite.');
+        user().error(TAG, 'Scroll trigger boundaries must be finite.');
         return result;
       }
 
@@ -442,50 +463,24 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Element} el
-   * @param {string} selector
-   * @return {boolean} True if the given element matches the given selector.
-   * @private
-   */
-  matchesSelector_(el, selector) {
-    try {
-      const matcher = el.matches ||
-          el.webkitMatchesSelector ||
-          el.mozMatchesSelector ||
-          el.msMatchesSelector ||
-          el.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(el, selector);
-      }
-      const matches = this.win_.document.querySelectorAll(selector);
-      let i = matches.length;
-      while (i-- > 0 && matches.item(i) != el) {};
-      return i > -1;
-    } catch (selectorError) {
-      user().error(this.TAG_, 'Bad query selector.', selector, selectorError);
-    }
-    return false;
-  }
-
-  /**
    * @param {JSONType} timerSpec
    * @private
    */
   isTimerSpecValid_(timerSpec) {
     if (!timerSpec) {
-      user().error(this.TAG_, 'Bad timer specification');
+      user().error(TAG, 'Bad timer specification');
       return false;
     } else if (!timerSpec.hasOwnProperty('interval')) {
-      user().error(this.TAG_, 'Timer interval specification required');
+      user().error(TAG, 'Timer interval specification required');
       return false;
     } else if (typeof timerSpec['interval'] !== 'number' ||
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      user().error(this.TAG_, 'Bad timer interval specification');
+      user().error(TAG, 'Bad timer interval specification');
       return false;
     } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
               (typeof timerSpec['maxTimerLength'] !== 'number' ||
                   timerSpec['maxTimerLength'] <= 0)) {
-      user().error(this.TAG_, 'Bad maxTimerLength specification');
+      user().error(TAG, 'Bad maxTimerLength specification');
       return false;
     } else {
       return true;
@@ -513,6 +508,21 @@ export class InstrumentationService {
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);
+  }
+
+  /**
+   * Checks to confirm that a given trigger type is allowed for the element.
+   * Specifically, it confirms that if the element is in the embed, only a
+   * subset of the trigger types are allowed.
+   * @param  {!AnalyticsEventType} triggerType
+   * @param  {!Element} element
+   * @return {boolean} True if the trigger is allowed. False otherwise.
+   */
+  isTriggerAllowed_(triggerType, element) {
+    if (element.ownerDocument.defaultView != this.win_) {
+      return ALLOWED_IN_EMBED.indexOf(triggerType) > -1;
+    }
+    return true;
   }
 }
 

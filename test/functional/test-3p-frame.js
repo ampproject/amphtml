@@ -21,11 +21,11 @@ import {
   getSubDomain,
   preloadBootstrap,
   resetCountForTesting,
+  resetBootstrapBaseUrlForTesting,
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {preconnectForElement} from '../../src/preconnect';
-import {resetServiceForTesting} from '../../src/service';
 import {validateData} from '../../3p/3p';
 import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
@@ -46,8 +46,8 @@ describe('3p-frame', () => {
   });
 
   afterEach(() => {
+    resetBootstrapBaseUrlForTesting(window);
     sandbox.restore();
-    resetServiceForTesting(window, 'bootstrapBaseUrl');
     resetCountForTesting();
     const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
@@ -165,6 +165,9 @@ describe('3p-frame', () => {
         '"test":false,"version":"$internalRuntimeVersion$"}' +
         ',"canary":true' +
         ',"hidden":false' +
+        // Note that DOM fingerprint will change if the document DOM changes
+        // Note also that running it using --files uses different DOM.
+        ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
@@ -177,7 +180,14 @@ describe('3p-frame', () => {
     const srcParts = src.split('#');
     expect(srcParts[0]).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
+    const expectedFragment = JSON.parse(srcParts[1]);
+    const parsedFragment = JSON.parse(fragment);
+    // Since DOM fingerprint changes between browsers and documents, to have
+    // stable tests, we can only verify its existence.
+    expect(expectedFragment._context.domFingerprint).to.exist;
+    delete expectedFragment._context.domFingerprint;
+    delete parsedFragment._context.domFingerprint;
+    expect(expectedFragment).to.deep.equal(parsedFragment);
 
     // Switch to same origin for inner tests.
     iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
@@ -321,7 +331,7 @@ describe('3p-frame', () => {
 
     container.appendChild(div);
     const name = getIframe(window, div).name;
-    resetServiceForTesting(window, 'bootstrapBaseUrl');
+    resetBootstrapBaseUrlForTesting(window);
     resetCountForTesting();
     const newName = getIframe(window, div).name;
     expect(name).to.match(/d-\d+.ampproject.net__ping__0/);

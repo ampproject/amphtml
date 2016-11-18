@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -23,8 +24,10 @@ import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
+import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -104,7 +107,9 @@ export class AmpIframe extends AMP.BaseElement {
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
-    return 'data:text/html;charset=utf-8;base64,' + btoa(srcdoc);
+
+    return 'data:text/html;charset=utf-8;base64,' +
+        base64EncodeFromBytes(utf8EncodeSync(srcdoc));
   }
 
   /** @override */
@@ -151,6 +156,9 @@ export class AmpIframe extends AMP.BaseElement {
     this.isAdLike_ = false;
 
     /** @private {boolean} */
+    this.isTrackingFrame_ = false;
+
+    /** @private {boolean} */
     this.isDisallowedAsAd_ = false;
 
     /**
@@ -191,6 +199,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.measureIframeLayoutBox_();
 
     this.isAdLike_ = isAdLike(this);
+    this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(this.element, this.win);
 
@@ -250,8 +259,7 @@ export class AmpIframe extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const isTracking = this.looksLikeTrackingIframe_();
-    if (isTracking) {
+    if (this.isTrackingFrame_) {
       trackingIframeCount++;
       if (trackingIframeCount > 1) {
         console/*OK*/.error('Only 1 analytics/tracking iframe allowed per ' +
@@ -270,7 +278,7 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
-      iframe.style.zIndex = -1;
+      setStyle(iframe, 'zIndex', -1);
     }
 
     this.propagateAttributes(
@@ -280,7 +288,7 @@ export class AmpIframe extends AMP.BaseElement {
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 
-    if (!isTracking) {
+    if (!this.isTrackingFrame_) {
       this.intersectionObserver_ = new IntersectionObserver(this, iframe);
     }
 
@@ -290,7 +298,7 @@ export class AmpIframe extends AMP.BaseElement {
 
       this.activateIframe_();
 
-      if (isTracking) {
+      if (this.isTrackingFrame_) {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
@@ -367,6 +375,9 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.isAdLike_) {
       return 2; // See AmpAd3PImpl.
     }
+    if (this.isTrackingFrame_) {
+      return 1;
+    }
     return super.getPriority();
   }
 
@@ -378,7 +389,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.placeholder_) {
       this.getVsync().mutate(() => {
         if (this.iframe_) {
-          this.iframe_.style.zIndex = 0;
+          setStyle(this.iframe_, 'zIndex', 0);
           this.togglePlaceholder(false);
         }
       });
@@ -419,17 +430,19 @@ export class AmpIframe extends AMP.BaseElement {
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
-    if (height !== undefined) {
+    height = parseInt(height, 10);
+    if (!isNaN(height)) {
       newHeight = Math.max(
-        (this.element./*OK*/offsetHeight - this.iframe_./*OK*/offsetHeight)
-            + height,
-        height);
+          height + (this.element./*OK*/offsetHeight
+              - this.iframe_./*OK*/offsetHeight),
+          height);
     }
-    if (width !== undefined) {
+    width = parseInt(width, 10);
+    if (!isNaN(width)) {
       newWidth = Math.max(
-        (this.element./*OK*/offsetWidth - this.iframe_./*OK*/offsetWidth)
-            + width,
-        width);
+          width + (this.element./*OK*/offsetWidth
+              - this.iframe_./*OK*/offsetWidth),
+          width);
     }
 
     if (newHeight !== undefined || newWidth !== undefined) {

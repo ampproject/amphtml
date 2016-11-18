@@ -26,6 +26,7 @@ import {
 } from
 '../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
 import {getMode} from '../src/mode';
+import {map} from '../src/types';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -40,14 +41,14 @@ import {getMode} from '../src/mode';
  *
  * @type {!Object<!string, !function(!Window, !Element): boolean>}
  */
-export const a4aRegistry = {
+export const a4aRegistry = map({
   'adsense': adsenseIsA4AEnabled,
   'doubleclick': doubleclickIsA4AEnabled,
   // TODO: Add new ad network implementation "is enabled" functions here.  Note:
   // if you add a function here that requires a new "import", above, you'll
   // probably also need to add a whitelist exception to
   // build-system/dep-check-config.js in the "filesMatching: 'ads/**/*.js' rule.
-};
+});
 
 // Note: the 'fake' ad network implementation is only for local testing.
 // Normally, ad networks should add their *IsA4AEnabled callback directly
@@ -64,5 +65,5 @@ if (getMode().localDev || getMode().test) {
  */
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-  // TODO(levitzky) Add dev key path once it is live.
+  'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
 };

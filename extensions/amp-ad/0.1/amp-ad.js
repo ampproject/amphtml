@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-ad-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
@@ -58,6 +59,9 @@ export class AmpAd extends AMP.BaseElement {
       if (type === 'custom' && isExperimentOn(this.win, 'ad-type-custom')) {
         return new AmpAdCustom(this.element);
       }
+      window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
+      const slotId = window.ampAdSlotIdCounter++;
+      this.element.setAttribute('data-amp-slot-index', slotId);
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
           !a4aRegistry[type](this.win, this.element)) {
@@ -71,11 +75,11 @@ export class AmpAd extends AMP.BaseElement {
       return extensionsFor(this.win).loadElementClass(extensionTagName)
         .then(ctor => new ctor(this.element))
         .catch(error => {
+          // Work around presubmit restrictions.
+          const TAG = this.element.tagName;
           // Report error and fallback to 3p
-          user().error(
-            this.element.tagName,
-            'Unable to load ad implementation for type ', type,
-            ', falling back to 3p, error: ', error);
+          user().error(TAG, 'Unable to load ad implementation for type ', type,
+              ', falling back to 3p, error: ', error);
           return new AmpAd3PImpl(this.element);
         });
     });
@@ -94,5 +98,5 @@ export class AmpAd extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-ad', AmpAd);
-AMP.registerElement('amp-embed', AmpAd);
+AMP.registerElement('amp-ad', AmpAd, CSS);
+AMP.registerElement('amp-embed', AmpAd, CSS);

@@ -24,6 +24,7 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
+import {setStyle} from '../../../src/style';
 
 
 /** @private @const {string} */
@@ -136,6 +137,12 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
     if (this.dismissHref_) {
       assertHttpsUrl(this.dismissHref_, this.element);
+    }
+
+    // Default to alert role if unspecified.
+    const roleAttribute = this.element.getAttribute('role');
+    if (!roleAttribute) {
+      this.element.setAttribute('role', 'alert');
     }
 
     const persistDismissal = this.element.getAttribute(
@@ -270,7 +277,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   show() {
-    this.element.style.display = '';
+    setStyle(this.element, 'display', '');
     this.element.classList.add('amp-active');
     this.getViewport().addToFixedLayer(this.element);
     return this.dialogPromise_;

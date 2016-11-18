@@ -184,16 +184,28 @@ AMP.BaseElement = class {
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
  * @constructor
- * @extends {AmpAdApiHandler$$module$extensions$amp_ad$0_1$amp_ad_api_handler}
+ * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
  */
-AMP.AmpAdApiHandler = class {
+AMP.AmpAdXOriginIframeHandler = class {
+  /**
+   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
+   */
+  constructor(baseInstance) {}
+};
+
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor
+ * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
+ */
+AMP.AmpAdUIHandler = class {
   /**
    * @param {!AMP.BaseElement} baseInstance
-   * @param {!Element} element
-   * @param {function()=} opt_noContentCallback
    */
-  constructor(baseInstance, element, opt_noContentCallback) {}
-}
+  constructor(baseInstance) {}
+};
 
 /*
      \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|

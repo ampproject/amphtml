@@ -23,6 +23,7 @@ import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
+import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -128,6 +129,7 @@ function buildAdUrl(
   const viewportRect = a4a.getViewport().getRect();
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
+  const adElement = a4a.element;
   const allQueryParams = queryParams.concat(
     [
       {
@@ -135,14 +137,15 @@ function buildAdUrl(
         value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
       },
       {name: 'amp_v', value: '$internalRuntimeVersion$'},
+      {name: 'd_imp', value: '1'},
       {name: 'dt', value: startTime},
-      {name: 'adk', value: adKey(slotNumber, slotRect, viewportRect)},
+      {name: 'adf', value: domFingerprint(adElement)},
       {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
       {name: 'output', value: 'html'},
       {name: 'nhd', value: iframeDepth},
-      {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
-      {name: 'bih', value: viewportRect.height},
+      {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
       {name: 'biw', value: viewportRect.width},
+      {name: 'bih', value: viewportRect.height},
       {name: 'adx', value: slotRect.left},
       {name: 'ady', value: slotRect.top},
       {name: 'u_hist', value: getHistoryLength(global)},
@@ -205,35 +208,6 @@ function iframeNestingDepth(global) {
   }
   dev().assert(win == global.top);
   return depth;
-}
-
-/**
- * @param {number} slotNumber
- * @param {!../../../src/layout-rect.LayoutRectDef} slotRect
- * @param {!../../../src/layout-rect.LayoutRectDef} viewportRect
- * @return {string}
- */
-function adKey(slotNumber, slotRect, viewportRect) {
-  return formatFixedWidthInteger(slotNumber, 2) +
-    // ad slot top, in 1/5 viewport height units
-    formatFixedWidthInteger(slotRect.top * 5 / viewportRect.height, 4) +
-    // ad slot left, in 1/5 viewport width units
-    formatFixedWidthInteger(slotRect.left * 5 / viewportRect.width, 4);
-}
-
-/**
- * @param {number} num Number, non-negative.
- * @param {number} digits Number of digits, max 20.
- * @return {string}
- */
-function formatFixedWidthInteger(num, digits) {
-  const intPart = String(Math.max(Math.round(num), 0));
-  const len = intPart.length;
-  digits = Math.min(digits, 20);
-  if (len > digits) {
-    return '99999999999999999999'.substr(0, digits);
-  }
-  return '00000000000000000000'.substr(0, digits - len) + intPart;
 }
 
 /**
@@ -305,4 +279,17 @@ function elapsedTimeWithCeiling(time, start) {
     return duration;
   }
   return '-M';
+}
+
+/**
+ * @param {!Window} win
+ * @param {string=} opt_cid
+ * @return {number} The correlator.
+ */
+export function getCorrelator(win, opt_cid) {
+  if (!win.ampAdPageCorrelator) {
+    win.ampAdPageCorrelator = makeCorrelator(
+        opt_cid, documentInfoForDoc(win.document).pageViewId);
+  }
+  return win.ampAdPageCorrelator;
 }

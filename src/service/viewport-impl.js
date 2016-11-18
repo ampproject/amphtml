@@ -31,10 +31,10 @@ import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
-import {installViewerServiceForDoc} from './viewer-impl';
+import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
 import {waitForBody} from '../dom';
-
+import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
 
@@ -266,7 +266,7 @@ export class Viewport {
    */
   updatePaddingBottom(paddingBottom) {
     this.ampdoc.whenBodyAvailable().then(body => {
-      body.style.borderBottom = `${paddingBottom}px solid transparent`;
+      setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }
 
@@ -521,7 +521,7 @@ export class Viewport {
   /**
    * Updates the fixed layer.
    */
-  updatedFixedLayer() {
+  updateFixedLayer() {
     this.fixedLayer_.update();
   }
 
@@ -591,9 +591,9 @@ export class Viewport {
       this.paddingTop_ = paddingTop;
       if (this.paddingTop_ < this.lastPaddingTop_) {
         this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-        this.animateFixedElements_(duration, curve);
+        this.animateFixedElements_(duration, curve, transient);
       } else {
-        this.animateFixedElements_(duration, curve).then(() => {
+        this.animateFixedElements_(duration, curve, transient).then(() => {
           this.binding_.showViewerHeader(transient, this.paddingTop_);
         });
       }
@@ -603,11 +603,12 @@ export class Viewport {
   /**
    * @param {number} duration
    * @param {string} curve
+   * @param {boolean} transient
    * @return {!Promise}
    * @private
    */
-  animateFixedElements_(duration, curve) {
-    this.fixedLayer_.updatePaddingTop(this.paddingTop_);
+  animateFixedElements_(duration, curve, transient) {
+    this.fixedLayer_.updatePaddingTop(this.paddingTop_, transient);
     if (duration <= 0) {
       return Promise.resolve();
     }
@@ -887,13 +888,14 @@ export class ViewportBindingNatural_ {
 
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
+        const body = dev().assertElement(this.win.document.body);
         // Override a user-supplied `body{overflow}` to be always visible. This
         // style is set in runtime vs css to avoid conflicts with ios-embedded
         // mode and fixed transfer layer.
-        this.win.document.body.style.overflow = 'visible';
+        setStyle(body, 'overflow', 'visible');
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
-          setStyles(this.win.document.body, {
+          setStyles(body, {
             overflowX: 'hidden',
             overflowY: 'visible',
           });
@@ -903,7 +905,7 @@ export class ViewportBindingNatural_ {
         // TODO(dvoytenko, #5660): cleanup "make-body-relative" experiment by
         // merging this style into `amp.css`.
         if (isExperimentOn(this.win, 'make-body-relative')) {
-          setStyles(this.win.document.body, {
+          setStyles(body, {
             display: 'block',
             position: 'relative',
             overflowX: 'hidden',
@@ -950,7 +952,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.win.document.documentElement.style.paddingTop = px(paddingTop);
+    setStyle(this.win.document.documentElement, 'paddingTop', px(paddingTop));
   }
 
   /** @override */
@@ -1218,9 +1220,10 @@ export class ViewportBindingNaturalIosEmbed_ {
       onDocumentReady(this.win.document, doc => {
         const existingPaddingTop =
             this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-        doc.body.style.paddingTop =
-            `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
-        doc.body.style.borderTop = '';
+        setStyles(dev().assertElement(doc.body), {
+          paddingTop: `calc(${existingPaddingTop} + ${lastPaddingTop}px)`,
+          borderTop: '',
+        });
       });
     } else {
       this.updatePaddingTop(0);
@@ -1240,8 +1243,10 @@ export class ViewportBindingNaturalIosEmbed_ {
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
-      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
-      doc.body.style.paddingTop = '';
+      setStyles(dev().assertElement(doc.body), {
+        borderTop: `${paddingTop}px solid transparent`,
+        paddingTop: '',
+      });
     });
   }
 
@@ -1250,7 +1255,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
     onDocumentReady(this.win.document, doc => {
-      doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
+      setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
     });
   }
 
@@ -1495,7 +1500,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.wrapper_.style.paddingTop = px(paddingTop);
+    setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
   }
 
   /** @override */
@@ -1684,11 +1689,13 @@ export function updateViewportMetaString(currentValue, updateParams) {
  * @private
  */
 function createViewport(ampdoc) {
-  const viewer = installViewerServiceForDoc(ampdoc);
+  const viewer = viewerForDoc(ampdoc);
   let binding;
   if (ampdoc.isSingleDoc() &&
-          viewer.getViewportType() == 'natural-ios-embed') {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')) {
+      getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
+    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
+        // The overriding of document.body fails in iOS7.
+        && platformFor(ampdoc.win).getMajorVersion() > 7) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
@@ -1699,6 +1706,49 @@ function createViewport(ampdoc) {
   return new Viewport(ampdoc, binding, viewer);
 }
 
+/**
+ * The type of the viewport.
+ * @enum {string}
+ */
+const ViewportType = {
+
+  /**
+   * Viewer leaves sizing and scrolling up to the AMP document's window.
+   */
+  NATURAL: 'natural',
+
+  /**
+   * This is AMP-specific type and doesn't come from viewer. This is the type
+   * that AMP sets when Viewer has requested "natural" viewport on a iOS
+   * device.
+   * See:
+   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
+   */
+  NATURAL_IOS_EMBED: 'natural-ios-embed',
+};
+
+/**
+ * @param {!Window} win
+ * @param {!./viewer-impl.Viewer} viewer
+ * @return {string}
+ */
+function getViewportType(win, viewer) {
+  let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
+  if (platformFor(win).isIos()
+      && ((viewportType == ViewportType.NATURAL
+              && viewer.isIframed()
+              // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
+              && viewer.isEmbedded())
+          // Enable iOS Embedded mode so that it's easy to test against a more
+          // realistic iOS environment.
+          || getMode(win).localDev
+          || getMode(win).development)) {
+    viewportType = ViewportType.NATURAL_IOS_EMBED;
+  }
+  dev().fine(TAG_, '- viewportType:', viewportType);
+  return viewportType;
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
@@ -1707,4 +1757,4 @@ function createViewport(ampdoc) {
 export function installViewportServiceForDoc(ampdoc) {
   return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
       ampdoc => createViewport(ampdoc)));
-};
+}

@@ -19,6 +19,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
   spec_name: "amp-app-banner extension .js script"
   also_requires_tag: "amp-app-banner"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true

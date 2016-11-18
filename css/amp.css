@@ -49,12 +49,13 @@ body {
 
 
 /**
- * iOS-Embed Wrapper mode. The `body` is wrapper into `i-amp-html-wrapper`
+ * iOS-Embed Wrapper mode. The `body` is wrapped into `i-amp-html-wrapper`
  * element.
  */
 html.-amp-ios-embed {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
+  position: static;
 }
 
 /** Wrapper for iOS-Embed-Wrapper mode. */
@@ -406,16 +407,6 @@ amp-pixel {
   height: 1px !important; /* Only things with height are ever loaded. */
   overflow: hidden !important;
   visibility: hidden;
-}
-
-/**
- * Force the layout box of the ad iframe to be exactly as big as the actual
- * iframe. The `amp-ad` tag itself can be freely styled.
- */
-amp-ad iframe {
-  border: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 /**

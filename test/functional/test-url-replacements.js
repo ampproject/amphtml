@@ -23,6 +23,8 @@ import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService,} from
     '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc,} from
+    '../../src/service/document-info-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {
@@ -33,6 +35,7 @@ import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
+import * as trackPromise from '../../src/impression';
 import * as sinon from 'sinon';
 
 
@@ -62,6 +65,7 @@ describe('UrlReplacements', () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      installDocumentInfoServiceForDoc(iframe.ampdoc);
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
@@ -133,6 +137,7 @@ describe('UrlReplacements', () => {
     win.document.defaultView = win;
     const ampdocService = installDocService(win, true);
     const ampdoc = ampdocService.getAmpDoc(win.document);
+    installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     return win;
   }
@@ -141,6 +146,14 @@ describe('UrlReplacements', () => {
     return expandAsync('ord=RANDOM?').then(res => {
       expect(res).to.match(/ord=(\d+(\.\d+)?)\?$/);
     });
+  });
+
+  it('should replace COUNTER', () => {
+    return expandAsync(
+        'COUNTER(foo),COUNTER(bar),COUNTER(foo),COUNTER(bar),COUNTER(bar)')
+            .then(res => {
+              expect(res).to.equal('1,1,2,2,3');
+            });
   });
 
   it('should replace CANONICAL_URL', () => {
@@ -198,6 +211,9 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SOURCE_URL and _HOST', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOST/);
@@ -205,10 +221,29 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SOURCE_URL and _HOSTNAME', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOSTNAME/);
     });
+  });
+
+  it('should update SOURCE_URL after track impression', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://wrong.com');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return new Promise(resolve => {
+        win.location = parseUrl('https://example.com?gclid=123456');
+        resolve();
+      });
+    });
+    return installUrlReplacementsServiceForDoc(win.ampdoc)
+      .expandAsync('?url=SOURCE_URL')
+      .then(res => {
+        expect(res).to.contain('example.com');
+      });
   });
 
   it('should replace SOURCE_PATH', () => {
@@ -569,10 +604,10 @@ describe('UrlReplacements', () => {
 
   it('should replace new substitutions', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('ONE', () => 'a');
+    replacements.getVariableSource().set('ONE', () => 'a');
     expect(replacements.expandAsync('?a=ONE')).to.eventually.equal('?a=a');
-    replacements.set_('ONE', () => 'b');
-    replacements.set_('TWO', () => 'b');
+    replacements.getVariableSource().set('ONE', () => 'b');
+    replacements.getVariableSource().set('TWO', () => 'b');
     return expect(replacements.expandAsync('?a=ONE&b=TWO'))
         .to.eventually.equal('?a=b&b=b');
   });
@@ -580,7 +615,7 @@ describe('UrlReplacements', () => {
   it('should report errors & replace them with empty string (sync)', () => {
     const clock = sandbox.useFakeTimers();
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('ONE', () => {
+    replacements.getVariableSource().set('ONE', () => {
       throw new Error('boom');
     });
     const p = expect(replacements.expandAsync('?a=ONE')).to.eventually
@@ -594,7 +629,7 @@ describe('UrlReplacements', () => {
   it('should report errors & replace them with empty string (promise)', () => {
     const clock = sandbox.useFakeTimers();
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('ONE', () => {
+    replacements.getVariableSource().set('ONE', () => {
       return Promise.reject(new Error('boom'));
     });
     return expect(replacements.expandAsync('?a=ONE')).to.eventually.equal('?a=')
@@ -607,14 +642,14 @@ describe('UrlReplacements', () => {
 
   it('should support positional arguments', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('FN', one => one);
+    replacements.getVariableSource().set('FN', one => one);
     return expect(replacements.expandAsync('?a=FN(xyz1)')).to
         .eventually.equal('?a=xyz1');
   });
 
   it('should support multiple positional arguments', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('FN', (one, two) => {
+    replacements.getVariableSource().set('FN', (one, two) => {
       return one + '-' + two;
     });
     return expect(replacements.expandAsync('?a=FN(xyz,abc)')).to
@@ -623,7 +658,7 @@ describe('UrlReplacements', () => {
 
   it('should support multiple positional arguments with dots', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('FN', (one, two) => {
+    replacements.getVariableSource().set('FN', (one, two) => {
       return one + '-' + two;
     });
     return expect(replacements.expandAsync('?a=FN(xy.z,ab.c)')).to
@@ -632,10 +667,10 @@ describe('UrlReplacements', () => {
 
   it('should support promises as replacements', () => {
     const replacements = urlReplacementsForDoc(window.document);
-    replacements.set_('P1', () => Promise.resolve('abc '));
-    replacements.set_('P2', () => Promise.resolve('xyz'));
-    replacements.set_('P3', () => Promise.resolve('123'));
-    replacements.set_('OTHER', () => 'foo');
+    replacements.getVariableSource().set('P1', () => Promise.resolve('abc '));
+    replacements.getVariableSource().set('P2', () => Promise.resolve('xyz'));
+    replacements.getVariableSource().set('P3', () => Promise.resolve('123'));
+    replacements.getVariableSource().set('OTHER', () => 'foo');
     return expect(replacements.expandAsync('?a=P1&b=P2&c=P3&d=OTHER'))
         .to.eventually.equal('?a=abc%20&b=xyz&c=123&d=foo');
   });
@@ -727,10 +762,19 @@ describe('UrlReplacements', () => {
 
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
-    win.location = parseUrl('https://example.com?query_string_param1=foo');
+    win.location = parseUrl('https://example.com?query_string_param1=wrong');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return new Promise(resolve => {
+        win.location =
+            parseUrl('https://example.com?query_string_param1=foo');
+        resolve();
+        console.log('promise resolve');
+      });
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
+        console.log('compare happend', res);
         expect(res).to.match(/sh=foo&s/);
       });
   });
@@ -738,6 +782,9 @@ describe('UrlReplacements', () => {
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
@@ -748,6 +795,9 @@ describe('UrlReplacements', () => {
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
       .then(res => {
@@ -758,6 +808,9 @@ describe('UrlReplacements', () => {
   it('should collect vars', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com?p1=foo');
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+      return Promise.resolve();
+    });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
         .collectVars('?SOURCE_HOST&QUERY_PARAM(p1)&SIMPLE&FUNC&PROMISE', {
           'SIMPLE': 21,
@@ -877,7 +930,7 @@ describe('UrlReplacements', () => {
         iframe.doc.head.appendChild(link);
 
         const replacements = urlReplacementsForDoc(iframe.ampdoc);
-        replacements.getAccessService_ = () => {
+        replacements.getVariableSource().getAccessService_ = () => {
           if (opt_disabled) {
             return Promise.resolve(null);
           }

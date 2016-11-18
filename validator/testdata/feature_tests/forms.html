@@ -30,7 +30,7 @@
 </head>
 <body>
   <!-- Valid form -->
-  <form method="post" action="https://example.com/subscribe" target="_blank"
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
     custom-validation-reporting="as-you-go">
     <fieldset>
       <label>
@@ -48,7 +48,7 @@
     <div submit-error><template type="amp-mustache">Error</template></div>
   </form>
   <!-- More valid tags (datalist and optgroup) -->
-  <form method="post" action="https://example.com/subscribe" target="_blank">
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <label>Choose a browser from this list:
     <input list="browsers" name="myBrowser" /></label>
     <datalist id="browsers">
@@ -75,19 +75,19 @@
     </select>
   </form>
   <!-- Invalid form action must not be a relative url -->
-  <form method="post" action="/subscribe" target="_blank">
+  <form method="post" action-xhr="/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: form action must be https. -->
-  <form method="post" action="http://example.com/subscribe" target="_blank">
+  <form method="post" action-xhr="http://example.com/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: form action must be a non-cdn link. -->
-  <form method="post" action="https://cdn.ampproject.org/subscribe" target="_blank">
+  <form method="post" action-xhr="https://cdn.ampproject.org/subscribe" target="_blank">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: form target must be _blank or _top -->
-  <form method="post" action="https://example/subscribe" target="_new">
+  <form method="post" action-xhr="https://example/subscribe" target="_new">
     <input type="submit" value="Subscribe">
   </form>
   <!-- Invalid: input, select, option and textarea must be children of form. -->
@@ -97,7 +97,7 @@
   </select>
   <textarea name="comment"></textarea>
   <!-- Invalid: input can not be type="button|file|image|password". -->
-  <form method="post" action="https://example.com/subscribe" target="_blank">
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="button" name="button">
     <input type="file" name="file">
     <input type="image" name="image">
@@ -111,16 +111,25 @@
   </form>
   <!-- Invalid: template child missing from submit-success and submit-error,
        misplaced submit-error -->
-  <form method="post" action="https://example.com/subscribe" target="_blank"
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
     custom-validation-reporting="as-you-go">
     <input submit-error type="submit" value="Subscribe">
     <div submit-success></div>
     <div submit-error></div>
   </form>
   <!-- Invalid: submit-success must be a div -->
-  <form method="post" action="https://example.com/subscribe" target="_blank"
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
     custom-validation-reporting="as-you-go">
     <span submit-success><template type="amp-mustache">Success</template></span>
+  </form>
+  <!-- Invalid: post implies action-xhr -->
+  <form method="post" action="https://example.com/subscribe" target="_top">
+  </form>
+  <!-- Invalid: get implies action -->
+  <form method="get" action-xhr="https://example.com/subscribe" target="_top">
+  </form>
+  <!-- Invalid: get implies action, default method is get -->
+  <form action-xhr="https://example.com/subscribe" target="_top">
   </form>
 </body>
 </html>

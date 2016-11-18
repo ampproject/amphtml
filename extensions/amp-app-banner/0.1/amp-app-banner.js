@@ -22,7 +22,6 @@ import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
 import {assertHttpsUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 import {removeElement, openWindowDialog} from '../../../src/dom';
 import {storageForDoc} from '../../../src/storage';
 import {timerFor} from '../../../src/timer';
@@ -90,6 +89,9 @@ export class AbstractAppBanner extends AMP.BaseElement {
    * @protected
    */
   addDismissButton_() {
+    const paddingBar = this.win.document.createElement(
+        'i-amp-app-banner-top-padding');
+    this.element.appendChild(paddingBar);
     const dismissButton = this.win.document.createElement('button');
     dismissButton.classList.add('amp-app-banner-dismiss-button');
     dismissButton.setAttribute('aria-label',
@@ -179,18 +181,10 @@ export class AmpAppBanner extends AbstractAppBanner {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {boolean} */
-    this.isExperimentOn_ = false;
   }
 
   /** @override */
   upgradeCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-    if (!this.isExperimentOn_) {
-      return null;
-    }
-
     const platform = platformFor(this.win);
     if (platform.isIos()) {
       return new AmpIosAppBanner(this.element);
@@ -202,11 +196,6 @@ export class AmpAppBanner extends AbstractAppBanner {
 
   /** @override */
   layoutCallback() {
-    if (!this.isExperimentOn_) {
-      user().warn(TAG, `Experiment ${TAG} disabled`);
-      return Promise.resolve();
-    }
-
     dev().info(TAG, 'Only iOS or Android platforms are currently supported.');
     return this.hide_();
   }
@@ -415,7 +404,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     const app = apps.find(app => app['platform'] == 'play');
     if (!app) {
-      dev().warn(app, 'Could not find a platform=play app in manifest: %s',
+      dev().warn(TAG, 'Could not find a platform=play app in manifest: %s',
           this.element);
       return;
     }

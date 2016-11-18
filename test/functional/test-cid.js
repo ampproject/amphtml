@@ -115,7 +115,7 @@ describe('cid', () => {
           crypto = results[1];
           crypto.sha384Base64 = val => {
             if (val instanceof Uint8Array) {
-              val = '[' + val + ']';
+              val = '[' + Array.apply([], val).join(',') + ']';
             }
 
             return Promise.resolve('sha384(' + val + ')');
@@ -416,7 +416,7 @@ describe('cid', () => {
     let sha384Promise;
     crypto.sha384Base64 = val => {
       if (val instanceof Uint8Array) {
-        val = '[' + val + ']';
+        val = '[' + Array.apply([], val).join(',') + ']';
       }
 
       return sha384Promise = Promise.resolve('sha384(' + val + ')');
@@ -551,6 +551,15 @@ describe('cid', () => {
         expect(c1).to.equal(c2);
       });
     });
+  });
+
+  it('should retreive cookie value with . in name', () => {
+    fakeWin.location.href =
+        'https://abc.org/';
+    fakeWin.document.cookie = '_sp_id.44=4567;';
+    return compare(
+        '_sp_id.44',
+        '4567');
   });
 
   function compare(externalCidScope, compareValue) {
