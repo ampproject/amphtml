@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 import {getSourceOrigin, getSourceUrl} from '../src/url';
 
 const pubmineOptional = ['adsafe', 'section', 'wordads'],
   pubmineRequired = ['siteid'],
-  pubmineURL = 'https://s.pubmine.com/showad.js';
+  pubmineURL = 'https://s.pubmine.com/head.js';
 
 /**
  * @param {!Window} global
@@ -28,54 +28,28 @@ const pubmineOptional = ['adsafe', 'section', 'wordads'],
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  let __ATA;
-  (function(__ATA, global, data) {
-    const ipwCustom = {
-        adSafe: 'adsafe' in data ? data.adsafe : '0',
-        amznPay: [],
-        domain: getSourceOrigin(global.context.location.href),
-        pageURL: getSourceUrl(global.context.location.href),
-        wordAds: 'wordads' in data ? data.wordads : '0',
-      },
-      unitData = {
-        sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
-        height: data.height,
-        width: data.width,
-      };
+  global._ipw_custom = { // eslint-disable-line google-camelcase/google-camelcase
+    adSafe: 'adsafe' in data ? data.adsafe : '0',
+    amznPay: [],
+    domain: getSourceOrigin(global.context.location.href),
+    pageURL: getSourceUrl(global.context.location.href),
+    wordAds: 'wordads' in data ? data.wordads : '0',
+    renderStartCallback: () => global.context.renderStart(),
+  };
+  writeScript(global, pubmineURL);
 
-    __ATA.customParams = ipwCustom;
-    __ATA.slotPrefix = 'automattic-id-';
+  const o = {
+      sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
+      height: data.height,
+      width: data.width,
+    },
+    wr = global.document.write;
 
-    __ATA.displayAd = function(id) {
-      __ATA.ids = __ATA.ids || {};
-      __ATA.ids[id] = 1;
-    };
-
-    __ATA.id = function() {
-      return __ATA.slotPrefix +
-        (parseInt(Math.random() * 10000, 10) +
-          1 + (new Date()).getMilliseconds());
-    };
-
-    __ATA.initAd = function() {
-      const o = unitData || {},
-        g = global,
-        d = g.document,
-        wr = d.write,
-        id = __ATA.id();
-
-      wr.call(d, '<body style="margin:0;">');
-      wr.call(d, '<div id="' + id + '" data-section="' + (o.sectionId || 0) +
-        '"' + (o.type ? ('data-type="' + o.type + '"') : '') +
-        ' ' + (o.forcedUrl ? ('data-forcedurl="' + o.forcedUrl + '"') : '') +
-        ' style="width:' + (o.width || 0) + 'px; height:' + (o.height || 0) +
-        'px; margin: 0;">');
-      __ATA.displayAd(id);
-      wr.call(d, '</div></body>');
-    };
-  })(__ATA || (__ATA = {}), global, data);
-
-  global.__ATA = __ATA;
-  __ATA.initAd();
-  loadScript(global, pubmineURL);
+  wr.call(global.document,
+    `<script type="text/javascript">
+      (function(g){g.__ATA.initAd(
+        {sectionId:${o.sectionId}, width:${o.width}, height:${o.height}});
+      })(window);
+    </script>`
+  );
 }
