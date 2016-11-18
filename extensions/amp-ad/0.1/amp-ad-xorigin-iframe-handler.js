@@ -15,6 +15,7 @@
  */
 
 import {removeElement} from '../../../src/dom';
+import {getAdCid} from '../../../src/ad-cid';
 import {
   SubscriptionApi,
   listenFor,
@@ -23,7 +24,7 @@ import {
 } from '../../../src/iframe-helper';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {setStyle} from '../../../src/style';
 import {AdDisplayState} from './amp-ad-ui';
@@ -138,7 +139,13 @@ export class AmpAdXOriginIframeHandler {
         this.adResponsePromise_,
         'timeout waiting for ad response').catch(e => {
           this.noContent_();
-          user().warn('AMP-AD', e);
+          getAdCid(this.baseInstance_).then(cid => {
+            const tagType = this.baseInstance_.element.getAttribute('type');
+            const correlator = this.baseInstance_.win.ampAdPageCorrelator ||
+                null;
+            const referrer = this.baseInstance_.win.document.referrer;
+            dev().error('AMP-AD', e, tagType, cid, correlator, referrer);
+          });
         }).then(() => {
           if (this.iframe) {
             setStyle(this.iframe, 'visibility', '');
