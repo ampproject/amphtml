@@ -22,6 +22,7 @@ import {
   getSourceOrigin,
   getSourceUrl,
   isProxyOrigin,
+  isLocalhostOrigin,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -443,21 +444,9 @@ describe('isProxyOrigin', () => {
   testProxyOrigin(
       'https://xyz.cdn.ampproject.org/c/www.origin.com/foo/?f=0', true);
 
-  // Localhost
+  // Others
   testProxyOrigin(
       'http://localhost:123', false);
-  testProxyOrigin(
-      'http://localhost:123/c/www.origin.com/foo/?f=0', true);
-  testProxyOrigin(
-      'http://localhost:123/v/www.origin.com/foo/?f=0', true);
-  testProxyOrigin(
-      'https://localhost:123/c/www.origin.com/foo/?f=0', true);
-  testProxyOrigin(
-      'https://localhost:123/c/www.origin.com/foo/?f=0', true);
-  testProxyOrigin(
-      'http://localhost:123/cba/www.origin.com/foo/?f=0', false);
-
-  // Others
   testProxyOrigin(
       'https://cdn.ampproject.net/v/www.origin.com/foo/?f=0', false);
   testProxyOrigin(
@@ -465,6 +454,21 @@ describe('isProxyOrigin', () => {
   testProxyOrigin(
       'http://www.spiegel.de/politik/deutschland/angela-merkel-a-1062761.html',
       false);
+});
+
+describe('isLocalhostOrigin', () => {
+  function testLocalhostOrigin(href, bool) {
+    it('should return whether it is a localhost origin for ' + href, () => {
+      expect(isLocalhostOrigin(parseUrl(href))).to.equal(bool);
+    });
+  }
+
+  testLocalhostOrigin(
+      'http://localhost:123', true);
+  testLocalhostOrigin(
+      'https://localhost:123', true);
+  testLocalhostOrigin(
+      'http://localhost.example.com', false);
 });
 
 describe('getSourceOrigin/Url', () => {

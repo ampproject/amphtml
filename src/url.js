@@ -298,8 +298,19 @@ export function isProxyOrigin(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  return urls.cdnProxyRegex.test(url.origin) ||
-      urls.localhostProxyRegex.test(url.href);
+  return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * Returns whether the URL origin is localhost.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isLocalhostOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return urls.localhostRegex.test(url.origin);
 }
 
 /**

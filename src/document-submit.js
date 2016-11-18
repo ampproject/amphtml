@@ -20,8 +20,8 @@ import {
   assertHttpsUrl,
   checkCorsUrl,
   SOURCE_ORIGIN_PARAM,
+  isProxyOrigin,
 } from './url';
-import {urls} from './config';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
@@ -83,7 +83,7 @@ export function onDocumentFormSubmit_(e) {
     user().assert(action,
         'form action attribute is required for method=GET: %s', form);
     assertHttpsUrl(action, dev().assertElement(form), 'action');
-    user().assert(!urls.cdnProxyRegex.test(action),
+    user().assert(!isProxyOrigin(action),
         'form action should not be on AMP CDN: %s', form);
     checkCorsUrl(action);
   } else if (method == 'POST') {

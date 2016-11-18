@@ -21,7 +21,7 @@ import {
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
 import {urls} from '../../src/config';
-import {isProxyOrigin, parseUrl} from '../../src/url';
+import {isProxyOrigin, isLocalhostOrigin, parseUrl} from '../../src/url';
 import {startsWith} from '../../src/string';
 
 /**
@@ -82,7 +82,7 @@ export function handleClick(e, opt_viewerNavigate) {
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
     destination = destination.replace(
-        `${parseUrl(link.eventualUrl).hostname}/c/`,
+        `${parseUrl(link.eventualUrl).host}/c/`,
         'http://localhost:8000/max/');
   }
   e.preventDefault();
@@ -228,7 +228,7 @@ export function getA2AAncestor(win) {
     return null;
   }
   const amp = origins[origins.length - 2];
-  if (!isProxyOrigin(amp)) {
+  if (!isProxyOrigin(amp) && !isLocalhostOrigin(amp)) {
     return null;
   }
   return {
