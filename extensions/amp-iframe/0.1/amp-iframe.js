@@ -234,9 +234,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    // If the iframe is full size, we avoid an object allocation by moving box.
-    return moveLayoutRect(box, this.iframeLayoutBox_.left,
-        this.iframeLayoutBox_.top);
+    return moveLayoutRect(this.iframeLayoutBox_, box.left, box.top);
   }
 
   /** @override */
