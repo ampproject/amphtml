@@ -133,7 +133,7 @@ describe('A4A loader', () => {
               .returns(Promise.resolve(zortConstructor));
           ampAd = new AmpAd(ampAdElement);
           return ampAd.upgradeCallback().then(baseElement => {
-            expect(extensionsStub.called).to.be.true;
+            expect(extensionsStub).to.be.calledAtLeastOnce;
             expect(ampAdElement.getAttribute(
                 'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
             expect(baseElement).to.equal(zortInstance);
@@ -150,10 +150,10 @@ describe('A4A loader', () => {
           const extensions = extensionsFor(fixture.win);
           const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
               .withArgs('amp-ad-network-zort-impl')
-              .returns(Promise.resolve(new Error('I failed!')));
+              .returns(Promise.reject(new Error('I failed!')));
           ampAd = new AmpAd(ampAdElement);
           return ampAd.upgradeCallback().then(baseElement => {
-            expect(extensionsStub.called).to.be.true;
+            expect(extensionsStub).to.be.calledAtLeastOnce;
             expect(ampAdElement.getAttribute(
                 'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
             expect(baseElement).to.be.instanceof(AmpAd3PImpl);
