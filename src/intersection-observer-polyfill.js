@@ -50,7 +50,6 @@ export function getIntersectionChangeEntry(
     element, owner, hostViewport) {
   const intersection = calculateIntersectionRect(
         element, owner, hostViewport);
-  console.log(intersection);
   const ratio = intersectionRatio(intersection, element);
   return calculateChangeEntry(
       element, hostViewport, intersection, ratio);
@@ -67,6 +66,9 @@ export class IntersectionObserverApi {
    * @param {boolean=} opt_is3p
    */
   constructor(baseElement, iframe, opt_is3p) {
+    /** @private @const {!AMP.BaseElement} */
+    this.baseElement_ = baseElement;
+
     /** @private {?IntersectionObserverPolyfill} */
     this.intersectionObserver_ = null;
 
@@ -76,8 +78,7 @@ export class IntersectionObserverApi {
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(
         iframe, 'send-intersections', opt_is3p || false, () => {
-          this.intersectionObserver_.observe(baseElement.element);
-          this.positionObserver_.startObserving();
+          this.startSendingIntersection_();
         });
 
     this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
@@ -86,6 +87,11 @@ export class IntersectionObserverApi {
     this.positionObserver_ = new PositionObserver(baseElement, vp => {
       this.intersectionObserver_.tick(vp);
     });
+  }
+
+  startSendingIntersection_() {
+    this.intersectionObserver_.observe(this.baseElement_.element);
+    this.positionObserver_.startObserving();
   }
 
   /**
@@ -270,7 +276,7 @@ class PositionObserver {
     /** @private {!boolean} */
     this.shouldObserver_ = false;
 
-    /** @private @const {!AMP.BaseElement} */
+    /** @private {?AMP.BaseElement} */
     this.baseElement_ = baseElement;
 
     /** @private {?function()} */
@@ -290,6 +296,7 @@ class PositionObserver {
    * Function to start listening to viewport position.
    */
   startObserving() {
+    dev().assert(this.baseElement_);
     this.shouldObserver_ = true;
     this.baseElement_.getVsync().measure(() => {
       this.onViewportCallback(this.baseElement_.isInViewport());
@@ -319,7 +326,6 @@ class PositionObserver {
       return;
     }
     this.inViewport_ = inViewport;
-
     this.callback_(this.viewport_.getRect());
     if (inViewport) {
       const unlistenScroll = this.viewport_.onScroll(() => {
@@ -352,6 +358,8 @@ class PositionObserver {
    * Destroy listener on viewport position
    */
   destroy() {
+    this.shouldObserver_ = false;
+    this.baseElement_ = null;
     this.unlistenOnOutViewport_();
   }
 }
@@ -439,7 +447,6 @@ function calculateIntersectionRect(element, owner, hostViewport, opt_iframe) {
   if (opt_iframe) {
     intersectionRect = rectIntersection(opt_iframe, intersectionRect) ||
         nonIntersectRect;
-    console.log(intersectionRect);
   }
   // element intersects with hostViewport
   intersectionRect = rectIntersection(hostViewport, intersectionRect) ||

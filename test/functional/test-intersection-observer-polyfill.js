@@ -15,6 +15,7 @@
  */
 
 import {
+  IntersectionObserverApi,
   IntersectionObserverPolyfill,
   getThresholdSlot,
   AMP_DEFAULT_THRESHOLD,
@@ -23,7 +24,149 @@ import {
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-// TODO(zhouyx): Add test to IntersectionObserverAPI,
+describe('IntersectionObserverApi', () => {
+  let sandbox;
+  let onScrollSpy;
+  let onChangeSpy;
+  let testEle;
+  let baseElement;
+  let ioApi;
+  let tickSpy;
+
+  const iframeSrc = 'http://iframe.localhost:' + location.port +
+      '/test/fixtures/served/iframe-intersection.html';
+  let testIframe;
+
+  function getIframe(src) {
+    const i = document.createElement('iframe');
+    i.src = src;
+    return i;
+  }
+
+  function insert(iframe) {
+    document.body.appendChild(iframe);
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    onScrollSpy = sandbox.spy();
+    onChangeSpy = sandbox.spy();
+    testIframe = getIframe(iframeSrc);
+    testEle = {
+      isBuilt: () => {return true;},
+      getOwner: () => {return null;},
+      getLayoutBox: () => {return layoutRectLtwh(50, 100, 150, 200);},
+      win: window,
+    };
+
+    baseElement = {
+      element: testEle,
+      getVsync: () => {
+        return {
+          measure: func => {
+            func();
+          },
+        };
+      },
+      getViewport: () => {
+        return {
+          getRect: () => {
+            return layoutRectLtwh(50, 100, 150, 200);
+          },
+          onScroll: () => {
+            onScrollSpy();
+            return () => {};
+          },
+          onChanged: () => {
+            onChangeSpy();
+            return () => {};
+          },
+        };
+      },
+      isInViewport: () => {return false;},
+    };
+    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    insert(testIframe);
+    tickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+  });
+  afterEach(() => {
+    sandbox.restore();
+    testIframe.parentNode.removeChild(testIframe);
+    if (ioApi) {
+      ioApi.destroy();
+    }
+    ioApi = null;
+    tickSpy = null;
+  });
+
+  it('should tick if element in viewport when start sending io', () => {
+    ioApi.startSendingIntersection_();
+    expect(tickSpy).to.not.be.called;
+    testIframe.parentNode.removeChild(testIframe);
+    ioApi.destroy();
+    baseElement.isInViewport = () => {return true;};
+    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    insert(testIframe);
+    const inViewportTickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+    ioApi.startSendingIntersection_();
+    expect(inViewportTickSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+  });
+
+  it('should tick when element get in/out viewport', () => {
+    ioApi.startSendingIntersection_();
+    ioApi.onViewportCallback(true);
+    expect(onChangeSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(tickSpy).to.be.calledOnce;
+    ioApi.onViewportCallback(true);
+    expect(onChangeSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(tickSpy).to.be.calledOnce;
+    expect(ioApi.positionObserver_.unlistenViewportChanges_).to.not.be.null;
+    ioApi.onViewportCallback(false);
+    expect(ioApi.positionObserver_.unlistenViewportChanges_).to.be.null;
+    expect(onChangeSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(tickSpy).to.be.calledTwice;
+  });
+
+  it('should tick on inViewport value when on element layoutMeasuer', () => {
+    ioApi.startSendingIntersection_();
+    ioApi.onLayoutMeasure();
+    expect(tickSpy).to.not.be.called;
+    ioApi.onViewportCallback(true);
+    expect(tickSpy).to.be.calledOnce;
+    ioApi.onLayoutMeasure();
+    expect(tickSpy).to.be.calledTwice;
+  });
+
+  it('should not tick before start observing', () => {
+    ioApi.onViewportCallback(true);
+    expect(tickSpy).to.not.be.called;
+    ioApi.onLayoutMeasure();
+    expect(tickSpy).to.not.be.called;
+  });
+
+  it('should destroy correctly', () => {
+    const positionObserverDestroySpy =
+        sandbox.spy(ioApi.positionObserver_, 'destroy');
+    const subscriptionApiDestroySy =
+        sandbox.spy(ioApi.subscriptionApi_, 'destroy');
+    ioApi.destroy();
+    expect(positionObserverDestroySpy).to.be.called;
+    expect(subscriptionApiDestroySy).to.be.called;
+    expect(ioApi.positionObserver_).to.be.null;
+    expect(ioApi.intersectionObserver_).to.be.null;
+    expect(ioApi.subscriptionApi_).to.be.null;
+    ioApi = null;
+  });
+});
+
+
+
+
 
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
