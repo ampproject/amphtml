@@ -17,7 +17,7 @@
 import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
-import {getElementServiceForDoc} from '../../../src/element-service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -528,6 +528,5 @@ export class InstrumentationService {
  */
 export function instrumentationServiceForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
-      getElementServiceForDoc(
-          nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics'));
+      getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
 }

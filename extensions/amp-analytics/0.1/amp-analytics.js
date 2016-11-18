@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from './vendors';
-import {
-  InstrumentationService,
-  instrumentationServiceForDoc,
-} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
-import {installCidService} from './cid-impl';
-import {installCryptoService} from './crypto-impl';
-import {Activity} from './activity-impl';
 import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
@@ -33,6 +25,14 @@ import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
+import {Activity} from './activity-impl';
+import {installCidService} from './cid-impl';
+import {installCryptoService} from './crypto-impl';
+import {
+    InstrumentationService,
+    instrumentationServiceForDoc,
+} from './instrumentation';
+import {ANALYTICS_CONFIG} from './vendors';
 
 // Register doc-service factory.
 AMP.registerServiceForDoc(
@@ -88,8 +88,8 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.remoteConfig_ = /** @type {JSONType} */ ({});
 
-    /** @private {?Promise<./instrumentation.InstrumentationService>} */
-    this.instrumentationPromise_ = null;
+    /** @private {?./instrumentation.InstrumentationService} */
+    this.instrumentation_ = null;
   }
 
   /** @override */
@@ -115,9 +115,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.consentNotificationId_ = this.element
         .getAttribute('data-consent-notification-id');
 
-    this.instrumentationPromise_ = instrumentationServiceForDoc(
-        this.getAmpDoc());
-
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = userNotificationManagerFor(this.win)
           .then(service => service.get(this.consentNotificationId_));
@@ -130,7 +127,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     // resource consumption.
     toggle(this.element, false);
 
-    return this.consentPromise_
+    return instrumentationServiceForDoc(this.getAmpDoc())
+        .then(instrumentation => {
+          this.instrumentation_ = instrumentation;
+        })
+        .then(() => this.consentPromise_)
         .then(this.fetchRemoteConfig_.bind(this))
         .then(this.onFetchRemoteConfigSuccess_.bind(this));
   }
@@ -190,15 +191,11 @@ export class AmpAnalytics extends AMP.BaseElement {
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
-            this.instrumentationPromise_.then(instrumentation => {
-              instrumentation.addListener(
-                  trigger, this.handleEvent_.bind(this, trigger), this.element);
-            });
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
           } else {
-            this.instrumentationPromise_.then(instrumentation => {
-              instrumentation.addListener(
-                  trigger, this.handleEvent_.bind(this, trigger), this.element);
-            });
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
           }
         }));
       }
