@@ -1,7 +1,7 @@
 import './polyfills';
 import {listen} from '../src/event-helper';
 import {user} from '../src/log';
-import {PostMessenger} from './postMessenger.js';
+import {XDomainChildMessageHandler} from './x-domain-child-message-handler';
 
 /**
   Enum for the different postmessage types for the window.context
@@ -19,7 +19,7 @@ export const MessageType_ = {
   EMBED_SIZE_DENIED: 'embed-size-denied',
 };
 
-export class AmpContext extends PostMessenger{
+export class AmpContext extends XDomainChildMessageHandler{
 
   /**
    *  @param {Window} win A window object.

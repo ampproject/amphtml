@@ -4,7 +4,7 @@ import {user} from '../src/log';
 /**
  * @abstract
  */
-export class PostMessenger {
+export class XDomainChildMessageHandler {
 
   /**
    *  @param {Window} win A window object.
