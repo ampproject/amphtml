@@ -14,13 +14,62 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill, getThresholdSlot, AMP_DEFAULT_THRESHOLD,
+import {
+  IntersectionObserverPolyfill,
+  getThresholdSlot,
+  AMP_DEFAULT_THRESHOLD,
+  getIntersectionChangeEntry,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
 // TODO(zhouyx): Add test to IntersectionObserverAPI,
-// and getIntersectionChangeEntry
+
+describe('getIntersectionChangeEntry', () => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(performance, 'now', () => 100);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+  it('without owner', () => {
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(0, 100, 50, 50),
+        null,
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRatio: 1,
+        });
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(50, 200, 150, 200),
+        null,
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, 100, 150, 200),
+          intersectionRect: DomRectLtwh(50, 100, 50, 0),
+          intersectionRatio: 0,
+        });
+  });
+  it('with owner', () => {
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(50, 50, 150, 200),
+        layoutRectLtwh(0, 50, 100, 100),
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, -50, 150, 200),
+          intersectionRect: DomRectLtwh(50, 0, 50, 50),
+          intersectionRatio: 1 / 12,
+        });
+  });
+});
 
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
