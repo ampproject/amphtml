@@ -16,30 +16,25 @@
 
 import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
+import {setParentWindow} from '../../src/service';
 
 
-describe('StandardActions', () => {
-
-  let sandbox;
-  let actions;
+describes.sandboxed('StandardActions', {}, () => {
+  let standardActions;
   let mutateElementStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    actions = new StandardActions(new AmpDocSingle(window));
-    mutateElementStub = sandbox.stub(actions.resources_, 'mutateElement',
+    standardActions = new StandardActions(new AmpDocSingle(window));
+    mutateElementStub = sandbox.stub(
+        standardActions.resources_,
+        'mutateElement',
         (unusedElement, mutator) => mutator());
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('"hide" action', () => {
     it('should handle normal element', () => {
       const element = document.createElement('div');
-      actions.handleHide({target: element});
+      standardActions.handleHide({target: element});
       expect(mutateElementStub.callCount).to.equal(1);
       expect(mutateElementStub.firstCall.args[0]).to.equal(element);
       expect(element.style.display).to.equal('none');
@@ -53,10 +48,37 @@ describe('StandardActions', () => {
         called = true;
       };
 
-      actions.handleHide({target: element});
+      standardActions.handleHide({target: element});
       expect(mutateElementStub.callCount).to.equal(1);
       expect(mutateElementStub.firstCall.args[0]).to.equal(element);
       expect(called).to.equal(true);
+    });
+  });
+
+  describes.fakeWin('adoptEmbedWindow', {}, env => {
+    let embedWin;
+    let embedActions;
+    let hideStub;
+
+    beforeEach(() => {
+      embedActions = {
+        addGlobalMethodHandler: sandbox.spy(),
+      };
+      embedWin = env.win;
+      embedWin.services = {
+        action: {obj: embedActions},
+      };
+      setParentWindow(embedWin, window);
+      hideStub = sandbox.stub(standardActions, 'handleHide');
+    });
+
+    it('should configured the embedded actions service', () => {
+      standardActions.adoptEmbedWindow(embedWin);
+      expect(embedActions.addGlobalMethodHandler).to.be.calledOnce;
+      expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
+      expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
+      embedActions.addGlobalMethodHandler.args[0][1]();
+      expect(hideStub).to.be.calledOnce;
     });
   });
 });
