@@ -55,8 +55,8 @@ understood by the ad server(s) which you are calling.
 ```html
 <amp-ad width=300 height=250
     type="custom"
-    data-slot="1"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
+    data-slot="1"
 >
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
@@ -66,8 +66,8 @@ understood by the ad server(s) which you are calling.
 </amp-ad>
 <amp-ad width=400 height=300
     type="custom"
-    data-slot="2"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
+    data-slot="2"
 >
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
@@ -82,8 +82,8 @@ understood by the ad server(s) which you are calling.
 ```html
 <amp-ad width=300 height=250
     type="custom"
-    data-slot="slot-name-a"
     data-url="https://mysite/my-ad-server"
+    data-slot="slot-name-a"
 >
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
@@ -93,8 +93,8 @@ understood by the ad server(s) which you are calling.
 </amp-ad>
 <amp-ad width=400 height=300
     type="custom"
-    data-slot="slot-name-b"
     data-url="https://mysite/my-ad-server"
+    data-slot="slot-name-b"
 >
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
@@ -104,8 +104,8 @@ understood by the ad server(s) which you are calling.
 </amp-ad>
 <amp-ad width=300 height=250
     type="custom"
-    data-slot="123"
     data-url="https://my-other-site/my-other-ad-server"
+    data-slot="123"
 >
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">

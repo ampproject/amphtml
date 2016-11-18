@@ -20,6 +20,7 @@ import {templatesFor} from '../../../src/template';
 import {xhrFor} from '../../../src/xhr';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
+import {removeChildren} from '../../../src/dom';
 import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
 
 /** @const {!string} Tag name for custom ad implementation. */
@@ -98,14 +99,11 @@ export class AmpAdCustom extends AMP.BaseElement {
       this.uiHandler.setDisplayState(
         templateData !== null && typeof templateData == 'object' ?
         AdDisplayState.LOADED_RENDER_START : AdDisplayState.LOADED_NO_CONTENT);
-      templatesFor(this.win).findAndRenderTemplate(element,
-        this.slot_ === null ? data : data[this.slot_])
+      templatesFor(this.win).findAndRenderTemplate(element, templateData)
         .then(renderedElement => {
         // Get here when the template has been rendered
         // Clear out the template and replace it by the rendered version
-          while (element.firstChild) {
-            element.removeChild(element.firstChild);
-          }
+          removeChildren(element);
           element.appendChild(renderedElement);
           return this;
         });
