@@ -163,6 +163,14 @@ export const adConfig = {
     preconnect: 'https://cas.criteo.com',
   },
 
+  distroscale: {
+    preconnect: [
+      'https://c.jsrdn.com',
+      'https://s.jsrdn.com',
+      'https://i.jsrdn.com',
+    ],
+  },
+
   dotandads: {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
