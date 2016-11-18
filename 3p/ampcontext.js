@@ -1,6 +1,7 @@
 import './polyfills';
 import {listen} from '../src/event-helper';
 import {user} from '../src/log';
+import {PostMessenger} from './postMessenger.js';
 
 /**
   Enum for the different postmessage types for the window.context
@@ -18,38 +19,13 @@ export const MessageType_ = {
   EMBED_SIZE_DENIED: 'embed-size-denied',
 };
 
-export class AmpContext {
+export class AmpContext extends PostMessenger{
 
   /**
    *  @param {Window} win A window object.
    */
   constructor(win) {
-    /** @private {!Window} */
-    this.win_ = win;
-    /** Map messageType keys to callback functions for when we receive
-     *  that message
-     *  @private {object}
-     */
-    this.callbackFor_ = {};
-
-    this.setupMetadata_();
-
-    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
-    if (sentinelMatch) {
-      // Sentinel has the format of "$windowDepth-$randomNumber".
-      // Depth is measured from window.top.
-      this.depth = Number(sentinelMatch[2]);
-      this.ancestors = [];
-      for (let win = this.win_; win && win != win.parent; win = win.parent) {
-        // Add window keeping the top-most one at the front.
-        this.ancestors.unshift(win.parent);
-      }
-      this.ampWindow = this.ancestors[this.depth];
-      this.setupEventListener_();
-    } else {
-      user().error('Incorrect sentinel format.');
-      throw new Error('Incorrect sentinel format.');
-    }
+    super(win);
   }
 
   /**
@@ -73,48 +49,28 @@ export class AmpContext {
     }
   }
 
-  /**
-   * Register callback function for message with type messageType.
-   * @param {string} messageType The type of the message.
-   * @param {function(object)} callback The callback function to call
-   *   when a message with type messageType is received.
-   */
-  registerCallback_(messageType, callback) {
-    this.callbackFor_[messageType] = callback;
-    return () => { delete this.callbackFor_[messageType]; };
+  /** @override */
+  getAmpWindow(){
+    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
+    if (sentinelMatch) {
+      this.depth = Number(sentinelMatch[2]);
+      this.ancestors = [];
+      for (let win = this.win_; win && win != win.parent; win = win.parent) {
+        // Add window keeping the top-most one at the front.
+        this.ancestors.unshift(win.parent);
+      }
+       return this.ancestors[this.depth];
+    } else {
+      user().error('Incorrect sentinel format.');
+      throw new Error("Sentinel wrong format");
+    }
   }
 
-  /**
-   * Sets up event listener for post messages of the desired type.
-   *   The actual implementation only uses a single event listener for all of
-   *   the different messages, and simply diverts the message to be handled
-   *   by different callbacks.
-   * @private
-   */
-  setupEventListener_() {
-    listen(this.win_, 'message', message => {
-      // Does it look a message from AMP?
-      if (message.source == this.ampWindow && message.data &&
-          message.data.indexOf('amp-') == 0) {
-        // See if we can parse the payload.
-        try {
-          const payload = JSON.parse(message.data.substring(4));
-          // Check the sentinel as well.
-          if (payload.sentinel == this.sentinel &&
-              this.callbackFor_[payload.type]) {
-            try {
-              // We should probably report exceptions within callback
-              this.callbackFor_[payload.type](payload);
-            } catch (err) {
-              user().error(`Error in registered callback ${payload.type}`, err);
-            }
-          }
-        } catch (e) {
-          // JSON parsing failed. Ignore the message.
-        }
-      }
-    });
-  };
+  /** @override */
+  getSentinel(){
+    this.setupMetadata_();
+    return this.sentinel;
+  }
 };
 
 /**
