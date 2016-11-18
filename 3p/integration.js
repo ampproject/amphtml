@@ -42,6 +42,7 @@ import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
+import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
 import {adition} from '../ads/adition';
@@ -149,6 +150,7 @@ if (getMode().test || getMode().localDev) {
 register('a9', a9);
 register('accesstrade', accesstrade);
 register('adblade', adblade);
+register('adbutler', adbutler);
 register('adform', adform);
 register('adgeneration', adgeneration);
 register('adition', adition);
