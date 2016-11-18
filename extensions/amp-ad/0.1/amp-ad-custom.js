@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 David Karlin, Bachtrack Ltd. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,9 @@ export class AmpAdCustom extends AMP.BaseElement {
         .then(renderedElement => {
         // Get here when the template has been rendered
         // Clear out the template and replace it by the rendered version
-          element.innerHTML = '';
+          while (element.firstChild) {
+            element.removeChild(element.firstChild);
+          }
           element.appendChild(renderedElement);
           return this;
         });
