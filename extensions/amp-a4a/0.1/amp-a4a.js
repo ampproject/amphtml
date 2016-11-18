@@ -56,17 +56,6 @@ import {rethrowAsync} from '../../../src/log';
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-/**
- * @param {*} ary
- * @return {boolean} whether input is array of 2 numeric elements.
- * @private
- */
-function isValidOffsetArray(ary) {
-  return isArray(ary) && ary.length == 2 &&
-      typeof ary[0] === 'number' &&
-      typeof ary[1] === 'number';
-}
-
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 
@@ -134,6 +123,10 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(AMP.AmpAdUIHandler);
     dev().assert(AMP.AmpAdXOriginIframeHandler);
 
+    /** @const @private{string} tag to be used for dev/user logging */
+    this.logTag_ =
+      ('AMP-A4A-' + this.element.getAttribute('type')).toUpperCase();
+
     /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
 
@@ -164,8 +157,9 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
 
-    /** @private {?Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
-    this.win.ampA4aValidationKeys = null;
+    /** @private {Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>} */
+    this.win.ampA4aValidationKeys =
+      this.win.ampA4aValidationKeys || this.getKeyInfoSets_();
 
     // TODO(tdrl): Temporary, while we're verifying whether this is an
     // acceptable solution to the 'Safari on iOS doesn't fetch iframe src
@@ -199,9 +193,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.config = adConfig[adType] || {};
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.init();
-    // Fetch crypto key sets.
-    this.win.ampA4aValidationKeys =
-      this.win.ampA4aValidationKeys || this.getKeyInfoSets_();
   }
 
   /** @override */
@@ -212,7 +203,9 @@ export class AmpA4A extends AMP.BaseElement {
       return false;
     }
     // Otherwise the ad is good to go.
-    return getAmpAdRenderOutsideViewport(this.element);
+    const elementCheck = getAmpAdRenderOutsideViewport(this.element);
+    return typeof elementCheck == 'number' ?
+      elementCheck : super.renderOutsideViewport();
   }
 
   /**
@@ -288,7 +281,8 @@ export class AmpA4A extends AMP.BaseElement {
     // its element ancestry.
     if (!this.isValidElement()) {
       // TODO(kjwright): collapse?
-      user().warn('AMP-A4A', 'Amp ad element ignored as invalid', this.element);
+      user().warn(
+        this.logTag_, 'Amp ad element ignored as invalid', this.element);
       return;
     }
 
@@ -406,7 +400,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns true iff the creative was rendered in the shadow
         // DOM.
-        /** @return {!Promise<!boolean>} */
+        /** @return {!Promise<?CreativeMetaDataDef>} */
         .then(creative => {
           checkStillCurrent(promiseId);
           // Note: It's critical that #getAmpAdMetadata_ be called
@@ -420,7 +414,7 @@ export class AmpA4A extends AMP.BaseElement {
 
           // Only return amp metadata if valid AMP creative.
           if (!creative) {
-            return null;
+            return Promise.resolve();
           }
           // Need to know if creative was verified as part of render outside
           // viewport but cannot wait on promise.  Sadly, need a state a
@@ -471,7 +465,7 @@ export class AmpA4A extends AMP.BaseElement {
                       'Key failed to validate creative\'s signature.');
                 },
                 err => {
-                  user().error('AMP-A4A', err, this.element);
+                  user().error(this.logTag_, err, this.element);
                 });
           });
         }))
@@ -523,7 +517,7 @@ export class AmpA4A extends AMP.BaseElement {
       if (promiseResult) {
         dev().assert(promiseResult.minifiedCreative);
         // Must be an AMP creative.
-        const metaData = /** @type {CreativeMetaDataDef} */promiseResult;
+        const metaData = /** @type {CreativeMetaDataDef} */(promiseResult);
         return this.renderAmpCreative_(metaData).then(
           // Failed to render via AMP creative path so fallback to non-AMP
           // rendering within cross domain iframe.
@@ -618,7 +612,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @visibleForTesting
    */
   onCrossDomainIframeCreated(iframe) {
-    dev().info('A4A', `onCrossDomainIframeCreated ${iframe}`);
+    dev().info(this.logTag_, `onCrossDomainIframeCreated ${iframe}`);
   }
 
   /**
@@ -676,20 +670,20 @@ export class AmpA4A extends AMP.BaseElement {
                   jwkSetObj.keys.every(isObject)) {
                 return jwkSetObj.keys;
               } else {
-                user().error('AMP-A4A',
+                user().error(this.logTag_,
                     'Invalid response from signing server.',
                     this.element);
                 return [];
               }
             }).catch(err => {
-              user().error('AMP-A4A', err, this.element);
+              user().error(this.logTag_, err, this.element);
               return [];
             });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
         const reason = `Signing service '${serviceName}' does not exist.`;
-        user().error('AMP-A4A', reason, this.element);
+        user().error(this.logTag_, reason, this.element);
         return [];
       }
     });
@@ -697,7 +691,7 @@ export class AmpA4A extends AMP.BaseElement {
         jwkSetPromise.then(jwkSet =>
           jwkSet.map(jwk =>
             importPublicKey(jwk).catch(err => {
-              user().error('AMP-A4A', err, this.element);
+              user().error(this.logTag_, err, this.element);
               return null;
             }))));
   }
@@ -772,17 +766,16 @@ export class AmpA4A extends AMP.BaseElement {
           this.registerExpandUrlParams_(friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
-          this.rendered_ = true;
           this.onAmpCreativeRender();
           return true;
         });
     } catch (e) {
-      dev().error('AMP-A4A', 'Error injecting creative in friendly frame',
+      dev().error(this.logTag_, 'Error injecting creative in friendly frame',
           e);
       // If we fail on any of the steps of Shadow DOM construction, just
       // render in iframe.
       // TODO: report!
-      return false;
+      return Promise.resolve(false);
     }
   }
 
@@ -868,14 +861,14 @@ export class AmpA4A extends AMP.BaseElement {
     const metadataStart = creative.lastIndexOf(METADATA_STRING);
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
-      dev().warn('A4A',
+      dev().warn(this.logTag_,
           'Could not locate start index for amp meta data in: %s', creative);
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
-      dev().warn('A4A',
+      dev().warn(this.logTag_,
           'Could not locate closing script tag for amp meta data in: %s',
           creative);
       return null;
@@ -885,7 +878,10 @@ export class AmpA4A extends AMP.BaseElement {
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];
-      if (!isValidOffsetArray(ampRuntimeUtf16CharOffsets)) {
+      if (!isArray(ampRuntimeUtf16CharOffsets) ||
+          ampRuntimeUtf16CharOffsets.length != 2 &&
+          typeof ampRuntimeUtf16CharOffsets[0] !== 'number' &&
+          typeof ampRuntimeUtf16CharOffsets[1] !== 'number') {
         throw new Error('Invalid runtime offsets');
       }
       const metaData = {};
@@ -920,7 +916,7 @@ export class AmpA4A extends AMP.BaseElement {
         creative.slice(metadataEnd + '</script>'.length);
       return metaData;
     } catch (err) {
-      dev().warn('A4A', 'Invalid amp metadata: %s',
+      dev().warn(this.logTag_, 'Invalid amp metadata: %s',
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }
