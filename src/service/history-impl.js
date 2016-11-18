@@ -358,7 +358,7 @@ export class HistoryBindingNatural_ {
     /**
      * Used to ignore `popstate` handler for cases where we know we caused the
      * popstate event through the use of location.replace.
-     * @private {boolean}
+     * @private {?string}
      **/
     this.lastNavigatedHash_ = null;
 
@@ -403,6 +403,9 @@ export class HistoryBindingNatural_ {
     // On pop, stack is not allowed to go prior to the starting point.
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
+      // Popping history forget the last navigated hash since we can't really
+      // know what hash the browser is going to go to.
+      this.lastNavigatedHash_ = null;
       return this.back_(this.stackIndex_ - stackIndex + 1);
     });
   }
@@ -570,7 +573,7 @@ export class HistoryBindingNatural_ {
       this.lastNavigatedHash_ = target;
       // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
       this.win.location.replace(target);
-      this.historyReplaceState_(undefined, undefined, this.win.location.href);
+      this.historyReplaceState_();
       return Promise.resolve();
     });
   }
