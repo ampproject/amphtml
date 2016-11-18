@@ -15,7 +15,10 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
-import {addListener, instrumentationServiceFor} from './instrumentation';
+import {
+  InstrumentationService,
+  instrumentationServiceForDoc,
+} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
@@ -23,7 +26,6 @@ import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
 import {installActivityService} from './activity-impl';
-import {installVisibilityService} from './visibility-impl';
 import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
@@ -32,11 +34,13 @@ import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
 
+// Register doc-service factory.
+AMP.registerServiceForDoc(
+    'amp-analytics-instrumentation', InstrumentationService);
+
 installActivityService(AMP.win);
 installCidService(AMP.win);
 installCryptoService(AMP.win);
-installVisibilityService(AMP.win);
-instrumentationServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
@@ -83,6 +87,9 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {JSONType}
      */
     this.remoteConfig_ = /** @type {JSONType} */ ({});
+
+    /** @private {?./instrumentation.InstrumentationService} */
+    this.instrumentation_ = null;
   }
 
   /** @override */
@@ -107,6 +114,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.consentNotificationId_ = this.element
         .getAttribute('data-consent-notification-id');
+
+    this.instrumentation_ = instrumentationServiceForDoc(this.getAmpDoc());
 
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = userNotificationManagerFor(this.win)
@@ -180,12 +189,12 @@ export class AmpAnalytics extends AMP.BaseElement {
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
-            addListener(this.win, trigger, this.handleEvent_.bind(this,
-                  trigger), this.element);
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
 
           } else {
-            addListener(this.win, trigger,
-                this.handleEvent_.bind(this, trigger), this.element);
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
           }
         }));
       }

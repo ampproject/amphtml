@@ -57,6 +57,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adbutler: {
+    prefetch: 'https://servedbyadbutler.com/app.js',
+  },
+
   adform: {},
 
   adgeneration: {
@@ -189,6 +193,11 @@ export const adConfig = {
   },
 
   fake: {},
+
+  felmat: {
+    prefetch: 'https://t.felmat.net/js/fmamp.js',
+    renderStartImplemented: true,
+  },
 
   flite: {},
 
@@ -355,7 +364,12 @@ export const adConfig = {
   },
 
   pubmine: {
-    prefetch: 'https://s.pubmine.com/showad.js',
+    prefetch: [
+      'https://s.pubmine.com/head.js',
+      'https://s.pubmine.com/showad.js',
+    ],
+    preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
   },
 
   pulsepoint: {

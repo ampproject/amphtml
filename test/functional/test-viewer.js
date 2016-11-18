@@ -212,7 +212,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     send.onFirstCall().returns(Promise.resolve('#from-viewer'));
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
@@ -226,7 +226,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     send.onFirstCall().returns(Promise.resolve('from-viewer'));
     return viewer.getFragment().then(() => {
       throw new Error('should not happen');
@@ -250,7 +250,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     send.onFirstCall().returns(Promise.resolve());
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.equal('');
@@ -287,7 +287,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     viewer.updateFragment('#bar');
     expect(send.withArgs('fragment', {fragment: '#bar'}, true)).to.be
         .calledOnce;
@@ -298,7 +298,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     viewer.updateFragment('#bar');
     expect(send.callCount).to.equal(0);
   });
@@ -1365,6 +1365,53 @@ describe('Viewer', () => {
       viewer.navigateTo(ampUrl, 'abc123');
       expect(send.callCount).to.equal(0);
       expect(windowApi.top.location.href).to.equal(ampUrl);
+    });
+  });
+
+  describe('sendMessageCancelUnsent', () => {
+
+    it('should send queued messages', () => {
+      viewer.sendMessageCancelUnsent('event-a', {value: 1}, true);
+      viewer.sendMessageCancelUnsent('event-b', {value: 2}, true);
+      viewer.sendMessageCancelUnsent('event-a', {value: 3}, true);
+
+      const delivererSpy = sandbox.stub();
+      delivererSpy.returns(Promise.resolve());
+
+      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
+      sinon.assert.callOrder(
+          delivererSpy.withArgs('event-b', {value: 2}, true),
+          delivererSpy.withArgs('event-a', {value: 3}, true));
+      expect(delivererSpy).to.not.be.calledWith('event-a', {value: 1}, true);
+
+      viewer.sendMessageCancelUnsent('event-a', {value: 4}, true);
+      expect(delivererSpy).to.be.calledWith('event-a', {value: 4}, true);
+    });
+
+    it('should return promise that resolves on response ' +
+        'if awaitResponse=true', () => {
+      const response1 =
+          viewer.sendMessageCancelUnsent('event-a', {value: 1}, true);
+      const response2 =
+          viewer.sendMessageCancelUnsent('event-a', {value: 2}, true);
+
+      const delivererSpy = sandbox.stub();
+      delivererSpy.withArgs('event-a', {value: 2}, true)
+          .returns(Promise.resolve('result-2'));
+      delivererSpy.withArgs('event-a', {value: 3}, true)
+          .returns(Promise.resolve('result-3'));
+      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
+
+      const response3 =
+          viewer.sendMessageCancelUnsent('event-a', {value: 3}, true);
+      return expect(Promise.all([response1, response2, response3]))
+          .to.eventually.deep.equal(['result-2', 'result-2', 'result-3']);
+    });
+
+    it('should return undefined if awaitResponse=false', () => {
+      const response =
+          viewer.sendMessageCancelUnsent('event-a', {value: 1}, false);
+      expect(response).to.be.undefined;
     });
   });
 });

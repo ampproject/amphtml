@@ -120,13 +120,17 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
-    this.setTimeout = window.setTimeout;
+    this.setTimeout = function () {
+      return window.setTimeout.apply(window, arguments);
+    };
 
     /**
      * @param {number} id
      * @const
      */
-    this.clearTimeout = window.clearTimeout;
+    this.clearTimeout = function () {
+      return window.clearTimeout.apply(window, arguments);
+    };
 
     /**
      * @param {function()} handler
@@ -135,13 +139,17 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
-    this.setInterval = window.setInterval;
+    this.setInterval = function () {
+      return window.setInterval.apply(window, arguments);
+    };
 
     /**
      * @param {number} id
      * @const
      */
-    this.clearInterval = window.clearInterval;
+    this.clearInterval = function () {
+      return window.clearInterval.apply(window, arguments);
+    };
 
     let raf = window.requestAnimationFrame
         || window.webkitRequestAnimationFrame;
@@ -357,7 +365,7 @@ class FakeLocation {
    */
   change_(args) {
     const change = parseUrl(this.url_.href);
-    Object.assign(change, args);
+    Object.assign({}, change, args);
     this.changes.push(change);
   }
 
@@ -453,6 +461,10 @@ export class FakeHistory {
       throw new Error('can\'t go forward');
     }
     this.index = newIndex;
+    // Make sure to restore the location href before firing popstate to match
+    // real browsers behaviors.
+    this.win.location.resetHref(this.stack[this.index].url);
+    this.win.eventListeners.fire({type: 'popstate'});
   }
 
   /**
