@@ -570,6 +570,12 @@ export class HistoryBindingNatural_ {
   replaceStateForTarget(target) {
     dev().assert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
+      // location.replace will fire a popstate event, this is not a history
+      // event. This tells the popstate handler to not handle it by setting
+      // the lastNavigatedHash_ to the future hash we know we're going toward.
+      // As explained above in the function comment, typically we'd just do
+      // replaceState here but in order to trigger :target re-eval we have to
+      // use location.replace.
       this.lastNavigatedHash_ = target;
       // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
       this.win.location.replace(target);
