@@ -205,6 +205,11 @@ export class Viewport {
       this.visible_ = visible;
       if (visible) {
         this.binding_.connect();
+        if (this.size_) {
+          // If the size has already been intialized, check it again in case
+          // the size has changed between `disconnect` and `connect`.
+          this.resize_();
+        }
       } else {
         this.binding_.disconnect();
       }
