@@ -356,16 +356,17 @@ export class HistoryBindingNatural_ {
 
 
     /**
-     * Used to ignore `popstate` handler for cases where we know we don't want it
-     * handled.
+     * Used to ignore `popstate` handler for cases where we know we caused the
+     * popstate event through the use of location.replace.
      * @private {boolean}
      **/
-    this.ignoreUpcomingPopstate_ = false;
+    this.lastNavigatedHash_ = null;
 
     this.popstateHandler_ = e => {
-      if (this.ignoreUpcomingPopstate_) {
+      if (this.lastNavigatedHash_ == this.win.location.hash) {
         return;
       }
+      this.lastNavigatedHash_ = this.win.location.hash;
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       this.onHistoryEvent_();
@@ -566,14 +567,10 @@ export class HistoryBindingNatural_ {
   replaceStateForTarget(target) {
     dev().assert(target[0] == '#', 'target should start with a #');
     this.whenReady_(() => {
-      this.ignoreUpcomingPopstate_ = true;
+      this.lastNavigatedHash_ = target;
       // TODO(mkhatib, #6095): Chrome iOS will add extra states for location.replace.
-      try {
-        this.win.location.replace(target);
-      } finally {
-        this.ignoreUpcomingPopstate_ = false;
-      }
-      this.historyReplaceState_();
+      this.win.location.replace(target);
+      this.historyReplaceState_(undefined, undefined, this.win.location.href);
       return Promise.resolve();
     });
   }

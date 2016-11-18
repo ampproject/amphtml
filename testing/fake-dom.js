@@ -435,6 +435,9 @@ export class FakeHistory {
       throw new Error('can\'t go forward');
     }
     this.index = newIndex;
+    // Make sure to restore the location href before firing popstate to match
+    // real browsers behaviors.
+    this.win.location.resetHref(this.stack[this.index].url);
     this.win.eventListeners.fire({type: 'popstate'});
   }
 

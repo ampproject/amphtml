@@ -430,8 +430,10 @@ describes.fakeWin('Local Hash Navigation', {
       clock.tick(1);
       expect(env.win.location.hash).to.equal('#hello');
       expect(env.win.history.index).to.equal(startIndex + 1);
-      return history.pop(history.stackIndex_).then(() => {
-        clock.tick(1);
+      const historyPopPromise = history.pop(history.stackIndex_);
+
+      clock.tick(1);
+      return historyPopPromise.then(() => {
         expect(env.win.location.hash).to.equal('#first');
         expect(env.win.history.index).to.equal(startIndex);
       });
