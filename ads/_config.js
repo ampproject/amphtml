@@ -190,6 +190,11 @@ export const adConfig = {
 
   fake: {},
 
+  felmat: {
+    prefetch: 'https://t.felmat.net/js/fmamp.js',
+    renderStartImplemented: true,
+  },
+
   flite: {},
 
   genieessp: {
