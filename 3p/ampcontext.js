@@ -192,3 +192,12 @@ AmpContext.prototype.onResizeDenied = function(callback) {
   this.registerCallback_(MessageType_.EMBED_SIZE_DENIED, function(obj) {
     callback(obj.requestedHeight, obj.requestedWidth); });
 };
+
+/**
+ *  Takes the current name on the window, and attaches it to
+ *  the name of the iframe.
+ *  @param {Iframe} iframe The iframe we are adding the context to.
+ */
+AmpContext.prototype.addContextToIframe = function(iframe){
+  iframe.name = this.win_.name;
+}
