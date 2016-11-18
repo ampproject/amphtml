@@ -121,19 +121,19 @@ describe('A4A loader', () => {
 
       it('upgrades to registered, A4A type network-specific element', () => {
         return iframePromise.then(fixture => {
-          const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
           a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
           const zortInstance = {};
           const zortConstructor = function() { return zortInstance; };
-          extensionsMock.expects('loadElementClass')
-              .withExactArgs('amp-ad-network-zort-impl')
-              .returns(Promise.resolve(zortConstructor)).once();
+          const extensions = extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.resolve(zortConstructor));
           ampAd = new AmpAd(ampAdElement);
           return ampAd.upgradeCallback().then(baseElement => {
-            extensionsMock.verify();
+            expect(extensionsStub).to.be.calledAtLeastOnce;
             expect(ampAdElement.getAttribute(
                 'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
             expect(baseElement).to.equal(zortInstance);
@@ -143,18 +143,17 @@ describe('A4A loader', () => {
 
       it('falls back to 3p impl on upgrade with loadElementClass error', () => {
         return iframePromise.then(fixture => {
-          const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
           a4aRegistry['zort'] = function() {
             return true;
           };
           ampAdElement.setAttribute('type', 'zort');
-          extensionsMock.expects('loadElementClass')
-              .withExactArgs('amp-ad-network-zort-impl')
-              .returns(Promise.resolve(new Error('I failed!')))
-              .once();
+          const extensions = extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.reject(new Error('I failed!')));
           ampAd = new AmpAd(ampAdElement);
           return ampAd.upgradeCallback().then(baseElement => {
-            extensionsMock.verify();
+            expect(extensionsStub).to.be.calledAtLeastOnce;
             expect(ampAdElement.getAttribute(
                 'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
             expect(baseElement).to.be.instanceof(AmpAd3PImpl);
