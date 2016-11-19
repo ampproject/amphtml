@@ -56,6 +56,11 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'ad-type-custom',
+    name: 'Activates support for custom (self-serve) advertisements',
+    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+  },
+  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
@@ -91,12 +96,6 @@ const EXPERIMENTS = [
     name: 'AMP inabox',
     spec: 'https://github.com/ampproject/amphtml/issues/5700',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
-  },
-  {
-    id: 'amp-scrollable-carousel',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
   },
   {
     id: 'amp-form-custom-validations',
