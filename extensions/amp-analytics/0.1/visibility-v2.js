@@ -30,7 +30,7 @@ export class VisibilityV2 {
 
   /**
    * @param {!JSONType} config
-   * @param {!VisibilityListenerCallbackDef} callback
+   * @param {function(!JSONType)} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
    * @param {Element} analyticsElement The amp-analytics element that the
