@@ -23,7 +23,7 @@ import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 import {Visibility} from './visibility-impl';
-import {VisibilityV2} from './visibility-v2'
+import {VisibilityV2} from './visibility-v2';
 import {isExperimentOn} from '../../../src/experiments';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
