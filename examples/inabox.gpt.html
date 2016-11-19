@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script async="async" src="/examples/inabox-gpt.js"></script>
+  <script>
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+  </script>
+  <title>AMP inabox for GPT demo</title>
+</head>
+<body>
+
+<h2>Scroll down to see a GPT slot that tries to request that same AMP ad</h2>
+<script>
+  googletag.cmd.push(function() {
+    googletag
+        .defineSlot("/30497360/cfuertes/amp/inabox_300_200", [300, 200], "div-gpt-ad-12345")
+        .addService(googletag.pubads());
+    googletag.enableServices();
+  });
+</script>
+<div style="height: 120vh"></div>
+<div id="div-gpt-ad-12345" style="width:300px;height:200px">
+  <script>
+    googletag.cmd.push(function() {
+      googletag.display("div-gpt-ad-12345");
+    });
+  </script>
+</div>
+<div style="height: 120vh"></div>
+</body>
+</html>
