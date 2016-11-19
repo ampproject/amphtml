@@ -72,8 +72,17 @@ export class IntersectionObserverApi {
     /** @private {?IntersectionObserverPolyfill} */
     this.intersectionObserver_ = null;
 
-    /** @private {?PositionObserver} */
-    this.positionObserver_ = null;
+    /** @private {!boolean} */
+    this.shouldObserve_ = false;
+
+    /** @private {!boolean} */
+    this.isInViewport_ = false;
+
+    /** @private {?function()} */
+    this.unlistenOnDestroy_ = null;
+
+    /** @private @const {!./service/viewport-impl.Viewport} */
+    this.viewport_ = baseElement.getViewport();
 
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(
@@ -82,16 +91,40 @@ export class IntersectionObserverApi {
         });
 
     this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
-      this.subscriptionApi_.send('intersection', {changes: {change}});
+      this.subscriptionApi_.send('intersection', {changes: [change]});
     }, {threshold: AMP_DEFAULT_THRESHOLD});
-    this.positionObserver_ = new PositionObserver(baseElement, vp => {
-      this.intersectionObserver_.tick(vp);
-    });
   }
 
+  /**
+   * Function to start listening to viewport event. and observer intersection
+   * change on the element.
+   */
   startSendingIntersection_() {
+    this.shouldObserve_ = true;
     this.intersectionObserver_.observe(this.baseElement_.element);
-    this.positionObserver_.startObserving();
+    this.baseElement_.getVsync().measure(() => {
+      if (this.baseElement_.isInViewport()) {
+        this.isInViewport_ = true;
+        this.intersectionObserver_.tick(this.viewport_.getRect());
+      }
+    });
+
+    const unlistenViewportScroll = this.viewport_.onScroll(() => {
+      if (!this.isInViewport_) {
+        return;
+      }
+      this.intersectionObserver_.tick(this.viewport_.getRect());
+    });
+    const unlistenViewportChange = this.viewport_.onChanged(() => {
+      if (!this.isInViewport_) {
+        return;
+      }
+      this.intersectionObserver_.tick(this.viewport_.getRect());
+    });
+    this.unlistenOnDestroy_ = () => {
+      unlistenViewportScroll();
+      unlistenViewportChange();
+    };
   }
 
   /**
@@ -99,27 +132,29 @@ export class IntersectionObserverApi {
    * @param {!boolean} inViewport
    */
   onViewportCallback(inViewport) {
-    if (this.positionObserver_) {
-      this.positionObserver_.onViewportCallback(inViewport);
-    }
+    this.isInViewport_ = inViewport;
   }
 
   /**
    * Tick intersectionObserver_ again if element in viewport
    */
   onLayoutMeasure() {
-    if (this.positionObserver_) {
-      this.positionObserver_.onLayoutMeasure();
+    if (!this.shouldObserve_ || !this.isInViewport_) {
+      return;
     }
+    this.intersectionObserver_.tick(this.viewport_.getRect());
   }
 
   /**
    * Clean all listenrs
    */
   destroy() {
+    this.shouldObserve_ = false;
     this.intersectionObserver_ = null;
-    this.positionObserver_.destroy();
-    this.positionObserver_ = null;
+    if (this.unlistenOnDestroy_) {
+      this.unlistenOnDestroy_();
+      this.unlistenOnDestroy_ = null;
+    }
     this.subscriptionApi_.destroy();
     this.subscriptionApi_ = null;
   }
@@ -260,107 +295,6 @@ export class IntersectionObserverPolyfill {
 
     return calculateChangeEntry(
         element, hostViewport, intersectionRect, ratio, opt_iframe);
-  }
-}
-
-/**
- * The PositionObserver class lets an element gets the current viewport info
- * when it is inside the current viewport.
- */
-class PositionObserver {
-  /**
-   * @param {!AMP.BaseElement} baseElement
-   * @param {!function(!./layout-rect.LayoutRectDef)} callback
-   */
-  constructor(baseElement, callback) {
-    /** @private {!boolean} */
-    this.shouldObserver_ = false;
-
-    /** @private {?AMP.BaseElement} */
-    this.baseElement_ = baseElement;
-
-    /** @private {?function()} */
-    this.unlistenViewportChanges_ = null;
-
-    /** @private {!boolean} */
-    this.inViewport_ = false;
-
-    /** @private @const {!./service/viewport-impl.Viewport} */
-    this.viewport_ = baseElement.getViewport();
-
-    /** @private @const {!function(!./layout-rect.LayoutRectDef)} */
-    this.callback_ = callback;
-  }
-
-  /**
-   * Function to start listening to viewport position.
-   */
-  startObserving() {
-    dev().assert(this.baseElement_);
-    this.shouldObserver_ = true;
-    this.baseElement_.getVsync().measure(() => {
-      this.onViewportCallback(this.baseElement_.isInViewport());
-    });
-  }
-
-  /**
-   * Function to stop listening to viewport change when element is out viewport
-   * @private
-   */
-  unlistenOnOutViewport_() {
-    if (this.unlistenViewportChanges_) {
-      this.unlistenViewportChanges_();
-      this.unlistenViewportChanges_ = null;
-    }
-  }
-
-  /**
-   * Function that enables element to tell when enter or exit viewport
-   * @param {!boolean} inViewport
-   */
-  onViewportCallback(inViewport) {
-    if (!this.shouldObserver_) {
-      return;
-    }
-    if (this.inViewport_ == inViewport) {
-      return;
-    }
-    this.inViewport_ = inViewport;
-    this.callback_(this.viewport_.getRect());
-    if (inViewport) {
-      const unlistenScroll = this.viewport_.onScroll(() => {
-        this.callback_(this.viewport_.getRect());
-      });
-        // Throttled scroll events. Also fires for resize events.
-      const unlistenChanged = this.viewport_.onChanged(() => {
-        this.callback_(this.viewport_.getRect());
-      });
-      this.unlistenViewportChanges_ = () => {
-        unlistenScroll();
-        unlistenChanged();
-      };
-    } else {
-      this.unlistenOnOutViewport_();
-    }
-  }
-
-  /**
-   * Function that enables element to tell when it is measured
-   */
-  onLayoutMeasure() {
-    if (!this.shouldObserver_ || !this.inViewport_) {
-      return;
-    }
-    this.callback_(this.viewport_.getRect());
-  }
-
-  /**
-   * Destroy listener on viewport position
-   */
-  destroy() {
-    this.shouldObserver_ = false;
-    this.baseElement_ = null;
-    this.unlistenOnOutViewport_();
   }
 }
 

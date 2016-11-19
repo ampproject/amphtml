@@ -102,6 +102,8 @@ describe('IntersectionObserverApi', () => {
   it('should tick if element in viewport when start sending io', () => {
     ioApi.startSendingIntersection_();
     expect(tickSpy).to.not.be.called;
+    expect(onChangeSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
     testIframe.parentNode.removeChild(testIframe);
     ioApi.destroy();
     baseElement.isInViewport = () => {return true;};
@@ -110,36 +112,17 @@ describe('IntersectionObserverApi', () => {
     const inViewportTickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
     ioApi.startSendingIntersection_();
     expect(inViewportTickSpy).to.be.calledOnce;
-    expect(onChangeSpy).to.be.calledOnce;
-    expect(onScrollSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledTwice;
+    expect(onScrollSpy).to.be.calledTwice;
   });
 
-  it('should tick when element get in/out viewport', () => {
-    ioApi.startSendingIntersection_();
-    ioApi.onViewportCallback(true);
-    expect(onChangeSpy).to.be.calledOnce;
-    expect(onScrollSpy).to.be.calledOnce;
-    expect(tickSpy).to.be.calledOnce;
-    ioApi.onViewportCallback(true);
-    expect(onChangeSpy).to.be.calledOnce;
-    expect(onScrollSpy).to.be.calledOnce;
-    expect(tickSpy).to.be.calledOnce;
-    expect(ioApi.positionObserver_.unlistenViewportChanges_).to.not.be.null;
-    ioApi.onViewportCallback(false);
-    expect(ioApi.positionObserver_.unlistenViewportChanges_).to.be.null;
-    expect(onChangeSpy).to.be.calledOnce;
-    expect(onScrollSpy).to.be.calledOnce;
-    expect(tickSpy).to.be.calledTwice;
-  });
-
-  it('should tick on inViewport value when on element layoutMeasuer', () => {
+  it('should tick on inViewport value when on element layoutMeasure', () => {
     ioApi.startSendingIntersection_();
     ioApi.onLayoutMeasure();
     expect(tickSpy).to.not.be.called;
     ioApi.onViewportCallback(true);
-    expect(tickSpy).to.be.calledOnce;
     ioApi.onLayoutMeasure();
-    expect(tickSpy).to.be.calledTwice;
+    expect(tickSpy).to.be.calledOnce;
   });
 
   it('should not tick before start observing', () => {
@@ -150,23 +133,16 @@ describe('IntersectionObserverApi', () => {
   });
 
   it('should destroy correctly', () => {
-    const positionObserverDestroySpy =
-        sandbox.spy(ioApi.positionObserver_, 'destroy');
     const subscriptionApiDestroySy =
         sandbox.spy(ioApi.subscriptionApi_, 'destroy');
     ioApi.destroy();
-    expect(positionObserverDestroySpy).to.be.called;
     expect(subscriptionApiDestroySy).to.be.called;
-    expect(ioApi.positionObserver_).to.be.null;
+    expect(ioApi.unlistenOnDestroy_).to.be.null;
     expect(ioApi.intersectionObserver_).to.be.null;
     expect(ioApi.subscriptionApi_).to.be.null;
     ioApi = null;
   });
 });
-
-
-
-
 
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
