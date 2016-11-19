@@ -21,7 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function contentad(global, data) {
-  validateData(data, [], ['id', 'd', 'wid', 'url', 'ampSlotIndex']);
+  validateData(data, [], ['id', 'd', 'wid', 'url']);
   global.id = data.id;
   global.d = data.d;
   global.wid = data.wid;
@@ -33,12 +33,15 @@ export function contentad(global, data) {
   window.document.body.appendChild(cadDiv);
 
   /* Capture or pass URL */
-  const h = window.context.location.host;
-  const od = (data.url) ? data.url : window.atob(data.d) ;
+  const host = window.context.location.host;
+  const domain = data.url || window.atob(data.d);
   let adUrl = window.context.location.href;
-  const myreg = new RegExp(':\/\/.*?(?=([a-z0-9\-]+\.?)?' + od + ')', 'i');
+  /* Identify and remove CDN path */
+  const myreg = new RegExp(':\/\/.*?(?=([a-z0-9\-]+\.?)?' + domain + ')', 'i');
   adUrl = adUrl.replace(myreg, '://');
-  if (data.url || !adUrl.includes(od)) { adUrl = adUrl.replace(h, od); }
+  if (data.url || !adUrl.includes(domain)) {
+    adUrl = adUrl.replace(host, domain);
+  }
 
   /* Build API URL */
   const cadApi = 'https://api.content.ad/Scripts/widget2.aspx'
