@@ -127,12 +127,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     // resource consumption.
     toggle(this.element, false);
 
-    return instrumentationServiceForDoc(this.getAmpDoc())
+    return this.consentPromise_
+        .then(this.fetchRemoteConfig_.bind(this))
+        .then(() => instrumentationServiceForDoc(this.getAmpDoc()))
         .then(instrumentation => {
           this.instrumentation_ = instrumentation;
         })
-        .then(() => this.consentPromise_)
-        .then(this.fetchRemoteConfig_.bind(this))
         .then(this.onFetchRemoteConfigSuccess_.bind(this));
   }
 

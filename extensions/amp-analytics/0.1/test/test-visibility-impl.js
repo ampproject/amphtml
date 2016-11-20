@@ -438,9 +438,9 @@ describe('amp-analytics.visibility', () => {
           .to.equal(div);
       expect(getElement(ampdoc, 'amp-img', analytics, 'closest'))
           .to.equal(img1);
-      // Should restrict elements to contained ampdoc.
       expect(getElement(ampdoc, 'amp-img', iframeAnalytics, 'closest'))
-          .to.equal(null);
+          .to.equal(iframe.contentDocument.querySelector('amp-img'));
+      // Should restrict elements to contained ampdoc.
       expect(getElement(iframeAmpDoc, 'amp-img', analytics, 'closest'))
           .to.equal(null);
     });

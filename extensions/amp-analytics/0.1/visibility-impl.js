@@ -159,27 +159,32 @@ export function getElement(ampdoc, selector, el, selectionMethod) {
     return null;
   }
 
+  const elWin = el.ownerDocument.defaultView;
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
-    const elWin = ampdoc.win;
     const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
     if (parentEl) {
       return closestBySelector(parentEl, '.-amp-element');
     }
   }
 
+  let foundEl;
   if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
-    const closestEl = closestByTag(el, selector);
-    // Restrict result to be contained by ampdoc.
-    if (closestEl && ampdoc.contains(closestEl)) {
-      return closestEl;
-    }
-    return null;
+    foundEl = closestByTag(el, selector);
   } else if (selectionMethod == 'scope') {
-    return el.parentElement.querySelector(selector);
+    foundEl = el.parentElement.querySelector(selector);
   } else if (selector[0] == '#') {
-    return ampdoc.getElementById(selector.slice(1));
+    foundEl = el.ownerDocument.getElementById(selector.slice(1));
+  }
+
+  if (foundEl) {
+    // Restrict result to be contained by ampdoc.
+    let isContainedInDoc = ampdoc.contains(
+        elWin === ampdoc.win ? foundEl : elWin.frameElement);
+    if (isContainedInDoc) {
+      return foundEl;
+    }
   }
   return null;
 }
