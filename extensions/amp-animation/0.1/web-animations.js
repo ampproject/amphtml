@@ -190,7 +190,6 @@ export class MeasureScanner extends Scanner {
       const element = this.targets_[i];
       if (element.classList.contains('-amp-element')) {
         const resource = resources.getResourceForElement(element);
-        // Ensure that the promise doesn't fail.
         promises.push(resource.loadedOnce());
       }
     }
