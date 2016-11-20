@@ -180,7 +180,7 @@ export function getElement(ampdoc, selector, el, selectionMethod) {
 
   if (foundEl) {
     // Restrict result to be contained by ampdoc.
-    let isContainedInDoc = ampdoc.contains(
+    const isContainedInDoc = ampdoc.contains(
         elWin === ampdoc.win ? foundEl : elWin.frameElement);
     if (isContainedInDoc) {
       return foundEl;

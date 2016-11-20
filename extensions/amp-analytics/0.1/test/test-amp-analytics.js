@@ -17,10 +17,7 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {Crypto} from '../crypto-impl';
-import {
-  InstrumentationService,
-  instrumentationServiceForDoc,
-} from '../instrumentation';
+import {InstrumentationService} from '../instrumentation';
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
