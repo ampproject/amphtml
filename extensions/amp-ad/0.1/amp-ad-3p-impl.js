@@ -184,6 +184,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       const iframeBox =
           this.getViewport().getLayoutRect(this.xOriginIframeHandler_.iframe);
       const box = this.getLayoutBox();
+      // Cache the iframe's relative position to the amp-ad. This is
+      // necessary for fixed-position containers which "move" with the
+      // viewport.
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }

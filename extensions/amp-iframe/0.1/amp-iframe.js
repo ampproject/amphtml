@@ -219,6 +219,9 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.iframe_) {
       const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
       const box = this.getLayoutBox();
+      // Cache the iframe's relative position to the amp-iframe. This is
+      // necessary for fixed-position containers which "move" with the
+      // viewport.
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
