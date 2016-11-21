@@ -36,7 +36,8 @@ export class VisibilityV2 {
    * @param {Element} analyticsElement The amp-analytics element that the
    *  config is associated with.
    */
-  listenOnce(config, callback, shouldBeVisible, analyticsElement) {
+  listenOnce(config, callback, shouldBeVisible,
+      /*eslint  no-unused-vars: 0*/ analyticsElement) {
     // TODO: make this happen!
   }
 }
