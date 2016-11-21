@@ -70,14 +70,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
-    const size = `${slotRect.width}x${slotRect.height}`;
+    let size = `${slotRect.width}x${slotRect.height}`;
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
     const adTestOn = isInManualExperiment(this.element);
 
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
-    let szStr = slotRect.width + 'x' + slotRect.height;
     if (multiSizeDataStr) {
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation');
