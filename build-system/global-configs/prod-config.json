@@ -1,5 +1,5 @@
 {
-  "canary": false,
+  "canary": 0,
   "amp-ios-overflow-x": 1,
   "amp-experiment": 1,
   "pan-y": 1,
