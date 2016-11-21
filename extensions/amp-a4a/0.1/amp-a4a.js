@@ -132,35 +132,6 @@ export const LIFECYCLE_STAGES = {
   adSlotCleared: '20',
 };
 
-
-
-// FOR DEVELOPMENT ONLY
-// REMOVE BEFORE SUBMITTING
-function newResponse(res, headerFn) {
-
-  function cloneHeaders() {
-    var headers = new Headers();
-    for (var kv of res.headers.entries()) {
-      headers.append(kv[0], kv[1]);
-    }
-    return headers;
-  }
-
-  var headers = headerFn ? headerFn(cloneHeaders()) : res.headers;
-
-  return new Promise(function (resolve) {
-    return res.blob().then(function (blob) {
-      resolve(new Response(blob, {
-        status: res.status,
-        statusText: res.statusText,
-        headers: headers
-      }));
-    });
-  });
-
-}
-
-
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
@@ -376,11 +347,6 @@ export class AmpA4A extends AMP.BaseElement {
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
-        // \/\/\/ THIS CODE IS FOR TESTING FRONTEND LOGIC ONLY \/\/\/
-        .then(fetchResponse => newResponse(fetchResponse, headers => {
-          headers.set('X-CreativeSize', '320x50');
-          return headers;}))
-          // /\/\/\ THIS CODE IS FOR TESTING FRONTEND LOGIC ONLY /\/\/\
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
