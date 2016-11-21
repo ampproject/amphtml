@@ -247,7 +247,7 @@ describe('amp-youtube', function() {
     });
   });
 
-  it.only('should preload the final url', () => {
+  it('should preload the final url', () => {
     return getYt({
       'autoplay': '',
       'data-videoid': 'mGENRKrdoGY',
