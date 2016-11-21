@@ -204,7 +204,7 @@ describe('A4A loader', () => {
           expect(newIntersection).not.to.deep.equal(intersection);
           expect(newIntersection.top).to.equal(intersection.top + 100);
           expect(newIntersection.width).to.equal(300);
-          expect(newIntersection.height).to.equal(250);
+          expect(newIntersection.height).to.equal(200);
         });
       });
     });
