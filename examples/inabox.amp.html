@@ -1,0 +1,45 @@
+<!doctype html>
+<html ⚡4ads>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+</head>
+<body>
+  <a href="https://google.com" target="_blank">
+    <amp-img width="300" height="200"
+        src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no">
+    </amp-img>
+  </a>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "transport": {"beacon": false, "xhrpost": false},
+        "requests": {
+          "visibility": "/ping?${type}&${elementY}"
+        },
+        "triggers": {
+          "pageVisible": {
+            "on": "visible",
+            "request": "visibility",
+            "vars": { "type": "pageVisible" }
+          },
+          "imgVisible": {
+            "on": "visible",
+            "request": "visibility",
+            "visibilitySpec": {
+              "selector": "amp-img",
+              "selectionMethod": "scope",
+              "visiblePercentageMin": 10
+            },
+            "vars": { "type": "imgVisible" }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+</body>
+</html>

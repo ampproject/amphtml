@@ -27,7 +27,6 @@ import * as sinon from 'sinon';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
-import {toggleExperiment} from '../../../../src/experiments';
 import {installDocService,} from
     '../../../../src/service/ampdoc-impl';
 import {installActionServiceForDoc,} from
@@ -43,7 +42,6 @@ describe('amp-form', () => {
     return createIframePromise().then(iframe => {
       const docService = installDocService(iframe.win, /* isSingleDoc */ true);
       installActionServiceForDoc(docService.getAmpDoc());
-      toggleExperiment(iframe.win, 'amp-form', true);
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
       const form = getForm(iframe.doc, button1, button2);
@@ -340,6 +338,7 @@ describe('amp-form', () => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
         fetchJsonResolver = resolve;
       }));
+      sandbox.stub(ampForm, 'analyticsEvent_');
       sandbox.stub(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
@@ -362,6 +361,8 @@ describe('amp-form', () => {
         expect(ampForm.actions_.trigger.called).to.be.true;
         expect(ampForm.actions_.trigger.calledWith(
             form, 'submit-success', null)).to.be.true;
+        expect(ampForm.analyticsEvent_).to.be.calledWith(
+            'amp-form-submit-success');
       });
     });
   });
@@ -369,6 +370,7 @@ describe('amp-form', () => {
   it('should manage form state classes (submitting, error)', () => {
     return getAmpForm(true, true).then(ampForm => {
       let fetchJsonRejecter;
+      sandbox.stub(ampForm, 'analyticsEvent_');
       sandbox.stub(ampForm.xhr_, 'fetchJson')
           .returns(new Promise((unusedResolve, reject) => {
             fetchJsonRejecter = reject;
@@ -403,6 +405,8 @@ describe('amp-form', () => {
         expect(ampForm.actions_.trigger.called).to.be.true;
         expect(ampForm.actions_.trigger.calledWith(
             form, 'submit-error', null)).to.be.true;
+        expect(ampForm.analyticsEvent_).to.be.calledWith(
+            'amp-form-submit-error');
       });
     });
   });

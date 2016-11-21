@@ -25,6 +25,8 @@ import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
 import {viewerForDoc} from './viewer';
 import {urls} from './config';
+import {setStyle} from './style';
+import {domFingerprint} from './utils/dom-fingerprint';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -79,6 +81,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
+    domFingerprint: domFingerprint(element),
     startTime,
   };
   Object.assign(attributes._context, opt_context);
@@ -123,8 +126,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   iframe.ampLocation = parseUrl(src);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
-  iframe.style.border = 'none';
   iframe.setAttribute('scrolling', 'no');
+  setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
   iframe.onload = function() {
     // Chrome does not reflect the iframe readystate.
@@ -231,7 +234,7 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
 
 function getAdsLocalhost(win) {
   if (urls.localDev) {
-    return `http://${urls.thirdPartyFrameHost}`;
+    return `//${urls.thirdPartyFrameHost}`;
   }
   return 'http://ads.localhost:'
       + (win.location.port || win.parent.location.port);

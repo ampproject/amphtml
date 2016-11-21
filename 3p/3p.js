@@ -270,7 +270,7 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
-    container: true,
+    ampSlotIndex: true,
   };
 
   for (const field in data) {

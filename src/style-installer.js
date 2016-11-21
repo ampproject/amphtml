@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {dev, rethrowAsync} from './log';
 import {documentStateFor} from './document-state';
 import {performanceFor} from './performance';
 import {setStyles} from './style';
@@ -81,7 +81,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
  */
 export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   const style = doc.createElement('style');
-  style.textContent = cssText;
+  style./*OK*/textContent = cssText;
   let afterElement = null;
   // Make sure that we place style tags after the main runtime CSS. Otherwise
   // the order is random.
@@ -116,29 +116,41 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       animation: 'none',
     });
   };
-  /** @const {!Window} */
-  const win = doc.defaultView;
-  documentStateFor(win).onBodyAvailable(() => {
-    if (win[bodyVisibleSentinel]) {
-      return;
-    }
-    win[bodyVisibleSentinel] = true;
-    if (opt_waitForServices) {
-      waitForServices(win).catch(() => []).then(services => {
+  try {
+    /** @const {!Window} */
+    const win = doc.defaultView;
+    documentStateFor(win).onBodyAvailable(() => {
+      if (win[bodyVisibleSentinel]) {
+        return;
+      }
+      win[bodyVisibleSentinel] = true;
+      if (opt_waitForServices) {
+        waitForServices(win).catch(reason => {
+          rethrowAsync(reason);
+          return [];
+        }).then(services => {
+          set();
+          if (services.length > 0) {
+            resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+          }
+          try {
+            const perf = performanceFor(win);
+            perf.tick('mbv');
+            perf.flush();
+          } catch (e) {}
+        });
+      } else {
         set();
-        if (services.length > 0) {
-          resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
-        }
-        try {
-          const perf = performanceFor(win);
-          perf.tick('mbv');
-          perf.flush();
-        } catch (e) {}
-      });
-    } else {
-      set();
-    }
-  });
+      }
+    });
+  } catch (e) {
+    // If there was an error during the logic above (such as service not
+    // yet installed, definitely try to make the body visible.
+    set();
+    // Avoid errors in the function to break execution flow as this is
+    // often called as a last resort.
+    rethrowAsync(e);
+  }
 }
 
 /**

@@ -118,9 +118,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
   installVideoManagerForDoc(ampdoc);
-  if (isExperimentOn(ampdoc.win, 'form-submit')) {
-    installGlobalSubmitListenerForDoc(ampdoc);
-  }
+  installGlobalSubmitListenerForDoc(ampdoc);
 }
 
 
@@ -527,7 +525,7 @@ class MultidocManager {
     dev().fine(TAG, 'Attach shadow doc:', doc);
     this.purgeShadowRoots_();
 
-    hostElement.style.visibility = 'hidden';
+    setStyle(hostElement, 'visibility', 'hidden');
     const shadowRoot = createShadowRoot(hostElement);
 
     if (shadowRoot.AMP) {
@@ -629,7 +627,7 @@ class MultidocManager {
     // E.g. integrate with dynamic classes. In shadow case specifically, we have
     // to wait for stubbing to complete, which may take awhile due to importNode.
     setTimeout(() => {
-      hostElement.style.visibility = 'visible';
+      setStyle(hostElement, 'visibility', 'visible');
     }, 50);
 
     // Store reference.

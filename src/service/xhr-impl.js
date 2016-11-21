@@ -412,7 +412,8 @@ export function assertSuccess(response) {
       if (isRetriable(response.status)) {
         err.retriable = true;
       }
-      if (response.headers.get('Content-Type') == 'application/json') {
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.split(';')[0] == 'application/json') {
         response.json().then(json => {
           err.responseJson = json;
           reject(err);
@@ -517,8 +518,9 @@ export class FetchResponse {
 
 /**
  * Provides access to the response headers as defined in the Fetch API.
+ * @private Visible for testing.
  */
-class FetchResponseHeaders {
+export class FetchResponseHeaders {
   /**
    * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
@@ -533,6 +535,14 @@ class FetchResponseHeaders {
    */
   get(name) {
     return this.xhr_.getResponseHeader(name);
+  }
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  has(name) {
+    return this.xhr_.getResponseHeader(name) != null;
   }
 }
 

@@ -15,8 +15,9 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {tryFocus} from '../../../src/dom';
+import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
+import {dev} from '../../../src/log';
 import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
@@ -62,6 +63,12 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = timerFor(this.win);
+
+    /** @private {number|string|null} */
+    this.openOrCloseTimeOut_ = null;
   }
 
   /** @override */
@@ -122,6 +129,13 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
+
+    this.element.addEventListener('click', e => {
+      const target = closestByTag(dev().assertElement(e.target), 'A');
+      if (target && target.href) {
+        this.close_();
+      }
+    }, true);
   }
 
  /**
@@ -174,7 +188,10 @@ export class AmpSidebar extends AMP.BaseElement {
         this.element.setAttribute('aria-hidden', 'false');
         // Focus on the sidebar for a11y.
         tryFocus(this.element);
-        timerFor(this.win).delay(() => {
+        if (this.openOrCloseTimeOut_) {
+          this.timer_.cancel(this.openOrCloseTimeOut_);
+        }
+        this.openOrCloseTimeOut_ = this.timer_.delay(() => {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
           this.scheduleResume(children);
@@ -199,7 +216,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      timerFor(this.win).delay(() => {
+      if (this.openOrCloseTimeOut_) {
+        this.timer_.cancel(this.openOrCloseTimeOut_);
+      }
+      this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {

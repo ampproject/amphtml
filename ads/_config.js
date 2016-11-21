@@ -57,6 +57,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adbutler: {
+    prefetch: 'https://servedbyadbutler.com/app.js',
+  },
+
   adform: {},
 
   adgeneration: {
@@ -190,6 +194,11 @@ export const adConfig = {
 
   fake: {},
 
+  felmat: {
+    prefetch: 'https://t.felmat.net/js/fmamp.js',
+    renderStartImplemented: true,
+  },
+
   flite: {},
 
   genieessp: {
@@ -198,6 +207,12 @@ export const adConfig = {
 
   gmossp: {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  },
+
+  holder: {
+    prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
+    preconnect: 'https://h.holder.com.ua',
+    renderStartImplemented: true,
   },
 
   ibillboard: {},
@@ -271,6 +286,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  medianet: {
+    preconnect: 'https://contextual.media.net',
+    renderStartImplemented: true,
+  },
+
   mediavine: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
@@ -339,7 +359,12 @@ export const adConfig = {
   },
 
   pubmine: {
-    prefetch: 'https://s.pubmine.com/showad.js',
+    prefetch: [
+      'https://s.pubmine.com/head.js',
+      'https://s.pubmine.com/showad.js',
+    ],
+    preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
   },
 
   pulsepoint: {

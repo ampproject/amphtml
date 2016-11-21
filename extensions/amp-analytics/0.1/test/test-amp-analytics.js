@@ -17,18 +17,27 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {Crypto} from '../crypto-impl';
-import {instrumentationServiceFor} from '../instrumentation';
+import {
+  InstrumentationService,
+  instrumentationServiceForDoc,
+} from '../instrumentation';
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getService, resetServiceForTesting} from '../../../../src/service';
+import {
+  getService,
+  resetServiceForTesting,
+  fromClassForDoc,
+} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
+
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 
 
 /* global require: false */
@@ -44,6 +53,7 @@ describe('amp-analytics', function() {
   let configWithCredentials;
   let uidService;
   let crypto;
+  let ampdoc;
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}',
@@ -78,6 +88,7 @@ describe('amp-analytics', function() {
         }};
       });
 
+
       resetServiceForTesting(iframe.win, 'crypto');
       crypto = new Crypto(iframe.win);
       getService(iframe.win, 'crypto', () => crypto);
@@ -86,6 +97,10 @@ describe('amp-analytics', function() {
       link.setAttribute('href', './test-canonical.html');
       iframe.win.document.head.appendChild(link);
       windowApi = iframe.win;
+      ampdoc = new AmpDocSingle(windowApi);
+
+      fromClassForDoc(
+          ampdoc, 'amp-analytics-instrumentation', InstrumentationService);
     });
   });
 
@@ -105,6 +120,7 @@ describe('amp-analytics', function() {
     }
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
+    windowApi.document.body.appendChild(el);
     analytics.buildCallback();
     sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
     return analytics;
@@ -179,10 +195,11 @@ describe('amp-analytics', function() {
             analytics.buildCallback();
             const urlReplacements = urlReplacementsForDoc(
                 analytics.win.document);
-            sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
-              expect(this.replacements_).to.have.property(name);
-              return {sync: '_' + name.toLowerCase() + '_'};
-            });
+            sandbox.stub(urlReplacements.getVariableSource(), 'get',
+              function(name) {
+                expect(this.replacements_).to.have.property(name);
+                return {sync: '_' + name.toLowerCase() + '_'};
+              });
             const encodeVars = analytics.encodeVars_;
             sandbox.stub(analytics, 'encodeVars_', function(val, name) {
               val = encodeVars.call(this, val, name);
@@ -221,6 +238,7 @@ describe('amp-analytics', function() {
     const el = windowApi.document.createElement('amp-analytics');
     el.textContent = config;
     const analytics = new AmpAnalytics(el);
+    windowApi.document.body.appendChild(el);
     analytics.createdCallback();
     analytics.buildCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
@@ -246,6 +264,7 @@ describe('amp-analytics', function() {
         const script = windowApi.document.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
         el.appendChild(script);
+        windowApi.document.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         analytics.createdCallback();
         analytics.buildCallback();
@@ -475,7 +494,7 @@ describe('amp-analytics', function() {
   it('expands element level vars with higher precedence than trigger vars',
     () => {
       const analytics = getAnalyticsTag();
-      const ins = instrumentationServiceFor(windowApi);
+      const ins = instrumentationServiceForDoc(ampdoc);
       sandbox.stub(ins, 'isTriggerAllowed_').returns(true);
       const el1 = windowApi.document.createElement('div');
       el1.className = 'x';
@@ -590,11 +609,12 @@ describe('amp-analytics', function() {
         },
       }]});
     const urlReplacements = urlReplacementsForDoc(analytics.win.document);
-    sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
-      return {sync: param => {
-        return '_' + name.toLowerCase() + '_' + param + '_';
-      }};
-    });
+    sandbox.stub(urlReplacements.getVariableSource(), 'get',
+      function(name) {
+        return {sync: param => {
+          return '_' + name.toLowerCase() + '_' + param + '_';
+        }};
+      });
 
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -604,7 +624,7 @@ describe('amp-analytics', function() {
   });
 
   it('expands selector with config variable', () => {
-    const ins = instrumentationServiceFor(windowApi);
+    const ins = instrumentationServiceForDoc(ampdoc);
     const addListenerSpy = sandbox.spy(ins, 'addListener');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
@@ -619,7 +639,7 @@ describe('amp-analytics', function() {
 
   function selectorExpansionTest(selector) {
     it('expand selector value: ' + selector, () => {
-      const ins = instrumentationServiceFor(windowApi);
+      const ins = instrumentationServiceForDoc(ampdoc);
       const addListenerSpy = sandbox.spy(ins, 'addListener');
       const analytics = getAnalyticsTag({
         requests: {foo: 'https://example.com/bar'},
@@ -641,7 +661,7 @@ describe('amp-analytics', function() {
         .map(selectorExpansionTest);
 
   it('does not expands selector with platform variable', () => {
-    const ins = instrumentationServiceFor(windowApi);
+    const ins = instrumentationServiceForDoc(ampdoc);
     const addListenerSpy = sandbox.spy(ins, 'addListener');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
@@ -838,7 +858,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = urlReplacementsForDoc(analytics.win.document);
-      sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {

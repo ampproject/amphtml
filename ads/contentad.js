@@ -33,9 +33,14 @@ export function contentad(global, data) {
   window.document.body.appendChild(cadDiv);
 
   /* Capture or pass URL */
+  const host = window.context.location.host;
+  const domain = data.url || window.atob(data.d);
   let adUrl = window.context.location.href;
-  if (data.url) {
-    adUrl = adUrl.replace(window.context.location.host, data.url);
+  /* Identify and remove CDN path */
+  const myreg = new RegExp(':\/\/.*?(?=([a-z0-9\-]+\.?)?' + domain + ')', 'i');
+  adUrl = adUrl.replace(myreg, '://');
+  if (data.url || !adUrl.includes(domain)) {
+    adUrl = adUrl.replace(host, domain);
   }
 
   /* Build API URL */

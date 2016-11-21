@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {stringHash32} from '../../src/crypto';
 
-/**
- * @param {!Window} win
- * @return {!Promise<!../extensions/amp-analytics/0.1/visibility-impl.Visibility>}
- */
-export function visibilityFor(win) {
-  return (/** @type {!Promise<
-      !../extensions/amp-analytics/0.1/visibility-impl.Visibility>}} */ (
-      getElementService(win, 'visibility', 'amp-analytics')));
-};
+describe('stringHash32', () => {
+  it('should map a sample string appropriately', () => {
+    expect(stringHash32('')).to.equal('5381');
+    expect(stringHash32('abcd1234!@#$')).to.equal('1765632611');
+    expect(stringHash32('a/foo.3,b/bar.4')).to.equal('3546926170');
+  });
+});

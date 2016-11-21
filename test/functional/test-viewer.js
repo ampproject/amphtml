@@ -18,8 +18,6 @@ import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installPerformanceService} from '../../src/service/performance-impl';
-import {resetServiceForTesting} from '../../src/service';
 import {timerFor} from '../../src/timer';
 import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
@@ -54,14 +52,13 @@ describe('Viewer', () => {
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
-    installPerformanceService(windowApi);
-    installPerformanceService(window);
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
       hash: '#origin=g.com',
       href: '/test/viewer',
       ancestorOrigins: null,
+      search: '',
     };
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
@@ -91,8 +88,6 @@ describe('Viewer', () => {
   });
 
   afterEach(() => {
-    resetServiceForTesting(windowApi, 'performance');
-    resetServiceForTesting(window, 'performance');
     windowMock.verify();
     sandbox.restore();
   });
@@ -152,7 +147,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('test')).to.equal('1');
   });
 
@@ -163,7 +158,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState.callCount).to.equal(1);
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
@@ -203,33 +198,6 @@ describe('Viewer', () => {
     expect(viewer.getPrerenderSize()).to.equal(3);
   });
 
-  it('should configure performance tracking', () => {
-    windowApi.location.hash = '';
-    let viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = Promise.resolve();
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
-
-    windowApi.location.hash = '#csi=1';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = Promise.resolve();
-    expect(viewer.isPerformanceTrackingOn()).to.be.true;
-
-    windowApi.location.hash = '#csi=0';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = Promise.resolve();
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
-
-    windowApi.location.hash = '#csi=1';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = null;
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
-
-    windowApi.location.hash = '#csi=0';
-    viewer = new Viewer(ampdoc);
-    viewer.messagingMaybePromise_ = null;
-    expect(viewer.isPerformanceTrackingOn()).to.be.false;
-  });
-
   it('should get fragment from the url in non-embedded mode', () => {
     windowApi.parent = windowApi;
     windowApi.location.hash = '#foo';
@@ -244,7 +212,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     send.onFirstCall().returns(Promise.resolve('#from-viewer'));
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
@@ -258,7 +226,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     send.onFirstCall().returns(Promise.resolve('from-viewer'));
     return viewer.getFragment().then(() => {
       throw new Error('should not happen');
@@ -282,7 +250,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     send.onFirstCall().returns(Promise.resolve());
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.equal('');
@@ -319,7 +287,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     viewer.updateFragment('#bar');
     expect(send.withArgs('fragment', {fragment: '#bar'}, true)).to.be
         .calledOnce;
@@ -330,7 +298,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageCancelUnsent');
     viewer.updateFragment('#bar');
     expect(send.callCount).to.equal(0);
   });
@@ -799,6 +767,12 @@ describe('Viewer', () => {
     it('should be embedded with "webview=1" param', () => {
       windowApi.parent = windowApi;
       windowApi.location.hash = '#webview=1';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded with query param', () => {
+      windowApi.parent = {};
+      windowApi.location.search = '?amp_js_v=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
   });
@@ -1391,6 +1365,53 @@ describe('Viewer', () => {
       viewer.navigateTo(ampUrl, 'abc123');
       expect(send.callCount).to.equal(0);
       expect(windowApi.top.location.href).to.equal(ampUrl);
+    });
+  });
+
+  describe('sendMessageCancelUnsent', () => {
+
+    it('should send queued messages', () => {
+      viewer.sendMessageCancelUnsent('event-a', {value: 1}, true);
+      viewer.sendMessageCancelUnsent('event-b', {value: 2}, true);
+      viewer.sendMessageCancelUnsent('event-a', {value: 3}, true);
+
+      const delivererSpy = sandbox.stub();
+      delivererSpy.returns(Promise.resolve());
+
+      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
+      sinon.assert.callOrder(
+          delivererSpy.withArgs('event-b', {value: 2}, true),
+          delivererSpy.withArgs('event-a', {value: 3}, true));
+      expect(delivererSpy).to.not.be.calledWith('event-a', {value: 1}, true);
+
+      viewer.sendMessageCancelUnsent('event-a', {value: 4}, true);
+      expect(delivererSpy).to.be.calledWith('event-a', {value: 4}, true);
+    });
+
+    it('should return promise that resolves on response ' +
+        'if awaitResponse=true', () => {
+      const response1 =
+          viewer.sendMessageCancelUnsent('event-a', {value: 1}, true);
+      const response2 =
+          viewer.sendMessageCancelUnsent('event-a', {value: 2}, true);
+
+      const delivererSpy = sandbox.stub();
+      delivererSpy.withArgs('event-a', {value: 2}, true)
+          .returns(Promise.resolve('result-2'));
+      delivererSpy.withArgs('event-a', {value: 3}, true)
+          .returns(Promise.resolve('result-3'));
+      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
+
+      const response3 =
+          viewer.sendMessageCancelUnsent('event-a', {value: 3}, true);
+      return expect(Promise.all([response1, response2, response3]))
+          .to.eventually.deep.equal(['result-2', 'result-2', 'result-3']);
+    });
+
+    it('should return undefined if awaitResponse=false', () => {
+      const response =
+          viewer.sendMessageCancelUnsent('event-a', {value: 1}, false);
+      expect(response).to.be.undefined;
     });
   });
 });

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +42,7 @@ import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
+import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
 import {adition} from '../ads/adition';
@@ -68,9 +69,11 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
+import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
+import {holder} from '../ads/holder';
 import {ibillboard} from '../ads/ibillboard';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
@@ -82,6 +85,7 @@ import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
+import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
@@ -146,6 +150,7 @@ if (getMode().test || getMode().localDev) {
 register('a9', a9);
 register('accesstrade', accesstrade);
 register('adblade', adblade);
+register('adbutler', adbutler);
 register('adform', adform);
 register('adgeneration', adgeneration);
 register('adition', adition);
@@ -173,9 +178,11 @@ register('doubleclick', doubleclick);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('facebook', facebook);
+register('felmat', felmat);
 register('flite', flite);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
+register('holder', holder);
 register('ibillboard', ibillboard);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
@@ -189,6 +196,7 @@ register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
+register('medianet', medianet);
 register('mediavine', mediavine);
 register('meg', meg);
 register('microad', microad);
