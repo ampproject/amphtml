@@ -18,7 +18,7 @@ import {
   IntersectionObserverApi,
   IntersectionObserverPolyfill,
   getThresholdSlot,
-  AMP_DEFAULT_THRESHOLD,
+  DEFAULT_THRESHOLD,
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
@@ -227,7 +227,7 @@ describe('IntersectionObserverPolyfill', () => {
     });
 
     it('getThresholdSlot function', () => {
-      let threshold = AMP_DEFAULT_THRESHOLD;
+      let threshold = DEFAULT_THRESHOLD;
       expect(getThresholdSlot(threshold, 0)).to.equal(0);
       expect(getThresholdSlot(threshold, 0.67)).to.equal(14);
       expect(getThresholdSlot(threshold, 0.65)).to.equal(14);

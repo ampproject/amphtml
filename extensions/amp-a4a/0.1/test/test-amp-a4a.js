@@ -114,6 +114,7 @@ describe('amp-a4a', () => {
       const ampdocService = ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
     };
+    element.isBuilt = () => {return true;};
     doc.body.appendChild(element);
     return element;
   }
@@ -159,7 +160,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
-        a4aElement.isBuilt = () => {return true;};
         a4a = new MockA4AImpl(a4aElement);
         return fixture;
       });
@@ -235,7 +235,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
-        a4aElement.isBuilt = () => {return true;};
         const a4a = new MockA4AImpl(a4aElement);
         verifyNonAMPRender(a4a);
         doc.body.appendChild(a4aElement);
@@ -271,7 +270,6 @@ describe('amp-a4a', () => {
           a4aElement.setAttribute('width', 200);
           a4aElement.setAttribute('height', 50);
           a4aElement.setAttribute('type', 'adsense');
-          a4aElement.isBuilt = () => {return true;};
           const a4a = new MockA4AImpl(a4aElement);
           verifyNonAMPRender(a4a);
           doc.body.appendChild(a4aElement);
@@ -421,7 +419,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
-        a4aElement.isBuilt = () => {return true;};
         const a4a = new MockA4AImpl(a4aElement);
         verifyNonAMPRender(a4a);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
@@ -526,7 +523,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
-        a4aElement.isBuilt = () => {return true;};
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         verifyNonAMPRender(a4a);
@@ -550,7 +546,6 @@ describe('amp-a4a', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
-        a4aElement.isBuilt = () => {return true;};
         const a4a = new MockA4AImpl(a4aElement);
         verifyNonAMPRender(a4a);
         a4a.onLayoutMeasure();
@@ -573,7 +568,6 @@ describe('amp-a4a', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
-        a4aElement.isBuilt = () => {return true;};
         const a4a = new MockA4AImpl(a4aElement);
         verifyNonAMPRender(a4a);
         a4a.onLayoutMeasure();
@@ -673,7 +667,6 @@ describe('amp-a4a', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
-        a4aElement.isBuilt = () => {return true;};
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
