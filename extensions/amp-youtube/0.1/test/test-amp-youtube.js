@@ -257,7 +257,6 @@ describe('amp-youtube', function() {
       const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'preload');
       yt.implementation_.preconnectCallback();
       preloadSpy.should.have.been.calledWithExactly(src);
-      expect(preloadSpy.calledWith(src)).to.be.true;
     });
   });
 });
