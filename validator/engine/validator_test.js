@@ -494,7 +494,7 @@ describe('ValidatorRulesMakeSense', () => {
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if (tagSpec.tagName.startsWith('AMP-')) {
+    if (tagSpec.tagName./*OK*/ startsWith('AMP-')) {
       it('AMP- tags have html_format', () => {
         expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
       });
