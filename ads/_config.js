@@ -215,7 +215,7 @@ export const adConfig = {
   flite: {},
 
   fusion: {
-    prefetch: 'https://assets.adtomafusion.net/fusion/0.9/latest/fusion-default.js',
+    prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.js',
   },
 
   genieessp: {
