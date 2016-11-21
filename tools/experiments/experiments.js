@@ -92,6 +92,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
+    id: 'amp-auto-ads',
+    name: 'AMP Auto Ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
+  },
+  {
     id: 'amp-inabox',
     name: 'AMP inabox',
     spec: 'https://github.com/ampproject/amphtml/issues/5700',
@@ -214,6 +220,18 @@ const EXPERIMENTS = [
     id: 'amp-ad-loading-ux',
     name: 'New default loading UX to amp-ad',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
+  },
+  {
+    id: 'visibility-v2',
+    name: 'New visibility tracking using native IntersectionObserver',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
+  },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-selector/amp-selector.md',
   },
 ];
 

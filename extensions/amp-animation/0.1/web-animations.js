@@ -169,9 +169,31 @@ export class MeasureScanner extends Scanner {
     this.computedStyleCache_ = [];
   }
 
-  /** @return {!WebAnimationRunner} */
-  createRunner() {
-    return new WebAnimationRunner(this.requests_);
+  /**
+   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @return {!Promise<!WebAnimationRunner>}
+   */
+  createRunner(resources) {
+    return this.unblockElements_(resources).then(() => {
+      return new WebAnimationRunner(this.requests_);
+    });
+  }
+
+  /**
+   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @return {!Promise}
+   * @private
+   */
+  unblockElements_(resources) {
+    const promises = [];
+    for (let i = 0; i < this.targets_.length; i++) {
+      const element = this.targets_[i];
+      if (element.classList.contains('-amp-element')) {
+        const resource = resources.getResourceForElement(element);
+        promises.push(resource.loadedOnce());
+      }
+    }
+    return Promise.all(promises);
   }
 
   /** @override */
