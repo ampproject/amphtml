@@ -37,7 +37,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
-import {utf8Encode, utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
@@ -132,6 +132,35 @@ export const LIFECYCLE_STAGES = {
   adSlotCleared: '20',
 };
 
+
+
+// FOR DEVELOPMENT ONLY
+// REMOVE BEFORE SUBMITTING
+function newResponse(res, headerFn) {
+
+  function cloneHeaders() {
+    var headers = new Headers();
+    for (var kv of res.headers.entries()) {
+      headers.append(kv[0], kv[1]);
+    }
+    return headers;
+  }
+
+  var headers = headerFn ? headerFn(cloneHeaders()) : res.headers;
+
+  return new Promise(function (resolve) {
+    return res.blob().then(function (blob) {
+      resolve(new Response(blob, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: headers
+      }));
+    });
+  });
+
+}
+
+
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
   // TODO: Handle creatives that do not fill.
@@ -191,6 +220,9 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
       platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+
+    /** @private {?Array<String>} */
+    this.creativeSize_ = null;
 
     this.emitLifecycleEvent('adSlotBuilt');
   }
@@ -347,6 +379,11 @@ export class AmpA4A extends AMP.BaseElement {
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
+        // \/\/\/ THIS CODE IS FOR TESTING FRONTEND LOGIC ONLY \/\/\/
+        .then(fetchResponse => newResponse(fetchResponse, headers => {
+          headers.set('X-CreativeSize', '320x50');
+          return headers;}))
+          // /\/\/\ THIS CODE IS FOR TESTING FRONTEND LOGIC ONLY /\/\/\
         .then(fetchResponse => {
           checkStillCurrent(promiseId);
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
@@ -410,6 +447,8 @@ export class AmpA4A extends AMP.BaseElement {
           }
           if (creativeParts && creativeParts.size
               && creativeParts.size.length == 2) {
+            // We'll need to remeber the creative size for the 3p case.
+            this.creativeSize_ = creativeParts.size;
             this.handleResize(creativeParts.size);
           }
           if (!creativeParts || !creativeParts.signature) {
@@ -671,7 +710,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Array<string>} size An array containing two elements, the first
    *     being the width and the second the height.
    */
-  handleResize(size) {}
+  handleResize(size) {
+    user().info('A4A', 'Received creative with size ' + size.join('x') + '.');
+  }
 
   /**
    * Callback executed when AMP creative has successfully rendered within the
@@ -871,6 +912,10 @@ export class AmpA4A extends AMP.BaseElement {
   iframeRenderHelper_(iframe) {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
+    this.rendered_ = true;
+    if (this.creativeSize_) {
+      this.handleResize(this.creativeSize_);
+    }
     return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
   }
 

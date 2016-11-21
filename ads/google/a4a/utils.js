@@ -47,11 +47,10 @@ const AmpAdImplementation = {
  * dev mode.
  *
  * @param {!Window} win  Host window for the ad.
- * @param {!Element} element The AMP tag element.
  * @returns {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
-export function isGoogleAdsA4AValidEnvironment(win, element) {
+export function isGoogleAdsA4AValidEnvironment(win) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
   // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it

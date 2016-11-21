@@ -56,7 +56,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win, this.element) &&
+    return isGoogleAdsA4AValidEnvironment(this.win) &&
         this.isAmpAdElement() &&
         // Ensure not within remote.html iframe.
         !document.querySelector('meta[name=amp-3p-iframe-src]');
@@ -79,15 +79,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
       const multiSizeValidation = this.element
-          .getAttribute('data-multi-size-validation');
+          .getAttribute('data-multi-size-validation') || 'true';
       // The following call will check all specified multi-size dimensions,
       // verify that they meet all requirements, and then return all the valid
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
-          multiSizeDataStr /* Raw multi-size data attribute */,
-          this.element.getAttribute('width') /* Primary width */,
-          this.element.getAttribute('height') /* Primary height */,
-          multiSizeValidation /* Raw multi-size-validation data attribute */);
+          multiSizeDataStr,
+          Number(this.element.getAttribute('width')),
+          Number(this.element.getAttribute('height')),
+          multiSizeValidation == 'true');
       size += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
     }
 
@@ -118,14 +118,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   handleResize(size) {
     const pWidth = this.element.getAttribute('width');
     const pHeight = this.element.getAttribute('height');
-    const rWidth = size[0];
-    const rHeight = size[1];
+    const rWidth = Number(size[0]);
+    const rHeight = Number(size[1]);
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
     if ((rWidth != pWidth || rHeight != pHeight)
         && (rWidth <= pWidth && rHeight <= pHeight)) {
-      this.attemptChangeSize(rHeight, rWidth);
+      this.attemptChangeSize(rHeight, rWidth).catch(() => {});
     }
   }
 

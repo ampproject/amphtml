@@ -253,11 +253,11 @@ export class AmpAdXOriginIframeHandler {
    * multi-size creative. The dimensions will have been validated elsewhere, so
    * no check is needed here.
    *
-   * @param {number|string} width
-   * @param {number|string} height
+   * @param {number} width
+   * @param {number} height
    */
   updateSizeForMultisize(width, height) {
-    this.baseInstance_.attemptChangeSize(height, width);
+    this.baseInstance_.attemptChangeSize(height, width).catch(() => {});
   }
 
   /**
