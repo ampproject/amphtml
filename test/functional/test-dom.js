@@ -77,6 +77,27 @@ describe('DOM', () => {
     expect(dom.closestByTag(child, 'DIV')).to.equal(child);
   });
 
+  it('closest should stop search at opt_stopAt', () => {
+    const cbSpy = sandbox.spy();
+    const cb = el => {
+      cbSpy();
+      return el.tagName == 'DIV';
+    };
+    const element = document.createElement('div');
+
+    const child = document.createElement('p');
+    const grandchild = document.createElement('img');
+    child.appendChild(grandchild);
+    element.appendChild(child);
+    expect(dom.closest(grandchild, cb)).to.equal(element);
+    expect(cbSpy).to.be.calledThrice;
+
+    expect(dom.closest(grandchild, cb, child)).to.be.null;
+    expect(cbSpy.callCount).to.equal(4);
+
+  });
+
+
   it('closest should find first match', () => {
     const parent = document.createElement('parent');
 

@@ -226,6 +226,13 @@ const EXPERIMENTS = [
     name: 'New visibility tracking using native IntersectionObserver',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
   },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-selector/amp-selector.md',
+  },
 ];
 
 if (getMode().localDev) {
