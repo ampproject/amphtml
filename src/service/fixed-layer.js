@@ -270,9 +270,13 @@ export class FixedLayer {
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
-              position == 'fixed' &&
-              element./*OK*/offsetWidth > 0 &&
-              element./*OK*/offsetHeight > 0);
+            position == 'fixed' && (
+                fe.forceTransfer || (
+                    element./*OK*/offsetWidth > 0 &&
+                    element./*OK*/offsetHeight > 0
+                )
+              )
+            );
           if (!isFixed) {
             state[fe.id] = {
               fixed: false,
