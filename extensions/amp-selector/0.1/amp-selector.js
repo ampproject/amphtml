@@ -34,6 +34,9 @@ export class AmpSelector extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} */
     this.inputs_ = [];
+
+    /** @private {boolean} */
+    this.isDisabled_ = false;
   }
 
   /** @override */
@@ -46,7 +49,7 @@ export class AmpSelector extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-selector'),
         `Experiment amp-selector is disabled.`);
     this.isMultiple_ = this.element.hasAttribute('multiple');
-    const isDisabled = this.element.hasAttribute('disabled');
+    this.isDisabled_ = this.element.hasAttribute('disabled');
 
     this.element.setAttribute('role', 'listbox');
 
@@ -54,12 +57,12 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.setAttribute('aria-multiselectable', 'true');
     }
 
-    if (this.isDisabled) {
+    if (this.isDisabled_) {
       this.element.setAttribute('aria-disabled', 'true');
     }
 
     this.init_();
-    if (!this.isDisabled) {
+    if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
     }
   }
@@ -91,7 +94,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   setInputs_() {
     const elementName = this.element.getAttribute('name');
-    if (!elementName || this.isDisabled) {
+    if (!elementName || this.isDisabled_) {
       return;
     }
     const formId = this.element.getAttribute('form');

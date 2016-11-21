@@ -385,7 +385,7 @@ describes.realWin('amp-selector', {
     });
 
     it('should not create hidden inputs for disabled options', () => {
-      let ampSelector = getSelector({
+      const ampSelector = getSelector({
         attributes: {
           name: 'muti_select',
           multiple: true,
@@ -393,10 +393,10 @@ describes.realWin('amp-selector', {
         config: {
           count: 4,
           selectedCount: 2,
-          disabledCount: 4
+          disabledCount: 4,
         },
       });
-      let impl = ampSelector.implementation_;
+      const impl = ampSelector.implementation_;
       ampSelector.build();
       expect(impl.inputs_.length).to.equal(0);
 
