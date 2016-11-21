@@ -285,7 +285,7 @@ export class Visibility {
    * @param {!VisibilityListenerCallbackDef} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
-   * @param {Element} analyticsElement The amp-analytics element that the
+   * @param {!Element} analyticsElement The amp-analytics element that the
    *  config is associated with.
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {

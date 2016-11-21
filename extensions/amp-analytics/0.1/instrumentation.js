@@ -23,6 +23,8 @@ import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 import {Visibility} from './visibility-impl';
+import {VisibilityV2} from './visibility-v2';
+import {isExperimentOn} from '../../../src/experiments';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -94,8 +96,10 @@ export class InstrumentationService {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./visibility-impl.Visibility} */
-    this.visibility_ = new Visibility(this.ampdoc);
+    /** @const @private {(!./visibility-impl.Visibility|!./visibility-v2.VisibilityV2)} */
+    this.visibility_ = isExperimentOn(this.ampdoc.win, 'visibility-v2')
+        ? new VisibilityV2(this.ampdoc)
+        : new Visibility(this.ampdoc);
 
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(this.ampdoc.win);
