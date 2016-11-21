@@ -16,7 +16,6 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/platform';
-import {toggleExperiment} from '../../../../src/experiments';
 import {vsyncFor} from '../../../../src/vsync';
 import {
     AmpAppBanner,
@@ -25,9 +24,6 @@ import {
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
 import {xhrFor} from '../../../../src/xhr';
-import {
-    installPerformanceService,
-} from '../../../../src/service/performance-impl';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-analytics/0.1/amp-analytics';
 import * as sinon from 'sinon';
@@ -59,7 +55,6 @@ describe('amp-app-banner', () => {
       ],
     },
   };
-  toggleExperiment(window, 'amp-app-banner', true);
 
   function runTask(task, state) {
     if (task.measure) {
@@ -72,7 +67,6 @@ describe('amp-app-banner', () => {
 
   function getTestFrame() {
     return createIframePromise(true).then(iframe => {
-      installPerformanceService(iframe.win);
       platform = platformFor(iframe.win);
       sandbox.stub(platform, 'isIos', () => isIos);
       sandbox.stub(platform, 'isAndroid', () => isAndroid);
@@ -85,7 +79,6 @@ describe('amp-app-banner', () => {
         return Promise.resolve();
       });
       sandbox.stub(vsync, 'run', runTask);
-      toggleExperiment(iframe.win, 'amp-app-banner', true);
       return iframe;
     });
   }
@@ -162,7 +155,6 @@ describe('amp-app-banner', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    installPerformanceService(window);
     platform = platformFor(window);
     sandbox.stub(platform, 'isIos', () => isIos);
     sandbox.stub(platform, 'isAndroid', () => isAndroid);
@@ -354,6 +346,10 @@ describe('amp-app-banner', () => {
         doc.body.appendChild(element);
         const banner = new AbstractAppBanner(element);
         banner.addDismissButton_();
+
+        const bannerTop = element.querySelector(
+            'i-amp-app-banner-top-padding');
+        expect(bannerTop).to.exist;
         const dismissBtn = element.querySelector(
             '.amp-app-banner-dismiss-button');
         expect(dismissBtn).to.not.be.null;

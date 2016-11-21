@@ -19,6 +19,7 @@ tags: {  # <script custom-element="amp-fx-flying-carpet">
   tag_name: "SCRIPT"
   spec_name: "amp-fx-flying-carpet extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true

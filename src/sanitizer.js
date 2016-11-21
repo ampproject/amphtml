@@ -114,6 +114,9 @@ const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
 
 
 /** @const {!Array<string>} */
+const WHITELISTED_TARGETS = ['_top', '_blank'];
+
+/** @const {!Array<string>} */
 const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ 'javascript:',
   /*eslint no-script-url: 0*/ 'vbscript:',
@@ -202,6 +205,34 @@ export function sanitizeHtml(html) {
             } else if (attribs[i].search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
+          }
+        }
+        // `<A>` has special target rules:
+        // - Default target is "_top";
+        // - Allowed targets are "_blank", "_top";
+        // - All other targets are rewritted to "_top".
+        if (tagName == 'a') {
+          let index = -1;
+          let hasHref = false;
+          for (let i = 0; i < savedAttribs.length; i += 2) {
+            if (savedAttribs[i] == 'target') {
+              index = i + 1;
+            } else if (savedAttribs[i] == 'href') {
+              // Only allow valid `href` values.
+              hasHref = attribs[i + 1] != null;
+            }
+          }
+          let origTarget = index != -1 ? savedAttribs[index] : null;
+          if (origTarget != null) {
+            origTarget = origTarget.toLowerCase();
+            if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
+              attribs[index] = origTarget;
+            } else {
+              attribs[index] = '_top';
+            }
+          } else if (hasHref) {
+            attribs.push('target');
+            attribs.push('_top');
           }
         }
       }

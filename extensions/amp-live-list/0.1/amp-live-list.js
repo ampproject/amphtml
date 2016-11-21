@@ -264,6 +264,7 @@ export class AmpLiveList extends AMP.BaseElement {
     if (this.pendingItemsInsert_.length > 0) {
       this.deferMutate(() => {
         this.toggleUpdateButton_(true);
+        this.viewport_.updateFixedLayer();
       });
     } else if (this.pendingItemsReplace_.length > 0 ||
         this.pendingItemsTombstone_.length > 0) {

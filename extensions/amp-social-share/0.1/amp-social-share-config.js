@@ -66,4 +66,11 @@ const BUILTINS = {
       body: 'CANONICAL_URL',
     },
   },
+  tumblr: {
+    shareEndpoint: 'https://www.tumblr.com/share/link',
+    defaultParams: {
+      name: 'TITLE',
+      url: 'CANONICAL_URL',
+    },
+  },
 };

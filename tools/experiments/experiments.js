@@ -62,13 +62,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-experiment',
-    name: 'AMP Experiment',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-experiment/amp-experiment.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4004',
-  },
-  {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
@@ -94,22 +87,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
-    id: 'amp-scrollable-carousel',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
-  },
-  {
-    id: 'form-submit',
-    name: 'Global document form submit handler',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3999',
-  },
-  {
-    id: 'amp-form',
-    name: 'AMP Form Extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
+    id: 'amp-inabox',
+    name: 'AMP inabox',
+    spec: 'https://github.com/ampproject/amphtml/issues/5700',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
   },
   {
     id: 'amp-form-custom-validations',
@@ -147,12 +128,6 @@ const EXPERIMENTS = [
     name: 'AMP extension for Apester media',
     spec: 'https://github.com/ampproject/amphtml/issues/3233',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
-    id: 'amp-app-banner',
-    name: 'Shows a native app install/open banner.',
-    spec: 'https://github.com/ampproject/amphtml/issues/800',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5166',
   },
   {
     id: 'cache-service-worker',
@@ -217,6 +192,23 @@ const EXPERIMENTS = [
     id: 'chunked-amp',
     name: 'Split AMP\'s loading phase into chunks',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
+  },
+  {
+    id: 'amp-sticky-ad-better-ux',
+    name: 'New breaking UX changes make to amp-sticky-ad',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
+  },
+  {
+    id: 'amp-animation',
+    name: 'High-performing keyframe animations in AMP.',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-animation/amp-animation.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
+  },
+  {
+    id: 'amp-ad-loading-ux',
+    name: 'New default loading UX to amp-ad',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
   },
 ];
 

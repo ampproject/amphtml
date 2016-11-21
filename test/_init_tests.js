@@ -27,16 +27,32 @@ import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
 import * as describes from '../testing/describes';
 
 
 // All exposed describes.
 global.describes = describes;
 
+// Increase the before/after each timeout since certain times they have timedout
+// during the normal 2000 allowance.
+const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
 adopt(window);
+
+// Override AMP.extension to buffer extension installers.
+/**
+ * @param {string} name
+ * @param {string} version
+ * @param {function(!Object)} installer
+ * @const
+ */
+global.AMP.extension = function(name, version, installer) {
+  describes.bufferExtension(`${name}:${version}`, installer);
+};
+
 
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
@@ -151,7 +167,10 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
-beforeEach(beforeTest);
+beforeEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
+  beforeTest();
+});
 
 function beforeTest() {
   activateChunkingForTesting();
@@ -169,7 +188,8 @@ function beforeTest() {
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
-afterEach(() => {
+afterEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.
@@ -208,6 +228,7 @@ afterEach(() => {
         '(installed via sandbox.useFakeTimers).');
   }
   setDefaultBootstrapBaseUrlForTesting(null);
+  resetAccumulatedErrorMessagesForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
@@ -239,15 +260,17 @@ chai.Assertion.addProperty('visible', function() {
   const computedStyle = window.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
+  const isOpaque = parseInt(opacity, 10) > 0;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-    visibility === 'visible' || parseInt(opacity, 10) > 0,
-    'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-    'expected element \'' +
-        tagName + '\' not to be #{act}. with classes: ' + obj.className,
-    'visible',
-    visibility
+      visibility === 'visible' && isOpaque,
+      'expected element \'' +
+      tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+      'expected element \'' +
+      tagName + '\' not to be #{exp}, got #{act}. with classes: ' +
+      obj.className,
+      'visible and opaque',
+      `visibility = ${visibility} and opacity = ${opacity}`
   );
 });
 

@@ -51,6 +51,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
+| `gulp build --fortesting`<sup>[[1]](#footnote-1)</sup>                  | Builds the AMP library and will read the AMP_TESTING_HOST environment variable to write out an override AMP_CONFIG. |
 | `gulp build --css-only`<sup>[[1]](#footnote-1)</sup>                    | Builds only the embedded css into js files for the AMP library.       |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`                                                              | Recompile css to build directory.                                     |
@@ -126,6 +127,11 @@ For testing documents on arbitrary URLs with your current local version of the A
 For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
 
 Meantime, you can also use our automatic build on Heroku [link](http://amphtml-nightly.herokuapp.com/), which is normally built with latest head on master branch (please allow delay). The first time load is normally slow due to Heroku's free account throttling policy.
+
+To correctly get ads and third party working when testing on hosted services
+you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
+is done through
+`heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
 
 ## Repository Layout
 <pre>
