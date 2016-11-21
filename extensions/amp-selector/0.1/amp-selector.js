@@ -73,16 +73,14 @@ export class AmpSelector extends AMP.BaseElement {
       option.setAttribute('role', 'option');
       if (option.hasAttribute('disabled')) {
         option.setAttribute('aria-disabled', 'true');
-        option.removeAttribute('selected');
-      } else {
-        if (option.hasAttribute('selected')) {
-          this.setSelection_(option);
-        } else {
-          this.clearSelection_(option);
-        }
-        option.setAttribute('tabindex', '0');
-        this.options_.push(option);
       }
+      if (option.hasAttribute('selected')) {
+        this.setSelection_(option);
+      } else {
+        this.clearSelection_(option);
+      }
+      option.setAttribute('tabindex', '0');
+      this.options_.push(option);
     });
     this.setInputs_();
   }
@@ -105,15 +103,17 @@ export class AmpSelector extends AMP.BaseElement {
     const doc = this.win.document;
     const fragment = doc.createDocumentFragment();
     this.selectedOptions_.forEach(option => {
-      const hidden = doc.createElement('input');
-      hidden.setAttribute('type', 'hidden');
-      hidden.setAttribute('name', elementName);
-      hidden.setAttribute('value', option.getAttribute('option'));
-      if (formId) {
-        hidden.setAttribute('form', formId);
+      if (!option.hasAttribute('disabled')) {
+        const hidden = doc.createElement('input');
+        hidden.setAttribute('type', 'hidden');
+        hidden.setAttribute('name', elementName);
+        hidden.setAttribute('value', option.getAttribute('option'));
+        if (formId) {
+          hidden.setAttribute('form', formId);
+        }
+        this.inputs_.push(hidden);
+        fragment.appendChild(hidden);
       }
-      this.inputs_.push(hidden);
-      fragment.appendChild(hidden);
     });
     this.element.appendChild(fragment);
   }
@@ -128,9 +128,7 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
     if (!el.hasAttribute('option')) {
-      el = closest(el, element => {
-        return element.hasAttribute('option');
-      }, this.element);
+      el = closest(el, e => e.hasAttribute('option'), this.element);
     }
     if (!el || el.hasAttribute('disabled')) {
       return;

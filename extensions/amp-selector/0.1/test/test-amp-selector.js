@@ -28,7 +28,7 @@ describes.realWin('amp-selector', {
   },
 }, env => {
   let win;
-  describe('test extension', () => {
+  describe.only('test extension', () => {
 
     beforeEach(() => {
       toggleExperiment(window, 'amp-selector', true);
@@ -202,7 +202,7 @@ describes.realWin('amp-selector', {
 
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.options_.length).to.equal(5);
+      expect(impl.options_.length).to.equal(10);
       expect(impl.selectedOptions_.length).to.equal(2);
       expect(setInputsSpy).to.have.been.calledOnce;
     });
