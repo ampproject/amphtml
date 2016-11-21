@@ -34,6 +34,7 @@ export class MockA4AImpl extends AmpA4A {
       creative: responseArrayBuffer,
       signature: responseHeaders.has(SIGNATURE_HEADER) ?
           base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
+      size: null,
     });
   }
 

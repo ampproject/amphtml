@@ -447,7 +447,7 @@ export class AmpA4A extends AMP.BaseElement {
           }
           if (creativeParts && creativeParts.size
               && creativeParts.size.length == 2) {
-            // We'll need to remeber the creative size for the 3p case.
+            // We'll need to remember the creative size for the 3p case.
             this.creativeSize_ = creativeParts.size;
             this.handleResize(creativeParts.size);
           }
