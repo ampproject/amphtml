@@ -54,12 +54,12 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.setAttribute('aria-multiselectable', 'true');
     }
 
-    if (isDisabled) {
+    if (this.isDisabled) {
       this.element.setAttribute('aria-disabled', 'true');
     }
 
-    if (!isDisabled) {
-      this.init_();
+    this.init_();
+    if (!this.isDisabled) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
     }
   }
@@ -91,10 +91,10 @@ export class AmpSelector extends AMP.BaseElement {
    */
   setInputs_() {
     const elementName = this.element.getAttribute('name');
-    const formId = this.element.getAttribute('form');
-    if (!elementName) {
+    if (!elementName || this.isDisabled) {
       return;
     }
+    const formId = this.element.getAttribute('form');
 
     this.inputs_.forEach(input => {
       this.element.removeChild(input);

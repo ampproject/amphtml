@@ -28,7 +28,7 @@ describes.realWin('amp-selector', {
   },
 }, env => {
   let win;
-  describe.only('test extension', () => {
+  describe('test extension', () => {
 
     beforeEach(() => {
       toggleExperiment(window, 'amp-selector', true);
@@ -64,7 +64,7 @@ describes.realWin('amp-selector', {
         img.setAttribute('height', '10');
         img.setAttribute('option', i);
 
-        if (noOfSelectables >= selectedCount + disabledCount) {
+        if (noOfSelectables > selectedCount + disabledCount) {
           if (selectedCount > 0) {
             img.setAttribute('selected', '');
             selectedCount--;
@@ -126,10 +126,7 @@ describes.realWin('amp-selector', {
       initSpy = sandbox.spy(impl, 'init_');
       ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
-      expect(initSpy).to.be.not.have.been.called;
-
-
-
+      expect(initSpy).to.be.calledOnce;
     });
 
     it('should init properly for single select', () => {
@@ -386,6 +383,28 @@ describes.realWin('amp-selector', {
         impl.options_[2],
       ]);
     });
+
+    it('should not create hidden inputs for disabled options', () => {
+      let ampSelector = getSelector({
+        attributes: {
+          name: 'muti_select',
+          multiple: true,
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+          disabledCount: 4
+        },
+      });
+      let impl = ampSelector.implementation_;
+      ampSelector.build();
+      expect(impl.inputs_.length).to.equal(0);
+
+      impl.setSelection_(impl.options_[3]);
+      impl.setInputs_();
+      expect(impl.inputs_.length).to.equal(0);
+    });
+
     it('should handle clicks', () => {
       let ampSelector = getSelector({
         attributes: {

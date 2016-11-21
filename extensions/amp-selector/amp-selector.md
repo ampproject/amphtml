@@ -36,7 +36,7 @@ AMP select is a control that presents a list of options and lets the user choose
 
 - An `amp-selector` can contain any arbitrary HTML elements or AMP components.
 - An `amp-selector` cannot contain any nested `amp-selector`s
-- Selectable options are marked by setting an `option` attribute on the element and assign a value to it. Example: <li option='value'></li>
+- Selectable options are marked by setting an `option` attribute on the element and assign a value to it. Example: `<li option='value'></li>`
 - One or more options can be disabled by marking them with the `disabled` attribute.
 - The entire amp-selector could be disabled by adding the `disabled` attribute on the `amp-selector` element itself.
 - The selector by default allows one selection at a time, when the `multiple` attribute is added to the `amp-selector` element it enables multiple options to be selected at the same time.
