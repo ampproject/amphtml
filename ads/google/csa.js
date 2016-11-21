@@ -15,9 +15,7 @@
  */
 import {validateData, loadScript} from '../../3p/3p';
 
-// Global variables to store backfill options
-let backfillAfsPageOptions = null;
-let backfillAfsAdblockOptions = null;
+// Keep track of current height of AMP iframe
 let currentAmpHeight = null;
 
 /**
@@ -78,14 +76,20 @@ function createOverflow(overflowH, fullH, container, containerH) {
 }
 
 /**
- * CSA callback function to resize the iframe and/or request backfill
- * @param {string} containerName The div id of the container of the ad block
- * @param {boolean} adsLoaded
+ * Create a callback function to resize the iframe and/or request backfill
+ * @param {*} backfillPageOptions AFS page options (if necessary)
+ * @param {*} backfillAdblockOptions AFS ad unit options (if necessary)
+ * @return {function(string,boolean)} The callback function
  */
-function resizeIframe(containerName, adsLoaded) {
+function generateCallback(backfillPageOptions, backfillAdblockOptions) {
+  /**
+   * CSA callback function to resize the iframe and/or request backfill
+   * @param {string} containerName
+   * @param {boolean} adsLoaded
+   */
+  const resizeIframe = function(containerName, adsLoaded) {
 
-  if (adsLoaded) {
-    try {
+    if (adsLoaded) {
 
       // Get actual height and width of container
       const container = document.querySelector('#' + containerName);
@@ -100,7 +104,7 @@ function resizeIframe(containerName, adsLoaded) {
 
         // Create the overflow
         createOverflow(overflowHeight, height, container,
-          currentAmpHeight - overflowHeight);
+            currentAmpHeight - overflowHeight);
 
       }
 
@@ -140,34 +144,30 @@ function resizeIframe(containerName, adsLoaded) {
         }
       });
 
-    } catch (e) {
-      // Callback error
-    }
-  } else {
-
-    // If we need to backfill, make the call
-    if (backfillAfsPageOptions != null &&
-        backfillAfsAdblockOptions != null) {
-
-      // We don't want to backfill again, so set global variables to null
-      const tmpBackfillAfsPageOptions = backfillAfsPageOptions;
-      const tmpBackfillAfsAdblockOptions = backfillAfsAdblockOptions;
-      backfillAfsPageOptions = null;
-      backfillAfsAdblockOptions = null;
-
-      const _googCsa = window['_googCsa'];
-
-      // Call AFS
-      _googCsa('ads', tmpBackfillAfsPageOptions,
-        tmpBackfillAfsAdblockOptions);
-
     } else {
 
-      // Let AMP know we didn't return anything
-      window.context.noContentAvailable();
+      // If we need to backfill, make the call
+      if (backfillPageOptions != null &&
+          backfillAdblockOptions != null) {
 
+        const _googCsa = window['_googCsa'];
+
+        backfillAdblockOptions['adLoadedCallback'] =
+          generateCallback(null, null);
+
+        // Call AFS
+        _googCsa('ads', backfillPageOptions, backfillAdblockOptions);
+
+      } else {
+
+        // Let AMP know we didn't return anything
+        window.context.noContentAvailable();
+
+      }
     }
-  }
+  };
+
+  return resizeIframe;
 }
 
 /* Time in ms to wait before executing orientation change function logic */
@@ -238,7 +238,8 @@ export function csa(global, data) {
 
   // Add the ad container to the document
   const d = global.document.createElement('div');
-  d.id = 'csacontainer';
+  const containerId = 'csacontainer';
+  d.id = containerId;
   global.document.body.appendChild(d);
 
   // Parse AFSh page options
@@ -258,10 +259,7 @@ export function csa(global, data) {
       afshAdblockOptions = JSON.parse(data['afshAdblockOptions']);
 
       // Set container to the container we just created
-      afshAdblockOptions['container'] = 'csacontainer';
-
-      // Set to our resize iframe callback
-      afshAdblockOptions['adLoadedCallback'] = resizeIframe;
+      afshAdblockOptions['container'] = containerId;
 
       // Set the width to the width of the screen if necessary
       if (afshAdblockOptions['width'] == 'auto') {
@@ -287,10 +285,7 @@ export function csa(global, data) {
       afsAdblockOptions = JSON.parse(data['afsAdblockOptions']);
 
       // Set the container to the container we just created
-      afsAdblockOptions['container'] = 'csacontainer';
-
-      // Set to our resize iframe callback
-      afsAdblockOptions['adLoadedCallback'] = resizeIframe;
+      afsAdblockOptions['container'] = containerId;
 
     } catch (e) {}
   }
@@ -301,23 +296,30 @@ export function csa(global, data) {
     // Make the call for CSA ads
     // Call the right product based on arguments passed
     if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
-
       // AFS only
+
+      // Create the callback without any backfill options
+      afsAdblockOptions['adLoadedCallback'] = generateCallback(null, null);
+
       global._googCsa('ads', afsPageOptions, afsAdblockOptions);
 
     } else if (data['afsPageOptions'] == null
       && data['afshPageOptions'] != null) {
-
       // AFSH only
+
+      // Create the callback without any backfill options
+      afshAdblockOptions['adLoadedCallback'] = generateCallback(null, null);
+
       global._googCsa('plas', afshPageOptions, afshAdblockOptions);
 
     } else if (data['afsPageOptions'] != null
       && data['afshPageOptions'] != null) {
-
       // AFSh backfilled with AFS
-      // Set global variables so the callback function knows the AFS params
-      backfillAfsPageOptions = afsPageOptions;
-      backfillAfsAdblockOptions = afsAdblockOptions;
+
+      // Create a callback with the AFS options
+      afshAdblockOptions['adLoadedCallback'] =
+          generateCallback(afsPageOptions, afsAdblockOptions);
+
       global._googCsa('plas', afshPageOptions, afshAdblockOptions);
     }
   });
