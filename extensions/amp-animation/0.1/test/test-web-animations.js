@@ -292,6 +292,69 @@ describes.sandboxed('MeasureScanner', {}, () => {
       {opacity: '1'},
     ]);
   });
+
+
+  describes.fakeWin('createRunner', {amp: 1}, env => {
+    let resources;
+    let amp1, amp2;
+
+    beforeEach(() => {
+      resources = env.win.services.resources.obj;
+      amp1 = env.createAmpElement();
+      amp2 = env.createAmpElement();
+      resources.add(amp1);
+      resources.add(amp2);
+    });
+
+    function waitForNextMicrotask() {
+      return Promise.resolve().then(() => Promise.resolve());
+    }
+
+    function createRunner(spec) {
+      const targets = {target1, target2, amp1, amp2};
+      const scanner = new MeasureScanner(window, {
+        resolveTarget: name => targets[name] || null,
+      }, true);
+      scanner.scan(spec);
+      return scanner.createRunner(resources);
+    }
+
+    it('should unblock non-AMP elements immediately', () => {
+      let runner;
+      createRunner([
+        {target: target1, keyframes: {}},
+        {target: target2, keyframes: {}},
+      ]).then(res => {
+        runner = res;
+      });
+      return waitForNextMicrotask().then(() => {
+        expect(runner).to.be.ok;
+        expect(runner.requests_).to.have.length(2);
+      });
+    });
+
+    it('should block AMP elements', () => {
+      let runner;
+      createRunner([
+        {target: amp1, keyframes: {}},
+        {target: amp2, keyframes: {}},
+      ]).then(res => {
+        runner = res;
+      });
+      return waitForNextMicrotask().then(() => {
+        expect(runner).to.be.undefined;
+        resources.getResourceForElement(amp1).loadPromiseResolve_();
+        return waitForNextMicrotask();
+      }).then(() => {
+        expect(runner).to.be.undefined;
+        resources.getResourceForElement(amp2).loadPromiseResolve_();
+        return waitForNextMicrotask();
+      }).then(() => {
+        expect(runner).to.be.ok;
+        expect(runner.requests_).to.have.length(2);
+      });
+    });
+  });
 });
 
 
