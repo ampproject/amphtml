@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 312
+spec_file_revision: 313
 
 # Validator extensions.
 # =====================
@@ -2397,6 +2397,7 @@ tags: {
 # Only the amphtml script, custom extensions and the LD/JSON description are
 # allowed.
 tags: {
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script"
   mandatory: true
@@ -2412,6 +2413,37 @@ tags: {
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
     dispatch_key: true
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+tags: {
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  spec_name: "amp4ads engine a4a-v0.js script"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    # TODO(gregable): When this becomes a value, rather than a value_regex,
+    #                 re-add 'dispatch_key: true'
+    value_regex: "https://cdn\\.ampproject\\.org/(amp4ads-)?v0\\.js"
   }
   attrs: {
     name: "type"
