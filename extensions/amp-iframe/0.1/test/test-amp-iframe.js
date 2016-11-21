@@ -590,4 +590,35 @@ describe('amp-iframe', () => {
       expect(error.message).to.match(/not used for displaying fixed ad/);
     });
   });
+
+  it.only('should not cache intersection box', () => {
+    return getAmpIframeObject({
+      src: iframeSrc,
+      sandbox: 'allow-scripts allow-same-origin',
+      width: 300,
+      height: 250,
+    }).then(impl => {
+      const stub = sandbox.stub(impl, 'getLayoutBox');
+      const box = {
+        top: 100,
+        bottom: 200,
+        left: 0,
+        right: 100,
+        width: 100,
+        height: 100,
+      };
+      stub.returns(box);
+
+      impl.onLayoutMeasure();
+      const intersection = impl.getIntersectionElementLayoutBox();
+
+      // Simulate a fixed position element "moving" 100px by scrolling down
+      // the page.
+      box.top += 100;
+      box.bottom += 100;
+      const newIntersection = impl.getIntersectionElementLayoutBox();
+      expect(newIntersection).not.to.deep.equal(intersection);
+      expect(newIntersection.top).to.equal(intersection.top + 100);
+    });
+  });
 });
