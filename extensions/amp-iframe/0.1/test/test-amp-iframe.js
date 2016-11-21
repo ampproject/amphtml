@@ -564,7 +564,7 @@ describe('amp-iframe', () => {
   it('should correctly classify ads', () => {
     function e(width, height) {
       return {
-        getIntersectionElementLayoutBox() {
+        getLayoutBox() {
           return {width, height};
         },
       };

@@ -198,7 +198,7 @@ export class AmpIframe extends AMP.BaseElement {
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
 
-    this.isAdLike_ = isAdLike(this);
+    this.isAdLike_ = isAdLike(this.element);
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(this.element, this.win);
@@ -510,12 +510,12 @@ const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
 
 /**
  * Guess whether this element might be an ad.
- * @param {!BaseElement} ampElement An amp-iframe element.
+ * @param {!Element} element An amp-iframe element.
  * @return {boolean}
  * @visibleForTesting
  */
-export function isAdLike(ampElement) {
-  const box = ampElement.getIntersectionElementLayoutBox();
+export function isAdLike(element) {
+  const box = element.getLayoutBox();
   const height = box.height;
   const width = box.width;
   for (let i = 0; i < adSizes.length; i++) {
