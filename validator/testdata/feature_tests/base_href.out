@@ -1,0 +1,2 @@
+FAIL
+feature_tests/base_href.html:26:2 The attribute 'href' in tag 'base' is set to the invalid value 'https://example.com/'. [DISALLOWED_HTML]
