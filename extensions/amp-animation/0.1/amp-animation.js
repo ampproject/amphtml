@@ -66,14 +66,13 @@ export class AmpAnimation extends AMP.BaseElement {
     const measurer = new MeasureScanner(this.win, {
       resolveTarget: id => this.getAmpDoc().getElementById(id),
     }, /* validate */ true);
-    this.getVsync().run({
-      measure: () => {
-        measurer.scan(configJson);
-      },
-      mutate: () => {
-        this.runner_ = measurer.createRunner();
-        this.runner_.play();
-      },
+    const vsync = this.getVsync();
+    vsync.measurePromise(() => {
+      measurer.scan(configJson);
+      return measurer.createRunner(this.element.getResources());
+    }).then(runner => {
+      this.runner_ = runner;
+      this.runner_.play();
     });
   }
 }
