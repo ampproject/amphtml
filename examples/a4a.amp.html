@@ -43,18 +43,44 @@
 <body>
   <h1>A4A Examples</h1>
 
+  <h2>Fake ad network</h2>
+  <amp-ad width="300" height="400"
+      type="fake"
+      data-use-a4a="true"
+      data-vars-analytics-var="bar"
+      src="fake_amp.json">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Adsense</h2>
+  <amp-ad width=300 height=250
+      type="adsense"
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Adsense w/o placeholder and fallback</h2>
+  <amp-ad width=300 height=300
+      type="adsense"
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912">
+  </amp-ad>
+
   <h2>Doubleclick</h2>
   <div style="width: 1px; height: 1600px;"></div>
   <amp-ad width=480 height=75
       type="doubleclick"
-      data-slot="/30497360/samfrank_native_v2_a4a"
+      data-slot="/4119129/mobile_ad_banner"
       data-multi-size="320x50"
       >
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
 
-  <!--<h2>Doubleclick w/o placeholder and fallback</h2>
+  <h2>Doubleclick w/o placeholder and fallback</h2>
   <amp-ad width=320 height=50
       type="doubleclick"
       data-slot="/4119129/mobile_ad_banner">
@@ -92,7 +118,7 @@
       class="red">
     <div placeholder></div>
     <div fallback></div>
-  </amp-ad>-->
+  </amp-ad>
 
 </body>
 </html>
