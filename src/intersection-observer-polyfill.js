@@ -95,6 +95,14 @@ export class IntersectionObserverApi {
     this.intersectionObserver_ = new IntersectionObserverPolyfill(change => {
       this.subscriptionApi_.send('intersection', {changes: [change]});
     }, {threshold: DEFAULT_THRESHOLD});
+
+    /** @const {function()} */
+    this.fire = () => {
+      if (!this.shouldObserve_ || !this.isInViewport_) {
+        return;
+      }
+      this.intersectionObserver_.tick(this.viewport_.getRect());
+    };
   }
 
   /**
@@ -107,22 +115,12 @@ export class IntersectionObserverApi {
     this.baseElement_.getVsync().measure(() => {
       if (this.baseElement_.isInViewport()) {
         this.isInViewport_ = true;
-        this.intersectionObserver_.tick(this.viewport_.getRect());
+        this.fire();
       }
     });
 
-    const unlistenViewportScroll = this.viewport_.onScroll(() => {
-      if (!this.isInViewport_) {
-        return;
-      }
-      this.intersectionObserver_.tick(this.viewport_.getRect());
-    });
-    const unlistenViewportChange = this.viewport_.onChanged(() => {
-      if (!this.isInViewport_) {
-        return;
-      }
-      this.intersectionObserver_.tick(this.viewport_.getRect());
-    });
+    const unlistenViewportScroll = this.viewport_.onScroll(this.fire);
+    const unlistenViewportChange = this.viewport_.onChanged(this.fire);
     this.unlistenOnDestroy_ = () => {
       unlistenViewportScroll();
       unlistenViewportChange();
@@ -135,16 +133,6 @@ export class IntersectionObserverApi {
    */
   onViewportCallback(inViewport) {
     this.isInViewport_ = inViewport;
-  }
-
-  /**
-   * Tick intersectionObserver_ again if element in viewport
-   */
-  onLayoutMeasure() {
-    if (!this.shouldObserve_ || !this.isInViewport_) {
-      return;
-    }
-    this.intersectionObserver_.tick(this.viewport_.getRect());
   }
 
   /**
@@ -294,8 +282,7 @@ export class IntersectionObserverPolyfill {
     // To get same behavior as native IntersectionObserver set hostViewport null
     // if inside an iframe
     return calculateChangeEntry(
-        element, (opt_iframe ? null : hostViewport), intersectionRect,
-        ratio, opt_iframe);
+        element, (opt_iframe ? null : hostViewport), intersectionRect, ratio);
   }
 }
 
@@ -396,27 +383,24 @@ function calculateIntersectionRect(element, owner, hostViewport, opt_iframe) {
  * @param {?./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
  * @param {!./layout-rect.LayoutRectDef} intersection
  * @param {number} ratio
- * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
  * @return {!IntersectionObserverEntry}}
  */
 function calculateChangeEntry(
-    element, hostViewport, intersection, ratio, opt_iframe) {
+    element, hostViewport, intersection, ratio) {
   // If element not in an iframe.
   // adjust all LayoutRect to hostViewport Origin.
   let boundingClientRect = element;
   let rootBounds = hostViewport;
-  // If element inside an non-scrollable iframe. Every Layoutrect has already
-  // adjust their origin according to opt_iframe rect origin.
-  // LayoutRect position is relative to iframe origin,
+  // If no hostViewport is provided, element is inside an non-scrollable iframe.
+  // Every Layoutrect has already adjust their origin according to iframe
+  // rect origin. LayoutRect position is relative to iframe origin,
   // thus relative to iframe's viewport origin because the viewport is at the
   // iframe origin. No need to adjust position here.
 
-  if (!opt_iframe) {
+  if (rootBounds) {
     // If element not in an iframe.
     // adjust all LayoutRect to hostViewport Origin.
-    rootBounds = /** @type {!./layout-rect.LayoutRectDef} */(
-        dev().assert(rootBounds,
-        'hostViewport must not be null when element is not in iframe'));
+    rootBounds = /** @type {!./layout-rect.LayoutRectDef} */ (rootBounds);
     intersection = moveLayoutRect(intersection, -hostViewport.left,
         -hostViewport.top);
     // The element is relative to (0, 0), while the viewport moves. So, we must

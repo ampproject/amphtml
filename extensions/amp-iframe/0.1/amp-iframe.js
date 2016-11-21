@@ -209,7 +209,7 @@ export class AmpIframe extends AMP.BaseElement {
     // have changed. Send an intersection record if needed. This can be done by
     // intersectionObserverApi onlayoutMeasure function.
     if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onLayoutMeasure();
+      this.intersectionObserverApi_.fire();
     }
   }
 

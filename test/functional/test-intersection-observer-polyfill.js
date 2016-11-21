@@ -116,19 +116,19 @@ describe('IntersectionObserverApi', () => {
     expect(onScrollSpy).to.be.calledTwice;
   });
 
-  it('should tick on inViewport value when on element layoutMeasure', () => {
+  it('should tick on inViewport value when element call fire', () => {
     ioApi.startSendingIntersection_();
-    ioApi.onLayoutMeasure();
+    ioApi.fire();
     expect(tickSpy).to.not.be.called;
     ioApi.onViewportCallback(true);
-    ioApi.onLayoutMeasure();
+    ioApi.fire();
     expect(tickSpy).to.be.calledOnce;
   });
 
   it('should not tick before start observing', () => {
     ioApi.onViewportCallback(true);
     expect(tickSpy).to.not.be.called;
-    ioApi.onLayoutMeasure();
+    ioApi.fire();
     expect(tickSpy).to.not.be.called;
   });
 

@@ -304,7 +304,7 @@ export class AmpAdXOriginIframeHandler {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
     if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onLayoutMeasure();
+      this.intersectionObserverApi_.fire();
     }
   }
 }
