@@ -649,4 +649,36 @@ describe('ValidatorRulesMakeSense', () => {
       attrRuleShouldMakeSense(attrSpec);
     }
   }
+
+  // Verify that for every error code in our enum, we have exactly one format
+  // and specificity value in the rules.
+  let numValidCodes = 0;
+  for (const code in amp.validator.ValidationError.Code) {
+    numValidCodes += 1;
+  }
+  let numErrorSpecificity = 0;
+  const errorSpecificityIsUnique = {};
+  it('Two specificity rules found for same error code', () => {
+    for (const errorSpecificity of rules.errorSpecificity) {
+      expect(errorSpecificityIsUnique.hasOwnProperty(errorSpecificity.code))
+          .toBe(false);
+      errorSpecificityIsUnique[errorSpecificity.code] = 0;
+      numErrorSpecificity += 1;
+    }
+  });
+  it('Some error codes are missing specificity rules', () => {
+    expect(numValidCodes == numErrorSpecificity).toBe(true);
+  });
+  let numErrorFormat = 0;
+  const errorFormatIsUnique = {};
+  it('Two error format string rules found for same error code', () => {
+    for (const errorFormat of rules.errorFormats) {
+      expect(errorFormatIsUnique.hasOwnProperty(errorFormat.code)).toBe(false);
+      errorFormatIsUnique[errorFormat.code] = 0;
+      numErrorFormat += 1;
+    }
+  });
+  it('Some error codes are missing format strings', () => {
+    expect(numValidCodes == numErrorFormat).toBe(true);
+  });
 });
