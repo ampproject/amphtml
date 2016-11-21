@@ -313,16 +313,16 @@ describe('performance', () => {
           perf.flush();
           expect(perf.events_.length).to.equal(0);
 
-          expect(viewerSendMessageStub.withArgs('tick').callCount).to.equal(0);
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi')
-              .callCount).to.equal(0);
+          expect(viewerSendMessageStub.withArgs('tick')).to.not.be.called;
+          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
+              .to.not.be.called;
         });
       });
 
       it('should ignore all calls to tick', () => {
         perf.tick('start0');
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageStub.withArgs('tick').callCount).to.equal(0);
+          expect(viewerSendMessageStub.withArgs('tick')).to.not.be.called;
         });
       });
 
@@ -330,8 +330,8 @@ describe('performance', () => {
         perf.tick('start0');
         perf.flush();
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi')
-              .callCount).to.equal(0);
+          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
+              .to.not.be.called;
         });
       });
     });

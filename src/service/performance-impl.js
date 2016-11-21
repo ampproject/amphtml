@@ -221,7 +221,8 @@ export class Performance {
    * @private
    */
   setFlushParams_(params) {
-    this.viewer_.sendMessageCancelUnsent('setFlushParams', params, false);
+    this.viewer_.sendMessageCancelUnsent('setFlushParams', params,
+        /* awaitResponse */false);
   }
 
   /**
@@ -243,7 +244,7 @@ export class Performance {
         label,
         from: opt_from,
         value: opt_value,
-      }, false);
+      }, /* awaitResponse */false);
     } else {
       this.queueTick_(label, opt_from, opt_value);
     }
@@ -286,7 +287,8 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessageCancelUnsent('sendCsi', undefined, false);
+      this.viewer_.sendMessageCancelUnsent('sendCsi', undefined,
+          /* awaitResponse */false);
     }
   }
 
@@ -332,7 +334,7 @@ export class Performance {
     }
 
     this.events_.forEach(tickEvent => {
-      this.viewer_.sendMessage('tick', tickEvent, false);
+      this.viewer_.sendMessage('tick', tickEvent, /* awaitResponse */false);
     });
     this.events_.length = 0;
   }
@@ -370,7 +372,8 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.sendMessageCancelUnsent('prerenderComplete', {value}, false);
+      this.viewer_.sendMessageCancelUnsent('prerenderComplete', {value},
+          /* awaitResponse */false);
     }
   }
 

@@ -263,6 +263,13 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/signin.js',
     ],
   },
+  'sendMessageCancelUnsent': {
+    message: 'Usages must be reviewed.',
+    whitelist: [
+      'src/service/viewer-impl.js',
+      'src/service/performance-impl.js',
+    ],
+  },
   // Privacy sensitive
   'cidFor': {
     message: requiresReviewPrivacy,
