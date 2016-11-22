@@ -464,11 +464,17 @@ describe('isLocalhostOrigin', () => {
   }
 
   testLocalhostOrigin(
-      'http://localhost:123', true);
+      'http://localhost', true);
   testLocalhostOrigin(
-      'https://localhost:123', true);
+      'https://localhost', true);
   testLocalhostOrigin(
-      'http://localhost.example.com', false);
+      'http://localhost:123/foo.html', true);
+  testLocalhostOrigin(
+      'https://localhost:123/foo.html', true);
+  testLocalhostOrigin(
+      'http://localhost.example.com/foo.html', false);
+  testLocalhostOrigin(
+      'http://www.example.com/foo.html', false);
 });
 
 describe('getSourceOrigin/Url', () => {
