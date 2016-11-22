@@ -533,9 +533,11 @@ export class Viewport {
   /**
    * Adds the element to the fixed layer.
    * @param {!Element} element
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the fixed layer.
    */
-  addToFixedLayer(element) {
-    this.fixedLayer_.addElement(element);
+  addToFixedLayer(element, opt_forceTransfer) {
+    this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**
@@ -1400,8 +1402,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 /**
  * Implementation of ViewportBindingDef based for iframed iOS case where iframes
  * are not scrollable. Scrolling accomplished here by inserting a scrollable
- * wrapper `<i-amp-html-wrapper>` inside the `<html>` element and reparenting the
- * original `<body>` inside.
+ * wrapper `<html id="i-amp-html-wrapper">` inside the `<html>` element and
+ * reparenting the original `<body>` inside.
  *
  * @implements {ViewportBindingDef}
  * @visibleForTesting
@@ -1414,10 +1416,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+    const topClasses = this.win.document.documentElement.className;
+    this.win.document.documentElement.className = '';
     this.win.document.documentElement.classList.add('-amp-ios-embed');
 
     /** @private @const {!Element} */
-    this.wrapper_ = this.win.document.createElement('i-amp-html-wrapper');
+    this.wrapper_ = this.win.document.createElement('html');
+    this.wrapper_.id = 'i-amp-html-wrapper';
+    this.wrapper_.className = topClasses;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();

@@ -192,6 +192,10 @@ export const adConfig = {
     ],
   },
 
+  f1e: {
+    prefetch: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
+  },
+
   fake: {},
 
   felmat: {
@@ -236,6 +240,11 @@ export const adConfig = {
   inmobi: {
     prefetch: 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js',
     renderStartImplemented: true,
+  },
+
+  ix: {
+    prefetch: 'https://js-sec.indexww.com/indexJTag.js',
+    preconnect: 'https://as-sec.casalemedia.com',
   },
 
   kargo: {},

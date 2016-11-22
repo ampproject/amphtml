@@ -91,6 +91,8 @@ describe('SlideScroll', () => {
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
           .to.be.true;
+      expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+      expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
     });
   });
 
@@ -192,6 +194,9 @@ describe('SlideScroll', () => {
           'amp-carousel-next', {'fromSlide': 'slide-id', 'toSlide': '1'});
       expect(analyticsEventSpy).to.have.been.calledWith(
           'amp-carousel-change', {'fromSlide': 'slide-id', 'toSlide': '1'});
+      expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('true');
+      expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('false');
+      expect(impl.slides_[2].getAttribute('aria-hidden')).to.equal('true');
 
       impl.showSlide_(0);
 
@@ -220,6 +225,8 @@ describe('SlideScroll', () => {
           'amp-carousel-prev', {'fromSlide': '1', 'toSlide': 'slide-id'});
       expect(analyticsEventSpy).to.have.been.calledWith(
           'amp-carousel-change', {'fromSlide': '1', 'toSlide': 'slide-id'});
+      expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+      expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
 
       impl.showSlide_(4);
 
@@ -246,6 +253,9 @@ describe('SlideScroll', () => {
           'amp-carousel-prev', {'fromSlide': 'slide-id', 'toSlide': '4'});
       expect(analyticsEventSpy).to.have.been.calledWith(
           'amp-carousel-change', {'fromSlide': 'slide-id', 'toSlide': '4'});
+      expect(impl.slides_[3].getAttribute('aria-hidden')).to.equal('true');
+      expect(impl.slides_[4].getAttribute('aria-hidden')).to.equal('false');
+      expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal(null);
     });
   });
 
@@ -587,6 +597,10 @@ describe('SlideScroll', () => {
             sandbox.spy(impl, 'hideRestOfTheSlides_');
         const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
 
+        expect(impl.slides_[4].getAttribute('aria-hidden')).to.equal('true');
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
+
         impl.showSlide_(1);
 
         expect(updateInViewportSpy).to.have.been.calledWith(
@@ -611,6 +625,9 @@ describe('SlideScroll', () => {
         expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
         expect(hideRestOfTheSlidesSpy.callCount).to.equal(1);
         expect(setControlsStateSpy.callCount).to.equal(1);
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('true');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[2].getAttribute('aria-hidden')).to.equal('true');
 
         impl.showSlide_(0);
 
@@ -637,6 +654,9 @@ describe('SlideScroll', () => {
         expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([4, 0, 1]);
         expect(hideRestOfTheSlidesSpy.callCount).to.equal(2);
         expect(setControlsStateSpy.callCount).to.equal(2);
+        expect(impl.slides_[4].getAttribute('aria-hidden')).to.equal('true');
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
 
         impl.showSlide_(4);
 
@@ -662,6 +682,9 @@ describe('SlideScroll', () => {
         expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4, 0]);
         expect(hideRestOfTheSlidesSpy.callCount).to.equal(3);
         expect(setControlsStateSpy.callCount).to.equal(3);
+        expect(impl.slides_[3].getAttribute('aria-hidden')).to.equal('true');
+        expect(impl.slides_[4].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('true');
 
       });
     });

@@ -82,6 +82,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.viewport_ = this.getViewport();
 
+    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */true);
+
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
           this.document_.body.getAttribute('dir') ||
@@ -176,7 +178,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
-      this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
       if (this.isIosSafari_) {
         this.compensateIosBottombar_();
@@ -221,7 +222,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {
-          this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
             toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());
