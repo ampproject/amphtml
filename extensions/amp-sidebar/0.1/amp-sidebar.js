@@ -222,7 +222,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {
-          //this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
             toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());

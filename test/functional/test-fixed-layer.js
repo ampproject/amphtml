@@ -319,8 +319,6 @@ describe('FixedLayer', () => {
       expect(fe.element).to.equal(element3);
       expect(fe.selectors).to.deep.equal(['*']);
 
-
-
       // Remove.
       fixedLayer.removeElement(element3);
       expect(fixedLayer.fixedElements_).to.have.length(2);
@@ -690,6 +688,27 @@ describe('FixedLayer', () => {
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].transferrable).to.equal(true);
+    });
+
+    it('should not disregard invisible element if it has forceTransfer', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 0;
+      element1.offsetHeight = 0;
+
+      expect(vsyncTasks).to.have.length(1);
+      let state = {};
+      vsyncTasks[0].measure(state);
+      expect(state['F0'].fixed).to.be.false;
+      expect(state['F0'].transferrable).to.equal(false);
+
+      // Add.
+      state = {};
+      fixedLayer.setupFixedElement_(element1, '*', true);
+      expect(vsyncTasks).to.have.length(1);
       vsyncTasks[0].measure(state);
 
       expect(state['F0'].fixed).to.be.true;
