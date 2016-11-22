@@ -141,10 +141,16 @@ export class AmpAdXOriginIframeHandler {
           this.noContent_();
           getAdCid(this.baseInstance_).then(cid => {
             const tagType = this.baseInstance_.element.getAttribute('type');
-            const correlator = this.baseInstance_.win.ampAdPageCorrelator ||
-                null;
-            const referrer = this.baseInstance_.win.document.referrer;
-            dev().error('AMP-AD', e, tagType, cid, correlator, referrer);
+            dev().error('amp-a4a: ' + tagType, JSON.stringify({
+              'm': e instanceof Error ? e.message : e,
+              'type': tagType,
+              'correlator': this.baseInstance_.win.ampAdPageCorrelator ||
+                  null,
+              'slotId': this.baseInstance_
+                  .element.getAttribute('data-amp-slot-index'),
+              'clientId': cid,
+              'referrer': this.baseInstance_.win.document.referrer,
+            }));
           });
         }).then(() => {
           if (this.iframe) {
