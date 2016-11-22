@@ -37,6 +37,7 @@ import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
+import {platformFor} from '../../../src/platform';
 import {
   importPublicKey,
   isCryptoAvailable,
@@ -171,8 +172,13 @@ export class AmpA4A extends AMP.BaseElement {
     // from cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
-    /** @private {?string} */
-    this.experimentalNonAmpCreativeRenderMethod_ = null;
+    /**
+     * Note(keithwrightbos) - ensure the default here is null so that ios
+     * uses safeframe when response header is not specified.
+     * @private {?string}
+     */
+    this.experimentalNonAmpCreativeRenderMethod_ =
+      platformFor(this.win).isIos() ? 'safeframe' : null;
 
     this.emitLifecycleEvent('adSlotBuilt');
   }
@@ -342,7 +348,8 @@ export class AmpA4A extends AMP.BaseElement {
           // iframe src from cache' issue.  See
           // https://github.com/ampproject/amphtml/issues/5614
           this.experimentalNonAmpCreativeRenderMethod_ =
-              fetchResponse.headers.get(RENDERING_TYPE_HEADER);
+              fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
+              this.experimentalNonAmpCreativeRenderMethod_;
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -522,7 +529,6 @@ export class AmpA4A extends AMP.BaseElement {
             this.creativeBody_) {
           const renderPromise = this.renderViaSafeFrame_(this.creativeBody_);
           this.creativeBody_ = null;  // Free resources.
-          this.experimentalNonAmpCreativeRenderMethod_ = null;
           return renderPromise;
         } else if (this.adUrl_) {
           return this.renderViaCachedContentIframe_(this.adUrl_);
@@ -555,7 +561,8 @@ export class AmpA4A extends AMP.BaseElement {
       this.adPromise_ = null;
       this.adUrl_ = null;
       this.creativeBody_ = null;
-      this.experimentalNonAmpCreativeRenderMethod_ = null;
+      this.experimentalNonAmpCreativeRenderMethod_ =
+          platformFor(this.win).isIos() ? 'safeframe' : null;
       this.rendered_ = false;
       if (this.xOriginIframeHandler_) {
         this.xOriginIframeHandler_.freeXOriginIframe();

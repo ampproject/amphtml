@@ -35,6 +35,7 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
+import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
@@ -171,6 +172,28 @@ describe('amp-a4a', () => {
       delete headers[SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      fixture.doc.body.appendChild(a4aElement);
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        // Force vsync system to run all queued tasks, so that DOM mutations
+        // are actually completed before testing.
+        a4a.vsync_.runScheduledTasks_();
+        const child = a4aElement.querySelector('iframe[name]');
+        expect(child).to.be.ok;
+        expect(child).to.be.visible;
+      });
+    });
+
+    it('for ios defaults to SafeFrame rendering', () => {
+      const platform = platformFor(fixture.win);
+      sandbox.stub(platform, 'isIos').returns(true);
+      a4a = new MockA4AImpl(a4aElement);
+      verifyNonAMPRender(a4a);
+      // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete headers[SIGNATURE_HEADER];
+      // Ensure no rendering type header (ios on safari will default to
+      // safeframe).
+      delete headers[RENDERING_TYPE_HEADER];
       fixture.doc.body.appendChild(a4aElement);
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
