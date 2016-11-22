@@ -255,7 +255,7 @@ describe('SlideScroll', () => {
           'amp-carousel-change', {'fromSlide': 'slide-id', 'toSlide': '4'});
       expect(impl.slides_[3].getAttribute('aria-hidden')).to.equal('true');
       expect(impl.slides_[4].getAttribute('aria-hidden')).to.equal('false');
-      expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('true');
+      expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal(null);
     });
   });
 
