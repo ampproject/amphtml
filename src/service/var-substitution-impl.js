@@ -510,12 +510,15 @@ export class GlobalVariableSource extends VariableSource {
  * @package For export
  */
 export class VarSubstitution {
-  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!VariableSource} variableSource
+   */
   constructor(ampdoc, variableSource) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @type {VariableSource} */
+    /** @type {!VariableSource} */
     this.variableSource_ = variableSource;
   }
 
@@ -673,7 +676,7 @@ export function installVarSubstitutionServiceForDoc(ampdoc) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
- * @param {*} varSource
+ * @param {!VariableSource} varSource
  */
 export function installVarSubstitutionForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'var-substitution',

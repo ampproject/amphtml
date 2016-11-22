@@ -25,7 +25,6 @@ import {
 } from './var-substitution-impl';
 import {varSubstitutionForDoc} from '../var-substitution';
 import {
-    VariableSource,
     ResolverReturnDef,
     SyncResolverDef,
 } from './variable-source';
@@ -168,7 +167,7 @@ export class UrlReplacements {
   }
 
   /**
-   * @return {VariableSource}
+   * @return {?./variable-source.VariableSource}
    */
   getVariableSource() {
     return this.varSub_.getVariableSource();
@@ -190,7 +189,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
- * @param {*} varSource
+ * @param {!./variable-source.VariableSource} varSource
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installVarSubstitutionForEmbed(ampdoc, embedWin, varSource);
