@@ -15,7 +15,9 @@
  */
 
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {IntersectionObserver} from '../../../src/intersection-observer';
+import {
+  IntersectionObserverApi,
+} from '../../../src/intersection-observer-polyfill';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
@@ -182,8 +184,8 @@ export class AmpIframe extends AMP.BaseElement {
       this.element.setAttribute('scrolling', 'no');
     }
 
-    /** @private {!IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    /** @private {?IntersectionObserverApi} */
+    this.intersectionObserverApi_ = null;
 
     if (!this.element.hasAttribute('frameborder')) {
       this.element.setAttribute('frameborder', '0');
@@ -204,10 +206,10 @@ export class AmpIframe extends AMP.BaseElement {
         !isAdPositionAllowed(this.element, this.win);
 
     // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This does nothing
-    // if we aren't currently in view.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    // have changed. Send an intersection record if needed. This can be done by
+    // intersectionObserverApi onlayoutMeasure function.
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.fire();
     }
   }
 
@@ -289,7 +291,7 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
-      this.intersectionObserver_ = new IntersectionObserver(this, iframe);
+      this.intersectionObserverApi_ = new IntersectionObserverApi(this, iframe);
     }
 
     iframe.onload = () => {
@@ -353,11 +355,10 @@ export class AmpIframe extends AMP.BaseElement {
       }
 
       this.iframe_ = null;
-      // IntersectionObserver's listeners were cleaned up by
-      // setInViewport(false) before #unlayoutCallback
-      if (this.intersectionObserver_) {
-        this.intersectionObserver_.destroy();
-        this.intersectionObserver_ = null;
+      // Needs to clean up intersectionObserverApi_
+      if (this.intersectionObserverApi_) {
+        this.intersectionObserverApi_.destroy();
+        this.intersectionObserverApi_ = null;
       }
     }
     return true;
@@ -365,8 +366,8 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.onViewportCallback(inViewport);
     }
   }
 

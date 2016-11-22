@@ -14,13 +14,181 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill, getThresholdSlot,
+import {
+  IntersectionObserverApi,
+  IntersectionObserverPolyfill,
+  getThresholdSlot,
+  DEFAULT_THRESHOLD,
+  getIntersectionChangeEntry,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-const DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+describe('IntersectionObserverApi', () => {
+  let sandbox;
+  let onScrollSpy;
+  let onChangeSpy;
+  let testEle;
+  let baseElement;
+  let ioApi;
+  let tickSpy;
+
+  const iframeSrc = 'http://iframe.localhost:' + location.port +
+      '/test/fixtures/served/iframe-intersection.html';
+  let testIframe;
+
+  function getIframe(src) {
+    const i = document.createElement('iframe');
+    i.src = src;
+    return i;
+  }
+
+  function insert(iframe) {
+    document.body.appendChild(iframe);
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    onScrollSpy = sandbox.spy();
+    onChangeSpy = sandbox.spy();
+    testIframe = getIframe(iframeSrc);
+    testEle = {
+      isBuilt: () => {return true;},
+      getOwner: () => {return null;},
+      getLayoutBox: () => {return layoutRectLtwh(50, 100, 150, 200);},
+      win: window,
+    };
+
+    baseElement = {
+      element: testEle,
+      getVsync: () => {
+        return {
+          measure: func => {
+            func();
+          },
+        };
+      },
+      getViewport: () => {
+        return {
+          getRect: () => {
+            return layoutRectLtwh(50, 100, 150, 200);
+          },
+          onScroll: () => {
+            onScrollSpy();
+            return () => {};
+          },
+          onChanged: () => {
+            onChangeSpy();
+            return () => {};
+          },
+        };
+      },
+      isInViewport: () => {return false;},
+    };
+    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    insert(testIframe);
+    tickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+  });
+  afterEach(() => {
+    sandbox.restore();
+    testIframe.parentNode.removeChild(testIframe);
+    if (ioApi) {
+      ioApi.destroy();
+    }
+    ioApi = null;
+    tickSpy = null;
+  });
+
+  it('should tick if element in viewport when start sending io', () => {
+    ioApi.startSendingIntersection_();
+    expect(tickSpy).to.not.be.called;
+    expect(onChangeSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    testIframe.parentNode.removeChild(testIframe);
+    ioApi.destroy();
+    baseElement.isInViewport = () => {return true;};
+    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    insert(testIframe);
+    const inViewportTickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+    ioApi.startSendingIntersection_();
+    expect(inViewportTickSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledTwice;
+    expect(onScrollSpy).to.be.calledTwice;
+  });
+
+  it('should tick on inViewport value when element call fire', () => {
+    ioApi.startSendingIntersection_();
+    ioApi.fire();
+    expect(tickSpy).to.not.be.called;
+    ioApi.onViewportCallback(true);
+    ioApi.fire();
+    expect(tickSpy).to.be.calledOnce;
+  });
+
+  it('should not tick before start observing', () => {
+    ioApi.onViewportCallback(true);
+    expect(tickSpy).to.not.be.called;
+    ioApi.fire();
+    expect(tickSpy).to.not.be.called;
+  });
+
+  it('should destroy correctly', () => {
+    const subscriptionApiDestroySy =
+        sandbox.spy(ioApi.subscriptionApi_, 'destroy');
+    ioApi.destroy();
+    expect(subscriptionApiDestroySy).to.be.called;
+    expect(ioApi.unlistenOnDestroy_).to.be.null;
+    expect(ioApi.intersectionObserver_).to.be.null;
+    expect(ioApi.subscriptionApi_).to.be.null;
+    ioApi = null;
+  });
+});
+
+describe('getIntersectionChangeEntry', () => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(performance, 'now', () => 100);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+  it('without owner', () => {
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(0, 100, 50, 50),
+        null,
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRatio: 1,
+        });
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(50, 200, 150, 200),
+        null,
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, 100, 150, 200),
+          intersectionRect: DomRectLtwh(50, 100, 50, 0),
+          intersectionRatio: 0,
+        });
+  });
+  it('with owner', () => {
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(50, 50, 150, 200),
+        layoutRectLtwh(0, 50, 100, 100),
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, -50, 150, 200),
+          intersectionRect: DomRectLtwh(50, 0, 50, 50),
+          intersectionRatio: 1 / 12,
+        });
+  });
+});
 
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
