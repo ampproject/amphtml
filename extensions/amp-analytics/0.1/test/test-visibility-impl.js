@@ -165,7 +165,7 @@ describe('amp-analytics.visibility', () => {
       elementY: '23', // 13 + 10
       elementWidth: '100',
       elementHeight: '100',
-      loadTimeVisibility: '63', // (100 - 30) * (100 - 10) / 100
+      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
       totalTime: sinon.match(value => {
         return isFiniteNumber(Number(value));
       }),
@@ -186,7 +186,7 @@ describe('amp-analytics.visibility', () => {
       elementY: '0',
       elementWidth: '100',
       elementHeight: '100',
-      loadTimeVisibility: '50',
+      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
       totalTime: sinon.match(value => {
         return isFiniteNumber(Number(value));
       }),
