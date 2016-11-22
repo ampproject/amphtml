@@ -1425,6 +1425,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.width = '100px';
     env.iframe.style.height = '100px';
     win = env.win;
+    win.document.documentElement.className = 'top';
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
@@ -1449,11 +1450,16 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
         .to.equal(binding.wrapper_);
     expect(binding.wrapper_.parentNode)
         .to.equal(win.document.documentElement);
-    expect(binding.wrapper_.tagName).to.equal('I-AMP-HTML-WRAPPER');
+    expect(binding.wrapper_.tagName).to.equal('HTML');
+    expect(binding.wrapper_.id).to.equal('i-amp-html-wrapper');
     expect(win.document.body.contains(child)).to.be.true;
     expect(binding.wrapper_.contains(child)).to.be.true;
     expect(win.document.contains(child)).to.be.true;
     expect(child.textContent).to.equal('test');
+
+    // Top-level classes moved to the wrapper element.
+    expect(win.document.documentElement).to.not.have.class('top');
+    expect(binding.wrapper_).to.have.class('top');
   });
 
   it('should have CSS setup', () => {
