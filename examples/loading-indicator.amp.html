@@ -1,0 +1,226 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+    article {
+      display: block;
+      max-width: 736px;
+      margin: 8px;
+    }
+
+    .bordered {
+      border: 1px solid black;
+    }
+
+    .box1 {
+      border: 1px solid black;
+      margin: 8px 0;
+    }
+
+    .logo {
+      background: yellow;
+      border: 5px solid black;
+      border-radius: 50%;
+      opacity: 0.7;
+      position: fixed;
+      z-index: 1000;
+      top: 100px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .ear {
+      background: lime;
+      border: 5px solid black;
+      opacity: 0.7;
+      position: absolute;
+      z-index: 999;
+      top: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    @media screen and (min-width: 380px) {
+      .logo {
+        top: auto;
+      }
+    }
+
+    @media screen and (min-width: 420px) {
+      .logo {
+        position: static;
+        top: auto;
+      }
+    }
+
+    .goto {
+      display: block;
+      margin: 16px;
+    }
+    @font-face {
+      font-family: 'Comic AMP';
+      font-style: bold;
+      font-weight: 700;
+      src: url(fonts/ComicAMP.ttf) format('truetype');
+    }
+    .comic-amp-font-loaded .comic-amp {
+      font-family: 'Comic AMP', serif, sans-serif;
+    }
+
+    .comic-amp-font-loading .comic-amp {
+      color: #0ff;
+    }
+
+    .comic-amp-font-missing .comic-amp {
+      color: #f00;
+    }
+
+    #amp-iframe:target {
+      border: 1px solid green;
+    }
+
+    #breaker {
+      height: 100px;
+      background: green;
+    }
+
+    #breaking {
+      height: 200px;
+      width: 200vw;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    #lightbox {
+      background-color: rgba(0, 0, 0, 0.95);
+    }
+
+  </style>
+  <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script custom-element="amp-pinterest" src="../dist/v0/amp-pinterest-0.1.max.js" async></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-list" src="../../dist/v0/amp-list-0.1.max.js"></script>
+  <script async custom-template="amp-mustache" src="../../dist/v0/amp-mustache-0.1.max.js"></script>
+  <script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async src="./viewer-integr.js" data-amp-report-test="viewer-integr.js"></script>
+</head>
+<body class="comic-amp-font-loading">
+<div class="logo"></div>
+<div class="ear"></div>
+
+<article>
+
+<h1 id="top">AMP #0</h1>
+  <h2>AMP-IMG</h2>
+  <p>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
+ </p>
+
+  <h2>AMP-ANIM</h2>
+  <p>
+    <amp-anim
+        src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no"
+        width="400" height="225" layout="responsive">
+      <amp-img placeholder
+          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no-k"
+          width="400" height="225" layout="responsive"></amp-img>
+    </amp-anim>
+  </p>
+
+  <h2>AMP-VIDEO</h2>
+  <amp-video
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      width="358"
+      height="204"
+      layout="responsive"
+      controls></amp-video>
+
+  <h2>AMP-YOUTUBE</h2>
+  <amp-youtube
+      data-videoid="mGENRKrdoGY"
+      width="480" height="270"></amp-youtube>
+
+  <h2>AMP-AD</h2>
+  <amp-ad width=300 height=250
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="abc123"
+      data-aax_src="302">
+  </amp-ad>
+
+  <h2>AMP-EMBED</h2>
+  <amp-embed width=100 height=283
+      type="mantis-recommend"
+      layout=responsive
+      heights="(min-width:1907px) 56%, (min-width:1100px) 64%, (min-width:780px) 75%, (min-width:480px) 105%, 200%"
+      data-property="demo">
+  </amp-embed>
+
+
+  <h2>AMP-INSTAGRAM</h2>
+  <amp-instagram
+    data-shortcode="fBwFP"
+    width="320"
+    height="320"
+    layout="responsive">
+  </amp-instagram>
+
+  <h2 id="amp-iframe">AMP-IFRAME</h2>
+  <amp-iframe width=300 height=300
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      layout="responsive"
+      frameborder="0"
+      src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+  </amp-iframe>
+
+  <h2>AMP-PINTEREST</h2>
+  <amp-pinterest height=28 width=120
+    data-do="buttonPin"
+    data-count="beside"
+    data-color="white"
+    data-tall="true"
+    data-url="http://www.flickr.com/photos/kentbrew/6851755809/"
+    data-media="http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg"
+    data-description="Next stop: Pinterest">
+  </amp-pinterest>
+
+  <h2>AMP-LIST</h2>
+  <amp-list width="396" height="80" layout=responsive
+      src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
+
+  <h2>AMP-BRIGHTCOVE</h2>
+  <amp-brightcove
+      data-account="906043040001"
+      data-video-id="1401169490001"
+      data-player="180a5658-8be8-4f33-8eba-d562ab41b40c"
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+
+</article>
+</body>
+</html>

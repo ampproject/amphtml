@@ -88,7 +88,6 @@ export const LOADING_ELEMENTS_ = {
   'AMP-EMBED': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
-  'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-VIDEO': true,

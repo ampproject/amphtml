@@ -104,10 +104,20 @@
       background-color: rgba(0, 0, 0, 0.95);
     }
 
+    .b222 {
+      position: absolute;
+      background-color: red;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+
   </style>
   <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
   <script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
   <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
@@ -124,238 +134,14 @@
 <div class="logo"></div>
 <div class="ear"></div>
 
-<article>
-
-<h1 id="top">AMP #0</h1>
-<a href="#amp-iframe">Go to iframe</a>
-  <p class="comic-amp">
-    Quisque ultricies id augue a convallis. Vivamus euismod est quis tellus laoreet lacinia. In quam tellus, mollis nec porta eget, volutpat sit amet nibh. Duis ac odio sem. Sed consequat, ante gravida fringilla suscipit, libero libero ullamcorper metus, nec porta est elit at est. Curabitur vel diam ligula. Nulla bibendum malesuada odio.
-  </p>
-  <p>
-    <amp-fit-text width="300" height="200" layout="responsive" class="box1">
-      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
-    </amp-fit-text>
-  </p>
-  <p>
-    <div class="box1">
-      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
-    </div>
-  </p>
-
-  <p>
-    <a class="goto" href="#top">Top</a>
-    <a class="goto" href="#img0">Image0</a>
-    <a class="goto" href="#footer">Footer</a>
-  </p>
-
-  <p>
-    <amp-carousel width=400 height=300 layout=responsive type=slides>
-      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
-      <amp-anim
-          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
-          width="400" height="300">
-        <amp-img placeholder
-            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no-k"
-            width="400" height="300"></amp-img>
-      </amp-anim>
-    </amp-carousel>
-  </p>
-  <p>
-    <amp-carousel width=auto height=200>
-      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no-n" width=300 height=200></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no-n" width=300 height=200></amp-img>
-      <amp-anim
-          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w300-h200-no"
-          width="300" height="200">
-        <amp-img placeholder
-            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w300-h200-no-k"
-            width="300" height="200"></amp-img>
-      </amp-anim>
-    </amp-carousel>
-  </p>
-  <p>
-    <amp-anim
-        src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no"
-        width="400" height="225" layout="responsive">
-      <amp-img placeholder
-          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no-k"
-          width="400" height="225" layout="responsive"></amp-img>
-    </amp-anim>
-  </p>
-
-  <h2>Video</h2>
-  <amp-video
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      width="358"
-      height="204"
-      layout="responsive"
-      controls></amp-video>
-
-  <h2>Youtube</h2>
-  <amp-youtube
-      data-videoid="mGENRKrdoGY"
-      width="480" height="270"></amp-youtube>
-
-  <amp-youtube
-      data-videoid="mGENRKrdoGY"
-      layout="responsive"
-      width="480" height="270"></amp-youtube>
-
-
-  <h2>Audio</h2>
-    <amp-audio src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3"></amp-audio>
-
-  <h2>Lightbox</h2>
-  <amp-lightbox id="lightbox" layout="nodisplay">
-    <p>
-      <button on="tap:lightbox.close">
-          Close Lightbox
-      </button>
-    </p>
-    <p>
-      <amp-twitter width=486 height=657
-          media="(min-width: 401px)"
-          layout="fixed"
-          data-tweetID="585110598171631616"></amp-twitter>
-      </p>
-    <p>
-      <amp-youtube
-          data-videoid="mGENRKrdoGY"
-          layout="fixed"
-          width="480" height="270"></amp-youtube>
-    </p>
-  </amp-lightbox>
-
-  <button on="tap:lightbox">
-      Open Lightbox
-  </button>
-
-  <h2>Images</h2>
-  <p>
-  Responsive (w/srcset, w/image-lightbox)
-  <p>
-    <amp-image-lightbox id="imagelightbox1" layout="nodisplay"></amp-image-lightbox>
-    <amp-img id="img0"
-        srcset="
-            https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg 2004w,
-            https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg 1002w"
-        width=527 height=193 layout="responsive"
-        on="tap:imagelightbox1" role="button" tabindex="0"></amp-img>
-  </p>
-
-  <p>
-  Fixed
-  <p>
-    <amp-img id="img1" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=264 height=96></amp-img>
-  </p>
-
-  <p>
-  None
-  <p class="bordered">
-    <amp-img id="img2" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="nodisplay"></amp-img>
-  </p>
-  <p>
-    Lorem ipsum dolor sit amet.
-  </p>
-  <amp-ad width=300 height=250
-      type="a9"
-      data-aax_size="300x250"
-      data-aax_pubname="abc123"
-      data-aax_src="302">
-  </amp-ad>
-  <p>
-    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
-  </p>
-
-  <p>
-    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
-  </p>
-  <p>
-    <amp-img id="img3" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    <amp-img id="img4" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    <amp-img id="img5" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
-  </p>
-  <section>
-    <h1>Media query selection<h1>
-    <amp-img
-        media="(min-width: 650px)"
-        id="img6" src="https://lh5.googleusercontent.com/-vmSp-YN10lA/VcH6S35gAWI/AAAAAAABYqk/6wuA5T3ApSk/w1832-h1376-no/IMG_20150805_131745-ANIMATION.gif"
-        width=466
-        height=355 layout="responsive" ></amp-img>
-    <amp-img
-        media="(max-width: 649px)"
-        id="img7" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg"
-        width=527
-        height=193 layout="responsive" ></amp-img>
-  </section>
-  <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
-  </p>
-  <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <h2>Twitter</h2>
-  <amp-twitter width=486 height=657
-      media="(min-width: 401px)"
-      layout="responsive"
-      data-tweetID="585110598171631616">
-  </amp-twitter>
-  <amp-twitter width=306 height=525
-      media="(max-width: 400px)"
-      layout="responsive"
-      data-tweetID="585110598171631616">
-  </amp-twitter>
-  <!-- no cards -->
-  <amp-twitter width=486 height=256
-      layout="responsive"
-      data-tweetID="585110598171631616"
-      data-cards="hidden">
-  </amp-twitter>
-  <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
-  </p>
-  <p>
-    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
-  </p>
-  <h2>Instagram</h2>
-  <amp-instagram
-    data-shortcode="fBwFP"
-    width="320"
-    height="320"
-    layout="responsive">
-  </amp-instagram>
-
   <h2 id="amp-iframe">IFrame</h2>
   <amp-iframe width=300 height=300
       sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       layout="responsive"
       frameborder="0"
       src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+      <!--<div placeholder class='b222'>
+      </div>-->
   </amp-iframe>
   </p>
   <amp-ad width=300 height=200

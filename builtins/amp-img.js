@@ -115,6 +115,14 @@ export class AmpImg extends BaseElement {
     return promise;
   }
 
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = document.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.classList.add('-amp-default-placeholder');
+    this.element.appendChild(placeholder);
+  }
+
   /**
    * @return {!Promise}
    * @private
