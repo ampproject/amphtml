@@ -49,7 +49,7 @@ body {
 
 
 /**
- * iOS-Embed Wrapper mode. The `body` is wrapped into `i-amp-html-wrapper`
+ * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amp-html-wrapper`
  * element.
  */
 html.-amp-ios-embed {
@@ -59,7 +59,7 @@ html.-amp-ios-embed {
 }
 
 /** Wrapper for iOS-Embed-Wrapper mode. */
-i-amp-html-wrapper {
+#i-amp-html-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -72,7 +72,7 @@ i-amp-html-wrapper {
   display: block !important;
 }
 
-i-amp-html-wrapper > body {
+#i-amp-html-wrapper > body {
   position: relative !important;
   display: block !important;
   /* Border is necessary to avoid margins collapsing outside body.
