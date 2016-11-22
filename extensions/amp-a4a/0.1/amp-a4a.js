@@ -348,12 +348,10 @@ export class AmpA4A extends AMP.BaseElement {
           // https://github.com/ampproject/amphtml/issues/5614
           this.experimentalNonAmpCreativeRenderMethod_ =
               fetchResponse.headers.get(RENDERING_TYPE_HEADER);
-          console.log('headers', this.experimentalNonAmpCreativeRenderMethod_);
           let platform;
           if (!this.experimentalNonAmpCreativeRenderMethod_ &&
             (platform = platformFor(this.win)) && platform.isIos()) {
             this.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
-            console.log('ios');
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
