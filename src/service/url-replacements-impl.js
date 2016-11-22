@@ -24,10 +24,6 @@ import {
   installVarSubstitutionForEmbed,
 } from './var-substitution-impl';
 import {varSubstitutionForDoc} from '../var-substitution';
-import {
-    ResolverReturnDef,
-    SyncResolverDef,
-} from './variable-source';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -53,8 +49,8 @@ export class UrlReplacements {
    * their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, (./variable-source.ResolverReturnDef|!./variable-source.SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ./variable-source.ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
    * @return {string}
