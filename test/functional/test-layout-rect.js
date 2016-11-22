@@ -74,7 +74,12 @@ describe('LayoutRect', () => {
     const rect1 = lr.layoutRectLtwh(10, 20, 40, 50);
     const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
     const rect3 = lr.layoutRectLtwh(1000, 60, 10, 10);
-    expect(lr.rectIntersection(rect1, rect2)).to.jsonEqual({
+    const rect4 = lr.layoutRectLtwh(45, 65, 10, 10);
+    // the LayoutRect array can deal with speical array
+    expect(lr.rectIntersection([null, undefined])).to.be.null;
+    expect(lr.rectIntersection([])).to.be.null;
+    expect(lr.rectIntersection([rect1])).to.equal(rect1);
+    expect(lr.rectIntersection([rect1, rect2])).to.jsonEqual({
       'left': 40,
       'top': 60,
       'width': 10,

@@ -24,7 +24,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
 
-describe('getIntersectionChangeEntry', () => {
+describe.skip('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -283,7 +283,7 @@ describe('getIntersectionChangeEntry', () => {
 });
 
 
-describe('IntersectionObserver', () => {
+describe.skip('IntersectionObserver', () => {
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
