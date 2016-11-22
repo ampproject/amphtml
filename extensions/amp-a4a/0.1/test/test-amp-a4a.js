@@ -183,7 +183,7 @@ describe('amp-a4a', () => {
       });
     });
 
-    it.only('for ios defaults to SafeFrame rendering', () => {
+    it('for ios defaults to SafeFrame rendering', () => {
       const platform = platformFor(fixture.win);
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);

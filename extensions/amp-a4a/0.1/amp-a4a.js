@@ -562,7 +562,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.adUrl_ = null;
       this.creativeBody_ = null;
       this.experimentalNonAmpCreativeRenderMethod_ =
-        platformFor(this.win).isIos() ? 'safeframe' : null;
+          platformFor(this.win).isIos() ? 'safeframe' : null;
       this.rendered_ = false;
       if (this.xOriginIframeHandler_) {
         this.xOriginIframeHandler_.freeXOriginIframe();
