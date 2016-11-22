@@ -517,19 +517,31 @@ describe('Resource', () => {
     let child;
     let parentResource;
     let resources;
+    let grandChild;
     beforeEach(() => {
       const parent = {
         ownerDocument: {defaultView: window},
-        tagName: 'AMP-STICKY-AD',
+        tagName: 'PARENT',
         isBuilt: () => false,
         contains: () => true,
       };
       child = {
         ownerDocument: {defaultView: window},
-        tagName: 'AMP-AD',
+        tagName: 'CHILD',
         isBuilt: () => false,
         contains: () => true,
+        parentElement: parent,
       };
+      grandChild = {
+        ownerDocument: {defaultView: window},
+        tagName: 'GRANDCHILD',
+        isBuilt: () => false,
+        contains: () => true,
+        getElementsByClassName: () => {return [];},
+        parentElement: child,
+      };
+      parent.getElementsByClassName = () => {return [child, grandChild];};
+      child.getElementsByClassName = () => {return [grandChild];};
       resources = new Resources(new AmpDocSingle(window));
       parentResource = new Resource(1, parent, resources);
     });
@@ -546,6 +558,24 @@ describe('Resource', () => {
       resources.setOwner(childResource.element, parentResource.element);
       expect(childResource.owner_).to.equal(parentResource.element);
       expect(childResource.getOwner()).to.equal(parentResource.element);
+    });
+
+    it('should remove cached value for grandchild', () => {
+      const childResource = new Resource(1, child, resources);
+      const grandChildResource = new Resource(1, grandChild, resources);
+      expect(grandChildResource.getOwner()).to.be.null;
+      resources.setOwner(childResource.element, parentResource.element);
+      expect(childResource.getOwner()).to.equal(parentResource.element);
+      expect(grandChildResource.getOwner()).to.equal(parentResource.element);
+    });
+
+    it('should not change owner if it is set via setOwner', () => {
+      const childResource = new Resource(1, child, resources);
+      const grandChildResource = new Resource(1, grandChild, resources);
+      resources.setOwner(grandChildResource.element, parentResource.element);
+      expect(grandChildResource.getOwner()).to.equal(parentResource.element);
+      resources.setOwner(childResource.element, parentResource.element);
+      expect(grandChildResource.getOwner()).to.equal(parentResource.element);
     });
   });
 
