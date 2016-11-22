@@ -22,11 +22,11 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function distroscale(global, data) {
   validateData(data, ['pid', 'zid'], ['tid']);
-  let src = '//c.jsrdn.com/s/cs.js?p=' + data.pid +
-  '&z=' + data.zid +
+  let src = '//c.jsrdn.com/s/cs.js?p=' + encodeURIComponent(data.pid) +
+  '&z=' + encodeURIComponent(data.zid) +
   '&f=' + encodeURIComponent(global.context.location.href);
   if (data.tid) {
-    src = src + '&t=' + data.tid;
+    src = src + '&t=' + encodeURIComponent(data.tid);
   }
   loadScript(global, src);
 }
