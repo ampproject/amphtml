@@ -109,7 +109,6 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
-    this.element.classList.add('-amp-slidescroll');
 
     this.slides_ = this.getRealChildren();
 
