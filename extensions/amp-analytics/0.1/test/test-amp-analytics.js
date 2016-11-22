@@ -118,9 +118,10 @@ describe('amp-analytics', function() {
     for (const k in attrs) {
       el.setAttribute(k, attrs[k]);
     }
+    windowApi.document.body.appendChild(el);
+    el.connectedCallback();
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
-    windowApi.document.body.appendChild(el);
     analytics.buildCallback();
     sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
     return analytics;
@@ -239,6 +240,7 @@ describe('amp-analytics', function() {
     el.textContent = config;
     const analytics = new AmpAnalytics(el);
     windowApi.document.body.appendChild(el);
+    el.connectedCallback();
     analytics.createdCallback();
     analytics.buildCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
@@ -266,6 +268,7 @@ describe('amp-analytics', function() {
         el.appendChild(script);
         windowApi.document.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
+        el.connectedCallback();
         analytics.createdCallback();
         analytics.buildCallback();
         sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
