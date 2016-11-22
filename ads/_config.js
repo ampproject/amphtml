@@ -341,7 +341,7 @@ export const adConfig = {
   plista: {},
 
   popin: {
-    renderStartImplemented: true
+    renderStartImplemented: true,
   },
 
   pubmatic: {
