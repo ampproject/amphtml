@@ -144,7 +144,6 @@ initLogConstructor();
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
-  register('fake', _ping_)
 }
 
 // Keep the list in alphabetic order
