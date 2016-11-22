@@ -242,6 +242,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  ix: {
+    prefetch: 'https://js-sec.indexww.com/indexJTag.js',
+    preconnect: 'https://as-sec.casalemedia.com',
+  },
+
   kargo: {},
 
   kixer: {
