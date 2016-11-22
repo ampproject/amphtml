@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,23 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# Chrome extension for loading public websites with a local AMP.
 
-# FlexOneELEPHANT 
+Install this extension to test existing public AMP docs against the current version in your development tree.
 
-## Example
-
-```html
-<amp-ad width=300 height=250
-    type="f1e"
-    data-url="https://demo.impact-ad.jp"
-    data-target="/SITE=AMPSITE/AREA=AMPAREA/AAMSZ=300X250/OENCJP=UTF8" >
-</amp-ad>
-```
-
-## Configuration
-
-Supported parameters:
-
-- `data-url` - Must start with "https:"
-- `data-target`
-
+- Please turn this extension off when you aren't currently working on AMP.
+- Should be used as an unpacked extension.
+  - Open chrome://extensions/
+  - Select "Load unpacked extension".
+- Only works with HTTP host pages.
