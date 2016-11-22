@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityFor} from '../../src/activity';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
-import {viewerFor} from '../../src/viewer';
-import {installViewportService} from '../../src/service/viewport-impl';
-import {viewportFor} from '../../src/viewport';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
+import {installTimerService} from '../../src/service/timer-impl';
+import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
+import {viewportForDoc} from '../../src/viewport';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
@@ -31,6 +32,7 @@ describe('Activity getTotalEngagedTime', () => {
   let clock;
   let fakeDoc;
   let fakeWin;
+  let ampdoc;
   let viewer;
   let viewport;
   let activity;
@@ -51,6 +53,7 @@ describe('Activity getTotalEngagedTime', () => {
     scrollObservable = new Observable();
 
     fakeDoc = {
+      nodeType: /* DOCUMENT */ 9,
       addEventListener: function(eventName, callback) {
         if (eventName === 'mousedown') {
           mousedownObservable.add(callback);
@@ -62,9 +65,14 @@ describe('Activity getTotalEngagedTime', () => {
           paddingTop: 0,
         },
       },
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
 
     fakeWin = {
+      services: {},
       document: fakeDoc,
       ampExtendedElements: {
         'amp-analytics': true,
@@ -77,11 +85,19 @@ describe('Activity getTotalEngagedTime', () => {
       clearTimeout: window.clearTimeout,
       // required to instantiate Viewport service
       addEventListener: () => {},
+      removeEventListener: () => {},
     };
+    fakeDoc.defaultView = fakeWin;
 
+    ampdoc = new AmpDocSingle(fakeWin);
+    fakeWin.services['ampdoc'] = {obj: {
+      getAmpDoc: () => ampdoc,
+      isSingleDoc: () => true,
+    }};
+
+    installTimerService(fakeWin);
     installPlatformService(fakeWin);
-    installViewerService(fakeWin);
-    viewer = viewerFor(fakeWin);
+    viewer = installViewerServiceForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
@@ -91,8 +107,8 @@ describe('Activity getTotalEngagedTime', () => {
       visibilityObservable.add(handler);
     });
 
-    installViewportService(fakeWin);
-    viewport = viewportFor(fakeWin);
+    installViewportServiceForDoc(ampdoc);
+    viewport = viewportForDoc(ampdoc);
 
     sandbox.stub(viewport, 'onScroll', handler => {
       scrollObservable.add(handler);

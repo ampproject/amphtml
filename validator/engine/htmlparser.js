@@ -864,7 +864,7 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
            // An unquoted value that is not an attribute name.
            // We know it is not an attribute name because the previous
            // zero-width match would've eliminated that possibility.
-           '|[^>\"\'\\s]*' +
+           '|[^>\\s]*' +
            ')') +
           ')') +
          '?' +
@@ -887,7 +887,7 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
         // Entity captured in group 1.
         '&(\\#[0-9]+|\\#[x][0-9a-f]+|\\w+);' +
         // Comments not captured.
-        '|<[!]--[\\s\\S]*?-->' +
+        '|<[!]--[\\s\\S]*?(?:-->|$)' +
         // '/' captured in group 2 for close tags, and name captured in group 3.
         '|<(/)?([a-z!\\?][a-z0-9_:-]*)' +
         // Text captured in group 4.

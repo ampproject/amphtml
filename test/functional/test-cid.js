@@ -21,10 +21,11 @@ import {
 } from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService, Crypto,}
     from '../../extensions/amp-analytics/0.1/crypto-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
@@ -36,6 +37,7 @@ describe('cid', () => {
   let sandbox;
   let clock;
   let fakeWin;
+  let ampdoc;
   let storage;
   let viewerStorage;
   let cid;
@@ -77,16 +79,22 @@ describe('cid', () => {
           array[15] = 15;
         },
       },
-      document: {},
+      document: {
+        nodeType: /* DOCUMENT */ 9,
+        body: {},
+      },
       navigator: window.navigator,
       ampExtendedElements: {
         'amp-analytics': true,
       },
       setTimeout: window.setTimeout,
     };
+    fakeWin.document.defaultView = fakeWin;
+    const ampdocService = installDocService(fakeWin, /* isSingleDoc */ true);
+    ampdoc = ampdocService.getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
-    const viewer = installViewerService(fakeWin);
+    const viewer = installViewerServiceForDoc(ampdoc);
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
     });
@@ -107,7 +115,7 @@ describe('cid', () => {
           crypto = results[1];
           crypto.sha384Base64 = val => {
             if (val instanceof Uint8Array) {
-              val = '[' + val + ']';
+              val = '[' + Array.apply([], val).join(',') + ']';
             }
 
             return Promise.resolve('sha384(' + val + ')');
@@ -267,7 +275,7 @@ describe('cid', () => {
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
-    installViewerService(win).isIframed = () => false;
+    installViewerServiceForDoc(ampdoc).isIframed = () => false;
     installCidService(win);
     installCryptoService(win);
     return cidFor(win).then(cid => {
@@ -408,7 +416,7 @@ describe('cid', () => {
     let sha384Promise;
     crypto.sha384Base64 = val => {
       if (val instanceof Uint8Array) {
-        val = '[' + val + ']';
+        val = '[' + Array.apply([], val).join(',') + ']';
       }
 
       return sha384Promise = Promise.resolve('sha384(' + val + ')');
@@ -543,6 +551,15 @@ describe('cid', () => {
         expect(c1).to.equal(c2);
       });
     });
+  });
+
+  it('should retreive cookie value with . in name', () => {
+    fakeWin.location.href =
+        'https://abc.org/';
+    fakeWin.document.cookie = '_sp_id.44=4567;';
+    return compare(
+        '_sp_id.44',
+        '4567');
   });
 
   function compare(externalCidScope, compareValue) {

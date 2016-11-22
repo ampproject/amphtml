@@ -21,9 +21,9 @@ import {documentInfoForDoc} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
+import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -62,17 +62,18 @@ export function isGoogleAdsA4AValidEnvironment(win, element) {
 }
 
 /**
- * @param {!AmpA4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {number} slotNumber
- * @param {!Array<!QueryParameter>} queryParams
- * @param {!Array<!QueryParameter>} unboundedQueryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams) {
-  const referrerPromise = viewerFor(a4a.win).getReferrerUrl();
+  /** @const {!Promise<string>} */
+  const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
       buildAdUrl(
           a4a, baseUrl, startTime, slotNumber, queryParams,
@@ -83,7 +84,7 @@ export function googleAdUrl(
 /**
  * @param {!ArrayBuffer} creative
  * @param {!Headers} responseHeaders
- * @return {!Promise<!AdResponseDef>}
+ * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
  */
 export function extractGoogleAdCreativeAndSignature(
     creative, responseHeaders) {
@@ -91,20 +92,23 @@ export function extractGoogleAdCreativeAndSignature(
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
       signature =
-        base64UrlDecodeToBytes(responseHeaders.get(AMP_SIGNATURE_HEADER));
+        base64UrlDecodeToBytes(dev().assertString(
+            responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
   } finally {
-    return Promise.resolve({creative, signature});
+    return Promise.resolve(/** @type {
+          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
+          {creative, signature}));
   }
 }
 
 /**
- * @param {!AmpA4A} a4a
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {number} slotNumber
- * @param {!Array<!QueryParameter>} queryParams
- * @param {!Array<!QueryParameter>} unboundedQueryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
+ * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
  * @param {(string|undefined)} clientId
  * @param {string} referrer
  * @return {string}
@@ -122,26 +126,26 @@ function buildAdUrl(
     };
   }
   const slotRect = a4a.getIntersectionElementLayoutBox();
-  const viewportRect = viewportFor(global).getRect();
+  const viewportRect = a4a.getViewport().getRect();
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
+  const adElement = a4a.element;
   const allQueryParams = queryParams.concat(
     [
       {
         name: 'is_amp',
-        value: a4a.supportsShadowDom() ?
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME,
+        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
       },
       {name: 'amp_v', value: '$internalRuntimeVersion$'},
+      {name: 'd_imp', value: '1'},
       {name: 'dt', value: startTime},
-      {name: 'adk', value: adKey(slotNumber, slotRect, viewportRect)},
+      {name: 'adf', value: domFingerprint(adElement)},
       {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
       {name: 'output', value: 'html'},
       {name: 'nhd', value: iframeDepth},
-      {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
-      {name: 'bih', value: viewportRect.height},
+      {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
       {name: 'biw', value: viewportRect.width},
+      {name: 'bih', value: viewportRect.height},
       {name: 'adx', value: slotRect.left},
       {name: 'ady', value: slotRect.top},
       {name: 'u_hist', value: getHistoryLength(global)},
@@ -204,35 +208,6 @@ function iframeNestingDepth(global) {
   }
   dev().assert(win == global.top);
   return depth;
-}
-
-/**
- * @param {number} slotNumber
- * @param {!LayoutRectDef} slotRect
- * @param {!LayoutRectDef} viewportRect
- * @return {string}
- */
-function adKey(slotNumber, slotRect, viewportRect) {
-  return formatFixedWidthInteger(slotNumber, 2) +
-    // ad slot top, in 1/5 viewport height units
-    formatFixedWidthInteger(slotRect.top * 5 / viewportRect.height, 4) +
-    // ad slot left, in 1/5 viewport width units
-    formatFixedWidthInteger(slotRect.left * 5 / viewportRect.width, 4);
-}
-
-/**
- * @param {number} num Number, non-negative.
- * @param {number} digits Number of digits, max 20.
- * @return {string}
- */
-function formatFixedWidthInteger(num, digits) {
-  const intPart = String(Math.max(Math.round(num), 0));
-  const len = intPart.length;
-  digits = Math.min(digits, 20);
-  if (len > digits) {
-    return '99999999999999999999'.substr(0, digits);
-  }
-  return '00000000000000000000'.substr(0, digits - len) + intPart;
 }
 
 /**
@@ -304,4 +279,17 @@ function elapsedTimeWithCeiling(time, start) {
     return duration;
   }
   return '-M';
+}
+
+/**
+ * @param {!Window} win
+ * @param {string=} opt_cid
+ * @return {number} The correlator.
+ */
+export function getCorrelator(win, opt_cid) {
+  if (!win.ampAdPageCorrelator) {
+    win.ampAdPageCorrelator = makeCorrelator(
+        opt_cid, documentInfoForDoc(win.document).pageViewId);
+  }
+  return win.ampAdPageCorrelator;
 }

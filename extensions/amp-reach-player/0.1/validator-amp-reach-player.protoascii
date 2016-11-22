@@ -20,6 +20,7 @@ tags: {  # amp-reach-player
   tag_name: "SCRIPT"
   mandatory_parent: "HEAD"
   spec_name: "amp-reach-player extension .js script"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -38,7 +39,7 @@ tags: {  # amp-reach-player
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {

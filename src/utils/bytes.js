@@ -16,10 +16,81 @@
 
 import {dev} from '../log';
 
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!BufferSource} bytes
+ * @return {!Promise<string>}
+ */
+export function utf8Decode(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => {
+      reject(reader.error);
+    };
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+    reader.readAsText(new Blob([bytes]));
+  });
+}
+
+// TODO(aghassemi, #6139): Remove the async version of utf8 encoding and rename
+// the sync versions to the canonical utf8Decode/utf8Encode.
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!BufferSource} bytes
+ * @return {!string}
+ */
+export function utf8DecodeSync(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+/**
+ * Turn a string into UTF-8 bytes.
+ * @param {string} string
+ * @return {!Promise<!Uint8Array>}
+ */
+export function utf8Encode(string) {
+  if (typeof TextEncoder !== 'undefined') {
+    return Promise.resolve(new TextEncoder('utf-8').encode(string));
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => {
+      reject(reader.error);
+    };
+    reader.onloadend = () => {
+      // Because we used readAsArrayBuffer, we know the result must be an
+      // ArrayBuffer.
+      resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
+    };
+    reader.readAsArrayBuffer(new Blob([string]));
+  });
+}
+
+/**
+ * Turn a string into UTF-8 bytes.
+ * @param {string} string
+ * @return {!Uint8Array}
+ */
+export function utf8EncodeSync(string) {
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder('utf-8').encode(string);
+  }
+  return stringToBytes(unescape(encodeURIComponent(string)));
+}
 
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
  * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
  * @param {string} str
  * @return {!Uint8Array}
  */

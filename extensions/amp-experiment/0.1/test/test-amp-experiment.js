@@ -18,7 +18,6 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';
 import {variantForOrNull} from '../../../../src/variant-service';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('amp-experiment', () => {
@@ -45,20 +44,21 @@ describe('amp-experiment', () => {
 
   let sandbox;
   let win;
+  let ampdoc;
   let experiment;
 
   beforeEach(() => {
     return createIframePromise().then(iframe => {
       sandbox = sinon.sandbox.create();
       win = iframe.win;
-      toggleExperiment(win, 'amp-experiment', true);
+      ampdoc = iframe.ampdoc;
       const el = win.document.createElement('amp-experiment');
+      el.ampdoc_ = ampdoc;
       experiment = new AmpExperiment(el);
     });
   });
 
   afterEach(() => {
-    toggleExperiment(win, 'amp-experiment', false);
     sandbox.restore();
   });
 
@@ -123,11 +123,11 @@ describe('amp-experiment', () => {
   it('should add attributes to body element for the allocated variants', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
-    stub.withArgs(win, 'experiment-1', config['experiment-1'])
+    stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
-    stub.withArgs(win, 'experiment-2', config['experiment-2'])
+    stub.withArgs(ampdoc, 'experiment-2', config['experiment-2'])
         .returns(Promise.resolve('variant-d'));
-    stub.withArgs(win, 'experiment-3', config['experiment-3'])
+    stub.withArgs(ampdoc, 'experiment-3', config['experiment-3'])
         .returns(Promise.resolve(null));
 
     experiment.buildCallback();

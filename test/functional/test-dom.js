@@ -16,6 +16,8 @@
 
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
+import {loadPromise} from '../../src/event-helper';
+
 
 
 describe('DOM', () => {
@@ -75,6 +77,27 @@ describe('DOM', () => {
     expect(dom.closestByTag(child, 'DIV')).to.equal(child);
   });
 
+  it('closest should stop search at opt_stopAt', () => {
+    const cbSpy = sandbox.spy();
+    const cb = el => {
+      cbSpy();
+      return el.tagName == 'DIV';
+    };
+    const element = document.createElement('div');
+
+    const child = document.createElement('p');
+    const grandchild = document.createElement('img');
+    child.appendChild(grandchild);
+    element.appendChild(child);
+    expect(dom.closest(grandchild, cb)).to.equal(element);
+    expect(cbSpy).to.be.calledThrice;
+
+    expect(dom.closest(grandchild, cb, child)).to.be.null;
+    expect(cbSpy.callCount).to.equal(4);
+
+  });
+
+
   it('closest should find first match', () => {
     const parent = document.createElement('parent');
 
@@ -112,7 +135,35 @@ describe('DOM', () => {
     expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
-  it('closest should find first match', () => {
+  it('closestBySelector should find first match', () => {
+    const parent = document.createElement('parent');
+    parent.className = 'parent';
+    parent.id = 'parent';
+
+    const element = document.createElement('element');
+    element.id = 'element';
+    element.className = 'element';
+    parent.appendChild(element);
+
+    const child = document.createElement('child');
+    child.id = 'child';
+    child.className = 'child';
+    element.appendChild(child);
+
+    expect(dom.closestBySelector(child, 'child')).to.equal(child);
+    expect(dom.closestBySelector(child, '.child')).to.equal(child);
+    expect(dom.closestBySelector(child, '#child')).to.equal(child);
+
+    expect(dom.closestBySelector(child, 'element')).to.equal(element);
+    expect(dom.closestBySelector(child, '.element')).to.equal(element);
+    expect(dom.closestBySelector(child, '#element')).to.equal(element);
+
+    expect(dom.closestBySelector(child, 'parent')).to.equal(parent);
+    expect(dom.closestBySelector(child, '.parent')).to.equal(parent);
+    expect(dom.closestBySelector(child, '#parent')).to.equal(parent);
+  });
+
+  it('elementByTag should find first match', () => {
     const parent = document.createElement('parent');
 
     const element1 = document.createElement('element');
@@ -345,60 +396,6 @@ describe('DOM', () => {
         .to.equal(1);
     expect(dom.ancestorElementsByTag(element2, 'ELEMENT3').length)
         .to.be.equal(0);
-  });
-
-  describe('contains', () => {
-    let connectedElement;
-    let connectedChild;
-    let disconnectedElement;
-    let disconnectedChild;
-
-    beforeEach(() => {
-      connectedElement = document.createElement('div');
-      connectedChild = document.createElement('div');
-      disconnectedElement = document.createElement('div');
-      disconnectedChild = document.createElement('div');
-
-      connectedElement.appendChild(connectedChild);
-      disconnectedElement.appendChild(disconnectedChild);
-      document.body.appendChild(connectedElement);
-    });
-
-    afterEach(() => {
-      dom.removeElement(connectedElement);
-    });
-
-    it('should use document.contains or fallback as available', () => {
-      expect(dom.documentContains(document, connectedElement)).to.be.true;
-      expect(dom.documentContains(document, connectedChild)).to.be.true;
-      expect(dom.documentContains(document, disconnectedElement)).to.be.false;
-      expect(dom.documentContains(document, disconnectedChild)).to.be.false;
-    });
-
-    it('should polyfill document.contains', () => {
-      expect(dom.documentContainsPolyfillInternal_(
-          document, connectedElement)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, connectedChild)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, disconnectedElement)).to.be.false;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, disconnectedChild)).to.be.false;
-    });
-
-    it('should be inclusionary for documentElement', () => {
-      expect(dom.documentContains(
-          document, document.documentElement)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, document.documentElement)).to.be.true;
-    });
-
-    it('should be inclusionary for document itself', () => {
-      expect(dom.documentContains(
-          document, document)).to.be.true;
-      expect(dom.documentContainsPolyfillInternal_(
-          document, document)).to.be.true;
-    });
   });
 
   describe('waitFor', () => {
@@ -726,6 +723,69 @@ describe('DOM', () => {
     it('should subsctitute escapes', () => {
       expect(dom.escapeHtml('a<b>&c"d\'e\`f')).to.equal(
           'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f');
+    });
+  });
+
+  describe('tryFocus', () => {
+    it('should call focus on the element', () => {
+      const element = {
+        focus() {},
+      };
+      const focusSpy = sandbox.spy(element, 'focus');
+      dom.tryFocus(element);
+      expect(focusSpy).to.have.been.called;
+    });
+
+    it('should not throw exception if element focus throws exception', () => {
+      const element = {
+        focus() {
+          throw new Error('Cannot focus');
+        },
+      };
+      const focusSpy = sandbox.spy(element, 'focus');
+      dom.tryFocus(element);
+      expect(focusSpy).to.have.been.called;
+      expect(focusSpy).to.not.throw;
+    });
+  });
+
+  describe('matches', () => {
+    let div, img1, iframe, ampEl;
+    beforeEach(() => {
+      ampEl = document.createElement('amp-ad');
+      ampEl.className = '-amp-element';
+      ampEl.id = 'ampEl';
+      iframe = document.createElement('iframe');
+      div = document.createElement('div');
+      div.id = 'div';
+      img1 = document.createElement('amp-img');
+      img1.id = 'img1';
+      div.appendChild(img1);
+      iframe.srcdoc = div.outerHTML;
+      document.body.appendChild(ampEl);
+
+      const loaded = loadPromise(iframe);
+      ampEl.appendChild(iframe);
+      return loaded;
+
+    });
+
+    afterEach(() => {
+      document.body.removeChild(ampEl);
+    });
+
+    it('finds element by id', () => {
+      expect(dom.matches(ampEl, '#ampEl')).to.be.true;
+      [div, img1, iframe].map(el => {
+        expect(dom.matches(el, '#ampEl')).to.be.false;
+      });
+    });
+
+    it('finds element by tagname', () => {
+      expect(dom.matches(div, 'div')).to.be.true;
+      [ampEl, img1, iframe].map(el => {
+        expect(dom.matches(el, 'div')).to.be.false;
+      });
     });
   });
 });

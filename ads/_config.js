@@ -54,6 +54,11 @@ export const adConfig = {
       'https://staticd.cdn.adblade.com',
       'https://static.adblade.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  adbutler: {
+    prefetch: 'https://servedbyadbutler.com/app.js',
   },
 
   adform: {},
@@ -96,6 +101,23 @@ export const adConfig = {
 
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
+  },
+
+  adverline: {
+    prefetch: 'https://ads.adverline.com/richmedias/amp.js',
+    preconnect: [
+      'https://adnext.fr',
+    ],
+    renderStartImplemented: true,
+  },
+
+  advertserve: {
+    renderStartImplemented: true,
+  },
+
+  affiliateb: {
+    prefetch: 'https://track.affiliate-b.com/amp/a.js',
+    renderStartImplemented: true,
   },
 
   amoad: {
@@ -174,6 +196,13 @@ export const adConfig = {
     prefetch: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
   },
 
+  fake: {},
+
+  felmat: {
+    prefetch: 'https://t.felmat.net/js/fmamp.js',
+    renderStartImplemented: true,
+  },
+
   flite: {},
 
   genieessp: {
@@ -183,6 +212,14 @@ export const adConfig = {
   gmossp: {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
+
+  holder: {
+    prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
+    preconnect: 'https://h.holder.com.ua',
+    renderStartImplemented: true,
+  },
+
+  ibillboard: {},
 
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
@@ -197,6 +234,7 @@ export const adConfig = {
       'https://staticd.cdn.industrybrains.com',
       'https://static.industrybrains.com',
     ],
+    renderStartImplemented: true,
   },
 
   inmobi: {
@@ -205,6 +243,22 @@ export const adConfig = {
   },
 
   kargo: {},
+
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+    renderStartImplemented: true,
+  },
+
+  ligatus: {},
+
+  loka: {
+    prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
+    preconnect: [
+      'https://scene-front.lokaplatform.com',
+      'https://loka-materials.akamaized.net',
+    ],
+    renderStartImplemented: true,
+  },
 
   mads: {
     prefetch: 'https://eu2.madsone.com/js/tags.js',
@@ -228,7 +282,27 @@ export const adConfig = {
   },
 
   mediaimpact: {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
+    preconnect: [
+      'https://ww251.smartadserver.com',
+      'https://static.sascdn.com/',
+    ],
+    renderStartImplemented: true,
+  },
+
+  medianet: {
+    preconnect: 'https://contextual.media.net',
+    renderStartImplemented: true,
+  },
+
+  mediavine: {
+    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://securepubads.g.doubleclick.net',
+      'https://tpc.googlesyndication.com',
+    ],
+    renderStartImplemented: true,
   },
 
   meg: {
@@ -246,6 +320,14 @@ export const adConfig = {
     ],
   },
 
+  mixpo: {
+    prefetch: 'https://cdn.mixpo.com/js/loader.js',
+    preconnect: [
+      'https://player1.mixpo.com',
+      'https://player2.mixpo.com',
+    ],
+  },
+
   nativo: {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
@@ -256,6 +338,11 @@ export const adConfig = {
       'https://output.nend.net',
       'https://img1.nend.net',
     ],
+  },
+
+  nokta: {
+    prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
+    renderStartImplemented: true,
   },
 
   openadstream: {},
@@ -276,12 +363,22 @@ export const adConfig = {
   },
 
   pubmine: {
-    prefetch: 'https://s.pubmine.com/showad.js',
+    prefetch: [
+      'https://s.pubmine.com/head.js',
+      'https://s.pubmine.com/showad.js',
+    ],
+    preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
   },
 
   pulsepoint: {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
+  },
+
+  purch: {
+    prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
   },
 
   revcontent: {
@@ -295,11 +392,19 @@ export const adConfig = {
 
   rubicon: {},
 
-  sharethrough: {},
+  sharethrough: {
+    renderStartImplemented: true,
+  },
 
   smartadserver: {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
+    renderStartImplemented: true,
+  },
+
+  smartclip: {
+    prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
+    preconnect: 'https://des.smartclip.net',
     renderStartImplemented: true,
   },
 
@@ -330,7 +435,14 @@ export const adConfig = {
 
   triplelift: {},
 
-  webediads: {},
+  webediads: {
+    prefetch: 'https://eu1.wbdds.com/amp.min.js',
+    preconnect: [
+      'https://goutee.top',
+      'https://mediaathay.org.uk',
+    ],
+    renderStartImplemented: true,
+  },
 
   'weborama-display': {
     prefetch: [
@@ -340,6 +452,16 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  xlift: {
+    prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+    renderStartImplemented: true,
+  },
+
+  yahoo: {
+    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    preconnect: 'https://us.adserver.yahoo.com',
+  },
 
   yahoojp: {
     prefetch: [
@@ -363,11 +485,26 @@ export const adConfig = {
       'https://s.yieldmo.com',
       'https://ads.yieldmo.com',
     ],
+    renderStartImplemented: true,
   },
 
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
   },
 
+  zedo: {
+    prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
+  },
+
   zergnet: {},
+
+  zucks: {
+    preconnect: [
+      'https://j.zucks.net.zimg.jp',
+      'https://sh.zucks.net',
+      'https://k.zucks.net',
+      'https://static.zucks.net.zimg.jp',
+    ],
+  },
 };

@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+// HACK. Define application types used in default AMP externs
+// that are not in the 3p code.
+/** @constructor */
+function BaseElement$$module$src$base_element() {};
+/** @constructor */
+function AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler() {};
+/** @constructor */
+function AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl() {};
+/** @constructor */
+function AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a() {};
+/** @constructor */
+function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
+
 // Long list of, uhm, stuff the ads code needs to compile.
 // All unquoted external properties need to be added here.
 data.cid;
@@ -22,6 +35,7 @@ data.mid;
 data.ws;
 data.s;
 data.sid;
+data.client;
 data.zid;
 data.pid;
 data.custom3;
@@ -33,8 +47,6 @@ data.clmb_slot;
 data.clmb_position;
 data.clmb_divid;
 data.clmb_section;
-var Criteo;
-Criteo.DisplayAd;
 data.epl_si;
 data.epl_isv;
 data.epl_sv;
@@ -43,6 +55,26 @@ data.epl_ksv;
 data.epl_kvs;
 data.epl_e;
 data.guid;
+data.adslot;
+
+var Criteo;
+Criteo.DisplayAd;
+Criteo.Log.Debug;
+Criteo.CallRTA;
+Criteo.ComputeDFPTargetingForAMP;
+Criteo.PubTag = {};
+Criteo.PubTag.RTA = {};
+Criteo.PubTag.RTA.DefaultCrtgContentName;
+Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
+data.varname;
+data.tagtype;
+data.cookiename;;
+data.networkid;;
+data.zone;
+data.adserver;
+data.slot;
+data.width;
+data.height;
 
 var googletag;
 window.googletag;
@@ -155,6 +187,7 @@ data.antid;
 data.anapiid;
 window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
+data.divid;
 /**
  * @constructor
  * @param {!Window} global
@@ -166,3 +199,32 @@ data.id;
 data.d;
 data.wid;
 data.url;
+data.customtarget;
+data.dynclickthrough;
+data.viewtracking;
+data.customcss;
+data.enablemraid;
+data.jsplayer;
+var sas;
+sas.callAmpAd;
+data.uuid;
+data.embedcreated;
+data.embedparent
+data.embedlive
+var ZGTag;
+var geckoTag;
+var placement;
+data.superId;
+data.network;
+geckoTag.setAMP;
+geckoTag.addPlacement;
+data.placementId;
+data.channel;
+data.publisher;
+data.dim;
+placement.includeRenderer;
+geckoTag.loadAds;
+geckoTag.placementReady;
+data.plc;
+data.sz;
+data.extra;

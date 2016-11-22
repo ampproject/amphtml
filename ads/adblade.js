@@ -34,6 +34,11 @@ function addAdiantUnit(hostname, global, data) {
   ins.setAttribute('data-tag-type', 1);
   global.document.getElementById('c').appendChild(ins);
 
+  ins.parentNode.addEventListener(
+    'eventAdbladeRenderStart',
+    global.context.renderStart()
+  );
+
   // run our JavaScript code to display the ad unit
   writeScript(global, 'https://' + hostname + '/js/ads/async/show.js');
 }

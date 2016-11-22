@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   History,
   HistoryBindingNatural_,
   HistoryBindingVirtual_,
+  installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
+import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
 
-describe('History', () => {
+describes.fakeWin('History', {
+  win: {
+    location: '#first',
+  },
+}, env => {
 
   let sandbox;
   let clock;
@@ -33,7 +40,8 @@ describe('History', () => {
   let history;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    installTimerService(env.win);
+    sandbox = env.sandbox;
     clock = sandbox.useFakeTimers();
 
     const binding = {
@@ -43,16 +51,15 @@ describe('History', () => {
       },
       push: () => {},
       pop(unusedStackIndex) {},
+      replaceStateForTarget: () => {},
     };
     bindingMock = sandbox.mock(binding);
 
-    history = new History(window, binding);
+    history = new History(new AmpDocSingle(env.win), binding);
   });
 
   afterEach(() => {
     bindingMock.verify();
-    history.cleanup_();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
@@ -107,18 +114,78 @@ describe('History', () => {
       expect(onPop.callCount).to.equal(1);
     });
   });
+
+  it('should push a new state and replace it for target', () => {
+    bindingMock.expects('push').withExactArgs()
+        .returns(Promise.resolve(11)).once();
+    bindingMock.expects('pop')
+        .returns(Promise.resolve(10)).once();
+    bindingMock.expects('replaceStateForTarget').withExactArgs('#hello');
+    return history.replaceStateForTarget('#hello').then(() => {
+      return history.pop(history.stackIndex_).then(() => {
+        clock.tick(1);
+        expect(env.win.location.hash).to.equal('#first');
+      });
+    });
+  });
 });
 
 
-describe('HistoryBindingNatural', () => {
+describes.sandboxed('History install', {}, () => {
+  let win;
+  let ampdoc;
+  let viewer;
 
-  let sandbox;
+  beforeEach(() => {
+    viewer = {
+      isOvertakeHistory: () => false,
+      onHistoryPoppedEvent: () => function() {},
+    };
+
+    win = {
+      services: {
+        'viewer': {obj: viewer},
+        'timer': {obj: installTimerService(window)},
+      },
+      history: {
+        length: 0,
+      },
+      document: {
+        body: {},
+        querySelector: () => null,
+      },
+      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
+      addEventListener: () => null,
+    };
+    ampdoc = new AmpDocSingle(win);
+  });
+
+  it('should create natural binding and make it singleton', () => {
+    const history = installHistoryServiceForDoc(ampdoc);
+    expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
+    expect(win.services.history.obj).to.equal(history);
+    // Ensure that binding is installed as a singleton.
+    expect(win.services['global-history-binding'].obj)
+        .to.equal(history.binding_);
+  });
+
+  it('should create virtual binding', () => {
+    viewer.isOvertakeHistory = () => true;
+    const history = installHistoryServiceForDoc(ampdoc);
+    expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
+    expect(win.services.history.obj).to.equal(history);
+    // Ensure that the global singleton has not been created.
+    expect(win.services['global-history-binding']).to.not.exist;
+  });
+});
+
+
+describes.sandboxed('HistoryBindingNatural', {}, () => {
   let clock;
   let onStackIndexUpdated;
   let history;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     onStackIndexUpdated = sandbox.spy();
     history = new HistoryBindingNatural_(window);
@@ -127,7 +194,6 @@ describe('HistoryBindingNatural', () => {
 
   afterEach(() => {
     history.cleanup_();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
@@ -273,7 +339,7 @@ describe('HistoryBindingVirtual', () => {
       postPopHistory: unusedStackIndex => {},
     };
     viewerMock = sandbox.mock(viewer);
-    history = new HistoryBindingVirtual_(viewer);
+    history = new HistoryBindingVirtual_(window, viewer);
     history.setOnStackIndexUpdated(onStackIndexUpdated);
   });
 
@@ -290,7 +356,8 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should push new state to viewer and notify', () => {
-    viewerMock.expects('postPushHistory').withExactArgs(1).once();
+    viewerMock.expects('postPushHistory').withExactArgs(1).once().returns(
+        Promise.resolve());
     return history.push().then(stackIndex => {
       expect(stackIndex).to.equal(1);
       expect(history.stackIndex_).to.equal(1);
@@ -300,8 +367,10 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should pop a state from the window.history and notify', () => {
-    viewerMock.expects('postPushHistory').withExactArgs(1).once();
-    viewerMock.expects('postPopHistory').withExactArgs(1).once();
+    viewerMock.expects('postPushHistory').withExactArgs(1).once().returns(
+        Promise.resolve());
+    viewerMock.expects('postPopHistory').withExactArgs(1).once().returns(
+        Promise.resolve());
     return history.push().then(stackIndex => {
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated.callCount).to.equal(1);
@@ -316,7 +385,8 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should update its state and notify on history.back', () => {
-    viewerMock.expects('postPushHistory').withExactArgs(1).once();
+    viewerMock.expects('postPushHistory').withExactArgs(1).once().returns(
+        Promise.resolve());
     return history.push().then(stackIndex => {
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated.callCount).to.equal(1);
@@ -326,6 +396,76 @@ describe('HistoryBindingVirtual', () => {
       expect(history.stackIndex_).to.equal(0);
       expect(onStackIndexUpdated.callCount).to.equal(2);
       expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(0);
+    });
+  });
+});
+
+describes.fakeWin('Local Hash Navigation', {
+  win: {
+    location: '#first',
+  },
+}, env => {
+
+  let sandbox;
+  let clock;
+  let history;
+
+  beforeEach(() => {
+    installTimerService(env.win);
+    sandbox = env.sandbox;
+    clock = sandbox.useFakeTimers();
+  });
+
+  afterEach(() => {
+    if (history) {
+      history.cleanup_();
+    }
+  });
+
+  it('should push a new state and replace it for target on Natural', () => {
+    history = new History(new AmpDocSingle(env.win),
+        new HistoryBindingNatural_(env.win));
+    const startIndex = env.win.history.index;
+    return history.replaceStateForTarget('#hello').then(() => {
+      clock.tick(1);
+      expect(env.win.location.hash).to.equal('#hello');
+      expect(env.win.history.index).to.equal(startIndex + 1);
+      const historyPopPromise = history.pop(history.stackIndex_);
+
+      clock.tick(1);
+      return historyPopPromise.then(() => {
+        expect(env.win.location.hash).to.equal('#first');
+        expect(env.win.history.index).to.equal(startIndex);
+      });
+    });
+  });
+
+  it('should push a new state and replace it for target on Virtual', () => {
+    const viewer = {
+      onHistoryPoppedEvent: () => {
+        return () => {};
+      },
+      postPushHistory: unusedStackIndex => {},
+      postPopHistory: unusedStackIndex => {},
+    };
+    const viewerMock = sandbox.mock(viewer);
+    history = new History(new AmpDocSingle(env.win),
+        new HistoryBindingVirtual_(env.win, viewer));
+    const startIndex = history.stackIndex_;
+
+    viewerMock.expects('postPushHistory').withExactArgs(1).once().returns(
+        Promise.resolve());
+    viewerMock.expects('postPopHistory').withExactArgs(1).once().returns(
+        Promise.resolve());
+    return history.replaceStateForTarget('#hello').then(() => {
+      clock.tick(1);
+      expect(env.win.location.hash).to.equal('#hello');
+      expect(history.stackIndex_).to.equal(startIndex + 1);
+      return history.pop(history.stackIndex_).then(() => {
+        clock.tick(1);
+        expect(env.win.location.hash).to.equal('#first');
+        expect(history.stackIndex_).to.equal(startIndex);
+      });
     });
   });
 });

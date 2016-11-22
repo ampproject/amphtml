@@ -16,7 +16,8 @@
 
 import {makeCorrelator} from './correlator';
 import {validateData, loadScript} from '../../3p/3p';
-import {user} from '../../src/log';
+import {dev, user} from '../../src/log';
+import {setStyles} from '../../src/style';
 
 /**
  * @enum {number}
@@ -42,7 +43,7 @@ export function doubleclick(global, data) {
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation',
+    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
   ]);
 
   if (global.context.clientId) {
@@ -52,6 +53,16 @@ export function doubleclick(global, data) {
       hid: global.context.pageViewId,
     };
   }
+
+  // Center the ad in the container.
+  const container = global.document.querySelector('#c');
+  setStyles(dev().assertElement(container), {
+    top: '50%',
+    left: '50%',
+    bottom: '',
+    right: '',
+    transform: 'translate(-50%, -50%)',
+  });
 
   if (data.useSameDomainRenderingUntilDeprecated != undefined ||
       data.multiSize) {
@@ -126,14 +137,6 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
   ]];
-
-  // Center the ad in the container.
-  const container = global.document.querySelector('#c');
-  container.style.top = '50%';
-  container.style.left = '50%';
-  container.style.bottom = '';
-  container.style.right = '';
-  container.style.transform = 'translate(-50%, -50%)';
 
   // Get multi-size ad request data, if any, and validate it in the following
   // ways:
@@ -276,9 +279,20 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
         } else {
-          // We don't want to call renderStart() on ads that failed to load, for
-          // whatever reasons, because then the fallback will not be shown.
-          global.context.renderStart({width: rWidth, height: rHeight});
+          // We only want to call renderStart with a specific size if the
+          // returned creative size matches one of the multi-size sizes.
+          let newSize;
+          for (let i = 1; i < dimensions.length; i++) {
+            // dimensions[0] is the primary or overridden size.
+            if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
+              newSize = {
+                width: rWidth,
+                height: rHeight,
+              };
+              break;
+            }
+          }
+          global.context.renderStart(newSize);
         }
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
@@ -314,7 +328,6 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
     jsonParameters.targeting = data.targeting;
   }
   if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
-    jsonParameters.gladeExp = '1';
     jsonParameters.gladeEids = '108809102';
   }
   const expIds = data['experimentId'];
@@ -336,11 +349,6 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   // Center the ad in the container.
   slot.setAttribute('height', requestHeight);
   slot.setAttribute('width', requestWidth);
-  slot.style.top = '50%';
-  slot.style.left = '50%';
-  slot.style.bottom = '';
-  slot.style.right = '';
-  slot.style.transform = 'translate(-50%, -50%)';
 
   slot.addEventListener('gladeAdFetched', event => {
     if (event.detail.empty) {

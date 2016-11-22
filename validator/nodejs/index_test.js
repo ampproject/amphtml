@@ -140,6 +140,22 @@ it('handles syntax errors in validator file', function(done) {
       });
 });
 
+it('also works with newInstance', function() {
+  var mini = fs.readFileSync(
+      '../testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
+  var validatorJsContents =
+      fs.readFileSync('../dist/validator_minified.js', 'utf-8');
+  var resultForMini =
+      ampValidator.newInstance(validatorJsContents).validateString(mini);
+  expect(resultForMini.status).toBe('PASS');
+
+  var severalErrorsHtml =
+      fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8');
+  var resultForSeveralErrors = ampValidator.newInstance(validatorJsContents)
+                                   .validateString(severalErrorsHtml);
+  expect(resultForSeveralErrors.status).toBe('FAIL');
+});
+
 it('emits text if --format=text is specified on command line', function(done) {
   var severalErrorsOut =
       fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8')
