@@ -141,7 +141,8 @@ export class AmpAdXOriginIframeHandler {
           this.noContent_();
           getAdCid(this.baseInstance_).then(cid => {
             const tagType = this.baseInstance_.element.getAttribute('type');
-            dev().error('amp-a4a: ' + tagType, JSON.stringify({
+            const TAG = `AMP-AD-${tagType}`;
+            dev().error(TAG, JSON.stringify({
               'm': e instanceof Error ? e.message : e,
               'type': tagType,
               'correlator': this.baseInstance_.win.ampAdPageCorrelator ||
@@ -149,7 +150,7 @@ export class AmpAdXOriginIframeHandler {
               'slotId': this.baseInstance_
                   .element.getAttribute('data-amp-slot-index'),
               'clientId': cid,
-              'referrer': this.baseInstance_.win.document.referrer,
+              'referrer': this.baseInstance_.win.document./*OK*/referrer,
             }));
           });
         }).then(() => {
