@@ -37,6 +37,7 @@ import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
+import {platformFor} from '../../../src/platform';
 import {
   importPublicKey,
   isCryptoAvailable,
@@ -171,7 +172,11 @@ export class AmpA4A extends AMP.BaseElement {
     // from cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
-    /** @private {?string} */
+    /**
+     * Note(keithwrightbos) - ensure the default here is null so that ios
+     * uses safeframe when response header is not specified.
+     * @private {?string}
+     */
     this.experimentalNonAmpCreativeRenderMethod_ = null;
 
     this.emitLifecycleEvent('adSlotBuilt');
@@ -343,6 +348,13 @@ export class AmpA4A extends AMP.BaseElement {
           // https://github.com/ampproject/amphtml/issues/5614
           this.experimentalNonAmpCreativeRenderMethod_ =
               fetchResponse.headers.get(RENDERING_TYPE_HEADER);
+          console.log('headers', this.experimentalNonAmpCreativeRenderMethod_);
+          let platform;
+          if (!this.experimentalNonAmpCreativeRenderMethod_ &&
+            (platform = platformFor(this.win)) && platform.isIos()) {
+            this.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
+            console.log('ios');
+          }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
