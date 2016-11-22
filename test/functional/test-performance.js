@@ -199,14 +199,14 @@ describe('performance', () => {
         expect(perf.isMessagingReady_).to.be.false;
 
         const flushSpy = sandbox.spy(perf, 'flush');
-        expect(flushSpy.callCount).to.equal(0);
+        expect(flushSpy).to.have.callCount(0);
         perf.flush();
-        expect(flushSpy.callCount).to.equal(1);
+        expect(flushSpy).to.have.callCount(1);
         expect(perf.events_.length).to.equal(2);
 
         return promise.then(() => {
           expect(perf.isMessagingReady_).to.be.true;
-          expect(flushSpy.callCount).to.equal(4);
+          expect(flushSpy).to.have.callCount(4);
           expect(perf.events_.length).to.equal(0);
         });
       });
@@ -228,13 +228,13 @@ describe('performance', () => {
         expect(perf.isMessagingReady_).to.be.false;
 
         const flushSpy = sandbox.spy(perf, 'flush');
-        expect(flushSpy.callCount).to.equal(0);
+        expect(flushSpy).to.have.callCount(0);
         perf.flush();
-        expect(flushSpy.callCount).to.equal(1);
+        expect(flushSpy).to.have.callCount(1);
         expect(perf.events_.length).to.equal(2);
 
         return perf.coreServicesAvailable().then(() => {
-          expect(flushSpy.callCount).to.equal(3);
+          expect(flushSpy).to.have.callCount(3);
           expect(perf.isMessagingReady_).to.be.false;
           expect(perf.events_.length).to.equal(4);
         });
@@ -256,7 +256,7 @@ describe('performance', () => {
         clock.tick(10);
         perf.tickSinceVisible('test');
 
-        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub).to.have.been.calledOnce;
         expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
       });
 
@@ -266,7 +266,7 @@ describe('performance', () => {
         clock.tick(10);
         perf.tickSinceVisible('test');
 
-        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub).to.have.been.calledOnce;
         expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
       });
 
@@ -277,7 +277,7 @@ describe('performance', () => {
         clock.tick(10);
         perf.tickSinceVisible('test');
 
-        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub).to.have.been.calledOnce;
         expect(tickDeltaStub.firstCall.args[1]).to.equal(5);
       });
 
@@ -289,7 +289,7 @@ describe('performance', () => {
         clock.tick(4);
         perf.tickSinceVisible('test');
 
-        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub).to.have.been.calledOnce;
         expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
       });
     });
@@ -401,18 +401,18 @@ describe('performance', () => {
       });
 
       it('should call the flush callback', () => {
-        expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi')
-            .callCount).to.equal(0);
+        expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
+            .to.have.callCount(0);
         // coreServicesAvailable calls flush once.
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi')
-              .callCount).to.equal(1);
+          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
+              .to.have.callCount(1);
           perf.flush();
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi')
-              .callCount).to.equal(2);
+          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
+              .to.have.callCount(2);
           perf.flush();
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi')
-              .callCount).to.equal(3);
+          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
+              .to.have.callCount(3);
         });
       });
 
@@ -553,14 +553,14 @@ describe('performance', () => {
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
-        expect(tickSpy.callCount).to.equal(1);
+        expect(tickSpy).to.have.callCount(1);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          expect(tickSpy.callCount).to.equal(2);
+          expect(tickSpy).to.have.callCount(2);
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.callCount).to.equal(4);
+            expect(tickSpy).to.have.callCount(4);
             expect(tickSpy.getCall(1).args[0]).to.equal('ofv');
             expect(tickSpy.getCall(2).args[0]).to.equal('_pc');
             expect(tickSpy.getCall(3).args[0]).to.equal('pc');
@@ -578,7 +578,7 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(3);
+          expect(tickSpy).to.have.callCount(3);
           expect(tickSpy.firstCall.args[0]).to.equal('ol');
           expect(tickSpy.secondCall.args[0]).to.equal('_pc');
           expect(tickSpy.thirdCall.args[0]).to.equal('pc');
@@ -615,7 +615,7 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(2);
+          expect(tickSpy).to.have.callCount(2);
           expect(tickSpy.firstCall.args[0]).to.equal('ol');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
           expect(tickSpy.secondCall.args[2]).to.be.undefined;
