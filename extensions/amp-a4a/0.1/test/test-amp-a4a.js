@@ -114,6 +114,7 @@ describe('amp-a4a', () => {
       const ampdocService = ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
     };
+    element.isBuilt = () => {return true;};
     doc.body.appendChild(element);
     return element;
   }
