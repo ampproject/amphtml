@@ -87,7 +87,7 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendAMessage_(this.requestSentinel_, requestId, eventType, payload,
+    this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
         awaitResponse);
     return promise;
   }
@@ -100,7 +100,7 @@ export class Messaging {
    */
   sendResponse_(requestId, payload) {
     dev().info('MESSAGING', 'messaging.js -> sendResponse_');
-    this.sendAMessage_(
+    this.sendMessage_(
       this.responseSentinel_, requestId.toString(), null, payload, false);
   }
 
@@ -113,7 +113,7 @@ export class Messaging {
    * @param {boolean} awaitResponse
    * @private
    */
-  sendAMessage_(sentinel, requestId, eventType, payload, awaitResponse) {
+  sendMessage_(sentinel, requestId, eventType, payload, awaitResponse) {
     const message = {
       sentinel,
       requestId,
@@ -131,7 +131,7 @@ export class Messaging {
    * @private
    */
   sendResponseError_(requestId, reason) {
-    this.sendAMessage_(
+    this.sendMessage_(
       this.responseSentinel_, requestId.toString(), 'ERROR', reason, false);
   }
 
