@@ -32,7 +32,7 @@ import {data as testFragments} from './testdata/test_fragments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8EncodeSync} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
 import {platformFor} from '../../../../src/platform';
@@ -90,7 +90,7 @@ describe('amp-a4a', () => {
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
       arrayBuffer: function() {
-        return Promise.resolve(utf8EncodeSync(validCSSAmp.reserialized));
+        return Promise.resolve(utf8Encode(validCSSAmp.reserialized));
       },
       bodyUsed: false,
       headers: new FetchResponseHeaders({
@@ -139,7 +139,7 @@ describe('amp-a4a', () => {
    * @return {!Uint8Array}
    */
   function buildCreativeArrayBuffer() {
-    return utf8EncodeSync(buildCreativeString());
+    return utf8Encode(buildCreativeString());
   }
 
   function verifyNonAMPRender(a4a) {
@@ -508,7 +508,7 @@ describe('amp-a4a', () => {
             </script>
             </body></html>`;
         mockResponse.arrayBuffer = () => {
-          return Promise.resolve(utf8EncodeSync(fullResponse));
+          return Promise.resolve(utf8Encode(fullResponse));
         };
         // Return value from `#extractCreativeAndSignature` is a sub-doc of
         // the full response.  To validate this test, comment out the following
@@ -516,7 +516,7 @@ describe('amp-a4a', () => {
         // to shadow doc.
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
             Promise.resolve({
-              creative: utf8EncodeSync(validCSSAmp.reserialized),
+              creative: utf8Encode(validCSSAmp.reserialized),
               signature: base64UrlDecodeToBytes(validCSSAmp.signature),
             }));
         a4a.onLayoutMeasure();

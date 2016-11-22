@@ -15,7 +15,7 @@
  */
 
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {utf8EncodeSync} from '../../../src/utils/bytes';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {boolean} */
 const isWebkit = window.crypto && 'webkitSubtle' in window.crypto;
@@ -49,7 +49,7 @@ export let PublicKeyInfoDef;
  */
 export function importPublicKey(jwk) {
   // WebKit wants this as an ArrayBufferView.
-  const encodedJwk = isWebkit ? utf8EncodeSync(JSON.stringify(jwk)) : jwk;
+  const encodedJwk = isWebkit ? utf8Encode(JSON.stringify(jwk)) : jwk;
   return crossCrypto.importKey(
           'jwk',
           encodedJwk,

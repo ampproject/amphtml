@@ -46,7 +46,7 @@ export function tryUtf8Decode(bytes, opt_onFailed) {
  * @param {string} string
  * @return {!Uint8Array}
  */
-export function utf8EncodeSync(string) {
+export function utf8Encode(string) {
   if (typeof TextEncoder !== 'undefined') {
     return new TextEncoder('utf-8').encode(string);
   }

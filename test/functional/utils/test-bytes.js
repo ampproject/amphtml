@@ -18,7 +18,7 @@ import {
   stringToBytes,
   bytesToString,
   getCryptoRandomBytesArray,
-  utf8EncodeSync,
+  utf8Encode,
   tryUtf8Decode,
 } from '../../../src/utils/bytes';
 
@@ -55,7 +55,7 @@ describe('utf-8 encode/decode', () => {
       it('should be symmetrical', () => {
         testCases.forEach(testCase => {
           it(testCase, () => {
-            const utf8Bytes = utf8EncodeSync(testCase);
+            const utf8Bytes = utf8Encode(testCase);
             const decoded = tryUtf8Decode(utf8Bytes);
             expect(decoded).to.equal(testCase);
           });
@@ -179,7 +179,7 @@ describe('utf8', function() {
 
   it('should encode given string into utf-8 byte array', () => {
     for (let i = 0; i < strings.length; i++) {
-      const encoded = utf8EncodeSync(strings[i]);
+      const encoded = utf8Encode(strings[i]);
       expect(encoded).to.deep.equal(new Uint8Array(bytes[i]));
     }
   });

@@ -32,7 +32,7 @@ import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
 } from '../../../../src/custom-element';
-import {utf8EncodeSync} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
@@ -75,7 +75,7 @@ describe('integration test: a4a', () => {
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     mockResponse = {
       arrayBuffer: function() {
-        return Promise.resolve(utf8EncodeSync(validCSSAmp.reserialized));
+        return Promise.resolve(utf8Encode(validCSSAmp.reserialized));
       },
       bodyUsed: false,
       headers: new FetchResponseHeaders({
@@ -157,7 +157,7 @@ describe('integration test: a4a', () => {
     const extractCreativeAndSignatureStub =
         sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature');
     extractCreativeAndSignatureStub.onFirstCall().returns(Promise.resolve({
-      creative: utf8EncodeSync(validCSSAmp.reserialized),
+      creative: utf8Encode(validCSSAmp.reserialized),
       signature: null,
     }));
     return fixture.addElement(a4aElement).then(unusedElement => {

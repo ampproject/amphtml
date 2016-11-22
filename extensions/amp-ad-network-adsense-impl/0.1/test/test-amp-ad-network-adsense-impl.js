@@ -20,7 +20,7 @@ import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8EncodeSync} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 
 describe('amp-ad-network-adsense-impl', () => {
@@ -69,7 +69,7 @@ describe('amp-ad-network-adsense-impl', () => {
 
   describe('#extractCreativeAndSignature', () => {
     it('without signature', () => {
-      const creative = utf8EncodeSync('some creative');
+      const creative = utf8Encode('some creative');
       return expect(adsenseImpl.extractCreativeAndSignature(
         creative,
         {
@@ -79,7 +79,7 @@ describe('amp-ad-network-adsense-impl', () => {
               {creative, signature: null});
     });
     it('with signature', () => {
-      const creative = utf8EncodeSync('some creative');
+      const creative = utf8Encode('some creative');
       return expect(adsenseImpl.extractCreativeAndSignature(
         creative,
         {
