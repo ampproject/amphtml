@@ -349,7 +349,6 @@ export class Visibility {
       }
 
       const change = res.element.getIntersectionChangeEntry();
-      const ir = change.intersectionRect;
       const br = change.boundingClientRect;
       const visible = !isFiniteNumber(change.intersectionRatio) ? 0
           : change.intersectionRatio * 100;
