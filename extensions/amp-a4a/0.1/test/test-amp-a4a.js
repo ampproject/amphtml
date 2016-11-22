@@ -183,9 +183,10 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('for ios defaults to SafeFrame rendering', () => {
-      const platform = platformFor(a4a.win);
+    it.only('for ios defaults to SafeFrame rendering', () => {
+      const platform = platformFor(fixture.win);
       sandbox.stub(platform, 'isIos').returns(true);
+      a4a = new MockA4AImpl(a4aElement);
       verifyNonAMPRender(a4a);
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
