@@ -118,6 +118,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [I-Mobile](../../ads/imobile.md)
 - [iBillboard](../../ads/ibillboard.md)
 - [Improve Digital](../../ads/improvedigital.md)
+- [Index Exchange](../../ads/ix.md)
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
 - [Kargo](../../ads/kargo.md)
