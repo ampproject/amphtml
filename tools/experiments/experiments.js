@@ -56,6 +56,11 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'ad-type-custom',
+    name: 'Activates support for custom (self-serve) advertisements',
+    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+  },
+  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
@@ -87,16 +92,16 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
+    id: 'amp-auto-ads',
+    name: 'AMP Auto Ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
+  },
+  {
     id: 'amp-inabox',
     name: 'AMP inabox',
     spec: 'https://github.com/ampproject/amphtml/issues/5700',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
-  },
-  {
-    id: 'amp-scrollable-carousel',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
   },
   {
     id: 'amp-form-custom-validations',
@@ -215,6 +220,18 @@ const EXPERIMENTS = [
     id: 'amp-ad-loading-ux',
     name: 'New default loading UX to amp-ad',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
+  },
+  {
+    id: 'visibility-v2',
+    name: 'New visibility tracking using native IntersectionObserver',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
+  },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-selector/amp-selector.md',
   },
 ];
 

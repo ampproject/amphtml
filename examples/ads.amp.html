@@ -64,6 +64,7 @@
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 
@@ -80,6 +81,7 @@
     <a href="#a9">A9</a> |
     <a href="#accesstrade">AccessTrade</a> |
     <a href="#adblade">Adblade</a> |
+    <a href="#adbutler">AdButler</a> |
     <a href="#adition">ADITION</a> |
     <a href="#adgeneration">Ad Generation</a> |
     <a href="#adman">Adman</a> |
@@ -101,10 +103,12 @@
     <a href="#colombia" class="broken">Colombia ad</a> |
     <a href="#contentad">Content.ad</a> |
     <a href="#criteo">Criteo</a> |
+    <a href="#custom">Custom</a>|
     <a href="#dotandads">DotAndAds</a> |
     <a href="#doubleclick">Doubleclick</a> |
     <a href="#eplanning">E-Planning</a> |
     <a href="#ezoic">Ezoic</a> |
+    <a href="#felmat">Felmat</a> |
     <a href="#flite">Flite</a> |
     <a href="#genieessp"></a> |
     <a href="#gmossp" class="broken"></a> |
@@ -199,7 +203,16 @@
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-
+  
+  <h2 id="adbutler">AdButler</h2>
+  <amp-ad width=300 height=250
+          type="adbutler"
+          data-account="167283"
+          data-zone="212491">
+      <div placeholder></div>
+      <div fallback></div>
+  </amp-ad>  
+  
   <h2 id="adition">ADITION</h2>
   <amp-ad width=300 height=250
       type="adition"
@@ -471,6 +484,48 @@
     <div fallback></div>
   </amp-ad>
 
+  
+  <h2 id="custom">Custom leaderboard</h2>
+  <amp-ad width=500 height=60
+    type="custom"
+    data-slot="1"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id-leader">
+      <a href="{{href}}" target='_blank'>
+        <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+ 
+  <h2>Custom square</h2>
+  <amp-ad width="200" height="200"
+    type="custom"
+    data-slot="2"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
+  <h2>Custom leaderboard with no slot specified</h2>
+  <amp-ad width="500" height="60"
+    type="custom"
+    data-url="/examples/custom.ad.example.single.json">
+    <template type="amp-mustache" id="amp-template-id-no-slot">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>  
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+  
   <h2 id="dotandads">DotAndAds masthead</h2>
   <amp-ad width=980 height=250
       type="dotandads"
@@ -556,6 +611,17 @@
       type="ezoic"
       data-slot="/1254144/28607874"
       json='{"targeting": {"iid15":"1479509","t":"134","d":"1317","t1":"134","pvc":"0","ap":"1144","sap":"1144","a":"|0|","as":"revenue","plat":"1","bra":"mod1","ic":"1","at":"mbf","adr":"400","reft":"tf","ga":"2497208","rid":"99998","pt":"0","al":"2022","compid":"1","tap":"28607874-1479509","br1":"0","br2":"0"}}'>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="felmat">Felmat</h2>
+  <amp-ad width=300 height=250
+      type="felmat"
+      data-host="felmat.net"
+      data-fmt="banner"
+      data-fmk="U12473_n2cJD"
+      data-fmp="0">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -1117,7 +1183,5 @@
      <div placeholder></div>
      <div fallback></div>
    </amp-ad>
-
-</amp-ad>
 </body>
 </html>

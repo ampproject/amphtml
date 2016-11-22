@@ -58,6 +58,7 @@ declareExtension('amp-animation', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
+declareExtension('amp-auto-ads', '0.1', false);
 declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
@@ -93,6 +94,8 @@ declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
+declareExtension('amp-selector', '0.1', false);
+
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -650,7 +653,7 @@ function buildExperiments(options) {
   // Build HTML.
   $$.util.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
-  var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
+  var minHtml = html.replace('/dist.tools/experiments/experiments.js',
       'https://cdn.ampproject.org/v0/experiments.js');
   gulp.src(htmlPath)
       .pipe($$.file('experiments.cdn.html', minHtml))

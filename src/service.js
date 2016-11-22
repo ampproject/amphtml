@@ -345,7 +345,7 @@ export function getParentWindowFrameElement(node, topWin) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
-function getAmpdoc(nodeOrDoc) {
+export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
     const win = /** @type {!Document} */ (
         nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;

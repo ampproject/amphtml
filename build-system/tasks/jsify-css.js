@@ -35,9 +35,16 @@ var cssprefixer = autoprefixer({
   ]
 });
 
+// See http://cssnano.co/optimisations/ for full list.
+// We try and turn off any optimization that is marked unsafe.
 cssnano = cssnano({
+  autoprefixer: false,
   convertValues: false,
-  zindex: false
+  discardUnused: false,
+  // `mergeIdents` this is only unsafe if you rely on those animation names in JavaScript.
+  mergeIdents: true,
+  reduceIdents: false,
+  zindex: false,
 });
 
 
@@ -55,8 +62,7 @@ exports.jsifyCssAsync = function(filename) {
   var transformers = [cssprefixer, cssnano];
   return postcss(transformers).use(postcssImport).process(css.toString(), {
         'from': filename
-      })
-      .then(function(result) {
+      }).then(function(result) {
         result.warnings().forEach(function(warn) {
           $$.util.log($$.util.colors.red(warn.toString()));
         });
