@@ -313,11 +313,11 @@ export class FixedLayer {
           // `height` is constrained to at most 300px. This is to avoid
           // transfering of more substantial sections for now. Likely to be
           // relaxed in the future.
-          const isTransferrable = fe.forceTransfer || (
-              isFixed &&
-              opacity > 0 &&
-              element./*OK*/offsetHeight < 300 &&
-              (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom)));
+          const isTransferrable = isFixed && (
+              fe.forceTransfer || (
+                  opacity > 0 &&
+                  element./*OK*/offsetHeight < 300 &&
+                  (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
           if (isTransferrable) {
             hasTransferables = true;
           }
