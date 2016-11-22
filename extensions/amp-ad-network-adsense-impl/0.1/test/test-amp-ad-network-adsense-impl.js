@@ -15,7 +15,12 @@
  */
 
 import {AmpAdNetworkAdsenseImpl} from '../amp-ad-network-adsense-impl';
+import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
+import {
+  AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
+} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 
 describe('amp-ad-network-adsense-impl', () => {
@@ -28,6 +33,10 @@ describe('amp-ad-network-adsense-impl', () => {
     sandbox = sinon.sandbox.create();
     adsenseImplElem = document.createElement('amp-ad');
     adsenseImplElem.setAttribute('data-ad-client', 'adsense');
+    sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
+        () => {
+          return ['google'];
+        });
     adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
   });
 
@@ -60,30 +69,30 @@ describe('amp-ad-network-adsense-impl', () => {
 
   describe('#extractCreativeAndSignature', () => {
     it('without signature', () => {
-      const creative =
-        new TextEncoder('utf-8').encode('some creative');
-      return expect(adsenseImpl.extractCreativeAndSignature(
-        creative,
-        {
-          get: function() { return undefined; },
-          has: function() { return false; },
-        })).to.eventually.deep.equal(
-              {creative, signature: null});
+      return utf8Encode('some creative').then(creative => {
+        return expect(adsenseImpl.extractCreativeAndSignature(
+          creative,
+          {
+            get: function() { return undefined; },
+            has: function() { return false; },
+          })).to.eventually.deep.equal(
+                {creative, signature: null});
+      });
     });
     it('with signature', () => {
-      const creative =
-        new TextEncoder('utf-8').encode('some creative');
-      return expect(adsenseImpl.extractCreativeAndSignature(
-        creative,
-        {
-          get: function(name) {
-            return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-          },
-          has: function(name) {
-            return name === 'X-AmpAdSignature';
-          },
-        })).to.eventually.deep.equal(
-            {creative, signature: base64UrlDecodeToBytes('AQAB')});
+      return utf8Encode('some creative').then(creative => {
+        return expect(adsenseImpl.extractCreativeAndSignature(
+          creative,
+          {
+            get: function(name) {
+              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+            },
+            has: function(name) {
+              return name === 'X-AmpAdSignature';
+            },
+          })).to.eventually.deep.equal(
+              {creative, signature: base64UrlDecodeToBytes('AQAB')});
+      });
     });
   });
 });

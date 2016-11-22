@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh, layoutRectsOverlap} from '../layout-rect';
+import {
+  layoutRectLtwh,
+  layoutRectsOverlap,
+  moveLayoutRect,
+} from '../layout-rect';
 import {dev} from '../log';
 import {toggle} from '../style';
 
@@ -95,6 +99,9 @@ export class Resource {
    */
   static setOwner(element, owner) {
     dev().assert(owner.contains(element), 'Owner must contain the element');
+    if (Resource.forElementOptional(element)) {
+      Resource.forElementOptional(element).updateOwner(owner);
+    }
     element[OWNER_PROP_] = owner;
   }
 
@@ -140,8 +147,8 @@ export class Resource {
     /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
-    /** @private {!../layout-rect.LayoutRectDef} */
-    this.initialLayoutBox_ = this.layoutBox_;
+    /** @private {?../layout-rect.LayoutRectDef} */
+    this.initialLayoutBox_ = null;
 
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
@@ -167,8 +174,6 @@ export class Resource {
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
-    }).then(() => {
-      this.loadedOnce_ = true;
     });
 
     /** @private {boolean} */
@@ -181,6 +186,14 @@ export class Resource {
    */
   getId() {
     return this.id_;
+  }
+
+  /**
+   * Update owner element
+   * @param {!AmpElement} owner
+   */
+  updateOwner(owner) {
+    this.owner_ = owner;
   }
 
   /**
@@ -227,6 +240,14 @@ export class Resource {
   }
 
   /**
+   * Returns whether the resource has been blacklisted.
+   * @return {boolean}
+   */
+  isBlacklisted() {
+    return this.blacklisted_;
+  }
+
+  /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
    */
@@ -247,6 +268,7 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**
@@ -298,27 +320,15 @@ export class Resource {
   }
 
   /**
-   * Measures the resource's boundaries. Only allowed for upgraded elements.
+   * Measures the resource's boundaries. An upgraded element will be
+   * transitioned to the "ready for layout" state.
    */
   measure() {
     this.isMeasureRequested_ = false;
-    const box = this.resources_.getViewport().getLayoutRect(this.element);
-    // Note that "left" doesn't affect readiness for the layout.
-    if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          this.layoutBox_.top != box.top ||
-          this.layoutBox_.width != box.width ||
-          this.layoutBox_.height != box.height) {
 
-      if (this.element.isUpgraded() &&
-              this.state_ != ResourceState.NOT_BUILT &&
-              (this.state_ == ResourceState.NOT_LAID_OUT ||
-                  this.element.isRelayoutNeeded())) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
-      }
-    }
-    if (!this.hasBeenMeasured()) {
-      this.initialLayoutBox_ = box;
-    }
+    let box = this.resources_.getViewport().getLayoutRect(this.element);
+    const oldBox = this.layoutBox_;
+    const viewport = this.resources_.getViewport();
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
@@ -326,7 +336,6 @@ export class Resource {
     if (this.isDisplayed()) {
       const win = this.resources_.win;
       const body = win.document.body;
-      const viewport = this.resources_.getViewport();
       for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
           isFixed = true;
@@ -340,6 +349,32 @@ export class Resource {
       }
     }
     this.isFixed_ = isFixed;
+
+    if (isFixed) {
+      // For fixed position elements, we need the relative position to the
+      // viewport. When accessing the layoutBox through #getLayoutBox, we'll
+      // return the new absolute position.
+      box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
+          -viewport.getScrollTop());
+    }
+
+    // Note that "left" doesn't affect readiness for the layout.
+    if (this.state_ == ResourceState.NOT_LAID_OUT ||
+          oldBox.top != box.top ||
+          oldBox.width != box.width ||
+          oldBox.height != box.height) {
+
+      if (this.element.isUpgraded() &&
+              this.state_ != ResourceState.NOT_BUILT &&
+              (this.state_ == ResourceState.NOT_LAID_OUT ||
+                  this.element.isRelayoutNeeded())) {
+        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      }
+    }
+
+    if (!this.hasBeenMeasured()) {
+      this.initialLayoutBox_ = box;
+    }
 
     this.element.updateLayoutBox(box);
   }
@@ -370,7 +405,7 @@ export class Resource {
    * @return {boolean}
    */
   hasBeenMeasured() {
-    return this.layoutBox_.top != -10000;
+    return !!this.initialLayoutBox_;
   }
 
   /**
@@ -389,7 +424,12 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
-    return this.layoutBox_;
+    if (!this.isFixed_) {
+      return this.layoutBox_;
+    }
+    const viewport = this.resources_.getViewport();
+    return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
+        viewport.getScrollTop());
   }
 
   /**
@@ -397,7 +437,9 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getInitialLayoutBox() {
-    return this.initialLayoutBox_;
+    // Before the first measure, there will be no initial layoutBox.
+    // Luckily, layoutBox will be present but essentially useless.
+    return this.initialLayoutBox_ || this.layoutBox_;
   }
 
   /**
@@ -423,7 +465,7 @@ export class Resource {
    * @return {boolean}
    */
   overlaps(rect) {
-    return layoutRectsOverlap(this.layoutBox_, rect);
+    return layoutRectsOverlap(this.getLayoutBox(), rect);
   }
 
   /**
@@ -439,6 +481,16 @@ export class Resource {
    * @return {boolean}
    */
   renderOutsideViewport() {
+    // The exception is for owned resources, since they only attempt to
+    // render outside viewport when the owner has explicitly allowed it.
+    // TODO(jridgewell, #5803): Resources should be asking owner if it can
+    // prerender this resource, so that it can avoid expensive elements wayyy
+    // outside of viewport. For now, blindly trust that owner knows what it's
+    // doing.
+    if (this.hasOwner()) {
+      return true;
+    }
+
     const renders = this.element.renderOutsideViewport();
     // Boolean interface, element is either always allowed or never allowed to
     // render outside viewport.
@@ -448,14 +500,14 @@ export class Resource {
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
-    const layoutBox = this.layoutBox_;
+    const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
     let distance;
-    // If outside of viewport's x-axis, element is not in viewport.
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
+      // If outside of viewport's x-axis, element is not in viewport.
       return false;
     }
     if (viewportBox.bottom < layoutBox.top) {
@@ -561,8 +613,12 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
-    this.loadPromiseResolve_();
+    if (this.loadPromiseResolve_) {
+      this.loadPromiseResolve_();
+      this.loadPromiseResolve_ = null;
+    }
     this.layoutPromise_ = null;
+    this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {

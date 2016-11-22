@@ -20,7 +20,6 @@ import {childElementByAttr} from '../../../src/dom';
 import {installLiveListManager, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {viewportFor} from '../../../src/viewport';
 
 
 /**
@@ -179,7 +178,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.viewport_ = viewportFor(this.win);
+    this.viewport_ = this.getViewport();
 
     this.manager_ = installLiveListManager(this.win);
 
@@ -241,6 +240,11 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /** @override */
+  activate() {
+    this.updateAction_();
+  }
+
+  /** @override */
   update(updatedElement) {
     const container = this.getItemsSlot_(updatedElement);
     if (!container) {
@@ -260,6 +264,7 @@ export class AmpLiveList extends AMP.BaseElement {
     if (this.pendingItemsInsert_.length > 0) {
       this.deferMutate(() => {
         this.toggleUpdateButton_(true);
+        this.viewport_.updateFixedLayer();
       });
     } else if (this.pendingItemsReplace_.length > 0 ||
         this.pendingItemsTombstone_.length > 0) {
@@ -361,6 +366,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   insert_(parent, orphans) {
     let count = 0;
+    /** @const {!DocumentFragment} */
     const fragment = this.win.document.createDocumentFragment();
     orphans.forEach(elem => {
       fragment.insertBefore(elem, fragment.firstElementChild);

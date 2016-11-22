@@ -25,15 +25,17 @@ import * as bytes from '../../../../src/utils/bytes';
 
 describe('amp-share-tracking', () => {
   let sandbox;
-  let viewerForMock;
-  let xhrMock;
-  let randomBytesMock;
+  let viewerGetFragmentStub;
+  let viewerUpdateFragmentStub;
+  let xhrStub;
+  let randomBytesStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    viewerForMock = sandbox.stub(Viewer.prototype, 'getFragment');
-    xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-    randomBytesMock = sandbox.stub(bytes, 'getCryptoRandomBytesArray');
+    viewerGetFragmentStub = sandbox.stub(Viewer.prototype, 'getFragment');
+    viewerUpdateFragmentStub = sandbox.stub(Viewer.prototype, 'updateFragment');
+    xhrStub = sandbox.stub(Xhr.prototype, 'fetchJson');
+    randomBytesStub = sandbox.stub(bytes, 'getCryptoRandomBytesArray');
   });
 
   afterEach(() => {
@@ -41,12 +43,13 @@ describe('amp-share-tracking', () => {
   });
 
   function getAmpShareTracking(optVendorUrl) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise(/* runtimeOff */ true).then(iframe => {
       toggleExperiment(iframe.win, 'amp-share-tracking', true);
       const el = iframe.doc.createElement('amp-share-tracking');
       if (optVendorUrl) {
         el.setAttribute('data-href', optVendorUrl);
       }
+      iframe.doc.body.appendChild(el);
       const ampShareTracking = new AmpShareTracking(el);
       ampShareTracking.buildCallback();
       return ampShareTracking;
@@ -54,9 +57,10 @@ describe('amp-share-tracking', () => {
   }
 
   it('should get incoming fragment starting with dot', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('.12345'));
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve('.12345'));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('12345');
       });
     });
@@ -64,74 +68,123 @@ describe('amp-share-tracking', () => {
 
   it('should get incoming fragment starting with dot and ignore ' +
       'other parameters', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('.12345&key=value'));
+    viewerGetFragmentStub.onFirstCall()
+        .returns(Promise.resolve('.12345&key=value'));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('12345');
       });
     });
   });
 
   it('should ignore incoming fragment if it is empty', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve(''));
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('');
       });
     });
   });
 
   it('should ignore incoming fragment if it does not start with dot', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('12345'));
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve('12345'));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.incomingFragment).to.equal('');
       });
     });
   });
 
-  it('should get outgoing fragment randomly if no vendor url ' +
-      'is provided and win.crypto is availble', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve(''));
-    randomBytesMock.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
+  it('should get outgoing fragment randomly if no vendor url is provided ' +
+      'and win.crypto is availble, update the url fragment correctly ' +
+      'when original fragment is empty', () => {
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
+    randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         // the base64url of byte array [1, 2, 3, 4, 5, 6]
         expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+        expect(viewerUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+            .calledOnce;
+      });
+    });
+  });
+
+  it('should get outgoing fragment randomly if no vendor url is provided ' +
+      'and win.crypto is availble, update the url fragment correctly ' +
+      'when original fragment only contains share tracking fragment', () => {
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve('.12345'));
+    randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        // the base64url of byte array [1, 2, 3, 4, 5, 6]
+        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+        expect(viewerUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+            .calledOnce;
+      });
+    });
+  });
+
+  it('should get outgoing fragment randomly if no vendor url is provided ' +
+      'and win.crypto is availble, update the url fragment correctly ' +
+      'when original fragment contains share tracking fragment and ' +
+      'other fragments', () => {
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(
+        '.12345&key=value'));
+    randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        // the base64url of byte array [1, 2, 3, 4, 5, 6]
+        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+        expect(viewerUpdateFragmentStub.withArgs('#.AQIDBAUG&key=value'))
+            .to.be.calledOnce;
       });
     });
   });
 
   it('should get outgoing fragment randomly if no vendor url ' +
       'is provided and fallback to Math.random generation', () => {
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     sandbox.stub(Math, 'random').returns(0.123456789123456789);
-    randomBytesMock.onFirstCall().returns(null);
-    viewerForMock.onFirstCall().returns(Promise.resolve(''));
+    randomBytesStub.onFirstCall().returns(null);
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
+        expect(viewerUpdateFragmentStub.withArgs('#.H5rdN8Eh')).to.be
+            .calledOnce;
       });
     });
   });
 
   it('should get outgoing fragment from vendor if vendor url is provided ' +
       'and the response format is correct', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve(''));
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     const mockJsonResponse = {fragment: '54321'};
-    xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
+    xhrStub.onFirstCall().returns(Promise.resolve(mockJsonResponse));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
         expect(fragments.outgoingFragment).to.equal('54321');
+        expect(viewerUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
       });
     });
   });
 
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the response format is NOT correct', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve(''));
-    xhrMock.onFirstCall().returns(Promise.resolve({foo: 'bar'}));
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
+    xhrStub.onFirstCall().returns(Promise.resolve({foo: 'bar'}));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        expect(viewerUpdateFragmentStub).to.not.be.called;
         expect(fragments.outgoingFragment).to.equal('');
       });
     });
@@ -139,10 +192,10 @@ describe('amp-share-tracking', () => {
 
   it('should call fetchJson with correct request when getting outgoing' +
       'fragment', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve(''));
-    xhrMock.onFirstCall().returns(Promise.resolve({fragment: '54321'}));
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
+    xhrStub.onFirstCall().returns(Promise.resolve({fragment: '54321'}));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      const xhrCall = xhrMock.getCall(0);
+      const xhrCall = xhrStub.getCall(0);
       expect(xhrCall.args[0]).to.equal('http://foo.bar');
       expect(xhrCall.args[1]).to.jsonEqual({
         method: 'POST',
@@ -151,6 +204,8 @@ describe('amp-share-tracking', () => {
         body: {},
       });
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        expect(viewerUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
         expect(fragments.outgoingFragment).to.equal('54321');
       });
     });
@@ -158,10 +213,12 @@ describe('amp-share-tracking', () => {
 
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the xhr fails', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve(''));
-    xhrMock.onFirstCall().returns(Promise.reject('404'));
+    viewerGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
+    xhrStub.onFirstCall().returns(Promise.reject('404'));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        expect(viewerGetFragmentStub).to.be.calledOnce;
+        expect(viewerUpdateFragmentStub).to.not.be.called;
         expect(fragments.outgoingFragment).to.equal('');
       });
     });

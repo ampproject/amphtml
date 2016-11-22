@@ -25,7 +25,7 @@ import {
   createIframePromise,
   poll,
 } from '../../../../testing/iframe';
-import {viewportFor} from '../../../../src/viewport';
+import {viewportForDoc} from '../../../../src/viewport';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -39,14 +39,22 @@ describe('amp-iframe', () => {
 
   const timer = timerFor(window);
   let ranJs = 0;
+  let content = '';
   let sandbox;
 
   beforeEach(() => {
     ranJs = 0;
     sandbox = sinon.sandbox.create();
     window.onmessage = function(message) {
+      if (!message.data) {
+        return;
+      }
       if (message.data == 'loaded-iframe') {
         ranJs++;
+      }
+
+      if (message.data.indexOf('content-iframe:') == 0) {
+        content = message.data.replace('content-iframe:', '');
       }
     };
     setTrackingIframeTimeoutForTesting(20);
@@ -72,7 +80,7 @@ describe('amp-iframe', () => {
         iframe.iframe.style.height = opt_height;
       }
       const top = opt_top || '600px';
-      const viewport = viewportFor(iframe.win);
+      const viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
       i.style.position = 'absolute';
       if (attributes.position) {
@@ -174,6 +182,16 @@ describe('amp-iframe', () => {
     });
   });
 
+  it('should default frameborder to 0 if not set', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      width: 100,
+      height: 100,
+    }).then(amp => {
+      expect(amp.iframe.getAttribute('frameborder')).to.equal('0');
+    });
+  });
+
   it('should allow JS and propagate scrolling and have lower priority', () => {
     return getAmpIframe({
       src: iframeSrc,
@@ -265,9 +283,12 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100,
       sandbox: 'allow-scripts',
-      srcdoc: '<script>try{parent.location.href}catch(e){' +
-          'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
-          '</script>',
+      srcdoc: '<div id="content"><p>௵Z加䅌ਇ☎Èʘغޝ</p></div>' +
+        '<script>try{parent.location.href}catch(e){' +
+        'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');' +
+        'var c = document.querySelector(\'#content\').innerHTML;' +
+        'parent.parent./*OK*/postMessage(\'content-iframe:\' + c, \'*\');' +
+        '}</script>',
     }).then(amp => {
       expect(amp.iframe.src).to.match(
           /^data\:text\/html;charset=utf-8;base64,/);
@@ -277,6 +298,7 @@ describe('amp-iframe', () => {
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
       return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
+        expect(content).to.equal('<p>௵Z加䅌ਇ☎Èʘغޝ</p>');
       });
     });
   });
@@ -405,10 +427,8 @@ describe('amp-iframe', () => {
     }).then(amp => {
       const impl = amp.container.implementation_;
       const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
-      impl.updateSize_(217, 114);
-      expect(attemptChangeSize.callCount).to.equal(1);
-      expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
-      expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
+      impl.updateSize_(217, '114' /* be tolerant to string number */);
+      expect(attemptChangeSize).to.be.calledWith(217, 114);
     });
   });
 
@@ -460,7 +480,7 @@ describe('amp-iframe', () => {
 
   it('should listen for embed-ready event', () => {
     const activateIframeSpy_ =
-        sandbox.spy(AmpIframe.prototype, 'activateIframe_');
+        sandbox./*OK*/spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({
       src: clickableIframeSrc,
       sandbox: 'allow-scripts allow-same-origin',
@@ -506,9 +526,13 @@ describe('amp-iframe', () => {
       // appended amp-iframe 10x10
       expect(iframes[0].implementation_
           .looksLikeTrackingIframe_()).to.be.true;
+      expect(iframes[0].implementation_
+          .getPriority()).to.equal(1);
       // appended amp-iframe 100x100
       expect(iframes[1].implementation_
           .looksLikeTrackingIframe_()).to.be.false;
+      expect(iframes[1].implementation_
+          .getPriority()).to.equal(0);
       // amp-iframe 5x5
       expect(iframes[2].implementation_
           .looksLikeTrackingIframe_()).to.be.true;

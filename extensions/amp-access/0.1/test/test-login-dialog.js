@@ -18,6 +18,7 @@ import {
   WebLoginDialog,
   openLoginDialog,
 } from '../login-dialog';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
@@ -49,6 +50,10 @@ describe('ViewerLoginDialog', () => {
         'viewer': {obj: viewer},
       },
       screen: {width: 1000, height: 1000},
+      document: {
+        nodeType: /* DOCUMENT */ 9,
+        body: {},
+      },
       open: () => {
         throw new Error('Not allowed');
       },
@@ -62,6 +67,8 @@ describe('ViewerLoginDialog', () => {
         throw new Error('Not allowed');
       },
     };
+    windowApi.document.defaultView = windowApi;
+    installDocService(windowApi, /* isSingleDoc */ true);
   });
 
   afterEach(() => {
@@ -166,6 +173,10 @@ describe('WebLoginDialog', () => {
         'viewer': {obj: viewer},
       },
       open: () => {},
+      document: {
+        nodeType: /* DOCUMENT */ 9,
+        body: {},
+      },
       location: {
         protocol: 'http:',
         host: 'localhost:8000',
@@ -186,7 +197,9 @@ describe('WebLoginDialog', () => {
       clearInterval: intervalId => window.clearInterval(intervalId),
     };
     windowApi = windowObj;
+    windowApi.document.defaultView = windowApi;
     windowMock = sandbox.mock(windowApi);
+    installDocService(windowApi, /* isSingleDoc */ true);
 
     dialogUrl = null;
     dialog = {

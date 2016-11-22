@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {closestByTag} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {fromClass} from '../../../src/service';
+import {closestByTag, closestBySelector} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
-import {viewportFor} from '../../../src/viewport';
-import {viewerFor} from '../../../src/viewer';
+import {isFiniteNumber} from '../../../src/types';
+import {viewportForDoc} from '../../../src/viewport';
+import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
+import {startsWith} from '../../../src/string';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -102,9 +102,12 @@ export function isVisibilitySpecValid(config) {
 
   const spec = config['visibilitySpec'];
   const selector = spec['selector'];
-  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0)) {
-    user().error(TAG_, 'Visibility spec requires an id selector or a tag ' +
-        'name starting with "amp-"');
+  if (!selector || (!startsWith(selector, '#') &&
+                    !startsWith(selector, 'amp-') &&
+                    selector != ':root' &&
+                    selector != ':host')) {
+    user().error(TAG_, 'Visibility spec requires an id selector, a tag ' +
+        'name starting with "amp-" or ":root"');
     return false;
   }
 
@@ -121,8 +124,8 @@ export function isVisibilitySpecValid(config) {
   }
 
   if (ctMax < ctMin || ttMax < ttMin) {
-    user().warn('Max value in timing conditions should be more ' +
-        'than the min value.');
+    user().warn('AMP-ANALYTICS', 'Max value in timing conditions should be ' +
+        'more than the min value.');
     return false;
   }
 
@@ -151,17 +154,32 @@ export function isVisibilitySpecValid(config) {
  * @param {!String} selectionMethod The method to use to find the element..
  * @return {?Element} Element corresponding to the selector if found.
  */
-export function getElement(selector, el, selectionMethod) {
+export function getElement(ampdoc, selector, el, selectionMethod) {
   if (!el) {
     return null;
   }
+
+  // Special case for root selector.
+  if (selector == ':host' || selector == ':root') {
+    const elWin = ampdoc.win;
+    const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
+    if (parentEl) {
+      return closestBySelector(parentEl, '.-amp-element');
+    }
+  }
+
   if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
-    return closestByTag(el, selector);
+    const closestEl = closestByTag(el, selector);
+    // Restrict result to be contained by ampdoc.
+    if (closestEl && ampdoc.contains(closestEl)) {
+      return closestEl;
+    }
+    return null;
   } else if (selectionMethod == 'scope') {
     return el.parentElement.querySelector(selector);
   } else if (selector[0] == '#') {
-    return el.ownerDocument.getElementById(selector.slice(1));
+    return ampdoc.getElementById(selector.slice(1));
   }
   return null;
 }
@@ -169,7 +187,7 @@ export function getElement(selector, el, selectionMethod) {
 /**
  * This type signifies a callback that gets called when visibility conditions
  * are met.
- * @typedef {function()}
+ * @typedef {function(!JSONType)}
  */
 let VisibilityListenerCallbackDef;
 
@@ -187,22 +205,23 @@ let VisibilityListenerDef;
  */
 export class Visibility {
 
-  /** @param {!Window} win */
-  constructor(win) {
-    this.win_ = win;
+  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    this.ampdoc = ampdoc;
 
     /**
      * key: resource id.
      * value: [{ config: <config>, callback: <callback>, state: <state>}]
-     * @type {Object<string, Array.<VisibilityListenerDef>>}
+     * @type {!Object<!Array<VisibilityListenerDef>>}
      * @private
      */
     this.listeners_ = Object.create(null);
 
-    /** @const {!Timer} */
-    this.timer_ = timerFor(win);
+    /** @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = timerFor(this.ampdoc.win);
 
-    /** @private {Array<!Resource>} */
+    /** @private {Array<!../../../src/service/resource.Resource>} */
     this.resources_ = [];
 
     /** @private @const {function()} */
@@ -217,10 +236,10 @@ export class Visibility {
     /** @private {boolean} */
     this.visibilityListenerRegistered_ = false;
 
-    /** @private {!Resources} */
-    this.resourcesService_ = resourcesForDoc(this.win_.document);
+    /** @private {!../../../src/service/resources-impl.Resources} */
+    this.resourcesService_ = resourcesForDoc(this.ampdoc);
 
-    /** @private {number|string} */
+    /** @private {number|string|null} */
     this.scheduledRunId_ = null;
 
     /** @private {number} Amount of time to wait for next calculation. */
@@ -229,8 +248,8 @@ export class Visibility {
     /** @private {boolean} */
     this.scheduledLoadedPromises_ = false;
 
-    /** @private {Viewer} */
-    this.viewer_ = viewerFor(this.win_);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.backgroundedAtStart_ = !this.viewer_.isVisible();
@@ -251,7 +270,7 @@ export class Visibility {
   /** @private */
   registerForViewportEvents_() {
     if (!this.scrollListenerRegistered_) {
-      const viewport = viewportFor(this.win_);
+      const viewport = viewportForDoc(this.ampdoc);
 
       // Currently unlistens are not being used. In the event that no resources
       // are actively being monitored, the scrollListener should be very cheap.
@@ -266,17 +285,20 @@ export class Visibility {
    * @param {!VisibilityListenerCallbackDef} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
-   * @param {Element} analyticsElement The amp-analytics element that the
+   * @param {!Element} analyticsElement The amp-analytics element that the
    *  config is associated with.
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
-    const element = getElement(selector, analyticsElement,
+    const element = getElement(this.ampdoc, selector,
+        dev().assertElement(analyticsElement),
         config['selectionMethod']);
-    user().assert(element, 'Element not found for visibilitySpec: ' + selector);
+    user().assert(element, 'Element not found for visibilitySpec: '
+        + selector);
     let res = null;
     try {
-      res = this.resourcesService_.getResourceForElement(element);
+      res = this.resourcesService_.getResourceForElement(
+          user().assertElement(element));
     } catch (e) {
       user().assert(res,
           'Visibility tracking not supported on element: ', element);
@@ -293,7 +315,7 @@ export class Visibility {
     this.listeners_[resId].push({config, callback, state, shouldBeVisible});
     this.resources_.push(res);
 
-    if (this.scheduledRunId_ == null) {
+    if (this.scheduledRunId_ === null) {
       this.scheduledRunId_ = this.timer_.delay(() => {
         this.scrollListener_();
       }, LISTENER_INITIAL_RUN_DELAY_);
@@ -317,7 +339,6 @@ export class Visibility {
       this.scheduledRunId_ = null;
     }
 
-    this.timeToWait = Infinity;
     const loadedPromises = [];
 
     for (let r = this.resources_.length - 1; r >= 0; r--) {
@@ -330,12 +351,12 @@ export class Visibility {
       const change = res.element.getIntersectionChangeEntry();
       const ir = change.intersectionRect;
       const br = change.boundingClientRect;
-      const visible = br.height * br.width == 0 ? 0 :
-          ir.width * ir.height * 100 / (br.height * br.width);
+      const visible = !isFiniteNumber(change.intersectionRatio) ? 0
+          : change.intersectionRatio * 100;
 
       const listeners = this.listeners_[res.getId()];
       for (let c = listeners.length - 1; c >= 0; c--) {
-        const shouldBeVisible = listeners[c]['shouldBeVisible'];
+        const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
         if (this.updateCounters_(visible, listeners[c], shouldBeVisible) &&
             this.viewer_.isVisible() == shouldBeVisible) {
           this.prepareStateForCallback_(listeners[c]['state'],
@@ -353,7 +374,7 @@ export class Visibility {
 
     // Schedule a calculation for the time when one of the conditions is
     // expected to be satisfied.
-    if (this.scheduledRunId_ == null &&
+    if (this.scheduledRunId_ === null &&
         this.timeToWait_ < Infinity && this.timeToWait_ > 0) {
       this.scheduledRunId_ = this.timer_.delay(() => {
         this.scrollListener_();
@@ -427,7 +448,7 @@ export class Visibility {
 
     // Wait for minimum of (previous timeToWait, positive values of
     // waitForContinuousTime and waitForTotalTime).
-    this.timeToWait_ = Math.min(this.timeToWait,
+    this.timeToWait_ = Math.min(this.timeToWait_,
         waitForContinuousTime > 0 ? waitForContinuousTime : Infinity,
         waitForTotalTime > 0 ? waitForTotalTime : Infinity);
     listener['state'] = state;
@@ -480,15 +501,20 @@ export class Visibility {
   /**
    * Sets variable values for callback. Cleans up existing values.
    * @param {Object<string, *>} state The state object to populate
-   * @param {!LayoutRect} rb Bounds of Root object. (the viewport in this case)
-   * @param {!LayoutRect} br The bounding rectangle for the element
-   * @param {!LayoutRect} ir The intersection between element and the viewport
+   * @param {!../../../src/layout-rect.LayoutRectDef} rb Bounds of Root object.
+   *     (the viewport in this case)
+   * @param {!../../../src/layout-rect.LayoutRectDef} br The bounding rectangle
+   *     for the element
+   * @param {!../../../src/layout-rect.LayoutRectDef} ir The intersection
+   *     between element and the viewport
    * @private
    */
   prepareStateForCallback_(state, rb, br, ir) {
-    const perf = this.win_.performance;
-    state[ELEMENT_X] = rb.left + br.left;
-    state[ELEMENT_Y] = rb.top + br.top;
+    const perf = this.ampdoc.win.performance;
+    const viewport = viewportForDoc(this.ampdoc);
+
+    state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
+    state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
     state[ELEMENT_WIDTH] = br.width;
     state[ELEMENT_HEIGHT] = br.height;
     state[TOTAL_TIME] = perf && perf.timing && perf.timing.domInteractive
@@ -497,16 +523,23 @@ export class Visibility {
 
     // Calculate the amount element visible at the time page was loaded. To do
     // this, assume that the page is scrolled all the way to top.
-    const viewportRect = {top: 0, height: rb.height, left: 0, width: rb.width};
+    const viewportRect = {top: 0, height: rb.height, left: 0, width: rb.width,
+        bottom: rb.height, right: rb.width};
     const elementRect = {top: ir.top, left: ir.left, width: br.width,
-      height: br.height};
+      height: br.height, bottom: br.height, right: br.width};
     const intersection = rectIntersection(viewportRect, elementRect);
     state[LOAD_TIME_VISIBILITY] = intersection != null
         ? Math.round(intersection.width * intersection.height * 10000
               / (br.width * br.height)) / 100
         : 0;
-    state[MIN_VISIBLE] = Math.round(state[MIN_VISIBLE] * 100) / 100;
-    state[MAX_VISIBLE] = Math.round(state[MAX_VISIBLE] * 100) / 100;
+    if (state[MIN_VISIBLE] !== undefined) {
+      state[MIN_VISIBLE] =
+          Math.round(dev().assertNumber(state[MIN_VISIBLE]) * 100) / 100;
+    }
+    if (state[MAX_VISIBLE] !== undefined) {
+      state[MAX_VISIBLE] =
+          Math.round(dev().assertNumber(state[MAX_VISIBLE]) * 100) / 100;
+    }
     state[BACKGROUNDED] = this.backgrounded_ ? '1' : '0';
     state[BACKGROUNDED_AT_START] = this.backgroundedAtStart_ ? '1' : '0';
 
@@ -523,11 +556,3 @@ export class Visibility {
     }
   }
 }
-
-/**
- * @param  {!Window} win
- * @return {!Visibility}
- */
-export function installVisibilityService(win) {
-  return fromClass(win, 'visibility', Visibility);
-};

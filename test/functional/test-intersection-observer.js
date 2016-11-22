@@ -45,33 +45,33 @@ describe('getIntersectionChangeEntry', () => {
 
     expect(change.rootBounds).to.deep.equal({
       'left': 0,
-      'top': 100,
+      'top': 0,
       'width': 100,
       'height': 100,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 0,
-      'y': 100,
+      'y': 0,
     });
     expect(change.boundingClientRect).to.deep.equal({
       'left': 50,
-      'top': 50,
+      'top': -50,
       'width': 150,
       'height': 200,
-      'bottom': 250,
+      'bottom': 150,
       'right': 200,
       'x': 50,
-      'y': 50,
+      'y': -50,
     });
     expect(change.intersectionRect).to.deep.equal({
       'left': 50,
-      'top': 100,
+      'top': 0,
       'width': 50,
       'height': 100,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 50,
-      'y': 100,
+      'y': 0,
     });
     expect(change.intersectionRatio).to.be.closeTo(0.1666666, .0001);
   });
@@ -86,33 +86,33 @@ describe('getIntersectionChangeEntry', () => {
 
     expect(change.rootBounds).to.deep.equal({
       'left': 0,
-      'top': 100,
+      'top': 0,
       'width': 100,
       'height': 100,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 0,
-      'y': 100,
+      'y': 0,
     });
     expect(change.boundingClientRect).to.deep.equal({
       'left': 50,
-      'top': 200,
+      'top': 100,
       'width': 150,
       'height': 200,
-      'bottom': 400,
+      'bottom': 300,
       'right': 200,
       'x': 50,
-      'y': 200,
+      'y': 100,
     });
     expect(change.intersectionRect).to.deep.equal({
       'left': 50,
-      'top': 200,
+      'top': 100,
       'width': 50,
       'height': 0,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 50,
-      'y': 200,
+      'y': 100,
     });
     expect(change.intersectionRatio).to.equal(0);
   });
@@ -124,13 +124,13 @@ describe('getIntersectionChangeEntry', () => {
 
     expect(change.intersectionRect).to.deep.equal({
       'left': 50,
-      'top': 199,
+      'top': 99,
       'width': 50,
       'height': 1,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 50,
-      'y': 199,
+      'y': 99,
     });
   });
 
@@ -164,33 +164,33 @@ describe('getIntersectionChangeEntry', () => {
 
     expect(change.rootBounds).to.deep.equal({
       'left': 0,
-      'top': 100,
+      'top': 0,
       'width': 100,
       'height': 100,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 0,
-      'y': 100,
+      'y': 0,
     });
     expect(change.boundingClientRect).to.deep.equal({
       'left': 50,
-      'top': 50,
+      'top': -50,
       'width': 150,
       'height': 200,
-      'bottom': 250,
+      'bottom': 150,
       'right': 200,
       'x': 50,
-      'y': 50,
+      'y': -50,
     });
     expect(change.intersectionRect).to.deep.equal({
       'left': 50,
-      'top': 110,
+      'top': 10,
       'width': 10,
       'height': 20,
-      'bottom': 130,
+      'bottom': 30,
       'right': 60,
       'x': 50,
-      'y': 110,
+      'y': 10,
     });
     expect(change.intersectionRatio).to.be.closeTo(0.0066666, .0001);
   });
@@ -207,23 +207,23 @@ describe('getIntersectionChangeEntry', () => {
 
     expect(change.rootBounds).to.deep.equal({
       'left': 0,
-      'top': 100,
+      'top': 0,
       'width': 100,
       'height': 100,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 0,
-      'y': 100,
+      'y': 0,
     });
     expect(change.boundingClientRect).to.deep.equal({
       'left': 50,
-      'top': 225,
+      'top': 125,
       'width': 100,
       'height': 100,
-      'bottom': 325,
+      'bottom': 225,
       'right': 150,
       'x': 50,
-      'y': 225,
+      'y': 125,
     });
     expect(change.intersectionRect).to.deep.equal({
       'left': 0,
@@ -250,23 +250,23 @@ describe('getIntersectionChangeEntry', () => {
 
     expect(change.rootBounds).to.deep.equal({
       'left': 0,
-      'top': 100,
+      'top': 0,
       'width': 100,
       'height': 100,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 0,
-      'y': 100,
+      'y': 0,
     });
     expect(change.boundingClientRect).to.deep.equal({
       'left': 50,
-      'top': 225,
+      'top': 125,
       'width': 100,
       'height': 100,
-      'bottom': 325,
+      'bottom': 225,
       'right': 150,
       'x': 50,
-      'y': 225,
+      'y': 125,
     });
     expect(change.intersectionRect).to.deep.equal({
       'left': 0,
@@ -416,10 +416,10 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
+    };
     clock.tick(33);
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
@@ -435,10 +435,10 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
+    };
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();

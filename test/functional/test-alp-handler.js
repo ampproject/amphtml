@@ -66,6 +66,7 @@ describe('alp-handler', () => {
     };
     win.document = doc;
     anchor = {
+      nodeType: 1,
       tagName: 'A',
       href: 'https://test.com?adurl=' +
         encodeURIComponent(
@@ -192,6 +193,21 @@ describe('alp-handler', () => {
     simpleSuccess();
   });
 
+  it('should perform special navigation if specially asked for', () => {
+    const navigateSpy = sandbox.spy();
+    const opt_navigate = val => {
+      navigateSpy();
+      expect(val).to.equal(
+          'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +
+          'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
+          'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html');
+    };
+    handleClick(event, opt_navigate);
+    expect(event.preventDefault).to.be.calledOnce;
+    expect(open).to.not.be.called;
+    expect(navigateSpy).to.be.calledOnce;
+  });
+
   it('should navigate if trusted is not set.', () => {
     delete event.trusted;
     simpleSuccess();
@@ -241,7 +257,9 @@ describe('alp-handler', () => {
   it('should find the closest a tag', () => {
     const a = anchor;
     event.target = {
+      nodeType: 1,
       parentElement: {
+        nodeType: 1,
         parentElement: a,
       },
     };
@@ -249,7 +267,9 @@ describe('alp-handler', () => {
   });
 
   it('should require an a tag', () => {
-    event.target = {};
+    event.target = {
+      nodeType: 1,
+    };
     noNavigation();
   });
 
@@ -282,8 +302,7 @@ describe('alp-handler', () => {
     expect(win.document.head.appendChild.callCount).to.equal(1);
     const link = win.document.head.appendChild.lastCall.args[0];
     expect(link.rel).to.equal('preload');
-    expect(link.href).to.equal(
-        'https://cdn.ampproject.org/rtv/01$internalRuntimeVersion$/v0.js');
+    expect(link.href).to.equal('https://cdn.ampproject.org/v0.js');
   });
 
   it('should warmup dynamically', () => {
@@ -296,7 +315,9 @@ describe('alp-handler', () => {
   });
 
   it('should ignore irrelevant events for warmup (bad target)', () => {
-    event.target = {};
+    event.target = {
+      nodeType: 1,
+    };
     warmupDynamic(event);
     expect(win.document.head.appendChild.callCount).to.equal(0);
   });

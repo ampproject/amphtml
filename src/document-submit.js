@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
+import {getServiceForDoc} from './service';
 import {startsWith} from './string';
-import {user} from './log';
+import {dev, user} from './log';
 import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
 
-/** @const {string} */
-const PROP = '__AMP_SUBMIT';
-
-
 /**
- * @param {!Window} window
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installGlobalSubmitListener(window) {
-  if (!window[PROP]) {
-    window[PROP] = true;
-    window.document.documentElement.addEventListener(
+export function installGlobalSubmitListenerForDoc(ampdoc) {
+  return getServiceForDoc(ampdoc, 'submit', ampdoc => {
+    ampdoc.getRootNode().addEventListener(
         'submit', onDocumentFormSubmit_, true);
-  }
+    return {};
+  });
 }
 
 
@@ -52,41 +49,6 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
-  const inputs = form.elements;
-  for (let i = 0; i < inputs.length; i++) {
-    user().assert(!inputs[i].name ||
-        inputs[i].name != SOURCE_ORIGIN_PARAM,
-        'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
-  }
-
-  const action = form.getAttribute('action');
-  const actionXhr = form.getAttribute('action-xhr');
-  const method = (form.getAttribute('method') || 'GET').toUpperCase();
-  if (method == 'GET') {
-    user().assert(action,
-        'form action attribute is required for method=GET: %s', form);
-    assertHttpsUrl(action, /** @type {!Element} */ (form), 'action');
-    user().assert(!startsWith(action, urls.cdn),
-        'form action should not be on AMP CDN: %s', form);
-    checkCorsUrl(action);
-  } else if (action) {
-    e.preventDefault();
-    user().assert(false,
-        'form action attribute is invalid for method=POST: %s', form);
-  } else if (!actionXhr) {
-    e.preventDefault();
-    user().assert(false,
-        'Only XHR based (via action-xhr attribute) submissions are support ' +
-        'for POST requests. %s',
-        form);
-  }
-  checkCorsUrl(actionXhr);
-
-  const target = form.getAttribute('target');
-  user().assert(target, 'form target attribute is required: %s', form);
-  user().assert(target == '_blank' || target == '_top',
-      'form target=%s is invalid can only be _blank or _top: %s', target, form);
-
   // amp-form extension will add novalidate to all forms to manually trigger
   // validation. In that case `novalidate` doesn't have the same meaning.
   const isAmpFormMarked = form.classList.contains('-amp-form');
@@ -100,11 +62,51 @@ export function onDocumentFormSubmit_(e) {
   // Safari does not trigger validation check on submission, hence we
   // trigger it manually. In other browsers this would never execute since
   // the submit event wouldn't be fired if the form is invalid.
-  // TODO: This doesn't display the validation error messages. Safari makes them
-  // available per input.validity object. We need to figure out a way of
-  // displaying these.
   if (shouldValidate && form.checkValidity && !form.checkValidity()) {
     e.preventDefault();
-    return;
+  }
+
+  const inputs = form.elements;
+  for (let i = 0; i < inputs.length; i++) {
+    user().assert(!inputs[i].name ||
+        inputs[i].name != SOURCE_ORIGIN_PARAM,
+        'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+  }
+
+  const action = form.getAttribute('action');
+  const actionXhr = form.getAttribute('action-xhr');
+  const method = (form.getAttribute('method') || 'GET').toUpperCase();
+  if (method == 'GET') {
+    // TODO(#5670): Make action optional for method=GET when action-xhr is provided.
+    user().assert(action,
+        'form action attribute is required for method=GET: %s', form);
+    assertHttpsUrl(action, dev().assertElement(form), 'action');
+    user().assert(!startsWith(action, urls.cdn),
+        'form action should not be on AMP CDN: %s', form);
+    checkCorsUrl(action);
+  } else if (method == 'POST') {
+    if (action) {
+      e.preventDefault();
+      user().assert(false,
+          'form action attribute is invalid for method=POST: %s', form);
+    }
+
+    if (!actionXhr) {
+      e.preventDefault();
+      user().assert(false,
+          'Only XHR based (via action-xhr attribute) submissions are support ' +
+          'for POST requests. %s',
+          form);
+    }
+  }
+
+  // TODO(#5607): Only require this with method=GET.
+  const target = form.getAttribute('target');
+  user().assert(target,
+      'form target attribute is required: %s', form);
+  user().assert(target == '_blank' || target == '_top',
+      'form target=%s is invalid can only be _blank or _top: %s', target, form);
+  if (actionXhr) {
+    checkCorsUrl(actionXhr);
   }
 }

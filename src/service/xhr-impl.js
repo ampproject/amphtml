@@ -162,7 +162,6 @@ export class Xhr {
     const init = opt_init || {};
     init.method = normalizeMethod_(init.method);
     setupJson_(init);
-
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response);
     }).then(response => response.json());
@@ -408,11 +407,13 @@ function isRetriable(status) {
 export function assertSuccess(response) {
   return new Promise((resolve, reject) => {
     if (response.status < 200 || response.status >= 300) {
+      /** @const {!Error} */
       const err = user().createError(`HTTP error ${response.status}`);
       if (isRetriable(response.status)) {
         err.retriable = true;
       }
-      if (response.headers.get('Content-Type') == 'application/json') {
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.split(';')[0] == 'application/json') {
         response.json().then(json => {
           err.responseJson = json;
           reject(err);
@@ -517,8 +518,9 @@ export class FetchResponse {
 
 /**
  * Provides access to the response headers as defined in the Fetch API.
+ * @private Visible for testing.
  */
-class FetchResponseHeaders {
+export class FetchResponseHeaders {
   /**
    * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
@@ -533,6 +535,14 @@ class FetchResponseHeaders {
    */
   get(name) {
     return this.xhr_.getResponseHeader(name);
+  }
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  has(name) {
+    return this.xhr_.getResponseHeader(name) != null;
   }
 }
 

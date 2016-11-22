@@ -20,6 +20,7 @@ tags: {  # amp-twitter
   tag_name: "SCRIPT"
   spec_name: "amp-twitter extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -38,7 +39,7 @@ tags: {  # amp-twitter
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -54,16 +55,9 @@ tags: {  # <amp-twitter>
   tag_name: "AMP-TWITTER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-twitter extension .js script"
-  attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
   attrs: {
-    name: "src"
-    mandatory_oneof: "['data-tweetid', 'src']"
-    value_url: {
-      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
-      allowed_protocol: "https"
-      allow_relative: true
-    }
-    blacklisted_value_regex: "__amp_source_origin"
+    name: "data-tweetid"
+    mandatory: true
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"

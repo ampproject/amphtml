@@ -45,6 +45,7 @@ describe('EventHelper', () => {
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {
+      tagName: 'TEST',
       complete: false,
       readyState: '',
       addEventListener: function(type, callback) {
@@ -177,6 +178,18 @@ describe('EventHelper', () => {
     expect(isLoaded(element)).to.equal(false);
     element.readyState = 'complete';
     expect(isLoaded(element)).to.equal(true);
+  });
+
+  it('isLoaded for Window', () => {
+    expect(isLoaded(window)).to.equal(true);
+    const win = {
+      document: {
+        readyState: 'interactive',
+      },
+    };
+    expect(isLoaded(win)).to.equal(false);
+    win.document.readyState = 'complete';
+    expect(isLoaded(win)).to.equal(true);
   });
 
   it('loadPromise - already complete', () => {

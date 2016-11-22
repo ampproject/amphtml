@@ -95,15 +95,11 @@ function compile(entryModuleFilenames, outputDir,
     var unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
-    var wrapper = '(function(){var process={env:{NODE_ENV:"production"}};' +
-        '%output%})();';
+    var wrapper = '(function(){%output%})();';
     if (options.wrapper) {
-      wrapper = options.wrapper.replace('<%= contents %>',
-          // TODO(@cramforce): Switch to define.
-          'var process={env:{NODE_ENV:"production"}};%output%');
+      wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
-    wrapper += '\n//# sourceMappingURL=' +
-        outputFilename + '.map\n';
+    wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
     patchRegisterElement();
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
@@ -123,6 +119,7 @@ function compile(entryModuleFilenames, outputDir,
       'ads/_*.js',
       'ads/alp/**/*.js',
       'ads/google/**/*.js',
+      'ads/inabox/**/*.js',
       // Files under build/. Should be sparse.
       'build/css.js',
       'build/*.css.js',
@@ -135,6 +132,9 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/**/*-config.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
+      // Currently needed for crypto.js and visibility.js.
+      // Should consider refactoring.
+      'extensions/amp-analytics/**/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
@@ -148,8 +148,9 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
+      'node_modules/web-animations-js/web-animations.install.js',
       'build/patched-module/document-register-element/build/' +
-          'document-register-element.max.js',
+          'document-register-element.node.js',
       //'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
@@ -169,6 +170,9 @@ function compile(entryModuleFilenames, outputDir,
       var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
       srcs.push(path);
     });
+    if (options.extraGlobs) {
+      srcs.push.apply(srcs, options.extraGlobs);
+    }
     if (options.include3pDirectories) {
       srcs.push(
         '3p/**/*.js',
@@ -183,14 +187,8 @@ function compile(entryModuleFilenames, outputDir,
         '!build/fake-module/src/polyfills/**/*.js'
       );
     } else {
-      srcs.push(
-        '!src/polyfills.js',
-        '!src/polyfills/**/*.js'
-      );
-      unneededFiles.push(
-          'build/fake-module/src/polyfills.js',
-          'build/fake-module/src/polyfills/promise.js',
-          'build/fake-module/src/polyfills/math-sign.js');
+      srcs.push('!src/polyfills.js');
+      unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
@@ -204,6 +202,7 @@ function compile(entryModuleFilenames, outputDir,
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
       'third_party/closure-compiler/externs/shadow_dom.js',
+      'third_party/closure-compiler/externs/web_animations.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
@@ -224,8 +223,10 @@ function compile(entryModuleFilenames, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
-        rewrite_polyfills: !!(
-            options.includePolyfills || options.includeBasicPolyfills),
+        // We do not use the polyfills provided by closure compiler.
+        // If you need a polyfill. Manually include them in the
+        // respective top level polyfills.js files.
+        rewrite_polyfills: false,
         externs: externs,
         js_module_root: [
           'node_modules/',
@@ -244,20 +245,17 @@ function compile(entryModuleFilenames, outputDir,
         warning_level: 'DEFAULT',
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
-        jscomp_off: 'unknownDefines',
+        jscomp_off: ['unknownDefines'],
         define: [],
         hide_warnings_for: [
+          'third_party/closure-library/sha384-generated.js',
           'third_party/d3/',
           'third_party/vega/',
           'third_party/webcomponentsjs/',
           'node_modules/',
           'build/patched-module/',
-          // TODO: The following three are whitelisted only because they're
-          // blocking an unrelated PR.  But they appear to contain real type
-          // errors and should be fixed at some point.
-          'src/service.js',
+          // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
-          'src/document-state.js',
         ],
         jscomp_error: [],
       }
@@ -269,7 +267,25 @@ function compile(entryModuleFilenames, outputDir,
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error.push(
-          'checkTypes', 'accessControls', 'const', 'constantProperty');
+          'checkTypes',
+          'accessControls',
+          'const',
+          'constantProperty',
+          'globalThis');
+
+      // TODO(aghassemi): Remove when NTI is the default.
+      if (argv.nti) {
+        compilerOptions.compilerFlags.new_type_inf = true;
+        compilerOptions.compilerFlags.jscomp_off.push(
+          'newCheckTypesExtraChecks');
+        compilerOptions.compilerFlags.externs.push(
+          'build-system/amp.nti.extern.js'
+        );
+      } else {
+        compilerOptions.compilerFlags.externs.push(
+          'build-system/amp.oti.extern.js'
+        );
+      }
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
@@ -311,18 +327,34 @@ function compile(entryModuleFilenames, outputDir,
 };
 
 function patchRegisterElement() {
+  var file;
   // Copies document-register-element into a new file that has an export.
   // This works around a bug in closure compiler, where without the
   // export this module does not generate a goog.provide which fails
   // compilation.
   // Details https://github.com/google/closure-compiler/issues/1831
   const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.max.js';
+      '/build/document-register-element.node.js';
   if (!fs.existsSync(patchedName)) {
-      fs.writeFileSync(patchedName,
-          fs.readFileSync(
-              'node_modules/document-register-element/build/' +
-              'document-register-element.max.js') +
-          '\n\nexport function deadCode() {}\n');
+    file = fs.readFileSync(
+        'node_modules/document-register-element/build/' +
+        'document-register-element.node.js').toString();
+    if (argv.fortesting) {
+      // Need to switch global to self since closure doesn't wrap the module
+      // like CommonJS
+      file = file.replace('installCustomElements(global);',
+          'installCustomElements(self);');
+    } else {
+      // Get rid of the side effect the module has so we can tree shake it
+      // better and control installation, unless --fortesting flag
+      // is passed since we also treat `--fortesting` mode as "dev".
+      file = file.replace('installCustomElements(global);', '');
     }
+    // Closure Compiler does not generate a `default` property even though
+    // to interop CommonJS and ES6 modules. This is the same issue typescript
+    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+    file = file.replace('module.exports = installCustomElements;',
+        'exports.default = installCustomElements;');
+    fs.writeFileSync(patchedName, file);
+  }
 }

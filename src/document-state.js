@@ -33,23 +33,23 @@ export class DocumentState {
     /** @private @const {!Document} */
     this.document_ = win.document;
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.hiddenProp_ = getVendorJsPropertyName(this.document_, 'hidden', true);
     if (this.document_[this.hiddenProp_] === undefined) {
       this.hiddenProp_ = null;
     }
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.visibilityStateProp_ = getVendorJsPropertyName(this.document_,
         'visibilityState', true);
     if (this.document_[this.visibilityStateProp_] === undefined) {
       this.visibilityStateProp_ = null;
     }
 
-    /** @private @const */
+    /** @private @const {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.visibilityChangeEvent_ = null;
     if (this.hiddenProp_) {
       this.visibilityChangeEvent_ = 'visibilitychange';
@@ -67,7 +67,7 @@ export class DocumentState {
           this.boundOnVisibilityChanged_);
     }
 
-    /** @private @const {?Observable} */
+    /** @private {?Observable} */
     this.bodyAvailableObservable_ = null;
   }
 
@@ -152,4 +152,4 @@ export class DocumentState {
  */
 export function documentStateFor(window) {
   return fromClass(window, 'documentState', DocumentState);
-};
+}

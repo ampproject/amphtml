@@ -42,8 +42,15 @@ class Shell {
 
     log('Shell created');
 
-    if (this.currentPage_) {
+    if (this.currentPage_ && !isShellUrl(this.currentPage_)) {
       this.navigateTo(this.currentPage_);
+    } else if (this.win.location.hash) {
+      const hashParams = parseQueryString(this.win.location.hash);
+      const href = hashParams['href'];
+      if (href) {
+        this.currentPage_ = href;
+        this.navigateTo(href);
+      }
     }
 
     // Install service worker
@@ -182,7 +189,7 @@ class AmpViewer {
     /** @private @const {?Element} */
     this.host_ = null;
     /** @private @const {...} */
-    this.viewer_ = null;
+    this.amp_ = null;
 
     // Immediately install amp-shadow.js.
     this.installScript_('/dist/amp-shadow.js');
@@ -191,6 +198,10 @@ class AmpViewer {
   /**
    */
   clear() {
+    if (this.amp_) {
+      this.amp_.close();
+      this.amp_ = null;
+    }
     this.container.textContent = '';
   }
 
@@ -200,7 +211,9 @@ class AmpViewer {
    */
   show(doc, url) {
     log('Show document:', doc, url);
-    this.container.textContent = '';
+
+    // Cleanup the existing document if any.
+    this.clear();
 
     this.baseUrl_ = url;
 
@@ -215,13 +228,10 @@ class AmpViewer {
     this.container.appendChild(this.host_);
 
     this.ampReadyPromise_.then(AMP => {
-      const amp = AMP.attachShadowDoc(this.host_, doc, url);
-      this.win.document.title = amp.title || '';
-      this.viewer_ = amp.viewer;
-      /* TODO(dvoytenko): enable message deliverer as soon as viewer is provided
-      this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
-          this.getOrigin_(this.win.location.href));
-      */
+      this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
+      this.win.document.title = this.amp_.title || '';
+      this.amp_.onMessage(this.onMessage_.bind(this));
+      this.amp_.setVisibilityState('visible');
     });
   }
 
@@ -314,6 +324,40 @@ function fetchDocument(url) {
   });
 }
 
+
+/**
+ * Parses the query string of an URL. This method returns a simple key/value
+ * map. If there are duplicate keys the latest value is returned.
+ * @param {string} queryString
+ * @return {!Object<string>}
+ */
+function parseQueryString(queryString) {
+  const params = Object.create(null);
+  if (!queryString) {
+    return params;
+  }
+  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
+    queryString = queryString.substr(1);
+  }
+  const pairs = queryString.split('&');
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i];
+    const eqIndex = pair.indexOf('=');
+    let name;
+    let value;
+    if (eqIndex != -1) {
+      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+    } else {
+      name = decodeURIComponent(pair).trim();
+      value = '';
+    }
+    if (name) {
+      params[name] = value;
+    }
+  }
+  return params;
+}
 
 
 var shell = new Shell(window);

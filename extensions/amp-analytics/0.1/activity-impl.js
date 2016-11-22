@@ -20,8 +20,8 @@
  */
 
 import {fromClass} from '../../../src/service';
-import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {viewerForDoc} from '../../../src/viewer';
+import {viewportForDoc} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
 
 
@@ -49,7 +49,7 @@ let ActivityEventDef;
 
 /**
  * Find the engaged time between the event and the time (exclusive of the time)
- * @param {ActivityEventDef} e1
+ * @param {ActivityEventDef} activityEvent
  * @param {number} time
  * @return {number}
  * @private
@@ -72,7 +72,7 @@ class ActivityHistory {
 
     /**
      * prevActivityEvent_ remains undefined until the first valid push call.
-     * @private {ActivityEventDef}
+     * @private {ActivityEventDef|undefined}
      */
     this.prevActivityEvent_ = undefined;
   }
@@ -169,11 +169,11 @@ export class Activity {
     /** @private @const {!ActivityHistory} */
     this.activityHistory_ = new ActivityHistory();
 
-    /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win_);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(this.win_.document);
 
-    /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(this.win_);
+    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = viewportForDoc(this.win_.document);
 
     this.viewer_.whenFirstVisible().then(this.start_.bind(this));
   }

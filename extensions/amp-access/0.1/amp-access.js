@@ -18,10 +18,11 @@ import {AccessClientAdapter} from './amp-access-client';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
+import {AccessVendorAdapter} from './amp-access-vendor';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
 import {actionServiceForDoc} from '../../../src/action';
-import {analyticsFor} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
@@ -40,9 +41,9 @@ import {performanceFor} from '../../../src/performance';
 import {resourcesForDoc} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timerFor} from '../../../src/timer';
-import {urlReplacementsFor} from '../../../src/url-replacements';
-import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {viewerForDoc} from '../../../src/viewer';
+import {viewportForDoc} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 
 
@@ -56,6 +57,7 @@ const TAG = 'amp-access';
 const AccessType = {
   CLIENT: 'client',
   SERVER: 'server',
+  VENDOR: 'vendor',
   OTHER: 'other',
 };
 
@@ -122,16 +124,16 @@ export class AccessService {
     this.vsync_ = vsyncFor(win);
 
     /** @const @private {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(win);
+    this.urlReplacements_ = urlReplacementsForDoc(win.document);
 
     /** @private @const {!Cid} */
     this.cid_ = cidFor(win);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(win);
+    this.viewer_ = viewerForDoc(win.document);
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(win);
+    this.viewport_ = viewportForDoc(win.document);
 
     /** @private @const {!Templates} */
     this.templates_ = templatesFor(win);
@@ -176,15 +178,23 @@ export class AccessService {
     /** @private {time} */
     this.loginStartTime_ = 0;
 
-    /** @private {!Promise<!InstrumentationService>} */
-    this.analyticsPromise_ = analyticsFor(win);
-
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
       this.performance_.tick('aaa');
       this.performance_.tickSinceVisible('aaav');
       this.performance_.flush();
     });
+  }
+
+  /**
+   * @param {string} name
+   * @param {./access-vendor.AccessVendor} vendor
+   */
+  registerVendor(name, vendor) {
+    user().assert(this.type_ == AccessType.VENDOR,
+        'Acccess vendor "%s" can only be used for "type=vendor"', name);
+    const vendorAdapter = /** @type {!AccessVendorAdapter} */ (this.adapter_);
+    vendorAdapter.registerVendor(name, vendor);
   }
 
   /**
@@ -209,6 +219,8 @@ export class AccessService {
           return new AccessServerJwtAdapter(this.win, configJson, context);
         }
         return new AccessServerAdapter(this.win, configJson, context);
+      case AccessType.VENDOR:
+        return new AccessVendorAdapter(this.win, configJson, context);
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
     }
@@ -222,7 +234,14 @@ export class AccessService {
   buildConfigType_(configJson) {
     let type = configJson['type'] ?
         user().assertEnumValue(AccessType, configJson['type'], 'access type') :
-        AccessType.CLIENT;
+        null;
+    if (!type) {
+      if (configJson['vendor']) {
+        type = AccessType.VENDOR;
+      } else {
+        type = AccessType.CLIENT;
+      }
+    }
     if (type == AccessType.SERVER && !this.isServerEnabled_) {
       user().warn(TAG, 'Experiment "amp-access-server" is not enabled.');
       type = AccessType.CLIENT;
@@ -274,9 +293,7 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    this.analyticsPromise_.then(analytics => {
-      analytics.triggerEvent(eventType);
-    });
+    triggerAnalyticsEvent(this.win, eventType);
   }
 
   /**
@@ -416,9 +433,7 @@ export class AccessService {
     }
 
     this.toggleTopClass_('amp-access-loading', true);
-    const startPromise = isExperimentOn(this.win, 'no-auth-in-prerender')
-        ? this.viewer_.whenFirstVisible()
-        : Promise.resolve();
+    const startPromise = this.viewer_.whenFirstVisible();
     const responsePromise = startPromise.then(() => {
       return this.adapter_.authorize();
     }).catch(error => {

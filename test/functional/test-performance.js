@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
-import {viewerFor} from '../../src/viewer';
+import {viewerForDoc} from '../../src/viewer';
 
 
 describe('performance', () => {
@@ -37,7 +37,6 @@ describe('performance', () => {
   });
 
   describe('when viewer is not ready', () => {
-
     it('should queue up tick events', () => {
       expect(perf.events_.length).to.equal(0);
 
@@ -138,14 +137,53 @@ describe('performance', () => {
     let viewer;
 
     beforeEach(() => {
-      viewer = viewerFor(window);
+      viewer = viewerForDoc(window.document);
       tickSpy = sandbox.stub(viewer, 'tick');
       flushTicksSpy = sandbox.stub(viewer, 'flushTicks');
     });
 
+
+    describe('config', () => {
+      it('should configure correctly when viewer is embedded and supports ' +
+          'csi', () => {
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+        sandbox.stub(viewer, 'isEmbedded').returns(true);
+        perf.coreServicesAvailable().then(() => {
+          expect(perf.isPerformanceTrackingOn()).to.be.true;
+        });
+      });
+
+      it('should configure correctly when viewer is embedded and does ' +
+          'NOT support csi', () => {
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns('0');
+        sandbox.stub(viewer, 'isEmbedded').returns(true);
+        perf.coreServicesAvailable().then(() => {
+          expect(perf.isPerformanceTrackingOn()).to.be.false;
+        });
+      });
+
+      it('should configure correctly when viewer is embedded and does ' +
+          'NOT support csi', () => {
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
+        sandbox.stub(viewer, 'isEmbedded').returns(true);
+        perf.coreServicesAvailable().then(() => {
+          expect(perf.isPerformanceTrackingOn()).to.be.false;
+        });
+      });
+
+      it('should configure correctly when viewer is not embedded', () => {
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
+        sandbox.stub(viewer, 'isEmbedded').returns(false);
+        perf.coreServicesAvailable().then(() => {
+          expect(perf.isPerformanceTrackingOn()).to.be.false;
+        });
+      });
+    });
+
     describe('channel established', () => {
 
-      it('should flush events when channel is not ready', () => {
+      it('should flush events when channel is ready', () => {
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
         sandbox.stub(viewer, 'whenMessagingReady')
             .returns(Promise.resolve());
         expect(perf.isMessagingReady_).to.be.false;
@@ -167,7 +205,7 @@ describe('performance', () => {
 
         return promise.then(() => {
           expect(perf.isMessagingReady_).to.be.true;
-          expect(flushSpy.callCount).to.equal(3);
+          expect(flushSpy.callCount).to.equal(4);
           expect(perf.events_.length).to.equal(0);
         });
       });
@@ -195,9 +233,9 @@ describe('performance', () => {
         expect(perf.events_.length).to.equal(2);
 
         return perf.coreServicesAvailable().then(() => {
-          expect(flushSpy.callCount).to.equal(2);
+          expect(flushSpy.callCount).to.equal(3);
           expect(perf.isMessagingReady_).to.be.false;
-          expect(perf.events_.length).to.equal(3);
+          expect(perf.events_.length).to.equal(4);
         });
       });
     });
@@ -258,8 +296,8 @@ describe('performance', () => {
     describe('and performanceTracking is off', () => {
 
       beforeEach(() => {
-        sandbox.stub(viewer, 'isPerformanceTrackingOn')
-            .returns(false);
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
+        sandbox.stub(viewer, 'isEmbedded').returns(false);
       });
 
       it('should not forward queued ticks', () => {
@@ -269,37 +307,37 @@ describe('performance', () => {
 
         expect(perf.events_.length).to.equal(2);
 
-        perf.coreServicesAvailable();
-        perf.flushQueuedTicks_();
-        perf.flush();
+        return perf.coreServicesAvailable().then(() => {
+          perf.flushQueuedTicks_();
+          perf.flush();
+          expect(perf.events_.length).to.equal(0);
 
-        expect(perf.events_.length).to.equal(0);
-
-        expect(tickSpy.callCount).to.equal(0);
-        expect(flushTicksSpy.callCount).to.equal(0);
+          expect(tickSpy.callCount).to.equal(0);
+          expect(flushTicksSpy.callCount).to.equal(0);
+        });
       });
 
       it('should ignore all calls to tick', () => {
-        perf.coreServicesAvailable();
-
         perf.tick('start0');
-        expect(tickSpy.callCount).to.equal(0);
+        return perf.coreServicesAvailable().then(() => {
+          expect(tickSpy.callCount).to.equal(0);
+        });
       });
 
       it('should ignore all calls to flush', () => {
-        perf.coreServicesAvailable();
-
         perf.tick('start0');
         perf.flush();
-        expect(flushTicksSpy.callCount).to.equal(0);
+        return perf.coreServicesAvailable().then(() => {
+          expect(flushTicksSpy.callCount).to.equal(0);
+        });
       });
     });
 
     describe('and performanceTracking is on', () => {
 
       beforeEach(() => {
-        sandbox.stub(viewer, 'isPerformanceTrackingOn')
-            .returns(true);
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+        sandbox.stub(viewer, 'isEmbedded').returns(true);
         sandbox.stub(viewer, 'whenMessagingReady')
             .returns(Promise.resolve());
       });
@@ -342,12 +380,12 @@ describe('performance', () => {
           perf.tick('start0');
           perf.tick('start1', 'start0', 300);
 
-          expect(tickSpy.getCall(1).args[0]).to.be.jsonEqual({
+          expect(tickSpy.getCall(2).args[0]).to.be.jsonEqual({
             label: 'start0',
             from: null,
             value: 100,
           });
-          expect(tickSpy.getCall(2).args[0]).to.be.jsonEqual({
+          expect(tickSpy.getCall(3).args[0]).to.be.jsonEqual({
             label: 'start1',
             from: 'start0',
             value: 300,
@@ -364,6 +402,50 @@ describe('performance', () => {
           expect(flushTicksSpy.callCount).to.equal(2);
           perf.flush();
           expect(flushTicksSpy.callCount).to.equal(3);
+        });
+      });
+
+      it('should setFlushParams', () => {
+        sandbox.stub(perf, 'whenViewportLayoutComplete_')
+            .returns(Promise.resolve());
+        const setFlushParamsSpy = sandbox.stub(viewer, 'setFlushParams');
+        perf.coreServicesAvailable();
+        resetServiceForTesting(window, 'documentInfo');
+        const info = {
+          get: () => {
+            return {
+              canonicalUrl: 'https://foo.bar/baz',
+              pageViewId: 12345,
+              sourceUrl: 'https://hello.world/baz/#development',
+            };
+          },
+        };
+        getService(window, 'documentInfo', () => info);
+
+        const ad1 = document.createElement('amp-ad');
+        ad1.setAttribute('type', 'abc');
+        const ad2 = document.createElement('amp-ad');
+        ad2.setAttribute('type', 'xyz');
+        const ad3 = document.createElement('amp-ad');
+        sandbox.stub(perf.resources_, 'get').returns([
+          {element: document.createElement('amp-img')},
+          {element: document.createElement('amp-img')},
+          {element: document.createElement('amp-anim')},
+          {element: ad1},
+          {element: ad2},
+          {element: ad3},
+        ]);
+
+        return perf.setDocumentInfoParams_().then(() => {
+          expect(setFlushParamsSpy.lastCall.args[0]).to.be.jsonEqual({
+            sourceUrl: 'https://hello.world/baz/',
+            'amp-img': 2,
+            'amp-anim': 1,
+            'amp-ad': 3,
+            'ad-abc': 1,
+            'ad-xyz': 1,
+            'ad-null': 1,
+          });
         });
       });
     });
@@ -386,7 +468,7 @@ describe('performance', () => {
     }
 
     beforeEach(() => {
-      viewer = viewerFor(window);
+      viewer = viewerForDoc(window.document);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
 
@@ -425,7 +507,8 @@ describe('performance', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
         const prerenderSpy = sandbox.spy(viewer, 'prerenderComplete');
-        sandbox.stub(viewer, 'isPerformanceTrackingOn').returns(true);
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+        sandbox.stub(viewer, 'isEmbedded').returns(true);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
           whenReadyToRetrieveResourcesResolve();
@@ -441,7 +524,7 @@ describe('performance', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
         const prerenderSpy = sandbox.spy(viewer, 'prerenderComplete');
-        sandbox.stub(viewer, 'isPerformanceTrackingOn').returns(false);
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
           whenReadyToRetrieveResourcesResolve();
@@ -456,19 +539,20 @@ describe('performance', () => {
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
-        expect(tickSpy.callCount).to.equal(0);
+        expect(tickSpy.callCount).to.equal(1);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.callCount).to.equal(2);
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.callCount).to.equal(3);
-            expect(tickSpy.getCall(1).args[0]).to.equal('_pc');
-            expect(tickSpy.getCall(2).args[0]).to.equal('pc');
-            expect(tickSpy.getCall(2).args[1]).to.equal('_pc');
-            expect(Number(tickSpy.getCall(1).args[2])).to.equal(perf.initTime_);
-            expect(Number(tickSpy.getCall(2).args[2]))
+            expect(tickSpy.callCount).to.equal(4);
+            expect(tickSpy.getCall(1).args[0]).to.equal('ofv');
+            expect(tickSpy.getCall(2).args[0]).to.equal('_pc');
+            expect(tickSpy.getCall(3).args[0]).to.equal('pc');
+            expect(tickSpy.getCall(3).args[1]).to.equal('_pc');
+            expect(Number(tickSpy.getCall(2).args[2])).to.equal(perf.initTime_);
+            expect(Number(tickSpy.getCall(3).args[2]))
                 .to.equal(perf.initTime_ + 400);
           });
         });
@@ -480,12 +564,13 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(2);
-          expect(tickSpy.firstCall.args[0]).to.equal('_pc');
-          expect(tickSpy.secondCall.args[0]).to.equal('pc');
-          expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.firstCall.args[2])).to.equal(perf.initTime_);
-          expect(Number(tickSpy.secondCall.args[2])).to.equal(
+          expect(tickSpy.callCount).to.equal(3);
+          expect(tickSpy.firstCall.args[0]).to.equal('ol');
+          expect(tickSpy.secondCall.args[0]).to.equal('_pc');
+          expect(tickSpy.thirdCall.args[0]).to.equal('pc');
+          expect(tickSpy.thirdCall.args[1]).to.equal('_pc');
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(perf.initTime_);
+          expect(Number(tickSpy.thirdCall.args[2])).to.equal(
               perf.initTime_ + 1);
         });
       });
@@ -500,7 +585,8 @@ describe('performance', () => {
 
       it('should call prerenderComplete on viewer', () => {
         const prerenderSpy = sandbox.spy(viewer, 'prerenderComplete');
-        sandbox.stub(viewer, 'isPerformanceTrackingOn').returns(true);
+        sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+        sandbox.stub(viewer, 'isEmbedded').returns(true);
         clock.tick(300);
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
@@ -515,52 +601,14 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(1);
-          expect(tickSpy.firstCall.args[0]).to.equal('pc');
-          expect(tickSpy.firstCall.args[2]).to.be.undefined;
+          expect(tickSpy.callCount).to.equal(2);
+          expect(tickSpy.firstCall.args[0]).to.equal('ol');
+          expect(tickSpy.secondCall.args[0]).to.equal('pc');
+          expect(tickSpy.secondCall.args[2]).to.be.undefined;
         });
       });
     });
   });
 
-  it('should setFlushParams', () => {
-    const viewer = viewerFor(window);
-    sandbox.stub(perf, 'whenViewportLayoutComplete_')
-        .returns(Promise.resolve());
-    const setFlushParamsSpy = sandbox.stub(viewer, 'setFlushParams');
-    perf.coreServicesAvailable();
-    resetServiceForTesting(window, 'documentInfo');
-    const info = {
-      canonicalUrl: 'https://foo.bar/baz',
-      pageViewId: 12345,
-      sourceUrl: 'https://hello.world/baz/#development',
-    };
-    getService(window, 'documentInfo', () => info);
 
-    const ad1 = document.createElement('amp-ad');
-    ad1.setAttribute('type', 'abc');
-    const ad2 = document.createElement('amp-ad');
-    ad2.setAttribute('type', 'xyz');
-    const ad3 = document.createElement('amp-ad');
-    sandbox.stub(perf.resources_, 'get').returns([
-      {element: document.createElement('amp-img')},
-      {element: document.createElement('amp-img')},
-      {element: document.createElement('amp-anim')},
-      {element: ad1},
-      {element: ad2},
-      {element: ad3},
-    ]);
-
-    return perf.setDocumentInfoParams_().then(() => {
-      expect(setFlushParamsSpy.lastCall.args[0]).to.be.jsonEqual({
-        sourceUrl: 'https://hello.world/baz/',
-        'amp-img': 2,
-        'amp-anim': 1,
-        'amp-ad': 3,
-        'ad-abc': 1,
-        'ad-xyz': 1,
-        'ad-null': 1,
-      });
-    });
-  });
 });

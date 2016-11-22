@@ -26,12 +26,15 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  getGoogleAdSlotCounter,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  getCorrelator,
 } from '../../../ads/google/a4a/utils';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
+import {stringHash32} from '../../../src/crypto';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -51,6 +54,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /**
+     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     */
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
   }
 
   /** @override */
@@ -63,28 +72,32 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
-    const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
+    const slotId = this.element.getAttribute('data-amp-slot-index');
+    const slotIdNumber = Number(slotId);
+    const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = documentStateFor(global).getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
-    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotNumber, [
+    const format = `${slotRect.width}x${slotRect.height}`;
+    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotIdNumber, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
-      {name: 'format', value: `${slotRect.width}x${slotRect.height}`},
+      {name: 'format', value: format},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
       {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
+      {name: 'adk', value: this.adKey_(format)},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?
             '1' : null,
       },
       {name: 'ctypes', value: this.getCtypes_()},
-      {name: 'd_imp', value: '1'},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'ifi', value: slotNumber},
+      {name: 'ifi', value: slotIdNumber},
+      {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
       {name: 'u_aw', value: screen ? screen.availWidth : null},
@@ -100,6 +113,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+  }
+
+  /**
+   * @param {string} format
+   * @return {string} The ad unit hash key string.
+   * @private
+   */
+  adKey_(format) {
+    const element = this.element;
+    const slot = element.getAttribute('data-ad-slot') || '';
+    const string = `${slot}:${format}:${domFingerprintPlain(element)}`;
+    return stringHash32(string);
   }
 
   /**
@@ -119,6 +144,52 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return null;
   }
 
+  /** @override */
+  emitLifecycleEvent(eventName, opt_associatedEventData) {
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
+    switch (eventName) {
+      case 'adRequestEnd':
+        const fetchResponse = opt_associatedEventData;
+        const qqid = fetchResponse.headers.get(
+            this.lifecycleReporter_.QQID_HEADER);
+        this.lifecycleReporter_.setQqid(qqid);
+        break;
+      case 'adSlotCleared':
+        this.lifecycleReporter_.sendPing(eventName);
+        this.lifecycleReporter_.reset();
+        this.element.setAttribute('data-amp-slot-index',
+            this.win.ampAdSlotIdCounter++);
+        this.lifecycleReporter_ = this.initLifecycleReporter();
+        return;
+      case 'adSlotBuilt':
+      case 'urlBuilt':
+      case 'adRequestStart':
+      case 'extractCreativeAndSignature':
+      case 'adResponseValidateStart':
+      case 'renderFriendlyStart':
+      case 'renderCrossDomainStart':
+      case 'renderFriendlyEnd':
+      case 'renderCrossDomainEnd':
+      case 'preAdThrottle':
+      case 'renderSafeFrameStart':
+        break;
+      default:
+    }
+    this.lifecycleReporter_.sendPing(eventName);
+  }
+
+  /**
+   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   */
+  initLifecycleReporter() {
+    const reporter =
+        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
+        (getLifecycleReporter(this, 'a4a', undefined,
+                              this.element.getAttribute(
+                                  'data-amp-slot-index')));
+    return reporter;
+  }
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);

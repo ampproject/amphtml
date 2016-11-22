@@ -89,13 +89,14 @@ var karma = {
     browsers: [
       'SL_Chrome_android',
       'SL_Chrome_latest',
-      'SL_Chrome_37',
+      'SL_Chrome_45',
       'SL_Firefox_latest',
       'SL_Safari_8',
       'SL_Safari_9',
       'SL_Edge_latest',
-      // TODO(#895) Enable these.
-      //'SL_iOS_9_1',
+      'SL_iOS_8_4',
+      'SL_iOS_9_1',
+      'SL_iOS_10_0',
       //'SL_IE_11',
     ],
   })
@@ -138,6 +139,7 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
+    '!examples/*.js',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };

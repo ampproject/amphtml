@@ -99,21 +99,14 @@ export class Timer {
    * @template RESULT
    */
   promise(opt_delay, opt_result) {
-    let timerKey = null;
-    return new Promise((resolve, reject) => {
-      timerKey = this.delay(() => {
-        timerKey = -1;
+    return new Promise(resolve => {
+      const timerKey = this.delay(() => {
         resolve(opt_result);
       }, opt_delay);
+
       if (timerKey == -1) {
-        reject(new Error('Failed to schedule timer.'));
+        throw new Error('Failed to schedule timer.');
       }
-    }).catch(error => {
-      // Clear the timer. The most likely reason is "cancel" signal.
-      if (timerKey != -1) {
-        this.cancel(timerKey);
-      }
-      throw error;
     });
   }
 
@@ -123,27 +116,20 @@ export class Timer {
    * resulting promise will either fail when the specified delay expires or
    * will resolve based on the opt_racePromise, whichever happens first.
    * @param {number} delay
-   * @param {!Promise<RESULT>|undefined} opt_racePromise
+   * @param {?Promise<RESULT>|undefined} opt_racePromise
    * @param {string=} opt_message
    * @return {!Promise<RESULT>}
    * @template RESULT
    */
   timeoutPromise(delay, opt_racePromise, opt_message) {
-    let timerKey = null;
     const delayPromise = new Promise((_resolve, reject) => {
-      timerKey = this.delay(() => {
-        timerKey = -1;
+      const timerKey = this.delay(() => {
         reject(user().createError(opt_message || 'timeout'));
       }, delay);
+
       if (timerKey == -1) {
-        reject(new Error('Failed to schedule timer.'));
+        throw new Error('Failed to schedule timer.');
       }
-    }).catch(error => {
-      // Clear the timer. The most likely reason is "cancel" signal.
-      if (timerKey != -1) {
-        this.cancel(timerKey);
-      }
-      throw error;
     });
     if (!opt_racePromise) {
       return delayPromise;
