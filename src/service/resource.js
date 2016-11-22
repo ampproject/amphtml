@@ -103,6 +103,15 @@ export class Resource {
       Resource.forElementOptional(element).updateOwner(owner);
     }
     element[OWNER_PROP_] = owner;
+
+    // Need to clear owner cache for all child elements
+    const cachedElements = element.getElementsByClassName('-amp-element');
+    for (let i = 0; i < cachedElements.length; i++) {
+      const ele = cachedElements[i];
+      if (Resource.forElementOptional(ele)) {
+        Resource.forElementOptional(ele).updateOwner(undefined);
+      }
+    }
   }
 
   /**
@@ -190,7 +199,7 @@ export class Resource {
 
   /**
    * Update owner element
-   * @param {!AmpElement} owner
+   * @param {AmpElement|undefined} owner
    */
   updateOwner(owner) {
     this.owner_ = owner;
