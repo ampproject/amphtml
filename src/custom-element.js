@@ -455,7 +455,7 @@ function createBaseCustomElementClass(win) {
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
-      this.isFirstLayoutCompleted_ = true;
+      this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
       this.isInViewport_ = false;
@@ -1066,9 +1066,9 @@ function createBaseCustomElementClass(win) {
         this.toggleLoading_(false, /* cleanup */ true);
         // Check if this is the first success layout that needs
         // to call firstLayoutCompleted.
-        if (this.isFirstLayoutCompleted_) {
+        if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
-          this.isFirstLayoutCompleted_ = false;
+          this.isFirstLayoutCompleted_ = true;
           this.dispatchCustomEvent('amp:load:end');
         }
       }, reason => {
@@ -1165,7 +1165,7 @@ function createBaseCustomElementClass(win) {
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.layoutCount_ = 0;
-        this.isFirstLayoutCompleted_ = true;
+        this.isFirstLayoutCompleted_ = false;
       }
       return isReLayoutNeeded;
     }
