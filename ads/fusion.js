@@ -28,7 +28,7 @@ export function fusion(global, data) {
   ad.setAttribute('data-fusion-space', data.space);
   container.appendChild(ad);
 
-  writeScript(global, 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.js', () => {
+  writeScript(global, 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js', () => {
     global.Fusion.apply(container, global.Fusion.loadAds(data));
   });
 }
