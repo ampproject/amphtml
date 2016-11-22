@@ -104,10 +104,10 @@ describe('SlideScroll', () => {
       impl.buildCarousel();
       expect(
           ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-start-marker').length).to.equal(1);
+              '-amp-carousel-start-marker').length).to.be.at.least(1);
       expect(
           ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-end-marker').length).to.equal(1);
+              '-amp-carousel-end-marker').length).to.be.at.least(1);
     });
   });
 
