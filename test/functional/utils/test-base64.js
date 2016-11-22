@@ -22,7 +22,7 @@ import {
 } from '../../../src/utils/base64';
 import {
   stringToBytes,
-  utf8DecodeSync,
+  tryUtf8Decode,
   utf8EncodeSync,
 } from '../../../src/utils/bytes';
 
@@ -63,7 +63,7 @@ describe('base64 <> utf-8 encode/decode', () => {
             const encoded = base64EncodeFromBytes(utf8Bytes);
             expect(encoded).not.to.equal(testCase);
             const decodedUtf8Bytes = base64DecodeToBytes(encoded);
-            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            const decoded = tryUtf8Decode(decodedUtf8Bytes);
             expect(decoded).to.equal(testCase);
           });
         });
@@ -77,7 +77,7 @@ describe('base64 <> utf-8 encode/decode', () => {
             expect(encoded).not.to.equal(testCase);
             expect(encoded).not.to.match(/[+/=]/g);
             const decodedUtf8Bytes = base64UrlDecodeToBytes(encoded);
-            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            const decoded = tryUtf8Decode(decodedUtf8Bytes);
             expect(decoded).to.equal(testCase);
           });
         });

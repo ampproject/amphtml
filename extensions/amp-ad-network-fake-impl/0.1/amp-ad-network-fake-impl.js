@@ -15,7 +15,7 @@
  */
 
 import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {tryUtf8Decode, utf8EncodeSync} from '../../../src/utils/bytes';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, user} from '../../../src/log';
 
@@ -28,8 +28,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     super(element);
     user().assert(element.hasAttribute('src'),
         'Attribute src required for <amp-ad type="fake">: %s', element);
-    user().assert(TextEncoder, '<amp-ad type="fake"> requires browser'
-        + ' support for TextEncoder() function.');
   }
 
   /** @override */
@@ -48,16 +46,22 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   extractCreativeAndSignature(responseText, unusedResponseHeaders) {
-    return utf8Decode(responseText).then(deserialized => {
-      const decoded = JSON.parse(deserialized);
-      dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
-      dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
-      const encoder = new TextEncoder('utf-8');
-      return {
-        creative: encoder.encode(decoded['creative']).buffer,
-        signature: base64DecodeToBytes(decoded['signature']),
-      };
+    let decodeErr;
+    const deserialized = tryUtf8Decode(responseText, err => {
+      decodeErr = err;
     });
+    if (decodeErr) {
+      return Promise.reject(decodeErr);
+    }
+
+    const decoded = JSON.parse(deserialized);
+    dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
+    dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
+    return Promise.resolve({
+      creative: utf8EncodeSync(decoded['creative']).buffer,
+      signature: base64DecodeToBytes(decoded['signature']),
+    });
+
   }
 }
 

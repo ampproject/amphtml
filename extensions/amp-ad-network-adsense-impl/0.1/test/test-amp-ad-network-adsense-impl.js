@@ -20,7 +20,7 @@ import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8EncodeSync} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 
 describe('amp-ad-network-adsense-impl', () => {
@@ -69,30 +69,28 @@ describe('amp-ad-network-adsense-impl', () => {
 
   describe('#extractCreativeAndSignature', () => {
     it('without signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(adsenseImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          })).to.eventually.deep.equal(
-                {creative, signature: null});
-      });
+      const creative = utf8EncodeSync('some creative');
+      return expect(adsenseImpl.extractCreativeAndSignature(
+        creative,
+        {
+          get: function() { return undefined; },
+          has: function() { return false; },
+        })).to.eventually.deep.equal(
+              {creative, signature: null});
     });
     it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(adsenseImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB')});
-      });
+      const creative = utf8EncodeSync('some creative');
+      return expect(adsenseImpl.extractCreativeAndSignature(
+        creative,
+        {
+          get: function(name) {
+            return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+          },
+          has: function(name) {
+            return name === 'X-AmpAdSignature';
+          },
+        })).to.eventually.deep.equal(
+            {creative, signature: base64UrlDecodeToBytes('AQAB')});
     });
   });
 });

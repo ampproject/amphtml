@@ -18,9 +18,69 @@ import {
   stringToBytes,
   bytesToString,
   getCryptoRandomBytesArray,
-  utf8Encode,
-  utf8Decode,
+  utf8EncodeSync,
+  tryUtf8Decode,
 } from '../../../src/utils/bytes';
+
+describe('utf-8 encode/decode', () => {
+  const testCases = [
+    'SimplyFoo',
+    'Unicode௵Z加䅌ਇ☎Èʘغޝ',
+    'Symbols/.,+-_()*&^%$#@!`~:="\'',
+  ];
+  const scenarios = ['NativeTextEncoding', 'PolyfillTextEncoding', 'Mixed'];
+
+  scenarios.forEach(scenario => {
+    describe(scenario, () => {
+      const oldTextEncoder = window.TextEncoder;
+      const oldTextDecoder = window.TextDecoder;
+      beforeEach(() => {
+        // Forces use of the TextEncoding polyfill
+        if (scenario == 'PolyfillTextEncoding') {
+          window.TextEncoder = undefined;
+          window.TextDecoder = undefined;
+        }
+        // Tests a mixture where encoding is done by the polyfill but decoding
+        // is done by the native TextDecoder
+        if (scenario == 'Mixed') {
+          window.TextEncoder = undefined;
+        }
+      });
+
+      afterEach(() => {
+        window.TextEncoder = oldTextEncoder;
+        window.TextDecoder = oldTextDecoder;
+      });
+
+      it('should be symmetrical', () => {
+        testCases.forEach(testCase => {
+          it(testCase, () => {
+            const utf8Bytes = utf8EncodeSync(testCase);
+            const decoded = tryUtf8Decode(utf8Bytes);
+            expect(decoded).to.equal(testCase);
+          });
+        });
+      });
+
+      it('should not throw on invalid input', () => {
+        const invalidUtf8Bytes = new Uint8Array([255, 152, 162]);
+        expect(() => {tryUtf8Decode(invalidUtf8Bytes);}).to.not.throw();
+        expect(tryUtf8Decode(invalidUtf8Bytes)).to.equal('');
+      });
+
+      it('should not throw on invalid input but should report error', () => {
+        const invalidUtf8Bytes = new Uint8Array([255, 152, 162]);
+        let errored = false;
+        const decoded = tryUtf8Decode(invalidUtf8Bytes, e => {
+          expect(e).to.match(/Failed to decode UTF-8 bytes/);
+          errored = true;
+        });
+        expect(decoded).to.equal('');
+        expect(errored).to.be.true;
+      });
+    });
+  });
+});
 
 describe('stringToBytes', function() {
   let fakeWin;
@@ -119,15 +179,15 @@ describe('utf8', function() {
 
   it('should encode given string into utf-8 byte array', () => {
     for (let i = 0; i < strings.length; i++) {
-      utf8Encode(strings[i]).then(byteArray => expect(byteArray).to.deep
-          .equal(new Uint8Array(bytes[i])));
+      const encoded = utf8EncodeSync(strings[i]);
+      expect(encoded).to.deep.equal(new Uint8Array(bytes[i]));
     }
   });
 
   it('should decode given utf-8 bytes into string', () => {
     for (let i = 0; i < bytes.length; i++) {
-      utf8Decode(new Uint8Array(bytes[i])).then(string => expect(string).to
-          .equal(strings[i]));
+      const decoded = tryUtf8Decode(new Uint8Array(bytes[i]));
+      expect(decoded).to.equal(strings[i]);
     }
   });
 });

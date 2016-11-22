@@ -14,65 +14,31 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
+import {dev, user} from '../log';
 
 /**
  * Interpret a byte array as a UTF-8 string.
+ * If decoding fails, it returns an empty string and calls the opt_onFailed
+ * callback if one is provided.
  * @param {!BufferSource} bytes
- * @return {!Promise<string>}
- */
-export function utf8Decode(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-  }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
-    reader.readAsText(new Blob([bytes]));
-  });
-}
-
-// TODO(aghassemi, #6139): Remove the async version of utf8 encoding and rename
-// the sync versions to the canonical utf8Decode/utf8Encode.
-/**
- * Interpret a byte array as a UTF-8 string.
- * @param {!BufferSource} bytes
+ * @param {function(!Error)=} opt_onFailed Optional function that will be called
+ *    with the error if decoding fails.
  * @return {!string}
  */
-export function utf8DecodeSync(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return new TextDecoder('utf-8').decode(bytes);
+export function tryUtf8Decode(bytes, opt_onFailed) {
+  try {
+    if (typeof TextDecoder !== 'undefined') {
+      return new TextDecoder('utf-8', {fatal: true}).decode(bytes);
+    }
+    const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+    return decodeURIComponent(escape(asciiString));
+  } catch (e) {
+    if (opt_onFailed) {
+      const err = user().createError('Failed to decode UTF-8 bytes');
+      opt_onFailed(err);
+    }
+    return '';
   }
-  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
-  return decodeURIComponent(escape(asciiString));
-}
-
-/**
- * Turn a string into UTF-8 bytes.
- * @param {string} string
- * @return {!Promise<!Uint8Array>}
- */
-export function utf8Encode(string) {
-  if (typeof TextEncoder !== 'undefined') {
-    return Promise.resolve(new TextEncoder('utf-8').encode(string));
-  }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      // Because we used readAsArrayBuffer, we know the result must be an
-      // ArrayBuffer.
-      resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
-    };
-    reader.readAsArrayBuffer(new Blob([string]));
-  });
 }
 
 /**

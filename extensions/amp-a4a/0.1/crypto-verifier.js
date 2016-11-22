@@ -15,7 +15,7 @@
  */
 
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {utf8EncodeSync} from '../../../src/utils/bytes';
 
 /** @const {boolean} */
 const isWebkit = window.crypto && 'webkitSubtle' in window.crypto;
@@ -49,13 +49,13 @@ export let PublicKeyInfoDef;
  */
 export function importPublicKey(jwk) {
   // WebKit wants this as an ArrayBufferView.
-  return (isWebkit ? utf8Encode(JSON.stringify(jwk)) : Promise.resolve(jwk))
-      .then(encodedJwk => crossCrypto.importKey(
+  const encodedJwk = isWebkit ? utf8EncodeSync(JSON.stringify(jwk)) : jwk;
+  return crossCrypto.importKey(
           'jwk',
           encodedJwk,
           {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
           true,
-          ['verify']))
+          ['verify'])
       .then(cryptoKey => {
         // We do the importKey first to allow the browser to check for
         // an invalid key.  This last check is in case the key is valid

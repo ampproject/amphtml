@@ -33,7 +33,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {tryUtf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
@@ -705,78 +705,85 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Render a validated AMP creative directly in the parent page.
    * @param {!ArrayBuffer} bytes The creative, as raw bytes.
-   * @return {Promise<boolean>} Whether the creative was successfully
+   * @return {boolean} Whether the creative was successfully
    *     rendered.
    * @private
    */
   maybeRenderAmpAd_(bytes) {
     this.emitLifecycleEvent('renderFriendlyStart', bytes);
     // AMP documents are required to be UTF-8
-    return utf8Decode(bytes).then(creative => {
-      // Find the json blob located at the end of the body and parse it.
-      const creativeMetaData = this.getAmpAdMetadata_(creative);
-      if (!creativeMetaData) {
-        // Could not find appropriate markers within the creative therefore
-        // load within cross domain iframe. Iframe is created immediately
-        // (as opposed to waiting for layoutCallback) as the the creative has
-        // been verified as AMP and will run efficiently.  Render inside a
-        // vsync block so that AMP can coordinate visual impact.
-        this.vsync_.mutate(() => {
-          dev().assert(this.adUrl_, 'Ad URL missing in A4A creative rendering');
-          this.renderViaCachedContentIframe_(this.adUrl_);
-        });
-        return true;
-      } else {
-        try {
-          // Create and setup friendly iframe.
-          dev().assert(!!this.element.ownerDocument);
-          const iframe = /** @type {!HTMLIFrameElement} */(
-            createElementWithAttributes(
-              /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
-                'frameborder': '0', 'allowfullscreen': '',
-                'allowtransparency': '', 'scrolling': 'no'}));
-          this.applyFillContent(iframe);
-          const fontsArray = [];
-          if (creativeMetaData.customStylesheets) {
-            creativeMetaData.customStylesheets.forEach(s => {
-              const href = s['href'];
-              if (href) {
-                fontsArray.push(href);
-              }
-            });
-          }
-          return installFriendlyIframeEmbed(
-            iframe, this.element, {
-              url: this.adUrl_,
-              html: creativeMetaData.minifiedCreative,
-              extensionIds: creativeMetaData.customElementExtensions || [],
-              fonts: fontsArray,
-            }, embedWin => {
-              installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
-                new A4AVariableSource(this.getAmpDoc(), embedWin));
-            }).then(friendlyIframeEmbed => {
-              // Ensure visibility hidden has been removed (set by boilerplate).
-              const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
-                friendlyIframeEmbed.win.document;
-              setStyle(frameDoc.body, 'visibility', 'visible');
-              // Capture phase click handlers on the ad.
-              this.registerExpandUrlParams_(friendlyIframeEmbed.win);
-              // Bubble phase click handlers on the ad.
-              this.registerAlpHandler_(friendlyIframeEmbed.win);
-              this.rendered_ = true;
-              this.onAmpCreativeRender();
-              return true;
-            });
-        } catch (e) {
-          dev().error('AMP-A4A', 'Error injecting creative in friendly frame',
-              e);
-          // If we fail on any of the steps of Shadow DOM construction, just
-          // render in iframe.
-          // TODO: report!
-          return false;
-        }
-      }
+    const creative = tryUtf8Decode(bytes, err => {
+      user().error('AMP-A4A', err, this.element);
     });
+
+    if (!creative) {
+      return false;
+    }
+
+    // Find the json blob located at the end of the body and parse it.
+    const creativeMetaData = this.getAmpAdMetadata_(creative);
+    if (!creativeMetaData) {
+      // Could not find appropriate markers within the creative therefore
+      // load within cross domain iframe. Iframe is created immediately
+      // (as opposed to waiting for layoutCallback) as the the creative has
+      // been verified as AMP and will run efficiently.  Render inside a
+      // vsync block so that AMP can coordinate visual impact.
+      this.vsync_.mutate(() => {
+        dev().assert(this.adUrl_, 'Ad URL missing in A4A creative rendering');
+        this.renderViaCachedContentIframe_(this.adUrl_);
+      });
+      return true;
+    } else {
+      try {
+        // Create and setup friendly iframe.
+        dev().assert(!!this.element.ownerDocument);
+        const iframe = /** @type {!HTMLIFrameElement} */(
+          createElementWithAttributes(
+            /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+              'frameborder': '0', 'allowfullscreen': '',
+              'allowtransparency': '', 'scrolling': 'no'}));
+        this.applyFillContent(iframe);
+        const fontsArray = [];
+        if (creativeMetaData.customStylesheets) {
+          creativeMetaData.customStylesheets.forEach(s => {
+            const href = s['href'];
+            if (href) {
+              fontsArray.push(href);
+            }
+          });
+        }
+        return installFriendlyIframeEmbed(
+          iframe, this.element, {
+            url: this.adUrl_,
+            html: creativeMetaData.minifiedCreative,
+            extensionIds: creativeMetaData.customElementExtensions || [],
+            fonts: fontsArray,
+          }, embedWin => {
+            installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
+              new A4AVariableSource(this.getAmpDoc(), embedWin));
+          }).then(friendlyIframeEmbed => {
+            // Ensure visibility hidden has been removed (set by boilerplate).
+            const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
+              friendlyIframeEmbed.win.document;
+            setStyle(frameDoc.body, 'visibility', 'visible');
+            // Capture phase click handlers on the ad.
+            this.registerExpandUrlParams_(friendlyIframeEmbed.win);
+            // Bubble phase click handlers on the ad.
+            this.registerAlpHandler_(friendlyIframeEmbed.win);
+            this.rendered_ = true;
+            this.onAmpCreativeRender();
+            return true;
+          });
+      } catch (e) {
+        dev().error('AMP-A4A', 'Error injecting creative in friendly frame',
+            e);
+        // If we fail on any of the steps of Shadow DOM construction, just
+        // render in iframe.
+        // TODO: report!
+        return false;
+      }
+    }
+
   }
 
   /**
@@ -833,18 +840,24 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaSafeFrame_(creativeBody) {
     this.emitLifecycleEvent('renderSafeFrameStart');
-    return utf8Decode(creativeBody).then(creative => {
-      /** @const {!Element} */
-      const iframe = createElementWithAttributes(
-          /** @type {!Document} */(this.element.ownerDocument),
-          'iframe', Object.assign({
-            'height': this.element.getAttribute('height'),
-            'width': this.element.getAttribute('width'),
-            'src': SAFEFRAME_IMPL_PATH + '?n=0',
-            'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
-          }, SHARED_IFRAME_PROPERTIES));
-      return this.iframeRenderHelper_(iframe);
+    let decodeErr;
+    const creative = tryUtf8Decode(creativeBody, err => {
+      decodeErr = err;
     });
+    if (decodeErr) {
+      return Promise.reject(decodeErr);
+    }
+    /** @const {!Element} */
+    const iframe = createElementWithAttributes(
+        /** @type {!Document} */(this.element.ownerDocument),
+        'iframe', Object.assign({
+          'height': this.element.getAttribute('height'),
+          'width': this.element.getAttribute('width'),
+          'src': SAFEFRAME_IMPL_PATH + '?n=0',
+          'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
+        }, SHARED_IFRAME_PROPERTIES));
+    return this.iframeRenderHelper_(iframe);
+
   }
 
   /**
