@@ -113,10 +113,8 @@ export class IntersectionObserverApi {
     this.shouldObserve_ = true;
     this.intersectionObserver_.observe(this.baseElement_.element);
     this.baseElement_.getVsync().measure(() => {
-      if (this.baseElement_.isInViewport()) {
-        this.isInViewport_ = true;
-        this.fire();
-      }
+      this.isInViewport_ = this.baseElement_.isInViewport();
+      this.fire();
     });
 
     const unlistenViewportScroll = this.viewport_.onScroll(this.fire);
@@ -397,7 +395,7 @@ function calculateChangeEntry(
   // thus relative to iframe's viewport origin because the viewport is at the
   // iframe origin. No need to adjust position here.
 
-  if (rootBounds) {
+  if (hostViewport) {
     // If element not in an iframe.
     // adjust all LayoutRect to hostViewport Origin.
     rootBounds = /** @type {!./layout-rect.LayoutRectDef} */ (rootBounds);
