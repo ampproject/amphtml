@@ -467,12 +467,10 @@ export class AmpSlideScroll extends BaseSlides {
       if (showIndex == newIndex) {
         this.scheduleLayout(this.slides_[showIndex]);
         this.scheduleResume(this.slides_[showIndex]);
-        this.slides_[showIndex] &&
-          this.slides_[showIndex].setAttribute('aria-hidden', 'false');
+        this.slides_[showIndex].setAttribute('aria-hidden', 'false');
       } else {
         this.schedulePreload(this.slides_[showIndex]);
-        this.slides_[showIndex] &&
-          this.slides_[showIndex].setAttribute('aria-hidden', 'true');
+        this.slides_[showIndex].setAttribute('aria-hidden', 'true');
       }
     });
     this.slidesContainer_./*OK*/scrollLeft =
@@ -519,8 +517,7 @@ export class AmpSlideScroll extends BaseSlides {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
         this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
-        this.slides_[i] &&
-          this.slides_[i].setAttribute('aria-hidden', 'true');
+        this.slides_[i].setAttribute('aria-hidden', 'true');
       }
       // Pause if not the current slide
       if (this.slideIndex_ != i) {
