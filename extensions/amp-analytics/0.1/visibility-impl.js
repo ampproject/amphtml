@@ -290,13 +290,14 @@ export class Visibility {
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
-    const element = getElement(this.ampdoc, selector,
-        dev().assertElement(analyticsElement),
-        config['selectionMethod']);
+    const element = user().assertElement(
+        getElement(this.ampdoc, selector,
+            dev().assertElement(analyticsElement),
+            config['selectionMethod']),
+        'Element not found for visibilitySpec: ' + selector);
 
-    const resource = this.resourcesService_.getResourceForElementOptional(
-        user().assertElement(
-            element, 'Element not found for visibilitySpec: ' + selector));
+    const resource =
+        this.resourcesService_.getResourceForElementOptional(element);
 
     user().assert(
         resource, 'Visibility tracking not supported on element: ', element);
@@ -328,18 +329,20 @@ export class Visibility {
    */
   listenOnceV2(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
-    const element = getElement(this.ampdoc, selector,
-        dev().assertElement(analyticsElement),
-        config['selectionMethod']);
+    const element = user().assertElement(
+        getElement(this.ampdoc, selector,
+            dev().assertElement(analyticsElement),
+            config['selectionMethod']),
+        'Element not found for visibilitySpec: ' + selector);
 
-    const resource = this.resourcesService_.getResourceForElementOptional(
-        user().assertElement(
-            element, 'Element not found for visibilitySpec: ' + selector));
+    const resource =
+        this.resourcesService_.getResourceForElementOptional(element);
 
     user().assert(
         resource, 'Visibility tracking not supported on element: ', element);
 
     if (!this.intersectionObserver_) {
+      /** @private {!IntersectionObserver} */
       this.intersectionObserver_ =
           // TODO: polyfill IntersectionObserver
           new IntersectionObserver(entries => {
