@@ -694,25 +694,25 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
-        a4a.maybeRenderAmpAd_ = function() { false; };
-        const rendered = a4a.maybeRenderAmpAd_();
-
-        // Force vsync system to run all queued tasks, so that DOM mutations
-        // are actually completed before testing.
-        a4a.vsync_.runScheduledTasks_();
-        expect(rendered).to.be.false;
-        expect(a4aElement.shadowRoot).to.be.null;
-        expect(a4a.rendered_).to.be.false;
-        // Force layout callback which will cause iframe to be attached
-        a4a.adPromise_ = Promise.resolve(false);
-        return a4a.layoutCallback().then(() => {
+        a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
+        return a4a.maybeRenderAmpAd_().then(rendered => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          // Verify iframe presence and lack of visibility hidden
-          expect(a4aElement.children.length).to.equal(1);
-          const iframe = a4aElement.children[0];
-          expect(iframe.tagName).to.equal('IFRAME');
-          expect(iframe.src.indexOf('https://nowhere.org')).to.equal(0);
-          expect(iframe.style.visibility).to.equal('');
+          expect(rendered).to.be.false;
+          expect(a4aElement.shadowRoot).to.be.null;
+          expect(a4a.rendered_).to.be.false;
+          // Force layout callback which will cause iframe to be attached
+          a4a.adPromise_ = Promise.resolve(false);
+          return a4a.layoutCallback().then(() => {
+            a4a.vsync_.runScheduledTasks_();
+            // Verify iframe presence and lack of visibility hidden
+            expect(a4aElement.children.length).to.equal(1);
+            const iframe = a4aElement.children[0];
+            expect(iframe.tagName).to.equal('IFRAME');
+            expect(iframe.src.indexOf('https://nowhere.org')).to.equal(0);
+            expect(iframe.style.visibility).to.equal('');
+          });
         });
       });
     });

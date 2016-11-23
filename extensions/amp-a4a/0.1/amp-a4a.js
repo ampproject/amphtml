@@ -712,7 +712,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Render a validated AMP creative directly in the parent page.
    * @param {!ArrayBuffer} bytes The creative, as raw bytes.
-   * @return {boolean} Whether the creative was successfully
+   * @return {Promise<boolean>} Whether the creative was successfully
    *     rendered.
    * @private
    */
@@ -724,7 +724,7 @@ export class AmpA4A extends AMP.BaseElement {
     });
 
     if (!creative) {
-      return false;
+      return Promise.resolve(false);
     }
 
     // Find the json blob located at the end of the body and parse it.
@@ -739,7 +739,7 @@ export class AmpA4A extends AMP.BaseElement {
         dev().assert(this.adUrl_, 'Ad URL missing in A4A creative rendering');
         this.renderViaCachedContentIframe_(this.adUrl_);
       });
-      return true;
+      return Promise.resolve(true);
     } else {
       try {
         // Create and setup friendly iframe.
@@ -787,7 +787,7 @@ export class AmpA4A extends AMP.BaseElement {
         // If we fail on any of the steps of Shadow DOM construction, just
         // render in iframe.
         // TODO: report!
-        return false;
+        return Promise.resolve(false);
       }
     }
 
