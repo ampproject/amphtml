@@ -45,16 +45,17 @@ amp-carousel-slide {
   background-color: rgba(0, 0, 0, .5);
   background-position: 50% 50%;
   background-repeat: no-repeat;
+  pointer-events: none;
   transform: translateY(-50%);
-  visibility: hidden;
   z-index: 10;
 }
 
 amp-carousel[controls] .amp-carousel-button,
 .amp-mode-mouse .amp-carousel-button {
   opacity: 1;
-  visibility: visible;
+  pointer-events: auto;
 }
+
 
 .amp-carousel-button-prev {
   left: 16px;
@@ -75,18 +76,18 @@ amp-carousel[controls] .amp-carousel-button,
 @keyframes -amp-carousel-hint {
   0% {
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
   }
   100% {
     opacity: 0;
-    visibility: hidden;
+    pointer-events: none;
   }
 }
 
 amp-carousel .amp-carousel-button.amp-disabled {
   animation: none;
   opacity: 0;
-  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Begin SlideScroll */
