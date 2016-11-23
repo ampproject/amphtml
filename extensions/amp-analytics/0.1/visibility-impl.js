@@ -23,6 +23,7 @@ import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
 import {startsWith} from '../../../src/string';
+import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -319,6 +320,70 @@ export class Visibility {
         this.scrollListener_();
       }, LISTENER_INITIAL_RUN_DELAY_);
     }
+  }
+
+  /**
+   * @param {!JSONType} config
+   * @param {function(!JSONType)} callback
+   * @param {boolean} shouldBeVisible True if the element should be visible
+   *   when callback is called. False otherwise.
+   * @param {!Element} analyticsElement The amp-analytics element that the
+   *   config is associated with.
+   */
+  listenOnceV2(config, callback, shouldBeVisible, analyticsElement) {
+    const selector = config['selector'];
+    const element = getElement(this.ampdoc, selector,
+        dev().assertElement(analyticsElement),
+        config['selectionMethod']);
+
+    const resource = this.resourcesService_.getResourceForElementOptional(
+        user().assertElement(
+            element, 'Element not found for visibilitySpec: ' + selector));
+
+    user().assert(
+        resource, 'Visibility tracking not supported on element: ', element);
+
+    if (!this.intersectionObserver_) {
+      this.intersectionObserver_ =
+          // TODO: polyfill IntersectionObserver
+          new IntersectionObserver(entries => {
+            entries.forEach(this.onIntersectionChange_.bind(this));
+          }, {threshold: DEFAULT_THRESHOLD});
+    }
+
+    resource.loadedOnce().then(() => {
+      this.intersectionObserver_.observe(element);
+
+      const resId = resource.getId();
+      this.listeners_[resId] = (this.listeners_[resId] || []);
+      const state = {};
+      state[TIME_LOADED] = Date.now();
+      this.listeners_[resId].push({config, callback, state, shouldBeVisible});
+      this.resources_.push(resource);
+    });
+  }
+
+  onIntersectionChange_(change) {
+    const listeners = this.listeners_[change.target.getResourceId()];
+
+    const visible = change.intersectionRatio * 100;
+    for (let c = listeners.length - 1; c >= 0; c--) {
+      const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
+      if (this.updateCounters_(visible, listeners[c], shouldBeVisible)
+          && this.viewer_.isVisible() == shouldBeVisible) {
+        this.prepareStateForCallback_(
+            listeners[c]['state'], change.boundingClientRect);
+        listeners[c].callback(listeners[c]['state']);
+        listeners.splice(c, 1);
+      }
+    }
+
+    // Remove target that have no listeners.
+    if (listeners.length == 0) {
+      this.intersectionObserver_.unobserve(change.target);
+    }
+
+    // TODO: support continuousTimeMin and totalTimeMin
   }
 
   /** @private */
