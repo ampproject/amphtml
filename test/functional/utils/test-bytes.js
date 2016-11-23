@@ -19,7 +19,7 @@ import {
   bytesToString,
   getCryptoRandomBytesArray,
   utf8Encode,
-  tryUtf8Decode,
+  utf8Decode,
 } from '../../../src/utils/bytes';
 
 describe('utf-8 encode/decode', () => {
@@ -56,27 +56,17 @@ describe('utf-8 encode/decode', () => {
         testCases.forEach(testCase => {
           it(testCase, () => {
             const utf8Bytes = utf8Encode(testCase);
-            const decoded = tryUtf8Decode(utf8Bytes);
+            const decoded = utf8Decode(utf8Bytes);
             expect(decoded).to.equal(testCase);
           });
         });
       });
 
-      it('should not throw on invalid input', () => {
+      it('should throw on invalid input', () => {
         const invalidUtf8Bytes = new Uint8Array([255, 152, 162]);
-        expect(() => {tryUtf8Decode(invalidUtf8Bytes);}).to.not.throw();
-        expect(tryUtf8Decode(invalidUtf8Bytes)).to.equal('');
-      });
-
-      it('should not throw on invalid input but should report error', () => {
-        const invalidUtf8Bytes = new Uint8Array([255, 152, 162]);
-        let errored = false;
-        const decoded = tryUtf8Decode(invalidUtf8Bytes, e => {
-          expect(e).to.match(/Failed to decode UTF-8 bytes/);
-          errored = true;
-        });
-        expect(decoded).to.equal('');
-        expect(errored).to.be.true;
+        expect(() => {
+          utf8Decode(invalidUtf8Bytes);
+        }).to.throw(/Failed to decode UTF-8 bytes/);
       });
     });
   });
@@ -186,7 +176,7 @@ describe('utf8', function() {
 
   it('should decode given utf-8 bytes into string', () => {
     for (let i = 0; i < bytes.length; i++) {
-      const decoded = tryUtf8Decode(new Uint8Array(bytes[i]));
+      const decoded = utf8Decode(new Uint8Array(bytes[i]));
       expect(decoded).to.equal(strings[i]);
     }
   });

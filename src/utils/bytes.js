@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../log';
+import {dev} from '../log';
 
 /**
  * Interpret a byte array as a UTF-8 string.
- * If decoding fails, it returns an empty string and calls the opt_onFailed
- * callback if one is provided.
+ * If decoding fails, it throws a synchronous exception.
  * @param {!BufferSource} bytes
- * @param {function(!Error)=} opt_onFailed Optional function that will be called
- *    with the error if decoding fails.
  * @return {!string}
  */
-export function tryUtf8Decode(bytes, opt_onFailed) {
+export function utf8Decode(bytes) {
   try {
     if (typeof TextDecoder !== 'undefined') {
       return new TextDecoder('utf-8', {fatal: true}).decode(bytes);
@@ -33,11 +30,7 @@ export function tryUtf8Decode(bytes, opt_onFailed) {
     const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
     return decodeURIComponent(escape(asciiString));
   } catch (e) {
-    if (opt_onFailed) {
-      const err = user().createError('Failed to decode UTF-8 bytes');
-      opt_onFailed(err);
-    }
-    return '';
+    throw new Error('Failed to decode UTF-8 bytes');
   }
 }
 

@@ -33,7 +33,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
-import {tryUtf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
@@ -719,11 +719,11 @@ export class AmpA4A extends AMP.BaseElement {
   maybeRenderAmpAd_(bytes) {
     this.emitLifecycleEvent('renderFriendlyStart', bytes);
     // AMP documents are required to be UTF-8
-    const creative = tryUtf8Decode(bytes, err => {
-      user().error('AMP-A4A', err, this.element);
-    });
-
-    if (!creative) {
+    let creative;
+    try {
+      creative = utf8Decode(bytes);
+    } catch (e) {
+      user().error('AMP-A4A', e, this.element);
       return Promise.resolve(false);
     }
 
@@ -847,12 +847,11 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaSafeFrame_(creativeBody) {
     this.emitLifecycleEvent('renderSafeFrameStart');
-    let decodeErr;
-    const creative = tryUtf8Decode(creativeBody, err => {
-      decodeErr = err;
-    });
-    if (decodeErr) {
-      return Promise.reject(decodeErr);
+    let creative;
+    try {
+      creative = utf8Decode(creativeBody);
+    } catch (e) {
+      return Promise.reject(e);
     }
     /** @const {!Element} */
     const iframe = createElementWithAttributes(

@@ -15,7 +15,7 @@
  */
 
 import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {tryUtf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, user} from '../../../src/log';
 
@@ -49,22 +49,18 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    * @return !Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>
   */
   extractCreativeAndSignature(responseText, unusedResponseHeaders) {
-    let decodeErr;
-    const deserialized = tryUtf8Decode(responseText, err => {
-      decodeErr = err;
+    return new Promise(resolve => {
+      const deserialized = utf8Decode(responseText);
+      const decoded = JSON.parse(deserialized);
+      dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
+      dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
+      /**  */
+      resolve({
+        creative: utf8Encode(decoded['creative']).buffer,
+        signature: base64DecodeToBytes(decoded['signature']),
+      });
     });
-    if (decodeErr) {
-      return Promise.reject(decodeErr);
-    }
 
-    const decoded = JSON.parse(deserialized);
-    dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
-    dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
-    /**  */
-    return Promise.resolve({
-      creative: utf8Encode(decoded['creative']).buffer,
-      signature: base64DecodeToBytes(decoded['signature']),
-    });
   }
 }
 
