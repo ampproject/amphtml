@@ -150,7 +150,7 @@ describe('amp-analytics.visibility', () => {
     expect(callbackStub.callCount).to.equal(1);
   });
 
-  it.only('fires for non-trivial on=visible config', () => {
+  it('fires for non-trivial on=visible config', () => {
     viewportScrollTopStub.returns(13);
     viewportScrollLeftStub.returns(5);
     listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
