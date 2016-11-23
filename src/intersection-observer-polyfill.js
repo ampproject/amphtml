@@ -244,8 +244,6 @@ export class IntersectionObserverPolyfill {
     // If opt_iframe is not provided, all LayoutRect has position relative to
     // the host document.
     elementRect = this.element_.getLayoutBox();
-    dev().assert(elementRect.width >= 0 && elementRect.height >= 0,
-      'Negative dimensions in element.');
     const owner = this.element_.getOwner();
     ownerRect = owner && owner.getLayoutBox();
 

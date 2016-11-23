@@ -85,25 +85,20 @@ export function rectIntersection(var_args) {
   let x1 = Infinity;
   let y0 = -Infinity;
   let y1 = Infinity;
-  let hasValidRect = false;;
   for (let i = 0; i < arguments.length; i++) {
     const current = arguments[i];
     if (!current) {
       continue;
     }
-    hasValidRect = true;
     x0 = Math.max(x0, current.left);
     x1 = Math.min(x1, current.left + current.width);
-    if (x1 < x0) {
-      return null;
-    }
     y0 = Math.max(y0, current.top);
     y1 = Math.min(y1, current.top + current.height);
-    if (y1 < y0) {
+    if (x1 < x0 || y1 < y0) {
       return null;
     }
   }
-  if (!hasValidRect) {
+  if (x1 == Infinity) {
     return null;
   }
   return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
