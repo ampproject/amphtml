@@ -413,9 +413,8 @@ function calculateChangeEntry(
   }
 
   return /** @type {!IntersectionObserverEntry} */ ({
-    time: (typeof performance !== 'undefined' &&
-        typeof performance.now !== 'undefined') ? performance.now()
-        : Date.now() - INIT_TIME,
+    time: (typeof performance !== 'undefined' && performance.now) ?
+        performance.now() : Date.now() - INIT_TIME,
     rootBounds: rootBounds && DomRectFromLayoutRect(rootBounds),
     boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
     intersectionRect: DomRectFromLayoutRect(intersection),
