@@ -945,9 +945,11 @@ describe('CustomElement', () => {
 
   it('should change size with sizer', () => {
     const element = new ElementClass();
-    element.sizerElement_ = document.createElement('div');
+    const sizer = document.createElement('div');
+    element.sizerElement_ = sizer;
     element.changeSize(111, 222);
-    expect(parseInt(element.sizerElement_.style.paddingTop, 10)).to.equal(0);
+    expect(parseInt(sizer.style.paddingTop, 10)).to.equal(0);
+    expect(element.sizerElement_).to.be.null;
     expect(element.style.height).to.equal('111px');
     expect(element.style.width).to.equal('222px');
   });
