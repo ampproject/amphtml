@@ -15,11 +15,13 @@
  */
 
 import {getServiceForDoc} from './service';
-import {startsWith} from './string';
 import {dev, user} from './log';
-import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
-import {urls} from './config';
-
+import {
+  assertHttpsUrl,
+  checkCorsUrl,
+  SOURCE_ORIGIN_PARAM,
+  isProxyOrigin,
+} from './url';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
@@ -81,7 +83,7 @@ export function onDocumentFormSubmit_(e) {
     user().assert(action,
         'form action attribute is required for method=GET: %s', form);
     assertHttpsUrl(action, dev().assertElement(form), 'action');
-    user().assert(!startsWith(action, urls.cdn),
+    user().assert(!isProxyOrigin(action),
         'form action should not be on AMP CDN: %s', form);
     checkCorsUrl(action);
   } else if (method == 'POST') {

@@ -21,7 +21,7 @@ import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
-import {startsWith} from './string';
+import {isProxyOrigin} from './url';
 
 const CANCELLED = 'CANCELLED';
 
@@ -248,7 +248,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
 export function detectNonAmpJs(win) {
   const scripts = win.document.querySelectorAll('script[src]');
   for (let i = 0; i < scripts.length; i++) {
-    if (!startsWith(scripts[i].src.toLowerCase(), urls.cdn)) {
+    if (!isProxyOrigin(scripts[i].src.toLowerCase())) {
       return true;
     }
   }
