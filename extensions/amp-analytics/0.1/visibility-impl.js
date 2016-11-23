@@ -293,27 +293,23 @@ export class Visibility {
     const element = getElement(this.ampdoc, selector,
         dev().assertElement(analyticsElement),
         config['selectionMethod']);
-    user().assert(element, 'Element not found for visibilitySpec: '
-        + selector);
-    let res = null;
-    try {
-      res = this.resourcesService_.getResourceForElement(
-          user().assertElement(element));
-    } catch (e) {
-      user().assert(res,
-          'Visibility tracking not supported on element: ', element);
-    }
 
-    const resId = res.getId();
+    const resource = this.resourcesService_.getResourceForElementOptional(
+        user().assertElement(
+            element, 'Element not found for visibilitySpec: ' + selector));
+
+    user().assert(
+        resource, 'Visibility tracking not supported on element: ', element);
 
     this.registerForViewportEvents_();
     this.registerForVisibilityEvents_();
 
+    const resId = resource.getId();
     this.listeners_[resId] = (this.listeners_[resId] || []);
     const state = {};
     state[TIME_LOADED] = Date.now();
     this.listeners_[resId].push({config, callback, state, shouldBeVisible});
-    this.resources_.push(res);
+    this.resources_.push(resource);
 
     if (this.scheduledRunId_ === null) {
       this.scheduledRunId_ = this.timer_.delay(() => {
