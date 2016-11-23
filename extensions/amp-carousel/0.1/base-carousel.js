@@ -70,7 +70,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.classList.add('amp-carousel-button');
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'presentation');
-    this.prevButton_.setAttribute('aria-disabled', 'true');
+    this.prevButton_.setAttribute('aria-hidden', 'true');
     this.prevButton_.onclick = () => {
       this.interactionPrev();
     };
@@ -80,7 +80,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'presentation');
-    this.prevButton_.setAttribute('aria-disabled', 'true');
+    this.prevButton_.setAttribute('aria-hidden', 'true');
     this.nextButton_.onclick = () => {
       this.interactionNext();
     };
@@ -94,18 +94,20 @@ export class BaseCarousel extends AMP.BaseElement {
     // TODO(erwinm): Does label need i18n support in the future? or provide
     // a way to be overridden.
     this.prevA11yBtn_.setAttribute('value', 'Previous item in carousel');
+    this.prevA11yBtn_.setAttribute('aria-controls', this.element.id);
     this.element.appendChild(this.prevA11yBtn_);
     this.prevA11yBtn_.addEventListener(
         'click', this.interactionPrev.bind(this));
 
 
-    this.nextA11yBtn_ = this.element.ownerDocument.createElement('button');
+    this.nextA11yBtn_ = this.element.ownerDocument.createElement('input');
     this.nextA11yBtn_.classList.add(
         '-amp-screen-reader', '-amp-carousel-a11-next');
     this.nextA11yBtn_.setAttribute('type', 'button');
     // TODO(erwinm): Does label need i18n support in the future? or provide
     // a way to be overridden.
     this.nextA11yBtn_.setAttribute('value', 'Next item in carousel');
+    this.nextA11yBtn_.setAttribute('aria-controls', this.element.id);
     this.element.appendChild(this.nextA11yBtn_);
     this.nextA11yBtn_.addEventListener(
         'click', this.interactionNext.bind(this));
@@ -164,11 +166,9 @@ export class BaseCarousel extends AMP.BaseElement {
   setControlsState() {
     this.prevButton_.classList.toggle('amp-disabled', !this.hasPrev());
     this.prevA11yBtn_.classList.toggle('amp-disabled', !this.hasPrev());
-    this.prevA11yBtn_.setAttribute('aria-disabled', !this.hasPrev());
 
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
     this.nextA11yBtn_.classList.toggle('amp-disabled', !this.hasNext());
-    this.nextA11yBtn_.setAttribute('aria-disabled', !this.hasNext());
   }
 
   /**
