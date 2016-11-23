@@ -44,15 +44,6 @@ export class Input {
     /** @private {!Function} */
     this.boundOnMouseDown_ = this.onMouseDown_.bind(this);
 
-    /** @private {!Function} */
-    this.boundOnMouseMove_ = this.onMouseMove_.bind(this);
-
-    /** @private {!Function} */
-    this.boundMouseCanceled_ = this.mouseCanceled_.bind(this);
-
-    /** @private {!Function} */
-    this.boundMouseConfirmed_ = this.mouseConfirmed_.bind(this);
-
     /** @private {boolean} */
     this.hasTouch_ = ('ontouchstart' in win ||
         (win.navigator['maxTouchPoints'] !== undefined &&
@@ -84,7 +75,7 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
+      listenOnce(win.document, 'mousemove', this.onMouseMove_.bind(this));
     }
   }
 
@@ -210,7 +201,7 @@ export class Input {
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
     return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
-        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
+        .then(this.mouseCanceled_.bind(this), this.mouseConfirmed_.bind(this));
   }
 
   /** @private */
@@ -225,7 +216,7 @@ export class Input {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
-      listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
+      listenOnce(this.win.document, 'mousemove', this.onMouseMove_.bind(this));
     } else {
       dev().fine(TAG_, 'mouse detection failed');
     }
