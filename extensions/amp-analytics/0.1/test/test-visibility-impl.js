@@ -150,7 +150,7 @@ describe('amp-analytics.visibility', () => {
     expect(callbackStub.callCount).to.equal(1);
   });
 
-  it('fires for non-trivial on=visible config', () => {
+  it.only('fires for non-trivial on=visible config', () => {
     viewportScrollTopStub.returns(13);
     viewportScrollLeftStub.returns(5);
     listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
@@ -165,7 +165,9 @@ describe('amp-analytics.visibility', () => {
       elementY: '23', // 13 + 10
       elementWidth: '100',
       elementHeight: '100',
-      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
+      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100,
+      minVisiblePercentage: '63',
+      maxVisiblePercentage: '63',
       totalTime: sinon.match(value => {
         return isFiniteNumber(Number(value));
       }),
