@@ -61,6 +61,7 @@ const VISIBLE_PERCENTAGE_MIN = 'visiblePercentageMin';
 const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
 
 const TAG_ = 'Analytics.Visibility';
+
 /**
  * Checks if the value is undefined or positive number like.
  * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
@@ -185,14 +186,12 @@ export function getElement(ampdoc, selector, el, selectionMethod) {
 }
 
 /**
- * This type signifies a callback that gets called when visibility conditions
- * are met.
- * @typedef {function(!JSONType)}
- */
-let VisibilityListenerCallbackDef;
-
-/**
- * @typedef {Object<string, JSONType|VisibilityListenerCallbackDef|Object>}
+ * @typedef {{
+ *   state: !Object,
+ *   config: !Object,
+  *  callback: function(!Object),
+  *  shouldBeVisible: boolean,
+ * }}
  */
 let VisibilityListenerDef;
 
@@ -212,7 +211,7 @@ export class Visibility {
 
     /**
      * key: resource id.
-     * value: [{ config: <config>, callback: <callback>, state: <state>}]
+     * value: [VisibilityListenerDef]
      * @type {!Object<!Array<VisibilityListenerDef>>}
      * @private
      */
@@ -281,8 +280,8 @@ export class Visibility {
   }
 
   /**
-   * @param {!JSONType} config
-   * @param {!VisibilityListenerCallbackDef} callback
+   * @param {!Object} config
+   * @param {function(!Object)} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
    * @param {!Element} analyticsElement The amp-analytics element that the
@@ -320,8 +319,8 @@ export class Visibility {
   }
 
   /**
-   * @param {!JSONType} config
-   * @param {function(!JSONType)} callback
+   * @param {!Object} config
+   * @param {function(!Object)} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *   when callback is called. False otherwise.
    * @param {!Element} analyticsElement The amp-analytics element that the
@@ -364,6 +363,7 @@ export class Visibility {
     // TODO: support "hidden" spec.
   }
 
+  /** @private */
   onIntersectionChange_(change) {
     const listeners = this.listeners_[change.target.getResourceId()];
 
@@ -535,7 +535,7 @@ export class Visibility {
   /**
    * For the purposes of these calculations, a resource is in viewport if the
    * visibility conditions are satisfied or they are not defined.
-   * @param {!number} visible Percentage of element visible
+   * @param {number} visible Percentage of element visible
    * @param {number} min Lower bound of visibility condition. Not inclusive
    * @param {number} max Upper bound of visibility condition. Inclusive.
    * @return {boolean} true if the conditions are satisfied.
@@ -549,7 +549,12 @@ export class Visibility {
     return !!(visible > (min || 0) && visible <= (max || 100));
   }
 
-  /** @private */
+  /**
+   * @param {!Object} s State of the listener
+   * @param {number} visible Percentage of element visible
+   * @param {number} sinceLast Milliseconds since last update
+   * @private
+   */
   setState_(s, visible, sinceLast) {
     s[LAST_UPDATE] = Date.now();
     s[TOTAL_VISIBLE_TIME] = s[TOTAL_VISIBLE_TIME] !== undefined
