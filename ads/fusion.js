@@ -30,5 +30,16 @@ export function fusion(global, data) {
 
   writeScript(global, 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js', () => {
     global.Fusion.apply(container, global.Fusion.loadAds(data));
+    
+	global.Fusion.on.adResized.run(ev => { 
+	    if (ev.width >= 20 && ev.height >= 20) { 
+	      global.context.renderStart(); 
+	    } 
+    });
+	global.Fusion.on.warning.run(ev => {
+		if (ev.msg === "Space not present in response.") {
+			global.context.noContentAvailable();
+		}
+	});
   });
 }
