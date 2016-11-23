@@ -181,13 +181,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
   },
   {
-    id: 'pan-y',
-    name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
-        ' touch handlers',
-    spec: 'https://github.com/ampproject/amphtml/issues/4820',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
-  },
-  {
     id: 'alp-for-a4a',
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
