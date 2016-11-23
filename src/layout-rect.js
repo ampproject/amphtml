@@ -77,11 +77,10 @@ export function layoutRectsOverlap(r1, r2) {
 
 /**
  * Returns the intersection between a, b or null if there is none.
- * @param {!LayoutRectDef} a
- * @param {!LayoutRectDef} b
+ * @param {...?LayoutRectDef|undefined} var_args
  * @return {?LayoutRectDef}
  */
-export function rectIntersection() {
+export function rectIntersection(var_args) {
   let x0 = -Infinity;
   let x1 = Infinity;
   let y0 = -Infinity;
@@ -107,7 +106,6 @@ export function rectIntersection() {
   if (!hasValidRect) {
     return null;
   }
-  console.log(x0, y0, x1 - x0, y1 - y0);
   return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
 }
 
