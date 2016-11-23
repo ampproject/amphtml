@@ -124,7 +124,7 @@ describe('amp-form', () => {
     form.addEventListener = sandbox.spy();
     form.setAttribute('action-xhr', 'https://example.com');
     new AmpForm(form);
-    expect(form.addEventListener.called).to.be.true;
+    expect(form.addEventListener).to.be.called;
     expect(form.addEventListener).to.be.calledWith('submit');
     expect(form.addEventListener).to.be.calledWith('blur');
     expect(form.addEventListener).to.be.calledWith('input');
@@ -143,9 +143,9 @@ describe('amp-form', () => {
     sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
     sandbox.spy(form, 'checkValidity');
     ampForm.handleSubmit_(event);
-    expect(event.stopImmediatePropagation.called).to.be.true;
-    expect(form.checkValidity.called).to.be.false;
-    expect(ampForm.xhr_.fetchJson.called).to.be.false;
+    expect(event.stopImmediatePropagation).to.be.called;
+    expect(form.checkValidity).to.not.be.called;
+    expect(ampForm.xhr_.fetchJson).to.not.be.called;
   });
 
   it('should throw error if POST non-xhr', () => {
@@ -195,10 +195,10 @@ describe('amp-form', () => {
 
     ampForm.handleSubmit_(event);
     // Check validity should always be called regardless of novalidate.
-    expect(form.checkValidity.called).to.be.true;
+    expect(form.checkValidity).to.be.called;
 
     // However reporting validity shouldn't happen when novalidate.
-    expect(emailInput.reportValidity.called).to.be.false;
+    expect(emailInput.reportValidity).to.not.be.called;
     expect(form.hasAttribute('amp-novalidate')).to.be.true;
   });
 
@@ -237,9 +237,9 @@ describe('amp-form', () => {
       sandbox.spy(validationBubble, 'show');
       sandbox.spy(validationBubble, 'hide');
       ampForm.handleSubmit_(event);
-      expect(event.stopImmediatePropagation.called).to.be.true;
-      expect(form.checkValidity.called).to.be.true;
-      expect(ampForm.xhr_.fetchJson.called).to.be.false;
+      expect(event.stopImmediatePropagation).to.be.called;
+      expect(form.checkValidity).to.be.called;
+      expect(ampForm.xhr_.fetchJson).to.not.be.called;
 
       const showCall1 = validationBubble.show.getCall(0);
       expect(showCall1.args[0]).to.equal(emailInput);
@@ -253,7 +253,7 @@ describe('amp-form', () => {
       expect(showCall2.args[0]).to.equal(emailInput);
       expect(showCall2.args[1]).to.not.be.null;
       expect(showCall2.args[1]).to.not.equal(showCall1.args[0]);
-      expect(ampForm.xhr_.fetchJson.called).to.be.false;
+      expect(ampForm.xhr_.fetchJson).to.not.be.called;
 
       // Check bubble would hide when input becomes valid.
       emailInput.value = 'cool@bea.ns';
@@ -271,7 +271,7 @@ describe('amp-form', () => {
       // Check xhr goes through when form is valid.
       emailInput.value = 'cool@bea.ns';
       ampForm.handleSubmit_(event);
-      expect(ampForm.xhr_.fetchJson.called).to.be.true;
+      expect(ampForm.xhr_.fetchJson).to.be.called;
     });
   });
 
@@ -323,7 +323,7 @@ describe('amp-form', () => {
       expect(button3.hasAttribute('disabled')).to.be.true;
       ampForm.handleSubmit_(event);
       ampForm.handleSubmit_(event);
-      expect(event.preventDefault.called).to.be.true;
+      expect(event.preventDefault).to.be.called;
       expect(event.preventDefault.callCount).to.equal(3);
       expect(event.stopImmediatePropagation.callCount).to.equal(2);
       expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
@@ -358,7 +358,7 @@ describe('amp-form', () => {
         preventDefault: sandbox.spy(),
       };
       ampForm.handleSubmit_(event);
-      expect(event.preventDefault.called).to.be.true;
+      expect(event.preventDefault).to.be.called;
       expect(ampForm.state_).to.equal('submitting');
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
@@ -369,7 +369,7 @@ describe('amp-form', () => {
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.contain('amp-form-submit-success');
-        expect(ampForm.actions_.trigger.called).to.be.true;
+        expect(ampForm.actions_.trigger).to.be.called;
         expect(ampForm.actions_.trigger.calledWith(
             form, 'submit-success', null)).to.be.true;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
@@ -400,7 +400,8 @@ describe('amp-form', () => {
       ampForm.handleSubmit_(event);
       expect(button1.hasAttribute('disabled')).to.be.true;
       expect(button2.hasAttribute('disabled')).to.be.true;
-      expect(event.preventDefault.called).to.be.true;
+      expect(event.preventDefault).to.be.called;
+      expect(event.stopImmediatePropagation).to.not.be.called;
       expect(ampForm.state_).to.equal('submitting');
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
@@ -413,7 +414,7 @@ describe('amp-form', () => {
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-success');
         expect(form.className).to.contain('amp-form-submit-error');
-        expect(ampForm.actions_.trigger.called).to.be.true;
+        expect(ampForm.actions_.trigger).to.be.called;
         expect(ampForm.actions_.trigger.calledWith(
             form, 'submit-error', null)).to.be.true;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
@@ -503,7 +504,7 @@ describe('amp-form', () => {
       };
       ampForm.handleSubmit_(event);
       return timer.promise(5).then(() => {
-        expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
+        expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
             successContainer, {'message': 'What What'})).to.be.true;
         const renderedTemplates = form.querySelectorAll('[i-amp-rendered]');
@@ -729,11 +730,13 @@ describe('amp-form', () => {
         };
         ampForm.handleSubmit_(event);
 
-        expect(form.checkValidity.called).to.be.true;
-        expect(emailInput.checkValidity.called).to.be.true;
-        expect(fieldset.checkValidity.called).to.be.true;
+        expect(form.checkValidity).to.be.called;
+        expect(emailInput.checkValidity).to.be.called;
+        expect(fieldset.checkValidity).to.be.called;
         expect(form.className).to.contain('user-invalid');
         expect(emailInput.className).to.contain('user-invalid');
+        expect(event.preventDefault).to.be.called;
+        expect(event.stopImmediatePropagation).to.be.called;
 
         emailInput.value = 'cool@bea.ns';
         ampForm.handleSubmit_(event);
@@ -763,9 +766,9 @@ describe('amp-form', () => {
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
 
         onInputInteraction_({target: emailInput});
-        expect(form.checkValidity.called).to.be.true;
-        expect(emailInput.checkValidity.called).to.be.true;
-        expect(fieldset.checkValidity.called).to.be.true;
+        expect(form.checkValidity).to.be.called;
+        expect(emailInput.checkValidity).to.be.called;
+        expect(fieldset.checkValidity).to.be.called;
         expect(form.className).to.contain('user-invalid');
         expect(emailInput.className).to.contain('user-invalid');
 
@@ -830,9 +833,9 @@ describe('amp-form', () => {
         const event = {target: emailInput};
         onInputInteraction_(event);
 
-        expect(emailInput.checkValidity.called).to.be.true;
-        expect(form.checkValidity.called).to.be.false;
-        expect(fieldset.checkValidity.called).to.be.false;
+        expect(emailInput.checkValidity).to.be.called;
+        expect(form.checkValidity).to.not.be.called;
+        expect(fieldset.checkValidity).to.not.be.called;
         expect(emailInput.className).to.contain('user-valid');
         expect(form.className).to.not.contain('user-valid');
       });
