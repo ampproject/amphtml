@@ -52,8 +52,8 @@ const INIT_TIME = Date.now();
  */
 export function getIntersectionChangeEntry(
     element, owner, hostViewport) {
-  const intersection = calculateIntersectionRect(
-        element, owner, hostViewport);
+  const intersection = rectIntersection(element, owner, hostViewport) ||
+      layoutRectLtwh(0, 0, 0, 0);
   const ratio = intersectionRatio(intersection, element);
   return calculateChangeEntry(
       element, hostViewport, intersection, ratio);
@@ -237,8 +237,10 @@ export class IntersectionObserverPolyfill {
     let elementRect;
     let ownerRect = null;
 
-    // If calls with container, always assume getLayoutBox() return relative
-    // LayoutRect to container
+    // If opt_iframe is provided, all LayoutRect has position relative to
+    // the iframe.
+    // If opt_iframe is not provided, all LayoutRect has position relative to
+    // the host document.
     elementRect = this.element_.getLayoutBox();
     const owner = this.element_.getOwner();
     ownerRect = owner && owner.getLayoutBox();
@@ -267,9 +269,11 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   getValidIntersectionChangeEntry_(element, owner, hostViewport, opt_iframe) {
-    // calculate intersectionRect
+    // calculate intersectionRect. that the element intersects with hostViewport
+    // and intersects with owner element and container iframe if exists.
     const intersectionRect =
-        calculateIntersectionRect(element, owner, hostViewport, opt_iframe);
+        rectIntersection(element, owner, hostViewport, opt_iframe) ||
+        layoutRectLtwh(0, 0, 0, 0);
 
     // calculate ratio, call callback based on new ratio value.
     const ratio = intersectionRatio(intersectionRect, element);
@@ -340,41 +344,6 @@ export function getThresholdSlot(sortedThreshold, ratio) {
     mid = ((startIdx + endIdx) / 2) | 0;
   }
   return endIdx;
-}
-
-/**
- * Helper function to calculate the intersectionRect and intersection ration.
- * @param {!./layout-rect.LayoutRectDef} element element's rect
- * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
- * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
- * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
- * @return {!./layout-rect.LayoutRectDef}
- */
-function calculateIntersectionRect(element, owner, hostViewport, opt_iframe) {
-  dev().assert(element.width >= 0 && element.height >= 0,
-      'Negative dimensions in element.');
-  // If opt_iframe is provided, all LayoutRect has position relative to
-  // the iframe.
-  // If opt_iframe is not provided, all LayoutRect has position relative to
-  // the host document.
-
-  // Building an IntersectionObserverEntry.
-  let intersectionRect = element;
-  const nonIntersectRect = layoutRectLtwh(0, 0, 0, 0);
-  // element intersects with its owner.
-  if (owner) {
-    intersectionRect = rectIntersection(owner, element) || nonIntersectRect;
-  }
-  // element intersects with container iframe.
-  if (opt_iframe) {
-    intersectionRect = rectIntersection(opt_iframe, intersectionRect) ||
-        nonIntersectRect;
-  }
-  // element intersects with hostViewport
-  intersectionRect = rectIntersection(hostViewport, intersectionRect) ||
-      nonIntersectRect;
-
-  return intersectionRect;
 }
 
 /**
