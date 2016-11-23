@@ -806,6 +806,7 @@ function createBaseCustomElementClass(win) {
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
         setStyle(this.sizerElement_, 'paddingTop', '0');
+        this.sizerElement_ = null;
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');

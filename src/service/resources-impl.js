@@ -1329,7 +1329,7 @@ export class Resources {
       }
       // Nothing to do.
       if (opt_callback) {
-        opt_callback(/* hasSizeChanged */false);
+        opt_callback(/* success */ true);
       }
       return;
     }
