@@ -900,6 +900,11 @@ export class ViewportBindingNatural_ {
         // style is set in runtime vs css to avoid conflicts with ios-embedded
         // mode and fixed transfer layer.
         setStyle(body, 'overflow', 'visible');
+
+        // Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS
+        // WebView does NOT respect `html {overflow-x: hidden}`.
+        // Note! For all other cases body's style should be
+        // `body {overflow: visible}` to avoid visibility issues with iframes.
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
           setStyles(body, {
@@ -915,8 +920,6 @@ export class ViewportBindingNatural_ {
           setStyles(body, {
             display: 'block',
             position: 'relative',
-            overflowX: 'hidden',
-            overflowY: 'visible',
           });
         }
       });

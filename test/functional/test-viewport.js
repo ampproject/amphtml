@@ -1001,8 +1001,11 @@ describe('ViewportBindingNatural', () => {
     binding = new ViewportBindingNatural_(windowApi, viewer);
     expect(documentBody.style.display).to.equal('block');
     expect(documentBody.style.position).to.equal('relative');
-    expect(documentBody.style.overflowY).to.equal('visible');
-    expect(documentBody.style.overflowX).to.equal('hidden');
+    // It's important that this experiment does NOT override the previously
+    // set `overflow`.
+    expect(documentBody.style.overflow).to.equal('visible');
+    expect(documentBody.style.overflowY).to.not.be.ok;
+    expect(documentBody.style.overflowX).to.not.be.ok;
   });
 
   it('should setup overflow:visible on body', () => {
