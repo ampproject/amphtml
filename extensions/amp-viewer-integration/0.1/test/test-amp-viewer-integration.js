@@ -43,7 +43,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     document.body.removeChild(viewerEl);
   });
 
-  describe('Handshake', () => {
+  describe('Handshake', function() {
+    this.timeout(5000);
     it('should confirm the handshake', () => {
       console.log('sending handshake response');
       viewer.confirmHandshake();
