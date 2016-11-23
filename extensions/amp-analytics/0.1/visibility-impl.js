@@ -16,7 +16,6 @@
 
 import {closestByTag, closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
 import {isFiniteNumber} from '../../../src/types';
@@ -349,7 +348,6 @@ export class Visibility {
       }
 
       const change = res.element.getIntersectionChangeEntry();
-      const ir = change.intersectionRect;
       const br = change.boundingClientRect;
       const visible = !isFiniteNumber(change.intersectionRatio) ? 0
           : change.intersectionRatio * 100;
@@ -359,8 +357,7 @@ export class Visibility {
         const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
         if (this.updateCounters_(visible, listeners[c], shouldBeVisible) &&
             this.viewer_.isVisible() == shouldBeVisible) {
-          this.prepareStateForCallback_(listeners[c]['state'],
-              change.rootBounds, br, ir);
+          this.prepareStateForCallback_(listeners[c]['state'], br);
           listeners[c].callback(listeners[c]['state']);
           listeners.splice(c, 1);
         }
@@ -406,9 +403,14 @@ export class Visibility {
     const state = listener['state'] || {};
 
     if (visible > 0) {
-      state[FIRST_SEEN_TIME] = state[FIRST_SEEN_TIME] ||
-          Date.now() - state[TIME_LOADED];
+      const timeElapsed = Date.now() - state[TIME_LOADED];
+      state[FIRST_SEEN_TIME] = state[FIRST_SEEN_TIME] || timeElapsed;
       state[LAST_SEEN_TIME] = Date.now() - state[TIME_LOADED];
+      // Consider it as load time visibility if this happens within 300ms of
+      // page load.
+      if (state[LOAD_TIME_VISIBILITY] == undefined && timeElapsed < 300) {
+        state[LOAD_TIME_VISIBILITY] = visible;
+      }
     }
 
     const wasInViewport = state[IN_VIEWPORT];
@@ -501,15 +503,11 @@ export class Visibility {
   /**
    * Sets variable values for callback. Cleans up existing values.
    * @param {Object<string, *>} state The state object to populate
-   * @param {!../../../src/layout-rect.LayoutRectDef} rb Bounds of Root object.
-   *     (the viewport in this case)
    * @param {!../../../src/layout-rect.LayoutRectDef} br The bounding rectangle
    *     for the element
-   * @param {!../../../src/layout-rect.LayoutRectDef} ir The intersection
-   *     between element and the viewport
    * @private
    */
-  prepareStateForCallback_(state, rb, br, ir) {
+  prepareStateForCallback_(state, br) {
     const perf = this.ampdoc.win.performance;
     const viewport = viewportForDoc(this.ampdoc);
 
@@ -521,17 +519,7 @@ export class Visibility {
         ? Date.now() - perf.timing.domInteractive
         : '';
 
-    // Calculate the amount element visible at the time page was loaded. To do
-    // this, assume that the page is scrolled all the way to top.
-    const viewportRect = {top: 0, height: rb.height, left: 0, width: rb.width,
-        bottom: rb.height, right: rb.width};
-    const elementRect = {top: ir.top, left: ir.left, width: br.width,
-      height: br.height, bottom: br.height, right: br.width};
-    const intersection = rectIntersection(viewportRect, elementRect);
-    state[LOAD_TIME_VISIBILITY] = intersection != null
-        ? Math.round(intersection.width * intersection.height * 10000
-              / (br.width * br.height)) / 100
-        : 0;
+    state[LOAD_TIME_VISIBILITY] = state[LOAD_TIME_VISIBILITY] || 0;
     if (state[MIN_VISIBLE] !== undefined) {
       state[MIN_VISIBLE] =
           Math.round(dev().assertNumber(state[MIN_VISIBLE]) * 100) / 100;
