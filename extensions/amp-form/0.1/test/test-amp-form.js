@@ -96,7 +96,7 @@ describe('amp-form', () => {
         /form action-xhr must start with/);
     form.setAttribute('action-xhr', 'https://cdn.ampproject.org/example.com');
     expect(() => new AmpForm(form)).to.throw(
-        /form action-xhr should not be on cdn\.ampproject\.org/);
+        /form action-xhr should not be on AMP CDN/);
     form.setAttribute('action-xhr', 'https://example.com');
     expect(() => new AmpForm(form)).to.not.throw;
   });

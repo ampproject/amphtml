@@ -298,12 +298,19 @@ export function isProxyOrigin(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  const path = url.pathname.split('/');
-  const prefix = path[1];
-  // List of well known proxy hosts. New proxies must be added here.
-  return (url.origin == urls.cdn ||
-      (url.origin.indexOf('http://localhost:') == 0 &&
-       (prefix == 'c' || prefix == 'v')));
+  return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * Returns whether the URL origin is localhost.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isLocalhostOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return urls.localhostRegex.test(url.origin);
 }
 
 /**
