@@ -118,7 +118,8 @@ export class AmpForm {
     }
     this.form_.classList.add('-amp-form');
 
-    const submitButtons = this.form_.querySelectorAll('input[type=submit]');
+    const submitButtons = this.form_.querySelectorAll(
+        'input[type="submit"],button[type="submit"]');
     /** @const @private {!Array<!Element>} */
     this.submitButtons_ = toArray(submitButtons);
 
@@ -179,6 +180,7 @@ export class AmpForm {
     if (this.state_ == FormState_.SUBMITTING) {
       if (opt_event) {
         opt_event.stopImmediatePropagation();
+        opt_event.preventDefault();
       }
       return;
     }
@@ -189,6 +191,7 @@ export class AmpForm {
     if (this.shouldValidate_ && !isValid) {
       if (opt_event) {
         opt_event.stopImmediatePropagation();
+        opt_event.preventDefault();
       }
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({

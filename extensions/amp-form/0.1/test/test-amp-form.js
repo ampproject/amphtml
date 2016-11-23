@@ -38,20 +38,21 @@ describe('amp-form', () => {
   let sandbox;
   const timer = timerFor(window);
 
-  function getAmpForm(button1 = true, button2 = false) {
+  function getAmpForm(button1 = true, button2 = false, button3 = false) {
     return createIframePromise().then(iframe => {
       const docService = installDocService(iframe.win, /* isSingleDoc */ true);
       installActionServiceForDoc(docService.getAmpDoc());
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
-      const form = getForm(iframe.doc, button1, button2);
+      const form = getForm(iframe.doc, button1, button2, button3);
       iframe.doc.body.appendChild(form);
       const ampForm = new AmpForm(form, 'amp-form-test-id');
       return ampForm;
     });
   }
 
-  function getForm(doc = document, button1 = true, button2 = false) {
+  function getForm(doc = document, button1 = true, button2 = false,
+                   button3 = false) {
     const form = doc.createElement('form');
     form.setAttribute('method', 'POST');
 
@@ -70,6 +71,12 @@ describe('amp-form', () => {
 
     if (button2) {
       const submitBtn = doc.createElement('input');
+      submitBtn.setAttribute('type', 'submit');
+      form.appendChild(submitBtn);
+    }
+
+    if (button3) {
+      const submitBtn = doc.createElement('button');
       submitBtn.setAttribute('type', 'submit');
       form.appendChild(submitBtn);
     }
@@ -291,7 +298,7 @@ describe('amp-form', () => {
   });
 
   it('should block multiple submissions and disable buttons', () => {
-    return getAmpForm(true, true).then(ampForm => {
+    return getAmpForm(true, true, true).then(ampForm => {
       let fetchJsonResolver;
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
         fetchJsonResolver = resolve;
@@ -304,17 +311,20 @@ describe('amp-form', () => {
       };
       const button1 = form.querySelectorAll('input[type=submit]')[0];
       const button2 = form.querySelectorAll('input[type=submit]')[1];
+      const button3 = form.querySelectorAll('button[type=submit]')[0];
       expect(button1.hasAttribute('disabled')).to.be.false;
       expect(button2.hasAttribute('disabled')).to.be.false;
+      expect(button3.hasAttribute('disabled')).to.be.false;
       ampForm.handleSubmit_(event);
       expect(ampForm.state_).to.equal('submitting');
       expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
       expect(button1.hasAttribute('disabled')).to.be.true;
       expect(button2.hasAttribute('disabled')).to.be.true;
+      expect(button3.hasAttribute('disabled')).to.be.true;
       ampForm.handleSubmit_(event);
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
-      expect(event.preventDefault.callCount).to.equal(1);
+      expect(event.preventDefault.callCount).to.equal(3);
       expect(event.stopImmediatePropagation.callCount).to.equal(2);
       expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
       expect(form.className).to.contain('amp-form-submitting');
@@ -324,6 +334,7 @@ describe('amp-form', () => {
       return timer.promise(20).then(() => {
         expect(button1.hasAttribute('disabled')).to.be.false;
         expect(button2.hasAttribute('disabled')).to.be.false;
+        expect(button3.hasAttribute('disabled')).to.be.false;
         expect(ampForm.state_).to.equal('submit-success');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
