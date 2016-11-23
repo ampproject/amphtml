@@ -44,7 +44,10 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         this.element.getAttribute('src');
   }
 
-  /** @override */
+  /**
+   * @override
+   * @return !Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>
+  */
   extractCreativeAndSignature(responseText, unusedResponseHeaders) {
     let decodeErr;
     const deserialized = tryUtf8Decode(responseText, err => {
@@ -57,11 +60,11 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     const decoded = JSON.parse(deserialized);
     dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
     dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
+    /**  */
     return Promise.resolve({
       creative: utf8Encode(decoded['creative']).buffer,
       signature: base64DecodeToBytes(decoded['signature']),
     });
-
   }
 }
 
