@@ -808,9 +808,11 @@ function createBaseCustomElementClass(win) {
         const sizer = this.sizerElement_;
         this.sizerElement_ = null;
         setStyle(sizer, 'paddingTop', '0');
-        this.getResources().deferMutate(this, () => {
-          dom.removeElement(sizer);
-        });
+        if (this.resources_) {
+          this.resources_.deferMutate(this, () => {
+            dom.removeElement(sizer);
+          });
+        }
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
