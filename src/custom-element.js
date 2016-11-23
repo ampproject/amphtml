@@ -805,8 +805,12 @@ function createBaseCustomElementClass(win) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        setStyle(this.sizerElement_, 'paddingTop', '0');
+        const sizer = this.sizerElement_;
         this.sizerElement_ = null;
+        setStyle(sizer, 'paddingTop', '0');
+        this.getResources().deferMutate(this, () => {
+          dom.removeElement(sizer);
+        });
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
