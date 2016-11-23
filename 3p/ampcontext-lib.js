@@ -8,8 +8,8 @@ import {AmpContext} from './ampcontext.js';
  *  functionality.
  */
 try {
-  console.log("Attempting to make AmpContext");
-  const windowContextCreated = new Event('windowContextCreated');
+  console.log('Attempting to make AmpContext');
+  const windowContextCreated = new Event('amp-windowContextCreated');
   windowContextCreated.lib = new AmpContext(window);
   // Allows for pre-existence, consider validating correct window.context lib instance?
   window.context = window.context || windowContextCreated.lib;

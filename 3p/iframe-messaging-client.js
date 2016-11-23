@@ -1,10 +1,11 @@
 import './polyfills';
 import {listen} from '../src/event-helper';
+import {getRandom} from '../src/3p-frame';
 import {user} from '../src/log';
 /**
  * @abstract
  */
-export class XDomainChildMessageHandler {
+export class IframeMessagingClient {
 
   /**
    *  @param {Window} win A window object.
@@ -17,8 +18,6 @@ export class XDomainChildMessageHandler {
      *  @private {object}
      */
     this.callbackFor_ = {};
-    this.sentinel = this.getSentinel();
-    this.ampWindow = this.getAmpWindow();
     this.setupEventListener_();
   }
 
@@ -74,7 +73,7 @@ export class XDomainChildMessageHandler {
    *  This must be overwritten by classes that extend this base class
    *  As implemented, this will only work for messaging the parent iframe.
    */
-  getSentinel(){
+  getSentinel() {
     return '0-' + getRandom(this.ampWindow);
   }
 
@@ -82,7 +81,7 @@ export class XDomainChildMessageHandler {
    *  Only valid for the trivial case when we will always be messaging our parent
    *  Should be overwritten for subclasses
    */
-  getAmpWindow(){
+  getHostWindow() {
     return this.win_.parent;
   }
 };
