@@ -27,9 +27,9 @@ export class AmpContext extends IframeMessagingClient {
    *  @param {Window} win The window that the instance is built inside.
    */
   constructor(win) {
+    super(win);
     this.setupMetadata_();
     this.ampWindow = this.getHostWindow();
-    super(win);
   }
 
   /** @override */
