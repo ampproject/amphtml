@@ -1159,12 +1159,16 @@ describe('Resources changeSize', () => {
     });
 
     it('should NOT change size when height is unchanged', () => {
+      const callback = sandbox.spy();
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
           height: 50};
-      resources.scheduleChangeSize_(resource1, 50, 120, false);
+      resources.scheduleChangeSize_(resource1, 50, /* width */ undefined, false,
+          callback);
       resources.mutateWork_();
       expect(resource1.changeSize).to.not.been.called;
       expect(overflowCallbackSpy).to.not.been.called;
+      expect(callback).to.be.calledOnce;
+      expect(callback.args[0][0]).to.be.true;
     });
 
     it('should change size when forced', () => {
