@@ -116,7 +116,7 @@ var forbiddenTerms = {
       'src/service/document-state.js',
       'src/service/viewer-impl.js',
       'src/service/vsync-impl.js',
-      // TODO(dvoytenko): confirm if amp-ad should be allowed access.
+      // TODO(dvoytenko, #3674): confirm if amp-ad should be allowed access.
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
     ],
   },
