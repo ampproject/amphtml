@@ -492,6 +492,16 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   });
 });
 
+// "fake" a4a creative.
+app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', function(req, res) {
+  var filePath = '/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json';
+  fs.readFileAsync(process.cwd() + filePath).then(file => {
+    const metadata = JSON.parse(file);
+    res.setHeader('Content-Type', 'text/html');
+    res.end(metadata.creative);
+  });
+});
+
 /**
  * @param {string} mode
  * @param {string} file
