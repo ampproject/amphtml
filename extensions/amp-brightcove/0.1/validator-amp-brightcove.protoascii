@@ -64,6 +64,8 @@ tags: {  # <amp-brightcove>
   attrs: { name: "data-playlist-id" }
   # If data-video-id is not used for perform player and hence it is optional.
   attrs: { name: "data-video-id" }
+  attrs: { name: "autoplay" }
+  attrs: { name: "muted" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
   amp_layout: {

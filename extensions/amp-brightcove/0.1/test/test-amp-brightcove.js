@@ -96,4 +96,18 @@ describe('amp-brightcove', () => {
       expect(params).to.contain('myParam=hello%20world');
     });
   });
+
+  it('adds autoplay and muted attributes to the iframe src', () => {
+    return getBrightcove({
+      'data-account': '906043040001',
+      'data-video-id': 'ref:ampdemo',
+      'autoplay': '',
+      'muted': ''
+    }).then(bc => {
+      const iframe = bc.querySelector('iframe');
+      const params = parseUrl(iframe.src).search.split('&');
+      expect(params).to.contain('autoplay=true');
+      expect(params).to.contain('muted=true');
+    });
+  });
 });

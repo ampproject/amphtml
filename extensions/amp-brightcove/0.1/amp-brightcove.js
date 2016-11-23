@@ -56,6 +56,9 @@ class AmpBrightcove extends AMP.BaseElement {
     const embed = (this.element.getAttribute('data-embed') || 'default');
     const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
+    let params = {
+      playsinline: true
+    };
 
     if (this.element.getAttribute('data-playlist-id')) {
       src += '?playlistId=';
@@ -64,6 +67,14 @@ class AmpBrightcove extends AMP.BaseElement {
       src += '?videoId=';
       src += this.encodeId_(this.element.getAttribute('data-video-id'));
     }
+
+    if (this.element.hasAttribute('muted')) {
+      params.muted = true;
+    }
+    if (this.element.hasAttribute('autoplay')) {
+      params.autoplay = true;
+    }
+    src = addParamsToUrl(src, params);
 
     // Pass through data-param-* attributes as params for plugin use
     src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
