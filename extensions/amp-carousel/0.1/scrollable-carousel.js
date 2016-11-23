@@ -54,7 +54,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    console.log('This is the test!!!!!!!!!!!');
     this.cells_ = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
