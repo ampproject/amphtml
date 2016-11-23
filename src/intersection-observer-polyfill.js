@@ -52,8 +52,6 @@ const INIT_TIME = Date.now();
  */
 export function getIntersectionChangeEntry(
     element, owner, hostViewport) {
-  dev().assert(element.width >= 0 && element.height >= 0,
-      'Negative dimensions in element.');
   const intersection = rectIntersection(element, owner, hostViewport) ||
       layoutRectLtwh(0, 0, 0, 0);
   const ratio = intersectionRatio(intersection, element);
