@@ -114,7 +114,9 @@ describe('JwtHelper', () => {
     afterEach(() => {
     });
 
-    it('should decode and verify token correctly', () => {
+    // TODO(aghassemi, 6292): Unskip for Safari after #6292
+    it.configure().skipSafari().run('should decode and verify token correctly',
+    () => {
       // Skip on non-subtle browser.
       if (!helper.isVerificationSupported()) {
         return;
@@ -124,7 +126,7 @@ describe('JwtHelper', () => {
       });
     });
 
-    it('should fail invalid signature', () => {
+    it.configure().skipSafari().run('should fail invalid signature', () => {
       // Skip on non-subtle browser.
       if (!helper.isVerificationSupported()) {
         return;
