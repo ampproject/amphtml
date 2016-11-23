@@ -172,10 +172,11 @@ i-amp-sizer {
  * does not allow activation of buttons.
  */
 .-amp-screen-reader {
-  position: fixed !important;
+  position: absolute !important;
   /* keep it on viewport */
   top: 0px !important;
-  left: 0px !important;
+  /* Left is overwritten by addScreenReaderButton per element*/
+  left: 0px;
   /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
      before allowing buttons to be activated. */
   width: 2px !important;

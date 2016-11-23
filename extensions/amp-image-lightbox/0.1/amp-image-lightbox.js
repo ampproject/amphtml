@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {addScreenReaderButton} from '../../../src/a11y';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
@@ -737,17 +738,10 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.
-    const screenReaderCloseButton = this.element.ownerDocument
-        .createElement('button');
     // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the lightbox';
-    screenReaderCloseButton.classList.add('-amp-screen-reader');
-    // This is for screen-readers only, should not get a tab stop.
-    screenReaderCloseButton.tabIndex = -1;
-    screenReaderCloseButton.addEventListener('click', () => {
-      this.close();
-    });
-    this.element.appendChild(screenReaderCloseButton);
+    addScreenReaderButton(this.element, 'Close the lightbox',
+      this.close.bind(this)
+    );
 
     const gestures = Gestures.get(this.element);
     this.element.addEventListener('click', e => {
