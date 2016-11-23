@@ -28,7 +28,7 @@ import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
-import {parseUrl, getSourceUrl} from '../src/url';
+import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
 
@@ -547,9 +547,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
   let hostname = parseUrl(ancestor).hostname;
-  const cdnHostname = parseUrl(urls.cdn).hostname;
-  const onDefault = hostname == cdnHostname;
-  if (onDefault) {
+  if (isProxyOrigin(ancestor)) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.
