@@ -93,11 +93,11 @@ export function rectIntersection(var_args) {
     }
     hasValidRect = true;
     x0 = Math.max(x0, current.left);
-    y0 = Math.max(y0, current.top);
     x1 = Math.min(x1, current.left + current.width);
     if (x1 < x0) {
       return null;
     }
+    y0 = Math.max(y0, current.top);
     y1 = Math.min(y1, current.top + current.height);
     if (y1 < y0) {
       return null;
