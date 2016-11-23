@@ -345,7 +345,7 @@ export class Visibility {
       /** @private {!IntersectionObserver} */
       this.intersectionObserver_ =
           // TODO: polyfill IntersectionObserver
-          new IntersectionObserver(entries => {
+          new this.ampdoc.win.IntersectionObserver(entries => {
             entries.forEach(this.onIntersectionChange_.bind(this));
           }, {threshold: DEFAULT_THRESHOLD});
     }
