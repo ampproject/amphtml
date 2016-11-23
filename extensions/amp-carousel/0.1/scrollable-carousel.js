@@ -54,26 +54,16 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
+    console.log('This is the test!!!!!!!!!!!');
     this.cells_ = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('-amp-scrollable-carousel-container');
-    st.setStyles(this.container_, {
-      'white-space': 'nowrap',
-      'overflow-x': 'auto',
-      'overflow-y': 'hidden',
-      '-webkit-overflow-scrolling': 'touch',
-    });
     this.element.appendChild(this.container_);
 
     this.cells_.forEach(cell => {
       this.setAsOwner(cell);
       cell.classList.add('amp-carousel-slide');
-      st.setStyle(cell, 'display', 'inline-block');
-      if (cell != this.cells_[0]) {
-        // TODO(dvoytenko): this has to be customizable
-        st.setStyle(cell, 'marginLeft', '8px');
-      }
       this.container_.appendChild(cell);
     });
 
