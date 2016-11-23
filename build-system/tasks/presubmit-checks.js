@@ -187,6 +187,13 @@ var forbiddenTerms = {
       'src/service/template-impl.js',
     ],
   },
+  'installVarSubstitutionServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+      'src/service/var-substitution-impl.js',
+    ],
+  },
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
@@ -277,7 +284,7 @@ var forbiddenTerms = {
       'src/ad-cid.js',
       'src/cid.js',
       'src/service/cid-impl.js',
-      'src/service/url-replacements-impl.js',
+      'src/service/var-substitution-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
@@ -315,6 +322,13 @@ var forbiddenTerms = {
       'src/experiments.js',
       'tools/experiments/experiments.js',
     ]
+  },
+  'varSubstitutionsForDoc': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+      'src/service/var-substitution-impl.js',
+    ],
   },
   'isDevChannel\\W': {
     message: requiresReviewPrivacy,
@@ -379,7 +393,7 @@ var forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
-      'src/service/url-replacements-impl.js',
+      'src/service/var-substitution-impl.js',
     ]
   },
   'getAuthdataField': {
@@ -387,7 +401,7 @@ var forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
-      'src/service/url-replacements-impl.js',
+      'src/service/var-substitution-impl.js',
     ]
   },
   'debugger': '',

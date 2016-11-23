@@ -18,13 +18,13 @@ import {whenDocumentComplete} from '../document-ready';
 import {isFiniteNumber} from '../types';
 
 /** @typedef {string|number|boolean|undefined|null} */
-let ResolverReturnDef;
+export let ResolverReturnDef;
 
 /** @typedef {function(...*):ResolverReturnDef} */
-let SyncResolverDef;
+export let SyncResolverDef;
 
 /** @typedef {function(...*):!Promise<ResolverReturnDef>} */
-let AsyncResolverDef;
+export let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
