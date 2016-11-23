@@ -357,6 +357,8 @@ export class Visibility {
       this.listeners_[resId].push({config, callback, state, shouldBeVisible});
       this.resources_.push(resource);
     });
+
+    // TODO: support "hidden" spec.
   }
 
   onIntersectionChange_(change) {
@@ -466,7 +468,7 @@ export class Visibility {
     if (visible > 0) {
       const timeElapsed = Date.now() - state[TIME_LOADED];
       state[FIRST_SEEN_TIME] = state[FIRST_SEEN_TIME] || timeElapsed;
-      state[LAST_SEEN_TIME] = Date.now() - state[TIME_LOADED];
+      state[LAST_SEEN_TIME] = timeElapsed;
       // Consider it as load time visibility if this happens within 300ms of
       // page load.
       if (state[LOAD_TIME_VISIBILITY] == undefined && timeElapsed < 300) {
@@ -529,7 +531,7 @@ export class Visibility {
 
   /**
    * For the purposes of these calculations, a resource is in viewport if the
-   * visbility conditions are satisfied or they are not defined.
+   * visibility conditions are satisfied or they are not defined.
    * @param {!number} visible Percentage of element visible
    * @param {number} min Lower bound of visibility condition. Not inclusive
    * @param {number} max Upper bound of visibility condition. Inclusive.
@@ -541,10 +543,7 @@ export class Visibility {
       return true;
     }
 
-    if (visible > (min || 0) && visible <= (max || 100)) { // (Min, Max]
-      return true;
-    }
-    return false;
+    return !!(visible > (min || 0) && visible <= (max || 100));
   }
 
   /** @private */

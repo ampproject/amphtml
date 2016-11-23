@@ -51,6 +51,7 @@ describe('amp-analytics.visibility', () => {
   let clock;
   let ampElement;
   let ampdoc;
+  let resourceLoadedResolver;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -77,6 +78,7 @@ describe('amp-analytics.visibility', () => {
     getIdStub.returns('0');
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
+    ampElement.getResourceId = getIdStub;
 
     const viewport = viewportForDoc(ampdoc);
     viewportScrollTopStub = sandbox.stub(viewport, 'getScrollTop');
@@ -85,12 +87,17 @@ describe('amp-analytics.visibility', () => {
     viewportScrollLeftStub.returns(0);
     viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new Visibility(ampdoc);
-    sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
-        .returns({
-          getLayoutBox: () => {},
-          element: {getIntersectionChangeEntry: getIntersectionStub},
-          getId: getIdStub,
-          hasLoadedOnce: () => true});
+    const resource = {
+      getLayoutBox: () => {},
+      element: {getIntersectionChangeEntry: getIntersectionStub},
+      getId: getIdStub,
+      hasLoadedOnce: () => true,
+      loadedOnce: () => {
+        return new Promise(resolve => resourceLoadedResolver = resolve);
+      },
+    };
+    sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
+        .returns(resource);
   });
 
   afterEach(() => {
@@ -109,6 +116,7 @@ describe('amp-analytics.visibility', () => {
       boundingClientRect,
       rootBounds,
       intersectionRatio: ratio,
+      target: ampElement,
     };
   }
 
@@ -465,5 +473,78 @@ describe('amp-analytics.visibility', () => {
       expect(getElement(iframeAmpDoc, ':root', iframeAnalytics, 'something'))
           .to.equal(ampEl);
     });
+  });
+
+  describe('listenOnceV2', () => {
+
+    let inObCallback;
+    let observeSpy;
+    let unobserveSpy;
+
+    beforeEach(() => {
+      observeSpy = sandbox.stub();
+      unobserveSpy = sandbox.stub();
+      sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
+        inObCallback = callback;
+        return {
+          observe: observeSpy,
+          unobserve: unobserveSpy,
+        };
+      });
+    });
+
+    afterEach(() => {
+      inObCallback = null;
+    });
+
+    it('should work for visible=true spec', () => {
+      visibility.listenOnceV2({
+        selector: '#abc',
+        visiblePercentageMin: 20,
+      }, callbackStub, true, ampElement);
+
+      // "observe" should not have been called since resource not loaded yet.
+      expect(observeSpy).to.be.not.called;
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(135);
+        fireIntersect(5); // below visiblePercentageMin, no trigger
+        expect(unobserveSpy).to.not.be.called;
+        expect(callbackStub).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(25); // above visiblePercentageMin, trigger callback
+        expect(callbackStub).to.be.calledWith(sinon.match({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '75',
+          firstSeenTime: '135',
+          fistVisibleTime: '235', // 135 + 100
+          lastSeenTime: '235',
+          lastVisibleTime: '235',
+          loadTimeVisibility: '5',
+          maxContinuousVisibleTime: '0',
+          maxVisiblePercentage: '-1', // TODO: will be fixed by #6326
+          minVisiblePercentage: '101', // TODO: will be fixed by #6326
+          totalVisibleTime: '0', // this is always 0 because the spec says:
+                                 // trigger ASAP when visible > 20
+          // totalTime is not testable because no way to stub performance API
+        }));
+
+
+        expect(unobserveSpy).to.be.calledOnce;
+      });
+    });
+
+    function fireIntersect(intersectPercent) {
+      const entry = makeIntersectionEntry(
+          [0, 100 - intersectPercent, 100, 100], [0, 0, 100, 100]);
+      inObCallback([entry]);
+    }
   });
 });
