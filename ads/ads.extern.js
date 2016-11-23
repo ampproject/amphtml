@@ -235,6 +235,7 @@ Fusion.on;
 Fusion.on.adResized;
 Fusion.on.warning;
 Fusion.loadAds;
+var ev;
 ev.msg;
 data.adServer;
 data.mediaZone;
