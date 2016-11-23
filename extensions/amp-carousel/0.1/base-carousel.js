@@ -30,6 +30,12 @@ export class BaseCarousel extends AMP.BaseElement {
     /** @private {?Element} */
     this.nextButton_ = null;
 
+    /** @private {?Element} */
+    this.nextA11yBtn_ = null;
+
+    /** @private {?Element} */
+    this.prevA11yBtn_ = null;
+
     /** @private {boolean} */
     this.showControls_ = false;
   }
@@ -63,10 +69,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_ = this.element.ownerDocument.createElement('div');
     this.prevButton_.classList.add('amp-carousel-button');
     this.prevButton_.classList.add('amp-carousel-button-prev');
-    this.prevButton_.setAttribute('role', 'button');
-    // TODO(erwinm): Does label need i18n support in the future? or provide
-    // a way to be overridden.
-    this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
+    this.prevButton_.setAttribute('role', 'presentation');
     this.prevButton_.onclick = () => {
       this.interactionPrev();
     };
@@ -75,12 +78,35 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_ = this.element.ownerDocument.createElement('div');
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
-    this.nextButton_.setAttribute('role', 'button');
+    this.nextButton_.setAttribute('role', 'presentation');
     this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
     this.nextButton_.onclick = () => {
       this.interactionNext();
     };
     this.element.appendChild(this.nextButton_);
+
+
+    this.prevA11yBtn_ = this.element.ownerDocument.createElement('button');
+    this.prevA11yBtn_.classList.add(
+        '-amp-screen-reader', '-amp-carousel-a11-prev');
+    // TODO(erwinm): Does label need i18n support in the future? or provide
+    // a way to be overridden.
+    this.prevA11yBtn_.setAttribute('aria-label', 'Previous item in carousel');
+    this.element.appendChild(this.prevA11yBtn_);
+    this.prevA11yBtn_.addEventListener(
+        'click', this.interactionPrev.bind(this));
+
+
+    this.nextA11yBtn_ = this.element.ownerDocument.createElement('button');
+    this.nextA11yBtn_.classList.add(
+        '-amp-screen-reader', '-amp-carousel-a11-next');
+    // TODO(erwinm): Does label need i18n support in the future? or provide
+    // a way to be overridden.
+    this.nextA11yBtn_.setAttribute('aria-label', 'Next item in carousel');
+    this.element.appendChild(this.nextA11yBtn_);
+    this.nextA11yBtn_.addEventListener(
+        'click', this.interactionNext.bind(this));
+
   }
 
   /** @override */
@@ -134,9 +160,11 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   setControlsState() {
     this.prevButton_.classList.toggle('amp-disabled', !this.hasPrev());
-    this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
+    this.prevA11yBtn_.classList.toggle('amp-disabled', !this.hasPrev());
+    this.prevA11yBtn_.setAttribute('aria-disabled', !this.hasPrev());
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
-    this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
+    this.prevA11yBtn_.classList.toggle('amp-disabled', !this.hasNext());
+    this.nextA11yBtn_.setAttribute('aria-disabled', !this.hasNext());
   }
 
   /**
