@@ -882,41 +882,6 @@ export class Viewer {
   }
 
   /**
-   * Triggers "tick" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl, and use sendMessage()
-   */
-  tick(message) {
-    this.sendMessageCancelUnsent('tick', message, false);
-  }
-
-  /**
-   * Triggers "sendCsi" event for the viewer.
-   * TODO: move this to performance-impl
-   */
-  flushTicks() {
-    this.sendMessageCancelUnsent('sendCsi', undefined, false);
-  }
-
-  /**
-   * Triggers "setFlushParams" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl
-   */
-  setFlushParams(message) {
-    this.sendMessageCancelUnsent('setFlushParams', message, false);
-  }
-
-  /**
-   * Triggers "prerenderComplete" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl
-   */
-  prerenderComplete(message) {
-    this.sendMessageCancelUnsent('prerenderComplete', message, false);
-  }
-
-  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {!JSONType} data
