@@ -214,6 +214,24 @@ The `style` attribute must not be used.
 
 XML-related attributes, such as xmlns, xml:lang, xml:base, and xml:space are disallowed in AMP HTML.
 
+Internal AMP attributes prefixed with `i-amp-` are disallowed in AMP HTML.
+
+### Classes
+
+Internal AMP class names prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
+
+Consult AMP documentation for meaning of class names prefixed with `amp-`. The use of these classes is allowed and meant to allow customization of some features of AMP runtime and extensions.
+
+All other authored class names are allowed in AMP HTML markup.
+
+### IDs
+
+Internal AMP IDs prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
+
+Consult AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
+
+All other authored IDs are allowed in AMP HTML markup.
+
 ### Links
 
 The `javascript:` schema is disallowed.
@@ -239,9 +257,9 @@ Authors may add custom styles to a document using a single `<style amp-custom>` 
 The following restrictions apply to selectors in author style sheets:
 
 ##### Class and tag names
-Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
+Class names, IDs, tag names and attributes, in author stylesheets, may not start with the string `-amp-` and `i-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes, `i-amp-` IDs and `i-amp-` tags and attributes. These classes, IDs and tag/attribute names are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
 
-To prevent usage of attribute selectors to circumvent class name limitations it is generally not allowed for CSS selectors to contain tokens and strings starting with `-amp-` and `i-amp`.
+To prevent usage of attribute selectors to circumvent class name limitations it is generally not allowed for CSS selectors to contain tokens and strings starting with `-amp-` and `i-amp-`.
 
 #### Important
 Usage of the `!important` qualifier is not allowed. This is a necessary requirement to enable AMP to enforce its element sizing invariants.
