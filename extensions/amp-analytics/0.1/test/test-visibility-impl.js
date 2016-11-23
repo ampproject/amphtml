@@ -87,14 +87,15 @@ describe('amp-analytics.visibility', () => {
     viewportScrollLeftStub.returns(0);
     viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new Visibility(ampdoc);
+
+    const resourceLoadedPromise =
+        new Promise(resolve => resourceLoadedResolver = resolve);
     const resource = {
       getLayoutBox: () => {},
       element: {getIntersectionChangeEntry: getIntersectionStub},
       getId: getIdStub,
       hasLoadedOnce: () => true,
-      loadedOnce: () => {
-        return new Promise(resolve => resourceLoadedResolver = resolve);
-      },
+      loadedOnce: () => resourceLoadedPromise,
     };
     sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
         .returns(resource);
@@ -480,10 +481,14 @@ describe('amp-analytics.visibility', () => {
     let inObCallback;
     let observeSpy;
     let unobserveSpy;
+    let callbackSpy1;
+    let callbackSpy2;
 
     beforeEach(() => {
       observeSpy = sandbox.stub();
       unobserveSpy = sandbox.stub();
+      callbackSpy1 = sandbox.stub();
+      callbackSpy2 = sandbox.stub();
       sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
         inObCallback = callback;
         return {
@@ -501,7 +506,13 @@ describe('amp-analytics.visibility', () => {
       visibility.listenOnceV2({
         selector: '#abc',
         visiblePercentageMin: 20,
-      }, callbackStub, true, ampElement);
+      }, callbackSpy1, true, ampElement);
+
+      // add multiple triggers on the same element
+      visibility.listenOnceV2({
+        selector: '#abc',
+        visiblePercentageMin: 30,
+      }, callbackSpy2, true, ampElement);
 
       // "observe" should not have been called since resource not loaded yet.
       expect(observeSpy).to.be.not.called;
@@ -511,12 +522,13 @@ describe('amp-analytics.visibility', () => {
 
         clock.tick(135);
         fireIntersect(5); // below visiblePercentageMin, no trigger
+        expect(callbackSpy1).to.not.be.called;
+        expect(callbackSpy2).to.not.be.called;
         expect(unobserveSpy).to.not.be.called;
-        expect(callbackStub).to.not.be.called;
 
         clock.tick(100);
-        fireIntersect(25); // above visiblePercentageMin, trigger callback
-        expect(callbackStub).to.be.calledWith(sinon.match({
+        fireIntersect(25); // above spec 1 min visible, trigger callback 1
+        expect(callbackSpy1).to.be.calledWith(sinon.match({
           backgrounded: '0',
           backgroundedAtStart: '0',
           elementHeight: '100',
@@ -528,16 +540,38 @@ describe('amp-analytics.visibility', () => {
           lastSeenTime: '235',
           lastVisibleTime: '235',
           loadTimeVisibility: '5',
-          maxContinuousVisibleTime: '0',
           maxVisiblePercentage: '-1', // TODO: will be fixed by #6326
           minVisiblePercentage: '101', // TODO: will be fixed by #6326
-          totalVisibleTime: '0', // this is always 0 because the spec says:
-                                 // trigger ASAP when visible > 20
+          totalVisibleTime: '0',         // this is always 0 because it triggers
+          maxContinuousVisibleTime: '0', // immediately when visible > 20
           // totalTime is not testable because no way to stub performance API
         }));
+        expect(callbackSpy2).to.not.be.called;
+        expect(unobserveSpy).to.not.be.called;
+        callbackSpy1.reset();
 
-
-        expect(unobserveSpy).to.be.calledOnce;
+        clock.tick(100);
+        fireIntersect(35); // above spec 2 min visible, trigger callback 2
+        expect(callbackSpy2).to.be.calledWith(sinon.match({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '65',
+          firstSeenTime: '135',
+          fistVisibleTime: '335', // 235 + 100
+          lastSeenTime: '335',
+          lastVisibleTime: '335',
+          loadTimeVisibility: '5',
+          maxVisiblePercentage: '-1', // TODO: will be fixed by #6326
+          minVisiblePercentage: '101', // TODO: will be fixed by #6326
+          totalVisibleTime: '0',         // this is always 0 because it triggers
+          maxContinuousVisibleTime: '0', // immediately when visible > 20
+          // totalTime is not testable because no way to stub performance API
+        }));
+        expect(callbackSpy1).to.not.be.called; // callback 1 not called again
+        expect(unobserveSpy).to.be.called; // unobserve when all callback fired
       });
     });
 
