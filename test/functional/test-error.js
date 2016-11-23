@@ -15,13 +15,61 @@
  */
 
 import {
-  getErrorReportUrl,
   cancellation,
   detectNonAmpJs,
+  getErrorReportUrl,
+  installErrorReporting,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
 import * as sinon from 'sinon';
+
+
+describes.fakeWin('installErrorReporting', {}, env => {
+  let win;
+  let rejectedPromiseError;
+  let rejectedPromiseEvent;
+  let rejectedPromiseEventCancelledSpy;
+
+  beforeEach(() => {
+    win = env.win;
+    installErrorReporting(win);
+    rejectedPromiseEventCancelledSpy = sandbox.spy();
+    rejectedPromiseError = new Error('error');
+    rejectedPromiseEvent = {
+      type: 'unhandledrejection',
+      reason: rejectedPromiseError,
+      preventDefault: rejectedPromiseEventCancelledSpy,
+    };
+  });
+
+  it('should install window.onerror handler', () => {
+    expect(win.onerror).to.not.be.null;
+  });
+
+  it('should install unhandledrejection handler', () => {
+    expect(win.eventListeners.count('unhandledrejection')).to.equal(1);
+  });
+
+  it('should report the normal promise rejection', () => {
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseError.reported).to.be.true;
+    expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+  });
+
+  it('should allow null errors', () => {
+    rejectedPromiseEvent.reason = null;
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+  });
+
+  it('should ignore cancellation', () => {
+    rejectedPromiseEvent.reason = rejectedPromiseError = cancellation();
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseError.reported).to.be.not.be.ok;
+    expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
+  });
+});
 
 
 describe('reportErrorToServer', () => {
