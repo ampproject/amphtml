@@ -26,7 +26,7 @@ export function revcontent(global, data) {
     'id',
     'width',
     'height',
-    'wrapper'
+    'wrapper',
   ];
   const optional = [
     'api',
@@ -41,7 +41,7 @@ export function revcontent(global, data) {
     'testing',
     'endpoint',
     'publisher',
-    'branding'
+    'branding',
   ];
 
   validateData(data, required, optional);
