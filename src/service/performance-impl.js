@@ -221,7 +221,8 @@ export class Performance {
    * @private
    */
   setFlushParams_(params) {
-    this.viewer_.setFlushParams(params);
+    this.viewer_.sendMessageCancelUnsent('setFlushParams', params,
+        /* awaitResponse */false);
   }
 
   /**
@@ -239,11 +240,11 @@ export class Performance {
     opt_value = opt_value == undefined ? Date.now() : opt_value;
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.tick({
+      this.viewer_.sendMessage('tick', {
         label,
         from: opt_from,
         value: opt_value,
-      });
+      }, /* awaitResponse */false);
     } else {
       this.queueTick_(label, opt_from, opt_value);
     }
@@ -282,11 +283,12 @@ export class Performance {
 
 
   /**
-   * Calls the "flushTicks" function on the viewer.
+   * Ask the viewer to flush the ticks
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.flushTicks();
+      this.viewer_.sendMessageCancelUnsent('sendCsi', undefined,
+          /* awaitResponse */false);
     }
   }
 
@@ -332,7 +334,7 @@ export class Performance {
     }
 
     this.events_.forEach(tickEvent => {
-      this.viewer_.tick(tickEvent);
+      this.viewer_.sendMessage('tick', tickEvent, /* awaitResponse */false);
     });
     this.events_.length = 0;
   }
@@ -370,9 +372,8 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.prerenderComplete({
-        value,
-      });
+      this.viewer_.sendMessageCancelUnsent('prerenderComplete', {value},
+          /* awaitResponse */false);
     }
   }
 
