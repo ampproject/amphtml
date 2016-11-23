@@ -24,11 +24,11 @@ import {
   parseQueryString,
   parseUrl,
   removeFragment,
+  isProxyOrigin,
 } from '../url';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
-import {urls} from '../config';
 import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
@@ -444,8 +444,7 @@ export class Viewer {
    *     requested the navigation.
    */
   navigateTo(url, requestedBy) {
-    dev().assert(url.indexOf(urls.cdn) == 0,
-        'Invalid A2A URL %s %s', url, requestedBy);
+    dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
     if (this.hasCapability('a2a')) {
       this.sendMessage('a2a', {
         url,

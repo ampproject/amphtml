@@ -33,6 +33,7 @@ function createAmpAd(win) {
     'data-valid': 'true',
     'data-width': '6666',
   });
+  ampAdElement.isBuilt = () => {return true;};
 
   return new AmpAd3PImpl(ampAdElement);
 }
