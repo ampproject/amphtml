@@ -169,6 +169,7 @@ export const adConfig = {
       'https://s.jsrdn.com',
       'https://i.jsrdn.com',
     ],
+    renderStartImplemented: true,
   },
 
   dotandads: {

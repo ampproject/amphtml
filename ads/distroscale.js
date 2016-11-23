@@ -28,5 +28,11 @@ export function distroscale(global, data) {
   if (data.tid) {
     src = src + '&t=' + encodeURIComponent(data.tid);
   }
-  loadScript(global, src);
+  global.dsAMPCallbacks = {
+    renderStart: global.context.renderStart,
+    noContentAvailable: global.context.noContentAvailable,
+  };
+  loadScript(global, src, () => {}, () => {
+    global.context.noContentAvailable();
+  });
 }
