@@ -77,23 +77,31 @@ export function layoutRectsOverlap(r1, r2) {
 
 /**
  * Returns the intersection between a, b or null if there is none.
- * @param {!LayoutRectDef} a
- * @param {!LayoutRectDef} b
+ * @param {...?LayoutRectDef|undefined} var_args
  * @return {?LayoutRectDef}
  */
-export function rectIntersection(a, b) {
-  const x0 = Math.max(a.left, b.left);
-  const x1 = Math.min(a.left + a.width, b.left + b.width);
-
-  if (x0 <= x1) {
-    const y0 = Math.max(a.top, b.top);
-    const y1 = Math.min(a.top + a.height, b.top + b.height);
-
-    if (y0 <= y1) {
-      return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
+export function rectIntersection(var_args) {
+  let x0 = -Infinity;
+  let x1 = Infinity;
+  let y0 = -Infinity;
+  let y1 = Infinity;
+  for (let i = 0; i < arguments.length; i++) {
+    const current = arguments[i];
+    if (!current) {
+      continue;
+    }
+    x0 = Math.max(x0, current.left);
+    x1 = Math.min(x1, current.left + current.width);
+    y0 = Math.max(y0, current.top);
+    y1 = Math.min(y1, current.top + current.height);
+    if (x1 < x0 || y1 < y0) {
+      return null;
     }
   }
-  return null;
+  if (x1 == Infinity) {
+    return null;
+  }
+  return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
 }
 
 
