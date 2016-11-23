@@ -16,6 +16,7 @@
 
 import {
   assertHttpsUrl,
+  getSourceOrigin,
   isProxyOrigin,
   isSecureUrl,
   parseUrl,
@@ -132,11 +133,6 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const win = this.win;
     const winUrl = parseUrl(win.location.href);
 
-    // Cannot install url rewrite on proxy.
-    if (isProxyOrigin(winUrl)) {
-      return;
-    }
-
     // Read the url-rewrite config.
     const urlMatch = this.element.getAttribute(
         'data-no-service-worker-fallback-url-match');
@@ -159,8 +155,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(winUrl.origin == parseUrl(shellUrl).origin,
-        'Shell origin "%s" must be the same as source origin "%s"',
+    user().assert(getSourceOrigin(winUrl) == parseUrl(shellUrl).origin,
+        'Shell source origin "%s" must be the same as source origin "%s"',
         shellUrl, winUrl.href);
 
     // Install URL rewriter.
