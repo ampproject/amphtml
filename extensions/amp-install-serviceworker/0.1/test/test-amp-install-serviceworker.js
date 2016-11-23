@@ -322,10 +322,10 @@ describes.fakeWin('url rewriter', {
       expect(implementation.urlRewriter_).to.be.null;
     });
 
-    it('should not install on proxy', () => {
-      win.location.resetHref('https://cdn.ampproject.org/c/example.com/doc1');
+    it('should install on proxy', () => {
+      win.location.resetHref('https://cdn.ampproject.org/c/s/example.com/doc1');
       implementation.maybeInstallUrlRewrite_();
-      expect(implementation.urlRewriter_).to.be.null;
+      expect(implementation.urlRewriter_).to.be.not.null;
     });
 
     it('should not install when mask/shell not configured', () => {
