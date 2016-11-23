@@ -499,5 +499,38 @@
 </form>
 
 
+<h4 id="header1">Using button[type=submit]</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name1" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email1" required>
+        </label>
+        <input type="submit" value="Subscribe - Input">
+        <input type="submit" value="Subscribe 2 - Input">
+        <button type="submit">Subscribe with a Button</button>
+        <button type="submit">Subscribe with a Button 2</button>
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+
 </body>
 </html>
