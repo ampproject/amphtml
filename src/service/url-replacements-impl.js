@@ -534,8 +534,8 @@ export class UrlReplacements {
    * @return {string}
    */
   expandSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
-    return /** @type {string} */ (this.expandUrlSync(
-        url, opt_bindings, opt_collectVars, opt_whiteList));
+    return this.expandUrlSync(
+        url, opt_bindings, opt_collectVars, opt_whiteList);
   }
 
   /**
@@ -549,8 +549,7 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandAsync(url, opt_bindings) {
-    return /** @type {!Promise<string>} */ (
-        this.expandUrlAsync(url, opt_bindings));
+    return this.expandUrlAsync(url, opt_bindings);
   }
 
 
@@ -595,10 +594,9 @@ export class UrlReplacements {
    * @return {string}
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
-    return /** @type {string} */ (
-        this.ensureProtocolMatches_(url, /** @type {string} */ (this.expand_(
+    return this.ensureProtocolMatches_(url, /** @type {string} */ (this.expand_(
             url, opt_bindings, opt_collectVars, /* opt_sync */ true,
-            opt_whiteList))));
+            opt_whiteList)));
   }
 
   /**

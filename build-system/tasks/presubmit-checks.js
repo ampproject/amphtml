@@ -390,19 +390,6 @@ var forbiddenTerms = {
       'src/service/url-replacements-impl.js',
     ]
   },
-  'expandStringSync\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/url-replacements-impl.js',
-    ]
-  },
-  'expandStringAsync\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/url-replacements-impl.js',
-    ]
-  },
-
   'debugger': '',
 
   // ES6. These are only the most commonly used.
@@ -622,6 +609,18 @@ var forbiddenTermsSrcInclusive = {
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
+  },
+  '\\.expandStringSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+    ]
+  },
+  '\\.expandStringAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+    ]
   },
 };
 
