@@ -54,7 +54,7 @@ export function getIntersectionChangeEntry(
     element, owner, hostViewport) {
   dev().assert(element.width >= 0 && element.height >= 0,
       'Negative dimensions in element.');
-  const intersection = rectIntersection([element, owner, hostViewport]) ||
+  const intersection = rectIntersection(element, owner, hostViewport) ||
       layoutRectLtwh(0, 0, 0, 0);
   const ratio = intersectionRatio(intersection, element);
   return calculateChangeEntry(
@@ -276,7 +276,7 @@ export class IntersectionObserverPolyfill {
     // calculate intersectionRect. that the element intersects with hostViewport
     // and intersects with owner element and container iframe if exists.
     const intersectionRect =
-        rectIntersection([element, owner, hostViewport, opt_iframe]) ||
+        rectIntersection(element, owner, hostViewport, opt_iframe) ||
         layoutRectLtwh(0, 0, 0, 0);
 
     // calculate ratio, call callback based on new ratio value.
