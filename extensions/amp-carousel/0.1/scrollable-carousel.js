@@ -20,7 +20,6 @@ import {Layout} from '../../../src/layout';
 import {timerFor} from '../../../src/timer';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
-import * as st from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
