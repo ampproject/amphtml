@@ -56,8 +56,8 @@ class AmpBrightcove extends AMP.BaseElement {
     const embed = (this.element.getAttribute('data-embed') || 'default');
     const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
-    let params = {
-      playsinline: true
+    const params = {
+      playsinline: true,
     };
 
     if (this.element.getAttribute('data-playlist-id')) {

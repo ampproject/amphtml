@@ -102,7 +102,7 @@ describe('amp-brightcove', () => {
       'data-account': '906043040001',
       'data-video-id': 'ref:ampdemo',
       'autoplay': '',
-      'muted': ''
+      'muted': '',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
       const params = parseUrl(iframe.src).search.split('&');
