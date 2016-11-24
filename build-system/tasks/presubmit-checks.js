@@ -610,6 +610,18 @@ var forbiddenTermsSrcInclusive = {
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
   },
+  '\\.expandStringSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+    ]
+  },
+  '\\.expandStringAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+    ]
+  },
 };
 
 // Terms that must appear in a source file.
