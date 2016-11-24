@@ -1074,4 +1074,32 @@ describe('UrlReplacements', () => {
       });
     });
   });
+
+  describe('Expanding String', () => {
+    it('should not reject protocol changes with expandStringSync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      let expanded = urlReplacements.expandStringSync(
+          'PROTOCOL://example.com/?r=RANDOM', {
+            'PROTOCOL': 'abc',
+          });
+      expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
+      expanded = urlReplacements.expandStringSync(
+          'FUNCT://example.com/?r=RANDOM', {
+            'FUNCT': function() { return 'abc'; },
+          });
+      expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
+    });
+
+    it('should not check protocol changes with expandStringAsync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      return urlReplacements.expandStringAsync(
+          'RANDOM:X:Y', {
+            'RANDOM': Promise.resolve('abc'),
+          }).then(expanded => {
+            expect(expanded).to.equal('abc:X:Y');
+          });
+    });
+  });
 });
