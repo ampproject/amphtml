@@ -622,8 +622,8 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ false, hasSizeChanged => {
-          if (hasSizeChanged) {
+        newWidth, /* force */ false, success => {
+          if (success) {
             resolve();
           } else {
             reject(new Error('changeSize attempt denied'));
@@ -1339,7 +1339,7 @@ export class Resources {
       }
       // Nothing to do.
       if (opt_callback) {
-        opt_callback(/* hasSizeChanged */false);
+        opt_callback(/* success */ true);
       }
       return;
     }
