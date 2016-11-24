@@ -495,8 +495,10 @@ export class Visibility {
         ? s[CONTINUOUS_TIME] + sinceLast : 0;
     s[MAX_CONTINUOUS_TIME] = s[MAX_CONTINUOUS_TIME] !== undefined
         ? Math.max(s[MAX_CONTINUOUS_TIME], s[CONTINUOUS_TIME]) : 0;
-    s[MIN_VISIBLE] = s[MIN_VISIBLE] ? Math.min(s[MIN_VISIBLE], visible) : 101;
-    s[MAX_VISIBLE] = s[MAX_VISIBLE] ? Math.max(s[MAX_VISIBLE], visible) : -1;
+    s[MIN_VISIBLE] =
+        s[MIN_VISIBLE] ? Math.min(s[MIN_VISIBLE], visible) : visible;
+    s[MAX_VISIBLE] =
+        s[MAX_VISIBLE] ? Math.max(s[MAX_VISIBLE], visible) : visible;
     s[LAST_VISIBLE_TIME] = Date.now() - s[TIME_LOADED];
   }
 
