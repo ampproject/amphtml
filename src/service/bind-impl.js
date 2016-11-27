@@ -223,9 +223,9 @@ export class Bind {
    */
   sanitizeAttribute_(value) {
     if (typeof value === 'string') {
-      const protocol = newValue.split(':')[0];
-      if (this.protocolWhitelist_.indexOf(protocol) < 0) {
-        return 'unsafe:' + newValue;
+      const split = value.split(':');
+      if (split.length > 1 && this.protocolWhitelist_.indexOf(split[0]) < 0) {
+        return 'unsafe:' + value;
       }
     }
     return value;

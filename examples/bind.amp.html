@@ -29,7 +29,8 @@
   <p [text]="myState.myStateKey1">This will read 'myStateValue1'<p>
   <button [disabled]="isButtonDisabled">This button will be disabled</button>
   <p [class]="textClass">This text will have have a red background color</p>
+  <amp-img src="shirts/blue.jpeg" [src]="shirt" width=100 height=100></amp-img>
   <hr>
-  <button on="tap:AMP.setState(foo='foo', isButtonDisabled=true, textClass='redBackground')">Click me</button>
+  <button on="tap:AMP.setState(foo='foo', isButtonDisabled=true, textClass='redBackground', shirt='shirts/white.jpeg')">Click me</button>
 </body>
 </html>
