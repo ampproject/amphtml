@@ -10,11 +10,18 @@
 
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+  <script id="myState" class="amp-bind-state" type="application/json">
+  {
+    "myStateKey1": "myStateValue1"
+  }
+  </script>
 </head>
 
 <body>
-  <p [text]="foo">Hello World<p>
-  <p id="foo" [text]="foo + 'baz'">Hello World<p>
+  <p [text]="foo">After clicking the button below, this should read 'foo'<p>
+  <p id="foo" [text]="foo + 'baz'">And this should read 'foobaz'<p>
+  <p [text]="myState.myStateKey1">This should read 'myStateValue1'<p>
   <button [disabled]="bar" on="tap:AMP.setState(foo='foo', bar=true)">foo</button>
 </body>
 </html>
