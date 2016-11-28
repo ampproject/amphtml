@@ -23,7 +23,6 @@ import {createAmpElementProto} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
@@ -402,6 +401,22 @@ describe('IntersectionObserver', () => {
     testIframe.parentNode.removeChild(testIframe);
   });
 
+  it('getThresholdSlot_', () => {
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    insert(testIframe);
+    ioInstance.thresholds_ = [0.01, 0.25, 0.5, 1];
+    expect(ioInstance.getThresholdSlot_(0)).to.equal(0);
+    ioInstance.thresholds_ = [0, 0.25, 0.5, 1];
+    expect(ioInstance.getThresholdSlot_(0)).to.equal(0);
+    expect(ioInstance.getThresholdSlot_(0.1)).to.equal(1);
+    expect(ioInstance.getThresholdSlot_(0.4)).to.equal(2);
+    expect(ioInstance.getThresholdSlot_(0.25)).to.equal(2);
+    expect(ioInstance.getThresholdSlot_(0.5)).to.equal(3);
+    expect(ioInstance.getThresholdSlot_(1)).to.equal(4);
+    ioInstance.thresholds_ = [0.5];
+    expect(ioInstance.getThresholdSlot_(1)).to.equal(1);
+  });
+
   it('should not send intersection', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
@@ -434,6 +449,10 @@ describe('IntersectionObserver', () => {
   it('should send more intersections', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
+    let fakeThresholdSlot = 1;
+    sandbox.stub(ioInstance, 'getThresholdSlot_', () => {
+      return fakeThresholdSlot++;
+    });
     insert(testIframe);
     testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
@@ -447,9 +466,11 @@ describe('IntersectionObserver', () => {
     expect(messages[0].changes).to.have.length(1);
     expect(messages[0].changes[0].time).to.equal(0);
     clock.tick(98);
+
     ioInstance.fire();
     clock.tick(1);
     ioInstance.fire();
+
     ioInstance.fire();  // Same time
     ioInstance.fire();  // Same time
     expect(ioInstance.pendingChanges_).to.have.length(2);
@@ -474,6 +495,30 @@ describe('IntersectionObserver', () => {
     expect(messages[2].changes[0].time).to.equal(100);
     expect(messages[3].changes).to.have.length(1);
     expect(messages[3].changes[0].time).to.equal(199);
+  });
+
+  it('should not send intersections w/ ratio under same threshold', () => {
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    insert(testIframe);
+    let fakeThresholdSlot = 1;
+    sandbox.stub(ioInstance, 'getThresholdSlot_', () => {
+      return fakeThresholdSlot++;
+    });
+    ioInstance.startSendingIntersectionChanges_();
+
+    expect(ioInstance.pendingChanges_).to.have.length(0);
+
+    clock.tick(1);
+    ioInstance.fire();
+    expect(ioInstance.pendingChanges_).to.have.length(1);
+    clock.tick(1);
+    ioInstance.fire();
+    expect(ioInstance.pendingChanges_).to.have.length(2);
+
+    ioInstance.prevThresholdSlot_ = fakeThresholdSlot;
+    clock.tick(1);
+    ioInstance.fire();  // Same threshold value
+    expect(ioInstance.pendingChanges_).to.have.length(2);
   });
 
   it('should init listeners when element is in viewport', () => {
