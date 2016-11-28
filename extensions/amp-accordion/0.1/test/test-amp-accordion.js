@@ -176,16 +176,19 @@ describes.sandboxed('amp-accordion', {}, () => {
       const iframe = obj.iframe;
       const ampAccordion = obj.ampAccordion;
       const impl = obj.ampAccordion.implementation_;
-      const setSessionStateSpy = sandbox.spy(impl, 'setSessionState_');
-      const getSessionStateSpy = sandbox.spy(impl, 'getSessionState_');
-      const getSessionStorageKeySpy =
-          sandbox.spy(impl, 'getSessionStorageKey_');
+      const setSessionStateSpy = sandbox.spy();
+      const getSessionStateSpy = sandbox.spy();
+      impl.win.sessionStorage.setItem = function() {
+        setSessionStateSpy();
+      };
+      impl.win.sessionStorage.getItem = function() {
+        getSessionStateSpy();
+      };
+
       toggleExperiment(iframe.win, 'amp-accordion-session-state-optout', true);
       ampAccordion.setAttribute('disable-session-states', null);
       impl.buildCallback();
-      expect(setSessionStateSpy).to.not.have.been.called;
-      expect(getSessionStateSpy).to.not.have.been.called;
-      expect(getSessionStorageKeySpy).to.not.have.been.called;
+      expect(Object.keys(impl.currentState_)).to.have.length(0);
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const clickEventExpandElement = {
@@ -193,7 +196,9 @@ describes.sandboxed('amp-accordion', {}, () => {
         preventDefault: sandbox.spy(),
       };
       impl.onHeaderClick_(clickEventExpandElement);
-      expect(Object.keys(impl.currentState_)).to.have.length(0);
+      expect(getSessionStateSpy).to.not.have.been.called;
+      expect(setSessionStateSpy).to.not.have.been.called;
+      expect(Object.keys(impl.currentState_)).to.have.length(1);
     });
   });
 });

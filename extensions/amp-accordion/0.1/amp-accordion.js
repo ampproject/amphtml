@@ -38,7 +38,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?Object} */
     this.currentState_ = null;
 
-    /** @const @private {boolean} */
+    /** @private {boolean} */
     this.sessionOptOut_ = false;
   }
 
@@ -51,8 +51,6 @@ class AmpAccordion extends AMP.BaseElement {
   buildCallback() {
     this.sections_ = this.getRealChildren();
 
-    this.sessionId_ = this.getSessionStorageKey_();
-
     if (isExperimentOn(this.win, TAG)) {
       this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
     }
@@ -61,13 +59,8 @@ class AmpAccordion extends AMP.BaseElement {
 
     // sessionStorage key: special created id for this element, this.sessionId_.
     // sessionStorage value: string that can convert to this.currentState_ obj.
-    if (!this.sessionOptOut_) {
-      this.sessionId_ = this.getSessionStorageKey_();
-      this.currentState_ = this.getSessionState_();
-    }
-    if (!this.currentState_) {
-      this.currentState_ = Object.create(null);
-    }
+    this.sessionId_ = this.getSessionStorageKey_();
+    this.currentState_ = this.getSessionState_();
 
     this.sections_.forEach((section, index) => {
       user().assert(
@@ -106,7 +99,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Generate a sessionStorage Key based on amp-accordion element id.
-   * @return {string}
+   * @return {?string}
    * @private
    */
   getSessionStorageKey_() {
@@ -121,6 +114,9 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   getSessionState_() {
+    if (this.sessionOptOut_) {
+      return Object.create(null);
+    }
     try {
       const sessionStr =
           this.win./*OK*/sessionStorage.getItem(
@@ -129,7 +125,7 @@ class AmpAccordion extends AMP.BaseElement {
           JSON.parse(dev().assertString(sessionStr)));
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
-      return null;
+      return Object.create(null);
     }
   }
 
@@ -138,6 +134,9 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   setSessionState_() {
+    if (this.sessionOptOut_) {
+      return;
+    }
     const sessionStr = JSON.stringify(this.currentState_);
     try {
       this.win./*OK*/sessionStorage.setItem(
@@ -170,10 +169,8 @@ class AmpAccordion extends AMP.BaseElement {
         header.setAttribute('aria-expanded', 'true');
       }
     }, content);
-    if (!this.sessionOptOut_) {
-      this.currentState_[contentId] = !isSectionClosedAfterClick;
-      this.setSessionState_();
-    }
+    this.currentState_[contentId] = !isSectionClosedAfterClick;
+    this.setSessionState_();
   }
 }
 
