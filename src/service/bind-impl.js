@@ -17,7 +17,6 @@
 import {evaluateBindExpr} from '../../extensions/amp-bind/0.1/bind-expr';
 import {fromClassForDoc} from '../service';
 import {getMode} from '../mode';
-import {tryParseJson} from '../json';
 import {user} from '../log';
 import {vsyncFor} from '../vsync'
 
@@ -53,9 +52,6 @@ export class Bind {
     this.protocolWhitelist_ = ['http', 'https'];
 
     this.ampdoc.whenBodyAvailable().then(body => {
-      // TODO: Wrap in custom element to avoid getElementsByClassName?
-      this.scanForState_(ampdoc.getRootNode());
-
       this.scanForBindings_(body);
 
       // Trigger verify-only digest in development.
@@ -70,28 +66,6 @@ export class Bind {
     Object.assign(this.scope_, state);
 
     this.digest_();
-  }
-
-  /**
-   * @param node {!Node}
-   * @private
-   */
-  scanForState_(node) {
-    const elements = node.getElementsByClassName('amp-bind-state');
-    for (let i = 0; i < elements.length; i++) {
-      const el = elements[i];
-      const json = tryParseJson(el.textContent, e => {
-        throw user().createError('Failed to parse "amp-bind-state" JSON: ' + e);
-      });
-      if (!json) {
-        continue;
-      }
-      if (el.id) {
-        this.scope_[el.id] = json;
-      } else {
-        user().error('"amp-bind-state" elements must have an id.');
-      }
-    }
   }
 
   /**
