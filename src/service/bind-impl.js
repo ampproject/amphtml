@@ -157,7 +157,9 @@ export class Bind {
     } else if (property === 'class') {
       element.classList = newValue;
     } else {
-      if (newValue === false) {
+      if (newValue === true) {
+        element.setAttribute(property, '');
+      } else if (newValue === false) {
         element.removeAttribute(property);
       } else {
         const sanitizedValue = this.sanitizeAttribute_(newValue);
@@ -187,9 +189,8 @@ export class Bind {
       initialValue = element.classList;
     } else {
       const attribute = element.getAttribute(property);
-      // A value of `false` means the attribute should be missing.
-      if (expectedValue === false) {
-        initialValue = (attribute !== null);
+      if (typeof expectedValue === 'boolean') {
+        initialValue = !!attribute;
       } else {
         initialValue = attribute;
       }
