@@ -39,8 +39,8 @@ export class Bind {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const {!Array<BindingDef>} */
-    this.bindings_ = [];
+    /** @const {?Array<BindingDef>} */
+    this.bindings_ = null;
 
     /** @const {!Object} */
     this.scope_ = Object.create(null);
@@ -52,7 +52,7 @@ export class Bind {
     this.protocolWhitelist_ = ['http', 'https'];
 
     this.ampdoc.whenBodyAvailable().then(body => {
-      this.scanForBindings_(body);
+      this.bindings_ = this.scanForBindings_(body);
 
       // Trigger verify-only digest in development.
       if (getMode().development) {
@@ -69,10 +69,14 @@ export class Bind {
   }
 
   /**
+   * Scans children for attributes that conform to bind syntax and returns
+   * all bindings.
    * @param body {!Element}
+   * @return {!Array<BindingDef>}
    * @private
    */
   scanForBindings_(body) {
+    const bindings = [];
     const elements = body.getElementsByTagName('*');
     for (let i = 0; i < elements.length; i++) {
       const el = elements[i];
@@ -80,13 +84,16 @@ export class Bind {
       for (let j = 0; j < attributes.length; j++) {
         const binding = this.bindingForAttribute_(attributes[j], el);
         if (binding) {
-          this.bindings_.push(binding);
+          bindings.push(binding);
         }
       }
     }
+    return bindings;
   }
 
   /**
+   * Returns a struct representing the binding corresponding to the
+   * attribute param, if applicable.
    * @param attribute {!Attr}
    * @param element {!Element}
    * @return {?BindingDef}
@@ -109,6 +116,7 @@ export class Bind {
   }
 
   /**
+   * Schedules a vsync task to reevaluate all binding expressions.
    * @param opt_verifyOnly {bool}
    * @private
    */
@@ -134,6 +142,7 @@ export class Bind {
   }
 
   /**
+   * Applies `newValue` to the element bound in `binding`.
    * @param binding {!BindingDef}
    * @param newValue {!(Object|string|number)}
    * @private
@@ -141,7 +150,7 @@ export class Bind {
   applyBinding_(binding, newValue) {
     const {property, expression, element} = binding;
 
-    // TODO: Support arrays for classes and objects for attributes?
+    // TODO: Support arrays for classes and objects for attributes.
 
     if (property === 'text') {
       element.textContent = newValue;
@@ -160,6 +169,8 @@ export class Bind {
   }
 
   /**
+   * If the current value of `binding` equals `expectedValue`, returns true.
+   * Otherwise, returns false.
    * @param binding {!BindingDef}
    * @param expectedValue {!(Object|string|number)}
    * @private
@@ -167,6 +178,8 @@ export class Bind {
   verifyBinding_(binding, expectedValue) {
     const {property, expression, element} = binding;
     let initialValue;
+
+    // TODO: Support arrays for classes and objects for attributes.
 
     if (property === 'text') {
       initialValue = element.textContent;
@@ -191,7 +204,8 @@ export class Bind {
   }
 
   /**
-   * @param value
+   * Sanitizes unsafe protocols in attributes, e.g. "javascript:".
+   * @param value {!(Object|string|number)}
    * @return {string}
    * @private
    */
