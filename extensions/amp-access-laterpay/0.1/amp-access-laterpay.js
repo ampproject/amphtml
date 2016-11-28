@@ -15,10 +15,10 @@
  */
 
 import {accessServiceFor} from '../../../src/access-service';
-import {xhrFor} from '../../../src/xhr';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 import {listen, listenOnce} from '../../../src/event-helper';
+import {xhrFor} from '../../../src/xhr';
 
 const TAG = 'amp-access-laterpay';
 const CONFIG_URL = 'http://localhost:8080/api/public/initial_config';
@@ -36,6 +36,7 @@ export class LaterpayVendor {
     /** @private @const */
     this.accessService_ = accessService;
     this.win_ = this.accessService_.win;
+    this.doc_ = this.win_.document;
     this.laterpayConfig_ = this.accessService_.adapter_.getConfig();
     this.purchaseConfig_ = null;
     this.purchaseOptionListeners_ = [];
@@ -76,9 +77,9 @@ export class LaterpayVendor {
   }
 
   renderPurchaseOverlay_() {
-    const laterpayList = this.win_.document.querySelectorAll(
-      'amp-access-laterpay-list')[0];
-    const listContainer = document.createElement('ul');
+    const laterpayList = this.doc_.querySelector(
+      'amp-access-laterpay-list');
+    const listContainer = this.doc_.createElement('ul');
     // TODO set these up somewhere else and make them configurable
     this.purchaseConfig_.premiumcontent.title = 'Buy this article';
     this.purchaseConfig_.premiumcontent.description =
@@ -89,8 +90,8 @@ export class LaterpayVendor {
     this.purchaseConfig_.timepasses.forEach(timepass => {
       listContainer.appendChild(this.createPurchaseOption_(timepass));
     });
-    const purchaseButton = document.createElement('button');
-    purchaseButton.innerHTML = 'Confirm your selection';
+    const purchaseButton = this.doc_.createElement('button');
+    purchaseButton.textContent = 'Confirm your selection';
     purchaseButton.disabled = true;
     this.purchaseButton_ = purchaseButton;
     listenOnce(purchaseButton, 'click', this.handlePurchase_.bind(this));
@@ -100,19 +101,19 @@ export class LaterpayVendor {
   }
 
   createPurchaseOption_(option) {
-    const li = document.createElement('li');
-    const title = document.createElement('h3');
-    const link = document.createElement('a');
+    const li = this.doc_.createElement('li');
+    const title = this.doc_.createElement('h3');
+    const link = this.doc_.createElement('a');
     link.href = option.purchase_url;
-    link.innerHTML = option.title;
+    link.textContent = option.title;
     this.purchaseOptionListeners_.push(listen(
       link, 'click', this.handlePurchaseOptionSelection_.bind(this)
     ));
     title.appendChild(link);
-    const description = document.createElement('p');
-    description.innerHTML = option.description;
-    const price = document.createElement('p');
-    price.innerHTML = this.formatPrice_(option.price);
+    const description = this.doc_.createElement('p');
+    description.textContent = option.description;
+    const price = this.doc_.createElement('p');
+    price.textContent = this.formatPrice_(option.price);
     li.appendChild(title);
     li.appendChild(description);
     li.appendChild(price);
@@ -141,8 +142,8 @@ export class LaterpayVendor {
     }
   }
 
-  handlePurchase_(ev) {
-    const purchaseUrl = this.selectedPurchaseOption_.href;
+  handlePurchase_() {
+    //const purchaseUrl = this.selectedPurchaseOption_.href;
     let unlistener;
     while (unlistener = this.purchaseOptionListeners_.shift()) {
       unlistener();
