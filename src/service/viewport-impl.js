@@ -165,16 +165,17 @@ export class Viewport {
     this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
-    // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
-    // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
-    // The enables passive touch handlers, e.g. for document swipe, since they
-    // no will longer need to try to cancel vertical scrolls during swipes.
-    // This is only done in the embedded mode because (a) the document swipe
-    // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
-    if (this.ampdoc.isSingleDoc() &&
-            viewer.isEmbedded() &&
-            isExperimentOn(this.ampdoc.win, 'pan-y')) {
-      setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
+    // Top-level mode classes.
+    if (this.ampdoc.isSingleDoc()) {
+      this.globalDoc_.documentElement.classList.add('-amp-singledoc');
+    }
+    if (viewer.isEmbedded()) {
+      this.globalDoc_.documentElement.classList.add('-amp-embedded');
+    } else {
+      this.globalDoc_.documentElement.classList.add('-amp-standalone');
+    }
+    if (viewer.isIframed()) {
+      this.globalDoc_.documentElement.classList.add('-amp-iframed');
     }
 
     // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
