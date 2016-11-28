@@ -1026,7 +1026,7 @@ describe('ViewportBindingNatural', () => {
   it('should configure make-body-relative', () => {
     toggleExperiment(windowApi, 'make-body-relative', true);
     binding = new ViewportBindingNatural_(windowApi, viewer);
-    expect(documentBody.style.display).to.equal('block');
+    expect(documentBody.style.display).to.be.undefined;
     expect(documentBody.style.position).to.equal('relative');
     // It's important that this experiment does NOT override the previously
     // set `overflow`.
@@ -1493,6 +1493,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   });
 
   it('should have CSS setup', () => {
+    win.document.body.style.display = 'table';
     const htmlCss = win.getComputedStyle(win.document.documentElement);
     const wrapperCss = win.getComputedStyle(binding.wrapper_);
     const bodyCss = win.getComputedStyle(win.document.body);
@@ -1520,7 +1521,8 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 
     // `body` must have `relative` positioning and `block` display.
     expect(bodyCss.position).to.equal('relative');
-    expect(bodyCss.display).to.equal('block');
+    // Preserve the customized `display` value.
+    expect(bodyCss.display).to.equal('table');
 
     // `body` must have a 1px transparent body for two purposes:
     // (1) to cancel out margin collapse in body's children;
