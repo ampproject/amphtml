@@ -41,6 +41,14 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'src') {
+      this.srcset_ = srcsetFromElement(this.element);
+      this.updateImageSrc_();
+    }
+  }
+
+  /** @override */
   buildCallback() {
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
 

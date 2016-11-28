@@ -39,8 +39,8 @@ export class Bind {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const {?Array<BindingDef>} */
-    this.bindings_ = null;
+    /** @const {!Array<BindingDef>} */
+    this.bindings_ = [];
 
     /** @const {!Object} */
     this.scope_ = Object.create(null);
@@ -61,7 +61,9 @@ export class Bind {
     });
   }
 
-  /** @param state {!Object} */
+  /**
+   * @param {!Object} state
+   */
   setState(state) {
     Object.assign(this.scope_, state);
 
@@ -71,7 +73,7 @@ export class Bind {
   /**
    * Scans children for attributes that conform to bind syntax and returns
    * all bindings.
-   * @param body {!Element}
+   * @param {!Element} body
    * @return {!Array<BindingDef>}
    * @private
    */
@@ -94,8 +96,8 @@ export class Bind {
   /**
    * Returns a struct representing the binding corresponding to the
    * attribute param, if applicable.
-   * @param attribute {!Attr}
-   * @param element {!Element}
+   * @param {!Attr} attribute
+   * @param {!Element} element
    * @return {?BindingDef}
    * @private
    */
@@ -117,7 +119,7 @@ export class Bind {
 
   /**
    * Schedules a vsync task to reevaluate all binding expressions.
-   * @param opt_verifyOnly {bool}
+   * @param {bool=} opt_verifyOnly
    * @private
    */
   digest_(opt_verifyOnly) {
@@ -143,8 +145,8 @@ export class Bind {
 
   /**
    * Applies `newValue` to the element bound in `binding`.
-   * @param binding {!BindingDef}
-   * @param newValue {!(Object|string|number)}
+   * @param {!BindingDef} binding
+   * @param {(Object|Array|string|number|boolean|null)} newValue
    * @private
    */
   applyBinding_(binding, newValue) {
@@ -162,8 +164,21 @@ export class Bind {
       } else if (newValue === false) {
         element.removeAttribute(property);
       } else {
+        const oldValue = element.getAttribute(property);
         const sanitizedValue = this.sanitizeAttribute_(newValue);
         element.setAttribute(property, sanitizedValue);
+
+        // TODO: Support binding to `layout`, `media`, `heights`?
+        if (element.classList.contains('-amp-element')) {
+          const resources = element.getResources();
+          if (property === 'width') {
+            resources.attemptChangeSize(element, undefined, sanitizedValue);
+          } else if (property === 'height') {
+            resources.attemptChangeSize(element, sanitizedValue, undefined);
+          }
+
+          element.attributeChangedCallback(property, oldValue, sanitizedValue);
+        }
       }
     }
 
@@ -173,8 +188,8 @@ export class Bind {
   /**
    * If the current value of `binding` equals `expectedValue`, returns true.
    * Otherwise, returns false.
-   * @param binding {!BindingDef}
-   * @param expectedValue {!(Object|string|number)}
+   * @param {!BindingDef} binding
+   * @param {?(Object|Array|string|number|boolean)} expectedValue
    * @private
    */
   verifyBinding_(binding, expectedValue) {
@@ -206,7 +221,7 @@ export class Bind {
 
   /**
    * Sanitizes unsafe protocols in attributes, e.g. "javascript:".
-   * @param value {!(Object|string|number)}
+   * @param {(Object|Array|string|number|boolean|null)} value
    * @return {string}
    * @private
    */

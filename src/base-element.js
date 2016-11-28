@@ -802,6 +802,16 @@ export class BaseElement {
   }
 
   /**
+   * Called when an attribute's value changes.
+   * @param {!string} name
+   * @param {?string} oldValue
+   * @param {?string} newValue
+   */
+  attributeChangedCallback(name, oldValue, newValue) {
+    // Subclasses may override.
+  }
+
+  /**
    * Called when we just measured the layout rect of this element. Doing
    * more expensive style reads should now be cheap.
    * This may currently not work with extended elements. Please file
