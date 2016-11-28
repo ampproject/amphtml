@@ -82,9 +82,9 @@ export class AmpContext extends IframeMessagingClient {
 
   /**
    *  Send message to runtime to start sending page visibility messages.
-   *  @param {function} callback Function to call every time we receive a
+   *  @param {function(Object)} callback Function to call every time we receive a
    *    page visibility message.
-   *  @returns {function} that when called stops triggering the callback
+   *  @returns {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
   observePageVisibility(callback) {
@@ -100,9 +100,9 @@ export class AmpContext extends IframeMessagingClient {
 
   /**
    *  Send message to runtime to start sending intersection messages.
-   *  @param {function} callback Function to call every time we receive an
+   *  @param {function(Object)} callback Function to call every time we receive an
    *    intersection message.
-   *  @returns {function} that when called stops triggering the callback
+   *  @returns {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
 
    */
