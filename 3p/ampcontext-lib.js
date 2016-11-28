@@ -1,4 +1,3 @@
-import './polyfills';
 import {AmpContext} from './ampcontext.js';
 
 
@@ -10,9 +9,8 @@ import {AmpContext} from './ampcontext.js';
 try {
   console.log('Attempting to make AmpContext');
   const windowContextCreated = new Event('amp-windowContextCreated');
-  windowContextCreated.lib = new AmpContext(window);
+  window.context = new AmpContext(window);
   // Allows for pre-existence, consider validating correct window.context lib instance?
-  window.context = window.context || windowContextCreated.lib;
   window.dispatchEvent(windowContextCreated);
 } catch (err) {
   // do nothing with error

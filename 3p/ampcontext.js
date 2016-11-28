@@ -45,7 +45,7 @@ export class AmpContext extends IframeMessagingClient {
       return this.ancestors[this.depth];
     } else {
       dev().error('Incorrect sentinel format.');
-      throw new Error('Sentinel wrong format');
+      throw new Error('Incorrect sentinel format.');
     }
   }
 
