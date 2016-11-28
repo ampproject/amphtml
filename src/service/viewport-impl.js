@@ -919,7 +919,6 @@ export class ViewportBindingNatural_ {
         // merging this style into `amp.css`.
         if (isExperimentOn(this.win, 'make-body-relative')) {
           setStyles(body, {
-            display: 'block',
             position: 'relative',
           });
         }
