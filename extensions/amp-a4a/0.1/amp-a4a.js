@@ -87,7 +87,7 @@ export let AdResponseDef;
 /** @typedef {{
       minifiedCreative: string,
       customElementExtensions: Array<string>,
-      customStylesheets: Array<string>
+      customStylesheets: Array<!{href: string}>
     }} */
 let CreativeMetaDataDef;
 
@@ -211,7 +211,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Otherwise the ad is good to go.
     const elementCheck = getAmpAdRenderOutsideViewport(this.element);
     return typeof elementCheck == 'number' ?
-      elementCheck : super.renderOutsideViewport();
+        elementCheck : super.renderOutsideViewport();
   }
 
   /**
@@ -491,7 +491,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   promiseErrorHandler_(error) {
     if (error && error.message) {
-      if (error.message.indexOf('amp-a4a: ') == 0) {
+      if (error.message.indexOf(this.logTag_) == 0) {
         // caught previous call to promiseErrorHandler?  Infinite loop?
         return error;
       }
@@ -510,7 +510,7 @@ export class AmpA4A extends AMP.BaseElement {
       'au': adQueryIdx < 0 ? '' :
           this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
     };
-    return new Error('amp-a4a: ' + JSON.stringify(state));
+    return new Error(this.logTag_ + ': ' + JSON.stringify(state));
   }
 
   /** @override */
@@ -520,22 +520,22 @@ export class AmpA4A extends AMP.BaseElement {
       return Promise.resolve();
     }
     // Promise chain will have determined if creative is valid AMP.
-    return this.adPromise_.then(promiseResult => {
-      if (promiseResult) {
-        dev().assert(promiseResult.minifiedCreative);
+    return this.adPromise_.then(creativeMetaData => {
+      if (creativeMetaData) {
+        dev().assert(creativeMetaData.minifiedCreative);
         // Must be an AMP creative.
-        const metaData = /** @type {CreativeMetaDataDef} */(promiseResult);
-        return this.renderAmpCreative_(metaData).then(
+        return this.renderAmpCreative_(creativeMetaData).catch(err => {
           // Failed to render via AMP creative path so fallback to non-AMP
           // rendering within cross domain iframe.
-          success => success || this.renderNonAmpCreative_());
+          user().error(
+            this.logTag_, 'Error injecting creative in friendly frame', err);
+          rethrowAsync(this.promiseErrorHandler_(err));
+          return this.renderNonAmpCreative_();
+        });
       }
       // Non-AMP creative case.
       return this.renderNonAmpCreative_();
-    }).catch(error => {
-      rethrowAsync(this.promiseErrorHandler_(error));
-      return this.renderNonAmpCreative_();
-    });
+    }).catch(error => this.promiseErrorHandler_(error));
   }
 
   /** @override  */
@@ -731,20 +731,20 @@ export class AmpA4A extends AMP.BaseElement {
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
-   * @return {Promise<boolean>} Whether the creative was successfully
+   * @return {Promise} Whether the creative was successfully
    *     rendered.
    * @private
    */
   renderAmpCreative_(creativeMetaData) {
-    this.emitLifecycleEvent('renderFriendlyStart', creativeMetaData);
     try {
+      this.emitLifecycleEvent('renderFriendlyStart', creativeMetaData);
       // Create and setup friendly iframe.
-      dev().assert(!!this.element.ownerDocument);
+      dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
       const iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
-            'frameborder': '0', 'allowfullscreen': '',
-            'allowtransparency': '', 'scrolling': 'no'}));
+            frameborder: '0', allowfullscreen: '', allowtransparency: '',
+            scrolling: 'no'}));
       this.applyFillContent(iframe);
       const fontsArray = [];
       if (creativeMetaData.customStylesheets) {
@@ -774,15 +774,9 @@ export class AmpA4A extends AMP.BaseElement {
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           this.onAmpCreativeRender();
-          return true;
         });
-    } catch (e) {
-      dev().error(this.logTag_, 'Error injecting creative in friendly frame',
-          e);
-      // If we fail on any of the steps of Shadow DOM construction, just
-      // render in iframe.
-      // TODO: report!
-      return Promise.resolve(false);
+    } catch (err) {
+      return Promise.reject(err);
     }
   }
 
@@ -900,8 +894,8 @@ export class AmpA4A extends AMP.BaseElement {
         }
       }
       if (metaDataObj['customStylesheets']) {
-        // Expect array of objects with at least one key being 'href' whose value
-        // is URL.
+        // Expect array of objects with at least one key being 'href' whose
+        // value is URL.
         metaData.customStylesheets = metaDataObj['customStylesheets'];
         const errorMsg = 'Invalid custom stylesheets';
         if (!isArray(metaData.customStylesheets)) {

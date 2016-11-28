@@ -134,7 +134,7 @@ describe('integration test: a4a', () => {
     // .catch to a .then.
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
-      expect(error.message).to.contain.string('amp-a4a:');
+      expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });

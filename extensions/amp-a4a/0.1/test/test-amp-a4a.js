@@ -178,7 +178,7 @@ describe('amp-a4a', () => {
       const platform = platformFor(fixture.win);
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);
-      verifyNonAMPRender(a4a);
+      const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
       // Ensure no rendering type header (ios on safari will default to
@@ -193,6 +193,7 @@ describe('amp-a4a', () => {
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
+        expect(onAmpCreativeRenderSpy.called).to.be.false;
       });
     });
 
@@ -431,8 +432,8 @@ describe('amp-a4a', () => {
             Promise.resolve({creative: mockResponse.arrayBuffer()}));
         }
         if (opt_failAmpRender) {
-          sandbox.stub(
-            a4a, 'renderAmpCreative_').returns(Promise.resolve(false));
+          sandbox.stub(a4a, 'renderAmpCreative_').returns(
+            Promise.reject('amp render failure'));
         }
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
@@ -731,8 +732,7 @@ describe('amp-a4a', () => {
     });
     it('should render correctly', () => {
       const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
-      return a4a.renderAmpCreative_(metaData).then(success => {
-        expect(success).to.be.true;
+      return a4a.renderAmpCreative_(metaData).then(() => {
         // Verify iframe presence.
         expect(a4aElement.children.length).to.equal(1);
         const friendlyIframe = a4aElement.children[0];
@@ -754,8 +754,7 @@ describe('amp-a4a', () => {
     });
 
     it('should handle click expansion correctly', () => {
-      return a4a.renderAmpCreative_(metaData).then(success => {
-        expect(success).to.be.true;
+      return a4a.renderAmpCreative_(metaData).then(() => {
         const adBody = a4aElement.querySelector('iframe')
             .contentDocument.querySelector('body');
         let clickHandlerCalled = 0;
