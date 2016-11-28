@@ -30,7 +30,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -356,12 +356,9 @@ export class AmpA4A extends AMP.BaseElement {
           this.experimentalNonAmpCreativeRenderMethod_ =
               fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
               this.experimentalNonAmpCreativeRenderMethod_;
-          try {
-            dev().assertEnumValue(XORIGIN_MODE,
-                                  this.experimentalNonAmpCreativeRenderMethod_,
-                                  'cross-origin render mode header');
-          } catch (err) {
-            dev().error('AMP-A4A', err.message);
+          if (!isEnumValue(XORIGIN_MODE, this.experimentalNonAmpCreativeRenderMethod_)) {
+            dev().error('AMP-A4A', 'cross-origin render mode header ' +
+                this.experimentalNonAmpCreativeRenderMethod_);
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
