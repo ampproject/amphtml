@@ -179,14 +179,14 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
+
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
-     * @private {?CROSS_ORIGIN_RENDERING_MODE}
+     * @private {?XORIGIN_MODE}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-      platformFor(this.win).isIos() ?
-          CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME : null;
+      platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
 
     this.emitLifecycleEvent('adSlotBuilt');
   }
@@ -353,12 +353,11 @@ export class AmpA4A extends AMP.BaseElement {
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
           // https://github.com/ampproject/amphtml/issues/5614
-          this.experimentalNonAmpCreativeRenderMethod_ =
-              fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
+          const method = fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
               this.experimentalNonAmpCreativeRenderMethod_;
-          if (!isEnumValue(XORIGIN_MODE, this.experimentalNonAmpCreativeRenderMethod_)) {
-            dev().error('AMP-A4A', 'cross-origin render mode header ' +
-                this.experimentalNonAmpCreativeRenderMethod_);
+          this.experimentalNonAmpCreativeRenderMethod_ = method;
+          if (!isEnumValue(XORIGIN_MODE, method)) {
+            dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -399,7 +398,7 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (this.nonAmpCreativeRenderMethod_ !=
+          if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts &&
               creativeParts.creative) {
@@ -539,7 +538,7 @@ export class AmpA4A extends AMP.BaseElement {
         // Haven't rendered yet, so try rendering via one of our
         // cross-domain iframe solutions.
         let renderPromise;
-        const method = this.nonAmpCreativeRenderMethod_;
+        const method = this.experimentalNonAmpCreativeRenderMethod_;
         if ((method == XORIGIN_MODE.SAFEFRAME ||
              method == XORIGIN_MODE.NAMEFRAME) &&
             this.creativeBody_) {
@@ -571,13 +570,11 @@ export class AmpA4A extends AMP.BaseElement {
     // state to be destroyed?
     this.vsync_.mutate(() => {
       removeChildren(this.element);
-
       this.adPromise_ = null;
       this.adUrl_ = null;
       this.creativeBody_ = null;
       this.experimentalNonAmpCreativeRenderMethod_ =
-          platformFor(this.win).isIos() ?
-              CROSS_ORIGIN_RENDERING_MODE.SAFEFRAME : null;
+          platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
       this.rendered_ = false;
       if (this.xOriginIframeHandler_) {
         this.xOriginIframeHandler_.freeXOriginIframe();
@@ -857,7 +854,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
-    const method = this.nonAmpCreativeRenderMethod_;
+    const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);

@@ -463,18 +463,19 @@ describe('amp-a4a', () => {
                 });
           });
 
-      it('should reset state to client_cache on unlayoutCallback', () => {
+      it('should reset state to null on unlayoutCallback', () => {
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          expect(a4a.nonAmpCreativeRenderMethod_).to.equal('safeframe');
+          expect(a4a.experimentalNonAmpCreativeRenderMethod_)
+              .to.equal('safeframe');
           a4a.unlayoutCallback();
           // QUESTION TO REVIEWERS: Do we really need the vsync.mutate in
           // AmpA4A.unlayoutCallback?  We have an open question there about
           // whether it's necessary or perhaps hazardous.  Feedback welcome.
           a4a.vsync_.runScheduledTasks_();
-          expect(a4a.nonAmpCreativeRenderMethod_).to.equal('client_cache');
+          expect(a4a.experimentalNonAmpCreativeRenderMethod_).to.be.null;
           expect(xhrMock).to.be.calledOnce;
         });
       });
