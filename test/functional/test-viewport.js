@@ -36,8 +36,7 @@ import {toggleExperiment} from '../../src/experiments';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
-describe('Viewport', () => {
-  let sandbox;
+describes.fakeWin('Viewport', {}, env => {
   let clock;
   let viewport;
   let binding;
@@ -51,11 +50,15 @@ describe('Viewport', () => {
   let vsyncTasks;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+
+    windowApi = env.win;
+    windowApi.requestAnimationFrame = fn => window.setTimeout(fn, 16);
+
     viewerViewportHandler = undefined;
     viewer = {
       isEmbedded: () => false,
+      isIframed: () => false,
       getPaddingTop: () => 19,
       onViewportEvent: handler => {
         viewerViewportHandler = handler;
@@ -67,22 +70,6 @@ describe('Viewport', () => {
       onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
-    windowApi = {
-      document: {
-        documentElement: {
-          nodeType: 1,
-          style: {},
-          classList: {
-            add: function() {},
-          },
-        },
-      },
-      location: {},
-      navigator: window.navigator,
-      setTimeout: window.setTimeout,
-      clearTimeout: window.clearTimeout,
-      requestAnimationFrame: fn => window.setTimeout(fn, 16),
-    };
     const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
@@ -122,7 +109,6 @@ describe('Viewport', () => {
   afterEach(() => {
     expect(vsyncTasks.length).to.equal(0);
     viewerMock.verify();
-    sandbox.restore();
   });
 
   function runVsync() {
@@ -136,6 +122,50 @@ describe('Viewport', () => {
       task.mutate(state);
     });
   }
+
+  describe('top-level classes', () => {
+    let root;
+
+    beforeEach(() => {
+      root = windowApi.document.documentElement;
+      root.className = '';
+    });
+
+    it('should set singledoc class', () => {
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-singledoc');
+    });
+
+    it('should not set singledoc class', () => {
+      sandbox.stub(ampdoc, 'isSingleDoc', () => false);
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.not.have.class('-amp-singledoc');
+    });
+
+    it('should set standalone class', () => {
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-standalone');
+      expect(root).to.not.have.class('-amp-embedded');
+    });
+
+    it('should set embedded class', () => {
+      sandbox.stub(viewer, 'isEmbedded', () => true);
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-embedded');
+      expect(root).to.not.have.class('-amp-standalone');
+    });
+
+    it('should not set iframed class', () => {
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.not.have.class('-amp-iframed');
+    });
+
+    it('should set iframed class', () => {
+      sandbox.stub(viewer, 'isIframed', () => true);
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-iframed');
+    });
+  });
 
   it('should connect binding right away when visible', () => {
     expect(binding.connect).to.be.calledOnce;
@@ -543,33 +573,6 @@ describe('Viewport', () => {
     expect(viewport.getScrollHeight()).to.equal(117);
   });
 
-  it('should not set pan-y w/o experiment', () => {
-    // TODO(dvoytenko, #4894): Cleanup the experiment.
-    viewer.isEmbedded = () => true;
-    toggleExperiment(windowApi, 'pan-y', false);
-    viewport = new Viewport(ampdoc, binding, viewer);
-    expect(windowApi.document.documentElement.style['touch-action'])
-        .to.not.exist;
-  });
-
-  it('should not set pan-y when not embedded', () => {
-    // TODO(dvoytenko, #4894): Cleanup the experiment.
-    viewer.isEmbedded = () => false;
-    toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(ampdoc, binding, viewer);
-    expect(windowApi.document.documentElement.style['touch-action'])
-        .to.not.exist;
-  });
-
-  it('should set pan-y with experiment', () => {
-    // TODO(dvoytenko, #4894): Cleanup the experiment.
-    viewer.isEmbedded = () => true;
-    toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(ampdoc, binding, viewer);
-    expect(windowApi.document.documentElement.style['touch-action'])
-        .to.equal('pan-y');
-  });
-
   it('should add class to HTML element with make-body-block experiment', () => {
     viewer.isEmbedded = () => true;
     toggleExperiment(windowApi, 'make-body-block', true);
@@ -577,6 +580,30 @@ describe('Viewport', () => {
     const addStub = sandbox.stub(docElement.classList, 'add');
     viewport = new Viewport(ampdoc, binding, viewer);
     expect(addStub).to.be.calledWith('-amp-make-body-block');
+  });
+
+  describes.realWin('top-level styles', {amp: 1}, env => {
+    let win;
+    let root;
+
+    beforeEach(() => {
+      win = env.win;
+      ampdoc = new AmpDocSingle(win);
+      root = win.document.documentElement;
+      root.className = '';
+    });
+
+    it('should not set pan-y when not embedded', () => {
+      viewer.isEmbedded = () => false;
+      viewport = new Viewport(ampdoc, binding, viewer);
+      expect(win.getComputedStyle(root)['touch-action']).to.equal('auto');
+    });
+
+    it('should set pan-y with experiment', () => {
+      viewer.isEmbedded = () => true;
+      viewport = new Viewport(ampdoc, binding, viewer);
+      expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
+    });
   });
 
   describe('for child window', () => {

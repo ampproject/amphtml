@@ -49,6 +49,17 @@ body {
 
 
 /**
+ * The enables passive touch handlers, e.g. for document swipe, since they
+ * no will longer need to try to cancel vertical scrolls during swipes.
+ * This is only done in the embedded mode because (a) the document swipe
+ * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
+ */
+html.-amp-singledoc.-amp-embedded {
+  touch-action: pan-y;
+}
+
+
+/**
  * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amp-html-wrapper`
  * element.
  */
