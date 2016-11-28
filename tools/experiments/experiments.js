@@ -228,6 +228,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-selector/amp-selector.md',
   },
+  {
+    id: 'amp-playbuzz',
+    name: 'AMP extension for playbuzz engaging items',
+    spec: 'https://github.com/ampproject/amphtml/issues/6106',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+  },
 ];
 
 if (getMode().localDev) {
