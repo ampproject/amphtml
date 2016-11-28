@@ -85,7 +85,6 @@ html.-amp-ios-embed {
 
 #i-amp-html-wrapper > body {
   position: relative !important;
-  display: block !important;
   /* Border is necessary to avoid margins collapsing outside body.
      Alternatively we can also set overflow to hidden. */
   border-top: 1px solid transparent !important;
