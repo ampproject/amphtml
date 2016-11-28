@@ -24,11 +24,11 @@ import {
   parseQueryString,
   parseUrl,
   removeFragment,
+  isProxyOrigin,
 } from '../url';
 import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
-import {urls} from '../config';
 import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
@@ -444,8 +444,7 @@ export class Viewer {
    *     requested the navigation.
    */
   navigateTo(url, requestedBy) {
-    dev().assert(url.indexOf(urls.cdn) == 0,
-        'Invalid A2A URL %s %s', url, requestedBy);
+    dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
     if (this.hasCapability('a2a')) {
       this.sendMessage('a2a', {
         url,
@@ -880,41 +879,6 @@ export class Viewer {
     }
     return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
         'fragment', {fragment}, true));
-  }
-
-  /**
-   * Triggers "tick" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl, and use sendMessage()
-   */
-  tick(message) {
-    this.sendMessageCancelUnsent('tick', message, false);
-  }
-
-  /**
-   * Triggers "sendCsi" event for the viewer.
-   * TODO: move this to performance-impl
-   */
-  flushTicks() {
-    this.sendMessageCancelUnsent('sendCsi', undefined, false);
-  }
-
-  /**
-   * Triggers "setFlushParams" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl
-   */
-  setFlushParams(message) {
-    this.sendMessageCancelUnsent('setFlushParams', message, false);
-  }
-
-  /**
-   * Triggers "prerenderComplete" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl
-   */
-  prerenderComplete(message) {
-    this.sendMessageCancelUnsent('prerenderComplete', message, false);
   }
 
   /**

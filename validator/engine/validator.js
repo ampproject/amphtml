@@ -1132,6 +1132,13 @@ class Context {
      * @private
      */
     this.conditionsSatisfied_ = {};
+
+    /**
+     * First tagspec seen (matched) which contains an URL.
+     * @type {?amp.validator.TagSpec}
+     * @private
+     */
+    this.firstUrlSeenTag_ = null;
   }
 
   /**
@@ -1195,6 +1202,33 @@ class Context {
    */
   conditionsSatisfied() {
     return this.conditionsSatisfied_;
+  }
+
+  /**
+   * Records that a Tag was seen which contains an URL. Used to note issues
+   * with <base href> occurring in the document after an URL.
+   * @param {amp.validator.TagSpec} tagSpec
+   */
+  markUrlSeen(tagSpec) {
+    this.firstUrlSeenTag_ = tagSpec;
+  }
+
+  /**
+   * Returns true iff the current context has observed a tag which contains
+   * an URL. This is set by calling markUrlSeen above.
+   * @return {boolean}
+   */
+  hasSeenUrl() {
+    return this.firstUrlSeenTag_ !== null;
+  }
+
+  /**
+   * The TagSpecName of the first seen URL. Do not call unless HasSeenUrl
+   * returns true.
+   * @return {string}
+   */
+  firstSeenUrlTagName() {
+    return getTagSpecName(this.firstUrlSeenTag_);
   }
 
   /**
@@ -2456,6 +2490,11 @@ class ParsedTagSpec {
      * @private
      */
     this.implicitAttrspecs_ = [];
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.containsUrl_ = false;
 
     const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
     for (const parsedAttrSpec of parsedAttrs) {
@@ -2476,6 +2515,9 @@ class ParsedTagSpec {
       }
       if (parsedAttrSpec.getSpec().implicit) {
         this.implicitAttrspecs_.push(parsedAttrSpec.getId());
+      }
+      if (parsedAttrSpec.getSpec().valueUrl) {
+        this.containsUrl_ = true;
       }
     }
     this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
@@ -2505,6 +2547,14 @@ class ParsedTagSpec {
    */
   getSpec() {
     return this.spec_;
+  }
+
+  /**
+   * Returns true if this tagSpec contains a value_url field.
+   * @return {boolean}
+   */
+  containsUrl() {
+    return this.containsUrl_;
   }
 
   /**
@@ -2918,11 +2968,13 @@ class ParsedTagSpec {
    * explicitly mentioned by this tag spec may appear.
    *  Returns true iff the validation is successful.
    * @param {!Context} context
+   * @param {!ParsedTagSpec} parsedSpec
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    * @param {!Array<!ParsedTagSpec>} tagSpecById
    * @param {!amp.validator.ValidationResult} result
    */
-  validateAttributes(context, encounteredAttrs, tagSpecById, result) {
+  validateAttributes(context, parsedSpec, encounteredAttrs, tagSpecById,
+      result) {
     if (this.spec_.ampLayout !== null) {
       /** @type {!Object<string, string>} */
       const attrsByKey = {};
@@ -2957,9 +3009,9 @@ class ParsedTagSpec {
       const attrName = attrKey.toLowerCase();
       let attrValue = encounteredAttrs[i + 1];
 
-      let parsedSpec;
+      let parsedAttrSpec;
       if (!this.attrsByName_.hasOwnProperty(attrName) ||
-          (parsedSpec = this.attrsByName_[attrName]) === undefined) {
+          (parsedAttrSpec = this.attrsByName_[attrName]) === undefined) {
         // While validating a reference point, we skip attributes that
         // we don't have a spec for. They will be validated when the
         // TagSpec itself gets validated.
@@ -2996,7 +3048,7 @@ class ParsedTagSpec {
           return;
         }
       }
-      if (parsedSpec.getSpec().deprecation !== null) {
+      if (parsedAttrSpec.getSpec().deprecation !== null) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.WARNING,
@@ -3005,21 +3057,21 @@ class ParsedTagSpec {
               /* params */
               [
                 attrName, getTagSpecName(this.spec_),
-                parsedSpec.getSpec().deprecation
+                parsedAttrSpec.getSpec().deprecation
               ],
-              parsedSpec.getSpec().deprecationUrl, result);
+              parsedAttrSpec.getSpec().deprecationUrl, result);
         }
         // Deprecation is only a warning, so we don't return.
       }
       if (!hasTemplateAncestor ||
           !ParsedTagSpec.valueHasTemplateSyntax(attrValue)) {
-        parsedSpec.validateNonTemplateAttrValueAgainstSpec(
+        parsedAttrSpec.validateNonTemplateAttrValueAgainstSpec(
             context, attrName, attrValue, this.spec_, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
       }
-      if (parsedSpec.hasBlacklistedValueRegex()) {
+      if (parsedAttrSpec.hasBlacklistedValueRegex()) {
         let decodedAttrValue;
         try {
           decodedAttrValue = decodeURIComponent(attrValue);
@@ -3034,8 +3086,8 @@ class ParsedTagSpec {
           // regex.
           decodedAttrValue = unescape(attrValue);
         }
-        if (parsedSpec.getBlacklistedValueRegex().test(attrValue) ||
-            parsedSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
+        if (parsedAttrSpec.getBlacklistedValueRegex().test(attrValue) ||
+            parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -3049,42 +3101,58 @@ class ParsedTagSpec {
           return;
         }
       }
-      if (parsedSpec.getSpec().mandatory) {
-        mandatoryAttrsSeen.push(parsedSpec.getId());
+      if (parsedAttrSpec.getSpec().mandatory) {
+        mandatoryAttrsSeen.push(parsedAttrSpec.getId());
       }
-      // The "at most 1" part of mandatory_oneof: mandatory_oneof
-      // wants exactly one of the alternatives, so here
-      // we check whether we already saw another alternative
-      if (parsedSpec.getSpec().mandatoryOneof &&
-          mandatoryOneofsSeen.hasOwnProperty(
-              parsedSpec.getSpec().mandatoryOneof)) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      if (parsedSpec.getSpec().tagName === "BASE" && attrName === "href" &&
+          context.hasSeenUrl()) {
+       if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+              amp.validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
               context.getDocLocator(),
-              /* params */
-              [getTagSpecName(this.spec_), parsedSpec.getSpec().mandatoryOneof],
+              /* params */ [context.firstSeenUrlTagName()],
               this.spec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
         }
         return;
       }
-      const mandatoryOneof = parsedSpec.getSpec().mandatoryOneof;
+      // The "at most 1" part of mandatory_oneof: mandatory_oneof
+      // wants exactly one of the alternatives, so here
+      // we check whether we already saw another alternative
+      if (parsedAttrSpec.getSpec().mandatoryOneof &&
+          mandatoryOneofsSeen.hasOwnProperty(
+              parsedAttrSpec.getSpec().mandatoryOneof)) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+              context.getDocLocator(),
+              /* params */
+              [getTagSpecName(this.spec_),
+               parsedAttrSpec.getSpec().mandatoryOneof],
+              this.spec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
+        return;
+      }
+      const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
       if (mandatoryOneof !== null) {
         mandatoryOneofsSeen[mandatoryOneof] = 0;
       }
       // If the trigger does not have an if_value_regex, then proceed to add the
       // spec. If it does have an if_value_regex, then test the regex to see
       // if it should add the spec.
-      if (parsedSpec.hasTriggerSpec() &&
-          (!parsedSpec.getTriggerSpec().hasIfValueRegex() ||
-           (parsedSpec.getTriggerSpec().hasIfValueRegex() &&
-            parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)))) {
-        parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
+      if (parsedAttrSpec.hasTriggerSpec() &&
+          (!parsedAttrSpec.getTriggerSpec().hasIfValueRegex() ||
+           (parsedAttrSpec.getTriggerSpec().hasIfValueRegex() &&
+            parsedAttrSpec.getTriggerSpec().getIfValueRegex().test(
+                attrValue)))) {
+        parsedTriggerSpecs.push(parsedAttrSpec.getTriggerSpec());
       }
-      attrspecsValidated[parsedSpec.getId()] = 0;
+      attrspecsValidated[parsedAttrSpec.getId()] = 0;
     }
     // The "at least 1" part of mandatory_oneof: If none of the
     // alternatives were present, we report that an attribute is missing.
@@ -3104,12 +3172,13 @@ class ParsedTagSpec {
     }
     for (const triggerSpec of parsedTriggerSpecs) {
       for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
-        let parsedSpec;
+        let parsedAttrSpec;
         if (!this.attrsByName_.hasOwnProperty(alsoRequiresAttr) ||
-            (parsedSpec = this.attrsByName_[alsoRequiresAttr]) === undefined) {
+            (parsedAttrSpec = this.attrsByName_[alsoRequiresAttr]) ===
+            undefined) {
           continue;
         }
-        if (!attrspecsValidated.hasOwnProperty(parsedSpec.getId())) {
+        if (!attrspecsValidated.hasOwnProperty(parsedAttrSpec.getId())) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -3117,7 +3186,7 @@ class ParsedTagSpec {
                 context.getDocLocator(),
                 /* params */
                 [
-                  parsedSpec.getSpec().name, getTagSpecName(this.spec_),
+                  parsedAttrSpec.getSpec().name, getTagSpecName(this.spec_),
                   triggerSpec.getAttrName()
                 ],
                 this.spec_.specUrl, result);
@@ -3379,7 +3448,7 @@ function validateTagAgainstSpec(
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   parsedSpec.validateAttributes(
-      context, encounteredAttrs, parsedRules.getTagSpecById(),
+      context, parsedSpec, encounteredAttrs, parsedRules.getTagSpecById(),
       resultForAttempt);
   parsedSpec.validateParentTag(context, resultForAttempt);
   parsedSpec.validateAncestorTags(context, resultForAttempt);
@@ -3430,6 +3499,9 @@ function validateTagAgainstSpec(
 
   for (const condition of spec.satisfies) {
     context.satisfyCondition(condition);
+  }
+  if (!context.hasSeenUrl() && parsedSpec.containsUrl()) {
+    context.markUrlSeen(spec);
   }
 
   if (parsedSpec.shouldRecordTagspecValidated()) {

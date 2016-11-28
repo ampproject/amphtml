@@ -158,6 +158,7 @@ describe('Viewport', () => {
     // Hasn't been called at first.
     expect(binding.connect).to.not.be.called;
     expect(binding.disconnect).to.not.be.called;
+    expect(viewport.size_).to.be.null;
 
     // When becomes visible - it gets called.
     viewer.isVisible = () => true;
@@ -175,6 +176,35 @@ describe('Viewport', () => {
     onVisibilityHandler();
     expect(binding.connect).to.be.calledOnce;
     expect(binding.disconnect).to.be.calledOnce;
+  });
+
+  it('should resize only after size has been initialed', () => {
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
+    viewer.isVisible = () => true;
+    let onVisibilityHandler;
+    viewer.onVisibilityChanged = handler => onVisibilityHandler = handler;
+    viewport = new Viewport(ampdoc, binding, viewer);
+
+    // Size has not be initialized yet.
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+    expect(viewport.size_).to.be.null;
+
+    // Disconnect: ignore resizing.
+    viewer.isVisible = () => false;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.be.calledOnce;
+    expect(viewport.size_).to.be.null;
+
+    // Size has been initialized.
+    viewport.size_ = {width: 0, height: 0};
+    viewer.isVisible = () => true;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledTwice;
+    expect(binding.disconnect).to.be.calledOnce;
+    expect(viewport.size_).to.deep.equal(viewportSize);
   });
 
   it('should pass through size and scroll', () => {
@@ -971,8 +1001,11 @@ describe('ViewportBindingNatural', () => {
     binding = new ViewportBindingNatural_(windowApi, viewer);
     expect(documentBody.style.display).to.equal('block');
     expect(documentBody.style.position).to.equal('relative');
-    expect(documentBody.style.overflowY).to.equal('visible');
-    expect(documentBody.style.overflowX).to.equal('hidden');
+    // It's important that this experiment does NOT override the previously
+    // set `overflow`.
+    expect(documentBody.style.overflow).to.equal('visible');
+    expect(documentBody.style.overflowY).to.not.be.ok;
+    expect(documentBody.style.overflowX).to.not.be.ok;
   });
 
   it('should setup overflow:visible on body', () => {
@@ -1395,6 +1428,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.width = '100px';
     env.iframe.style.height = '100px';
     win = env.win;
+    win.document.documentElement.className = 'top';
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
@@ -1419,11 +1453,16 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
         .to.equal(binding.wrapper_);
     expect(binding.wrapper_.parentNode)
         .to.equal(win.document.documentElement);
-    expect(binding.wrapper_.tagName).to.equal('I-AMP-HTML-WRAPPER');
+    expect(binding.wrapper_.tagName).to.equal('HTML');
+    expect(binding.wrapper_.id).to.equal('i-amp-html-wrapper');
     expect(win.document.body.contains(child)).to.be.true;
     expect(binding.wrapper_.contains(child)).to.be.true;
     expect(win.document.contains(child)).to.be.true;
     expect(child.textContent).to.equal('test');
+
+    // Top-level classes moved to the wrapper element.
+    expect(win.document.documentElement).to.not.have.class('top');
+    expect(binding.wrapper_).to.have.class('top');
   });
 
   it('should have CSS setup', () => {

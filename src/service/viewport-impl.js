@@ -205,6 +205,11 @@ export class Viewport {
       this.visible_ = visible;
       if (visible) {
         this.binding_.connect();
+        if (this.size_) {
+          // If the size has already been intialized, check it again in case
+          // the size has changed between `disconnect` and `connect`.
+          this.resize_();
+        }
       } else {
         this.binding_.disconnect();
       }
@@ -528,9 +533,11 @@ export class Viewport {
   /**
    * Adds the element to the fixed layer.
    * @param {!Element} element
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the fixed layer.
    */
-  addToFixedLayer(element) {
-    this.fixedLayer_.addElement(element);
+  addToFixedLayer(element, opt_forceTransfer) {
+    this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**
@@ -893,6 +900,11 @@ export class ViewportBindingNatural_ {
         // style is set in runtime vs css to avoid conflicts with ios-embedded
         // mode and fixed transfer layer.
         setStyle(body, 'overflow', 'visible');
+
+        // Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS
+        // WebView does NOT respect `html {overflow-x: hidden}`.
+        // Note! For all other cases body's style should be
+        // `body {overflow: visible}` to avoid visibility issues with iframes.
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
           setStyles(body, {
@@ -908,8 +920,6 @@ export class ViewportBindingNatural_ {
           setStyles(body, {
             display: 'block',
             position: 'relative',
-            overflowX: 'hidden',
-            overflowY: 'visible',
           });
         }
       });
@@ -1395,8 +1405,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 /**
  * Implementation of ViewportBindingDef based for iframed iOS case where iframes
  * are not scrollable. Scrolling accomplished here by inserting a scrollable
- * wrapper `<i-amp-html-wrapper>` inside the `<html>` element and reparenting the
- * original `<body>` inside.
+ * wrapper `<html id="i-amp-html-wrapper">` inside the `<html>` element and
+ * reparenting the original `<body>` inside.
  *
  * @implements {ViewportBindingDef}
  * @visibleForTesting
@@ -1409,10 +1419,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+    const topClasses = this.win.document.documentElement.className;
+    this.win.document.documentElement.className = '';
     this.win.document.documentElement.classList.add('-amp-ios-embed');
 
     /** @private @const {!Element} */
-    this.wrapper_ = this.win.document.createElement('i-amp-html-wrapper');
+    this.wrapper_ = this.win.document.createElement('html');
+    this.wrapper_.id = 'i-amp-html-wrapper';
+    this.wrapper_.className = topClasses;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();

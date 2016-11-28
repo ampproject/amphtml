@@ -56,6 +56,11 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'ad-type-custom',
+    name: 'Activates support for custom (self-serve) advertisements',
+    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+  },
+  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
@@ -85,6 +90,12 @@ const EXPERIMENTS = [
     name: 'AMP Access sign-in',
     spec: 'https://github.com/ampproject/amphtml/issues/4227',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
+  },
+  {
+    id: 'amp-auto-ads',
+    name: 'AMP Auto Ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
     id: 'amp-inabox',
@@ -194,11 +205,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
-    id: 'amp-sticky-ad-better-ux',
-    name: 'New breaking UX changes make to amp-sticky-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
-  },
-  {
     id: 'amp-animation',
     name: 'High-performing keyframe animations in AMP.',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -209,6 +215,18 @@ const EXPERIMENTS = [
     id: 'amp-ad-loading-ux',
     name: 'New default loading UX to amp-ad',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
+  },
+  {
+    id: 'visibility-v2',
+    name: 'New visibility tracking using native IntersectionObserver',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
+  },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-selector/amp-selector.md',
   },
 ];
 
