@@ -863,7 +863,6 @@ export class AmpA4A extends AMP.BaseElement {
           'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
         }, SHARED_IFRAME_PROPERTIES));
     return this.iframeRenderHelper_(iframe);
-
   }
 
   /**

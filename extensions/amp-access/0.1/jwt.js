@@ -129,8 +129,8 @@ export class JwtHelper {
     let decodedHeader;
     let decodedPayload;
     try {
-      decodedHeader = utf8Decode(headerUtf8Bytes, invalidToken);
-      decodedPayload = utf8Decode(payloadUtf8Bytes, invalidToken);
+      decodedHeader = utf8Decode(headerUtf8Bytes);
+      decodedPayload = utf8Decode(payloadUtf8Bytes);
     } catch (e) {
       invalidToken();
     }
