@@ -19,6 +19,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
+import {map} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-accordion-session-state-optout';
@@ -115,7 +116,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   getSessionState_() {
     if (this.sessionOptOut_) {
-      return Object.create(null);
+      return map();
     }
     try {
       const sessionStr =
@@ -125,7 +126,7 @@ class AmpAccordion extends AMP.BaseElement {
           JSON.parse(dev().assertString(sessionStr)));
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
-      return Object.create(null);
+      return map();
     }
   }
 
