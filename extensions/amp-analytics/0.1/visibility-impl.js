@@ -341,11 +341,12 @@ export class Visibility {
         resource, 'Visibility tracking not supported on element: ', element);
 
     if (!this.intersectionObserver_) {
+      const onIntersectionChange = this.onIntersectionChange_.bind(this);
       /** @private {!IntersectionObserver} */
       this.intersectionObserver_ =
           // TODO: polyfill IntersectionObserver
           new this.ampdoc.win.IntersectionObserver(entries => {
-            entries.forEach(this.onIntersectionChange_.bind(this));
+            entries.forEach(onIntersectionChange);
           }, {threshold: DEFAULT_THRESHOLD});
     }
 
