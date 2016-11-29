@@ -51,6 +51,7 @@ We will provide the following information to the ad:
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
 - `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
   - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
   - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
