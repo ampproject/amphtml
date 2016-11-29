@@ -261,6 +261,7 @@ var forbiddenTerms = {
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-viewer-integration/0.1/messaging.js',
     ],
   },
   'sendMessageCancelUnsent': {
