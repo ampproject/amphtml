@@ -103,6 +103,7 @@ export function isFormData(value) {
  * @param {!Object<T>} enumObj
  * @param {T} s
  * @return {boolean}
+ * @template T
  */
 export function isEnumValue(enumObj, s) {
   for (const k in enumObj) {
