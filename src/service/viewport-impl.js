@@ -1749,18 +1749,20 @@ const ViewportType = {
  */
 function getViewportType(win, viewer) {
   let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (platformFor(win).isIos()
-      && ((viewportType == ViewportType.NATURAL
-              && viewer.isIframed()
-              // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
-              && viewer.isEmbedded())
-          // Enable iOS Embedded mode so that it's easy to test against a more
-          // realistic iOS environment.
-          || getMode(win).localDev
-          || getMode(win).development)) {
-    viewportType = ViewportType.NATURAL_IOS_EMBED;
+  if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
+    return viewportType;
   }
-  dev().fine(TAG_, '- viewportType:', viewportType);
+  // Enable iOS Embedded mode so that it's easy to test against a more
+  // realistic iOS environment w/o an iframe.
+  const mode = getMode(win);
+  if (!viewer.isIframed() && (mode.localDev || mode.development)) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+  // Override to ios-embed for iframe-viewer mode.
+  // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
+  if (viewer.isIframed() && viewer.isEmbedded()) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
   return viewportType;
 }
 
