@@ -67,13 +67,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-fx-flying-carpet',
-    name: 'AMP Flying Carpet',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
