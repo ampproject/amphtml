@@ -50,7 +50,7 @@ change. The layout could be fully responsive as is the case with `responsive`, `
 `flex-item` layouts. It simply means that the size does not change without an explicit user action, e.g.
 during rendering or scrolling or post download.
 
-If the element has been configured incorrectly, it will not be rendered at all in PROD and in DEV mode; the runtime will display the element in the error state. Possible errors include invalid or unsupported
+If the element has been configured incorrectly, in PROD it will not be rendered at all and in DEV mode the runtime will render the element in the error state. Possible errors include invalid or unsupported
 values of `layout`, `width` and `height` attributes.
 
 
@@ -71,7 +71,7 @@ In a few cases, if `width` or `height` are not specified, the AMP runtime can de
 
 AMP provides a set of layouts that specify how an AMP component behaves in the document layout. You can specify a layout for a component by adding the `layout` attribute with one of the values specified in the table below.
 
-**Example**: A simple responsive image, where width and height are used to determine the aspect ration.
+**Example**: A simple responsive image, where width and height are used to determine the aspect ratio.
 
 ```html
 <amp-img src="/img/amp.jpg"
@@ -92,7 +92,7 @@ Supported values for the `layout` attribute:
 | `fixed-height` |  The element takes the space available to it but keeps the height unchanged. This layout works well for elements such as `amp-carousel` that involves content positioned horizontally. The `height` attribute must be present. The `width` attribute must not be present or must be equal to `auto`. |
 | `flex-item` | The element and other elements in its parent with layout type `flex-item` take the parent container's remaining space when the parent is a flexible container (i.e., `display: flex`). The `width` and `height` attributes are not required. |
 | `nodisplay` | The element isn't displayed, and takes up zero space on the screen as if its display style was `none`. This layout can be applied to every AMP element.  It’s assumed that the element can display itself on user action (e.g., `amp-lightbox`). The `width` and `height` attributes are not required. |
-| `responsive` | The element takes the space available to it and resizes its height automatically to the aspect ratio given by teh `width` and `height` attributes. This layout works very well for most AMP elements, including `amp-img`, `amp-video`, etc.  The available space depends on the parent element and can also be customized using `max-width` CSS. The `width` and `height` attributes must be present. |
+| `responsive` | The element takes the space available to it and resizes its height automatically to the aspect ratio given by the `width` and `height` attributes. This layout works very well for most AMP elements, including `amp-img`, `amp-video`, etc.  The available space depends on the parent element and can also be customized using `max-width` CSS. The `width` and `height` attributes must be present. |
 
 To find out which layouts are supported for a particular component, refer to the [reference documentation](https://www.ampproject.org/docs/reference/components) for that component. If a component does not support the specified value, AMP triggers a runtime error.
 
