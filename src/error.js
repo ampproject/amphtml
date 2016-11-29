@@ -112,6 +112,10 @@ export function cancellation() {
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
+    if (event.reason && event.reason.message === CANCELLED) {
+      event.preventDefault();
+      return;
+    }
     reportError(event.reason || new Error('rejected promise ' + event));
   });
 }

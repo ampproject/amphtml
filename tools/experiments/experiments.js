@@ -163,6 +163,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
   {
+    id: 'amp-playbuzz',
+    name: 'AMP extension for playbuzz engaging items',
+    spec: 'https://github.com/ampproject/amphtml/issues/6106',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+  },
+  {
     id: 'make-body-block',
     name: 'Sets the body to display:block.',
     spec: 'https://github.com/ampproject/amphtml/issues/5310',
@@ -179,13 +185,6 @@ const EXPERIMENTS = [
     name: 'Enables replacing variables in URLs of outgoing links.',
     spec: 'https://github.com/ampproject/amphtml/issues/4078',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
-  },
-  {
-    id: 'pan-y',
-    name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
-        ' touch handlers',
-    spec: 'https://github.com/ampproject/amphtml/issues/4820',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
   },
   {
     id: 'alp-for-a4a',
@@ -229,10 +228,9 @@ const EXPERIMENTS = [
         'amp-selector/amp-selector.md',
   },
   {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz engaging items',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+    id: 'amp-accordion-session-state-optout',
+    name: 'AMP Accordion attribute to opt out of preserved state.',
+    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
 ];
 
