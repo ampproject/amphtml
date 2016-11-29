@@ -31,20 +31,23 @@ import {
   getCorrelator,
 } from '../../../ads/google/a4a/utils';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
-import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {viewerForDoc} from '../../../src/viewer';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
-/** @const {!Object<string, string>} */
+/**
+ * See `VisibilityState` enum.
+ * @const {!Object<string, string>}
+ */
 const visibilityStateCodes = {
   'visible': '1',
   'hidden': '2',
   'prerender': '3',
-  'preview': '4',
+  'unloaded': '5',
 };
 
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
@@ -77,7 +80,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
-    const visibilityState = documentStateFor(global).getVisibilityState();
+    const visibilityState = viewerForDoc(this.getAmpDoc()).getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
