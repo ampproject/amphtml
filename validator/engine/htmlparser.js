@@ -234,6 +234,8 @@ class TagNameStack {
             if (this.handler_.markManufacturedBody)
               this.handler_.markManufacturedBody();
             this.startTag('BODY', []);
+          } else {
+            this.region_ = TagRegion.IN_BODY;
           }
         }
         break;
