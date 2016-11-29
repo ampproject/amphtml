@@ -27,7 +27,8 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('3 * 4')).to.equal(12);
     expect(evaluateBindExpr('4 / 5')).to.equal(0.8);
     expect(evaluateBindExpr('5 % 4')).to.equal(1);
-    expect(evaluateBindExpr('1 / 0')).to.equal(Infinity);
+    expect(evaluateBindExpr('1 / 0')).to.be.Infinity;
+    expect(evaluateBindExpr('0 / 0')).to.be.NaN;
   });
 
   it('should evaluate comparison operations', () => {
@@ -415,6 +416,8 @@ describe('evaluateBindExpr', () => {
   /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators */
   it('should NOT allow access to non-whitelisted operators', () => {
     expect(evaluateBindExpr('this')).to.be.null;
+    expect(evaluateBindExpr('self')).to.be.null;
+    expect(evaluateBindExpr('global')).to.be.null;
     expect(evaluateBindExpr('function')).to.be.null;
     expect(evaluateBindExpr('class')).to.be.null;
     expect(evaluateBindExpr('yield')).to.be.null;

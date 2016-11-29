@@ -1,41 +1,45 @@
 /** shared vars and functions */
 
 %{
+// Shortcuts for common functions.
+var toString = Object.prototype.toString;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 // For security reasons, must not contain functions that mutate the caller.
 var functionWhitelist =
 {
   '[object Array]':
-    [
-      Array.prototype.concat,
-      Array.prototype.includes,
-      Array.prototype.indexOf,
-      Array.prototype.join,
-      Array.prototype.lastIndexOf,
-      Array.prototype.slice,
-    ],
+    {
+      'concat': Array.prototype.concat,
+      'includes': Array.prototype.includes,
+      'indexOf': Array.prototype.indexOf,
+      'join': Array.prototype.join,
+      'lastIndexOf': Array.prototype.lastIndexOf,
+      'slice': Array.prototype.slice,
+    },
   '[object String]':
-    [
-      String.prototype.charAt,
-      String.prototype.charCodeAt,
-      String.prototype.concat,
-      String.prototype.includes,
-      String.prototype.indexOf,
-      String.prototype.lastIndexOf,
-      String.prototype.repeat,
-      String.prototype.slice,
-      String.prototype.split,
-      String.prototype.substr,
-      String.prototype.substring,
-      String.prototype.toLowerCase,
-      String.prototype.toUpperCase,
-    ],
+    {
+      'charAt': String.prototype.charAt,
+      'charCodeAt': String.prototype.charCodeAt,
+      'concat': String.prototype.concat,
+      'includes': String.prototype.includes,
+      'indexOf': String.prototype.indexOf,
+      'lastIndexOf': String.prototype.lastIndexOf,
+      'repeat': String.prototype.repeat,
+      'slice': String.prototype.slice,
+      'split': String.prototype.split,
+      'substr': String.prototype.substr,
+      'substring': String.prototype.substring,
+      'toLowerCase': String.prototype.toLowerCase,
+      'toUpperCase': String.prototype.toUpperCase,
+    },
 };
 
 /** @return {bool} Returns false if args contains an invalid type. */
 function typeCheckArgs(args) {
   for (var i = 0; i < args.length; i++) {
     var arg = args[i];
-    if (Object.prototype.toString.call(arg) === '[object Object]') {
+    if (toString.call(arg) === '[object Object]') {
       return false;
     }
   }
@@ -181,12 +185,12 @@ invocation:
       %{
         $$ = null;
 
-        var obj = Object.prototype.toString.call($1);
+        var obj = toString.call($1);
 
         var whitelist = functionWhitelist[obj];
         if (whitelist) {
           var fn = $1[$3];
-          if (whitelist.indexOf(fn) >= 0) {
+          if (fn && whitelist[$3] === fn) {
             if (typeCheckArgs($4)) {
               $$ = fn.apply($1, $4);
             } else {
@@ -216,11 +220,8 @@ member_access:
           return;
         }
 
-        var prop = Object.prototype.toString.call($2);
-        if (prop === '[object String]' || prop === '[object Number]') {
-          if (Object.prototype.hasOwnProperty.call($1, $2)) {
-            $$ = $1[$2];
-          }
+        if (typeof $2 !== 'symbol' && hasOwnProperty.call($1, $2)) {
+          $$ = $1[$2];
         }
       %}
   ;
@@ -234,7 +235,7 @@ member:
 
 variable:
     NAME
-      {$$ = Object.prototype.hasOwnProperty.call(yy, $1) ? yy[$1] : null;}
+      {$$ = hasOwnProperty.call(yy, $1) ? yy[$1] : null;}
   ;
 
 literal:
