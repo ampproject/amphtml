@@ -75,7 +75,9 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      listenOnce(win.document, 'mousemove', this.onMouseMove_.bind(this));
+      /** @const {!Function} */
+      const boundOnMouseMove_ = this.onMouseMove_.bind(this);
+      listenOnce(win.document, 'mousemove', boundOnMouseMove_);
     }
   }
 
@@ -216,7 +218,9 @@ export class Input {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
-      listenOnce(this.win.document, 'mousemove', this.onMouseMove_.bind(this));
+      /** @const {!Function} */
+      const boundOnMouseMove_ = this.onMouseMove_.bind(this);
+      listenOnce(this.win.document, 'mousemove', boundOnMouseMove_);
     } else {
       dev().fine(TAG_, 'mouse detection failed');
     }
