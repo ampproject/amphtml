@@ -156,7 +156,7 @@ function assertCors(req, res, opt_validMethods) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Expose-Headers',
-      'AMP-Access-Control-Allow-Source-Origin')
+      'AMP-Access-Control-Allow-Source-Origin');
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
       req.query.__amp_source_origin);
 }
@@ -519,6 +519,8 @@ function replaceUrls(mode, file) {
     file = file.replace(/\.max\.js/g, '.js');
     file = file.replace('/dist/amp.js', '/dist/v0.js');
     file = file.replace('/dist/amp-inabox.js', '/dist/amp4ads-v0.js');
+    file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/,
+        '/dist.3p/current-min/$1.html');
   }
   return file;
 }

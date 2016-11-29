@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+    window.onload = function() {
+      try {
+        var name_data = JSON.parse(window.name);
+        if (!name_data || !name_data['creative']) {
+          throw new Error('Missing or incorrectly formatted JSON ' +
+            'input to nameframe');
+        }
+        document.open();
+        document.write(name_data['creative']);
+        document.close();
+        window.name = '';
+      } catch (err) {
+        window.parent.postMessage(
+          {type: 'no-content', error: err.message}, '*');
+      }
+    };
+  </script>
+</head>
+<body style="visibility: hidden;">
+</body>
+</html>

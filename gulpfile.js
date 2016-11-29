@@ -234,10 +234,18 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   });
 
   var frameHtml = '3p/frame.max.html';
-  thirdPartyBootstrap(frameHtml, shouldMinify);
+  thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
   if (watch) {
     $$.watch(frameHtml, function() {
-      thirdPartyBootstrap(frameHtml, shouldMinify);
+      thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
+    });
+  }
+
+  var nameFrameHtml = '3p/nameframe.max.html';
+  thirdPartyBootstrap(nameFrameHtml, 'nameframe.html',shouldMinify);
+  if (watch) {
+    $$.watch(nameFrameHtml, function () {
+      thirdPartyBootstrap(nameFrameHtml, 'nameframe.html', shouldMinify);
     });
   }
 }
@@ -458,9 +466,10 @@ function checkTypes() {
  * copies, and generates symlink to it.
  *
  * @param {string} input
+ * @param {string} outputName
  * @param {boolean} shouldMinify
  */
-function thirdPartyBootstrap(input, shouldMinify) {
+function thirdPartyBootstrap(input, outputName, shouldMinify) {
   $$.util.log('Processing ' + input);
 
   if (!shouldMinify) {
@@ -479,7 +488,7 @@ function thirdPartyBootstrap(input, shouldMinify) {
   // Convert default relative URL to absolute min URL.
   var html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
-  $$.file('frame.html', html, {src: true})
+  $$.file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         var aliasToLatestBuild = 'dist.3p/current-min';
