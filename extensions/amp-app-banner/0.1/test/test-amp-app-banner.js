@@ -99,7 +99,7 @@ describe('amp-app-banner', () => {
 
       if (config.manifest) {
         const manifest = iframe.doc.createElement('link');
-        manifest.setAttribute('rel', 'amp-manifest');
+        manifest.setAttribute('rel', 'manifest');
         manifest.setAttribute('href', config.manifest.href);
         iframe.doc.head.appendChild(manifest);
         sandbox.mock(xhrFor(iframe.win)).expects('fetchJson')
