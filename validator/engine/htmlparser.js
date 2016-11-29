@@ -889,7 +889,11 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
         // Comments not captured.
         '|<[!]--[\\s\\S]*?(?:-->|$)' +
         // '/' captured in group 2 for close tags, and name captured in group 3.
-        '|<(/)?([a-z!\\?][a-z0-9_:-]*)' +
+        // The first character of a tag (after possibly '/') can be A-Z, a-z,
+        // '!' or '?'. The remaining characters are more easily expressed as a
+        // negative set of: '\0', ' ', '\n', '\r', '\t', '\f', '\v', '>', or
+        // '/'.
+        '|<(/)?([a-z!\\?][^\0 \n\r\t\f\v>/]*)' +
         // Text captured in group 4.
         '|([^<&>]+)' +
         // Cruft captured in group 5.
