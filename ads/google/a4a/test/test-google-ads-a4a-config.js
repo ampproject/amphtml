@@ -24,7 +24,7 @@ import {resetExperimentToggles_} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
-import {documentStateFor} from '../../../../src/document-state';
+import {documentStateFor} from '../../../../src/service/document-state';
 import * as sinon from 'sinon';
 
 const EXP_ID = 'EXP_ID';

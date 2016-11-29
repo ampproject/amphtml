@@ -15,7 +15,7 @@
  */
 
 import {dev, rethrowAsync} from './log';
-import {documentStateFor} from './document-state';
+import {documentStateFor} from './service/document-state';
 import {performanceFor} from './performance';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
