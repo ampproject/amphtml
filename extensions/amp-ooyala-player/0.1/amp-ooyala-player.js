@@ -80,22 +80,22 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.iframe_.contentWindow.postMessage("play", "*");
+    this.iframe_.contentWindow.postMessage('play', '*');
   }
 
   /** @override */
   pause() {
-    this.iframe_.contentWindow.postMessage("pause", "*");
+    this.iframe_.contentWindow.postMessage('pause', '*');
   }
 
   /** @override */
   mute() {
-    this.iframe_.contentWindow.postMessage("mute", "*");
+    this.iframe_.contentWindow.postMessage('mute', '*');
   }
 
   /** @override */
   unmute() {
-    this.iframe_.contentWindow.postMessage("unmute", "*");
+    this.iframe_.contentWindow.postMessage('unmute', '*');
   }
 
   /** @override */
