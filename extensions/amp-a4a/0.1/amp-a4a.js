@@ -429,6 +429,12 @@ export class AmpA4A extends AMP.BaseElement {
           this.isVerifiedAmpCreative_ = true;
           return utf8Decode(creative).then(
             creative => this.getAmpAdMetadata_(creative));
+        }).catch(error => {
+          // If error in chain occurs, report it and return null so that
+          // layoutCallback can render via cross domain iframe assuming ad
+          // url or creative exist.
+          rethrowAsync(this.promiseErrorHandler_(error));
+          return null;
         });
   }
 
@@ -533,7 +539,7 @@ export class AmpA4A extends AMP.BaseElement {
           return this.renderNonAmpCreative_();
         });
       }
-      // Non-AMP creative case.
+      // Non-AMP creative case, will verify ad url existence.
       return this.renderNonAmpCreative_();
     }).catch(error => this.promiseErrorHandler_(error));
   }
@@ -722,8 +728,12 @@ export class AmpA4A extends AMP.BaseElement {
     } else if (this.adUrl_) {
       return this.renderViaCachedContentIframe_(this.adUrl_);
     } else {
-      throw new Error('No creative or URL available -- A4A can\'t render' +
-          ' any ad');
+      // Ad URL may not exist if buildAdUrl throws error or returns empty.
+      // If error occurred, it would have already been reported but let's
+      // report to user in case of empty.
+      user().warn(this.logTag_,
+        'No creative or URL available -- A4A can\'t render any ad');
+      return Promise.resolve();
     }
   }
 
@@ -880,8 +890,8 @@ export class AmpA4A extends AMP.BaseElement {
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];
       if (!isArray(ampRuntimeUtf16CharOffsets) ||
-          ampRuntimeUtf16CharOffsets.length != 2 &&
-          typeof ampRuntimeUtf16CharOffsets[0] !== 'number' &&
+          ampRuntimeUtf16CharOffsets.length != 2 ||
+          typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
           typeof ampRuntimeUtf16CharOffsets[1] !== 'number') {
         throw new Error('Invalid runtime offsets');
       }

@@ -74,6 +74,7 @@ describe('amp-a4a', () => {
   let getSigningServiceNamesMock;
   let viewerWhenVisibleMock;
   let mockResponse;
+  let onAmpCreativeRenderSpy;
   let headers;
 
   beforeEach(() => {
@@ -82,6 +83,8 @@ describe('amp-a4a', () => {
     xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
     getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
         'getSigningServiceNames');
+    onAmpCreativeRenderSpy =
+        sandbox.spy(AmpA4A.prototype, 'onAmpCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
@@ -164,7 +167,6 @@ describe('amp-a4a', () => {
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
       fixture.doc.body.appendChild(a4aElement);
-      const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[name]');
@@ -178,7 +180,6 @@ describe('amp-a4a', () => {
       const platform = platformFor(fixture.win);
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);
-      const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
       // Ensure no rendering type header (ios on safari will default to
@@ -201,7 +202,6 @@ describe('amp-a4a', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
       fixture.doc.body.appendChild(a4aElement);
-      const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[src]');
@@ -246,7 +246,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         doc.body.appendChild(a4aElement);
-        const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           const child = a4aElement.querySelector('iframe[name]');
@@ -279,8 +278,6 @@ describe('amp-a4a', () => {
           a4aElement.setAttribute('type', 'adsense');
           const a4a = new MockA4AImpl(a4aElement);
           doc.body.appendChild(a4aElement);
-          const onAmpCreativeRenderSpy =
-            sandbox.spy(a4a, 'onAmpCreativeRender');
           a4a.onLayoutMeasure();
           return a4a.layoutCallback().then(() => {
             const safeChild = a4aElement.querySelector('iframe[name]');
@@ -343,7 +340,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
-        const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const extractCreativeAndSignatureSpy = sandbox.spy(
             a4a, 'extractCreativeAndSignature');
@@ -426,7 +422,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
         if (!isValidCreative) {
           sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
             Promise.resolve({creative: mockResponse.arrayBuffer()}));
@@ -447,7 +442,7 @@ describe('amp-a4a', () => {
             expect(promiseResult).to.be.ok;
             expect(promiseResult.minifiedCreative).to.be.ok;
           } else {
-            expect(promiseResult).to.be.null;
+            expect(promiseResult).to.not.be.ok;
           }
           return a4a.layoutCallback().then(() => {
             expect(a4aElement.getElementsByTagName('iframe').length)
@@ -471,7 +466,7 @@ describe('amp-a4a', () => {
       return executeLayoutCallbackTest(true);
     });
     it('#layoutCallback not valid AMP', () => {
-      return executeLayoutCallbackTest(true);
+      return executeLayoutCallbackTest(false);
     });
     it('#layoutCallback AMP render fail, recover non-AMP', () => {
       return executeLayoutCallbackTest(true, true);
@@ -522,7 +517,6 @@ describe('amp-a4a', () => {
               };
             }));
         a4a.onLayoutMeasure();
-        const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
         return a4a.layoutCallback().then(() => {
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
           const friendlyIframe = a4aElement.getElementsByTagName('iframe')[0];
@@ -549,7 +543,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
@@ -571,7 +564,6 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
         a4a.onLayoutMeasure();
         return a4a.adPromise_.then(() => a4a.layoutCallback().then(() => {
           expect(a4aElement.children.length).to.equal(1);
@@ -592,7 +584,6 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
         a4a.onLayoutMeasure();
         const layoutCallbackPromise = a4a.layoutCallback();
         rejectXhr(new Error('XHR Error'));
@@ -731,7 +722,6 @@ describe('amp-a4a', () => {
       });
     });
     it('should render correctly', () => {
-      const onAmpCreativeRenderSpy = sandbox.spy(a4a, 'onAmpCreativeRender');
       return a4a.renderAmpCreative_(metaData).then(() => {
         // Verify iframe presence.
         expect(a4aElement.children.length).to.equal(1);
