@@ -16,6 +16,7 @@
 
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
+import {isEnumValue} from './types';
 
 
 /** @const Time when this JS loaded.  */
@@ -312,10 +313,8 @@ export class Log {
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
-    for (const k in enumObj) {
-      if (enumObj[k] == s) {
-        return enumObj[k];
-      }
+    if (isEnumValue(enumObj, s)) {
+      return s;
     }
     this.assert(false,
         'Unknown %s value: "%s"',
