@@ -24,6 +24,7 @@ import {
   setReportValiditySupported,
 } from '../form-validators';
 import * as sinon from 'sinon';
+import {toggleExperiment} from '../../../../src/experiments';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
@@ -52,6 +53,7 @@ describe('amp-form', () => {
       installAmpForm(iframe.win);
       installCidService(iframe.win);
       installCryptoService(iframe.win);
+      toggleExperiment(iframe.win, 'amp-form-var-sub');
       const form = getForm(iframe.doc, button1, button2, button3);
       iframe.doc.body.appendChild(form);
       const ampForm = new AmpForm(form, 'amp-form-test-id');
@@ -96,6 +98,7 @@ describe('amp-form', () => {
     installTemplatesService(window);
     const docService = installDocService(window, /* isSingleDoc */ true);
     installActionServiceForDoc(docService.getAmpDoc());
+    toggleExperiment(window, 'amp-form-var-sub');
 
     sandbox = sinon.sandbox.create();
   });
@@ -104,7 +107,6 @@ describe('amp-form', () => {
     sandbox.restore();
   });
 
-  // asd
   it('should assert valid action-xhr when provided', () => {
     const form = getForm();
     form.setAttribute('action-xhr', 'http://example.com');
@@ -280,7 +282,6 @@ describe('amp-form', () => {
       // Check xhr goes through when form is valid.
       emailInput.value = 'cool@bea.ns';
       ampForm.handleSubmit_(event);
-      expect(ampForm.xhr_.fetchJson).to.be.called;
       return timer.promise(10).then(() => {
         expect(ampForm.xhr_.fetchJson).to.have.been.called;
       });
@@ -338,7 +339,7 @@ describe('amp-form', () => {
         ampForm.handleSubmit_(event);
         ampForm.handleSubmit_(event);
         expect(event.preventDefault.called).to.be.true;
-        expect(event.preventDefault.callCount).to.equal(1);
+        expect(event.preventDefault.callCount).to.equal(3);
         expect(event.stopImmediatePropagation.callCount).to.equal(2);
         expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
         expect(form.className).to.contain('amp-form-submitting');
@@ -904,16 +905,18 @@ describe('amp-form', () => {
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
-        sandbox.spy(ampForm.urlReplacement_, 'expandAsync');
-        sandbox.stub(ampForm.urlReplacement_, 'expandSync');
+        sandbox.spy(ampForm.urlReplacement_, 'expandStringAsync');
+        sandbox.stub(ampForm.urlReplacement_, 'expandStringSync');
         ampForm.handleSubmit_();
         expect(ampForm.xhr_.fetchJson).to.have.not.been.called;
-        expect(ampForm.urlReplacement_.expandSync).to.not.have.been.called;
-        expect(ampForm.urlReplacement_.expandAsync).to.have.been.calledTwice;
-        expect(ampForm.urlReplacement_.expandAsync).to.have.been.calledWith(
-            'CLIENT_ID(form)');
-        expect(ampForm.urlReplacement_.expandAsync).to.have.been.calledWith(
-            'CANONICAL_URL');
+        expect(ampForm.urlReplacement_.expandStringSync)
+            .to.not.have.been.called;
+        expect(ampForm.urlReplacement_.expandStringAsync)
+            .to.have.been.calledTwice;
+        expect(ampForm.urlReplacement_.expandStringAsync)
+            .to.have.been.calledWith('CLIENT_ID(form)');
+        expect(ampForm.urlReplacement_.expandStringAsync)
+            .to.have.been.calledWith('CANONICAL_URL');
         return timer.promise(10).then(() => {
           expect(ampForm.xhr_.fetchJson).to.be.called;
           expect(clientIdField.value).to.match(/amp-\w+/);
@@ -924,7 +927,7 @@ describe('amp-form', () => {
 
     it('should send request if vars did not resolve after a timeout', () => {
       return getAmpForm().then(ampForm => {
-        const expandAsyncResolvers = [];
+        const expandAsyncStringResolvers = [];
         const form = ampForm.form_;
         const clientIdField = document.createElement('input');
         clientIdField.setAttribute('name', 'clientId');
@@ -938,20 +941,24 @@ describe('amp-form', () => {
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
-        sandbox.stub(ampForm.urlReplacement_, 'expandAsync')
+        sandbox.stub(ampForm.urlReplacement_, 'expandStringAsync')
             .returns(new Promise(resolve => {
-              expandAsyncResolvers.push(resolve);
+              expandAsyncStringResolvers.push(resolve);
             }));
-        sandbox.stub(ampForm.urlReplacement_, 'expandSync');
+        sandbox.stub(ampForm.urlReplacement_, 'expandStringSync');
         ampForm.handleSubmit_();
         expect(ampForm.xhr_.fetchJson).to.have.not.been.called;
-        expect(ampForm.urlReplacement_.expandSync).to.not.have.been.called;
-        expect(ampForm.urlReplacement_.expandAsync).to.have.been.calledTwice;
-        expect(ampForm.urlReplacement_.expandAsync).to.have.been.calledWith(
+        expect(ampForm.urlReplacement_.expandStringSync)
+            .to.not.have.been.called;
+        expect(ampForm.urlReplacement_.expandStringAsync)
+            .to.have.been.calledTwice;
+        expect(ampForm.urlReplacement_.expandStringAsync)
+            .to.have.been.calledWith(
             'CLIENT_ID(form)');
-        expect(ampForm.urlReplacement_.expandAsync).to.have.been.calledWith(
+        expect(ampForm.urlReplacement_.expandStringAsync)
+            .to.have.been.calledWith(
             'CANONICAL_URL');
-        return timer.promise(110).then(() => {
+        return timer.promise(210).then(() => {
           expect(ampForm.xhr_.fetchJson).to.be.called;
           expect(clientIdField.value).to.equal('');
           expect(canonicalUrlField.value).to.equal('');
@@ -976,15 +983,16 @@ describe('amp-form', () => {
         form.appendChild(canonicalUrlField);
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
-        sandbox.stub(ampForm.urlReplacement_, 'expandAsync');
-        sandbox.spy(ampForm.urlReplacement_, 'expandSync');
+        sandbox.stub(ampForm.urlReplacement_, 'expandStringAsync');
+        sandbox.spy(ampForm.urlReplacement_, 'expandStringSync');
         ampForm.handleSubmit_();
-        expect(ampForm.urlReplacement_.expandAsync).to.not.have.been.called;
-        expect(ampForm.urlReplacement_.expandSync).to.have.been.called;
-        expect(ampForm.urlReplacement_.expandSync).to.have.been.calledWith(
-            'CLIENT_ID(form)');
-        expect(ampForm.urlReplacement_.expandSync).to.have.been.calledWith(
-            'CANONICAL_URL');
+        expect(ampForm.urlReplacement_.expandStringAsync)
+            .to.not.have.been.called;
+        expect(ampForm.urlReplacement_.expandStringSync).to.have.been.called;
+        expect(ampForm.urlReplacement_.expandStringSync)
+            .to.have.been.calledWith('CLIENT_ID(form)');
+        expect(ampForm.urlReplacement_.expandStringSync)
+            .to.have.been.calledWith('CANONICAL_URL');
         return timer.promise(10).then(() => {
           expect(clientIdField.value).to.equal('');
           expect(canonicalUrlField.value).to.equal('about%3Asrcdoc');

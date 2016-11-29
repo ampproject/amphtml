@@ -15,6 +15,7 @@
  */
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
   assertHttpsUrl,
@@ -36,7 +37,6 @@ import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
-import {urls} from '../../../src/config';
 import {timerFor} from '../../../src/timer';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {getFormValidator} from './form-validators';
@@ -210,10 +210,10 @@ export class AmpForm {
       return;
     }
 
+    const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
     // Fields that support var substitutions.
-    const varSubsFields = this.form_.querySelectorAll(
+    const varSubsFields = !isVarSubExpOn ? [] : this.form_.querySelectorAll(
         '[type="hidden"][default-value]');
-
     if (this.xhrAction_) {
       if (opt_event) {
         opt_event.preventDefault();
@@ -221,23 +221,26 @@ export class AmpForm {
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
       const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
-      let xhrUrl = this.xhrAction_;
-
       const varSubPromises = [];
       for (let i = 0; i < varSubsFields.length; i++) {
         const variable = varSubsFields[i].getAttribute('default-value');
         varSubPromises.push(
-            this.urlReplacement_.expandAsync(variable).then(value => {
+            this.urlReplacement_.expandStringAsync(variable).then(value => {
               varSubsFields[i].value = value;
             }));
       }
       // Wait until all variables have been substituted or 100ms timeout.
-      return this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
+      this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
+        let xhrUrl, body;
         if (isHeadOrGet) {
-          xhrUrl = addParamsToUrl(this.xhrAction_, this.getFormAsObject_());
+          xhrUrl = addParamsToUrl(
+              dev().assertString(this.xhrAction_), this.getFormAsObject_());
+        } else {
+          xhrUrl = this.xhrAction_;
+          body = new FormData(this.form_);
         }
-        return this.xhr_.fetchJson(xhrUrl, {
-          body: isHeadOrGet ? undefined : new FormData(this.form_),
+        return this.xhr_.fetchJson(dev().assertString(xhrUrl), {
+          body,
           method: this.method_,
           credentials: 'include',
           requireAmpResponseSourceOrigin: true,
@@ -268,7 +271,8 @@ export class AmpForm {
       // Non-xhr GET requests replacement should happen synchronously.
       for (let i = 0; i < varSubsFields.length; i++) {
         const variable = varSubsFields[i].getAttribute('default-value');
-        varSubsFields[i].value = this.urlReplacement_.expandSync(variable);
+        varSubsFields[i].value = this.urlReplacement_.expandStringSync(
+            variable);
       }
     }
   }
