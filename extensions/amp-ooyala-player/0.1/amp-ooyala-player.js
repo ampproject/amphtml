@@ -116,6 +116,24 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   unlayoutOnPause() {
     return false;
   }
+
+  /** @override */
+  supportsPlatform() {
+    return true;
+  }
+
+  /** @override */
+  isInViewport() {
+    return true;
+  }
+
+  /** @override */
+  showControls() {
+  }
+
+  /** @override */
+  hideControls() {
+  }
 };
 
 AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
