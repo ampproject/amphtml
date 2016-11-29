@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
-import {fromClass} from './service';
-import {getVendorJsPropertyName} from './style';
-import {waitForChild} from './dom';
+import {Observable} from '../observable';
+import {fromClass} from '../service';
+import {getVendorJsPropertyName} from '../style';
+import {waitForChild} from '../dom';
 
 
 /**
