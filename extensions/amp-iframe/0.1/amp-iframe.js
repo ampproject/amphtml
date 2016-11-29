@@ -23,7 +23,7 @@ import {listenFor} from '../../../src/iframe-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
@@ -237,7 +237,10 @@ export class AmpIframe extends AMP.BaseElement {
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    return moveLayoutRect(this.iframeLayoutBox_, box.left, box.top);
+
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
+        dev().assert(this.iframeLayoutBox_));
+    return moveLayoutRect(iframe, box.left, box.top);
   }
 
   /** @override */
