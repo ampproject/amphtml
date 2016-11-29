@@ -1,3 +1,18 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import './polyfills';
 import {listen} from '../src/event-helper';
 import {getRandom} from '../src/3p-frame';
@@ -31,6 +46,9 @@ export class IframeMessagingClient {
    *   when a message with type messageType is received.
    */
   registerCallback_(messageType, callback) {
+    // NOTE : no validation done here. any callback can be register
+    // for any callback, and then if that message is received, this
+    // class *will execute* that callback
     this.callbackFor_[messageType] = callback;
     return () => { delete this.callbackFor_[messageType]; };
   }
@@ -47,19 +65,20 @@ export class IframeMessagingClient {
   setupEventListener_() {
     listen(this.win_, 'message', message => {
       // Does it look a message from AMP?
-      if (message.source == this.ampWindow && message.data &&
+      if (message.source == this.getHostWindow() && message.data &&
           message.data.indexOf('amp-') == 0) {
         // See if we can parse the payload.
         try {
           const payload = JSON.parse(message.data.substring(4));
           // Check the sentinel as well.
-          if (payload.sentinel == this.sentinel &&
+          if (payload.sentinel == this.getSentinel() &&
               this.callbackFor_[payload.type]) {
             try {
               // We should probably report exceptions within callback
               this.callbackFor_[payload.type](payload);
             } catch (err) {
-              user().error(`Error in registered callback ${payload.type}`, err);
+              user().error('IFRAME-MSG',
+                           `- Error in registered callback ${payload.type}`, err);
             }
           }
         } catch (e) {
@@ -74,7 +93,10 @@ export class IframeMessagingClient {
    *  As implemented, this will only work for messaging the parent iframe.
    */
   getSentinel() {
-    return '0-' + getRandom(this.ampWindow);
+    if (!this.sentinel){
+     this.sentinel = '0-' + getRandom(this.win_);
+    }
+    return this.sentinel;
   }
 
   /**
@@ -82,6 +104,9 @@ export class IframeMessagingClient {
    *  Should be overwritten for subclasses
    */
   getHostWindow() {
-    return this.win_.parent;
+    if (!this.hostWindow){
+      this.hostWindow = this.win_.parent;
+    }
+    return this.hostWindow;
   }
 };
