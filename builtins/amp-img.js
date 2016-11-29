@@ -38,6 +38,10 @@ export class AmpImg extends BaseElement {
 
     /** @private {?../src/srcset.Srcset} */
     this.srcset_ = null;
+
+    /** @private {!Array<string>} */
+    this.attributesToPropagate_ = ['alt', 'referrerpolicy', 'aria-label',
+      'aria-describedby', 'aria-labelledby'];
   }
 
   /** @override */
@@ -45,6 +49,8 @@ export class AmpImg extends BaseElement {
     if (name === 'src') {
       this.srcset_ = srcsetFromElement(this.element);
       this.updateImageSrc_();
+    } else if (this.attributesToPropagate_.indexOf(name) >= 0) {
+      this.propagateAttributes(name, this.img_);
     }
   }
 
@@ -89,8 +95,7 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
-    this.propagateAttributes(['alt', 'referrerpolicy', 'aria-label',
-      'aria-describedby', 'aria-labelledby'], this.img_);
+    this.propagateAttributes(this.attributesToPropagate_, this.img_);
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
