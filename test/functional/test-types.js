@@ -118,9 +118,9 @@ describe('Types', () => {
     it('should return false for non-enum values', () => {
       ['a', 'X', 'Z', {'x': 'x'}, ['y'], null, undefined, [], /x/, /y/, 42]
           .forEach(value => {
-        expect(types.isEnumValue(enumObj, value),
-            'enum value = ' + value).to.be.false;
-      });
+            expect(types.isEnumValue(enumObj, value),
+                'enum value = ' + value).to.be.false;
+          });
     });
   });
 });
