@@ -47,6 +47,7 @@ const visibilityStateCodes = {
   'visible': '1',
   'hidden': '2',
   'prerender': '3',
+  'unloaded': '5',
 };
 
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
