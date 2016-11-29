@@ -76,7 +76,7 @@ Usage example:
 
 - `carousel` (default): All slides are shown and are scrollable horizontally.
   The `carousel` type only supports `layout="fixed"` and `layout="fixed-height"`.
-- `slides`: Shows a single slide at a time. 
+- `slides`: Shows a single slide at a time. It supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
 
 **loop** (type=slides only)
 
@@ -100,7 +100,7 @@ attribute if present (minimum of 1000 ms; an error will be thrown if it's any lo
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
 - By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
-- By default, the visual state of an `amp-carousel` button when it's disabled is hidden. You may override this visual state of an `amp-carousel` button by setting the visibility to `visible` as in the example below.
+- The visual state of an `amp-carousel` button when it's disabled is hidden.
 
 **Example**: Default `.amp-carousel-button` inlined SVG
 
@@ -117,17 +117,6 @@ attribute if present (minimum of 1000 ms; an error will be thrown if it's any lo
 .amp-carousel-button-prev {
   left: 5%;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
-}
-```
-
-**Example**: Overriding the visual state of a disabled `amp-carousel` button 
-
-```css
-.amp-carousel-button.amp-disabled {
-  /* make sure we make it visible */
-  visibility: visible;
-  /* choose our own background styling, red'ish */
-  background-color: rgba(255, 0, 0, .5);
 }
 ```
 
