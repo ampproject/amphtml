@@ -524,6 +524,8 @@ export class UrlReplacements {
    * Synchronously expands the provided URL by replacing all known variables with
    * their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
+   *
+   * TODO(mkhatib, #6322): Deprecate and please use expandUrlSync or expandStringSync.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
@@ -532,9 +534,69 @@ export class UrlReplacements {
    * @return {string}
    */
   expandSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
-    return /** @type {string} */(
-        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+    return this.expandUrlSync(
+        url, opt_bindings, opt_collectVars, opt_whiteList);
+  }
+
+  /**
+   * Expands the provided URL by replacing all known variables with their
+   * resolved values. Optional `opt_bindings` can be used to add new variables
+   * or override existing ones.
+   *
+   * TODO(mkhatib, #6322): Deprecate and please use expandUrlAsync or expandStringAsync.
+   * @param {string} url
+   * @param {!Object<string, *>=} opt_bindings
+   * @return {!Promise<string>}
+   */
+  expandAsync(url, opt_bindings) {
+    return this.expandUrlAsync(url, opt_bindings);
+  }
+
+
+  /**
+   * Synchronously expands the provided source by replacing all known variables with
+   * their resolved values. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.  Any async bindings are ignored.
+   * @param {string} source
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
+   * @return {string}
+   */
+  expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
+    return /** @type {string} */ (
+        this.expand_(source, opt_bindings, opt_collectVars, /* opt_sync */ true,
             opt_whiteList));
+  }
+
+  /**
+   * Expands the provided source by replacing all known variables with their
+   * resolved values. Optional `opt_bindings` can be used to add new variables
+   * or override existing ones.
+   * @param {string} source
+   * @param {!Object<string, *>=} opt_bindings
+   * @return {!Promise<string>}
+   */
+  expandStringAsync(source, opt_bindings) {
+    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings));
+  }
+
+  /**
+   * Synchronously expands the provided URL by replacing all known variables with
+   * their resolved values. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.  Any async bindings are ignored.
+   * @param {string} url
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
+   * @return {string}
+   */
+  expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
+    return this.ensureProtocolMatches_(url, /** @type {string} */ (this.expand_(
+            url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+            opt_whiteList)));
   }
 
   /**
@@ -545,8 +607,10 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @return {!Promise<string>}
    */
-  expandAsync(url, opt_bindings) {
-    return /** @type {!Promise<string>} */(this.expand_(url, opt_bindings));
+  expandUrlAsync(url, opt_bindings) {
+    return /** @type {!Promise<string>} */ (
+        this.expand_(url, opt_bindings).then(
+            replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -687,10 +751,9 @@ export class UrlReplacements {
     }
 
     if (opt_sync) {
-      return this.ensureProtocolMatches_(url, replacement);
+      return replacement;
     }
-    return (replacementPromise || Promise.resolve(replacement))
-        .then(replacement => this.ensureProtocolMatches_(url, replacement));
+    return replacementPromise || Promise.resolve(replacement);
   }
 
   /**

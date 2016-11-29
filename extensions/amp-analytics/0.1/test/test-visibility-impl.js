@@ -165,7 +165,9 @@ describe('amp-analytics.visibility', () => {
       elementY: '23', // 13 + 10
       elementWidth: '100',
       elementHeight: '100',
-      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
+      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100,
+      minVisiblePercentage: '63',
+      maxVisiblePercentage: '63',
       totalTime: sinon.match(value => {
         return isFiniteNumber(Number(value));
       }),
