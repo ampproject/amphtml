@@ -65,7 +65,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.item_ = '';
 
      /** @private {?number} */
-    this.itemHeight_ = 0;
+    this.itemHeight_ = 300; //default
 
      /** @private {?boolean} */
     this.displayItemInfo_ = false;
@@ -100,8 +100,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
       e.getAttribute('item-url'),
       'The item attribute is required for <amp-playbuzz> %s',
       e);
-
-    this.itemHeight_ = e.height;
+    const parsedHeight = parseInt(e.getAttribute('height'), 10);
+    this.itemHeight_ = isNaN(parsedHeight) ? this.itemHeight_ : parsedHeight;
     this.displayItemInfo_ = e.getAttribute('display-item-info') === 'true';
     this.displayShareBar_ = e.getAttribute('display-share-buttons') === 'true';
     this.displayComments_ = e.getAttribute('display-comments') === 'true';
@@ -135,7 +135,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.src = this.generateEmbedSourceUrl_();
 
     this.listenToPlaybuzzItemMessage_('resize_height',
-      utils.debounce(this.setElementSize_.bind(this), 250));
+      this.setElementSize_.bind(this));
 
     whenDocumentComplete(this.win.document)
       .then(this.setElementSize_.bind(this));
