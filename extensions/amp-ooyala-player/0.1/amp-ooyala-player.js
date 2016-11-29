@@ -69,8 +69,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       '&pbid=' + encodeURIComponent(playerId);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.setAttribute('sandbox',
-      'allow-scripts allow-popups allow-same-origin');
     iframe.src = src;
     this.applyFillContent(iframe);
 
