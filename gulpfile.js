@@ -175,7 +175,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 
   compileJs('./3p/', 'ampcontext-lib.js',
       './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-    minifiedName: 'ampcontext-lib.js',
+    minifiedName: 'ampcontext-v0.js',
     checkTypes: opt_checkTypes,
     watch: watch,
     minify: false,
