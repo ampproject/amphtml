@@ -4890,9 +4890,7 @@ amp.validator.validateSaxEvents = function(saxEvents, htmlFormat) {
   for (const e of saxEvents) {
     switch (e[0]) {
       case 'startTag':
-        e.shift();
-        const tagName = e.shift();
-        handler.startTag(tagName, e);
+        handler.startTag(/*tagName=*/e[1], e.slice(2));
         break;
       case 'endTag':
         handler.endTag(e[1]);
