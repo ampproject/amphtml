@@ -34,13 +34,17 @@
  * For responsive embedding the width and height can be left unchanged from
  * the example above and will produce the correct aspect ratio.
  */
+
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
+import {logo} from './logo-image';
+import * as utils from './utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 import * as events from '../../../src/event-helper';
+import {whenDocumentComplete} from '../../../src/document-ready';
+import {postMessage} from '../../../src/iframe-helper';
 
 /** @const */
 const EXPERIMENT = 'amp-playbuzz';
@@ -60,33 +64,47 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?string} */
     this.item_ = '';
 
+     /** @private {?number} */
+    this.itemHeight_ = 0;
+
+     /** @private {?boolean} */
+    this.displayItemInfo_ = false;
+
+     /** @private {?boolean} */
+    this.displayShareBar_ = false;
+
+     /** @private {?boolean} */
+    this.displayComments_ = false;
   }
   /**
-   * @param {boolean=} opt_onLayout
    * @override
    */
-  preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://www.playbuzz.com', opt_onLayout);
-    this.preconnect.url('http://cdn.playbuzz.com', opt_onLayout);
+  preconnectCallback() {
+    this.preconnect.preload(this.item_);
   }
 
   /** @override */
-  // renderOutsideViewport() {
-  //   return false;
-  // }
+  renderOutsideViewport() {
+    return false;
+  }
 
   /** @override */
   buildCallback() {
-
     // EXPERIMENT
     AMP.toggleExperiment('amp-playbuzz', true); //for dev
     user().assert(isExperimentOn(this.win, EXPERIMENT),
       `Enable ${EXPERIMENT} experiment`);
 
+    const e = this.element;
     this.item_ = user().assert(
-      this.element.getAttribute('item-url'),
+      e.getAttribute('item-url'),
       'The item attribute is required for <amp-playbuzz> %s',
-      this.element);
+      e);
+
+    this.itemHeight_ = e.height;
+    this.displayItemInfo_ = e.getAttribute('display-item-info') === 'true';
+    this.displayShareBar_ = e.getAttribute('display-share-buttons') === 'true';
+    this.displayComments_ = e.getAttribute('display-comments') === 'true';
   }
 
   /** @override */
@@ -105,7 +123,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
     });
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createPlaybuzzLoader_());
-    //placeholder.appendChild(this.createAmpImage_('//cdn.playbuzz.com/amp/assets/loader/loader-360@2x.png'));
     return placeholder;
   }
 
@@ -118,7 +135,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.src = this.generateEmbedSourceUrl_();
 
     this.listenToPlaybuzzItemMessage_('resize_height',
-      this.setElementSize_.bind(this));
+      utils.debounce(this.setElementSize_.bind(this), 250));
+
+    whenDocumentComplete(this.win.document)
+      .then(this.setElementSize_.bind(this));
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -134,44 +154,31 @@ class AmpPlaybuzz extends AMP.BaseElement {
       this.getVsync().mutate(() => {
         setStyles(iframe, {'opacity': 1});
       });
-      this.win.addEventListener('scroll',
-        this.sendScrollDataToItem_.bind(this));
+      this.getViewport().onChanged(
+        utils.debounce(this.sendScrollDataToItem_.bind(this), 250));
     });
-  }
-
-  createAmpImage_(src) {
-    const image = this.win.document.createElement('amp-img');
-    image.setAttribute('noprerender', '');
-    image.setAttribute('src', src);
-    image.setAttribute('layout', 'fill');
-    image.setAttribute('referrerpolicy', 'origin');
-    this.propagateAttributes(['alt'], image);
-    setStyles(image, {
-      'top': '48px',
-      'bottom': '48px',
-      'left': '8px',
-      'right': '8px',
-    });
-    return image;
   }
 
   createPlaybuzzLoader_() {
-    /*eslint-disable */
-    const loadingPlaceholder = this.win.document.createElement('div');
-    loadingPlaceholder.className = 'pb_feed_placeholder_container';
-    let loadingPlaceholderInner = "<div class='pb_feed_placeholder_inner'>";
-    loadingPlaceholderInner += "    <div class='pb_feed_placeholder_content'>";
-    loadingPlaceholderInner += "        <div class='pb_feed_placeholder_preloader'>";
-    loadingPlaceholderInner += "            <img src='data:image/png;base64,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' class='pb_feed_anim_mask' />";
-    loadingPlaceholderInner += '        </div>';
-    loadingPlaceholderInner += "        <div class='pb_ie_fixer'></div>";
-    loadingPlaceholderInner += "        <div class='pb_feed_loading_text'>Loading...</div>";
-    loadingPlaceholderInner += '    </div>';
-    loadingPlaceholderInner += '</div>';
+    const doc = this.element.ownerDocument;
+    const createElement = utils.getElementCreator(doc);
 
-    loadingPlaceholder.innerHTML = loadingPlaceholderInner;
+    const loaderImage = createElement('img', 'pb_feed_anim_mask');
+    loaderImage.src = logo;
+
+    const loaderText = createElement('div', 'pb_feed_loading_text');
+    loaderText.textContent = 'Loading...';
+
+    const loadingPlaceholder =
+      createElement('div', 'pb_feed_placeholder_container',
+        createElement('div', 'pb_feed_placeholder_inner',
+          createElement('div', 'pb_feed_placeholder_content', [
+            createElement('div', 'pb_feed_placeholder_preloader', loaderImage),
+            createElement('div', 'pb_ie_fixer'),
+            loaderText,
+          ])));
+
     return loadingPlaceholder;
-    /*eslint-enable */
   }
 
   /**
@@ -180,150 +187,76 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @memberOf AmpPlaybuzz
    */
   setElementSize_(height) {
-    const heightInPixels = height + 'px';
+
+    if (isNaN(height) || height === this.itemHeight_) {
+      return;
+    }
+
+    this.itemHeight_ = height; //Save new height
+
+    if (this.win.document.readyState !== 'complete') {
+      return;
+    }
+
+    const heightInPixels = this.itemHeight_ + 'px';
+    // this.changeHeight(this.itemHeight_); //Is that better than using vSync mutate + setStyles ?
+    this.getVsync().mutate(() => {
+      setStyles(this.element, {'height': heightInPixels, 'width': '100%'});
+    });
 
     this.getVsync().mutate(() => {
       setStyles(this.iframe_, {
         'height': heightInPixels,
         'max-height': heightInPixels,
+        'width': '100%',
       });
     });
-
-    this.getVsync().mutate(() => {
-      setStyles(this.element, {'height': heightInPixels});
-    });
   }
 
-  /**
-   * @param {Object} event
-   * @param {String} eventName
-   * @param {Function} handler
-   *
-   * @memberOf AmpPlaybuzz
-   */
-  handlePlaybuzzItemEvent_(event, eventName, handler) {
-    const data = this.parsePlaybuzzEventData_(event.data);
-    if (data[eventName]) {
-      // console.log('Handeling playbuzz item message -->' + eventName);
-      handler(data[eventName]);
-    }
-  }
-
-  parsePlaybuzzEventData_(data) {
-    if (typeof data === 'object') {
-      return data;
-    }
-    const err = 'error parsing json message from playbuzz item: ' + data;
-    try {
-      if (typeof data === 'string') {
-        return JSON.parse(data);
-      }
-    }
-    catch (e) {
-      //TODO: use user().error()
-      console.error(err, e);
-      return {};
-    }
-
-    console.error(err, data);
-    return {};
-  }
 
   listenToPlaybuzzItemMessage_(messageName, handler) {
-    events.listen(this.win, 'message', function gotMessageEvent(event) {
-      const isPlaybuzzItemEvent = event.origin &&
-        event.origin.indexOf &&
-        event.origin.indexOf('playbuzz.com') >= 0;
-
-      if (isPlaybuzzItemEvent) {
-        this.handlePlaybuzzItemEvent_(event, messageName, handler);
-      }
-
-    }.bind(this));
+    events.listen(this.win, 'message',
+      event => utils.handleMessageByName(event, messageName, handler));
   }
 
   generateEmbedSourceUrl_() {
-    const e = this.element;
-    const itemUrl = this.item_.replace('https://', '//').replace('http://', '//');
-    const displayItemInfo = e.getAttribute('display-item-info') === 'true';
-    const displayShareBar = e.getAttribute('display-share-buttons') === 'true';
-    const displayComments = e.getAttribute('display-comments') === 'true';
-    const windowUrl = this.win.location;
-    const parentUrl = windowUrl.href.split(windowUrl.hash)[0];
+    const params = {};
+    params.itemUrl = this.item_.replace('https://', '//').replace('http://', '//').split('#')[0];
+    params.relativeUrl = params.itemUrl.split('.playbuzz.com')[1];
+    params.displayItemInfo = this.displayItemInfo_;
+    params.displayShareBar = this.displayShareBar_;
+    params.displayComments = this.displayComments_;
+    params.windowUrl = this.win.location;
+    params.parentUrl = params.windowUrl.href.split(params.windowUrl.hash)[0];
+    params.parentHost = params.windowUrl.hostname;
 
-    const embedUrl = itemUrl +
-      '?feed=true' +
-      '&implementation=amp' +
-      '&src=' + itemUrl +
-      '&embedBy=00000000-0000-0000-0000-000000000000' + // TODO: (must pass user id - for now can generate uuid)
-      '&game=' + itemUrl.split('.playbuzz.com')[1] + // /shaulolmert10/5-u-s-athletes-you-need-to-know-about-before-the-rio-olympics
-      '&comments=undefined' + //display comments (not in use)
-      '&useComments=' + displayComments +
-      '&gameInfo=' + displayItemInfo +
-      '&useShares=' + displayShareBar +
-      '&socialReferrer=false' + //always false - will use parent url for sharing
-      '&height=auto' + //must pass as is - if not, makes problems in trivia (iframe height scrolling)
-      '&parentUrl=' + parentUrl + //used for sharing
-      '&parentHost=' + windowUrl.hostname;
-
+    const embedUrl = utils.composeEmbedUrl(params);
     return embedUrl;
   }
 
-  sendScrollDataToItem_() {
-    const doc = this.win.document.documentElement;
+  sendScrollDataToItem_(changeEvent) {
+    const viewport = this.getViewport();
+
     const scrollingData = {
-      event: 'queryScroll',
-      data: {
-        windowHeight: this.win.innerHeight,
-        scroll: doc.scrollTop || this.win.pageYOffset,
-        offsetTop: Math.round(this.calculateOffset_(this.iframe_).top) || 0,
-      },
+      event: 'scroll',
+      windowHeight: changeEvent.height,
+      scroll: changeEvent.top,
+      offsetTop: viewport.getLayoutRect(this.element).top,
     };
 
-    this.iframe_.contentWindow.postMessage(scrollingData, '*');
-  }
-
-  calculateOffset_(element) {
-    let box = {top: 0, left: 0};
-    const elem = element;
-    const doc = elem && elem.ownerDocument;
-
-    if (!doc) {
-      return {
-        top: null,
-        left: null,
-      };
-    }
-
-    const docElem = doc.documentElement;
-
-    if (elem.getBoundingClientRect != undefined) {
-      box = elem.getBoundingClientRect();
-    }
-
-    return {
-      top: box.top +
-        (this.win.pageYOffset || docElem.scrollTop) -
-        (docElem.clientTop || 0),
-      left: box.left +
-        (this.win.pageXOffset || docElem.scrollLeft) -
-        (docElem.clientLeft || 0),
-    };
+    const data = JSON.stringify(scrollingData);
+    postMessage(this.iframe_, 'onMessage', data, '*', false);
   }
 
   /** @override */
   unlayoutOnPause() {
-    return true;
+    return false;
   }
 
   /** @override */
   unlayoutCallback() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-      this.iframePromise_ = null;
-    }
-    return true;  // Call layoutCallback again.
+    //User might have made some progress or had the results when going inactive
+    return false;
   }
 };
 

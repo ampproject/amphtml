@@ -23,6 +23,10 @@ import {adopt} from '../../../../src/runtime';
 
 adopt(window);
 
+function startsWith(string, searchString) {
+  return string.substr(0, searchString.length) === searchString;
+};
+
 describe('amp-playbuzz', () => {
 
   function createOptionalParams(displayInfo, displayShareBar, displayComments) {
@@ -60,7 +64,7 @@ describe('amp-playbuzz', () => {
   function testIframe(iframe) {
     const itemSrcUrl = '//www.playbuzz.com/bob/bobs-life';
     expect(iframe).to.not.be.null;
-    expect(iframe.src.startsWith(itemSrcUrl)).to.be.true;
+    expect(startsWith(iframe.src, itemSrcUrl)).to.be.true;
     expect(iframe.className).to.match(/-amp-fill-content/);
   }
 
@@ -96,7 +100,7 @@ describe('amp-playbuzz', () => {
 
   it('builds a placeholder image without inserting iframe', () => {
     return getIns('https://www.playbuzz.com/bob/bobs-life', createOptionalParams(), true, ins => {
-      console.log(ins);
+      // console.log(ins);
       const placeholder = ins.querySelector('[placeholder]');
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
@@ -114,19 +118,6 @@ describe('amp-playbuzz', () => {
       ins.implementation_.iframePromise_.then(() => {
         expect(placeholder.style.display).to.be.equal('none');
       });
-    });
-  });
-
-  it('removes iframe after unlayoutCallback', () => {
-    return getIns('https://www.playbuzz.com/bob/bobs-life').then(ins => {
-      const placeholder = ins.querySelector('[placeholder]');
-      testIframe(ins.querySelector('iframe'));
-      const obj = ins.implementation_;
-      obj.unlayoutCallback();
-      expect(ins.querySelector('iframe')).to.be.null;
-      expect(obj.iframe_).to.be.null;
-      expect(obj.iframePromise_).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
     });
   });
 
