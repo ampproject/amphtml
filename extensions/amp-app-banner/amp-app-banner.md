@@ -171,7 +171,7 @@ Not permitted: **disabled**
 <head>
   <meta name="apple-itunes-app"
              content="app-id=123456789, app-argument=app-name://link/to/app-content">
-  <link rel="amp-manifest" href="https://link/to/manifest.json">
+  <link rel="manifest" href="https://link/to/manifest.json">
 </head>
 
 . . . 
