@@ -38,7 +38,18 @@ export const DEFAULT_THRESHOLD =
     [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
     0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
+/** @typedef {{
+ *    element: !Element,
+ *    currentThresholdSlot: number,
+ *  }}
+ */
+let observeEntryDef;
+
+/** @const @private */
 const INIT_TIME = Date.now();
+
+/** @const @private */
+const TAG = 'IntersectionObserver';
 
 /**
  * A function to get the element's current IntersectionObserverEntry
@@ -167,7 +178,7 @@ export class IntersectionObserverPolyfill {
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {
-    /** @private @const {function(?IntersectionObserverEntry)} */
+    /** @private @const {function(?IntersectionObserverEntry, ?Element)} */
     this.callback_ = callback;
 
     /**
@@ -180,41 +191,53 @@ export class IntersectionObserverPolyfill {
         this.threshold_[this.threshold_.length - 1] <= 1,
         'Threshold should be in the range from "[0, 1]"');
 
-    /** @private {?Element} */
-    this.element_ = null;
-
     /**
-     * The prev threshold slot which the previous ratio fills
-     * Range [0, this.threshold_.length]
-     * TODO: Do we always want to call callback at the first tick?
-     * @private {number}
+     * Store a list of observed elements and their current threshold slot which
+     * their intersection ratio fills, range from [0, this.threshold_.length]
+     * @private {Array<!observeEntryDef>}
      */
-    this.prevThresholdSlot_ = 0;
-
-    // TODO: create the PositionObserver class, or create listener for position
-    // info if inside an iframe
-
-    // TODO: Add the postMessageApi logic outside IntersectionObserverPolyfill.
+    this.observeEntries_ = [];
   }
 
   /**
-   * Provide a way to observer the intersection change for a specific element
-   * Please note that the IntersectionObserverPolyfill only allow to observe one
-   * element at a time.
-   * TODO: Support observing multiple elements.
+   * Provide a way to observe the intersection change for a specific element
+   * Please note IntersectionObserverPolyfill only support AMP element now
    * TODO: Support non AMP element
    * @param {!Element} element
    */
   observe(element) {
     // Check the element is an AMP element
     dev().assert(element.isBuilt && element.isBuilt());
-    // Reset cached value for a new element
 
-    this.prevThresholdSlot_ = 0;
-    this.element_ = element;
+    // If the element already exists in current observeEntries, do nothing
+    this.observerEntries_.forEach(entry => {
+      if (entry.element === element) {
+        dev().warn('INTERSECTION-OBSERVER', 'should observe same element once');
+      }
+      return;
+    });
+
+    // push new observed element
+    this.observeEntries.push({
+      element,
+      currentThresholdSlot: 0,
+    });
   }
 
-  // TODO: Support unobserve() function
+  /**
+   * Provide a way to unobserve intersection change for a specified element
+   * @param {!Element} element
+   */
+  unobserve(element) {
+    // find the unobserved element in observeEntries
+    for (let i = 0; i < this.observeEntries_.length; i++) {
+      if (this.observeEntries_[i].element === element) {
+        this.observeEntries_.splice(i, 1);
+        return;
+      }
+    }
+    dev().warn('INTERSECTION-OBSERVER', 'unobserver non-observed element');
+  }
 
   /**
    * Tick function that update the DOMRect of the root of observed element.
@@ -233,60 +256,44 @@ export class IntersectionObserverPolyfill {
           moveLayoutRect(opt_iframe, -opt_iframe.left, -opt_iframe.top);
     }
 
+    this.observeEntries_.forEach(entry => {
+      this.tickOnEntry(entry, hostViewport, opt_iframe);
+    });
+  }
+
+  tickOnEntry_(entry, hostViewport, opt_iframe) {
     // Normalize container LayoutRect to be relative to page
     let elementRect;
     let ownerRect = null;
+    const element = entry.element;
 
     // If opt_iframe is provided, all LayoutRect has position relative to
     // the iframe.
     // If opt_iframe is not provided, all LayoutRect has position relative to
     // the host document.
-    elementRect = this.element_.getLayoutBox();
-    const owner = this.element_.getOwner();
+    elementRect = element.getLayoutBox();
+    const owner = element.getOwner();
     ownerRect = owner && owner.getLayoutBox();
 
-    const changeEntry = this.getValidIntersectionChangeEntry_(
-        elementRect, ownerRect, hostViewport, opt_iframe);
-    if (changeEntry) {
-      this.callback_(changeEntry);
-    }
-  }
-
-  /**
-   * Return a change entry for that should be compatible with
-   * IntersectionObserverEntry if it's valid with current config.
-   * When the new intersection ratio doesn't cross one of a threshold value,
-   * the function will return null.
-   *
-   * Mutates passed in rootBounds to have x and y according to spec.
-   *
-   * @param {!./layout-rect.LayoutRectDef} element element's rect
-   * @param {?./layout-rect.LayoutRectDef} owner element's owner rect
-   * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
-   * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
-   * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
-   * does not fill in a new threshold bucket.
-   * @private
-   */
-  getValidIntersectionChangeEntry_(element, owner, hostViewport, opt_iframe) {
     // calculate intersectionRect. that the element intersects with hostViewport
     // and intersects with owner element and container iframe if exists.
     const intersectionRect =
-        rectIntersection(element, owner, hostViewport, opt_iframe) ||
+        rectIntersection(elementRect, ownerRect, hostViewport, opt_iframe) ||
         layoutRectLtwh(0, 0, 0, 0);
 
     // calculate ratio, call callback based on new ratio value.
     const ratio = intersectionRatio(intersectionRect, element);
     const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
-    if (newThresholdSlot == this.prevThresholdSlot_) {
-      return null;
+
+    if (newThresholdSlot == entry.currentThresholdSlot) {
+      return;
     }
-    this.prevThresholdSlot_ = newThresholdSlot;
 
     // To get same behavior as native IntersectionObserver set hostViewport null
     // if inside an iframe
-    return calculateChangeEntry(
+    const changeEntry = calculateChangeEntry(
         element, (opt_iframe ? null : hostViewport), intersectionRect, ratio);
+    this.callback_(changeEntry, element);
   }
 }
 
