@@ -836,8 +836,9 @@ amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_ = /^#x([0-9A-Fa-f]+)$/;
  * @private
  */
 amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
-    // Don't capture space.
-    '^\\s*(?:' +
+    // Don't capture space. In this case, we don't use \s because it includes a
+    // nonbreaking space which gets included as an attribute in our validation.
+    '^[ \\t\\n\\f\\r\\v]*(?:' +
         // Capture an attribute name in group 1, and value in group 3.
         // We capture the fact that there was an attribute in group 2, since
         // interpreters are inconsistent in whether a group that matches nothing
@@ -893,7 +894,7 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
         // '!' or '?'. The remaining characters are more easily expressed as a
         // negative set of: '\0', ' ', '\n', '\r', '\t', '\f', '\v', '>', or
         // '/'.
-        '|<(/)?([a-z!\\?][^\0 \n\r\t\f\v>/]*)' +
+        '|<(/)?([a-z!\\?][^\\0 \\n\\r\\t\\f\\v>/]*)' +
         // Text captured in group 4.
         '|([^<&>]+)' +
         // Cruft captured in group 5.
