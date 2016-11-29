@@ -30,6 +30,7 @@ import {
   isGoogleAdsA4AValidEnvironment,
   getCorrelator,
 } from '../../../ads/google/a4a/utils';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
@@ -69,11 +70,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
-    const size = `${slotRect.width}x${slotRect.height}`;
+    let size = `${slotRect.width}x${slotRect.height}`;
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
     const adTestOn = isInManualExperiment(this.element);
+
+    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    if (multiSizeDataStr) {
+      const multiSizeValidation = this.element
+          .getAttribute('data-multi-size-validation');
+      // The following call will check all specified multi-size dimensions,
+      // verify that they meet all requirements, and then return all the valid
+      // dimensions in an array.
+      const dimensions = getMultiSizeDimensions(
+          multiSizeDataStr /* Raw multi-size data attribute */,
+          this.element.getAttribute('width') /* Primary width */,
+          this.element.getAttribute('height') /* Primary height */,
+          multiSizeValidation /* Raw multi-size-validation data attribute */);
+      size += '|' + dimensions.map(dimension => dimension.join('x')).join('|');
+    }
+
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotIdNumber, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
@@ -87,7 +104,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'adtest', value: adTestOn},
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
-
     ], [
       {
         name: 'scp',
@@ -96,6 +112,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             jsonParameters['categoryExclusions'] || null),
       },
     ]);
+  }
+
+  /** @override */
+  handleResize(size) {
+    const pWidth = this.element.getAttribute('width');
+    const pHeight = this.element.getAttribute('height');
+    const rWidth = size[0];
+    const rHeight = size[1];
+    // We want to resize only if neither returned dimension is larger than its
+    // primary counterpart, and if at least one of the returned dimensions
+    // differ from its primary counterpart.
+    if ((rWidth != pWidth || rHeight != pHeight)
+        && (rWidth <= pWidth && rHeight <= pHeight)) {
+      this.attemptChangeSize(rHeight, rWidth);
+    }
   }
 
   /** @override */

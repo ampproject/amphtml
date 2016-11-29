@@ -28,6 +28,9 @@ import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
+/** @const {string} */
+const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+
 /** @const {number} */
 const MAX_URL_LENGTH = 4096;
 
@@ -51,13 +54,12 @@ const AmpAdImplementation = {
 export function isGoogleAdsA4AValidEnvironment(win, element) {
   const supportsNativeCrypto = win.crypto &&
       (win.crypto.subtle || win.crypto.webkitSubtle);
-  const multiSizeRequest = element.dataset && element.dataset.multiSize;
   // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
   // will be kept up to date with known proxies.  However, it doesn't seem to
   // be compatible with loading the example files from localhost.  To hack
   // around that, just say that we're A4A eligible if we're in local dev
   // mode, regardless of origin path.
-  return supportsNativeCrypto && !multiSizeRequest &&
+  return supportsNativeCrypto &&
       (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
 }
 
@@ -89,16 +91,23 @@ export function googleAdUrl(
 export function extractGoogleAdCreativeAndSignature(
     creative, responseHeaders) {
   let signature = null;
+  let size = null;
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
       signature =
         base64UrlDecodeToBytes(dev().assertString(
             responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
+    if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
+      const sizeStr = responseHeaders.get(CREATIVE_SIZE_HEADER);
+      // We should trust that the server returns the size information in the
+      // form of a WxH string.
+      size = sizeStr.split('x').map(dim => Number(dim));
+    }
   } finally {
     return Promise.resolve(/** @type {
           !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature}));
+          {creative, signature, size}));
   }
 }
 

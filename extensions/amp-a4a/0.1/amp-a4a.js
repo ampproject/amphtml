@@ -33,7 +33,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Encode, utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
@@ -90,7 +90,11 @@ const SHARED_IFRAME_PROPERTIES = {
   marginheight: '0',
 };
 
-/** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
+/** @typedef {{
+ *    creative: ArrayBuffer,
+ *    signature: ?Uint8Array,
+ *    size: ?Array<string>
+ *  }} */
 export let AdResponseDef;
 
 /** @typedef {{
@@ -118,7 +122,6 @@ export const LIFECYCLE_STAGES = {
   renderSafeFrameStart: '11',
   adSlotCleared: '20',
 };
-
 
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
@@ -388,9 +391,12 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
-              creativeParts && creativeParts.creative) {
+          if (creativeParts && creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
+          }
+          if (creativeParts && creativeParts.size
+              && creativeParts.size.length == 2) {
+            this.handleResize(creativeParts.size);
           }
           if (!creativeParts || !creativeParts.signature) {
             return /** @type {!Promise<?string>} */ (Promise.resolve(null));
@@ -418,10 +424,6 @@ export class AmpA4A extends AMP.BaseElement {
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
-
-          // TODO(levitzky) If creative comes back null, we should consider re-
-          // fetching the signing server public keys and try the verification
-          // step again.
           return creative && this.maybeRenderAmpAd_(creative);
         })
         .catch(error => this.promiseErrorHandler_(error));
@@ -531,6 +533,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.creativeBody_ = null;  // Free resources.
           return renderPromise;
         } else if (this.adUrl_) {
+          const creativeStr = utf8Decode(this.creativeBody_);
           return this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
           throw new Error('No creative or URL available -- A4A can\'t render' +
@@ -610,6 +613,18 @@ export class AmpA4A extends AMP.BaseElement {
       unusedResponseHeaders) {
     throw new Error('extractCreativeAndSignature not implemented!');
   }
+
+  /**
+   * This function is called if the ad response contains a creative size header
+   * indicating the size of the header. It provides an opportunity to resize the
+   * creative, if desired, before it is rendered.
+   *
+   * To be implemented by network.
+   *
+   * @param {!Array<string>} size An array containing two elements, the first
+   *     being the width and the second the height.
+   */
+  handleResize(size) {}
 
   /**
    * Callback executed when AMP creative has successfully rendered within the
