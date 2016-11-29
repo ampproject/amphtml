@@ -129,7 +129,9 @@ module.exports = {
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+    '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
+    '!validator/nodejs/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',

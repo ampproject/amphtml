@@ -370,9 +370,9 @@ export class Viewer {
       }
     });
 
-    // Remove hash - no reason to keep it around, but only when embedded or we have
-    // an incoming click tracking string (see impression.js).
-    if (this.isEmbedded_ || this.params_['click']) {
+    // Remove hash when we have an incoming click tracking string
+    // (see impression.js).
+    if (this.params_['click']) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
@@ -380,9 +380,7 @@ export class Viewer {
         if (!this.win.location.originalHash) {
           this.win.location.originalHash = this.win.location.hash;
         }
-        // Using #- to falsify a theory that could lead to
-        // https://github.com/ampproject/amphtml/issues/6070
-        this.win.history.replaceState({}, '', newUrl + '#-');
+        this.win.history.replaceState({}, '', newUrl);
         dev().fine(TAG_, 'replace url:' + this.win.location.href);
       }
     }
@@ -879,41 +877,6 @@ export class Viewer {
     }
     return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
         'fragment', {fragment}, true));
-  }
-
-  /**
-   * Triggers "tick" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl, and use sendMessage()
-   */
-  tick(message) {
-    this.sendMessageCancelUnsent('tick', message, false);
-  }
-
-  /**
-   * Triggers "sendCsi" event for the viewer.
-   * TODO: move this to performance-impl
-   */
-  flushTicks() {
-    this.sendMessageCancelUnsent('sendCsi', undefined, false);
-  }
-
-  /**
-   * Triggers "setFlushParams" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl
-   */
-  setFlushParams(message) {
-    this.sendMessageCancelUnsent('setFlushParams', message, false);
-  }
-
-  /**
-   * Triggers "prerenderComplete" event for the viewer.
-   * @param {!Object} message
-   * TODO: move this to performance-impl
-   */
-  prerenderComplete(message) {
-    this.sendMessageCancelUnsent('prerenderComplete', message, false);
   }
 
   /**
