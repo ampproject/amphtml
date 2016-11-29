@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {bindServiceForDoc} from '../bind';
+import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
 import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
@@ -229,8 +229,9 @@ export class ActionService {
     // TODO(choumx): This is hacky.
     if (action.actionInfo.target === 'AMP') {
       dev().assert(action.actionInfo.method === 'setState');
-      const bindService = bindServiceForDoc(this.ampdoc);
-      bindService.setState(action.actionInfo.args);
+      bindForDoc(this.ampdoc).then(bind => {
+        bind.setState(action.actionInfo.args);
+      });
     } else {
       const target = this.root_.getElementById(action.actionInfo.target);
       if (!target) {

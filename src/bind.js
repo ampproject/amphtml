@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForDoc} from './service';
+import {getElementServiceForDoc} from './element-service';
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!./service/bind-impl.Bind}
+ * @return {!Promise<!Activity>}
  */
-export function bindServiceForDoc(nodeOrDoc) {
-  return /** @type {!./service/bind-impl.Bind} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'amp-bind'));
-};
+export function bindForDoc(nodeOrDoc) {
+  return /** @type {!Promise<!Bind>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'amp-bind', 'amp-bind'));
+}

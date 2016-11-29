@@ -15,7 +15,7 @@
  */
 
 import {AmpBindState} from './amp-bind-state';
-import {Bind} from '../../../src/service/bind-impl';
+import {Bind} from './bind-impl';
 
 AMP.registerServiceForDoc('amp-bind', Bind);
 

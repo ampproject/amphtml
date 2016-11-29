@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {bindServiceForDoc} from '../../../src/bind'
+import {bindForDoc} from '../../../src/bind'
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -68,8 +68,9 @@ export class AmpBindState extends AMP.BaseElement {
       const state = Object.create(null);
       state[id] = json;
 
-      const bindService = bindServiceForDoc(this.getAmpDoc());
-      bindService.setState(state);
+      bindForDoc(this.getAmpDoc()).then(bind => {
+        bind.setState(state, true);
+      });
     }
   }
 

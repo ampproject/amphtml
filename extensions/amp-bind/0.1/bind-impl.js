@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {evaluateBindExpr} from '../../extensions/amp-bind/0.1/bind-expr';
-import {fromClassForDoc} from '../service';
-import {getMode} from '../mode';
-import {user} from '../log';
-import {vsyncFor} from '../vsync'
+import {evaluateBindExpr} from './bind-expr';
+import {fromClassForDoc} from '../../../src/service';
+import {getMode} from '../../../src/mode';
+import {user} from '../../../src/log';
+import {vsyncFor} from '../../../src/vsync'
 
 const TAG_ = 'AMP-BIND';
 
@@ -63,11 +63,14 @@ export class Bind {
 
   /**
    * @param {!Object} state
+   * @param {boolean=} opt_skipDigest
    */
-  setState(state) {
+  setState(state, opt_skipDigest) {
     Object.assign(this.scope_, state);
 
-    this.digest_();
+    if (!opt_skipDigest) {
+      this.digest_();
+    }
   }
 
   /**
@@ -119,7 +122,7 @@ export class Bind {
 
   /**
    * Schedules a vsync task to reevaluate all binding expressions.
-   * @param {bool=} opt_verifyOnly
+   * @param {boolean=} opt_verifyOnly
    * @private
    */
   digest_(opt_verifyOnly) {
@@ -172,9 +175,9 @@ export class Bind {
         if (element.classList.contains('-amp-element')) {
           const resources = element.getResources();
           if (property === 'width') {
-            resources.attemptChangeSize(element, undefined, sanitizedValue);
+            resources.changeSize(element, undefined, sanitizedValue);
           } else if (property === 'height') {
-            resources.attemptChangeSize(element, sanitizedValue, undefined);
+            resources.changeSize(element, sanitizedValue, undefined);
           }
 
           element.attributeChangedCallback(property, oldValue, sanitizedValue);
