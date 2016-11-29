@@ -26,6 +26,7 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
+import {getMode} from '../../src/mode';
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -1692,6 +1693,28 @@ describe('createViewport', () => {
     it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
       win.parent = {};
       const ampDoc = installDocService(win, true).getAmpDoc();
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => true);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNatural_);
+    });
+
+    it('should bind to "iOS embed" when not iframed but in dev mode', () => {
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      getMode(win).development = true;
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => false);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+    });
+
+    it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
       sandbox.stub(viewer, 'isIframed', () => true);
       sandbox.stub(viewer, 'isEmbedded', () => false);
