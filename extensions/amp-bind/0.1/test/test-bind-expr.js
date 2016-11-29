@@ -27,6 +27,7 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('3 * 4')).to.equal(12);
     expect(evaluateBindExpr('4 / 5')).to.equal(0.8);
     expect(evaluateBindExpr('5 % 4')).to.equal(1);
+    expect(evaluateBindExpr('1 / 0')).to.equal(Infinity);
   });
 
   it('should evaluate comparison operations', () => {
@@ -216,6 +217,10 @@ describe('evaluateBindExpr', () => {
   });
 
   it('should NOT allow access to prototype properties', () => {
+    expect(evaluateBindExpr('constructor')).to.be.null;
+    expect(evaluateBindExpr('prototype')).to.be.null;
+    expect(evaluateBindExpr('__proto__')).to.be.null;
+
     expect(evaluateBindExpr('{}.constructor')).to.be.null;
     expect(evaluateBindExpr('{}.prototype')).to.be.null;
     expect(evaluateBindExpr('{}.__proto__')).to.be.null;

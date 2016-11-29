@@ -196,18 +196,8 @@ case 29:
           return;
         }
 
-        var obj = Object.prototype.toString.call($$[$0-1]);
         var prop = Object.prototype.toString.call($$[$0]);
-
-        if (obj === '[object Array]') {
-          if (prop === '[object Number]' && Number.isInteger($$[$0])) {
-            if ($$[$0] >= 0 && $$[$0] < $$[$0-1].length) {
-              this.$ = $$[$0-1][$$[$0]];
-            }
-          }
-        }
-
-        if (prop === '[object String]') {
+        if (prop === '[object String]' || prop === '[object Number]') {
           if (Object.prototype.hasOwnProperty.call($$[$0-1], $$[$0])) {
             this.$ = $$[$0-1][$$[$0]];
           }
@@ -215,7 +205,7 @@ case 29:
       
 break;
 case 32:
-this.$ = yy[$$[$0]] !== undefined ? yy[$$[$0]] : null;
+this.$ = Object.prototype.hasOwnProperty.call(yy, $$[$0]) ? yy[$$[$0]] : null;
 break;
 case 33:
 this.$ = yytext.substr(1, yyleng - 2);

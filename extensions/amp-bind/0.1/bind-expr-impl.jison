@@ -216,18 +216,8 @@ member_access:
           return;
         }
 
-        var obj = Object.prototype.toString.call($1);
         var prop = Object.prototype.toString.call($2);
-
-        if (obj === '[object Array]') {
-          if (prop === '[object Number]' && Number.isInteger($2)) {
-            if ($2 >= 0 && $2 < $1.length) {
-              $$ = $1[$2];
-            }
-          }
-        }
-
-        if (prop === '[object String]') {
+        if (prop === '[object String]' || prop === '[object Number]') {
           if (Object.prototype.hasOwnProperty.call($1, $2)) {
             $$ = $1[$2];
           }
@@ -244,7 +234,7 @@ member:
 
 variable:
     NAME
-      {$$ = yy[$1] !== undefined ? yy[$1] : null;}
+      {$$ = Object.prototype.hasOwnProperty.call(yy, $1) ? yy[$1] : null;}
   ;
 
 literal:
