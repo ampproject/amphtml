@@ -591,7 +591,7 @@ describe('amp-iframe', () => {
     });
   });
 
-  it.only('should not cache intersection box', () => {
+  it('should not cache intersection box', () => {
     return getAmpIframeObject({
       src: iframeSrc,
       sandbox: 'allow-scripts allow-same-origin',
