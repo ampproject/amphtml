@@ -1748,7 +1748,7 @@ const ViewportType = {
  * @return {string}
  */
 function getViewportType(win, viewer) {
-  let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
+  const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
   if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
     return viewportType;
   }
