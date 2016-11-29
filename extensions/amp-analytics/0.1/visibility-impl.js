@@ -18,6 +18,7 @@ import {closestByTag, closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/resources';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {isFiniteNumber} from '../../../src/types';
 import {viewportForDoc} from '../../../src/viewport';
@@ -149,39 +150,35 @@ export function isVisibilitySpecValid(config) {
  * id, the element with that id is returned. If the selector is a tag name, an
  * ancestor of the analytics element with that tag name is returned.
  *
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc.
  * @param {string} selector The selector for the element to track.
- * @param {!Element} el Element whose ancestors to search.
- * @param {!String} selectionMethod The method to use to find the element..
+ * @param {!Element} analyticsEl Element whose ancestors to search.
+ * @param {!String} selectionMethod The method to use to find the element.
  * @return {?Element} Element corresponding to the selector if found.
  */
-export function getElement(ampdoc, selector, el, selectionMethod) {
-  if (!el) {
+export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
+  if (!analyticsEl) {
     return null;
   }
 
-  const elWin = el.ownerDocument.defaultView;
-  // Special case for root selector.
-  if (selector == ':host' || selector == ':root') {
-    const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
-    if (parentEl) {
-      return closestBySelector(parentEl, '.-amp-element');
-    }
-  }
-
   let foundEl;
-  if (selectionMethod == 'closest') {
+  const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
+  // Special case for root selector.
+  if (friendlyFrame && (selector == ':host' || selector == ':root')) {
+    foundEl = closestBySelector(friendlyFrame, '.-amp-element');
+  } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
-    foundEl = closestByTag(el, selector);
+    foundEl = closestByTag(analyticsEl, selector);
   } else if (selectionMethod == 'scope') {
-    foundEl = el.parentElement.querySelector(selector);
+    foundEl = analyticsEl.parentElement.querySelector(selector);
   } else if (selector[0] == '#') {
-    foundEl = el.ownerDocument.getElementById(selector.slice(1));
+    const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
+    foundEl = containerDoc.getElementById(selector.slice(1));
   }
 
   if (foundEl) {
     // Restrict result to be contained by ampdoc.
-    const isContainedInDoc = ampdoc.contains(
-        elWin === ampdoc.win ? foundEl : elWin.frameElement);
+    const isContainedInDoc = ampdoc.contains(friendlyFrame || foundEl);
     if (isContainedInDoc) {
       return foundEl;
     }

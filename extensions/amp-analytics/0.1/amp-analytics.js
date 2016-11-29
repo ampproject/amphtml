@@ -262,7 +262,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
     const ampdoc = this.getAmpDoc();
-    return urlReplacementsForDoc(ampdoc).expandAsync(remoteConfigUrl)
+    return urlReplacementsForDoc(this.element).expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
           return xhrFor(ampdoc.win).fetchJson(remoteConfigUrl, fetchConfig);
@@ -438,7 +438,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     request = this.expandTemplate_(request, trigger, event);
 
     // For consistency with amp-pixel we also expand any url replacements.
-    return urlReplacementsForDoc(this.getAmpDoc()).expandAsync(request)
+    return urlReplacementsForDoc(this.element).expandAsync(request)
         .then(request => {
           this.sendRequest_(request, trigger);
           return request;
@@ -466,7 +466,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
       const key = this.expandTemplate_(spec['sampleOn'], trigger);
-      const keyPromise = urlReplacementsForDoc(this.getAmpDoc())
+      const keyPromise = urlReplacementsForDoc(this.element)
           .expandAsync(key);
       const cryptoPromise = cryptoFor(this.win);
       return Promise.all([keyPromise, cryptoPromise])
