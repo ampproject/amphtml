@@ -38,14 +38,8 @@ limitations under the License.
     <td>nodisplay</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li>
-          TBD
-        </li>
-      </ul>
-    </td>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-app-banner/">Annotated code example for amp-app-banner</a></td>
   </tr>
 </table>
 
