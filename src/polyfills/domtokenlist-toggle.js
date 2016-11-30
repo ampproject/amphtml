@@ -43,7 +43,7 @@ function domTokenListTogglePolyfill(token, opt_force) {
  */
 export function install(win) {
   const ua = win.navigator.userAgent;
-  if (isIe(ua) && win.DOMTokenList && win.DOMTokenList.prototype.toggle) {
+  if (isIe(ua) && win.DOMTokenList) {
     win.DOMTokenList.prototype.toggle = domTokenListTogglePolyfill;
   }
 }
