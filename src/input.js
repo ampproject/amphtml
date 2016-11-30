@@ -44,6 +44,15 @@ export class Input {
     /** @private {!Function} */
     this.boundOnMouseDown_ = this.onMouseDown_.bind(this);
 
+    /** @private {!Function} */
+    this.boundOnMouseMove_ = null;
+
+    /** @private {!Function} */
+    this.boundMouseCanceled_ = null;
+
+    /** @private {!Function} */
+    this.boundMouseConfirmed_ = null;
+
     /** @private {boolean} */
     this.hasTouch_ = ('ontouchstart' in win ||
         (win.navigator['maxTouchPoints'] !== undefined &&
@@ -75,8 +84,10 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      listenOnce(win.document, 'mousemove',
-        /** @const {!Function} */ (this.onMouseMove_.bind(this)));
+      if (!this.boundOnMouseMove_) {
+        this.boundOnMouseMove_ = this.onMouseMove_.bind(this);
+      }
+      listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
 
@@ -198,11 +209,17 @@ export class Input {
       this.mouseCanceled_();
       return undefined;
     }
+    if (!this.boundMouseCanceled_) {
+      this.boundMouseCanceled_ = this.mouseCanceled_.bind(this);
+    }
+    if (!this.boundMouseConfirmed_) {
+      this.boundMouseConfirmed_ = this.mouseConfirmed_.bind(this);
+    }
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
     return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
-        .then(this.mouseCanceled_.bind(this), this.mouseConfirmed_.bind(this));
+        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
   }
 
   /** @private */
@@ -217,8 +234,10 @@ export class Input {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
-      listenOnce(this.win.document, 'mousemove',
-        /** @const {!Function} */ (this.onMouseMove_.bind(this)));
+      if (!this.boundOnMouseMove_) {
+        this.boundOnMouseMove_ = this.onMouseMove_.bind(this);
+      }
+      listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
     } else {
       dev().fine(TAG_, 'mouse detection failed');
     }
