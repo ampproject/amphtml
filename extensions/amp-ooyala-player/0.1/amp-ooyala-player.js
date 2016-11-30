@@ -17,7 +17,11 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
+import {VideoEvents} from '../../../src/video-interface';
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -73,8 +77,39 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.applyFillContent(iframe);
 
     this.element.appendChild(iframe);
-    return this.loadPromise(iframe);
+
+    return this.loadPromise(iframe).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
   }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }  
+
+  /** @override */
+  pauseCallback() {
+    if (this.iframe_) {
+      this.pause();
+    }
+  }
+
+  // VideoInterface Implementation. See ../src/video-interface.VideoInterface  
 
   /** @override */
   play(unusedIsAutoplay) {
@@ -97,22 +132,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  pauseCallback() {
-    if (this.iframe_) {
-      this.pause();
-    }
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-    }
-    return true;
-  }
-
-  /** @override */
   unlayoutOnPause() {
     return false;
   }
@@ -123,7 +142,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  isInViewport() {
+  isInteractive() {
     return true;
   }
 
