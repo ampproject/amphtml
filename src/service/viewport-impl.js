@@ -165,16 +165,17 @@ export class Viewport {
     this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
-    // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
-    // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
-    // The enables passive touch handlers, e.g. for document swipe, since they
-    // no will longer need to try to cancel vertical scrolls during swipes.
-    // This is only done in the embedded mode because (a) the document swipe
-    // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
-    if (this.ampdoc.isSingleDoc() &&
-            viewer.isEmbedded() &&
-            isExperimentOn(this.ampdoc.win, 'pan-y')) {
-      setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
+    // Top-level mode classes.
+    if (this.ampdoc.isSingleDoc()) {
+      this.globalDoc_.documentElement.classList.add('-amp-singledoc');
+    }
+    if (viewer.isEmbedded()) {
+      this.globalDoc_.documentElement.classList.add('-amp-embedded');
+    } else {
+      this.globalDoc_.documentElement.classList.add('-amp-standalone');
+    }
+    if (viewer.isIframed()) {
+      this.globalDoc_.documentElement.classList.add('-amp-iframed');
     }
 
     // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
@@ -918,7 +919,6 @@ export class ViewportBindingNatural_ {
         // merging this style into `amp.css`.
         if (isExperimentOn(this.win, 'make-body-relative')) {
           setStyles(body, {
-            display: 'block',
             position: 'relative',
           });
         }
@@ -1748,19 +1748,21 @@ const ViewportType = {
  * @return {string}
  */
 function getViewportType(win, viewer) {
-  let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (platformFor(win).isIos()
-      && ((viewportType == ViewportType.NATURAL
-              && viewer.isIframed()
-              // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
-              && viewer.isEmbedded())
-          // Enable iOS Embedded mode so that it's easy to test against a more
-          // realistic iOS environment.
-          || getMode(win).localDev
-          || getMode(win).development)) {
-    viewportType = ViewportType.NATURAL_IOS_EMBED;
+  const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
+  if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
+    return viewportType;
   }
-  dev().fine(TAG_, '- viewportType:', viewportType);
+  // Enable iOS Embedded mode so that it's easy to test against a more
+  // realistic iOS environment w/o an iframe.
+  if (!viewer.isIframed()
+          && (getMode(win).localDev || getMode(win).development)) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+  // Override to ios-embed for iframe-viewer mode.
+  // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
+  if (viewer.isIframed() && viewer.isEmbedded()) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
   return viewportType;
 }
 

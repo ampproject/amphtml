@@ -95,7 +95,9 @@ export class InstrumentationService {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
     this.ampdoc = ampdoc;
 
-    this.visibilityV2Enabled = isExperimentOn(this.ampdoc.win, 'visibility-v2');
+    /** @private {boolean} */
+    this.visibilityV2Enabled_ = this.ampdoc.win.IntersectionObserver &&
+        isExperimentOn(this.ampdoc.win, 'visibility-v2');
 
     /** @const @private {!./visibility-impl.Visibility} */
     this.visibility_ = new Visibility(this.ampdoc);
@@ -261,7 +263,7 @@ export class InstrumentationService {
         return;
       }
 
-      const listenOnceFunc = this.visibilityV2Enabled
+      const listenOnceFunc = this.visibilityV2Enabled_
           ? this.visibility_.listenOnceV2.bind(this.visibility_)
           : this.visibility_.listenOnce.bind(this.visibility_);
 

@@ -311,7 +311,7 @@ export class Resources {
 
   /**
    * Returns the {@link Resource} instance corresponding to the specified AMP
-   * Element. Return null if no resource is found.
+   * Element. Returns null if no resource is found.
    * @param {!AmpElement} element
    * @return {?Resource}
    */

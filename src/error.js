@@ -112,6 +112,10 @@ export function cancellation() {
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
+    if (event.reason && event.reason.message === CANCELLED) {
+      event.preventDefault();
+      return;
+    }
     reportError(event.reason || new Error('rejected promise ' + event));
   });
 }
@@ -207,7 +211,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     url += '&iem=1';
   }
 
-  if (self.AMP.viewer) {
+  if (self.AMP && self.AMP.viewer) {
     const resolvedViewerUrl = self.AMP.viewer.getResolvedViewerUrl();
     const messagingOrigin = self.AMP.viewer.maybeGetMessagingOrigin();
     if (resolvedViewerUrl) {
