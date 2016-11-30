@@ -172,7 +172,7 @@ case 26:
         const whitelist = functionWhitelist[obj];
         if (whitelist) {
           const fn = $$[$0-3][$$[$0-1]];
-          if (whitelist.indexOf(fn) >= 0) {
+          if (fn && fn === whitelist[$$[$0-1]]) {
             if (typeCheckArgs($$[$0])) {
               this.$ = fn.apply($$[$0-3], $$[$0]);
             } else {
@@ -393,34 +393,48 @@ const toString = Object.prototype.toString;
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // For security reasons, must not contain functions that mutate the caller.
-const functionWhitelist =
-{
-  '[object Array]':
-    [
-      Array.prototype.concat,
-      Array.prototype.includes,
-      Array.prototype.indexOf,
-      Array.prototype.join,
-      Array.prototype.lastIndexOf,
-      Array.prototype.slice,
-    ],
-  '[object String]':
-    [
-      String.prototype.charAt,
-      String.prototype.charCodeAt,
-      String.prototype.concat,
-      String.prototype.includes,
-      String.prototype.indexOf,
-      String.prototype.lastIndexOf,
-      String.prototype.repeat,
-      String.prototype.slice,
-      String.prototype.split,
-      String.prototype.substr,
-      String.prototype.substring,
-      String.prototype.toLowerCase,
-      String.prototype.toUpperCase,
-    ],
-};
+const functionWhitelist = (() => {
+  const whitelist = {
+    '[object Array]':
+      [
+        Array.prototype.concat,
+        Array.prototype.includes,
+        Array.prototype.indexOf,
+        Array.prototype.join,
+        Array.prototype.lastIndexOf,
+        Array.prototype.slice,
+      ],
+    '[object String]':
+      [
+        String.prototype.charAt,
+        String.prototype.charCodeAt,
+        String.prototype.concat,
+        String.prototype.includes,
+        String.prototype.indexOf,
+        String.prototype.lastIndexOf,
+        String.prototype.repeat,
+        String.prototype.slice,
+        String.prototype.split,
+        String.prototype.substr,
+        String.prototype.substring,
+        String.prototype.toLowerCase,
+        String.prototype.toUpperCase,
+      ],
+  };
+  // Creates a prototype-less map of function name to the function itself.
+  // This makes function lookups faster (compared to Array.indexOf).
+  const out = Object.create(null);
+  Object.keys(whitelist).forEach(type => {
+    out[type] = Object.create(null);
+
+    const functions = whitelist[type];
+    for (let i = 0; i < functions.length; i++) {
+      const f = functions[i];
+      out[type][f.name] = f;
+    }
+  });
+  return out;
+})();
 
 /** @return {bool} Returns false if args contains an invalid type. */
 function typeCheckArgs(args) {
