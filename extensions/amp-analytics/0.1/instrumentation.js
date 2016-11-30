@@ -23,7 +23,6 @@ import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 import {Visibility} from './visibility-impl';
-import {VisibilityV2} from './visibility-v2';
 import {isExperimentOn} from '../../../src/experiments';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
@@ -96,10 +95,12 @@ export class InstrumentationService {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
     this.ampdoc = ampdoc;
 
-    /** @const @private {(!./visibility-impl.Visibility|!./visibility-v2.VisibilityV2)} */
-    this.visibility_ = isExperimentOn(this.ampdoc.win, 'visibility-v2')
-        ? new VisibilityV2(this.ampdoc)
-        : new Visibility(this.ampdoc);
+    /** @private {boolean} */
+    this.visibilityV2Enabled_ = this.ampdoc.win.IntersectionObserver &&
+        isExperimentOn(this.ampdoc.win, 'visibility-v2');
+
+    /** @const @private {!./visibility-impl.Visibility} */
+    this.visibility_ = new Visibility(this.ampdoc);
 
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(this.ampdoc.win);
@@ -262,7 +263,11 @@ export class InstrumentationService {
         return;
       }
 
-      this.visibility_.listenOnce(spec, vars => {
+      const listenOnceFunc = this.visibilityV2Enabled_
+          ? this.visibility_.listenOnceV2.bind(this.visibility_)
+          : this.visibility_.listenOnce.bind(this.visibility_);
+
+      listenOnceFunc(spec, vars => {
         const el = getElement(this.ampdoc, spec['selector'],
             analyticsElement, spec['selectionMethod']);
         if (el) {
