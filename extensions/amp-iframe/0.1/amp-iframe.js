@@ -25,7 +25,7 @@ import {listenFor} from '../../../src/iframe-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
@@ -200,7 +200,7 @@ export class AmpIframe extends AMP.BaseElement {
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
 
-    this.isAdLike_ = isAdLike(this);
+    this.isAdLike_ = isAdLike(this.element);
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(this.element, this.win);
@@ -221,6 +221,9 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.iframe_) {
       const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
       const box = this.getLayoutBox();
+      // Cache the iframe's relative position to the amp-iframe. This is
+      // necessary for fixed-position containers which "move" with the
+      // viewport.
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
@@ -236,9 +239,10 @@ export class AmpIframe extends AMP.BaseElement {
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    // If the iframe is full size, we avoid an object allocation by moving box.
-    return moveLayoutRect(box, this.iframeLayoutBox_.left,
-        this.iframeLayoutBox_.top);
+
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
+        dev().assert(this.iframeLayoutBox_));
+    return moveLayoutRect(iframe, box.left, box.top);
   }
 
   /** @override */
@@ -513,12 +517,12 @@ const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
 
 /**
  * Guess whether this element might be an ad.
- * @param {!BaseElement} ampElement An amp-iframe element.
+ * @param {!Element} element An amp-iframe element.
  * @return {boolean}
  * @visibleForTesting
  */
-export function isAdLike(ampElement) {
-  const box = ampElement.getIntersectionElementLayoutBox();
+export function isAdLike(element) {
+  const box = element.getLayoutBox();
   const height = box.height;
   const width = box.width;
   for (let i = 0; i < adSizes.length; i++) {
