@@ -21,7 +21,7 @@ import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
-import {startsWith} from './string';
+import {isProxyOrigin} from './url';
 
 const CANCELLED = 'CANCELLED';
 
@@ -112,6 +112,10 @@ export function cancellation() {
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
+    if (event.reason && event.reason.message === CANCELLED) {
+      event.preventDefault();
+      return;
+    }
     reportError(event.reason || new Error('rejected promise ' + event));
   });
 }
@@ -207,7 +211,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     url += '&iem=1';
   }
 
-  if (self.AMP.viewer) {
+  if (self.AMP && self.AMP.viewer) {
     const resolvedViewerUrl = self.AMP.viewer.getResolvedViewerUrl();
     const messagingOrigin = self.AMP.viewer.maybeGetMessagingOrigin();
     if (resolvedViewerUrl) {
@@ -248,7 +252,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
 export function detectNonAmpJs(win) {
   const scripts = win.document.querySelectorAll('script[src]');
   for (let i = 0; i < scripts.length; i++) {
-    if (!startsWith(scripts[i].src.toLowerCase(), urls.cdn)) {
+    if (!isProxyOrigin(scripts[i].src.toLowerCase())) {
       return true;
     }
   }

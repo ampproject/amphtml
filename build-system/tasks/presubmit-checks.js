@@ -108,6 +108,16 @@ var forbiddenTerms = {
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
   },
+  'documentStateFor': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/custom-element.js',
+      'src/style-installer.js',
+      'src/service/document-state.js',
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
+    ],
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -257,9 +267,17 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
+      'src/service/performance-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+    ],
+  },
+  'sendMessageCancelUnsent': {
+    message: 'Usages must be reviewed.',
+    whitelist: [
+      'src/service/viewer-impl.js',
+      'src/service/performance-impl.js',
     ],
   },
   // Privacy sensitive
@@ -601,6 +619,18 @@ var forbiddenTermsSrcInclusive = {
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
+  },
+  '\\.expandStringSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+    ]
+  },
+  '\\.expandStringAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+    ]
   },
 };
 

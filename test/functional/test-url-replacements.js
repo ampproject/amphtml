@@ -25,12 +25,11 @@ import {installCryptoService,} from
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
-import {installActivityService,} from
-    '../../extensions/amp-analytics/0.1/activity-impl';
+import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {getService} from '../../src/service';
+import {getService, fromClassForDoc} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {toggleExperiment} from '../../src/experiments';
@@ -74,7 +73,7 @@ describe('UrlReplacements', () => {
         }
         if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          installActivityService(iframe.win);
+          fromClassForDoc(iframe.ampdoc, 'activity', Activity);
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
@@ -1072,6 +1071,34 @@ describe('UrlReplacements', () => {
         expect(a.href).to.equal(
             'https://canonical.com/link?out=bar&c=test-cid(abc)');
       });
+    });
+  });
+
+  describe('Expanding String', () => {
+    it('should not reject protocol changes with expandStringSync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      let expanded = urlReplacements.expandStringSync(
+          'PROTOCOL://example.com/?r=RANDOM', {
+            'PROTOCOL': 'abc',
+          });
+      expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
+      expanded = urlReplacements.expandStringSync(
+          'FUNCT://example.com/?r=RANDOM', {
+            'FUNCT': function() { return 'abc'; },
+          });
+      expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
+    });
+
+    it('should not check protocol changes with expandStringAsync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      return urlReplacements.expandStringAsync(
+          'RANDOM:X:Y', {
+            'RANDOM': Promise.resolve('abc'),
+          }).then(expanded => {
+            expect(expanded).to.equal('abc:X:Y');
+          });
     });
   });
 });

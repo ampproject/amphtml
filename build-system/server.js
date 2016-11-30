@@ -156,7 +156,7 @@ function assertCors(req, res, opt_validMethods) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Expose-Headers',
-      'AMP-Access-Control-Allow-Source-Origin')
+      'AMP-Access-Control-Allow-Source-Origin');
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
       req.query.__amp_source_origin);
 }
@@ -492,6 +492,16 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   });
 });
 
+// "fake" a4a creative.
+app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', function(req, res) {
+  var filePath = '/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json';
+  fs.readFileAsync(process.cwd() + filePath).then(file => {
+    const metadata = JSON.parse(file);
+    res.setHeader('Content-Type', 'text/html');
+    res.end(metadata.creative);
+  });
+});
+
 /**
  * @param {string} mode
  * @param {string} file
@@ -509,6 +519,8 @@ function replaceUrls(mode, file) {
     file = file.replace(/\.max\.js/g, '.js');
     file = file.replace('/dist/amp.js', '/dist/v0.js');
     file = file.replace('/dist/amp-inabox.js', '/dist/amp4ads-v0.js');
+    file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/,
+        '/dist.3p/current-min/$1.html');
   }
   return file;
 }

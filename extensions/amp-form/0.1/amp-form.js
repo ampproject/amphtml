@@ -20,12 +20,12 @@ import {
   assertHttpsUrl,
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
+  isProxyOrigin,
 } from '../../../src/url';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
-import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
 import {
   removeElement,
@@ -36,7 +36,6 @@ import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
-import {urls} from '../../../src/config';
 import {getFormValidator} from './form-validators';
 
 /** @type {string} */
@@ -102,8 +101,8 @@ export class AmpForm {
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
       assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user().assert(!startsWith(this.xhrAction_, urls.cdn),
-          'form action-xhr should not be on cdn.ampproject.org: %s',
+      user().assert(!isProxyOrigin(this.xhrAction_),
+          'form action-xhr should not be on AMP CDN: %s',
           this.form_);
     }
 
@@ -118,7 +117,7 @@ export class AmpForm {
     }
     this.form_.classList.add('-amp-form');
 
-    const submitButtons = this.form_.querySelectorAll('input[type=submit]');
+    const submitButtons = this.form_.querySelectorAll('[type="submit"]');
     /** @const @private {!Array<!Element>} */
     this.submitButtons_ = toArray(submitButtons);
 
@@ -179,6 +178,7 @@ export class AmpForm {
     if (this.state_ == FormState_.SUBMITTING) {
       if (opt_event) {
         opt_event.stopImmediatePropagation();
+        opt_event.preventDefault();
       }
       return;
     }
@@ -189,6 +189,7 @@ export class AmpForm {
     if (this.shouldValidate_ && !isValid) {
       if (opt_event) {
         opt_event.stopImmediatePropagation();
+        opt_event.preventDefault();
       }
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({

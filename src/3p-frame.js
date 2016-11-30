@@ -71,6 +71,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes._context = {
     referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
+    sourceUrl: docInfo.sourceUrl,
     pageViewId: docInfo.pageViewId,
     location: {
       href: locationHref,
@@ -215,21 +216,24 @@ export function resetBootstrapBaseUrlForTesting(win) {
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
+ * @param {string=} opt_srcFileBasename
  * @return {string}
  */
-function getDefaultBootstrapBaseUrl(parentWindow) {
+export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
+  const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
     if (overrideBootstrapBaseUrl) {
       return overrideBootstrapBaseUrl;
     }
     return getAdsLocalhost(parentWindow)
         + '/dist.3p/'
-        + (getMode().minified ? '$internalRuntimeVersion$/frame'
-            : 'current/frame.max')
+        + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
+            : `current/${srcFileBasename}.max`)
         + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
-      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
+      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+      `${srcFileBasename}.html`;
 }
 
 function getAdsLocalhost(win) {

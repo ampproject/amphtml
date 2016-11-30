@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>AMP selector represents a control that presents a menu of options and lets the user choose from it.</td>
+    <td>Represents a control that presents a menu of options and lets the user choose from it.</td>
   </tr>
   <tr>
     <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -32,16 +32,17 @@ limitations under the License.
 </table>
 
 ## Behavior
-AMP select is a control that presents a list of options and lets the user choose one or many.
 
-- An `amp-selector` can contain any arbitrary HTML elements or AMP components.
-- An `amp-selector` cannot contain any nested `amp-selector`s
-- Selectable options are marked by setting an `option` attribute on the element and assign a value to it. Example: `<li option='value'></li>`
-- One or more options can be disabled by marking them with the `disabled` attribute.
-- The entire amp-selector could be disabled by adding the `disabled` attribute on the `amp-selector` element itself.
-- The selector by default allows one selection at a time, when the `multiple` attribute is added to the `amp-selector` element it enables multiple options to be selected at the same time.
-- Options can be pre-selected by adding the `selected` attribute to one or more options.
-- When an `amp-selector` has a `name` attribute and is put inside a `form` tag and a submit event occurs on the corresonding form the selector behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the selector.
+The AMP selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
+
+- An `amp-selector` can contain any arbitrary HTML elements or AMP components (e.g., `amp-carousel`, `amp-img`, etc.).
+- An `amp-selector` cannot contain any nested `amp-selector` controls.
+- Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option='value'></li>`).
+- Disabled options can be set by adding the `disabled` attribute to the element (e.g.,  `<li option='d' disabled></li>`).
+- Preselected options can be set by adding the `selected` attribute to the element (e.g.,  `<li option='b' selected></li>`).
+- To allow for multiple selections, add the `multiple` attribute to the `amp-selector` element.  By default, the `amp-selector` allows for one selection at a time. 
+- To disable the entire `amp-selector`, add the `disabled` attribute to the `amp-selector` element.
+- When an `amp-selector` contains a `name` attribute and the `amp-selector` is inside a `form` tag, if a submit event occurs on the form, the `amp-selector`behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the `amp-selector`.
 
 Example:
 
@@ -79,11 +80,19 @@ Example:
 ```
 
 ##Attributes
-### disabled, form, multiple, name
 
-The attributes above should all behave like they do on standard HTML select.
+###Attributes on `<amp-selector>`
 
-###Attributes on the options
-#### disabled, selected
+**disabled, form, multiple, name**
 
-The attributes above should all behave like they do on standard HTML option.
+The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
+
+###Attributes on `<amp-selector>` options
+
+**option**
+
+Indicates that the option is selectable.  If a value is specified, the contents of the value is submitted with the form.
+
+**disabled, selected**
+
+The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.

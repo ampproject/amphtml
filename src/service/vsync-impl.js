@@ -18,7 +18,7 @@ import {Pass} from '../pass';
 import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
-import {documentStateFor} from '../document-state';
+import {documentStateFor} from './document-state';
 import {getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {viewerForDoc, viewerPromiseForDoc} from '../viewer';
@@ -62,7 +62,7 @@ export class Vsync {
     /** @private @const {!./ampdoc-impl.AmpDocService} */
     this.ampdocService_ = ampdocServiceFor(this.win);
 
-    /** @private @const {!../document-state.DocumentState} */
+    /** @private @const {!./document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
 
     /** @private @const {function(function())}  */
