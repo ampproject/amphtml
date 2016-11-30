@@ -31,8 +31,8 @@
   <p [text]="myState.myStateKey1">This will read 'myStateValue1'<p>
   <button [disabled]="isButtonDisabled">This button will be disabled</button>
   <p [class]="textClass">This text will have have a red background color</p>
-  <amp-img src="shirts/blue.jpeg" [src]="shirtSrc" width=100 [width]="shirtSize" height=100 [height]="shirtSize" alt="asdf"></amp-img>
+  <amp-img src="shirts/blue.jpeg" [src]="shirtSrc" width=100 [width]="shirtSize" height=100 [height]="shirtSize" alt="asdf" [alt]="imgAlt"></amp-img>
   <hr>
-  <button on="tap:AMP.setBindState(foo='foo', isButtonDisabled=true, textClass='redBackground', shirtSrc='shirts/white.jpeg', shirtSize=200)">Click me</button>
+  <button on="tap:AMP.setBindState(foo='foo', isButtonDisabled=true, textClass='redBackground', shirtSrc='shirts/white.jpeg', shirtSize=200, imgAlt='a white shirt')">Click me</button>
 </body>
 </html>

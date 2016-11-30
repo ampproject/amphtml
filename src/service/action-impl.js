@@ -232,7 +232,7 @@ export class ActionService {
           bind.setState(action.actionInfo.args);
         });
       } else {
-        this.actionInfoError_('unrecognized action', action.actionInfo, target);
+        this.actionInfoError_('unrecognized action', action.actionInfo);
       }
     } else {
       const target = this.root_.getElementById(action.actionInfo.target);

@@ -45,7 +45,7 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name, unusedOldValue, unusedNewValue) {
     if (name === 'src') {
       this.srcset_ = srcsetFromElement(this.element);
       this.updateImageSrc_();

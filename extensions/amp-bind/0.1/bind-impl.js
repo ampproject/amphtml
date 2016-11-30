@@ -15,10 +15,9 @@
  */
 
 import {evaluateBindExpr} from './bind-expr';
-import {fromClassForDoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {user} from '../../../src/log';
-import {vsyncFor} from '../../../src/vsync'
+import {vsyncFor} from '../../../src/vsync';
 
 const TAG_ = 'AMP-BIND';
 
@@ -115,7 +114,7 @@ export class Bind {
       return {
         property: name.substr(1, name.length - 2),
         expression: attribute.value,
-        element: element,
+        element,
       };
     }
   }
@@ -153,7 +152,8 @@ export class Bind {
    * @private
    */
   applyBinding_(binding, newValue) {
-    const {property, expression, element} = binding;
+    const property = binding.property;
+    const element = binding.element;
 
     // TODO: Support arrays for classes and objects for attributes.
 
@@ -193,11 +193,12 @@ export class Bind {
    * @private
    */
   verifyBinding_(binding, expectedValue) {
-    const {property, expression, element} = binding;
-    let initialValue;
+    const property = binding.property;
+    const element = binding.element;
 
     // TODO: Support arrays for classes and objects for attributes.
 
+    let initialValue;
     if (property === 'text') {
       initialValue = element.textContent;
     } else if (property === 'class') {

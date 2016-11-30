@@ -803,11 +803,11 @@ export class BaseElement {
 
   /**
    * Called when an attribute's value changes.
-   * @param {!string} name
-   * @param {?string} oldValue
-   * @param {?string} newValue
+   * @param {!string} unusedName
+   * @param {?string} unusedOldValue
+   * @param {?string} unusedNewValue
    */
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(unusedName, unusedOldValue, unusedNewValue) {
     // Subclasses may override.
   }
 

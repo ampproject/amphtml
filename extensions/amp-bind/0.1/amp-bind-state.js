@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {bindForDoc} from '../../../src/bind'
+import {bindForDoc} from '../../../src/bind';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
