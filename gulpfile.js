@@ -865,7 +865,6 @@ function patchWebAnimations() {
 }
 patchWebAnimations();
 
-
 /**
  * Gulp tasks
  */
