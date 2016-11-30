@@ -99,8 +99,9 @@ attribute if present (minimum of 1000 ms; an error will be thrown if it's any lo
 ## Styling
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 - The visual state of an `amp-carousel` button when it's disabled is hidden.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
+
 
 **Example**: Default `.amp-carousel-button` inlined SVG
 
