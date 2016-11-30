@@ -176,13 +176,13 @@ case 26:
             if (typeCheckArgs($$[$0])) {
               this.$ = fn.apply($$[$0-3], $$[$0]);
             } else {
-              throw new Error(`Unexpected argument type in {$$[$0-1]}()`);
+              throw new Error('Unexpected argument type in ' + $$[$0-1] + '()');
             }
             return;
           }
         }
 
-        throw new Error(`{$$[$0-1]}() is not a supported function.`);
+        throw new Error($$[$0-1] + '() is not a supported function.');
       
 break;
 case 27: case 40:

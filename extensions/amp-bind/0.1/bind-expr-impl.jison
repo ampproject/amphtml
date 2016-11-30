@@ -194,13 +194,13 @@ invocation:
             if (typeCheckArgs($4)) {
               $$ = fn.apply($1, $4);
             } else {
-              throw new Error(`Unexpected argument type in {$3}()`);
+              throw new Error('Unexpected argument type in ' + $3 + '()');
             }
             return;
           }
         }
 
-        throw new Error(`{$3}() is not a supported function.`);
+        throw new Error($3 + '() is not a supported function.');
       %}
   ;
 
