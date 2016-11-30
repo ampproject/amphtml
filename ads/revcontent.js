@@ -42,6 +42,9 @@ export function revcontent(global, data) {
     'endpoint',
     'publisher',
     'branding',
+    'font',
+    'css',
+    'sizer',
   ];
 
   validateData(data, required, optional);
