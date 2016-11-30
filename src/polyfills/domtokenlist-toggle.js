@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isIe} from '../service/platform-impl';
 
 /**
  * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method.
@@ -25,15 +26,8 @@
  * @return {boolean}
  */
 function domTokenListTogglePolyfill(token, opt_force) {
-  if (opt_force !== undefined) {
-    if (opt_force) {
-      this.add(token);
-      return true;
-    } else {
-      this.remove(token);
-      return false;
-    }
-  } else if (this.contains(token)) {
+  const remove = opt_force === undefined ? this.contains(token) : !opt_force;
+  if (remove) {
     this.remove(token);
     return false;
   } else {
@@ -48,17 +42,8 @@ function domTokenListTogglePolyfill(token, opt_force) {
  * @param {!Window} win
  */
 export function install(win) {
-  if (isIe(win) && win.DOMTokenList && win.DOMTokenList.prototype.toggle) {
+  const ua = win.navigator.userAgent;
+  if (isIe(ua) && win.DOMTokenList && win.DOMTokenList.prototype.toggle) {
     win.DOMTokenList.prototype.toggle = domTokenListTogglePolyfill;
   }
-}
-
-/**
- * Returns true if browser is IE.
- * @param {!Window} win
- * @return {boolean}
- */
-function isIe(win) {
-  const ua = win.navigator.userAgent;
-  return /MSIE/i.test(ua) || /IEMobile/i.test(ua) || /Trident/i.test(ua);
 }
