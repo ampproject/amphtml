@@ -220,7 +220,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       const paramList = [];
       for (const param in opt_extraParams) {
         if (!!param) {
-          paramList.push(`${param}=${opt_extraParams[param]}`);
+          paramList.push(
+              encodeURIComponent(param) + '=' +
+              encodeURIComponent(opt_extraParams[param]));
         }
       }
       if (paramList.length > 0) {
