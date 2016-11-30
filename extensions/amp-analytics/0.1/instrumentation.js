@@ -17,7 +17,7 @@
 import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
-import {getExistingServiceForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
@@ -528,10 +528,14 @@ export class InstrumentationService {
 }
 
 /**
+ * It's important to resolve instrumentation asynchronously in elements that depends on
+ * it in multi-doc scope. Otherwise an element life-cycle could resolve way before we
+ * have the service available.
+ *
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!InstrumentationService}
+ * @return {!Promise<InstrumentationService>}
  */
 export function instrumentationServiceForDoc(nodeOrDoc) {
-  return /** @type {!InstrumentationService} */ (getExistingServiceForDoc(
-      nodeOrDoc, 'amp-analytics-instrumentation'));
+  return /** @type {!Promise<InstrumentationService>} */ (
+      getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
 }

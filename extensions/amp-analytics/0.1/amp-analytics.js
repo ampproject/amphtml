@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from './vendors';
-import {
-  InstrumentationService,
-  instrumentationServiceForDoc,
-} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
-import {installCidService} from './cid-impl';
-import {installCryptoService} from './crypto-impl';
-import {installActivityService} from './activity-impl';
 import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
@@ -33,12 +25,20 @@ import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
+import {Activity} from './activity-impl';
+import {installCidService} from './cid-impl';
+import {installCryptoService} from './crypto-impl';
+import {
+    InstrumentationService,
+    instrumentationServiceForDoc,
+} from './instrumentation';
+import {ANALYTICS_CONFIG} from './vendors';
 
 // Register doc-service factory.
 AMP.registerServiceForDoc(
     'amp-analytics-instrumentation', InstrumentationService);
+AMP.registerServiceForDoc('activity', Activity);
 
-installActivityService(AMP.win);
 installCidService(AMP.win);
 installCryptoService(AMP.win);
 
@@ -115,8 +115,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.consentNotificationId_ = this.element
         .getAttribute('data-consent-notification-id');
 
-    this.instrumentation_ = instrumentationServiceForDoc(this.getAmpDoc());
-
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = userNotificationManagerFor(this.win)
           .then(service => service.get(this.consentNotificationId_));
@@ -131,6 +129,10 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     return this.consentPromise_
         .then(this.fetchRemoteConfig_.bind(this))
+        .then(() => instrumentationServiceForDoc(this.getAmpDoc()))
+        .then(instrumentation => {
+          this.instrumentation_ = instrumentation;
+        })
         .then(this.onFetchRemoteConfigSuccess_.bind(this));
   }
 
@@ -191,7 +193,6 @@ export class AmpAnalytics extends AMP.BaseElement {
                 /* arg*/ false);
             this.instrumentation_.addListener(
                 trigger, this.handleEvent_.bind(this, trigger), this.element);
-
           } else {
             this.instrumentation_.addListener(
                 trigger, this.handleEvent_.bind(this, trigger), this.element);
@@ -260,12 +261,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
-    /** @const {!Window} */
-    const win = this.win;
-    return urlReplacementsForDoc(win.document).expandAsync(remoteConfigUrl)
+    const ampdoc = this.getAmpDoc();
+    return urlReplacementsForDoc(this.element).expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
-          return xhrFor(win).fetchJson(remoteConfigUrl, fetchConfig);
+          return xhrFor(ampdoc.win).fetchJson(remoteConfigUrl, fetchConfig);
         })
         .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
@@ -438,7 +438,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     request = this.expandTemplate_(request, trigger, event);
 
     // For consistency with amp-pixel we also expand any url replacements.
-    return urlReplacementsForDoc(this.win.document).expandAsync(request)
+    return urlReplacementsForDoc(this.element).expandAsync(request)
         .then(request => {
           this.sendRequest_(request, trigger);
           return request;
@@ -466,7 +466,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
       const key = this.expandTemplate_(spec['sampleOn'], trigger);
-      const keyPromise = urlReplacementsForDoc(this.win.document)
+      const keyPromise = urlReplacementsForDoc(this.element)
           .expandAsync(key);
       const cryptoPromise = cryptoFor(this.win);
       return Promise.all([keyPromise, cryptoPromise])
