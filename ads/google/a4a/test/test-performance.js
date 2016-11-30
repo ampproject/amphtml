@@ -356,6 +356,98 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(arg).to.match(new RegExp(`[&?]e=${escapeRegExp_(encodedEid)}`));
       });
     });
+
+    describe('with optional args', () => {
+      it('should attach single extra arg', () => {
+        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+          expect(emitPingSpy).to.not.be.called;
+          reporter.sendPing('adRequestStart', {fnord: 37});
+          expect(emitPingSpy).to.be.calledOnce;
+          const arg = emitPingSpy.getCall(0).args[0];
+          const expectations = [
+            // Be sure that existing ping not deleted by args.
+            /[&?]s=test_foo/,
+            /\&fnord=37/,
+          ];
+          expectMatchesAll(arg, expectations);
+          expectHasSiblingImgMatchingAll(elem, expectations);
+        });
+      });
+
+      it('should attach multiple extra args', () => {
+        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+          expect(emitPingSpy).to.not.be.called;
+          reporter.sendPing('adRequestStart', {
+            fnord: 37,
+            zort: 'flubble',
+            blob: 'xonx',
+            crash: 'boom',
+            fwip: 999,
+          });
+          expect(emitPingSpy).to.be.calledOnce;
+          const arg = emitPingSpy.getCall(0).args[0];
+          const expectations = [
+            // Be sure that existing ping not deleted by args.
+            /[&?]s=test_foo/,
+            /\&fnord=37/,
+            /\&zort=flubble/,
+            /\&blob=xonx/,
+            /\&crash=boom/,
+            /\&fwip=999/,
+          ];
+          expectMatchesAll(arg, expectations);
+          expectHasSiblingImgMatchingAll(elem, expectations);
+        });
+      });
+
+      it('should not add args on null input', () => {
+        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+          expect(emitPingSpy).to.not.be.called;
+          reporter.sendPing('adRequestStart', null);
+          expect(emitPingSpy).to.be.calledOnce;
+          const arg = emitPingSpy.getCall(0).args[0];
+          const expectations = [
+            // Be sure that existing ping not deleted by args.
+            /[&?]s=test_foo/,
+            // And it should not end with a & or ?.
+            /[^&?]$/,
+          ];
+          expectMatchesAll(arg, expectations);
+          expectHasSiblingImgMatchingAll(elem, expectations);
+        });
+      });
+
+      it('should not add args on empty input', () => {
+        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+          expect(emitPingSpy).to.not.be.called;
+          reporter.sendPing('adRequestStart', {});
+          expect(emitPingSpy).to.be.calledOnce;
+          const arg = emitPingSpy.getCall(0).args[0];
+          const expectations = [
+            // Be sure that existing ping not deleted by args.
+            /[&?]s=test_foo/,
+            // And it should not end with a & or ?.
+            /[^&?]$/,
+          ];
+          expectMatchesAll(arg, expectations);
+          expectHasSiblingImgMatchingAll(elem, expectations);
+        });
+      });
+
+      it('does not allow empty args', () => {
+        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+          expect(emitPingSpy).to.not.be.called;
+          reporter.sendPing('adRequestStart', {
+            null: '',
+            '': '',
+            x: 'x'
+          });
+          expect(emitPingSpy).to.be.calledOnce;
+          const arg = emitPingSpy.getCall(0).args[0];
+          expect(arg).not.to.match(/\&=?\&/);
+        });
+      });
+    });
   });
 
   describe('#setQqid', () => {

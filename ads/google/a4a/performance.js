@@ -217,11 +217,15 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     const eidParam = eid ? `&e=${encodeURIComponent(eid)}` : '';
     let extraParams = '';
     if (opt_extraParams) {
-      let paramList = [];
+      const paramList = [];
       for (const param in opt_extraParams) {
-        paramList.push(`${param}=${opt_extraParams[param]}`);
+        if (!!param) {
+          paramList.push(`${param}=${opt_extraParams[param]}`);
+        }
       }
-      extraParams = '&' + paramList.join('&');
+      if (paramList.length > 0) {
+        extraParams = '&' + paramList.join('&');
+      }
     }
     const pingUrl = `${this.pingbackAddress_}?` +
         `s=${this.namespace_}` +
