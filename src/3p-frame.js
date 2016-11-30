@@ -260,7 +260,7 @@ export function getSubDomain(win) {
  * @param {!Window} win
  * @return {string}
  */
-function getRandom(win) {
+export function getRandom(win) {
   let rand;
   if (win.crypto && win.crypto.getRandomValues) {
     // By default use 2 32 bit integers.
