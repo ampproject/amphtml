@@ -55,6 +55,7 @@ import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {adverline} from '../ads/adverline';
+import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
@@ -125,6 +126,8 @@ import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
+
+
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -149,6 +152,7 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('adverticum',adverticum);
 register('a9', a9);
 register('accesstrade', accesstrade);
 register('adblade', adblade);

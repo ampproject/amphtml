@@ -40,6 +40,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+
   a9: {
     prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   },
@@ -110,6 +111,7 @@ export const adConfig = {
     ],
     renderStartImplemented: true,
   },
+  adverticum: {},
 
   advertserve: {
     renderStartImplemented: true,
@@ -254,10 +256,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  ligatus: {
-    prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
-    renderStartImplemented: true,
-  },
+  ligatus: {},
 
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
