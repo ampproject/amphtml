@@ -22,6 +22,56 @@ import {
   utf8Decode,
 } from '../../../src/utils/bytes';
 
+describe('utf-8 encode/decode', () => {
+  const testCases = [
+    'SimplyFoo',
+    'Unicode௵Z加䅌ਇ☎Èʘغޝ',
+    'Symbols/.,+-_()*&^%$#@!`~:="\'',
+  ];
+  const scenarios = ['NativeTextEncoding', 'PolyfillTextEncoding', 'Mixed'];
+
+  scenarios.forEach(scenario => {
+    describe(scenario, () => {
+      const oldTextEncoder = window.TextEncoder;
+      const oldTextDecoder = window.TextDecoder;
+      beforeEach(() => {
+        // Forces use of the TextEncoding polyfill
+        if (scenario == 'PolyfillTextEncoding') {
+          window.TextEncoder = undefined;
+          window.TextDecoder = undefined;
+        }
+        // Tests a mixture where encoding is done by the polyfill but decoding
+        // is done by the native TextDecoder
+        if (scenario == 'Mixed') {
+          window.TextEncoder = undefined;
+        }
+      });
+
+      afterEach(() => {
+        window.TextEncoder = oldTextEncoder;
+        window.TextDecoder = oldTextDecoder;
+      });
+
+      it('should be symmetrical', () => {
+        testCases.forEach(testCase => {
+          it(testCase, () => {
+            const utf8Bytes = utf8Encode(testCase);
+            const decoded = utf8Decode(utf8Bytes);
+            expect(decoded).to.equal(testCase);
+          });
+        });
+      });
+
+      it('should throw on invalid input', () => {
+        const invalidUtf8Bytes = new Uint8Array([255, 152, 162]);
+        expect(() => {
+          utf8Decode(invalidUtf8Bytes);
+        }).to.throw(/Failed to decode UTF-8 bytes/);
+      });
+    });
+  });
+});
+
 describe('stringToBytes', function() {
   let fakeWin;
 
@@ -119,15 +169,15 @@ describe('utf8', function() {
 
   it('should encode given string into utf-8 byte array', () => {
     for (let i = 0; i < strings.length; i++) {
-      utf8Encode(strings[i]).then(byteArray => expect(byteArray).to.deep
-          .equal(new Uint8Array(bytes[i])));
+      const encoded = utf8Encode(strings[i]);
+      expect(encoded).to.deep.equal(new Uint8Array(bytes[i]));
     }
   });
 
   it('should decode given utf-8 bytes into string', () => {
     for (let i = 0; i < bytes.length; i++) {
-      utf8Decode(new Uint8Array(bytes[i])).then(string => expect(string).to
-          .equal(strings[i]));
+      const decoded = utf8Decode(new Uint8Array(bytes[i]));
+      expect(decoded).to.equal(strings[i]);
     }
   });
 });

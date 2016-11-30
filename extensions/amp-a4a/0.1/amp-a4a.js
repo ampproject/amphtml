@@ -731,71 +731,78 @@ export class AmpA4A extends AMP.BaseElement {
   maybeRenderAmpAd_(bytes) {
     this.emitLifecycleEvent('renderFriendlyStart', bytes);
     // AMP documents are required to be UTF-8
-    return utf8Decode(bytes).then(creative => {
-      // Find the json blob located at the end of the body and parse it.
-      const creativeMetaData = this.getAmpAdMetadata_(creative);
-      if (!creativeMetaData) {
-        // Could not find appropriate markers within the creative therefore
-        // load within cross domain iframe. Iframe is created immediately
-        // (as opposed to waiting for layoutCallback) as the the creative has
-        // been verified as AMP and will run efficiently.  Render inside a
-        // vsync block so that AMP can coordinate visual impact.
-        this.vsync_.mutate(() => {
-          dev().assert(this.adUrl_, 'Ad URL missing in A4A creative rendering');
-          this.renderViaCachedContentIframe_(this.adUrl_);
-        });
-        return true;
-      } else {
-        try {
-          // Create and setup friendly iframe.
-          dev().assert(!!this.element.ownerDocument);
-          const iframe = /** @type {!HTMLIFrameElement} */(
-            createElementWithAttributes(
-              /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
-                'frameborder': '0', 'allowfullscreen': '',
-                'allowtransparency': '', 'scrolling': 'no'}));
-          this.applyFillContent(iframe);
-          const fontsArray = [];
-          if (creativeMetaData.customStylesheets) {
-            creativeMetaData.customStylesheets.forEach(s => {
-              const href = s['href'];
-              if (href) {
-                fontsArray.push(href);
-              }
-            });
-          }
-          return installFriendlyIframeEmbed(
-            iframe, this.element, {
-              url: this.adUrl_,
-              html: creativeMetaData.minifiedCreative,
-              extensionIds: creativeMetaData.customElementExtensions || [],
-              fonts: fontsArray,
-            }, embedWin => {
-              installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
-                new A4AVariableSource(this.getAmpDoc(), embedWin));
-            }).then(friendlyIframeEmbed => {
-              // Ensure visibility hidden has been removed (set by boilerplate).
-              const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
-                friendlyIframeEmbed.win.document;
-              setStyle(frameDoc.body, 'visibility', 'visible');
-              // Capture phase click handlers on the ad.
-              this.registerExpandUrlParams_(friendlyIframeEmbed.win);
-              // Bubble phase click handlers on the ad.
-              this.registerAlpHandler_(friendlyIframeEmbed.win);
-              this.rendered_ = true;
-              this.onAmpCreativeRender();
-              return true;
-            });
-        } catch (e) {
-          dev().error('AMP-A4A', 'Error injecting creative in friendly frame',
-              e);
-          // If we fail on any of the steps of Shadow DOM construction, just
-          // render in iframe.
-          // TODO: report!
-          return false;
+    let creative;
+    try {
+      creative = utf8Decode(bytes);
+    } catch (e) {
+      user().error('AMP-A4A', e, this.element);
+      return Promise.resolve(false);
+    }
+
+    // Find the json blob located at the end of the body and parse it.
+    const creativeMetaData = this.getAmpAdMetadata_(creative);
+    if (!creativeMetaData) {
+      // Could not find appropriate markers within the creative therefore
+      // load within cross domain iframe. Iframe is created immediately
+      // (as opposed to waiting for layoutCallback) as the the creative has
+      // been verified as AMP and will run efficiently.  Render inside a
+      // vsync block so that AMP can coordinate visual impact.
+      this.vsync_.mutate(() => {
+        dev().assert(this.adUrl_, 'Ad URL missing in A4A creative rendering');
+        this.renderViaCachedContentIframe_(this.adUrl_);
+      });
+      return Promise.resolve(true);
+    } else {
+      try {
+        // Create and setup friendly iframe.
+        dev().assert(!!this.element.ownerDocument);
+        const iframe = /** @type {!HTMLIFrameElement} */(
+          createElementWithAttributes(
+            /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+              'frameborder': '0', 'allowfullscreen': '',
+              'allowtransparency': '', 'scrolling': 'no'}));
+        this.applyFillContent(iframe);
+        const fontsArray = [];
+        if (creativeMetaData.customStylesheets) {
+          creativeMetaData.customStylesheets.forEach(s => {
+            const href = s['href'];
+            if (href) {
+              fontsArray.push(href);
+            }
+          });
         }
+        return installFriendlyIframeEmbed(
+          iframe, this.element, {
+            url: this.adUrl_,
+            html: creativeMetaData.minifiedCreative,
+            extensionIds: creativeMetaData.customElementExtensions || [],
+            fonts: fontsArray,
+          }, embedWin => {
+            installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
+              new A4AVariableSource(this.getAmpDoc(), embedWin));
+          }).then(friendlyIframeEmbed => {
+            // Ensure visibility hidden has been removed (set by boilerplate).
+            const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
+              friendlyIframeEmbed.win.document;
+            setStyle(frameDoc.body, 'visibility', 'visible');
+            // Capture phase click handlers on the ad.
+            this.registerExpandUrlParams_(friendlyIframeEmbed.win);
+            // Bubble phase click handlers on the ad.
+            this.registerAlpHandler_(friendlyIframeEmbed.win);
+            this.rendered_ = true;
+            this.onAmpCreativeRender();
+            return true;
+          });
+      } catch (e) {
+        dev().error('AMP-A4A', 'Error injecting creative in friendly frame',
+            e);
+        // If we fail on any of the steps of Shadow DOM construction, just
+        // render in iframe.
+        // TODO: report!
+        return Promise.resolve(false);
       }
-    });
+    }
+
   }
 
   /**
@@ -859,38 +866,42 @@ export class AmpA4A extends AMP.BaseElement {
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.emitLifecycleEvent('renderSafeFrameStart');
-    return utf8Decode(creativeBody).then(creative => {
-      let srcPath;
-      let nameData;
-      switch (method) {
-        case XORIGIN_MODE.SAFEFRAME:
-          srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
-          nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
-          break;
-        case XORIGIN_MODE.NAMEFRAME:
-          srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
-          nameData = JSON.stringify({creative});
-          break;
-        default:
-          // Shouldn't be able to get here, but...  Because of the assert, above,
-          // we can only get here in non-dev mode, so give user feedback.
-          user().error('A4A', 'A4A received unrecognized cross-domain name'
-              + ' attribute iframe rendering mode request: %s.  Unable to'
-              + ' render a creative for'
-              + ' slot %s.', method, this.element.getAttribute('id'));
-          return Promise.reject('Unrecognized rendering mode request');
-      }
-      /** @const {!Element} */
-      const iframe = createElementWithAttributes(
-          /** @type {!Document} */(this.element.ownerDocument),
-          'iframe', Object.assign({
-            'height': this.element.getAttribute('height'),
-            'width': this.element.getAttribute('width'),
-            'src': srcPath,
-            'name': nameData,
-          }, SHARED_IFRAME_PROPERTIES));
-      return this.iframeRenderHelper_(iframe);
-    });
+    let creative;
+    try {
+      creative = utf8Decode(creativeBody);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    let srcPath;
+    let nameData;
+    switch (method) {
+      case XORIGIN_MODE.SAFEFRAME:
+        srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
+        nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
+        break;
+      case XORIGIN_MODE.NAMEFRAME:
+        srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
+        nameData = JSON.stringify({creative});
+        break;
+      default:
+        // Shouldn't be able to get here, but...  Because of the assert, above,
+        // we can only get here in non-dev mode, so give user feedback.
+        user().error('A4A', 'A4A received unrecognized cross-domain name'
+            + ' attribute iframe rendering mode request: %s.  Unable to'
+            + ' render a creative for'
+            + ' slot %s.', method, this.element.getAttribute('id'));
+        return Promise.reject('Unrecognized rendering mode request');
+    }
+    /** @const {!Element} */
+    const iframe = createElementWithAttributes(
+        /** @type {!Document} */(this.element.ownerDocument),
+        'iframe', Object.assign({
+          'height': this.element.getAttribute('height'),
+          'width': this.element.getAttribute('width'),
+          'src': srcPath,
+          'name': nameData,
+        }, SHARED_IFRAME_PROPERTIES));
+    return this.iframeRenderHelper_(iframe);
   }
 
   /**

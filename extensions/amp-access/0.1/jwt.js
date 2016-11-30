@@ -17,7 +17,7 @@
 import {
   base64UrlDecodeToBytes,
 } from '../../../src/utils/base64';
-import {stringToBytes, utf8DecodeSync} from '../../../src/utils/bytes';
+import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
 import {pemToBytes} from '../../../src/utils/pem';
 import {tryParseJson} from '../../../src/json';
 
@@ -126,9 +126,17 @@ export class JwtHelper {
     }
     const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
     const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
+    let decodedHeader;
+    let decodedPayload;
+    try {
+      decodedHeader = utf8Decode(headerUtf8Bytes);
+      decodedPayload = utf8Decode(payloadUtf8Bytes);
+    } catch (e) {
+      invalidToken();
+    }
     return {
-      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
-      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
+      header: tryParseJson(decodedHeader, invalidToken),
+      payload: tryParseJson(decodedPayload, invalidToken),
       verifiable: `${parts[0]}.${parts[1]}`,
       sig: parts[2],
     };

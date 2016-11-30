@@ -49,13 +49,17 @@ export let PublicKeyInfoDef;
  */
 export function importPublicKey(jwk) {
   // WebKit wants this as an ArrayBufferView.
-  return (isWebkit ? utf8Encode(JSON.stringify(jwk)) : Promise.resolve(jwk))
-      .then(encodedJwk => crossCrypto.importKey(
+  /** @const  */
+  const encodedJwk = /** @type {!ArrayBufferView|!webCrypto.JsonWebKey} */ (
+    isWebkit ? utf8Encode(JSON.stringify(jwk)) : jwk);
+  // Despite importKey expecting to return a promise, Safari throws synchronous
+  // exceptions on importKey if not valid, so we wrap it in a Promise.then()
+  return new Promise(resolve => resolve(crossCrypto.importKey(
           'jwk',
           encodedJwk,
           {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
           true,
-          ['verify']))
+          ['verify'])))
       .then(cryptoKey => {
         // We do the importKey first to allow the browser to check for
         // an invalid key.  This last check is in case the key is valid

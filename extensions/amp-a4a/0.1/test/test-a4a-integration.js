@@ -75,7 +75,7 @@ describe('integration test: a4a', () => {
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     mockResponse = {
       arrayBuffer: function() {
-        return utf8Encode(validCSSAmp.reserialized);
+        return Promise.resolve(utf8Encode(validCSSAmp.reserialized));
       },
       bodyUsed: false,
       headers: new FetchResponseHeaders({
@@ -156,10 +156,10 @@ describe('integration test: a4a', () => {
   it('should fall back to 3p when extractCreative returns empty sig', () => {
     const extractCreativeAndSignatureStub =
         sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature');
-    extractCreativeAndSignatureStub.onFirstCall().returns({
+    extractCreativeAndSignatureStub.onFirstCall().returns(Promise.resolve({
       creative: utf8Encode(validCSSAmp.reserialized),
       signature: null,
-    });
+    }));
     return fixture.addElement(a4aElement).then(unusedElement => {
       expect(extractCreativeAndSignatureStub).to.be.calledOnce;
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
@@ -169,10 +169,10 @@ describe('integration test: a4a', () => {
   it('should fall back to 3p when extractCreative returns empty creative',
       () => {
         sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
-            .onFirstCall().returns({
+            .onFirstCall().returns(Promise.resolve({
               creative: null,
               signature: validCSSAmp.signature,
-            })
+            }))
             .onSecondCall().throws(new Error(
             'Testing extractCreativeAndSignature should not occur error'));
         // TODO(tdrl) Currently layoutCallback rejects, even though something
