@@ -338,7 +338,7 @@ describe('evaluateBindExpr', () => {
     expect(() => {
       evaluateBindExpr('foo.__defineSetter__()', scope);
     }).to.throw(Error, unsupportedFunctionError);
-        expect(() => {
+    expect(() => {
       evaluateBindExpr('bar.constructor()', scope);
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
