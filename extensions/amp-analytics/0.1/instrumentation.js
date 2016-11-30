@@ -96,7 +96,7 @@ export class InstrumentationService {
     this.ampdoc = ampdoc;
 
     /** @private {boolean} */
-    this.visibilityV2Enabled_ =
+    this.visibilityV2Enabled_ = this.ampdoc.win.IntersectionObserver &&
         isExperimentOn(this.ampdoc.win, 'visibility-v2');
 
     /** @const @private {!./visibility-impl.Visibility} */
