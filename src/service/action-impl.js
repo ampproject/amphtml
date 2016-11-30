@@ -37,7 +37,7 @@ const DEFAULT_METHOD_ = 'activate';
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
-  'amp': ['setState'],
+  'amp': ['setBindState'],
 };
 
 /**
@@ -226,12 +226,14 @@ export class ActionService {
       return;
     }
 
-    // TODO(choumx): This is hacky.
     if (action.actionInfo.target === 'AMP') {
-      dev().assert(action.actionInfo.method === 'setState');
-      bindForDoc(this.ampdoc).then(bind => {
-        bind.setState(action.actionInfo.args);
-      });
+      if (action.actionInfo.method === 'setBindState') {
+        bindForDoc(this.ampdoc).then(bind => {
+          bind.setState(action.actionInfo.args);
+        });
+      } else {
+        this.actionInfoError_('unrecognized action', action.actionInfo, target);
+      }
     } else {
       const target = this.root_.getElementById(action.actionInfo.target);
       if (!target) {

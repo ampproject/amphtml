@@ -179,13 +179,10 @@ export class Bind {
           } else if (property === 'height') {
             resources.changeSize(element, sanitizedValue, undefined);
           }
-
           element.attributeChangedCallback(property, oldValue, sanitizedValue);
         }
       }
     }
-
-    // TODO: Update AMP component state and queue relayout if necessary.
   }
 
   /**
