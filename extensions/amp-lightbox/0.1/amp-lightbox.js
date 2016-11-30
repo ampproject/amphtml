@@ -40,6 +40,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     /**  @private {?function(this:AmpLightbox, Event)}*/
     this.boundCloseOnEscape_ = null;
+
+    /** @private {boolean} */
+    this.isScrollable_ = false;
   }
 
   /** @override */
@@ -65,10 +68,19 @@ class AmpLightbox extends AMP.BaseElement {
       right: 0,
     });
 
+    if (this.isScrollable_) {
+      st.setStyles(this.element, {
+        overflowY: 'auto',
+        overflowX: 'hidden',
+      });
+    }
+
     const children = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.applyFillContent(this.container_);
+    if (!this.isScrollable_) {
+      this.applyFillContent(this.container_);
+    }
     this.element.appendChild(this.container_);
     children.forEach(child => {
       this.container_.appendChild(child);
@@ -77,10 +89,12 @@ class AmpLightbox extends AMP.BaseElement {
     this.registerAction('open', this.activate.bind(this));
     this.registerAction('close', this.close.bind(this));
 
-    const gestures = Gestures.get(this.element);
-    gestures.onGesture(SwipeXYRecognizer, () => {
-      // Consume to block scroll events and side-swipe.
-    });
+    if (!this.isScrollable_) {
+      const gestures = Gestures.get(this.element);
+      gestures.onGesture(SwipeXYRecognizer, () => {
+        // Consume to block scroll events and side-swipe.
+      });
+    }
   }
 
   /** @override */
@@ -93,6 +107,7 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
+    this.isScrollable_ = this.element.hasAttribute('scrollable');
     this.initialize_();
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(

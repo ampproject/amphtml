@@ -100,7 +100,7 @@
       background: rgba(0, 0, 0, 0.5);
     }
 
-    #lightbox {
+    .lightbox {
       background-color: rgba(0, 0, 0, 0.95);
     }
 
@@ -211,7 +211,7 @@
     <amp-audio src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3"></amp-audio>
 
   <h2>Lightbox</h2>
-  <amp-lightbox id="lightbox" layout="nodisplay">
+  <amp-lightbox id="lightbox" layout="nodisplay" class="lightbox">
     <p>
       <button on="tap:lightbox.close">
           Close Lightbox
@@ -220,19 +220,44 @@
     <p>
       <amp-twitter width=486 height=657
           media="(min-width: 401px)"
-          layout="fixed"
+          layout="responsive"
           data-tweetID="585110598171631616"></amp-twitter>
       </p>
     <p>
       <amp-youtube
           data-videoid="mGENRKrdoGY"
-          layout="fixed"
+          layout="responsive"
           width="480" height="270"></amp-youtube>
     </p>
   </amp-lightbox>
 
   <button on="tap:lightbox">
       Open Lightbox
+  </button>
+
+  <h2>Scrollable Lightbox</h2>
+  <amp-lightbox scrollable id="lightbox-scrollable" layout="nodisplay" class="lightbox">
+    <p>
+      <button on="tap:lightbox-scrollable.close">
+        Close Scrollable Lightbox
+      </button>
+    </p>
+    <p>
+      <amp-twitter width=486 height=657
+                   media="(min-width: 401px)"
+                   layout="responsive"
+                   data-tweetID="585110598171631616"></amp-twitter>
+    </p>
+    <p>
+      <amp-youtube
+          data-videoid="mGENRKrdoGY"
+          layout="responsive"
+          width="480" height="270"></amp-youtube>
+    </p>
+  </amp-lightbox>
+
+  <button on="tap:lightbox-scrollable">
+    Open Scrollable Lightbox
   </button>
 
   <h2>Images</h2>
