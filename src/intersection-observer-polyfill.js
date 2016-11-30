@@ -103,7 +103,7 @@ export class IntersectionObserverApi {
         });
 
     this.intersectionObserver_ = new IntersectionObserverPolyfill(entries => {
-      // Remove target info to cross origin iframe.
+      // Remove target info from cross origin iframe.
       entries.forEach(entry => {
         delete entry['target'];
       });
@@ -175,11 +175,11 @@ export class IntersectionObserverApi {
  */
 export class IntersectionObserverPolyfill {
   /**
-   * @param {!function(?IntersectionObserverEntry)} callback.
+   * @param {!function(?Array<!IntersectionObserverEntry>)} callback.
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {
-    /** @private @const {function(?Array<?IntersectionObserverEntry, ?Element>)} */
+    /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
     /**
