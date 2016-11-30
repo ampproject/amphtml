@@ -26,10 +26,13 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  getGoogleAdSlotCounter,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  getCorrelator,
 } from '../../../ads/google/a4a/utils';
+import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {stringHash32} from '../../../src/crypto';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -42,6 +45,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /**
+     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     */
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
   }
 
   /** @override */
@@ -56,23 +65,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
-    const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
+    const slotId = this.element.getAttribute('data-amp-slot-index');
+    const slotIdNumber = Number(slotId);
+    const correlator = getCorrelator(global, slotId);
     const slotRect = this.getIntersectionElementLayoutBox();
+    const size = `${slotRect.width}x${slotRect.height}`;
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
     const adTestOn = isInManualExperiment(this.element);
-    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotNumber, [
+    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotIdNumber, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
+      {name: 'adk', value: this.adKey_(size)},
       {name: 'gdfp_req', value: '1'},
-      {name: 'd_imp', value: '1'},
       {name: 'impl', value: 'ifr'},
       {name: 'sfv', value: 'A'},
-      {name: 'sz', value: `${slotRect.width}x${slotRect.height}`},
+      {name: 'sz', value: size},
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
       {name: 'adtest', value: adTestOn},
+      {name: 'ifi', value: slotIdNumber},
+      {name: 'c', value: correlator},
+
     ], [
       {
         name: 'scp',
@@ -88,6 +103,66 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
+  /** @override */
+  emitLifecycleEvent(eventName, opt_associatedEventData) {
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
+    switch (eventName) {
+      case 'adRequestEnd':
+        const fetchResponse = opt_associatedEventData;
+        const qqid = fetchResponse.headers.get(
+            this.lifecycleReporter_.QQID_HEADER);
+        this.lifecycleReporter_.setQqid(qqid);
+        break;
+      case 'adSlotCleared':
+        this.lifecycleReporter_.sendPing(eventName);
+        this.lifecycleReporter_.reset();
+        this.element.setAttribute('data-amp-slot-index',
+            this.win.ampAdSlotIdCounter++);
+        this.lifecycleReporter_ = this.initLifecycleReporter();
+        return;
+      case 'adSlotBuilt':
+      case 'urlBuilt':
+      case 'adRequestStart':
+      case 'extractCreativeAndSignature':
+      case 'adResponseValidateStart':
+      case 'renderFriendlyStart':
+      case 'renderCrossDomainStart':
+      case 'renderFriendlyEnd':
+      case 'renderCrossDomainEnd':
+      case 'preAdThrottle':
+      case 'renderSafeFrameStart':
+        break;
+      default:
+    }
+    this.lifecycleReporter_.sendPing(eventName);
+  }
+
+  /**
+   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   */
+  initLifecycleReporter() {
+    const reporter =
+        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
+        (getLifecycleReporter(this, 'a4a', undefined,
+                              this.element.getAttribute(
+                                  'data-amp-slot-index')));
+    return reporter;
+  }
+
+  /**
+   * @param {string} size
+   * @return {string} The ad unit hash key string.
+   * @private
+   */
+  adKey_(size) {
+    const element = this.element;
+    const domFingerprint = domFingerprintPlain(element);
+    const slot = element.getAttribute('data-slot') || '';
+    const multiSize = element.getAttribute('data-multi-size') || '';
+    const string = `${slot}:${size}:${multiSize}:${domFingerprint}`;
+    return stringHash32(string);
+  }
 }
 
 AMP.registerElement(

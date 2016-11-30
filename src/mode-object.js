@@ -32,5 +32,6 @@ export function getModeObject(opt_win) {
     test: getMode(opt_win).test,
     log: getMode(opt_win).log,
     version: getMode(opt_win).version,
+    rtvVersion: getMode(opt_win).rtvVersion,
   };
 }

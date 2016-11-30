@@ -17,6 +17,7 @@
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {dev} from '../../../src/log';
 import {historyForDoc} from '../../../src/history';
 import {vsyncFor} from '../../../src/vsync';
 import * as st from '../../../src/style';
@@ -24,13 +25,37 @@ import * as st from '../../../src/style';
 
 class AmpLightbox extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    /** @private {number} */
+    this.historyId_ = -1;
+
+    /** @private {boolean} */
+    this.active_ = false;
+
+    /**  @private {?function(this:AmpLightbox, Event)}*/
+    this.boundCloseOnEscape_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }
 
-  /** @override */
-  buildCallback() {
+  /**
+   * Lazily builds the lightbox DOM on the first open.
+   * @private
+   */
+  initialize_() {
+    if (this.container_) {
+      return;
+    }
+
     st.setStyles(this.element, {
       position: 'fixed',
       zIndex: 1000,
@@ -42,7 +67,6 @@ class AmpLightbox extends AMP.BaseElement {
 
     const children = this.getRealChildren();
 
-    /** @private {!Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.container_);
     this.element.appendChild(this.container_);
@@ -50,18 +74,13 @@ class AmpLightbox extends AMP.BaseElement {
       this.container_.appendChild(child);
     });
 
+    this.registerAction('open', this.activate.bind(this));
     this.registerAction('close', this.close.bind(this));
 
     const gestures = Gestures.get(this.element);
     gestures.onGesture(SwipeXYRecognizer, () => {
       // Consume to block scroll events and side-swipe.
     });
-
-    /** @private {number} */
-    this.historyId_ = -1;
-
-    /** @private {boolean} */
-    this.active_ = false;
   }
 
   /** @override */
@@ -74,24 +93,27 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
-    /**  @private {function(this:AmpLightbox, Event)}*/
+    this.initialize_();
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.getViewport().enterLightboxMode();
 
     this.mutateElement(() => {
-      this.element.style.display = '';
-      this.element.style.opacity = 0;
-      // TODO(dvoytenko): use new animations support instead.
-      this.element.style.transition = 'opacity 0.1s ease-in';
+      st.setStyles(this.element, {
+        display: '',
+        opacity: 0,
+        // TODO(dvoytenko): use new animations support instead.
+        transition: 'opacity 0.1s ease-in',
+      });
       vsyncFor(this.win).mutate(() => {
-        this.element.style.opacity = '';
+        st.setStyle(this.element, 'opacity', '');
       });
     }).then(() => {
-      this.updateInViewport(this.container_, true);
-      this.scheduleLayout(this.container_);
-      this.scheduleResume(this.container_);
+      const container = dev().assertElement(this.container_);
+      this.updateInViewport(container, true);
+      this.scheduleLayout(container);
+      this.scheduleResume(container);
     });
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
@@ -124,7 +146,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
-    this.schedulePause(this.container_);
+    this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
   }
 

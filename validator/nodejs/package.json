@@ -1,7 +1,8 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.12",
-  "description": "Validator for AMP HTML (www.ampproject.org)",
+  "version": "1.0.17",
+  "description": "Official validator for AMP HTML (www.ampproject.org)",
+  "keywords": ["AMP", "validator", "validate", "AMP HTML", "Accelerated Mobile Pages"],
   "engines": {
     "node": ">=0.10.25"
   },
@@ -21,5 +22,8 @@
   },
   "devDependencies": {
     "jasmine": "2.3.2"
+  },
+  "scripts": {
+    "postinstall": "/bin/sh -c \"exit 0\" 2> NUL && rm NUL || node postinstall-windows.js"
   }
 }

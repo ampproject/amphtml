@@ -10,6 +10,7 @@
     <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
@@ -67,9 +68,80 @@
             align-items: center;
             color: white;
         }
+
+
+        #poll1 li {
+            position: relative;
+            padding: 1em;
+            list-style: none;
+            margin: 0;
+            display: block;
+            height: 20px;
+        }
+
+        #poll1.amp-form-submit-success fieldset {
+            display: none;
+        }
+
+        .percentage-container {
+            z-index: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .one-pc {
+            width: 1%;
+            height: 100%;
+            display: inline-block;
+        }
+        .Wekas .one-pc {
+            background: #dc4e41;
+        }
+        .Penguins .one-pc {
+            background: #3f51b5;
+        }
+        .Ostriches .one-pc {
+            background: #4CAF50;
+        }
+        .Kiwis .one-pc {
+            background: #00ffff;
+        }
+        .poll1-results .title {
+            z-index: 1;
+            color: black;
+            position: absolute;
+        }
     </style>
 </head>
 <body>
+
+<amp-analytics>
+    <script type="application/json">
+        {
+            "requests": {
+                "event": "https://www.ampproject.org/static/img/logo-blue.svg?eid=${eventId}"
+            },
+            "triggers": {
+                "formSubmitSuccess": {
+                    "on": "amp-form-submit-success",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-success"
+                    }
+                },
+                "formSubmitError": {
+                    "on": "amp-form-submit-error",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-error"
+                    }
+                }
+            }
+        }
+    </script>
+</amp-analytics>
 
 <h4>Search (GET non-xhr same origin)</h4>
 <form method="get" action="/form/search-html/get" target="_blank">
@@ -371,6 +443,94 @@
         <input type="submit" value="Subscribe">
     </fieldset>
 </form>
+
+<h4 id="header1">on=change and form.submit examples</h4>
+<button on="tap:header1.submit">Wrong Action - should throw an error</button>
+<form method="post"
+      id="poll1"
+      action-xhr="/form/json/poll1"
+      target="_blank"
+      custom-validation-reporting="as-you-go">
+    <fieldset>
+        <p>What is your favorite flightless bird?</p>
+        <ul>
+            <li>
+                <label>
+                    <input name="question1" value="Penguins" type="radio" on="change:poll1.submit">
+                    Penguins
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Ostriches" type="radio" on="change:poll1.submit">
+                    Ostriches
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Kiwis" type="radio" on="change:poll1.submit">
+                    Kiwis
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Wekas" type="radio" on="change:poll1.submit">
+                    Wekas
+                </label>
+            </li>
+        </ul>
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Thanks for answering the poll! Here are the results!
+            <ul class="poll1-results">
+            {{#result}}
+                <li>
+                    <div class="percentage-container {{answer}}">
+                        {{#percentage}}<span class="one-pc"></span>{{/percentage}}
+                    </div>
+                    <span class="title">{{answer}}</span>
+                </li>
+            {{/result}}
+            </ul>
+        </template>
+    </div>
+</form>
+
+
+<h4 id="header1">Using button[type=submit]</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name1" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email1" required>
+        </label>
+        <input type="submit" value="Subscribe - Input">
+        <input type="submit" value="Subscribe 2 - Input">
+        <button type="submit">Subscribe with a Button</button>
+        <button type="submit">Subscribe with a Button 2</button>
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
 
 </body>
 </html>

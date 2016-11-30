@@ -65,6 +65,24 @@ export function getExistingServiceForWindow(win, id) {
 /**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
+ * @param {!Window} win
+ * @param {string} id
+ * @return {!Object} The service.
+ */
+export function getExistingServiceForWindowInEmbedScope(win, id) {
+  // First, try to resolve via local (embed) window.
+  const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
+  if (local) {
+    return local;
+  }
+  // Fallback to top-level window.
+  return getExistingServiceForWindow(win, id);
+}
+
+
+/**
+ * Returns a service with the given id. Assumes that it has been constructed
+ * already.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id
  * @return {!Object} The service.
@@ -75,6 +93,65 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
       serviceHolder.services[id] && serviceHolder.services[id].obj;
   return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
       `installed.`);
+}
+
+
+/**
+ * Returns a service with the given id. Assumes that it has been constructed
+ * already.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ * @return {!Object} The service.
+ */
+export function getExistingServiceForDocInEmbedScope(nodeOrDoc, id) {
+  // First, try to resolve via local (embed) window.
+  if (nodeOrDoc.nodeType) {
+    // If a node is passed, try to resolve via this node.
+    const win = /** @type {!Document} */ (
+        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
+    if (local) {
+      return local;
+    }
+  }
+  // Fallback to ampdoc.
+  return getExistingServiceForDoc(nodeOrDoc, id);
+}
+
+
+/**
+ * Installs a service override on amp-doc level.
+ * @param {!Window} embedWin
+ * @param {string} id
+ * @param {!Object} service The service.
+ */
+export function installServiceInEmbedScope(embedWin, id, service) {
+  const topWin = getTopWindow(embedWin);
+  dev().assert(embedWin != topWin,
+      'Service override can only be installed in embed window: %s', id);
+  dev().assert(!getLocalExistingServiceForEmbedWinOrNull(embedWin, id),
+      'Service override has already been installed: %s', id);
+  getServiceInternal(embedWin, embedWin, id, () => service);
+}
+
+
+/**
+ * @param {!Window} embedWin
+ * @param {string} id
+ * @return {?Object}
+ */
+function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
+  // Note that this method currently only resolves against the given window.
+  // It does not try to go all the way up the parent window chain. We can change
+  // this in the future, but for now this gives us a better performance.
+  const topWin = getTopWindow(embedWin);
+  if (embedWin != topWin &&
+          embedWin.services &&
+          embedWin.services[id] &&
+          embedWin.services[id].obj) {
+    return embedWin.services[id].obj;
+  }
+  return null;
 }
 
 
@@ -148,7 +225,7 @@ export function getServicePromiseOrNull(win, id) {
  * expected to return the service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(!./service/ampdoc-impl.AmpDoc):!T=} opt_factory
+ * @param {function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
  *     Should create the service if it does not exist yet. If the factory is
  *     not given, it is an error if the service does not exist yet.
  * @return {T}
@@ -268,7 +345,7 @@ export function getParentWindowFrameElement(node, topWin) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
-function getAmpdoc(nodeOrDoc) {
+export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
     const win = /** @type {!Document} */ (
         nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
@@ -304,11 +381,11 @@ function getAmpdocService(win) {
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {function(!Window):T|function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
+ * @param {function(?):T=} opt_factory
  *     Should create the service if it does not exist yet. If the factory
  *     is not given, it is an error if the service does not exist yet.
  *     Called with context.
- * @param {function(new:T, !Window)|function(new:T, !./service/ampdoc-impl.AmpDoc)=} opt_constructor
+ * @param {function(new:T, ?)=} opt_constructor
  *     Constructor function to new the service. Called with context.
  * @return {*}
  * @template T
@@ -438,6 +515,16 @@ export function disposeServicesForDoc(ampdoc) {
 
 
 /**
+ * Disposes all disposable (implements `Disposable` interface) services in
+ * embed scope.
+ * @param {!Window} embedWin
+ */
+export function disposeServicesForEmbed(embedWin) {
+  disposeServicesInternal(embedWin);
+}
+
+
+/**
  * @param {!Object} holder Object holding the service instances.
  */
 function disposeServicesInternal(holder) {
@@ -472,7 +559,7 @@ function disposeServiceInternal(id, service) {
   } catch (e) {
     // Ensure that a failure to dispose a service does not disrupt other
     // services.
-    dev().error('service', 'failed to dispose service', id, e);
+    dev().error('SERVICE', 'failed to dispose service', id, e);
   }
 }
 

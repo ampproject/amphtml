@@ -141,6 +141,61 @@ describe('vsync', () => {
       });
     });
 
+    it('should tolerate errors in measures and mutates', () => {
+      let result = '';
+      return new Promise(resolve => {
+        vsync.run({
+          measure: () => {
+            result += 'me1';
+          },
+          mutate: () => {
+            result += 'mu1';
+          },
+        });
+        // Measure fails.
+        vsync.run({
+          measure: () => {
+            throw new Error('intentional');
+          },
+          mutate: () => {
+            result += 'mu2';
+          },
+        });
+        // Mutate fails.
+        vsync.run({
+          measure: () => {
+            result += 'me3';
+          },
+          mutate: () => {
+            throw new Error('intentional');
+          },
+        });
+        // Both fail.
+        vsync.run({
+          measure: () => {
+            throw new Error('intentional');
+          },
+          mutate: () => {
+            throw new Error('intentional');
+          },
+        });
+        // Both succeed.
+        vsync.run({
+          measure: () => {
+            result += 'me5';
+          },
+          mutate: () => {
+            result += 'mu5';
+          },
+        });
+        // Resolve.
+        vsync.mutate(resolve);
+      }).then(() => {
+        // Notice that `mu2` is skipped becuase `me2` failed.
+        expect(result).to.equal('me1me3me5mu1mu5');
+      });
+    });
+
     it('should schedule nested vsyncs', () => {
       let result = '';
       return new Promise(resolve => {

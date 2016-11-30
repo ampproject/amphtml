@@ -15,9 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
+import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
+import {map} from '../../../src/types';
+
+/** @const */
+const TAG = 'amp-accordion-session-state-optout';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -29,10 +34,13 @@ class AmpAccordion extends AMP.BaseElement {
     this.sections_ = null;
 
     /** @private {?string} */
-    this.id_ = null;
+    this.sessionId_ = null;
 
     /** @private {?Object} */
     this.currentState_ = null;
+
+    /** @private {boolean} */
+    this.sessionOptOut_ = false;
   }
 
   /** @override */
@@ -44,16 +52,16 @@ class AmpAccordion extends AMP.BaseElement {
   buildCallback() {
     this.sections_ = this.getRealChildren();
 
-    this.id_ = this.getSessionStorageKey_();
+    if (isExperimentOn(this.win, TAG)) {
+      this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
+    }
 
     this.element.setAttribute('role', 'tablist');
 
-    // sessionStorage key: special created id for this element, this.id_.
+    // sessionStorage key: special created id for this element, this.sessionId_.
     // sessionStorage value: string that can convert to this.currentState_ obj.
+    this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
-    if (!this.currentState_) {
-      this.currentState_ = Object.create(null);
-    }
 
     this.sections_.forEach((section, index) => {
       user().assert(
@@ -83,16 +91,16 @@ class AmpAccordion extends AMP.BaseElement {
       } else if (this.currentState_[contentId] == false) {
         section.removeAttribute('expanded');
       }
-      content.setAttribute(
-          'aria-expanded', section.hasAttribute('expanded').toString());
       header.setAttribute('aria-controls', contentId);
+      header.setAttribute('aria-expanded',
+          section.hasAttribute('expanded').toString());
       header.addEventListener('click', this.onHeaderClick_.bind(this));
     });
   }
 
   /**
    * Generate a sessionStorage Key based on amp-accordion element id.
-   * @return {string}
+   * @return {?string}
    * @private
    */
   getSessionStorageKey_() {
@@ -107,14 +115,18 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   getSessionState_() {
+    if (this.sessionOptOut_) {
+      return map();
+    }
     try {
       const sessionStr =
-          this.win./*OK*/sessionStorage.getItem(dev().assertString(this.id_));
+          this.win./*OK*/sessionStorage.getItem(
+          dev().assertString(this.sessionId_));
       return /** @type {!Object} */ (
           JSON.parse(dev().assertString(sessionStr)));
     } catch (e) {
-      dev().error(e.message, e.stack);
-      return null;
+      dev().fine('AMP-ACCORDION', e.message, e.stack);
+      return map();
     }
   }
 
@@ -123,12 +135,15 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   setSessionState_() {
+    if (this.sessionOptOut_) {
+      return;
+    }
     const sessionStr = JSON.stringify(this.currentState_);
     try {
       this.win./*OK*/sessionStorage.setItem(
-          dev().assertString(this.id_), sessionStr);
+          dev().assertString(this.sessionId_), sessionStr);
     } catch (e) {
-      dev().error(e.message, e.stack);
+      dev().fine('AMP-ACCORDION', e.message, e.stack);
     }
   }
 
@@ -139,18 +154,20 @@ class AmpAccordion extends AMP.BaseElement {
    */
   onHeaderClick_(event) {
     event.preventDefault();
+    /** @const {!Element} */
     const section = event.currentTarget.parentNode;
     const sectionComponents_ = section.children;
+    const header = sectionComponents_[0];
     const content = sectionComponents_[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
       if (section.hasAttribute('expanded')) {
         section.removeAttribute('expanded');
-        content.setAttribute('aria-expanded', 'false');
+        header.setAttribute('aria-expanded', 'false');
       } else {
         section.setAttribute('expanded', '');
-        content.setAttribute('aria-expanded', 'true');
+        header.setAttribute('aria-expanded', 'true');
       }
     }, content);
     this.currentState_[contentId] = !isSectionClosedAfterClick;

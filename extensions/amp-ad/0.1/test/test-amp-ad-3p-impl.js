@@ -33,6 +33,7 @@ function createAmpAd(win) {
     'data-valid': 'true',
     'data-width': '6666',
   });
+  ampAdElement.isBuilt = () => {return true;};
 
   return new AmpAd3PImpl(ampAdElement);
 }
@@ -53,7 +54,7 @@ describe('amp-ad-3p-impl', () => {
           }));
       ad3p = createAmpAd(win);
       win.document.body.appendChild(ad3p.element);
-
+      ad3p.buildCallback();
       // Turn the doc to visible so prefetch will be proceeded.
       stubService(sandbox, win, 'viewer', 'whenFirstVisible')
           .returns(Promise.resolve());
@@ -116,12 +117,6 @@ describe('amp-ad-3p-impl', () => {
       });
     });
 
-    it('should reject if no canonical URL provided', () => {
-      win.document.head.innerHTML = '';
-      return expect(ad3p.layoutCallback())
-          .to.eventually.be.rejectedWith('canonical');
-    });
-
     it('should reject if no type attribute provided', () => {
       ad3p.element.removeAttribute('type');
       return expect(ad3p.layoutCallback())
@@ -151,6 +146,7 @@ describe('amp-ad-3p-impl', () => {
       win.document.body.appendChild(adContainerElement);
       const ad3p = createAmpAd(win);
       adContainerElement.appendChild(ad3p.element);
+      ad3p.buildCallback();
       ad3p.onLayoutMeasure();
       return ad3p.layoutCallback();
     });
@@ -160,6 +156,7 @@ describe('amp-ad-3p-impl', () => {
       win.document.body.appendChild(adContainerElement);
       const ad3p = createAmpAd(win);
       adContainerElement.appendChild(ad3p.element);
+      ad3p.buildCallback();
       ad3p.onLayoutMeasure();
       return ad3p.layoutCallback().then(() => {
         const src = ad3p.element.firstChild.getAttribute('src');

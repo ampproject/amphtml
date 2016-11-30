@@ -41,8 +41,10 @@ export function waitForChild(parent, checkFunc, callback) {
     callback();
     return;
   }
+  /** @const {!Window} */
   const win = parent.ownerDocument.defaultView;
   if (win.MutationObserver) {
+    /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
         observer.disconnect();
@@ -51,6 +53,7 @@ export function waitForChild(parent, checkFunc, callback) {
     });
     observer.observe(parent, {childList: true});
   } else {
+    /** @const {number} */
     const interval = win.setInterval(() => {
       if (checkFunc(parent)) {
         win.clearInterval(interval);
@@ -60,6 +63,18 @@ export function waitForChild(parent, checkFunc, callback) {
   }
 }
 
+/**
+ * Waits until the child element is constructed. Once the child is found, the
+ * promise is resolved.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @return {!Promise}
+ */
+export function waitForChildPromise(parent, checkFunc) {
+  return new Promise(resolve => {
+    waitForChild(parent, checkFunc, resolve);
+  });
+}
 
 /**
  * Waits for document's body to be available.
@@ -143,10 +158,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * up the DOM subtree.
  * @param {!Element} element
  * @param {function(!Element):boolean} callback
+ * @param {Element=} opt_stopAt optional elemnt to stop the search at.
  * @return {?Element}
  */
-export function closest(element, callback) {
-  for (let el = element; el; el = el.parentElement) {
+export function closest(element, callback, opt_stopAt) {
+  for (let el = element; el && el !== opt_stopAt; el = el.parentElement) {
     if (callback(el)) {
       return el;
     }
@@ -189,6 +205,39 @@ export function closestByTag(element, tagName) {
   });
 }
 
+/**
+ * Finds the closest element with the specified selector from this element
+ * @param {!Element} element
+ * @param {string} selector
+ * @return {?Element} closest ancestor if found.
+ */
+export function closestBySelector(element, selector) {
+  if (element.closest) {
+    return element.closest(selector);
+  }
+
+  return closest(element, el => {
+    return matches(el, selector);
+  });
+}
+
+/**
+ * Checks if the given element matches the selector
+ * @param  {!Element} el The element to verify
+ * @param  {!string} selector The selector to check against
+y * @return {boolean} True if the element matched the selector. False otherwise
+ */
+export function matches(el, selector) {
+  const matcher = el.matches ||
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
+  if (matcher) {
+    return matcher.call(el, selector);
+  }
+  return false;  // IE8 always returns false.
+}
 
 /**
  * Finds the first descendant element with the specified name.
@@ -486,7 +535,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev().error('dom', 'Failed to open url on target: ', target, e);
+    dev().error('DOM', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.
@@ -543,4 +592,17 @@ export function escapeHtml(text) {
  */
 function escapeHtmlChar(c) {
   return HTML_ESCAPE_CHARS[c];
+}
+
+/**
+ * Tries to focus on the given element; fails silently if browser throws an
+ * exception.
+ * @param {!Element} element
+ */
+export function tryFocus(element) {
+  try {
+    element./*OK*/focus();
+  } catch (e) {
+    // IE <= 7 may throw exceptions when focusing on hidden items.
+  }
 }

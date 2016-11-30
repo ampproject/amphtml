@@ -18,6 +18,7 @@ var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
 var srcGlobs = require('../config').presubmitGlobs;
 var util = require('gulp-util');
+var through2 = require('through2');
 
 var dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -46,6 +47,7 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
+  'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
@@ -56,6 +58,11 @@ var forbiddenTerms = {
   },
   'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
+  'sandbox\\.(spy|stub|mock)\\([^,\\s]*[iI]?frame[^,\\s]*,': {
+    message: 'Do NOT stub on a cross domain iframe! #5359\n' +
+        '  If this is same domain, mark /*OK*/.\n' +
+        '  If this is cross domain, overwrite the method directly.'
   },
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
@@ -101,6 +108,16 @@ var forbiddenTerms = {
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
   },
+  'documentStateFor': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/custom-element.js',
+      'src/style-installer.js',
+      'src/service/document-state.js',
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
+    ],
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -122,6 +139,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-form/0.1/amp-form.js',
     ],
   },
   'installActivityService': {
@@ -151,7 +169,9 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp.js',
       'src/amp-shadow.js',
+      'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
+      'testing/describes.js',
       'testing/iframe.js',
     ],
   },
@@ -159,6 +179,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
+      'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
     ],
   },
@@ -187,11 +208,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/history-impl.js',
-      'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
-      'src/service/viewport-impl.js',
-      'src/service/vsync-impl.js',
     ],
   },
   'setViewerVisibilityState': {
@@ -205,7 +222,6 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
-      'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
   },
@@ -237,7 +253,9 @@ var forbiddenTerms = {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
       '3p/integration.js',
+      '3p/ampcontext-lib.js',
       'ads/alp/install-alp.js',
+      'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'src/runtime.js',
@@ -250,9 +268,17 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
+      'src/service/performance-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+    ],
+  },
+  'sendMessageCancelUnsent': {
+    message: 'Usages must be reviewed.',
+    whitelist: [
+      'src/service/viewer-impl.js',
+      'src/service/performance-impl.js',
     ],
   },
   // Privacy sensitive
@@ -339,6 +365,7 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/storage-impl.js',
+      'testing/fake-dom.js',
     ],
   },
   'sessionStorage': {
@@ -428,6 +455,10 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {
+    message: 'Logging message require explicitly `TAG`, or an all uppercase' +
+        ' string as the first parameter',
+  },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, thinking twice before using it',
     whitelist: [
@@ -443,6 +474,28 @@ var forbiddenTerms = {
   '\\.getWin\\(': {
     message: backwardCompat,
     whitelist: [
+    ],
+  },
+  '/\\*\\* @type \\{\\!Element\\} \\*/': {
+    message: 'Use assertElement instead of casting to !Element.',
+    whitelist: [
+      'src/log.js',  // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js',  // Includes the previous.
+    ],
+  },
+  'chunk\\(': {
+    message: 'chunk( should only be used during startup',
+    whitelist: [
+      'src/amp.js',
+      'src/chunk.js',
+      'src/inabox/amp-inabox.js',
+      'src/runtime.js',
+    ],
+  },
+  'style\\.\\w+ = ': {
+    message: 'Use setStyle instead!',
+    whitelist: [
+      'testing/iframe.js',
     ],
   },
 };
@@ -560,9 +613,24 @@ var forbiddenTermsSrcInclusive = {
       'src/friendly-iframe-embed.js',
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
-      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
+    ]
+  },
+  '\\.getTime\\(\\)': {
+    message: 'Unless you do weird date math (whitelist), use Date.now().',
+  },
+  '\\.expandStringSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
+    ]
+  },
+  '\\.expandStringAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/url-replacements-impl.js',
     ]
   },
 };
@@ -591,11 +659,19 @@ function isInTestFolder(path) {
 
 function stripComments(contents) {
   // Multi-line comments
-  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, '');
-  // Single line comments with only leading whitespace
-  contents = contents.replace(/\n\s*\/\/.*/g, '');
-  // Single line comments following a space, semi-colon, or closing brace
-  return contents.replace(/( |\}|;)\s*\/\/.*/g, '$1');
+  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
+    // Preserve the newlines
+    var newlines = [];
+    for (var i = 0; i < match.length; i++) {
+      if (match[i] === '\n') {
+        newlines.push('\n');
+      }
+    }
+    return newlines.join('');
+  });
+  // Single line comments either on its own line or following a space,
+  // semi-colon, or closing brace
+  return contents.replace(/( |}|;|^) *\/\/.*/g, '$1');
 }
 
 /**
@@ -627,11 +703,26 @@ function matchTerms(file, terms) {
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var matches = contents.match(new RegExp(term, 'gm'));
+    var regex = new RegExp(term, 'gm');
+    var index = 0;
+    var line = 1;
+    var column = 0;
+    var match;
+    var hasTerm = false;
 
-    if (matches) {
-      util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + relative));
+    while ((match = regex.exec(contents))) {
+      hasTerm = true;
+      for (index; index < match.index; index++) {
+        if (contents[index] === '\n') {
+          line++;
+          column = 1;
+        } else {
+          column++;
+        }
+      }
+
+      util.log(util.colors.red('Found forbidden: "' + match[0] +
+          '" in ' + relative + ':' + line + ':' + column));
       if (typeof terms[term] == 'string') {
         fix = terms[term];
       } else {
@@ -643,9 +734,9 @@ function matchTerms(file, terms) {
         util.log(util.colors.blue(fix));
       }
       util.log(util.colors.blue('=========='));
-      return true;
     }
-    return false;
+
+    return hasTerm;
   }).some(function(hasAnyTerm) {
     return hasAnyTerm;
   });
@@ -723,14 +814,10 @@ function checkForbiddenAndRequiredTerms() {
   var forbiddenFound = false;
   var missingRequirements = false;
   return gulp.src(srcGlobs)
-    .pipe(util.buffer(function(err, files) {
-      forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
-        return errorFound;
-      });
-      missingRequirements = files.map(isMissingTerms).some(
-          function(errorFound) {
-        return errorFound;
-      });
+    .pipe(through2.obj(function(file, enc, cb) {
+      forbiddenFound = hasAnyTerms(file) || forbiddenFound;
+      missingRequirements = isMissingTerms(file) || missingRequirements;
+      cb();
     }))
     .on('end', function() {
       if (forbiddenFound) {

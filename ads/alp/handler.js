@@ -19,17 +19,10 @@ import {
   parseQueryString,
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
+import {dev} from '../../src/log';
 import {urls} from '../../src/config';
-
-
-/**
- * Origins that are trusted to serve valid AMP documents.
- */
-const ampOrigins = {
-  [urls.cdn]: true,
-  'http://localhost:8000': true,
-};
-
+import {isProxyOrigin, isLocalhostOrigin, parseUrl} from '../../src/url';
+import {startsWith} from '../../src/string';
 
 /**
  * Install a click listener that transforms navigation to the AMP cache
@@ -51,9 +44,10 @@ export function installAlpClickHandler(win) {
  * Filter click event and then transform URL for direct AMP navigation
  * with impression logging.
  * @param {!Event} e
+ * @param {function(string)=} opt_viewerNavigate
  * @visibleForTesting
  */
-export function handleClick(e) {
+export function handleClick(e, opt_viewerNavigate) {
   if (e.defaultPrevented) {
     return;
   }
@@ -87,12 +81,19 @@ export function handleClick(e) {
   const win = link.a.ownerDocument.defaultView;
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
-    destination = destination.replace(`${urls.cdn}/c/`,
+    destination = destination.replace(
+        `${parseUrl(link.eventualUrl).host}/c/`,
         'http://localhost:8000/max/');
   }
-
   e.preventDefault();
-  navigateTo(win, link.a, destination);
+  if (opt_viewerNavigate) {
+    // TODO: viewer navigate only support navigating top level window to
+    // destination. should we try to open a new window here with target=_blank
+    // here instead of using viewer navigation.
+    opt_viewerNavigate(destination);
+  } else {
+    navigateTo(win, link.a, destination);
+  }
 }
 
 /**
@@ -106,7 +107,7 @@ export function handleClick(e) {
  * }|undefined} A URL on the AMP Cache.
  */
 function getLinkInfo(e) {
-  const a = closest(/** @type {!Element} */ (e.target), element => {
+  const a = closest(dev().assertElement(e.target), element => {
     return element.tagName == 'A' && element.href;
   });
   if (!a) {
@@ -130,7 +131,8 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+  if (!isProxyOrigin(eventualUrl) ||
+      !startsWith(parseUrl(eventualUrl).pathname, '/c/')) {
     return;
   }
   return eventualUrl;
@@ -169,8 +171,7 @@ export function warmupStatic(win) {
   const linkRel = /*OK*/document.createElement('link');
   linkRel.rel = 'preload';
   linkRel.setAttribute('as', 'script');
-  linkRel.href =
-      `${urls.cdn}/rtv/01$internalRuntimeVersion$/v0.js`;
+  linkRel.href = `${urls.cdn}/v0.js`;
   getHeadOrFallback(win.document).appendChild(linkRel);
 }
 
@@ -227,7 +228,7 @@ export function getA2AAncestor(win) {
     return null;
   }
   const amp = origins[origins.length - 2];
-  if (!ampOrigins[amp] && !ampOrigins.hasOwnProperty(amp)) {
+  if (!isProxyOrigin(amp) && !isLocalhostOrigin(amp)) {
     return null;
   }
   return {

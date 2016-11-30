@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-accordion';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-accordion', () => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
+describes.sandboxed('amp-accordion', {}, () => {
 
   function getAmpAccordion() {
     return createIframePromise().then(iframe => {
@@ -63,8 +52,10 @@ describe('amp-accordion', () => {
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
       obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
       expect(clickEvent.preventDefault.called).to.be.true;
     });
   });
@@ -79,8 +70,10 @@ describe('amp-accordion', () => {
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
       obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
       expect(clickEvent.preventDefault.called).to.be.true;
     });
   });
@@ -95,8 +88,10 @@ describe('amp-accordion', () => {
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
       obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
       expect(clickEvent.preventDefault.called).to.be.true;
     });
   });
@@ -121,7 +116,6 @@ describe('amp-accordion', () => {
           'section > *:first-child');
       const clickEventExpandElement = {
         currentTarget: headerElements[0],
-        //elementId = currentTarget.getAttribute('id');
         preventDefault: sandbox.spy(),
       };
       const clickEventCollapseElement = {
@@ -146,6 +140,7 @@ describe('amp-accordion', () => {
       let headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
       impl.getSessionState_ = function() {
@@ -157,6 +152,7 @@ describe('amp-accordion', () => {
       headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
       impl.getSessionState_ = function() {
@@ -169,8 +165,40 @@ describe('amp-accordion', () => {
       headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
+    });
+  });
+
+  it('should disable sessionStorage when opt-out', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const ampAccordion = obj.ampAccordion;
+      const impl = obj.ampAccordion.implementation_;
+      const setSessionStateSpy = sandbox.spy();
+      const getSessionStateSpy = sandbox.spy();
+      impl.win.sessionStorage.setItem = function() {
+        setSessionStateSpy();
+      };
+      impl.win.sessionStorage.getItem = function() {
+        getSessionStateSpy();
+      };
+
+      toggleExperiment(iframe.win, 'amp-accordion-session-state-optout', true);
+      ampAccordion.setAttribute('disable-session-states', null);
+      impl.buildCallback();
+      expect(Object.keys(impl.currentState_)).to.have.length(0);
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const clickEventExpandElement = {
+        currentTarget: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
+      impl.onHeaderClick_(clickEventExpandElement);
+      expect(getSessionStateSpy).to.not.have.been.called;
+      expect(setSessionStateSpy).to.not.have.been.called;
+      expect(Object.keys(impl.currentState_)).to.have.length(1);
     });
   });
 });

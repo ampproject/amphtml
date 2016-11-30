@@ -32,6 +32,7 @@ describe('Resources', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
   });
 
   afterEach(() => {
@@ -43,10 +44,10 @@ describe('Resources', () => {
     sandbox.stub(resources.viewport_, 'getRect', () => viewportRect);
 
     // Task 1 is right in the middle of the viewport and priority 0
-    const task_vp0_p0 = {
+    const task_in_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100);
+          return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -55,10 +56,10 @@ describe('Resources', () => {
       priority: 0,
     };
     // Task 2 is in the viewport and priority 1
-    const task_vp0_p1 = {
+    const task_in_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100);
+          return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -67,7 +68,7 @@ describe('Resources', () => {
       priority: 1,
     };
     // Task 3 is above viewport and priority 0
-    const task_vpu_p0 = {
+    const task_above_viewport_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
@@ -78,8 +79,8 @@ describe('Resources', () => {
       },
       priority: 0,
     };
-    // Task 4 is above viewport and priority 0
-    const task_vpu_p1 = {
+    // Task 4 is above viewport and priority 1
+    const task_above_viewport_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
@@ -91,7 +92,7 @@ describe('Resources', () => {
       priority: 1,
     };
     // Task 5 is below viewport and priority 0
-    const task_vpd_p0 = {
+    const task_below_viewport_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
@@ -102,8 +103,8 @@ describe('Resources', () => {
       },
       priority: 0,
     };
-    // Task 6 is below viewport and priority 0
-    const task_vpd_p1 = {
+    // Task 6 is below viewport and priority 1
+    const task_below_viewport_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
@@ -114,45 +115,102 @@ describe('Resources', () => {
       },
       priority: 1,
     };
-    // Task 7 is fixed with priority 0.
-    const task_vpf_p0 = {
+    // Task 7 is fixed right in the middle of the viewport and priority 0
+    const task_fixed_in_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50);
+          return layoutRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
-          return true;
+          return false;
         },
       },
       priority: 0,
     };
-    // Task 8 is fixed with priority 1.
-    const task_vpf_p1 = {
+    // Task 8 is fixed in the viewport and priority 1
+    const task_fixed_in_viewport_p1 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 200, 300, 100);
+        },
+        isFixed() {
+          return false;
+        },
+      },
+      priority: 1,
+    };
+    // Task 9 is fixed above viewport and priority 0
+    const task_fixed_above_viewport_p0 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 0, 300, 50);
+        },
+        isFixed() {
+          return false;
+        },
+      },
+      priority: 0,
+    };
+    // Task 10 is fixed above viewport and priority 1
+    const task_fixed_above_viewport_p1 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 0, 300, 50);
+        },
+        isFixed() {
+          return false;
+        },
+      },
+      priority: 1,
+    };
+    // Task 11 is fixed below viewport and priority 0
+    const task_fixed_below_viewport_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
-          return true;
+          return false;
+        },
+      },
+      priority: 0,
+    };
+    // Task 12 is fixed below viewport and priority 1
+    const task_fixed_below_viewport_p1 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 600, 300, 50);
+        },
+        isFixed() {
+          return false;
         },
       },
       priority: 1,
     };
 
-    expect(resources.calcTaskScore_(task_vp0_p0)).to.equal(0);
-    expect(resources.calcTaskScore_(task_vp0_p1)).to.equal(10);
+    // 0 for in viewport
+    expect(resources.calcTaskScore_(task_in_viewport_p0)).to.equal(0);
+    expect(resources.calcTaskScore_(task_in_viewport_p1)).to.equal(10);
 
     // +2 for "one viewport away" * 2 because dir is opposite
-    expect(resources.calcTaskScore_(task_vpu_p0)).to.equal(2);
-    expect(resources.calcTaskScore_(task_vpu_p1)).to.equal(12);
+    expect(resources.calcTaskScore_(task_above_viewport_p0)).to.equal(2);
+    expect(resources.calcTaskScore_(task_above_viewport_p1)).to.equal(12);
 
     // +1 for "one viewport away" * 1 because dir is the same
-    expect(resources.calcTaskScore_(task_vpd_p0)).to.equal(1);
-    expect(resources.calcTaskScore_(task_vpd_p1)).to.equal(11);
+    expect(resources.calcTaskScore_(task_below_viewport_p0)).to.equal(1);
+    expect(resources.calcTaskScore_(task_below_viewport_p1)).to.equal(11);
 
-    // 0 for fixed.
-    expect(resources.calcTaskScore_(task_vpf_p0)).to.equal(0);
-    expect(resources.calcTaskScore_(task_vpf_p1)).to.equal(10);
+    // 0 for fixed in viewport
+    expect(resources.calcTaskScore_(task_fixed_in_viewport_p0)).to.equal(0);
+    expect(resources.calcTaskScore_(task_fixed_in_viewport_p1)).to.equal(10);
+
+    // +2 for fixed "one viewport away", * 2 because dir is opposite
+    expect(resources.calcTaskScore_(task_fixed_above_viewport_p0)).to.equal(2);
+    expect(resources.calcTaskScore_(task_fixed_above_viewport_p1)).to.equal(12);
+
+    // +1 for fixed "one viewport away" * 1 because dir is the same
+    expect(resources.calcTaskScore_(task_fixed_below_viewport_p0)).to.equal(1);
+    expect(resources.calcTaskScore_(task_fixed_below_viewport_p1)).to.equal(11);
   });
 
   it('should calculate correct calcTaskTimeout', () => {
@@ -334,6 +392,7 @@ describe('Resources pause/resume/unlayout scheduling', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
     const parentTuple = createElementWithResource(1);
     parent = parentTuple[0];
     child0 = document.createElement('div');
@@ -523,6 +582,7 @@ describe('Resources schedulePreload', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
     const parentTuple = createElementWithResource(1);
     parent = parentTuple[0];
     placeholder = document.createElement('div');
@@ -950,7 +1010,7 @@ describe('Resources changeSize', () => {
     const resource = new Resource(id, createElement(rect), resources);
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = rect;
+    resource.initialLayoutBox_ = resource.layoutBox_ = rect;
     resource.changeSize = sandbox.spy();
     return resource;
   }
@@ -1058,6 +1118,31 @@ describe('Resources changeSize', () => {
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
   });
 
+  it('should measure non-measured elements', () => {
+    resource1.initialLayoutBox_ = null;
+    resource1.measure = sandbox.spy();
+    resource2.measure = sandbox.spy();
+
+    resources.scheduleChangeSize_(resource1, 111, 200, true);
+    resources.scheduleChangeSize_(resource2, 111, 222, true);
+    expect(resource1.hasBeenMeasured()).to.be.false;
+    expect(resource2.hasBeenMeasured()).to.be.true;
+
+    // Not yet scheduled, will wait until vsync.
+    expect(resource1.measure).to.not.be.called;
+
+    // Scheduling is done after vsync.
+    resources.vsync_.runScheduledTasks_();
+    expect(resource1.measure).to.be.calledOnce;
+    expect(resource2.measure).to.not.be.called;
+
+    // Notice that the `resource2` was scheduled first since it didn't
+    // require vsync.
+    expect(resources.requestsChangeSize_).to.have.length(2);
+    expect(resources.requestsChangeSize_[0].resource).to.equal(resource2);
+    expect(resources.requestsChangeSize_[1].resource).to.equal(resource1);
+  });
+
   describe('attemptChangeSize rules wrt viewport', () => {
     let overflowCallbackSpy;
     let vsyncSpy;
@@ -1074,12 +1159,16 @@ describe('Resources changeSize', () => {
     });
 
     it('should NOT change size when height is unchanged', () => {
+      const callback = sandbox.spy();
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
           height: 50};
-      resources.scheduleChangeSize_(resource1, 50, 120, false);
+      resources.scheduleChangeSize_(resource1, 50, /* width */ undefined, false,
+          callback);
       resources.mutateWork_();
       expect(resource1.changeSize).to.not.been.called;
       expect(overflowCallbackSpy).to.not.been.called;
+      expect(callback).to.be.calledOnce;
+      expect(callback.args[0][0]).to.be.true;
     });
 
     it('should change size when forced', () => {
@@ -1326,6 +1415,7 @@ describe('Resources mutateElement and collapse', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     resources = new Resources(new AmpDocSingle(window));
+    resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
       mutate: callback => callback(),
@@ -1516,6 +1606,17 @@ describe('Resources.add', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  it('should enforce that viewport is ready for first add', () => {
+    const ensureViewportReady = sandbox.stub(resources.viewport_,
+        'ensureReadyForElements');
+    resources.add(child1);
+    expect(ensureViewportReady).to.be.calledOnce;
+
+    // Second `add` is ignored.
+    resources.add(child2);
+    expect(ensureViewportReady).to.be.calledOnce;
   });
 
   it('should build elements immediately if the document is ready', () => {

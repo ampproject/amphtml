@@ -21,6 +21,7 @@ tags: {  # amp-form
   tag_name: "SCRIPT"
   spec_name: "amp-form extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -39,7 +40,7 @@ tags: {  # amp-form
   }
   attrs: {
     name: "type"
-    value: "text/javascript"
+    value_casei: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {

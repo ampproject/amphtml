@@ -41,21 +41,6 @@ const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
- * @typedef {({
- *   href: string,
- *   protocol: string,
- *   host: string,
- *   hostname: string,
- *   port: string,
- *   pathname: string,
- *   search: string,
- *   hash: string,
- *   origin: string
- * }|!Location)}
- */
-export let Location;
-
-/**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
@@ -83,7 +68,7 @@ export function parseUrl(url, opt_nocache) {
     a.href = a.href;
   }
 
-  const info = {
+  const info = /** @type {!Location} */({
     href: a.href,
     protocol: a.protocol,
     host: a.host,
@@ -93,7 +78,7 @@ export function parseUrl(url, opt_nocache) {
     search: a.search,
     hash: a.hash,
     origin: null,  // Set below.
-  };
+  });
 
   // Some IE11 specific polyfills.
   // 1) IE11 strips out the leading '/' in the pathname.
@@ -203,6 +188,20 @@ export function serializeQueryString(params) {
 }
 
 /**
+ * Returns `true` if the URL is secure: either HTTPS or localhost (for testing).
+ * @param {string|!Location} url
+ * @return {boolean}
+ */
+export function isSecureUrl(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return (url.protocol == 'https:' ||
+      url.hostname == 'localhost' ||
+      endsWith(url.hostname, '.localhost'));
+}
+
+/**
  * Asserts that a given url is HTTPS or protocol relative. It's a user-level
  * assert.
  *
@@ -217,16 +216,14 @@ export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
-  // (erwinm, #4560): type cast necessary until #4560 is fixed
-  const url = parseUrl(/** @type {string} */ (urlString));
-  user().assert(
-      url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
-      url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
+  // (erwinm, #4560): type cast necessary until #4560 is fixed.
+  const theUrlString = /** @type {string} */ (urlString);
+  user().assert(isSecureUrl(theUrlString) || /^(\/\/)/.test(theUrlString),
       '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
-      elementContext, sourceName, urlString);
-  return /** @type {string} */ (urlString);
+      elementContext, sourceName, theUrlString);
+  return theUrlString;
 }
 
 /**
@@ -301,12 +298,19 @@ export function isProxyOrigin(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  const path = url.pathname.split('/');
-  const prefix = path[1];
-  // List of well known proxy hosts. New proxies must be added here.
-  return (url.origin == urls.cdn ||
-      (url.origin.indexOf('http://localhost:') == 0 &&
-       (prefix == 'c' || prefix == 'v')));
+  return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * Returns whether the URL origin is localhost.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isLocalhostOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return urls.localhostRegex.test(url.origin);
 }
 
 /**

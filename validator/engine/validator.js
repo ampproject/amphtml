@@ -14,16 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
+goog.provide('amp.validator.CssLength');  // Only for testing.
 goog.provide('amp.validator.Terminal');
 goog.provide('amp.validator.ValidationHandler');
 goog.provide('amp.validator.annotateWithErrorCategories');
 goog.provide('amp.validator.isSeverityWarning');
 goog.provide('amp.validator.renderErrorMessage');
 goog.provide('amp.validator.renderValidationResult');
-goog.provide('amp.validator.validateNode');
+goog.provide('amp.validator.validateSaxEvents');
 goog.provide('amp.validator.validateString');
-goog.require('amp.domwalker.DomWalker');
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AtRuleSpec');
@@ -1126,6 +1125,20 @@ class Context {
      * @private
      */
     this.tagspecsValidated_ = {};
+
+    /**
+     * Set of conditions that we've satisfied.
+     * @type {!Object<string, ?>}
+     * @private
+     */
+    this.conditionsSatisfied_ = {};
+
+    /**
+     * First tagspec seen (matched) which contains an URL.
+     * @type {?amp.validator.TagSpec}
+     * @private
+     */
+    this.firstUrlSeenTag_ = null;
   }
 
   /**
@@ -1168,6 +1181,54 @@ class Context {
       error.dataAmpReportTestValue = reportTestValue;
     goog.asserts.assert(validationResult.errors !== undefined);
     validationResult.errors.push(error);
+  }
+
+  /**
+   * Records a condition that's been validated. Returns true iff
+   * `condition` has not been seen before.
+   * @param {string} condition
+   * @return {boolean} whether or not condition has been seen before.
+   */
+  satisfyCondition(condition) {
+    const duplicate = this.conditionsSatisfied_.hasOwnProperty(condition);
+    if (!duplicate) {
+      this.conditionsSatisfied_[condition] = 0;
+    }
+    return !duplicate;
+  }
+
+  /**
+   * @return {!Object<number, ?>}
+   */
+  conditionsSatisfied() {
+    return this.conditionsSatisfied_;
+  }
+
+  /**
+   * Records that a Tag was seen which contains an URL. Used to note issues
+   * with <base href> occurring in the document after an URL.
+   * @param {amp.validator.TagSpec} tagSpec
+   */
+  markUrlSeen(tagSpec) {
+    this.firstUrlSeenTag_ = tagSpec;
+  }
+
+  /**
+   * Returns true iff the current context has observed a tag which contains
+   * an URL. This is set by calling markUrlSeen above.
+   * @return {boolean}
+   */
+  hasSeenUrl() {
+    return this.firstUrlSeenTag_ !== null;
+  }
+
+  /**
+   * The TagSpecName of the first seen URL. Do not call unless HasSeenUrl
+   * returns true.
+   * @return {string}
+   */
+  firstSeenUrlTagName() {
+    return getTagSpecName(this.firstUrlSeenTag_);
   }
 
   /**
@@ -1325,7 +1386,8 @@ class ParsedUrlSpec {
    * @param {!amp.validator.ValidationResult} result
    */
   validateUrlAndProtocol(adapter, context, urlStr, tagSpec, result) {
-    if (urlStr === '' &&
+    const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
+    if (urlStr.match(onlyWhitespaceRe) !== null &&
         (this.spec_.allowEmpty === null || this.spec_.allowEmpty === false)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.missingUrl(context, tagSpec, result);
@@ -1799,13 +1861,28 @@ class ParsedAttrSpec {
     // open-source version uses).
     // begin oneof {
     if (this.spec_.value !== null) {
-      if (attrValue == this.spec_.value) {
+      if (attrValue === this.spec_.value) {
         return;
       }
       // Allow spec's with value: "" to also be equal to their attribute
       // name (e.g. script's spec: async has value: "" so both
       // async and async="async" is okay in a script tag).
       if ((this.spec_.value == '') && (attrValue == attrName)) {
+        return;
+      }
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+            tagSpec.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
+    } else if (this.spec_.valueCasei !== null) {
+      if (attrValue.toLowerCase() === this.spec_.valueCasei) {
         return;
       }
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -1860,10 +1937,9 @@ class ParsedAttrSpec {
     /** @type {!Array<string>} */
     let maybeUris = [];
     if (attrName !== 'srcset') {
-      maybeUris.push(goog.string.trim(attrValue));
+      maybeUris.push(attrValue);
     } else {
-      let srcset = goog.string.trim(attrValue);
-      if (srcset === '') {
+      if (attrValue === '') {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1877,7 +1953,7 @@ class ParsedAttrSpec {
         return;
       }
       /** @type {!parse_srcset.SrcsetParsingResult} */
-      const parseResult = parse_srcset.parseSrcset(srcset);
+      const parseResult = parse_srcset.parseSrcset(attrValue);
       if (!parseResult.success) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
@@ -2162,7 +2238,7 @@ function parseLayout(layout) {
  * Parses a width or height layout attribute, for the determining the layout
  * of AMP tags (e.g. <amp-img width="42px" etc.).
  */
-amp.validator.CssLengthAndUnit = class {
+amp.validator.CssLength = class {
   /**
    * @param {string|undefined} input The input attribute value to be parsed.
    * @param {boolean} allowAuto Whether or not to allow the 'auto' value as
@@ -2188,6 +2264,11 @@ amp.validator.CssLengthAndUnit = class {
      */
     this.isAuto = false;
     /**
+     * The numeric value.
+     * @type {number}
+     */
+    this.numeral = Number.NaN;
+    /**
      * The unit, 'px' being the default in case it's absent.
      * @type {string}
      */
@@ -2203,11 +2284,12 @@ amp.validator.CssLengthAndUnit = class {
       this.isValid = allowAuto;
       return;
     }
-    const re = /^\d+(?:\.\d+)?(px|em|rem|vh|vw|vmin|vmax)?$/;
+    const re = /^(\d+(?:\.\d+)?)(px|em|rem|vh|vw|vmin|vmax)?$/;
     const match = re.exec(input);
     if (match !== null) {
       this.isValid = true;
-      this.unit = match[1] || 'px';
+      this.numeral = parseFloat(match[1]);
+      this.unit = match[2] || 'px';
     }
   }
 }
@@ -2219,14 +2301,14 @@ amp.validator.CssLengthAndUnit = class {
  * defaults for width / height).
  * @param {!amp.validator.AmpLayout} spec
  * @param {!amp.validator.AmpLayout.Layout} inputLayout
- * @param {!amp.validator.CssLengthAndUnit} inputWidth
- * @return {!amp.validator.CssLengthAndUnit}
+ * @param {!amp.validator.CssLength} inputWidth
+ * @return {!amp.validator.CssLength}
  */
 function CalculateWidth(spec, inputLayout, inputWidth) {
   if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED) &&
       !inputWidth.isSet && spec.definesDefaultWidth) {
-    return new amp.validator.CssLengthAndUnit('1px', /* allowAuto */ false);
+    return new amp.validator.CssLength('1px', /* allowAuto */ false);
   }
   return inputWidth;
 }
@@ -2236,15 +2318,15 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
  * Calculates the effective height from input layout and input height.
  * @param {!amp.validator.AmpLayout} spec
  * @param {!amp.validator.AmpLayout.Layout} inputLayout
- * @param {!amp.validator.CssLengthAndUnit} inputHeight
- * @return {!amp.validator.CssLengthAndUnit}
+ * @param {!amp.validator.CssLength} inputHeight
+ * @return {!amp.validator.CssLength}
  */
 function CalculateHeight(spec, inputLayout, inputHeight) {
   if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT) &&
       !inputHeight.isSet && spec.definesDefaultHeight) {
-    return new amp.validator.CssLengthAndUnit('1px', /* allowAuto */ false);
+    return new amp.validator.CssLength('1px', /* allowAuto */ false);
   }
   return inputHeight;
 }
@@ -2255,8 +2337,8 @@ function CalculateHeight(spec, inputLayout, inputHeight) {
  * fixed-sized mocks first and then the layout determines how things
  * will change for different viewports / devices / etc.
  * @param {!amp.validator.AmpLayout.Layout} inputLayout
- * @param {!amp.validator.CssLengthAndUnit} width
- * @param {!amp.validator.CssLengthAndUnit} height
+ * @param {!amp.validator.CssLength} width
+ * @param {!amp.validator.CssLength} height
  * @param {?string} sizesAttr
  * @param {?string} heightsAttr
  * @return {!amp.validator.AmpLayout.Layout}
@@ -2289,7 +2371,7 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * @return {boolean}
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
-  return tag.mandatory || tag.unique ||
+  return tag.mandatory || tag.unique || tag.uniqueWarning ||
       tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
 }
 
@@ -2384,6 +2466,11 @@ class ParsedTagSpec {
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
     /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.requires_ = [];
+    /**
      * @type {!Array<number>}
      * @private
      */
@@ -2403,6 +2490,11 @@ class ParsedTagSpec {
      * @private
      */
     this.implicitAttrspecs_ = [];
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.containsUrl_ = false;
 
     const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
     for (const parsedAttrSpec of parsedAttrs) {
@@ -2424,9 +2516,15 @@ class ParsedTagSpec {
       if (parsedAttrSpec.getSpec().implicit) {
         this.implicitAttrspecs_.push(parsedAttrSpec.getId());
       }
+      if (parsedAttrSpec.getSpec().valueUrl) {
+        this.containsUrl_ = true;
+      }
     }
     this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
+    for (const condition of tagSpec.requires) {
+      this.requires_.push(condition);
+    }
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
       this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
     }
@@ -2452,6 +2550,14 @@ class ParsedTagSpec {
   }
 
   /**
+   * Returns true if this tagSpec contains a value_url field.
+   * @return {boolean}
+   */
+  containsUrl() {
+    return this.containsUrl_;
+  }
+
+  /**
    * A dispatch key is a mandatory attribute name/value unique to this
    * TagSpec. If an encountered tag matches this dispatch key, it is
    * validated first against this TagSpec in order to improve validation
@@ -2473,7 +2579,9 @@ class ParsedTagSpec {
     var mandatoryParent =
         this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
     const attrName = parsedSpec.getSpec().name;
-    const attrValue = parsedSpec.getSpec().value;
+    const attrValue = parsedSpec.getSpec().value !== null ?
+        parsedSpec.getSpec().value.toLowerCase() :
+        parsedSpec.getSpec().valueCasei;
     goog.asserts.assert(attrValue !== null);
     return makeDispatchKey(attrName, attrValue, mandatoryParent);
   }
@@ -2497,6 +2605,15 @@ class ParsedTagSpec {
    */
   getAlsoRequiresTagWarning() {
     return this.alsoRequiresTagWarning_;
+  }
+
+  /**
+   * A TagSpec may specify generic conditions which are required if the
+   * tag is present. This accessor returns the list of those conditions.
+   * @return {!Array<string>}
+   */
+  requires() {
+    return this.requires_;
   }
 
   /**
@@ -2595,7 +2712,7 @@ class ParsedTagSpec {
       return;
     }
     const inputWidth =
-        new amp.validator.CssLengthAndUnit(widthAttr, /* allowAuto */ true);
+        new amp.validator.CssLength(widthAttr, /* allowAuto */ true);
     if (!inputWidth.isValid) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         context.addError(
@@ -2610,7 +2727,7 @@ class ParsedTagSpec {
       return;
     }
     const inputHeight =
-        new amp.validator.CssLengthAndUnit(heightAttr, /* allowAuto */ true);
+        new amp.validator.CssLength(heightAttr, /* allowAuto */ true);
     if (!inputHeight.isValid) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         context.addError(
@@ -2851,15 +2968,20 @@ class ParsedTagSpec {
    * explicitly mentioned by this tag spec may appear.
    *  Returns true iff the validation is successful.
    * @param {!Context} context
+   * @param {!ParsedTagSpec} parsedSpec
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    * @param {!Array<!ParsedTagSpec>} tagSpecById
    * @param {!amp.validator.ValidationResult} result
    */
-  validateAttributes(context, encounteredAttrs, tagSpecById, result) {
+  validateAttributes(context, parsedSpec, encounteredAttrs, tagSpecById,
+      result) {
     if (this.spec_.ampLayout !== null) {
       /** @type {!Object<string, string>} */
       const attrsByKey = {};
-      for (let i = 0; i < encounteredAttrs.length; i += 2) {
+      // We iterate in reverse order because if a attribute name is repeated,
+      // we want to use the value from the first instance seen in the tag rather
+      // than later instances. This is the same behavior that browsers have.
+      for (let i = encounteredAttrs.length - 2; i >= 0; i -= 2) {
         attrsByKey[encounteredAttrs[i]] = encounteredAttrs[i + 1];
       }
       this.validateLayout(context, attrsByKey, result);
@@ -2887,9 +3009,9 @@ class ParsedTagSpec {
       const attrName = attrKey.toLowerCase();
       let attrValue = encounteredAttrs[i + 1];
 
-      let parsedSpec;
+      let parsedAttrSpec;
       if (!this.attrsByName_.hasOwnProperty(attrName) ||
-          (parsedSpec = this.attrsByName_[attrName]) === undefined) {
+          (parsedAttrSpec = this.attrsByName_[attrName]) === undefined) {
         // While validating a reference point, we skip attributes that
         // we don't have a spec for. They will be validated when the
         // TagSpec itself gets validated.
@@ -2926,7 +3048,7 @@ class ParsedTagSpec {
           return;
         }
       }
-      if (parsedSpec.getSpec().deprecation !== null) {
+      if (parsedAttrSpec.getSpec().deprecation !== null) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.WARNING,
@@ -2935,21 +3057,21 @@ class ParsedTagSpec {
               /* params */
               [
                 attrName, getTagSpecName(this.spec_),
-                parsedSpec.getSpec().deprecation
+                parsedAttrSpec.getSpec().deprecation
               ],
-              parsedSpec.getSpec().deprecationUrl, result);
+              parsedAttrSpec.getSpec().deprecationUrl, result);
         }
         // Deprecation is only a warning, so we don't return.
       }
       if (!hasTemplateAncestor ||
           !ParsedTagSpec.valueHasTemplateSyntax(attrValue)) {
-        parsedSpec.validateNonTemplateAttrValueAgainstSpec(
+        parsedAttrSpec.validateNonTemplateAttrValueAgainstSpec(
             context, attrName, attrValue, this.spec_, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
       }
-      if (parsedSpec.hasBlacklistedValueRegex()) {
+      if (parsedAttrSpec.hasBlacklistedValueRegex()) {
         let decodedAttrValue;
         try {
           decodedAttrValue = decodeURIComponent(attrValue);
@@ -2964,8 +3086,8 @@ class ParsedTagSpec {
           // regex.
           decodedAttrValue = unescape(attrValue);
         }
-        if (parsedSpec.getBlacklistedValueRegex().test(attrValue) ||
-            parsedSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
+        if (parsedAttrSpec.getBlacklistedValueRegex().test(attrValue) ||
+            parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -2979,39 +3101,58 @@ class ParsedTagSpec {
           return;
         }
       }
-      if (parsedSpec.getSpec().mandatory) {
-        mandatoryAttrsSeen.push(parsedSpec.getId());
+      if (parsedAttrSpec.getSpec().mandatory) {
+        mandatoryAttrsSeen.push(parsedAttrSpec.getId());
       }
-      // The "at most 1" part of mandatory_oneof: mandatory_oneof
-      // wants exactly one of the alternatives, so here
-      // we check whether we already saw another alternative
-      if (parsedSpec.getSpec().mandatoryOneof &&
-          mandatoryOneofsSeen.hasOwnProperty(
-              parsedSpec.getSpec().mandatoryOneof)) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      if (parsedSpec.getSpec().tagName === "BASE" && attrName === "href" &&
+          context.hasSeenUrl()) {
+       if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+              amp.validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
               context.getDocLocator(),
-              /* params */
-              [getTagSpecName(this.spec_), parsedSpec.getSpec().mandatoryOneof],
+              /* params */ [context.firstSeenUrlTagName()],
               this.spec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
         }
         return;
       }
-      const mandatoryOneof = parsedSpec.getSpec().mandatoryOneof;
+      // The "at most 1" part of mandatory_oneof: mandatory_oneof
+      // wants exactly one of the alternatives, so here
+      // we check whether we already saw another alternative
+      if (parsedAttrSpec.getSpec().mandatoryOneof &&
+          mandatoryOneofsSeen.hasOwnProperty(
+              parsedAttrSpec.getSpec().mandatoryOneof)) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+              context.getDocLocator(),
+              /* params */
+              [getTagSpecName(this.spec_),
+               parsedAttrSpec.getSpec().mandatoryOneof],
+              this.spec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
+        return;
+      }
+      const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
       if (mandatoryOneof !== null) {
         mandatoryOneofsSeen[mandatoryOneof] = 0;
       }
-      if (parsedSpec.hasTriggerSpec() &&
-          parsedSpec.getTriggerSpec().hasIfValueRegex()) {
-        if (parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)) {
-          parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
-        }
+      // If the trigger does not have an if_value_regex, then proceed to add the
+      // spec. If it does have an if_value_regex, then test the regex to see
+      // if it should add the spec.
+      if (parsedAttrSpec.hasTriggerSpec() &&
+          (!parsedAttrSpec.getTriggerSpec().hasIfValueRegex() ||
+           (parsedAttrSpec.getTriggerSpec().hasIfValueRegex() &&
+            parsedAttrSpec.getTriggerSpec().getIfValueRegex().test(
+                attrValue)))) {
+        parsedTriggerSpecs.push(parsedAttrSpec.getTriggerSpec());
       }
-      attrspecsValidated[parsedSpec.getId()] = 0;
+      attrspecsValidated[parsedAttrSpec.getId()] = 0;
     }
     // The "at least 1" part of mandatory_oneof: If none of the
     // alternatives were present, we report that an attribute is missing.
@@ -3031,12 +3172,13 @@ class ParsedTagSpec {
     }
     for (const triggerSpec of parsedTriggerSpecs) {
       for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
-        let parsedSpec;
+        let parsedAttrSpec;
         if (!this.attrsByName_.hasOwnProperty(alsoRequiresAttr) ||
-            (parsedSpec = this.attrsByName_[alsoRequiresAttr]) === undefined) {
+            (parsedAttrSpec = this.attrsByName_[alsoRequiresAttr]) ===
+            undefined) {
           continue;
         }
-        if (!attrspecsValidated.hasOwnProperty(parsedSpec.getId())) {
+        if (!attrspecsValidated.hasOwnProperty(parsedAttrSpec.getId())) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -3044,7 +3186,7 @@ class ParsedTagSpec {
                 context.getDocLocator(),
                 /* params */
                 [
-                  parsedSpec.getSpec().name, getTagSpecName(this.spec_),
+                  parsedAttrSpec.getSpec().name, getTagSpecName(this.spec_),
                   triggerSpec.getAttrName()
                 ],
                 this.spec_.specUrl, result);
@@ -3306,7 +3448,7 @@ function validateTagAgainstSpec(
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   parsedSpec.validateAttributes(
-      context, encounteredAttrs, parsedRules.getTagSpecById(),
+      context, parsedSpec, encounteredAttrs, parsedRules.getTagSpecById(),
       resultForAttempt);
   parsedSpec.validateParentTag(context, resultForAttempt);
   parsedSpec.validateAncestorTags(context, resultForAttempt);
@@ -3355,23 +3497,41 @@ function validateTagAgainstSpec(
     }
   }
 
+  for (const condition of spec.satisfies) {
+    context.satisfyCondition(condition);
+  }
+  if (!context.hasSeenUrl() && parsedSpec.containsUrl()) {
+    context.markUrlSeen(spec);
+  }
+
   if (parsedSpec.shouldRecordTagspecValidated()) {
     const isUnique = context.recordTagspecValidated(parsedSpec.getId());
     // If a duplicate tag is encountered for a spec that's supposed
     // to be unique, we've found an error that we must report.
-    if (spec.unique && !isUnique) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(spec)], spec.specUrl,
-            resultForBestAttempt);
-      } else {
-        resultForBestAttempt.status =
-            amp.validator.ValidationResult.Status.FAIL;
+    if (!isUnique) {
+      if (spec.unique) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              resultForBestAttempt);
+        } else {
+          resultForBestAttempt.status =
+              amp.validator.ValidationResult.Status.FAIL;
+        }
+        return;
+      } else if (spec.uniqueWarning) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.WARNING,
+              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              resultForBestAttempt);
+        }
       }
-      return;
     }
   }
 
@@ -3630,7 +3790,8 @@ class ParsedValidatorRules {
   }
 
   /**
-   * Emits errors for tags that specify that another tag is also required.
+   * Emits errors for tags that specify that another tag is also required or
+   * a condition is required to be satisfied.
    * Returns false iff context.Progress(result).complete.
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
@@ -3642,6 +3803,26 @@ class ParsedValidatorRules {
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
       const spec = this.tagSpecById_[tagSpecId];
+      for (const condition of spec.requires()) {
+        if (!context.conditionsSatisfied().hasOwnProperty(condition)) {
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
+                context.getDocLocator(),
+                /* params */
+                [
+                  condition,
+                  getTagSpecName(spec.getSpec())
+                ],
+                spec.getSpec().specUrl, validationResult);
+          } else {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
+        }
+      }
       for (const tagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -4009,7 +4190,12 @@ amp.validator.ValidationHandler =
         attrName = attrName.toLowerCase();
 
         const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
-            attrName, attrValue, this.context_.getTagStack().getParent());
+            attrName,
+            // Attribute values are case-sensitive by default, but we
+            // match dispatch keys in a case-insensitive manner and then
+            // validate using whatever the tagspec requests.
+            attrValue.toLowerCase(),
+            this.context_.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
           const parsedSpec = this.rules_.getTagSpec(maybeTagSpecId);
           goog.asserts.assert(parsedSpec !== undefined, '1');
@@ -4620,7 +4806,9 @@ amp.validator.categorizeError = function(error) {
   }
   // E.g. "The tag 'boilerplate (noscript) - old variant' appears
   // more than once in the document."
-  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG) {
+  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG ||
+      error.code ===
+          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING) {
     return amp.validator.ErrorCategory.Code
         .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
   }
@@ -4683,22 +4871,49 @@ amp.validator.annotateWithErrorCategories = function(result) {
 };
 
 /**
- * Validates a document stored below a DOM node.
+ * Validates a document based on SAX events.
  * EXPERIMENTAL: Do not rely on this API for now, it is still a work in
- * progress.
- *
- * @param {!Document} rootDoc
- * @return {!amp.validator.ValidationResult} Validation Result (status and
- *     errors)
+ * progress. It will change and/or go away without notice.
+ * @param {!Array<!Array<string>>} saxEvents
+ * @param {string} htmlFormat
+ * @return {!amp.validator.ValidationResult}
  * @export
  */
-amp.validator.validateNode = function(rootDoc) {
+amp.validator.validateSaxEvents = function(saxEvents, htmlFormat) {
   if (amp.validator.GENERATE_DETAILED_ERRORS) {
     throw 'not implemented';
   }
-  const handler = new amp.validator.ValidationHandler('AMP');
-  const visitor = new amp.domwalker.DomWalker();
-  visitor.walktree(handler, rootDoc);
-
+  // TODO(powdercloud): This needs additional logic to make sure
+  // that markManufacturedBody / the start of the body tag is not
+  // inserted in the wrong spot.
+  const handler = new amp.validator.ValidationHandler(htmlFormat);
+  for (const e of saxEvents) {
+    switch (e[0]) {
+      case 'startTag':
+        handler.startTag(/*tagName=*/e[1], e.slice(2));
+        break;
+      case 'endTag':
+        handler.endTag(e[1]);
+        break;
+      case 'pcdata':
+        handler.pcdata(e[1]);
+        break;
+      case 'rcdata':
+        handler.rcdata(e[1]);
+        break;
+      case 'cdata':
+        handler.cdata(e[1]);
+        break;
+      case 'startDoc':
+        handler.startDoc();
+        break;
+      case 'endDoc':
+        handler.endDoc();
+        break;
+      case 'markManufacturedBody':
+        handler.markManufacturedBody();
+        break;
+    }
+  }
   return handler.Result();
 };

@@ -25,8 +25,8 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
-import {installViewerServiceForDoc} from './viewer-impl';
-import {installViewportServiceForDoc} from './viewport-impl';
+import {viewerForDoc} from '../viewer';
+import {viewportForDoc} from '../viewport';
 import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
@@ -71,7 +71,7 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerServiceForDoc(ampdoc);
+    this.viewer_ = viewerForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -84,6 +84,9 @@ export class Resources {
 
     /** @private @const {!Array<!Resource>} */
     this.resources_ = [];
+
+    /** @private {number} */
+    this.addCount_ = 0;
 
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
@@ -128,7 +131,7 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = task => this.calcTaskScore_(task);
 
    /**
@@ -146,7 +149,7 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = installViewportServiceForDoc(this.ampdoc);
+    this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = installVsyncService(this.win);
@@ -307,6 +310,16 @@ export class Resources {
   }
 
   /**
+   * Returns the {@link Resource} instance corresponding to the specified AMP
+   * Element. Returns null if no resource is found.
+   * @param {!AmpElement} element
+   * @return {?Resource}
+   */
+  getResourceForElementOptional(element) {
+    return Resource.forElementOptional(element);
+  }
+
+  /**
    * Returns the viewport instance
    * @return {!./viewport-impl.Viewport}
    */
@@ -331,10 +344,14 @@ export class Resources {
    * @param {!AmpElement} element
    */
   add(element) {
-    const resource = new Resource((++this.resourceIdCounter_), element, this);
-    if (!element.id) {
-      element.id = 'AMP_' + resource.getId();
+    // Ensure the viewport is ready to accept the first element.
+    this.addCount_++;
+    if (this.addCount_ == 1) {
+      this.viewport_.ensureReadyForElements();
     }
+
+    // Create and add the resource.
+    const resource = new Resource((++this.resourceIdCounter_), element, this);
     this.resources_.push(resource);
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element added:', resource.debugid);
@@ -605,8 +622,8 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ false, hasSizeChanged => {
-          if (hasSizeChanged) {
+        newWidth, /* force */ false, success => {
+          if (success) {
             resolve();
           } else {
             reject(new Error('changeSize attempt denied'));
@@ -817,6 +834,7 @@ export class Resources {
       const scrollAdjSet = [];
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
+        /** @const {!Resource} */
         const resource = request.resource;
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
@@ -1059,7 +1077,7 @@ export class Resources {
       // layers. This is currently a short-term fix to the problem that
       // the fixed elements get incorrect top coord.
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          (r.isFixed() || r.overlaps(visibleRect)));
+          r.overlaps(visibleRect));
       r.setInViewport(shouldBeInViewport);
     }
 
@@ -1074,7 +1092,7 @@ export class Resources {
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
         // layers. This is currently a short-term fix to the problem that
         // the fixed elements get incorrect top coord.
-        if (r.isDisplayed() && (r.isFixed() || r.overlaps(loadRect))) {
+        if (r.isDisplayed() && r.overlaps(loadRect)) {
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
       }
@@ -1189,18 +1207,13 @@ export class Resources {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
+   * @return {number}
    * @private
    */
   calcTaskScore_(task) {
-    let posPriority = 0;
-    // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-    // layers. This is currently a short-term fix to the problem that
-    // the fixed elements get incorrect top coord.
-    if (!task.resource.isFixed()) {
-      const viewport = this.viewport_.getRect();
-      const box = task.resource.getLayoutBox();
-      posPriority = Math.floor((box.top - viewport.top) / viewport.height);
-    }
+    const viewport = this.viewport_.getRect();
+    const box = task.resource.getLayoutBox();
+    let posPriority = Math.floor((box.top - viewport.top) / viewport.height);
     if (Math.sign(posPriority) != this.getScrollDirection()) {
       posPriority *= 2;
     }
@@ -1273,7 +1286,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev().error(TAG_, 'task failed:',
+      dev().info(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1290,6 +1303,31 @@ export class Resources {
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
       opt_callback) {
+    if (resource.hasBeenMeasured()) {
+      this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+          opt_callback);
+    } else {
+      // This is a rare case since most of times the element itself schedules
+      // resize requests. However, this case is possible when another element
+      // requests resize of a controlled element.
+      this.vsync_.measure(() => {
+        resource.measure();
+        this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+            opt_callback);
+      });
+    }
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
+   * @param {boolean} force
+   * @param {function(boolean)=} opt_callback A callback function
+   * @private
+   */
+  completeScheduleChangeSize_(resource, newHeight, newWidth, force,
+      opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
@@ -1301,7 +1339,7 @@ export class Resources {
       }
       // Nothing to do.
       if (opt_callback) {
-        opt_callback(/* hasSizeChanged */false);
+        opt_callback(/* success */ true);
       }
       return;
     }

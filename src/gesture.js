@@ -139,13 +139,14 @@ export class Gestures {
   }
 
   /**
-   * Unsubscribes from all pointer events.
+   * Unsubscribes from all pointer events and removes the shared cache instance.
    */
   cleanup() {
     this.element_.removeEventListener('touchstart', this.boundOnTouchStart_);
     this.element_.removeEventListener('touchend', this.boundOnTouchEnd_);
     this.element_.removeEventListener('touchmove', this.boundOnTouchMove_);
     this.element_.removeEventListener('touchcancel', this.boundOnTouchCancel_);
+    delete this.element_[PROP_];
     this.pass_.cancel();
   }
 
@@ -155,7 +156,7 @@ export class Gestures {
    * and from that point on it participates in the event processing.
    *
    * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
-   * @param {function(!Gesture<!DATA>)} handler
+   * @param {function(!Gesture<DATA>)} handler
    * @return {!UnlistenDef}
    * @template DATA
    */
@@ -581,7 +582,7 @@ export class GestureRecognizer {
    * The recognizer can call this method to emit the gestures while in the
    * "emitting" state. Recognizer can only call this method if it has
    * previously received the {@link acceptStart} call.
-   * @param {!DATA} data
+   * @param {DATA} data
    * @param {?Event} event
    */
   signalEmit(data, event) {

@@ -267,7 +267,7 @@ describe('XHR', function() {
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
-          if (test.desc == 'Native') {
+          if (test.desc == 'Native' && 'Response' in Window) {
             return new Response(body, init);
           } else {
             init.responseText = body;
@@ -303,6 +303,18 @@ describe('XHR', function() {
           mockXhr.responseText = '{"a": "hello"}';
           mockXhr.headers['Content-Type'] = 'application/json';
           mockXhr.getResponseHeader = () => 'application/json';
+          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+              .catch(error => {
+                expect(error.responseJson).to.be.defined;
+                expect(error.responseJson.a).to.equal(2);
+              });
+        });
+
+        it('should parse json content with charset when error', () => {
+          mockXhr.status = 500;
+          mockXhr.responseText = '{"a": "hello"}';
+          mockXhr.headers['Content-Type'] = 'application/json; charset=utf-8';
+          mockXhr.getResponseHeader = () => 'application/json; charset=utf-8';
           return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
               .catch(error => {
                 expect(error.responseJson).to.be.defined;

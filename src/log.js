@@ -16,10 +16,11 @@
 
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
+import {isEnumValue} from './types';
 
 
 /** @const Time when this JS loaded.  */
-const start = new Date().getTime();
+const start = Date.now();
 
 /**
  * Triple zero width space.
@@ -312,10 +313,8 @@ export class Log {
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
-    for (const k in enumObj) {
-      if (enumObj[k] == s) {
-        return enumObj[k];
-      }
+    if (isEnumValue(enumObj, s)) {
+      return s;
     }
     this.assert(false,
         'Unknown %s value: "%s"',
@@ -405,17 +404,18 @@ export function rethrowAsync(var_args) {
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log}}
  */
-const logs = self.log = (self.log || {
+self.log = (self.log || {
   user: null,
   dev: null,
 });
 
+const logs = self.log;
 
 /**
  * Eventually holds a constructor for Log objects. Lazily initialized, so we
  * can avoid ever referencing the real constructor except in JS binaries
  * that actually want to include the implementation.
- * @typedef {?Function}
+ * @type {?Function}
  */
 let logConstructor = null;
 

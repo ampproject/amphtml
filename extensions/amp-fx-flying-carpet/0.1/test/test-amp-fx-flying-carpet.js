@@ -18,7 +18,6 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
 import {viewportForDoc} from '../../../../src/viewport';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
 
@@ -42,9 +41,12 @@ describe('amp-fx-flying-carpet', () => {
     let flyingCarpet;
     return createIframePromise().then(i => {
       iframe = i;
-      toggleExperiment(iframe.win, 'amp-fx-flying-carpet', true);
 
-      iframe.doc.body.style.height = '400vh';
+      const bodyResizer = iframe.doc.createElement('div');
+      bodyResizer.style.height = '400vh';
+      bodyResizer.style.width = '1px';
+      iframe.doc.body.appendChild(bodyResizer);
+
       iframe.doc.body.style.position = 'relative';
       viewport = viewportForDoc(iframe.win.document);
       viewport.resize_();
@@ -117,7 +119,7 @@ describe('amp-fx-flying-carpet', () => {
       const container = flyingCarpet.firstChild.firstChild;
       let width = 10;
 
-      impl.vsync_.mutate = function(callback) {
+      impl.getVsync().mutate = function(callback) {
         callback();
       };
       impl.getLayoutWidth = () => width;

@@ -17,11 +17,21 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+import {isLoadErrorMessage} from './event-helper';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
+import {isProxyOrigin} from './url';
 
 const CANCELLED = 'CANCELLED';
+
+/**
+ * Collects error messages, so they can be included in subsequent reports.
+ * That allows identifying errors that might be caused by previous errors.
+ */
+let accumulatedErrorMessages = self.AMPErrors || [];
+// Use a true global, to avoid multi-module inclusion issues.
+self.AMPErrors = accumulatedErrorMessages;
 
 /**
  * A wrapper around our exponentialBackoff, to lazy initialize it to avoid an
@@ -71,12 +81,12 @@ export function reportError(error, opt_associatedElement) {
     if (element) {
       (console.error || console.log).call(console,
           element.tagName + '#' + element.id, error.message);
+    } else if (!getMode().minified) {
+      (console.error || console.log).call(console, error.stack);
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!getMode().minified) {
-      (console.error || console.log).call(console, error.stack);
-    }
+
   }
   if (element && element.dispatchCustomEventForTesting) {
     element.dispatchCustomEventForTesting('amp:error', error.message);
@@ -102,6 +112,10 @@ export function cancellation() {
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
+    if (event.reason && event.reason.message === CANCELLED) {
+      event.preventDefault();
+      return;
+    }
     reportError(event.reason || new Error('rejected promise ' + event));
   });
 }
@@ -123,7 +137,20 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
-  const url = getErrorReportUrl(message, filename, line, col, error);
+  let hasNonAmpJs = false;
+  try {
+    hasNonAmpJs = detectNonAmpJs(self);
+  } catch (ignore) {
+    // Ignore errors during error report generation.
+  }
+  if (hasNonAmpJs && Math.random() > 0.01) {
+    // Only report 1% of errors on pages with non-AMP JS.
+    // These errors can almost never be acted upon, but spikes such as
+    // due to buggy browser extensions may be helpful to notify authors.
+    return;
+  }
+  const url = getErrorReportUrl(message, filename, line, col, error,
+      hasNonAmpJs);
   globalExponentialBackoff(() => {
     if (url) {
       new Image().src = url;
@@ -138,10 +165,12 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {*|undefined} error
+ * @param {boolean} hasNonAmpJs
  * @return {string|undefined} The URL
  * visibleForTesting
  */
-export function getErrorReportUrl(message, filename, line, col, error) {
+export function getErrorReportUrl(message, filename, line, col, error,
+    hasNonAmpJs) {
   message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
     return;
@@ -152,6 +181,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   if (!message) {
     message = 'Unknown error';
   }
+  if (isLoadErrorMessage(message)) {
+    return;
+  }
 
   // This is the App Engine app in
   // ../tools/errortracker
@@ -159,6 +191,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = urls.errorReporting +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);
   if (self.context && self.context.location) {
@@ -178,7 +211,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
     url += '&iem=1';
   }
 
-  if (self.AMP.viewer) {
+  if (self.AMP && self.AMP.viewer) {
     const resolvedViewerUrl = self.AMP.viewer.getResolvedViewerUrl();
     const messagingOrigin = self.AMP.viewer.maybeGetMessagingOrigin();
     if (resolvedViewerUrl) {
@@ -202,7 +235,30 @@ export function getErrorReportUrl(message, filename, line, col, error) {
         '&c=' + encodeURIComponent(col || '');
   }
   url += '&r=' + encodeURIComponent(self.document.referrer);
+  url += '&ae=' + encodeURIComponent(accumulatedErrorMessages.join(','));
+  accumulatedErrorMessages.push(message);
+  url += '&fr=' + encodeURIComponent(self.location.originalHash
+      || self.location.hash);
 
-  // Shorten URLs to a value all browsers will send.
-  return url.substr(0, 2000);
+  return url;
+}
+
+/**
+ * Returns true if it appears like there is non-AMP JS on the
+ * current page.
+ * @param {!Window} win
+ * @visibleForTesting
+ */
+export function detectNonAmpJs(win) {
+  const scripts = win.document.querySelectorAll('script[src]');
+  for (let i = 0; i < scripts.length; i++) {
+    if (!isProxyOrigin(scripts[i].src.toLowerCase())) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function resetAccumulatedErrorMessagesForTesting() {
+  accumulatedErrorMessages = [];
 }
