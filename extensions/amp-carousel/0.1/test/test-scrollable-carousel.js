@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
@@ -55,12 +56,8 @@ describes.sandboxed('ScrollableCarousel', {}, () => {
       return iframe.addElement(carouselElement);
     });
   }
-  describes.realWin('font-stylesheet-timeout', {
-    amp: true,
-  }, () => {
 
-
-
+  describes.realWin('test-scrollable-carousel', {ampCss: true}, () => {
     it('should initialize correctly: create container, build initial slides ' +
         'and show control buttons', () => {
       return getAmpScrollableCarousel().then(carousel => {
@@ -89,9 +86,6 @@ describes.sandboxed('ScrollableCarousel', {}, () => {
 
       });
     });
-
-
-
   });
 
   it('should behave correctly when clicking on next button and the space ' +
