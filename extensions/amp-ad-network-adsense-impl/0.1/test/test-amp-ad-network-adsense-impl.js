@@ -32,6 +32,7 @@ describe('amp-ad-network-adsense-impl', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     adsenseImplElem = document.createElement('amp-ad');
+    adsenseImplElem.setAttribute('type', 'adsense');
     adsenseImplElem.setAttribute('data-ad-client', 'adsense');
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
         () => {
@@ -50,6 +51,7 @@ describe('amp-ad-network-adsense-impl', () => {
     });
     it('should NOT be valid (impl tag name)', () => {
       adsenseImplElem = document.createElement('amp-ad-network-adsense-impl');
+      adsenseImplElem.setAttribute('type', 'adsense');
       adsenseImplElem.setAttribute('data-ad-client', 'adsense');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.false;
@@ -57,10 +59,12 @@ describe('amp-ad-network-adsense-impl', () => {
     it.skip('should be NOT valid (missing ad client)', () => {
       // TODO(taymonbeal): reenable this test after clarifying validation
       adsenseImplElem.setAttribute('data-ad-client', '');
+      adsenseImplElem.setAttribute('type', 'adsense');
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
       adsenseImplElem = document.createElement('amp-embed');
+      adsenseImplElem.setAttribute('type', 'adsense');
       adsenseImplElem.setAttribute('data-ad-client', 'adsense');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.true;
