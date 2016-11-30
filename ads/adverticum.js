@@ -47,8 +47,5 @@ export function adverticum(global,data) {
     }
 
     writeScript(global,'http://ad.adverticum.net/g3.js');
-  } else {
-    console.log('No Adverticum zoneID');
-    console.log('Please add the data-goa3zone parameter to the amp-ad tag!');
   }
 }
