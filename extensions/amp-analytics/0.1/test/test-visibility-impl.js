@@ -30,6 +30,7 @@ import {viewportForDoc} from '../../../../src/viewport';
 import {loadPromise} from '../../../../src/event-helper';
 
 import * as sinon from 'sinon';
+import {setParentWindow} from '../../../../src/service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {installPlatformService} from '../../../../src/service/platform-impl';
@@ -428,6 +429,7 @@ describe('amp-analytics.visibility', () => {
       ampEl.appendChild(iframe);
       iframeAmpDoc = new AmpDocSingle(iframe.contentWindow);
       return loaded.then(() => {
+        setParentWindow(iframe.contentWindow, window);
         iframeAnalytics = iframe.contentDocument.querySelector(
             'amp-analytics');
       });
@@ -449,9 +451,9 @@ describe('amp-analytics.visibility', () => {
           .to.equal(div);
       expect(getElement(ampdoc, 'amp-img', analytics, 'closest'))
           .to.equal(img1);
-      // Should restrict elements to contained ampdoc.
       expect(getElement(ampdoc, 'amp-img', iframeAnalytics, 'closest'))
-          .to.equal(null);
+          .to.equal(iframe.contentDocument.querySelector('amp-img'));
+      // Should restrict elements to contained ampdoc.
       expect(getElement(iframeAmpDoc, 'amp-img', analytics, 'closest'))
           .to.equal(null);
     });
@@ -468,12 +470,17 @@ describe('amp-analytics.visibility', () => {
           .to.equal(null);
       expect(getElement(ampdoc, 'amp-img', analytics, 'scope'))
           .to.equal(img2);
+      expect(getElement(ampdoc, 'div', iframeAnalytics, 'scope'))
+          .to.equal(null);
+      expect(getElement(ampdoc, 'amp-img', iframeAnalytics, 'scope'))
+          .to.equal(iframe.contentDocument.querySelectorAll('amp-img')[1]);
     });
 
     it('finds element for selectionMethod=host', () => {
-      expect(getElement(iframeAmpDoc, ':host', iframeAnalytics))
-          .to.equal(ampEl);
-      expect(getElement(iframeAmpDoc, ':root', iframeAnalytics, 'something'))
+      expect(getElement(ampdoc, ':host', analytics)).to.equal(null);
+      expect(getElement(ampdoc, ':root', analytics)).to.equal(null);
+      expect(getElement(ampdoc, ':host', iframeAnalytics)).to.equal(ampEl);
+      expect(getElement(ampdoc, ':root', iframeAnalytics, 'something'))
           .to.equal(ampEl);
     });
   });
