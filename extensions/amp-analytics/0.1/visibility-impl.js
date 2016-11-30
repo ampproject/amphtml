@@ -164,8 +164,9 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
   let foundEl;
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
-  if (friendlyFrame && (selector == ':host' || selector == ':root')) {
-    foundEl = closestBySelector(friendlyFrame, '.-amp-element');
+  if (selector == ':host' || selector == ':root') {
+    foundEl = friendlyFrame ?
+        closestBySelector(friendlyFrame, '.-amp-element') : null;
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
