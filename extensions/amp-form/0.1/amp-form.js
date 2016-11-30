@@ -212,8 +212,8 @@ export class AmpForm {
 
     const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
     // Fields that support var substitutions.
-    const varSubsFields = !isVarSubExpOn ? [] : this.form_.querySelectorAll(
-        '[type="hidden"][default-value]');
+    const varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
+        '[type="hidden"][default-value]') : [];
     if (this.xhrAction_) {
       if (opt_event) {
         opt_event.preventDefault();
