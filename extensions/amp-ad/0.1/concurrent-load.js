@@ -32,7 +32,8 @@ export function is3pThrottled(win) {
 
 /**
  * @param {!Element} element
- * @return {number|boolean}
+ * @return {?number} number if explicit value should be used otherwise super
+ *    default should be used.
  */
 export function getAmpAdRenderOutsideViewport(element) {
   // Ad opts into lazier loading strategy where we only load ads that are
@@ -41,7 +42,7 @@ export function getAmpAdRenderOutsideViewport(element) {
       'prefer-viewability-over-views') {
     return 1.25;
   }
-  return true;
+  return null;
 }
 
 /**

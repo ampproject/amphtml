@@ -148,17 +148,6 @@ describe('amp-a4a', () => {
         baseTestDoc.slice(splicePoint);
   }
 
-  function buildCreativeArrayBuffer() {
-    return utf8Encode(buildCreativeString());
-  }
-
-  // Fails if onAmpCreativeRender is ever called.
-  function verifyNonAMPRender(a4a) {
-    a4a.onAmpCreativeRender = () => {
-      assert.fail('AMP creative should never have rendered!');
-    };
-  }
-
   // Checks that element is an amp-ad that is rendered via A4A.
   function verifyA4ARender(element) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');

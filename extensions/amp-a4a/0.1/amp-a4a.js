@@ -217,7 +217,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     // Otherwise the ad is good to go.
     const elementCheck = getAmpAdRenderOutsideViewport(this.element);
-    return typeof elementCheck == 'number' ?
+    return elementCheck !== null ?
         elementCheck : super.renderOutsideViewport();
   }
 
@@ -383,7 +383,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
-        /** @return {!Promise<?string>} */
+        /** @return {!Promise<?ArrayBuffer>} */
         .then(creativeParts => {
           checkStillCurrent(promiseId);
           // Keep a handle to the creative body so that we can render into
@@ -400,7 +400,7 @@ export class AmpA4A extends AMP.BaseElement {
             this.creativeBody_ = creativeParts.creative;
           }
           if (!creativeParts || !creativeParts.signature) {
-            return /** @type {!Promise<?string>} */ (Promise.resolve(null));
+            return Promise.resolve();
           }
           this.emitLifecycleEvent('adResponseValidateStart', creativeParts);
           return this.verifyCreativeSignature_(
@@ -416,31 +416,29 @@ export class AmpA4A extends AMP.BaseElement {
                     creativeParts.creative, creativeParts.signature);
               });
         })
-        // This block returns true iff the creative was rendered in the shadow
-        // DOM.
-        /** @return {!Promise<?CreativeMetaDataDef>} */
         .then(creative => {
+          checkStillCurrent(promiseId);
+          // Need to know if creative was verified as part of render outside
+          // viewport but cannot wait on promise.  Sadly, need a state a
+          // variable.
+          this.isVerifiedAmpCreative_ = !!creative;
+          // TODO(levitzky) If creative comes back null, we should consider re-
+          // fetching the signing server public keys and try the verification
+          // step again.
+          return creative && utf8Decode(creative);
+        })
+        // This block returns CreativeMetaDataDef iff the creative was verified
+        // as AMP and could be properly parsed for friendly iframe render.
+        /** @return {!Promise<?CreativeMetaDataDef>} */
+        .then(creativeDecoded => {
           checkStillCurrent(promiseId);
           // Note: It's critical that #getAmpAdMetadata_ be called
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
-
-          // TODO(levitzky) If creative comes back null, we should consider re-
-          // fetching the signing server public keys and try the verification
-          // step again.
-
-          // Only return amp metadata if valid AMP creative.
-          if (!creative) {
-            return Promise.resolve();
-          }
-          // Need to know if creative was verified as part of render outside
-          // viewport but cannot wait on promise.  Sadly, need a state a
-          // variable.
-          this.isVerifiedAmpCreative_ = true;
-          return utf8Decode(creative).then(
-            creative => this.getAmpAdMetadata_(creative));
-        }).catch(error => {
+          return creativeDecoded && this.getAmpAdMetadata_(creativeDecoded);
+        })
+        .catch(error => {
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
           // url or creative exist.
@@ -734,7 +732,7 @@ export class AmpA4A extends AMP.BaseElement {
     if ((method == XORIGIN_MODE.SAFEFRAME ||
          method == XORIGIN_MODE.NAMEFRAME) &&
         this.creativeBody_) {
-      renderPromise = this.renderViaNameAttrOfXOriginIframe_(
+      const renderPromise = this.renderViaNameAttrOfXOriginIframe_(
           this.creativeBody_);
       this.creativeBody_ = null;  // Free resources.
       return renderPromise;
