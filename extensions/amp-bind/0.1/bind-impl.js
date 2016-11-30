@@ -32,10 +32,10 @@ let BindingDef;
 
 export class Bind {
   /**
-   * @param {!./ampdoc-impl.AmpDoc}
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!./ampdoc-impl.AmpDoc} */
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @const {!Array<BindingDef>} */
@@ -44,7 +44,7 @@ export class Bind {
     /** @const {!Object} */
     this.scope_ = Object.create(null);
 
-    /** @const {!./vsync-impl.Vsync} */
+    /** @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
 
     /** @const {!Array<string>} */
