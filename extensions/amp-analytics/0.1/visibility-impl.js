@@ -17,12 +17,14 @@
 import {closestByTag, closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {resourcesForDoc} from '../../../src/resources';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {isFiniteNumber} from '../../../src/types';
 import {viewportForDoc} from '../../../src/viewport';
 import {viewerForDoc} from '../../../src/viewer';
 import {VisibilityState} from '../../../src/visibility-state';
 import {startsWith} from '../../../src/string';
+import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -60,6 +62,7 @@ const VISIBLE_PERCENTAGE_MIN = 'visiblePercentageMin';
 const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
 
 const TAG_ = 'Analytics.Visibility';
+
 /**
  * Checks if the value is undefined or positive number like.
  * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
@@ -148,50 +151,50 @@ export function isVisibilitySpecValid(config) {
  * id, the element with that id is returned. If the selector is a tag name, an
  * ancestor of the analytics element with that tag name is returned.
  *
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc.
  * @param {string} selector The selector for the element to track.
- * @param {!Element} el Element whose ancestors to search.
- * @param {!String} selectionMethod The method to use to find the element..
+ * @param {!Element} analyticsEl Element whose ancestors to search.
+ * @param {!String} selectionMethod The method to use to find the element.
  * @return {?Element} Element corresponding to the selector if found.
  */
-export function getElement(ampdoc, selector, el, selectionMethod) {
-  if (!el) {
+export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
+  if (!analyticsEl) {
     return null;
   }
 
+  let foundEl;
+  const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
-    const elWin = ampdoc.win;
-    const parentEl = elWin.frameElement && elWin.frameElement.parentElement;
-    if (parentEl) {
-      return closestBySelector(parentEl, '.-amp-element');
-    }
+    foundEl = friendlyFrame ?
+        closestBySelector(friendlyFrame, '.-amp-element') : null;
+  } else if (selectionMethod == 'closest') {
+    // Only tag names are supported currently.
+    foundEl = closestByTag(analyticsEl, selector);
+  } else if (selectionMethod == 'scope') {
+    foundEl = analyticsEl.parentElement.querySelector(selector);
+  } else if (selector[0] == '#') {
+    const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
+    foundEl = containerDoc.getElementById(selector.slice(1));
   }
 
-  if (selectionMethod == 'closest') {
-    // Only tag names are supported currently.
-    const closestEl = closestByTag(el, selector);
+  if (foundEl) {
     // Restrict result to be contained by ampdoc.
-    if (closestEl && ampdoc.contains(closestEl)) {
-      return closestEl;
+    const isContainedInDoc = ampdoc.contains(friendlyFrame || foundEl);
+    if (isContainedInDoc) {
+      return foundEl;
     }
-    return null;
-  } else if (selectionMethod == 'scope') {
-    return el.parentElement.querySelector(selector);
-  } else if (selector[0] == '#') {
-    return ampdoc.getElementById(selector.slice(1));
   }
   return null;
 }
 
 /**
- * This type signifies a callback that gets called when visibility conditions
- * are met.
- * @typedef {function(!JSONType)}
- */
-let VisibilityListenerCallbackDef;
-
-/**
- * @typedef {Object<string, JSONType|VisibilityListenerCallbackDef|Object>}
+ * @typedef {{
+ *   state: !Object,
+ *   config: !Object,
+  *  callback: function(!Object),
+  *  shouldBeVisible: boolean,
+ * }}
  */
 let VisibilityListenerDef;
 
@@ -211,7 +214,7 @@ export class Visibility {
 
     /**
      * key: resource id.
-     * value: [{ config: <config>, callback: <callback>, state: <state>}]
+     * value: [VisibilityListenerDef]
      * @type {!Object<!Array<VisibilityListenerDef>>}
      * @private
      */
@@ -280,8 +283,8 @@ export class Visibility {
   }
 
   /**
-   * @param {!JSONType} config
-   * @param {!VisibilityListenerCallbackDef} callback
+   * @param {!Object} config
+   * @param {function(!Object)} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
    * @param {!Element} analyticsElement The amp-analytics element that the
@@ -289,36 +292,103 @@ export class Visibility {
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
-    const element = getElement(this.ampdoc, selector,
-        dev().assertElement(analyticsElement),
-        config['selectionMethod']);
-    user().assert(element, 'Element not found for visibilitySpec: '
-        + selector);
-    let res = null;
-    try {
-      res = this.resourcesService_.getResourceForElement(
-          user().assertElement(element));
-    } catch (e) {
-      user().assert(res,
-          'Visibility tracking not supported on element: ', element);
-    }
+    const element = user().assertElement(
+        getElement(this.ampdoc, selector,
+            dev().assertElement(analyticsElement),
+            config['selectionMethod']),
+        'Element not found for visibilitySpec: ' + selector);
 
-    const resId = res.getId();
+    const resource =
+        this.resourcesService_.getResourceForElementOptional(element);
+
+    user().assert(
+        resource, 'Visibility tracking not supported on element: ', element);
 
     this.registerForViewportEvents_();
     this.registerForVisibilityEvents_();
 
+    const resId = resource.getId();
     this.listeners_[resId] = (this.listeners_[resId] || []);
     const state = {};
     state[TIME_LOADED] = Date.now();
     this.listeners_[resId].push({config, callback, state, shouldBeVisible});
-    this.resources_.push(res);
+    this.resources_.push(resource);
 
     if (this.scheduledRunId_ === null) {
       this.scheduledRunId_ = this.timer_.delay(() => {
         this.scrollListener_();
       }, LISTENER_INITIAL_RUN_DELAY_);
     }
+  }
+
+  /**
+   * @param {!Object} config
+   * @param {function(!Object)} callback
+   * @param {boolean} shouldBeVisible True if the element should be visible
+   *   when callback is called. False otherwise.
+   * @param {!Element} analyticsElement The amp-analytics element that the
+   *   config is associated with.
+   */
+  listenOnceV2(config, callback, shouldBeVisible, analyticsElement) {
+    const selector = config['selector'];
+    const element = user().assertElement(
+        getElement(this.ampdoc, selector,
+            dev().assertElement(analyticsElement),
+            config['selectionMethod']),
+        'Element not found for visibilitySpec: ' + selector);
+
+    const resource =
+        this.resourcesService_.getResourceForElementOptional(element);
+
+    user().assert(
+        resource, 'Visibility tracking not supported on element: ', element);
+
+    if (!this.intersectionObserver_) {
+      const onIntersectionChange = this.onIntersectionChange_.bind(this);
+      /** @private {!IntersectionObserver} */
+      this.intersectionObserver_ =
+          // TODO: polyfill IntersectionObserver
+          new this.ampdoc.win.IntersectionObserver(entries => {
+            entries.forEach(onIntersectionChange);
+          }, {threshold: DEFAULT_THRESHOLD});
+    }
+
+    resource.loadedOnce().then(() => {
+      this.intersectionObserver_.observe(element);
+
+      const resId = resource.getId();
+      this.listeners_[resId] = (this.listeners_[resId] || []);
+      const state = {};
+      state[TIME_LOADED] = Date.now();
+      this.listeners_[resId].push({config, callback, state, shouldBeVisible});
+      this.resources_.push(resource);
+    });
+
+    // TODO: support "hidden" spec.
+  }
+
+  /** @private */
+  onIntersectionChange_(change) {
+    const listeners = this.listeners_[change.target.getResourceId()];
+
+    const visible = change.intersectionRatio * 100;
+    for (let c = listeners.length - 1; c >= 0; c--) {
+      const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
+      if (this.updateCounters_(visible, listeners[c], shouldBeVisible)
+          && this.viewer_.isVisible() == shouldBeVisible) {
+        this.prepareStateForCallback_(
+            listeners[c]['state'], change.boundingClientRect);
+        listeners[c].callback(listeners[c]['state']);
+        listeners.splice(c, 1);
+      }
+    }
+
+    // Remove target that have no listeners.
+    if (listeners.length == 0) {
+      this.intersectionObserver_.unobserve(change.target);
+    }
+
+    // TODO: support continuousTimeMin and totalTimeMin
   }
 
   /** @private */
@@ -405,7 +475,7 @@ export class Visibility {
     if (visible > 0) {
       const timeElapsed = Date.now() - state[TIME_LOADED];
       state[FIRST_SEEN_TIME] = state[FIRST_SEEN_TIME] || timeElapsed;
-      state[LAST_SEEN_TIME] = Date.now() - state[TIME_LOADED];
+      state[LAST_SEEN_TIME] = timeElapsed;
       // Consider it as load time visibility if this happens within 300ms of
       // page load.
       if (state[LOAD_TIME_VISIBILITY] == undefined && timeElapsed < 300) {
@@ -468,8 +538,8 @@ export class Visibility {
 
   /**
    * For the purposes of these calculations, a resource is in viewport if the
-   * visbility conditions are satisfied or they are not defined.
-   * @param {!number} visible Percentage of element visible
+   * visibility conditions are satisfied or they are not defined.
+   * @param {number} visible Percentage of element visible
    * @param {number} min Lower bound of visibility condition. Not inclusive
    * @param {number} max Upper bound of visibility condition. Inclusive.
    * @return {boolean} true if the conditions are satisfied.
@@ -480,13 +550,15 @@ export class Visibility {
       return true;
     }
 
-    if (visible > (min || 0) && visible <= (max || 100)) { // (Min, Max]
-      return true;
-    }
-    return false;
+    return !!(visible > (min || 0) && visible <= (max || 100));
   }
 
-  /** @private */
+  /**
+   * @param {!Object} s State of the listener
+   * @param {number} visible Percentage of element visible
+   * @param {number} sinceLast Milliseconds since last update
+   * @private
+   */
   setState_(s, visible, sinceLast) {
     s[LAST_UPDATE] = Date.now();
     s[TOTAL_VISIBLE_TIME] = s[TOTAL_VISIBLE_TIME] !== undefined
