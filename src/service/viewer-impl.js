@@ -16,7 +16,7 @@
 
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
-import {documentStateFor} from '../document-state';
+import {documentStateFor} from './document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
 import {
@@ -94,7 +94,7 @@ export class Viewer {
     /** @private @const {boolean} */
     this.isIframed_ = (this.win.parent && this.win.parent != this.win);
 
-    /** @const {!../document-state.DocumentState} */
+    /** @const {!./document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
 
     /** @private {boolean} */

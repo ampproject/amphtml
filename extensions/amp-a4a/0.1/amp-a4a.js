@@ -30,7 +30,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -48,6 +48,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
 import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
 import {A4AVariableSource} from './a4a-variable-source';
@@ -74,12 +75,21 @@ const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
 const SAFEFRAME_VERSION = '1-0-4';
-/** @type {string} */
-const SAFEFRAME_IMPL_PATH =
+/** @type {string} @visibleForTesting */
+export const SAFEFRAME_IMPL_PATH =
     'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
     '/html/container.html';
+
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+
+/** @enum {string} */
+export const XORIGIN_MODE = {
+  CLIENT_CACHE: 'client_cache',
+  SAFEFRAME: 'safeframe',
+  NAMEFRAME: 'nameframe',
+};
+
 /** @type {!Object} @private */
 const SHARED_IFRAME_PROPERTIES = {
   frameborder: '0',
@@ -167,18 +177,16 @@ export class AmpA4A extends AMP.BaseElement {
       this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
     }
 
-    // TODO(tdrl): Temporary, while we're verifying whether this is an
-    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src
-    // from cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
+
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
-     * @private {?string}
+     * @private {?XORIGIN_MODE}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-      platformFor(this.win).isIos() ? 'safeframe' : null;
+      platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
 
     this.emitLifecycleEvent('adSlotBuilt');
   }
@@ -248,10 +256,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
-    // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
-    // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
     this.preconnect.url(SAFEFRAME_IMPL_PATH);
+    this.preconnect.url(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     if (!this.config) {
       return;
     }
@@ -347,9 +353,12 @@ export class AmpA4A extends AMP.BaseElement {
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
           // https://github.com/ampproject/amphtml/issues/5614
-          this.experimentalNonAmpCreativeRenderMethod_ =
-              fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
+          const method = fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
               this.experimentalNonAmpCreativeRenderMethod_;
+          this.experimentalNonAmpCreativeRenderMethod_ = method;
+          if (!isEnumValue(XORIGIN_MODE, method)) {
+            dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
+          }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
           // and one of which isn't.  If we just return
@@ -383,13 +392,16 @@ export class AmpA4A extends AMP.BaseElement {
         .then(creativeParts => {
           checkStillCurrent(promiseId);
           // Keep a handle to the creative body so that we can render into
-          // SafeFrame later, if necessary.  TODO(tdrl): Temporary, while we
+          // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
+          // while we
           // assess whether this is the right solution to the Safari+iOS iframe
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
-              creativeParts && creativeParts.creative) {
+          if (this.experimentalNonAmpCreativeRenderMethod_ !=
+              XORIGIN_MODE.CLIENT_CACHE &&
+              creativeParts &&
+              creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
           }
           if (!creativeParts || !creativeParts.signature) {
@@ -525,20 +537,21 @@ export class AmpA4A extends AMP.BaseElement {
         incrementLoadingAds(this.win);
         // Haven't rendered yet, so try rendering via one of our
         // cross-domain iframe solutions.
-        if (this.experimentalNonAmpCreativeRenderMethod_ == 'safeframe' &&
+        let renderPromise;
+        const method = this.experimentalNonAmpCreativeRenderMethod_;
+        if ((method == XORIGIN_MODE.SAFEFRAME ||
+             method == XORIGIN_MODE.NAMEFRAME) &&
             this.creativeBody_) {
-          const renderPromise = this.renderViaSafeFrame_(this.creativeBody_);
-          this.creativeBody_ = null;  // Free resources.
-          return renderPromise;
+          renderPromise = this.renderViaNameAttrOfXOriginIframe_(
+              this.creativeBody_);
         } else if (this.adUrl_) {
-          return this.renderViaCachedContentIframe_(this.adUrl_);
+          renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
         } else {
-          throw new Error('No creative or URL available -- A4A can\'t render' +
-              ' any ad');
+          throw new Error(
+              'No creative or URL available -- A4A can\'t render any ad');
         }
-      }
-      if (rendered instanceof Error) {
-        throw rendered;
+        this.creativeBody_ = null;  // Free resources.
+        return renderPromise;
       }
     }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
   }
@@ -557,12 +570,11 @@ export class AmpA4A extends AMP.BaseElement {
     // state to be destroyed?
     this.vsync_.mutate(() => {
       removeChildren(this.element);
-
       this.adPromise_ = null;
       this.adUrl_ = null;
       this.creativeBody_ = null;
       this.experimentalNonAmpCreativeRenderMethod_ =
-          platformFor(this.win).isIos() ? 'safeframe' : null;
+          platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
       this.rendered_ = false;
       if (this.xOriginIframeHandler_) {
         this.xOriginIframeHandler_.freeXOriginIframe();
@@ -833,22 +845,49 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Render creative via SafeFrame.
-   * @param {!ArrayBuffer} creativeBody  The creative, as raw bytes.
+   * Render the creative via some "cross domain iframe that accepts the creative
+   * in the name attribute".  This could be SafeFrame or the AMP-native
+   * NameFrame.
+   *
+   * @param {!ArrayBuffer} creativeBody
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  renderViaSafeFrame_(creativeBody) {
+  renderViaNameAttrOfXOriginIframe_(creativeBody) {
+    const method = this.experimentalNonAmpCreativeRenderMethod_;
+    dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
+        method == XORIGIN_MODE.NAMEFRAME,
+        'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.emitLifecycleEvent('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
+      let srcPath;
+      let nameData;
+      switch (method) {
+        case XORIGIN_MODE.SAFEFRAME:
+          srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
+          nameData = `${SAFEFRAME_VERSION};${creative.length};${creative}`;
+          break;
+        case XORIGIN_MODE.NAMEFRAME:
+          srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
+          nameData = JSON.stringify({creative});
+          break;
+        default:
+          // Shouldn't be able to get here, but...  Because of the assert, above,
+          // we can only get here in non-dev mode, so give user feedback.
+          user().error('A4A', 'A4A received unrecognized cross-domain name'
+              + ' attribute iframe rendering mode request: %s.  Unable to'
+              + ' render a creative for'
+              + ' slot %s.', method, this.element.getAttribute('id'));
+          return Promise.reject('Unrecognized rendering mode request');
+      }
       /** @const {!Element} */
       const iframe = createElementWithAttributes(
           /** @type {!Document} */(this.element.ownerDocument),
           'iframe', Object.assign({
             'height': this.element.getAttribute('height'),
             'width': this.element.getAttribute('width'),
-            'src': SAFEFRAME_IMPL_PATH + '?n=0',
-            'name': `${SAFEFRAME_VERSION};${creative.length};${creative}`,
+            'src': srcPath,
+            'name': nameData,
           }, SHARED_IFRAME_PROPERTIES));
       return this.iframeRenderHelper_(iframe);
     });
