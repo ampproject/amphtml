@@ -84,7 +84,7 @@ export class AmpAnim extends AMP.BaseElement {
     if (!inViewport) {
       this.updateInViewport_();
     } else if (this.loadPromise_) {
-      this.loadPromise.then(() => this.updateInViewport_());
+      this.loadPromise_.then(() => this.updateInViewport_());
     }
   }
 
