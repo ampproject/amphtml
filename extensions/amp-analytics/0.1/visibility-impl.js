@@ -527,7 +527,7 @@ export class Visibility {
     } else if (state[IN_VIEWPORT] && !wasInViewport) {
       // The resource came into view. start counting.
       dev().assert(state[LAST_UPDATE] == undefined ||
-          state[LAST_UPDATE] == -1, 'lastUpdated time in weird state2.');
+          state[LAST_UPDATE] == -1, 'lastUpdated time in weird state.');
       state[FIRST_VISIBLE_TIME] = state[FIRST_VISIBLE_TIME] ||
           Date.now() - state[TIME_LOADED];
       this.setState_(state, visible, 0);
