@@ -9,30 +9,30 @@ var hasOwnProperty = Object.prototype.hasOwnProperty;
 var functionWhitelist =
 {
   '[object Array]':
-    {
-      'concat': Array.prototype.concat,
-      'includes': Array.prototype.includes,
-      'indexOf': Array.prototype.indexOf,
-      'join': Array.prototype.join,
-      'lastIndexOf': Array.prototype.lastIndexOf,
-      'slice': Array.prototype.slice,
-    },
+    [
+      Array.prototype.concat,
+      Array.prototype.includes,
+      Array.prototype.indexOf,
+      Array.prototype.join,
+      Array.prototype.lastIndexOf,
+      Array.prototype.slice,
+    ],
   '[object String]':
-    {
-      'charAt': String.prototype.charAt,
-      'charCodeAt': String.prototype.charCodeAt,
-      'concat': String.prototype.concat,
-      'includes': String.prototype.includes,
-      'indexOf': String.prototype.indexOf,
-      'lastIndexOf': String.prototype.lastIndexOf,
-      'repeat': String.prototype.repeat,
-      'slice': String.prototype.slice,
-      'split': String.prototype.split,
-      'substr': String.prototype.substr,
-      'substring': String.prototype.substring,
-      'toLowerCase': String.prototype.toLowerCase,
-      'toUpperCase': String.prototype.toUpperCase,
-    },
+    [
+      String.prototype.charAt,
+      String.prototype.charCodeAt,
+      String.prototype.concat,
+      String.prototype.includes,
+      String.prototype.indexOf,
+      String.prototype.lastIndexOf,
+      String.prototype.repeat,
+      String.prototype.slice,
+      String.prototype.split,
+      String.prototype.substr,
+      String.prototype.substring,
+      String.prototype.toLowerCase,
+      String.prototype.toUpperCase,
+    ],
 };
 
 /** @return {bool} Returns false if args contains an invalid type. */
@@ -190,7 +190,7 @@ invocation:
         var whitelist = functionWhitelist[obj];
         if (whitelist) {
           var fn = $1[$3];
-          if (fn && whitelist[$3] === fn) {
+          if (whitelist.indexOf(fn) >= 0) {
             if (typeCheckArgs($4)) {
               $$ = fn.apply($1, $4);
             } else {
@@ -220,7 +220,9 @@ member_access:
           return;
         }
 
-        if (typeof $2 !== 'symbol' && hasOwnProperty.call($1, $2)) {
+        var type = typeof $2;
+        var isCorrectType = type === 'string' || type === 'number';
+        if (isCorrectType && hasOwnProperty.call($1, $2)) {
           $$ = $1[$2];
         }
       %}

@@ -324,6 +324,31 @@ describe('evaluateBindExpr', () => {
     }).to.throw(Error, unsupportedFunctionError);
   });
 
+  it('shoud NOT allow invocation of prototype functions', () => {
+    const scope = {
+      foo: '',
+      bar: [],
+    };
+    expect(() => {
+      evaluateBindExpr('foo.constructor()', scope);
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('foo.__defineGetter__()', scope);
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('foo.__defineSetter__()', scope);
+    }).to.throw(Error, unsupportedFunctionError);
+        expect(() => {
+      evaluateBindExpr('bar.constructor()', scope);
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('bar.__defineGetter__()', scope);
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('bar.__defineSetter__()', scope);
+    }).to.throw(Error, unsupportedFunctionError);
+  });
+
   it('should NOT allow invocation of whitelisted functions ' +
       'with invalid argument types', () => {
     expect(() => {

@@ -167,7 +167,7 @@ case 26:
 
         this.$ = null;
 
-        var obj = Object.prototype.toString.call($$[$0-3]);
+        var obj = toString.call($$[$0-3]);
 
         var whitelist = functionWhitelist[obj];
         if (whitelist) {
@@ -196,16 +196,15 @@ case 29:
           return;
         }
 
-        var prop = Object.prototype.toString.call($$[$0]);
-        if (prop === '[object String]' || prop === '[object Number]') {
-          if (Object.prototype.hasOwnProperty.call($$[$0-1], $$[$0])) {
-            this.$ = $$[$0-1][$$[$0]];
-          }
+        var type = typeof $$[$0];
+        var isCorrectType = type === 'string' || type === 'number';
+        if (isCorrectType && hasOwnProperty.call($$[$0-1], $$[$0])) {
+          this.$ = $$[$0-1][$$[$0]];
         }
       
 break;
 case 32:
-this.$ = Object.prototype.hasOwnProperty.call(yy, $$[$0]) ? yy[$$[$0]] : null;
+this.$ = hasOwnProperty.call(yy, $$[$0]) ? yy[$$[$0]] : null;
 break;
 case 33:
 this.$ = yytext.substr(1, yyleng - 2);
@@ -389,6 +388,10 @@ parse: function parse(input) {
     return true;
 }};
 
+// Shortcuts for common functions.
+var toString = Object.prototype.toString;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 // For security reasons, must not contain functions that mutate the caller.
 var functionWhitelist =
 {
@@ -423,7 +426,7 @@ var functionWhitelist =
 function typeCheckArgs(args) {
   for (var i = 0; i < args.length; i++) {
     var arg = args[i];
-    if (Object.prototype.toString.call(arg) === '[object Object]') {
+    if (toString.call(arg) === '[object Object]') {
       return false;
     }
   }
