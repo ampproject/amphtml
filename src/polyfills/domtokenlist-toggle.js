@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {isIe} from '../service/platform-impl';
 
 /**
  * Polyfill for `DOMTokenList.prototype.toggle(token, opt_force)` method.
@@ -42,8 +41,17 @@ function domTokenListTogglePolyfill(token, opt_force) {
  * @param {!Window} win
  */
 export function install(win) {
-  const ua = win.navigator.userAgent;
-  if (isIe(ua) && win.DOMTokenList) {
+  if (isIe(win) && win.DOMTokenList) {
     win.DOMTokenList.prototype.toggle = domTokenListTogglePolyfill;
   }
+}
+
+
+/**
+ * Whether the current browser is a IE browser.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isIe(win) {
+  return /Trident|MSIE|IEMobile/i.test(win.navigator.userAgent);
 }

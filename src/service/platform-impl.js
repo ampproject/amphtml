@@ -18,16 +18,6 @@ import {fromClass} from '../service';
 
 
 /**
- * Returns true if the userAgent represents an IE browser.
- * @param {string} userAgent
- * @return {boolean}
- */
-export function isIe(userAgent) {
-  return /Trident|MSIE|IEMobile/i.test(userAgent);
-}
-
-
-/**
  * A helper class that provides information about device/OS/browser currently
  * running.
  */
@@ -88,7 +78,7 @@ export class Platform {
    * @return {boolean}
    */
   isIe() {
-    return isIe(this.navigator_.userAgent);
+    return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
   }
 
   /**
