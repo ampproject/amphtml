@@ -33,10 +33,17 @@ if (process.env.OS !== 'Windows_NT') {
 // /bin/sh -c "exit 0" will succeed (see package.json).
 var validatorShimPath =
     path.join(process.env.npm_config_prefix, 'amphtml-validator.cmd');
-var stats = fs.statSync(validatorShimPath);
-if (!stats.isFile()) {
-  console./*OK*/ error('postinstall-windows.js: amphtml-validator not found.');
-  process.exit(1);
+if (!fs.existsSync(validatorShimPath)) {
+  // We exit here because postinstall-windows.js will be invoked for both
+  // a local install and for a --global npm install. While both create a shim,
+  // the local install would place this shim into node_modules/.bin, and to
+  // determine which node_modules/.bin we'd need to reimplement the Node.js
+  // mechanism that's described in https://docs.npmjs.com/files/folders.
+  // So we punt here, because this is complex and a modified shim is mostly
+  // useful in the global install case.
+  console./*OK*/ log(
+      'postinstall-windows.js: No amphtml-validator shim found to modify.');
+  process.exit(0);
 }
 
 // We take a quick look into the shim file that npm for Windows generates.
