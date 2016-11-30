@@ -254,7 +254,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  ligatus: {},
+  ligatus: {
+    prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
+    renderStartImplemented: true,
+  },
 
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
