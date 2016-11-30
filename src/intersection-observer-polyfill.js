@@ -211,12 +211,12 @@ export class IntersectionObserverPolyfill {
     dev().assert(element.isBuilt && element.isBuilt());
 
     // If the element already exists in current observeEntries, do nothing
-    this.observeEntries_.forEach(entry => {
-      if (entry.element === element) {
+    for (let i = 0; i < this.observeEntries_.length; i++) {
+      if (this.observeEntries_[i].element === element) {
         dev().warn('INTERSECTION-OBSERVER', 'should observe same element once');
+        return;
       }
-      return;
-    });
+    }
 
     // push new observed element
     this.observeEntries_.push({
