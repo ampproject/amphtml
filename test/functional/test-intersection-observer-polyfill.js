@@ -600,7 +600,7 @@ describe('IntersectionObserverPolyfill', () => {
         }]);
       });
 
-      it('should only get element with crossing threshold', () => {
+      it('should only fire for elements that crossed threshold', () => {
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 200, 150, 200);

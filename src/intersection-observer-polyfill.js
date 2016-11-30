@@ -43,7 +43,10 @@ export const DEFAULT_THRESHOLD =
  *    currentThresholdSlot: number,
  *  }}
  */
-let observeEntryDef;
+let IntersectionStateDef;
+
+/** @const @private */
+const TAG = 'INTERSECTION-OBSERVER';
 
 /** @const @private */
 const INIT_TIME = Date.now();
@@ -104,9 +107,9 @@ export class IntersectionObserverApi {
 
     this.intersectionObserver_ = new IntersectionObserverPolyfill(entries => {
       // Remove target info from cross origin iframe.
-      entries.forEach(entry => {
-        delete entry['target'];
-      });
+      for (let i = 0; i < entries.length; i++) {
+        delete entries[i]['target'];
+      }
       this.subscriptionApi_.send('intersection', {changes: entries});
     }, {threshold: DEFAULT_THRESHOLD});
 
@@ -195,7 +198,7 @@ export class IntersectionObserverPolyfill {
     /**
      * Store a list of observed elements and their current threshold slot which
      * their intersection ratio fills, range from [0, this.threshold_.length]
-     * @private {Array<!observeEntryDef>}
+     * @private {Array<!IntersectionStateDef>}
      */
     this.observeEntries_ = [];
   }
@@ -213,7 +216,7 @@ export class IntersectionObserverPolyfill {
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {
       if (this.observeEntries_[i].element === element) {
-        dev().warn('INTERSECTION-OBSERVER', 'should observe same element once');
+        dev().warn(TAG, 'should observe same element once');
         return;
       }
     }
@@ -237,7 +240,7 @@ export class IntersectionObserverPolyfill {
         return;
       }
     }
-    dev().warn('INTERSECTION-OBSERVER', 'unobserver non-observed element');
+    dev().warn(TAG, 'unobserve non-observed element');
   }
 
   /**
@@ -249,7 +252,6 @@ export class IntersectionObserverPolyfill {
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
-    const changes = [];
 
     if (opt_iframe) {
       // If element inside an iframe. Adjust origin to the iframe.left/top.
@@ -259,13 +261,15 @@ export class IntersectionObserverPolyfill {
           moveLayoutRect(opt_iframe, -opt_iframe.left, -opt_iframe.top);
     }
 
-    this.observeEntries_.forEach(entry => {
+    const changes = [];
+
+    for (let i = 0; i < this.observeEntries_.length; i++) {
       const change = this.getValidIntersectionChangeEntry_(
-            entry, hostViewport, opt_iframe);
+          this.observeEntries_[i], hostViewport, opt_iframe);
       if (change) {
         changes.push(change);
       }
-    });
+    }
 
     if (changes.length) {
       this.callback_(changes);
@@ -278,7 +282,7 @@ export class IntersectionObserverPolyfill {
    * When the new intersection ratio doesn't cross one of a threshold value,
    * the function will return null.
    *
-   * @param {!observeEntryDef} entry
+   * @param {!IntersectionStateDef} entry
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
