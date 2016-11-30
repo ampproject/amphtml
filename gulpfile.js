@@ -81,6 +81,7 @@ declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-live-list', '0.1', true);
 declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-ooyala-player', '0.1', false);
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
@@ -124,67 +125,10 @@ function declareExtension(name, version, hasCss, opt_noTypeCheck) {
  * @param {!Object} options
  */
 function buildExtensions(options) {
-  // We pass watch further in to have browserify watch the built file
-  // and update it if any of its required deps changed.
-  // Each extension and version must be listed individually here.
-  buildExtension('amp-a4a', '0.1', false, options);
-  buildExtension('amp-access', '0.1', true, options);
-  buildExtension('amp-accordion', '0.1', true, options);
-  buildExtension('amp-ad', '0.1', false, options);
-  buildExtension('amp-ad-network-adsense-impl', 0.1, false, options);
-  buildExtension('amp-ad-network-doubleclick-impl', 0.1, false, options);
-  buildExtension('amp-ad-network-fake-impl', 0.1, false, options);
-  buildExtension('amp-analytics', '0.1', false, options);
-  buildExtension('amp-anim', '0.1', false, options);
-  buildExtension('amp-apester-media', '0.1', true, options);
-  buildExtension('amp-app-banner', '0.1', true, options);
-  buildExtension('amp-audio', '0.1', false, options);
-  buildExtension('amp-brid-player', '0.1', false, options);
-  buildExtension('amp-brightcove', '0.1', false, options);
-  buildExtension('amp-kaltura-player', '0.1', false, options);
-  buildExtension('amp-carousel', '0.1', true, options);
-  buildExtension('amp-dailymotion', '0.1', false, options);
-  buildExtension('amp-dynamic-css-classes', '0.1', false, options);
-  buildExtension('amp-experiment', '0.1', false, options);
-  buildExtension('amp-facebook', '0.1', false, options);
-  buildExtension('amp-fit-text', '0.1', true, options);
-  buildExtension('amp-font', '0.1', false, options);
-  buildExtension('amp-form', '0.1', true, options);
-  buildExtension('amp-fresh', '0.1', false, options);
-  buildExtension('amp-fx-flying-carpet', '0.1', true, options);
-  buildExtension('amp-gfycat', '0.1', false, options);
-  buildExtension('amp-iframe', '0.1', false, options);
-  buildExtension('amp-image-lightbox', '0.1', true, options);
-  buildExtension('amp-instagram', '0.1', false, options);
-  buildExtension('amp-install-serviceworker', '0.1', false, options);
-  buildExtension('amp-jwplayer', '0.1', false, options);
-  buildExtension('amp-lightbox', '0.1', false, options);
-  buildExtension('amp-lightbox-viewer', '0.1', true, options);
-  buildExtension('amp-list', '0.1', false, options);
-  buildExtension('amp-live-list', '0.1', true, options);
-  buildExtension('amp-mustache', '0.1', false, options);
-  buildExtension('amp-o2-player', '0.1', false, options);
-  buildExtension('amp-ooyala-player', '0.1', false, options);
-  buildExtension('amp-pinterest', '0.1', true, options);
-  buildExtension('amp-reach-player', '0.1', false, options);
-  buildExtension('amp-share-tracking', '0.1', false, options);
-  buildExtension('amp-sidebar', '0.1', true, options);
-  buildExtension('amp-soundcloud', '0.1', false, options);
-  buildExtension('amp-springboard-player', '0.1', false, options);
-  buildExtension('amp-sticky-ad', '0.1', true, options);
-  /**
-   * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
-   * Please see {@link AmpCarousel} with `type=slides` attribute instead.
-   */
-  buildExtension('amp-slides', '0.1', false, options);
-  buildExtension('amp-social-share', '0.1', true, options);
-  buildExtension('amp-twitter', '0.1', false, options);
-  buildExtension('amp-user-notification', '0.1', true, options);
-  buildExtension('amp-vimeo', '0.1', false, options);
-  buildExtension('amp-vine', '0.1', false, options);
-  buildExtension('amp-viz-vega', '0.1', true, options);
-  buildExtension('amp-google-vrview-image', '0.1', false, options);
-  buildExtension('amp-youtube', '0.1', false, options);
+  for (var key in extensions) {
+    var e = extensions[key];
+    buildExtension(e.name, e.version, e.hasCss, options);
+  }
 }
 
 /**
