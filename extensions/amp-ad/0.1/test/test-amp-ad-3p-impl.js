@@ -69,7 +69,8 @@ describe('amp-ad-3p-impl', () => {
 
     it('should create iframe and pass data via URL fragment', () => {
       return ad3p.layoutCallback().then(() => {
-        const iframe = ad3p.element.firstChild;
+        const iframe = ad3p.element.querySelector('iframe[src]');
+        expect(iframe).to.be.ok;
         expect(iframe.tagName).to.equal('IFRAME');
         const url = iframe.getAttribute('src');
         expect(url).to.match(/^http:\/\/ads.localhost:/);
@@ -102,8 +103,10 @@ describe('amp-ad-3p-impl', () => {
       });
 
       return ad3p.layoutCallback().then(() => {
-        const src = ad3p.element.firstChild.getAttribute('src');
-        expect(src).to.contain('"clientId":"sentinel123"');
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        expect(frame.getAttribute('src')).to.contain(
+          '"clientId":"sentinel123"');
       });
     });
 
@@ -112,8 +115,9 @@ describe('amp-ad-3p-impl', () => {
         return Promise.resolve(undefined);
       });
       return ad3p.layoutCallback().then(() => {
-        const src = ad3p.element.firstChild.getAttribute('src');
-        expect(src).to.contain('"clientId":null');
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        expect(frame.getAttribute('src')).to.contain('"clientId":null');
       });
     });
 
@@ -159,8 +163,10 @@ describe('amp-ad-3p-impl', () => {
       ad3p.buildCallback();
       ad3p.onLayoutMeasure();
       return ad3p.layoutCallback().then(() => {
-        const src = ad3p.element.firstChild.getAttribute('src');
-        expect(src).to.contain('"container":"AMP-STICKY-AD"');
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        expect(frame.getAttribute('src')).to.contain(
+          '"container":"AMP-STICKY-AD"');
       });
     });
   });
@@ -193,6 +199,7 @@ describe('amp-ad-3p-impl', () => {
 
   describe('renderOutsideViewport', () => {
     it('should allow rendering within 3 viewports by default', () => {
+      console.log(ad3p.renderOutsideViewport());
       expect(ad3p.renderOutsideViewport()).to.equal(3);
     });
 

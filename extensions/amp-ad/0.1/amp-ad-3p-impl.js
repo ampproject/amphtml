@@ -16,7 +16,8 @@
 
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
-  allowRenderOutsideViewport,
+  is3pThrottled,
+  getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from './concurrent-load';
 import {getAdCid} from '../../../src/ad-cid';
@@ -99,12 +100,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   renderOutsideViewport() {
-    const allowRender = allowRenderOutsideViewport(this.element, this.win);
-    if (allowRender !== true) {
-      return allowRender;
+    if (is3pThrottled(this.win)) {
+      return false;
     }
     // Otherwise the ad is good to go.
-    return super.renderOutsideViewport();
+    const elementCheck = getAmpAdRenderOutsideViewport(this.element);
+    return elementCheck !== null ?
+      elementCheck : super.renderOutsideViewport();
   }
 
   /** @override */

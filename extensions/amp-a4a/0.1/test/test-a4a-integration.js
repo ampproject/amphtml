@@ -45,11 +45,11 @@ function expectRenderedInFriendlyIframe(element, srcdoc) {
   const child = element.querySelector('iframe[srcdoc]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
-  const childBody = child.contentDocument.body;
-  expect(childBody, 'body of iframe doc').to.be.ok;
+  const childDocument = child.contentDocument.documentElement;
+  expect(childDocument, 'iframe doc').to.be.ok;
   expect(element, 'ad tag').to.be.visible;
   expect(child, 'iframe child').to.be.visible;
-  expect(childBody, 'ad creative content body').to.be.visible;
+  expect(childDocument, 'ad creative content doc').to.be.visible;
 }
 
 function expectRenderedInXDomainIframe(element, src) {
@@ -134,7 +134,7 @@ describe('integration test: a4a', () => {
     // .catch to a .then.
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
-      expect(error.message).to.contain.string('amp-a4a:');
+      expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });
