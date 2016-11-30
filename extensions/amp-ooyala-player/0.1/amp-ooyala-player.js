@@ -75,7 +75,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-
     this.element.appendChild(iframe);
 
     return this.loadPromise(iframe).then(() => {
