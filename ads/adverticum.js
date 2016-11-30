@@ -23,7 +23,7 @@ import {writeScript} from '../3p/3p';
  */
 
 export function adverticum(global,data) {
-  if(data.goa3zone){
+  if (data.goa3zone) {
     const zoneid = 'zone' + data.goa3zone;
     const d = global.document.createElement('div');
 
@@ -47,7 +47,8 @@ export function adverticum(global,data) {
     }
 
     writeScript(global,'http://ad.adverticum.net/g3.js');
-  }else{
-    console.log("No Adverticum zoneID. Please add the data-goa3zone parameter to the amp-ad tag!")
+  } else {
+    console.log('No Adverticum zoneID');
+    console.log('Please add the data-goa3zone parameter to the amp-ad tag!');
   }
 }
