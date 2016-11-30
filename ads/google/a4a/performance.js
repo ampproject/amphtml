@@ -133,8 +133,10 @@ export class BaseLifecycleReporter {
    * To be overriden by network specific implementations.
    *
    * @param {string} unusedName A descriptive name for the beacon signal.
+   * @param {Object=} opt_extraParams Dictionary of key:value params to add
+   *   to the ping request.
    */
-  sendPing(unusedName) {}
+  sendPing(unusedName, opt_extraParams) {}
   /**
    * A function to reset the lifecycle reporter. Will be called immediately
    * after firing the last beacon signal in unlayoutCallback.
@@ -188,18 +190,20 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @param {string} name  Stage name to ping out.  Should be one of the ones
    * from `LIFECYCLE_STAGES`.  If it's an unknown name, it will still be pinged,
    * but the stage ID will be set to `9999`.
+   * @param {Object=} opt_extraParams
    * @override
    */
-  sendPing(name) {
-    this.emitPing_(this.buildPingAddress_(name));
+  sendPing(name, opt_extraParams) {
+    this.emitPing_(this.buildPingAddress_(name, opt_extraParams));
   }
 
   /**
    * @param {string} name  Metric name to send.
+   * @param {Object=} opt_extraParams
    * @returns {string}  URL to send metrics to.
    * @private
    */
-  buildPingAddress_(name) {
+  buildPingAddress_(name, opt_extraParams) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
     const delta = Date.now() - this.initTime_;
     // Note: QQid comes from a network header and eid could, potentially, be
@@ -211,6 +215,14 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         `&qqid.${this.slotId_}=${encodedQqid}` : '';
     const eid = this.element_.getAttribute(EXPERIMENT_ATTRIBUTE);
     const eidParam = eid ? `&e=${encodeURIComponent(eid)}` : '';
+    let extraParams = '';
+    if (opt_extraParams) {
+      let paramList = [];
+      for (const param in opt_extraParams) {
+        paramList.push(`${param}=${opt_extraParams[param]}`);
+      }
+      extraParams = '&' + paramList.join('&');
+    }
     const pingUrl = `${this.pingbackAddress_}?` +
         `s=${this.namespace_}` +
         `&v=2&it=${name}.${delta},${name}_${this.slotId_}.${delta}` +
@@ -220,7 +232,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         `${eidParam}${qqidParam}` +
         `&it.${this.slotName_}=${name}.${delta}` +
         `&rt.${this.slotName_}=stage.${stageId}` +
-        `&met.${this.slotName_}=stage_${stageId}.${delta}`;
+        `&met.${this.slotName_}=stage_${stageId}.${delta}` +
+        extraParams;
     return pingUrl;
   }
 
