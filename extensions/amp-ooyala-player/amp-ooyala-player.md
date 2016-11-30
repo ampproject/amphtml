@@ -71,6 +71,16 @@ An optional attribute to specify which version of the Ooyala player to use, V3 o
 
 An optional attribute to specify a skin.json config file URL for player V4.
 
+**autoplay**
+
+If this attribute is present, and the browser supports autoplay:
+
+* the video is automatically muted before autoplay starts
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* when the user taps the video, the video is unmuted
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+
 ## Validation
 
 See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/0.1/validator-amp-ooyala-player.protoascii) in the AMP validator specification.

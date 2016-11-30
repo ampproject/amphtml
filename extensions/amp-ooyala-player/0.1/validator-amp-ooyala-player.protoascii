@@ -38,6 +38,9 @@ tags: {  # amp-ooyala-player
     name: "type"
     value: "text/javascript"
   }
+  attrs: { 
+    name: "autoplay" 
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
