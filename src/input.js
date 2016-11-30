@@ -44,13 +44,13 @@ export class Input {
     /** @private {!Function} */
     this.boundOnMouseDown_ = this.onMouseDown_.bind(this);
 
-    /** @private {!Function} */
+    /** @private {?Function} */
     this.boundOnMouseMove_ = null;
 
-    /** @private {!Function} */
+    /** @private {?Function} */
     this.boundMouseCanceled_ = null;
 
-    /** @private {!Function} */
+    /** @private {?Function} */
     this.boundMouseConfirmed_ = null;
 
     /** @private {boolean} */
@@ -85,7 +85,8 @@ export class Input {
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
       if (!this.boundOnMouseMove_) {
-        this.boundOnMouseMove_ = this.onMouseMove_.bind(this);
+        this.boundOnMouseMove_ =
+          /** @private {!Function} */ (this.onMouseMove_.bind(this));
       }
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
@@ -235,7 +236,8 @@ export class Input {
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
       if (!this.boundOnMouseMove_) {
-        this.boundOnMouseMove_ = this.onMouseMove_.bind(this);
+        this.boundOnMouseMove_ =
+          /** @private {!Function} */ (this.onMouseMove_.bind(this));
       }
       listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
     } else {
