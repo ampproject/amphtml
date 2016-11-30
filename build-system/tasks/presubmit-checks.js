@@ -624,12 +624,14 @@ var forbiddenTermsSrcInclusive = {
   '\\.expandStringSync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
     ]
   },
   '\\.expandStringAsync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
     ]
   },
