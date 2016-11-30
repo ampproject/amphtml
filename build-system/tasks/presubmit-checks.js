@@ -253,6 +253,7 @@ var forbiddenTerms = {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
       '3p/integration.js',
+      '3p/ampcontext-lib.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
