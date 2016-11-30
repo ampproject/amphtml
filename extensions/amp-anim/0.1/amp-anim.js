@@ -81,10 +81,10 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    if (!inViewport || !this.loadPromise_) {
+    if (!inViewport) {
       this.updateInViewport_();
-    } else {
-      this.loadPromise_.then(() => this.updateInViewport_());
+    } else if (this.loadPromise_) {
+      this.loadPromise.then(() => this.updateInViewport_());
     }
   }
 
@@ -123,6 +123,7 @@ export class AmpAnim extends AMP.BaseElement {
           }
           throw error;
         });
+    this.loadPromise_.then(() => this.updateInViewport_());
     return this.loadPromise_;
   }
 };
