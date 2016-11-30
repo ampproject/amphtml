@@ -27,7 +27,7 @@ import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
@@ -186,6 +186,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       const iframeBox =
           this.getViewport().getLayoutRect(this.xOriginIframeHandler_.iframe);
       const box = this.getLayoutBox();
+      // Cache the iframe's relative position to the amp-ad. This is
+      // necessary for fixed-position containers which "move" with the
+      // viewport.
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
@@ -201,9 +204,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    // If the iframe is full size, we avoid an object allocation by moving box.
-    return moveLayoutRect(box, this.iframeLayoutBox_.left,
-        this.iframeLayoutBox_.top);
+
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
+        dev().assert(this.iframeLayoutBox_));
+    return moveLayoutRect(iframe, box.left, box.top);
   }
 
   /** @override */
