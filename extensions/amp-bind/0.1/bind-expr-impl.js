@@ -167,11 +167,11 @@ case 26:
 
         this.$ = null;
 
-        var obj = toString.call($$[$0-3]);
+        const obj = toString.call($$[$0-3]);
 
-        var whitelist = functionWhitelist[obj];
+        const whitelist = functionWhitelist[obj];
         if (whitelist) {
-          var fn = $$[$0-3][$$[$0-1]];
+          const fn = $$[$0-3][$$[$0-1]];
           if (whitelist.indexOf(fn) >= 0) {
             if (typeCheckArgs($$[$0])) {
               this.$ = fn.apply($$[$0-3], $$[$0]);
@@ -196,8 +196,8 @@ case 29:
           return;
         }
 
-        var type = typeof $$[$0];
-        var isCorrectType = type === 'string' || type === 'number';
+        const type = typeof $$[$0];
+        const isCorrectType = type === 'string' || type === 'number';
         if (isCorrectType && hasOwnProperty.call($$[$0-1], $$[$0])) {
           this.$ = $$[$0-1][$$[$0]];
         }
@@ -389,11 +389,11 @@ parse: function parse(input) {
 }};
 
 // Shortcuts for common functions.
-var toString = Object.prototype.toString;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+const toString = Object.prototype.toString;
+const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // For security reasons, must not contain functions that mutate the caller.
-var functionWhitelist =
+const functionWhitelist =
 {
   '[object Array]':
     [
@@ -424,9 +424,8 @@ var functionWhitelist =
 
 /** @return {bool} Returns false if args contains an invalid type. */
 function typeCheckArgs(args) {
-  for (var i = 0; i < args.length; i++) {
-    var arg = args[i];
-    if (toString.call(arg) === '[object Object]') {
+  for (let i = 0; i < args.length; i++) {
+    if (toString.call(args[i]) === '[object Object]') {
       return false;
     }
   }

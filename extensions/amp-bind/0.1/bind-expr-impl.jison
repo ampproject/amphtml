@@ -2,11 +2,11 @@
 
 %{
 // Shortcuts for common functions.
-var toString = Object.prototype.toString;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+const toString = Object.prototype.toString;
+const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 // For security reasons, must not contain functions that mutate the caller.
-var functionWhitelist =
+const functionWhitelist =
 {
   '[object Array]':
     [
@@ -37,9 +37,8 @@ var functionWhitelist =
 
 /** @return {bool} Returns false if args contains an invalid type. */
 function typeCheckArgs(args) {
-  for (var i = 0; i < args.length; i++) {
-    var arg = args[i];
-    if (toString.call(arg) === '[object Object]') {
+  for (let i = 0; i < args.length; i++) {
+    if (toString.call(args[i]) === '[object Object]') {
       return false;
     }
   }
@@ -185,11 +184,11 @@ invocation:
       %{
         $$ = null;
 
-        var obj = toString.call($1);
+        const obj = toString.call($1);
 
-        var whitelist = functionWhitelist[obj];
+        const whitelist = functionWhitelist[obj];
         if (whitelist) {
-          var fn = $1[$3];
+          const fn = $1[$3];
           if (whitelist.indexOf(fn) >= 0) {
             if (typeCheckArgs($4)) {
               $$ = fn.apply($1, $4);
@@ -220,8 +219,8 @@ member_access:
           return;
         }
 
-        var type = typeof $2;
-        var isCorrectType = type === 'string' || type === 'number';
+        const type = typeof $2;
+        const isCorrectType = type === 'string' || type === 'number';
         if (isCorrectType && hasOwnProperty.call($1, $2)) {
           $$ = $1[$2];
         }
