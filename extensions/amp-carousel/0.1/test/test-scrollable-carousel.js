@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
-describe('ScrollableCarousel', () => {
+describes.sandboxed('ScrollableCarousel', {}, () => {
 
   let sandbox;
 
@@ -55,34 +55,43 @@ describe('ScrollableCarousel', () => {
       return iframe.addElement(carouselElement);
     });
   }
+  describes.realWin('font-stylesheet-timeout', {
+    amp: true,
+  }, () => {
 
-  it('should initialize correctly: create container, build initial slides ' +
-      'and show control buttons', () => {
-    return getAmpScrollableCarousel().then(carousel => {
-      const impl = carousel.implementation_;
 
-      // create container
-      expect(carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container').length).to.equal(1);
-      const container = carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container')[0];
-      expect(container.style.overflowX).to.equal('auto');
-      expect(container.style.overflowY).to.equal('hidden');
-      expect(container.style.whiteSpace).to.equal('nowrap');
 
-      // build child slides
-      expect(container.getElementsByClassName('amp-carousel-slide').length)
-          .to.equal(7);
-      expect(container.getElementsByClassName('amp-carousel-slide')[0]
-          .style.display).to.equal('inline-block');
+    it('should initialize correctly: create container, build initial slides ' +
+        'and show control buttons', () => {
+      return getAmpScrollableCarousel().then(carousel => {
+        const impl = carousel.implementation_;
 
-      // show control buttons correctly
-      expect(impl.hasPrev()).to.be.false;
-      expect(impl.hasNext()).to.be.true;
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+        // create container
+        expect(carousel.getElementsByClassName(
+            '-amp-scrollable-carousel-container').length).to.equal(1);
+        const container = carousel.getElementsByClassName(
+            '-amp-scrollable-carousel-container')[0];
+        expect(container.style.overflowX).to.equal('auto');
+        expect(container.style.overflowY).to.equal('hidden');
+        expect(container.style.whiteSpace).to.equal('nowrap');
 
+        // build child slides
+        expect(container.getElementsByClassName('amp-carousel-slide').length)
+            .to.equal(7);
+        expect(container.getElementsByClassName('amp-carousel-slide')[0]
+            .style.display).to.equal('inline-block');
+
+        // show control buttons correctly
+        expect(impl.hasPrev()).to.be.false;
+        expect(impl.hasNext()).to.be.true;
+        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+
+      });
     });
+
+
+
   });
 
   it('should behave correctly when clicking on next button and the space ' +
