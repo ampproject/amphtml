@@ -9,7 +9,11 @@
   <script id="amp-access" type="application/json">
     {
       "vendor": "laterpay",
-      "authorizationFallbackResponse": {"error": true}
+      "authorizationFallbackResponse": {"error": true},
+      "noPingback": true,
+      "laterpay": {
+        "articleTitleSelector": ".content-container > header > h1"
+      }
     }
   </script>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
