@@ -79,6 +79,6 @@ if (contents.indexOf('"%~dp0\\node_modules\\amphtml-validator\\index.sh"') ===
   process.exit(1);
 }
 
-fs.writeFileSync(validatorShimPath, shimForwindows);
+fs.writeFileSync(validatorShimPath, shimForWindows);
 console./*OK*/ log(
     'postinstall-windows.js: Modified amphtml-validator for Windows.');
