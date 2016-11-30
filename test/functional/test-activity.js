@@ -15,9 +15,9 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {installActivityService,} from
-    '../../extensions/amp-analytics/0.1/activity-impl';
-import {activityFor} from '../../src/activity';
+import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {activityForDoc} from '../../src/activity';
+import {fromClassForDoc} from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -117,9 +117,9 @@ describe('Activity getTotalEngagedTime', () => {
       scrollObservable.add(handler);
     });
 
-    installActivityService(fakeWin);
+    fromClassForDoc(ampdoc, 'activity', Activity);
 
-    return activityFor(fakeWin).then(a => {
+    return activityForDoc(ampdoc).then(a => {
       activity = a;
     });
   });
