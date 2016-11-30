@@ -46,12 +46,32 @@ if (!fs.existsSync(validatorShimPath)) {
   process.exit(0);
 }
 
-// We take a quick look into the shim file that npm for Windows generates.
-// This will try to invoke the shell script, using /bin/sh as the interpreter -
-// which we already established won't work if this postinstall were to trigger
-// (again, see the command line in package.json and imagine what happens if
-// cmd.exe executes it).
+// Unfortunately the shim file that npm for Windows generates doesn't
+// work. It will try to invoke the shell script that's part of this
+// package, using /bin/sh as the interpreter - which we've already
+// established won't work if this postinstall were to trigger (again,
+// see the command line in package.json and imagine what happens if
+// cmd.exe executes it). So, we detect this file and replace it with a
+// shim that will likely work. We already know that the node command
+// works (since this is how we were invoked from the command line in
+// package.json), and we know that index.js is a sibling to
+// index.sh. So, we can just invoke that.
+var shimForWindows = '@ECHO OFF\r\n' +
+    'node "%~dp0\\node_modules\\amphtml-validator\\index.js" %*';
+
 var contents = fs.readFileSync(validatorShimPath, 'utf8');
+// This check triggers specifically if amphtml-validator has been globally
+// installed already and now we're performing a local install. This crude
+// postinstall script will then nevertheless reach for the global installation
+// which may already be patched up. But it's a good idea to be idempotent in
+// general.
+if (contents === shimForWindows) {
+  console./*OK*/ log('postinstall-windows.js: amphtml-validator already fine.');
+  process.exit(0);
+}
+
+// Before we write the modified shim we still check the contents of the file
+// to make sure it's not something unexpected.
 if (contents.indexOf('"%~dp0\\node_modules\\amphtml-validator\\index.sh"') ===
     -1) {
   console./*OK*/ error(
@@ -59,12 +79,6 @@ if (contents.indexOf('"%~dp0\\node_modules\\amphtml-validator\\index.sh"') ===
   process.exit(1);
 }
 
-// Now we write a shim file that will likely work. We already know that the
-// node command works (since this is how we were invoked from the command line
-// in package.json), and we know that index.js is a sibling to index.sh.
-// So, we can just invoke that.
-fs.writeFileSync(
-    validatorShimPath, '@ECHO OFF\r\n' +
-        'node "%~dp0\\node_modules\\amphtml-validator\\index.js" %*');
+fs.writeFileSync(validatorShimPath, shimForWindows);
 console./*OK*/ log(
     'postinstall-windows.js: Modified amphtml-validator for Windows.');
