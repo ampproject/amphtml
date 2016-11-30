@@ -802,8 +802,15 @@ describe('amp-a4a', () => {
   });
 
   describe('#getAmpAdMetadata_', () => {
+    let a4a;
+    beforeEach(() => {
+      return createAdTestingIframePromise().then(fixture => {
+        a4a = new MockA4AImpl(createA4aElement(fixture.doc));
+        return fixture;
+      });
+    });
     it('should parse metadata', () => {
-      const actual = AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
+      const actual = a4a.getAmpAdMetadata_(buildCreativeString({
         customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
@@ -823,13 +830,13 @@ describe('amp-a4a', () => {
     it('should return null if missing ampRuntimeUtf16CharOffsets', () => {
       const baseTestDoc = testFragments.minimalDocOneStyle;
       const splicePoint = baseTestDoc.indexOf('</body>');
-      expect(AmpA4A.prototype.getAmpAdMetadata_(
+      expect(a4a.getAmpAdMetadata_(
         baseTestDoc.slice(0, splicePoint) +
         '<script type="application/json" amp-ad-metadata></script>' +
         baseTestDoc.slice(splicePoint))).to.be.null;
     });
     it('should return null if invalid extensions', () => {
-      expect(AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
+      expect(a4a.getAmpAdMetadata_(buildCreativeString({
         customElementExtensions: 'amp-vine',
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
@@ -838,13 +845,13 @@ describe('amp-a4a', () => {
       }))).to.be.null;
     });
     it('should return null if non-array stylesheets', () => {
-      expect(AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
+      expect(a4a.getAmpAdMetadata_(buildCreativeString({
         customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
         customStylesheets: 'https://fonts.googleapis.com/css?foobar',
       }))).to.be.null;
     });
     it('should return null if invalid stylesheet object', () => {
-      expect(AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString({
+      expect(a4a.getAmpAdMetadata_(buildCreativeString({
         customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
