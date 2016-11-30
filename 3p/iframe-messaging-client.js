@@ -88,8 +88,10 @@ export class IframeMessagingClient {
             // We should probably report exceptions within callback
             this.callbackFor_[payload.type](payload);
           } catch (err) {
-            user().error('IFRAME-MSG',
-                         `- Error in registered callback ${payload.type}`, err);
+            user().error(
+                'IFRAME-MSG',
+                `- Error in registered callback ${payload.type}`,
+                err);
           }
         }
       } catch (e) {

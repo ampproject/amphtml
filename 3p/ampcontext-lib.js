@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {AmpContext} from './ampcontext.js';
-import {initLogConstructor, dev} from '../src/log';
+import {initLogConstructor} from '../src/log';
 initLogConstructor();
 
 

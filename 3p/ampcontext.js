@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import './polyfills';
-import {initLogConstructor, dev, user} from '../src/log';
+import {dev, user} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 /**
