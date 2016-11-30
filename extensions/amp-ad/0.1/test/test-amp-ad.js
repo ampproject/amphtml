@@ -179,34 +179,6 @@ describe('A4A loader', () => {
           });
         });
       });
-
-      it('should not cache intersection box', () => {
-        return iframePromise.then(() => {
-          const stub = sandbox.stub(ampAd, 'getLayoutBox');
-          const box = {
-            top: 100,
-            bottom: 200,
-            left: 0,
-            right: 100,
-            width: 100,
-            height: 100,
-          };
-          stub.returns(box);
-
-          ampAd.onLayoutMeasure();
-          const intersection = ampAd.getIntersectionElementLayoutBox();
-
-          // Simulate a fixed position element "moving" 100px by scrolling down
-          // the page.
-          box.top += 100;
-          box.bottom += 100;
-          const newIntersection = ampAd.getIntersectionElementLayoutBox();
-          expect(newIntersection).not.to.deep.equal(intersection);
-          expect(newIntersection.top).to.equal(intersection.top + 100);
-          expect(newIntersection.width).to.equal(300);
-          expect(newIntersection.height).to.equal(200);
-        });
-      });
     });
   });
 });
