@@ -79,7 +79,8 @@ export class Platform {
    */
   isIe() {
     return (/MSIE/i.test(this.navigator_.userAgent) ||
-        /IEMobile/i.test(this.navigator_.userAgent));
+        /IEMobile/i.test(this.navigator_.userAgent) ||
+        /Trident/i.test(this.navigator_.userAgent));
   }
 
   /**
