@@ -231,6 +231,10 @@ export class AmpA4A extends AMP.BaseElement {
     this.experimentalNonAmpCreativeRenderMethod_ =
       platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
 
+    this.standardLifecycleData_ = {
+      'v_h': 'VIEWPORT_HEIGHT',
+      's_t': 'SCROLL_TOP',
+    };
 
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
@@ -243,8 +247,6 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error on emitLifecycleEvent', err, varArgs) ;
       });
-
-    this.protectedEmitLifecycleEvent_('adSlotBuilt');
   }
 
   /** @override */

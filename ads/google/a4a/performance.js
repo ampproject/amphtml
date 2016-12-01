@@ -32,6 +32,7 @@ import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getCorrelator} from './utils';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -167,6 +168,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.qqid_ = null;
     this.initTime_ = Date.now();
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
+    this.urlReplacer_ = urlReplacementsForDoc(element.ownerDocument);
   }
 
   /**
@@ -226,7 +228,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         }
       }
       if (paramList.length > 0) {
-        extraParams = '&' + paramList.join('&');
+        extraParams = '&' +
+            this.urlReplacer_.expandStringSync(paramList.join('&'));
       }
     }
     const pingUrl = `${this.pingbackAddress_}?` +

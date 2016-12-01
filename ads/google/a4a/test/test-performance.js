@@ -468,6 +468,22 @@ describe('GoogleAdLifecycleReporter', () => {
               '=3');
         });
       });
+
+      it('should expand URL parameters in extra params', () => {
+        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+          expect(emitPingSpy).to.not.be.called;
+          reporter.sendPing('adRequestStart', {zort: 'RANDOM'});
+          expect(emitPingSpy).to.be.calledOnce;
+          const arg = emitPingSpy.getCall(0).args[0];
+          const expectations = [
+            // Be sure that existing ping not deleted by args.
+            /[&?]s=test_foo/,
+            /zort=x[0-9.]+/,
+          ];
+          expectMatchesAll(arg, expectations);
+          expectHasSiblingImgMatchingAll(elem, expectations);
+        });
+      });
     });
   });
 
