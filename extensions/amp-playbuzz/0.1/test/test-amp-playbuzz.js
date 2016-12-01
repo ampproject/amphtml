@@ -41,7 +41,7 @@ describe('amp-playbuzz', () => {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-playbuzz');
-      ins.setAttribute('item-url', itemUrl);
+      ins.setAttribute('src', itemUrl);
       ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
       ins.setAttribute('alt', 'Testing');
@@ -49,13 +49,13 @@ describe('amp-playbuzz', () => {
         ins.setAttribute('layout', 'responsive');
       }
       if (params && typeof params.displayItemInfo === 'boolean') {
-        ins.setAttribute('display-item-info', params.displayItemInfo);
+        ins.setAttribute('data-item-info', params.displayItemInfo);
       }
       if (params && typeof params.displayShareBar === 'boolean') {
-        ins.setAttribute('display-share-buttons', params.displayShareBar);
+        ins.setAttribute('data-share-buttons', params.displayShareBar);
       }
       if (params && typeof params.displayComments === 'boolean') {
-        ins.setAttribute('display-comments', params.displayComments);
+        ins.setAttribute('data-comments', params.displayComments);
       }
       return iframe.addElement(ins);
     });
@@ -67,6 +67,10 @@ describe('amp-playbuzz', () => {
     expect(startsWith(iframe.src, itemSrcUrl)).to.be.true;
     expect(iframe.className).to.match(/-amp-fill-content/);
   }
+
+  before(() => {
+    AMP.toggleExperiment('amp-playbuzz', true);
+  });
 
   it('renders', () => {
     return getIns('https://www.playbuzz.com/bob/bobs-life').then(ins => {

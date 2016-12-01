@@ -14,37 +14,13 @@
  * limitations under the License.
  */
 
-.pb_feed_loading {
-        height: 320px;
-        overflow: hidden;
-}
-
-.pb_top_content_container {
-        opacity: 0;
-}
-
-.pb_top_content_container {
-        opacity: 1;
-}
-
 .pb_feed_placeholder_container {
-        position: absolute;
-        top: 0;
         width: 100%;
         height: 100%;
 }
 
 .pb_feed_placeholder_container, .pb_feed_placeholder_container {
         direction: ltr;
-}
-
-.pb_embed_spinner_iframe {
-        position: relative;
-        max-width: 640px;
-        width: 100%;
-        height: 320px;
-        margin: auto;
-        border: 0
 }
 
 .pb_feed_placeholder_inner {
@@ -72,17 +48,6 @@
         margin-left: -15px;
         overflow: hidden;
         box-sizing: border-box;
-}
-
-.pb_ie_fixer {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 30px;
-        height: 38px;
-        margin-top: -36px;
-        margin-left: 14px;
-        background-color: #f2f2f2;
 }
 
 .pb_feed_anim_mask {

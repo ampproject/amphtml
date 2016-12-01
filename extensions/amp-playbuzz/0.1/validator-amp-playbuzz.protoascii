@@ -54,7 +54,7 @@ tags: {  # <amp-playbuzz>
   tag_name: "AMP-PLAYBUZZ"
   also_requires_tag: "amp-playbuzz extension .js script"
   attrs: {
-    name: "item-url"
+    name: "src"
     mandatory: true
   }
   attr_lists: "extended-amp-global"

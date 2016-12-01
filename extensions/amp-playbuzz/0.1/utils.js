@@ -19,7 +19,8 @@
 // N milliseconds. If `immediate` is passed, trigger the function on the
 // leading edge, instead of the trailing.
 
-import {dev} from './../../../src/log';
+import {rethrowAsync} from './../../../src/log';
+import {serializeQueryString} from '../../../src/url';
 
 export function debounce(func, wait, immediate) {
   let timeout;
@@ -81,29 +82,29 @@ function parsePlaybuzzEventData(data) {
     }
   }
   catch (e) {
-    dev().log(err, e);
+    rethrowAsync('amp-playbuzz',err, e);
     return {};
   }
 
-  dev().log(err, data);
+  rethrowAsync('amp-playbuzz',err, data);
   return {};
 }
 
 export function composeEmbedUrl(options) {
-  const embedUrl = options.itemUrl +
-      '?feed=true' +
-      '&implementation=amp' +
-      '&src=' + options.itemUrl +
-      '&embedBy=00000000-0000-0000-0000-000000000000' + // TODO: EREZ- not mendetory ask lior (must pass user id - for now can generate uuid)
-      '&game=' + options.relativeUrl + // /shaulolmert10/5-u-s-athletes-you-need-to-know-about-before-the-rio-olympics
-      '&comments=undefined' + //display comments (not in use) //TODO: EREZ- might be able to use false
-      '&useComments=' + options.displayComments +
-      '&gameInfo=' + options.displayItemInfo +
-      '&useShares=' + options.displayShareBar +
-      '&socialReferrer=false' + //always false - will use parent url for sharing
-      '&height=auto' + //must pass as is - if not, makes problems in trivia (iframe height scrolling)
-      '&parentUrl=' + options.parentUrl + //used for sharing
-      '&parentHost=' + options.parentHost;
-
+  const embedUrl = options.itemUrl + '?' + serializeQueryString({
+    feed: true,
+    implementation: 'amp',
+    src: options.itemUrl,
+    embedBy: '00000000-0000-0000-0000-000000000000',
+    game: options.relativeUrl,
+    comments: undefined,
+    useComments: options.displayComments,
+    gameInfo: options.displayItemInfo,
+    useShares: options.displayShareBar,
+    socialReferrer: false, //always false - will use parent url for sharing
+    height: 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
+    parentUrl: options.parentUrl, //used for sharing
+    parentHost: options.parentHost,
+  });
   return embedUrl;
 }
