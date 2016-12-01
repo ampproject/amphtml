@@ -67,13 +67,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-fx-flying-carpet',
-    name: 'AMP Flying Carpet',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -108,6 +101,12 @@ const EXPERIMENTS = [
     name: 'AMP Form Custom Validations',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
+  },
+  {
+    id: 'amp-form-var-sub',
+    name: 'Variable Substitutions in AMP Form inputs',
+    spec: 'https://github.com/ampproject/amphtml/issues/5654',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
   {
     id: 'amp-google-vrview-image',

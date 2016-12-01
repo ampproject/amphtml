@@ -216,21 +216,24 @@ export function resetBootstrapBaseUrlForTesting(win) {
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
+ * @param {string=} opt_srcFileBasename
  * @return {string}
  */
-function getDefaultBootstrapBaseUrl(parentWindow) {
+export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
+  const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
     if (overrideBootstrapBaseUrl) {
       return overrideBootstrapBaseUrl;
     }
     return getAdsLocalhost(parentWindow)
         + '/dist.3p/'
-        + (getMode().minified ? '$internalRuntimeVersion$/frame'
-            : 'current/frame.max')
+        + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
+            : `current/${srcFileBasename}.max`)
         + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
-      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
+      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+      `${srcFileBasename}.html`;
 }
 
 function getAdsLocalhost(win) {
@@ -257,7 +260,7 @@ export function getSubDomain(win) {
  * @param {!Window} win
  * @return {string}
  */
-function getRandom(win) {
+export function getRandom(win) {
   let rand;
   if (win.crypto && win.crypto.getRandomValues) {
     // By default use 2 32 bit integers.
