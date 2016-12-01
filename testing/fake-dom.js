@@ -48,6 +48,8 @@ export class FakeWindow {
     this.Object = window.Object;
     /** @const */
     this.HTMLElement = window.HTMLElement;
+    /** @const */
+    this.DOMTokenList = window.DOMTokenList;
 
     // Events.
     EventListeners.intercept(this);

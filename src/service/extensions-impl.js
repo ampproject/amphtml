@@ -25,6 +25,9 @@ import {fromClass, setParentWindow} from '../service';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {install as installDocContains} from '../polyfills/document-contains';
+import {
+  install as installDOMTokenListToggle,
+} from '../polyfills/domtokenlist-toggle';
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
@@ -623,5 +626,6 @@ function copyBuiltinElementsToChildWindow(childWin) {
  */
 function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
+  installDOMTokenListToggle(childWin);
   installCustomElements(childWin);
 }
