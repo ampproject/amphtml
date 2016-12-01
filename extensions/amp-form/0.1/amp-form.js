@@ -295,7 +295,7 @@ export class AmpForm {
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
-    triggerAnalyticsEvent(this.win_, eventType, opt_vars);
+    triggerAnalyticsEvent(this.form_, eventType, opt_vars);
   }
 
   /**

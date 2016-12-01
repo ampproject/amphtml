@@ -15,17 +15,20 @@
  */
 
 import {
-    fromClass,
+    fromClassForDoc,
     resetServiceForTesting,
 } from '../../src/service';
 import {triggerAnalyticsEvent} from '../../src/analytics';
 import {timerFor} from '../../src/timer';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 describe('triggerAnalyticsEvent', () => {
   let sandbox;
   let timer;
+  let ampdoc;
   let triggerEventSpy;
+
 
   class MockInstrumentation {
     triggerEvent(eventType, opt_vars) {
@@ -36,8 +39,9 @@ describe('triggerAnalyticsEvent', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     timer = timerFor(window);
+    ampdoc = new AmpDocSingle(window);
     triggerEventSpy = sandbox.spy();
-    resetServiceForTesting(window, 'amp-analytics-instrumentation');
+    resetServiceForTesting(ampdoc, 'amp-analytics-instrumentation');
   });
 
   afterEach(() => {
@@ -45,15 +49,16 @@ describe('triggerAnalyticsEvent', () => {
   });
 
   it('should not do anything if analytics is not installed', () => {
-    triggerAnalyticsEvent(window, 'hello');
+    triggerAnalyticsEvent(ampdoc, 'hello');
     return timer.promise(10).then(() => {
       expect(triggerEventSpy).to.have.not.been.called;
     });
   });
 
   it('should trigger analytics event if analytics is installed', () => {
-    fromClass(window, 'amp-analytics-instrumentation', MockInstrumentation);
-    triggerAnalyticsEvent(window, 'hello');
+    fromClassForDoc(
+        ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+    triggerAnalyticsEvent(ampdoc, 'hello');
     return timer.promise(10).then(() => {
       expect(triggerEventSpy).to.have.been.called;
       expect(triggerEventSpy).to.have.been.calledWith('hello');
