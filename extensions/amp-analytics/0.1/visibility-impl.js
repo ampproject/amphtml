@@ -380,6 +380,10 @@ export class Visibility {
 
       // Update states and check if all conditions are satisfied
       if (this.updateCounters_(visible, listener, shouldBeVisible)) {
+        if (state[SCHEDULED_RUN_ID]) {
+          this.timer_.cancel(state[SCHEDULED_RUN_ID]);
+          state[SCHEDULED_RUN_ID] = null;
+        }
         this.prepareStateForCallback_(state, change.boundingClientRect);
         listener.callback(state);
         listeners.splice(c, 1);
