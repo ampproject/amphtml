@@ -514,7 +514,7 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    it.only('should work for visible=true spec', () => {
+    it('should work for visible=true spec', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
