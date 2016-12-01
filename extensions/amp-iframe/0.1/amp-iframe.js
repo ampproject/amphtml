@@ -22,8 +22,8 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
+import {removeFragment, parseUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
@@ -91,17 +91,42 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /**
+   * Transforms the src attribute. When possible, it adds `#amp=1` fragment
+   * to indicate that the iframe is running in AMP environment.
+   * @param {?string} src
+   * @return {string|undefined}
+   * @private
+   */
+  transformSrc_(src) {
+    if (!src) {
+      return;
+    }
+    const url = parseUrl(src);
+    // data-URLs are not modified.
+    if (url.protocol == 'data:') {
+      return src;
+    }
+    // If fragment already exists, it's not modified.
+    if (url.hash && url.hash != '#') {
+      return src;
+    }
+    // Add `#amp=1` fragment.
+    return removeFragment(src) + '#amp=1';
+  }
+
+  /**
    * Transforms the srcdoc attribute if present to an equivalent data URI.
    *
    * It may be OK to change this later to leave the `srcdoc` in place and
    * instead ensure that `allow-same-origin` is not present, but this
    * implementation has the right security behavior which is that the document
    * may under no circumstances be able to run JS on the parent.
-   * @param {string} srcdoc
+   * @param {?string} srcdoc
    * @param {string} sandbox
-   * @return {string} Data URI for the srcdoc
+   * @return {string|undefined} Data URI for the srcdoc
+   * @private
    */
-  transformSrcDoc(srcdoc, sandbox) {
+  transformSrcDoc_(srcdoc, sandbox) {
     if (!srcdoc) {
       return;
     }
@@ -120,8 +145,8 @@ export class AmpIframe extends AMP.BaseElement {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
     const iframeSrc =
-        this.element.getAttribute('src') ||
-        this.transformSrcDoc(
+        this.transformSrc_(this.element.getAttribute('src')) ||
+        this.transformSrcDoc_(
             this.element.getAttribute('srcdoc'), this.sandbox_);
     /**
      * The source of the iframe. May later be set to null for tracking iframes
