@@ -45,6 +45,7 @@ export function revcontent(global, data) {
     'font',
     'css',
     'sizer',
+    'debug',
   ];
 
   validateData(data, required, optional);
