@@ -24,6 +24,9 @@ const amphtmlValidator = require('amphtml-validator');
 const PLUGIN_NAME = 'gulp-amphtml-validator';
 const PluginError = gutil.PluginError;
 
+const STATUS_FAIL = 'FAIL';
+const STATUS_PASS = 'PASS';
+
 /**
  * Validates AMP files and attaches the validation result to the file object.
  *
@@ -45,18 +48,22 @@ module.exports.validate = function(validator) {
         'Streams not supported!'));
     }
     if (file.isBuffer()) {
-      const context = this;
       validator.getInstance()
         .then(function(validatorInstance) {
           const inputString = file.contents.toString();
           file.ampValidationResult = validatorInstance.validateString(inputString);
           return callback(null, file);
         })
-        .done(function(result) {
-          if (result instanceof Error) {
-            context.emit('error', new PluginError(PLUGIN_NAME,
-              '\nAMPHTML Validator failed with exception: ' + e));
-          }
+        .catch(function(err) {
+          file.ampValidationResult = {
+            status: STATUS_FAIL,
+            errors: [{
+              line: 0,
+              col: 0,
+              message: err.message,
+            }],
+          };
+          return callback(null, file);
         });
     }
   }
@@ -84,29 +91,28 @@ module.exports.format = function(logger) {
   }
 
   function formatResults(callback) {
-    results.forEach(printResult);
+    logger.log('AMP Validation results:\n\n' + results.map(printResult).join('\n\n'));
     return callback();
   }
 
   function printResult(file) {
     const validationResult = file.ampValidationResult;
-    let report = '';
-    if (validationResult.status === 'PASS') {
+    let report = file.relative + ': ';
+    if (validationResult.status === STATUS_PASS) {
       report += gutil.colors.green(validationResult.status);
     } else {
       report += gutil.colors.red(validationResult.status);
     }
-    report += ' ' + file.relative;
     for (let ii = 0; ii < validationResult.errors.length; ii++) {
       const error = validationResult.errors[ii];
-      let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
-        error.message;
+      let msg = file.relative + ':' + error.line + ':' + error.col + ' ' +
+        gutil.colors.red(error.message);
       if (error.specUrl !== null) {
         msg += ' (see ' + error.specUrl + ')';
       }
       report += '\n' + msg;
     }
-    logger.log(report);
+    return report;
   }
 
   return through.obj(collectResults, formatResults);
@@ -119,22 +125,22 @@ module.exports.format = function(logger) {
  */
 module.exports.failAfterError = function() {
 
-  const failedFiles = [];
+  let failedFiles = 0;
 
   function collectFailedFiles(file, encoding, callback) {
     if (file.isNull() || !file.ampValidationResult) {
       return callback(null, file);
     }
-    if (file.ampValidationResult.status === 'FAIL') {
-      failedFiles.push(file.relative);
+    if (file.ampValidationResult.status === STATUS_FAIL) {
+      failedFiles++;
     }
     return callback(null, file);
   }
 
   function failOnError(callback) {
-    if (failedFiles.length > 0) {
+    if (failedFiles > 0) {
       this.emit('error', new PluginError(PLUGIN_NAME,
-        '\nAMPHTML Validation failed for: \n\n' + failedFiles.join('\n')));
+        '\nAMPHTML Validation failed for ' + failedFiles + ' files.'));
     }
     callback();
   }
