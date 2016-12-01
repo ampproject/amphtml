@@ -18,14 +18,21 @@
 import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
+const sentinel_ = '__AMPHTML__';
+const requestSentinel_ = sentinel_ + 'REQUEST';
+const responseSentinel_ = sentinel_ + 'RESPONSE';
 
 /**
- * @fileoverview This is a used in amp-viewer-integration.js for the
- * communication protocol between AMP and the viewer.
+ * @fileoverview This is used in amp-viewer-integration.js for the
+ * communication protocol between AMP and the viewer. In the comments, I will
+ * refer to the communication as a conversation between me and Bob. The
+ * messaging protocol should support both sides, but at this point I'm the
+ * ampdoc and Bob is the viewer.
  */
 export class Messaging {
+
   /**
-   * Messaging protocol between viewer and viewer client.
+   * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} source
    * @param {!Window} target
    * @param {string} targetOrigin
@@ -33,13 +40,10 @@ export class Messaging {
    *    requestProcessor
    */
   constructor(source, target, targetOrigin, requestProcessor) {
-    this.sentinel_ = '__AMPHTML__';
-    this.requestSentinel_ = this.sentinel_ + 'REQUEST';
-    this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
-
+    /**  @private {!number} */
     this.requestIdCounter_ = 0;
+    /**  @private {*} */
     this.waitingForResponse_ = {};
-
     /** @const @private {!Window} */
     this.target_ = target;
     /** @const @private {string} */
@@ -54,6 +58,8 @@ export class Messaging {
 
 
   /**
+   * Bob sent me a message. I need to decide if it's a new request or
+   * a response to a previous 'conversation' we were having.
    * @param {Event|null} event
    * @private
    */
@@ -63,15 +69,16 @@ export class Messaging {
       return;
     }
     const message = event.data;
-    if (message.sentinel == this.requestSentinel_) {
+    if (message.sentinel == requestSentinel_) {
       this.handleRequest_(message);
-    } else if (message.sentinel == this.responseSentinel_) {
+    } else if (message.sentinel == responseSentinel_) {
       this.handleResponse_(message);
     }
   }
 
 
   /**
+   * I'm sending Bob a new outgoing request.
    * @param {string} eventType
    * @param {*} payload
    * @param {boolean} awaitResponse
@@ -79,21 +86,22 @@ export class Messaging {
    */
   sendRequest(eventType, payload, awaitResponse) {
     dev().info(
-      'MESSAGING', 'messaging.js -> sendRequest, eventType: ', eventType);
-    const requestId = String(++this.requestIdCounter_);
+        'MESSAGING', 'messaging.js -> sendRequest, eventType: ', eventType);
+    const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
       promise = new Promise((resolve, reject) => {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
-        awaitResponse);
+    this.sendMessage_(requestSentinel_, requestId.toString(), eventType,
+      payload, awaitResponse);
     return promise;
   }
 
 
   /**
+   * I'm responding to a request that Bob made earlier.
    * @param {number} requestId
    * @param {*} payload
    * @private
@@ -101,7 +109,7 @@ export class Messaging {
   sendResponse_(requestId, payload) {
     dev().info('MESSAGING', 'messaging.js -> sendResponse_');
     this.sendMessage_(
-      this.responseSentinel_, requestId.toString(), null, payload, false);
+      responseSentinel_, requestId.toString(), null, payload, false);
   }
 
 
@@ -132,11 +140,14 @@ export class Messaging {
    */
   sendResponseError_(requestId, reason) {
     this.sendMessage_(
-      this.responseSentinel_, requestId.toString(), 'ERROR', reason, false);
+      responseSentinel_, requestId.toString(), 'ERROR', reason, false);
   }
 
 
   /**
+   * I'm handing an incoming request from Bob. I'll either respond normally
+   * (ex: "got it Bob!") or with an error (ex: "I didn't get a word of what
+   * you said!").
    * @param {*} message
    * @private
    */
@@ -148,18 +159,21 @@ export class Messaging {
     if (message.rsvp) {
       if (!promise) {
         this.sendResponseError_(requestId, 'no response');
-        throw new Error('expected response but none given: ' + message.type);
+        dev().assert(promise,
+          'expected response but none given: ' + message.type);
       }
-      promise.then(function(payload) {
+      promise.then(payload => {
         this.sendResponse_(requestId, payload);
-      }.bind(this), function(reason) {
+      }, reason => {
         this.sendResponseError_(requestId, reason);
-      }.bind(this));
+      });
     }
   }
 
 
   /**
+   * I sent out a request to Bob. He responded. And now I'm handling that
+   * response.
    * @param {*} message
    * @private
    */

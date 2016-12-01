@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * Directions: to run this test locally you will need to add ".max" in
+ * ampdoc-with-messaging.html line 24 like this:
+ * <script src="...amp-viewer-integration-0.1.js"></script> =>
+ * <script src="...amp-viewer-integration-0.1.max.js"></script>
+ * but don't submit this otherwise the Travis won't build.
+ */
+
 import {Messaging} from '../messaging.js';
 import {Viewer} from './viewer-messaging-example.js';
 import {adopt} from '../../../../src/runtime';
@@ -27,32 +35,30 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
   let viewerEl;
   let viewer;
-
-  beforeEach(() => {
-    const loc = window.location;
-    const ampDocUrl =
-      `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
-
-    viewerEl = document.createElement('div');
-    document.body.appendChild(viewerEl);
-    viewer = new Viewer(viewerEl, '1', ampDocUrl, true);
-    return viewer.waitForHandshakeRequest();
-  });
-
-  afterEach(() => {
-    document.body.removeChild(viewerEl);
-  });
-
   describe('Handshake', function() {
-    this.timeout(5000);
+    beforeEach(() => {
+      const loc = window.location;
+      const ampDocUrl =
+        `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
+
+      viewerEl = document.createElement('div');
+      document.body.appendChild(viewerEl);
+      viewer = new Viewer(viewerEl, '1', ampDocUrl, true);
+      return viewer.waitForHandshakeRequest();
+    });
+
     it('should confirm the handshake', () => {
       console.log('sending handshake response');
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();
     });
+
+    afterEach(() => {
+      document.body.removeChild(viewerEl);
+    });
   });
 
-  describe('Unit Tests', () => {
+  describe('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
     const ampDoc = 'http://localhost:8000/examples/everything.amp.max.html';
     const requestProcessor = function() {};
@@ -72,8 +78,6 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('should initialize correctly', () => {
-      expect(messaging.requestSentinel_).to.equal('__AMPHTML__REQUEST');
-      expect(messaging.responseSentinel_).to.equal('__AMPHTML__RESPONSE');
       expect(messaging.requestProcessor_).to.equal(requestProcessor);
       expect(messaging.target_).to.equal(window);
       expect(messaging.targetOrigin_).to.equal(viewerOrigin);
@@ -82,7 +86,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     it('handleMessage_ should call handleRequest_', () => {
       const src = 'source';
       const orgn = 'origin';
-      const sntnl = 'request';
+      const sntnl = '__AMPHTML__REQUEST';
       const event = {
         source: src,
         origin: orgn,
@@ -92,8 +96,6 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       };
       sandbox.stub(messaging, 'target_', src);
       sandbox.stub(messaging, 'targetOrigin_', orgn);
-      sandbox.stub(messaging, 'requestSentinel_', sntnl);
-      sandbox.stub(messaging, 'responseSentinel_', 'response');
       sandbox.stub(messaging, 'handleResponse_', () => {});
       const handleRequest_ =
         sandbox.stub(messaging, 'handleRequest_', () => {});
@@ -106,7 +108,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     it('handleMessage_ should call handleResponse_', () => {
       const src = 'source';
       const orgn = 'origin';
-      const sntnl = 'response';
+      const sntnl = '__AMPHTML__RESPONSE';
       const event = {
         source: src,
         origin: orgn,
@@ -116,8 +118,6 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       };
       sandbox.stub(messaging, 'target_', src);
       sandbox.stub(messaging, 'targetOrigin_', orgn);
-      sandbox.stub(messaging, 'requestSentinel_', 'request');
-      sandbox.stub(messaging, 'responseSentinel_', sntnl);
       sandbox.stub(messaging, 'handleRequest_', () => {});
       const handleResponse_ =
         sandbox.stub(messaging, 'handleResponse_', () => {});

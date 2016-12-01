@@ -37,13 +37,16 @@ export class AmpViewerIntegration {
   /**
    * Initiate the handshake. If handshake confirmed, start listening for
    * messages.
-   * @return {!Promise}
+   * @return {!Promise|undefined}
    */
   init() {
-    if (window.parent && window.parent != window) {
-      dev().info('AVI', 'amp-viewer-integration.js => handshake init()');
-      const viewer = viewerForDoc(this.win_.document);
-      return this.getHandshakePromise_(viewer)
+    const isIframed = window.parent && window.parent != window;
+    if (!isIframed) {
+      return;
+    }
+    dev().info('AVI', 'amp-viewer-integration.js => handshake init()');
+    const viewer = viewerForDoc(this.win_.document);
+    return this.getHandshakePromise_(viewer)
       .then(viewerOrigin => {
         dev().info('AVI',
           'amp-viewer-integration.js => listening for messages');
@@ -57,9 +60,6 @@ export class AmpViewerIntegration {
           return messaging_.sendRequest(type, payload, awaitResponse);
         }, viewerOrigin);
       });
-    } else {
-      return new Promise(resolve => {resolve();});
-    }
   }
 
   /**
@@ -89,6 +89,7 @@ export class AmpViewerIntegration {
         }
       };
 
+      // Confirmed origin will come in the response.
       win.parent./*OK*/postMessage('amp-handshake-request',
           unconfirmedViewerOrigin);
     });
