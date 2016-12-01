@@ -46,11 +46,20 @@ function expectRenderedInFriendlyIframe(element, srcdoc) {
   const child = element.querySelector('iframe[srcdoc]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
-  const childDocument = child.contentDocument.documentElement;
-  expect(childDocument, 'iframe doc').to.be.ok;
-  expect(element, 'ad tag').to.be.visible;
-  expect(child, 'iframe child').to.be.visible;
-  expect(childDocument, 'ad creative content doc').to.be.visible;
+  return new Promise(resolve => {
+    const interval = setInterval(function() {
+      if (child.contentDocument && child.contentDocument.documentElement) {
+        resolve();
+        clearInterval(interval);
+      }
+    }, 4);
+  }).then(() => {
+    const childDocument = child.contentDocument.documentElement;
+    expect(childDocument, 'iframe doc').to.be.ok;
+    expect(element, 'ad tag').to.be.visible;
+    expect(child, 'iframe child').to.be.visible;
+    expect(childDocument, 'ad creative content doc').to.be.visible;
+  });
 }
 
 function expectRenderedInXDomainIframe(element, src) {
@@ -116,7 +125,7 @@ describe('integration test: a4a', () => {
 
   it('should render a single AMP ad in a friendly iframe', () => {
     return fixture.addElement(a4aElement).then(unusedElement => {
-      expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
+      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     });
   });
 
