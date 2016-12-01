@@ -80,11 +80,13 @@ export class AmpAdUIHandler {
     }
 
     // Apply default fallback div when there's no default one
-    const holder = createElementWithAttributes(document, 'div', {
+    const fallback = createElementWithAttributes(document, 'div', {
       'fallback': '',
     });
-    holder.classList.add('amp-ad-default-fallback');
-    this.baseInstance_.element.appendChild(holder);
+    fallback.classList.add('amp-ad-default-display');
+    fallback.appendChild(this.createDefaultHolder_());
+
+    this.baseInstance_.element.appendChild(fallback);
   }
 
   /**
@@ -114,6 +116,35 @@ export class AmpAdUIHandler {
       default:
         dev().error(TAG, 'state is not supported');
     }
+  }
+
+  /**
+   * See BaseElement method.
+   */
+  createPlaceholderCallback() {
+    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
+      return null;
+    }
+    const placeholder = createElementWithAttributes(document, 'div', {
+      'placeholder': '',
+    });
+    placeholder.appendChild(this.createDefaultHolder_());
+    this.baseInstance_.element.appendChild(placeholder);
+  }
+
+  /**
+   * Create the same holder for placeholder and fallback
+   * @return {!Element}
+   */
+  createDefaultHolder_() {
+    const adTagHolder = document.createElement('div');
+    adTagHolder.classList.add('-amp-ad-default-holder');
+    const adTag = document.createElement('div');
+    adTag.classList.add('-amp-ad-tag');
+    // TODO: support i8n
+    adTag.textContent = 'Ad';
+    adTagHolder.appendChild(adTag);
+    return adTagHolder;
   }
 
   /**

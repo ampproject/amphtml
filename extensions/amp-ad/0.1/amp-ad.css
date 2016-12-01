@@ -24,7 +24,32 @@ amp-ad iframe {
   padding: 0 !important;
 }
 
-.amp-ad-default-fallback {
+.amp-ad-default-display {
   /* TODO(zhouyx): Confirm on the background-color value */
   background-color: #d3d3d3;
+}
+
+.-amp-ad-default-holder {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #d3d3d3;
+}
+
+.-amp-ad-tag {
+  background-color: grey;
+  border-radius: 2px;
+  color: #fff;
+  display: inline-block;
+  padding: 0 2px;
+  height: 18px;
+  width: 23px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 18px;
 }
