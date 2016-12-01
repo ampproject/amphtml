@@ -39,7 +39,11 @@ import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
 import {timerFor} from '../../../src/timer';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {getFormValidator} from './form-validators';
+import {
+  getFormValidator,
+  isCheckValiditySupported,
+} from './form-validators';
+
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -192,22 +196,24 @@ export class AmpForm {
       return;
     }
 
-    // Validity checking should always occur, novalidate only circumvent
-    // reporting and blocking submission on non-valid forms.
-    const isValid = checkUserValidityOnSubmission(this.form_);
-    if (this.shouldValidate_ && !isValid) {
-      if (opt_event) {
-        opt_event.stopImmediatePropagation();
-        opt_event.preventDefault();
+    if (isCheckValiditySupported(this.win_.document)) {
+      // Validity checking should always occur, novalidate only circumvent
+      // reporting and blocking submission on non-valid forms.
+      const isValid = checkUserValidityOnSubmission(this.form_);
+      if (this.shouldValidate_ && !isValid) {
+        if (opt_event) {
+          opt_event.stopImmediatePropagation();
+          opt_event.preventDefault();
+        }
+        // TODO(#3776): Use .mutate method when it supports passing state.
+        this.vsync_.run({
+          measure: undefined,
+          mutate: reportValidity,
+        }, {
+          validator: this.validator_,
+        });
+        return;
       }
-      // TODO(#3776): Use .mutate method when it supports passing state.
-      this.vsync_.run({
-        measure: undefined,
-        mutate: reportValidity,
-      }, {
-        validator: this.validator_,
-      });
-      return;
     }
 
     const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
@@ -454,7 +460,7 @@ function updateInvalidTypesClasses(element) {
  *
  * @param {!Element} element
  * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
- * @returns {boolean} Whether the element is valid or not.
+ * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
   let shouldPropagate = false;
