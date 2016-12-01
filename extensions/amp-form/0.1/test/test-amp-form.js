@@ -322,9 +322,11 @@ describe('amp-form', () => {
       };
 
       ampForm.handleSubmit_(event);
-      expect(event.stopImmediatePropagation).to.not.be.called;
-      expect(form.checkValidity).to.not.be.called;
-      expect(ampForm.xhr_.fetchJson).to.be.called;
+      return timer.promise(1).then(() => {
+        expect(event.stopImmediatePropagation).to.not.be.called;
+        expect(form.checkValidity).to.not.be.called;
+        expect(ampForm.xhr_.fetchJson).to.be.called;
+      });
     });
   });
 
