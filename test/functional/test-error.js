@@ -19,6 +19,7 @@ import {
   detectNonAmpJs,
   getErrorReportUrl,
   installErrorReporting,
+  reportError,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
@@ -63,6 +64,12 @@ describes.fakeWin('installErrorReporting', {}, env => {
     expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
   });
 
+  it('should allow string errors', () => {
+    rejectedPromiseEvent.reason = 'string error';
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+  });
+
   it('should ignore cancellation', () => {
     rejectedPromiseEvent.reason = rejectedPromiseError = cancellation();
     win.eventListeners.fire(rejectedPromiseEvent);
@@ -73,7 +80,6 @@ describes.fakeWin('installErrorReporting', {}, env => {
 
 
 describe('reportErrorToServer', () => {
-
   let sandbox;
   let onError;
 
@@ -109,6 +115,24 @@ describe('reportErrorToServer', () => {
     expect(query.ae).to.equal('');
     expect(query.r).to.contain('http://localhost');
     expect(query.noAmp).to.equal('1');
+  });
+
+  it('reportError with a string instead of error', () => {
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined,
+            'string error',
+            true));
+    const query = parseQueryString(url.search);
+    expect(query.m).to.equal('string error');
+  });
+
+  it('reportError with no error', () => {
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined,
+            undefined,
+            true));
+    const query = parseQueryString(url.search);
+    expect(query.m).to.equal('Unknown error');
   });
 
   it('reportError with associatedElement', () => {
@@ -286,5 +310,56 @@ describe('reportErrorToServer', () => {
       scripts = [];
       expect(detectNonAmpJs(window)).to.be.true;
     });
+  });
+});
+
+
+describes.sandboxed('reportError', {}, () => {
+  let clock;
+
+  beforeEach(() => {
+    clock = sandbox.useFakeTimers();
+  });
+
+  it('should accept Error type', () => {
+    const error = new Error('error');
+    const result = reportError(error);
+    expect(result).to.equal(error);
+    expect(result.origError).to.be.undefined;
+    expect(result.reported).to.be.true;
+    clock.tick();
+  });
+
+  it('should accept string and report incorrect use', () => {
+    const result = reportError('error');
+    expect(result).to.be.instanceOf(Error);
+    expect(result.message).to.be.equal('error');
+    expect(result.origError).to.be.equal('error');
+    expect(result.reported).to.be.true;
+    expect(() => {
+      clock.tick();
+    }).to.throw(/_reported_ Error reported incorrectly/);
+  });
+
+  it('should accept number and report incorrect use', () => {
+    const result = reportError(101);
+    expect(result).to.be.instanceOf(Error);
+    expect(result.message).to.be.equal('101');
+    expect(result.origError).to.be.equal(101);
+    expect(result.reported).to.be.true;
+    expect(() => {
+      clock.tick();
+    }).to.throw(/_reported_ Error reported incorrectly/);
+  });
+
+  it('should accept null and report incorrect use', () => {
+    const result = reportError(null);
+    expect(result).to.be.instanceOf(Error);
+    expect(result.message).to.be.equal('Unknown error');
+    expect(result.origError).to.be.undefined;
+    expect(result.reported).to.be.true;
+    expect(() => {
+      clock.tick();
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 });
