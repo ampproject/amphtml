@@ -191,6 +191,18 @@ describe('AccessService', () => {
         .instanceOf(AccessVendorAdapter);
   });
 
+  it('should return adapter config', () => {
+    const config = {
+      type: 'vendor',
+      vendor: 'vendor1',
+    };
+    element.textContent = JSON.stringify(config);
+    const accessService = new AccessService(window);
+    sandbox.stub(accessService.adapter_, 'getConfig');
+    accessService.getAdapterConfig();
+    expect(accessService.adapter_.getConfig.called).to.be.true;
+  });
+
   it('should parse type for JWT w/o experiment', () => {
     const config = {
       'authorization': 'https://acme.com/a',

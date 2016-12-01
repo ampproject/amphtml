@@ -37,7 +37,11 @@ export class LaterpayVendor {
     this.accessService_ = accessService;
     this.win_ = this.accessService_.win;
     this.doc_ = this.win_.document;
-    this.laterpayConfig_ = this.accessService_.adapter_.getConfig();
+
+    /** @private @const {!LaterpayConfig} */
+    this.laterpayConfig_ = this.accessService_.getAdapterConfig();
+
+    /** @private @const {!PurchaseConfig} */
     this.purchaseConfig_ = null;
     this.purchaseOptionListeners_ = [];
     this.selectedPurchaseOption_ = null;

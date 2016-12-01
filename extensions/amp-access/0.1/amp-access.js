@@ -228,6 +228,13 @@ export class AccessService {
   }
 
   /**
+   * @return {!JSONType}
+   */
+  getAdapterConfig() {
+    return this.adapter_.getConfig();
+  }
+
+  /**
    * @param {!JSONType} configJson
    * @return {!AccessType}
    */
