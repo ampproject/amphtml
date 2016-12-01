@@ -21,7 +21,8 @@ import {
   onInputInteraction_,
 } from '../amp-form';
 import {
-  setReportValiditySupported,
+  setReportValiditySupportedForTesting,
+  setCheckValiditySupportedForTesting,
 } from '../form-validators';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -104,6 +105,9 @@ describe('amp-form', () => {
   });
 
   afterEach(() => {
+    // Reset supported state for checkValidity and reportValidity.
+    setCheckValiditySupportedForTesting(undefined);
+    setReportValiditySupportedForTesting(undefined);
     sandbox.restore();
   });
 
@@ -176,7 +180,7 @@ describe('amp-form', () => {
   });
 
   it('should respect novalidate on a form', () => {
-    setReportValiditySupported(true);
+    setReportValiditySupportedForTesting(true);
     const form = getForm();
     form.setAttribute('novalidate', '');
     const emailInput = document.createElement('input');
@@ -214,7 +218,7 @@ describe('amp-form', () => {
   });
 
   it('should check validity and report when invalid', () => {
-    setReportValiditySupported(false);
+    setReportValiditySupportedForTesting(false);
     return getAmpForm().then(ampForm => {
       const form = ampForm.form_;
       const emailInput = document.createElement('input');
@@ -284,6 +288,44 @@ describe('amp-form', () => {
       ampForm.handleSubmit_(event);
       return timer.promise(10).then(() => {
         expect(ampForm.xhr_.fetchJson).to.have.been.called;
+      });
+    });
+  });
+
+  it('should not check validity if .checkValidity is not supported', () => {
+    setCheckValiditySupportedForTesting(false);
+    return getAmpForm().then(ampForm => {
+      const form = ampForm.form_;
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('required', '');
+      form.appendChild(emailInput);
+      sandbox.spy(form, 'checkValidity');
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+
+      const event = {
+        stopImmediatePropagation: sandbox.spy(),
+        target: ampForm.form_,
+        preventDefault: sandbox.spy(),
+      };
+
+      ampForm.vsync_ = {
+        run: (task, state) => {
+          if (task.measure) {
+            task.measure(state);
+          }
+          if (task.mutate) {
+            task.mutate(state);
+          }
+        },
+      };
+
+      ampForm.handleSubmit_(event);
+      return timer.promise(1).then(() => {
+        expect(event.stopImmediatePropagation).to.not.be.called;
+        expect(form.checkValidity).to.not.be.called;
+        expect(ampForm.xhr_.fetchJson).to.be.called;
       });
     });
   });
@@ -740,7 +782,7 @@ describe('amp-form', () => {
 
   describe('User Validity', () => {
     it('should manage valid/invalid on input/fieldset/form on submit', () => {
-      setReportValiditySupported(false);
+      setReportValiditySupportedForTesting(false);
       return getAmpForm(true).then(ampForm => {
         const form = ampForm.form_;
         const fieldset = document.createElement('fieldset');
@@ -778,7 +820,7 @@ describe('amp-form', () => {
     });
 
     it('should manage valid/invalid on input user interaction', () => {
-      setReportValiditySupported(false);
+      setReportValiditySupportedForTesting(false);
       return getAmpForm(true).then(ampForm => {
         const form = ampForm.form_;
         const fieldset = document.createElement('fieldset');
@@ -846,7 +888,7 @@ describe('amp-form', () => {
     });
 
     it('should propagates user-valid only when going from invalid', () => {
-      setReportValiditySupported(false);
+      setReportValiditySupportedForTesting(false);
       return getAmpForm(true).then(ampForm => {
         const form = ampForm.form_;
         const fieldset = document.createElement('fieldset');

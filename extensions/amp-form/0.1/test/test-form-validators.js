@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 import {
-  setReportValiditySupported,
+  setReportValiditySupportedForTesting,
   getFormValidator,
   DefaultValidator,
   PolyfillDefaultValidator,
@@ -111,9 +111,9 @@ describe('form-validators', () => {
       return getTestingIframe().then(iframe => {
         const doc = iframe.doc;
         const form = getForm(doc);
-        setReportValiditySupported(true);
+        setReportValiditySupportedForTesting(true);
         expect(getFormValidator(form)).to.be.instanceOf(DefaultValidator);
-        setReportValiditySupported(false);
+        setReportValiditySupportedForTesting(false);
         expect(getFormValidator(form)).to.be.instanceOf(
             PolyfillDefaultValidator);
       });
