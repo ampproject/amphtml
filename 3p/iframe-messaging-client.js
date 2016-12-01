@@ -86,7 +86,8 @@ export class IframeMessagingClient {
             this.callbackFor_[payload.type]) {
           try {
             // We should probably report exceptions within callback
-            this.callbackFor_[payload.type](payload);
+            const callback = this.callbackFor_[payload.type];
+            callback(payload);
           } catch (err) {
             user().error(
                 'IFRAME-MSG',
@@ -117,8 +118,12 @@ export class IframeMessagingClient {
    */
   getHostWindow() {
     if (!this.hostWindow) {
-      this.hostWindow = this.win_.parent;
+      this.hostWindow = this.generateWindow();
     }
     return this.hostWindow;
+  }
+
+  generateWindow() {
+    return this.win_.parent;
   }
 };

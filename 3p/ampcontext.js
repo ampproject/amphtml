@@ -41,30 +41,20 @@ export class AmpContext extends IframeMessagingClient {
   constructor(win) {
     super(win);
     this.setupMetadata_();
+    this.getHostWindow();
+  }
 
-    /** Calculate the hostWindow / ampWindow_ */
+  generateWindow() {
+    /** Calculate the hostWindow */
     const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
     dev().assert(sentinelMatch, 'Incorrect sentinel format');
-    this.depth = Number(sentinelMatch[2]);
+    const depth = Number(sentinelMatch[2]);
     const ancestors = [];
     for (let win = this.win_; win && win != win.parent; win = win.parent) {
       // Add window keeping the top-most one at the front.
       ancestors.push(win.parent);
     }
-    ancestors.reverse();
-
-    /** @private */
-    this.ampWindow_ = ancestors[this.depth];
-  }
-
-  /** @override */
-  getHostWindow() {
-    return this.ampWindow_;
-  }
-
-  /** @override */
-  getSentinel() {
-    return this.sentinel;
+    return ancestors[(ancestors.length - 1) - depth];
   }
 
   /** @override */
@@ -84,7 +74,7 @@ export class AmpContext extends IframeMessagingClient {
   observePageVisibility(callback) {
     const stopObserveFunc = this.registerCallback_(
         MessageType_.EMBED_STATE, callback);
-    this.ampWindow_.postMessage/*REVIEW*/({
+    this.hostWindow.postMessage/*OK*/({
       sentinel: this.sentinel,
       type: MessageType_.SEND_EMBED_STATE,
     }, '*');
@@ -103,7 +93,7 @@ export class AmpContext extends IframeMessagingClient {
   observeIntersection(callback) {
     const stopObserveFunc = this.registerCallback_(
         MessageType_.INTERSECTION, callback);
-    this.ampWindow_.postMessage/*REVIEW*/({
+    this.hostWindow.postMessage/*OK*/({
       sentinel: this.sentinel,
       type: MessageType_.SEND_INTERSECTIONS,
     }, '*');
@@ -118,7 +108,7 @@ export class AmpContext extends IframeMessagingClient {
    *  @param {int} width The new width for the ad we are requesting.
    */
   requestResize(height, width) {
-    this.ampWindow_.postMessage/*REVIEW*/({
+    this.hostWindow.postMessage/*OK*/({
       sentinel: this.sentinel,
       type: MessageType_.EMBED_SIZE,
       width,
