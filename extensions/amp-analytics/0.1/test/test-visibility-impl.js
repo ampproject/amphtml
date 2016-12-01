@@ -493,12 +493,14 @@ describe('amp-analytics.visibility', () => {
     let callbackSpy1;
     let callbackSpy2;
 
-    beforeEach(() => {
+    beforeEach(function() {
+      if (!ampdoc.win.IntersectionObserver) {
+        this.skip();
+      }
       observeSpy = sandbox.stub();
       unobserveSpy = sandbox.stub();
       callbackSpy1 = sandbox.stub();
       callbackSpy2 = sandbox.stub();
-      ampdoc.win.IntersectionObserver = {};
       sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
         inObCallback = callback;
         return {
@@ -512,7 +514,7 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    it('should work for visible=true spec', () => {
+    it.only('should work for visible=true spec', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
