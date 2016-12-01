@@ -126,8 +126,6 @@ import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
-
-
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -152,7 +150,6 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
-register('adverticum',adverticum);
 register('a9', a9);
 register('accesstrade', accesstrade);
 register('adblade', adblade);
@@ -169,6 +166,7 @@ register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
 register('adverline', adverline);
+register('adverticum',adverticum);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);

@@ -1,4 +1,3 @@
-
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -17,18 +16,23 @@ limitations under the License.
 
 #Adverticum
 
-
-
 ##Example
 
-
+```html
 <amp-ad width=300 height=250
     type="adverticum" data-goa3zone="123456789" data-costumetargetstring="bXVzdGJlYmVhc2U2NGVuY29kZWQ=" >
 </amp-ad>
+```
 
-Note: The only supported costume parameters are: 
--data-goa3zone. It's value is the zoneID wich can be found at the Adverticum AdServer.
--data-costumetargetstring. It's value must be Base64Encoded!
+##Configuration
+
+The only supported costume parameters are: 
+-data-goa3zone: 
+	Required!
+	It's value is the zoneID wich can be found at the Adverticum AdServer.
+-data-costumetargetstring:
+	Optional parameter. 
+	It's value must be Base64Encoded!
 
 
 ##Support and contact
