@@ -498,6 +498,7 @@ describe('amp-analytics.visibility', () => {
       unobserveSpy = sandbox.stub();
       callbackSpy1 = sandbox.stub();
       callbackSpy2 = sandbox.stub();
+      ampdoc.win.IntersectionObserver = {};
       sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
         inObCallback = callback;
         return {
