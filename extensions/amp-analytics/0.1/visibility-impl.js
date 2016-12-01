@@ -52,6 +52,7 @@ const LAST_UPDATE = 'lU';
 const IN_VIEWPORT = 'iV';
 const TIME_LOADED = 'tL';
 const SCHEDULED_RUN_ID = 'schId';
+const LAST_CHANGE_ENTRY = 'lCE';
 
 // Keys used in VisibilitySpec
 const CONTINUOUS_TIME_MAX = 'continuousTimeMax';
@@ -375,16 +376,14 @@ export class Visibility {
       const shouldBeVisible = !!listener.shouldBeVisible;
       const config = listener.config;
       const state = listener.state;
-      if (state[SCHEDULED_RUN_ID]) {
-        this.timer_.cancel(state[SCHEDULED_RUN_ID]);
-        state[SCHEDULED_RUN_ID] = null;
-      }
+      state[LAST_CHANGE_ENTRY] = change;
+
       // Update states and check if all conditions are satisfied
       if (this.updateCounters_(visible, listener, shouldBeVisible)) {
         this.prepareStateForCallback_(state, change.boundingClientRect);
         listener.callback(state);
         listeners.splice(c, 1);
-      } else if (state[IN_VIEWPORT]) {
+      } else if (state[IN_VIEWPORT] && !state[SCHEDULED_RUN_ID]) {
         // There is unmet duration condition, schedule a check
         const timeToWait = this.computeTimeToWait_(state, config);
         if (timeToWait <= 0) {
@@ -392,12 +391,14 @@ export class Visibility {
         }
         state[SCHEDULED_RUN_ID] = this.timer_.delay(() => {
           dev().assert(state[IN_VIEWPORT], 'should have been in viewport');
+          const lastChange = state[LAST_CHANGE_ENTRY];
           state[LAST_SEEN_TIME] = Date.now() - state[TIME_LOADED];
           const timeSinceLastUpdate = Date.now() - state[LAST_UPDATE];
-          this.setState_(state, visible, timeSinceLastUpdate);
+          this.setState_(
+              state, lastChange.intersectionRatio * 100, timeSinceLastUpdate);
 
           if (this.isConditionMet_(state, config, true)) {
-            this.prepareStateForCallback_(state, change.boundingClientRect);
+            this.prepareStateForCallback_(state, lastChange.boundingClientRect);
             listener.callback(state);
             const found = listeners.indexOf(listener);
             if (found != -1) {
@@ -405,6 +406,9 @@ export class Visibility {
             }
           }
         }, timeToWait);
+      } else if (!state[IN_VIEWPORT] && state[SCHEDULED_RUN_ID]) {
+        this.timer_.cancel(state[SCHEDULED_RUN_ID]);
+        state[SCHEDULED_RUN_ID] = null;
       }
     }
 
@@ -662,6 +666,8 @@ export class Visibility {
     delete state[LAST_UPDATE];
     delete state[IN_VIEWPORT];
     delete state[TIME_LOADED];
+    delete state[SCHEDULED_RUN_ID];
+    delete state[LAST_CHANGE_ENTRY];
 
     for (const k in state) {
       if (state.hasOwnProperty(k)) {
