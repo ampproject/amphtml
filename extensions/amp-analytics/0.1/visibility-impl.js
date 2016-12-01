@@ -371,17 +371,18 @@ export class Visibility {
 
     const visible = change.intersectionRatio * 100;
     for (let c = listeners.length - 1; c >= 0; c--) {
-      const shouldBeVisible = !!listeners[c].shouldBeVisible;
-      const config = listeners[c].config;
-      const state = listeners[c].state;
+      const listener = listeners[c];
+      const shouldBeVisible = !!listener.shouldBeVisible;
+      const config = listener.config;
+      const state = listener.state;
       if (state[SCHEDULED_RUN_ID]) {
         this.timer_.cancel(state[SCHEDULED_RUN_ID]);
         state[SCHEDULED_RUN_ID] = null;
       }
       // Update states and check if all conditions are satisfied
-      if (this.updateCounters_(visible, listeners[c], shouldBeVisible)) {
+      if (this.updateCounters_(visible, listener, shouldBeVisible)) {
         this.prepareStateForCallback_(state, change.boundingClientRect);
-        listeners[c].callback(state);
+        listener.callback(state);
         listeners.splice(c, 1);
       } else if (state[IN_VIEWPORT]) {
         // There is unmet duration condition, schedule a check
@@ -397,8 +398,11 @@ export class Visibility {
 
           if (this.isConditionMet_(state, config, true)) {
             this.prepareStateForCallback_(state, change.boundingClientRect);
-            listeners[c].callback(state);
-            listeners.splice(c, 1);
+            listener.callback(state);
+            const found = listeners.indexOf(listener);
+            if (found != -1) {
+              listeners.splice(found, 1);
+            }
           }
         }, timeToWait);
       }
