@@ -19,25 +19,28 @@ import {toArray} from '../../src/types';
 import * as sinon from 'sinon';
 
 
-describe('DOMTokenList.toggle', () => {
+describes.fakeWin('DOMTokenList.toggle on non-IE', {
+  win: {
+    navigator: {
+      userAgent: 'Chrome',
+    },
+  },
+}, env => {
 
-  const originalToggle = window.DOMTokenList.prototype.toggle;
   let sandbox;
-  let fakeWinNonIE;
-  let fakeWinIE;
-  let nativeToggle;
-  let polyfillToggle;
+  let originalToggle;
   let element;
 
   beforeEach(() => {
+    originalToggle = env.win.DOMTokenList.prototype.toggle;
     sandbox = sinon.sandbox.create();
 
-    element = document.createElement('div');
-    document.body.appendChild(element);
+    element = env.win.document.createElement('div');
+    env.win.document.body.appendChild(element);
   });
 
   afterEach(() => {
-    window.DOMTokenList.prototype.toggle = originalToggle;
+    env.win.DOMTokenList.prototype.toggle = originalToggle;
     if (element.parentNode) {
       element.parentNode.removeChild(element);
     }
@@ -45,42 +48,49 @@ describe('DOMTokenList.toggle', () => {
   });
 
   it('should NOT override in non-IE browsers', () => {
-    fakeWinNonIE = {
-      navigator: {
-        userAgent: 'Chrome',
-      },
-      DOMTokenList: window.DOMTokenList,
-    };
-    nativeToggle = fakeWinNonIE.DOMTokenList.prototype.toggle;
-
-    install(fakeWinNonIE);
-    expect(fakeWinNonIE.DOMTokenList.prototype.toggle).to.equal(nativeToggle);
+    env.win.DOMTokenList = window.DOMTokenList;
+    install(env.win);
+    const newToggle = env.win.DOMTokenList.prototype.toggle;
+    expect(newToggle).to.equal(originalToggle);
   });
 
+});
 
-  it('should override on IE browsers', () => {
-    fakeWinIE = {
-      navigator: {
-        userAgent: 'MSIE',
-      },
-      DOMTokenList: window.DOMTokenList,
-    };
-    install(fakeWinIE);
-    polyfillToggle = fakeWinIE.DOMTokenList.prototype.toggle;
+describes.fakeWin('DOMTokenList.toggle On IE', {
+  win: {
+    navigator: {
+      userAgent: 'MSIE',
+    },
+  },
+}, env => {
 
-    expect(polyfillToggle).to.be.ok;
-    expect(polyfillToggle).to.not.equal(nativeToggle);
+  let sandbox;
+  let originalToggle;
+  let element;
+
+  beforeEach(() => {
+    originalToggle = env.win.DOMTokenList.prototype.toggle;
+    sandbox = sinon.sandbox.create();
+
+    element = env.win.document.createElement('div');
+    env.win.document.body.appendChild(element);
+  });
+
+  afterEach(() => {
+    env.win.DOMTokenList.prototype.toggle = originalToggle;
+    if (element.parentNode) {
+      element.parentNode.removeChild(element);
+    }
+    sandbox.restore();
   });
 
   it('should polyfill DOMTokenList.toggle API', () => {
-    fakeWinIE = {
-      navigator: {
-        userAgent: 'MSIE',
-      },
-      DOMTokenList: window.DOMTokenList,
-    };
-    install(fakeWinIE);
-    polyfillToggle = fakeWinIE.DOMTokenList.prototype.toggle;
+    env.win.DOMTokenList = window.DOMTokenList;
+    install(env.win);
+    const polyfillToggle = env.win.DOMTokenList.prototype.toggle;
+
+    expect(polyfillToggle).to.be.ok;
+    expect(polyfillToggle).to.not.equal(originalToggle);
 
     expect(toArray(element.classList)).to.not.contain('first');
     expect(polyfillToggle.call(element.classList, 'first')).to.be.true;
