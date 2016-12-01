@@ -150,7 +150,7 @@ export class Resource {
     /** @private {number} */
     this.layoutCount_ = 0;
 
-    /** @private {*|null} */
+    /** @private {*} */
     this.lastLayoutError_ = null;
 
     /** @private {boolean} */

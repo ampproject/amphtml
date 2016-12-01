@@ -60,10 +60,12 @@ export function reportError(error, opt_associatedElement) {
   // Convert error to the expected type.
   let isValidError;
   if (error) {
-    if (typeof error == 'string') {
-      error = new Error(error);
-    } else {
+    if (error.message !== undefined) {
       isValidError = true;
+    } else {
+      const origError = error;
+      error = new Error(String(origError));
+      error.origError = origError;
     }
   } else {
     error = new Error('Unknown error');
@@ -71,8 +73,8 @@ export function reportError(error, opt_associatedElement) {
   // Report if error is not an expected type.
   if (!isValidError && getMode().localDev) {
     setTimeout(function() {
-      const rethrow = new Error('Error reported incorrectly: ' + error);
-      rethrow.reported = true;
+      const rethrow = new Error(
+          '_reported_ Error reported incorrectly: ' + error);
       throw rethrow;
     });
   }

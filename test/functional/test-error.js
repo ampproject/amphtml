@@ -325,6 +325,7 @@ describes.sandboxed('reportError', {}, () => {
     const error = new Error('error');
     const result = reportError(error);
     expect(result).to.equal(error);
+    expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
     clock.tick();
   });
@@ -333,19 +334,32 @@ describes.sandboxed('reportError', {}, () => {
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('error');
+    expect(result.origError).to.be.equal('error');
     expect(result.reported).to.be.true;
     expect(() => {
       clock.tick();
-    }).to.throw(/Error reported incorrectly/);
+    }).to.throw(/_reported_ Error reported incorrectly/);
+  });
+
+  it('should accept number and report incorrect use', () => {
+    const result = reportError(101);
+    expect(result).to.be.instanceOf(Error);
+    expect(result.message).to.be.equal('101');
+    expect(result.origError).to.be.equal(101);
+    expect(result.reported).to.be.true;
+    expect(() => {
+      clock.tick();
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 
   it('should accept null and report incorrect use', () => {
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.be.equal('Unknown error');
+    expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
     expect(() => {
       clock.tick();
-    }).to.throw(/Error reported incorrectly/);
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 });
