@@ -24,6 +24,9 @@ const File = require('vinyl');
 const fs = require('fs');
 const amphtmlValidator = require('../');
 
+const VALID_FILE = '../testdata/feature_tests/minimum_valid_amp.html';
+const INVALID_FILE = '../testdata/feature_tests/empty.html';
+
 describe('gulp-amphtml-validator', function() {
 
   describe('validate', function() {
@@ -35,7 +38,7 @@ describe('gulp-amphtml-validator', function() {
     });
 
     it('passes valid AMPs', function(done) {
-      const validFile = createFile('valid.html');
+      const validFile = createFile(VALID_FILE);
       validate.write(validFile);
       validate.once('data', function(file) {
         assert.equal(file.ampValidationResult.status, 'PASS');
@@ -44,7 +47,7 @@ describe('gulp-amphtml-validator', function() {
     });
 
     it('fails invalid AMPs', function(done) {
-      const invalidFile = createFile('invalid.html');
+      const invalidFile = createFile(INVALID_FILE);
       validate.write(invalidFile);
       validate.once('data', function(file) {
         assert.equal(file.ampValidationResult.status, 'FAIL');
@@ -55,19 +58,18 @@ describe('gulp-amphtml-validator', function() {
     it('fails if validator cannot be downloaded', function(done) {
       const faillingValidator = {
         getInstance: function() {
-          return Promise.resolve().then(function() {
-            throw new Error();
-          }
-          );
+          return new Promise(function(resolve, reject) {
+            reject(new Error('expected'));
+          });
         },
       };
       validate = amphtmlValidator.validate(faillingValidator);
-      const validFile = createFile('valid.html');
-      try {
-        validate.write(validFile);
-      } catch (expected) {
+      const validFile = createFile(VALID_FILE);
+      validate.write(validFile);
+      validate.once('data', function(file) {
+        assert.equal(file.ampValidationResult.status, 'FAIL');
         done();
-      }
+      });
     });
 
   });
@@ -83,7 +85,7 @@ describe('gulp-amphtml-validator', function() {
     });
 
     it('prints passed validation results', function(done) {
-      const pass = createFileStub('valid.html');
+      const pass = createFileStub(VALID_FILE);
       pass.ampValidationResult = {
         status: 'PASS',
         errors: [],
@@ -91,13 +93,14 @@ describe('gulp-amphtml-validator', function() {
       format.write(pass);
       format.end();
       format.once('finish', function() {
-        assert.equal(logger.logged, '\u001b[32mPASS\u001b[39m valid.html');
+        assert.equal(logger.logged, 'AMP Validation results:\n\n' + VALID_FILE +
+          ': \u001b[32mPASS\u001b[39m');
         done();
       });
     });
 
     it('prints failed vaidation results', function(done) {
-      const fail = createFileStub('invalid.html');
+      const fail = createFileStub(INVALID_FILE);
       fail.ampValidationResult = {
         status: 'FAIL',
         errors: [
@@ -105,11 +108,10 @@ describe('gulp-amphtml-validator', function() {
             severity: 'ERROR',
             line: 24,
             col: 4,
-            message: 'The tag \'img\' may only appear as a descendant of ' +
-              'tag \'noscript\'. Did you mean \'amp-img\'?',
-            specUrl: 'https://www.ampproject.org/docs/reference/amp-img.html' ,
-            category: 'DISALLOWED_HTML_WITH_AMP_EQUIVALENT',
-            code: 'MANDATORY_TAG_ANCESTOR_WITH_HINT',
+            message: 'errorMessage',
+            specUrl: 'specUrl' ,
+            category: 'category',
+            code: 'errorCode',
             params: ['img','noscript','amp-img'],
           },
         ],
@@ -117,10 +119,9 @@ describe('gulp-amphtml-validator', function() {
       format.write(fail);
       format.end();
       format.once('finish', function() {
-        assert.equal(logger.logged, '\u001b[31mFAIL\u001b[39m invalid.html\n' +
-          'line 24, col 4: The tag \'img\' may only appear as a descendant ' +
-          'of tag \'noscript\'. Did you mean \'amp-img\'? (see ' +
-          'https://www.ampproject.org/docs/reference/amp-img.html)');
+        assert.equal(logger.logged, 'AMP Validation results:\n\n' +
+          INVALID_FILE + ': \u001b[31mFAIL\u001b[39m\n' + INVALID_FILE + 
+          ':24:4 ' + '\u001b[31merrorMessage\u001b[39m (see specUrl)');
         done();
       });
     });
@@ -178,7 +179,7 @@ describe('gulp-amphtml-validator', function() {
   function createFile(name) {
     return new File({
       path: name,
-      contents: new Buffer(fs.readFileSync('sample/' + name, 'utf8')),
+      contents: new Buffer(fs.readFileSync(name, 'utf8')),
     });
   }
 
