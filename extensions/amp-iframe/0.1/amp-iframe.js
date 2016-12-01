@@ -57,7 +57,7 @@ export class AmpIframe extends AMP.BaseElement {
     user().assert(
         url.protocol == 'https:' ||
         url.protocol == 'data:' ||
-        url.origin.indexOf('http://iframe.localhost:') == 0,
+        /http:\/\/(\w*)\.{0,1}localhost(:|\/)(.*)/.test(url.origin),
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
