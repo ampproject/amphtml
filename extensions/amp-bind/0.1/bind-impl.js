@@ -169,9 +169,14 @@ export class Bind {
       } else {
         const oldValue = element.getAttribute(property);
         const sanitizedValue = this.sanitizeAttribute_(newValue);
+
+        if (oldValue === sanitizedValue) {
+          return;
+        }
+
         element.setAttribute(property, sanitizedValue);
 
-        // TODO: Support binding to `layout`, `media`, `heights`?
+        // Update internal state for AMP elements.
         if (element.classList.contains('-amp-element')) {
           const resources = element.getResources();
           if (property === 'width') {

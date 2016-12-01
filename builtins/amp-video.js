@@ -41,11 +41,24 @@ export function installVideo(win) {
 
       /** @private {?Element} */
       this.video_ = null;
+
+      /** @private {!Array<string>} */
+      this.attributesToPropagateOnChange_ = ['poster', 'controls',
+          'aria-label', 'aria-describedby', 'aria-labelledby', 'loop'];
     }
 
     /** @override */
     isLayoutSupported(layout) {
       return isLayoutSizeDefined(layout);
+    }
+
+    /** @override */
+    attributeChangedCallback(name, unusedOldValue, unusedNewValue) {
+      if (name === 'src') {
+        this.updateVideoSrc_();
+      } else if (this.attributesToPropagateOnChange_.indexOf(name) >= 0) {
+        this.propagateAttributes(name, this.video_);
+      }
     }
 
     /** @override */
@@ -86,15 +99,11 @@ export function installVideo(win) {
         return Promise.resolve();
       }
 
-      if (this.element.getAttribute('src')) {
-        assertHttpsUrl(this.element.getAttribute('src'), this.element);
-      }
+      this.updateVideoSrc_();
 
       // Do not propagate `autoplay`. Autoplay behaviour is managed by
-      // video manager since amp-video implements the VideoInterface
-      this.propagateAttributes(
-          ['src', 'loop'],
-          this.video_);
+      // video manager since amp-video implements the VideoInterface.
+      this.propagateAttributes('loop', this.video_);
 
       if (this.element.hasAttribute('preload')) {
         this.video_.setAttribute(
@@ -131,6 +140,14 @@ export function installVideo(win) {
     /** @private */
     isVideoSupported_() {
       return !!this.video_.play;
+    }
+
+    /** @private */
+    updateVideoSrc_() {
+      if (this.element.getAttribute('src')) {
+        assertHttpsUrl(this.element.getAttribute('src'), this.element);
+      }
+      this.propagateAttributes('src', this.video_);
     }
 
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
