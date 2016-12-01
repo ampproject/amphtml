@@ -50,7 +50,7 @@ import * as sinon from 'sinon';
  * @param {!Element} element amp-ad element to examine.
  * @param {string} srcdoc  A string that must occur somewhere in the friendly
  *   iframe `srcdoc` attribute.
- * @return {!Promise<boolean>} Promise that executes assertions on friendly
+ * @return {!Promise} Promise that executes assertions on friendly
  *   iframe contents.
  */
 function expectRenderedInFriendlyIframe(element, srcdoc) {
@@ -64,7 +64,6 @@ function expectRenderedInFriendlyIframe(element, srcdoc) {
     expect(element, 'ad tag').to.be.visible;
     expect(child, 'iframe child').to.be.visible;
     expect(childDocument, 'ad creative content doc').to.be.visible;
-    return true;
   });
 }
 
@@ -81,7 +80,7 @@ function expectRenderedInXDomainIframe(element, src) {
   expect(child, 'iframe child').to.be.visible;
 }
 
-describe.only('integration test: a4a', () => {
+describe('integration test: a4a', () => {
   let sandbox;
   let xhrMock;
   let fixture;
