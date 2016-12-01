@@ -149,7 +149,7 @@ describe('amp-iframe', () => {
       height: 100,
     }).then(amp => {
       const impl = amp.container.implementation_;
-      expect(amp.iframe.src).to.equal(iframeSrc);
+      expect(amp.iframe.src).to.equal(iframeSrc + '#amp=1');
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
@@ -374,7 +374,7 @@ describe('amp-iframe', () => {
       amp.element.setAttribute('sandbox', 'allow-same-origin');
 
       expect(() => {
-        amp.transformSrcDoc('<script>try{parent.location.href}catch(e){' +
+        amp.transformSrcDoc_('<script>try{parent.location.href}catch(e){' +
           'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
           '</script>', 'Allow-Same-Origin');
       }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
@@ -387,6 +387,28 @@ describe('amp-iframe', () => {
         amp.assertSource('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
       }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+    });
+  });
+
+  it('should transform source', () => {
+    return getAmpIframeObject().then(amp => {
+      // null -> undefined
+      expect(amp.transformSrc_(null)).to.be.undefined;
+
+      // data: is unchanged
+      expect(amp.transformSrc_('data:abc')).to.equal('data:abc');
+
+      // URL with fragment is unchanged.
+      expect(amp.transformSrc_('https://example.com/#1'))
+          .to.equal('https://example.com/#1');
+
+      // URL w/o fragment is modified.
+      expect(amp.transformSrc_('https://example.com/'))
+          .to.equal('https://example.com/#amp=1');
+
+      // URL with empty fragment is modified.
+      expect(amp.transformSrc_('https://example.com/#'))
+          .to.equal('https://example.com/#amp=1');
     });
   });
 
