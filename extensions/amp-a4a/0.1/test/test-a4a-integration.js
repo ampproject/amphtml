@@ -33,6 +33,7 @@ import {
     upgradeOrRegisterElement,
 } from '../../../../src/custom-element';
 import {utf8Encode} from '../../../../src/utils/bytes';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world

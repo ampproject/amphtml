@@ -511,7 +511,8 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    it('should work for visible=true spec', () => {
+    // TODO(lannka, #6429): Enable test after fixing it on Saucelabs
+    it.skip('should work for visible=true spec', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
