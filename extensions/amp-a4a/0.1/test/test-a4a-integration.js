@@ -55,8 +55,6 @@ import * as sinon from 'sinon';
  */
 function expectRenderedInFriendlyIframe(element, srcdoc) {
   expect(element, 'ad element').to.be.ok;
-  expect(element.querySelectorAll('iframe'),
-    'amp-ad tag should have single iframe child').to.have.lengthOf(1);
   const child = element.querySelector('iframe[srcdoc]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
@@ -74,8 +72,6 @@ function expectRenderedInXDomainIframe(element, src) {
   // Note: Unlike expectRenderedInXDomainIframe, this doesn't return a Promise
   // because it doesn't (cannot) inspect the contents of the iframe.
   expect(element, 'ad element').to.be.ok;
-  expect(element.querySelectorAll('iframe'),
-      'amp-ad tag should have single iframe child').to.have.lengthOf(1);
   expect(element.querySelector('iframe[srcdoc]'),
       'does not have a friendly iframe child').to.not.be.ok;
   const child = element.querySelector('iframe[src]');
