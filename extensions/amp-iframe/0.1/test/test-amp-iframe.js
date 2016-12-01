@@ -39,14 +39,22 @@ describe('amp-iframe', () => {
 
   const timer = timerFor(window);
   let ranJs = 0;
+  let content = '';
   let sandbox;
 
   beforeEach(() => {
     ranJs = 0;
     sandbox = sinon.sandbox.create();
     window.onmessage = function(message) {
+      if (!message.data) {
+        return;
+      }
       if (message.data == 'loaded-iframe') {
         ranJs++;
+      }
+
+      if (message.data.indexOf('content-iframe:') == 0) {
+        content = message.data.replace('content-iframe:', '');
       }
     };
     setTrackingIframeTimeoutForTesting(20);
@@ -141,7 +149,7 @@ describe('amp-iframe', () => {
       height: 100,
     }).then(amp => {
       const impl = amp.container.implementation_;
-      expect(amp.iframe.src).to.equal(iframeSrc);
+      expect(amp.iframe.src).to.equal(iframeSrc + '#amp=1');
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
@@ -275,9 +283,12 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100,
       sandbox: 'allow-scripts',
-      srcdoc: '<script>try{parent.location.href}catch(e){' +
-          'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
-          '</script>',
+      srcdoc: '<div id="content"><p>௵Z加䅌ਇ☎Èʘغޝ</p></div>' +
+        '<script>try{parent.location.href}catch(e){' +
+        'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');' +
+        'var c = document.querySelector(\'#content\').innerHTML;' +
+        'parent.parent./*OK*/postMessage(\'content-iframe:\' + c, \'*\');' +
+        '}</script>',
     }).then(amp => {
       expect(amp.iframe.src).to.match(
           /^data\:text\/html;charset=utf-8;base64,/);
@@ -287,6 +298,7 @@ describe('amp-iframe', () => {
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
       return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
+        expect(content).to.equal('<p>௵Z加䅌ਇ☎Èʘغޝ</p>');
       });
     });
   });
@@ -362,7 +374,7 @@ describe('amp-iframe', () => {
       amp.element.setAttribute('sandbox', 'allow-same-origin');
 
       expect(() => {
-        amp.transformSrcDoc('<script>try{parent.location.href}catch(e){' +
+        amp.transformSrcDoc_('<script>try{parent.location.href}catch(e){' +
           'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
           '</script>', 'Allow-Same-Origin');
       }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
@@ -375,6 +387,28 @@ describe('amp-iframe', () => {
         amp.assertSource('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
       }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+    });
+  });
+
+  it('should transform source', () => {
+    return getAmpIframeObject().then(amp => {
+      // null -> undefined
+      expect(amp.transformSrc_(null)).to.be.undefined;
+
+      // data: is unchanged
+      expect(amp.transformSrc_('data:abc')).to.equal('data:abc');
+
+      // URL with fragment is unchanged.
+      expect(amp.transformSrc_('https://example.com/#1'))
+          .to.equal('https://example.com/#1');
+
+      // URL w/o fragment is modified.
+      expect(amp.transformSrc_('https://example.com/'))
+          .to.equal('https://example.com/#amp=1');
+
+      // URL with empty fragment is modified.
+      expect(amp.transformSrc_('https://example.com/#'))
+          .to.equal('https://example.com/#amp=1');
     });
   });
 
@@ -415,10 +449,8 @@ describe('amp-iframe', () => {
     }).then(amp => {
       const impl = amp.container.implementation_;
       const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
-      impl.updateSize_(217, 114);
-      expect(attemptChangeSize.callCount).to.equal(1);
-      expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
-      expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
+      impl.updateSize_(217, '114' /* be tolerant to string number */);
+      expect(attemptChangeSize).to.be.calledWith(217, 114);
     });
   });
 
@@ -516,9 +548,13 @@ describe('amp-iframe', () => {
       // appended amp-iframe 10x10
       expect(iframes[0].implementation_
           .looksLikeTrackingIframe_()).to.be.true;
+      expect(iframes[0].implementation_
+          .getPriority()).to.equal(1);
       // appended amp-iframe 100x100
       expect(iframes[1].implementation_
           .looksLikeTrackingIframe_()).to.be.false;
+      expect(iframes[1].implementation_
+          .getPriority()).to.equal(0);
       // amp-iframe 5x5
       expect(iframes[2].implementation_
           .looksLikeTrackingIframe_()).to.be.true;
@@ -550,7 +586,7 @@ describe('amp-iframe', () => {
   it('should correctly classify ads', () => {
     function e(width, height) {
       return {
-        getIntersectionElementLayoutBox() {
+        getLayoutBox() {
           return {width, height};
         },
       };
@@ -574,6 +610,39 @@ describe('amp-iframe', () => {
       throw new Error('must never happen');
     }, error => {
       expect(error.message).to.match(/not used for displaying fixed ad/);
+    });
+  });
+
+  it('should not cache intersection box', () => {
+    return getAmpIframeObject({
+      src: iframeSrc,
+      sandbox: 'allow-scripts allow-same-origin',
+      width: 300,
+      height: 250,
+    }).then(impl => {
+      const stub = sandbox.stub(impl, 'getLayoutBox');
+      const box = {
+        top: 100,
+        bottom: 200,
+        left: 0,
+        right: 100,
+        width: 100,
+        height: 100,
+      };
+      stub.returns(box);
+
+      impl.onLayoutMeasure();
+      const intersection = impl.getIntersectionElementLayoutBox();
+
+      // Simulate a fixed position element "moving" 100px by scrolling down
+      // the page.
+      box.top += 100;
+      box.bottom += 100;
+      const newIntersection = impl.getIntersectionElementLayoutBox();
+      expect(newIntersection).not.to.deep.equal(intersection);
+      expect(newIntersection.top).to.equal(intersection.top + 100);
+      expect(newIntersection.width).to.equal(300);
+      expect(newIntersection.height).to.equal(250);
     });
   });
 });

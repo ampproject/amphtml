@@ -74,7 +74,7 @@ describe('amp-youtube', function() {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          'https://www.youtube.com/embed/mGENRKrdoGY?enablejsapi=1');
+          'https://www.youtube.com/embed/mGENRKrdoGY?enablejsapi=1&playsinline=1');
     });
   });
 
@@ -202,9 +202,9 @@ describe('amp-youtube', function() {
 
   it('should not pause when video not playing', () => {
     return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
-      sandbox.spy(yt.implementation_, 'pauseVideo_');
+      sandbox.spy(yt.implementation_, 'pause');
       yt.implementation_.pauseCallback();
-      expect(yt.implementation_.pauseVideo_.called).to.be.false;
+      expect(yt.implementation_.pause.called).to.be.false;
     });
 
   });
@@ -212,9 +212,9 @@ describe('amp-youtube', function() {
   it('should pause if the video is playing', () => {
     return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       yt.implementation_.playerState_ = 1;
-      sandbox.spy(yt.implementation_, 'pauseVideo_');
+      sandbox.spy(yt.implementation_, 'pause');
       yt.implementation_.pauseCallback();
-      expect(yt.implementation_.pauseVideo_.called).to.be.true;
+      expect(yt.implementation_.pause.called).to.be.true;
     });
   });
 
@@ -226,8 +226,37 @@ describe('amp-youtube', function() {
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe.src).to.contain('myParam=hello%20world');
-      // autoplay is temporarily black listed.
+      // data-param-autoplay is black listed in favour of just autoplay
       expect(iframe.src).to.not.contain('autoplay=1');
+      // playsinline should default to 1 if not provided.
+      expect(iframe.src).to.contain('playsinline=1');
+    });
+  });
+
+  it('should change defaults for some data-param-* when autoplaying', () => {
+    return getYt({
+      'autoplay': '',
+      'data-videoid': 'mGENRKrdoGY',
+      'data-param-playsinline': '0',
+    }).then(yt => {
+      const iframe = yt.querySelector('iframe');
+      // playsinline must be set 1 even if specified as 0
+      expect(iframe.src).to.contain('playsinline=1');
+      // annotation policy should default to 3 if not specified.
+      expect(iframe.src).to.contain('iv_load_policy=3');
+    });
+  });
+
+  it('should preload the final url', () => {
+    return getYt({
+      'autoplay': '',
+      'data-videoid': 'mGENRKrdoGY',
+      'data-param-playsinline': '0',
+    }).then(yt => {
+      const src = yt.querySelector('iframe').src;
+      const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'preload');
+      yt.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly(src);
     });
   });
 });

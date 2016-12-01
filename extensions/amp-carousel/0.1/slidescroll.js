@@ -16,7 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {analyticsForOrNull} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -93,9 +93,6 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
 
-    /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
-    this.analyticsPromise_ = null;
-
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -108,8 +105,6 @@ export class AmpSlideScroll extends BaseSlides {
   }
   /** @override */
   buildSlides() {
-    this.analyticsPromise_ = analyticsForOrNull(this.win);
-
     this.vsync_ = this.getVsync();
 
     this.hasNativeSnapPoints_ = (
@@ -122,6 +117,10 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.slidesContainer_ = this.win.document.createElement('div');
     this.slidesContainer_.classList.add('-amp-slides-container');
+    // Let screen reader know that this is a live area and changes
+    // to it (such after pressing next) should be announced to the
+    // user.
+    this.slidesContainer_.setAttribute('aria-live', 'polite');
 
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
@@ -468,8 +467,10 @@ export class AmpSlideScroll extends BaseSlides {
       if (showIndex == newIndex) {
         this.scheduleLayout(this.slides_[showIndex]);
         this.scheduleResume(this.slides_[showIndex]);
+        this.slides_[showIndex].setAttribute('aria-hidden', 'false');
       } else {
         this.schedulePreload(this.slides_[showIndex]);
+        this.slides_[showIndex].setAttribute('aria-hidden', 'true');
       }
     });
     this.slidesContainer_./*OK*/scrollLeft =
@@ -516,6 +517,7 @@ export class AmpSlideScroll extends BaseSlides {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
         this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
       if (this.slideIndex_ != i) {
@@ -590,13 +592,6 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    if (this.analyticsPromise_) {
-      this.analyticsPromise_.then(analytics => {
-        if (!analytics) {
-          return;
-        }
-        analytics.triggerEvent(eventType, vars);
-      });
-    }
+    triggerAnalyticsEvent(this.win, eventType, vars);
   }
 }

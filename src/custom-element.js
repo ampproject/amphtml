@@ -22,8 +22,10 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {documentStateFor} from './document-state';
-import {getIntersectionChangeEntry} from '../src/intersection-observer';
+import {documentStateFor} from './service/document-state';
+import {
+  getIntersectionChangeEntry,
+} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
@@ -31,6 +33,7 @@ import {resourcesForDoc} from './resources';
 import {timerFor} from './timer';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
+import {setStyle, setStyles} from './style';
 
 
 const TAG_ = 'CustomElement';
@@ -135,7 +138,7 @@ function tryUpgradeElementNoInline(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {
-    reportError(e, this);
+    reportError(e, element);
   }
 }
 
@@ -295,17 +298,21 @@ export function applyLayout_(element) {
     element.classList.add('-amp-layout-size-defined');
   }
   if (layout == Layout.NODISPLAY) {
-    element.style.display = 'none';
+    setStyle(element, 'display', 'none');
   } else if (layout == Layout.FIXED) {
-    element.style.width = dev().assertString(width);
-    element.style.height = dev().assertString(height);
+    setStyles(element, {
+      width: dev().assertString(width),
+      height: dev().assertString(height),
+    });
   } else if (layout == Layout.FIXED_HEIGHT) {
-    element.style.height = dev().assertString(height);
+    setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amp-sizer');
-    sizer.style.display = 'block';
-    sizer.style.paddingTop =
-        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
+    setStyles(sizer, {
+      display: 'block',
+      paddingTop:
+        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
+    });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement_ = sizer;
   } else if (layout == Layout.FILL) {
@@ -318,10 +325,10 @@ export function applyLayout_(element) {
     // Set height and width to a flex item if they exist.
     // The size set to a flex item could be overridden by `display: flex` later.
     if (width) {
-      element.style.width = width;
+      setStyle(element, 'width', width);
     }
     if (height) {
-      element.style.height = height;
+      setStyle(element, 'height', height);
     }
   }
   return layout;
@@ -450,7 +457,7 @@ function createBaseCustomElementClass(win) {
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
-      this.isFirstLayoutCompleted_ = true;
+      this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
       this.isInViewport_ = false;
@@ -573,7 +580,14 @@ function createBaseCustomElementClass(win) {
       if (this.isInTemplate_) {
         return;
       }
-      this.tryUpgrade_(new newImplClass(this));
+      if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
+        // Already upgraded or in progress or failed.
+        return;
+      }
+      this.implementation_ = new newImplClass(this);
+      if (this.everAttached) {
+        this.tryUpgrade_();
+      }
     }
 
     /**
@@ -589,7 +603,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.createdCallback();
       if (this.layout_ != Layout.NODISPLAY &&
         !this.implementation_.isLayoutSupported(this.layout_)) {
-        throw new Error('Layout not supported: ' + this.layout_);
+        throw user().createError('Layout not supported: ' + this.layout_);
       }
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
@@ -760,8 +774,8 @@ function createBaseCustomElementClass(win) {
         this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
       }
       if (this.sizeList_) {
-        this.style.width =
-            this.sizeList_.select(this.ownerDocument.defaultView);
+        setStyle(this, 'width', this.sizeList_.select(
+            this.ownerDocument.defaultView));
       }
       // Heights.
       if (this.heightsList_ === undefined) {
@@ -772,8 +786,8 @@ function createBaseCustomElementClass(win) {
 
       if (this.heightsList_ && this.layout_ ===
         Layout.RESPONSIVE && this.sizerElement_) {
-        this.sizerElement_.style.paddingTop = this.heightsList_.select(
-          this.ownerDocument.defaultView);
+        setStyle(this.sizerElement_, 'paddingTop', this.heightsList_.select(
+            this.ownerDocument.defaultView));
       }
     }
 
@@ -793,13 +807,20 @@ function createBaseCustomElementClass(win) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        this.sizerElement_.style.paddingTop = '0';
+        const sizer = this.sizerElement_;
+        this.sizerElement_ = null;
+        setStyle(sizer, 'paddingTop', '0');
+        if (this.resources_) {
+          this.resources_.deferMutate(this, () => {
+            dom.removeElement(sizer);
+          });
+        }
       }
       if (newHeight !== undefined) {
-        this.style.height = newHeight + 'px';
+        setStyle(this, 'height', newHeight, 'px');
       }
       if (newWidth !== undefined) {
-        this.style.width = newWidth + 'px';
+        setStyle(this, 'width', newWidth, 'px');
       }
     }
 
@@ -832,7 +853,7 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.everAttached) {
         if (!isStub(this.implementation_)) {
-          this.tryUpgrade_(this.implementation_);
+          this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
@@ -842,7 +863,8 @@ function createBaseCustomElementClass(win) {
           this.layout_ = applyLayout_(this);
           if (this.layout_ != Layout.NODISPLAY &&
             !this.implementation_.isLayoutSupported(this.layout_)) {
-            throw new Error('Layout not supported for: ' + this.layout_);
+            throw user().createError('Layout not supported: ' +
+                this.layout_);
           }
           this.implementation_.layout_ = this.layout_;
           this.implementation_.firstAttachedCallback();
@@ -871,11 +893,10 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Try to upgrade the element with the provided implementation.
-     * @param {!./base-element.BaseElement=} opt_impl
      * @private @final @this {!Element}
      */
-    tryUpgrade_(opt_impl) {
-      const impl = opt_impl || this.implementation_;
+    tryUpgrade_() {
+      const impl = this.implementation_;
       dev().assert(!isStub(impl), 'Implementation must not be a stub');
       if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
@@ -986,6 +1007,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Element}
+     * @final @this {!Element}
+     */
+    getOwner() {
+      return this.getResources().getResourceForElement(this).getOwner();
+    }
+
+    /**
      * Returns a change entry for that should be compatible with
      * IntersectionObserverEntry.
      * @return {!IntersectionObserverEntry} A change entry.
@@ -998,6 +1027,14 @@ function createBaseCustomElementClass(win) {
       // TODO(jridgewell, #4826): We may need to make this recursive.
       const ownerBox = owner && owner.getLayoutBox();
       return getIntersectionChangeEntry(box, ownerBox, viewportBox);
+    }
+
+    /**
+     * Returns the resource ID of the element.
+     * @return {number}
+     */
+    getResourceId() {
+      return this.getResources().getResourceForElement(this).getId();
     }
 
     /**
@@ -1038,9 +1075,9 @@ function createBaseCustomElementClass(win) {
         this.toggleLoading_(false, /* cleanup */ true);
         // Check if this is the first success layout that needs
         // to call firstLayoutCompleted.
-        if (this.isFirstLayoutCompleted_) {
+        if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
-          this.isFirstLayoutCompleted_ = false;
+          this.isFirstLayoutCompleted_ = true;
           this.dispatchCustomEvent('amp:load:end');
         }
       }, reason => {
@@ -1137,7 +1174,7 @@ function createBaseCustomElementClass(win) {
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.layoutCount_ = 0;
-        this.isFirstLayoutCompleted_ = true;
+        this.isFirstLayoutCompleted_ = false;
       }
       return isReLayoutNeeded;
     }
@@ -1328,7 +1365,7 @@ function createBaseCustomElementClass(win) {
       if (this.loadingDisabled_ === undefined) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
-      if (this.loadingDisabled_ || !isLoadingAllowed(this.tagName) ||
+      if (this.loadingDisabled_ || !isLoadingAllowed(this) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
         this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {

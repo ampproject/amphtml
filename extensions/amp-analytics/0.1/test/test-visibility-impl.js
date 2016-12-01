@@ -26,8 +26,18 @@ import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/viewer';
-import * as sinon from 'sinon';
+import {viewportForDoc} from '../../../../src/viewport';
+import {loadPromise} from '../../../../src/event-helper';
 
+import * as sinon from 'sinon';
+import {setParentWindow} from '../../../../src/service';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {
+  installResourcesServiceForDoc,
+} from '../../../../src/service/resources-impl';
+import {documentStateFor} from '../../../../src/service/document-state';
 
 adopt(window);
 
@@ -36,9 +46,13 @@ describe('amp-analytics.visibility', () => {
   let sandbox;
   let visibility;
   let getIntersectionStub;
+  let viewportScrollTopStub;
+  let viewportScrollLeftStub;
   let callbackStub;
   let clock;
   let ampElement;
+  let ampdoc;
+  let resourceLoadedResolver;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -50,23 +64,42 @@ describe('amp-analytics.visibility', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    const docState = documentStateFor(window);
+    sandbox.stub(docState, 'isHidden', () => false);
+    ampdoc = new AmpDocSingle(window);
+    installResourcesServiceForDoc(ampdoc);
+    installPlatformService(window);
+    installTimerService(window);
 
     ampElement = document.createElement('amp-analytics');
     ampElement.id = 'abc';
     document.body.appendChild(ampElement);
+
     const getIdStub = sandbox.stub();
     getIdStub.returns('0');
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
+    ampElement.getResourceId = getIdStub;
 
-    viewerForDoc(window.document).setVisibilityState_(VisibilityState.VISIBLE);
-    visibility = new Visibility(window);
-    sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
-        .returns({
-          getLayoutBox: () => {},
-          element: {getIntersectionChangeEntry: getIntersectionStub},
-          getId: getIdStub,
-          hasLoadedOnce: () => true});
+    const viewport = viewportForDoc(ampdoc);
+    viewportScrollTopStub = sandbox.stub(viewport, 'getScrollTop');
+    viewportScrollTopStub.returns(0);
+    viewportScrollLeftStub = sandbox.stub(viewport, 'getScrollLeft');
+    viewportScrollLeftStub.returns(0);
+    viewerForDoc(ampdoc).setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new Visibility(ampdoc);
+
+    const resourceLoadedPromise =
+        new Promise(resolve => resourceLoadedResolver = resolve);
+    const resource = {
+      getLayoutBox: () => {},
+      element: {getIntersectionChangeEntry: getIntersectionStub},
+      getId: getIdStub,
+      hasLoadedOnce: () => true,
+      loadedOnce: () => resourceLoadedPromise,
+    };
+    sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
+        .returns(resource);
   });
 
   afterEach(() => {
@@ -77,10 +110,15 @@ describe('amp-analytics.visibility', () => {
   function makeIntersectionEntry(boundingClientRect, rootBounds) {
     boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
     rootBounds = layoutRectLtwh.apply(null, rootBounds);
+    const intersect = rectIntersection(boundingClientRect, rootBounds);
+    const ratio = (intersect.width * intersect.height)
+        / (boundingClientRect.width * boundingClientRect.height);
     return {
-      intersectionRect: rectIntersection(boundingClientRect, rootBounds),
+      intersectionRect: intersect,
       boundingClientRect,
       rootBounds,
+      intersectionRatio: ratio,
+      target: ampElement,
     };
   }
 
@@ -123,17 +161,23 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires for non-trivial on=visible config', () => {
+    viewportScrollTopStub.returns(13);
+    viewportScrollLeftStub.returns(5);
     listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
           {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
-    verifyChange(INTERSECTION_50P, 1, [sinon.match({
+    const intersection =
+        makeIntersectionEntry([30, 10, 100, 100], [0, 0, 100, 100]);
+    verifyChange(intersection, 1, [sinon.match({
       backgrounded: '0',
       backgroundedAtStart: '0',
-      elementX: '50',
-      elementY: '0',
+      elementX: '35', // 5 + 30
+      elementY: '23', // 13 + 10
       elementWidth: '100',
       elementHeight: '100',
-      loadTimeVisibility: '50',
+      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100,
+      minVisiblePercentage: '63',
+      maxVisiblePercentage: '63',
       totalTime: sinon.match(value => {
         return isFiniteNumber(Number(value));
       }),
@@ -154,7 +198,7 @@ describe('amp-analytics.visibility', () => {
       elementY: '0',
       elementWidth: '100',
       elementHeight: '100',
-      loadTimeVisibility: '50',
+      loadTimeVisibility: '49', // (100 - 51) * (100 - 0) / 100
       totalTime: sinon.match(value => {
         return isFiniteNumber(Number(value));
       }),
@@ -359,8 +403,13 @@ describe('amp-analytics.visibility', () => {
   });
 
   describe('getElement', () => {
-    let div, img1, img2, analytics;
+    let div, img1, img2, analytics, iframe, ampEl, iframeAmpDoc,
+      iframeAnalytics;
     beforeEach(() => {
+      ampEl = document.createElement('span');
+      ampEl.className = '-amp-element';
+      ampEl.id = 'ampEl';
+      iframe = document.createElement('iframe');
       div = document.createElement('div');
       div.id = 'div';
       img1 = document.createElement('amp-img');
@@ -369,35 +418,178 @@ describe('amp-analytics.visibility', () => {
       img2.id = 'img2';
       analytics = document.createElement('amp-analytics');
       analytics.id = 'analytics';
-      div.appendChild(img1);
       img1.appendChild(analytics);
       img1.appendChild(img2);
+      div.appendChild(img1);
+      iframe.srcdoc = div.outerHTML;
+      document.body.appendChild(ampEl);
       document.body.appendChild(div);
+
+      const loaded = loadPromise(iframe);
+      ampEl.appendChild(iframe);
+      iframeAmpDoc = new AmpDocSingle(iframe.contentWindow);
+      return loaded.then(() => {
+        setParentWindow(iframe.contentWindow, window);
+        iframeAnalytics = iframe.contentDocument.querySelector(
+            'amp-analytics');
+      });
     });
 
     afterEach(() => {
-      document.body.removeChild(div);
+      document.body.removeChild(ampEl);
     });
 
     it('finds element by id', () => {
-      expect(getElement('#div', analytics, undefined)).to.equal(div);
+      expect(getElement(ampdoc, '#ampEl', analytics, undefined)).to.equal(
+          ampEl);
     });
 
     // In the following tests, getElement returns non-amp elements. Those are
     // discarded by visibility-impl later in the code.
     it('finds element by tagname, selectionMethod=closest', () => {
-      expect(getElement('div', analytics, 'closest')).to.equal(div);
-      expect(getElement('amp-img', analytics, 'closest')).to.equal(img1);
+      expect(getElement(ampdoc, 'div', analytics, 'closest'))
+          .to.equal(div);
+      expect(getElement(ampdoc, 'amp-img', analytics, 'closest'))
+          .to.equal(img1);
+      expect(getElement(ampdoc, 'amp-img', iframeAnalytics, 'closest'))
+          .to.equal(iframe.contentDocument.querySelector('amp-img'));
+      // Should restrict elements to contained ampdoc.
+      expect(getElement(iframeAmpDoc, 'amp-img', analytics, 'closest'))
+          .to.equal(null);
     });
 
     it('finds element by id, selectionMethod=scope', () => {
-      expect(getElement('#div', analytics, 'scope')).to.equal(null);
-      expect(getElement('#img2', analytics, 'scope')).to.equal(img2);
+      expect(getElement(ampdoc, '#div', analytics, 'scope'))
+          .to.equal(null);
+      expect(getElement(ampdoc, '#img2', analytics, 'scope'))
+          .to.equal(img2);
     });
 
     it('finds element by tagname, selectionMethod=scope', () => {
-      expect(getElement('div', analytics, 'scope')).to.equal(null);
-      expect(getElement('amp-img', analytics, 'scope')).to.equal(img2);
+      expect(getElement(ampdoc, 'div', analytics, 'scope'))
+          .to.equal(null);
+      expect(getElement(ampdoc, 'amp-img', analytics, 'scope'))
+          .to.equal(img2);
+      expect(getElement(ampdoc, 'div', iframeAnalytics, 'scope'))
+          .to.equal(null);
+      expect(getElement(ampdoc, 'amp-img', iframeAnalytics, 'scope'))
+          .to.equal(iframe.contentDocument.querySelectorAll('amp-img')[1]);
     });
+
+    it('finds element for selectionMethod=host', () => {
+      expect(getElement(ampdoc, ':host', analytics)).to.equal(null);
+      expect(getElement(ampdoc, ':root', analytics)).to.equal(null);
+      expect(getElement(ampdoc, ':host', iframeAnalytics)).to.equal(ampEl);
+      expect(getElement(ampdoc, ':root', iframeAnalytics, 'something'))
+          .to.equal(ampEl);
+    });
+  });
+
+  describe('listenOnceV2', () => {
+
+    let inObCallback;
+    let observeSpy;
+    let unobserveSpy;
+    let callbackSpy1;
+    let callbackSpy2;
+
+    beforeEach(() => {
+      observeSpy = sandbox.stub();
+      unobserveSpy = sandbox.stub();
+      callbackSpy1 = sandbox.stub();
+      callbackSpy2 = sandbox.stub();
+      sandbox.stub(ampdoc.win, 'IntersectionObserver', callback => {
+        inObCallback = callback;
+        return {
+          observe: observeSpy,
+          unobserve: unobserveSpy,
+        };
+      });
+    });
+
+    afterEach(() => {
+      inObCallback = null;
+    });
+
+    // TODO(lannka, #6429): Enable test after fixing it on Saucelabs
+    it.skip('should work for visible=true spec', () => {
+
+      visibility.listenOnceV2({
+        selector: '#abc',
+        visiblePercentageMin: 20,
+      }, callbackSpy1, true, ampElement);
+
+      // add multiple triggers on the same element
+      visibility.listenOnceV2({
+        selector: '#abc',
+        visiblePercentageMin: 30,
+      }, callbackSpy2, true, ampElement);
+
+      // "observe" should not have been called since resource not loaded yet.
+      expect(observeSpy).to.be.not.called;
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(135);
+        fireIntersect(5); // below visiblePercentageMin, no trigger
+        expect(callbackSpy1).to.not.be.called;
+        expect(callbackSpy2).to.not.be.called;
+        expect(unobserveSpy).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(25); // above spec 1 min visible, trigger callback 1
+        expect(callbackSpy1).to.be.calledWith(sinon.match({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '75',
+          firstSeenTime: '135',
+          fistVisibleTime: '235', // 135 + 100
+          lastSeenTime: '235',
+          lastVisibleTime: '235',
+          loadTimeVisibility: '5',
+          maxVisiblePercentage: '25',
+          minVisiblePercentage: '25',
+          totalVisibleTime: '0',         // duration metrics are always 0
+          maxContinuousVisibleTime: '0', // as it triggers immediately
+          // totalTime is not testable because no way to stub performance API
+        }));
+        expect(callbackSpy2).to.not.be.called;
+        expect(unobserveSpy).to.not.be.called;
+        callbackSpy1.reset();
+
+        clock.tick(100);
+        fireIntersect(35); // above spec 2 min visible, trigger callback 2
+        expect(callbackSpy2).to.be.calledWith(sinon.match({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '65',
+          firstSeenTime: '135',
+          fistVisibleTime: '335', // 235 + 100
+          lastSeenTime: '335',
+          lastVisibleTime: '335',
+          loadTimeVisibility: '5',
+          maxVisiblePercentage: '35',
+          minVisiblePercentage: '35',
+          totalVisibleTime: '0',         // duration metrics is always 0
+          maxContinuousVisibleTime: '0', // as it triggers immediately
+          // totalTime is not testable because no way to stub performance API
+        }));
+        expect(callbackSpy1).to.not.be.called; // callback 1 not called again
+        expect(unobserveSpy).to.be.called; // unobserve when all callback fired
+      });
+    });
+
+    function fireIntersect(intersectPercent) {
+      const entry = makeIntersectionEntry(
+          [0, 100 - intersectPercent, 100, 100], [0, 0, 100, 100]);
+      inObCallback([entry]);
+    }
   });
 });

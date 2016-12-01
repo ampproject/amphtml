@@ -19,7 +19,7 @@
     - [Verify your examples](#verify-your-examples)
     - [Tests](#tests)
     - [Other tips](#other-tips)
-    
+
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information. If you are an ad technology provider looking to integrate with AMP HTML, please also check the [general 3P inclusion guidelines](../3p/README.md#ads) and [ad service integration guidelines](./_integration-guide.md).
 
@@ -51,6 +51,7 @@ We will provide the following information to the ad:
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
 - `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
   - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
   - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
@@ -77,8 +78,6 @@ Depending on the ad server / provider some methods of rendering ads involve a se
 Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
-
-When a listener is registered, it will be called 2x in short order. Once with the position of the ad when its iframe was created and then again with the current position.
 
 Example usage:
 
@@ -223,7 +222,7 @@ Please read through [DEVELOPING.md](../DEVELOPING.md) before contributing to thi
 If you're adding support for a new 3P ad service, changes to the following files are expected:
 
 - `/ads/yournetwork.js` - implement the main logic here. This is the code that will be invoked in the 3P iframe once loaded.
-- `/ads/yournetwork.md` - have your service documented for the publishers to read. 
+- `/ads/yournetwork.md` - have your service documented for the publishers to read.
 - `/ads/_config.js` - add service specific configuration here.
 - `/3p/integration.js` - register your service here.
 - `/extensions/amp-ad/amp-ad.md` - add a link that points to your publisher doc.
@@ -231,7 +230,7 @@ If you're adding support for a new 3P ad service, changes to the following files
 
 ### Verify your examples
 
-To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.max.html` in your browser to make sure the examples load ads.
+To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.max.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 
@@ -255,5 +254,5 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 ### Other tips
 
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
-- [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread. 
+- [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread.
 

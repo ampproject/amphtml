@@ -54,6 +54,11 @@ export const adConfig = {
       'https://staticd.cdn.adblade.com',
       'https://static.adblade.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  adbutler: {
+    prefetch: 'https://servedbyadbutler.com/app.js',
   },
 
   adform: {},
@@ -96,6 +101,14 @@ export const adConfig = {
 
   aduptech: {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
+  },
+
+  adverline: {
+    prefetch: 'https://ads.adverline.com/richmedias/amp.js',
+    preconnect: [
+      'https://adnext.fr',
+    ],
+    renderStartImplemented: true,
   },
 
   advertserve: {
@@ -179,6 +192,17 @@ export const adConfig = {
     ],
   },
 
+  f1e: {
+    prefetch: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
+  },
+
+  fake: {},
+
+  felmat: {
+    prefetch: 'https://t.felmat.net/js/fmamp.js',
+    renderStartImplemented: true,
+  },
+
   flite: {},
 
   genieessp: {
@@ -187,6 +211,12 @@ export const adConfig = {
 
   gmossp: {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  },
+
+  holder: {
+    prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
+    preconnect: 'https://h.holder.com.ua',
+    renderStartImplemented: true,
   },
 
   ibillboard: {},
@@ -204,6 +234,7 @@ export const adConfig = {
       'https://staticd.cdn.industrybrains.com',
       'https://static.industrybrains.com',
     ],
+    renderStartImplemented: true,
   },
 
   inmobi: {
@@ -211,7 +242,22 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  ix: {
+    prefetch: 'https://js-sec.indexww.com/indexJTag.js',
+    preconnect: 'https://as-sec.casalemedia.com',
+  },
+
   kargo: {},
+
+  kixer: {
+    prefetch: 'https://cdn.kixer.com/ad/load.js',
+    renderStartImplemented: true,
+  },
+
+  ligatus: {
+    prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
+    renderStartImplemented: true,
+  },
 
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
@@ -248,6 +294,21 @@ export const adConfig = {
     preconnect: [
       'https://ww251.smartadserver.com',
       'https://static.sascdn.com/',
+    ],
+    renderStartImplemented: true,
+  },
+
+  medianet: {
+    preconnect: 'https://contextual.media.net',
+    renderStartImplemented: true,
+  },
+
+  mediavine: {
+    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://securepubads.g.doubleclick.net',
+      'https://tpc.googlesyndication.com',
     ],
     renderStartImplemented: true,
   },
@@ -310,7 +371,12 @@ export const adConfig = {
   },
 
   pubmine: {
-    prefetch: 'https://s.pubmine.com/showad.js',
+    prefetch: [
+      'https://s.pubmine.com/head.js',
+      'https://s.pubmine.com/showad.js',
+    ],
+    preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
   },
 
   pulsepoint: {
@@ -341,6 +407,12 @@ export const adConfig = {
   smartadserver: {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
+    renderStartImplemented: true,
+  },
+
+  smartclip: {
+    prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
+    preconnect: 'https://des.smartclip.net',
     renderStartImplemented: true,
   },
 
@@ -388,6 +460,16 @@ export const adConfig = {
   },
 
   widespace: {},
+
+  xlift: {
+    prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+    renderStartImplemented: true,
+  },
+
+  yahoo: {
+    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    preconnect: 'https://us.adserver.yahoo.com',
+  },
 
   yahoojp: {
     prefetch: [

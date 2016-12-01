@@ -21,17 +21,8 @@ import {
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
 import {urls} from '../../src/config';
-
-
-/**
- * Origins that are trusted to serve valid AMP documents.
- * @const {Object}
- */
-const ampOrigins = {
-  [urls.cdn]: true,
-  'http://localhost:8000': true,
-};
-
+import {isProxyOrigin, isLocalhostOrigin, parseUrl} from '../../src/url';
+import {startsWith} from '../../src/string';
 
 /**
  * Install a click listener that transforms navigation to the AMP cache
@@ -90,7 +81,8 @@ export function handleClick(e, opt_viewerNavigate) {
   const win = link.a.ownerDocument.defaultView;
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
-    destination = destination.replace(`${urls.cdn}/c/`,
+    destination = destination.replace(
+        `${parseUrl(link.eventualUrl).host}/c/`,
         'http://localhost:8000/max/');
   }
   e.preventDefault();
@@ -139,7 +131,8 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+  if (!isProxyOrigin(eventualUrl) ||
+      !startsWith(parseUrl(eventualUrl).pathname, '/c/')) {
     return;
   }
   return eventualUrl;
@@ -235,7 +228,7 @@ export function getA2AAncestor(win) {
     return null;
   }
   const amp = origins[origins.length - 2];
-  if (!ampOrigins[amp] && !ampOrigins.hasOwnProperty(amp)) {
+  if (!isProxyOrigin(amp) && !isLocalhostOrigin(amp)) {
     return null;
   }
   return {

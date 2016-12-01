@@ -99,7 +99,19 @@ export class Resource {
    */
   static setOwner(element, owner) {
     dev().assert(owner.contains(element), 'Owner must contain the element');
+    if (Resource.forElementOptional(element)) {
+      Resource.forElementOptional(element).updateOwner(owner);
+    }
     element[OWNER_PROP_] = owner;
+
+    // Need to clear owner cache for all child elements
+    const cachedElements = element.getElementsByClassName('-amp-element');
+    for (let i = 0; i < cachedElements.length; i++) {
+      const ele = cachedElements[i];
+      if (Resource.forElementOptional(ele)) {
+        Resource.forElementOptional(ele).updateOwner(undefined);
+      }
+    }
   }
 
   /**
@@ -183,6 +195,14 @@ export class Resource {
    */
   getId() {
     return this.id_;
+  }
+
+  /**
+   * Update owner element
+   * @param {AmpElement|undefined} owner
+   */
+  updateOwner(owner) {
+    this.owner_ = owner;
   }
 
   /**
@@ -470,6 +490,16 @@ export class Resource {
    * @return {boolean}
    */
   renderOutsideViewport() {
+    // The exception is for owned resources, since they only attempt to
+    // render outside viewport when the owner has explicitly allowed it.
+    // TODO(jridgewell, #5803): Resources should be asking owner if it can
+    // prerender this resource, so that it can avoid expensive elements wayyy
+    // outside of viewport. For now, blindly trust that owner knows what it's
+    // doing.
+    if (this.hasOwner()) {
+      return true;
+    }
+
     const renders = this.element.renderOutsideViewport();
     // Boolean interface, element is either always allowed or never allowed to
     // render outside viewport.
@@ -487,11 +517,7 @@ export class Resource {
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
       // If outside of viewport's x-axis, element is not in viewport.
-      // The exception is for owned resources, since they only attempt to
-      // render outside viewport when the owner has explicitly allowed it.
-      if (!this.hasOwner()) {
-        return false;
-      }
+      return false;
     }
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport

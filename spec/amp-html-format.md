@@ -96,7 +96,7 @@ AMP HTML documents MUST
 - <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
-- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommend to include `initial-scale=1` (1). [🔗](#vprt)
+- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommended to include `initial-scale=1` (1). [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
 - <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) (`head > style[amp-boilerplate]` and `noscript > style[amp-boilerplate]`) in their head tag. [🔗](#boilerplate)
 
@@ -214,6 +214,24 @@ The `style` attribute must not be used.
 
 XML-related attributes, such as xmlns, xml:lang, xml:base, and xml:space are disallowed in AMP HTML.
 
+Internal AMP attributes prefixed with `i-amp-` are disallowed in AMP HTML.
+
+### Classes
+
+Internal AMP class names prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
+
+Consult AMP documentation for meaning of class names prefixed with `amp-`. The use of these classes is allowed and meant to allow customization of some features of AMP runtime and extensions.
+
+All other authored class names are allowed in AMP HTML markup.
+
+### IDs
+
+Internal AMP IDs prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
+
+Consult AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
+
+All other authored IDs are allowed in AMP HTML markup.
+
 ### Links
 
 The `javascript:` schema is disallowed.
@@ -238,23 +256,10 @@ Authors may add custom styles to a document using a single `<style amp-custom>` 
 
 The following restrictions apply to selectors in author style sheets:
 
-##### Universal selector
-The universal selector `*` may not be used in author stylesheets. This is because it can have negative performance implications and could be used to circumvent the rules set out in the following paragraph.
-
-##### not selector
-`:not()` may not be used in selectors because it can be used to simulate the universal selector.
-
-##### Pseudo-selectors, pseudo-classes and pseudo-elements
-Pseudo-selectors, pseudo-classes and pseudo-elements are only allowed in selectors that contain tag names and those tag names must not start with `amp-`.
-
-Example OK: `a:hover`, `div:last-of-type`
-
-Example not OK:  `amp-img:hover`, `amp-img:last-of-type`
-
 ##### Class and tag names
-Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
+Class names, IDs, tag names and attributes, in author stylesheets, may not start with the string `-amp-` and `i-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes, `i-amp-` IDs and `i-amp-` tags and attributes. These classes, IDs and tag/attribute names are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
 
-To prevent usage of attribute selectors to circumvent class name limitations it is generally not allowed for CSS selectors to contain tokens and strings starting with `-amp-` and `i-amp`.
+To prevent usage of attribute selectors to circumvent class name limitations it is generally not allowed for CSS selectors to contain tokens and strings starting with `-amp-` and `i-amp-`.
 
 #### Important
 Usage of the `!important` qualifier is not allowed. This is a necessary requirement to enable AMP to enforce its element sizing invariants.
@@ -434,7 +439,7 @@ The `id` attribute is optional. Individual AMP elements discover their own templ
 
 The syntax within the template element depends on the specific template language. However, the template language could be restricted within AMP. For instance, in accordance with the "template" element, all productions have to be over a valid well-formed DOM. All of the template outputs are also subject to sanitizing to ensure AMP-valid output.
 
-See the documentation for a specific extended template on the syntax and restrictions.
+To learn about the syntax and restrictions for an extended template, visit the [extended template's documentation](./amp-html-templates.md#templates).
 
 ##### URL
 
@@ -475,7 +480,9 @@ As well as these attributes:
 
 ## AMP document discovery
 
-If AMP documents are alternative representations of a canonical document, then the canonical document should point to the AMP document via a `link` tag with the [relation "amphtml"](http://microformats.org/wiki/existing-rel-values#HTML5_link_type_extensions).
+The mechanism described below provides a standardized way for software to discover whether an AMP version exists for a canonical document.
+
+If an AMP document exists that is an alternative representation of a canonical document, then the canonical document should point to the AMP document via a `link` tag with the [relation "amphtml"](http://microformats.org/wiki/existing-rel-values#HTML5_link_type_extensions).
 
 Example:
 
@@ -483,6 +490,14 @@ Example:
 <link rel="amphtml" href="https://www.example.com/url/to/amp/document.html">
 ```
 
-The AMP document itself is expected to point back with its canonical relation to a document that has the "amphtml" relation.
+The AMP document itself is expected to point back to its canonical document via a `link` tag with the relation "canonical".
 
-Note, that AMP document may also be linked to directly. The mechanism described here provides a standardized way for software to discover whether an AMP version exists for a canonical document.
+Example:
+
+```html
+<link rel="canonical" href="https://www.example.com/url/to/canonical/document.html">
+```
+
+(If a single resource is simultaneously the AMP *and* the canonical document, the canonical relation should point to itself--no "amphtml" relation is required.)
+
+Note that for widest compatibility with AMP-consuming systems, it should be possible to read the "amphtml" relation without executing JavaScript. (That is, the tag should be present in the raw HTML, and not injected via JavaScript.)

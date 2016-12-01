@@ -44,6 +44,7 @@ import {
 } from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryServiceForDoc} from './service/history-impl';
@@ -107,6 +108,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
@@ -116,9 +118,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
   installVideoManagerForDoc(ampdoc);
-  if (isExperimentOn(ampdoc.win, 'form-submit')) {
-    installGlobalSubmitListenerForDoc(ampdoc);
-  }
+  installGlobalSubmitListenerForDoc(ampdoc);
 }
 
 
@@ -172,16 +172,17 @@ function adoptShared(global, opts, callback) {
   // `AMP.extension()` function is only installed in a non-minified mode.
   // This function is meant to play the same role for development and testing
   // as `AMP.push()` in production.
-  // TODO(dvoytenko, #5507): Only expose this method for `!getMode().minified`
-  // once the compile-time inlining is done.
-  /**
-   * @param {string} unusedName
-   * @param {function(!Object)} installer
-   * @const
-   */
-  global.AMP.extension = function(unusedName, installer) {
-    installer(global.AMP);
-  };
+  if (!getMode().minified) {
+    /**
+     * @param {string} unusedName
+     * @param {string} unusedVersion
+     * @param {function(!Object)} installer
+     * @const
+     */
+    global.AMP.extension = function(unusedName, unusedVersion, installer) {
+      installer(global.AMP);
+    };
+  }
 
   /** @const */
   global.AMP.config = config;
@@ -524,7 +525,7 @@ class MultidocManager {
     dev().fine(TAG, 'Attach shadow doc:', doc);
     this.purgeShadowRoots_();
 
-    hostElement.style.visibility = 'hidden';
+    setStyle(hostElement, 'visibility', 'hidden');
     const shadowRoot = createShadowRoot(hostElement);
 
     if (shadowRoot.AMP) {
@@ -626,7 +627,7 @@ class MultidocManager {
     // E.g. integrate with dynamic classes. In shadow case specifically, we have
     // to wait for stubbing to complete, which may take awhile due to importNode.
     setTimeout(() => {
-      hostElement.style.visibility = 'visible';
+      setStyle(hostElement, 'visibility', 'visible');
     }, 50);
 
     // Store reference.
@@ -835,4 +836,20 @@ export function registerForUnitTest(win) {
       registerElement(win, element.name, element.implementationClass);
     }
   }
+}
+
+
+/**
+ * Registers a specific element for testing.
+ * @param {!Window} win
+ * @param {string} elementName
+ * @visibleForTesting
+ */
+export function registerElementForTesting(win, elementName) {
+  const element = elementsForTesting[elementName];
+  if (!element) {
+    throw new Error('test element not found: ' + elementName);
+  }
+  win.AMP.registerElement(element.name, element.implementationClass,
+      element.css);
 }

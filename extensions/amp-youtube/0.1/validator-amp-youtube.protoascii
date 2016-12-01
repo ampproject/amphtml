@@ -20,6 +20,7 @@ tags: {  # amp-youtube
   tag_name: "SCRIPT"
   spec_name: "amp-youtube extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -54,6 +55,7 @@ tags: {  # <amp-youtube>
   tag_name: "AMP-YOUTUBE"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-youtube extension .js script"
+  attrs: { name: "autoplay" }
   attrs: {
     name: "data-videoid"
     mandatory: true

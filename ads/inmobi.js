@@ -30,7 +30,7 @@ export function inmobi(global, data) {
     onError: code => {
       if (code == 'nfr') {
         global.context.noContentAvailable();
-        document.getElementById('my-ad-slot').style.display = 'none';
+        document.getElementById('my-ad-slot').style./*OK*/display = 'none';
       }
     },
     onSuccess: () => {

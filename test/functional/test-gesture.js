@@ -50,6 +50,9 @@ describe('Gestures', () => {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
       },
+      removeEventListener: eventType => {
+        delete eventListeners[eventType];
+      },
       ownerDocument: {
         defaultView: window,
       },
@@ -57,7 +60,7 @@ describe('Gestures', () => {
 
     onGesture = sandbox.spy();
 
-    gestures = new Gestures(element);
+    gestures = Gestures.get(element);
     gestures.onGesture(TestRecognizer, onGesture);
     expect(gestures.recognizers_.length).to.equal(1);
     recognizer = gestures.recognizers_[0];
@@ -352,6 +355,21 @@ describe('Gestures', () => {
     expect(event.stopPropagation.callCount).to.equal(0);
   });
 
+  it('should remove listeners and shared cache instance on cleanup', () => {
+    const eventNames = ['touchstart', 'touchend', 'touchmove', 'touchcancel'];
+    const prop = '__AMP_Gestures';
+    const removeSpy = sandbox.spy(element, 'removeEventListener');
+
+    expect(element[prop]).to.exist;
+
+    gestures.cleanup();
+
+    eventNames.forEach(eventName => {
+      expect(removeSpy.withArgs(eventName).callCount).to.equal(1);
+    });
+    expect(element[prop]).to.not.exist;
+  });
+
   describe('Gestures - with shouldNotPreventdefault', () => {
     let sandbox;
     let element;
@@ -378,7 +396,7 @@ describe('Gestures', () => {
 
       onGesture = sandbox.spy();
 
-      gestures = new Gestures(element, /* shouldNotPreventDefault */true);
+      gestures = Gestures.get(element, /* shouldNotPreventDefault */true);
       gestures.onGesture(TestRecognizer, onGesture);
       expect(gestures.recognizers_.length).to.equal(1);
       recognizer = gestures.recognizers_[0];

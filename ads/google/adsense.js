@@ -15,6 +15,7 @@
  */
 
 import {validateData} from '../../3p/3p';
+import {setStyles} from '../../src/style';
 
 /**
  * Make an adsense iframe.
@@ -24,7 +25,8 @@ import {validateData} from '../../3p/3p';
 export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
-      ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId']);
+      ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
+       'ampSlotIndex']);
 
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
@@ -53,7 +55,11 @@ export function adsense(global, data) {
   }
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
-  i.style.cssText = 'display:inline-block;width:100%;height:100%;';
+  setStyles(i, {
+    display: 'inline-block',
+    width: '100%',
+    height: '100%',
+  });
   const initializer = {};
   if (data['experimentId']) {
     const experimentIdList = data['experimentId'].split(',');

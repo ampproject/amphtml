@@ -16,6 +16,7 @@
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {
+  installViewportServiceForDoc,
   Viewport,
   ViewportBindingDef,
   ViewportBindingIosEmbedWrapper_,
@@ -25,6 +26,7 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
+import {getMode} from '../../src/mode';
 import {getStyle} from '../../src/style';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -35,8 +37,7 @@ import {toggleExperiment} from '../../src/experiments';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
-describe('Viewport', () => {
-  let sandbox;
+describes.fakeWin('Viewport', {}, env => {
   let clock;
   let viewport;
   let binding;
@@ -50,11 +51,15 @@ describe('Viewport', () => {
   let vsyncTasks;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+
+    windowApi = env.win;
+    windowApi.requestAnimationFrame = fn => window.setTimeout(fn, 16);
+
     viewerViewportHandler = undefined;
     viewer = {
       isEmbedded: () => false,
+      isIframed: () => false,
       getPaddingTop: () => 19,
       onViewportEvent: handler => {
         viewerViewportHandler = handler;
@@ -66,22 +71,6 @@ describe('Viewport', () => {
       onVisibilityChanged: () => {},
     };
     viewerMock = sandbox.mock(viewer);
-    windowApi = {
-      document: {
-        documentElement: {
-          nodeType: 1,
-          style: {},
-          classList: {
-            add: function() {},
-          },
-        },
-      },
-      location: {},
-      navigator: window.navigator,
-      setTimeout: window.setTimeout,
-      clearTimeout: window.clearTimeout,
-      requestAnimationFrame: fn => window.setTimeout(fn, 16),
-    };
     const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = ampdocService.getAmpDoc();
     installTimerService(windowApi);
@@ -99,9 +88,12 @@ describe('Viewport', () => {
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => updatedPaddingTop = paddingTop;
     viewport = new Viewport(ampdoc, binding, viewer);
-    viewport.fixedLayer_ = {update: () => {
-      return {then: callback => callback()};
-    }};
+    viewport.fixedLayer_ = {
+      update: () => {
+        return {then: callback => callback()};
+      },
+      updatePaddingTop: () => {},
+    };
     viewport.getSize();
 
     // Use window since Animation by default will use window.
@@ -118,7 +110,6 @@ describe('Viewport', () => {
   afterEach(() => {
     expect(vsyncTasks.length).to.equal(0);
     viewerMock.verify();
-    sandbox.restore();
   });
 
   function runVsync() {
@@ -132,6 +123,50 @@ describe('Viewport', () => {
       task.mutate(state);
     });
   }
+
+  describe('top-level classes', () => {
+    let root;
+
+    beforeEach(() => {
+      root = windowApi.document.documentElement;
+      root.className = '';
+    });
+
+    it('should set singledoc class', () => {
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-singledoc');
+    });
+
+    it('should not set singledoc class', () => {
+      sandbox.stub(ampdoc, 'isSingleDoc', () => false);
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.not.have.class('-amp-singledoc');
+    });
+
+    it('should set standalone class', () => {
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-standalone');
+      expect(root).to.not.have.class('-amp-embedded');
+    });
+
+    it('should set embedded class', () => {
+      sandbox.stub(viewer, 'isEmbedded', () => true);
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-embedded');
+      expect(root).to.not.have.class('-amp-standalone');
+    });
+
+    it('should not set iframed class', () => {
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.not.have.class('-amp-iframed');
+    });
+
+    it('should set iframed class', () => {
+      sandbox.stub(viewer, 'isIframed', () => true);
+      new Viewport(ampdoc, binding, viewer);
+      expect(root).to.have.class('-amp-iframed');
+    });
+  });
 
   it('should connect binding right away when visible', () => {
     expect(binding.connect).to.be.calledOnce;
@@ -154,6 +189,7 @@ describe('Viewport', () => {
     // Hasn't been called at first.
     expect(binding.connect).to.not.be.called;
     expect(binding.disconnect).to.not.be.called;
+    expect(viewport.size_).to.be.null;
 
     // When becomes visible - it gets called.
     viewer.isVisible = () => true;
@@ -171,6 +207,35 @@ describe('Viewport', () => {
     onVisibilityHandler();
     expect(binding.connect).to.be.calledOnce;
     expect(binding.disconnect).to.be.calledOnce;
+  });
+
+  it('should resize only after size has been initialed', () => {
+    binding.connect = sandbox.spy();
+    binding.disconnect = sandbox.spy();
+    viewer.isVisible = () => true;
+    let onVisibilityHandler;
+    viewer.onVisibilityChanged = handler => onVisibilityHandler = handler;
+    viewport = new Viewport(ampdoc, binding, viewer);
+
+    // Size has not be initialized yet.
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.not.be.called;
+    expect(viewport.size_).to.be.null;
+
+    // Disconnect: ignore resizing.
+    viewer.isVisible = () => false;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledOnce;
+    expect(binding.disconnect).to.be.calledOnce;
+    expect(viewport.size_).to.be.null;
+
+    // Size has been initialized.
+    viewport.size_ = {width: 0, height: 0};
+    viewer.isVisible = () => true;
+    onVisibilityHandler();
+    expect(binding.connect).to.be.calledTwice;
+    expect(binding.disconnect).to.be.calledOnce;
+    expect(viewport.size_).to.deep.equal(viewportSize);
   });
 
   it('should pass through size and scroll', () => {
@@ -256,13 +321,28 @@ describe('Viewport', () => {
     bindingMock.verify();
   });
 
+  it('should update non-transient padding', () => {
+    const bindingMock = sandbox.mock(binding);
+    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    fixedLayerMock.expects('updatePaddingTop')
+        .withExactArgs(/* paddingTop */ 0, /* transient */ undefined)
+        .once();
+    viewerViewportHandler({paddingTop: 0});
+    bindingMock.verify();
+    fixedLayerMock.verify();
+  });
+
   it('should update padding when viewer wants to hide header', () => {
     const bindingMock = sandbox.mock(binding);
-    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    fixedLayerMock.expects('updatePaddingTop')
+        .withExactArgs(/* paddingTop */ 0, /* transient */ true)
+        .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
         transient: true});
     bindingMock.verify();
+    fixedLayerMock.verify();
   });
 
   it('should update padding for fixed layer when viewer wants to ' +
@@ -494,33 +574,6 @@ describe('Viewport', () => {
     expect(viewport.getScrollHeight()).to.equal(117);
   });
 
-  it('should not set pan-y w/o experiment', () => {
-    // TODO(dvoytenko, #4894): Cleanup the experiment.
-    viewer.isEmbedded = () => true;
-    toggleExperiment(windowApi, 'pan-y', false);
-    viewport = new Viewport(ampdoc, binding, viewer);
-    expect(windowApi.document.documentElement.style['touch-action'])
-        .to.not.exist;
-  });
-
-  it('should not set pan-y when not embedded', () => {
-    // TODO(dvoytenko, #4894): Cleanup the experiment.
-    viewer.isEmbedded = () => false;
-    toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(ampdoc, binding, viewer);
-    expect(windowApi.document.documentElement.style['touch-action'])
-        .to.not.exist;
-  });
-
-  it('should set pan-y with experiment', () => {
-    // TODO(dvoytenko, #4894): Cleanup the experiment.
-    viewer.isEmbedded = () => true;
-    toggleExperiment(windowApi, 'pan-y', true);
-    viewport = new Viewport(ampdoc, binding, viewer);
-    expect(windowApi.document.documentElement.style['touch-action'])
-        .to.equal('pan-y');
-  });
-
   it('should add class to HTML element with make-body-block experiment', () => {
     viewer.isEmbedded = () => true;
     toggleExperiment(windowApi, 'make-body-block', true);
@@ -528,6 +581,30 @@ describe('Viewport', () => {
     const addStub = sandbox.stub(docElement.classList, 'add');
     viewport = new Viewport(ampdoc, binding, viewer);
     expect(addStub).to.be.calledWith('-amp-make-body-block');
+  });
+
+  describes.realWin('top-level styles', {amp: 1}, env => {
+    let win;
+    let root;
+
+    beforeEach(() => {
+      win = env.win;
+      ampdoc = new AmpDocSingle(win);
+      root = win.document.documentElement;
+      root.className = '';
+    });
+
+    it('should not set pan-y when not embedded', () => {
+      viewer.isEmbedded = () => false;
+      viewport = new Viewport(ampdoc, binding, viewer);
+      expect(win.getComputedStyle(root)['touch-action']).to.equal('auto');
+    });
+
+    it('should set pan-y with experiment', () => {
+      viewer.isEmbedded = () => true;
+      viewport = new Viewport(ampdoc, binding, viewer);
+      expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
+    });
   });
 
   describe('for child window', () => {
@@ -916,6 +993,7 @@ describe('ViewportBindingNatural', () => {
       style: {},
     };
     documentBody = {
+      nodeType: 1,
       style: {},
     };
     windowApi.document = {
@@ -949,10 +1027,13 @@ describe('ViewportBindingNatural', () => {
   it('should configure make-body-relative', () => {
     toggleExperiment(windowApi, 'make-body-relative', true);
     binding = new ViewportBindingNatural_(windowApi, viewer);
-    expect(documentBody.style.display).to.equal('block');
+    expect(documentBody.style.display).to.be.undefined;
     expect(documentBody.style.position).to.equal('relative');
-    expect(documentBody.style.overflowY).to.equal('visible');
-    expect(documentBody.style.overflowX).to.equal('hidden');
+    // It's important that this experiment does NOT override the previously
+    // set `overflow`.
+    expect(documentBody.style.overflow).to.equal('visible');
+    expect(documentBody.style.overflowY).to.not.be.ok;
+    expect(documentBody.style.overflowX).to.not.be.ok;
   });
 
   it('should setup overflow:visible on body', () => {
@@ -1205,7 +1286,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border on BODY', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1214,7 +1298,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border in lightbox mode', () => {
     windowApi.document = {
-      body: {style: {}},
+      body: {
+        nodeType: 1,
+        style: {},
+      },
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -1369,6 +1456,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.width = '100px';
     env.iframe.style.height = '100px';
     win = env.win;
+    win.document.documentElement.className = 'top';
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
@@ -1393,17 +1481,26 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
         .to.equal(binding.wrapper_);
     expect(binding.wrapper_.parentNode)
         .to.equal(win.document.documentElement);
-    expect(binding.wrapper_.tagName).to.equal('I-AMP-HTML-WRAPPER');
+    expect(binding.wrapper_.tagName).to.equal('HTML');
+    expect(binding.wrapper_.id).to.equal('i-amp-html-wrapper');
     expect(win.document.body.contains(child)).to.be.true;
     expect(binding.wrapper_.contains(child)).to.be.true;
     expect(win.document.contains(child)).to.be.true;
     expect(child.textContent).to.equal('test');
+
+    // Top-level classes moved to the wrapper element.
+    expect(win.document.documentElement).to.not.have.class('top');
+    expect(binding.wrapper_).to.have.class('top');
   });
 
   it('should have CSS setup', () => {
+    win.document.body.style.display = 'table';
     const htmlCss = win.getComputedStyle(win.document.documentElement);
     const wrapperCss = win.getComputedStyle(binding.wrapper_);
     const bodyCss = win.getComputedStyle(win.document.body);
+
+    // `<html>` must have `position: static` or layout is broken.
+    expect(htmlCss.position).to.equal('static');
 
     // `<html>` and `<i-amp-html-wrapper>` must be scrollable, but not `body`.
     // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
@@ -1425,7 +1522,8 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 
     // `body` must have `relative` positioning and `block` display.
     expect(bodyCss.position).to.equal('relative');
-    expect(bodyCss.display).to.equal('block');
+    // Preserve the customized `display` value.
+    expect(bodyCss.display).to.equal('table');
 
     // `body` must have a 1px transparent body for two purposes:
     // (1) to cancel out margin collapse in body's children;
@@ -1529,6 +1627,100 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
       binding.wrapper_.scrollTop = 11;
     }).then(() => {
       expect(binding.getScrollTop()).to.equal(11);
+    });
+  });
+});
+
+describe('createViewport', () => {
+
+  describes.fakeWin('in Android', {win: {navigator: {userAgent: 'Android'}}},
+      env => {
+        let win;
+
+        beforeEach(() => {
+          win = env.win;
+          installPlatformService(win);
+          installTimerService(win);
+        });
+
+        it('should bind to "natural" when not iframed', () => {
+          win.parent = win;
+          const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
+          const viewport = installViewportServiceForDoc(ampDoc);
+          expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+        });
+
+        it('should bind to "naturual" when iframed', () => {
+          win.parent = {};
+          const ampDoc = installDocService(win, true).getAmpDoc();
+          installViewerServiceForDoc(ampDoc);
+          const viewport = installViewportServiceForDoc(ampDoc);
+          expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+        });
+      });
+
+  describes.fakeWin('in iOS', {
+    win: {navigator: {userAgent: 'iPhone'}},
+  }, env => {
+    let win;
+
+    beforeEach(() => {
+      win = env.win;
+      installPlatformService(win);
+      installTimerService(win);
+    });
+
+    it('should bind to "natural" when not iframed', () => {
+      win.parent = win;
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      installViewerServiceForDoc(ampDoc);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
+    });
+
+    it('should bind to "iOS embed" when iframed', () => {
+      win.parent = {};
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => true);
+      sandbox.stub(viewer, 'isEmbedded', () => true);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+    });
+
+    it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
+      win.parent = {};
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => true);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNatural_);
+    });
+
+    it('should bind to "iOS embed" when not iframed but in dev mode', () => {
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      getMode(win).development = true;
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => false);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+    });
+
+    it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
+      const ampDoc = installDocService(win, true).getAmpDoc();
+      getMode(win).development = true;
+      const viewer = installViewerServiceForDoc(ampDoc);
+      sandbox.stub(viewer, 'isIframed', () => true);
+      sandbox.stub(viewer, 'isEmbedded', () => false);
+      const viewport = installViewportServiceForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingNatural_);
     });
   });
 });

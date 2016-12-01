@@ -18,17 +18,14 @@ addons:
     - protobuf-compiler
     - python-protobuf
 before_install:
-  - |
-      [ -z "$(git diff --name-only $TRAVIS_COMMIT_RANGE)" ] || git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(\.(md|txt)$)|(^(examples|spec))/' || {
-        echo "Only docs were updated, stopping build process."
-        exit
-      }
-  - export CHROME_BIN=chromium-browser
+  - export CHROME_BIN=google-chrome
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
 before_script:
   - pip install --user protobuf
-script: node build-system/pr-check.js $TRAVIS_COMMIT_RANGE
+script: node build-system/pr-check.js
 branches:
   only:
     - master

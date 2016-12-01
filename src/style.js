@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 /** @type {Object<string, string>} */
@@ -139,9 +138,9 @@ export function setStyles(element, styles) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = !(element.style.display != 'none');
+    opt_display = getStyle(element, 'display') == 'none';
   }
-  element.style.display = opt_display ? '' : 'none';
+  setStyle(element, 'display', opt_display ? '' : 'none');
 }
 
 
@@ -195,4 +194,16 @@ export function translate(x, opt_y) {
  */
 export function scale(value) {
   return `scale(${value})`;
+}
+
+/**
+ * Remove alpha value from a rgba color value.
+ * Return the new color property with alpha equals if has the alpha value.
+ * Caller needs to make sure the input color value is a valid rgba/rgb value
+ * @param {string} rgbaColor
+ * @return {string}
+ */
+export function removeAlphaFromColor(rgbaColor) {
+  return rgbaColor.replace(
+      /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g, '($1,$2,$3, 1)');
 }

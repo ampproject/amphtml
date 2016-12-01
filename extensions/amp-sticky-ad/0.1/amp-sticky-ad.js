@@ -21,7 +21,6 @@ import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {listenOnce} from '../../../src/event-helper';
 
-
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -203,4 +202,6 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
+AMP.extension('amp-sticky-ad', '0.1', AMP => {
+  AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
+});

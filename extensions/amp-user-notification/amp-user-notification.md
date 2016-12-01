@@ -110,7 +110,7 @@ You can add it as a query string field. (ex.
     - `ampUserId`
 
   Example:
-  ```html
+  ```text
   https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
   ```
 
@@ -264,7 +264,7 @@ The `amp-user-notification` exposes the following actions you can use [AMP on-sy
 
 Optionally one can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
-- [CLIENT_ID URL substitution.](../../spec/amp-var-substitutions.md#CLIENT_ID)
+- [CLIENT_ID URL substitution.](../../spec/amp-var-substitutions.md#client-id)
 - [`amp-ad`](../../builtins/amp-ad.md)
 - [`amp-analytics`](../amp-analytics/amp-analytics.md)
 

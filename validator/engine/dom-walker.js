@@ -26,6 +26,9 @@
  *
  * See the {@code goog.string.html.HtmlParser}, this is simulating that
  * interface.
+ *
+ * TODO(powdercloud): We're not currently using this, but may use it. Ronsider
+ * removing it if not used after 2017-04-01.
  */
 
 goog.provide('amp.domwalker');

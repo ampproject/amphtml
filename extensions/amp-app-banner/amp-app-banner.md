@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permenantly if the user dismisses the banner.</td>
+    <td>A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -38,19 +38,13 @@ limitations under the License.
     <td>nodisplay</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li>
-          TBD
-        </li>
-      </ul>
-    </td>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-app-banner/">Annotated code example for amp-app-banner</a></td>
   </tr>
 </table>
 
 ## Behavior
-`amp-app-banner` is a wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permenantly if the user dismisses the banner.
+`amp-app-banner` is a wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 
 
 ##Data Sources
@@ -171,7 +165,7 @@ Not permitted: **disabled**
 <head>
   <meta name="apple-itunes-app"
              content="app-id=123456789, app-argument=app-name://link/to/app-content">
-  <link rel="amp-manifest" href="https://link/to/manifest.json">
+  <link rel="manifest" href="https://link/to/manifest.json">
 </head>
 
 . . . 

@@ -37,6 +37,7 @@ limitations under the License.
 
 For semantics of configuration, please see contact us [support@zedo.com]
 
+
 ### Required parameters
 
 - `data-super-id`

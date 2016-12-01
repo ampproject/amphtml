@@ -19,6 +19,8 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
+import {installDocumentInfoServiceForDoc,} from
+    '../../src/service/document-info-impl';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../src/experiments';
 
@@ -36,26 +38,30 @@ describe('test-document-click onDocumentElementClick_', () => {
   let preventDefaultSpy;
   let scrollIntoViewSpy;
   let querySelectorSpy;
-  let replaceLocSpy;
   let viewport;
   let timerFuncSpy;
+  let replaceStateForTargetSpy;
+  let replaceStateForTargetPromise;
+  let replaceStateForTargetResolver;
 
   beforeEach(() => {
+    replaceStateForTargetPromise = new Promise(resolve => {
+      replaceStateForTargetResolver = resolve;
+    });
     sandbox = sinon.sandbox.create();
     preventDefaultSpy = sandbox.spy();
     scrollIntoViewSpy = sandbox.spy();
-    timerFuncSpy = sandbox.spy();
-    replaceLocSpy = sandbox.spy();
+    timerFuncSpy = sandbox.stub();
     elem = {nodeType: 1};
     getElementByIdSpy = sandbox.stub();
     querySelectorSpy = sandbox.stub();
+    replaceStateForTargetSpy = sandbox.stub();
     tgt = document.createElement('a');
     tgt.href = 'https://www.google.com';
     win = {
       document: {},
       location: {
         href: 'https://www.google.com/some-path?hello=world#link',
-        replace: replaceLocSpy,
       },
       setTimeout: fn => {
         timerFuncSpy();
@@ -92,9 +98,14 @@ describe('test-document-click onDocumentElementClick_', () => {
       scrollIntoView: scrollIntoViewSpy,
     };
     history = {
-      push: () => {},
+      push: () => Promise.resolve(),
+      replaceStateForTarget: hash => {
+        replaceStateForTargetSpy(hash);
+        return replaceStateForTargetPromise;
+      },
     };
     installTimerService(win);
+    installDocumentInfoServiceForDoc(ampdoc);
     installUrlReplacementsServiceForDoc(ampdoc);
   });
 
@@ -106,6 +117,10 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     beforeEach(() => {
       win.location.href = 'https://www.google.com/some-path?hello=world#link';
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('should not do anything on path change', () => {
@@ -156,6 +171,10 @@ describe('test-document-click onDocumentElementClick_', () => {
       tgt.href = 'https://www.google.com/some-path?hello=world#test';
     });
 
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it('should call getElementById on document', () => {
       getElementByIdSpy.returns(elem);
       expect(getElementByIdSpy.callCount).to.equal(0);
@@ -197,33 +216,39 @@ describe('test-document-click onDocumentElementClick_', () => {
       onDocumentElementClick_(evt, ampdoc, viewport, history);
       expect(getElementByIdSpy.callCount).to.equal(1);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
-      expect(replaceLocSpy.callCount).to.equal(1);
-      expect(replaceLocSpy.args[0][0]).to.equal('#test');
+      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
     });
 
     it('should call scrollIntoView if element with id is found', () => {
       getElementByIdSpy.returns(elem);
 
-      expect(replaceLocSpy.callCount).to.equal(0);
+      expect(replaceStateForTargetSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(2);
-      expect(timerFuncSpy).to.be.calledOnce;
-      expect(replaceLocSpy.callCount).to.equal(1);
-      expect(replaceLocSpy.args[0][0]).to.equal('#test');
+      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
+      replaceStateForTargetResolver();
+      return replaceStateForTargetPromise.then(() => {
+        expect(scrollIntoViewSpy.callCount).to.equal(2);
+        expect(timerFuncSpy).to.be.calledOnce;
+      });
     });
 
     it('should call scrollIntoView if element with name is found', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(elem);
 
-      expect(replaceLocSpy.callCount).to.equal(0);
+      expect(replaceStateForTargetSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(scrollIntoViewSpy.callCount).to.equal(2);
-      expect(timerFuncSpy).to.be.calledOnce;
-      expect(replaceLocSpy.callCount).to.equal(1);
-      expect(replaceLocSpy.args[0][0]).to.equal('#test');
+      replaceStateForTargetResolver();
+      return replaceStateForTargetPromise.then(() => {
+        expect(scrollIntoViewSpy.callCount).to.equal(2);
+        expect(timerFuncSpy).to.be.calledOnce;
+        expect(replaceStateForTargetSpy.callCount).to.equal(1);
+        expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
+      });
     });
 
     it('should use escaped css selectors', () => {
@@ -240,62 +265,38 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(querySelectorSpy).to.be.calledWith('a[name="test\\"hello"]');
     });
 
-    it('should call location.replace before scrollIntoView', () => {
+    it('should call replaceStateForTarget before scrollIntoView', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(elem);
-
-      const ops = [];
-      win.location.replace = () => {
-        ops.push('location.replace');
-      };
-      viewport.scrollIntoView = () => {
-        ops.push('scrollIntoView');
-      };
       onDocumentElementClick_(evt, ampdoc, viewport, history);
-
-      expect(timerFuncSpy).to.be.calledOnce;
-      expect(ops).to.have.length(3);
-      expect(ops[0]).to.equal('location.replace');
-      expect(ops[1]).to.equal('scrollIntoView');
+      expect(replaceStateForTargetSpy).to.have.been.calledOnce;
+      expect(scrollIntoViewSpy).to.not.be.called;
+      replaceStateForTargetResolver();
+      return replaceStateForTargetPromise.then(() => {
+        expect(timerFuncSpy).to.be.calledOnce;
+        expect(scrollIntoViewSpy).to.be.calledTwice;
+      });
     });
 
     it('should push and pop history state', () => {
-      let historyOnPop;
-      const historyPushStub = sandbox.stub(history, 'push', onPop => {
-        historyOnPop = onPop;
-      });
+      sandbox.stub(history, 'push');
 
       // Click -> push.
       onDocumentElementClick_(evt, ampdoc, viewport, history);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
-      expect(replaceLocSpy.callCount).to.equal(1);
-      expect(replaceLocSpy.args[0][0]).to.equal('#test');
-      expect(historyPushStub.callCount).to.equal(1);
-      expect(historyOnPop).to.exist;
-
-      // Pop.
-      historyOnPop();
-      expect(replaceLocSpy.callCount).to.equal(2);
-      expect(replaceLocSpy.args[1][0]).to.equal('#');
+      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
     });
 
     it('should push and pop history state with pre-existing hash', () => {
       win.location.href = 'https://www.google.com/some-path?hello=world#first';
-      let historyOnPop;
-      const historyPushStub = sandbox.stub(history, 'push', onPop => {
-        historyOnPop = onPop;
-      });
+      sandbox.stub(history, 'push');
 
       // Click -> push.
-      onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(historyPushStub.callCount).to.equal(1);
-      expect(replaceLocSpy.callCount).to.equal(1);
-      expect(replaceLocSpy.args[0][0]).to.equal('#test');
-
-      // Pop.
-      historyOnPop();
-      expect(replaceLocSpy.callCount).to.equal(2);
-      expect(replaceLocSpy.args[1][0]).to.equal('#first');
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ false);
+      expect(replaceStateForTargetSpy.callCount).to.equal(1);
+      expect(replaceStateForTargetSpy.args[0][0]).to.equal('#test');
     });
   });
 
@@ -312,11 +313,19 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should always open in _blank when embedded', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history);
-      expect(win.open.called).to.be.true;
-      expect(win.open.calledWith(
-          'ftp://example.com/a', '_blank')).to.be.true;
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari */ false, /* isIframed */ true);
+      expect(win.open).to.be.called;
+      expect(win.open).to.be.calledWith('ftp://example.com/a', '_blank');
       expect(preventDefaultSpy.callCount).to.equal(1);
+    });
+
+    it('should not do anything not embedded', () => {
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari */ false, /* isIframed */ false);
+      expect(win.open).to.not.be.called;
+      expect(win.open).to.not.be.calledWith('ftp://example.com/a', '_blank');
+      expect(preventDefaultSpy.callCount).to.equal(0);
     });
   });
 
@@ -333,28 +342,41 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should open link in _top on Safari iOS when embedded', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history, true);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ true);
       expect(win.open.called).to.be.true;
       expect(win.open.calledWith(
           'whatsapp://send?text=hello', '_top')).to.be.true;
       expect(preventDefaultSpy.callCount).to.equal(1);
     });
 
+    it('should not do anything on when not embedded', () => {
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ false);
+      expect(win.open).to.not.be.called;
+      expect(win.open).to.not.be.calledWith(
+          'whatsapp://send?text=hello', '_top');
+      expect(preventDefaultSpy.callCount).to.equal(0);
+    });
+
     it('should not do anything for mailto: protocol', () => {
       tgt.href = 'mailto:hello@example.com';
-      onDocumentElementClick_(evt, ampdoc, viewport, history, true);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ true, /* isIframed */ true);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other non-safari iOS', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history, false);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ false, /* isIframed */ true);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other platforms', () => {
-      onDocumentElementClick_(evt, ampdoc, viewport, history, false);
+      onDocumentElementClick_(evt, ampdoc, viewport, history,
+          /* isIosSafari*/ false, /* isIframed */ true);
       expect(win.top.location.href).to.equal('https://google.com');
       expect(preventDefaultSpy.callCount).to.equal(0);
     });

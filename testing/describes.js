@@ -16,6 +16,7 @@
 
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
+import {BaseElement} from '../src/base-element';
 import {
   FakeCustomElements,
   FakeWindow,
@@ -27,9 +28,10 @@ import {
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-  registerForUnitTest,
+  registerElementForTesting,
 } from '../src/runtime';
 import {cssText} from '../build/css';
+import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
@@ -41,6 +43,22 @@ const SUB = ' ';
 
 /** @type {number} */
 let iframeCount = 0;
+
+
+/**
+ * @const {!Object<string, function(!Object)>}
+ */
+const extensionsBuffer = {};
+
+
+/**
+ * @param {string} name
+ * @param {function(!Object)} installer
+ * @const
+ */
+export function bufferExtension(name, installer) {
+  extensionsBuffer[name] = installer;
+}
 
 
 /**
@@ -56,7 +74,9 @@ export let TestSpec;
  *
  * @typedef {{
  *   runtimeOn: (boolean|undefined),
- *   ampdoc: (string),
+ *   extensions: (!Array<string>|undefined),
+ *   canonicalUrl: (string|undefined),
+ *   ampdoc: (string|undefined),
  *   params: (!Object<string, string>|undefined),
  * }}
  */
@@ -122,7 +142,7 @@ export const realWin = describeEnv(spec => [
 
 
 /**
- * A test with in a described environment.
+ * A test within a described environment.
  * @param {function(!Object):!Array<?Fixture>} factory
  */
 function describeEnv(factory) {
@@ -288,7 +308,11 @@ class FakeWinFixture {
 /** @implements {Fixture} */
 class RealWinFixture {
 
-  /** @param {!{fakeRegisterElement: boolean, ampCss: boolean}} spec */
+  /** @param {!{
+  *   fakeRegisterElement: boolean,
+  *   ampCss: boolean,
+  *   allowExternalResources: boolean
+  * }} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
@@ -316,7 +340,9 @@ class RealWinFixture {
         // Flag as being a test window.
         win.AMP_TEST_IFRAME = true;
 
-        doNotLoadExternalResourcesInTest(win);
+        if (!spec.allowExternalResources) {
+          doNotLoadExternalResourcesInTest(win);
+        }
 
         // Install AMP CSS if requested.
         if (spec.ampCss) {
@@ -324,7 +350,10 @@ class RealWinFixture {
         }
 
         if (spec.fakeRegisterElement) {
-          win.customElements = new FakeCustomElements(win);
+          const customElements = new FakeCustomElements(win);
+          Object.defineProperty(win, 'customElements', {
+            get: () => customElements,
+          });
         } else {
           installCustomElements(win);
         }
@@ -375,6 +404,12 @@ class AmpFixture {
     const win = env.win;
     let completePromise;
 
+    // AMP requires canonical URL.
+    const link = win.document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', spec.canonicalUrl || window.location.href);
+    win.document.head.appendChild(link);
+
     win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
       win.name = '__AMP__off=1';
@@ -400,6 +435,29 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
+    if (spec.extensions) {
+      spec.extensions.forEach(extensionIdWithVersion => {
+        const tuple = extensionIdWithVersion.split(':');
+        const extensionId = tuple[0];
+        // Default to 0.1 if no version was provided.
+        const version = tuple[1] || '0.1';
+        const installer = extensionsBuffer[`${extensionId}:${version}`];
+        if (installer) {
+          installer(win.AMP);
+        } else {
+          resetScheduledElementForTesting(win, extensionId);
+          registerElementForTesting(win, extensionId);
+        }
+      });
+    }
+
+    /**
+     * Creates a custom element without registration.
+     * @param {string=} opt_name
+     * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+     * @return {!AmpElement}
+     */
+    env.createAmpElement = createAmpElement.bind(null, win);
 
     return completePromise;
   }
@@ -411,6 +469,14 @@ class AmpFixture {
       for (const k in win.customElements.elements) {
         resetScheduledElementForTesting(win, k);
       }
+    }
+    if (this.spec.amp.extensions) {
+      this.spec.amp.extensions.forEach(extensionId => {
+        if (extensionId.indexOf(':') != -1) {
+          extensionId = extensionId.substring(0, extensionId.indexOf(':'));
+        }
+        resetScheduledElementForTesting(win, extensionId);
+      });
     }
   }
 }
@@ -426,6 +492,35 @@ function installRuntimeStylesPromise(win) {
   }
   const style = document.createElement('style');
   style.setAttribute('amp-runtime', '');
-  style.textContent = cssText;
+  style./*OK*/textContent = cssText;
   win.document.head.appendChild(style);
 }
+
+
+/**
+ * Creates a custom element without registration.
+ * @param {!Window} win
+ * @param {string=} opt_name
+ * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+ * @return {!AmpElement}
+ */
+function createAmpElement(win, opt_name, opt_implementationClass) {
+  // Create prototype and constructor.
+  const name = opt_name || 'amp-element';
+  const proto = createAmpElementProto(win, name);
+  const ctor = function() {
+    const el = win.document.createElement(name);
+    el.__proto__ = proto;
+    return el;
+  };
+  ctor.prototype = proto;
+  proto.constructor = ctor;
+
+  // Create the element instance.
+  const element = new ctor();
+  element.implementationClassForTesting =
+      opt_implementationClass || BaseElement;
+  element.createdCallback();
+  element.classList.add('-amp-element');
+  return element;
+};

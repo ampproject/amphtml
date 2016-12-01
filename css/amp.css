@@ -49,16 +49,28 @@ body {
 
 
 /**
- * iOS-Embed Wrapper mode. The `body` is wrapper into `i-amp-html-wrapper`
+ * The enables passive touch handlers, e.g. for document swipe, since they
+ * no will longer need to try to cancel vertical scrolls during swipes.
+ * This is only done in the embedded mode because (a) the document swipe
+ * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
+ */
+html.-amp-singledoc.-amp-embedded {
+  touch-action: pan-y;
+}
+
+
+/**
+ * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amp-html-wrapper`
  * element.
  */
 html.-amp-ios-embed {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
+  position: static;
 }
 
 /** Wrapper for iOS-Embed-Wrapper mode. */
-i-amp-html-wrapper {
+#i-amp-html-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -71,9 +83,8 @@ i-amp-html-wrapper {
   display: block !important;
 }
 
-i-amp-html-wrapper > body {
+#i-amp-html-wrapper > body {
   position: relative !important;
-  display: block !important;
   /* Border is necessary to avoid margins collapsing outside body.
      Alternatively we can also set overflow to hidden. */
   border-top: 1px solid transparent !important;
@@ -406,16 +417,6 @@ amp-pixel {
   height: 1px !important; /* Only things with height are ever loaded. */
   overflow: hidden !important;
   visibility: hidden;
-}
-
-/**
- * Force the layout box of the ad iframe to be exactly as big as the actual
- * iframe. The `amp-ad` tag itself can be freely styled.
- */
-amp-ad iframe {
-  border: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 /**

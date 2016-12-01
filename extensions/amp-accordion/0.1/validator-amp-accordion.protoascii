@@ -19,6 +19,7 @@ tags: {  # amp-accordion
   tag_name: "SCRIPT"
   spec_name: "amp-accordion extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
   attrs: {
     name: "async"
     mandatory: true
@@ -53,6 +54,7 @@ tags: {  # <amp-accordion>
   tag_name: "AMP-ACCORDION"
   also_requires_tag: "amp-accordion extension .js script"
   attrs: { name: "animate" value: "" }
+  attrs: { name: "disable-session-states" value: "" }
   child_tags: {
     child_tag_name_oneof: "SECTION"
   }

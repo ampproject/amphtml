@@ -64,9 +64,12 @@ exports.rules = [
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
+      '3p/**->src/style.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
+      '3p/polyfills.js->src/polyfills/math-sign.js',
+      '3p/polyfills.js->src/polyfills/object-assign.js',
     ],
   },
   {
@@ -79,9 +82,13 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
       'ads/**->src/utils/base64.js',
+      'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
+      'ads/**->src/types.js',
+      'ads/**->src/string.js',
+      'ads/**->src/style.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
@@ -112,6 +119,7 @@ exports.rules = [
       'ads/google/a4a/performance.js->' +
           'extensions/amp-ad-network-doubleclick-impl/0.1/' +
           'doubleclick-a4a-config.js',
+      'ads/google/a4a/performance.js->extensions/amp-a4a/0.1/amp-a4a.js',
     ],
   },
   // Rules for extensions and main src.
@@ -124,14 +132,40 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
+    whitelist: [
+      'extensions/amp-a4a/0.1/a4a-variable-source.js->' +
+          'src/service/variable-source.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+          'src/service/url-replacements-impl.js',
+    ],
   },
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/base-element.js',
   },
   {
-    filesMatching: 'extensions/**/*.js',
+    filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills/**/*.js',
+    whitelist: [
+      // DO NOT add extensions/ files
+      '3p/polyfills.js->src/polyfills/math-sign.js',
+      '3p/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/document-contains.js',
+      'src/polyfills.js->src/polyfills/math-sign.js',
+      'src/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/promise.js',
+      'src/service/extensions-impl.js->src/polyfills/document-contains.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/polyfills.js',
+    whitelist: [
+      'src/amp.js->src/polyfills.js',
+      'src/service.js->src/polyfills.js',
+      'src/service/timer-impl.js->src/polyfills.js',
+      'src/service/extensions-impl.js->src/polyfills.js',
+    ],
   },
 
   // Rules for main src.
@@ -149,7 +183,7 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*-ad-network-*.js',
     mustNotDependOn: [
-      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-ad/0.1/concurrent-load.js',
       'src/3p-frame.js',
       'src/iframe-helper.js',

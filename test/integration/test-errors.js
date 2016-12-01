@@ -20,10 +20,11 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe.configure().retryOnSaucelabs().run('error page', () => {
+describe.configure().retryOnSaucelabs().run('error page', function() {
+  this.timeout(5000);
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/errors.html', 500, win => {
+    return createFixtureIframe('test/fixtures/errors.html', 1000, win => {
       // Trigger dev mode.
       try {
         win.history.pushState({}, '', 'test2.html#development=1');
@@ -43,13 +44,14 @@ describe.configure().retryOnSaucelabs().run('error page', () => {
     });
   });
 
-  it.configure().skipFirefox().run('should show the body in error test', () => {
+  it.configure().skipFirefox().skipEdge()
+  .run('should show the body in error test', () => {
     return expectBodyToBecomeVisible(fixture.win);
   });
 
   function shouldFail(id) {
     // Skip for issue #110
-    it.configure().skipFirefox().run('should fail to load #' + id, () => {
+    it.configure().skipEdge().run('should fail to load #' + id, () => {
       const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));

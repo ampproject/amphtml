@@ -64,6 +64,7 @@
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 
@@ -80,6 +81,7 @@
     <a href="#a9">A9</a> |
     <a href="#accesstrade">AccessTrade</a> |
     <a href="#adblade">Adblade</a> |
+    <a href="#adbutler">AdButler</a> |
     <a href="#adition">ADITION</a> |
     <a href="#adgeneration">Ad Generation</a> |
     <a href="#adman">Adman</a> |
@@ -90,6 +92,7 @@
     <a href="#adstir">AdStir</a> |
     <a href="#adtech">AdTech</a> |
     <a href="#aduptech">Ad Up Technology</a> |
+    <a href="#adverline">Adverline</a> |
     <a href="#advertserve">AdvertServe</a> |
     <a href="#affiliateb">Affiliate-B</a> |
     <a href="#amoad">AMoAd</a> |
@@ -100,22 +103,31 @@
     <a href="#colombia" class="broken">Colombia ad</a> |
     <a href="#contentad">Content.ad</a> |
     <a href="#criteo">Criteo</a> |
+    <a href="#custom">Custom</a>|
     <a href="#dotandads">DotAndAds</a> |
     <a href="#doubleclick">Doubleclick</a> |
     <a href="#eplanning">E-Planning</a> |
     <a href="#ezoic">Ezoic</a> |
+    <a href="#f1e">FlexOneELEPHANT</a> |
+    <a href="#felmat">Felmat</a> |
     <a href="#flite">Flite</a> |
     <a href="#genieessp"></a> |
     <a href="#gmossp" class="broken"></a> |
+    <a href="#holder">Holder</a> |
     <a href="#ibillboard">iBILLBOARD</a> |
     <a href="#imobile">I-Mobile</a> |
     <a href="#industrybrains">Industrybrains</a> |
     <a href="#inmobi">InMobi</a> |
+    <a href="#ix">Index Exchange</a> |
     <a href="#kargo">Kargo</a> |
+    <a href="#kixer">Kixer</a> |
+    <a href="#ligatus">Ligatus</a> |
     <a href="#loka">LOKA</a> |
     <a href="#mads">MADS</a> |
     <a href="#mantis-display">MANTIS</a> |
     <a href="#mediaimpact">Media Impact</a> |
+    <a href="#medianet">Media.Net</a> |
+    <a href="#mediavine">Mediavine</a> |
     <a href="#meg">Meg</a> |
     <a href="#microad">MicroAd</a> |
     <a href="#mixpo">Mixpo</a> |
@@ -132,14 +144,17 @@
     <a href="#rubicon">Rubicon</a> |
     <a href="#sharethrough">Sharethrough</a> |
     <a href="#smartadserver">SmartAdServer</a> |
+    <a href="#smartclip">smartclip</a> |
     <a href="#sortable">Sortable ad</a> |
-    <a href="#sovrn" class="broken">SOVRN</a> |
+    <a href="#sovrn">SOVRN</a> |
     <a href="#taboola">Taboola</a> |
     <a href="#teads">Teads</a> |
     <a href="#triplelift">TripleLift</a> |
     <a href="#webediads">Webediads</a> |
     <a href="#weborama">Weborama</a> |
     <a href="#widespace">Widespace</a> |
+    <a href="#xlift">Xlift</a> |
+    <a href="#yahoo">Yahoo</a> |
     <a href="#yahoojp">YahooJP</a> |
     <a href="#yieldbot">Yieldbot</a> |
     <a href="#yieldone">Yield One</a> |
@@ -188,6 +203,15 @@
       data-cid="19626-3798936394">
     <div placeholder></div>
     <div fallback></div>
+  </amp-ad>
+
+  <h2 id="adbutler">AdButler</h2>
+  <amp-ad width=300 height=250
+          type="adbutler"
+          data-account="167283"
+          data-zone="212491">
+      <div placeholder></div>
+      <div fallback></div>
   </amp-ad>
 
   <h2 id="adition">ADITION</h2>
@@ -284,12 +308,21 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="adverline">Adverline</h2>
+  <amp-ad width=300 height=250
+      type="adverline"
+      data-id=13625
+      data-plc=3>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="advertserve">AdvertServe</h2>
   <amp-ad width=300 height=250
-          type="advertserve"
-          data-client="tester"
-          data-pid=0
-          data-zid=68>
+      type="advertserve"
+      data-client="tester"
+      data-pid=0
+      data-zid=68>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -452,6 +485,48 @@
     <div fallback></div>
   </amp-ad>
 
+
+  <h2 id="custom">Custom leaderboard</h2>
+  <amp-ad width=500 height=60
+    type="custom"
+    data-slot="1"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id-leader">
+      <a href="{{href}}" target='_blank'>
+        <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Custom square</h2>
+  <amp-ad width="200" height="200"
+    type="custom"
+    data-slot="2"
+    data-url="/examples/custom.ad.example.json">
+    <template type="amp-mustache" id="amp-template-id">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Custom leaderboard with no slot specified</h2>
+  <amp-ad width="500" height="60"
+    type="custom"
+    data-url="/examples/custom.ad.example.single.json">
+    <template type="amp-mustache" id="amp-template-id-no-slot">
+      <a href="{{href}}" target="_blank">
+        <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+      </a>
+    </template>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="dotandads">DotAndAds masthead</h2>
   <amp-ad width=980 height=250
       type="dotandads"
@@ -541,6 +616,24 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="f1e">FlexOneELEPHANT</h2>
+  <amp-ad width=300 height=250
+      type="f1e"
+      data-url="https://demo.impact-ad.jp"
+      data-target="/SITE=AMPSITE/AREA=AMPAREA/AAMSZ=300X250/OENCJP=UTF8" >
+  </amp-ad>
+
+  <h2 id="felmat">Felmat</h2>
+  <amp-ad width=300 height=250
+      type="felmat"
+      data-host="felmat.net"
+      data-fmt="banner"
+      data-fmk="U12473_n2cJD"
+      data-fmp="0">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="flite">Flite</h2>
   <amp-ad width=320 height=568
       type="flite"
@@ -563,6 +656,14 @@
   <amp-ad width="320" height="50"
       type="gmossp"
       data-id="10014">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="holder">Holder 300x250 banner</h2>
+  <amp-ad width="300" height="250"
+      type="holder"
+      data-block="7163">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -602,12 +703,38 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="ix">Index Exchange 300x250 banner</h2>
+  <amp-ad width="300" height="250"
+      type="ix"
+      data-version="2"
+      data-ad-units="4"
+      data-casale-i-d="1">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="kargo">Kargo</h2>
   <amp-ad width=300 height=250
       type="kargo"
       data-site="_tt9gZ3qxCc2RCg6CADfLAAFR"
       data-slot="_vypM8bkVCf"
       data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="kixer">Kixer</h2>
+  <amp-ad width=300 height=250
+      type="kixer"
+      data-adslot="6812">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="ligatus">Ligatus</h2>
+  <amp-ad width=300 height=250
+      type="ligatus"
+      src="https://a-ssl.ligatus.com/?ids=88443&t=js&s=1&bc=2">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -656,6 +783,26 @@
       data-slot="4459">
     <div placeholder></div>
     <div fallback></div>
+  </amp-ad>
+
+  <h2 id="medianet">Media.Net Header Bidder Tag</h2>
+  <amp-ad width="300" height="250"
+      type="medianet"
+      data-tagtype="headerbidder"
+      data-cid="8CU852274"
+      data-slot="/45361917/AMP_Header_Bidder"
+      json='{"targeting":{"mnetAmpTest":"1","pos":"mnetSlot1"}}'>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2 id="mediavine">Mediavine</h2>
+  <amp-ad width="300" height="250"
+      type="mediavine"
+      data-site="amp-project"
+      data-sizes="300x250,320x50">
+      <div placeholder></div>
+      <div fallback></div>
   </amp-ad>
 
   <h2 id="meg">Meg</h2>
@@ -853,6 +1000,15 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="smartclip">smartclip</h2>
+  <amp-ad width=400 height=225
+      type="smartclip"
+      data-plc="84555"
+      data-sz="400x320">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="sortable">Sortable ad</h2>
   <amp-ad width=300 height=250
       type="sortable"
@@ -862,8 +1018,7 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="sovrn" class="broken">SOVRN</h2>
-  <a href="https://github.com/ampproject/amphtml/issues/4614">Issue on GitHub</a><br>
+  <h2 id="sovrn">SOVRN</h2>
   <amp-ad width=300 height=250
       type="sovrn"
       data-width="300"
@@ -872,7 +1027,7 @@
       data-iid="informerIDgoeshere"
       data-aid="affiliateIDgoeshere"
       data-testFlag="true"
-      data-z="342521">
+      data-z="393900"><!-- this ID is only whitelisted for localhost:8000 and http://amphtml-nightly.herokuapp.com-->
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -938,6 +1093,24 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="xlift">Xlift native ad</h2>
+  <amp-ad width="300" height="300"
+      type="xlift"
+      data-mediaid="mamastar">
+      <div placeholder></div>
+      <div fallback></div>
+  </amp-ad>
+
+  <h2 id="yahoo">Yahoo Display</h2>
+  <amp-ad width="316" height="264"
+      type="yahoo"
+      data-sid="954014446"
+      data-site="news"
+      data-sa='{"LREC":"300x250","secure":"true","content":"no_expandable;"}'>
+      <div placeholder></div>
+      <div fallback></div>
+  </amp-ad>
+
   <h2 id="yahoojp">YahooJP YDN</h2>
   <amp-ad width="300" height="250"
       type="yahoojp"
@@ -990,11 +1163,11 @@
   <h2 id="zedo">ZEDO</h2>
   <amp-ad width="300" height="250"
       type="zedo"
-      data-super-id="766778"
-      data-network="2117"
-      data-placement-id="766778_1"
-      data-channel="856"
-      data-publisher="118"
+      data-super-id="364489"
+      data-network="2500"
+      data-placement-id="364489_1"
+      data-channel="727"
+      data-publisher="0"
       data-dim="9">
     <div placeholder></div>
     <div fallback></div>
@@ -1017,7 +1190,5 @@
      <div placeholder></div>
      <div fallback></div>
    </amp-ad>
-
-</amp-ad>
 </body>
 </html>

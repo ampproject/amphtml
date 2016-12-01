@@ -15,7 +15,6 @@
  */
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
-import {adopt} from '../../../../src/runtime';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   getService,
@@ -26,7 +25,6 @@ import {loadPromise} from '../../../../src/event-helper';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
-adopt(window);
 
 describe('amp-install-serviceworker', () => {
 
@@ -34,6 +32,7 @@ describe('amp-install-serviceworker', () => {
   let sandbox;
   let container;
   let ampdoc;
+  let maybeInstallUrlRewriteStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -41,6 +40,9 @@ describe('amp-install-serviceworker', () => {
     ampdoc = ampdocServiceFor(window).getAmpDoc();
     container = document.createElement('div');
     document.body.appendChild(container);
+    maybeInstallUrlRewriteStub = sandbox.stub(
+        AmpInstallServiceWorker.prototype,
+        'maybeInstallUrlRewrite_');
   });
 
   afterEach(() => {
@@ -76,6 +78,8 @@ describe('amp-install-serviceworker', () => {
     expect(calledSrc).to.be.undefined;
     return loadPromise(implementation.win).then(() => {
       expect(calledSrc).to.equal('https://example.com/sw.js');
+      // Should not be called before `register` resolves.
+      expect(maybeInstallUrlRewriteStub).to.not.be.called;
     });
   });
 
@@ -92,6 +96,7 @@ describe('amp-install-serviceworker', () => {
       },
     };
     implementation.buildCallback();
+    expect(maybeInstallUrlRewriteStub).to.be.calledOnce;
   });
 
   it('should do nothing with non-matching origins', () => {
@@ -171,7 +176,10 @@ describe('amp-install-serviceworker', () => {
         },
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
-        document: {nodeType: /* document */ 9},
+        document: {
+          nodeType: /* document */ 9,
+          createElement: document.createElement.bind(document),
+        },
       };
       installTimerService(win);
       win.document.defaultView = win;
@@ -182,7 +190,9 @@ describe('amp-install-serviceworker', () => {
       };
       resetServiceForTesting(window, 'documentInfo');
       getServiceForDoc(document, 'documentInfo', () => {
-        return documentInfo;
+        return {
+          get: () => documentInfo,
+        };
       });
       whenVisible = Promise.resolve();
       getService(win, 'viewer', () => {
@@ -250,6 +260,278 @@ describe('amp-install-serviceworker', () => {
       expect(() => {
         implementation.buildCallback();
       }).to.throw(/https/);
+    });
+  });
+});
+
+
+describes.fakeWin('url rewriter', {
+  win: {
+    location: 'https://example.com/thisdoc.amp.html',
+  },
+  amp: 1,
+}, env => {
+  let win;
+  let ampdoc;
+  let viewer;
+  let element;
+  let implementation;
+
+  beforeEach(() => {
+    win = env.win;
+    ampdoc = env.ampdoc;
+    viewer = win.services.viewer.obj;
+    element = win.document.createElement('amp-install-serviceworker');
+    element.setAttribute('src', 'https://example.com/sw.js');
+    // This is a RegExp string.
+    element.setAttribute('data-no-service-worker-fallback-url-match',
+        '\\.amp\\.html');
+    element.setAttribute('data-no-service-worker-fallback-shell-url',
+        'https://example.com/shell');
+    element.getAmpDoc = () => ampdoc;
+    implementation = new AmpInstallServiceWorker(element);
+  });
+
+  describe('install conditions', () => {
+    beforeEach(() => {
+      sandbox.stub(implementation, 'preloadShell_');
+    });
+
+    it('should install rewriter', () => {
+      implementation.maybeInstallUrlRewrite_();
+      expect(implementation.urlRewriter_).to.be.ok;
+      expect(implementation.urlRewriter_.urlMatchExpr_.source)
+          .to.equal('\\.amp\\.html');
+      expect(implementation.urlRewriter_.shellUrl_)
+          .to.equal('https://example.com/shell');
+    });
+
+    it('should strip fragment from shell URL', () => {
+      element.setAttribute('data-no-service-worker-fallback-shell-url',
+          'https://example.com/shell#abc');
+      implementation.maybeInstallUrlRewrite_();
+      expect(implementation.urlRewriter_.shellUrl_)
+          .to.equal('https://example.com/shell');
+    });
+
+    it('should not install in multi-doc environment', () => {
+      element.getAmpDoc = () => {
+        return {isSingleDoc: () => false};
+      };
+      implementation.maybeInstallUrlRewrite_();
+      expect(implementation.urlRewriter_).to.be.null;
+    });
+
+    it('should install on proxy', () => {
+      win.location.resetHref('https://cdn.ampproject.org/c/s/example.com/doc1');
+      implementation.maybeInstallUrlRewrite_();
+      expect(implementation.urlRewriter_).to.be.not.null;
+    });
+
+    it('should not install when mask/shell not configured', () => {
+      element.removeAttribute('data-no-service-worker-fallback-url-match');
+      element.removeAttribute('data-no-service-worker-fallback-shell-url');
+      implementation.maybeInstallUrlRewrite_();
+      expect(implementation.urlRewriter_).to.be.null;
+    });
+
+    it('should fail when only mask configured', () => {
+      element.removeAttribute('data-no-service-worker-fallback-shell-url');
+      expect(() => {
+        implementation.maybeInstallUrlRewrite_();
+      }).to.throw(/must be specified/);
+    });
+
+    it('should fail when only shell configured', () => {
+      element.removeAttribute('data-no-service-worker-fallback-url-match');
+      expect(() => {
+        implementation.maybeInstallUrlRewrite_();
+      }).to.throw(/must be specified/);
+    });
+
+    it('should fail when shell is on different origin', () => {
+      element.setAttribute('data-no-service-worker-fallback-shell-url',
+          'https://acme.org/shell#abc');
+      expect(() => {
+        implementation.maybeInstallUrlRewrite_();
+      }).to.throw(/must be the same as source origin/);
+    });
+
+    it('should fail when mask is an invalid expression', () => {
+      element.setAttribute('data-no-service-worker-fallback-url-match',
+          '?');
+      expect(() => {
+        implementation.maybeInstallUrlRewrite_();
+      }).to.throw(/Invalid/);
+    });
+  });
+
+  describe('start shell preload', () => {
+    let deferMutateStub;
+    let preloadStub;
+
+    beforeEach(() => {
+      deferMutateStub = sandbox.stub(implementation, 'deferMutate',
+          callback => callback());
+      preloadStub = sandbox.stub(implementation, 'preloadShell_');
+      viewer.setVisibilityState_('visible');
+    });
+
+    it('should start preload wait', () => {
+      const stub = sandbox.stub(implementation, 'waitToPreloadShell_');
+      implementation.maybeInstallUrlRewrite_();
+      expect(stub).to.be.calledOnce;
+    });
+
+    it('should not preload non-HTTPS shell', () => {
+      win.location.resetHref('http://example.com/thisdoc.amp.html');
+      element.setAttribute('data-no-service-worker-fallback-shell-url',
+          'http://example.com/shell');
+      const stub = sandbox.stub(implementation, 'waitToPreloadShell_');
+      implementation.maybeInstallUrlRewrite_();
+      expect(stub).to.not.be.called;
+    });
+
+    it('should run preload when visible', () => {
+      implementation.waitToPreloadShell_('https://example.com/shell');
+      expect(preloadStub).to.not.be.called;
+      return loadPromise(win).then(() => {
+        return viewer.whenFirstVisible();
+      }).then(() => {
+        expect(preloadStub).to.be.calledOnce;
+        expect(deferMutateStub).to.be.calledOnce;
+      });
+    });
+  });
+
+  describe('shell preload', () => {
+    it('should install iframe', () => {
+      implementation.preloadShell_('https://example.com/shell');
+      const iframe = element.querySelector('iframe');
+      expect(iframe).to.exist;
+      expect(iframe.src).to.equal('https://example.com/shell#preload');
+      expect(iframe.style.display).to.equal('none');
+      expect(iframe.getAttribute('sandbox'))
+          .to.equal('allow-scripts allow-same-origin');
+    });
+
+    it('should remove iframe once laoded', () => {
+      implementation.preloadShell_('https://example.com/shell');
+      const iframe = element.querySelector('iframe');
+      expect(iframe).to.exist;
+      expect(iframe.eventListeners).to.exist;
+      expect(iframe.parentNode).to.equal(element);
+      const loaded = loadPromise(iframe);
+      iframe.eventListeners.fire({type: 'load'});
+      return loaded.then(() => {
+        expect(iframe.parentNode).to.be.null;
+      });
+    });
+  });
+
+  describe('UrlRewriter', () => {
+    let rewriter;
+    let event;
+    let anchor;
+    let span;
+    let other;
+    let origHref;
+
+    beforeEach(() => {
+      sandbox.stub(implementation, 'preloadShell_');
+      implementation.maybeInstallUrlRewrite_();
+      rewriter = implementation.urlRewriter_;
+      anchor = win.document.createElement('a');
+      origHref = 'https://example.com/doc1.amp.html';
+      anchor.setAttribute('href', origHref);
+      span = win.document.createElement('span');
+      anchor.appendChild(span);
+      other = win.document.createElement('div');
+      event = {
+        type: 'click',
+        target: anchor,
+        defaultPrevented: false,
+        preventDefault: () => {
+          event.defaultPrevented = true;
+        },
+      };
+    });
+
+    function testRewritten() {
+      expect(anchor.getAttribute('i-amp-orig-href'))
+          .to.equal('https://example.com/doc1.amp.html');
+      expect(anchor.href)
+          .to.equal('https://example.com/shell#href=%2Fdoc1.amp.html');
+      expect(event.defaultPrevented).to.be.false;
+    }
+
+    function testNotRewritten() {
+      expect(anchor.getAttribute('i-amp-orig-href')).to.be.null;
+      expect(anchor.href).to.equal(origHref);
+    }
+
+    it('should rewrite URL', () => {
+      rewriter.handle_(event);
+      testRewritten();
+    });
+
+    it('should rewrite URL from a child', () => {
+      event.target = span;
+      rewriter.handle_(event);
+      testRewritten();
+    });
+
+    it('should not rewrite URL if event is canceled', () => {
+      event.preventDefault();
+      rewriter.handle_(event);
+      testNotRewritten();
+    });
+
+    it('should not rewrite URL if anchor is not found', () => {
+      event.target = other;
+      rewriter.handle_(event);
+      testNotRewritten();
+    });
+
+    it('should not rewrite URL if anchor has no target', () => {
+      origHref = '';
+      anchor.removeAttribute('href');
+      rewriter.handle_(event);
+      testNotRewritten();
+    });
+
+    it('should not rewrite URL with different origin', () => {
+      origHref = 'https://acme.org/doc1.amp.html';
+      anchor.setAttribute('href', origHref);
+      rewriter.handle_(event);
+      testNotRewritten();
+    });
+
+    it('should not rewrite shell URL', () => {
+      origHref = 'https://example.com/shell?a=amp.html';
+      anchor.setAttribute('href', origHref);
+      rewriter.handle_(event);
+      testNotRewritten();
+    });
+
+    it('should not rewrite non-masked URL', () => {
+      origHref = 'https://example.com/doc1.html';
+      anchor.setAttribute('href', origHref);
+      rewriter.handle_(event);
+      testNotRewritten();
+    });
+
+    it('should not rewrite already rewritten URL', () => {
+      anchor.setAttribute('i-amp-orig-href', 'rewritten');
+      rewriter.handle_(event);
+      expect(anchor.href).to.equal(origHref);
+    });
+
+    it('should not rewrite fragment URL', () => {
+      origHref = 'https://example.com/thisdoc.amp.html#hash';
+      anchor.setAttribute('href', origHref);
+      rewriter.handle_(event);
+      testNotRewritten();
     });
   });
 });

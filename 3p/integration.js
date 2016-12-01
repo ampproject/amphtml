@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,12 +28,13 @@ import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
-import {parseUrl, getSourceUrl} from '../src/url';
+import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
+import {reddit} from './reddit';
 import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
@@ -41,6 +42,7 @@ import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
+import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
 import {adition} from '../ads/adition';
@@ -52,6 +54,7 @@ import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
+import {adverline} from '../ads/adverline';
 import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
@@ -66,18 +69,26 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
+import {f1e} from '../ads/f1e';
+import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
+import {holder} from '../ads/holder';
 import {ibillboard} from '../ads/ibillboard';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
+import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
+import {kixer} from '../ads/kixer';
+import {ligatus} from '../ads/ligatus';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
+import {medianet} from '../ads/medianet';
+import {mediavine} from '../ads/mediavine';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
 import {mixpo} from '../ads/mixpo';
@@ -95,6 +106,7 @@ import {revcontent} from '../ads/revcontent';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {smartadserver} from '../ads/smartadserver';
+import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {taboola} from '../ads/taboola';
@@ -103,6 +115,8 @@ import {triplelift} from '../ads/triplelift';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
+import {xlift} from '../ads/xlift';
+import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
@@ -116,11 +130,12 @@ import {zucks} from '../ads/zucks';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  taboola: true,
+  _ping_: true,
   'mantis-recommend': true,
   plista: true,
+  smartclip: true,
+  taboola: true,
   zergnet: true,
-  _ping_: true,
 };
 
 const data = parseFragment(location.hash);
@@ -137,6 +152,7 @@ if (getMode().test || getMode().localDev) {
 register('a9', a9);
 register('accesstrade', accesstrade);
 register('adblade', adblade);
+register('adbutler', adbutler);
 register('adform', adform);
 register('adgeneration', adgeneration);
 register('adition', adition);
@@ -148,6 +164,7 @@ register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
+register('adverline', adverline);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);
@@ -162,21 +179,29 @@ register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
+register('f1e', f1e);
 register('facebook', facebook);
+register('felmat', felmat);
 register('flite', flite);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
+register('holder', holder);
 register('ibillboard', ibillboard);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
+register('ix', ix);
 register('kargo', kargo);
+register('kixer', kixer);
+register('ligatus', ligatus);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
+register('medianet', medianet);
+register('mediavine', mediavine);
 register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);
@@ -190,10 +215,12 @@ register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
+register('reddit', reddit);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
 register('smartadserver', smartadserver);
+register('smartclip', smartclip);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('taboola', taboola);
@@ -203,6 +230,8 @@ register('twitter', twitter);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
+register('xlift' , xlift);
+register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
@@ -518,9 +547,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
   let hostname = parseUrl(ancestor).hostname;
-  const cdnHostname = parseUrl(urls.cdn).hostname;
-  const onDefault = hostname == cdnHostname;
-  if (onDefault) {
+  if (isProxyOrigin(ancestor)) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.

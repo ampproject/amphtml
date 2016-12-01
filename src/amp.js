@@ -20,6 +20,7 @@
 
 import './polyfills';
 import {chunk} from './chunk';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListenerForDoc} from './document-click';
@@ -37,6 +38,12 @@ import {
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
+
+// Store the originalHash as early as possible. Trying to debug:
+// https://github.com/ampproject/amphtml/issues/6070
+if (self.location) {
+  self.location.originalHash = self.location.hash;
+}
 
 /** @type {!./service/ampdoc-impl.AmpDocService} */
 let ampdocService;
@@ -65,6 +72,7 @@ chunk(self.document, function initial() {
     chunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
+      fontStylesheetTimeout(self);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
