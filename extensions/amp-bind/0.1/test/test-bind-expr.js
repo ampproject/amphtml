@@ -56,6 +56,11 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('false || false')).to.be.false;
   });
 
+  it('should evaluate ternary operator', () => {
+    expect(evaluateBindExpr('true ? "a" : "b"')).to.be.equal('a');
+    expect(evaluateBindExpr('false ? "a" : "b"')).to.be.equal('b');
+  });
+
   it('should respect arithmetic operator precedence', () => {
     expect(evaluateBindExpr('-1 + 2')).to.equal(1);
     expect(evaluateBindExpr('1 - -0.5')).to.equal(1.5);
