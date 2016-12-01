@@ -253,6 +253,7 @@ var forbiddenTerms = {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
       '3p/integration.js',
+      '3p/ampcontext-lib.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -623,12 +624,14 @@ var forbiddenTermsSrcInclusive = {
   '\\.expandStringSync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
     ]
   },
   '\\.expandStringAsync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
     ]
   },
