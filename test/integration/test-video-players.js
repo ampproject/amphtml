@@ -37,10 +37,14 @@ describe('amp-video', () => {
   });
 });
 
-describe('amp-youtube', () => {
+describe('amp-ooyala-player', () => {
   runVideoPlayerIntegrationTests(fixture => {
-    const video = fixture.doc.createElement('amp-youtube');
-    video.setAttribute('data-videoid', 'mGENRKrdoGY');
+    const video = fixture.doc.createElement('amp-ooyala-player');
+    video.setAttribute('data-embedcode', 'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ');
+    video.setAttribute('data-pcode', '5zb2wxOlZcNCe_HVT3a6cawW298X');
+    video.setAttribute('data-playerid', '6440813504804d76ba35c8c787a4b33c');
+    video.setAttribute('data-playerversion', 'v4');
+    video.setAttribute('data-config', '//player.ooyala.com/static/v4/stable/latest/skin-plugin/skin.json');
     return video;
   });
 });

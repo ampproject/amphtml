@@ -39,7 +39,7 @@ tags: {  # amp-ooyala-player
     value: "text/javascript"
   }
   attrs: { 
-    name: "autoplay" 
+    name: "autoplay"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -71,6 +71,9 @@ tags: {  # <amp-ooyala-player>
   }
   attrs: {
     name: "data-config"
+  }
+  attrs: { 
+    name: "autoplay"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ooyala-player.html"
