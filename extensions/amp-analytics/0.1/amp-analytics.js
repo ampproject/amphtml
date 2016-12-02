@@ -447,8 +447,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     return Promise.all(requestPromises)
-      .then(() => this.addParamsToUrl_(request, params))
-      .then(request => {
+      .then(() => {
+        request = this.addParamsToUrl_(request, params);
         this.config_['vars']['requestCount']++;
         const expansionOptions = this.expansionOptions_(event, trigger);
         return this.variableService_.expandTemplate(request, expansionOptions);

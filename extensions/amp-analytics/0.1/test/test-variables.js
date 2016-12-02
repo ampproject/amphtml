@@ -17,16 +17,24 @@
 import {ExpansionOptions, variableServiceFor} from '../variables';
 import {adopt} from '../../../../src/runtime';
 import {cryptoFor} from '../../../../src/crypto';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-analytics.VariableService', function() {
-  let variables;
+  let variables, sandbox;
+
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     return cryptoFor(window).then(() => {
       variables = variableServiceFor(window);
     });
   });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
 
   it('correctly encodes scalars and arrays', () => {
     expect(variables.encodeVars('abc %&')).to.equal('abc%20%25%26');
@@ -79,8 +87,17 @@ describe('amp-analytics.VariableService', function() {
     });
   });
 
+  it('default filterdoesn\'t work when experiment is off' , () =>
+      variables.expandTemplate('${bar|default:baz}',
+          new ExpansionOptions({'foo': ' Hello world! '}))
+    .then(actual => expect(actual).to.equal('')));
+
   describe('filter:', () => {
     const vars = new ExpansionOptions({'foo': ' Hello world! '});
+
+    beforeEach(() => {
+      sandbox.stub(variables, 'isFilterExperimentOn_', () => true);
+    });
 
     function check(input, output) {
       return variables.expandTemplate(input, vars).then(actual =>

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from '../../../src/experiments';
 import {cryptoFor} from '../../../src/crypto';
 import {dev, user} from '../../../src/log';
 import {fromClass} from '../../../src/service';
@@ -25,17 +26,20 @@ const TAG = 'Analytics.Variables';
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^ ]*)(\([^)]*\))|.+)$/;
 
+/** @typedef {{name: string, argList: string}} */
+let FunctionNameArgsDef;
+
 /**
  * @struct
  * @const
  */
-class FilterDef {
+class Filter {
   /**
-   * @param {function(...?):(?|!Promise<?>)} filter
+   * @param {function(...?):(string|!Promise<string>)} filter
    * @param {boolean=} opt_allowNull
    */
   constructor(filter, opt_allowNull) {
-    /** @type {!function(...?):(?|!Promise<?>)} */
+    /** @type {!function(...?):(string|!Promise<string>)} */
     this.filter = filter;
 
     /** @type{boolean} */
@@ -59,7 +63,7 @@ export class ExpansionOptions {
   constructor(vars, opt_iterations, opt_noEncode) {
     /** @const {!Object<string, string|Array<string>>} */
     this.vars = vars;
-    /** @const {!number} */
+    /** @const {number} */
     this.iterations = opt_iterations === undefined ? 2 : opt_iterations;
     /** @const {boolean} */
     this.noEncode = !!opt_noEncode;
@@ -69,18 +73,18 @@ export class ExpansionOptions {
 
 
 /**
- * @param {!string} str
- * @param {Number} s
- * @param {Number} l
+ * @param {string} str
+ * @param {string} s
+ * @param {string=} opt_l
  * @return {string}
  */
-function substrFilter(str, s, l) {
+function substrFilter(str, s, opt_l) {
   const start = Number(s);
   let length = str.length;
   user().assert(isFiniteNumber(start),
       'Start index ' + start + 'in substr filter should be a number');
-  if (l) {
-    length = Number(l);
+  if (opt_l) {
+    length = Number(opt_l);
     user().assert(isFiniteNumber(length),
         'Length ' + length + ' in substr filter should be a number');
   }
@@ -89,15 +93,19 @@ function substrFilter(str, s, l) {
 }
 
 /**
- * @param {*} value
- * @param {*} defaultValue
- * @return {*}
+ * @param {string} value
+ * @param {string} defaultValue
+ * @return {string}
  */
 function defaultFilter(value, defaultValue) {
   return value || user().assertString(defaultValue);
 }
 
 
+/**
+ * Provides support for processing of advanced variable syntax like nested
+ * expansions filters etc.
+ */
 export class VariableService {
   /**
    * @param {!Window} window
@@ -107,29 +115,25 @@ export class VariableService {
     /** @private {!Window} */
     this.win_ = window;
 
-    /** @private {!Object<string, FilterDef>} */
+    /** @private {!Object<string, Filter>} */
     this.filters_ = map();
 
-    this.register_('default', new FilterDef(defaultFilter, true));
-    this.register_('substr', new FilterDef(substrFilter));
-    this.register_('trim', new FilterDef(
-        value => user().assertString(value).trim()));
-    this.register_('json', new FilterDef(value => JSON.stringify(value)));
-    this.register_('toLowerCase', new FilterDef(value =>
-        user().assertString(value).toLowerCase()));
-    this.register_('toUpperCase', new FilterDef(value =>
-        user().assertString(value).toUpperCase()));
-    this.register_('not', new FilterDef(value => String(!value)));
-    this.register_('base64', new FilterDef(
-        value => btoa(user().assertString(value))));
-    this.register_('hash', new FilterDef(this.hashFilter_.bind(this)));
-    this.register_('if', new FilterDef(
+    this.register_('default', new Filter(defaultFilter, /* allowNulls */ true));
+    this.register_('substr', new Filter(substrFilter));
+    this.register_('trim', new Filter(value => value.trim()));
+    this.register_('json', new Filter(value => JSON.stringify(value)));
+    this.register_('toLowerCase', new Filter(value => value.toLowerCase()));
+    this.register_('toUpperCase', new Filter(value => value.toUpperCase()));
+    this.register_('not', new Filter(value => String(!value)));
+    this.register_('base64', new Filter(value => btoa(value)));
+    this.register_('hash', new Filter(this.hashFilter_.bind(this)));
+    this.register_('if', new Filter(
         (value, thenValue, elseValue) => value ? thenValue : elseValue, true));
   }
 
   /**
    * @param {string} name
-   * @param {FilterDef} filter
+   * @param {Filter} filter
    */
   register_(name, filter) {
     dev().assert(!this.filters_[name], 'Filter "' + name
@@ -139,7 +143,7 @@ export class VariableService {
 
   /**
    * @param {string} filterStr
-   * @return {Object<string, FilterDef|Array<string>>}
+   * @return {Object<string, Filter|Array<string>>}
    */
   parseFilter_(filterStr) {
     if (!filterStr) {
@@ -163,6 +167,10 @@ export class VariableService {
    * @return {Promise<string>}
    */
   applyFilters_(value, filters) {
+    if (!this.isFilterExperimentOn_()) {
+      return Promise.resolve(value);
+    }
+
     let result = Promise.resolve(value);
     for (let i = 0; i < filters.length; i++) {
       const {filter, args} = this.parseFilter_(filters[i].trim());
@@ -180,7 +188,7 @@ export class VariableService {
   }
 
   /**
-   * @param {!string} template The template to expand
+   * @param {string} template The template to expand
    * @param {!ExpansionOptions} options configuration to use for expansion
    * @return {!Promise<!string>} The expanded string
    */
@@ -218,8 +226,8 @@ export class VariableService {
       }
 
       p = p.then(expandedValue =>
-          // First apply filters
-          this.applyFilters_(expandedValue, tokens))
+            // First apply filters
+            this.applyFilters_(expandedValue, tokens))
         .then(finalRawValue => {
           // Then encode the value
           const val = options.noEncode
@@ -237,7 +245,6 @@ export class VariableService {
 
       // Since the replacement will happen later, return the original template.
       return match;
-
     });
 
     // Once all the promises are complete, return the expanded value.
@@ -248,7 +255,7 @@ export class VariableService {
    * Returns an array containing two values: name and args parsed from the key.
    *
    * @param {string} key The key to be parsed.
-   * @return {!Object<string>}
+   * @return {!FunctionNameArgsDef}
    * @private
    */
   getNameArgs_(key) {
@@ -280,11 +287,14 @@ export class VariableService {
 
   /**
    * @param {string} value
-   * @return {!Promise<!string>}
+   * @return {!Promise<string>}
    */
   hashFilter_(value) {
-    return cryptoFor(this.win_).then(crypto =>
-      crypto.sha384Base64(user().assertString(value)));
+    return cryptoFor(this.win_).then(crypto => crypto.sha384Base64(value));
+  }
+
+  isFilterExperimentOn_() {
+    return isExperimentOn(this.win_, 'variable-filters');
   }
 }
 
