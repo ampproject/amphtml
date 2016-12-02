@@ -118,12 +118,15 @@ export class IframeMessagingClient {
    */
   getHostWindow() {
     if (!this.hostWindow) {
-      this.hostWindow = this.generateWindow();
+      this.hostWindow = this.generateWindow_();
     }
     return this.hostWindow;
   }
 
-  generateWindow() {
+  /**
+   *  @private
+   */
+  generateWindow_() {
     return this.win_.parent;
   }
 };

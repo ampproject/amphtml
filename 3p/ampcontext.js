@@ -44,19 +44,6 @@ export class AmpContext extends IframeMessagingClient {
     this.getHostWindow();
   }
 
-  generateWindow() {
-    /** Calculate the hostWindow */
-    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
-    dev().assert(sentinelMatch, 'Incorrect sentinel format');
-    const depth = Number(sentinelMatch[2]);
-    const ancestors = [];
-    for (let win = this.win_; win && win != win.parent; win = win.parent) {
-      // Add window keeping the top-most one at the front.
-      ancestors.push(win.parent);
-    }
-    return ancestors[(ancestors.length - 1) - depth];
-  }
-
   /** @override */
   registerCallback_(messageType, callback) {
     user().assertEnumValue(MessageType_, messageType);
@@ -169,4 +156,21 @@ export class AmpContext extends IframeMessagingClient {
       throw new Error('Could not parse metadata.');
     }
   }
+
+  /**
+   *  Calculate the hostWindow
+   *  @private
+   */
+  generateWindow_() {
+    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
+    dev().assert(sentinelMatch, 'Incorrect sentinel format');
+    const depth = Number(sentinelMatch[2]);
+    const ancestors = [];
+    for (let win = this.win_; win && win != win.parent; win = win.parent) {
+      // Add window keeping the top-most one at the front.
+      ancestors.push(win.parent);
+    }
+    return ancestors[(ancestors.length - 1) - depth];
+  }
+
 };
