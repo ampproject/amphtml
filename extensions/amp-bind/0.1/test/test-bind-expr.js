@@ -101,10 +101,8 @@ describe('evaluateBindExpr', () => {
     expect(evaluateBindExpr('"abc".charAt(0)')).to.equal('a');
     expect(evaluateBindExpr('"abc".charCodeAt(0)')).to.equal(97);
     expect(evaluateBindExpr('"abc".concat("def")')).to.equal('abcdef');
-    expect(evaluateBindExpr('"abc".includes("ab")')).to.equal(true);
     expect(evaluateBindExpr('"abc".indexOf("b")')).to.equal(1);
     expect(evaluateBindExpr('"aaa".lastIndexOf("a")')).to.equal(2);
-    expect(evaluateBindExpr('"ab".repeat(2)')).to.equal('abab');
     expect(evaluateBindExpr('"abc".slice(0, 2)')).to.equal('ab');
     expect(evaluateBindExpr('"a-b-c".split("-")'))
         .to.deep.equal(['a', 'b', 'c']);
@@ -119,7 +117,13 @@ describe('evaluateBindExpr', () => {
       evaluateBindExpr('"abc".anchor()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
+      evaluateBindExpr('"abc".includes("ab")');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
       evaluateBindExpr('"abc".link()');
+    }).to.throw(Error, unsupportedFunctionError);
+    expect(() => {
+      evaluateBindExpr('"abc".repeat(2)');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluateBindExpr('"abc".replace("bc", "xy")');
@@ -175,7 +179,6 @@ describe('evaluateBindExpr', () => {
   it('should support array whitelisted methods', () => {
     expect(evaluateBindExpr('["a", "b"].concat(["c", "d"])'))
         .to.deep.equal(['a', 'b', 'c', 'd']);
-    expect(evaluateBindExpr('["a"].includes("a")')).to.be.true;
     expect(evaluateBindExpr('["a", "a"].indexOf("a")')).to.equal(0);
     expect(evaluateBindExpr('["a", "b", "c"].join("-")')).to.equal('a-b-c');
     expect(evaluateBindExpr('["a", "a"].lastIndexOf("a")')).to.equal(1);
@@ -184,6 +187,9 @@ describe('evaluateBindExpr', () => {
   });
 
   it('should NOT allow access to array non-whitelisted methods', () => {
+    expect(() => {
+      evaluateBindExpr('["a", "b", "c"].includes("a")');
+    }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
       evaluateBindExpr('["a", "b", "c"].find()');
     }).to.throw(Error, unsupportedFunctionError);
