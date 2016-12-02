@@ -38,6 +38,7 @@ export function yandex(global, data) {
  */
 function setAdToQueue(global, data) {
     const n = 'yandexContextAsyncCallbacks';
+    console.log('>>>', global.context);
 
     global[n] = [];
     global[n].push(() => {
