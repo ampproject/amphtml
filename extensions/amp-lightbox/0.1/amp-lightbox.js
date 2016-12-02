@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
@@ -75,23 +76,6 @@ class AmpLightbox extends AMP.BaseElement {
     }
 
     this.isScrollable_ = this.element.hasAttribute('scrollable');
-
-    st.setStyles(this.element, {
-      position: 'fixed',
-      zIndex: 1000,
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-    });
-
-    if (this.isScrollable_) {
-      st.setStyles(this.element, {
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        webkitOverflowScrolling: 'touch',
-      });
-    }
 
     this.children_ = this.getRealChildren();
 
@@ -280,4 +264,4 @@ class AmpLightbox extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-lightbox', AmpLightbox);
+AMP.registerElement('amp-lightbox', AmpLightbox, CSS);
