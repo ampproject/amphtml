@@ -184,7 +184,6 @@ key_value:
 
 ```
 Array.concat
-Array.includes
 Array.indexOf
 Array.join
 Array.lastIndexOf
@@ -192,10 +191,8 @@ Array.slice
 String.charAt
 String.charCodeAt
 String.concat
-String.includes
 String.indexOf
 String.lastIndexOf
-String.repeat
 String.slice
 String.split
 String.substr
