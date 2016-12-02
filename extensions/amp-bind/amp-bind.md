@@ -1,4 +1,4 @@
-# <a name="amp-bind-"></a> `amp-bind`
+# <a name="amp-bind"></a> `amp-bind`
 
 **This extension is under active development, and the version number of the specification section should provide guidance to its evolution.**
 
@@ -45,13 +45,13 @@ limitations under the License.
 
 Once installed, `amp-bind` scans the DOM for bindings -- an element may have attributes, CSS classes or textContent bound to a JS-like expression (see [Expressions](#expressions) below).
 
-The **scope** is implicit, mutable document state that binding expressions may reference. The scope may be initialized with a new AMP component `<amp-bind-state>`. Changes to the scope happen through user actions, e.g. clicking a `<button>` or switching slides on an `<amp-carousel>`.
+The **scope** is mutable implicit document state that binding expressions may reference. The scope may be initialized with a new AMP component `<amp-bind-state>`. Changes to the scope happen through user actions, e.g. clicking a `<button>` or switching slides on an `<amp-carousel>`.
 
 A **digest** is an evaluation of all binding expressions. Since scope is mutable and expressions can reference the scope, the evaluated result of expressions may change over time. Bound elements are updated as a result of a digest.
 
 A simple example:
 
-```
+```html
 <amp-bind-state id=”foo”>
   <script type=”application/json”>{ message: “Hello World” }</script>
 </amp-bind-state>
@@ -59,9 +59,9 @@ A simple example:
 <p [text]=”foo.message”>Placeholder text</p>
 ```
 
-1. `amp-bind` scans the DOM and finds the `<p>` element’s `[text]` binding
-2. During the next digest, `amp-bind` reevaluates the expression `foo.message`
-3. On the next frame, `amp-bind` updates the `<p>` element's textContent from "Placeholder text" to "Hello World"
+1. `amp-bind` scans the DOM and finds the `<p>` element’s `[text]` binding.
+2. During the next digest, `amp-bind` reevaluates the expression `foo.message`.
+3. On the next frame, `amp-bind` updates the `<p>` element's textContent from "Placeholder text" to "Hello World".
 
 ## Binding
 
@@ -73,7 +73,7 @@ A simple example:
 | CSS Classes | `[class]` | Expression result must be a space-delimited string.
 | Node.textContent | `[text]` | For applicable elements.
 
-Caveats:
+**Caveats:**
 
 - For security reasons, binding to `innerHTML` is disallowed
 - All attribute bindings are sanitized for unsafe URL protocols (e.g. `javascript:`)
