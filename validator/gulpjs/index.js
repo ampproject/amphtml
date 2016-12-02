@@ -26,6 +26,7 @@ const PluginError = gutil.PluginError;
 
 const STATUS_FAIL = 'FAIL';
 const STATUS_PASS = 'PASS';
+const STATUS_VALIDATOR_UNAVAILABLE = 'N/A';
 
 /**
  * Validates AMP files and attaches the validation result to the file object.
@@ -55,13 +56,13 @@ module.exports.validate = function(validator) {
           return callback(null, file);
         })
         .catch(function(err) {
+          // This happens if the validator download failed. We don't fail the
+          // build, but map the exception to an validation error instead. This
+          // makes it possible to configure via failAfterError whether this
+          // should fail the build or not.
+          gutil.log(gutil.colors.red(err.message));
           file.ampValidationResult = {
-            status: STATUS_FAIL,
-            errors: [{
-              line: 0,
-              col: 0,
-              message: err.message,
-            }],
+            status: STATUS_VALIDATOR_UNAVAILABLE,
           };
           return callback(null, file);
         });
@@ -91,7 +92,7 @@ module.exports.format = function(logger) {
   }
 
   function formatResults(callback) {
-    logger.log('AMP Validation results:\n\n' + results.map(printResult).join('\n\n'));
+    logger.log('AMP Validation results:\n\n' + results.map(printResult).join('\n'));
     return callback();
   }
 
@@ -100,17 +101,19 @@ module.exports.format = function(logger) {
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
       report += gutil.colors.green(validationResult.status);
+    } else if (validationResult.status === STATUS_VALIDATOR_UNAVAILABLE) {
+      report += gutil.colors.red(validationResult.status);
     } else {
       report += gutil.colors.red(validationResult.status);
-    }
-    for (let ii = 0; ii < validationResult.errors.length; ii++) {
-      const error = validationResult.errors[ii];
-      let msg = file.relative + ':' + error.line + ':' + error.col + ' ' +
-        gutil.colors.red(error.message);
-      if (error.specUrl !== null) {
-        msg += ' (see ' + error.specUrl + ')';
+      for (let ii = 0; ii < validationResult.errors.length; ii++) {
+        const error = validationResult.errors[ii];
+        let msg = file.relative + ':' + error.line + ':' + error.col + ' ' +
+          gutil.colors.red(error.message);
+        if (error.specUrl) {
+          msg += ' (see ' + error.specUrl + ')';
+        }
+        report += '\n' + msg;
       }
-      report += '\n' + msg;
     }
     return report;
   }
