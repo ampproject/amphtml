@@ -48,6 +48,34 @@ const BLACKLIST = self.AMP_CONFIG[`${TAG}-blacklist`] || [];
 const BASE_RTV_VERSION = self.AMP_CONFIG.v;
 
 /**
+ * Our cache of CDN JS files.
+ *
+ * @type {!Cache}
+ */
+let cache;
+
+/**
+ * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
+ * release version we are serving it.
+ *
+ * @type {!Object<string, RtvVersion>}
+ */
+const clientsMap = Object.create(null);
+
+/**
+ * A mapping from a client's referrer into the time that referrer last made a
+ * request. This is used as a fallback to a clientId for Foreign Fetch, since
+ * it does not provide a unique clientId.
+ *
+ * This object will hopefully not grow too large. When the SW is terminated,
+ * it'll use a brand new object on restart.
+ *
+ * @type {!Object<string, number>}
+ */
+const referrersLastRequestTime = Object.create(null);
+
+
+/**
  * A regex that matches every CDN JS URL we care to cache.
  * The "experiments" JS is explicitly disallowed.
  *
@@ -163,19 +191,27 @@ export function isBlacklisted(version) {
 }
 
 /**
- * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
- * release version we are serving it.
+ * Generates a clientId for Foreign Fetchs, since one is not provided.
  *
- * @type {!Object<string, RtvVersion>}
+ * The current strategy is to batch all requests from referrer that happen
+ * within 60 seconds (of the first request) into one clientId.
+ *
+ * @param {string} referrer
+ * @return {string}
+ * @visibleForTesting
  */
-const clientsMap = Object.create(null);
+export function generateFallbackClientId(referrer) {
+  const now = Date.now();
+  let lastRequestTime = referrersLastRequestTime[referrer] || 0;
 
-/**
- * Our cache of CDN JS files.
- *
- * @type {!Cache}
- */
-let cache;
+  // If last request was more than 60 seconds ago, we are now in a new
+  // "clientId".
+  if (lastRequestTime < now - (60 * 1000)) {
+    lastRequestTime = referrersLastRequestTime[referrer] = now;
+  }
+
+  return referrer + lastRequestTime;
+}
 
 /**
  * A promise to open up our CDN JS cache, which will be resolved before any
@@ -230,7 +266,6 @@ export function fetchAndCache(cache, request, requestPath, requestVersion) {
     return response;
   });
 }
-
 
 /**
  * Gets the version we have cached for this file. It's either:
@@ -339,6 +374,7 @@ export function handleFetch(request, maybeClientId) {
   });
 }
 
+
 self.addEventListener('install', install => {
   install.waitUntil(cachePromise);
   // Registers the SW for Foreign Fetch events, if they are supported.
@@ -362,6 +398,22 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(response);
 });
+
+
+// Polyfill clientId into Foreign Fetch Events. This will generate a likely
+// unique id based on the request's referrer and a 60 batch timer.
+// Ugh, sometimes Closure Compiler kills me.
+const FFE = self['ForeignFetchEvent'];
+if (FFE) {
+  const hasOwn = Object.prototype.hasOwnProperty;
+  if (!hasOwn.call(FFE.prototype, 'clientId')) {
+    Object.defineProperty(FFE.prototype, 'clientId', {
+      get() {
+        return generateFallbackClientId(this.request.referrer);
+      },
+    });
+  }
+}
 
 // Setup the Foreign Fetch listener, for when the client is on a Publisher
 // origin.
