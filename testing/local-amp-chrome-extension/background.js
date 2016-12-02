@@ -27,7 +27,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       path = path.replace(/\.js$/, '.max.js');
     }
     return {
-      redirectUrl: 'http://localhost:8000/' + path
+      redirectUrl: 'http://gismeteo.ru/' + path
     };
   },
   {
@@ -47,7 +47,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       path = path.replace(/\/f\.js$/, '/integration.js');
     }
     return {
-      redirectUrl: 'http://localhost:8000/' + path
+      redirectUrl: 'http://gismeteo.ru/' + path
     };
   },
   {

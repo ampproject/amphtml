@@ -118,6 +118,7 @@ import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
+import {yandex} from '../ads/yandex';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
@@ -233,11 +234,12 @@ register('widespace', widespace);
 register('xlift' , xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
+register('yandex', yandex);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
-register('zergnet', zergnet);
 register('yieldone', yieldone);
 register('zedo', zedo);
+register('zergnet', zergnet);
 register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe

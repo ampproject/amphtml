@@ -476,6 +476,11 @@ export const adConfig = {
     preconnect: 'https://yads.yahoo.co.jp',
   },
 
+  yandex: {
+    prefetch: 'https://an.yandex.ru/system/context.js',
+    renderStartImplemented: true,
+  },
+
   yieldbot: {
     prefetch: [
       'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
