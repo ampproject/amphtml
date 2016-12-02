@@ -485,7 +485,10 @@ describe('amp-analytics.visibility', () => {
     });
   });
 
-  describe('listenOnceV2', () => {
+  describe
+  .configure()
+  .skip(() => typeof IntersectionObserver == 'undefined')
+  .run('listenOnceV2', () => {
 
     let inObCallback;
     let observeSpy;
@@ -511,8 +514,7 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    // TODO(lannka, #6429): Enable test after fixing it on Saucelabs
-    it.skip('should work for visible=true spec', () => {
+    it('should work for visible=true spec', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
