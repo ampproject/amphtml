@@ -25,8 +25,8 @@ export function xrostssp(global, data) {
   validateData(data, [], ['aid', 'slot_id']);
   
   const url = 'https://proparm.jp/ssp/p/js1'
-  + '?_aid=' + encodeURIComponent(data.aid)
-  +'&amp;_slot=' + encodeURIComponent(data.slot_id);
+    + '?_aid=' + encodeURIComponent(data['aid'])
+    + '&amp;_slot=' + encodeURIComponent(data['slotId']);
 
   writeScript(global, url);
 }
