@@ -107,7 +107,7 @@ export class IframeMessagingClient {
    */
   getSentinel() {
     if (!this.sentinel) {
-      this.sentinel = '0-' + getRandom(this.win_);
+      this.sentinel = generateSentinel_();
     }
     return this.sentinel;
   }
@@ -128,5 +128,9 @@ export class IframeMessagingClient {
    */
   generateWindow_() {
     return this.win_.parent;
+  }
+
+  generateSentinel_(){
+    return '0-' + getRandom(this.win_)
   }
 };
