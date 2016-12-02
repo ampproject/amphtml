@@ -398,7 +398,6 @@ const functionWhitelist = (() => {
     '[object Array]':
       [
         Array.prototype.concat,
-        Array.prototype.includes,
         Array.prototype.indexOf,
         Array.prototype.join,
         Array.prototype.lastIndexOf,
@@ -409,10 +408,8 @@ const functionWhitelist = (() => {
         String.prototype.charAt,
         String.prototype.charCodeAt,
         String.prototype.concat,
-        String.prototype.includes,
         String.prototype.indexOf,
         String.prototype.lastIndexOf,
-        String.prototype.repeat,
         String.prototype.slice,
         String.prototype.split,
         String.prototype.substr,
@@ -430,10 +427,7 @@ const functionWhitelist = (() => {
     const functions = whitelist[type];
     for (let i = 0; i < functions.length; i++) {
       const f = functions[i];
-      // Not all browsers support all the whitelisted functions.
-      if (f) {
-        out[type][f.name] = f;
-      }
+      out[type][f.name] = f;
     }
   });
   return out;
