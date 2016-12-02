@@ -22,7 +22,7 @@ const es = require('event-stream');
 const gutil = require('gulp-util');
 const File = require('vinyl');
 const fs = require('fs');
-const amphtmlValidator = require('../');
+const gulpAmpHtmlValidator = require('../');
 
 const VALID_FILE = '../testdata/feature_tests/minimum_valid_amp.html';
 const INVALID_FILE = '../testdata/feature_tests/empty.html';
@@ -34,7 +34,7 @@ describe('gulp-amphtml-validator', function() {
     let validate;
 
     beforeEach(function() {
-      validate = amphtmlValidator.validate();
+      validate = gulpAmpHtmlValidator.validate();
     });
 
     it('passes valid AMPs', function(done) {
@@ -63,7 +63,7 @@ describe('gulp-amphtml-validator', function() {
           });
         },
       };
-      validate = amphtmlValidator.validate(faillingValidator);
+      validate = gulpAmpHtmlValidator.validate(faillingValidator);
       const validFile = createFile(VALID_FILE);
       validate.write(validFile);
       validate.once('data', function(file) {
@@ -81,7 +81,7 @@ describe('gulp-amphtml-validator', function() {
 
     beforeEach(function() {
       logger = new MockLogger();
-      format = amphtmlValidator.format(logger);
+      format = gulpAmpHtmlValidator.format(logger);
     });
 
     it('prints passed validation results', function(done) {
@@ -133,7 +133,7 @@ describe('gulp-amphtml-validator', function() {
     let failAfterError;
 
     beforeEach(function() {
-      failAfterError = amphtmlValidator.failAfterError();
+      failAfterError = gulpAmpHtmlValidator.failAfterError();
     });
 
     it('fails after invalid AMP', function(done) {

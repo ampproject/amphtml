@@ -13,18 +13,18 @@ npm install --save-dev gulp-amphtml-validator
 ## Usage
 
 ```js
-const ampValidator = require('gulp-amphtml-validator');
+const gulpAmpValidator = require('gulp-amphtml-validator');
 
 gulp.task('amphtml:validate', () => {
-  return gulp.src(['samples/*.html'])
+  return gulp.src('*.html')
     // Valide the input and attach the validation result to the "amp" property
     // of the file object. 
-    .pipe(ampValidator.validate())
+    .pipe(gulpAmpValidator.validate())
     // Print the validation results to the console.
-    .pipe(ampValidator.format())
+    .pipe(gulpAmpValidator.format())
     // Exit the process with error code (1) if an AMP validation error
     // occurred.
-    .pipe(ampValidator.failAfterError());
+    .pipe(gulpAmpValidator.failAfterError());
 });
 ```
 
