@@ -183,7 +183,7 @@ case 26:
         }
 
         throw new Error($$[$0-1] + '() is not a supported function.');
-      
+
 break;
 case 27: case 40:
 this.$ = [];
@@ -201,7 +201,7 @@ case 29:
         if (isCorrectType && hasOwnProperty.call($$[$0-1], $$[$0])) {
           this.$ = $$[$0-1][$$[$0]];
         }
-      
+
 break;
 case 32:
 this.$ = hasOwnProperty.call(yy, $$[$0]) ? yy[$$[$0]] : null;
@@ -398,7 +398,6 @@ const functionWhitelist = (() => {
     '[object Array]':
       [
         Array.prototype.concat,
-        Array.prototype.includes,
         Array.prototype.indexOf,
         Array.prototype.join,
         Array.prototype.lastIndexOf,
@@ -409,10 +408,8 @@ const functionWhitelist = (() => {
         String.prototype.charAt,
         String.prototype.charCodeAt,
         String.prototype.concat,
-        String.prototype.includes,
         String.prototype.indexOf,
         String.prototype.lastIndexOf,
-        String.prototype.repeat,
         String.prototype.slice,
         String.prototype.split,
         String.prototype.substr,
