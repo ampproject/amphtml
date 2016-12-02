@@ -22,8 +22,8 @@ import {writeScript, validateData} from '../3p/3p';
  */
 export function xrostssp(global, data) {
 
-  validateData(data, [], ['aid', 'slot_id']);
-  
+  validateData(data, [], ['aid', 'slotId']);
+
   const url = 'https://proparm.jp/ssp/p/js1'
     + '?_aid=' + encodeURIComponent(data['aid'])
     + '&amp;_slot=' + encodeURIComponent(data['slotId']);

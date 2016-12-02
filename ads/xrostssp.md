@@ -22,7 +22,7 @@ limitations under the License.
 <amp-ad width="320" height="50"
     type="xrostssp"
     data-aid="10"
-    data-slot_id="3347">
+    data-slot-id="3347">
 </amp-ad>
 ```
 
@@ -33,4 +33,4 @@ For configuration details and to generate your tags, please contact https://www.
 Supported parameters:
 
 - data-aid
-- data-slot_id
+- data-slot-id
