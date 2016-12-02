@@ -121,6 +121,7 @@ module.exports = {
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
+    '!extensions/amp-bind/0.1/bind-expr-impl.js',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
