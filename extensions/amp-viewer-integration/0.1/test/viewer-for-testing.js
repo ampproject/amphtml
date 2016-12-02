@@ -16,25 +16,29 @@
 
 import {parseUrl, serializeQueryString} from '../../../../src/url';
 
+/**
+ * @fileoverview This is a Viewer file that communicates with ampdocs. It is
+ * used for testing of the ampdoc-viewer messaging protocol for the
+ * amp-viewer-integration extension.
+ */
 export class ViewerForTesting {
+  /**
+   * @param {Element} container
+   * @param {string} id
+   * @param {string} url
+   * @param {boolean} visible
+   */
   constructor(container, id, url, visible) {
-    this.id = id;
     this.url = url;
     this.alreadyLoaded_ = false;
-    this.stackIndex_ = 0;
     this.viewportType_ = 'natural';
     this.visibilityState_ = visible ? 'visible' : 'hidden';
-    this.prerenderSize_ = 1;
-    this.csi_ = 1;
-
-    this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-
-    this.viewer = document.querySelector('viewer');
     this.container = container;
     this.iframe = document.createElement('iframe');
-    this.iframe.setAttribute('id', 'AMP_DOC_' + this.id);
+    this.iframe.setAttribute('id', 'AMP_DOC_' + id);
 
-    if (this.viewportType_ == 'natural' && !this.isIos_) {
+    const isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+    if (this.viewportType_ == 'natural' && !isIos_) {
       this.iframe.setAttribute('scrolling', 'yes');
     } else {
       this.iframe.setAttribute('scrolling', 'no');
@@ -53,6 +57,10 @@ export class ViewerForTesting {
     });
   }
 
+  /**
+   * I'm waiting for the ampdoc to request for us to shake hands.
+   * @return {!Promise}
+   */
   waitForHandshakeRequest() {
     const params = {
       history: 1,
@@ -60,9 +68,9 @@ export class ViewerForTesting {
       width: this.container./*OK*/offsetWidth,
       height: this.container./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
-      prerenderSize: this.prerenderSize_,
+      prerenderSize: 1,
       viewerorigin: parseUrl(window.location.href).origin,
-      csi: this.csi_,
+      csi: 1,
       cap: 'foo,a2a',
     };
 
@@ -77,6 +85,8 @@ export class ViewerForTesting {
     this.frameOrigin_ = parsedUrl.origin;
     this.iframe.style.display = 'none';
 
+    // Listening for messages, hoping that I get a request for a handshake and
+    // a notification that a document was loaded.
     window.addEventListener('message', e => {
       this.log('message received', e, e.data);
       // IMPORTANT: There could be many windows with the same origin!
@@ -104,15 +114,30 @@ export class ViewerForTesting {
     return this.handshakeReceivedPromise_;
   }
 
+  /**
+   * Letting the ampdoc know that I received the handshake request and all is
+   * well.
+   */
   confirmHandshake() {
     this.iframe.contentWindow./*OK*/postMessage(
       'amp-handshake-response', this.frameOrigin_);
   }
 
+  /**
+   * This is used in test-amp-viewer-integration to test the handshake and make
+   * sure the test waits for everything to get executed.
+   */
   waitForDocumentLoaded() {
     return this.documentLoadedPromise_;
   }
 
+  /**
+   * I'm sending Bob a new outgoing request.
+   * @param {string} eventType
+   * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
+   */
   sendRequest_(type, data, awaitResponse) {
     this.log('here @ Viewer.prototype.sendRequest_');
     if (!this.messaging_) {
