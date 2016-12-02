@@ -208,6 +208,40 @@ runner.run('Cache SW', () => {
     });
   });
 
+  describe('generateFallbackClientId', () => {
+    let clock;
+    let i = 0;
+    const referrer = 'https://publisher.com/amp/article';
+    const other = 'https://publisher.com/amp/other';
+
+    beforeEach(() => {
+      clock = sandbox.useFakeTimers();
+      i++;
+      // Ensure the clientIds are not cached.
+      clock.tick(61 * 1000 * i);
+    });
+
+    it('generates a clientId lumped in 60 second blocks', () => {
+      const clientId = sw.generateFallbackClientId(referrer);
+      expect(sw.generateFallbackClientId(referrer)).to.equal(clientId);
+    });
+
+    it('generates a new clientId after 60 seconds', () => {
+      const clientId = sw.generateFallbackClientId(referrer);
+      clock.tick(60 * 1000);
+      expect(sw.generateFallbackClientId(referrer)).to.equal(clientId);
+      clock.tick(1);
+      expect(sw.generateFallbackClientId(referrer)).not.to.equal(clientId);
+    });
+
+    it('generates a different clientId for different referrers', () => {
+      const clientId = sw.generateFallbackClientId(referrer);
+      const otherId = sw.generateFallbackClientId(other);
+      expect(otherId).not.to.equal(clientId);
+      expect(sw.generateFallbackClientId(other)).to.equal(otherId);
+    });
+  });
+
   describe('fetchAndCache', () => {
     const request = {url};
     const response = {
