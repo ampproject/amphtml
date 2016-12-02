@@ -3,12 +3,15 @@
 This package is published and available at
 https://www.npmjs.com/package/amphtml-validator.
 
+The source code is available at
+https://github.com/ampproject/amphtml/tree/master/validator/nodejs.
+
 ## Command Line Tool
 
 The `amphtml-validator` command line tool is documented here:
 https://www.ampproject.org/docs/guides/validate.html#command-line-tool
 
-## Node.js API (Beta!)
+## Node.js API
 
 This API is new and still experimental, feedback is especially welcome.
 
@@ -70,3 +73,6 @@ As expected, this emits errors because the provided string in the example, `<htm
 * If the amphtml-validator command is already patched up for Windows, leave it
   alone instead of failing. Relevant if the package has been installed globally
   and now we're performing a local install on top of it.
+
+### 1.0.18
+* Small tweaks to this file and package.json.
