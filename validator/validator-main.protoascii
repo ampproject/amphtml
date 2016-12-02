@@ -2256,6 +2256,7 @@ tags: {
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "checked" }
+  attrs: { name: "default-value" }
   attrs: { name: "disabled" }
   attrs: { name: "height" }
   attrs: { name: "inputmode" }
