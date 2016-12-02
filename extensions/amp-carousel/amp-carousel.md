@@ -75,7 +75,7 @@ Usage example:
 **type**
 
 - `carousel` (default): All slides are shown and are scrollable horizontally.
-  The `carousel` type only supports `layout="fixed"` and `layout="fixed-height"`.
+  The `carousel` type only supports the following layouts: `fixed`, `fixed-height`, and `nodisplay`.
 - `slides`: Shows a single slide at a time. It supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
 
 **loop** (type=slides only)
