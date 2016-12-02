@@ -396,18 +396,13 @@ export class Visibility {
         state[SCHEDULED_RUN_ID] = this.timer_.delay(() => {
           dev().assert(state[IN_VIEWPORT], 'should have been in viewport');
           const lastChange = state[LAST_CHANGE_ENTRY];
-          state[LAST_SEEN_TIME] = Date.now() - state[TIME_LOADED];
-          const timeSinceLastUpdate = Date.now() - state[LAST_UPDATE];
-          this.setState_(
-              state, lastChange.intersectionRatio * 100, timeSinceLastUpdate);
 
-          if (this.isConditionMet_(state, config, true)) {
+          if (this.updateCounters_(
+              lastChange.intersectionRatio * 100,
+              listener, shouldBeVisible)) {
             this.prepareStateForCallback_(state, lastChange.boundingClientRect);
             listener.callback(state);
-            const found = listeners.indexOf(listener);
-            if (found != -1) {
-              listeners.splice(found, 1);
-            }
+            listeners.splice(listeners.indexOf(listener), 1);
           }
         }, timeToWait);
       } else if (!state[IN_VIEWPORT] && state[SCHEDULED_RUN_ID]) {
@@ -547,7 +542,15 @@ export class Visibility {
 
     listener['state'] = state;
 
-    return this.isConditionMet_(state, config, triggerType);
+    return ((triggerType && state[IN_VIEWPORT]) || !triggerType) &&
+        (config[TOTAL_TIME_MIN] === undefined ||
+        state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
+        (config[TOTAL_TIME_MAX] === undefined ||
+        state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
+        (config[CONTINUOUS_TIME_MIN] === undefined ||
+        state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
+        (config[CONTINUOUS_TIME_MAX] === undefined ||
+        state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
   }
 
   /**
@@ -560,12 +563,12 @@ export class Visibility {
     const waitForContinuousTime =
         config[CONTINUOUS_TIME_MIN] > state[CONTINUOUS_TIME]
             ? config[CONTINUOUS_TIME_MIN] - state[CONTINUOUS_TIME]
-            : null;
+            : 0;
 
     const waitForTotalTime =
         config[TOTAL_TIME_MIN] > state[TOTAL_VISIBLE_TIME]
             ? config[TOTAL_TIME_MIN] - state[TOTAL_VISIBLE_TIME]
-            : null;
+            : 0;
 
     // Wait for minimum of (previous timeToWait, positive values of
     // waitForContinuousTime and waitForTotalTime).
@@ -574,26 +577,7 @@ export class Visibility {
         waitForTotalTime || Infinity);
 
     // Return a max of wait time (used by V2)
-    return Math.max(waitForContinuousTime || 0, waitForTotalTime || 0);
-  }
-
-  /**
-   * @param {!Object} state
-   * @param {!Object} config
-   * @param {boolean} triggerType
-   * @return {boolean}
-   * @private
-   */
-  isConditionMet_(state, config, triggerType) {
-    return ((triggerType && state[IN_VIEWPORT]) || !triggerType) &&
-        (config[TOTAL_TIME_MIN] === undefined ||
-            state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
-        (config[TOTAL_TIME_MAX] === undefined ||
-            state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
-        (config[CONTINUOUS_TIME_MIN] === undefined ||
-            state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
-        (config[CONTINUOUS_TIME_MAX] === undefined ||
-            state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
+    return Math.max(waitForContinuousTime, waitForTotalTime);
   }
 
   /**
