@@ -50,7 +50,7 @@ describe('triggerAnalyticsEvent', () => {
 
   it('should not do anything if analytics is not installed', () => {
     triggerAnalyticsEvent(ampdoc, 'hello');
-    return timer.promise(10).then(() => {
+    return timer.promise(50).then(() => {
       expect(triggerEventSpy).to.have.not.been.called;
     });
   });
@@ -59,7 +59,7 @@ describe('triggerAnalyticsEvent', () => {
     fromClassForDoc(
         ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
     triggerAnalyticsEvent(ampdoc, 'hello');
-    return timer.promise(10).then(() => {
+    return timer.promise(50).then(() => {
       expect(triggerEventSpy).to.have.been.called;
       expect(triggerEventSpy).to.have.been.calledWith('hello');
     });
