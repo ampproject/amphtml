@@ -183,7 +183,7 @@ case 26:
         }
 
         throw new Error($$[$0-1] + '() is not a supported function.');
-      
+
 break;
 case 27: case 40:
 this.$ = [];
@@ -201,7 +201,7 @@ case 29:
         if (isCorrectType && hasOwnProperty.call($$[$0-1], $$[$0])) {
           this.$ = $$[$0-1][$$[$0]];
         }
-      
+
 break;
 case 32:
 this.$ = hasOwnProperty.call(yy, $$[$0]) ? yy[$$[$0]] : null;
@@ -430,7 +430,10 @@ const functionWhitelist = (() => {
     const functions = whitelist[type];
     for (let i = 0; i < functions.length; i++) {
       const f = functions[i];
-      out[type][f.name] = f;
+      // Not all browsers support all the whitelisted functions.
+      if (f) {
+        out[type][f.name] = f;
+      }
     }
   });
   return out;
