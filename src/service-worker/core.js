@@ -402,13 +402,15 @@ self.addEventListener('fetch', event => {
 
 // Polyfill clientId into Foreign Fetch Events. This will generate a likely
 // unique id based on the request's referrer and a 60 batch timer.
-if (typeof ForeignFetchEvent !== 'undefined') {
+// Ugh, sometimes Closure Compiler kills me.
+const FFE = self['ForeignFetchEvent'];
+if (FFE) {
   const hasOwn = Object.prototype.hasOwnProperty;
-  if (!hasOwn.call(ForeignFetchEvent.prototype, 'clientId')) {
-    Object.defineProperty(ForeignFetchEvent.prototype, 'clientId', {
+  if (!hasOwn.call(FFE.prototype, 'clientId')) {
+    Object.defineProperty(FFE.prototype, 'clientId', {
       get() {
         return generateFallbackClientId(this.request.referrer);
-      }
+      },
     });
   }
 }
