@@ -234,12 +234,25 @@ can be reduced to an array of components. For instance:
 
 ## Triggering animation
 
-The animation can be triggered via an `on` action. For instance:
+The animation can be triggered via a `trigger` attribute an `on` action.
+
+### `trigger` attribute
+
+For instance:
+```
+<amp-animation id="anim1" layout="nodisplay"
+    trigger="visibility">
+  ...
+</amp-animation>
+```
+
+### `on` action
+
+For instance:
 
 ```
-<amp-animation id="anim1" layout="nodisplay"></amp-animation>
+<amp-animation id="anim1" layout="nodisplay">
+  ...
+</amp-animation>
 <button on="tap:anim1.activate">Animate</button>
 ```
-
-More triggering mechanisms will be added in the future, including visibility triggers.
-

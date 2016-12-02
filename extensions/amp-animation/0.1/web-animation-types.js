@@ -65,6 +65,19 @@ export let WebAnimationTimingDef;
 
 
 /**
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Animation/playState
+ * @enum {string}
+ */
+export const WebAnimationPlayState = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RUNNING: 'running',
+  PAUSED: 'paused',
+  FINISHED: 'finished',
+};
+
+
+/**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/direction
  * @enum {string}
  */
