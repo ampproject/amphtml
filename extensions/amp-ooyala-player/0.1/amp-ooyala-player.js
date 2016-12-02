@@ -144,11 +144,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  unlayoutOnPause() {
-    return false;
-  }
-
-  /** @override */
   supportsPlatform() {
     return true;
   }
