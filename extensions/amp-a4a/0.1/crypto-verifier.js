@@ -82,6 +82,22 @@ export function importPublicKey(jwk) {
 }
 
 /**
+ * Verifies signature was signed with private key matching public key given.
+ * Does not verify data actually matches signature (use verifySignature).
+ * @param {!Uint8Array} signature the RSA signature.
+ * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
+ * @return {boolean} whether signature was generated using hash.
+ */
+export function verifyHashVersion(signature, publicKeyInfo) {
+  // The signature has the following format:
+  // 1-byte version + 4-byte key hash + raw RSA signature where
+  // the raw RSA signature is computed over (data || 1-byte version).
+  // If the hash doesn't match, don't bother checking this key.
+  return signature.length > 5 && signature[0] == VERSION &&
+      hashesEqual(signature, publicKeyInfo.hash);
+}
+
+/**
  * Verifies RSA signature corresponds to the data, given a public key.
  * @param {!Uint8Array} data the data that was signed.
  * @param {!Uint8Array} signature the RSA signature.
@@ -90,12 +106,7 @@ export function importPublicKey(jwk) {
  *     the public key.
  */
 export function verifySignature(data, signature, publicKeyInfo) {
-  // The signature has the following format:
-  // 1-byte version + 4-byte key hash + raw RSA signature where
-  // the raw RSA signature is computed over (data || 1-byte version).
-  // If the hash doesn't match, don't bother checking this key.
-  if (!(signature.length > 5 && signature[0] == VERSION &&
-      hashesEqual(signature, publicKeyInfo.hash))) {
+  if (!verifyHashVersion(signature, publicKeyInfo)) {
     return Promise.resolve(false);
   }
   // Verify that the data matches the raw RSA signature, using the
