@@ -41,7 +41,6 @@ export class AmpContext extends IframeMessagingClient {
   constructor(win) {
     super(win);
     this.setupMetadata_();
-    this.getHostWindow();
   }
 
   /** @override */
@@ -61,10 +60,10 @@ export class AmpContext extends IframeMessagingClient {
   observePageVisibility(callback) {
     const stopObserveFunc = this.registerCallback_(
         MessageType_.EMBED_STATE, callback);
-    this.hostWindow.postMessage/*OK*/({
+    this.messageHost_({
       sentinel: this.sentinel,
       type: MessageType_.SEND_EMBED_STATE,
-    }, '*');
+    });
 
     return stopObserveFunc;
   };
@@ -80,10 +79,9 @@ export class AmpContext extends IframeMessagingClient {
   observeIntersection(callback) {
     const stopObserveFunc = this.registerCallback_(
         MessageType_.INTERSECTION, callback);
-    this.hostWindow.postMessage/*OK*/({
-      sentinel: this.sentinel,
-      type: MessageType_.SEND_INTERSECTIONS,
-    }, '*');
+    this.messageHost_({
+      sentinel: this.getSentinel(),
+      type: MessageType_.SEND_INTERSECTIONS});
 
     return stopObserveFunc;
   };
@@ -95,12 +93,12 @@ export class AmpContext extends IframeMessagingClient {
    *  @param {int} width The new width for the ad we are requesting.
    */
   requestResize(height, width) {
-    this.hostWindow.postMessage/*OK*/({
+    this.messageHost_({
       sentinel: this.sentinel,
       type: MessageType_.EMBED_SIZE,
       width,
       height,
-    }, '*');
+    });
   };
 
   /**
