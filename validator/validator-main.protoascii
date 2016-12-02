@@ -1693,6 +1693,22 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
+  tag_name: "ELLIPSE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "cx" }
+  attrs: { name: "cy" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "rx" }
+  attrs: { name: "ry" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
   tag_name: "LINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "class" }
