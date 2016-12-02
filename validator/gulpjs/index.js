@@ -134,7 +134,8 @@ module.exports.failAfterError = function() {
     if (file.isNull() || !file.ampValidationResult) {
       return callback(null, file);
     }
-    if (file.ampValidationResult.status === STATUS_FAIL) {
+    const status = file.ampValidationResult.status;
+    if (status === STATUS_FAIL || status === STATUS_VALIDATOR_UNAVAILABLE) {
       failedFiles++;
     }
     return callback(null, file);

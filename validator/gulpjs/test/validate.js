@@ -138,7 +138,17 @@ describe('gulp-amphtml-validator', function() {
 
     it('fails after invalid AMP', function(done) {
       const invalidFile = createFailedFile('fail.html');
-        failAfterError.write(invalidFile);
+      failAfterError.write(invalidFile);
+      try {
+        failAfterError.end();
+      } catch (expected) {
+        done();
+      }
+    });
+
+    it('fails if validator fails to load', function(done) {
+      const invalidFile = createFileWithValidatorFailure('fail.html');
+      failAfterError.write(invalidFile);
       try {
         failAfterError.end();
       } catch (expected) {
@@ -157,15 +167,25 @@ describe('gulp-amphtml-validator', function() {
 
   function createFailedFile(name) {
     const file = createFileStub(name);
-    file.ampValidationResult = {};
-    file.ampValidationResult.status = 'FAIL';
+    file.ampValidationResult = {
+      status: 'FAIL',
+    };
+    return file;
+  }
+
+  function createFileWithValidatorFailure(name) {
+    const file = createFileStub(name);
+    file.ampValidationResult = {
+      status: 'N/A',
+    };
     return file;
   }
 
   function createPassedFile(name) {
     const file = createFileStub(name);
-    file.ampValidationResult = {};
-    file.ampValidationResult.status = 'PASS';
+    file.ampValidationResult = {
+      status: 'PASS',
+    };
     return file;
   }
 
