@@ -48,6 +48,7 @@ Each of the `amp-accordion` component’s immediate children is considered a sec
 - The first child (of the section) must be one of `h1`, `h2`, ..., `h6`, `header`, and is the heading of the section.
 - The second child (of the section) can be any tag allowed in AMP HTML and is the content of the section.
 - Clicking/tapping on the heading of a section expands/ or collapses the section.
+- The collapsed/expanded state of each section in `amp-accordion` element will be preserved at session level. User has the option to disable this feature.
 
 Example:
 
@@ -69,6 +70,10 @@ Example:
 ```
 
 ## Attributes
+
+**disable-session-states**
+
+The `disable-session-states` attribute can be set on `<amp-accordion>` to opt out of preserving state of `amp-accordion` element.
 
 **expanded**
 
