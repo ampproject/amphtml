@@ -18,6 +18,7 @@
 import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
+const TAG = 'amp-viewer-messaging';
 const sentinel_ = '__AMPHTML__';
 const requestSentinel_ = sentinel_ + 'REQUEST';
 const responseSentinel_ = sentinel_ + 'RESPONSE';
@@ -42,7 +43,7 @@ export class Messaging {
   constructor(source, target, targetOrigin, requestProcessor) {
     /**  @private {!number} */
     this.requestIdCounter_ = 0;
-    /**  @private {*} */
+    /**  @private {!Object<string, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
     /** @const @private {!Window} */
     this.target_ = target;
@@ -56,11 +57,10 @@ export class Messaging {
     listen(source, 'message', this.handleMessage_.bind(this));
   }
 
-
   /**
    * Bob sent me a message. I need to decide if it's a new request or
    * a response to a previous 'conversation' we were having.
-   * @param {Event|null} event
+   * @param {?Event} event
    * @private
    */
   handleMessage_(event) {
@@ -76,7 +76,6 @@ export class Messaging {
     }
   }
 
-
   /**
    * I'm sending Bob a new outgoing request.
    * @param {string} eventType
@@ -85,33 +84,30 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(eventType, payload, awaitResponse) {
-    dev().info(
-        'MESSAGING', 'messaging.js -> sendRequest, eventType: ', eventType);
-    const requestId = ++this.requestIdCounter_;
+    dev().info(TAG, 'messaging.js -> sendRequest, eventType: ', eventType);
+    const requestId = String(++this.requestIdCounter_);
     let promise = undefined;
     if (awaitResponse) {
       promise = new Promise((resolve, reject) => {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_(requestSentinel_, requestId.toString(), eventType,
+    this.sendMessage_(requestSentinel_, requestId, eventType,
       payload, awaitResponse);
     return promise;
   }
 
-
   /**
    * I'm responding to a request that Bob made earlier.
-   * @param {number} requestId
+   * @param {string} requestId
    * @param {*} payload
    * @private
    */
   sendResponse_(requestId, payload) {
-    dev().info('MESSAGING', 'messaging.js -> sendResponse_');
+    dev().info(TAG, 'messaging.js -> sendResponse_');
     this.sendMessage_(
-      responseSentinel_, requestId.toString(), null, payload, false);
+      responseSentinel_, requestId, null, payload, false);
   }
-
 
   /**
    * @param {string} sentinel
@@ -132,17 +128,15 @@ export class Messaging {
     this.target_./*OK*/postMessage(message, this.targetOrigin_);
   }
 
-
   /**
-   * @param {number} requestId
+   * @param {string} requestId
    * @param {*} reason
    * @private
    */
   sendResponseError_(requestId, reason) {
     this.sendMessage_(
-      responseSentinel_, requestId.toString(), 'ERROR', reason, false);
+      responseSentinel_, requestId, 'ERROR', reason, false);
   }
-
 
   /**
    * I'm handing an incoming request from Bob. I'll either respond normally
@@ -152,8 +146,8 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    dev().info('MESSAGING', 'messaging.js -> handleRequest_');
-    const requestId = message.requestId.toString();
+    dev().info(TAG, 'messaging.js -> handleRequest_');
+    const requestId = message.requestId;
     const promise = this.requestProcessor_(message.type, message.payload,
         message.rsvp);
     if (message.rsvp) {
@@ -170,7 +164,6 @@ export class Messaging {
     }
   }
 
-
   /**
    * I sent out a request to Bob. He responded. And now I'm handling that
    * response.
@@ -178,7 +171,7 @@ export class Messaging {
    * @private
    */
   handleResponse_(message) {
-    dev().info('MESSAGING', 'messaging.js -> handleResponse_');
+    dev().info(TAG, 'messaging.js -> handleResponse_');
     const requestId = message.requestId;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {parseUrl, serializeQueryString} from '../../../../src/url';
 
-export class Viewer {
+export class ViewerForTesting {
   constructor(container, id, url, visible) {
     this.id = id;
     this.url = url;
@@ -60,16 +61,17 @@ export class Viewer {
       height: this.container./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: this.prerenderSize_,
-      viewerorigin: this.parseUrl_(window.location.href).origin,
+      viewerorigin: parseUrl(window.location.href).origin,
       csi: this.csi_,
       cap: 'foo,a2a',
     };
 
-    let inputUrl = this.url + '#' + this.paramsStr_(params);
+    let inputUrl = this.url + '#' + serializeQueryString(params);
+
     if (window.location.hash && window.location.hash.length > 1) {
       inputUrl += '&' + window.location.hash.substring(1);
     }
-    const parsedUrl = this.parseUrl_(inputUrl);
+    const parsedUrl = parseUrl(inputUrl);
     const url = parsedUrl.href;
     this.iframe.setAttribute('src', url);
     this.frameOrigin_ = parsedUrl.origin;
@@ -117,44 +119,6 @@ export class Viewer {
       return;
     }
     return this.messaging_.sendRequest(type, data, awaitResponse);
-  }
-
-  parseUrl_(urlString) {
-    const a = document.createElement('a');
-    a.href = urlString;
-    return {
-      href: a.href,
-      protocol: a.protocol,
-      host: a.host,
-      hostname: a.hostname,
-      port: a.port == '0' ? '' : a.port,
-      pathname: a.pathname,
-      search: a.search,
-      hash: a.hash,
-      origin: a.protocol + '//' + a.host,
-    };
-  }
-
-  documentReady_() {
-    this.log('AMP document ready');
-    return Promise.resolve();
-  }
-
-  paramsStr_(params) {
-    this.log('params: ',params);
-    let s = '';
-    for (const k in params) {
-      const v = params[k];
-      if (v === null || v === undefined) {
-        continue;
-      }
-      if (s.length > 0) {
-        s += '&';
-      }
-      s += encodeURIComponent(k) + '=' + encodeURIComponent(v);
-    }
-    this.log('s: ',s);
-    return s;
   }
 
   log() {

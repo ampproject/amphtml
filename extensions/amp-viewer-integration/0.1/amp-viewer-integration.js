@@ -19,6 +19,7 @@ import {listen} from '../../../src/event-helper';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev,user} from '../../../src/log';
 
+const TAG = 'amp-viewer-integration';
 
 /**
  * @fileoverview This is the communication protocol between AMP and the viewer.
@@ -30,8 +31,8 @@ export class AmpViewerIntegration {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const @private {!Window} win */
-    this.win_ = win;
+    /** @const {!Window} win */
+    this.win = win;
   }
 
   /**
@@ -40,24 +41,19 @@ export class AmpViewerIntegration {
    * @return {!Promise|undefined}
    */
   init() {
-    const isIframed = window.parent && window.parent != window;
-    if (!isIframed) {
-      return;
-    }
-    dev().info('AVI', 'amp-viewer-integration.js => handshake init()');
-    const viewer = viewerForDoc(this.win_.document);
+    dev().info('AVI', TAG + ' => handshake init()');
+    const viewer = viewerForDoc(this.win.document);
     return this.getHandshakePromise_(viewer)
       .then(viewerOrigin => {
-        dev().info('AVI',
-          'amp-viewer-integration.js => listening for messages');
-        const messaging_ =
-          new Messaging(this.win_, this.win_.parent, viewerOrigin,
+        dev().info('AVI', TAG + ' => listening for messages');
+        const messaging =
+          new Messaging(this.win, this.win.parent, viewerOrigin,
             (type, payload, awaitResponse) => {
               return viewer.receiveMessage(
                 type, /** @type {!JSONType} */ (payload), awaitResponse);
             });
         viewer.setMessageDeliverer((type, payload, awaitResponse) => {
-          return messaging_.sendRequest(type, payload, awaitResponse);
+          return messaging.sendRequest(type, payload, awaitResponse);
         }, viewerOrigin);
       });
   }
@@ -70,24 +66,25 @@ export class AmpViewerIntegration {
    * @private
    */
   getHandshakePromise_(viewer) {
-    const win = this.win_;
-
+    const win = this.win;
     return new Promise(resolve => {
-      const unconfirmedViewerOrigin = viewer.getParam('viewerorigin');
+      const unconfirmedViewerOrigin =
+        viewer.getParam('viewerorigin') || viewer.getParam('origin');
       user().assert(unconfirmedViewerOrigin,
               'Expected viewer origin must be specified!');
 
-      const unlisten = listen(win, 'message', listener);
-      function listener(event) {
+      const unlisten = listen(win, 'message', event => {
         if (event.origin == unconfirmedViewerOrigin &&
             event.data == 'amp-handshake-response' &&
             event.source == win.parent) {
-          dev().info('AVI', 'amp-viewer-integration.js => received handshake ' +
-            'confirmation');
+          dev().info('AVI', TAG + ' => received handshake confirmation');
+          // TODO: Viewer may immediately start sending messages after issuing
+          // handshake response, but we will miss these messages in the time
+          // between unlisten and the next listen later.
           unlisten();
           resolve(event.origin);
         }
-      };
+      });
 
       // Confirmed origin will come in the response.
       win.parent./*OK*/postMessage('amp-handshake-request',
@@ -96,6 +93,6 @@ export class AmpViewerIntegration {
   }
 }
 
-AMP.extension('amp-viewer-integration', '0.1', function() {
+AMP.extension(TAG, '0.1', function(AMP) {
   new AmpViewerIntegration(AMP.win).init();
 });

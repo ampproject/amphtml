@@ -23,19 +23,16 @@
  */
 
 import {Messaging} from '../messaging.js';
-import {Viewer} from './viewer-messaging-example.js';
-import {adopt} from '../../../../src/runtime';
+import {ViewerForTesting} from './viewer-for-testing.js';
 import * as sinon from 'sinon';
 
 
-adopt(window);
-
 describes.sandboxed('AmpViewerIntegration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
-
-  let viewerEl;
-  let viewer;
   describe('Handshake', function() {
+    let viewerEl;
+    let viewer;
+
     beforeEach(() => {
       const loc = window.location;
       const ampDocUrl =
@@ -43,18 +40,18 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
       viewerEl = document.createElement('div');
       document.body.appendChild(viewerEl);
-      viewer = new Viewer(viewerEl, '1', ampDocUrl, true);
+      viewer = new ViewerForTesting(viewerEl, '1', ampDocUrl, true);
       return viewer.waitForHandshakeRequest();
+    });
+
+    afterEach(() => {
+      document.body.removeChild(viewerEl);
     });
 
     it('should confirm the handshake', () => {
       console.log('sending handshake response');
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();
-    });
-
-    afterEach(() => {
-      document.body.removeChild(viewerEl);
     });
   });
 
@@ -71,10 +68,6 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       };
       messaging = new Messaging(
         source, window, viewerOrigin, requestProcessor, ampDoc);
-    });
-
-    afterEach(() => {
-      messaging = null;
     });
 
     it('should initialize correctly', () => {
