@@ -349,11 +349,11 @@ describe('isDevChannel', () => {
   it('should return value based on binary version', () => {
     const win = {
       AMP_CONFIG: {
-        canary: false,
+        canary: 0,
       },
     };
     expect(isDevChannelVersionDoNotUse_(win)).to.be.false;
-    win.AMP_CONFIG.canary = true;
+    win.AMP_CONFIG.canary = 1;
     expect(isDevChannelVersionDoNotUse_(win)).to.be.true;
   });
 });
