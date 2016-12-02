@@ -261,6 +261,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    this.uiHandler.createPlaceholderCallback();
+    return this.uiHandler.createPlaceholderCallback();
   }
 }

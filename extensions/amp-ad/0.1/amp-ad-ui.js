@@ -130,6 +130,7 @@ export class AmpAdUIHandler {
     });
     placeholder.appendChild(this.createDefaultHolder_());
     this.baseInstance_.element.appendChild(placeholder);
+    return placeholder;
   }
 
   /**

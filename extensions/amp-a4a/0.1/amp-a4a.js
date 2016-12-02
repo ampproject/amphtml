@@ -593,7 +593,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    this.uiHandler.createPlaceholderCallback();
+    return this.uiHandler.createPlaceholderCallback();
   }
 
   /**
