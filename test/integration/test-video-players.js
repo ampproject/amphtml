@@ -44,7 +44,8 @@ describe('amp-ooyala-player', () => {
     video.setAttribute('data-pcode', '5zb2wxOlZcNCe_HVT3a6cawW298X');
     video.setAttribute('data-playerid', '6440813504804d76ba35c8c787a4b33c');
     video.setAttribute('data-playerversion', 'v4');
-    video.setAttribute('data-config', '//player.ooyala.com/static/v4/stable/latest/skin-plugin/skin.json');
+    video.setAttribute('data-config', '//player.ooyala.com/static/' +
+                       'v4/stable/latest/skin-plugin/skin.json');
     return video;
   });
 });

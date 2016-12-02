@@ -15,9 +15,20 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
+import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
+
+/**
+ * @enum {number}
+ * @private
+ */
+const PlayerStates = {
+  PLAYING: 1,
+  PAUSED: 2,
+};
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -27,6 +38,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {number} */
+    this.playerState_ = 0;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -77,6 +91,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
+    this.win.addEventListener(
+        'message', event => this.handleOoyalaMessages_(event));
+
     return this.loadPromise(iframe).then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
@@ -103,8 +120,37 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_) {
+    // Only send pauseVideo command if the player is playing. Otherwise
+    // The player breaks if the user haven't played the video yet specially
+    // on mobile.
+    if (this.iframe_ && this.iframe_.contentWindow &&
+        this.playerState_ == PlayerStates.PLAYING) {
       this.pause();
+    }
+  }
+
+  /** @private */
+  handleOoyalaMessages_(event) {
+    if (event.origin != 'https://player.ooyala.com' ||
+        event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    if (!event.data ||
+        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
+      return;  // Doesn't look like JSON.
+    }
+    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    if (data === undefined) {
+      return; // We only process valid JSON.
+    }
+    if (data.event == 'infoDelivery' &&
+        data.info && data.info.playerState !== undefined) {
+      this.playerState_ = data.info.playerState;
+      if (this.playerState_ == PlayerStates.PAUSED) {
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (this.playerState_ == PlayerStates.PLAYING) {
+        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      }
     }
   }
 
@@ -112,22 +158,30 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.iframe_.contentWindow.postMessage(JSON.stringify({'event': 'command', 'func': VideoEvents.PLAY, 'args': ''}));
+    this.iframe_.contentWindow.postMessage(JSON.stringify(
+      {'event': 'command', 'func': VideoEvents.PLAY, 'args': ''}
+    ));
   }
 
   /** @override */
   pause() {
-    this.iframe_.contentWindow.postMessage(JSON.stringify({'event': 'command', 'func': VideoEvents.PAUSE, 'args': ''}));
+    this.iframe_.contentWindow.postMessage(JSON.stringify(
+      {'event': 'command', 'func': VideoEvents.PAUSE, 'args': ''}
+    ));
   }
 
   /** @override */
   mute() {
-    this.iframe_.contentWindow.postMessage(JSON.stringify({'event': 'command', 'func': 'mute', 'args': ''}));
+    this.iframe_.contentWindow.postMessage(JSON.stringify(
+      {'event': 'command', 'func': 'mute', 'args': ''}
+    ));
   }
 
   /** @override */
   unmute() {
-    this.iframe_.contentWindow.postMessage(JSON.stringify({'event': 'command', 'func': 'unmute', 'args': ''}));
+    this.iframe_.contentWindow.postMessage(JSON.stringify(
+      {'event': 'command', 'func': 'unmute', 'args': ''}
+    ));
   }
 
   /** @override */
