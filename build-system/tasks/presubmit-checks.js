@@ -330,12 +330,7 @@ var forbiddenTerms = {
   'isDevChannel\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-user-notification/0.1/amp-user-notification.js',
-      'src/3p-frame.js',
       'src/experiments.js',
-      'src/service/storage-impl.js',
-      'src/service/viewport-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
