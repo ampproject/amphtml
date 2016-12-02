@@ -15,8 +15,9 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {tryFocus} from '../../../src/dom';
+import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
+import {dev} from '../../../src/log';
 import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
@@ -81,6 +82,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.viewport_ = this.getViewport();
 
+    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */true);
+
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
           this.document_.body.getAttribute('dir') ||
@@ -128,6 +131,13 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
+
+    this.element.addEventListener('click', e => {
+      const target = closestByTag(dev().assertElement(e.target), 'A');
+      if (target && target.href) {
+        this.close_();
+      }
+    }, true);
   }
 
  /**
@@ -168,7 +178,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
-      this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
       if (this.isIosSafari_) {
         this.compensateIosBottombar_();
@@ -213,7 +222,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {
-          this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
             toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());

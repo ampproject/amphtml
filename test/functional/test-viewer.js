@@ -140,14 +140,12 @@ describe('Viewer', () => {
     expect(viewer.hasCapability('foo')).to.be.false;
   });
 
-  it('should clear fragment in embedded mode', () => {
+  it('should NOT clear fragment in embedded mode', () => {
     windowApi.parent = {};
     windowApi.location.href = 'http://www.example.com#test=1';
     windowApi.location.hash = '#origin=g.com&test=1';
     const viewer = new Viewer(ampdoc);
-    expect(windowApi.history.replaceState.callCount).to.equal(1);
-    const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
+    expect(windowApi.history.replaceState).to.not.be.called;
     expect(viewer.getParam('test')).to.equal('1');
   });
 
@@ -156,9 +154,9 @@ describe('Viewer', () => {
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
     const viewer = new Viewer(ampdoc);
-    expect(windowApi.history.replaceState.callCount).to.equal(1);
+    expect(windowApi.history.replaceState).to.be.calledOnce;
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
     expect(viewer.getParam('click')).to.equal('abc');
   });
 

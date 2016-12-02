@@ -22,8 +22,10 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {documentStateFor} from './document-state';
-import {getIntersectionChangeEntry} from '../src/intersection-observer';
+import {documentStateFor} from './service/document-state';
+import {
+  getIntersectionChangeEntry,
+} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
@@ -455,7 +457,7 @@ function createBaseCustomElementClass(win) {
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
-      this.isFirstLayoutCompleted_ = true;
+      this.isFirstLayoutCompleted_ = false;
 
       /** @private {boolean} */
       this.isInViewport_ = false;
@@ -805,7 +807,14 @@ function createBaseCustomElementClass(win) {
         // From the moment height is changed the element becomes fully
         // responsible for managing its height. Aspect ratio is no longer
         // preserved.
-        setStyle(this.sizerElement_, 'paddingTop', '0');
+        const sizer = this.sizerElement_;
+        this.sizerElement_ = null;
+        setStyle(sizer, 'paddingTop', '0');
+        if (this.resources_) {
+          this.resources_.deferMutate(this, () => {
+            dom.removeElement(sizer);
+          });
+        }
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
@@ -1066,9 +1075,9 @@ function createBaseCustomElementClass(win) {
         this.toggleLoading_(false, /* cleanup */ true);
         // Check if this is the first success layout that needs
         // to call firstLayoutCompleted.
-        if (this.isFirstLayoutCompleted_) {
+        if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
-          this.isFirstLayoutCompleted_ = false;
+          this.isFirstLayoutCompleted_ = true;
           this.dispatchCustomEvent('amp:load:end');
         }
       }, reason => {
@@ -1165,7 +1174,7 @@ function createBaseCustomElementClass(win) {
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.layoutCount_ = 0;
-        this.isFirstLayoutCompleted_ = true;
+        this.isFirstLayoutCompleted_ = false;
       }
       return isReLayoutNeeded;
     }

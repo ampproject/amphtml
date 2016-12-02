@@ -17,12 +17,13 @@
 import {dev, user} from '../../../src/log';
 import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
-import {getExistingServiceForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 import {Visibility} from './visibility-impl';
+import {isExperimentOn} from '../../../src/experiments';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -93,6 +94,10 @@ export class InstrumentationService {
   constructor(ampdoc) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
     this.ampdoc = ampdoc;
+
+    /** @private {boolean} */
+    this.visibilityV2Enabled_ = this.ampdoc.win.IntersectionObserver &&
+        isExperimentOn(this.ampdoc.win, 'visibility-v2');
 
     /** @const @private {!./visibility-impl.Visibility} */
     this.visibility_ = new Visibility(this.ampdoc);
@@ -258,7 +263,11 @@ export class InstrumentationService {
         return;
       }
 
-      this.visibility_.listenOnce(spec, vars => {
+      const listenOnceFunc = this.visibilityV2Enabled_
+          ? this.visibility_.listenOnceV2.bind(this.visibility_)
+          : this.visibility_.listenOnce.bind(this.visibility_);
+
+      listenOnceFunc(spec, vars => {
         const el = getElement(this.ampdoc, spec['selector'],
             analyticsElement, spec['selectionMethod']);
         if (el) {
@@ -519,10 +528,14 @@ export class InstrumentationService {
 }
 
 /**
+ * It's important to resolve instrumentation asynchronously in elements that depends on
+ * it in multi-doc scope. Otherwise an element life-cycle could resolve way before we
+ * have the service available.
+ *
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!InstrumentationService}
+ * @return {!Promise<InstrumentationService>}
  */
 export function instrumentationServiceForDoc(nodeOrDoc) {
-  return /** @type {!InstrumentationService} */ (getExistingServiceForDoc(
-      nodeOrDoc, 'amp-analytics-instrumentation'));
+  return /** @type {!Promise<InstrumentationService>} */ (
+      getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
 }

@@ -339,7 +339,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     const viewer = viewerForDoc(this.getAmpDoc());
     this.manifestLink_ = this.win.document.head.querySelector(
-        'link[rel=manifest],link[rel=amp-manifest]');
+        'link[rel=manifest],link[rel=origin-manifest]');
 
     const platform = platformFor(this.win);
     // We want to fallback to browser builtin mechanism when possible.

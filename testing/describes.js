@@ -16,6 +16,7 @@
 
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
+import {BaseElement} from '../src/base-element';
 import {
   FakeCustomElements,
   FakeWindow,
@@ -30,6 +31,7 @@ import {
   registerElementForTesting,
 } from '../src/runtime';
 import {cssText} from '../build/css';
+import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
@@ -140,7 +142,7 @@ export const realWin = describeEnv(spec => [
 
 
 /**
- * A test with in a described environment.
+ * A test within a described environment.
  * @param {function(!Object):!Array<?Fixture>} factory
  */
 function describeEnv(factory) {
@@ -306,7 +308,11 @@ class FakeWinFixture {
 /** @implements {Fixture} */
 class RealWinFixture {
 
-  /** @param {!{fakeRegisterElement: boolean, ampCss: boolean}} spec */
+  /** @param {!{
+  *   fakeRegisterElement: boolean,
+  *   ampCss: boolean,
+  *   allowExternalResources: boolean
+  * }} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
@@ -334,7 +340,9 @@ class RealWinFixture {
         // Flag as being a test window.
         win.AMP_TEST_IFRAME = true;
 
-        doNotLoadExternalResourcesInTest(win);
+        if (!spec.allowExternalResources) {
+          doNotLoadExternalResourcesInTest(win);
+        }
 
         // Install AMP CSS if requested.
         if (spec.ampCss) {
@@ -442,6 +450,15 @@ class AmpFixture {
         }
       });
     }
+
+    /**
+     * Creates a custom element without registration.
+     * @param {string=} opt_name
+     * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+     * @return {!AmpElement}
+     */
+    env.createAmpElement = createAmpElement.bind(null, win);
+
     return completePromise;
   }
 
@@ -478,3 +495,32 @@ function installRuntimeStylesPromise(win) {
   style./*OK*/textContent = cssText;
   win.document.head.appendChild(style);
 }
+
+
+/**
+ * Creates a custom element without registration.
+ * @param {!Window} win
+ * @param {string=} opt_name
+ * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+ * @return {!AmpElement}
+ */
+function createAmpElement(win, opt_name, opt_implementationClass) {
+  // Create prototype and constructor.
+  const name = opt_name || 'amp-element';
+  const proto = createAmpElementProto(win, name);
+  const ctor = function() {
+    const el = win.document.createElement(name);
+    el.__proto__ = proto;
+    return el;
+  };
+  ctor.prototype = proto;
+  proto.constructor = ctor;
+
+  // Create the element instance.
+  const element = new ctor();
+  element.implementationClassForTesting =
+      opt_implementationClass || BaseElement;
+  element.createdCallback();
+  element.classList.add('-amp-element');
+  return element;
+};
