@@ -20,8 +20,11 @@ import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dev} from '../../../src/log';
 import {historyForDoc} from '../../../src/history';
 import {vsyncFor} from '../../../src/vsync';
+import {timerFor} from '../../../src/timer';
 import * as st from '../../../src/style';
 
+/** @const {string} */
+const TAG = 'amp-lightbox';
 
 class AmpLightbox extends AMP.BaseElement {
 
@@ -31,6 +34,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {?Array<!Element>} */
+    this.children_ = null;
 
     /** @private {number} */
     this.historyId_ = -1;
@@ -43,6 +49,15 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isScrollable_ = false;
+
+    /** @private {number} */
+    this.pos_ = 0;
+
+    /** @private {number} */
+    this.oldPos_ = 0;
+
+    /** @private {?number} */
+    this.scrollTimerId_ = null;
   }
 
   /** @override */
@@ -59,6 +74,8 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
 
+    this.isScrollable_ = this.element.hasAttribute('scrollable');
+
     st.setStyles(this.element, {
       position: 'fixed',
       zIndex: 1000,
@@ -72,19 +89,26 @@ class AmpLightbox extends AMP.BaseElement {
       st.setStyles(this.element, {
         overflowY: 'auto',
         overflowX: 'hidden',
+        webkitOverflowScrolling: 'touch',
       });
     }
 
-    const children = this.getRealChildren();
+    this.children_ = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
       this.applyFillContent(this.container_);
     }
     this.element.appendChild(this.container_);
-    children.forEach(child => {
+
+    this.children_.forEach(child => {
+      this.setAsOwner(child);
       this.container_.appendChild(child);
     });
+
+    if (this.isScrollable_) {
+      this.element.addEventListener('scroll', this.scrollHandler_.bind(this));
+    }
 
     this.registerAction('open', this.activate.bind(this));
     this.registerAction('close', this.close.bind(this));
@@ -107,7 +131,6 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
-    this.isScrollable_ = this.element.hasAttribute('scrollable');
     this.initialize_();
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
@@ -126,7 +149,13 @@ class AmpLightbox extends AMP.BaseElement {
       });
     }).then(() => {
       const container = dev().assertElement(this.container_);
-      this.updateInViewport(container, true);
+      if (!this.isScrollable_) {
+        this.updateInViewport(container, true);
+      } else {
+        this.updateChildrenInViewport_(this.pos_, this.pos_);
+      }
+      // TODO: instead of laying out children all at once, layout children based
+      // on visibility.
       this.scheduleLayout(container);
       this.scheduleResume(container);
     });
@@ -163,6 +192,87 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = null;
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
+  }
+
+  /**
+   * Handles scroll on the amp-lightbox.
+   * @private
+   */
+  scrollHandler_() {
+    const currentScrollTop = this.element./*OK*/scrollTop;
+    this.pos_ = currentScrollTop;
+
+    if (this.scrollTimerId_ === null) {
+      this.waitForScroll_(currentScrollTop);
+    }
+  }
+
+  /**
+   * @param {!number} startingScrollTop
+   * @private
+   */
+  waitForScroll_(startingScrollTop) {
+    this.scrollTimerId_ = timerFor(this.win).delay(() => {
+      if (Math.abs(startingScrollTop - this.pos_) < 30) {
+        dev().fine(TAG, 'slow scrolling: ' + startingScrollTop + ' - '
+            + this.pos_);
+        this.scrollTimerId_ = null;
+        this.update_(this.pos_);
+      } else {
+        dev().fine(TAG, 'fast scrolling: ' + startingScrollTop + ' - '
+            + this.pos_);
+        this.waitForScroll_(this.pos_);
+      }
+    }, 100);
+  }
+
+  /**
+   * @param {number} pos
+   * @param {function(!Element)} callback
+   * @private
+   */
+  forEachInLightbox_(pos, callback) {
+    const containerHeight = this.element./*OK*/clientHeight;
+    for (let i = 0; i < this.children_.length; i++) {
+      const cell = this.children_[i];
+      if (cell./*OK*/offsetTop + cell./*OK*/offsetHeight >= pos &&
+          cell./*OK*/offsetTop <= pos + containerHeight) {
+        callback(cell);
+      }
+    }
+  }
+
+  /**
+   * @param {number} newPos
+   * @param {number} oldPos
+   * @private
+   */
+  updateChildrenInViewport_(newPos, oldPos) {
+    const seen = [];
+    this.forEachInLightbox_(newPos, cell => {
+      seen.push(cell);
+      this.updateInViewport(cell, true);
+    });
+    if (oldPos != newPos) {
+      this.forEachInLightbox_(oldPos, cell => {
+        if (seen.indexOf(cell) == -1) {
+          this.updateInViewport(cell, false);
+          this.schedulePause(cell);
+        }
+      });
+    }
+  }
+
+  /**
+   * Update the inViewport status given current position.
+   * @param {number} pos
+   * @private
+   */
+  update_(pos) {
+    dev().fine(TAG, 'update_');
+    this.updateChildrenInViewport_(pos, this.oldPos_);
+    this.oldPos_ = pos;
+    this.pos_ = pos;
   }
 
   getHistory_() {
