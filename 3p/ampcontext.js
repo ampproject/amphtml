@@ -41,30 +41,6 @@ export class AmpContext extends IframeMessagingClient {
   constructor(win) {
     super(win);
     this.setupMetadata_();
-
-    /** Calculate the hostWindow / ampWindow_ */
-    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
-    dev().assert(sentinelMatch, 'Incorrect sentinel format');
-    this.depth = Number(sentinelMatch[2]);
-    const ancestors = [];
-    for (let win = this.win_; win && win != win.parent; win = win.parent) {
-      // Add window keeping the top-most one at the front.
-      ancestors.push(win.parent);
-    }
-    ancestors.reverse();
-
-    /** @private */
-    this.ampWindow_ = ancestors[this.depth];
-  }
-
-  /** @override */
-  getHostWindow() {
-    return this.ampWindow_;
-  }
-
-  /** @override */
-  getSentinel() {
-    return this.sentinel;
   }
 
   /** @override */
@@ -84,10 +60,10 @@ export class AmpContext extends IframeMessagingClient {
   observePageVisibility(callback) {
     const stopObserveFunc = this.registerCallback_(
         MessageType_.EMBED_STATE, callback);
-    this.ampWindow_.postMessage/*REVIEW*/({
+    this.messageHost_({
       sentinel: this.sentinel,
       type: MessageType_.SEND_EMBED_STATE,
-    }, '*');
+    });
 
     return stopObserveFunc;
   };
@@ -103,10 +79,9 @@ export class AmpContext extends IframeMessagingClient {
   observeIntersection(callback) {
     const stopObserveFunc = this.registerCallback_(
         MessageType_.INTERSECTION, callback);
-    this.ampWindow_.postMessage/*REVIEW*/({
-      sentinel: this.sentinel,
-      type: MessageType_.SEND_INTERSECTIONS,
-    }, '*');
+    this.messageHost_({
+      sentinel: this.getSentinel(),
+      type: MessageType_.SEND_INTERSECTIONS});
 
     return stopObserveFunc;
   };
@@ -118,12 +93,12 @@ export class AmpContext extends IframeMessagingClient {
    *  @param {int} width The new width for the ad we are requesting.
    */
   requestResize(height, width) {
-    this.ampWindow_.postMessage/*REVIEW*/({
+    this.messageHost_({
       sentinel: this.sentinel,
       type: MessageType_.EMBED_SIZE,
       width,
       height,
-    }, '*');
+    });
   };
 
   /**
@@ -179,4 +154,21 @@ export class AmpContext extends IframeMessagingClient {
       throw new Error('Could not parse metadata.');
     }
   }
+
+  /**
+   *  Calculate the hostWindow
+   *  @private
+   */
+  generateWindow_() {
+    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
+    dev().assert(sentinelMatch, 'Incorrect sentinel format');
+    const depth = Number(sentinelMatch[2]);
+    const ancestors = [];
+    for (let win = this.win_; win && win != win.parent; win = win.parent) {
+      // Add window keeping the top-most one at the front.
+      ancestors.push(win.parent);
+    }
+    return ancestors[(ancestors.length - 1) - depth];
+  }
+
 };
