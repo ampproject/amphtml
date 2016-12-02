@@ -33,6 +33,8 @@ import {
     upgradeOrRegisterElement,
 } from '../../../../src/custom-element';
 import {utf8Encode} from '../../../../src/utils/bytes';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
@@ -40,19 +42,34 @@ import * as sinon from 'sinon';
 // otherwise test the complete A4A flow, without making assumptions about
 // the structure of that flow.
 
+/**
+ * Checks various consistency properties on the friendly iframe created by
+ * A4A privileged path rendering.  Note that this returns a Promise, so its
+ * value must be returned from any test invoking it.
+ *
+ * @param {!Element} element amp-ad element to examine.
+ * @param {string} srcdoc  A string that must occur somewhere in the friendly
+ *   iframe `srcdoc` attribute.
+ * @return {!Promise} Promise that executes assertions on friendly
+ *   iframe contents.
+ */
 function expectRenderedInFriendlyIframe(element, srcdoc) {
   expect(element, 'ad element').to.be.ok;
   const child = element.querySelector('iframe[srcdoc]');
   expect(child, 'iframe child').to.be.ok;
   expect(child.getAttribute('srcdoc')).to.contain.string(srcdoc);
-  const childBody = child.contentDocument.body;
-  expect(childBody, 'body of iframe doc').to.be.ok;
-  expect(element, 'ad tag').to.be.visible;
-  expect(child, 'iframe child').to.be.visible;
-  expect(childBody, 'ad creative content body').to.be.visible;
+  return loadPromise(child).then(() => {
+    const childDocument = child.contentDocument.documentElement;
+    expect(childDocument, 'iframe doc').to.be.ok;
+    expect(element, 'ad tag').to.be.visible;
+    expect(child, 'iframe child').to.be.visible;
+    expect(childDocument, 'ad creative content doc').to.be.visible;
+  });
 }
 
 function expectRenderedInXDomainIframe(element, src) {
+  // Note: Unlike expectRenderedInXDomainIframe, this doesn't return a Promise
+  // because it doesn't (cannot) inspect the contents of the iframe.
   expect(element, 'ad element').to.be.ok;
   expect(element.querySelector('iframe[srcdoc]'),
       'does not have a friendly iframe child').to.not.be.ok;
@@ -115,7 +132,7 @@ describe('integration test: a4a', () => {
 
   it('should render a single AMP ad in a friendly iframe', () => {
     return fixture.addElement(a4aElement).then(unusedElement => {
-      expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
+      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     });
   });
 
@@ -134,7 +151,7 @@ describe('integration test: a4a', () => {
     // .catch to a .then.
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
-      expect(error.message).to.contain.string('amp-a4a:');
+      expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
   });

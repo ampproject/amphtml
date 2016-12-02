@@ -485,7 +485,10 @@ describe('amp-analytics.visibility', () => {
     });
   });
 
-  describe('listenOnceV2', () => {
+  describe
+  .configure()
+  .skip(() => typeof IntersectionObserver == 'undefined')
+  .run('listenOnceV2', () => {
 
     let inObCallback;
     let observeSpy;

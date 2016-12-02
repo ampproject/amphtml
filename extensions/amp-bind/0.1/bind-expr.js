@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-require('./babel-helpers');
-require('./changelog');
-require('./clean');
-require('./compile');
-require('./compile-access-expr');
-require('./compile-bind-expr');
-require('./csvify-size');
-require('./dep-check');
-require('./get-zindex');
-require('./lint');
-require('./make-golden');
-require('./prepend-global');
-require('./presubmit-checks');
-require('./serve');
-require('./size');
-require('./runtime-test');
-require('./validator');
+import {parser} from './bind-expr-impl';
+
+export function evaluateBindExpr(expr, data) {
+  try {
+    parser.yy = data;
+    return parser.parse(expr);
+  } finally {
+    parser.yy = null;
+  }
+}
