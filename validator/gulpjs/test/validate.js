@@ -67,7 +67,7 @@ describe('gulp-amphtml-validator', function() {
       const validFile = createFile(VALID_FILE);
       validate.write(validFile);
       validate.once('data', function(file) {
-        assert.equal(file.ampValidationResult.status, 'FAIL');
+        assert.equal(file.ampValidationResult.status, 'N/A');
         done();
       });
     });
