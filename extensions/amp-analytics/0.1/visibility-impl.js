@@ -544,13 +544,13 @@ export class Visibility {
 
     return ((triggerType && state[IN_VIEWPORT]) || !triggerType) &&
         (config[TOTAL_TIME_MIN] === undefined ||
-        state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
+            state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
         (config[TOTAL_TIME_MAX] === undefined ||
-        state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
+            state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
         (config[CONTINUOUS_TIME_MIN] === undefined ||
-        state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
+            state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
         (config[CONTINUOUS_TIME_MAX] === undefined ||
-        state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
+            state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
   }
 
   /**
