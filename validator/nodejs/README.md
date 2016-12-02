@@ -61,3 +61,12 @@ As expected, this emits errors because the provided string in the example, `<htm
 ### 1.0.15
 * Added support for installing on Windows.
   `npm install -g amphtml-validator` should now just work.
+
+### 1.0.16
+* `npm install amphtml-validator` (local install) should now work on Windows,
+  for `require('amphtml-validator')`.
+
+### 1.0.17
+* If the amphtml-validator command is already patched up for Windows, leave it
+  alone instead of failing. Relevant if the package has been installed globally
+  and now we're performing a local install on top of it.

@@ -16,12 +16,8 @@
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
-import {isExperimentOn} from '../../../src/experiments';
-import {dev, user} from '../../../src/log';
-import {toggle, setStyle} from '../../../src/style';
-
-/** @const */
-const EXPERIMENT = 'amp-fx-flying-carpet';
+import {user} from '../../../src/log';
+import {setStyle} from '../../../src/style';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
@@ -66,12 +62,6 @@ class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, EXPERIMENT)) {
-      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
-      toggle(this.element, false);
-      return;
-    }
-
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 

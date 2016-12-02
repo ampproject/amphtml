@@ -173,6 +173,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     includePolyfills: true,
   });
 
+  compileJs('./3p/', 'ampcontext-lib.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+    minifiedName: 'ampcontext-v0.js',
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    minify: false,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    externs: ['ads/ads.extern.js',],
+    includeBasicPolyfills: false,
+  });
+
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
   compileJs('./src/', 'amp-babel.js', './dist', {
@@ -234,10 +245,18 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   });
 
   var frameHtml = '3p/frame.max.html';
-  thirdPartyBootstrap(frameHtml, shouldMinify);
+  thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
   if (watch) {
     $$.watch(frameHtml, function() {
-      thirdPartyBootstrap(frameHtml, shouldMinify);
+      thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
+    });
+  }
+
+  var nameFrameHtml = '3p/nameframe.max.html';
+  thirdPartyBootstrap(nameFrameHtml, 'nameframe.html',shouldMinify);
+  if (watch) {
+    $$.watch(nameFrameHtml, function () {
+      thirdPartyBootstrap(nameFrameHtml, 'nameframe.html', shouldMinify);
     });
   }
 }
@@ -458,9 +477,10 @@ function checkTypes() {
  * copies, and generates symlink to it.
  *
  * @param {string} input
+ * @param {string} outputName
  * @param {boolean} shouldMinify
  */
-function thirdPartyBootstrap(input, shouldMinify) {
+function thirdPartyBootstrap(input, outputName, shouldMinify) {
   $$.util.log('Processing ' + input);
 
   if (!shouldMinify) {
@@ -479,7 +499,7 @@ function thirdPartyBootstrap(input, shouldMinify) {
   // Convert default relative URL to absolute min URL.
   var html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
-  $$.file('frame.html', html, {src: true})
+  $$.file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         var aliasToLatestBuild = 'dist.3p/current-min';

@@ -54,18 +54,37 @@ let globalExponentialBackoff = function(work) {
  * elements instead of stringification.
  * @param {*} error
  * @param {!Element=} opt_associatedElement
+ * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
-  if (!self.console) {
-    return;
+  // Convert error to the expected type.
+  let isValidError;
+  if (error) {
+    if (error.message !== undefined) {
+      isValidError = true;
+    } else {
+      const origError = error;
+      error = new Error(String(origError));
+      error.origError = origError;
+    }
+  } else {
+    error = new Error('Unknown error');
   }
-  if (!error) {
-    error = new Error('no error supplied');
+  // Report if error is not an expected type.
+  if (!isValidError && getMode().localDev) {
+    setTimeout(function() {
+      const rethrow = new Error(
+          '_reported_ Error reported incorrectly: ' + error);
+      throw rethrow;
+    });
   }
+
   if (error.reported) {
-    return;
+    return /** @type {!Error} */ (error);
   }
   error.reported = true;
+
+  // Update element.
   const element = opt_associatedElement || error.associatedElement;
   if (element && element.classList) {
     element.classList.add('-amp-error');
@@ -74,27 +93,32 @@ export function reportError(error, opt_associatedElement) {
       element.setAttribute('error-message', error.message);
     }
   }
-  if (error.messageArray) {
-    (console.error || console.log).apply(console,
-        error.messageArray);
-  } else {
-    if (element) {
-      (console.error || console.log).call(console,
-          element.tagName + '#' + element.id, error.message);
-    } else if (!getMode().minified) {
-      (console.error || console.log).call(console, error.stack);
-    } else {
-      (console.error || console.log).call(console, error.message);
-    }
 
+  // Report to console.
+  if (self.console) {
+    if (error.messageArray) {
+      (console.error || console.log).apply(console,
+          error.messageArray);
+    } else {
+      if (element) {
+        (console.error || console.log).call(console,
+            element.tagName + '#' + element.id, error.message);
+      } else if (!getMode().minified) {
+        (console.error || console.log).call(console, error.stack);
+      } else {
+        (console.error || console.log).call(console, error.message);
+      }
+    }
   }
   if (element && element.dispatchCustomEventForTesting) {
     element.dispatchCustomEventForTesting('amp:error', error.message);
   }
+
   // 'call' to make linter happy. And .call to make compiler happy
   // that expects some @this.
   reportErrorToServer['call'](undefined, undefined, undefined, undefined,
       undefined, error);
+  return /** @type {!Error} */ (error);
 }
 
 /**
@@ -171,15 +195,22 @@ function reportErrorToServer(message, filename, line, col, error) {
  */
 export function getErrorReportUrl(message, filename, line, col, error,
     hasNonAmpJs) {
-  message = error && error.message ? error.message : message;
+  if (error) {
+    if (error.message) {
+      message = error.message;
+    } else {
+      // This should never be a string, but sometimes it is.
+      message = String(error);
+    }
+  }
+  if (!message) {
+    message = 'Unknown error';
+  }
   if (/_reported_/.test(message)) {
     return;
   }
   if (message == CANCELLED) {
     return;
-  }
-  if (!message) {
-    message = 'Unknown error';
   }
   if (isLoadErrorMessage(message)) {
     return;
@@ -211,7 +242,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     url += '&iem=1';
   }
 
-  if (self.AMP.viewer) {
+  if (self.AMP && self.AMP.viewer) {
     const resolvedViewerUrl = self.AMP.viewer.getResolvedViewerUrl();
     const messagingOrigin = self.AMP.viewer.maybeGetMessagingOrigin();
     if (resolvedViewerUrl) {

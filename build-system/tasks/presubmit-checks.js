@@ -108,6 +108,16 @@ var forbiddenTerms = {
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
   },
+  'documentStateFor': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/custom-element.js',
+      'src/style-installer.js',
+      'src/service/document-state.js',
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
+    ],
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -243,6 +253,7 @@ var forbiddenTerms = {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
       '3p/integration.js',
+      '3p/ampcontext-lib.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -319,12 +330,7 @@ var forbiddenTerms = {
   'isDevChannel\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-user-notification/0.1/amp-user-notification.js',
-      'src/3p-frame.js',
       'src/experiments.js',
-      'src/service/storage-impl.js',
-      'src/service/viewport-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -340,7 +346,12 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
     ]
   },
-  'eval\\(': '',
+  'eval\\(': {
+    message: shouldNeverBeUsed,
+    whitelist: [
+      'extension/amp-bind/0.1/test/test-bind-expr.js',
+    ],
+  },
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
@@ -592,6 +603,7 @@ var forbiddenTermsSrcInclusive = {
         'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
+      'extensions/amp-bind/0.1/bind-expr-impl.js',
     ],
   },
   '[^.]loadPromise': {
@@ -613,12 +625,14 @@ var forbiddenTermsSrcInclusive = {
   '\\.expandStringSync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
     ]
   },
   '\\.expandStringAsync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
     ]
   },

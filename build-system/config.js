@@ -121,6 +121,7 @@ module.exports = {
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
+    '!extensions/amp-bind/0.1/bind-expr-impl.js',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
@@ -129,6 +130,7 @@ module.exports = {
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+    '!dist.3p/current/**/ampcontext-lib.js',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',

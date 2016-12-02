@@ -15,6 +15,7 @@
  */
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {
   assertHttpsUrl,
@@ -36,7 +37,13 @@ import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
-import {getFormValidator} from './form-validators';
+import {timerFor} from '../../../src/timer';
+import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {
+  getFormValidator,
+  isCheckValiditySupported,
+} from './form-validators';
+
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -75,6 +82,12 @@ export class AmpForm {
 
     /** @const @private {!Window} */
     this.win_ = element.ownerDocument.defaultView;
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = timerFor(this.win_);
+
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacement_ = urlReplacementsForDoc(this.win_.document);
 
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
@@ -183,24 +196,30 @@ export class AmpForm {
       return;
     }
 
-    // Validity checking should always occur, novalidate only circumvent
-    // reporting and blocking submission on non-valid forms.
-    const isValid = checkUserValidityOnSubmission(this.form_);
-    if (this.shouldValidate_ && !isValid) {
-      if (opt_event) {
-        opt_event.stopImmediatePropagation();
-        opt_event.preventDefault();
+    if (isCheckValiditySupported(this.win_.document)) {
+      // Validity checking should always occur, novalidate only circumvent
+      // reporting and blocking submission on non-valid forms.
+      const isValid = checkUserValidityOnSubmission(this.form_);
+      if (this.shouldValidate_ && !isValid) {
+        if (opt_event) {
+          opt_event.stopImmediatePropagation();
+          opt_event.preventDefault();
+        }
+        // TODO(#3776): Use .mutate method when it supports passing state.
+        this.vsync_.run({
+          measure: undefined,
+          mutate: reportValidity,
+        }, {
+          validator: this.validator_,
+        });
+        return;
       }
-      // TODO(#3776): Use .mutate method when it supports passing state.
-      this.vsync_.run({
-        measure: undefined,
-        mutate: reportValidity,
-      }, {
-        validator: this.validator_,
-      });
-      return;
     }
 
+    const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
+    // Fields that support var substitutions.
+    const varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
+        '[type="hidden"][default-value]') : [];
     if (this.xhrAction_) {
       if (opt_event) {
         opt_event.preventDefault();
@@ -208,29 +227,45 @@ export class AmpForm {
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
       const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
-      let xhrUrl = this.xhrAction_;
-      if (isHeadOrGet) {
-        xhrUrl = addParamsToUrl(this.xhrAction_, this.getFormAsObject_());
+      const varSubPromises = [];
+      for (let i = 0; i < varSubsFields.length; i++) {
+        const variable = varSubsFields[i].getAttribute('default-value');
+        varSubPromises.push(
+            this.urlReplacement_.expandStringAsync(variable).then(value => {
+              varSubsFields[i].value = value;
+            }));
       }
-      this.xhr_.fetchJson(xhrUrl, {
-        body: isHeadOrGet ? undefined : new FormData(this.form_),
-        method: this.method_,
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
-      }).then(response => {
-        this.actions_.trigger(this.form_, 'submit-success', null);
-        // TODO(mkhatib, #6032): Update docs to reflect analytics events.
-        this.analyticsEvent_('amp-form-submit-success');
-        this.setState_(FormState_.SUBMIT_SUCCESS);
-        this.renderTemplate_(response || {});
-      }).catch(error => {
-        this.actions_.trigger(this.form_, 'submit-error', null);
-        this.analyticsEvent_('amp-form-submit-error');
-        this.setState_(FormState_.SUBMIT_ERROR);
-        this.renderTemplate_(error.responseJson || {});
-        rethrowAsync('Form submission failed:', error);
+      // Wait until all variables have been substituted or 100ms timeout.
+      this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
+        let xhrUrl, body;
+        if (isHeadOrGet) {
+          xhrUrl = addParamsToUrl(
+              dev().assertString(this.xhrAction_), this.getFormAsObject_());
+        } else {
+          xhrUrl = this.xhrAction_;
+          body = new FormData(this.form_);
+        }
+        return this.xhr_.fetchJson(dev().assertString(xhrUrl), {
+          body,
+          method: this.method_,
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true,
+        }).then(response => {
+          this.actions_.trigger(this.form_, 'submit-success', null);
+          // TODO(mkhatib, #6032): Update docs to reflect analytics events.
+          this.analyticsEvent_('amp-form-submit-success');
+          this.setState_(FormState_.SUBMIT_SUCCESS);
+          this.renderTemplate_(response || {});
+        }).catch(error => {
+          this.actions_.trigger(this.form_, 'submit-error', null);
+          this.analyticsEvent_('amp-form-submit-error');
+          this.setState_(FormState_.SUBMIT_ERROR);
+          this.renderTemplate_(error.responseJson || {});
+          rethrowAsync('Form submission failed:', error);
+        });
       });
     } else if (this.method_ == 'POST') {
+      // non-XHR POST requests are not supported.
       if (opt_event) {
         opt_event.preventDefault();
       }
@@ -238,7 +273,26 @@ export class AmpForm {
           'Only XHR based (via action-xhr attribute) submissions are support ' +
           'for POST requests. %s',
           this.form_);
+    } else if (this.method_ == 'GET') {
+      // Non-xhr GET requests replacement should happen synchronously.
+      for (let i = 0; i < varSubsFields.length; i++) {
+        const variable = varSubsFields[i].getAttribute('default-value');
+        varSubsFields[i].value = this.urlReplacement_.expandStringSync(
+            variable);
+      }
     }
+  }
+
+  /**
+   * Returns a race promise between resolving all promises or timing out.
+   * @param {!Array<!Promise>} promises
+   * @param {number} timeout
+   * @return {!Promise}
+   * @private
+   */
+  waitOnPromisesOrTimeout_(promises, timeout) {
+    return Promise.race(
+        [Promise.all(promises), this.timer_.promise(timeout)]);
   }
 
   /**
@@ -406,7 +460,7 @@ function updateInvalidTypesClasses(element) {
  *
  * @param {!Element} element
  * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
- * @returns {boolean} Whether the element is valid or not.
+ * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
   let shouldPropagate = false;
