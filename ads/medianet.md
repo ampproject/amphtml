@@ -16,10 +16,25 @@ limitations under the License.
 
 # Media.net
 
-Media.net adapter supports the integration of its Header Bidding solution with the publisher website that uses DoubleClick for Publishers (DFP) as the Ad Server. The example listed below states the configuration and the implementation related details.
+Media.net adapter supports the integration of both, its Contextual Monetization solution and the Header Bidding solution. 
+The example listed below states the configuration and the implementation related details.
 
 
 ## Example
+
+
+### Media.net Contextual Monetization
+
+``` html
+<amp-ad width="300" height="250"
+    type="medianet"
+    data-tagtype="cm"
+    data-cid="8CUS8O7EX"
+    data-crid="112682482">
+</amp-ad>
+
+
+```
 
 ### Media.net Header Bidder 
 
@@ -44,18 +59,32 @@ The ad size depends on the ``width`` and ``height`` attributes specified in the 
  * ``height`` 
  * ``type = "medianet"``
 
-For further configuration related details, please feel free to reach out to your Media.net contact.
+If you have questions, please feel free to reach out to your Media.net contact.
+
 
 ## Supported Parameters 
+
+###Media.net Contextual Monetization
+
+<strong>Mandatory Parameters</strong>
+ 
+* ``data-tagtype`` - This parameter represents the product the publisher is using; It should be <strong>``cm``</strong> for our <strong>Contextual Monetization solution</strong>
+* ``data-cid`` - Represents the unique customer identifier
+* ``data-crid`` - Media.net Ad unit
+
+<strong>Optional Parameters</strong>
+
+* ``data-misc`` - Accepts a json value & used to send additional data
+
+
 
 ###Media.net Header Bidder
 
 <strong>Mandatory Parameters</strong>
  
-* ``data-tagtype`` - This parameter represents the product the publisher is using; It should be <strong>headerbidder</strong> for our Header Bidding solution.
-* ``data-cid`` - Represents the unique customer identifier.
+* ``data-tagtype`` - This parameter represents the product the publisher is using; It should be <strong>``headerbidder``</strong> for our <strong>Header Bidding solution</strong>
+* ``data-cid`` - Represents the unique customer identifier
 * ``data-slot`` - Ad unit as specified in DFP
-
 
 <strong>Some of the parameters supported via Json attribute (DFP Parameters)</strong>
 
