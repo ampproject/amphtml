@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>`amp-bind` allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.</td>
+    <td><code>amp-bind</code> allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
