@@ -103,7 +103,7 @@ describes.realWin('inabox-host:position-observer', {}, env => {
         },
       };
 
-      postMessageSpy = sandbox.stub(iframe1.contentWindow, 'postMessage');
+      iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();
     });
 
     it('should postMessage on position change', () => {
