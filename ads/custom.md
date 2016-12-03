@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Custom
+# Custom (experimental)
 
 Custom does not represent a specific network. Rather, it provides a way for 
 a site to display simple ads on a self-service basis. You must provide
@@ -39,8 +39,7 @@ understood by the ad server(s) which you are calling.
 ```html
 <amp-ad width=300 height=250
     type="custom"
-    data-url="https://mysite/my-ad-server"
->
+    data-url="https://mysite/my-ad-server">
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
         <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
@@ -56,8 +55,7 @@ understood by the ad server(s) which you are calling.
 <amp-ad width=300 height=250
     type="custom"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
-    data-slot="1"
->
+    data-slot="1">
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
         <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
@@ -67,8 +65,7 @@ understood by the ad server(s) which you are calling.
 <amp-ad width=400 height=300
     type="custom"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
-    data-slot="2"
->
+    data-slot="2">
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
         <amp-img layout='fixed' height="400" width="300" src="{{src}}" data-info="{{info}}"></amp-img>
@@ -83,8 +80,7 @@ understood by the ad server(s) which you are calling.
 <amp-ad width=300 height=250
     type="custom"
     data-url="https://mysite/my-ad-server"
-    data-slot="slot-name-a"
->
+    data-slot="slot-name-a">
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
         <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
@@ -94,8 +90,7 @@ understood by the ad server(s) which you are calling.
 <amp-ad width=400 height=300
     type="custom"
     data-url="https://mysite/my-ad-server"
-    data-slot="slot-name-b"
->
+    data-slot="slot-name-b">
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
         <amp-img layout='fixed' height="400" width="300" src="{{src}}" data-info="{{info}}"></amp-img>
@@ -105,8 +100,7 @@ understood by the ad server(s) which you are calling.
 <amp-ad width=300 height=250
     type="custom"
     data-url="https://my-other-site/my-other-ad-server"
-    data-slot="123"
->
+    data-slot="123">
     <template type="amp-mustache" id="amp-template-id">
       <a href="{{href}}">
         <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
