@@ -60,6 +60,9 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
+    /** @private @const {!Document} */
+    this.doc_ = baseInstance.win.document;
+
     /** {number} */
     this.state = AdDisplayState.NOT_LAID_OUT;;
 
@@ -80,7 +83,7 @@ export class AmpAdUIHandler {
     }
 
     // Apply default fallback div when there's no default one
-    const fallback = createElementWithAttributes(document, 'div', {
+    const fallback = createElementWithAttributes(this.doc_, 'div', {
       'fallback': '',
     });
     fallback.classList.add('amp-ad-default-display');
@@ -125,7 +128,7 @@ export class AmpAdUIHandler {
     if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
       return null;
     }
-    const placeholder = createElementWithAttributes(document, 'div', {
+    const placeholder = createElementWithAttributes(this.doc_, 'div', {
       'placeholder': '',
     });
     placeholder.appendChild(this.createDefaultHolder_());
@@ -138,9 +141,9 @@ export class AmpAdUIHandler {
    * @return {!Element}
    */
   createDefaultHolder_() {
-    const adTagHolder = document.createElement('div');
+    const adTagHolder = this.doc_.createElement('div');
     adTagHolder.classList.add('-amp-ad-default-holder');
-    const adTag = document.createElement('div');
+    const adTag = this.doc_.createElement('div');
     adTag.classList.add('-amp-ad-tag');
     // TODO: support i8n
     adTag.textContent = 'Ad';
