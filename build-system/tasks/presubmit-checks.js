@@ -330,12 +330,7 @@ var forbiddenTerms = {
   'isDevChannel\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-user-notification/0.1/amp-user-notification.js',
-      'src/3p-frame.js',
       'src/experiments.js',
-      'src/service/storage-impl.js',
-      'src/service/viewport-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -351,7 +346,12 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
     ]
   },
-  'eval\\(': '',
+  'eval\\(': {
+    message: shouldNeverBeUsed,
+    whitelist: [
+      'extension/amp-bind/0.1/test/test-bind-expr.js',
+    ],
+  },
   'storageForDoc': {
     message: requiresReviewPrivacy,
     whitelist: [
@@ -603,6 +603,7 @@ var forbiddenTermsSrcInclusive = {
         'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
+      'extensions/amp-bind/0.1/bind-expr-impl.js',
     ],
   },
   '[^.]loadPromise': {

@@ -22,6 +22,8 @@ import {ValidationBubble} from './validation-bubble';
 /** @type {boolean|undefined} */
 let reportValiditySupported;
 
+/** @type {boolean|undefined} */
+let checkValiditySupported;
 
 /** @type {number} */
 let validationBubbleCount = 0;
@@ -31,8 +33,17 @@ let validationBubbleCount = 0;
  * @param {boolean} isSupported
  * @private visible for testing.
  */
-export function setReportValiditySupported(isSupported) {
+export function setReportValiditySupportedForTesting(isSupported) {
   reportValiditySupported = isSupported;
+}
+
+
+/**
+ * @param {boolean} isSupported
+ * @private visible for testing.
+ */
+export function setCheckValiditySupportedForTesting(isSupported) {
+  checkValiditySupported = isSupported;
 }
 
 
@@ -370,6 +381,19 @@ function isReportValiditySupported(doc) {
     reportValiditySupported = !!doc.createElement('form').reportValidity;
   }
   return reportValiditySupported;
+}
+
+
+/**
+ * Returns whether reportValidity API is supported.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isCheckValiditySupported(doc) {
+  if (checkValiditySupported === undefined) {
+    checkValiditySupported = !!doc.createElement('input').checkValidity;
+  }
+  return checkValiditySupported;
 }
 
 

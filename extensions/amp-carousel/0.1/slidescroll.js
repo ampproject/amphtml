@@ -96,7 +96,7 @@ export class AmpSlideScroll extends BaseSlides {
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
-    this.isAndroidFF_ = platform.isAndroid() && platform.isFirefox();
+    this.isIos_ = platform.isIos();
   }
 
   /** @override */
@@ -410,16 +410,16 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      //TODO (camelburrito): Identify more platforms that dont require
+      //TODO (camelburrito): Identify more platforms that require
       // -amp-no-scroll.
-      if (!this.isAndroidFF_) {
+      if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.
         this.slidesContainer_.classList.add('-amp-no-scroll');
       }
       // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlide_(newIndex);
       this.vsync_.mutate(() => {
-        if (!this.isAndroidFF_) {
+        if (this.isIos_) {
           // Make the container scrollable again to enable user swiping.
           this.slidesContainer_.classList.remove('-amp-no-scroll');
         }
