@@ -26,13 +26,13 @@ const PluginError = gutil.PluginError;
 
 const STATUS_FAIL = 'FAIL';
 const STATUS_PASS = 'PASS';
-const STATUS_VALIDATOR_UNAVAILABLE = 'N/A';
+const STATUS_UNKNOWN = 'UNKNOWN';
 
 /**
  * Validates AMP files and attaches the validation result to the file object.
  *
- * @param {Object} validator - amphtml validator
- * @returns {stream} gulp file stream
+ * @param {?Object} validator - amphtml validator
+ * @return {!stream} gulp file stream
  */
 module.exports.validate = function(validator) {
 
@@ -62,7 +62,7 @@ module.exports.validate = function(validator) {
           // should fail the build or not.
           gutil.log(gutil.colors.red(err.message));
           file.ampValidationResult = {
-            status: STATUS_VALIDATOR_UNAVAILABLE,
+            status: STATUS_UNKNOWN,
           };
           return callback(null, file);
         });
@@ -74,8 +74,8 @@ module.exports.validate = function(validator) {
 /**
  * Formats and prints the validation results to the console.
  *
- * @param {Object} logger - logger used for printing the results (optional)
- * @returns {stream} gulp file stream
+ * @param {?Object} logger - logger used for printing the results (optional)
+ * @return {!stream} gulp file stream
  */
 module.exports.format = function(logger) {
 
@@ -101,7 +101,7 @@ module.exports.format = function(logger) {
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
       report += gutil.colors.green(validationResult.status);
-    } else if (validationResult.status === STATUS_VALIDATOR_UNAVAILABLE) {
+    } else if (validationResult.status === STATUS_UNKNOWN) {
       report += gutil.colors.red(validationResult.status);
     } else {
       report += gutil.colors.red(validationResult.status);
@@ -124,7 +124,7 @@ module.exports.format = function(logger) {
 /**
  * Fail when the stream ends if any AMP validation error(s) occurred.
  *
- * @returns {stream} gulp file stream
+ * @return {!stream} gulp file stream
  */
 module.exports.failAfterError = function() {
 
@@ -135,7 +135,7 @@ module.exports.failAfterError = function() {
       return callback(null, file);
     }
     const status = file.ampValidationResult.status;
-    if (status === STATUS_FAIL || status === STATUS_VALIDATOR_UNAVAILABLE) {
+    if (status === STATUS_FAIL || status === STATUS_UNKNOWN) {
       failedFiles++;
     }
     return callback(null, file);
