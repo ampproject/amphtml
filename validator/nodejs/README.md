@@ -13,7 +13,7 @@ https://www.ampproject.org/docs/guides/validate.html#command-line-tool
 
 ## Node.js API
 
-This API is new and still experimental, feedback is especially welcome.
+This API is new - feedback is especially welcome.
 
 To install, use `npm install amphtml-validator` in your project directory,
 or add `amphtml-validator` as a dependency to your package.json.
