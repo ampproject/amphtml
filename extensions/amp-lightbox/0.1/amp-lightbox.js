@@ -33,6 +33,9 @@ class AmpLightbox extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?{width: number, height: number}} */
+    this.size_ = null;
+
     /** @private {?Element} */
     this.container_ = null;
 
@@ -162,6 +165,9 @@ class AmpLightbox extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Clean up when closing lightbox.
+   */
   close() {
     if (!this.active_) {
       return;
@@ -180,6 +186,8 @@ class AmpLightbox extends AMP.BaseElement {
 
   /**
    * Handles scroll on the amp-lightbox.
+   * The scroll throttling and visibility calculation is similar to
+   * the implementation in scrollable-carousel
    * @private
    */
   scrollHandler_() {
@@ -192,7 +200,9 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
-   * @param {!number} startingScrollTop
+   * Throttle scrolling events and update the lightbox
+   * when scrolling slowly or when the scrolling ends.
+   * @param {number} startingScrollTop
    * @private
    */
   waitForScroll_(startingScrollTop) {
@@ -211,43 +221,6 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
-   * @param {number} pos
-   * @param {function(!Element)} callback
-   * @private
-   */
-  forEachInLightbox_(pos, callback) {
-    const containerHeight = this.element./*OK*/clientHeight;
-    for (let i = 0; i < this.children_.length; i++) {
-      const cell = this.children_[i];
-      if (cell./*OK*/offsetTop + cell./*OK*/offsetHeight >= pos &&
-          cell./*OK*/offsetTop <= pos + containerHeight) {
-        callback(cell);
-      }
-    }
-  }
-
-  /**
-   * @param {number} newPos
-   * @param {number} oldPos
-   * @private
-   */
-  updateChildrenInViewport_(newPos, oldPos) {
-    const seen = [];
-    this.forEachInLightbox_(newPos, cell => {
-      seen.push(cell);
-      this.updateInViewport(cell, true);
-    });
-    if (oldPos != newPos) {
-      this.forEachInLightbox_(oldPos, cell => {
-        if (seen.indexOf(cell) == -1) {
-          this.updateInViewport(cell, false);
-          this.schedulePause(cell);
-        }
-      });
-    }
-  }
-
-  /**
    * Update the inViewport status given current position.
    * @param {number} pos
    * @private
@@ -257,6 +230,61 @@ class AmpLightbox extends AMP.BaseElement {
     this.updateChildrenInViewport_(pos, this.oldPos_);
     this.oldPos_ = pos;
     this.pos_ = pos;
+  }
+
+  /**
+   * Update the inViewport status of children when scroll position changed.
+   * @param {number} newPos
+   * @param {number} oldPos
+   * @private
+   */
+  updateChildrenInViewport_(newPos, oldPos) {
+    const seen = [];
+    this.forEachVisibleChild_(newPos, cell => {
+      seen.push(cell);
+      this.updateInViewport(cell, true);
+    });
+    if (oldPos != newPos) {
+      this.forEachVisibleChild_(oldPos, cell => {
+        if (seen.indexOf(cell) == -1) {
+          this.updateInViewport(cell, false);
+        }
+      });
+    }
+  }
+
+  /**
+   * Call the callback function for each child element that is visible in the
+   * lightbox given current scroll position.
+   * @param {number} pos
+   * @param {function(!Element)} callback
+   * @private
+   */
+  forEachVisibleChild_(pos, callback) {
+    const containerHeight = this.getSize_().height;
+    for (let i = 0; i < this.children_.length; i++) {
+      const child = this.children_[i];
+      // Check whether child element is visible in the lightbox given
+      // current scrollTop position of lightbox
+      if (child./*OK*/offsetTop + child./*OK*/offsetHeight >= pos &&
+          child./*OK*/offsetTop <= pos + containerHeight) {
+        callback(child);
+      }
+    }
+  }
+
+  /**
+   * Returns the size of the lightbox.
+   * @return {!{width: number, height: number}}
+   */
+  getSize_() {
+    if (!this.size_) {
+      this.size_ = {
+        width: this.element./*OK*/clientWidth,
+        height: this.element./*OK*/clientHeight,
+      };
+    }
+    return this.size_;
   }
 
   getHistory_() {
