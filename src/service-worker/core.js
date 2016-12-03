@@ -58,9 +58,9 @@ let cache;
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
  * release version we are serving it.
  *
- * @type {!Object<string, RtvVersion>}
+ * @type {!Object<string, !Promise<RtvVersion>>}
  */
-const clientsMap = Object.create(null);
+const clientsVersion = Object.create(null);
 
 /**
  * A mapping from a client's referrer into the time that referrer last made a
@@ -275,21 +275,47 @@ export function fetchAndCache(cache, request, requestPath, requestVersion) {
  *
  * @param {!Cache} cache
  * @param {string} requestPath
+ * @param {RtvVersion} requestVersion
  * @return {!Promise<RtvVersion>}
  * @visibleForTesting
  */
-export function getCachedVersion(cache, requestPath) {
-  // TODO(jridgewell): We should make this a bit smarter, so that it selects
-  // the version that has a lot of matches, not just this request file.
+export function getCachedVersion(cache, requestPath, requestVersion) {
   return cache.keys().then(requests => {
+    // TODO(jridgewell): This should really count the bytes of the response,
+    // but there's no efficient way to do that.
+    const counts = {};
+    let max = requestVersion;
+    let maxCount = 0;
+
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
-      if (requestPath === pathname(url)) {
-        return rtvVersion(url);
+      const path = pathname(url);
+      const version = rtvVersion(url);
+
+      if (isBlacklisted(version)) {
+        continue;
+      }
+
+      let count = counts[version] || 0;
+
+      if (path.indexOf('/', 1) === -1) {
+        // Main binary
+        count += 5;
+      } else if (requestPath === path) {
+        // Give a little precedence to the requested file
+        count += 2;
+      } else {
+        count++;
+      }
+
+      counts[version] = count;
+      if (count > maxCount) {
+        max = version;
+        maxCount = count;
       }
     }
 
-    return '';
+    return max;
   });
 }
 
@@ -328,30 +354,13 @@ export function handleFetch(request, maybeClientId) {
   return cachePromise.then(() => {
     // If we already registered this client, we must always use the same
     // version.
-    if (clientsMap[clientId]) {
-      return clientsMap[clientId];
+    if (clientsVersion[clientId]) {
+      return clientsVersion[clientId];
     }
 
-    // If not, do we have this version cached?
-    return getCachedVersion(cache, requestPath).then(version => {
-      // We have a cached version! Serve it up!
-      if (version && !isBlacklisted(version)) {
-        return version;
-      }
-
-      // Tears! We have nothing cached, so we'll have to make a request.
-      return requestVersion;
-    }).then(version => {
-      // Determining the version to serve is racey, since there are parallel
-      // requests coming in for all the CDN JS files. If one of them "won"
-      // the race, respect the winner.
-      if (clientsMap[clientId]) {
-        return clientsMap[clientId];
-      }
-
-      clientsMap[clientId] = version;
-      return version;
-    });
+    // If not, let's find the version to serve up.
+    return clientsVersion[clientId] = getCachedVersion(cache, requestPath,
+        requestVersion);
   }).then(version => {
     const versionedRequest = normalizedRequest(request, version);
 
