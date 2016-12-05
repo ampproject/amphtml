@@ -272,6 +272,8 @@ function compile(entryModuleFilenames, outputDir,
           'const',
           'constantProperty',
           'globalThis');
+      compilerOptions.compilerFlags.conformance_configs =
+          'build-system/conformance-config.textproto';
 
       // TODO(aghassemi): Remove when NTI is the default.
       if (argv.nti) {

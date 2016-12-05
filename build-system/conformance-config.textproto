@@ -1,0 +1,6 @@
+requirement: {
+  rule_id: 'closure:throwOfNonErrorTypes'
+  type: CUSTOM
+  java_class: 'com.google.javascript.jscomp.ConformanceRules$BanThrowOfNonErrorTypes'
+  error_message: 'Should not throw a non-Error object.'
+}
