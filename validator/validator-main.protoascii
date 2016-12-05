@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 318
+spec_file_revision: 319
 
 # Validator extensions.
 # =====================
@@ -1695,6 +1695,22 @@ tags: {
   attrs: { name: "cy" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "r" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
+  tag_name: "ELLIPSE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "cx" }
+  attrs: { name: "cy" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "rx" }
+  attrs: { name: "ry" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
   attr_lists: "svg-conditional-processing-attributes"
