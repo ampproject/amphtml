@@ -36,12 +36,12 @@
  */
 
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {logo} from './logo-image';
+import {logo, showMoreArrow} from './images';
 import * as utils from './utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyles} from '../../../src/style';
+// import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 import * as events from '../../../src/event-helper';
 import {postMessage} from '../../../src/iframe-helper';
@@ -64,9 +64,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.iframePromise_ = null;
-
-    /** @private {?boolean} */
-    this.iframeLoaded_ = false;
 
     /** @private {?string} */
     this.item_ = '';
@@ -127,14 +124,32 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
-    setStyles(placeholder, {'height': '300px'});
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createPlaybuzzLoader_());
     return placeholder;
   }
 
+  getOverflowElement_() {
+    const createElement = utils.getElementCreator(this.element.ownerDocument);
+
+    const overflow = createElement('div', 'pb-overflow');
+    overflow.setAttribute('overflow', '');
+
+    const overflowButton = createElement('button');
+    overflowButton.textContent = 'Show More';
+
+    const arrow = createElement('img', 'pb-arrow-down');
+    arrow.src = showMoreArrow;
+
+    overflowButton.appendChild(arrow);
+    overflow.appendChild(overflowButton);
+
+    return overflow;
+  }
+
   /** @override */
   layoutCallback() {
+
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('frameborder', '0');
@@ -145,19 +160,15 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.listenToPlaybuzzItemMessage_('resize_height',
       this.itemHeightChanged_.bind(this));
 
+    this.element.appendChild(this.getOverflowElement_());
+
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    setStyles(this.element, {'height': '300px'});
-
-    setStyles(iframe, {
-      'opacity': 0,
-      'min-height': '300px',
-      'height': '300px',
-    });
 
     return this.iframePromise_ = this.loadPromise(iframe).then(() => {
-      this.iframeLoaded_ = true;
-      this.applyHeight_();
+
+      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */});
+
       const unlisten = this.getViewport().onChanged(
         utils.debounce(this.sendScrollDataToItem_.bind(this), 250));
       this.unlisteners_.push(unlisten);
@@ -196,26 +207,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
     }
 
     this.itemHeight_ = height; //Save new height
-
-    if (!this.iframeLoaded_) {
-      return;
-    }
-
-    this.applyHeight_();
   }
 
-  applyHeight_() {
-    const heightInPixels = this.itemHeight_ + 'px';
-    this.attemptChangeHeight(this.itemHeight_);
-
-    this.getVsync().mutate(() => {
-      setStyles(this.iframe_, {
-        'height': heightInPixels,
-        'width': '100%',
-        'opacity': 1,
-      });
-    });
-  }
 
   /**
    * @param {string} messageName
