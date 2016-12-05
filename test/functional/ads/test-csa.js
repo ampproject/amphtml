@@ -301,5 +301,51 @@ describe('amp-ad-csa-impl', () => {
 
     });
 
+    it('when ads do not load', () => {
+
+      setContainerHeight('0px');
+      setContextHeight(400);
+
+      // Set up
+      registerCallbacks();
+      const noAdsSpy = sandbox.stub(window.context, 'noContentAvailable');
+      const resizeIframe = generateCallback(null,null);
+
+      // Try to resize when ads are loaded
+      resizeIframe('csacontainer', false);
+
+      expect(noAdsSpy.called).to.equal(true);
+
+    });
+
+    it('when ads do not load but there is backfill', () => {
+
+      setContainerHeight('0px');
+      setContextHeight(400);
+
+      // Set up stubs and spys
+      registerCallbacks();
+      const noAdsSpy = sandbox.stub(window.context, 'noContentAvailable');
+      global._googCsa = function(a,b,c) { return true; };
+      const _googCsaSpy = sandbox.stub(global, '_googCsa',
+        (a,b,c) => { 
+          return true; 
+        }
+      );
+      
+      // Generate a callback with non-null backfill options
+      const resizeIframe = generateCallback({},{});
+
+      // Try to resize when ads are loaded
+      resizeIframe('csacontainer', false);
+
+      // Should not tell AMP we have no ads
+      expect(noAdsSpy.called).to.equal(false);
+
+      // Should make a new request for ads
+      expect(_googCsaSpy.args[0][0]).to.equal('ads');
+
+    });
+
   });
 });
