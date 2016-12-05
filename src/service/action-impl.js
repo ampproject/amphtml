@@ -232,7 +232,7 @@ export class ActionService {
           if (bind) {
             bind.setState(action.actionInfo.args);
           } else {
-            this.actionInfoError_('amp-bind is not installed', action.actionInfo);
+            this.actionInfoError_('amp-bind not installed', action.actionInfo);
           }
         });
       } else {
