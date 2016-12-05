@@ -18,9 +18,9 @@ import {getElementServiceForDoc} from './element-service';
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!../extensions/amp-bind/0.1/bind.Bind>}
+ * @return {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>}
  */
 export function bindForDoc(nodeOrDoc) {
-  return /** @type {!Promise<!../extensions/amp-bind/0.1/bind.Bind>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'amp-bind', 'amp-bind'));
+  return /** @type {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'bind', 'amp-bind'));
 }

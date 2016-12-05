@@ -32,7 +32,7 @@ let BindingDef;
 
 /**
  * @typedef {{
- *   result: BindExpressionResultDef,
+ *   results: Array<BindExpressionResultDef>,
  *   verifyOnly: boolean
  * }}
  */
@@ -49,7 +49,7 @@ export class Bind {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const {!Array<BindingDef>} */
+    /** {!Array<BindingDef>} */
     this.bindings_ = [];
 
     /** @const {!Object} */
@@ -121,17 +121,17 @@ export class Bind {
   bindingForAttribute_(attribute, element) {
     // TODO(choumx): Only allow binding to attributes allowed by validator.
 
-    if (attribute.name.length <= 2) {
-      return null;
-    }
     const name = attribute.name;
-    if (name[0] === '[' && name[name.length - 1] === ']') {
-      return {
-        property: name.substr(1, name.length - 2),
-        expression: attribute.value,
-        element,
-      };
+    if (name.length > 2) {
+      if (name[0] === '[' && name[name.length - 1] === ']') {
+        return {
+          property: name.substr(1, name.length - 2),
+          expression: attribute.value,
+          element,
+        };
+      }
     }
+    return null;
   }
 
   /**
@@ -189,13 +189,20 @@ export class Bind {
     const property = binding.property;
     const element = binding.element;
 
-    // TODO(choumx): Support arrays for classes and objects for attributes.
+    // TODO(choumx): Support objects for attributes.
 
     if (property === 'text') {
       element.textContent = newValue;
     } else if (property === 'class') {
       // TODO(choumx): SVG elements are an issue, should disallow in validator.
-      element.classList = newValue;
+
+      if (Array.isArray(newValue)) {
+        element.className = newValue.join(' ');
+      } else if (typeof newValue === 'string') {
+        element.className = newValue;
+      } else {
+        user().error(TAG_, 'Unsupported result for class binding', newValue);
+      }
     } else {
       if (newValue === true) {
         element.setAttribute(property, '');
@@ -207,19 +214,32 @@ export class Bind {
           return;
         }
 
+        /** @type {boolean|number|string|null} */
+        const attributeValue = this.attributeValueOf_(newValue);
+        if (attributeValue === null) {
+          user().error(TAG_,
+              'Unsupported result for attribute binding', newValue);
+          return;
+        }
+
         // TODO(choumx): Add attribute sanitization in line with validator.
 
-        element.setAttribute(property, newValue);
+        element.setAttribute(property, attributeValue);
 
         // Update internal state for AMP elements.
         if (element.classList.contains('-amp-element')) {
           const resources = element.getResources();
-          if (property === 'width') {
-            resources./*OK*/changeSize(element, undefined, newValue);
-          } else if (property === 'height') {
-            resources./*OK*/changeSize(element, newValue, undefined);
+          if (typeof attributeValue === 'number') {
+            if (property === 'width') {
+              resources./*OK*/changeSize(element, undefined, attributeValue);
+            } else if (property === 'height') {
+              resources./*OK*/changeSize(element, attributeValue, undefined);
+            }
+          } else {
+            user().error(TAG_,
+                'Unsupported result for [width] or [height]', attributeValue);
           }
-          element.attributeChangedCallback(property, oldValue, newValue);
+          element.attributeChangedCallback(property, oldValue, attributeValue);
         }
       }
     }
@@ -236,13 +256,28 @@ export class Bind {
     const property = binding.property;
     const element = binding.element;
 
-    // TODO(choumx): Support arrays for classes and objects for attributes.
+    // TODO(choumx): Support objects for attributes.
 
     let initialValue;
+    let match = true;
+
     if (property === 'text') {
       initialValue = element.textContent;
+      match = (initialValue === expectedValue);
     } else if (property === 'class') {
       initialValue = element.classList;
+
+      /** @type {!Array<string>} */
+      let classes = [];
+      if (Array.isArray(expectedValue)) {
+        classes = expectedValue;
+      } else if (typeof expectedValue === 'string') {
+        classes = expectedValue.split(' ');
+      } else {
+        user().error(TAG_,
+            'Unsupported result for class binding', expectedValue);
+      }
+      match = this.compareStringArrays_(initialValue, classes);
     } else {
       const attribute = element.getAttribute(property);
       if (typeof expectedValue === 'boolean') {
@@ -250,13 +285,50 @@ export class Bind {
       } else {
         initialValue = attribute;
       }
+      // Use abstract equality since boolean attributes return value of ''.
+      match = (initialValue == expectedValue);
     }
 
-    if (initialValue != expectedValue) {
+    if (!match) {
       user().error(TAG_,
         `<${element.tagName}> element [${property}] binding ` +
         `default value (${initialValue}) does not match first expression ` +
         `result (${expectedValue}).`);
+    }
+  }
+
+  /**
+   * Returns true if both arrays contain the same strings.
+   * @param {!(IArrayLike<string>|Array<string>)} a
+   * @param {!(IArrayLike<string>|Array<string>)} b
+   * @return {boolean}
+   */
+  compareStringArrays_(a, b) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    const sortedA = a.slice().sort();
+    const sortedB = b.slice().sort();
+    for (let i = 0; i < a.length; i++) {
+      if (sortedA[i] !== sortedB[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Returns `value` if it's an appropriate Element attribute type.
+   * Otherwise, returns null.
+   * @param {BindExpressionResultDef} value
+   * @return {(string|boolean|number|null)}
+   */
+  attributeValueOf_(value) {
+    if (typeof value === 'string' || typeof value === 'boolean'
+       || typeof value === 'number') {
+      return value;
+    } else {
+      return null;
     }
   }
 }

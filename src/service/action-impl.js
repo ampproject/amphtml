@@ -229,14 +229,10 @@ export class ActionService {
     if (action.actionInfo.target === 'AMP') {
       if (action.actionInfo.method === 'setBindState') {
         bindForDoc(this.ampdoc).then(bind => {
-          if (bind) {
-            bind.setState(action.actionInfo.args);
-          } else {
-            this.actionInfoError_('amp-bind not installed', action.actionInfo);
-          }
+          bind.setState(action.actionInfo.args);
         });
       } else {
-        this.actionInfoError_('unrecognized action', action.actionInfo);
+        this.actionInfoError_('unrecognized action', action.actionInfo, null);
       }
     } else {
       const target = this.root_.getElementById(action.actionInfo.target);

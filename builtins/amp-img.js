@@ -49,7 +49,7 @@ export class AmpImg extends BaseElement {
     if (name === 'src') {
       this.srcset_ = srcsetFromElement(this.element);
       this.updateImageSrc_();
-    } else if (this.attributesToPropagate_.indexOf(name) >= 0) {
+    } else if (this.img_ && this.attributesToPropagate_.indexOf(name) >= 0) {
       this.propagateAttributes(name, this.img_);
     }
   }

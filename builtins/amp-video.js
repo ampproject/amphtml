@@ -56,7 +56,7 @@ export function installVideo(win) {
     attributeChangedCallback(name, unusedOldValue, unusedNewValue) {
       if (name === 'src') {
         this.updateVideoSrc_();
-      } else if (this.attributesToPropagateOnChange_.indexOf(name) >= 0) {
+      } else if (this.video_ && this.attributesToPropagateOnChange_.indexOf(name) >= 0) {
         this.propagateAttributes(name, this.video_);
       }
     }
@@ -147,7 +147,9 @@ export function installVideo(win) {
       if (this.element.getAttribute('src')) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
-      this.propagateAttributes('src', this.video_);
+      if (this.video_) {
+        this.propagateAttributes('src', this.video_);
+      }
     }
 
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
