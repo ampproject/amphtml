@@ -15,41 +15,41 @@
  */
 
 import {
-  getElementService,
-  getElementServiceIfAvailable,
+  getElementServiceForDoc,
+  getElementServiceIfAvailableForDoc,
 } from './element-service';
 
 
 /**
- * @param {!Window} window
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
-export function analyticsFor(window) {
+export function analyticsForDoc(nodeOrDoc) {
   return (/** @type {!Promise<
             !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementService(
-                window, 'amp-analytics-instrumentation', 'amp-analytics')));
+          >} */ (getElementServiceForDoc(
+                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 };
 
 /**
- * @param {!Window} window
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
  */
-export function analyticsForOrNull(window) {
+export function analyticsForDocOrNull(nodeOrDoc) {
   return (/** @type {!Promise<
             ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementServiceIfAvailable(
-                window, 'amp-analytics-instrumentation', 'amp-analytics')));
+          >} */ (getElementServiceIfAvailableForDoc(
+                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 };
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.
- * @param {!Window} window
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  */
-export function triggerAnalyticsEvent(window, eventType, opt_vars) {
-  analyticsForOrNull(window).then(analytics => {
+export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
+  analyticsForDocOrNull(nodeOrDoc).then(analytics => {
     if (!analytics) {
       return;
     }

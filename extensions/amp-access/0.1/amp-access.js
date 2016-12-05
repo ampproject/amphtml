@@ -293,7 +293,9 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.win, eventType);
+    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
+    // is migrated to ampdoc as well.
+    triggerAnalyticsEvent(this.win.document.documentElement, eventType);
   }
 
   /**

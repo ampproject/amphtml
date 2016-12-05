@@ -592,6 +592,6 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    triggerAnalyticsEvent(this.win, eventType, vars);
+    triggerAnalyticsEvent(this.element, eventType, vars);
   }
 }
