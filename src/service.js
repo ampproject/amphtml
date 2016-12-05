@@ -18,6 +18,7 @@
 import './polyfills';
 import {dev} from './log';
 
+
 /**
  * Holds info about a service.
  * - obj: Actual service implementation when available.
@@ -44,6 +45,22 @@ export class Disposable {
    * be called only once in the lifecycle of a service.
    */
   dispose() {}
+}
+
+
+/**
+ * This interface provides a `adoptEmbedWindow` method that will be called by
+ * runtime for a new embed window.
+ * @interface
+ */
+export class EmbeddableService {
+
+  /**
+   * Instructs the service to adopt the embed window and add any necessary
+   * listeners and resources.
+   * @param {!Window} unusedEmbedWin
+   */
+  adoptEmbedWindow(unusedEmbedWin) {}
 }
 
 
@@ -561,6 +578,44 @@ function disposeServiceInternal(id, service) {
     // services.
     dev().error('SERVICE', 'failed to dispose service', id, e);
   }
+}
+
+
+/**
+ * Whether the specified service implements `EmbeddableService` interface.
+ * @param {!Object} service
+ * @return {boolean}
+ */
+export function isEmbeddable(service) {
+  return typeof service.adoptEmbedWindow == 'function';
+}
+
+
+/**
+ * Asserts that the specified service implements `EmbeddableService` interface
+ * and typecasts the instance to `EmbeddableService`.
+ * @param {!Object} service
+ * @return {!EmbeddableService}
+ */
+export function assertEmbeddable(service) {
+  dev().assert(isEmbeddable(service),
+      'required to implement EmbeddableService');
+  return /** @type {!EmbeddableService} */ (service);
+}
+
+
+/**
+ * Adopts an embeddable (implements `EmbeddableService` interface) service
+ * in embed scope.
+ * @param {!Window} embedWin
+ * @param {string} serviceId
+ */
+export function adoptServiceForEmbed(embedWin, serviceId) {
+  const frameElement = /** @type {!Node} */ (dev().assert(
+      embedWin.frameElement,
+      'frameElement not found for embed'));
+  const service = getExistingServiceForDoc(frameElement, serviceId);
+  assertEmbeddable(service).adoptEmbedWindow(embedWin);
 }
 
 

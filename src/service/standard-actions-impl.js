@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {actionServiceForDoc} from '../action';
 import {fromClassForDoc} from '../service';
-import {installActionServiceForDoc} from './action-impl';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
 
@@ -23,6 +23,7 @@ import {toggle} from '../style';
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
+ * @implements {../service.EmbeddableService}
  * @private Visible for testing.
  */
 export class StandardActions {
@@ -31,12 +32,25 @@ export class StandardActions {
    */
   constructor(ampdoc) {
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = installActionServiceForDoc(ampdoc);
+    this.actions_ = actionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = installResourcesServiceForDoc(ampdoc);
 
-    this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
+    this.installActions_(this.actions_);
+  }
+
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    this.installActions_(actionServiceForDoc(embedWin.document));
+  }
+
+  /**
+   * @param {!./action-impl.ActionService} actionService
+   * @private
+   */
+  installActions_(actionService) {
+    actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
   }
 
   /**

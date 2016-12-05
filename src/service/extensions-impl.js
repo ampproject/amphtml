@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -21,7 +22,6 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import {fromClass, setParentWindow} from '../service';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {install as installDocContains} from '../polyfills/document-contains';
@@ -385,6 +385,9 @@ export class Extensions {
       opt_preinstallCallback(childWin);
     }
 
+    // Adopt embeddable services.
+    adoptServicesForEmbed(childWin);
+
     // Install built-ins.
     copyBuiltinElementsToChildWindow(childWin);
 
@@ -393,15 +396,20 @@ export class Extensions {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
-      copyElementToChildWindow(childWin, extensionId);
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
+        // TODO(dvoytenko): Adopt embeddable services from the extension when
+        // becomes necessary. This will require refactoring of extension
+        // loader that can be resolved via the parent ampdoc.
+
+        // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
         if (elementDef && elementDef.css) {
           installStyles(childWin.document, elementDef.css, () => {},
               /* isRuntime */ false, extensionId);
         }
+        copyElementToChildWindow(childWin, extensionId);
       });
       promises.push(promise);
     });
@@ -610,6 +618,7 @@ export function installBuiltinElements(win) {
   installVideo(win);
 }
 
+
 /**
  * Copy builtins to a child window.
  * @param {!Window} childWin
@@ -620,6 +629,7 @@ function copyBuiltinElementsToChildWindow(childWin) {
   copyElementToChildWindow(childWin, 'amp-video');
 }
 
+
 /**
  * Install polyfills in the child window (friendly iframe).
  * @param {!Window} childWin
@@ -628,4 +638,17 @@ function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
   installCustomElements(childWin);
+}
+
+
+/**
+ * Adopt predefined core services for the child window (friendly iframe).
+ * @param {!Window} childWin
+ */
+function adoptServicesForEmbed(childWin) {
+  // The order of service adoptations is important.
+  // TODO(dvoytenko): Refactor service registration if this set becomes
+  // to pass the "embeddable" flag if this set becomes too unwieldy.
+  adoptServiceForEmbed(childWin, 'action');
+  adoptServiceForEmbed(childWin, 'standard-actions');
 }
