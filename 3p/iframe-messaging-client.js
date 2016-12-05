@@ -57,6 +57,15 @@ export class IframeMessagingClient {
   }
 
   /**
+   *  Send a postMessage to Host Window
+   *  @param {object} message The message to send.
+   *  @private
+   */
+  messageHost_(message) {
+    this.getHostWindow().postMessage/*OK*/(message, '*');
+  }
+
+  /**
    * Sets up event listener for post messages of the desired type.
    *   The actual implementation only uses a single event listener for all of
    *   the different messages, and simply diverts the message to be handled
@@ -86,7 +95,8 @@ export class IframeMessagingClient {
             this.callbackFor_[payload.type]) {
           try {
             // We should probably report exceptions within callback
-            this.callbackFor_[payload.type](payload);
+            const callback = this.callbackFor_[payload.type];
+            callback(payload);
           } catch (err) {
             user().error(
                 'IFRAME-MSG',
@@ -106,7 +116,7 @@ export class IframeMessagingClient {
    */
   getSentinel() {
     if (!this.sentinel) {
-      this.sentinel = '0-' + getRandom(this.win_);
+      this.sentinel = this.generateSentinel_();
     }
     return this.sentinel;
   }
@@ -117,8 +127,19 @@ export class IframeMessagingClient {
    */
   getHostWindow() {
     if (!this.hostWindow) {
-      this.hostWindow = this.win_.parent;
+      this.hostWindow = this.generateWindow_();
     }
     return this.hostWindow;
+  }
+
+  /**
+   *  @private
+   */
+  generateWindow_() {
+    return this.win_.parent;
+  }
+
+  generateSentinel_() {
+    return '0-' + getRandom(this.win_);
   }
 };
