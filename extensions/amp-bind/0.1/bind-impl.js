@@ -32,14 +32,14 @@ let BindingDef;
 
 /**
  * @typedef {{
- *   result: BindExpressionResult
+ *   result: BindExpressionResultDef,
  *   verifyOnly: boolean
  * }}
  */
 let BindVsyncStateDef;
 
 /** @typedef {(null|boolean|string|number|Array|Object)} */
-let BindExpressionResult;
+let BindExpressionResultDef;
 
 export class Bind {
   /**
@@ -182,7 +182,7 @@ export class Bind {
   /**
    * Applies `newValue` to the element bound in `binding`.
    * @param {!BindingDef} binding
-   * @param {BindExpressionResult} newValue
+   * @param {BindExpressionResultDef} newValue
    * @private
    */
   applyBinding_(binding, newValue) {
@@ -229,7 +229,7 @@ export class Bind {
    * If the current value of `binding` equals `expectedValue`, returns true.
    * Otherwise, returns false.
    * @param {!BindingDef} binding
-   * @param {BindExpressionResult} expectedValue
+   * @param {BindExpressionResultDef} expectedValue
    * @private
    */
   verifyBinding_(binding, expectedValue) {
