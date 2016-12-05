@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 316
+spec_file_revision: 320
 
 # Validator extensions.
 # =====================
@@ -577,9 +577,14 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     }
     # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
+    # TODO(honeybadgerdontcare): Remove the .i-amp- case after i-amphtml launch.
     blacklisted_cdata_regex: {
       regex: "\\.i?-amp-"
       error_message: "CSS -amp- class name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
       regex: "!important"
@@ -667,9 +672,14 @@ tags: {  # Special custom 'author' spreadsheet for A4A
     }
     # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
+    # TODO(honeybadgerdontcare): Remove the .i-amp- case after i-amphtml launch.
     blacklisted_cdata_regex: {
       regex: "\\.i?-amp-"
       error_message: "CSS -amp- class name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
       regex: "!important"
@@ -2702,10 +2712,16 @@ attr_lists: {
   attrs: { name: "itemtype" }
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "accesskey" }
-  attrs: { name: "class" }
+  attrs: {
+    name: "class"
+    blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  }
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
-  attrs: { name: "id" }
+  attrs: {
+    name: "id"
+    blacklisted_value_regex: "^i-amphtml-"
+  }
   attrs: { name: "lang" }
   attrs: { name: "tabindex" }
   attrs: { name: "title" }
