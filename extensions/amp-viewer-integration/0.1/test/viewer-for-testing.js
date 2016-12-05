@@ -23,17 +23,28 @@ import {parseUrl, serializeQueryString} from '../../../../src/url';
  */
 export class ViewerForTesting {
   /**
-   * @param {Element} container
+   * @param {Element} containerEl
    * @param {string} id
-   * @param {string} url
+   * @param {string} ampdocUrl
    * @param {boolean} visible
    */
-  constructor(container, id, url, visible) {
-    this.url = url;
+  constructor(containerEl, id, ampdocUrl, visible) {
+    /** @private {string} */
+    this.ampdocUrl = ampdocUrl;
+
+    /** @private {boolean} */
     this.alreadyLoaded_ = false;
+
+    /** @private {string} */
     this.viewportType_ = 'natural';
+
+    /** @private {string} */
     this.visibilityState_ = visible ? 'visible' : 'hidden';
-    this.container = container;
+
+    /** @private {Element} */
+    this.containerEl = containerEl;
+
+    /** @type {Element} */
     this.iframe = document.createElement('iframe');
     this.iframe.setAttribute('id', 'AMP_DOC_' + id);
 
@@ -65,8 +76,8 @@ export class ViewerForTesting {
     const params = {
       history: 1,
       viewportType: this.viewportType_,
-      width: this.container./*OK*/offsetWidth,
-      height: this.container./*OK*/offsetHeight,
+      width: this.containerEl./*OK*/offsetWidth,
+      height: this.containerEl./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       viewerorigin: parseUrl(window.location.href).origin,
@@ -74,12 +85,12 @@ export class ViewerForTesting {
       cap: 'foo,a2a',
     };
 
-    let inputUrl = this.url + '#' + serializeQueryString(params);
+    let ampdocUrl = this.ampdocUrl + '#' + serializeQueryString(params);
 
     if (window.location.hash && window.location.hash.length > 1) {
-      inputUrl += '&' + window.location.hash.substring(1);
+      ampdocUrl += '&' + window.location.hash.substring(1);
     }
-    const parsedUrl = parseUrl(inputUrl);
+    const parsedUrl = parseUrl(ampdocUrl);
     const url = parsedUrl.href;
     this.iframe.setAttribute('src', url);
     this.frameOrigin_ = parsedUrl.origin;
@@ -109,7 +120,7 @@ export class ViewerForTesting {
       }
     }, false);
 
-    this.container.appendChild(this.iframe);
+    this.containerEl.appendChild(this.iframe);
 
     return this.handshakeReceivedPromise_;
   }
