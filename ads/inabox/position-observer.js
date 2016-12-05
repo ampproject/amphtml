@@ -69,8 +69,8 @@ export class PositionObserver {
         this.positionObservable_.fire();
       };
 
-      this.win_.addEventListener('scroll', listener);
-      this.win_.addEventListener('resize', listener);
+      this.win_.addEventListener('scroll', listener, true);
+      this.win_.addEventListener('resize', listener, true);
     }
     this.positionObservable_.add(() => {
       callback(this.getPositionEntry_(element));
@@ -86,6 +86,7 @@ export class PositionObserver {
     const b = element./*OK*/getBoundingClientRect();
     return {
       viewport: /** @type {!LayoutRectDef} */(this.viewportRect_),
+      // relative position to host doc
       target: layoutRectLtwh(
           Math.round(b.left + this.scrollLeft_),
           Math.round(b.top + this.scrollTop_),

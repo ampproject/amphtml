@@ -20,7 +20,7 @@ import {dev} from '../../src/log';
 /** @const */
 const TAG = 'inabox-messaging-host';
 /** @const */
-const AMP_MESSGE_PREFIX = 'amp-';
+const AMP_MESSAGE_PREFIX = 'amp-';
 /** @const */
 const REQUEST_TYPE = {
   SEND_POSITIONS: 'send-positions',
@@ -35,8 +35,8 @@ export class InaboxMessagingHost {
   constructor(win, iframes) {
     this.win_ = win;
     this.iframes_ = iframes;
-    this.iframeMap_ = {};
-    this.registeredIframeSentinels_ = {};
+    this.iframeMap_ = Object.create(null);
+    this.registeredIframeSentinels_ = Object.create(null);
     this.positionObserver_ = new PositionObserver(win);
   }
 
@@ -84,6 +84,10 @@ export class InaboxMessagingHost {
   }
 
   /**
+   * Returns source window's ancestor iframe who is the direct child of host
+   * doc. The sentinel should be unique to the source window, and the result
+   * is cached using the sentinel as the key.
+   *
    * @param source {!Window}
    * @param sentinel {string}
    * @returns {?HTMLIFrameElement}
@@ -94,7 +98,7 @@ export class InaboxMessagingHost {
       return this.iframeMap_[sentinel];
     }
 
-    // Walk up on the window tree util find host's direct child window
+    // Walk up on the window tree until find host's direct child window
     while (source.parent !== this.win_ && source !== this.win_.top) {
       source = source.parent;
     }
@@ -119,16 +123,21 @@ export class InaboxMessagingHost {
  * @returns {string}
  */
 function serializeMessage(type, sentinel, data) {
-  return AMP_MESSGE_PREFIX + JSON.stringify({type, sentinel, data});
+  return AMP_MESSAGE_PREFIX + JSON.stringify({type, sentinel, data});
 }
 
+/**
+ * @param message {*}
+ * @returns {?JSONType}
+ */
 function deserializeMessage(message) {
-  if (typeof message !== 'string' || message.indexOf(AMP_MESSGE_PREFIX) != 0) {
+  if (typeof message !== 'string' || message.indexOf(AMP_MESSAGE_PREFIX) != 0) {
     return null;
   }
   try {
-    return JSON.parse(message.substring(AMP_MESSGE_PREFIX.length));
+    return JSON.parse(message.substring(AMP_MESSAGE_PREFIX.length));
   } catch (e) {
+    dev().error(TAG, 'Failed to parse message: ' + message, e);
     return null;
   }
 }
