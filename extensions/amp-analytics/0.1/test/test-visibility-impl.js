@@ -99,6 +99,8 @@ describe('amp-analytics.visibility', () => {
     };
     sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
         .returns(resource);
+    // no way to stub performance API so stub a private method instead
+    sandbox.stub(visibility, 'getTotalTime_').returns(1234);
   });
 
   afterEach(() => {
@@ -531,7 +533,7 @@ describe('amp-analytics.visibility', () => {
 
         clock.tick(100);
         fireIntersect(25); // above spec 1 min visible, trigger callback 1
-        expect(callbackSpy1).to.be.calledWith(sinon.match({
+        expect(callbackSpy1).to.be.calledWith({
           backgrounded: '0',
           backgroundedAtStart: '0',
           elementHeight: '100',
@@ -547,8 +549,8 @@ describe('amp-analytics.visibility', () => {
           minVisiblePercentage: '25',
           totalVisibleTime: '0',         // duration metrics are always 0
           maxContinuousVisibleTime: '0', // as it triggers immediately
-          // totalTime is not testable because no way to stub performance API
-        }));
+          totalTime: '1234',
+        });
         expect(callbackSpy2).to.not.be.called;
         expect(unobserveSpy).to.not.be.called;
         callbackSpy1.reset();
@@ -605,7 +607,7 @@ describe('amp-analytics.visibility', () => {
         clock.tick(899); // not yet!
         expect(callbackSpy1).to.not.be.called;
         clock.tick(1);  // now fire
-        expect(callbackSpy1).to.be.calledWith(sinon.match({
+        expect(callbackSpy1).to.be.calledWith({
           backgrounded: '0',
           backgroundedAtStart: '0',
           elementHeight: '100',
@@ -621,8 +623,8 @@ describe('amp-analytics.visibility', () => {
           minVisiblePercentage: '5',
           totalVisibleTime: '1999',
           maxContinuousVisibleTime: '1000',
-          // totalTime is not testable because no way to stub performance API
-        }));
+          totalTime: '1234',
+        });
       });
     });
 

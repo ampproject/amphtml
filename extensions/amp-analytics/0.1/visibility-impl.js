@@ -626,16 +626,13 @@ export class Visibility {
    * @private
    */
   prepareStateForCallback_(state, br) {
-    const perf = this.ampdoc.win.performance;
     const viewport = viewportForDoc(this.ampdoc);
 
     state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
     state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
     state[ELEMENT_WIDTH] = br.width;
     state[ELEMENT_HEIGHT] = br.height;
-    state[TOTAL_TIME] = perf && perf.timing && perf.timing.domInteractive
-        ? Date.now() - perf.timing.domInteractive
-        : '';
+    state[TOTAL_TIME] = this.getTotalTime_() || '';
 
     state[LOAD_TIME_VISIBILITY] = state[LOAD_TIME_VISIBILITY] || 0;
     if (state[MIN_VISIBLE] !== undefined) {
@@ -662,5 +659,12 @@ export class Visibility {
         state[k] = String(state[k]);
       }
     }
+  }
+
+  getTotalTime_() {
+    const perf = this.ampdoc.win.performance;
+    return perf && perf.timing && perf.timing.domInteractive
+        ? Date.now() - perf.timing.domInteractive
+        : null;
   }
 }
