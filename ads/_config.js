@@ -216,7 +216,6 @@ export const adConfig = {
 
   fusion: {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
-    renderStartImplemented: true,
   },
 
   genieessp: {

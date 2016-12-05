@@ -232,7 +232,6 @@ data.extra;
 data.nativeIntersectionObserver
 var Fusion;
 Fusion.on;
-Fusion.on.adResized;
 Fusion.on.warning;
 Fusion.loadAds;
 var ev;
