@@ -30,6 +30,17 @@ const TAG_ = 'AMP-BIND';
  */
 let BindingDef;
 
+/**
+ * @typedef {{
+ *   result: BindExpressionResult
+ *   verifyOnly: boolean
+ * }}
+ */
+let BindVsyncStateDef;
+
+/** @typedef {(null|boolean|string|number|Array|Object)} */
+let BindExpressionResult;
+
 export class Bind {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -47,8 +58,11 @@ export class Bind {
     /** @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
 
-    /** @const {!Array<string>} */
-    this.protocolWhitelist_ = ['http', 'https'];
+    /** @const {!Function} */
+    this.boundMeasure_ = this.measure_.bind(this);
+
+    /** @const {!Function} */
+    this.boundMutate_ = this.mutate_.bind(this);
 
     this.ampdoc.whenBodyAvailable().then(body => {
       this.bindings_ = this.scanForBindings_(body);
@@ -80,6 +94,7 @@ export class Bind {
    * @private
    */
   scanForBindings_(body) {
+    // TODO(choumx): Chunk if taking too long in a single frame.
     const bindings = [];
     const elements = body.getElementsByTagName('*');
     for (let i = 0; i < elements.length; i++) {
@@ -104,13 +119,13 @@ export class Bind {
    * @private
    */
   bindingForAttribute_(attribute, element) {
-    // TODO: Disallow binding to blacklisted attributes.
+    // TODO(choumx): Only allow binding to attributes allowed by validator.
 
     if (attribute.name.length <= 2) {
       return null;
     }
     const name = attribute.name;
-    if (name.charAt(0) === '[' && name.charAt(name.length - 1) === ']') {
+    if (name[0] === '[' && name[name.length - 1] === ']') {
       return {
         property: name.substr(1, name.length - 2),
         expression: attribute.value,
@@ -125,41 +140,61 @@ export class Bind {
    * @private
    */
   digest_(opt_verifyOnly) {
+    // TODO(choumx): Chunk if takes too long for a single frame.
+
+    /** {!VsyncTaskSpecDef} */
+    const task = {measure: this.boundMeasure_, mutate: this.boundMutate_};
+    this.vsync_.run(task, {
+      results: [],
+      verifyOnly: opt_verifyOnly,
+    });
+  }
+
+  /**
+   * Reevaluates all bindings and stores results in `state`.
+   * @param {BindVsyncStateDef} state
+   * @private
+   */
+  measure_(state) {
     for (let i = 0; i < this.bindings_.length; i++) {
       const binding = this.bindings_[i];
+      state.results[i] = evaluateBindExpr(binding.expression, this.scope_);
+    }
+  }
 
-      /** {!VsyncTaskSpecDef} */
-      const task = {
-        measure: state => {
-          state.result = evaluateBindExpr(binding.expression, this.scope_);
-        },
-        mutate: state => {
-          if (opt_verifyOnly) {
-            this.verifyBinding_(binding, state.result);
-          } else {
-            this.applyBinding_(binding, state.result);
-          }
-        },
-      };
-      this.vsync_.run(task, {});
+  /**
+   * Either applies or verifies the binding evaluation results in `state`.
+   * @param {BindVsyncStateDef} state
+   * @private
+   */
+  mutate_(state) {
+    for (let i = 0; i < this.bindings_.length; i++) {
+      const binding = this.bindings_[i];
+      const result = state.results[i];
+      if (state.verifyOnly) {
+        this.verifyBinding_(binding, result);
+      } else {
+        this.applyBinding_(binding, result);
+      }
     }
   }
 
   /**
    * Applies `newValue` to the element bound in `binding`.
    * @param {!BindingDef} binding
-   * @param {(Object|Array|string|number|boolean|null)} newValue
+   * @param {BindExpressionResult} newValue
    * @private
    */
   applyBinding_(binding, newValue) {
     const property = binding.property;
     const element = binding.element;
 
-    // TODO: Support arrays for classes and objects for attributes.
+    // TODO(choumx): Support arrays for classes and objects for attributes.
 
     if (property === 'text') {
       element.textContent = newValue;
     } else if (property === 'class') {
+      // TODO(choumx): SVG elements are an issue, should disallow in validator.
       element.classList = newValue;
     } else {
       if (newValue === true) {
@@ -168,23 +203,23 @@ export class Bind {
         element.removeAttribute(property);
       } else {
         const oldValue = element.getAttribute(property);
-        const sanitizedValue = this.sanitizeAttribute_(newValue);
-
-        if (oldValue === sanitizedValue) {
+        if (oldValue === newValue) {
           return;
         }
 
-        element.setAttribute(property, sanitizedValue);
+        // TODO(choumx): Add attribute sanitization in line with validator.
+
+        element.setAttribute(property, newValue);
 
         // Update internal state for AMP elements.
         if (element.classList.contains('-amp-element')) {
           const resources = element.getResources();
           if (property === 'width') {
-            resources.changeSize(element, undefined, sanitizedValue);
+            resources./*OK*/changeSize(element, undefined, newValue);
           } else if (property === 'height') {
-            resources.changeSize(element, sanitizedValue, undefined);
+            resources./*OK*/changeSize(element, newValue, undefined);
           }
-          element.attributeChangedCallback(property, oldValue, sanitizedValue);
+          element.attributeChangedCallback(property, oldValue, newValue);
         }
       }
     }
@@ -194,14 +229,14 @@ export class Bind {
    * If the current value of `binding` equals `expectedValue`, returns true.
    * Otherwise, returns false.
    * @param {!BindingDef} binding
-   * @param {?(Object|Array|string|number|boolean)} expectedValue
+   * @param {BindExpressionResult} expectedValue
    * @private
    */
   verifyBinding_(binding, expectedValue) {
     const property = binding.property;
     const element = binding.element;
 
-    // TODO: Support arrays for classes and objects for attributes.
+    // TODO(choumx): Support arrays for classes and objects for attributes.
 
     let initialValue;
     if (property === 'text') {
@@ -223,21 +258,5 @@ export class Bind {
         `default value (${initialValue}) does not match first expression ` +
         `result (${expectedValue}).`);
     }
-  }
-
-  /**
-   * Sanitizes unsafe protocols in attributes, e.g. "javascript:".
-   * @param {(Object|Array|string|number|boolean|null)} value
-   * @return {string}
-   * @private
-   */
-  sanitizeAttribute_(value) {
-    if (typeof value === 'string') {
-      const split = value.split(':');
-      if (split.length > 1 && this.protocolWhitelist_.indexOf(split[0]) < 0) {
-        return 'unsafe:' + value;
-      }
-    }
-    return value;
   }
 }

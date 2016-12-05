@@ -44,9 +44,7 @@ export class AmpBindState extends AMP.BaseElement {
     this.element.setAttribute('aria-hidden', 'true');
 
     const id = this.element.id;
-    if (!id) {
-      user().error(TAG, 'Element must have an id.');
-    }
+    user().assert(id, '%s element must have an id.', TAG);
 
     let json;
     const children = this.element.children;
