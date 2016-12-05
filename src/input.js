@@ -44,14 +44,14 @@ export class Input {
     /** @private {!Function} */
     this.boundOnMouseDown_ = this.onMouseDown_.bind(this);
 
-    /** @private {!Function} */
-    this.boundOnMouseMove_ = this.onMouseMove_.bind(this);
+    /** @private {?Function} */
+    this.boundOnMouseMove_ = null;
 
-    /** @private {!Function} */
-    this.boundMouseCanceled_ = this.mouseCanceled_.bind(this);
+    /** @private {?Function} */
+    this.boundMouseCanceled_ = null;
 
-    /** @private {!Function} */
-    this.boundMouseConfirmed_ = this.mouseConfirmed_.bind(this);
+    /** @private {?Function} */
+    this.boundMouseConfirmed_ = null;
 
     /** @private {boolean} */
     this.hasTouch_ = ('ontouchstart' in win ||
@@ -84,6 +84,8 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
+      this.boundOnMouseMove_ =
+        /** @private {!Function} */ (this.onMouseMove_.bind(this));
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
@@ -205,6 +207,10 @@ export class Input {
     if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) {
       this.mouseCanceled_();
       return undefined;
+    }
+    if (!this.boundMouseConfirmed_) {
+      this.boundMouseConfirmed_ = this.mouseConfirmed_.bind(this);
+      this.boundMouseCanceled_ = this.mouseCanceled_.bind(this);
     }
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
