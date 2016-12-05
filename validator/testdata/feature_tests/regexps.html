@@ -48,7 +48,7 @@
         href="http://xss.com/https://fonts.googleapis.com/css?foobar">
 
   <!--
-  rel value_regex: lenghty, see protoascii
+  rel value_regex: lengthy, see protoascii
   The first three examples are valid. The latter three examples are invalid.
   -->
   <link rel="accessibility">
@@ -67,6 +67,20 @@
   <meta name="content-disposition" content="">
   <meta name="invalid content-disposition" content="">
 
+  <!--
+  css selector blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  The first example is valid. The latter four are invalid.
+  -->
+  <style amp-custom>
+    .comic-amp-font-loaded .comic-amp {
+      font-family: 'Comic AMP', serif, sans-serif;
+    }
+    .i-amphtml-hidden {}
+    #i-amphtml-wrapper {}
+    i-amphtml-sizer {}
+    [i-amphtml-section] {}
+  </style>
+
 </head>
 <body>
 
@@ -79,6 +93,21 @@
   <amp-audio src="https://example.com/audio" layout="fixed" autoplay="invalid">
   <amp-audio src="https://example.com/audio" layout="fixed" autoplay="desktopfoo">
   <amp-audio src="https://example.com/audio" layout="fixed" autoplay="foodesktop">
+
+  <!--
+  class blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  The first example is valid. The latter two are invalid.
+  -->
+  <div class="example-amp-font"></div>
+  <div class="example-amp-font i-amphtml-hidden"></div>
+  <div class="i-amphtml-hidden example-amp-font"></div>
+
+  <!--
+  id blacklisted_value_regex: "^i-amphtml-"
+  The first example is valid. The latter is invalid.
+  -->
+  <div id="exampe-amp-font"></div>
+  <div id="i-amphtml-abc"></div>
 
 </body>
 </html>
