@@ -17,7 +17,7 @@
 import {Messaging} from './messaging.js';
 import {listen} from '../../../src/event-helper';
 import {viewerForDoc} from '../../../src/viewer';
-import {dev,user} from '../../../src/log';
+import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-integration';
 
@@ -38,14 +38,14 @@ export class AmpViewerIntegration {
   /**
    * Initiate the handshake. If handshake confirmed, start listening for
    * messages.
-   * @return {!Promise|undefined}
+   * @return {!Promise}
    */
   init() {
-    dev().info('AVI', TAG + ' => handshake init()');
+    dev().info(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
     return this.getHandshakePromise_(viewer)
       .then(viewerOrigin => {
-        dev().info('AVI', TAG + ' => listening for messages');
+        dev().info(TAG, 'listening for messages');
         const messaging =
           new Messaging(this.win, this.win.parent, viewerOrigin,
             (type, payload, awaitResponse) => {
@@ -62,22 +62,23 @@ export class AmpViewerIntegration {
    * Send a handshake request, and listen for a handshake response to
    * confirm the handshake.
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @return {!Promise}
+   * @return {?Promise}
    * @private
    */
   getHandshakePromise_(viewer) {
     const win = this.win;
     return new Promise(resolve => {
-      const unconfirmedViewerOrigin =
-        viewer.getParam('viewerorigin') || viewer.getParam('origin');
-      user().assert(unconfirmedViewerOrigin,
-              'Expected viewer origin must be specified!');
+      const unconfirmedViewerOrigin = viewer.getParam('viewerorigin');
+      if (!unconfirmedViewerOrigin) {
+        dev().info(TAG, 'Viewer origin not specified.');
+        return null;
+      }
 
       const unlisten = listen(win, 'message', event => {
         if (event.origin == unconfirmedViewerOrigin &&
             event.data == 'amp-handshake-response' &&
             event.source == win.parent) {
-          dev().info('AVI', TAG + ' => received handshake confirmation');
+          dev().info(TAG, 'received handshake confirmation');
           // TODO: Viewer may immediately start sending messages after issuing
           // handshake response, but we will miss these messages in the time
           // between unlisten and the next listen later.

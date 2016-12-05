@@ -24,7 +24,6 @@
 
 import {Messaging} from '../messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
-import * as sinon from 'sinon';
 
 
 describes.sandboxed('AmpViewerIntegration', {}, () => {
@@ -58,10 +57,22 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
   describe('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
     const ampDoc = 'http://localhost:8000/examples/everything.amp.max.html';
-    const requestProcessor = function() {};
+    const requestProcessor = function() {
+      return Promise.resolve();
+    };
     let messaging;
+    let postMessagePromise;
+    let postMessageSpy;
 
     beforeEach(() => {
+      let postMessageResolve;
+      postMessagePromise = new Promise(resolve => {
+        postMessageResolve = resolve;
+      });
+      postMessageSpy = sandbox.stub(window, 'postMessage', () => {
+        postMessageResolve();
+      });
+
       const source = {
         postMessage: function() {},
         addEventListener: function() {},
@@ -70,130 +81,155 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         source, window, viewerOrigin, requestProcessor, ampDoc);
     });
 
-    it('should initialize correctly', () => {
-      expect(messaging.requestProcessor_).to.equal(requestProcessor);
-      expect(messaging.target_).to.equal(window);
-      expect(messaging.targetOrigin_).to.equal(viewerOrigin);
-    });
-
-    it('handleMessage_ should call handleRequest_', () => {
-      const src = 'source';
-      const orgn = 'origin';
+    it('handleMessage_ should call postMessage correctly', () => {
       const sntnl = '__AMPHTML__REQUEST';
       const event = {
-        source: src,
-        origin: orgn,
+        source: window,
+        origin: viewerOrigin,
         data: {
           sentinel: sntnl,
+          rsvp: true,
         },
       };
-      sandbox.stub(messaging, 'target_', src);
-      sandbox.stub(messaging, 'targetOrigin_', orgn);
-      sandbox.stub(messaging, 'handleResponse_', () => {});
-      const handleRequest_ =
-        sandbox.stub(messaging, 'handleRequest_', () => {});
 
       messaging.handleMessage_(event);
 
-      sinon.assert.calledWith(handleRequest_);
+      return postMessagePromise.then(function() {
+        expect(postMessageSpy).to.have.been.calledOnce;
+        expect(postMessageSpy).to.have.been.calledWith({
+          payload: undefined,
+          requestId: undefined,
+          rsvp: false,
+          sentinel: '__AMPHTML__RESPONSE',
+          type: null,
+        });
+      });
     });
 
-    it('handleMessage_ should call handleResponse_', () => {
-      const src = 'source';
-      const orgn = 'origin';
+    it('handleMessage_ should resolve', () => {
       const sntnl = '__AMPHTML__RESPONSE';
       const event = {
-        source: src,
-        origin: orgn,
+        source: window,
+        origin: viewerOrigin,
         data: {
+          requestId: '1',
           sentinel: sntnl,
+          rsvp: true,
+          type: 'messageType',
         },
       };
-      sandbox.stub(messaging, 'target_', src);
-      sandbox.stub(messaging, 'targetOrigin_', orgn);
-      sandbox.stub(messaging, 'handleRequest_', () => {});
-      const handleResponse_ =
-        sandbox.stub(messaging, 'handleResponse_', () => {});
 
+      const resolveSpy = sandbox.stub();
+      const rejectSpy = sandbox.stub();
+      const waitingForResponse = {'1': {
+        resolve: resolveSpy,
+        reject: rejectSpy,
+      }};
+
+      sandbox.stub(messaging, 'waitingForResponse_', waitingForResponse);
       messaging.handleMessage_(event);
 
-      sinon.assert.calledWith(handleResponse_);
+      expect(resolveSpy).to.have.been.calledOnce;
     });
 
+    it('handleMessage_ should reject', () => {
+      const sntnl = '__AMPHTML__RESPONSE';
+      const event = {
+        source: window,
+        origin: viewerOrigin,
+        data: {
+          requestId: '1',
+          sentinel: sntnl,
+          rsvp: true,
+          type: 'ERROR',
+        },
+      };
 
-    it('sendRequest should call sendMessage_ and have correct input', () => {
+      const resolveSpy = sandbox.stub();
+      const rejectSpy = sandbox.stub();
+      const waitingForResponse = {'1': {
+        resolve: resolveSpy,
+        reject: rejectSpy,
+      }};
+
+      sandbox.stub(messaging, 'waitingForResponse_', waitingForResponse);
+      messaging.handleMessage_(event);
+
+      expect(rejectSpy).to.have.been.calledOnce;
+    });
+
+    it('sendRequest should call postMessage correctly', () => {
       const message = 'message';
       const awaitResponse = false;
       const payload = {};
-      const requestId = '1';
-      const requestSentinel = '__AMPHTML__REQUEST';
-
-      const sendMessageSpy = sandbox.spy(messaging, 'sendMessage_');
-
       messaging.sendRequest(message, payload, awaitResponse);
 
-      expect(sendMessageSpy).to.have.been.called;
-      expect(sendMessageSpy.getCall(0).args[0]).to.equal(requestSentinel);
-      expect(sendMessageSpy.getCall(0).args[1]).to.equal(requestId);
-      expect(sendMessageSpy.getCall(0).args[2]).to.equal(message);
-      expect(sendMessageSpy.getCall(0).args[3]).to.equal(payload);
-      expect(sendMessageSpy.getCall(0).args[4]).to.equal(awaitResponse);
+      return postMessagePromise.then(function() {
+        expect(postMessageSpy).to.have.been.calledOnce;
+        expect(postMessageSpy).to.have.been.calledWith({
+          payload: {},
+          requestId: '1',
+          rsvp: awaitResponse,
+          sentinel: '__AMPHTML__REQUEST',
+          type: message,
+        });
+      });
     });
 
-
-    it('sendResponse_ should call sendMessage_ and have correct input', () => {
-      const message = null;
-      const awaitResponse = false;
+    it('sendResponse_ should call postMessage correctly', () => {
       const payload = {};
       const requestId = '1';
-      const requestSentinel = '__AMPHTML__RESPONSE';
-
-      const sendMessageSpy = sandbox.spy(messaging, 'sendMessage_');
-
       messaging.sendResponse_(requestId, payload);
 
-      expect(sendMessageSpy).to.have.been.called;
-      expect(sendMessageSpy.getCall(0).args[0]).to.equal(requestSentinel);
-      expect(sendMessageSpy.getCall(0).args[1]).to.equal(requestId);
-      expect(sendMessageSpy.getCall(0).args[2]).to.equal(message);
-      expect(sendMessageSpy.getCall(0).args[3]).to.equal(payload);
-      expect(sendMessageSpy.getCall(0).args[4]).to.equal(awaitResponse);
+      return postMessagePromise.then(function() {
+        expect(postMessageSpy).to.have.been.calledOnce;
+        expect(postMessageSpy).to.have.been.calledWith({
+          payload: {},
+          requestId: '1',
+          rsvp: false,
+          sentinel: '__AMPHTML__RESPONSE',
+          type: null,
+        });
+      });
     });
 
-
-    it('sendResponseError_ should call sendMessage_ and have correct input',
-    () => {
+    it('sendResponseError_ should call postMessage correctly', () => {
       const message = 'ERROR';
-      const awaitResponse = false;
       const reason = {};
       const requestId = '1';
-      const requestSentinel = '__AMPHTML__RESPONSE';
-
-      const sendMessageSpy = sandbox.spy(messaging, 'sendMessage_');
-
       messaging.sendResponseError_(requestId, reason);
 
-      expect(sendMessageSpy).to.have.been.called;
-      expect(sendMessageSpy.getCall(0).args[0]).to.equal(requestSentinel);
-      expect(sendMessageSpy.getCall(0).args[1]).to.equal(requestId);
-      expect(sendMessageSpy.getCall(0).args[2]).to.equal(message);
-      expect(sendMessageSpy.getCall(0).args[3]).to.equal(reason);
-      expect(sendMessageSpy.getCall(0).args[4]).to.equal(awaitResponse);
+      return postMessagePromise.then(function() {
+        expect(postMessageSpy).to.have.been.calledOnce;
+        expect(postMessageSpy).to.have.been.calledWith({
+          payload: reason,
+          requestId: '1',
+          rsvp: false,
+          sentinel: '__AMPHTML__RESPONSE',
+          type: message,
+        });
+      });
     });
 
     it('sendMessage_ should call postMessage on this.target_', () => {
-      const sentinel = 'sntnl';
+      const sntnl = 'sntnl';
       const awaitResponse = false;
       const payload = null;
       const requestId = '1';
       const eventType = 'message';
-
-      const postMessageSpy = sandbox.spy(messaging.target_, 'postMessage');
-
       messaging.sendMessage_(
-        sentinel, requestId, eventType, payload, awaitResponse);
-      expect(postMessageSpy).to.have.been.called;
-    });
+        sntnl, requestId, eventType, payload, awaitResponse);
 
+      return postMessagePromise.then(function() {
+        expect(postMessageSpy).to.have.been.calledOnce;
+        expect(postMessageSpy).to.have.been.calledWith({
+          payload: null,
+          requestId: '1',
+          rsvp: awaitResponse,
+          sentinel: sntnl,
+          type: eventType,
+        });
+      });
+    });
   });
 });

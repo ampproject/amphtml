@@ -73,6 +73,8 @@ export class Messaging {
       this.handleRequest_(message);
     } else if (message.sentinel == responseSentinel_) {
       this.handleResponse_(message);
+    } else {
+      throw new Error('Invalid Format!');
     }
   }
 

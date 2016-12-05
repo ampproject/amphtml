@@ -29,7 +29,7 @@ export class ViewerForTesting {
    * @param {boolean} visible
    */
   constructor(containerEl, id, ampdocUrl, visible) {
-    /** @private {string} */
+    /** @type {string} */
     this.ampdocUrl = ampdocUrl;
 
     /** @private {boolean} */
@@ -41,7 +41,7 @@ export class ViewerForTesting {
     /** @private {string} */
     this.visibilityState_ = visible ? 'visible' : 'hidden';
 
-    /** @private {Element} */
+    /** @type {Element} */
     this.containerEl = containerEl;
 
     /** @type {Element} */
