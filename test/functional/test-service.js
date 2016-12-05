@@ -15,7 +15,9 @@
  */
 
 import {
+  adoptServiceForEmbed,
   assertDisposable,
+  assertEmbeddable,
   disposeServicesForDoc,
   fromClass,
   getExistingServiceForDocInEmbedScope,
@@ -29,6 +31,7 @@ import {
   getServicePromiseForDoc,
   installServiceInEmbedScope,
   isDisposable,
+  isEmbeddable,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -459,6 +462,54 @@ describe('service', () => {
         // up the window chain.
         expect(getExistingServiceForDocInEmbedScope(grandChildWinNode, 'c'))
             .to.equal(topService);
+      });
+    });
+
+    describe('embeddable interface', () => {
+      let embedWin;
+      let embeddable;
+      let nonEmbeddable;
+
+      beforeEach(() => {
+        embedWin = {
+          frameElement: {
+            nodeType: 1,
+            ownerDocument: {defaultView: windowApi},
+          },
+        };
+        nonEmbeddable = {};
+        embeddable = {adoptEmbedWindow: sandbox.spy()};
+        getServiceForDoc(ampdoc, 'embeddable', () => embeddable);
+        getServiceForDoc(ampdoc, 'nonEmbeddable', () => nonEmbeddable);
+      });
+
+      it('should test embeddable interface', () => {
+        expect(isEmbeddable(embeddable)).to.be.true;
+        expect(isEmbeddable(nonEmbeddable)).to.be.false;
+      });
+
+      it('should assert embeddable interface', () => {
+        expect(assertEmbeddable(embeddable)).to.equal(embeddable);
+        expect(() => assertEmbeddable(nonEmbeddable))
+            .to.throw(/required to implement EmbeddableService/);
+      });
+
+      it('should adopt embeddable', () => {
+        adoptServiceForEmbed(embedWin, 'embeddable');
+        expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
+        expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
+      });
+
+      it('should refuse adopt of non-embeddable', () => {
+        expect(() => {
+          adoptServiceForEmbed(embedWin, 'nonEmbeddable');
+        }).to.throw(/required to implement EmbeddableService/);
+      });
+
+      it('should refuse adopt of unknown service', () => {
+        expect(() => {
+          adoptServiceForEmbed(embedWin, 'unknown');
+        }).to.throw(/unknown/);
       });
     });
   });

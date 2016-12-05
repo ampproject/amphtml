@@ -520,6 +520,7 @@ export class AmpA4A extends AMP.BaseElement {
     const adQueryIdx = this.adUrl_ ? this.adUrl_.indexOf('?') : -1;
     const state = {
       'm': error instanceof Error ? error.message : error,
+      's': error instanceof Error ? error.stack : '',
       'tag': this.element.tagName,
       'type': this.element.getAttribute('type'),
       'au': adQueryIdx < 0 ? '' :
