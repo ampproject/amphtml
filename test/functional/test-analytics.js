@@ -15,8 +15,8 @@
  */
 
 import {
-    fromClassForDoc,
-    resetServiceForTesting,
+  fromClassForDoc,
+  resetServiceForTesting,
 } from '../../src/service';
 import {triggerAnalyticsEvent} from '../../src/analytics';
 import {timerFor} from '../../src/timer';
@@ -41,7 +41,7 @@ describe('triggerAnalyticsEvent', () => {
     timer = timerFor(window);
     ampdoc = new AmpDocSingle(window);
     triggerEventSpy = sandbox.spy();
-    resetServiceForTesting(ampdoc, 'amp-analytics-instrumentation');
+    resetServiceForTesting(window, 'amp-analytics-instrumentation');
   });
 
   afterEach(() => {
