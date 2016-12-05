@@ -117,30 +117,22 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(
-      {'event': 'command', 'func': VideoEvents.PLAY, 'args': ''}
-    ));
+    this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PLAY, '*');
   }
 
   /** @override */
   pause() {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(
-      {'event': 'command', 'func': VideoEvents.PAUSE, 'args': ''}
-    ));
+    this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PAUSE, '*');
   }
 
   /** @override */
   mute() {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(
-      {'event': 'command', 'func': 'mute', 'args': ''}
-    ));
+    this.iframe_.contentWindow./*OK*/postMessage('mute', '*');
   }
 
   /** @override */
   unmute() {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(
-      {'event': 'command', 'func': 'unmute', 'args': ''}
-    ));
+    this.iframe_.contentWindow./*OK*/postMessage('unmute', '*');
   }
 
   /** @override */
