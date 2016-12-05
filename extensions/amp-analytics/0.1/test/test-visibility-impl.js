@@ -100,6 +100,8 @@ describe('amp-analytics.visibility', () => {
     };
     sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
         .returns(resource);
+    // no way to stub performance API so stub a private method instead
+    sandbox.stub(visibility, 'getTotalTime_').returns(1234);
   });
 
   afterEach(() => {
@@ -541,7 +543,7 @@ describe('amp-analytics.visibility', () => {
 
         clock.tick(100);
         fireIntersect(25); // above spec 1 min visible, trigger callback 1
-        expect(callbackSpy1).to.be.calledWith(sinon.match({
+        expect(callbackSpy1).to.be.calledWith({
           backgrounded: '0',
           backgroundedAtStart: '0',
           elementHeight: '100',
@@ -557,8 +559,8 @@ describe('amp-analytics.visibility', () => {
           minVisiblePercentage: '25',
           totalVisibleTime: '0',         // duration metrics are always 0
           maxContinuousVisibleTime: '0', // as it triggers immediately
-          // totalTime is not testable because no way to stub performance API
-        }));
+          totalTime: '1234',
+        });
         expect(callbackSpy2).to.not.be.called;
         expect(unobserveSpy).to.not.be.called;
         callbackSpy1.reset();
@@ -585,6 +587,54 @@ describe('amp-analytics.visibility', () => {
         }));
         expect(callbackSpy1).to.not.be.called; // callback 1 not called again
         expect(unobserveSpy).to.be.called; // unobserve when all callback fired
+      });
+    });
+
+    it('should work for visible=true with duration condition', () => {
+      visibility.listenOnceV2({
+        selector: '#abc',
+        continuousTimeMin: 1000,
+        visiblePercentageMin: 0,
+      }, callbackSpy1, true, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(999);
+        fireIntersect(0); // this will reset the timer for continuous time
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // visible again.
+        clock.tick(100);
+        fireIntersect(35); // keep being visible
+        expect(callbackSpy1).to.not.be.called;
+        clock.tick(899); // not yet!
+        expect(callbackSpy1).to.not.be.called;
+        clock.tick(1);  // now fire
+        expect(callbackSpy1).to.be.calledWith({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '65',
+          firstSeenTime: '100',
+          fistVisibleTime: '100',
+          lastSeenTime: '2199',
+          lastVisibleTime: '2199',
+          loadTimeVisibility: '25',
+          maxVisiblePercentage: '35',
+          minVisiblePercentage: '5',
+          totalVisibleTime: '1999',
+          maxContinuousVisibleTime: '1000',
+          totalTime: '1234',
+        });
       });
     });
 
