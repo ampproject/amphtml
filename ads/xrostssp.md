@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="50"
+<amp-ad width="300" height="250"
     type="xrostssp"
     data-aid="10"
     data-slot-id="3347">
