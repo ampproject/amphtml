@@ -56,7 +56,8 @@ export function installVideo(win) {
     attributeChangedCallback(name, unusedOldValue, unusedNewValue) {
       if (name === 'src') {
         this.updateVideoSrc_();
-      } else if (this.video_ && this.attributesToPropagateOnChange_.indexOf(name) >= 0) {
+      } else if (this.video_
+          && this.attributesToPropagateOnChange_.indexOf(name) >= 0) {
         this.propagateAttributes(name, this.video_);
       }
     }
