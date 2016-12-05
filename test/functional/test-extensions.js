@@ -441,6 +441,22 @@ describes.sandboxed('Extensions', {}, () => {
       expect(iframeWin.ampExtendedElements['amp-embed']).to.be.true;
     });
 
+    it('should adopt core services', () => {
+      const actionsMock = sandbox.mock(
+          parentWin.services['action'].obj);
+      const standardActionsMock = sandbox.mock(
+          parentWin.services['standard-actions'].obj);
+      actionsMock.expects('adoptEmbedWindow')
+          .withExactArgs(iframeWin)
+          .once();
+      standardActionsMock.expects('adoptEmbedWindow')
+          .withExactArgs(iframeWin)
+          .once();
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      actionsMock.verify();
+      standardActionsMock.verify();
+    });
+
     it('should install extensions', () => {
       extensionsMock.expects('loadExtension')
           .withExactArgs('amp-test')
@@ -464,7 +480,9 @@ describes.sandboxed('Extensions', {}, () => {
             elements: {'amp-test': {css: 'a{}'}},
           }));
       let preinstallCount = 0;
-      extensions.installExtensionsInChildWindow(iframeWin, ['amp-test'],
+      const promise = extensions.installExtensionsInChildWindow(
+          iframeWin,
+          ['amp-test'],
           function() {
             // Built-ins not installed yet.
             expect(
@@ -481,7 +499,11 @@ describes.sandboxed('Extensions', {}, () => {
       expect(iframeWin.ampExtendedElements).to.exist;
       expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
       expect(loadExtensionStub).to.be.calledOnce;
-      expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+      return promise.then(() => {
+        // Extension elements are stubbed immediately, but registered only
+        // after extension is loaded.
+        expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+      });
     });
   });
 
