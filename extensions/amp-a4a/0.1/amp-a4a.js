@@ -56,9 +56,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 
 /** @private @const {string} */
-const TAG = 'amp-a4a';
-
-/** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /** @type {string} */
@@ -354,7 +351,7 @@ export class AmpA4A extends AMP.BaseElement {
               this.experimentalNonAmpCreativeRenderMethod_;
           this.experimentalNonAmpCreativeRenderMethod_ = method;
           if (!isEnumValue(XORIGIN_MODE, method)) {
-            dev().error(TAG, `cross-origin render mode header ${method}`);
+            dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -508,7 +505,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   promiseErrorHandler_(error) {
-    dev().error(TAG, 'friendly iframe failed: ', error);
     if (error && error.message) {
       if (error.message.indexOf(TAG) == 0) {
         // caught previous call to promiseErrorHandler?  Infinite loop?
@@ -524,6 +520,7 @@ export class AmpA4A extends AMP.BaseElement {
     const adQueryIdx = this.adUrl_ ? this.adUrl_.indexOf('?') : -1;
     const state = {
       'm': error instanceof Error ? error.message : error,
+      's': error instanceof Error ? error.stack : '',
       'tag': this.element.tagName,
       'type': this.element.getAttribute('type'),
       'au': adQueryIdx < 0 ? '' :
