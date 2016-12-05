@@ -81,7 +81,7 @@ function createOverflow(overflowH, fullH, container, containerH) {
  * @param {*} backfillAdblockOptions AFS ad unit options (if necessary)
  * @return {function(string,boolean)} The callback function
  */
-function generateCallback(backfillPageOptions, backfillAdblockOptions) {
+export function generateCallback(backfillPageOptions, backfillAdblockOptions) {
   /**
    * CSA callback function to resize the iframe and/or request backfill
    * @param {string} containerName
