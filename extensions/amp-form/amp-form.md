@@ -23,7 +23,12 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable<br>(<a href="#custom-validations">Custom Validation still experimental - See below</a>)</td>
+    <td>Stable<br>Experimental Features:
+       <ul>
+          <li><a href="#custom-validations">Custom Validation</a></li>
+          <li><a href="#variable-substitution">Variable Substitutions</a></li>
+       </ul>
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -290,6 +295,38 @@ This shows all validation errors on all invalid inputs when the form is submitte
 
 #### As You Go
 This allows your user to see validation messages as they're interacting with the input, if the email they typed is invalid they'll see the error right away and once fixed the error goes away.
+
+## Variable Substitutions
+__(<a href="https://www.ampproject.org/docs/reference/experimental.html">experimental</a>)__
+
+`amp-form` allows [variable substitutions](../../spec/amp-var-substitutions.md) for inside hidden inputs with `default-value` attribute. On each submission, `amp-form` finds all `input[type=hidden]` inside the form and apply variable substitutions to `default-value` attribute and fill the result in the input `value`.
+
+Here's an example of how inputs are before and after substitutions:
+```html
+<!-- Initial Load -->
+<form ...>
+  <input name="canonicalUrl" type="hidden" default-value="The canonical URL is: CANONICAL_URL">
+  <input name="clientId" type="hidden" default-value="CLIENT_ID(myid)">
+  ...
+</form>
+```
+
+Once the user tries to submit the form, AMP will try to resolve the variables and update the fields values. For XHR submissions, all variables are likely to be substituted and resolved. However, in non-XHR GET submissions, values that requires async-resolution might not be available and might not be resolved if it has not previously been resolved. `CLIENT_ID` for example would not resolve if it wasn't resolved and cached previously.
+
+```html
+<!-- User submits the form, variables values are resolved into fields value -->
+<form ...>
+  <input name="canonicalUrl" type="hidden"
+        default-value="The canonical URL is: CANONICAL_URL"
+        value="The canonical URL is: https://example.com/hello">
+  <input name="clientId" type="hidden"
+        default-value="CLIENT_ID(myid)"
+        value="amp:asqar893yfaiufhbas9g879ab9cha0cja0sga87scgas9ocnas0ch">
+    ...
+</form>
+```
+
+Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
 
 ## Security Considerations
 Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
