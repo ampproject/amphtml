@@ -26,5 +26,4 @@ amp-lightbox {
 amp-lightbox[scrollable] {
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
 }

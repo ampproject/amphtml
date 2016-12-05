@@ -124,6 +124,9 @@ class AmpLightbox extends AMP.BaseElement {
         'keydown', this.boundCloseOnEscape_);
     this.getViewport().enterLightboxMode();
 
+    if (this.isScrollable_) {
+      st.setStyle(this.element, 'webkitOverflowScrolling', 'touch');
+    }
     this.mutateElement(() => {
       st.setStyles(this.element, {
         display: '',
@@ -171,6 +174,9 @@ class AmpLightbox extends AMP.BaseElement {
   close() {
     if (!this.active_) {
       return;
+    }
+    if (this.isScrollable_) {
+      st.setStyle(this.element, 'webkitOverflowScrolling', '');
     }
     this.getViewport().leaveLightboxMode();
     this./*OK*/collapse();
