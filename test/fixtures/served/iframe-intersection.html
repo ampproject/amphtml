@@ -50,7 +50,7 @@ function sendPostMessage() {
   }, '*');
 }
 sendPostMessage();
-setInterval(sendPostMessage, 10);
+sendPostMessage(); // send twice to test no double registration
 
 </script>
 </body>
