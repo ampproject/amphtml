@@ -27,12 +27,10 @@ limitations under the License.
 ##Configuration
 
 The only supported costume parameters are: 
--data-goa3zone: 
-	Required!
-	It's value is the zoneID wich can be found at the Adverticum AdServer.
--data-costumetargetstring:
-	Optional parameter. 
-	It's value must be Base64Encoded!
+
+-data-goa3zone: Required! It's value is the zoneID wich can be found at the Adverticum AdServer.
+
+-data-costumetargetstring: Optional parameter. It's value must be Base64Encoded!
 
 
 ##Support and contact
