@@ -213,8 +213,8 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
  */
 export function upgradeElementInChildWindow(parentWin, childWin, name) {
   const toClass = getExtendedElements(parentWin)[name];
-  user().assert(toClass, '%s is not stubbed yet', name);
-  user().assert(toClass != ElementStub, '%s is not upgraded yet', name);
+  dev().assert(toClass, '%s is not stubbed yet', name);
+  dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
   upgradeOrRegisterElement(childWin, name, toClass);
 }
 

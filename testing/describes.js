@@ -453,7 +453,6 @@ class AmpFixture {
         if (installer) {
           registerExtension(env.extensions, extensionId, installer, win.AMP);
         } else {
-          resetScheduledElementForTesting(win, extensionId);
           registerElementForTesting(win, extensionId);
         }
       });
