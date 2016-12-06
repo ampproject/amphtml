@@ -87,7 +87,7 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return 'AmpState ' +
+    return '<amp-state> ' +
         (this.element.getAttribute('id') || '<unknown id>');
   }
 }

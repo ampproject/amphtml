@@ -16,12 +16,14 @@
 
 import {evaluateBindExpr} from './bind-expr';
 import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import {vsyncFor} from '../../../src/vsync';
 
-const TAG_ = 'AMP-BIND';
+const TAG = 'AMP-BIND';
 
 /**
+ * A single binding, e.g. <element [property]="expression"></element>.
  * @typedef {{
  *   property: !string,
  *   expression: !string,
@@ -31,6 +33,7 @@ const TAG_ = 'AMP-BIND';
 let BindingDef;
 
 /**
+ * The state passed through vsync measure/mutate during a Bind digest cycle.
  * @typedef {{
  *   results: Array<BindExpressionResultDef>,
  *   verifyOnly: boolean
@@ -38,19 +41,38 @@ let BindingDef;
  */
 let BindVsyncStateDef;
 
-/** @typedef {(null|boolean|string|number|Array|Object)} */
+/**
+ * Possible types of a Bind expression evaluation.
+ * @typedef {(null|boolean|string|number|Array|Object)}
+ */
 let BindExpressionResultDef;
 
+/**
+ * Bind is the service that handles the Bind lifecycle, from identifying
+ * bindings in the document to scope mutations to reevaluating expressions
+ * during a digest.
+ */
 export class Bind {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @const {boolean} */
+    this.enabled_ = isExperimentOn(ampdoc.win, TAG);
+    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
+
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** {!Array<BindingDef>} */
     this.bindings_ = [];
+
+    /**
+     * Expression results during the previous digest cycle, where the i'th
+     * element is the last result of `this.bindings_[i].expression`.
+     * @type {!Array<BindExpressionResultDef>}
+     */
+    this.previousResults_ = [];
 
     /** @const {!Object} */
     this.scope_ = Object.create(null);
@@ -75,10 +97,14 @@ export class Bind {
   }
 
   /**
+   * Merges `state` into the current scope and immediately triggers a digest
+   * unless `opt_skipDigest` is false.
    * @param {!Object} state
    * @param {boolean=} opt_skipDigest
    */
   setState(state, opt_skipDigest) {
+    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
+
     Object.assign(this.scope_, state);
 
     if (!opt_skipDigest) {
@@ -171,6 +197,14 @@ export class Bind {
     for (let i = 0; i < this.bindings_.length; i++) {
       const binding = this.bindings_[i];
       const result = state.results[i];
+
+      // Don't apply mutation if the result hasn't changed.
+      if (result === this.previousResults_[i]) {
+        continue;
+      } else {
+        this.previousResults_[i] = result;
+      }
+
       if (state.verifyOnly) {
         this.verifyBinding_(binding, result);
       } else {
@@ -189,9 +223,12 @@ export class Bind {
     const property = binding.property;
     const element = binding.element;
 
+    // TODO(choumx): Does `element.tagName` support binding to `property`?
+
     // TODO(choumx): Support objects for attributes.
 
     if (property === 'text') {
+      // TODO(choumx): How to trigger reflow when necessary?
       element.textContent = newValue;
     } else if (property === 'class') {
       // TODO(choumx): SVG elements are an issue, should disallow in validator.
@@ -201,7 +238,7 @@ export class Bind {
       } else if (typeof newValue === 'string') {
         element.className = newValue;
       } else {
-        user().error(TAG_, 'Unsupported result for class binding', newValue);
+        user().error(TAG, 'Invalid result for class binding', newValue);
       }
     } else {
       if (newValue === true) {
@@ -217,27 +254,27 @@ export class Bind {
         /** @type {boolean|number|string|null} */
         const attributeValue = this.attributeValueOf_(newValue);
         if (attributeValue === null) {
-          user().error(TAG_,
-              'Unsupported result for attribute binding', newValue);
+          user().error(TAG, 'Invalid result for attribute binding', newValue);
           return;
         }
 
-        // TODO(choumx): Add attribute sanitization in line with validator.
+        // TODO(choumx): Does `newValue` pass validator value_casei,
+        // value_regex, blacklisted_value_regex, value_url>allowed_protocol,
+        // mandatory?
 
         element.setAttribute(property, attributeValue);
 
         // Update internal state for AMP elements.
         if (element.classList.contains('-amp-element')) {
           const resources = element.getResources();
-          if (typeof attributeValue === 'number') {
-            if (property === 'width') {
-              resources./*OK*/changeSize(element, undefined, attributeValue);
-            } else if (property === 'height') {
-              resources./*OK*/changeSize(element, attributeValue, undefined);
-            }
-          } else {
-            user().error(TAG_,
-                'Unsupported result for [width] or [height]', attributeValue);
+          if (property === 'width') {
+            user().assert(typeof attributeValue === 'number',
+                'Invalid result for [width]: %s', attributeValue);
+            resources./*OK*/changeSize(element, undefined, attributeValue);
+          } else if (property === 'height') {
+            user().assert(typeof attributeValue === 'number',
+                'Invalid result for [height]: %s', attributeValue);
+            resources./*OK*/changeSize(element, attributeValue, undefined);
           }
           element.attributeChangedCallback(property, oldValue, attributeValue);
         }
@@ -263,7 +300,7 @@ export class Bind {
 
     if (property === 'text') {
       initialValue = element.textContent;
-      match = (initialValue === expectedValue);
+      match = (initialValue.trim() === expectedValue.trim());
     } else if (property === 'class') {
       initialValue = element.classList;
 
@@ -274,7 +311,7 @@ export class Bind {
       } else if (typeof expectedValue === 'string') {
         classes = expectedValue.split(' ');
       } else {
-        user().error(TAG_,
+        user().error(TAG,
             'Unsupported result for class binding', expectedValue);
       }
       match = this.compareStringArrays_(initialValue, classes);
@@ -290,7 +327,7 @@ export class Bind {
     }
 
     if (!match) {
-      user().error(TAG_,
+      user().error(TAG,
         `<${element.tagName}> element [${property}] binding ` +
         `default value (${initialValue}) does not match first expression ` +
         `result (${expectedValue}).`);
