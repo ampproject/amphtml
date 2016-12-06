@@ -16,7 +16,6 @@
 
 
 import {
-  EXPERIMENT_ATTRIBUTE,
   RANDOM_NUMBER_GENERATORS,
   addExperimentIdToElement,
   getPageExperimentBranch,
@@ -25,7 +24,11 @@ import {
   randomlySelectUnsetPageExperiments,
   validateExperimentIds,
 } from '../traffic-experiments';
-import {isExperimentOn} from '../../../../src/experiments';
+import {EXPERIMENT_ATTRIBUTE} from '../utils';
+import {
+  isExperimentOn,
+  resetExperimentToggles_,
+} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 

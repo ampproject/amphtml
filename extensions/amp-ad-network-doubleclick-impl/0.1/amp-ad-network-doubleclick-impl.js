@@ -20,7 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {AmpA4A, RENDERING_TYPE_HEADER} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -29,9 +29,9 @@ import {
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   getCorrelator,
-  QQID_HEADER,
+  googleLifecycleReporterFactory,
+  setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/utils';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 
@@ -101,15 +101,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
-    const qqid = responseHeaders.get(QQID_HEADER);
-    if (qqid) {
-      this.lifecycleReporter_.setPingVariable(
-          `qqid${this.lifecycleReporter_.getSlotId()}`, qqid);
-    }
-    const method = responseHeaders.get(RENDERING_TYPE_HEADER);
-    if (method) {
-      this.lifecycleReporter_.setPingVariable('rm', method);
-    }
+    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
@@ -120,6 +112,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.lifecycleReporter_.sendPing(eventName);
   }
 
+  /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
     this.lifecycleReporter_.reset();
@@ -132,14 +125,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
    */
   initLifecycleReporter() {
-    const reporter =
-        /** @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter} */
-        (getLifecycleReporter(this, 'a4a', undefined,
-                              this.element.getAttribute(
-                                  'data-amp-slot-index')));
-    reporter.setPingVariable('v_h', 'VIEWPORT_HEIGHT');
-    reporter.setPingVariable('s_t', 'SCROLL_TOP');
-    return reporter;
+    return googleLifecycleReporterFactory(this);
   }
 
   /**

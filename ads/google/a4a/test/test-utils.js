@@ -16,6 +16,8 @@
 
 import {
   extractGoogleAdCreativeAndSignature,
+  setGoogleLifecycleVarsFromHeaders,
+  QQID_HEADER,
 } from '../utils';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 
@@ -48,6 +50,25 @@ describe('Google A4A utils', () => {
             creative,
             signature: null,
           });
+    });
+  });
+
+  describe('#setGoogleLifecycleVarsFromHeaders', () => {
+    const pingVars = {};
+    const mockReporter = {
+      getSlotId: () => { return 37; },
+      setPingVariable: (variable, val) => { pingVars[variable] = val; },
+    };
+    const headerData = {};
+    const headerMock = {
+      get: h => { return h in headerData ? headerData[h] : null; },
+    };
+
+    it('should pick up qqid from headers', () => {
+      headerData[QQID_HEADER] = 'test qqid';
+      expect(pingVars).to.be.empty;
+      setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
+      expect(pingVars).to.have.property('qqid_37', 'test qqid');
     });
   });
 });

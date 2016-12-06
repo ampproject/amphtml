@@ -15,7 +15,6 @@
  */
 
 import {
-    EXPERIMENT_ATTRIBUTE,
     isInManualExperiment,
     randomlySelectUnsetPageExperiments,
 } from './traffic-experiments';
@@ -31,7 +30,7 @@ import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getCorrelator} from './utils';
+import {getCorrelator, EXPERIMENT_ATTRIBUTE} from './utils';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 
 /**
@@ -134,10 +133,8 @@ export class BaseLifecycleReporter {
    * To be overriden by network specific implementations.
    *
    * @param {string} unusedName A descriptive name for the beacon signal.
-   * @param {Object<string, string|number>=} opt_extraParams Dictionary of
-   *   key:value params to add to the ping request.
    */
-  sendPing(unusedName, opt_extraParams) {}
+  sendPing(unusedName) {}
 
   /**
    * Set a variable to be added to the ping data.  The variable's value is
@@ -195,11 +192,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @param {string} name  Stage name to ping out.  Should be one of the ones
    * from `LIFECYCLE_STAGES`.  If it's an unknown name, it will still be pinged,
    * but the stage ID will be set to `9999`.
-   * @param {Object<string, string|number>=} opt_extraParams
    * @override
    */
-  sendPing(name, opt_extraParams) {
-    this.emitPing_(this.buildPingAddress_(name, opt_extraParams));
+  sendPing(name) {
+    this.emitPing_(this.buildPingAddress_(name, this.extraVariables_));
   }
 
   /**
@@ -233,15 +229,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   buildPingAddress_(name, opt_extraParams) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
     const delta = Date.now() - this.initTime_;
-    // Note: QQid comes from a network header and eid could, potentially, be
-    // injected by a publisher.  Treat both of them as unverified user content
-    // and encode before inserting them into URI.
-    const encodedQqid = this.qqid_ ?
-        encodeURIComponent(this.qqid_) : false;
-    const qqidParam = encodedQqid ?
-        `&qqid.${this.slotId_}=${encodedQqid}` : '';
-    const eid = this.element_.getAttribute(EXPERIMENT_ATTRIBUTE);
-    const eidParam = eid ? `&e=${encodeURIComponent(eid)}` : '';
     let extraParams = '';
     if (opt_extraParams) {
       const paramList = [];
@@ -263,7 +250,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         `&rt=stage.${stageId},slotId.${this.slotId_}` +
         `&c=${this.correlator_}` +
         '&rls=$internalRuntimeVersion$' +
-        `${eidParam}${qqidParam}` +
         `&it.${this.slotName_}=${name}.${delta}` +
         `&rt.${this.slotName_}=stage.${stageId}` +
         `&met.${this.slotName_}=stage_${stageId}.${delta}` +

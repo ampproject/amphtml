@@ -24,6 +24,7 @@ import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
+import {getLifecycleReporter} from './performance';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -39,6 +40,18 @@ const AmpAdImplementation = {
 
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
+
+/**
+ * Element attribute that stores experiment IDs.
+ *
+ * Note: This attribute should be used only for tracking experimental
+ * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
+ * added by a publisher page.
+ *
+ * @const {!string}
+ * @visibleForTesting
+ */
+export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
@@ -295,4 +308,48 @@ export function getCorrelator(win, opt_cid) {
         opt_cid, documentInfoForDoc(win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
+}
+
+/**
+ * Creates or reinitializes a lifecycle reporter for Google ad network
+ * implementations.
+ *
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
+ * @return {!./performance.GoogleAdLifecycleReporter}
+ */
+export function googleLifecycleReporterFactory(a4aElement) {
+  const reporter =
+      /** @type {!./performance.GoogleAdLifecycleReporter} */
+      (getLifecycleReporter(a4aElement, 'a4a', undefined,
+          a4aElement.element.getAttribute('data-amp-slot-index')));
+  reporter.setPingVariable('v_h', 'VIEWPORT_HEIGHT');
+  reporter.setPingVariable('s_t', 'SCROLL_TOP');
+  const eid = this.element_.getAttribute(EXPERIMENT_ATTRIBUTE);
+  if (eid) {
+    reporter.setPingVariable('e', eid);
+  }
+  return reporter;
+}
+
+/**
+ * Sets reportable variables from ad response headers.
+ *
+ * @param {!FetchResponseHeaders} headers
+ * @param {!./performance.GoogleAdLifecycleReporter} reporter
+ */
+export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
+  const qqid = headers.get(QQID_HEADER);
+  if (qqid) {
+    reporter.setPingVariable(`qqid_${reporter.getSlotId()}`, qqid);
+  }
+  // This is duplicated from the amp-a4a.js implementation.  It needs to be
+  // defined there because it's an implementation detail of that module, but
+  // we want to report it to Google b/c we're interested in how rendering mode
+  // affects Google ads.  However, we can't directly reference a variable
+  // in extensions/ from here.
+  const renderingTypeHeader = 'X-AmpAdRender';
+  const method = headers.get(renderingTypeHeader);
+  if (method) {
+    reporter.setPingVariable(`rm_${reporter.getSlotId()}`, method);
+  }
 }

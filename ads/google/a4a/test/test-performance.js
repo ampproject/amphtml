@@ -19,7 +19,7 @@ import {
   BaseLifecycleReporter,
   getLifecycleReporter,
 } from '../performance';
-import {EXPERIMENT_ATTRIBUTE} from '../traffic-experiments';
+import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {childElements} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -127,65 +127,71 @@ describe('#getLifecycleReporter', () => {
   ];
 
   ['adsense', 'doubleclick'].forEach(type => {
-    EXPERIMENT_BRANCH_EIDS.forEach(eid => {
-      it(`should return real reporter for a4a eid = ${eid}`, () => {
-        return buildElementWithEid('a4a', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
+    describe(`type = ${type}`, () => {
+      EXPERIMENT_BRANCH_EIDS.forEach(eid => {
+        it(`should return real reporter for a4a eid = ${eid}`, () => {
+          return buildElementWithEid('a4a', type, eid).then(reporter => {
+            expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
+          });
         });
+
+        it(`should return a null reporter for amp eid = ${eid}`, () => {
+          return buildElementWithEid('amp', type, eid).then(reporter => {
+            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+          });
+        });
+
+        it(`should return null reporter for bogus namespace eid = ${eid}`,
+            () => {
+              return buildElementWithEid('fnord', type, eid).then(reporter => {
+                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+              });
+            });
+
+        it(`should return null reporter for non-Google ad, eid = ${eid}`,
+            () => {
+              return buildElementWithEid('a4a', 'a9', eid).then(reporter => {
+                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+              });
+            });
       });
 
-      it(`should return a null reporter for amp eid = ${eid}`, () => {
-        return buildElementWithEid('amp', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+      CONTROL_BRANCH_EIDS.forEach(eid => {
+        it(`should return null reporter for a4a eid = ${eid}`, () => {
+          return buildElementWithEid('a4a', type, eid).then(reporter => {
+            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+          });
         });
+
+        it(`should return a real reporter for amp eid = ${eid}`, () => {
+          return buildElementWithEid('amp', type, eid).then(reporter => {
+            expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
+          });
+        });
+
+        it(`should return null reporter for bogus namespace eid = ${eid}`,
+            () => {
+              return buildElementWithEid('fnord', type, eid).then(reporter => {
+                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+              });
+            });
+
+        it(`should return null reporter for non-Google ad, eid = ${eid}`,
+            () => {
+              return buildElementWithEid('amp', 'a9', eid).then(reporter => {
+                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+              });
+            });
       });
 
-      it(`should return null reporter for bogus namespace eid = ${eid}`, () => {
-        return buildElementWithEid('fnord', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+      for (const namespace in ['a4a', 'amp']) {
+        it(`should return null reporter for ${namespace} and no eid`, () => {
+          return buildElementWithEid(namespace, type).then(reporter => {
+            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
+          });
         });
-      });
-
-      it(`should return null reporter for non-Google ad, eid = ${eid}`, () => {
-        return buildElementWithEid('a4a', 'a9', eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
+      }
     });
-
-    CONTROL_BRANCH_EIDS.forEach(eid => {
-      it(`should return null reporter for a4a eid = ${eid}`, () => {
-        return buildElementWithEid('a4a', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-
-      it(`should return a real reporter for amp eid = ${eid}`, () => {
-        return buildElementWithEid('amp', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-        });
-      });
-
-      it(`should return null reporter for bogus namespace eid = ${eid}`, () => {
-        return buildElementWithEid('fnord', type, eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-
-      it(`should return null reporter for non-Google ad, eid = ${eid}`, () => {
-        return buildElementWithEid('amp', 'a9', eid).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-    });
-
-    for (const namespace in ['a4a', 'amp']) {
-      it(`should return null reporter for ${namespace} and no eid`, () => {
-        return buildElementWithEid(namespace, type).then(reporter => {
-          expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-        });
-      });
-    }
   });
 });
 
@@ -317,209 +323,77 @@ describe('GoogleAdLifecycleReporter', () => {
         }
       });
     });
+  });
 
-    it('should capture eid', () => {
-      return iframe.then(({win, doc, unusedElem, reporter}) => {
+  describe('#setPingVariable', () => {
+    it('should pass through static ping variables', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
+        reporter.setPingVariable('zort', 314159);
+        reporter.setPingVariable('gack', 'flubble');
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
-        // No e= param when no EID is present on element.
-        expect(arg).to.not.match(/[&?]e=/);
-        const elem2 = doc.createElement('div');
-        elem2.setAttribute(EXPERIMENT_ATTRIBUTE, '123456');
-        doc.body.appendChild(elem2);
-        const reporter2 = new GoogleAdLifecycleReporter(win, elem2, 'test_foo');
-        reporter2.setPingAddress('/');
-        reporter2.sendPing('adRequestStart');
-        expect(emitPingSpy).to.be.calledTwice;
-        const arg2 = emitPingSpy.getCall(1).args[0];
-        // Now there should be an e= param.
-        expect(arg2).to.match(/[&?]e=123456/);
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=314159/,
+          /gack=flubble/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
-    it('eid should be URL encoded', () => {
+    it('does not allow empty args', () => {
+      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingVariable('', '');
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        expect(arg).not.to.match(/\&=?\&/);
+      });
+    });
+
+    it('should uri encode extra params', () => {
+      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingVariable('evil',
+            '<script src="https://evil.com">doEvil()</script>');
+        reporter.setPingVariable(
+            '<script src="https://very.evil.com">doMoreEvil()</script>', 3);
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        expect(arg).not.to.have.string(
+            '<script src="https://evil.com">doEvil()</script>');
+        expect(arg).to.have.string('&evil=' + encodeURIComponent(
+                '<script src="https://evil.com">doEvil()</script>'));
+        expect(arg).not.to.have.string(
+            '<script src="https://very.evil.com">doMoreEvil()</script>');
+        expect(arg).to.have.string('&' + encodeURIComponent(
+                '<script src="https://very.evil.com">doMoreEvil()</script>') +
+            '=3');
+      });
+    });
+
+    it('should expand URL parameters in extra params', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-        // The following string is deliberately a script URL to test that
-        // the ping system correctly URL encodes such strings.
-        /* eslint-disable no-script-url */
-        const rawEid =
-            'javascript:{doSomethingHeinous("https://malware.central.com");}';
-        /* eslint-enable no-script-url */
-        elem.setAttribute(EXPERIMENT_ATTRIBUTE, rawEid);
         expect(emitPingSpy).to.not.be.called;
-        reporter.sendPing('onLayoutMeasure');
+        reporter.setPingVariable('zort', 'RANDOM');
+        reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
-        const encodedEid = encodeURIComponent(rawEid);
-        expect(arg).to.match(new RegExp(`[&?]e=${escapeRegExp_(encodedEid)}`));
-      });
-    });
-
-    describe('with optional args', () => {
-      it('should attach single extra arg', () => {
-        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-          expect(emitPingSpy).to.not.be.called;
-          reporter.sendPing('adRequestStart', {fnord: 37});
-          expect(emitPingSpy).to.be.calledOnce;
-          const arg = emitPingSpy.getCall(0).args[0];
-          const expectations = [
-            // Be sure that existing ping not deleted by args.
-            /[&?]s=test_foo/,
-            /\&fnord=37/,
-          ];
-          expectMatchesAll(arg, expectations);
-          expectHasSiblingImgMatchingAll(elem, expectations);
-        });
-      });
-
-      it('should attach multiple extra args', () => {
-        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-          expect(emitPingSpy).to.not.be.called;
-          reporter.sendPing('adRequestStart', {
-            fnord: 37,
-            zort: 'flubble',
-            blob: 'xonx',
-            crash: 'boom',
-            fwip: 999,
-          });
-          expect(emitPingSpy).to.be.calledOnce;
-          const arg = emitPingSpy.getCall(0).args[0];
-          const expectations = [
-            // Be sure that existing ping not deleted by args.
-            /[&?]s=test_foo/,
-            /\&fnord=37/,
-            /\&zort=flubble/,
-            /\&blob=xonx/,
-            /\&crash=boom/,
-            /\&fwip=999/,
-          ];
-          expectMatchesAll(arg, expectations);
-          expectHasSiblingImgMatchingAll(elem, expectations);
-        });
-      });
-
-      it('should not add args on null input', () => {
-        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-          expect(emitPingSpy).to.not.be.called;
-          reporter.sendPing('adRequestStart', null);
-          expect(emitPingSpy).to.be.calledOnce;
-          const arg = emitPingSpy.getCall(0).args[0];
-          const expectations = [
-            // Be sure that existing ping not deleted by args.
-            /[&?]s=test_foo/,
-            // And it should not end with a & or ?.
-            /[^&?]$/,
-          ];
-          expectMatchesAll(arg, expectations);
-          expectHasSiblingImgMatchingAll(elem, expectations);
-        });
-      });
-
-      it('should not add args on empty input', () => {
-        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-          expect(emitPingSpy).to.not.be.called;
-          reporter.sendPing('adRequestStart', {});
-          expect(emitPingSpy).to.be.calledOnce;
-          const arg = emitPingSpy.getCall(0).args[0];
-          const expectations = [
-            // Be sure that existing ping not deleted by args.
-            /[&?]s=test_foo/,
-            // And it should not end with a & or ?.
-            /[^&?]$/,
-          ];
-          expectMatchesAll(arg, expectations);
-          expectHasSiblingImgMatchingAll(elem, expectations);
-        });
-      });
-
-      it('does not allow empty args', () => {
-        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-          expect(emitPingSpy).to.not.be.called;
-          reporter.sendPing('adRequestStart', {
-            null: '',
-            '': '',
-            x: 'x'
-          });
-          expect(emitPingSpy).to.be.calledOnce;
-          const arg = emitPingSpy.getCall(0).args[0];
-          expect(arg).not.to.match(/\&=?\&/);
-        });
-      });
-
-      it('should uri encode extra params', () => {
-        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-          expect(emitPingSpy).to.not.be.called;
-          reporter.sendPing('adRequestStart', {
-            evil: '<script src="https://evil.com">doEvil()</script>',
-            '<script src="https://very.evil.com">doMoreEvil()</script>': 3,
-          });
-          expect(emitPingSpy).to.be.calledOnce;
-          const arg = emitPingSpy.getCall(0).args[0];
-          expect(arg).not.to.have.string(
-              '<script src="https://evil.com">doEvil()</script>');
-          expect(arg).to.have.string('&evil=' + encodeURIComponent(
-              '<script src="https://evil.com">doEvil()</script>'));
-          expect(arg).not.to.have.string(
-              '<script src="https://very.evil.com">doMoreEvil()</script>');
-          expect(arg).to.have.string('&' + encodeURIComponent(
-              '<script src="https://very.evil.com">doMoreEvil()</script>') +
-              '=3');
-        });
-      });
-
-      it('should expand URL parameters in extra params', () => {
-        return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-          expect(emitPingSpy).to.not.be.called;
-          reporter.sendPing('adRequestStart', {zort: 'RANDOM'});
-          expect(emitPingSpy).to.be.calledOnce;
-          const arg = emitPingSpy.getCall(0).args[0];
-          const expectations = [
-            // Be sure that existing ping not deleted by args.
-            /[&?]s=test_foo/,
-            /zort=x[0-9.]+/,
-          ];
-          expectMatchesAll(arg, expectations);
-          expectHasSiblingImgMatchingAll(elem, expectations);
-        });
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=[0-9.]+/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
   });
 
-  describe('#setQqid', () => {
-    it('should populate qqid after set', () => {
-      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
-        expect(emitPingSpy).to.not.be.called;
-        reporter.sendPing('buildUrl');
-        expect(emitPingSpy).to.be.calledOnce;
-        let arg = emitPingSpy.getCall(0).args[0];
-        expect(arg).to.not.match(/qqid/);
-        reporter.setQqid('zort');
-        reporter.sendPing('renderViaIframe');
-        expect(emitPingSpy).to.be.calledTwice;
-        arg = emitPingSpy.getCall(1).args[0];
-        expect(arg).to.match(/&qqid\.0=zort/);
-      });
-    });
-
-    it('qqid should be url encoded', () => {
-      return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
-        expect(emitPingSpy).to.not.be.called;
-        // The following string is deliberately a script URL to test that
-        // the ping system correctly URL encodes such strings.
-        /* eslint-disable no-script-url */
-        const rawQqid =
-            'javascript:{doSomethingHeinous("https://malware.central.com");}';
-        /* eslint-enable no-script-url */
-        const encodedQqid = encodeURIComponent(rawQqid);
-        reporter.setQqid(rawQqid);
-        reporter.sendPing('renderViaIframe');
-        expect(emitPingSpy).to.be.calledOnce;
-        const arg = emitPingSpy.getCall(0).args[0];
-        expect(arg).to.match(
-            new RegExp(`[&?]qqid\.0=${escapeRegExp_(encodedQqid)}`));
-      });
-    });
-  });
 });
