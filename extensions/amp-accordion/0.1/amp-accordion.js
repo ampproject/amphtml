@@ -111,7 +111,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Get previous state from sessionStorage.
-   * @return {!Object|null}
+   * @return {!Object}
    * @private
    */
   getSessionState_() {
@@ -122,8 +122,9 @@ class AmpAccordion extends AMP.BaseElement {
       const sessionStr =
           this.win./*OK*/sessionStorage.getItem(
           dev().assertString(this.sessionId_));
-      return /** @type {!Object} */ (
-          JSON.parse(dev().assertString(sessionStr)));
+      return sessionStr
+          ? /** @type {!Object} */ (JSON.parse(dev().assertString(sessionStr)))
+          : map();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
       return map();
