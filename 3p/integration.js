@@ -31,7 +31,6 @@ import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
-import {DEFAULT_THRESHOLD} from '../src/intersection-observer-polyfill';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -126,6 +125,15 @@ import {yieldone} from '../ads/yieldone';
 import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+
+/**
+ * This value is copied here to avoid importing from src/intersection-observer-polyfill.js
+ * Please keep this value same with DEFAULT_THRESHOLD from that file.
+ * @const @private {!Array}
+ */
+const DEFAULT_THRESHOLD =
+    [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
+    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -424,18 +432,16 @@ function triggerRenderStart(opt_data) {
 function observeIntersection(observerCallback) {
   // Send request to received records.
   if (window.IntersectionObserver && window.IntersectionObserver.prototype) {
-    console.log('use native');
+    // use native IntersectionObserver if exist
     const io = new window.IntersectionObserver(changes => {
-      console.log('observe changes');
       observerCallback(changes);
     }, {
-      threshold: [0, 0.5],//DEFAULT_THRESHOLD,
+      threshold: DEFAULT_THRESHOLD,
     });
     io.observe(window.document.documentElement);
     const unlistener = () => io.unobserve(window.document.documentElement);
     return unlistener;
   }
-  console.log('use polyfill');
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);
