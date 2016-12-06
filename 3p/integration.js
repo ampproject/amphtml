@@ -166,7 +166,7 @@ register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
 register('adverline', adverline);
-register('adverticum',adverticum);
+register('adverticum', adverticum);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);

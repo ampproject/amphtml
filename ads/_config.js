@@ -40,7 +40,6 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-
   a9: {
     prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   },
@@ -111,7 +110,9 @@ export const adConfig = {
     ],
     renderStartImplemented: true,
   },
-  adverticum: {},
+  adverticum: {
+    renderStartImplemented: true,
+  },
 
   advertserve: {
     renderStartImplemented: true,
