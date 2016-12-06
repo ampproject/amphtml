@@ -779,6 +779,31 @@ export class AccessService {
   }
 
   /**
+   * Runs the login flow using one of the predefined urls in the amp-access config
+   *
+   * @param {string} type Type of login defined in the config
+   * @return {!Promise}
+   */
+  loginWithType_(type) {
+    // Login URL should always be available at this time.
+    const loginUrl = user().assert(this.loginUrlMap_[type],
+        'Login URL is not ready: %s', type);
+    user().assert(this.loginConfig_[type],
+        'Login URL is not configured: %s', type);
+    return this.login_(loginUrl, type);
+  }
+
+  /**
+   * Runs the login flow opening the given url in the login window.
+   *
+   * @param {string} url
+   * @return {!Promise}
+   */
+  loginWithUrl(url) {
+    return this.login_(url, url);
+  }
+
+  /**
    * Runs the Login flow. Returns a promise that is resolved if login succeeds
    * or is rejected if login fails. Login flow is performed as an external
    * 1st party Web dialog. It's goal is to authenticate the reader.
@@ -786,10 +811,11 @@ export class AccessService {
    * Type can be either an empty string for a default login or a name of the
    * login URL.
    *
-   * @param {string} type
+   * @param {string} loginUrl
+   * @param {string} eventLabel
    * @return {!Promise}
    */
-  login(type) {
+  login_(loginUrl, eventLabel) {
     const now = Date.now();
 
     // If login is pending, block a new one from starting for 1 second. After
@@ -800,26 +826,21 @@ export class AccessService {
       return this.loginPromise_;
     }
 
-    dev().fine(TAG, 'Start login: ', type);
-    user().assert(this.loginConfig_[type],
-        'Login URL is not configured: %s', type);
-    // Login URL should always be available at this time.
-    const loginUrl = user().assert(this.loginUrlMap_[type],
-        'Login URL is not ready: %s', type);
+    dev().fine(TAG, 'Start login: ', eventLabel);
 
-    this.loginAnalyticsEvent_(type, 'started');
+    this.loginAnalyticsEvent_(eventLabel, 'started');
     const dialogPromise = this.signIn_.requestSignIn(loginUrl) ||
         this.openLoginDialog_(loginUrl);
     const loginPromise = dialogPromise.then(result => {
-      dev().fine(TAG, 'Login dialog completed: ', type, result);
+      dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
       const s = query['success'];
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
-        this.loginAnalyticsEvent_(type, 'success');
+        this.loginAnalyticsEvent_(eventLabel, 'success');
       } else {
-        this.loginAnalyticsEvent_(type, 'rejected');
+        this.loginAnalyticsEvent_(eventLabel, 'rejected');
       }
       const exchangePromise = this.signIn_.postLoginResult(query) ||
           Promise.resolve();
@@ -837,8 +858,8 @@ export class AccessService {
         });
       }
     }).catch(reason => {
-      dev().fine(TAG, 'Login dialog failed: ', type, reason);
-      this.loginAnalyticsEvent_(type, 'failed');
+      dev().fine(TAG, 'Login dialog failed: ', eventLabel, reason);
+      this.loginAnalyticsEvent_(eventLabel, 'failed');
       if (this.loginPromise_ == loginPromise) {
         this.loginPromise_ = null;
       }
