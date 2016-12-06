@@ -155,10 +155,11 @@ describe('3p-frame', () => {
     expect(locationHref).to.not.be.empty;
     const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
-    const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
+    const name = JSON.parse(decodeURIComponent(iframe.name));
+    const sentinel = name.attributes._context.sentinel;
     const fragment =
         '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
-        '"type":"_ping_"' +
+        '"type":"_ping_", "ampcontextVersion": "LOCAL"' +
         ',"_context":{"referrer":"http://acme.org/",' +
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"sourceUrl":"' + locationHref + '",' +
@@ -172,7 +173,7 @@ describe('3p-frame', () => {
         // Note also that running it using --files uses different DOM.
         ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
-        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
+        ',"sentinel":"' + sentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
@@ -180,20 +181,18 @@ describe('3p-frame', () => {
         '{"width":100,"height":200},"intersectionRect":{' +
         '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
         '"right":0,"x":0,"y":0}}}}';
-    const srcParts = src.split('#');
-    expect(srcParts[0]).to.equal(
+    expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    const expectedFragment = JSON.parse(srcParts[1]);
     const parsedFragment = JSON.parse(fragment);
     // Since DOM fingerprint changes between browsers and documents, to have
     // stable tests, we can only verify its existence.
-    expect(expectedFragment._context.domFingerprint).to.exist;
-    delete expectedFragment._context.domFingerprint;
+    expect(name.attributes._context.domFingerprint).to.exist;
+    delete name.attributes._context.domFingerprint;
     delete parsedFragment._context.domFingerprint;
-    expect(expectedFragment).to.deep.equal(parsedFragment);
+    expect(name.attributes).to.deep.equal(parsedFragment);
 
     // Switch to same origin for inner tests.
-    iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
+    iframe.src = '/dist.3p/current/frame.max.html';
 
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
@@ -334,12 +333,16 @@ describe('3p-frame', () => {
     };
 
     container.appendChild(div);
-    const name = getIframe(window, div).name;
+    const name = JSON.parse(getIframe(window, div).name);
     resetBootstrapBaseUrlForTesting(window);
     resetCountForTesting();
-    const newName = getIframe(window, div).name;
-    expect(name).to.match(/d-\d+.ampproject.net__ping__0/);
-    expect(newName).to.match(/d-\d+.ampproject.net__ping__0/);
+    const newName = JSON.parse(getIframe(window, div).name);
+    expect(name.host).to.match(/d-\d+.ampproject.net/);
+    expect(name.type).to.match(/ping/);
+    expect(name.count).to.match(/0/);
+    expect(newName.host).to.match(/d-\d+.ampproject.net/);
+    expect(newName.type).to.match(/ping/);
+    expect(newName.count).to.match(/0/);
     expect(newName).not.to.equal(name);
   });
 

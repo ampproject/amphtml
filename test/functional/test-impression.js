@@ -24,7 +24,7 @@ import {viewerForDoc} from '../../src/viewer';
 import {xhrFor} from '../../src/xhr';
 import * as sinon from 'sinon';
 
-describe('impression', () => {
+describe('test-impression', () => {
 
   let sandbox;
   let viewer;

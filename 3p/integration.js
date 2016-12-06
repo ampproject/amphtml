@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -144,9 +144,13 @@ const AMP_EMBED_ALLOWED = {
 };
 
 const iframeName = window.name;
-const data = JSON.parse(window.name).attributes;
-window.context = data._context;
-
+let data;
+try {
+  data = JSON.parse(window.name).attributes;
+  window.context = data._context;
+} catch (err) {
+  window.context = {};
+}
 // This should only be invoked after window.context is set
 initLogConstructor();
 
@@ -498,10 +502,12 @@ function reportRenderedEntityIdentifier(entityId) {
 
 /**
  *  Adds the serialized ad attributes to an iframe's name attribute.
- *  @param {object} iframe A creative iframe that will be added to the
- *    DOM.
+ *  @param {string} iframeName A URIencoded JSON object of context
+ *      that needs to be attached to an iframe.
+ *  @return {function(Element)} Function that will attach iframeName
+ *      to the name attribute of iframe.
  */
-function getAddContextToIframe(iframeName){
+function getAddContextToIframe(iframeName) {
   return iframe => {
     iframe.name = iframeName;
   };
