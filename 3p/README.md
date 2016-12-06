@@ -59,4 +59,4 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 - JavaScript can not be involved with the initiation of font loading.
 - Font loading gets controlled (but not initiated) by [`<amp-font>`](https://github.com/ampproject/amphtml/issues/648).
 - AMP by default does not allow inclusion of external stylesheets, but it is happy to whitelist URL prefixes of font providers for font inclusion via link tags. These link tags and their fonts must be served via HTTPS.
-- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist. AMP proxy sends the appropriate referrer header such as "https://cdn.ampproject.org".
+- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist. AMP proxy sends the appropriate referrer header such as "https://cdn.ampproject.org" and "https://amp.cloudflare.com".
