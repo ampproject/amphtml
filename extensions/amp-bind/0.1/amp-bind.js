@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpBindState} from './amp-bind-state';
+import {AmpState} from './amp-state';
 import {Bind} from './bind-impl';
 
 AMP.registerServiceForDoc('bind', Bind);
-AMP.registerElement('amp-bind-state', AmpBindState);
+AMP.registerElement('amp-state', AmpState);

@@ -16,13 +16,13 @@
     }
   </style>
 
-  <amp-bind-state id="myState">
+  <amp-state id="myState">
     <script type="application/json">
       {
         "myStateKey1": "myStateValue1"
       }
     </script>
-</amp-bind-state>
+</amp-state>
 </head>
 
 <body>
@@ -37,6 +37,6 @@
   <amp-video src="https://ampbyexample.com/video/tokyo.mp4" [src]="videoSrc" width=480 height=270 controls></amp-video>
   -->
   <hr>
-  <button on="tap:AMP.setBindState(foo='foo', isButtonDisabled=true, textClass='redBackground', imgSrc='https://ampbyexample.com/img/Shetland_Sheepdog.jpg', imgSize=200, imgAlt='Sheepdog', videoSrc='https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4')">Click me</button>
+  <button on="tap:AMP.setState(foo='foo', isButtonDisabled=true, textClass='redBackground', imgSrc='https://ampbyexample.com/img/Shetland_Sheepdog.jpg', imgSize=200, imgAlt='Sheepdog', videoSrc='https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4')">Click me</button>
 </body>
 </html>

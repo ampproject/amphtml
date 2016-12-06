@@ -47,9 +47,9 @@ tags: {  # amp-bind
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-bind.html"
 }
-tags: {  # <amp-bind-state>
+tags: {  # <amp-state>
   html_format: AMP
-  tag_name: "AMP-BIND-STATE"
+  tag_name: "AMP-STATE"
   mandatory_parent: "HEAD"
   also_requires_tag: "amp-bind extension .js script"
   attrs: {
@@ -58,11 +58,11 @@ tags: {  # <amp-bind-state>
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-bind.html"
 }
-tags: {  # <amp-bind-state> (json)
+tags: {  # <amp-state> (json)
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
-  mandatory_parent: "AMP-BIND-STATE"
+  mandatory_parent: "AMP-STATE"
   attrs: {
     name: "type"
     mandatory: true

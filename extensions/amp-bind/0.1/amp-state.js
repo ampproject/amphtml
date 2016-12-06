@@ -20,7 +20,7 @@ import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
-export class AmpBindState extends AMP.BaseElement {
+export class AmpState extends AMP.BaseElement {
   /** @override */
   getPriority() {
     // Loads after other content.
@@ -87,7 +87,7 @@ export class AmpBindState extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return 'AmpBindState ' +
+    return 'AmpState ' +
         (this.element.getAttribute('id') || '<unknown id>');
   }
 }

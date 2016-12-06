@@ -37,7 +37,7 @@ const DEFAULT_METHOD_ = 'activate';
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
-  'amp': ['setBindState'],
+  'amp': ['setState'],
 };
 
 /**
@@ -227,7 +227,7 @@ export class ActionService {
     }
 
     if (action.actionInfo.target === 'AMP') {
-      if (action.actionInfo.method === 'setBindState') {
+      if (action.actionInfo.method === 'setState') {
         bindForDoc(this.ampdoc).then(bind => {
           bind.setState(action.actionInfo.args);
         });
