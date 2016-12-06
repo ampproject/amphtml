@@ -74,15 +74,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = this.element.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
-      src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/skin-plugin/amp_iframe.html?pcode='
-        + encodeURIComponent(pCode);
+      src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
+        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(pCode);
       const configUrl = this.element.getAttribute('data-config');
       if (configUrl) {
         src += '&options[skin.config]=' + encodeURIComponent(configUrl);
       }
     }
 
-    src += '&ec=' + encodeURIComponent(embedCode) +
+    src += '&ec=' + encodeURIComponent(embedCode) + 
       '&pbid=' + encodeURIComponent(playerId);
     if (autoplay) {
       src += '&autoplay=true';
