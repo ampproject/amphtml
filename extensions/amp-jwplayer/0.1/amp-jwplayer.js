@@ -101,7 +101,7 @@ class AmpJWPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
-    return true; //Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
