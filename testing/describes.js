@@ -35,6 +35,7 @@ import {cssText} from '../build/css';
 import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
+  installBuiltinElements,
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
@@ -424,6 +425,7 @@ class AmpFixture {
     const ampdocService = installDocService(win, singleDoc);
     env.ampdocService  = ampdocService;
     env.extensions = installExtensionsService(win);
+    installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
       win.services.vsync.obj.runScheduledTasks_();

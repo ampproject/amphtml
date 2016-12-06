@@ -318,7 +318,7 @@ describes.sandboxed('Extensions', {}, () => {
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
       expect(win.customElements.elements['amp-test']).to.exist;
-      expect(win.ampExtendedElements['amp-test']).to.be.true;
+      expect(win.ampExtendedElements['amp-test']).to.equal(ElementStub);
     });
 
     it('should only insert script once', () => {
@@ -439,11 +439,18 @@ describes.sandboxed('Extensions', {}, () => {
     it('should install built-ins', () => {
       extensions.installExtensionsInChildWindow(iframeWin, []);
       expect(iframeWin.ampExtendedElements).to.exist;
-      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-video']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-pixel']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-ad']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-embed']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img'])
+          .to.not.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-video']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-video'])
+          .to.not.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-pixel'])
+          .to.not.equal(ElementStub);
+      // Legacy elements are installed as well.
+      expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
     });
 
     it('should adopt core services', () => {
@@ -477,13 +484,13 @@ describes.sandboxed('Extensions', {}, () => {
       const promise = extensions.installExtensionsInChildWindow(
           iframeWin, ['amp-test']);
       // Must be stubbed already.
-      expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
       expect(iframeWin.document.createElement('amp-test').implementation_)
           .to.be.instanceOf(ElementStub);
       return promise.then(() => {
         expect(stub).to.be.calledOnce;
-        expect(parentWin.ampExtendedElements['amp-test']).to.be.true;
-        expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(parentWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+        expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
         expect(iframeWin.document
             .querySelector('style[amp-extension=amp-test]')).to.exist;
         // Must be upgraded already.
@@ -519,12 +526,14 @@ describes.sandboxed('Extensions', {}, () => {
           });
       expect(preinstallCount).to.equal(1);
       expect(iframeWin.ampExtendedElements).to.exist;
-      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img'])
+          .to.not.equal(ElementStub);
       expect(stub).to.be.calledOnce;
       return promise.then(() => {
         // Extension elements are stubbed immediately, but registered only
         // after extension is loaded.
-        expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
       });
     });
   });
@@ -615,9 +624,3 @@ describes.sandboxed('Extensions', {}, () => {
     });
   });
 });
-
-//QQQ
-// // Also stubs legacy elements.
-// expect(childWin.ampExtendedElements['amp-ad']).to.be.true;
-// expect(childWin.ampExtendedElements['amp-embed']).to.be.true;
-
