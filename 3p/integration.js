@@ -425,14 +425,14 @@ function triggerRenderStart(opt_data) {
 function observeIntersection(observerCallback) {
   // Send request to received records.
   if (window.IntersectionObserver) {
-    console.log('aaaaaaa');
     const io = new window.IntersectionObserver(changes => {
       observerCallback(changes);
     }, {
       threshold: DEFAULT_THRESHOLD,
     });
-    io.observe(window.document.body);
-    return io.unobserve.bind(window.document.body);
+    io.observe(window.document.documentElement);
+    const unlistener = () => io.unobserve(window.document.documentElement);
+    return unlistener;
   }
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {

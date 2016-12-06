@@ -49,12 +49,17 @@ export function _ping_(global, data) {
     } else {
       global.context.renderStart();
     }
-    global.context.observeIntersection(function(changes) {
+    const unlisten = global.context.observeIntersection(function(changes) {
       changes.forEach(function(c) {
         dev().info('AMP-AD', 'Intersection: (WxH)' +
             `${c.intersectionRect.width}x${c.intersectionRect.height}`);
       });
     });
+    if (data.unlistenIo) {
+      global.setTimeout(() => {
+        unlisten();
+      }, 1000);
+    }
   } else {
     global.context.noContentAvailable();
   }
