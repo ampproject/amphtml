@@ -344,15 +344,15 @@ export class ViewerStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return this.viewer_.sendMessage('loadStore', {origin}, true).then(
+    return this.viewer_.sendMessageAwaitResponse('loadStore', {origin}).then(
       response => response['blob']
     );
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return /** @type {!Promise} */ (this.viewer_.sendMessage(
-        'saveStore', {origin, blob}, true));
+    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
+        'saveStore', {origin, blob}));
   }
 }
 
