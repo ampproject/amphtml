@@ -231,7 +231,6 @@ export function copyElementToChildWindow(childWin, name) {
  * Upgrade element in the child window.
  * @param {!Window} childWin
  * @param {string} name
- * @param {function(!Function)} toClass
  */
 export function upgradeElementInChildWindow(childWin, name) {
   const toClass = knownElements[name];

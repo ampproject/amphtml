@@ -499,7 +499,7 @@ describes.sandboxed('Extensions', {}, () => {
         }, parentWin.AMP);
         const elements = {};
         elements[extensionId] = {css: 'a{}'};
-        return Promise.resolve({elements: elements});
+        return Promise.resolve({elements});
       });
       let preinstallCount = 0;
       const promise = extensions.installExtensionsInChildWindow(
