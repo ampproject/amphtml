@@ -29,13 +29,13 @@ function callDoubleclick(global, data) {
   doubleclick(global, data);
 }
 
-function index_amp_render(doc, targetID) {
+function indexAmpRender(doc, targetID) {
   try {
-    var ad = _IndexRequestData.targetIDToBid[targetID].pop();
+    const ad = global._IndexRequestData.targetIDToBid[targetID].pop();
     if (ad != null) {
-        var admDiv = document.createElement('div');
-        admDiv.innerHTML = ad;
-        doc.body.appendChild(admDiv);
+      const admDiv = document.createElement('div');
+      admDiv./*OK*/innerHTML = ad;
+      doc.body.appendChild(admDiv);
     }
   } catch (e) {};
 }
@@ -50,30 +50,39 @@ export function ix(global, data) {
       return;
     }
 
+    if (typeof global._IndexRequestData === 'undefined') {
+      global._IndexRequestData = {};
+      global._IndexRequestData.impIDToSlotID = {};
+      global._IndexRequestData.reqOptions = {};
+      global._IndexRequestData.targetIDToBid = {};
+    }
+
     global.IndexArgs = {
-      siteID: parseInt(data.ixId),
+      siteID: parseInt(data.ixId, 10),
       slots: [{
-        width:data.width,
-        height:data.height,
-        id:1,
+        width: data.width,
+        height: data.height,
+        id: 1,
       }],
       callback: (responseID, bids) => {
         if (!('targeting' in data)) {
           data.targeting = {};
         }
-        if (typeof bids !== "undefined" && bids.length > 0){
-          data.targeting[bids[0].target.substring(0,2) === 'O_' ? 'IOM' : 'IPM'] = bids[0].target.substring(2);
+        if (typeof bids !== 'undefined' && bids.length > 0) {
+          const target = bids[0].target.substring(0,2) === 'O_' ? 'IOM' : 'IPM';
+          data.targeting[target] = bids[0].target.substring(2);
         }
         data.targeting['IX_AMP'] = '1';
         callDoubleclick(global, data);
       },
     };
 
-    window.addEventListener('message', (event) => {
-      if (typeof event.data !== 'string' || event.data.substring(0,11) !== 'ix-message-') {
+    window.addEventListener('message', event => {
+      if (typeof event.data !== 'string' ||
+        event.data.substring(0,11) !== 'ix-message-') {
         return;
       }
-      index_amp_render(document, event.data.substring(11));
+      indexAmpRender(document, event.data.substring(11));
     }, false);
 
     writeScript(global, 'https://js-sec.indexww.com/apl/apl6.js');
