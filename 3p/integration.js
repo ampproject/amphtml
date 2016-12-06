@@ -147,7 +147,6 @@ window.context = data._context;
 initLogConstructor();
 
 if (getMode().test || getMode().localDev) {
-  // NOTE: Please type _ping_ for testing, as it disables native IO.
   register('_ping_', _ping_);
 }
 
