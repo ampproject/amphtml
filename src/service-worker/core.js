@@ -268,10 +268,9 @@ export function fetchAndCache(cache, request, requestPath, requestVersion) {
 }
 
 /**
- * Gets the version we have cached for this file. It's either:
- *  - The requestVersion, meaning we have this explicit version cached.
- *  - Some older version
- *  - An empty string, meaning we have nothing cached for this file.
+ * Gets the version we want to serve for this client. We attempt to serve the
+ * version with the most cached files, with a additional weight given to the
+ * main binary and the first requested file.
  *
  * @param {!Cache} cache
  * @param {string} requestPath
@@ -284,20 +283,30 @@ export function getCachedVersion(cache, requestPath, requestVersion) {
     // TODO(jridgewell): This should really count the bytes of the response,
     // but there's no efficient way to do that.
     const counts = {};
-    let max = requestVersion;
-    let maxCount = 0;
+    let most = requestVersion;
+    let mostCount = 0;
 
+    // Generates a weighted maximum version, ie the version with the most
+    // cached files. Given every file we've cached, determine what version
+    // it is, and increment the number of files we have for that version.
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
       const path = pathname(url);
       const version = rtvVersion(url);
 
+      // We do not want to stale serve blacklisted files. If nothing else is
+      // cached, we will end up serving whatever version is requested.
       if (isBlacklisted(version)) {
         continue;
       }
 
       let count = counts[version] || 0;
 
+      // Incrementing the number of "files" that have this version with a
+      // weight.
+      // The main binary (arguably the most important file to cache) is given a
+      // heavy weight, while the first requested file is given a slight weight.
+      // Everything else increments normally.
       if (path.indexOf('/', 1) === -1) {
         // Main binary
         count += 5;
@@ -309,13 +318,13 @@ export function getCachedVersion(cache, requestPath, requestVersion) {
       }
 
       counts[version] = count;
-      if (count > maxCount) {
-        max = version;
-        maxCount = count;
+      if (count > mostCount) {
+        most = version;
+        mostCount = count;
       }
     }
 
-    return max;
+    return most;
   });
 }
 
