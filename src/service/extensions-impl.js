@@ -650,8 +650,8 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
  * @param {!Window} win
  */
 export function stubLegacyElements(win) {
-  registerElement(win, 'amp-ad', ElementStub);
-  registerElement(win, 'amp-embed', ElementStub);
+  stubElementIfNotKnown(win, 'amp-ad');
+  stubElementIfNotKnown(win, 'amp-embed');
 }
 
 

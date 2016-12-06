@@ -177,10 +177,9 @@ export function stubElements(win) {
  */
 export function stubElementIfNotKnown(win, name) {
   const knownElements = getExtendedElements(win);
-  if (knownElements[name]) {
-    return;
+  if (!knownElements[name]) {
+    registerElement(win, name, ElementStub);
   }
-  registerElement(win, name, ElementStub);
 }
 
 /**

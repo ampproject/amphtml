@@ -416,7 +416,6 @@ class AmpFixture {
     link.setAttribute('href', spec.canonicalUrl || window.location.href);
     win.document.head.appendChild(link);
 
-    //QQQ: ??? win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
       win.name = '__AMP__off=1';
     }
