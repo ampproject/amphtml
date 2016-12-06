@@ -31,6 +31,7 @@ import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
+import {DEFAULT_THRESHOLD} from '../src/intersection-observer-polyfill';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -146,6 +147,7 @@ window.context = data._context;
 initLogConstructor();
 
 if (getMode().test || getMode().localDev) {
+  // NOTE: Please type _ping_ for testing, as it disables native IO.
   register('_ping_', _ping_);
 }
 
@@ -422,6 +424,16 @@ function triggerRenderStart(opt_data) {
  */
 function observeIntersection(observerCallback) {
   // Send request to received records.
+  if (window.IntersectionObserver) {
+    console.log('aaaaaaa');
+    const io = new window.IntersectionObserver(changes => {
+      observerCallback(changes);
+    }, {
+      threshold: DEFAULT_THRESHOLD,
+    });
+    io.observe(window.document.body);
+    return io.unobserve.bind(window.document.body);
+  }
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);

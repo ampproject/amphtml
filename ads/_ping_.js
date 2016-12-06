@@ -22,7 +22,9 @@ import {dev} from '../src/log';
  */
 export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
-
+  if (!data.nativeIo) {
+    global.IntersectionObserver = null;
+  }
   if (data.ad_container) {
     dev().assert(
         global.context.container == data.ad_container, 'wrong container');
