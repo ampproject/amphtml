@@ -139,6 +139,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [plista](../../ads/plista.md)
+- [popin](../../ads/popin.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)
