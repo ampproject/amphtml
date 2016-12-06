@@ -135,7 +135,8 @@ function deserializeMessage(message) {
     return null;
   }
   try {
-    return JSON.parse(message.substring(AMP_MESSAGE_PREFIX.length));
+    return /** @type {!JSONType} */ (JSON.parse(
+        message.substring(AMP_MESSAGE_PREFIX.length)));
   } catch (e) {
     dev().error(TAG, 'Failed to parse message: ' + message, e);
     return null;
