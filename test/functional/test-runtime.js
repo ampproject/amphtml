@@ -26,7 +26,6 @@ import {
 } from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
 import {timerFor} from '../../src/timer';

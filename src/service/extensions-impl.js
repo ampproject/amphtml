@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {ElementStub} from '../element-stub';
 import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
 import {
   copyElementToChildWindow,
-  registerElement,
   stubElementIfNotKnown,
   stubElementInChildWindow,
   upgradeElementInChildWindow,

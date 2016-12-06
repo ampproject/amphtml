@@ -47,7 +47,6 @@ describes.realWin('CustomElement register', {amp: 1}, env => {
   class ConcreteElement extends BaseElement {}
 
   let win;
-  let doc;
 
   beforeEach(() => {
     win = env.win;
