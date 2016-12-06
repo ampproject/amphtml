@@ -15,7 +15,6 @@
  */
 
 import * as sinon from 'sinon';
-import {timerFor} from '../../src/timer';
 
 /**
  * Cache SW has some side-effects, so we've got to do a little jig to test.
@@ -464,27 +463,23 @@ runner.run('Cache SW', () => {
         });
       });
 
-      describe('with multiple parallel requests', () => {
-        it('forces uniform RTV version of winner', () => {
-          const timer = timerFor(window);
-          // First call will resolve after the first.
-          cache.cached.push([prevRequest, responseFromRequest(prevRequest)]);
-
-          return Promise.all([
-            sw.handleFetch(request, clientId),
-            sw.handleFetch(compRequest, clientId),
-          ]).then(responses => {
-            expect(sw.rtvVersion(responses[0].url)).to.equal(
-                sw.rtvVersion(prevRequest.url));
-            expect(sw.rtvVersion(responses[1].url)).to.equal(
-                sw.rtvVersion(prevRequest.url));
-          });
-        });
-      });
-
       describe('with cached files', () => {
         beforeEach(() => {
           cache.cached.push([prevRequest, responseFromRequest(prevRequest)]);
+        });
+
+        describe('with multiple parallel requests', () => {
+          it('forces uniform RTV version of winner', () => {
+            return Promise.all([
+              sw.handleFetch(request, clientId),
+              sw.handleFetch(compRequest, clientId),
+            ]).then(responses => {
+              expect(sw.rtvVersion(responses[0].url)).to.equal(
+                sw.rtvVersion(prevRequest.url));
+              expect(sw.rtvVersion(responses[1].url)).to.equal(
+                sw.rtvVersion(prevRequest.url));
+            });
+          });
         });
 
         it('fulfills with cached version', () => {
@@ -544,6 +539,22 @@ runner.run('Cache SW', () => {
             });
           }).then(() => {
             expect(cache.cached[1][0]).to.equal(compRequest);
+          });
+        });
+      });
+
+      describe('without cached files', () => {
+        describe('with multiple parallel requests', () => {
+          it('forces uniform RTV version of winner', () => {
+            return Promise.all([
+              sw.handleFetch(request, clientId),
+              sw.handleFetch(prevRequest, clientId),
+            ]).then(responses => {
+              expect(sw.rtvVersion(responses[0].url)).to.equal(
+                sw.rtvVersion(request.url));
+              expect(sw.rtvVersion(responses[1].url)).to.equal(
+                sw.rtvVersion(request.url));
+            });
           });
         });
       });
