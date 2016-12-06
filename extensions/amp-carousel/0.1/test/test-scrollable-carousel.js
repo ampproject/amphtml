@@ -18,12 +18,13 @@ import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
-describes.sandboxed('ScrollableCarousel', {}, () => {
-
+describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
   let sandbox;
+  let win;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    win = env.win;
   });
 
   afterEach(() => {
@@ -57,34 +58,35 @@ describes.sandboxed('ScrollableCarousel', {}, () => {
     });
   }
 
-  describes.realWin('test-scrollable-carousel', {ampCss: true}, () => {
-    it('should initialize correctly: create container, build initial slides ' +
-        'and show control buttons', () => {
-      return getAmpScrollableCarousel().then(carousel => {
-        const impl = carousel.implementation_;
+  it('should initialize correctly: create container, build initial slides ' +
+      'and show control buttons', () => {
+    return getAmpScrollableCarousel().then(carousel => {
+      const impl = carousel.implementation_;
 
-        // create container
-        expect(carousel.getElementsByClassName(
-            '-amp-scrollable-carousel-container').length).to.equal(1);
-        const container = carousel.getElementsByClassName(
-            '-amp-scrollable-carousel-container')[0];
-        expect(container.style.overflowX).to.equal('auto');
-        expect(container.style.overflowY).to.equal('hidden');
-        expect(container.style.whiteSpace).to.equal('nowrap');
+      // create container
+      expect(carousel.getElementsByClassName(
+          '-amp-scrollable-carousel-container').length).to.equal(1);
+      const container = carousel.getElementsByClassName(
+          '-amp-scrollable-carousel-container')[0];
+      const containerStyle = win.getComputedStyle(container, null);
 
-        // build child slides
-        expect(container.getElementsByClassName('amp-carousel-slide').length)
-            .to.equal(7);
-        expect(container.getElementsByClassName('amp-carousel-slide')[0]
-            .style.display).to.equal('inline-block');
+      expect(containerStyle.getPropertyValue('overflow-x')).to.equal('auto');
+      expect(containerStyle.getPropertyValue('overflow-y')).to.equal('hidden');
+      expect(containerStyle.getPropertyValue('white-space')).to.equal('nowrap');
 
-        // show control buttons correctly
-        expect(impl.hasPrev()).to.be.false;
-        expect(impl.hasNext()).to.be.true;
-        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
-        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+      // build child slides
+      const carouselSlideEls =
+        container.getElementsByClassName('amp-carousel-slide');
+      const slideStyle = win.getComputedStyle(carouselSlideEls[0], null);
+      expect(carouselSlideEls.length).to.equal(7);
+      expect(slideStyle.getPropertyValue('display')).to.equal('inline-block');
 
-      });
+      // show control buttons correctly
+      expect(impl.hasPrev()).to.be.false;
+      expect(impl.hasNext()).to.be.true;
+      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+
     });
   });
 
