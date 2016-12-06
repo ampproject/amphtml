@@ -130,6 +130,10 @@ export const LIFECYCLE_STAGES = {
   preAdThrottle: '10',
   renderSafeFrameStart: '11',
   throttled3p: '12',
+  adResponseValidateEnd: '13',
+  xDomIframeLoaded: '14',
+  adSlotCollapsed: '15',
+  adSlotUnhidden: '16',
   adSlotCleared: '20',
 };
 
@@ -493,6 +497,10 @@ export class AmpA4A extends AMP.BaseElement {
                 return this.verifyCreativeSignature_(
                     creativeParts.creative, creativeParts.signature);
               });
+        })
+        .then(creative => {
+          this.emitLifecycleEvent('adResponseValidateEnd');
+          return creative;
         })
         .then(creative => {
           checkStillCurrent(promiseId);
@@ -1197,13 +1205,23 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Receive collapse notifications and record lifecycle events for them.
+   *
+   * @param unusedElement {!AmpElement}
+   * @override
+   */
+  collapsedCallback(unusedElement) {
+    this.emitLifecycleEvent('adSlotCollapsed');
+  }
+
+  /**
    * To be overriden by network specific implementation.
    * This function will be called for each lifecycle event as specified in the
    * LIFECYCLE_STAGES enum declaration. For certain events, an optional
    * associated piece of data will be passed.
    *
    * @param {string} eventName
-   * @param {!Object=} opt_associatedEventData
+   * @param {Object=} opt_associatedEventData
    */
   emitLifecycleEvent(eventName, opt_associatedEventData) {}
 }
