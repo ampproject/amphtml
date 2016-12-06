@@ -518,10 +518,12 @@ function reportRenderedEntityIdentifier(entityId) {
 
 /**
  *  Adds the serialized ad attributes to an iframe's name attribute.
- *  @param {object} iframe A creative iframe that will be added to the
- *    DOM.
+ *  @param {string} iframeName A URIencoded JSON object of context
+ *      that needs to be attached to an iframe.
+ *  @return {function(Element)} Function that will attach iframeName
+ *      to the name attribute of iframe.
  */
-function getAddContextToIframe(iframeName){
+function getAddContextToIframe(iframeName) {
   return iframe => {
     iframe.name = iframeName;
   };

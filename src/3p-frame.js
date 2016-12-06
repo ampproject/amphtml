@@ -90,8 +90,8 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     domFingerprint: domFingerprint(element),
     startTime,
   };
-  attributes.ampcontextVersion = (getMode().localDev ? "LOCAL" :
-      $internalRuntimeVersion$ );
+  attributes.ampcontextVersion = (getMode().localDev ? 'LOCAL' :
+      '$internalRuntimeVersion$');
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -159,7 +159,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     this.readyState = 'complete';
   };
   iframe.setAttribute(
-      'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
+      'data-amp-3p-sentinel', attributes._context.sentinel);
   return iframe;
 }
 
