@@ -423,16 +423,19 @@ function triggerRenderStart(opt_data) {
  */
 function observeIntersection(observerCallback) {
   // Send request to received records.
-  if (window.IntersectionObserver) {
+  if (window.IntersectionObserver && window.IntersectionObserver.prototype) {
+    console.log('use native');
     const io = new window.IntersectionObserver(changes => {
+      console.log('observe changes');
       observerCallback(changes);
     }, {
-      threshold: DEFAULT_THRESHOLD,
+      threshold: [0, 0.5],//DEFAULT_THRESHOLD,
     });
     io.observe(window.document.documentElement);
     const unlistener = () => io.unobserve(window.document.documentElement);
     return unlistener;
   }
+  console.log('use polyfill');
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);

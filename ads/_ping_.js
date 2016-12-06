@@ -23,7 +23,9 @@ import {dev} from '../src/log';
 export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
   if (!data.nativeIo) {
-    global.IntersectionObserver = null;
+    const nullIO = () => {};
+    nullIO.prototype = null;
+    global.IntersectionObserver = nullIO;
   }
   if (data.ad_container) {
     dev().assert(
@@ -50,6 +52,9 @@ export function _ping_(global, data) {
       global.context.renderStart();
     }
     const unlisten = global.context.observeIntersection(function(changes) {
+      if (!data.nativeIo) {
+        return;
+      }
       changes.forEach(function(c) {
         dev().info('AMP-AD', 'Intersection: (WxH)' +
             `${c.intersectionRect.width}x${c.intersectionRect.height}`);
