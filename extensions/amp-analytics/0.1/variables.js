@@ -115,7 +115,7 @@ export class VariableService {
     /** @private {!Window} */
     this.win_ = window;
 
-    /** @private {!Object<string, Filter>} */
+    /** @private {!Object<string, !Filter>} */
     this.filters_ = map();
 
     this.register_('default', new Filter(defaultFilter, /* allowNulls */ true));
@@ -133,7 +133,7 @@ export class VariableService {
 
   /**
    * @param {string} name
-   * @param {Filter} filter
+   * @param {!Filter} filter
    */
   register_(name, filter) {
     dev().assert(!this.filters_[name], 'Filter "' + name
@@ -143,7 +143,7 @@ export class VariableService {
 
   /**
    * @param {string} filterStr
-   * @return {Object<string, Filter|Array<string>>}
+   * @return {?{filter: !Filter, args: !Array<string>}}
    */
   parseFilter_(filterStr) {
     if (!filterStr) {
@@ -157,7 +157,7 @@ export class VariableService {
     const fnName = tokens.shift();
     user().assert(fnName, 'Filter ' + name + ' is invalid.');
     const filter = user().assert(this.filters_[fnName],
-        'Invalid filter name: ' + fnName);
+        'Unknown filter: ' + fnName);
     return {filter, args: tokens};
   }
 
