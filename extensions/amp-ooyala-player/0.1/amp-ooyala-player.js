@@ -32,6 +32,12 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
   }
 
   /**
@@ -47,23 +53,28 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
 
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     const embedCode = user().assert(
-        this.element.getAttribute('data-embedcode'),
-        'The data-embedcode attribute is required for <amp-ooyala-player> %s',
-        this.element);
+      this.element.getAttribute('data-embedcode'),
+      'The data-embedcode attribute is required for <amp-ooyala-player> %s',
+      this.element);
     const pCode = user().assert(
-        this.element.getAttribute('data-pcode'),
-        'The data-pcode attribute is required for <amp-ooyala-player> %s',
-        this.element);
+      this.element.getAttribute('data-pcode'),
+      'The data-pcode attribute is required for <amp-ooyala-player> %s',
+      this.element);
     const playerId = user().assert(
-        this.element.getAttribute('data-playerid'),
-        'The data-playerid attribute is required for <amp-ooyala-player> %s',
-        this.element);
+      this.element.getAttribute('data-playerid'),
+      'The data-playerid attribute is required for <amp-ooyala-player> %s',
+      this.element);
+    const autoplay = this.element.getAttribute('autoplay');
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = this.element.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
-      src = 'https://player.ooyala.com/static/v4/stable/latest/skin-plugin/amp_iframe.html?pcode='
+      src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/skin-plugin/amp_iframe.html?pcode='
         + encodeURIComponent(pCode);
       const configUrl = this.element.getAttribute('data-config');
       if (configUrl) {
@@ -73,14 +84,22 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     src += '&ec=' + encodeURIComponent(embedCode) +
       '&pbid=' + encodeURIComponent(playerId);
+    if (autoplay) {
+      src += '&autoplay=true';
+    }
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
+    window.addEventListener('message', event => this.handleOoyalaMessages_(event));
+
     return this.loadPromise(iframe).then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      this.playerReadyResolver_(this.iframe_);
+    }).then(() => {
+      this.playerReadyPromise_;
     });
   }
 
@@ -101,6 +120,13 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   viewportCallback(visible) {
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+    if (this.playerReadyPromise_) {
+      if (visible) {
+        this.play();
+      } else {
+        this.pause();
+      }
+    }
   }
 
   /** @override */
@@ -113,26 +139,51 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     }
   }
 
+  /** @private */
+  handleOoyalaMessages_(event) {
+    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    if (data === undefined) {
+      return; // We only process valid JSON.
+    }
+    if (data == "playing") {
+      this.element.dispatchCustomEvent(VideoEvents.PLAY);
+    } else if (data == "paused") {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+    } else if (data == "muted") {
+      this.element.dispatchCustomEvent("mute");
+    } else if (data == "unmuted") {
+      this.element.dispatchCustomEvent("unmute");
+    }
+  }
+
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PLAY, '*');
+    this.playerReadyPromise_.then(() => {
+      this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PLAY, '*');
+    });
   }
 
   /** @override */
   pause() {
-    this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PAUSE, '*');
+    this.playerReadyPromise_.then(() => {
+      this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PAUSE, '*');
+    });
   }
 
   /** @override */
   mute() {
-    this.iframe_.contentWindow./*OK*/postMessage('mute', '*');
+    this.playerReadyPromise_.then(() => {
+      this.iframe_.contentWindow./*OK*/postMessage('mute', '*');
+    });
   }
 
   /** @override */
   unmute() {
-    this.iframe_.contentWindow./*OK*/postMessage('unmute', '*');
+    this.playerReadyPromise_.then(() => {
+      this.iframe_.contentWindow./*OK*/postMessage('unmute', '*');
+    });
   }
 
   /** @override */
