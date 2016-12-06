@@ -20,6 +20,7 @@ import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {platformFor} from '../../../src/platform';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
@@ -311,6 +312,36 @@ export function getCorrelator(win, opt_cid) {
 }
 
 /**
+ * Gets a relatively terse and controlled-format string version of the user
+ * agent.
+ *
+ * @param {!Window} win
+ * @return {string}
+ */
+export function userAgentString(win) {
+  const platform = platformFor(win);
+  let browser;
+  let os;
+  let version;
+  if (platform.isIos()) {
+    os = 'ios';
+  } else if (platform.isAndroid()) {
+    os = 'android';
+  } else {
+    os = 'other_os';
+  }
+  if (platform.isSafari()) {
+    browser = 'safari';
+  } else if (platform.isChrome()) {
+    browser = 'chrome';
+  } else {
+    browser = 'other_browser';
+  }
+  version = platform.getMajorVersion();
+  return `${browser}_${version}_on_${os}`;
+}
+
+/**
  * Creates or reinitializes a lifecycle reporter for Google ad network
  * implementations.
  *
@@ -322,12 +353,18 @@ export function googleLifecycleReporterFactory(a4aElement) {
       /** @type {!./performance.GoogleAdLifecycleReporter} */
       (getLifecycleReporter(a4aElement, 'a4a', undefined,
           a4aElement.element.getAttribute('data-amp-slot-index')));
+  const slotId = reporter.getSlotId();
   reporter.setPingVariable('v_h', 'VIEWPORT_HEIGHT');
   reporter.setPingVariable('s_t', 'SCROLL_TOP');
-  const eid = this.element_.getAttribute(EXPERIMENT_ATTRIBUTE);
+  const eid = a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (eid) {
     reporter.setPingVariable('e', eid);
   }
+  const type = a4aElement.element.getAttribute('type');
+  if (type) {
+    reporter.setPingVariable(`adt.${slotId}`, type);
+  }
+  reporter.setPingVariable('ua', userAgentString(a4aElement.win));
   return reporter;
 }
 
@@ -340,7 +377,7 @@ export function googleLifecycleReporterFactory(a4aElement) {
 export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   const qqid = headers.get(QQID_HEADER);
   if (qqid) {
-    reporter.setPingVariable(`qqid_${reporter.getSlotId()}`, qqid);
+    reporter.setPingVariable(`qqid.${reporter.getSlotId()}`, qqid);
   }
   // This is duplicated from the amp-a4a.js implementation.  It needs to be
   // defined there because it's an implementation detail of that module, but
@@ -350,6 +387,6 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   const renderingTypeHeader = 'X-AmpAdRender';
   const method = headers.get(renderingTypeHeader);
   if (method) {
-    reporter.setPingVariable(`rm_${reporter.getSlotId()}`, method);
+    reporter.setPingVariable(`rm.${reporter.getSlotId()}`, method);
   }
 }
