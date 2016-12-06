@@ -23,6 +23,7 @@ import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_IMPL_PATH,
+  protectFunctionWrapper_,
 } from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -1019,6 +1020,29 @@ describe('amp-a4a', () => {
               .to.be.false;
           expect(reason).to.deep.equal(cancellation());
         });
+      });
+    });
+
+    describe('protectFunctionWrapper', () => {
+      it('works properly with no error', () => {
+        let errorCalls = 0;
+        expect(protectFunctionWrapper_(name => {
+          return `hello ${name}`;
+        }, null, () => {errorCalls++;})('world')).to.equal('hello world');
+        expect(errorCalls).to.equal(0);
+      });
+
+      it('handles error properly', done => {
+        let err;
+        expect(protectFunctionWrapper_((name, suffix) => {
+          err = new Error(`error ${name}${suffix}`);
+          throw err;
+        }, null, (currErr, name, suffix) => {
+          expect(currErr).to.equal(err);
+          expect(name).to.equal('world');
+          expect(suffix).to.equal('!');
+          done();
+        })('world', '!')).to.not.be.ok;
       });
     });
   });

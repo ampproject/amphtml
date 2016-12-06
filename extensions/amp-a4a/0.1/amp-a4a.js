@@ -130,20 +130,29 @@ export const LIFECYCLE_STAGES = {
  * Utility function that ensures any error thrown is handled by optional
  * onError handler (if none provided, error is swallowed).
  * @param {!Function} fn to protect
- * @param {!Object=} opt_this An optional object to use as the 'this' object
+ * @param {T=} opt_this An optional object to use as the 'this' object
 *     when calling the function.
- * @param {function(!Error, ...*):?=} opt_onError function given error and
- *    arguments provided to function call.
+ * @param {function(this:T, !Error, ...*):?=} opt_onError function given error
+ *    and arguments provided to function call.
  * @return {!Function} protected function
+ * @template T
+ * @visibileForTesting
  * @private
  */
-const protectFunctionWrapper_ = (fn, opt_this, opt_onError) => {
+export const protectFunctionWrapper_ = (fn, opt_this, opt_onError) => {
   return (...var_args) => {
     try {
       return fn.apply(opt_this, var_args);
     } catch (err) {
       if (opt_onError) {
-        return opt_onError.apply(opt_this, err, var_args);
+        try {
+          // Ideally we could use [err, ...var_args] but linter disallows
+          // spread so instead using unshift :(
+          var_args.unshift(err);
+          return opt_onError.apply(opt_this, var_args);
+        } catch (captureErr) {
+          // swallow error if error handler throws.
+        }
       }
     }
   };
@@ -479,7 +488,6 @@ export class AmpA4A extends AMP.BaseElement {
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
           // url or creative exist.
-          console.log('promise error', error);
           rethrowAsync(this.promiseErrorHandler_(error));
           return null;
         });
@@ -735,11 +743,10 @@ export class AmpA4A extends AMP.BaseElement {
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
             .then(jwkSetObj => {
-              console.log(currServiceName, jwkSetObj, jwkSetObj.keys);
-              let result = {serviceName: currServiceName};
+              const result = {serviceName: currServiceName};
               if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
                   jwkSetObj.keys.every(isObject)) {
-                result.keys = jwkSetObj;
+                result.keys = jwkSetObj.keys;
               } else {
                 user().error(TAG, this.element.getAttribute('type'),
                     `Invalid response from signing server ${currServiceName}`,
@@ -763,7 +770,6 @@ export class AmpA4A extends AMP.BaseElement {
     });
     return jwkSetPromises.map(jwkSetPromise =>
         jwkSetPromise.then(jwkSet => {
-          console.log('jwkSet', jwkSet);
           return jwkSet.keys.map(jwk =>
             importPublicKey(jwkSet.serviceName, jwk)
             .catch(err => {
@@ -771,7 +777,7 @@ export class AmpA4A extends AMP.BaseElement {
                   `error importing keys for service: ${jwkSet.serviceName}`,
                   err, this.element);
               return null;
-            }))
+            }));
         }));
   }
 
