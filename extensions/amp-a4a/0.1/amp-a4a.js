@@ -125,21 +125,26 @@ export const LIFECYCLE_STAGES = {
   adSlotCleared: '20',
 };
 
+
 /**
  * Utility function that ensures any error thrown is handled by optional
  * onError handler (if none provided, error is swallowed).
  * @param {!Function} fn to protect
+ * @param {!Object=} opt_this An optional object to use as the 'this' object
+*     when calling the function.
  * @param {function(!Error, ...*):?=} opt_onError function given error and
  *    arguments provided to function call.
  * @return {!Function} protected function
  * @private
  */
-const protectFunctionWrapper_ = (fn, opt_onError) => {
+const protectFunctionWrapper_ = (fn, opt_this, opt_onError) => {
   return (...var_args) => {
     try {
-      return fn.apply(this, var_args);
+      return fn.apply(opt_this, var_args);
     } catch (err) {
-      return opt_onError ? opt_onError(err, var_args) : undefined;
+      if (opt_onError) {
+        return opt_onError.apply(opt_this, err, var_args);
+      }
     }
   };
 };
@@ -208,7 +213,7 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {!function(string, !Object=)}
      */
     this.protectedEmitLifecycleEvent_ = protectFunctionWrapper_(
-      this.emitLifecycleEvent,
+      this.emitLifecycleEvent, this,
       (err, var_args) => {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error on emitLifecycleEvent', err, var_args) ;
@@ -474,6 +479,7 @@ export class AmpA4A extends AMP.BaseElement {
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad
           // url or creative exist.
+          console.log('promise error', error);
           rethrowAsync(this.promiseErrorHandler_(error));
           return null;
         });
@@ -519,7 +525,8 @@ export class AmpA4A extends AMP.BaseElement {
                   // multiple key providers could have been specified.
                   if (!verifyHashVersion(signature, keyInfo)) {
                     user().error(TAG, this.element.getAttribute('type'),
-                        'Key failed to validate creative\'s signature.');
+                        `Key failed to validate creative\'s signature for
+                        service ${keyInfo.serviceName}.`, keyInfo.cryptoKey);
                   }
                   return null;
                 },
@@ -714,7 +721,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Retrieves all public keys, as specified in _a4a-config.js.
    * None of the (inner or outer) promises returned by this function can reject.
    *
-   * @return {!Array<!Promise<!Array<!Promise<?PublicKeyInfoDef>>>>}
+   * @return {!Array<!Promise<!{serviceName: string, keys: !Array<!Promise<?PublicKeyInfoDef>>}>>}
    * @private
    */
   getKeyInfoSets_() {
@@ -724,22 +731,26 @@ export class AmpA4A extends AMP.BaseElement {
     const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
       dev().assert(getMode().localDev || !endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
+      const currServiceName = serviceName;
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
             .then(jwkSetObj => {
+              console.log(currServiceName, jwkSetObj, jwkSetObj.keys);
+              let result = {serviceName: currServiceName};
               if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
                   jwkSetObj.keys.every(isObject)) {
-                return jwkSetObj.keys;
+                result.keys = jwkSetObj;
               } else {
                 user().error(TAG, this.element.getAttribute('type'),
-                    'Invalid response from signing server.',
+                    `Invalid response from signing server ${currServiceName}`,
                     this.element);
-                return [];
+                result.keys = [];
               }
+              return result;
             }).catch(err => {
               user().error(
                   TAG, this.element.getAttribute('type'), err, this.element);
-              return [];
+              return {serviceName: currServiceName};
             });
       } else {
         // The given serviceName does not have a corresponding URL in
@@ -747,17 +758,21 @@ export class AmpA4A extends AMP.BaseElement {
         const reason = `Signing service '${serviceName}' does not exist.`;
         user().error(
             TAG, this.element.getAttribute('type'), reason, this.element);
-        return [];
+        return {serviceName: currServiceName};
       }
     });
     return jwkSetPromises.map(jwkSetPromise =>
-        jwkSetPromise.then(jwkSet =>
-          jwkSet.map(jwk =>
-            importPublicKey(jwk).catch(err => {
-              user().error(
-                  TAG, this.element.getAttribute('type'), err, this.element);
+        jwkSetPromise.then(jwkSet => {
+          console.log('jwkSet', jwkSet);
+          return jwkSet.keys.map(jwk =>
+            importPublicKey(jwkSet.serviceName, jwk)
+            .catch(err => {
+              user().error(TAG, this.element.getAttribute('type'),
+                  `error importing keys for service: ${jwkSet.serviceName}`,
+                  err, this.element);
               return null;
-            }))));
+            }))
+        }));
   }
 
   /**
@@ -837,7 +852,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.registerExpandUrlParams_(friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
-          protectFunctionWrapper_(this.onAmpCreativeRender, err => {
+          protectFunctionWrapper_(this.onAmpCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onAmpCreativeRender', err);
           })();
