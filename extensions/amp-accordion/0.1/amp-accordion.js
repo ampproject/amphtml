@@ -122,11 +122,9 @@ class AmpAccordion extends AMP.BaseElement {
       const sessionStr =
           this.win./*OK*/sessionStorage.getItem(
           dev().assertString(this.sessionId_));
-      if (!sessionStr) {
-        return map();
-      }
-      return /** @type {!Object} */ (
-          JSON.parse(dev().assertString(sessionStr)));
+      return sessionStr
+          ? /** @type {!Object} */ (JSON.parse(dev().assertString(sessionStr)))
+          : map();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
       return map();
