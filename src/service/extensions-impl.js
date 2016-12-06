@@ -18,6 +18,8 @@ import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
+  stubElementInChildWindow,
+  upgradeElementInChildWindow,
 } from '../custom-element';
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
@@ -396,6 +398,7 @@ export class Extensions {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
+      stubElementInChildWindow(childWin, extensionId);
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
@@ -409,7 +412,9 @@ export class Extensions {
           installStyles(childWin.document, elementDef.css, () => {},
               /* isRuntime */ false, extensionId);
         }
-        copyElementToChildWindow(childWin, extensionId);
+        // Notice that stubbing happens much sooner above
+        // (see stubElementInChildWindow).
+        upgradeElementInChildWindow(childWin, extensionId);
       });
       promises.push(promise);
     });

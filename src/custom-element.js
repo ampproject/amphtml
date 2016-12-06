@@ -198,6 +198,19 @@ export function stubElementIfNotKnown(win, name) {
 }
 
 /**
+ * Stub element in the child window.
+ * @param {!Window} childWin
+ * @param {string} name
+ */
+export function stubElementInChildWindow(childWin, name) {
+  if (!childWin.ampExtendedElements) {
+    childWin.ampExtendedElements = {};
+  }
+  childWin.ampExtendedElements[name] = true;
+  registerElement(childWin, name, ElementStub);
+}
+
+/**
  * Copies the specified element to child window (friendly iframe). This way
  * all implementations of the AMP elements are shared between all friendly
  * frames.
@@ -213,6 +226,27 @@ export function copyElementToChildWindow(childWin, name) {
   registerElement(childWin, name, knownElements[name] || ElementStub);
 }
 
+
+/**
+ * Upgrade element in the child window.
+ * @param {!Window} childWin
+ * @param {string} name
+ * @param {function(!Function)} toClass
+ */
+export function upgradeElementInChildWindow(childWin, name) {
+  const toClass = knownElements[name];
+  user().assert(toClass != ElementStub, '%s is not upgraded yet.', name);
+  for (let i = 0; i < stubbedElements.length; i++) {
+    const stub = stubbedElements[i];
+    const element = stub.element;
+    if (element.tagName.toLowerCase() == name &&
+            element.ownerDocument.defaultView == childWin) {
+      tryUpgradeElementNoInline(element, toClass);
+      // Remove element from array.
+      stubbedElements.splice(i--, 1);
+    }
+  }
+}
 
 /**
  * Applies layout to the element. Visible for testing only.

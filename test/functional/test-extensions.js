@@ -15,6 +15,8 @@
  */
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
+import {BaseElement} from '../../src/base-element';
+import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {
   Extensions,
   addDocFactoryToExtension,
@@ -388,6 +390,9 @@ describes.sandboxed('Extensions', {}, () => {
     let iframe;
     let iframeWin;
 
+    class AmpTest extends BaseElement {
+    }
+
     beforeEach(() => {
       parentWin = env.win;
       resetScheduledElementForTesting(parentWin, 'amp-test');
@@ -458,27 +463,44 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install extensions', () => {
-      extensionsMock.expects('loadExtension')
-          .withExactArgs('amp-test')
-          .returns(Promise.resolve({
-            elements: {'amp-test': {css: 'a{}'}},
-          }))
-          .once();
+      setLoadingCheckForTests('amp-test');
+      const stub = sandbox.stub(extensions, 'loadExtension', extensionId => {
+        return Promise.resolve().then(() => {
+          registerExtension(extensions, extensionId, AMP => {
+            AMP.registerElement(extensionId, AmpTest);
+          }, parentWin.AMP);
+          const elements = {};
+          elements[extensionId] = {css: 'a{}'};
+          return {elements};
+        });
+      });
       const promise = extensions.installExtensionsInChildWindow(
           iframeWin, ['amp-test']);
+      // Must be stubbed already.
+      expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+      expect(iframeWin.document.createElement('amp-test').implementation_)
+          .to.be.instanceOf(ElementStub);
       return promise.then(() => {
+        expect(stub).to.be.calledOnce;
         expect(parentWin.ampExtendedElements['amp-test']).to.be.true;
         expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
         expect(iframeWin.document
             .querySelector('style[amp-extension=amp-test]')).to.exist;
+        // Must be upgraded already.
+        expect(iframeWin.document.createElement('amp-test').implementation_)
+            .to.be.instanceOf(AmpTest);
       });
     });
 
     it('should call pre-install callback before other installs', () => {
-      const loadExtensionStub = sandbox.stub(extensions, 'loadExtension',
-          () => Promise.resolve({
-            elements: {'amp-test': {css: 'a{}'}},
-          }));
+      const stub = sandbox.stub(extensions, 'loadExtension', extensionId => {
+        registerExtension(extensions, extensionId, AMP => {
+          AMP.registerElement(extensionId, AmpTest);
+        }, parentWin.AMP);
+        const elements = {};
+        elements[extensionId] = {css: 'a{}'};
+        return Promise.resolve({elements: elements});
+      });
       let preinstallCount = 0;
       const promise = extensions.installExtensionsInChildWindow(
           iframeWin,
@@ -489,7 +511,7 @@ describes.sandboxed('Extensions', {}, () => {
                 iframeWin.ampExtendedElements &&
                 iframeWin.ampExtendedElements['amp-img']).to.not.exist;
             // Extension is not loaded yet.
-            expect(loadExtensionStub).to.not.be.called;
+            expect(stub).to.not.be.called;
             expect(
                 iframeWin.ampExtendedElements &&
                 iframeWin.ampExtendedElements['amp-test']).to.not.exist;
@@ -498,7 +520,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(preinstallCount).to.equal(1);
       expect(iframeWin.ampExtendedElements).to.exist;
       expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
-      expect(loadExtensionStub).to.be.calledOnce;
+      expect(stub).to.be.calledOnce;
       return promise.then(() => {
         // Extension elements are stubbed immediately, but registered only
         // after extension is loaded.
