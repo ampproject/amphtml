@@ -41,6 +41,7 @@ This security protocol consists of three components: `AMP-Same-Origin`, CORS ori
 
 CORS endpoints receive requesting origin via "Origin" HTTP header. This header has to be restricted to only allow the following origins:
  - *.ampproject.org
+ - *.amp.cloudflare.com
  - The Publisher’s own origins
 
 If `Origin` header is missing, AMP will set `AMP-Same-Origin: true` custom header. If this header is set it indicates the request is coming from same origin. And should, as rule, be allowed.
@@ -57,7 +58,7 @@ When making requests that would change the state of your system (e.g. user subsc
 
 If `Origin` header is set:
 
-1. If the origin was not `*.ampproject.org` or the publisher's (aka your) origin, stop and return an error response.
+1. If the origin was not `*.ampproject.org`, `*.amp.cloudflare.com` or the publisher's (aka your) origin, stop and return an error response.
 2. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
 3. If both checks pass, proceed to process the request.
 
