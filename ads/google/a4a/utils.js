@@ -37,6 +37,9 @@ const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
 };
 
+/** @const {string} */
+export const QQID_HEADER = 'X-QQID';
+
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
  * environment by ensuring native crypto support and page originated in the

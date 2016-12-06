@@ -1220,8 +1220,7 @@ export class AmpA4A extends AMP.BaseElement {
    * LIFECYCLE_STAGES enum declaration. For certain events, an optional
    * associated piece of data will be passed.
    *
-   * @param {string} eventName
-   * @param {Object=} opt_associatedEventData
+   * @param {string} unusedEventName
    */
-  emitLifecycleEvent(eventName, opt_associatedEventData) {}
+  emitLifecycleEvent(unusedEventName) {}
 }

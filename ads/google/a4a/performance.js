@@ -134,10 +134,21 @@ export class BaseLifecycleReporter {
    * To be overriden by network specific implementations.
    *
    * @param {string} unusedName A descriptive name for the beacon signal.
-   * @param {Object=} opt_extraParams Dictionary of key:value params to add
-   *   to the ping request.
+   * @param {Object<string, string|number>=} opt_extraParams Dictionary of
+   *   key:value params to add to the ping request.
    */
   sendPing(unusedName, opt_extraParams) {}
+
+  /**
+   * Set a variable to be added to the ping data.  The variable's value is
+   * subject to URL replacement and both variable name and value are URI
+   * encoded before being written to the ping.
+   *
+   * @param {string} unusedVariable
+   * @param {string|number} unusedValue
+   */
+  setPingVariable(unusedVariable, unusedValue) {}
+
   /**
    * A function to reset the lifecycle reporter. Will be called immediately
    * after firing the last beacon signal in unlayoutCallback.
@@ -158,24 +169,16 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   constructor(win, element, namespace, correlator, slotId) {
     super();
 
-    this.QQID_HEADER = 'X-QQID';
     this.win_ = win;
     this.element_ = element;
     this.namespace_ = namespace;
     this.slotId_ = slotId;
     this.correlator_ = correlator;
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
-    this.qqid_ = null;
     this.initTime_ = Date.now();
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
     this.urlReplacer_ = urlReplacementsForDoc(element.ownerDocument);
-  }
-
-  /**
-   * @param {?string} qqid
-   */
-  setQqid(qqid) {
-    this.qqid_ = qqid;
+    this.extraVariables_ = new Object(null);
   }
 
   /**
@@ -192,7 +195,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @param {string} name  Stage name to ping out.  Should be one of the ones
    * from `LIFECYCLE_STAGES`.  If it's an unknown name, it will still be pinged,
    * but the stage ID will be set to `9999`.
-   * @param {Object=} opt_extraParams
+   * @param {Object<string, string|number>=} opt_extraParams
    * @override
    */
   sendPing(name, opt_extraParams) {
@@ -200,8 +203,30 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   }
 
   /**
+   * @param {string} variable
+   * @param {string|number} value
+   * @override
+   */
+  setPingVariable(variable, value) {
+    this.extraVariables_[variable] = value;
+  }
+
+  /**
+   * @return {number}
+   */
+  getSlotId() {
+    return this.slotId_;
+  }
+
+  /** @override */
+  reset() {
+    this.extraVariables_ = new Object(null);
+  }
+
+
+  /**
    * @param {string} name  Metric name to send.
-   * @param {Object=} opt_extraParams
+   * @param {Object<string, string|number>=} opt_extraParams
    * @returns {string}  URL to send metrics to.
    * @private
    */

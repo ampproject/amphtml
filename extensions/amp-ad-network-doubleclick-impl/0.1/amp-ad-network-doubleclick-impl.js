@@ -20,7 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, RENDERING_TYPE_HEADER} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -29,6 +29,7 @@ import {
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   getCorrelator,
+  QQID_HEADER,
 } from '../../../ads/google/a4a/utils';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
 import {stringHash32} from '../../../src/crypto';
@@ -100,42 +101,31 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
+    const qqid = responseHeaders.get(QQID_HEADER);
+    if (qqid) {
+      this.lifecycleReporter_.setPingVariable(
+          `qqid${this.lifecycleReporter_.getSlotId()}`, qqid);
+    }
+    const method = responseHeaders.get(RENDERING_TYPE_HEADER);
+    if (method) {
+      this.lifecycleReporter_.setPingVariable('rm', method);
+    }
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_associatedEventData) {
+  emitLifecycleEvent(eventName) {
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
-    switch (eventName) {
-      case 'adRequestEnd':
-        const fetchResponse = opt_associatedEventData;
-        const qqid = fetchResponse.headers.get(
-            this.lifecycleReporter_.QQID_HEADER);
-        this.lifecycleReporter_.setQqid(qqid);
-        break;
-      case 'adSlotCleared':
-        this.lifecycleReporter_.sendPing(eventName);
-        this.lifecycleReporter_.reset();
-        this.element.setAttribute('data-amp-slot-index',
-            this.win.ampAdSlotIdCounter++);
-        this.lifecycleReporter_ = this.initLifecycleReporter();
-        return;
-      case 'adSlotBuilt':
-      case 'urlBuilt':
-      case 'adRequestStart':
-      case 'extractCreativeAndSignature':
-      case 'adResponseValidateStart':
-      case 'renderFriendlyStart':
-      case 'renderCrossDomainStart':
-      case 'renderFriendlyEnd':
-      case 'renderCrossDomainEnd':
-      case 'preAdThrottle':
-      case 'renderSafeFrameStart':
-        break;
-      default:
-    }
     this.lifecycleReporter_.sendPing(eventName);
+  }
+
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    this.lifecycleReporter_.reset();
+    this.element.setAttribute('data-amp-slot-index',
+        this.win.ampAdSlotIdCounter++);
+    this.lifecycleReporter_ = this.initLifecycleReporter();
   }
 
   /**
@@ -147,6 +137,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         (getLifecycleReporter(this, 'a4a', undefined,
                               this.element.getAttribute(
                                   'data-amp-slot-index')));
+    reporter.setPingVariable('v_h', 'VIEWPORT_HEIGHT');
+    reporter.setPingVariable('s_t', 'SCROLL_TOP');
     return reporter;
   }
 
