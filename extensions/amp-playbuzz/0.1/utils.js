@@ -49,10 +49,10 @@ function appendChildren(element, children) {
   children.forEach(child => element.appendChild(child));
 };
 
-export function handleMessageByName(event, messageName, handler) {
-  const isPlaybuzzItemEvent = event.origin &&
-        event.origin.indexOf &&
-        event.origin.indexOf('playbuzz.com') >= 0;
+export function handleMessageByName(element, event, messageName, handler) {
+  const originWindow = element.ownerDocument.defaultView;
+  const senderWindow = event.source.parent;
+  const isPlaybuzzItemEvent = originWindow === senderWindow;
 
   if (isPlaybuzzItemEvent) {
     handlePlaybuzzItemEvent(event, messageName, handler);

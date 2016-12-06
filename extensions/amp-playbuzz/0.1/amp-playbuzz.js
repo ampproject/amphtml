@@ -216,7 +216,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
    */
   listenToPlaybuzzItemMessage_(messageName, handler) {
     const unlisten = events.listen(this.win, 'message',
-      event => utils.handleMessageByName(event, messageName, handler));
+      event => utils.handleMessageByName(this.iframe_,
+        event, messageName, handler));
     this.unlisteners_.push(unlisten);
   }
 
