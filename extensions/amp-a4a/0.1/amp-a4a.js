@@ -471,7 +471,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Resolve Promise into signing key.
           return keyInfoPromise.then(keyInfo => {
             if (!keyInfo) {
-              return Promise.reject('Promise resolved to null key.');
+              return Promise.reject(new Error('Promise resolved to null key.'));
             }
             // If the key exists, try verifying with it.
             return verifySignature(
@@ -482,8 +482,8 @@ export class AmpA4A extends AMP.BaseElement {
                   if (isValid) {
                     return creative;
                   }
-                  return Promise.reject(
-                      'Key failed to validate creative\'s signature.');
+                  return Promise.reject(new Error(
+                      'Key failed to validate creative\'s signature.'));
                 },
                 err => {
                   user().error(
@@ -802,7 +802,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.onAmpCreativeRender();
         });
     } catch (err) {
-      return Promise.reject(err);
+      return Promise.reject(/** @type {!Error} */ (err));
     }
   }
 
@@ -885,7 +885,8 @@ export class AmpA4A extends AMP.BaseElement {
               + ' attribute iframe rendering mode request: %s.  Unable to'
               + ' render a creative for'
               + ' slot %s.', method, this.element.getAttribute('id'));
-          return Promise.reject('Unrecognized rendering mode request');
+          return Promise.reject(new Error(
+              'Unrecognized rendering mode request'));
       }
       /** @const {!Element} */
       const iframe = createElementWithAttributes(

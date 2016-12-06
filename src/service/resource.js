@@ -567,7 +567,7 @@ export class Resource {
       return Promise.resolve();
     }
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
-      return Promise.reject(this.lastLayoutError_);
+      return Promise.reject(new Error(this.lastLayoutError_));
     }
 
     dev().assert(this.state_ != ResourceState.NOT_BUILT,
@@ -611,7 +611,7 @@ export class Resource {
     try {
       promise = this.element.layoutCallback();
     } catch (e) {
-      return Promise.reject(e);
+      return Promise.reject(/** @type {!Error} */ (e));
     }
 
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
@@ -638,7 +638,7 @@ export class Resource {
       dev().fine(TAG, 'layout complete:', this.debugid);
     } else {
       dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
-      return Promise.reject(opt_reason);
+      return Promise.reject(new Error(opt_reason));
     }
   }
 
