@@ -15,7 +15,6 @@
  */
 
 import * as sinon from 'sinon';
-import {timerFor} from '../../src/timer';
 
 /**
  * Cache SW has some side-effects, so we've got to do a little jig to test.
@@ -320,20 +319,58 @@ runner.run('Cache SW', () => {
   });
 
   describe('getCachedVersion', () => {
+    let keys;
     beforeEach(() => {
+      keys = [{url}];
       sandbox.stub(cache, 'keys', () => {
-        return Promise.resolve([{url}]);
+        return Promise.resolve(keys);
       });
     });
+
     it('returns cached rtv version, if file is cached', () => {
-      return sw.getCachedVersion(cache, '/v0.js').then(version => {
+      return sw.getCachedVersion(cache, '/v0.js', prevRtv).then(version => {
         expect(version).to.equal(rtv);
       });
     });
 
-    it('returns empty string, if file is not cached', () => {
-      return sw.getCachedVersion(cache, '/amp-comp.js').then(version => {
-        expect(version).to.equal('');
+    it('defaults to requested version, if file no files are cached', () => {
+      keys.length = 0;
+      return sw.getCachedVersion(cache, '/v0.js', prevRtv).then(version => {
+        expect(version).to.equal(prevRtv);
+      });
+    });
+
+    it('returns version with most responses', () => {
+      keys.splice(0, 1,
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-1-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-2-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-3-0.1.js`});
+      return sw.getCachedVersion(cache, '/v0.js', rtv).then(version => {
+        expect(version).to.equal(prevRtv);
+      });
+    });
+
+    it('weights requested file cached version', () => {
+      keys.splice(0, 1,
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-1-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-2-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-3-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-4-0.1.js`});
+
+      return sw.getCachedVersion(cache, '/v0/amp-4-0.1.js', '123')
+        .then(version => {
+          expect(version).to.equal(rtv);
+        });
+    });
+
+    it('heavily weights main binary version', () => {
+      keys.splice(0, 1,
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-1-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-2-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`},
+          {url: `https://cdn.ampproject.org/rtv/${rtv}/v0.js`});
+      return sw.getCachedVersion(cache, '/v0.js', '123').then(version => {
+        expect(version).to.equal(rtv);
       });
     });
   });
@@ -426,29 +463,23 @@ runner.run('Cache SW', () => {
         });
       });
 
-      describe('with multiple parallel requests', () => {
-        it('forces uniform RTV version of winner', () => {
-          const timer = timerFor(window);
-          // First call will resolve after the first.
-          const keys = sandbox.stub(cache, 'keys');
-          keys.returns(Promise.resolve([]));
-          keys.onCall(0).returns(timer.promise(100, []));
-          return Promise.all([
-            sw.handleFetch(request, clientId),
-            sw.handleFetch(prevRequest, clientId),
-          ]).then(responses => {
-            expect(sw.rtvVersion(responses[0].url)).to.equal(
-                sw.rtvVersion(prevRequest.url));
-            expect(sw.rtvVersion(responses[1].url)).to.equal(
-                sw.rtvVersion(prevRequest.url));
-          });
-        });
-      });
-
       describe('with cached files', () => {
         beforeEach(() => {
-          cache.cached.push([request, responseFromRequest(request)]);
           cache.cached.push([prevRequest, responseFromRequest(prevRequest)]);
+        });
+
+        describe('with multiple parallel requests', () => {
+          it('forces uniform RTV version of winner', () => {
+            return Promise.all([
+              sw.handleFetch(request, clientId),
+              sw.handleFetch(compRequest, clientId),
+            ]).then(responses => {
+              expect(sw.rtvVersion(responses[0].url)).to.equal(
+                sw.rtvVersion(prevRequest.url));
+              expect(sw.rtvVersion(responses[1].url)).to.equal(
+                sw.rtvVersion(prevRequest.url));
+            });
+          });
         });
 
         it('fulfills with cached version', () => {
@@ -468,7 +499,7 @@ runner.run('Cache SW', () => {
 
         describe('with blacklisted file', () => {
           beforeEach(() => {
-            cache.cached.splice(1, 1,
+            cache.cached.splice(0, 1,
                 [blacklistedRequest, responseFromRequest(blacklistedRequest)]);
           });
 
@@ -494,7 +525,7 @@ runner.run('Cache SW', () => {
               setTimeout(resolve, 50);
             });
           }).then(() => {
-            expect(cache.cached[1][0]).to.equal(prodRequest);
+            expect(cache.cached[0][0]).to.equal(prodRequest);
           });
         });
 
@@ -508,6 +539,22 @@ runner.run('Cache SW', () => {
             });
           }).then(() => {
             expect(cache.cached[1][0]).to.equal(compRequest);
+          });
+        });
+      });
+
+      describe('without cached files', () => {
+        describe('with multiple parallel requests', () => {
+          it('forces uniform RTV version of winner', () => {
+            return Promise.all([
+              sw.handleFetch(request, clientId),
+              sw.handleFetch(prevRequest, clientId),
+            ]).then(responses => {
+              expect(sw.rtvVersion(responses[0].url)).to.equal(
+                sw.rtvVersion(request.url));
+              expect(sw.rtvVersion(responses[1].url)).to.equal(
+                sw.rtvVersion(request.url));
+            });
           });
         });
       });
