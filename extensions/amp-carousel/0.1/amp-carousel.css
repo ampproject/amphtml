@@ -23,9 +23,6 @@ amp-carousel {
  * Every `<amp-carousel>'s` immediate child is considered a slide in
  * the carousel.
  */
-amp-carousel-slide {
-}
-
 .amp-carousel-slide > .-amp-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
@@ -163,5 +160,23 @@ amp-carousel .amp-carousel-button.amp-disabled {
   order: 100000000 !important;
   margin-right: -1px !important;
 }
-
 /* End SlideScroll */
+
+/* Begin ScrollableCarousel */
+.-amp-scrollable-carousel-container .amp-carousel-slide {
+  display: inline-block !important;
+  margin-left: 8px;
+}
+
+/*TODO(dvoytenko): this has to be customizable*/
+.-amp-scrollable-carousel-container .amp-carousel-slide:first-child {
+  margin-left: 0px;
+}
+
+.-amp-scrollable-carousel-container {
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+/* End ScrollableCarousel */
