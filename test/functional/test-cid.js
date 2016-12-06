@@ -84,9 +84,9 @@ describe('cid', () => {
         body: {},
       },
       navigator: window.navigator,
-      ampExtendedElements: {
-        'amp-analytics': true,
-      },
+      //QQQ: used?   ampExtendedElements: {
+      //   'amp-analytics': true,
+      // },
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;

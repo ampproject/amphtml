@@ -39,6 +39,7 @@ import {
   registerExtension,
 } from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
+import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -414,7 +415,7 @@ class AmpFixture {
     link.setAttribute('href', spec.canonicalUrl || window.location.href);
     win.document.head.appendChild(link);
 
-    win.ampExtendedElements = {};
+    //QQQ: ??? win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
       win.name = '__AMP__off=1';
     }
@@ -473,8 +474,10 @@ class AmpFixture {
       embedIframe.setAttribute('frameborder', '0');
       embedIframe.setAttribute('allowfullscreen', '');
       embedIframe.setAttribute('scrolling', 'no');
-      embedIframe.style.width = '300px';
-      embedIframe.style.height = '150px';
+      setStyles(embedIframe, {
+        width: '300px',
+        height: '150px',
+      });
       win.document.body.appendChild(container);
       const html = '<!doctype html>'
           + '<html amp4ads>'

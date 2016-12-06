@@ -216,7 +216,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
-      iframe.contentWindow.ampExtendedElements = {};
+      //QQQ: ???   iframe.contentWindow.ampExtendedElements = {};
       installStyles(iframe.contentWindow.document, cssText, () => {
         resolve({
           win: iframe.contentWindow,

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {ElementStub} from '../element-stub';
 import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
 import {
   copyElementToChildWindow,
+  registerElement,
   stubElementIfNotKnown,
   stubElementInChildWindow,
   upgradeElementInChildWindow,
@@ -390,8 +392,9 @@ export class Extensions {
     // Adopt embeddable services.
     adoptServicesForEmbed(childWin);
 
-    // Install built-ins.
-    copyBuiltinElementsToChildWindow(childWin);
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
 
     const promises = [];
     extensionIds.forEach(extensionId => {
@@ -409,12 +412,19 @@ export class Extensions {
         // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
         if (elementDef && elementDef.css) {
-          installStyles(childWin.document, elementDef.css, () => {},
-              /* isRuntime */ false, extensionId);
+          return new Promise(resolve => {
+            installStyles(
+                childWin.document,
+                /** @type {string} */ (elementDef.css),
+                /* completeCallback */ resolve,
+                /* isRuntime */ false,
+                extensionId);
+          });
         }
+      }).then(() => {
         // Notice that stubbing happens much sooner above
         // (see stubElementInChildWindow).
-        upgradeElementInChildWindow(childWin, extensionId);
+        upgradeElementInChildWindow(topWin, childWin, extensionId);
       });
       promises.push(promise);
     });
@@ -626,12 +636,22 @@ export function installBuiltinElements(win) {
 
 /**
  * Copy builtins to a child window.
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function copyBuiltinElementsToChildWindow(childWin) {
-  copyElementToChildWindow(childWin, 'amp-img');
-  copyElementToChildWindow(childWin, 'amp-pixel');
-  copyElementToChildWindow(childWin, 'amp-video');
+function copyBuiltinElementsToChildWindow(parentWin, childWin) {
+  copyElementToChildWindow(parentWin, childWin, 'amp-img');
+  copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
+  copyElementToChildWindow(parentWin, childWin, 'amp-video');
+}
+
+
+/**
+ * @param {!Window} win
+ */
+export function stubLegacyElements(win) {
+  registerElement(win, 'amp-ad', ElementStub);
+  registerElement(win, 'amp-embed', ElementStub);
 }
 
 

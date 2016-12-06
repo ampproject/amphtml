@@ -963,3 +963,9 @@ describes.realWin('runtime multidoc', {
 function getShadowRoot(hostElement) {
   return hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
 }
+
+
+//QQQ
+// // Also stubs legacy elements.
+// expect(childWin.ampExtendedElements['amp-ad']).to.be.true;
+// expect(childWin.ampExtendedElements['amp-embed']).to.be.true;

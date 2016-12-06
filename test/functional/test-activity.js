@@ -77,9 +77,9 @@ describe('Activity getTotalEngagedTime', () => {
     fakeWin = {
       services: {},
       document: fakeDoc,
-      ampExtendedElements: {
-        'amp-analytics': true,
-      },
+      //QQQ:used?   ampExtendedElements: {
+      //   'amp-analytics': true,
+      // },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
