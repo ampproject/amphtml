@@ -84,8 +84,6 @@ export class DocInfo {
   }
 }
 
-const pageViewIdByWindow = {};
-
 /**
  * Returns a relatively low entropy random string.
  * This should be called once per window and then cached for subsequent
@@ -94,8 +92,8 @@ const pageViewIdByWindow = {};
  * @return {string}
  */
 export function getPageViewId(win) {
-  if (!pageViewIdByWindow[win]) {
-    pageViewIdByWindow[win] = String(Math.floor(win.Math.random() * 10000));
+  if (!win.pageViewId) {
+    win.pageViewId = String(Math.floor(win.Math.random() * 10000));
   }
-  return pageViewIdByWindow[win];
+  return win.pageViewId;
 }
