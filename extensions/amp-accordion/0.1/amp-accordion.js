@@ -111,7 +111,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Get previous state from sessionStorage.
-   * @return {!Object|null}
+   * @return {!Object}
    * @private
    */
   getSessionState_() {
