@@ -107,7 +107,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName) {
-    this.lifecycleReporter_.sendPing(eventName);
+    // This function can be invoked by the superclass constructor before this
+    // class's constructor gets to run.  In that case, this.lifecycleReporter_
+    // may not be initialized.  So initialize it here.  However, we'd rather
+    // not be doing this check and initialization on every emitLifecycleEvent
+    // call, so we'll pull a classic JS move and redefine this function to
+    // the underlying sendPing once we've initialized the lifecycleReporter_.
+    // Finally, make sure that the first ping actually gets sent.
+    this.lifecycleReporter_ = this.lifecycleReporter_ ||
+        this.initLifecycleReporter();
+    this.emitLifecycleEvent =
+        this.lifecycleReporter_.sendPing.bind(this.lifecycleReporter_);
+    this.emitLifecycleEvent(eventName);
   }
 
   /** @override */
