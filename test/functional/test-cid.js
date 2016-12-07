@@ -84,9 +84,6 @@ describe('cid', () => {
         body: {},
       },
       navigator: window.navigator,
-      ampExtendedElements: {
-        'amp-analytics': true,
-      },
       setTimeout: window.setTimeout,
     };
     fakeWin.document.defaultView = fakeWin;
@@ -267,9 +264,6 @@ describe('cid', () => {
         href: 'https://cdn.ampproject.org/v/www.origin.com/',
       },
       services: {},
-      ampExtendedElements: {
-        'amp-analytics': true,
-      },
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
