@@ -18,11 +18,13 @@ import {
   activateChunkingForTesting,
   chunk,
   deactivateChunking,
+  onIdle,
   resolvedObjectforTesting,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
+import * as sinon from 'sinon';
 
 
 describe('chunk', () => {
@@ -34,6 +36,12 @@ describe('chunk', () => {
     experimentOn = true;
     activateChunkingForTesting();
   });
+
+  const resolvingIdleCallbackWithTimeRemaining = timeRemaining => fn => {
+    Promise.resolve({
+      timeRemaining: () => timeRemaining,
+    }).then(fn);
+  };
 
   function basicTests(env) {
     let fakeWin;
@@ -160,9 +168,8 @@ describe('chunk', () => {
         env.sandbox.stub(viewer, 'isVisible', () => {
           return false;
         });
-        env.win.requestIdleCallback = fn => {
-          Promise.resolve().then(fn);
-        };
+        env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
         env.sandbox.stub(resolved, 'then', () => {
           throw new Error('No calls expected');
         });
@@ -194,9 +201,8 @@ describe('chunk', () => {
         env.sandbox.stub(viewer, 'isVisible', () => {
           return false;
         });
-        env.win.requestIdleCallback = fn => {
-          Promise.resolve().then(fn);
-        };
+        env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
         env.sandbox.stub(resolved, 'then', () => {
           throw new Error('No calls expected');
         });
@@ -289,5 +295,109 @@ describe('chunk', () => {
       });
     });
     basicTests(env);
+  });
+});
+
+describe('onIdle', () => {
+  let win;
+  let calls;
+  let callbackCalled;
+  let sandbox;
+  let clock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    calls = [];
+    callbackCalled = false;
+    win = {
+      requestIdleCallback: (fn, options) => {
+        calls.push({
+          invoke: (timeRemaining, didTimeout) => {
+            fn({
+              timeRemaining: () => timeRemaining,
+              didTimeout: !!didTimeout,
+            });
+          },
+          options,
+        });
+      },
+    };
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  function markCalled() {
+    callbackCalled = true;
+  }
+
+  it('should fire for sufficient remaining time', () => {
+    onIdle(win, 66, 1000, markCalled);
+    expect(calls).to.have.length(1);
+    expect(callbackCalled).to.be.false;
+    expect(calls[0].options.timeout).to.equal(1000);
+    calls[0].invoke(66);
+    expect(callbackCalled).to.be.true;
+    expect(calls).to.have.length(1);
+  });
+
+  it('should try again with not enough time', () => {
+    onIdle(win, 66, 1000, markCalled);
+    expect(calls).to.have.length(1);
+    expect(callbackCalled).to.be.false;
+    expect(calls[0].options.timeout).to.equal(1000);
+    clock.tick(100);
+    calls[0].invoke(65);
+    expect(callbackCalled).to.be.false;
+    expect(calls).to.have.length(2);
+    expect(calls[1].options.timeout).to.equal(900);
+    calls[1].invoke(66);
+    expect(callbackCalled).to.be.true;
+    expect(calls).to.have.length(2);
+  });
+
+  it('should try again with not enough time (2 recursions)', () => {
+    onIdle(win, 66, 1000, markCalled);
+    expect(calls).to.have.length(1);
+    expect(callbackCalled).to.be.false;
+    expect(calls[0].options.timeout).to.equal(1000);
+    clock.tick(100);
+    calls[0].invoke(65);
+    expect(callbackCalled).to.be.false;
+    expect(calls).to.have.length(2);
+    expect(calls[1].options.timeout).to.equal(900);
+    clock.tick(50);
+    calls[1].invoke(0);
+    expect(callbackCalled).to.be.false;
+    expect(calls).to.have.length(3);
+    expect(calls[2].options.timeout).to.equal(850);
+    calls[2].invoke(66);
+    expect(callbackCalled).to.be.true;
+    expect(calls).to.have.length(3);
+  });
+
+  it('should timeout when callback is called after timeout', () => {
+    onIdle(win, 66, 1000, markCalled);
+    expect(calls).to.have.length(1);
+    expect(callbackCalled).to.be.false;
+    expect(calls[0].options.timeout).to.equal(1000);
+    clock.tick(1000);
+    // Not enough time remaining but timed out via time.
+    calls[0].invoke(1);
+    expect(callbackCalled).to.be.true;
+    expect(calls).to.have.length(1);
+  });
+
+  it('should timeout when callback is called with didTimeout', () => {
+    onIdle(win, 66, 1000, markCalled);
+    expect(calls).to.have.length(1);
+    expect(callbackCalled).to.be.false;
+    expect(calls[0].options.timeout).to.equal(1000);
+    // Not enough time remaining but timed out via didTimeout.
+    calls[0].invoke(1, /* didTimeout */ true);
+    expect(callbackCalled).to.be.true;
+    expect(calls).to.have.length(1);
   });
 });
