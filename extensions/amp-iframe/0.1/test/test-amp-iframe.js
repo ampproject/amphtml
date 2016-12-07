@@ -363,7 +363,7 @@ describe('amp-iframe', () => {
 
       expect(() => {
         amp.assertSource('./foo', location.href, 'allow-same-origin');
-      }).to.throw(/Must start with https/);
+      }).to.throw(/must not be equal to container/);
 
       amp.assertSource('http://iframe.localhost:123/foo',
           'https://foo.com', '');
