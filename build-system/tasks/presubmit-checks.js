@@ -266,12 +266,17 @@ var forbiddenTerms = {
   'sendMessage': {
     message: 'Usages must be reviewed.',
     whitelist: [
+      // viewer-impl.sendMessage
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
       'src/service/performance-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+
+      // iframe-messaging-client.sendMessage
+      '3p/iframe-messaging-client.js',
+      '3p/ampcontext.js',
     ],
   },
   'sendMessageAwaitResponse': {
@@ -511,12 +516,6 @@ var forbidden3pTerms = {
   // usage in babel's external helpers that is in a code path that we do
   // not use.
   '\\.then\\((?!callNext)': ThreePTermsMessage,
-  'Math\\.sign': ThreePTermsMessage,
-  'Object\\.assign': {
-    message: ThreePTermsMessage,
-    // See https://github.com/ampproject/amphtml/issues/4877
-    whitelist: ['ads/openx.js'],
-  },
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
