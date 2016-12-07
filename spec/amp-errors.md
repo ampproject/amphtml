@@ -44,6 +44,8 @@ The following fields are reported:
 
 The "expected" errors are marked with `&ex=1`.
 
+An expected error is identified by the `.expected` property on the `Error` object being `true`.
+
 An "expected" error is still an error, i.e. some features are disabled or not
 functioning fully because of it. However, it's an expected error. E.g. as is the
 case with some browser API missing (storage).
