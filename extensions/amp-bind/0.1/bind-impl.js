@@ -17,7 +17,7 @@
 import {evaluateBindExpr} from './bind-expr';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {vsyncFor} from '../../../src/vsync';
 
 const TAG = 'AMP-BIND';
@@ -199,7 +199,7 @@ export class Bind {
       const result = state.results[i];
 
       // Don't apply mutation if the result hasn't changed.
-      if (result === this.previousResults_[i]) {
+      if (this.shallowEquals_(result, this.previousResults_[i])) {
         continue;
       } else {
         this.previousResults_[i] = result;
@@ -229,6 +229,7 @@ export class Bind {
 
     if (property === 'text') {
       // TODO(choumx): How to trigger reflow when necessary?
+
       element.textContent = newValue;
     } else if (property === 'class') {
       // TODO(choumx): SVG elements are an issue, should disallow in validator.
@@ -247,9 +248,9 @@ export class Bind {
         element.removeAttribute(property);
       } else {
         const oldValue = element.getAttribute(property);
-        if (oldValue === newValue) {
-          return;
-        }
+
+        dev().assert(oldValue !== newValue,
+          `Applying [${property}] binding but value hasn't changed.`);
 
         /** @type {boolean|number|string|null} */
         const attributeValue = this.attributeValueOf_(newValue);
@@ -368,5 +369,50 @@ export class Bind {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Checks strict equality of 1D children in arrays and objects.
+   * @param {BindExpressionResultDef|undefined} a
+   * @param {BindExpressionResultDef|undefined} b
+   * @return {boolean}
+   */
+  shallowEquals_(a, b) {
+    if (a === null && b === null) {
+      return true;
+    }
+
+    if (typeof a !== typeof b) {
+      return false;
+    }
+
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) {
+        return false;
+      }
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (typeof a === 'object') {
+      const keysA = a.keys();
+      const keysB = b.keys();
+      if (keysA.length !== keysB.length) {
+        return false;
+      }
+      for (let i = 0; i < keysA; i++) {
+        const keyA = keysA[i];
+        if (a[keyA] !== b[keyA]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return a === b;
   }
 }

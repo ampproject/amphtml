@@ -15,26 +15,20 @@
  */
 
 import {Bind} from '../bind-impl';
-import {getMode} from '../../../../src/mode';
+import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import {vsyncFor} from '../../../../src/vsync';
 
 describes.realWin('amp-bind', {
   amp: {
     runtimeOn: false,
-  }
+  },
 }, env => {
   let bind;
-  let element;
-  let vsync;
 
   beforeEach(() => {
     toggleExperiment(env.win, 'AMP-BIND', true);
-
-    element = createElementWithBinding(env.win);
     bind = new Bind(env.ampdoc);
-    vsync = vsyncFor(env.win);
   });
 
   afterEach(() => {
@@ -42,18 +36,12 @@ describes.realWin('amp-bind', {
   });
 
   /**
-   * @param {!Window} win
+   * @param {!string} binding
    * @return {!Element}
    */
-  function createElementWithBinding(win) {
-    const parent = win.document.getElementById('parent');
-    const bindings = [
-      `[onePlusOne]="1 + 1"`,
-      `[boolean]="!false"`,
-      `[class]="['a','b']"`,
-      '[text]="foo + bar"',
-    ];
-    parent.innerHTML = '<button ' + bindings.join(' ') + '>Hello World</button>';
+  function createElementWithBinding(binding) {
+    const parent = env.win.document.getElementById('parent');
+    parent.innerHTML = '<p ' + binding + '></p>';
     return parent.firstElementChild;
   }
 
@@ -73,13 +61,15 @@ describes.realWin('amp-bind', {
   });
 
   it('should scan for bindings when body is available', () => {
+    createElementWithBinding('[onePlusOne]="1+1"');
     expect(bind.bindings_.length).to.equal(0);
     return bodyReady(unusedBody => {
-      expect(bind.bindings_.length).to.equal(4);
+      expect(bind.bindings_.length).to.equal(1);
     });
   });
 
   it('should NOT apply expressions on first load', () => {
+    const element = createElementWithBinding('[onePlusOne]="1+1"');
     expect(element.getAttribute('onePlusOne')).to.equal(null);
     return bodyReady(unusedBody => {
       expect(element.getAttribute('onePlusOne')).to.equal(null);
@@ -87,45 +77,121 @@ describes.realWin('amp-bind', {
   });
 
   it('should verify initial values of bindings in dev mode', () => {
-    const ampMode = window.AMP_MODE;
-    window.AMP_MODE = {development: true};
-
-    const errorStub = env.sandbox.stub(user(), 'error');
-    new Bind(env.ampdoc);
-    bodyReady(unusedBody => {
+    env.sandbox.stub(window, 'AMP_MODE', {development: true});
+    // Only the initial value for [a] binding does not match.
+    createElementWithBinding('[a]="a" [b]="b" b="b"');
+    const errorStub = env.sandbox.stub(user(), 'error').withArgs('AMP-BIND');
+    return bodyReady(unusedBody => {
       env.flushVsync();
-      window.AMP_MODE = ampMode;
-      return expect(errorStub.callCount).to.equal(4);
+      expect(errorStub.callCount).to.equal(1);
     });
   });
 
-  it('should apply expressions on scope state change', () => {
+  it('should skip digest if specified in setState()', () => {
+    const element = createElementWithBinding('[onePlusOne]="1+1"');
+    expect(element.getAttribute('onePlusOne')).to.equal(null);
+    return bodyReady(unusedBody => {
+      bind.setState({}, /* opt_skipDigest */ true);
+      env.flushVsync();
+      expect(element.getAttribute('onePlusOne')).to.equal(null);
+    });
+  });
+
+  it('should support binding to string attributes', () => {
+    const element = createElementWithBinding('[onePlusOne]="1+1"');
     expect(element.getAttribute('onePlusOne')).to.equal(null);
     return bodyReady(unusedBody => {
       bind.setState({});
-      return vsync.mutatePromise(state => {
-        expect(element.getAttribute('onePlusOne')).to.equal('2');
-      });
+      env.flushVsync();
+      expect(element.getAttribute('onePlusOne')).to.equal('2');
     });
   });
 
-  it('should support toggling of boolean attributes', () => {
-    expect(element.getAttribute('boolean')).to.equal(null);
+  it('should support binding to boolean attributes', () => {
+    const element =
+        createElementWithBinding('[true]="true" [false]="false" false');
+    expect(element.getAttribute('true')).to.equal(null);
+    expect(element.getAttribute('false')).to.equal('');
     return bodyReady(unusedBody => {
       bind.setState({});
-      return vsync.mutatePromise(state => {
-        expect(element.getAttribute('boolean')).to.equal('');
-      });
+      env.flushVsync();
+      expect(element.getAttribute('true')).to.equal('');
+      expect(element.getAttribute('false')).to.equal(null);
     });
   });
 
   it('should support binding to Node.textContent', () => {
-    expect(element.textContent).to.equal('Hello World');
+    const element = createElementWithBinding(`[text]="'a' + 'b' + 'c'"`);
+    expect(element.textContent).to.equal('');
     return bodyReady(unusedBody => {
-      bind.setState({foo: 'foo', bar: 'bar'});
-      return vsync.mutatePromise(state => {
-        expect(element.textContent).to.equal('foobar');
-      });
+      bind.setState({});
+      env.flushVsync();
+      expect(element.textContent).to.equal('abc');
     });
   });
+
+  it('should support binding to CSS classes with strings', () => {
+    const element = createElementWithBinding(`[class]="['abc']"`);
+    expect(toArray(element.classList)).to.deep.equal([]);
+    return bodyReady(unusedBody => {
+      bind.setState({});
+      env.flushVsync();
+      expect(toArray(element.classList)).to.deep.equal(['abc']);
+    });
+  });
+
+  it('should support binding to CSS classes with arrays', () => {
+    const element = createElementWithBinding(`[class]="['a','b']"`);
+    expect(toArray(element.classList)).to.deep.equal([]);
+    return bodyReady(unusedBody => {
+      bind.setState({});
+      env.flushVsync();
+      expect(toArray(element.classList)).to.deep.equal(['a', 'b']);
+    });
+  });
+
+  it('should support scope variable references', () => {
+    const binding = `[text]="foo + bar + baz.qux.join(',')"`;
+    const element = createElementWithBinding(binding);
+    expect(element.textContent).to.equal('');
+    return bodyReady(unusedBody => {
+      bind.setState({
+        foo: 'abc',
+        bar: 123,
+        baz: {
+          qux: ['x', 'y', 'z'],
+        },
+      });
+      env.flushVsync();
+      expect(element.textContent).to.equal('abc123x,y,z');
+    });
+  });
+
+  it('should NOT mutate elements if expression result is unchanged', () => {
+    const binding = `[onePlusOne]="1+1" [class]="'abc'" [text]="'a'+'b'"`;
+    const element = createElementWithBinding(binding);
+    return bodyReady(unusedBody => {
+      bind.setState({});
+      env.flushVsync();
+
+      expect(element.textContent.length).to.not.equal(0);
+      expect(element.classList.length).to.not.equal(0);
+      expect(element.attributes.length).to.not.equal(0);
+
+      element.textContent = '';
+      element.className = '';
+      while (element.attributes.length > 0) {
+        element.removeAttribute(element.attributes[0].name);
+      }
+
+      bind.setState({});
+      env.flushVsync();
+
+      expect(element.textContent).to.equal('');
+      expect(element.className).to.equal('');
+      expect(element.attributes.length).to.equal(0);
+    });
+  });
+
+  // TODO(choumx): Add tests for security (binding to banned attributes, etc.).
 });
