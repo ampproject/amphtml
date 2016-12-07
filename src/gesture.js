@@ -111,8 +111,8 @@ export class Gestures {
     this.pass_ = new Pass(element.ownerDocument.defaultView,
         this.doPass_.bind(this));
 
-    /** @private {?Observable} */
-    this.pointerDownObservable_ = null;
+    /** @private {!Observable} */
+    this.pointerDownObservable_ = new Observable();
 
     /**
      * Observers for each type of registered gesture types.
@@ -178,9 +178,6 @@ export class Gestures {
    * @return {!UnlistenDef}
    */
   onPointerDown(handler) {
-    if (!this.pointerDownObservable_) {
-      this.pointerDownObservable_ = new Observable();
-    }
     return this.pointerDownObservable_.add(handler);
   }
 
