@@ -249,9 +249,7 @@ describe('amp-iframe', () => {
 
   it('should deny http', () => {
     return getAmpIframe({
-      // ads. is not whitelisted for http iframes.
-      src: 'http://ads.localhost:' + location.port +
-          '/test/fixtures/served/iframe.html',
+      src: 'http://google.com/fpp',
       sandbox: 'allow-scripts',
       width: 100,
       height: 100,
@@ -364,8 +362,8 @@ describe('amp-iframe', () => {
       }).to.throw(/Must start with https/);
 
       expect(() => {
-        amp.assertSource('./foo', 'https://foo.com', '');
-      }).to.throw(/Must start with https/);
+        amp.assertSource('./foo', location.href, 'allow-same-origin');
+      }).to.throw(/must not be equal to container/);
 
       amp.assertSource('http://iframe.localhost:123/foo',
           'https://foo.com', '');
