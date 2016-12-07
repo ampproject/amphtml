@@ -23,7 +23,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {removeFragment, parseUrl} from '../../../src/url';
+import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
@@ -55,9 +55,7 @@ export class AmpIframe extends AMP.BaseElement {
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
     user().assert(
-        url.protocol == 'https:' ||
-        url.protocol == 'data:' ||
-        url.origin.indexOf('http://iframe.localhost:') == 0,
+        isSecureUrl(url) || url.protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);

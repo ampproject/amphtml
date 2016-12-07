@@ -15,11 +15,11 @@
  */
 
 import {dev, user} from '../log';
-import {fromClassForDoc} from '../service';
+import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
+import {isArray, map} from '../types';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
-import {isArray, map} from '../types';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -80,22 +80,26 @@ export class ActionInvocation {
 }
 
 
-
 /**
  * TODO(dvoytenko): consider splitting this class into two:
  * 1. A class that has a method "trigger(element, eventType, data)" and
  *    simply can search target in DOM and trigger methods on it.
  * 2. A class that configures event recognizers and rules and then
  *    simply calls action.trigger.
+ * @implements {../service.EmbeddableService}
  */
 export class ActionService {
 
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {(!Document|!ShadowRoot)=} opt_root
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_root) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
+
+    /** @const {!Document|!ShadowRoot} */
+    this.root_ = opt_root || ampdoc.getRootNode();
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = map();
@@ -110,6 +114,12 @@ export class ActionService {
     this.addEvent('change');
   }
 
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    installServiceInEmbedScope(embedWin, 'action',
+        new ActionService(this.ampdoc, embedWin.document));
+  }
+
   /**
    * @param {string} name
    * TODO(dvoytenko): switch to a system where the event recognizers are
@@ -119,13 +129,13 @@ export class ActionService {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.ampdoc.getRootNode().addEventListener('click', event => {
+      this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
     } else if (name == 'submit' || name == 'change') {
-      this.ampdoc.getRootNode().addEventListener(name, event => {
+      this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       });
     }
@@ -214,7 +224,7 @@ export class ActionService {
       return;
     }
 
-    const target = this.ampdoc.getElementById(action.actionInfo.target);
+    const target = this.root_.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;
@@ -625,4 +635,4 @@ function isNum(c) {
  */
 export function installActionServiceForDoc(ampdoc) {
   return fromClassForDoc(ampdoc, 'action', ActionService);
-};
+}

@@ -33,82 +33,44 @@ export const MessageType_ = {
   EMBED_SIZE_DENIED: 'embed-size-denied',
 };
 
-export class AmpContext extends IframeMessagingClient {
+export class AmpContext {
 
   /**
    *  @param {Window} win The window that the instance is built inside.
    */
   constructor(win) {
-    super(win);
     this.setupMetadata_();
-
-    /** Calculate the hostWindow / ampWindow_ */
-    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
-    dev().assert(sentinelMatch, 'Incorrect sentinel format');
-    this.depth = Number(sentinelMatch[2]);
-    const ancestors = [];
-    for (let win = this.win_; win && win != win.parent; win = win.parent) {
-      // Add window keeping the top-most one at the front.
-      ancestors.push(win.parent);
-    }
-    ancestors.reverse();
-
-    /** @private */
-    this.ampWindow_ = ancestors[this.depth];
-  }
-
-  /** @override */
-  getHostWindow() {
-    return this.ampWindow_;
-  }
-
-  /** @override */
-  getSentinel() {
-    return this.sentinel;
-  }
-
-  /** @override */
-  registerCallback_(messageType, callback) {
-    user().assertEnumValue(MessageType_, messageType);
-    this.callbackFor_[messageType] = callback;
-    return () => { delete this.callbackFor_[messageType]; };
+    this.client_ = new IframeMessagingClient(win);
+    this.client_.setHostWindow(this.getHostWindow_());
+    this.client_.setSentinel(this.sentinel);
   }
 
   /**
    *  Send message to runtime to start sending page visibility messages.
-   *  @param {function(Object)} callback Function to call every time we receive a
-   *    page visibility message.
+   *  @param {function(Object)} callback Function to call every time we receive
+   *    a page visibility message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
   observePageVisibility(callback) {
-    const stopObserveFunc = this.registerCallback_(
-        MessageType_.EMBED_STATE, callback);
-    this.ampWindow_.postMessage/*REVIEW*/({
-      sentinel: this.sentinel,
-      type: MessageType_.SEND_EMBED_STATE,
-    }, '*');
-
-    return stopObserveFunc;
+    return this.client_.makeRequest(
+        MessageType_.SEND_EMBED_STATE,
+        MessageType_.EMBED_STATE,
+        callback);
   };
 
   /**
    *  Send message to runtime to start sending intersection messages.
-   *  @param {function(Object)} callback Function to call every time we receive an
-   *    intersection message.
+   *  @param {function(Object)} callback Function to call every time we receive
+   *  an intersection message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
-
    */
   observeIntersection(callback) {
-    const stopObserveFunc = this.registerCallback_(
-        MessageType_.INTERSECTION, callback);
-    this.ampWindow_.postMessage/*REVIEW*/({
-      sentinel: this.sentinel,
-      type: MessageType_.SEND_INTERSECTIONS,
-    }, '*');
-
-    return stopObserveFunc;
+    return this.client_.makeRequest(
+        MessageType_.SEND_INTERSECTIONS,
+        MessageType_.INTERSECTION,
+        callback);
   };
 
   /**
@@ -118,12 +80,7 @@ export class AmpContext extends IframeMessagingClient {
    *  @param {int} width The new width for the ad we are requesting.
    */
   requestResize(height, width) {
-    this.ampWindow_.postMessage/*REVIEW*/({
-      sentinel: this.sentinel,
-      type: MessageType_.EMBED_SIZE,
-      width,
-      height,
-    }, '*');
+    this.client_.sendMessage(MessageType_.EMBED_SIZE, {width, height});
   };
 
   /**
@@ -134,7 +91,7 @@ export class AmpContext extends IframeMessagingClient {
    *    to call if the resize request succeeds.
    */
   onResizeSuccess(callback) {
-    this.registerCallback_(MessageType_.EMBED_SIZE_CHANGED, function(obj) {
+    this.client_.registerCallback(MessageType_.EMBED_SIZE_CHANGED, obj => {
       callback(obj.requestedHeight, obj.requestedWidth); });
   };
 
@@ -146,8 +103,9 @@ export class AmpContext extends IframeMessagingClient {
    *    to call if the resize request is denied.
    */
   onResizeDenied(callback) {
-    this.registerCallback_(MessageType_.EMBED_SIZE_DENIED, function(obj) {
-      callback(obj.requestedHeight, obj.requestedWidth); });
+    this.client_.registerCallback(MessageType_.EMBED_SIZE_DENIED, obj => {
+      callback(obj.requestedHeight, obj.requestedWidth);
+    });
   };
 
   /**
@@ -179,4 +137,20 @@ export class AmpContext extends IframeMessagingClient {
       throw new Error('Could not parse metadata.');
     }
   }
-};
+
+  /**
+   *  Calculate the hostWindow
+   *  @private
+   */
+  getHostWindow_() {
+    const sentinelMatch = this.sentinel.match(/((\d+)-\d+)/);
+    dev().assert(sentinelMatch, 'Incorrect sentinel format');
+    const depth = Number(sentinelMatch[2]);
+    const ancestors = [];
+    for (let win = this.win_; win && win != win.parent; win = win.parent) {
+      // Add window keeping the top-most one at the front.
+      ancestors.push(win.parent);
+    }
+    return ancestors[(ancestors.length - 1) - depth];
+  }
+}

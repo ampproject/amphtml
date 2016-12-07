@@ -150,11 +150,13 @@ exports.rules = [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
+      'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
     ],
   },
   {

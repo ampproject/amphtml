@@ -15,14 +15,10 @@
  */
 import './polyfills';
 import {listen} from '../src/event-helper';
-import {getRandom} from '../src/3p-frame';
 import {map} from '../src/types';
 import {user} from '../src/log';
 import {startsWith} from '../src/string';
 
-/**
- * @abstract
- */
 export class IframeMessagingClient {
 
   /**
@@ -31,6 +27,7 @@ export class IframeMessagingClient {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
+    this.hostWindow_ = win.parent;
     /** Map messageType keys to callback functions for when we receive
      *  that message
      *  @private {!Object}
@@ -40,20 +37,45 @@ export class IframeMessagingClient {
   }
 
   /**
+   * Make an event listening request to the host window.
+   *
+   * @param {string} requestType The type of the request message.
+   * @param {string} responseType The type of the response message.
+   * @param {function(object)} callback The callback function to call
+   *   when a message with type responseType is received.
+   */
+  makeRequest(requestType, responseType, callback) {
+    const unlisten = this.registerCallback(responseType, callback);
+    this.sendMessage(requestType);
+    return unlisten;
+  }
+
+  /**
    * Register callback function for message with type messageType.
    *   As it stands right now, only one callback can exist at a time.
    *   All future calls will overwrite any previously registered
    *   callbacks.
    * @param {string} messageType The type of the message.
-   * @param {function(object)} callback The callback function to call
+   * @param {function()} callback The callback function to call
    *   when a message with type messageType is received.
    */
-  registerCallback_(messageType, callback) {
+  registerCallback(messageType, callback) {
     // NOTE : no validation done here. any callback can be register
     // for any callback, and then if that message is received, this
     // class *will execute* that callback
     this.callbackFor_[messageType] = callback;
     return () => { delete this.callbackFor_[messageType]; };
+  }
+
+  /**
+   *  Send a postMessage to Host Window
+   *  @param {string} type The type of message to send.
+   *  @param {Object=} opt_payload The payload of message to send.
+   */
+  sendMessage(type, opt_payload) {
+    const message = {type, sentinel: this.sentinel_};
+    this.hostWindow_.postMessage/*OK*/(
+        Object.assign(message, opt_payload), '*');
   }
 
   /**
@@ -68,7 +90,7 @@ export class IframeMessagingClient {
   setupEventListener_() {
     listen(this.win_, 'message', message => {
       // Does it look a message from AMP?
-      if (message.source != this.getHostWindow()) {
+      if (message.source != this.hostWindow_) {
         return;
       }
       if (!message.data) {
@@ -82,11 +104,12 @@ export class IframeMessagingClient {
       try {
         const payload = JSON.parse(message.data.substring(4));
         // Check the sentinel as well.
-        if (payload.sentinel == this.getSentinel() &&
+        if (payload.sentinel == this.sentinel_ &&
             this.callbackFor_[payload.type]) {
           try {
             // We should probably report exceptions within callback
-            this.callbackFor_[payload.type](payload);
+            const callback = this.callbackFor_[payload.type];
+            callback(payload);
           } catch (err) {
             user().error(
                 'IFRAME-MSG',
@@ -100,25 +123,11 @@ export class IframeMessagingClient {
     });
   }
 
-  /**
-   *  This must be overwritten by classes that extend this base class
-   *  As implemented, this will only work for messaging the parent iframe.
-   */
-  getSentinel() {
-    if (!this.sentinel) {
-      this.sentinel = '0-' + getRandom(this.win_);
-    }
-    return this.sentinel;
+  setHostWindow(win) {
+    this.hostWindow_ = win;
   }
 
-  /**
-   *  Only valid for the trivial case when we will always be messaging our parent
-   *  Should be overwritten for subclasses
-   */
-  getHostWindow() {
-    if (!this.hostWindow) {
-      this.hostWindow = this.win_.parent;
-    }
-    return this.hostWindow;
+  setSentinel(sentinel) {
+    this.sentinel_ = sentinel;
   }
-};
+}

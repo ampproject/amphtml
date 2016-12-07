@@ -150,6 +150,9 @@ export class Resource {
     /** @private {number} */
     this.layoutCount_ = 0;
 
+    /** @private {*} */
+    this.lastLayoutError_ = null;
+
     /** @private {boolean} */
     this.isFixed_ = false;
 
@@ -564,7 +567,7 @@ export class Resource {
       return Promise.resolve();
     }
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
-      return Promise.reject('already failed');
+      return Promise.reject(this.lastLayoutError_);
     }
 
     dev().assert(this.state_ != ResourceState.NOT_BUILT,
@@ -630,6 +633,7 @@ export class Resource {
     this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
+    this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
     } else {

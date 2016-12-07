@@ -34,7 +34,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
   "transport": {"beacon": false, "xhrpost": false},
   "requests": {
     "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
-    "base": "${endpoint}?${type}&path=${canonicalPath}",
+    "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
     "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
     "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}",
     "timer": "${base}&backgroundState=${backgroundState}"
@@ -58,6 +58,13 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       },
       "extraUrlParams": {
         "param1": "Another value"
+      }
+    },
+    "pageview": {
+      "on": "visible",
+      "request": "base",
+      "vars": {
+        "type": "${random}${title}"
       }
     },
     "visibility": {
