@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './polyfills';
 import {listen} from '../src/event-helper';
 import {map} from '../src/types';
 import {user} from '../src/log';
-import {startsWith} from '../src/string';
+import {serializeMessage, deserializeMessage} from './messaging';
 
 export class IframeMessagingClient {
 
@@ -73,9 +72,8 @@ export class IframeMessagingClient {
    *  @param {Object=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    const message = {type, sentinel: this.sentinel_};
     this.hostWindow_.postMessage/*OK*/(
-        Object.assign(message, opt_payload), '*');
+        serializeMessage(type, this.sentinel_, opt_payload), '*');
   }
 
   /**
@@ -93,32 +91,24 @@ export class IframeMessagingClient {
       if (message.source != this.hostWindow_) {
         return;
       }
-      if (!message.data) {
-        return;
-      }
-      if (!startsWith(String(message.data), 'amp-')) {
-        return;
-      }
 
-      // See if we can parse the payload.
-      try {
-        const payload = JSON.parse(message.data.substring(4));
-        // Check the sentinel as well.
-        if (payload.sentinel == this.sentinel_ &&
-            this.callbackFor_[payload.type]) {
-          try {
-            // We should probably report exceptions within callback
-            const callback = this.callbackFor_[payload.type];
-            callback(payload);
-          } catch (err) {
-            user().error(
-                'IFRAME-MSG',
-                `- Error in registered callback ${payload.type}`,
-                err);
-          }
+      const payload = deserializeMessage(message.data);
+      if (payload == null) {
+        return;
+      }
+      // Check the sentinel as well.
+      if (payload.sentinel == this.sentinel_ &&
+          this.callbackFor_[payload.type]) {
+        try {
+          // We should probably report exceptions within callback
+          const callback = this.callbackFor_[payload.type];
+          callback(payload);
+        } catch (err) {
+          user().error(
+              'IFRAME-MSG',
+              `- Error in registered callback ${payload.type}`,
+              err);
         }
-      } catch (e) {
-        // JSON parsing failed. Ignore the message.
       }
     });
   }
