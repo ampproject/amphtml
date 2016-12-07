@@ -23,7 +23,19 @@ import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
 import {isProxyOrigin} from './url';
 
+
+/**
+ * @const {string}
+ */
 const CANCELLED = 'CANCELLED';
+
+
+/**
+ * The threshold for throttling load errors. Currently at 0.1%.
+ * @const {number}
+ */
+const LOAD_ERROR_THRESHOLD = 1e-3;
+
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -212,7 +224,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
   if (message == CANCELLED) {
     return;
   }
-  if (isLoadErrorMessage(message)) {
+  if (isLoadErrorMessage(message) && (Math.random() > LOAD_ERROR_THRESHOLD)) {
     return;
   }
 
