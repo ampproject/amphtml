@@ -86,20 +86,20 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', message => {
+    listen(this.win_, 'message', event => {
       // Does it look a message from AMP?
-      if (message.source != this.hostWindow_) {
+      if (event.source != this.hostWindow_) {
         return;
       }
 
-      const payload = deserializeMessage(message.data);
-      if (!payload || payload.sentinel != this.sentinel_) {
+      const message = deserializeMessage(event.data);
+      if (!message || message.sentinel != this.sentinel_) {
         return;
       }
 
-      const callback = this.callbackFor_[payload.type];
+      const callback = this.callbackFor_[message.type];
       if (callback) {
-        callback(payload);
+        callback(message);
       }
     });
   }
