@@ -38,7 +38,6 @@ import {parseUrl} from '../../src/url';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import * as trackPromise from '../../src/impression';
-import * as sinon from 'sinon';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {

@@ -71,13 +71,10 @@ export class GlobalVariableSource extends VariableSource {
     /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {?Promise<?Object<string, string>>} */
+    /** @private {?Promise<?Object<string, string>>} */
     this.variants_ = null;
 
-    /**
-     * @private @const {
-     *   ?Promise<(?{incomingFragment: string, outgoingFragment: string})>}
-     */
+    /** @private {?Promise<?ShareTrackingFragmentsDef>} */
     this.shareTrackingFragments_ = null;
   }
 
@@ -254,7 +251,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns assigned variant name for the given experiment.
-    this.setAsync('VARIANT', experiment => {
+    this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
       return this.getVairiantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
@@ -263,10 +260,10 @@ export class GlobalVariableSource extends VariableSource {
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : /** @type {string} */(variant);
       }, 'VARIANT');
-    });
+    }));
 
     // Returns all assigned experiment variants in a serialized form.
-    this.setAsync('VARIANTS', () => {
+    this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
       return this.getVairiantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
@@ -276,21 +273,23 @@ export class GlobalVariableSource extends VariableSource {
         }
         return experiments.join(EXPERIMENT_DELIMITER);
       }, 'VARIANTS');
-    });
+    }));
 
     // Returns incoming share tracking fragment.
-    this.setAsync('SHARE_TRACKING_INCOMING', () => {
-      return this.getShareTrackingValue_(fragments => {
-        return fragments.incomingFragment;
-      }, 'SHARE_TRACKING_INCOMING');
-    });
+    this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.incomingFragment;
+          }, 'SHARE_TRACKING_INCOMING');
+        }));
 
     // Returns outgoing share tracking fragment.
-    this.setAsync('SHARE_TRACKING_OUTGOING', () => {
-      return this.getShareTrackingValue_(fragments => {
-        return fragments.outgoingFragment;
-      }, 'SHARE_TRACKING_OUTGOING');
-    });
+    this.setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.outgoingFragment;
+          }, 'SHARE_TRACKING_OUTGOING');
+        }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set('TIMESTAMP', () => {
@@ -498,9 +497,9 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-experiment's variants service.
-   * @param {function(!Object<string, string>):(T|!Promise<T>)} getter
+   * @param {function(!Object<string, string>):(?string)} getter
    * @param {string} expr
-   * @return {!Promise<T>|null}
+   * @return {!Promise<?string>}
    * @template T
    * @private
    */
@@ -518,9 +517,9 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-share-tracking's service.
-   * @param {function(!{incomingFragment: string, outgoingFragment: string}):(T|!Promise<T>)} getter
+   * @param {function(!ShareTrackingFragmentsDef):T} getter
    * @param {string} expr
-   * @return {!Promise<T>|null}
+   * @return {!Promise<T>}
    * @template T
    * @private
    */
@@ -532,7 +531,7 @@ export class GlobalVariableSource extends VariableSource {
       user().assert(fragments, 'To use variable %s, ' +
           'amp-share-tracking should be configured',
           expr);
-      return getter(fragments);
+      return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
   }
 }
@@ -851,3 +850,12 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
       new UrlReplacements(ampdoc, varSource));
 }
+
+
+/**
+ * @typedef {{
+ *   incomingFragment: string,
+ *   outgoingFragment: string,
+ * }}
+ */
+let ShareTrackingFragmentsDef;
