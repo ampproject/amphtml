@@ -229,4 +229,4 @@ data.plc;
 data.sz;
 data.extra;
 // _ping_
-data.nativeIo
+data.nativeIntersectionObserver
