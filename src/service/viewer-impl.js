@@ -1012,7 +1012,6 @@ export class Viewer {
           eventType, data, awaitResponse));
     }
 
-    // If there is no viewer, no further action is needed.
     if (!this.messagingReadyPromise_) {
       if (awaitResponse) {
         return Promise.reject(getChannelError());
