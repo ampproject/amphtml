@@ -71,14 +71,14 @@ export class GlobalVariableSource extends VariableSource {
     /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, string>>} */
-    this.variants_ = variantForOrNull(this.ampdoc.win);
+    /** @private @const {?Promise<?Object<string, string>>} */
+    this.variants_ = null;
 
     /**
      * @private @const {
-     *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
+     *   ?Promise<(?{incomingFragment: string, outgoingFragment: string})>}
      */
-    this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
+    this.shareTrackingFragments_ = null;
   }
 
   /**
@@ -255,51 +255,41 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns assigned variant name for the given experiment.
     this.setAsync('VARIANT', experiment => {
-      return this.variants_.then(variants => {
-        user().assert(variants,
-            'To use variable VARIANT, amp-experiment should be configured');
+      return this.getVairiantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : /** @type {string} */(variant);
-      });
+      }, 'VARIANT');
     });
 
     // Returns all assigned experiment variants in a serialized form.
     this.setAsync('VARIANTS', () => {
-      return this.variants_.then(variants => {
-        user().assert(variants,
-            'To use variable VARIANTS, amp-experiment should be configured');
-
+      return this.getVairiantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
           const variant = variants[experiment];
           experiments.push(
               experiment + VARIANT_DELIMITER + (variant || 'none'));
         }
-
         return experiments.join(EXPERIMENT_DELIMITER);
-      });
+      }, 'VARIANTS');
     });
 
     // Returns incoming share tracking fragment.
     this.setAsync('SHARE_TRACKING_INCOMING', () => {
-      return this.shareTrackingFragments_.then(fragments => {
-        user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
-            'amp-share-tracking should be configured');
+      return this.getShareTrackingValue_(fragments => {
         return fragments.incomingFragment;
-      });
+      }, 'SHARE_TRACKING_INCOMING');
     });
 
     // Returns outgoing share tracking fragment.
     this.setAsync('SHARE_TRACKING_OUTGOING', () => {
-      return this.shareTrackingFragments_.then(fragments => {
-        user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
-            'amp-share-tracking should be configured');
+      return this.getShareTrackingValue_(fragments => {
         return fragments.outgoingFragment;
-      });
+      }, 'SHARE_TRACKING_OUTGOING');
     });
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
@@ -475,6 +465,7 @@ export class GlobalVariableSource extends VariableSource {
    * @param {string} expr
    * @return {T|null}
    * @template T
+   * @private
    */
   getAccessValue_(getter, expr) {
     return this.getAccessService_(this.ampdoc.win).then(accessService => {
@@ -492,6 +483,7 @@ export class GlobalVariableSource extends VariableSource {
    * @param {*} param
    * @param {string} defaultValue
    * @return {string}
+   * @private
    */
   getQueryParamData_(param, defaultValue) {
     user().assert(param,
@@ -502,6 +494,46 @@ export class GlobalVariableSource extends VariableSource {
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
         ? params[param] : defaultValue;
+  }
+
+  /**
+   * Resolves the value via amp-experiment's variants service.
+   * @param {function(!Object<string, string>):(T|!Promise<T>)} getter
+   * @param {string} expr
+   * @return {!Promise<T>|null}
+   * @template T
+   * @private
+   */
+  getVairiantsValue_(getter, expr) {
+    if (!this.variants_) {
+      this.variants_ = variantForOrNull(this.ampdoc.win);
+    }
+    return this.variants_.then(variants => {
+      user().assert(variants,
+          'To use variable %s, amp-experiment should be configured',
+          expr);
+      return getter(variants);
+    });
+  }
+
+  /**
+   * Resolves the value via amp-share-tracking's service.
+   * @param {function(!{incomingFragment: string, outgoingFragment: string}):(T|!Promise<T>)} getter
+   * @param {string} expr
+   * @return {!Promise<T>|null}
+   * @template T
+   * @private
+   */
+  getShareTrackingValue_(getter, expr) {
+    if (!this.shareTrackingFragments_) {
+      this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
+    }
+    return this.shareTrackingFragments_.then(fragments => {
+      user().assert(fragments, 'To use variable %s, ' +
+          'amp-share-tracking should be configured',
+          expr);
+      return getter(fragments);
+    });
   }
 }
 
