@@ -15,7 +15,6 @@
  */
 
 import {createIframePromise} from '../../../testing/iframe';
-import {stubService} from '../../../testing/test-helper';
 import {csa, generateCallback} from '../../../ads/google/csa';
 import * as sinon from 'sinon';
 import * as p3p from '../../../3p/3p';
@@ -32,26 +31,26 @@ describe('amp-ad-csa-impl', () => {
         afsAdblockOptions: '{"width": "auto", "maxTop": 1}',
         ampSlotIndex: '0',
         height: 300,
-        type: 'csa'
+        type: 'csa',
       };
     } else if (type == 'afsh') {
-       return {
+      return {
         afshPageOptions: '{"pubId": "vert-pla-test1-srp", "query": "flowers"}',
         afshAdblockOptions: '{"width": "auto", "height": 300}',
         ampSlotIndex: '0',
         height: 300,
-        type: 'csa'
-      };     
+        type: 'csa',
+      };
     } else if (type == 'both') {
-       return {
+      return {
         afsPageOptions: '{"pubId": "gtech-codegen", "query": "flowers"}',
         afsAdblockOptions: '{"width": "auto", "maxTop": 1}',
         afshPageOptions: '{"pubId": "vert-pla-test1-srp", "query": "flowers"}',
         afshAdblockOptions: '{"width": "auto", "height": 300}',
         ampSlotIndex: '0',
         height: 300,
-        type: 'csa'
-      }; 
+        type: 'csa',
+      };
     } else {
       return {};
     }
@@ -88,7 +87,7 @@ describe('amp-ad-csa-impl', () => {
         callback();
       });
 
-      win._googCsa = function(a,b,c) { return true; };
+      win._googCsa = function() {};
       googCsaSpy = sandbox.stub(win, '_googCsa');
     });
 
@@ -119,9 +118,9 @@ describe('amp-ad-csa-impl', () => {
       const iframe = document.createElement('iframe');
       iframe.id = 'csaiframe';
       div.appendChild(iframe);
-      document.body.appendChild(div);    
+      document.body.appendChild(div);
 
-      window.context = {};    
+      window.context = {};
     });
 
     afterEach(() => {
@@ -142,34 +141,30 @@ describe('amp-ad-csa-impl', () => {
       const div = document.getElementById('csacontainer');
       div.style.height = height;
       const iframe = document.getElementById('csaiframe');
-      iframe.style.height = height;   
+      iframe.style.height = height;
     }
 
-    function setContextHeight(height) {
+    function setContextHeight(h) {
       window.context = {
         initialIntersection: {
           boundingClientRect: {
-            height: height
-          }
+            height: h,
+          },
         },
         requestResize: function() {},
         onResizeSuccess: function() {},
         onResizeDenied: function() {},
-        noContentAvailable: function() {}
-      };      
+        noContentAvailable: function() {},
+      };
     }
 
     function registerCallbacks() {
-      const onResizeSuccessSpy = sandbox.stub(window.context, 'onResizeSuccess',
-        (callback) => {
-          successCallback = callback;
-        }
-      );
-      const onResizeDeniedeSpy = sandbox.stub(window.context, 'onResizeDenied',
-        (callback) => {
-          deniedCallback = callback;
-        }
-      );      
+      sandbox.stub(window.context, 'onResizeSuccess', callback => {
+        successCallback = callback;
+      });
+      sandbox.stub(window.context, 'onResizeDenied', callback => {
+        deniedCallback = callback;
+      });
     }
 
     it('when ads are ATF and CSA container > AMP container', () => {
@@ -231,7 +226,7 @@ describe('amp-ad-csa-impl', () => {
 
       // We should have tried to resize to 300 px
       expect(requestedHeight).to.equal(300);
-      
+
       // Container should not have been changed
       expect(container.style.height).to.equal('300px');
 
@@ -326,13 +321,9 @@ describe('amp-ad-csa-impl', () => {
       // Set up stubs and spys
       registerCallbacks();
       const noAdsSpy = sandbox.stub(window.context, 'noContentAvailable');
-      global._googCsa = function(a,b,c) { return true; };
-      const _googCsaSpy = sandbox.stub(global, '_googCsa',
-        (a,b,c) => { 
-          return true; 
-        }
-      );
-      
+      global._googCsa = function() {};
+      const _googCsaSpy = sandbox.stub(global, '_googCsa', () => {});
+
       // Generate a callback with non-null backfill options
       const resizeIframe = generateCallback({},{});
 
