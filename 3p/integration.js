@@ -435,10 +435,11 @@ function observeIntersection(observerCallback) {
   // Send request to received records.
   if (window.IntersectionObserver &&
       window.IntersectionObserver.prototype.observe) {
-    // use native IntersectionObserver if exist. NOTE: add the check for
-    // prototype.observer for test reason to force using polyfill by fake
-    // the prototype.
+    // NOTE: Add extra check for `IntersectionObserver.prototype.observe`
+    // so that we can still test our IntersectionObserver polyfill impl by
+    // setting `IntersectionObserver.prototype` to a null object.
 
+    // use native IntersectionObserver if it exists.
     const io = new window.IntersectionObserver(changes => {
       observerCallback(changes);
     }, {
