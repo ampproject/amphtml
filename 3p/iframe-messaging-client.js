@@ -93,22 +93,13 @@ export class IframeMessagingClient {
       }
 
       const payload = deserializeMessage(message.data);
-      if (payload == null) {
+      if (!payload || payload.sentinel != this.sentinel_) {
         return;
       }
-      // Check the sentinel as well.
-      if (payload.sentinel == this.sentinel_ &&
-          this.callbackFor_[payload.type]) {
-        try {
-          // We should probably report exceptions within callback
-          const callback = this.callbackFor_[payload.type];
-          callback(payload);
-        } catch (err) {
-          user().error(
-              'IFRAME-MSG',
-              `- Error in registered callback ${payload.type}`,
-              err);
-        }
+
+      const callback = this.callbackFor_[payload.type];
+      if (callback) {
+        callback(payload);
       }
     });
   }
