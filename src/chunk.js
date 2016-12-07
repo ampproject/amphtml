@@ -228,8 +228,7 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {
-      const now = Date.now();
-      const remainingTimeout = timeout - (now - startTime);
+      const remainingTimeout = timeout - (Date.now() - startTime);
       if (remainingTimeout <= 0 || info.didTimeout) {
         dev().fine(TAG, 'Timed out', timeout, info.didTimeout);
         fn();
