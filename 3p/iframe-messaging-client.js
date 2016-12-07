@@ -59,7 +59,7 @@ export class IframeMessagingClient {
   /**
    *  Send a postMessage to Host Window
    *  @param {object} message The message to send.
-   *  @private
+   *  @protected
    */
   messageHost_(message) {
     this.getHostWindow().postMessage/*OK*/(message, '*');
