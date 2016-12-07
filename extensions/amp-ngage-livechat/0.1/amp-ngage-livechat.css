@@ -1,0 +1,221 @@
+	a.ngageBoxClose {
+	    float: right;
+	    margin-top: 4px;
+	    margin-right: 4px;
+	    cursor: pointer;
+	    color: #ccc;
+	    background: transparent;
+	    font-size: 48px;
+	    display: inline-block;
+	    line-height: 24px;
+	    font-family: 'Proxima Nova Rg Regular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	}
+	.ngageStrong {
+	    font-weight: bold;
+	    display: inline-block;
+	}
+	.ngageBoxClose:before {
+	    content: '×';
+	}
+	.ngageBoxClose:after {
+	    content: '';
+	    height: 2px;
+	    background: #ccc;
+	    display: block;
+	    margin-top: 2px;
+	}
+	.ngageHeader {
+	    font-family: 'Roboto Slab Regular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	    font-size: 125%;
+	}
+	.ngageMobileFloat {
+	    z-index: 99999999;
+	    position: fixed;
+	    -webkit-transition: top .5s;
+	    transition: top .5s;
+	    top: 0px;
+	    left: 0px;
+	    width: 100%;
+	    background-color: rgb(51, 51, 51);
+	    color: #fff;
+	    font-family: 'Proxima Nova Rg Regular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	    font-size: 16px;
+	    box-shadow: 0px 20px 10px #888888;
+	}
+	.ngageText {
+	    padding: .5em 5% 2em 5%;
+	}
+	.ngageMobilePicContainer {
+	    margin-right: 5%;
+	    margin-top: 8px;
+	    float: left;
+	    height: 60px;
+	    width: 60px;
+	    overflow: hidden;
+	    border-radius: 50%;
+	    background-color: #fff;
+	    display: inline-block;
+	    border: 3px solid;
+	}
+	#ngageMobilePic {
+	    margin: 0 auto;
+	    height: 100%;
+	    width: auto;
+	}
+	.ngageMobileBar {
+	    position: absolute;
+	    bottom: -1em;
+	    padding: .25em 1em .25em 1em;
+	    text-align: center;
+	    font-size: 16px;
+	    color: #fff;
+	    width: 60%;
+	    border-radius: 1em;
+	    margin-left: 20%;
+	    background-color: rgb(240, 140, 2);
+	}
+	.ngageMobilePic2 {
+	    display: inline;
+	    float: left;
+	    height: 150%;
+	    width: auto;
+	    margin-top: -25px;
+	}
+	.ngageMobileText {
+	    display: inline;
+	    margin-left: 5px;
+	    font-size: 22px;
+	}
+	.ngageMobileBar2 {
+	    display: inline;
+	    text-align: center;
+	    padding: 4px 8px 4px 8px;
+	    vertical-align: middle;
+	    font-size: 14px;
+	    width: 60%;
+	    border-radius: 1em;
+	    margin-left: 5px;
+	    background-color: rgb(240, 140, 2);
+	}
+	.liveChatFloatingButtonMobile {
+	    box-shadow: 5px -2px 5px #888888;
+	    font-family: 'Roboto Slab Regular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	    -webkit-transition: bottom .5s;
+	    transition: bottom .5s;
+	}
+	@font-face {
+	    font-family: 'Roboto Slab Regular';
+	    src: url('https://messenger.ngageics.com/Content/Fonts/RobotoSlab-Regular-webfont.eot');
+	    src: url('https://messenger.ngageics.com/Content/Fonts/RobotoSlab-Regular-webfont.eot#iefix') format('embedded-opentype'), url('https://messenger.ngageics.com/Content/Fonts/RobotoSlab-Regular-webfont.woff') format('woff'), url('https://messenger.ngageics.com/Content/Fonts/RobotoSlab-Regular-webfont.ttf') format('truefont'), url('https://messenger.ngageics.com/Content/Fonts/RobotoSlab-Regular-webfont.svg#roboto_slabregular') format('svg');
+	    font-style: normal;
+	    font-weight: normal;
+	}
+	@font-face {
+	    font-family: 'Roboto Condensed Bold';
+	    src: url('https://messenger.ngageics.com/Content/Fonts/RobotoCondensed-Bold-webfont.eot');
+	    src: url('https://messenger.ngageics.com/Content/Fonts/RobotoCondensed-Bold-webfont.eot?#iefix') format('embedded-opentype'), url('https://messenger.ngageics.com/Content/Fonts/RobotoCondensed-Bold-webfont.woff') format('woff'), url('https://messenger.ngageics.com/Content/Fonts/RobotoCondensed-Bold-webfont.ttf') format('truetype'), url('https://messenger.ngageics.com/Content/Fonts/RobotoCondensed-Bold-webfont.svg#roboto_condensedbold') format('svg');
+	    font-style: normal;
+	    font-weight: normal;
+	}
+	@font-face {
+	    font-family: 'Proxima Nova Rg Regular';
+	    src: url('https://messenger.ngageics.com/Content/Fonts/proximanova-regular-webfont.eot');
+	    src: url('https://messenger.ngageics.com/Content/Fonts/proximanova-regular-webfont.eot?#iefix') format('embedded-opentype'), url('https://messenger.ngageics.com/Content/Fonts/proximanova-regular-webfont.woff2') format('woff2'), url('https://messenger.ngageics.com/Content/Fonts/proximanova-regular-webfont.woff') format('woff'), url('https://messenger.ngageics.com/Content/Fonts/proximanova-regular-webfont.ttf') format('truetype'), url('https://messenger.ngageics.com/Content/Fonts/proximanova-regular-webfont.svg#proxima_nova_rgregular') format('svg');
+	    font-style: normal;
+	    font-weight: normal;
+	}
+	.ngageMobilePicContainer {
+	    border-radius: 0px;
+	    border: 0px;
+	}
+	@-moz-keyframes dropHeader {
+	    0% {
+	        -moz-transform: translateY(-300px);
+	    }
+	    89% {
+	        -moz-transform: translateY(-300px);
+	    }
+	    100% {
+	        -moz-transform: translateY(0);
+	    }
+	}
+	@-webkit-keyframes dropHeader {
+	    0% {
+	        -webkit-transform: translateY(-300px);
+	    }
+	    89% {
+	        -webkit-transform: translateY(-300px);
+	    }
+	    100% {
+	        -webkit-transform: translateY(0);
+	    }
+	}
+	@keyframes dropHeader {
+	    0% {
+	        transform: translateY(-300px);
+	    }
+	    89% {
+	        transform: translateY(-300px);
+	    }
+	    100% {
+	        transform: translateY(0);
+	    }
+	}
+	@-moz-keyframes raiseHeader {
+	    0% {
+	        -moz-transform: translateY(0);
+	    }
+	    100% {
+	        -moz-transform: translateY(-300px);
+	    }
+	}
+	@-webkit-keyframes raiseHeader {
+	    0% {
+	        -webkit-transform: translateY(0);
+	    }
+	    100% {
+	        -webkit-transform: translateY(-300px);
+	    }
+	}
+	@keyframes raiseHeader {
+	    0% {
+	        transform: translateY(0);
+	    }
+	    100% {
+	        transform: translateY(-300px);
+	    }
+	}
+	#ngageMobileInvite {
+	    display: none;
+	}
+	.ngageMobileFloat {
+	    -moz-animation-name: dropHeader;
+	    -moz-animation-fill-mode: forwards;
+	    -moz-animation-iteration-count: 1;
+	    -moz-animation-timing-function: ease-out;
+	    -moz-animation-duration: 5.6;
+	    -webkit-animation-name: dropHeader;
+	    -webkit-animation-fill-mode: forwards;
+	    -webkit-animation-iteration-count: 1;
+	    -webkit-animation-timing-function: ease-out;
+	    -webkit-animation-duration: 5.6s;
+	    animation-name: dropHeader;
+	    animation-fill-mode: forwards;
+	    animation-iteration-count: 1;
+	    animation-timing-function: ease-out;
+	    animation-duration: 5.6s;
+	}
+	#ngageMobileInvite:checked + label {
+	    -moz-animation-name: raiseHeader;
+	    -moz-animation-iteration-count: 1;
+	    -moz-animation-timing-function: ease-out;
+	    -moz-animation-duration: 0.6;
+	    -webkit-animation-name: raiseHeader;
+	    -webkit-animation-iteration-count: 1;
+	    -webkit-animation-timing-function: ease-out;
+	    -webkit-animation-duration: 0.6s;
+	    animation-name: raiseHeader;
+	    animation-iteration-count: 1;
+	    animation-timing-function: ease-out;
+	    animation-duration: 0.6s;
+	}
