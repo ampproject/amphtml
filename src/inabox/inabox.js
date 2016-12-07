@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {dev} from '../log';
+
+const TAG = 'inabox-client';
+
 /**
  * Inabox provides environment for AMP runtime to work in a non-scrollable
  * cross-origin iframe, e.g. an ad slot.
@@ -24,12 +28,18 @@ export class Inabox {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const {!Window} */
+    /** @private {!Window} */
     this.win_ = win;
   }
 
   init() {
-    this.win_.top./*OK*/postMessage('amp-inabox:hello world', '*');
+    this.win_.addEventListener('message', event => {
+      dev().info(TAG, event.data);
+    });
+
+    this.win_.top./*OK*/postMessage('amp-' + JSON.stringify({
+      type: 'send-positions',
+      sentinel: '0-12345',
+    }), '*');
   }
 }
-

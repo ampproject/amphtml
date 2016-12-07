@@ -22,6 +22,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   adopt,
@@ -33,8 +34,13 @@ import {
 import {cssText} from '../build/css';
 import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {installExtensionsService} from '../src/service/extensions-impl';
+import {
+  installBuiltinElements,
+  installExtensionsService,
+  registerExtension,
+} from '../src/service/extensions-impl';
 import {resetScheduledElementForTesting} from '../src/custom-element';
+import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -181,7 +187,7 @@ function describeEnv(factory) {
 
       afterEach(() => {
         // Tear down all fixtures.
-        fixtures.forEach(fixture => {
+        fixtures.slice(0).reverse().forEach(fixture => {
           fixture.teardown(env);
         });
 
@@ -410,15 +416,15 @@ class AmpFixture {
     link.setAttribute('href', spec.canonicalUrl || window.location.href);
     win.document.head.appendChild(link);
 
-    win.ampExtendedElements = {};
     if (!spec.runtimeOn) {
       win.name = '__AMP__off=1';
     }
     const ampdocType = spec.ampdoc || 'single';
-    const singleDoc = ampdocType == 'single';
+    const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     const ampdocService = installDocService(win, singleDoc);
     env.ampdocService  = ampdocService;
     env.extensions = installExtensionsService(win);
+    installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
       win.services.vsync.obj.runScheduledTasks_();
@@ -435,17 +441,18 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
+    const extensionIds = [];
     if (spec.extensions) {
       spec.extensions.forEach(extensionIdWithVersion => {
         const tuple = extensionIdWithVersion.split(':');
         const extensionId = tuple[0];
+        extensionIds.push(extensionId);
         // Default to 0.1 if no version was provided.
         const version = tuple[1] || '0.1';
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
-          installer(win.AMP);
+          registerExtension(env.extensions, extensionId, installer, win.AMP);
         } else {
-          resetScheduledElementForTesting(win, extensionId);
           registerElementForTesting(win, extensionId);
         }
       });
@@ -459,12 +466,47 @@ class AmpFixture {
      */
     env.createAmpElement = createAmpElement.bind(null, win);
 
+    // Friendly embed setup.
+    if (ampdocType == 'fie') {
+      const container = win.document.createElement('div');
+      const embedIframe = win.document.createElement('iframe');
+      container.appendChild(embedIframe);
+      embedIframe.setAttribute('frameborder', '0');
+      embedIframe.setAttribute('allowfullscreen', '');
+      embedIframe.setAttribute('scrolling', 'no');
+      setStyles(embedIframe, {
+        width: '300px',
+        height: '150px',
+      });
+      win.document.body.appendChild(container);
+      const html = '<!doctype html>'
+          + '<html amp4ads>'
+          + '<head></head>'
+          + '<body></body>'
+          + '</html>';
+      const promise = installFriendlyIframeEmbed(
+          embedIframe, container, {
+            url: 'http://ads.localhost:8000/example',
+            html,
+            extensionIds,
+          }).then(embed => {
+            env.embed = embed;
+            env.parentWin = env.win;
+            env.win = embed.win;
+          });
+      completePromise = completePromise ?
+          completePromise.then(() => promise) : promise;
+    }
+
     return completePromise;
   }
 
   /** @override */
   teardown(env) {
     const win = env.win;
+    if (env.embed) {
+      env.embed.destroy();
+    }
     if (win.customElements && win.customElements.elements) {
       for (const k in win.customElements.elements) {
         resetScheduledElementForTesting(win, k);

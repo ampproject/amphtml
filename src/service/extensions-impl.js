@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
+  stubElementInChildWindow,
+  upgradeElementInChildWindow,
 } from '../custom-element';
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import {fromClass, setParentWindow} from '../service';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {install as installDocContains} from '../polyfills/document-contains';
@@ -385,23 +387,42 @@ export class Extensions {
       opt_preinstallCallback(childWin);
     }
 
-    // Install built-ins.
-    copyBuiltinElementsToChildWindow(childWin);
+    // Adopt embeddable services.
+    adoptServicesForEmbed(childWin);
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
 
     const promises = [];
     extensionIds.forEach(extensionId => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
-      copyElementToChildWindow(childWin, extensionId);
+      stubElementInChildWindow(childWin, extensionId);
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
+        // TODO(dvoytenko): Adopt embeddable services from the extension when
+        // becomes necessary. This will require refactoring of extension
+        // loader that can be resolved via the parent ampdoc.
+
+        // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
         if (elementDef && elementDef.css) {
-          installStyles(childWin.document, elementDef.css, () => {},
-              /* isRuntime */ false, extensionId);
+          return new Promise(resolve => {
+            installStyles(
+                childWin.document,
+                /** @type {string} */ (elementDef.css),
+                /* completeCallback */ resolve,
+                /* isRuntime */ false,
+                extensionId);
+          });
         }
+      }).then(() => {
+        // Notice that stubbing happens much sooner above
+        // (see stubElementInChildWindow).
+        upgradeElementInChildWindow(topWin, childWin, extensionId);
       });
       promises.push(promise);
     });
@@ -610,15 +631,27 @@ export function installBuiltinElements(win) {
   installVideo(win);
 }
 
+
 /**
  * Copy builtins to a child window.
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function copyBuiltinElementsToChildWindow(childWin) {
-  copyElementToChildWindow(childWin, 'amp-img');
-  copyElementToChildWindow(childWin, 'amp-pixel');
-  copyElementToChildWindow(childWin, 'amp-video');
+function copyBuiltinElementsToChildWindow(parentWin, childWin) {
+  copyElementToChildWindow(parentWin, childWin, 'amp-img');
+  copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
+  copyElementToChildWindow(parentWin, childWin, 'amp-video');
 }
+
+
+/**
+ * @param {!Window} win
+ */
+export function stubLegacyElements(win) {
+  stubElementIfNotKnown(win, 'amp-ad');
+  stubElementIfNotKnown(win, 'amp-embed');
+}
+
 
 /**
  * Install polyfills in the child window (friendly iframe).
@@ -628,4 +661,17 @@ function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
   installCustomElements(childWin);
+}
+
+
+/**
+ * Adopt predefined core services for the child window (friendly iframe).
+ * @param {!Window} childWin
+ */
+function adoptServicesForEmbed(childWin) {
+  // The order of service adoptations is important.
+  // TODO(dvoytenko): Refactor service registration if this set becomes
+  // to pass the "embeddable" flag if this set becomes too unwieldy.
+  adoptServiceForEmbed(childWin, 'action');
+  adoptServiceForEmbed(childWin, 'standard-actions');
 }
