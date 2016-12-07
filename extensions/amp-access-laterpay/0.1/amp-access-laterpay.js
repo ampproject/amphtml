@@ -38,6 +38,7 @@ const DEFAULT_MESSAGES = {
   ppuButton: 'Buy Now, Pay Later',
   sisButton: 'Buy Now',
   defaultButton: 'Buy Now',
+  alreadyPurchasedLink: 'I already bought this',
 };
 
 /**
@@ -98,9 +99,11 @@ export class LaterpayVendor {
     /** @private @const {!PurchaseConfig} */
     this.purchaseConfig_ = null;
 
-    /** @private @const {?Event} */
+    /** @private @const {?Function} */
     this.purchaseButtonListener_ = null;
 
+    /** @private @const {?Function} */
+    this.alreadyPurchasedListener_ = null;
     /** @private @const {!Array<Event>} */
     this.purchaseOptionListeners_ = [];
 
@@ -208,7 +211,7 @@ export class LaterpayVendor {
    * @private
    */
   getContainer_() {
-    return this.doc_.querySelector('amp-access-laterpay-list');
+    return this.doc_.querySelector(TAG + '-list');
   }
 
   /**
@@ -226,6 +229,9 @@ export class LaterpayVendor {
     }
     if (this.purchaseButtonListener_) {
       this.purchaseButtonListener_();
+    }
+    if (this.alreadyPurchasedListener_) {
+      this.alreadyPurchasedListener_();
     }
     return this.vsync_.mutatePromise(() => {
       this.containerEmpty_ = true;
@@ -252,13 +258,17 @@ export class LaterpayVendor {
       );
     });
     const purchaseButton = this.doc_.createElement('button');
+    purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_.defaultButton;
     purchaseButton.disabled = true;
     this.purchaseButton_ = purchaseButton;
-    this.purchaseButtonListener_ = listen(
-      purchaseButton, 'click', this.handlePurchase_.bind(this));
+    this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
+      this.handlePurchase_(ev, this.selectedPurchaseOption_.value);
+    });
     laterpayList.appendChild(listContainer);
     laterpayList.appendChild(purchaseButton);
+    laterpayList.appendChild(
+      this.createAlreadyPurchasedLink_(this.purchaseConfig_.apl));
     this.containerEmpty_ = false;
   }
 
@@ -273,14 +283,17 @@ export class LaterpayVendor {
     const control = this.doc_.createElement('label');
     control.for = option.tp_title;
     control.appendChild(this.createRadioControl_(option, purchaseActionLabel));
-    const titleContainer = this.doc_.createElement('div');
+    const metadataContainer = this.doc_.createElement('div');
+    metadataContainer.className = TAG + '-metadata';
     const title = this.doc_.createElement('span');
+    title.className = TAG + '-title';
     title.textContent = option.tp_title;
-    titleContainer.appendChild(title);
+    metadataContainer.appendChild(title);
     const description = this.doc_.createElement('p');
+    description.className = TAG + '-description';
     description.textContent = option.description;
-    titleContainer.appendChild(description);
-    control.appendChild(titleContainer);
+    metadataContainer.appendChild(description);
+    control.appendChild(metadataContainer);
     li.appendChild(control);
     li.appendChild(this.createPrice_(option.price));
     return li;
@@ -314,10 +327,13 @@ export class LaterpayVendor {
     const currency = Object.keys(price)[0];
     const formattedPrice = this.formatPrice_(price[currency]);
     const valueEl = this.doc_.createElement('span');
+    valueEl.className = TAG + '-price';
     valueEl.textContent = formattedPrice;
     const currencyEl = this.doc_.createElement('sup');
+    currencyEl.className = TAG + '-currency';
     currencyEl.textContent = currency;
     const priceEl = this.doc_.createElement('p');
+    priceEl.className = TAG + '-price-container';
     priceEl.appendChild(valueEl);
     priceEl.appendChild(currencyEl);
     return priceEl;
@@ -335,6 +351,23 @@ export class LaterpayVendor {
       minimumFractionDigits: 0,
     };
     return value.toLocaleString(this.currentLocale_, props);
+  }
+
+  /**
+   * @param {!string} href
+   * @returns {!Node}
+  */
+  createAlreadyPurchasedLink_(href) {
+    const p = this.doc_.createElement('p');
+    p.className = TAG + '-already-purchased-container';
+    const a = this.doc_.createElement('a');
+    a.href = href;
+    a.textContent = this.i18n_.alreadyPurchasedLink;
+    this.alreadyPurchasedListener_ = listen(a, 'click', ev => {
+      this.handlePurchase_(ev, href);
+    });
+    p.appendChild(a);
+    return p;
   }
 
   /**
@@ -359,11 +392,21 @@ export class LaterpayVendor {
   }
 
   /**
+   * @param {!Event} ev
    * @private
    */
-  handlePurchase_() {
-    const purchaseUrl = this.selectedPurchaseOption_.value;
-    this.accessService_.loginWithUrl(purchaseUrl);
+  handlePurchase_(ev, purchaseUrl) {
+    ev.preventDefault();
+    const configuredUrl = purchaseUrl +
+                '?return_url=RETURN_URL' +
+                '&article_url=SOURCE_URL' +
+                '&amp_reader_id=READER_ID';
+    const urlPromise = this.accessService_.buildUrl_(
+      configuredUrl, /* useAuthData */ false);
+    return urlPromise.then(url => {
+      dev().fine(TAG, 'Authorization URL: ', url);
+      this.accessService_.loginWithUrl(url);
+    });
   }
 }
 
