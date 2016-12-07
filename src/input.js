@@ -162,7 +162,7 @@ export class Input {
     if (opt_fireImmediately) {
       handler(this.isKeyboardActive());
     }
-    if (this.keyboardStateObservable_) {
+    if (!this.keyboardStateObservable_) {
       this.keyboardStateObservable_ = new Observable();
     }
     return this.keyboardStateObservable_.add(handler);

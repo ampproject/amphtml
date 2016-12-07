@@ -91,6 +91,9 @@ export class FocusHistory {
       this.history_[this.history_.length - 1].time = now;
     }
     this.purgeBefore(now - this.purgeTimeout_);
+    if (!this.observeFocus_) {
+      this.observeFocus_ = new Observable();
+    }
     this.observeFocus_.fire(element);
   }
 

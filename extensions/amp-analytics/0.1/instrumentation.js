@@ -316,6 +316,9 @@ export class InstrumentationService {
    * @private
    */
   onClick_(e) {
+    if (!this.clickObservable_) {
+      this.clickObservable_ = new Observable();
+    }
     this.clickObservable_.fire(e);
   }
 
@@ -324,6 +327,9 @@ export class InstrumentationService {
    * @private
    */
   onScroll_(e) {
+    if (!this.scrollObservable_) {
+      this.scrollObservable_ = new Observable();
+    }
     this.scrollObservable_.fire(e);
   }
 
