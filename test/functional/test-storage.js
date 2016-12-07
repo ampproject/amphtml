@@ -543,7 +543,7 @@ describe('ViewerStorageBinding', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     viewer = {
-      sendMessage: () => {},
+      sendMessageAwaitResponse: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewerStorageBinding(viewer);
@@ -554,10 +554,10 @@ describe('ViewerStorageBinding', () => {
   });
 
   it('should load store from viewer', () => {
-    viewerMock.expects('sendMessage')
+    viewerMock.expects('sendMessageAwaitResponse')
         .withExactArgs('loadStore', sinon.match(arg => {
           return (arg['origin'] == 'https://acme.com');
-        }), true)
+        }))
         .returns(Promise.resolve({'blob': 'BLOB1'}))
         .once();
     return binding.loadBlob('https://acme.com').then(blob => {
@@ -566,10 +566,10 @@ describe('ViewerStorageBinding', () => {
   });
 
   it('should load default store when not yet available', () => {
-    viewerMock.expects('sendMessage')
+    viewerMock.expects('sendMessageAwaitResponse')
         .withExactArgs('loadStore', sinon.match(arg => {
           return (arg['origin'] == 'https://acme.com');
-        }), true)
+        }))
         .returns(Promise.resolve({}))
         .once();
     return binding.loadBlob('https://acme.com').then(blob => {
@@ -578,10 +578,10 @@ describe('ViewerStorageBinding', () => {
   });
 
   it('should reject on viewer failure', () => {
-    viewerMock.expects('sendMessage')
+    viewerMock.expects('sendMessageAwaitResponse')
         .withExactArgs('loadStore', sinon.match(arg => {
           return (arg['origin'] == 'https://acme.com');
-        }), true)
+        }))
         .returns(Promise.reject('unknown'))
         .once();
     return binding.loadBlob('https://acme.com')
@@ -591,19 +591,19 @@ describe('ViewerStorageBinding', () => {
   });
 
   it('should save store', () => {
-    viewerMock.expects('sendMessage')
+    viewerMock.expects('sendMessageAwaitResponse')
         .withExactArgs('saveStore', sinon.match(arg => {
           return (arg['origin'] == 'https://acme.com' &&
               arg['blob'] == 'BLOB1');
-        }), true)
+        }))
         .returns(Promise.resolve())
         .once();
     return binding.saveBlob('https://acme.com', 'BLOB1');
   });
 
   it('should reject on save store failure', () => {
-    viewerMock.expects('sendMessage')
-        .withExactArgs('saveStore', sinon.match(() => true), true)
+    viewerMock.expects('sendMessageAwaitResponse')
+        .withExactArgs('saveStore', sinon.match(() => true))
         .returns(Promise.reject('unknown'))
         .once();
     return binding.saveBlob('https://acme.com', 'BLOB1')

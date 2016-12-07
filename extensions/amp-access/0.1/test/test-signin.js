@@ -52,7 +52,7 @@ describe('SignInProtocol', () => {
         }
         return undefined;
       },
-      sendMessage: () => Promise.resolve({}),
+      sendMessageAwaitResponse: () => Promise.resolve({}),
     };
     viewerMock = sandbox.mock(viewer);
 
@@ -142,10 +142,10 @@ describe('SignInProtocol', () => {
     });
 
     it('should call viewer for access token', () => {
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('getAccessTokenPassive', {
             origin: ORIGIN,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.resolve('access token'))
           .once();
       return signin.getAccessTokenPassive().then(token => {
@@ -155,10 +155,10 @@ describe('SignInProtocol', () => {
     });
 
     it('should return null on viewer error for access token', () => {
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('getAccessTokenPassive', {
             origin: ORIGIN,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.getAccessTokenPassive().then(token => {
@@ -171,16 +171,16 @@ describe('SignInProtocol', () => {
     });
 
     it('should return null for post-login when no auth code in query', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       expect(signin.postLoginResult({})).to.be.null;
     });
 
     it('should call viewer for post-login with auth code', () => {
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
             authorizationCode: 'X',
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.resolve('access token X'))
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
@@ -195,11 +195,11 @@ describe('SignInProtocol', () => {
 
     it('should recorver from viewer error on post-login with auth code', () => {
       signin.updateAccessToken_('access token');
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
             authorizationCode: 'X',
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
@@ -214,11 +214,11 @@ describe('SignInProtocol', () => {
 
     it('should call viewer for request sign-in', () => {
       const loginUrl = 'https://acme.com/login';
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('requestSignIn', {
             origin: ORIGIN,
             url: loginUrl,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.resolve('access token X'))
           .once();
       return signin.requestSignIn(loginUrl).then(result => {
@@ -232,11 +232,11 @@ describe('SignInProtocol', () => {
 
     it('should fail on viewer error for request sign-in', () => {
       const loginUrl = 'https://acme.com/login';
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('requestSignIn', {
             origin: ORIGIN,
             url: loginUrl,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.requestSignIn(loginUrl).then(() => {
@@ -267,17 +267,17 @@ describe('SignInProtocol', () => {
     });
 
     it('should never call viewer for access token', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       signin.getAccessTokenPassive();
     });
 
     it('should return null for post-login', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       expect(signin.postLoginResult({'code': 'X'})).to.be.null;
     });
 
     it('should return null for request sign-in', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       expect(signin.requestSignIn('https://acme.com/login')).to.be.null;
     });
   });

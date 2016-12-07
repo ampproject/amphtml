@@ -890,10 +890,10 @@ describes.realWin('runtime multidoc', {
       const viewer = getServiceForDoc(ampdoc, 'viewer');
       const broadcastReceived = sandbox.spy();
       viewer.onBroadcast(broadcastReceived);
-      const onMessage = sandbox.spy();
+      const onMessage = sandbox.stub();
       amp.onMessage(function(eventType, data) {
         if (eventType == 'ignore' || eventType == 'documentLoaded') {
-          return undefined;
+          return Promise.resolve();
         }
         return onMessage(eventType, data);
       });
@@ -902,7 +902,7 @@ describes.realWin('runtime multidoc', {
 
     it('should broadcast to all but sender', () => {
       doc1.viewer.broadcast({test: 1});
-      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+      return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
         return timer.promise(0);
       }).then(() => {
         // Sender is not called.
@@ -924,7 +924,7 @@ describes.realWin('runtime multidoc', {
     it('should stop broadcasting after close', () => {
       doc3.amp.close();
       doc1.viewer.broadcast({test: 1});
-      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+      return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
         return timer.promise(0);
       }).then(() => {
         // Sender is not called, closed is not called.
@@ -940,7 +940,7 @@ describes.realWin('runtime multidoc', {
     it('should stop broadcasting after force-close', () => {
       doc3.hostElement.parentNode.removeChild(doc3.hostElement);
       doc1.viewer.broadcast({test: 1});
-      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+      return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
         return timer.promise(0);
       }).then(() => {
         // Sender is not called, closed is not called.
@@ -953,14 +953,17 @@ describes.realWin('runtime multidoc', {
       });
     });
 
+
     it('should send message', () => {
-      return doc1.viewer.sendMessage('test3', {test: 3}).then(() => {
-        return timer.promise(0);
-      }).then(() => {
-        expect(doc1.onMessage).to.be.calledOnce;
-        expect(doc1.onMessage.args[0][0]).to.equal('test3');
-        expect(doc1.onMessage.args[0][1]).to.deep.equal({test: 3});
-      });
+      doc1.onMessage.returns(Promise.resolve());
+      return doc1.viewer.sendMessageAwaitResponse('test3', {test: 3}).then(
+          () => {
+            return timer.promise(0);
+          }).then(() => {
+            expect(doc1.onMessage).to.be.calledOnce;
+            expect(doc1.onMessage.args[0][0]).to.equal('test3');
+            expect(doc1.onMessage.args[0][1]).to.deep.equal({test: 3});
+          });
     });
 
     it('should receive message', () => {
