@@ -215,6 +215,12 @@ export function getErrorReportUrl(message, filename, line, col, error,
       // This should never be a string, but sometimes it is.
       message = String(error);
     }
+    // An "expected" error is still an error, i.e. some features are disabled
+    // or not functioning fully because of it. However, it's an expected
+    // error. E.g. as is the case with some browser API missing (storage).
+    // Thus, the error can be classified differently by log aggregators.
+    // The main goal is to monitor that an "expected" error doesn't deteriorate
+    // over time. It's impossible to completely eliminate it.
     if (error.expected) {
       expected = true;
     }
@@ -249,6 +255,8 @@ export function getErrorReportUrl(message, filename, line, col, error,
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);
   if (expected) {
+    // Errors are tagged with "ex" ("expected") label to allow loggers to
+    // classify these errors as benchmarks and not exceptions.
     url += '&ex=1';
   }
   if (self.context && self.context.location) {
