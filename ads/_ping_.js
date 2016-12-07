@@ -22,7 +22,7 @@ import {dev} from '../src/log';
  */
 export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
-  if (!data.nativeIo) {
+  if (!data.nativeIntersectionObserver) {
     const nullIO = () => {};
     nullIO.prototype = null;
     global.IntersectionObserver = nullIO;
@@ -52,9 +52,6 @@ export function _ping_(global, data) {
       global.context.renderStart();
     }
     const unlisten = global.context.observeIntersection(function(changes) {
-      if (!data.nativeIo) {
-        return;
-      }
       changes.forEach(function(c) {
         dev().info('AMP-AD', 'Intersection: (WxH)' +
             `${c.intersectionRect.width}x${c.intersectionRect.height}`);
@@ -63,7 +60,7 @@ export function _ping_(global, data) {
     if (data.unlistenIo) {
       global.setTimeout(() => {
         unlisten();
-      }, 1000);
+      }, Number(data.unlistenIo));
     }
   } else {
     global.context.noContentAvailable();

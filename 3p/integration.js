@@ -439,8 +439,7 @@ function observeIntersection(observerCallback) {
       threshold: DEFAULT_THRESHOLD,
     });
     io.observe(window.document.documentElement);
-    const unlistener = () => io.unobserve(window.document.documentElement);
-    return unlistener;
+    return () => io.unobserve(window.document.documentElement);
   }
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
