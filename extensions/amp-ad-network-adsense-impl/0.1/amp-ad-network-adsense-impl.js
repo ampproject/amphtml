@@ -50,6 +50,23 @@ const visibilityStateCodes = {
   'unloaded': '5',
 };
 
+/**
+ * Shared state for AdSense ad slots. This is used primarily for ad request url
+ * parameters that depend on previous slots.
+ * @const {!Object}
+ */
+const sharedState = {
+  /*
+   * Comma separated list of previous slot formats.
+   */
+  prevFmts: '',
+  /*
+   * Page view. Further subdivided by ad client: maps client id to pv value.
+   * @const {!Object<string, number>}
+   */
+  pv: {},
+};
+
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
@@ -75,6 +92,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   getAdUrl() {
     const startTime = Date.now();
     const global = this.win;
+    const adClientId = this.element.getAttribute('data-ad-client');
     const slotId = this.element.getAttribute('data-amp-slot-index');
     const slotIdNumber = Number(slotId);
     const correlator = getCorrelator(this.win, slotId);
@@ -84,8 +102,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
-    return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotIdNumber, [
-      {name: 'client', value: this.element.getAttribute('data-ad-client')},
+    const prevFmts = sharedState['prevFmts'];
+
+    // Update shared state.
+    sharedState['prevFmts'] +=
+        (sharedState['prevFmts'] ? ',' : '') + format;
+    if (typeof sharedState['pv'][adClientId] === 'undefined') {
+      sharedState['pv'][adClientId] = 2;
+    } else {
+      sharedState['pv'][adClientId] = 1;
+    }
+
+    const paramList = [
+      {name: 'client', value: adClientId},
       {name: 'format', value: format},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
@@ -102,6 +131,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
+      {name: 'pv', value: sharedState['pv'][adClientId]},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
       {name: 'u_aw', value: screen ? screen.availWidth : null},
       {name: 'u_cd', value: screen ? screen.colorDepth : null},
@@ -110,7 +140,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'u_w', value: screen ? screen.width : null},
       {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
-    ], []);
+    ];
+
+    if (prevFmts) {
+      paramList.push({name: 'prev_fmts', value: prevFmts});
+    }
+
+    return googleAdUrl(
+        this, ADSENSE_BASE_URL, startTime, slotIdNumber, paramList, []);
   }
 
   /** @override */
