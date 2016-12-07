@@ -136,10 +136,6 @@ class AmpStickyAd extends AMP.BaseElement {
       this.deferMutate(() => {
         this.visible_ = true;
         this.viewport_.addToFixedLayer(this.element);
-        // Add border-bottom to the body to compensate space that was taken
-        // by sticky ad, so no content would be blocked by sticky ad unit.
-        const borderBottom = this.element./*OK*/offsetHeight;
-        this.viewport_.updatePaddingBottom(borderBottom);
         this.addCloseButton_();
         this.scheduleLayoutForAd_();
       });
@@ -173,6 +169,10 @@ class AmpStickyAd extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
+        // Add border-bottom to the body to compensate space that was taken
+        // by sticky ad, so no content would be blocked by sticky ad unit.
+        const borderBottom = this.element./*OK*/offsetHeight;
+        this.viewport_.updatePaddingBottom(borderBottom);
         this.forceOpacity_();
       });
     });
