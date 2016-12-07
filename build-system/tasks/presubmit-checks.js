@@ -274,11 +274,13 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/signin.js',
     ],
   },
-  'sendMessageCancelUnsent': {
+  'sendMessageAwaitResponse': {
     message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
-      'src/service/performance-impl.js',
+      'src/service/storage-impl.js',
+      'extensions/amp-access/0.1/login-dialog.js',
+      'extensions/amp-access/0.1/signin.js',
     ],
   },
   // Privacy sensitive

@@ -447,7 +447,7 @@ export class Viewer {
       this.sendMessage('a2a', {
         url,
         requestedBy,
-      }, /* awaitResponse */ false);
+      });
     } else {
       this.win.top.location.href = url;
     }
@@ -734,11 +734,12 @@ export class Viewer {
    * TODO: move this to resources-impl, and use sendMessage()
    */
   postDocumentReady() {
-    this.sendMessageCancelUnsent('documentLoaded', {
+    this.sendMessage('documentLoaded', {
       title: this.win.document.title,
       sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-    }, false);
+    }, /* cancelUnsent */true);
   }
+
 
   /**
    * Triggers "scroll" event for the viewer.
@@ -746,8 +747,8 @@ export class Viewer {
    * TODO: move this to viewport-impl
    */
   postScroll(scrollTop) {
-    this.sendMessageCancelUnsent(
-        'scroll', {scrollTop}, false);
+    this.sendMessage(
+        'scroll', {scrollTop}, /* cancelUnsent */true);
   }
 
   /**
@@ -758,7 +759,8 @@ export class Viewer {
    */
   requestFullOverlay() {
     return /** @type {!Promise} */ (
-        this.sendMessageCancelUnsent('requestFullOverlay', {}, true));
+        this.sendMessageAwaitResponse('requestFullOverlay', {},
+            /* cancelUnsent */true));
   }
 
   /**
@@ -769,29 +771,30 @@ export class Viewer {
    */
   cancelFullOverlay() {
     return /** @type {!Promise} */ (
-        this.sendMessageCancelUnsent('cancelFullOverlay', {}, true));
+        this.sendMessageAwaitResponse('cancelFullOverlay', {},
+            /* cancelUnsent */true));
   }
 
   /**
    * Triggers "pushHistory" event for the viewer.
    * @param {number} stackIndex
    * @return {!Promise}
-   * TODO: move this to history-impl and use sendMessage()
+   * TODO: move this to history-impl
    */
   postPushHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
-        'pushHistory', {stackIndex}, true));
+    return /** @type {!Promise} */ (this.sendMessageAwaitResponse(
+        'pushHistory', {stackIndex}));
   }
 
   /**
    * Triggers "popHistory" event for the viewer.
    * @param {number} stackIndex
    * @return {!Promise}
-   * TODO: move this to history-impl and use sendMessage()
+   * TODO: move this to history-impl
    */
   postPopHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
-        'popHistory', {stackIndex}, true));
+    return /** @type {!Promise} */ (this.sendMessageAwaitResponse(
+        'popHistory', {stackIndex}));
   }
 
   /**
@@ -805,7 +808,7 @@ export class Viewer {
       if (!trusted) {
         return undefined;
       }
-      const cidPromise = this.sendMessage('cid', opt_data, true)
+      const cidPromise = this.sendMessageAwaitResponse('cid', opt_data)
           .then(data => {
             // For backward compatibility: #4029
             if (data && !tryParseJson(data)) {
@@ -843,7 +846,8 @@ export class Viewer {
     if (!this.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.sendMessageCancelUnsent('fragment', undefined, true).then(
+    return this.sendMessageAwaitResponse('fragment', undefined,
+        /* cancelUnsent */true).then(
         hash => {
           if (!hash) {
             return '';
@@ -861,7 +865,7 @@ export class Viewer {
    * The fragment variable should contain leading '#'
    * @param {string} fragment
    * @return {!Promise}
-   * TODO: move this to history-impl, and use sendMessage()
+   * TODO: move this to history-impl
    */
   updateFragment(fragment) {
     dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
@@ -875,8 +879,8 @@ export class Viewer {
     if (!this.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (this.sendMessageCancelUnsent(
-        'fragment', {fragment}, true));
+    return /** @type {!Promise} */ (this.sendMessageAwaitResponse(
+        'fragment', {fragment}, /* cancelUnsent */true));
   }
 
   /**
@@ -963,44 +967,63 @@ export class Viewer {
   }
 
   /**
-   * Sends the message to the viewer. This method will wait for the messaging
-   * channel to be established. If the messaging channel times out, the
-   * promise will fail.
+   * Sends the message to the viewer without waiting for any response.
+   * If cancelUnsent is true, the previous message of the same message type will
+   * be canceled.
    *
    * This is a restricted API.
    *
    * @param {string} eventType
    * @param {*} data
-   * @param {boolean} awaitResponse
-   * @return {!Promise<*>|undefined} the response promise if awaitResponse is
-   *     true, otherwise undefined
+   * @param {boolean=} cancelUnsent
    */
-  sendMessage(eventType, data, awaitResponse) {
-    if (!this.messagingReadyPromise_) {
-      return Promise.reject(getChannelError());
-    }
-    return this.messagingReadyPromise_.then(() => {
-      return this.messageDeliverer_(eventType, data, awaitResponse);
-    });
+  sendMessage(eventType, data, cancelUnsent = false) {
+    this.sendMessageInternal_(eventType, data, cancelUnsent, false);
   }
 
   /**
-   * Sends the message to the viewer. This method queues up the message if the
-   * communication channel isn't established yet. The message will cancel an
-   * unsent message of the same type if seen in the queue.
+   * Sends the message to the viewer and wait for response.
+   * If cancelUnsent is true, the previous message of the same message type will
+   * be canceled.
+   *
+   * This is a restricted API.
    *
    * @param {string} eventType
    * @param {*} data
-   * @param {boolean} awaitResponse
-   * @return {?Promise<*>|undefined} the response promise if awaitResponse is
-   *     true, otherwise undefined
+   * @param {boolean=} cancelUnsent
+   * @return {!Promise<*>} the response promise
    */
-  sendMessageCancelUnsent(eventType, data, awaitResponse) {
+  sendMessageAwaitResponse(eventType, data, cancelUnsent = false) {
+    return this.sendMessageInternal_(eventType, data, cancelUnsent, true);
+  }
+
+  /**
+   * Sends the message to the viewer.
+   *
+   * @param {string} eventType
+   * @param {*} data
+   * @param {boolean} cancelUnsent
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>} the response promise
+   */
+  sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
     if (this.messageDeliverer_) {
-      return this.messageDeliverer_(eventType, data, awaitResponse);
+      return /** @type {!Promise<*>} */ (this.messageDeliverer_(
+          eventType, data, awaitResponse));
     }
 
-    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
+    if (!this.messagingReadyPromise_) {
+      return Promise.reject(getChannelError());
+    }
+
+    if (!cancelUnsent) {
+      return this.messagingReadyPromise_.then(() => {
+        return this.messageDeliverer_(eventType, data, awaitResponse);
+      });
+    }
+
+    const found = findIndex(this.messageQueue_,
+        m => m.eventType == eventType);
 
     let message;
     if (found != -1) {
@@ -1021,7 +1044,7 @@ export class Viewer {
       };
     }
     this.messageQueue_.push(message);
-    return awaitResponse ? message.responsePromise : undefined;
+    return message.responsePromise;
   }
 
   /**
@@ -1036,11 +1059,8 @@ export class Viewer {
       // Messaging is not expected.
       return;
     }
-    this.messagingMaybePromise_.then(() => {
-      if (this.messageDeliverer_) {
-        this.messageDeliverer_('broadcast', message, false);
-      }
-    });
+
+    this.sendMessage('broadcast', message);
   }
 
   /**
