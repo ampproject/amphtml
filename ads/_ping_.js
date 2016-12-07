@@ -25,8 +25,6 @@ export function _ping_(global, data) {
   if (!data.nativeIntersectionObserver) {
     function nullIO() {};
     nullIO.prototype = Object.create(null);
-    // const nullIO = () => {};
-    // nullIO.prototype = null;
     global.IntersectionObserver = nullIO;
   }
   if (data.ad_container) {
