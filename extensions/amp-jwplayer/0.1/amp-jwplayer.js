@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -85,6 +86,22 @@ class AmpJWPlayer extends AMP.BaseElement {
       this.iframe_.contentWindow./*OK*/postMessage('pause',
         'https://content.jwplatform.com');
     }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    // TODO(aghassemi, #6483): Temporarily unlayout on pause until JWPlayer
+    // fixes the "pause" behaviour as described in bug #6483.
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
