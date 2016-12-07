@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {utf8Decode} from '../../../src/utils/bytes';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
+import {resolveRelativeUrl} from '../../../src/url';
+import {utf8Decode} from '../../../src/utils/bytes';
+
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
 
@@ -42,8 +44,9 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return '/extensions/amp-ad-network-fake-impl/0.1/data/' +
-        this.element.getAttribute('src');
+    return resolveRelativeUrl(
+        this.element.getAttribute('src'),
+        '/extensions/amp-ad-network-fake-impl/0.1/data/');
   }
 
   /** @override */
