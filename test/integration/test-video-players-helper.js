@@ -153,7 +153,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     })
     .then(() => {
       const video = createVideoElementFunc(fixture);
-      video.setAttribute('autoplay', '');
+      video.setAttribute('autoplay', true);
       video.setAttribute('controls', '');
       video.setAttribute('layout', 'fixed');
       video.setAttribute('width', '100');

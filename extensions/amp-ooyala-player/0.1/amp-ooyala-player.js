@@ -20,6 +20,7 @@ import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
+import {videoManagerForDoc} from '../../../src/video-manager';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -49,14 +50,26 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
+  buildCallback() {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
 
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
+
+    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
+    this.applyFillContent(iframe, true);
+    this.element.appendChild(iframe);
+
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+
+    videoManagerForDoc(this.win.document).register(this);
+  }
+  
+  /** @override */
+  layoutCallback() {
     const embedCode = user().assert(
       this.element.getAttribute('data-embedcode'),
       'The data-embedcode attribute is required for <amp-ooyala-player> %s',
@@ -75,7 +88,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const playerVersion = this.element.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
       src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
-        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(pCode);
+        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(pCode);      
       const configUrl = this.element.getAttribute('data-config');
       if (configUrl) {
         src += '&options[skin.config]=' + encodeURIComponent(configUrl);
@@ -87,20 +100,18 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     if (autoplay) {
       src += '&autoplay=true';
     }
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
-    this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
+    this.iframe_.src = src;
 
     window.addEventListener('message', event => this.handleOoyalaMessages_(event));
 
-    return this.loadPromise(iframe).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      this.playerReadyResolver_(this.iframe_);
-    }).then(() => {
-      this.playerReadyPromise_;
-    });
+    return this.loadPromise(this.iframe_)
+      .then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        this.playerReadyResolver_(this.iframe_);
+      })
+      .then(() => {
+        this.playerReadyPromise_;
+      });
   }
 
   /** @override */
@@ -120,13 +131,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   viewportCallback(visible) {
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-    if (this.playerReadyPromise_) {
-      if (visible) {
-        this.play();
-      } else {
-        this.pause();
-      }
-    }
   }
 
   /** @override */
@@ -145,13 +149,13 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data == "playing") {
+    if (data.data == "playing") {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data == "paused") {
+    } else if (data.data == "paused") {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data == "muted") {
+    } else if (data.data == "muted") {
       this.element.dispatchCustomEvent("mute");
-    } else if (data == "unmuted") {
+    } else if (data.data == "unmuted") {
       this.element.dispatchCustomEvent("unmute");
     }
   }
