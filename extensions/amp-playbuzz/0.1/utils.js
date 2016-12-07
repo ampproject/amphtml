@@ -35,6 +35,14 @@ export function debounce(func, wait, immediate) {
   };
 };
 
+
+/**
+ *
+ * Gets an element creator using a given document to create elements.
+ * @export getElementCreator
+ * @param {!Document} document
+ * @returns {!Element}
+ */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {
     const element = document.createElement(name);
@@ -49,12 +57,20 @@ function appendChildren(element, children) {
   children.forEach(child => element.appendChild(child));
 };
 
-export function handleMessageByName(element, event, messageName, handler) {
-  const originWindow = element.ownerDocument.defaultView;
-  const senderWindow = event.source.parent;
-  const isPlaybuzzItemEvent = originWindow === senderWindow;
 
-  if (isPlaybuzzItemEvent) {
+/**
+ * Handles a message from element by a given message name
+ *
+ * @export {function} handleMessageByName
+ * @param {!Element} element
+ * @param {!Event} event
+ * @param {string} messageName
+ * @param {function} handler
+ */
+export function handleMessageByName(element, event, messageName, handler) {
+  const isMessageFromElement = element.contentWindow === event.source;
+
+  if (isMessageFromElement) {
     handlePlaybuzzItemEvent(event, messageName, handler);
   }
 }
@@ -71,6 +87,13 @@ function handlePlaybuzzItemEvent(event, eventName, handler) {
   }
 }
 
+
+/**
+ * Parses Playbuzz Event Data
+ *
+ * @param {String|Object} data
+ * @returns {Object} parsedObject
+ */
 function parsePlaybuzzEventData(data) {
   if (typeof data === 'object') {
     return data;
@@ -90,6 +113,12 @@ function parsePlaybuzzEventData(data) {
   return {};
 }
 
+
+/**
+ * @export {function} composeEmbedUrl
+ * @param {Object} options
+ * @returns {string} playbuzzEmbedUrl
+ */
 export function composeEmbedUrl(options) {
   const embedUrl = options.itemUrl + '?' + serializeQueryString({
     feed: true,

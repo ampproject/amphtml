@@ -129,6 +129,13 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return placeholder;
   }
 
+
+  /**
+   *
+   * Returns the overflow element
+   * @returns {!Element} overflowElement
+   *
+   */
   getOverflowElement_() {
     const createElement = utils.getElementCreator(this.element.ownerDocument);
 
@@ -158,7 +165,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.src = this.generateEmbedSourceUrl_();
 
     this.listenToPlaybuzzItemMessage_('resize_height',
-      this.itemHeightChanged_.bind(this));
+      utils.debounce(this.itemHeightChanged_.bind(this), 100));
 
     this.element.appendChild(this.getOverflowElement_());
 
@@ -207,6 +214,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
     }
 
     this.itemHeight_ = height; //Save new height
+
+    this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */});
   }
 
 
@@ -221,12 +230,18 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.unlisteners_.push(unlisten);
   }
 
+  /**
+   *
+   * Returns the composed embed source url
+   * @returns {string} url
+   *
+   */
   generateEmbedSourceUrl_() {
     const itemSrc = parseUrl(this.item_);
     const winUrl = this.win.location;
     const params = {
       itemUrl: removeFragment(itemSrc.href).replace(itemSrc.protocol, ''), //remove scheme (cors) & fragment
-      relativeUrl: itemSrc.pathname, //params.itemUrl.split('.playbuzz.com')[1];
+      relativeUrl: itemSrc.pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
