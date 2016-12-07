@@ -1012,7 +1012,8 @@ export class Viewer {
           eventType, data, awaitResponse));
     }
 
-    if (!this.messagingReadyPromise_) {
+    if (awaitResponse // Only throw when caller is waiting for response.
+        && !this.messagingReadyPromise_) {
       return Promise.reject(getChannelError());
     }
 
