@@ -417,26 +417,11 @@ self.addEventListener('fetch', event => {
   event.respondWith(response);
 });
 
-
-// Polyfill clientId into Foreign Fetch Events. This will generate a likely
-// unique id based on the request's referrer and a 60 batch timer.
-// Ugh, sometimes Closure Compiler kills me.
-const FFE = self['ForeignFetchEvent'];
-if (FFE) {
-  const hasOwn = Object.prototype.hasOwnProperty;
-  if (!hasOwn.call(FFE.prototype, 'clientId')) {
-    Object.defineProperty(FFE.prototype, 'clientId', {
-      get() {
-        return generateFallbackClientId(this.request.referrer);
-      },
-    });
-  }
-}
-
 // Setup the Foreign Fetch listener, for when the client is on a Publisher
 // origin.
 self.addEventListener('foreignfetch', event => {
-  const response = handleFetch(event.request, event.clientId);
+  const response = handleFetch(event.request,
+      (event.clientId || generateFallbackClientId(event.request.referrer)));
 
   // We only get a response promise back if it's a request we care to cache.
   if (!response) {
