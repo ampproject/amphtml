@@ -68,7 +68,7 @@ export class InaboxMessagingHost {
       this.registeredIframeSentinels_[request.sentinel] = true;
       this.positionObserver_.observe(iframe, data => {
         message.source./*OK*/postMessage(
-            serializeMessage(MessageType.POSITION, request.sentinel, {data}),
+            serializeMessage(MessageType.POSITION, request.sentinel, data),
             message.origin);
       });
       return true;

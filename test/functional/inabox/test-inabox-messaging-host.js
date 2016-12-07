@@ -119,7 +119,7 @@ describes.realWin('inabox-host:position-observer', {}, env => {
       expect(target).to.equal(iframe1);
       callback({x: 1});
       expect(postMessageSpy).to.be.calledWith(
-          'amp-{"type":"position","sentinel":"0-123","data":{"x":1}}',
+          'amp-{"type":"position","sentinel":"0-123","x":1}',
           'www.example.com');
     });
 
