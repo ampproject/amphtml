@@ -41,7 +41,8 @@ describes.realWin('iframe-messaging-client', {}, env => {
         sentinel: 'sentinel-123',
       });
 
-      postAmpMessage({type: 'response-type', sentinel: 'sentinel-123'});
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
       expect(callbackSpy).to.be.calledOnce;
     });
   });
@@ -57,7 +58,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
         sentinel: 'sentinel-123',
         x: 1,
         y: 'abc',
-      });
+      }, hostWindow);
       expect(callbackSpy).to.be.calledWith({
         type: 'response-type',
         sentinel: 'sentinel-123',
@@ -71,7 +72,8 @@ describes.realWin('iframe-messaging-client', {}, env => {
       const callbackSpy = sandbox.spy();
       client.registerCallback('response-type', callbackSpy);
 
-      postAmpMessage({type: 'response-type-2', sentinel: 'sentinel-123'});
+      postAmpMessage(
+          {type: 'response-type-2', sentinel: 'sentinel-123'}, hostWindow);
       expect(callbackSpy).to.not.be.called;
     });
 
@@ -90,6 +92,36 @@ describes.realWin('iframe-messaging-client', {}, env => {
       });
       expect(callbackSpy).to.not.be.called;
     });
+
+    it('should not invoke callback on receiving a message ' +
+        'not from host window', () => {
+      const callbackSpy = sandbox.spy();
+      client.registerCallback('response-type', callbackSpy);
+      const randomWindow = {};
+
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, randomWindow);
+      expect(callbackSpy).to.not.be.called;
+    });
+
+    it('should not invoke callback on receiving a message ' +
+        'containing no sentinel', () => {
+      const callbackSpy = sandbox.spy();
+      client.registerCallback('response-type', callbackSpy);
+
+      postAmpMessage({type: 'response-type'}, hostWindow);
+      expect(callbackSpy).to.not.be.called;
+    });
+
+    it('should not invoke callback on receiving a message ' +
+        'containing wrong sentinel', () => {
+      const callbackSpy = sandbox.spy();
+      client.registerCallback('response-type', callbackSpy);
+
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123-1'}, hostWindow);
+      expect(callbackSpy).to.not.be.called;
+    });
   });
 
   describe('sendMessage', () => {
@@ -104,10 +136,10 @@ describes.realWin('iframe-messaging-client', {}, env => {
     });
   });
 
-  function postAmpMessage(data) {
+  function postAmpMessage(data, source) {
     win.eventListeners.fire({
       type: 'message',
-      source: hostWindow,
+      source,
       origin: 'http://www.example.com',
       data: 'amp-' + JSON.stringify(data),
     });
