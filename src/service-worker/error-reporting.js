@@ -40,7 +40,7 @@ self.addEventListener('error', event => {
  * @param {*} e
  */
 function report(e) {
-  if (!self.location.href.startsWith(urls.cdn)) {
+  if (urls.localhostRegex.test(self.location.origin)) {
     return;
   }
   if (!(e instanceof Error)) {
@@ -53,10 +53,10 @@ function report(e) {
       '&m=' + encodeURIComponent(e.message) +
       '&ca=' + (config.canary ? 1 : 0) +
       '&s=' + encodeURIComponent(e.stack || '');
-  self.fetch(url, /** @type {!RequestInit} */ ({
+  fetch(url, /** @type {!RequestInit} */ ({
     // We don't care about the response.
     mode: 'no-cors',
   })).catch(reason => {
-    console.error(reason);
+    console./*OK*/error(reason);
   });
 }
