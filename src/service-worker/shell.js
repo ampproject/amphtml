@@ -15,6 +15,7 @@
  */
 
 import {calculateExtensionScriptUrl} from '../service/extensions-impl';
+import './error-reporting';
 
 /**
  * Import the "core" entry point for the AMP CDN Service Worker. This shell
