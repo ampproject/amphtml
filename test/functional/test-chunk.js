@@ -321,11 +321,11 @@ describe('onIdle', () => {
           },
           options,
         });
-      }
-    }
+      },
+    };
   });
 
-   afterEach(() => {
+  afterEach(() => {
     sandbox.restore();
   });
 

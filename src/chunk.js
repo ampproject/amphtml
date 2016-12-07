@@ -236,14 +236,14 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
       } else {
         dev().fine(TAG, 'Rescheduling with', remainingTimeout,
             info.timeRemaining());
-        win.requestIdleCallback(rIC, { timeout: remainingTimeout, });
+        win.requestIdleCallback(rIC, {timeout: remainingTimeout});
       }
     } else {
       dev().fine(TAG, 'Running idle callback with ', minimumTimeRemaining);
       fn();
     }
   }
-  win.requestIdleCallback(rIC, { timeout: timeout, });
+  win.requestIdleCallback(rIC, {timeout});
 }
 
 /**
