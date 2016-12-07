@@ -1013,7 +1013,11 @@ export class Viewer {
     }
 
     if (!this.messagingReadyPromise_) {
-      return Promise.reject(getChannelError());
+      if (awaitResponse) {
+        return Promise.reject(getChannelError());
+      } else {
+        return Promise.resolve();
+      }
     }
 
     if (!cancelUnsent) {

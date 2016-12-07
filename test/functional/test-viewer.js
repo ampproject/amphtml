@@ -641,13 +641,18 @@ describe('Viewer', () => {
           });
     });
 
+    it('should do nothing in sendMessage but not fail', () => {
+      viewer.sendMessage('message1', {});
+      expect(viewer.messageQueue_.length).to.equal(0);
+    });
+
     it('should post broadcast event but not fail', () => {
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
     });
   });
 
-  describe('Messaging', () => {
+  describe('Messaging embedded', () => {
     beforeEach(() => {
       windowApi.parent = {};
       viewer = new Viewer(ampdoc);
