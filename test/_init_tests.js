@@ -179,7 +179,6 @@ function beforeTest() {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  window.ampExtendedElements = {};
   const ampdocService = installDocService(window, true);
   const ampdoc = ampdocService.getAmpDoc(window.document);
   installRuntimeServices(window);
@@ -206,7 +205,6 @@ afterEach(function() {
     }
   }
   window.localStorage.clear();
-  window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;

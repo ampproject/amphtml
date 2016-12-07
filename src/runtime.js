@@ -25,6 +25,7 @@ import {
   installExtensionsInShadowDoc,
   installExtensionsService,
   registerExtension,
+  stubLegacyElements,
 } from './service/extensions-impl';
 import {ampdocServiceFor} from './ampdoc';
 import {chunk} from './chunk';
@@ -164,6 +165,7 @@ function adoptShared(global, opts, callback) {
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = installExtensionsService(global);
   installRuntimeServices(global);
+  stubLegacyElements(global);
 
   global.AMP = {
     win: global,

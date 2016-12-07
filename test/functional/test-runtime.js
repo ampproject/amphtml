@@ -15,8 +15,9 @@
  */
 
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {ElementStub} from '../../src/element-stub';
 import {Observable} from '../../src/observable';
-import {adopt, adoptShadowMode} from '../../src/runtime';
+import {adopt, adoptShadowMode, installAmpdocServices} from '../../src/runtime';
 import {deactivateChunking} from '../../src/chunk';
 import {
   getServiceForDoc,
@@ -24,7 +25,7 @@ import {
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {parseUrl} from '../../src/url';
+import {installTimerService} from '../../src/service/timer-impl';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
 import {timerFor} from '../../src/timer';
@@ -35,38 +36,30 @@ import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
-describes.sandboxed('runtime', {}, env => {
-
+describes.fakeWin('runtime', {
+  location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
+}, env => {
   let win;
-  let sandbox;
   let ampdocService;
   let ampdocServiceMock;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
+    win = env.win;
     ampdocService = {
       isSingleDoc: () => true,
       getAmpDoc: () => null,
       installShadowDoc_: () => null,
     };
     ampdocServiceMock = sandbox.mock(ampdocService);
-    win = {
-      localStorage: {},
-      AMP: [],
-      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
-      addEventListener: () => {},
-      document: window.document,
-      history: {},
-      navigator: {},
-      setTimeout: () => {},
-      Object,
-      HTMLElement,
-      services: {
-        ampdoc: {obj: ampdocService},
-      },
+    win.AMP = [];
+    win.services = {
+      ampdoc: {obj: ampdocService},
     };
-    ampdocService.getAmpDoc = () => new AmpDocSingle(win);
+    const ampdoc = new AmpDocSingle(win);
+    ampdocService.getAmpDoc = () => ampdoc;
     installPlatformService(win);
+    installTimerService(win);
+    installAmpdocServices(ampdoc);
   });
 
   afterEach(() => {
@@ -85,6 +78,24 @@ describes.sandboxed('runtime', {}, env => {
     adoptShadowMode(win);
     expect(win.AMP.push).to.not.equal([].push);
     expect(win.AMP_TAG).to.be.true;
+  });
+
+  it('should install legacy stubs in single-doc', () => {
+    const initial = win.ampExtendedElements || {};
+    expect(initial['amp-ad']).to.be.undefined;
+    expect(initial['amp-embed']).to.be.undefined;
+    adopt(win);
+    expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+  });
+
+  it('should install legacy stubs in shadow-doc', () => {
+    const initial = win.ampExtendedElements || {};
+    expect(initial['amp-ad']).to.be.undefined;
+    expect(initial['amp-embed']).to.be.undefined;
+    adoptShadowMode(win);
+    expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
   });
 
   it('should NOT set cursor:pointer on document element on non-IOS', () => {
