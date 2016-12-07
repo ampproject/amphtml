@@ -71,6 +71,14 @@ export class AmpList extends AMP.BaseElement {
         });
   }
 
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = document.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.classList.add('-amp-default-placeholder');
+    this.element.appendChild(placeholder);
+  }
+
   /**
    * @param {!Array<!Element>} elements
    * @private

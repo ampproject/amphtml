@@ -24,10 +24,8 @@
 export function createLoaderElement(doc) {
   const loader = doc.createElement('div');
   loader.classList.add('-amp-loader');
-  for (let i = 0; i < 3; i++) {
-    const dot = doc.createElement('div');
-    dot.classList.add('-amp-loader-dot');
-    loader.appendChild(dot);
-  }
+  const line = doc.createElement('div');
+  line.classList.add('-amp-loader-line');
+  loader.appendChild(line);
   return loader;
 }

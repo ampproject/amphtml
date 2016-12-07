@@ -117,8 +117,17 @@ export function installVideo(win) {
 
       // loadPromise for media elements listens to `loadstart`
       return this.loadPromise(this.video_).then(() => {
+        console.log('vedio loaded');
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
       });
+    }
+
+    /** @override */
+    createPlaceholderCallback() {
+      const placeholder = document.createElement('div');
+      placeholder.setAttribute('placeholder', '');
+      placeholder.classList.add('-amp-default-placeholder');
+      this.element.appendChild(placeholder);
     }
 
     /** @override */

@@ -244,6 +244,10 @@ i-amp-sizer {
   display: block;
 }
 
+.-amp-default-placeholder {
+  background-color: #d3d3d3;
+}
+
 .-amp-element > [placeholder].hidden,
 .-amp-element > [placeholder].amp-hidden {
   visibility: hidden;
@@ -325,55 +329,35 @@ i-amp-scroll-container.amp-active {
 
 .-amp-loader {
   position: absolute;
+  top:0;
+  width: 100%;
+  height:2px;
+  overflow:hidden;
+  background-color:#696969;
   display: block;
-  height: 10px;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
+
+  /*transform: translateX(-50%) translateY(-50%);
   transform-origin: 50% 50%;
-  white-space: nowrap;
+  white-space: nowrap;*/
 }
 
-.-amp-loader.amp-active .-amp-loader-dot {
-  animation: -amp-loader-dots 2s infinite;
+.-amp-loader.amp-active .-amp-loader-line {
+  animation: -amp-loader-dots 1.5s infinite;
 }
 
-.-amp-loader-dot {
-  position: relative;
-  display: inline-block;
-
-  height: 10px;
-  width: 10px;
-  margin: 2px;
-  border-radius: 100%;
-  background-color: rgba(0, 0, 0, .3);
-
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
-  will-change: transform;
-}
-
-.-amp-loader .-amp-loader-dot:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.-amp-loader .-amp-loader-dot:nth-child(2) {
-  animation-delay: .1s;
-}
-
-.-amp-loader .-amp-loader-dot:nth-child(3) {
-  animation-delay: .2s;
+.-amp-loader-line {
+  display:block;
+  position: absolute;
+  left:-50%;
+  width:50%;
+  height:100%;
+  background-color: #DCDCDC;
+  z-index: 500;
 }
 
 @keyframes -amp-loader-dots {
-  0%, 100% {
-    transform: scale(.7);
-    background-color: rgba(0, 0, 0, .3);
-  }
-
-  50% {
-    transform: scale(.8);
-    background-color: rgba(0, 0, 0, .5);
-  }
+  0% {left: -50%;}
+  100% {left: 100%;}
 }
 
 
