@@ -72,18 +72,6 @@ function expectHasSiblingImgMatchingAll(element, matchList) {
       .to.be.true;
 }
 
-// From
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions?redirectlocale=en-US&redirectslug=JavaScript%2FGuide%2FRegular_Expressions
-/**
- * Escape a string for use as a literal inside a regular expression.
- * @param {!string} string
- * @returns {!string}
- * @private
- */
-function escapeRegExp_(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
-
 /**
  * Construct a lifecycle reporter for an element with a given eid in one of
  * the reporting namespaces.  If eid is not specified, creates an element with

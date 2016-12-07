@@ -127,6 +127,10 @@ export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
  * A NOOP base class for the LifecycleReporter
  */
 export class BaseLifecycleReporter {
+  constructor() {
+    this.extraVariables_ = new Object(null);
+  }
+
   /**
    * A beacon function that will be called at various stages of the lifecycle.
    *
@@ -141,16 +145,23 @@ export class BaseLifecycleReporter {
    * subject to URL replacement and both variable name and value are URI
    * encoded before being written to the ping.
    *
-   * @param {string} unusedVariable
-   * @param {string|number} unusedValue
+   * @param {string} variable
+   * @param {string|number} value
    */
-  setPingVariable(unusedVariable, unusedValue) {}
+  setPingVariable(variable, value) {
+    this.extraVariables_[variable] = value;
+  }
 
   /**
    * A function to reset the lifecycle reporter. Will be called immediately
-   * after firing the last beacon signal in unlayoutCallback.
+   * after firing the last beacon signal in unlayoutCallback.  Clears all
+   * variables that have been set via #setPingVariable.
    */
-  reset() {}
+  reset() {
+    this.extraVariables_ = new Object(null);
+  }
+
+
 }
 
 export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
@@ -175,7 +186,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.initTime_ = Date.now();
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
     this.urlReplacer_ = urlReplacementsForDoc(element.ownerDocument);
-    this.extraVariables_ = new Object(null);
   }
 
   /**
@@ -199,26 +209,11 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   }
 
   /**
-   * @param {string} variable
-   * @param {string|number} value
-   * @override
-   */
-  setPingVariable(variable, value) {
-    this.extraVariables_[variable] = value;
-  }
-
-  /**
    * @return {number}
    */
   getSlotId() {
     return this.slotId_;
   }
-
-  /** @override */
-  reset() {
-    this.extraVariables_ = new Object(null);
-  }
-
 
   /**
    * @param {string} name  Metric name to send.

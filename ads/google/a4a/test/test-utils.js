@@ -68,7 +68,7 @@ describe('Google A4A utils', () => {
       headerData[QQID_HEADER] = 'test qqid';
       expect(pingVars).to.be.empty;
       setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
-      expect(pingVars).to.have.property('qqid_37', 'test qqid');
+      expect(pingVars).to.have.property('qqid.37', 'test qqid');
     });
   });
 });

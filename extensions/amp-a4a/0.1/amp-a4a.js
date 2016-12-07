@@ -496,12 +496,6 @@ export class AmpA4A extends AMP.BaseElement {
                 this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
                 return this.verifyCreativeSignature_(
                     creativeParts.creative, creativeParts.signature);
-              })
-              // Emit adResponseValidateEnd for any non-erroneous validation
-              // completion, but only if we've actually started validation.
-              .then(creative => {
-                this.emitLifecycleEvent('adResponseValidateEnd');
-                return creative;
               });
         })
         .then(creative => {
@@ -611,7 +605,10 @@ export class AmpA4A extends AMP.BaseElement {
         .then(returnedArray => returnedArray[0]);
       });
     }))
-    .then(returnedArray => returnedArray[0]);
+    .then(returnedArray => {
+      this.emitLifecycleEvent('adResponseValidateEnd');
+      return returnedArray[0];
+    });
   }
 
   /**

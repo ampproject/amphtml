@@ -34,6 +34,7 @@ describes.skip.sandboxed('A4A integration', {}, () => {
         height: 20,
         type: 'doubleclick',
       });
+      doc.body.appendChild(element);
     });
 
     it('should send ping beacons for all lifecycle stages', () => {

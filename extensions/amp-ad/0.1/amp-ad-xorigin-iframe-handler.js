@@ -66,15 +66,6 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private {?Promise} */
     this.adResponsePromise_ = null;
-
-    if (this.baseInstance_.emitLifecycleEvent &&
-        typeof this.baseInstance_.emitLifecycleEvent == 'function') {
-      /** @private {!function(string, Object=)} */
-      this.emitLifecycleEvent_ = this.baseInstance_.emitLifecycleEvent;
-    } else {
-      /** @private {!function(string, Object=)} */
-      this.emitLifecycleEvent_ = (unusedArg, opt_extraData) => {};
-    }
   }
 
   /**
@@ -164,7 +155,9 @@ export class AmpAdXOriginIframeHandler {
         }).then(() => {
           if (this.iframe) {
             setStyle(this.iframe, 'visibility', '');
-            this.emitLifecycleEvent_('adSlotUnhidden');
+            if (this.baseInstance_.emitLifecycleEvent) {
+              this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+            }
           }
         });
   }
@@ -179,7 +172,9 @@ export class AmpAdXOriginIframeHandler {
     this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.updateSize_(data.height, data.width,
                 info.source, info.origin);
-    this.emitLifecycleEvent_('renderCrossDomainStart');
+    if (this.baseInstance_.emitLifecycleEvent) {
+      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
+    }
   }
 
   /**

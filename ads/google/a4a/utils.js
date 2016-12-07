@@ -20,7 +20,6 @@ import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {platformFor} from '../../../src/platform';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
@@ -312,36 +311,6 @@ export function getCorrelator(win, opt_cid) {
 }
 
 /**
- * Gets a relatively terse and controlled-format string version of the user
- * agent.
- *
- * @param {!Window} win
- * @return {string}
- */
-export function userAgentString(win) {
-  const platform = platformFor(win);
-  let browser;
-  let os;
-  let version;
-  if (platform.isIos()) {
-    os = 'ios';
-  } else if (platform.isAndroid()) {
-    os = 'android';
-  } else {
-    os = 'other_os';
-  }
-  if (platform.isSafari()) {
-    browser = 'safari';
-  } else if (platform.isChrome()) {
-    browser = 'chrome';
-  } else {
-    browser = 'other_browser';
-  }
-  version = platform.getMajorVersion();
-  return `${browser}_${version}_on_${os}`;
-}
-
-/**
  * Creates or reinitializes a lifecycle reporter for Google ad network
  * implementations.
  *
@@ -364,7 +333,6 @@ export function googleLifecycleReporterFactory(a4aElement) {
   if (type) {
     reporter.setPingVariable(`adt.${slotId}`, type);
   }
-  reporter.setPingVariable('ua', userAgentString(a4aElement.win));
   return reporter;
 }
 
