@@ -22,7 +22,11 @@ import {dev} from '../src/log';
  */
 export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
-
+  if (!data.nativeIntersectionObserver) {
+    const nullIO = () => {};
+    nullIO.prototype = null;
+    global.IntersectionObserver = nullIO;
+  }
   if (data.ad_container) {
     dev().assert(
         global.context.container == data.ad_container, 'wrong container');
@@ -47,12 +51,17 @@ export function _ping_(global, data) {
     } else {
       global.context.renderStart();
     }
-    global.context.observeIntersection(function(changes) {
+    const unlisten = global.context.observeIntersection(function(changes) {
       changes.forEach(function(c) {
         dev().info('AMP-AD', 'Intersection: (WxH)' +
             `${c.intersectionRect.width}x${c.intersectionRect.height}`);
       });
     });
+    if (data.unlistenIo) {
+      global.setTimeout(() => {
+        unlisten();
+      }, Number(data.unlistenIo));
+    }
   } else {
     global.context.noContentAvailable();
   }
