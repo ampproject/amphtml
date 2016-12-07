@@ -18,6 +18,8 @@ import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
+  stubElementInChildWindow,
+  upgradeElementInChildWindow,
 } from '../custom-element';
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
@@ -388,14 +390,16 @@ export class Extensions {
     // Adopt embeddable services.
     adoptServicesForEmbed(childWin);
 
-    // Install built-ins.
-    copyBuiltinElementsToChildWindow(childWin);
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
 
     const promises = [];
     extensionIds.forEach(extensionId => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
+      stubElementInChildWindow(childWin, extensionId);
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
@@ -406,10 +410,19 @@ export class Extensions {
         // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
         if (elementDef && elementDef.css) {
-          installStyles(childWin.document, elementDef.css, () => {},
-              /* isRuntime */ false, extensionId);
+          return new Promise(resolve => {
+            installStyles(
+                childWin.document,
+                /** @type {string} */ (elementDef.css),
+                /* completeCallback */ resolve,
+                /* isRuntime */ false,
+                extensionId);
+          });
         }
-        copyElementToChildWindow(childWin, extensionId);
+      }).then(() => {
+        // Notice that stubbing happens much sooner above
+        // (see stubElementInChildWindow).
+        upgradeElementInChildWindow(topWin, childWin, extensionId);
       });
       promises.push(promise);
     });
@@ -621,12 +634,22 @@ export function installBuiltinElements(win) {
 
 /**
  * Copy builtins to a child window.
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function copyBuiltinElementsToChildWindow(childWin) {
-  copyElementToChildWindow(childWin, 'amp-img');
-  copyElementToChildWindow(childWin, 'amp-pixel');
-  copyElementToChildWindow(childWin, 'amp-video');
+function copyBuiltinElementsToChildWindow(parentWin, childWin) {
+  copyElementToChildWindow(parentWin, childWin, 'amp-img');
+  copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
+  copyElementToChildWindow(parentWin, childWin, 'amp-video');
+}
+
+
+/**
+ * @param {!Window} win
+ */
+export function stubLegacyElements(win) {
+  stubElementIfNotKnown(win, 'amp-ad');
+  stubElementIfNotKnown(win, 'amp-embed');
 }
 
 
