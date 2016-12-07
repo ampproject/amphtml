@@ -1059,11 +1059,8 @@ export class Viewer {
       // Messaging is not expected.
       return;
     }
-    this.messagingMaybePromise_.then(() => {
-      if (this.messageDeliverer_) {
-        this.messageDeliverer_('broadcast', message, false);
-      }
-    });
+
+    this.sendMessage('broadcast', message);
   }
 
   /**
