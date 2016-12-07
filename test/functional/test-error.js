@@ -256,10 +256,29 @@ describe('reportErrorToServer', () => {
   });
 
   it('should not report load errors', () => {
+    sandbox.stub(Math, 'random', () => (1e-3 + 1e-4));
     const e = new Error('Failed to load:');
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
     expect(url).to.be.undefined;
+  });
+
+  it('should report throttled load errors at threshold', () => {
+    sandbox.stub(Math, 'random', () => 1e-3);
+    const e = new Error('Failed to load:');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.ok;
+    expect(url).to.contain('&ex=1');
+  });
+
+  it('should report throttled load errors under threshold', () => {
+    sandbox.stub(Math, 'random', () => (1e-3 - 1e-4));
+    const e = new Error('Failed to load:');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.ok;
+    expect(url).to.contain('&ex=1');
   });
 
   describe('detectNonAmpJs', () => {
