@@ -409,6 +409,20 @@ template {
   box-sizing: border-box;
 }
 
+/**
+ * Authors can add this class to their html tags to provide `border-box` box-sizing
+ * can be easily overriden when you are using a third party component.
+ * https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
+ */
+.amp-border-box-inherit {
+  box-sizing: border-box;
+}
+.amp-border-box-inherit *,
+.amp-border-box-inherit *:before,
+.amp-border-box-inherit *:after {
+  box-sizing: inherit;
+}
+
 amp-pixel {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
