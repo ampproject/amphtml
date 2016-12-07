@@ -23,8 +23,8 @@ import {dev} from '../src/log';
 export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
   if (!data.nativeIntersectionObserver) {
-    const nullIO = () => {};
-    nullIO.prototype = null;
+    function nullIO() {};
+    nullIO.prototype = Object.create(null);
     global.IntersectionObserver = nullIO;
   }
   if (data.ad_container) {
