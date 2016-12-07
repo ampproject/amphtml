@@ -289,7 +289,9 @@ export class LocalStorageBinding {
     this.isLocalStorageSupported_ = 'localStorage' in this.win;
 
     if (!this.isLocalStorageSupported_) {
-      dev().error(TAG, 'localStorage not supported.');
+      const error = new Error('localStorage not supported.');
+      error.expected = true;
+      dev().error(TAG, error);
     }
   }
 

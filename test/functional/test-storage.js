@@ -455,6 +455,8 @@ describe('LocalStorageBinding', () => {
     delete windowApi.localStorage;
     new LocalStorageBinding(windowApi);
     expect(errorSpy.callCount).to.equal(1);
+    expect(errorSpy.args[0][1].message).to.match(/localStorage not supported/);
+    expect(errorSpy.args[0][1].expected).to.be.true;
   });
 
   it('should load store when available', () => {
