@@ -67,7 +67,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     videoManagerForDoc(this.win.document).register(this);
   }
-  
+
   /** @override */
   layoutCallback() {
     const embedCode = user().assert(
@@ -88,21 +88,22 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const playerVersion = this.element.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
       src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
-        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(pCode);      
+        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(pCode);
       const configUrl = this.element.getAttribute('data-config');
       if (configUrl) {
         src += '&options[skin.config]=' + encodeURIComponent(configUrl);
       }
     }
 
-    src += '&ec=' + encodeURIComponent(embedCode) + 
+    src += '&ec=' + encodeURIComponent(embedCode) +
       '&pbid=' + encodeURIComponent(playerId);
     if (autoplay) {
       src += '&autoplay=true';
     }
     this.iframe_.src = src;
 
-    window.addEventListener('message', event => this.handleOoyalaMessages_(event));
+    window.addEventListener('message',
+                            event => this.handleOoyalaMessages_(event));
 
     return this.loadPromise(this.iframe_)
       .then(() => {
@@ -149,14 +150,14 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.data == "playing") {
+    if (data.data == 'playing') {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.data == "paused") {
+    } else if (data.data == 'paused') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.data == "muted") {
-      this.element.dispatchCustomEvent("mute");
-    } else if (data.data == "unmuted") {
-      this.element.dispatchCustomEvent("unmute");
+    } else if (data.data == 'muted') {
+      this.element.dispatchCustomEvent('mute');
+    } else if (data.data == 'unmuted') {
+      this.element.dispatchCustomEvent('unmute');
     }
   }
 
