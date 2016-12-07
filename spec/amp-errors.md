@@ -23,12 +23,12 @@ The following fields are reported:
 
 - `v=string` - AMP version
 - `m=string` - the error message
-- `a=0|1` - whether the error is labeled as "user" or "dev" error.
-- `ex=0|1` - whether the error is labeled as "expected".
-- `3p=0|1` - whether the error occured in the 3p context.
-- `ca=0|1` - whether this is a canary version of AMP.
+- `a=1` - whether the error is labeled as "user" error (as opposed to a "dev" error).
+- `ex=1` - whether the error is labeled as "expected".
+- `3p=1` - whether the error occured in the 3p context.
+- `ca=1` - whether this is a canary version of AMP.
 - `or=string` - the ancestor origin if available.
-- `iem=0|1` - whether this document is iframed.
+- `iem=1` - whether this document is iframed.
 - `rvu=string` - the viewer URL, provided by the viewer.
 - `mso=string` - the messaging origin for viewer communication.
 - `el=string` - the identifier/information on the associated DOM element.
