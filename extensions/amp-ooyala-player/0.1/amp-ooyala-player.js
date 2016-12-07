@@ -109,9 +109,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       .then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
-      })
-      .then(() => {
-        this.playerReadyPromise_;
       });
   }
 
