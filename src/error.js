@@ -207,12 +207,16 @@ function reportErrorToServer(message, filename, line, col, error) {
  */
 export function getErrorReportUrl(message, filename, line, col, error,
     hasNonAmpJs) {
+  let expected = false;
   if (error) {
     if (error.message) {
       message = error.message;
     } else {
       // This should never be a string, but sometimes it is.
       message = String(error);
+    }
+    if (error.expected) {
+      expected = true;
     }
   }
   if (!message) {
@@ -224,8 +228,15 @@ export function getErrorReportUrl(message, filename, line, col, error,
   if (message == CANCELLED) {
     return;
   }
-  if (isLoadErrorMessage(message) && (Math.random() > LOAD_ERROR_THRESHOLD)) {
-    return;
+
+  // Load errors are always "expected".
+  if (isLoadErrorMessage(message)) {
+    expected = true;
+
+    // Throttle load errors.
+    if (Math.random() > LOAD_ERROR_THRESHOLD) {
+      return;
+    }
   }
 
   // This is the App Engine app in
@@ -237,6 +248,9 @@ export function getErrorReportUrl(message, filename, line, col, error,
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);
+  if (expected) {
+    url += '&ex=1';
+  }
   if (self.context && self.context.location) {
     url += '&3p=1';
   }

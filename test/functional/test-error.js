@@ -269,6 +269,7 @@ describe('reportErrorToServer', () => {
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
     expect(url).to.be.ok;
+    expect(url).to.contain('&ex=1');
   });
 
   it('should report throttled load errors under threshold', () => {
@@ -277,6 +278,7 @@ describe('reportErrorToServer', () => {
     const url =
         getErrorReportUrl(undefined, undefined, undefined, undefined, e);
     expect(url).to.be.ok;
+    expect(url).to.contain('&ex=1');
   });
 
   describe('detectNonAmpJs', () => {
