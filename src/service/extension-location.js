@@ -55,6 +55,23 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
 }
 
 /**
+ * Calculate script url for an entry point.
+ * @param {!Location} location The window's location
+ * @param {string} entryPoint
+ * @param {boolean=} isLocalDev
+ * @param {boolean=} isTest
+ * @return {string}
+ */
+export function calculateEntryPointScriptUrl(location, entryPoint, isLocalDev,
+    isTest) {
+  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
+  if (isLocalDev) {
+    return `${base}/${entryPoint}${isMax(location) ? '.max' : ''}.js`;
+  }
+  return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+}
+
+/**
  * Is this path to a max (unminified) version?
  * @param {!Location} location
  * @return {boolean}
