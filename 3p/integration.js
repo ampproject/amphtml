@@ -433,7 +433,8 @@ function triggerRenderStart(opt_data) {
  */
 function observeIntersection(observerCallback) {
   // Send request to received records.
-  if (window.IntersectionObserver && window.IntersectionObserver.prototype) {
+  if (window.IntersectionObserver &&
+      Object.keys(window.IntersectionObserver.prototype).length) {
     // use native IntersectionObserver if exist
     const io = new window.IntersectionObserver(changes => {
       observerCallback(changes);
