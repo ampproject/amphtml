@@ -150,15 +150,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_associatedEventData) {
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
+  emitLifecycleEvent(eventName) {
     this.lifecycleReporter_.sendPing(eventName);
   }
 
   unlayoutCallback() {
     super.unlayoutCallback();
-    this.lifecycleReporter_.reset();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();

@@ -107,15 +107,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   emitLifecycleEvent(eventName) {
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
     this.lifecycleReporter_.sendPing(eventName);
   }
 
   /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
-    this.lifecycleReporter_.reset();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
