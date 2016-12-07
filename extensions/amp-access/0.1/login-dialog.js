@@ -79,9 +79,9 @@ class ViewerLoginDialog {
     return urlPromise.then(url => {
       const loginUrl = buildLoginUrl(url, 'RETURN_URL');
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
-      return this.viewer.sendMessage('openDialog', {
+      return this.viewer.sendMessageAwaitResponse('openDialog', {
         'url': loginUrl,
-      }, true);
+      });
     });
   }
 }

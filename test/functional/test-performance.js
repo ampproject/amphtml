@@ -134,13 +134,10 @@ describe('performance', () => {
   describe('when viewer is ready,', () => {
     let viewer;
     let viewerSendMessageStub;
-    let viewerSendMessageCancelUnsentStub;
 
     beforeEach(() => {
       viewer = viewerForDoc(window.document);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
-      viewerSendMessageCancelUnsentStub = sandbox.stub(viewer,
-          'sendMessageCancelUnsent');
     });
 
 
@@ -314,8 +311,8 @@ describe('performance', () => {
           expect(perf.events_.length).to.equal(0);
 
           expect(viewerSendMessageStub.withArgs('tick')).to.not.be.called;
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.not.be.called;
+          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+              /* cancelUnsent */true)).to.not.be.called;
         });
       });
 
@@ -330,8 +327,8 @@ describe('performance', () => {
         perf.tick('start0');
         perf.flush();
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.not.be.called;
+          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+              /* cancelUnsent */true)).to.not.be.called;
         });
       });
     });
@@ -401,18 +398,18 @@ describe('performance', () => {
       });
 
       it('should call the flush callback', () => {
-        expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-            .to.have.callCount(0);
+        expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+            /* cancelUnsent */true)).to.have.callCount(0);
         // coreServicesAvailable calls flush once.
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.have.callCount(1);
+          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+              /* cancelUnsent */true)).to.have.callCount(1);
           perf.flush();
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.have.callCount(2);
+          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+              /* cancelUnsent */true)).to.have.callCount(2);
           perf.flush();
-          expect(viewerSendMessageCancelUnsentStub.withArgs('sendCsi'))
-              .to.have.callCount(3);
+          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+              /* cancelUnsent */true)).to.have.callCount(3);
         });
       });
 
@@ -447,7 +444,7 @@ describe('performance', () => {
         ]);
 
         return perf.setDocumentInfoParams_().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs('setFlushParams')
+          expect(viewerSendMessageStub.withArgs('setFlushParams')
               .lastCall.args[1]).to.be.jsonEqual({
                 sourceUrl: 'https://hello.world/baz/',
                 'amp-img': 2,
@@ -466,7 +463,7 @@ describe('performance', () => {
   describe('coreServicesAvailable', () => {
     let tickSpy;
     let viewer;
-    let viewerSendMessageCancelUnsentStub;
+    let viewerSendMessageStub;
     let whenFirstVisiblePromise;
     let whenFirstVisibleResolve;
     let whenReadyToRetrieveResourcesPromise;
@@ -483,8 +480,8 @@ describe('performance', () => {
       viewer = viewerForDoc(window.document);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
-      viewerSendMessageCancelUnsentStub = sandbox.stub(viewer,
-          'sendMessageCancelUnsent');
+      viewerSendMessageStub = sandbox.stub(viewer,
+          'sendMessage');
 
       tickSpy = sandbox.spy(perf, 'tick');
 
@@ -527,7 +524,7 @@ describe('performance', () => {
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(viewerSendMessageCancelUnsentStub.withArgs(
+            expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
           });
         });
@@ -543,7 +540,7 @@ describe('performance', () => {
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(viewerSendMessageCancelUnsentStub.withArgs(
+            expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
           });
         });
@@ -604,7 +601,7 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(viewerSendMessageCancelUnsentStub.withArgs(
+          expect(viewerSendMessageStub.withArgs(
               'prerenderComplete').firstCall.args[1].value).to.equal(300);
         });
       });
