@@ -37,6 +37,14 @@ describe('amp-video', () => {
   });
 });
 
+describe('amp-youtube', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-youtube');
+    video.setAttribute('data-videoid', 'mGENRKrdoGY');
+    return video;
+  });
+});
+
 describe('amp-ooyala-player', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-ooyala-player');

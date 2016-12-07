@@ -82,7 +82,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       this.element.getAttribute('data-playerid'),
       'The data-playerid attribute is required for <amp-ooyala-player> %s',
       this.element);
-    const autoplay = this.element.getAttribute('autoplay');
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = this.element.getAttribute('data-playerversion') || '';
@@ -97,9 +96,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     src += '&ec=' + encodeURIComponent(embedCode) +
       '&pbid=' + encodeURIComponent(playerId);
-    if (autoplay) {
-      src += '&autoplay=true';
-    }
     this.iframe_.src = src;
 
     window.addEventListener('message',
@@ -163,14 +159,14 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   play(unusedIsAutoplay) {
     this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PLAY, '*');
+      this.iframe_.contentWindow./*OK*/postMessage('play', '*');
     });
   }
 
   /** @override */
   pause() {
     this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage(VideoEvents.PAUSE, '*');
+      this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
     });
   }
 
