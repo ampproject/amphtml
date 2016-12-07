@@ -46,7 +46,7 @@ export class IframeMessagingClient {
    */
   makeRequest(requestType, responseType, callback) {
     const unlisten = this.registerCallback(responseType, callback);
-    this.messageHost(requestType);
+    this.sendMessage(requestType);
     return unlisten;
   }
 
@@ -72,7 +72,7 @@ export class IframeMessagingClient {
    *  @param {string} type The type of message to send.
    *  @param {Object=} opt_payload The payload of message to send.
    */
-  messageHost(type, opt_payload) {
+  sendMessage(type, opt_payload) {
     const message = {type, sentinel: this.sentinel_};
     this.hostWindow_.postMessage/*OK*/(
         Object.assign(message, opt_payload), '*');

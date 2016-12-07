@@ -47,8 +47,8 @@ export class AmpContext {
 
   /**
    *  Send message to runtime to start sending page visibility messages.
-   *  @param {function(Object)} callback Function to call every time we receive a
-   *    page visibility message.
+   *  @param {function(Object)} callback Function to call every time we receive
+   *    a page visibility message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive a page visibility message.
    */
@@ -61,8 +61,8 @@ export class AmpContext {
 
   /**
    *  Send message to runtime to start sending intersection messages.
-   *  @param {function(Object)} callback Function to call every time we receive an
-   *    intersection message.
+   *  @param {function(Object)} callback Function to call every time we receive
+   *  an intersection message.
    *  @returns {function()} that when called stops triggering the callback
    *    every time we receive an intersection message.
    */
@@ -80,7 +80,7 @@ export class AmpContext {
    *  @param {int} width The new width for the ad we are requesting.
    */
   requestResize(height, width) {
-    this.client_.messageHost(MessageType_.EMBED_SIZE, {width, height});
+    this.client_.sendMessage(MessageType_.EMBED_SIZE, {width, height});
   };
 
   /**
@@ -91,7 +91,7 @@ export class AmpContext {
    *    to call if the resize request succeeds.
    */
   onResizeSuccess(callback) {
-    this.client_.registerCallback(MessageType_.EMBED_SIZE_CHANGED, function(obj) {
+    this.client_.registerCallback(MessageType_.EMBED_SIZE_CHANGED, obj => {
       callback(obj.requestedHeight, obj.requestedWidth); });
   };
 
@@ -103,7 +103,7 @@ export class AmpContext {
    *    to call if the resize request is denied.
    */
   onResizeDenied(callback) {
-    this.client_.registerCallback(MessageType_.EMBED_SIZE_DENIED, function(obj) {
+    this.client_.registerCallback(MessageType_.EMBED_SIZE_DENIED, obj => {
       callback(obj.requestedHeight, obj.requestedWidth);
     });
   };
