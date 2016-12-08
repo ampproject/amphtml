@@ -83,7 +83,7 @@ function isBuildSystemFile(filePath) {
   return filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
-      !path.dirname(filePath).endsWith('textproto');
+      path.extname(filePath) != '.textproto';
 }
 
 /**
