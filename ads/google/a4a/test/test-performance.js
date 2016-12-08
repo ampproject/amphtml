@@ -337,11 +337,35 @@ describe('GoogleAdLifecycleReporter', () => {
       return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
         reporter.setPingVariable('', '');
+        reporter.setPingVariable('foo', '');
+        reporter.setPingVariable('bar', null);
+        reporter.setPingVariable('baz', undefined);
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         expect(arg).not.to.match(/\&=?\&/);
+        expect(arg).not.to.match(/[&?]foo/);
+        expect(arg).not.to.match(/[&?]bar/);
+        expect(arg).not.to.match(/[&?]baz/);
       });
+    });
+
+    it('does allow value === 0', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingVariable('foo', 0);
+        reporter.setPingVariable('bar', 0.0);
+        reporter.setPingVariable('baz', -0);
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          /foo=0/,
+          /bar=0/,
+          /baz=0/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);      });
     });
 
     it('should uri encode extra params', () => {
@@ -384,4 +408,63 @@ describe('GoogleAdLifecycleReporter', () => {
     });
   });
 
+  describe('#setPingVariables', () => {
+    it('should do nothing on an an empty input', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        const setPingVariableSpy = sandbox.spy(reporter, 'setPingVariable');
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingVariables({});
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        expect(setPingVariableSpy).not.to.be.called;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
+      });
+    });
+
+    it('should set a singleton input', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        const setPingVariableSpy = sandbox.spy(reporter, 'setPingVariable');
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingVariables({zort: '12345'});
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        expect(setPingVariableSpy).to.be.calledOnce;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=12345/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
+      });
+    });
+
+    it('should set multiple inputs', () => {
+      return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
+        const setPingVariableSpy = sandbox.spy(reporter, 'setPingVariable');
+        expect(emitPingSpy).to.not.be.called;
+        reporter.setPingVariables({zort: '12345', gax: 99, flub: 0});
+        reporter.sendPing('adRequestStart');
+        expect(emitPingSpy).to.be.calledOnce;
+        expect(setPingVariableSpy).to.be.calledThrice;
+        const arg = emitPingSpy.getCall(0).args[0];
+        const expectations = [
+          // Be sure that existing ping not deleted by args.
+          /[&?]s=test_foo/,
+          /zort=12345/,
+          /gax=99/,
+          /flub=0/,
+        ];
+        expectMatchesAll(arg, expectations);
+        expectHasSiblingImgMatchingAll(elem, expectations);
+      });
+    });
+  });
 });

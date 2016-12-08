@@ -143,13 +143,31 @@ export class BaseLifecycleReporter {
   /**
    * Set a variable to be added to the ping data.  The variable's value is
    * subject to URL replacement and both variable name and value are URI
-   * encoded before being written to the ping.
+   * encoded before being written to the ping.  The entry is silently dropped
+   * if either `variable` or `value` is falsey, with the exception that the
+   * `value` may be 0.
    *
    * @param {string} variable
    * @param {string|number} value
    */
   setPingVariable(variable, value) {
-    this.extraVariables_[variable] = value;
+    if (!!variable && (!!value || value === 0)) {
+      this.extraVariables_[variable] = value;
+    }
+  }
+
+  /**
+   * Sets a (possibly empty) collection of variable values by invoking
+   * #setPingVariable on each key/value pair in the input collection.
+   *
+   * @param {!Object<string, string|number>} variablesToValues
+   */
+  setPingVariables(variablesToValues) {
+    for (const variable in variablesToValues) {
+      if (variablesToValues.hasOwnProperty(variable)) {
+        this.setPingVariable(variable, variablesToValues[variable]);
+      }
+    }
   }
 
   /**
@@ -160,8 +178,6 @@ export class BaseLifecycleReporter {
   reset() {
     this.extraVariables_ = new Object(null);
   }
-
-
 }
 
 export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
@@ -235,6 +251,19 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         }
       }
       if (paramList.length > 0) {
+        // Note: Using sync URL replacer here, rather than async, for a number
+        // of reasons:
+        //   - Don't want to block pings waiting for potentially delayed bits
+        //     of information.
+        //   - Don't (currently) need access to any properties that are
+        //     available async only.
+        //   - Don't want to pass through expandStringAsync if there are zero
+        //     extra params, but async would force us to (or to maintain two
+        //     code branches).
+        // TODO(ampproject/a4a): Change to async if/when there's a need to
+        // expand async-only parameters.  E.g., we'd like to have scroll_y
+        // offset, but it's not currently available through url-replacement.
+        // If it becomes available, it's likely to be an async parameter.
         extraParams = '&' +
             this.urlReplacer_.expandStringSync(paramList.join('&'));
       }

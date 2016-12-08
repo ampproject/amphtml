@@ -323,16 +323,13 @@ export function googleLifecycleReporterFactory(a4aElement) {
       (getLifecycleReporter(a4aElement, 'a4a', undefined,
           a4aElement.element.getAttribute('data-amp-slot-index')));
   const slotId = reporter.getSlotId();
-  reporter.setPingVariable('v_h', 'VIEWPORT_HEIGHT');
-  reporter.setPingVariable('s_t', 'SCROLL_TOP');
-  const eid = a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE);
-  if (eid) {
-    reporter.setPingVariable('e', eid);
-  }
-  const type = a4aElement.element.getAttribute('type');
-  if (type) {
-    reporter.setPingVariable(`adt.${slotId}`, type);
-  }
+  reporter.setPingVariables({
+    'v_h': 'VIEWPORT_HEIGHT',
+    's_t': 'SCROLL_TOP',
+    'e': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
+  });
+  reporter.setPingVariable(
+      `adt.${slotId}`, a4aElement.element.getAttribute('type'));
   return reporter;
 }
 
@@ -343,18 +340,16 @@ export function googleLifecycleReporterFactory(a4aElement) {
  * @param {!./performance.GoogleAdLifecycleReporter} reporter
  */
 export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
-  const qqid = headers.get(QQID_HEADER);
-  if (qqid) {
-    reporter.setPingVariable(`qqid.${reporter.getSlotId()}`, qqid);
-  }
   // This is duplicated from the amp-a4a.js implementation.  It needs to be
   // defined there because it's an implementation detail of that module, but
   // we want to report it to Google b/c we're interested in how rendering mode
   // affects Google ads.  However, we can't directly reference a variable
   // in extensions/ from here.
-  const renderingTypeHeader = 'X-AmpAdRender';
-  const method = headers.get(renderingTypeHeader);
-  if (method) {
-    reporter.setPingVariable(`rm.${reporter.getSlotId()}`, method);
-  }
+  const renderingMethodHeader = 'X-AmpAdRender';
+  const renderingMethodKey = `rm.${reporter.getSlotId()}`;
+  const qqidKey = `qqid.${reporter.getSlotId()}`;
+  const pingVariables = new Object(null);
+  pingVariables[qqidKey] = headers.get(QQID_HEADER);
+  pingVariables[renderingMethodKey] = headers.get(renderingMethodHeader);
+  reporter.setPingVariables(pingVariables);
 }

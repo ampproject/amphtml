@@ -15,6 +15,10 @@
  */
 
 import {createElementWithAttributes} from '../../../../src/dom';
+import {Xhr} from '../../../../src/service/xhr-impl';
+import {
+  GoogleAdLifecycleReporter
+} from '../../../../ads/google/a4a/performance';
 
 // Still under construction.
 describes.skip.sandboxed('A4A integration', {}, () => {
@@ -25,14 +29,21 @@ describes.skip.sandboxed('A4A integration', {}, () => {
     let win;
     let doc;
     let element;
+    let pingStub;
+    let creativeXhrStub;
+    let keyXhrStub;
     beforeEach(() => {
       fixture = env;
       win = fixture.win;
       doc = win.document;
+      pingStub = sandbox.stub(GoogleAdLifecycleReporter.prototype, 'sendPing');
+      creativeXhrStub = sandbox.stub(Xhr.prototype, 'fetch');
+      keyXhrStub = sandbox.stub(Xhr.prototype, 'fetchJson');
       element = createElementWithAttributes(doc, 'amp-ad', {
         width: 320,
         height: 20,
         type: 'doubleclick',
+        'data-use-beta-a4a-implementation': true,
       });
       doc.body.appendChild(element);
     });
