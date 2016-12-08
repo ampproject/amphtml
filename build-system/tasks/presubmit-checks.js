@@ -268,6 +268,7 @@ var forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/service/viewer-impl.js',
+      'src/service/viewport-impl.js',
       'src/service/storage-impl.js',
       'src/service/performance-impl.js',
       'examples/viewer-integr-messaging.js',
