@@ -435,7 +435,7 @@ export class Viewport {
    * Instruct the viewport to enter lightbox mode.
    */
   enterLightboxMode() {
-    this.viewer_.requestFullOverlay();
+    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
     this.disableTouchZoom();
     this.hideFixedLayer();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
@@ -445,7 +445,7 @@ export class Viewport {
    * Instruct the viewport to enter lightbox mode.
    */
   leaveLightboxMode() {
-    this.viewer_.cancelFullOverlay();
+    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
     this.showFixedLayer();
     this.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
@@ -720,7 +720,8 @@ export class Viewport {
       this.scrollAnimationFrameThrottled_ = true;
       this.vsync_.measure(() => {
         this.scrollAnimationFrameThrottled_ = false;
-        this.viewer_.postScroll(this.getScrollTop());
+        this.viewer_.sendMessage('scroll', {scrollTop: this.getScrollTop()},
+            /* cancelUnsent */true);
       });
     }
   }

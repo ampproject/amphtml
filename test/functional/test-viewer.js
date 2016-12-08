@@ -507,25 +507,6 @@ describe('Viewer', () => {
     expect(m.data.sourceUrl).to.equal('http://localhost:9876/test/viewer');
   });
 
-  it('should post scroll event', () => {
-    windowApi.parent = {};
-    const viewer = new Viewer(ampdoc);
-    viewer.messageReadyPromise_ = Promise.resolve();
-    viewer.postScroll(111);
-    const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('scroll');
-    expect(m.data.scrollTop).to.equal(111);
-  });
-
-  it('should post request/cancelFullOverlay event', () => {
-    windowApi.parent = {};
-    const viewer = new Viewer(ampdoc);
-    viewer.requestFullOverlay();
-    viewer.cancelFullOverlay();
-    expect(viewer.messageQueue_[0].eventType).to.equal('requestFullOverlay');
-    expect(viewer.messageQueue_[1].eventType).to.equal('cancelFullOverlay');
-  });
-
   it('should queue non-dupe events', () => {
     windowApi.parent = {};
     const viewer = new Viewer(ampdoc);
@@ -641,13 +622,18 @@ describe('Viewer', () => {
           });
     });
 
+    it('should do nothing in sendMessage but not fail', () => {
+      viewer.sendMessage('message1', {});
+      expect(viewer.messageQueue_.length).to.equal(0);
+    });
+
     it('should post broadcast event but not fail', () => {
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
     });
   });
 
-  describe('Messaging', () => {
+  describe('Messaging embedded', () => {
     beforeEach(() => {
       windowApi.parent = {};
       viewer = new Viewer(ampdoc);
