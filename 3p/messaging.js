@@ -27,7 +27,7 @@ export const MessageType = {
 };
 
 /**
- * Serialize a AMP post message.
+ * Serialize an AMP post message.
  *
  * @param type {string}
  * @param sentinel {string}
@@ -35,13 +35,13 @@ export const MessageType = {
  * @returns {string}
  */
 export function serializeMessage(type, sentinel, opt_data) {
-  // TODO: consider wrap playload in a data field. { type, sentinal, data }
+  // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   return AMP_MESSAGE_PREFIX
       + JSON.stringify(Object.assign({type, sentinel}, opt_data));
 }
 
 /**
- * Deserialize a AMP post message payload.
+ * Deserialize an AMP post message.
  * Returns null if it's not valid AMP message format.
  *
  * @param message {*}
