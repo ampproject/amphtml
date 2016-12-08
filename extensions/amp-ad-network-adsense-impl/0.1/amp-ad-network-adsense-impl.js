@@ -35,6 +35,7 @@ import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {viewerForDoc} from '../../../src/viewer';
+import {AdsenseSharedState} from './adsense-shared-state';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -53,19 +54,9 @@ const visibilityStateCodes = {
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
  * parameters that depend on previous slots.
- * @const {!Object}
+ * @const {!AdsenseSharedState}
  */
-const sharedState = {
-  /*
-   * Comma separated list of previous slot formats.
-   */
-  prevFmts: '',
-  /*
-   * Page view. Further subdivided by ad client: maps client id to pv value.
-   * @const {!Object<string, number>}
-   */
-  pv: {},
-};
+const sharedState = new AdsenseSharedState();
 
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
@@ -102,16 +93,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
-    const prevFmts = sharedState['prevFmts'];
+    const prevFmts = sharedState.getPrevFmts();
 
-    // Update shared state.
-    sharedState['prevFmts'] +=
-        (sharedState['prevFmts'] ? ',' : '') + format;
-    if (typeof sharedState['pv'][adClientId] === 'undefined') {
-      sharedState['pv'][adClientId] = 2;
-    } else {
-      sharedState['pv'][adClientId] = 1;
-    }
+    sharedState.addFormat(format);
 
     const paramList = [
       {name: 'client', value: adClientId},
@@ -131,7 +115,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
-      {name: 'pv', value: sharedState['pv'][adClientId]},
+      {name: 'pv', value: sharedState.getPv(adClientId)},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
       {name: 'u_aw', value: screen ? screen.availWidth : null},
       {name: 'u_cd', value: screen ? screen.colorDepth : null},
