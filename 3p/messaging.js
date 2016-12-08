@@ -31,13 +31,13 @@ export const MessageType = {
  *
  * @param type {string}
  * @param sentinel {string}
- * @param opt_payload {Object=}
+ * @param opt_data {Object=}
  * @returns {string}
  */
-export function serializeMessage(type, sentinel, opt_payload) {
+export function serializeMessage(type, sentinel, opt_data) {
   // TODO: consider wrap playload in a data field. { type, sentinal, data }
   return AMP_MESSAGE_PREFIX
-      + JSON.stringify(Object.assign({type, sentinel}, opt_payload));
+      + JSON.stringify(Object.assign({type, sentinel}, opt_data));
 }
 
 /**

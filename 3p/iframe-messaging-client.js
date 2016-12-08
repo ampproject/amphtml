@@ -15,7 +15,6 @@
  */
 import {listen} from '../src/event-helper';
 import {map} from '../src/types';
-import {user} from '../src/log';
 import {serializeMessage, deserializeMessage} from './messaging';
 
 export class IframeMessagingClient {
