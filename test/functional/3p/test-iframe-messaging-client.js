@@ -127,7 +127,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
     it('should send postMessage to host window', () => {
       client.sendMessage('request-type', {x: 1, y: 'abc'});
       expect(postMessageStub).to.be.calledWith(
-          serializeMessage('request-type', 'sentinel-123',{x: 1, y: 'abc'}));
+          serializeMessage('request-type', 'sentinel-123', {x: 1, y: 'abc'}));
     });
   });
 
