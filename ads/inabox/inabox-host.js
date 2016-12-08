@@ -22,12 +22,8 @@
 import '../../third_party/babel/custom-babel-helpers';
 import {dev, initLogConstructor} from '../../src/log';
 import {InaboxMessagingHost} from './inabox-messaging-host';
-import {
-  install as installObjectAssign,
-} from '../../src/polyfills/object-assign';
 
 const TAG = 'inabox-host';
-installObjectAssign(self);
 run(self);
 
 /**

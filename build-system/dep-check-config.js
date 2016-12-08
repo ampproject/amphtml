@@ -157,7 +157,6 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/promise.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
       'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
-      'ads/inabox/inabox-host.js->src/polyfills/object-assign.js',
     ],
   },
   {

@@ -345,25 +345,22 @@ describe('3p-frame', () => {
 
   describe('serializeMessage', () => {
     it('should work without payload', () => {
-      expect(serializeMessage('msgtype', 'msgsentinel'))
-          .to.equal('amp-{"type":"msgtype","sentinel":"msgsentinel"}');
+      const message = serializeMessage('msgtype', 'msgsentinel');
+      expect(message.indexOf('amp-')).to.equal(0);
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+      });
     });
 
     it('should work with payload', () => {
-      expect(serializeMessage('msgtype', 'msgsentinel', {x: 1, y: 'abc'}))
-          .to.equal(
-              'amp-{"x":1,"y":"abc","type":"msgtype","sentinel":"msgsentinel"}'
-      );
-    });
-
-    it('should be able to deserialize back', () => {
       const message = serializeMessage('msgtype', 'msgsentinel', {
         type: 'type_override', // override should be ignored
         sentinel: 'sentinel_override', // override should be ignored
         x: 1,
         y: 'abc',
       });
-      expect(deserializeMessage(message)).to.jsonEqual({
+      expect(deserializeMessage(message)).to.deep.equal({
         type: 'msgtype',
         sentinel: 'msgsentinel',
         x: 1,
@@ -374,14 +371,14 @@ describe('3p-frame', () => {
 
   describe('deserializeMessage', () => {
     it('should deserialize valid message', () => {
-      expect(deserializeMessage(
-          'amp-{"type":"msgtype","sentinel":"msgsentinel","x":1,"y":"abc"}'))
-          .to.jsonEqual({
-            type: 'msgtype',
-            sentinel: 'msgsentinel',
-            x: 1,
-            y: 'abc',
-          });
+      const message = deserializeMessage(
+          'amp-{"type":"msgtype","sentinel":"msgsentinel","x":1,"y":"abc"}');
+      expect(message).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
     });
 
     it('should return null if the input not a string', () => {
