@@ -365,7 +365,8 @@ describe('GoogleAdLifecycleReporter', () => {
           /baz=0/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);      });
+        expectHasSiblingImgMatchingAll(elem, expectations);
+      });
     });
 
     it('should uri encode extra params', () => {

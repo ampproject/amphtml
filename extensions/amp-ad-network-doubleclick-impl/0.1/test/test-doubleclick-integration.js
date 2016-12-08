@@ -17,7 +17,7 @@
 import {createElementWithAttributes} from '../../../../src/dom';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {
-  GoogleAdLifecycleReporter
+  GoogleAdLifecycleReporter,
 } from '../../../../ads/google/a4a/performance';
 
 // Still under construction.
@@ -49,6 +49,10 @@ describes.skip.sandboxed('A4A integration', {}, () => {
     });
 
     it('should send ping beacons for all lifecycle stages', () => {
+      pingStub.returns(null);
+      creativeXhrStub.returns(Promise.resolve({}));
+      keyXhrStub.returns(Promise.resolve({}));
+      expect(0).to.equal(1);
     });
   });
 });
