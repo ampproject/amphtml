@@ -16,7 +16,7 @@
 import './polyfills';
 import {dev, user} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from './messaging';
+import {MessageType} from '../src/3p-frame';
 
 export class AmpContext {
 

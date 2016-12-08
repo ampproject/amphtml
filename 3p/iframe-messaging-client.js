@@ -15,7 +15,7 @@
  */
 import {listen} from '../src/event-helper';
 import {map} from '../src/types';
-import {serializeMessage, deserializeMessage} from './messaging';
+import {serializeMessage, deserializeMessage} from '../src/3p-frame';
 
 export class IframeMessagingClient {
 

@@ -15,7 +15,7 @@
  */
 
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
-import {serializeMessage} from '../../../3p/messaging';
+import {serializeMessage} from '../../../src/3p-frame';
 
 describes.realWin('iframe-messaging-client', {}, env => {
 

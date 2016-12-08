@@ -22,6 +22,8 @@ import {
   preloadBootstrap,
   resetCountForTesting,
   resetBootstrapBaseUrlForTesting,
+  serializeMessage,
+  deserializeMessage,
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
@@ -339,5 +341,56 @@ describe('3p-frame', () => {
     expect(name).to.match(/d-\d+.ampproject.net__ping__0/);
     expect(newName).to.match(/d-\d+.ampproject.net__ping__0/);
     expect(newName).not.to.equal(name);
+  });
+
+  describe('serializeMessage', () => {
+    it('should work without payload', () => {
+      expect(serializeMessage('msgtype', 'msgsentinel'))
+          .to.equal('amp-{"type":"msgtype","sentinel":"msgsentinel"}');
+    });
+
+    it('should work with payload', () => {
+      expect(serializeMessage('msgtype', 'msgsentinel', {x: 1, y: 'abc'}))
+          .to.equal('amp-{"type":"msgtype","sentinel":"msgsentinel",'
+          + '"x":1,"y":"abc"}');
+    });
+
+    it('should be able to deserialize back', () => {
+      const message =
+          serializeMessage('msgtype', 'msgsentinel', {x: 1, y: 'abc'});
+      expect(deserializeMessage(message)).to.jsonEqual({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+  });
+
+  describe('deserializeMessage', () => {
+    it('should work without payload', () => {
+      expect(deserializeMessage(
+          'amp-{"type":"msgtype","sentinel":"msgsentinel","x":1,"y":"abc"}'))
+          .to.jsonEqual({
+            type: 'msgtype',
+            sentinel: 'msgsentinel',
+            x: 1,
+            y: 'abc',
+          });
+    });
+
+    it('should return null if the input not a string', () => {
+      expect(deserializeMessage({x: 1, y: 'abc'})).to.be.null;
+    });
+
+    it('should return null if the input does not start with amp-', () => {
+      expect(deserializeMessage(
+          'noamp-{"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+    });
+
+    it('should return null if failed to parse the input', () => {
+      expect(deserializeMessage(
+          'amp-"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+    });
   });
 });

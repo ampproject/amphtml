@@ -459,7 +459,7 @@ function checkTypes() {
   }).sort();
   closureCompile(compileSrcs.concat(extensionSrcs), './dist',
       'check-types.js', {
-        include3pDirectories: true,
+        include3pDirectories: false,
         includePolyfills: true,
         checkTypes: true,
       });
