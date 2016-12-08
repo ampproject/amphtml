@@ -41,7 +41,6 @@ import * as utils from './utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-// import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 import * as events from '../../../src/event-helper';
 import {postMessage} from '../../../src/iframe-helper';
@@ -277,6 +276,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
+
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
