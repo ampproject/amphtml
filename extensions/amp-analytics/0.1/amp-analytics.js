@@ -424,8 +424,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     // once destroyed embed release is implemented. See `detachedCallback`.
     if (!this.element.ownerDocument.defaultView) {
       const TAG = this.getName_();
-      dev().warn(TAG, 'request against destroyed embed: ', trigger.on, trigger);
-      return;
+      dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
+      return Promise.resolve();
     }
 
     if (!request) {
