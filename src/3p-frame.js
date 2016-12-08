@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import './polyfills'; // Object.assign is used by serializeMessage
 import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
 import {getLengthNumeral} from '../src/layout';
