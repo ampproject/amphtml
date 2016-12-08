@@ -25,7 +25,7 @@
  * @constructor
  */
 function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId) {
-  this.sentinel_ = '__AMP__';
+  this.sentinel_ = '__AMPHTML__';
   this.requestSentinel_ = this.sentinel_ + 'REQUEST';
   this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
 
