@@ -52,9 +52,8 @@ export class AmpViewerIntegration {
               return viewer.receiveMessage(
                 type, /** @type {!JSONType} */ (payload), awaitResponse);
             });
-        viewer.setMessageDeliverer((type, payload, awaitResponse) => {
-          return messaging.sendRequest(type, payload, awaitResponse);
-        }, viewerOrigin);
+        viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
+          viewerOrigin);
       });
   }
 
