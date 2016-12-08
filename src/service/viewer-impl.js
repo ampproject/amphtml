@@ -740,41 +740,6 @@ export class Viewer {
     }, /* cancelUnsent */true);
   }
 
-
-  /**
-   * Triggers "scroll" event for the viewer.
-   * @param {number} scrollTop
-   * TODO: move this to viewport-impl
-   */
-  postScroll(scrollTop) {
-    this.sendMessage(
-        'scroll', {scrollTop}, /* cancelUnsent */true);
-  }
-
-  /**
-   * Requests full overlay mode from the viewer. Returns a promise that yields
-   * when the viewer has switched to full overlay mode.
-   * @return {!Promise}
-   * TODO: move this to viewport-impl and use sendMessage()
-   */
-  requestFullOverlay() {
-    return /** @type {!Promise} */ (
-        this.sendMessageAwaitResponse('requestFullOverlay', {},
-            /* cancelUnsent */true));
-  }
-
-  /**
-   * Requests to cancel full overlay mode from the viewer. Returns a promise
-   * that yields when the viewer has switched off full overlay mode.
-   * @return {!Promise}
-   * TODO: move this to viewport-impl and use sendMessage()
-   */
-  cancelFullOverlay() {
-    return /** @type {!Promise} */ (
-        this.sendMessageAwaitResponse('cancelFullOverlay', {},
-            /* cancelUnsent */true));
-  }
-
   /**
    * Triggers "pushHistory" event for the viewer.
    * @param {number} stackIndex
