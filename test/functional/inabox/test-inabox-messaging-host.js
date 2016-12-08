@@ -15,6 +15,7 @@
  */
 
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
+import {deserializeMessage} from '../../../src/3p-frame';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
 
@@ -118,9 +119,14 @@ describes.realWin('inabox-host:position-observer', {}, env => {
 
       expect(target).to.equal(iframe1);
       callback({x: 1});
-      expect(postMessageSpy).to.be.calledWith(
-          'amp-{"type":"position","sentinel":"0-123","data":{"x":1}}',
-          'www.example.com');
+      const message = postMessageSpy.getCall(0).args[0];
+      const targetOrigin = postMessageSpy.getCall(0).args[1];
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'position',
+        sentinel: '0-123',
+        x: 1,
+      });
+      expect(targetOrigin).to.equal('www.example.com');
     });
 
     it('should not double register', () => {
