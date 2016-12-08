@@ -33,7 +33,6 @@ const DAY = 24 * 3600 * 1000;
 
 describe('cid', () => {
 
-  let isIframed;
   let sandbox;
   let clock;
   let fakeWin;
@@ -50,7 +49,6 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    isIframed = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
@@ -92,9 +90,6 @@ describe('cid', () => {
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
     const viewer = installViewerServiceForDoc(ampdoc);
-    sandbox.stub(viewer, 'isIframed', function() {
-      return isIframed;
-    });
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -206,7 +201,7 @@ describe('cid', () => {
   });
 
   it('should read from viewer storage if embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expectedBaseCid = 'from-viewer';
     viewerStorage = JSON.stringify({
       time: 0,
@@ -229,7 +224,7 @@ describe('cid', () => {
   });
 
   it('should store to viewer storage if embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
     return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
         .then(() => {
@@ -248,7 +243,7 @@ describe('cid', () => {
   });
 
   it('should prefer value in storage if present', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     storage['amp-cid'] = JSON.stringify({
       cid: 'in-storage',
       time: Date.now(),
@@ -269,7 +264,7 @@ describe('cid', () => {
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
-    installViewerServiceForDoc(ampdoc).isIframed = () => false;
+    installViewerServiceForDoc(ampdoc);
     installCidService(win);
     installCryptoService(win);
     return cidFor(win).then(cid => {
@@ -305,7 +300,7 @@ describe('cid', () => {
   });
 
   it('should expire on read after 365 days when embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expectedBaseCid = 'from-viewer';
     viewerStorage = JSON.stringify({
       time: 0,
@@ -346,7 +341,7 @@ describe('cid', () => {
   });
 
   it('should set last access time once a day when embedded', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
     function getStoredTime() {
       return JSON.parse(viewerStorage).time;
@@ -432,7 +427,7 @@ describe('cid', () => {
   });
 
   it('should not wait persistence consent for viewer storage', () => {
-    isIframed = true;
+    fakeWin.parent = {};
     const persistencePromise = new Promise(() => {/* never resolves */});
     return cid.get('e2', hasConsent, persistencePromise).then(() => {
       expect(viewerStorage).to.equal(JSON.stringify({
