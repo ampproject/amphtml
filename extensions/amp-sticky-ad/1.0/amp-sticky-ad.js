@@ -152,7 +152,7 @@ class AmpStickyAd extends AMP.BaseElement {
     if (this.ad_.isBuilt()) {
       this.layoutAd_();
     } else {
-      listenOnce(this.ad_, 'amp:built', () => {
+      listenOnce(dev().assertElement(this.ad_), 'amp:built', () => {
         this.layoutAd_();
       });
     }
@@ -165,7 +165,7 @@ class AmpStickyAd extends AMP.BaseElement {
   layoutAd_() {
     this.updateInViewport(dev().assertElement(this.ad_), true);
     this.scheduleLayout(dev().assertElement(this.ad_));
-    listenOnce(this.ad_, 'amp:load:end', () => {
+    listenOnce(dev().assertElement(this.ad_), 'amp:load:end', () => {
       this.vsync_.mutate(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
