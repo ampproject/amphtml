@@ -23,6 +23,22 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 
+import {createIframePromise} from '../../../../testing/iframe';
+
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {upgradeOrRegisterElement} from '../../../../src/custom-element';
+
+
+function getAdsenseImplElement(attributes, opt_doc, opt_tag) {
+  const doc = opt_doc || document;
+  const tag = opt_tag || 'amp-ad';
+  const adsenseImplElem = doc.createElement(tag);
+  for (const attrName in attributes) {
+    adsenseImplElem.setAttribute(attrName, attributes[attrName]);
+  }
+  return adsenseImplElem;
+}
+
 describe('amp-ad-network-adsense-impl', () => {
 
   let sandbox;
@@ -31,13 +47,23 @@ describe('amp-ad-network-adsense-impl', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    adsenseImplElem = document.createElement('amp-ad');
-    adsenseImplElem.setAttribute('type', 'adsense');
-    adsenseImplElem.setAttribute('data-ad-client', 'adsense');
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
         () => {
           return ['google'];
         });
+    /*sandbox.stub(
+        AmpAdNetworkAdsenseImpl.prototype, 'getIntersectionElementLayoutBox')
+        .returns({width:1200, height:500});
+    sandbox.stub(
+        AmpAdNetworkAdsenseImpl.prototype, 'getVisibilityState_')
+        .returns('1');*/
+    adsenseImplElem = getAdsenseImplElement({
+      'type': 'adsense',
+      'data-ad-client': 'adsense',
+      'width': '320',
+      'height': '50',
+      'data-experiment-id': '8675309',
+    });
     adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
   });
 
@@ -45,14 +71,101 @@ describe('amp-ad-network-adsense-impl', () => {
     sandbox.restore();
   });
 
+  describe('#getAdUrl', () => {
+    const invariantParams = {
+      'client': 'adsense',
+      'format': '320x50',
+      'w': '320',
+      'h': '50',
+      'output': 'html',
+      'is_amp': '3',
+      'eid': '8675309',
+    };
+    const variableParams = [
+      'slotname', 'adk', 'adf', 'ea', 'flash', 'url', 'wg', 'dt', 'bpp', 'bdt',
+      'fdt', 'idt', 'shb', 'cbv', 'saldr', 'amp_v', 'correlator', 'frm',
+      'ga_vid', 'ga_hid', 'iag', 'icsg', 'nhd', 'dssz', 'mdo', 'mso', 'u_tz',
+      'u_his', 'u_java', 'u_h', 'u_w', 'u_ah', 'u_aw', 'u_cd', 'u_nplug',
+      'u_nmime', 'dff', 'adx', 'ady', 'biw', 'isw', 'ish', 'ifk', 'oid', 'loc',
+      'rx', 'eae', 'pc', 'brdim', 'vis', 'rsz', 'abl', 'ppjl', 'pfx', 'fu',
+      'bc', 'ifi', 'dtd',
+    ];
+    // Skipping this test until all AdSense parameters are standardized, and
+    // their implementation in A4A and 3p reach parity.
+    it.skip('with single slot', () => {
+      return createIframePromise().then(fixture => {
+        // Set up the element's underlying infrastructure.
+        installDocService(fixture.win, /* isSingleDoc */ true);
+        upgradeOrRegisterElement(fixture.win, 'amp-a4a',
+            AmpAdNetworkAdsenseImpl);
+        const elem = getAdsenseImplElement({
+          'type': 'adsense',
+          'data-ad-client': 'adsense',
+          'width': '320',
+          'height': '50',
+          'data-experiment-id': '8675309',
+        }, fixture.doc);
+        return fixture.addElement(elem).then(addedElem => {
+          // Create AdsenseImpl instance.
+          adsenseImpl = new AmpAdNetworkAdsenseImpl(addedElem);
+          // The expected url parameters whose values are known and fixed.
+          const urlParams = Object.assign({}, invariantParams, {pv: '2'});
+          return adsenseImpl.getAdUrl().then(adUrl => {
+            const queryPairs = adUrl.split('?')[1].split('&');
+            const actualQueryParams = {};
+            queryPairs.forEach(pair => {
+              const pairArr = pair.split('=');
+              actualQueryParams[pairArr[0]] = pairArr[1];
+            });
+            // Check that the fixed url parameters are all contained within the
+            // actual query parameters, and that the corresponding known values
+            // match.
+            for (const name in urlParams) {
+              expect(!!actualQueryParams[name],
+                  `missing parameter ${name}`)
+                  .to.be.true;
+              expect(actualQueryParams[name],
+                  `parameter ${name} has wrong value`)
+                  .to.equal(urlParams[name]);
+            }
+            // Check that the other url parameters are also contained within the
+            // actual query parameters. Remember the ones that aren't for
+            // debugging purposes.
+            const missingParams = [];
+            for (const i in variableParams) {
+              const name = variableParams[i];
+              if (!actualQueryParams[name]) {
+                missingParams.push(name);
+              }
+            }
+            expect(missingParams.length,
+                `missing parameters ${missingParams.join(', ')}`)
+                .to.equal(0);
+            // Check if there are any extraneous actual query parameters.
+            // Remember them for debugging purposes.
+            const extraneousParams = [];
+            for (const name in actualQueryParams) {
+              if (!(name in urlParams) && variableParams.indexOf(name) < 0) {
+                extraneousParams.push(`${name}=${actualQueryParams[name]}`);
+              }
+            }
+            expect(extraneousParams.length,
+                'found extraneous parameters: ' + extraneousParams.join('&'))
+                .to.equal(0);
+          });
+        });
+      });
+    });
+  });
+
   describe('#isValidElement', () => {
     it('should be valid', () => {
       expect(adsenseImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      adsenseImplElem = document.createElement('amp-ad-network-adsense-impl');
-      adsenseImplElem.setAttribute('type', 'adsense');
-      adsenseImplElem.setAttribute('data-ad-client', 'adsense');
+      adsenseImplElem = getAdsenseImplElement({
+        type: 'adsense',
+        'data-ad-client': 'adsense'}, document, 'amp-ad-network-adsense-impl');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
@@ -63,9 +176,9 @@ describe('amp-ad-network-adsense-impl', () => {
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      adsenseImplElem = document.createElement('amp-embed');
-      adsenseImplElem.setAttribute('type', 'adsense');
-      adsenseImplElem.setAttribute('data-ad-client', 'adsense');
+      adsenseImplElem = getAdsenseImplElement({
+        type: 'adsense',
+        'data-ad-client': 'adsense'}, document, 'amp-embed');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.true;
     });

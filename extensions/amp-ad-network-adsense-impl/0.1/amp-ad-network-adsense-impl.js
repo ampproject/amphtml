@@ -79,6 +79,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.isAmpAdElement();
   }
 
+  /**
+   * For testing purposes, this value is retrieved by function call.
+   */
+  getVisibilityState_() {
+    return viewerForDoc(this.getAmpDoc()).getVisibilityState();
+  }
+
   /** @override */
   getAdUrl() {
     const startTime = Date.now();
@@ -89,7 +96,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
-    const visibilityState = viewerForDoc(this.getAmpDoc()).getVisibilityState();
+    const visibilityState = this.getVisibilityState_();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
