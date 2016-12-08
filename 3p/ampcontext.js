@@ -16,22 +16,7 @@
 import './polyfills';
 import {dev, user} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
-
-/**
-   Enum for the different postmessage types for the window.context
-   postmess api.
-*/
-export const MessageType_ = {
-  SEND_EMBED_STATE: 'send-embed-state',
-  EMBED_STATE: 'embed-state',
-  SEND_EMBED_CONTEXT: 'send-embed-context',
-  EMBED_CONTEXT: 'embed-context',
-  SEND_INTERSECTIONS: 'send-intersections',
-  INTERSECTION: 'intersection',
-  EMBED_SIZE: 'embed-size',
-  EMBED_SIZE_CHANGED: 'embed-size-changed',
-  EMBED_SIZE_DENIED: 'embed-size-denied',
-};
+import {MessageType} from '../src/3p-frame';
 
 export class AmpContext {
 
@@ -54,8 +39,8 @@ export class AmpContext {
    */
   observePageVisibility(callback) {
     return this.client_.makeRequest(
-        MessageType_.SEND_EMBED_STATE,
-        MessageType_.EMBED_STATE,
+        MessageType.SEND_EMBED_STATE,
+        MessageType.EMBED_STATE,
         callback);
   };
 
@@ -68,8 +53,8 @@ export class AmpContext {
    */
   observeIntersection(callback) {
     return this.client_.makeRequest(
-        MessageType_.SEND_INTERSECTIONS,
-        MessageType_.INTERSECTION,
+        MessageType.SEND_INTERSECTIONS,
+        MessageType.INTERSECTION,
         callback);
   };
 
@@ -80,7 +65,7 @@ export class AmpContext {
    *  @param {int} width The new width for the ad we are requesting.
    */
   requestResize(height, width) {
-    this.client_.sendMessage(MessageType_.EMBED_SIZE, {width, height});
+    this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
   };
 
   /**
@@ -91,7 +76,7 @@ export class AmpContext {
    *    to call if the resize request succeeds.
    */
   onResizeSuccess(callback) {
-    this.client_.registerCallback(MessageType_.EMBED_SIZE_CHANGED, obj => {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
       callback(obj.requestedHeight, obj.requestedWidth); });
   };
 
@@ -103,7 +88,7 @@ export class AmpContext {
    *    to call if the resize request is denied.
    */
   onResizeDenied(callback) {
-    this.client_.registerCallback(MessageType_.EMBED_SIZE_DENIED, obj => {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
       callback(obj.requestedHeight, obj.requestedWidth);
     });
   };
