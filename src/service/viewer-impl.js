@@ -115,20 +115,20 @@ export class Viewer {
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    /** @private {!Observable<boolean>} */
-    this.runtimeOnObservable_ = new Observable();
+    /** @private {?Observable<boolean>} */
+    this.runtimeOnObservable_ = null;
 
-    /** @private {!Observable} */
-    this.visibilityObservable_ = new Observable();
+    /** @private {?Observable} */
+    this.visibilityObservable_ = null;
 
-    /** @private {!Observable<!JSONType>} */
-    this.viewportObservable_ = new Observable();
+    /** @private {?Observable<!JSONType>} */
+    this.viewportObservable_ = null;
 
-    /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
-    this.historyPoppedObservable_ = new Observable();
+    /** @private {?Observable<!ViewerHistoryPoppedEventDef>} */
+    this.historyPoppedObservable_ = null;
 
-    /** @private {!Observable<!JSONType>} */
-    this.broadcastObservable_ = new Observable();
+    /** @private {?Observable<!JSONType>} */
+    this.broadcastObservable_ = null;
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
@@ -404,6 +404,9 @@ export class Viewer {
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
+    if (!this.visibilityObservable_) {
+      this.visibilityObservable_ = new Observable();
+    }
     this.visibilityObservable_.fire();
   }
 
@@ -490,6 +493,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onRuntimeState(handler) {
+    if (!this.runtimeOnObservable_) {
+      this.runtimeOnObservable_ = new Observable();
+    }
     return this.runtimeOnObservable_.add(handler);
   }
 
@@ -709,6 +715,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
+    if (!this.visibilityObservable_) {
+      this.visibilityObservable_ = new Observable();
+    }
     return this.visibilityObservable_.add(handler);
   }
 
@@ -718,6 +727,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
+    if (!this.viewportObservable_) {
+      this.viewportObservable_ = new Observable();
+    }
     return this.viewportObservable_.add(handler);
   }
 
@@ -727,6 +739,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onHistoryPoppedEvent(handler) {
+    if (!this.historyPoppedObservable_) {
+      this.historyPoppedObservable_ = new Observable();
+    }
     return this.historyPoppedObservable_.add(handler);
   }
 
@@ -1039,6 +1054,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onBroadcast(handler) {
+    if (!this.broadcastObservable_) {
+      this.broadcastObservable_ = new Observable();
+    }
     return this.broadcastObservable_.add(handler);
   }
 
