@@ -18,7 +18,8 @@ import {isExperimentOn} from '../../../src/experiments';
 import {cryptoFor} from '../../../src/crypto';
 import {dev, user} from '../../../src/log';
 import {fromClass} from '../../../src/service';
-import {isArray, isFiniteNumber, map} from '../../../src/types';
+import {isArray, isFiniteNumber} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';

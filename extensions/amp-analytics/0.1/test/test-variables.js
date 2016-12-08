@@ -156,6 +156,8 @@ describe('amp-analytics.VariableService', function() {
     check('client id', 'client id', '');
     check('client id()', 'client id()', '');
     check('client id (abc)', 'client id (abc)', '');
+    check('client id\nand something', 'client id\nand something', '');
+    check('client id\nclientId()', 'client id\nclientId()', '');
 
 
     check('clientId()', 'clientId', '()');

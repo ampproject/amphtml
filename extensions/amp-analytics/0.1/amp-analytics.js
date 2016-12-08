@@ -18,7 +18,8 @@ import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
-import {isArray, isObject, map} from '../../../src/types';
+import {isArray, isObject} from '../../../src/types';
+import {hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
@@ -177,7 +178,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
-      if (this.config_['triggers'].hasOwnProperty(k)) {
+      if (hasOwn(this.config_['triggers'], k)) {
         const trigger = this.config_['triggers'][k];
         const expansionOptions = this.expansionOptions_(
             {}, trigger, undefined, true);
@@ -383,7 +384,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     for (const k in this.config_['requests']) {
-      if (this.config_['requests'].hasOwnProperty(k)) {
+      if (hasOwn(this.config_['requests'], k)) {
         requests[k] = this.config_['requests'][k];
       }
     }
@@ -584,7 +585,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().assert(opt_predefinedConfig || property != 'iframePing',
           'iframePing config is only available to vendor config.');
       // Only deal with own properties.
-      if (from.hasOwnProperty(property)) {
+      if (hasOwn(from, property)) {
         if (isArray(from[property])) {
           if (!isArray(to[property])) {
             to[property] = [];

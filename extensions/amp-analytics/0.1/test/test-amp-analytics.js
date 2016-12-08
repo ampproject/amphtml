@@ -30,6 +30,7 @@ import {
   fromClassForDoc,
 } from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
+import {map} from '../../../../src/utils/object';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
@@ -386,6 +387,8 @@ describe('amp-analytics', function() {
 
     return analytics.layoutCallback().then(() => {
       expect(analytics.mergeObjects_({}, {})).to.deep.equal({});
+      expect(analytics.mergeObjects_(map({'a': 0}), map({'b': 1})))
+          .to.deep.equal(map({'a': 0, 'b': 1}));
       expect(analytics.mergeObjects_({'foo': 1}, {'1': 1}))
           .to.deep.equal({'foo': 1, '1': 1});
       expect(analytics.mergeObjects_({'1': 1}, {'bar': 'bar'}))
@@ -999,28 +1002,5 @@ describe('amp-analytics', function() {
         expect(sendRequestSpy.callCount).to.equal(0);
       });
     });
-  });
-
-  describe('getNameArgs:', () => {
-
-    function check(input, name, argList) {
-      it('can parse ' + name, () => {
-        const analytics = getAnalyticsTag(trivialConfig);
-        expect(analytics.getNameArgs_(input)).to.deep.equal({name, argList});
-      });
-    }
-
-    check('abc', 'abc', '');
-    check('client id', 'client id', '');
-    check('client id\nand something', 'client id\nand something', '');
-    check('client id()', 'client id()', '');
-    check('client id\nclientId()', 'client id\nclientId()', '');
-    check('client id (abc)', 'client id (abc)', '');
-
-
-    check('clientId()', 'clientId', '()');
-    check('clientId(abc)', 'clientId', '(abc)');
-    check('clientId(abc,def)', 'clientId', '(abc,def)');
-    check('clientId(abc, def)', 'clientId', '(abc, def)');
   });
 });
