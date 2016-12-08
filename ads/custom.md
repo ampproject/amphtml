@@ -188,7 +188,7 @@ that displays the page (as in `eventAction`) or in variables passed back by the 
         </a>
     </template>  
 </amp-ad>
-<amp-analytics type='googleanalytics' id='myamppage'>
+<amp-analytics type='googleanalytics'>
 <script type='application/json'>
 {
     "requests": {

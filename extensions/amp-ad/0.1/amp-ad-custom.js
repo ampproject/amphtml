@@ -104,7 +104,6 @@ export class AmpAdCustom extends AMP.BaseElement {
           // Clear out the template and replace it by the rendered version
             removeChildren(element);
             element.appendChild(renderedElement);
-            return this;
           });
       } else {
         this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
