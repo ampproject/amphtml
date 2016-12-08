@@ -195,7 +195,7 @@ export class History {
     try {
       promise = task.callback();
     } catch (e) {
-      promise = Promise.reject(e);
+      promise = Promise.reject(/** @type {!Error} */ (e));
     }
 
     promise.then(result => {

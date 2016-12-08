@@ -4,3 +4,20 @@ requirement: {
   java_class: 'com.google.javascript.jscomp.ConformanceRules$BanThrowOfNonErrorTypes'
   error_message: 'Should not throw a non-Error object.'
 }
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  rule_id: 'amp:rejectOfNonErrorTypes'
+  error_message: 'Always reject with an Error type object.'
+  # Since we can't really express in refaster to ONLY allow for Error and its
+  # subtypes we try to list down as much primitive types that we can and more
+  # or less allow Object.
+  value: '/**\n'
+         '  * @param {string|null|undefined|number|Date} reason\n'
+         '  */\n'
+         'function template(reason) { Promise.reject(reason) }'
+  value: '/**\n'
+         '  * @param {string|null|undefined|number|Date} reason\n'
+         '  */\n'
+         'function template(reason) { reject(reason) }'
+}
