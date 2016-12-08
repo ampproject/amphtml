@@ -66,8 +66,8 @@ export class ClickHandler {
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
     /** @private @const {boolean} */
-    this.isIframed_ = isIframed(this.ampdoc.win &&
-        this.viewer_.isOvertakeHistory());
+    this.isIframed_ =
+        isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
