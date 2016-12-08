@@ -834,7 +834,6 @@ describe('Viewport META', () => {
     let viewport;
     let binding;
     let viewer;
-    let viewerMock;
     let windowApi;
     let ampdoc;
     let originalViewportMetaString, viewportMetaString;
@@ -851,7 +850,6 @@ describe('Viewport META', () => {
         isVisible: () => true,
         onVisibilityChanged: () => {},
       };
-      viewerMock = sandbox.mock(viewer);
 
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
