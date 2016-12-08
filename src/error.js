@@ -51,10 +51,10 @@ self.AMPErrors = accumulatedErrorMessages;
  * @param {function()} work the function to execute after backoff
  * @return {number} the setTimeout id
  */
-let globalExponentialBackoff = function(work) {
-  // Set globalExponentialBackoff as the lazy-created function. JS Vooodoooo.
-  globalExponentialBackoff = exponentialBackoff(1.5);
-  return globalExponentialBackoff(work);
+let reportingBackoff = function(work) {
+  // Set reportingBackoff as the lazy-created function. JS Vooodoooo.
+  reportingBackoff = exponentialBackoff(1.5);
+  return reportingBackoff(work);
 };
 
 /**
@@ -187,11 +187,11 @@ function reportErrorToServer(message, filename, line, col, error) {
   }
   const url = getErrorReportUrl(message, filename, line, col, error,
       hasNonAmpJs);
-  globalExponentialBackoff(() => {
-    if (url) {
+  if (url) {
+    reportingBackoff(() => {
       new Image().src = url;
-    }
-  });
+    });
+  }
 }
 
 /**
