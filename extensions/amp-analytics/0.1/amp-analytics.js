@@ -527,13 +527,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!key) {
       return {name: '', argList: ''};
     }
-    const match = key.match(/([^(]*)(\([^)]*\))?/);
+    const match = key.match(/^(?:([^ ]*)(\([^)]*\))|.+)$/);
     if (!match) {
       const TAG = this.getName_();
       user().error(TAG,
           'Variable with invalid format found: ' + key);
     }
-    return {name: match[1], argList: match[2] || ''};
+    return {name: match[1] || match[0], argList: match[2] || ''};
   }
 
   /**
