@@ -606,3 +606,13 @@ export function tryFocus(element) {
     // IE <= 7 may throw exceptions when focusing on hidden items.
   }
 }
+
+/**
+ * Whether the given window is in an iframe or not.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isIframed(win) {
+  return win.parent && win.parent != win;
+}
+

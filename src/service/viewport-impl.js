@@ -33,7 +33,7 @@ import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
-import {waitForBody} from '../dom';
+import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
@@ -174,7 +174,7 @@ export class Viewport {
     } else {
       this.globalDoc_.documentElement.classList.add('-amp-standalone');
     }
-    if (viewer.isIframed()) {
+    if (isIframed(this.ampdoc.win)) {
       this.globalDoc_.documentElement.classList.add('-amp-iframed');
     }
 
@@ -569,7 +569,7 @@ export class Viewport {
    * @private
    */
   getViewportMeta_() {
-    if (this.viewer_.isIframed()) {
+    if (isIframed(this.ampdoc.win)) {
       // An embedded document does not control its viewport meta tag.
       return null;
     }
@@ -1755,13 +1755,12 @@ function getViewportType(win, viewer) {
   }
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
-  if (!viewer.isIframed()
-          && (getMode(win).localDev || getMode(win).development)) {
+  if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
   // Override to ios-embed for iframe-viewer mode.
   // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
-  if (viewer.isIframed() && viewer.isEmbedded()) {
+  if (isIframed(win) && viewer.isEmbedded()) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
   return viewportType;
