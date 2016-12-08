@@ -263,7 +263,7 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
-  'sendMessage\\W': {
+  '\\.sendMessage\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
       // viewer-impl.sendMessage
@@ -276,7 +276,7 @@ var forbiddenTerms = {
       '3p/ampcontext.js',
     ],
   },
-  'sendMessageAwaitResponse\\W': {
+  '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
