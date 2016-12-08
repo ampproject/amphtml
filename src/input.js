@@ -71,14 +71,14 @@ export class Input {
     /** @private {number} */
     this.mouseConfirmAttemptCount_ = 0;
 
-    /** @private {!Observable<boolean>} */
-    this.touchDetectedObservable_ = new Observable();
+    /** @private {?Observable<boolean>} */
+    this.touchDetectedObservable_ = null;
 
-    /** @private {!Observable<boolean>} */
-    this.mouseDetectedObservable_ = new Observable();
+    /** @private {?Observable<boolean>} */
+    this.mouseDetectedObservable_ = null;
 
-    /** @private {!Observable<boolean>} */
-    this.keyboardStateObservable_ = new Observable();
+    /** @private {?Observable<boolean>} */
+    this.keyboardStateObservable_ = null;
 
     // If touch available, temporarily set hasMouse to false and wait for
     // mouse events.
@@ -114,6 +114,9 @@ export class Input {
     if (opt_fireImmediately) {
       handler(this.isTouchDetected());
     }
+    if (!this.touchDetectedObservable_) {
+      this.touchDetectedObservable_ = new Observable();
+    }
     return this.touchDetectedObservable_.add(handler);
   }
 
@@ -135,6 +138,9 @@ export class Input {
     if (opt_fireImmediately) {
       handler(this.isMouseDetected());
     }
+    if (!this.mouseDetectedObservable_) {
+      this.mouseDetectedObservable_ = new Observable();
+    }
     return this.mouseDetectedObservable_.add(handler);
   }
 
@@ -155,6 +161,9 @@ export class Input {
   onKeyboardStateChanged(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {
       handler(this.isKeyboardActive());
+    }
+    if (!this.keyboardStateObservable_) {
+      this.keyboardStateObservable_ = new Observable();
     }
     return this.keyboardStateObservable_.add(handler);
   }
