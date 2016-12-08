@@ -414,31 +414,8 @@ var forbiddenTerms = {
 
   // ES6. These are only the most commonly used.
   'Array\\.of': es6polyfill,
-  // These currently depend on core-js/modules/web.dom.iterable which
-  // we don't want. That decision could be reconsidered.
-  '\\.startsWith': {
-    message: es6polyfill,
-    whitelist: [
-      'build-system/pr-check.js',
-      'validator/engine/tokenize-css.js',
-      'validator/engine/validator.js',
-      // Service workers are only available in ES6 environments
-      'src/service-worker/core.js',
-      // exports.startsWith occurs in babel generated code.
-      'dist.3p/current/integration.js',
-    ]
-  },
-  '\\.endsWith': {
-    message: es6polyfill,
-    whitelist: [
-      'build-system/pr-check.js',
-      'build-system/tasks/csvify-size/index.js',
-      // Service workers are only available in ES6 environments
-      'src/service-worker/core.js',
-      // .endsWith occurs in babel generated code.
-      'dist.3p/current/integration.js',
-    ],
-  },
+  'String\\.raw': es6polyfill,
+  'String\\.fromCodePoint': es6polyfill,
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
