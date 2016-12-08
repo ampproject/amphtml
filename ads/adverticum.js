@@ -15,31 +15,28 @@
  */
 
 import {writeScript} from '../3p/3p';
-
+import {validateData} from '../3p/3p';
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
+export function adverticum(global, data) {
+  validateData(data, ['goa3zone'], ['costumetargetstring'])
+  const zoneid = 'zone' + data['goa3zone'];
+  const d = global.document.createElement('div');
 
-export function adverticum(global,data) {
-  if (data.goa3zone) {
-    const zoneid = 'zone' + data.goa3zone;
-    const d = global.document.createElement('div');
+  d.setAttribute('id', zoneid);
+  d.setAttribute('class', 'goAdverticum goa-embedded');
 
-    d.setAttribute('id', zoneid);
-    d.setAttribute('class', 'goAdverticum goa-embedded');
+  document.getElementById('c').appendChild(d);
 
-    document.getElementById('c').appendChild(d);
+  const s = global.document.createTextNode(data['costumetargetstring']);
+  const v = global.document.createElement('var');
+  v.setAttribute('id', 'cT');
+  v.setAttribute('class', 'customtarget');
+  v.setAttribute('style', 'display:none');
+  v.appendChild(s);
+  document.getElementById(zoneid).appendChild(v);
 
-    if (data.costumetargetstring) {
-      const s = global.document.createTextNode(data.costumetargetstring);
-      const v = global.document.createElement('var');
-      v.setAttribute('id', 'cT');
-      v.setAttribute('class', 'customtarget');
-      v.setAttribute('style', 'display:none');
-      v.appendChild(s);
-      document.getElementById(zoneid).appendChild(v);
-    }
-    writeScript(global, 'http://ad.adverticum.net/g3.js');
-  }
+  writeScript(global, 'http://ad.adverticum.net/g3.js');
 }

@@ -20,7 +20,9 @@ limitations under the License.
 
 ```html
 <amp-ad width=300 height=250
-    type="adverticum" data-goa3zone="123456789" data-costumetargetstring="bXVzdGJlYmVhc2U2NGVuY29kZWQ=" >
+    type="adverticum"
+    data-goa3zone="123456789"
+    data-costumetargetstring="bXVzdGJlYmVhc2U2NGVuY29kZWQ=" >
 </amp-ad>
 ```
 
