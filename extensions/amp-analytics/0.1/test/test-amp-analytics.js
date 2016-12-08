@@ -18,6 +18,7 @@ import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {Crypto} from '../crypto-impl';
 import {InstrumentationService} from '../instrumentation';
+import {variableServiceFor} from '../variables';
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
@@ -199,8 +200,9 @@ describe('amp-analytics', function() {
                 expect(this.replacements_).to.have.property(name);
                 return {sync: '_' + name.toLowerCase() + '_'};
               });
-            const encodeVars = analytics.encodeVars_;
-            sandbox.stub(analytics, 'encodeVars_', function(val, name) {
+            const variables = variableServiceFor(analytics.win);
+            const encodeVars = variables.encodeVars;
+            sandbox.stub(variables, 'encodeVars', function(val, name) {
               val = encodeVars.call(this, val, name);
               if (val == '') {
                 return '$' + name;
@@ -567,15 +569,6 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('correctly encodes scalars and arrays', () => {
-    const a = getAnalyticsTag();
-    expect(a.encodeVars_('abc %&')).to.equal('abc%20%25%26');
-    const array = ['abc %&', 'a b'];
-    expect(a.encodeVars_(array)).to.equal('abc%20%25%26,a%20b');
-    // Test non-inplace semantics but testing again.
-    expect(a.encodeVars_(array)).to.equal('abc%20%25%26,a%20b');
-  });
-
   it('expands url-replacements vars', () => {
     const analytics = getAnalyticsTag({
       'requests': {
@@ -930,41 +923,6 @@ describe('amp-analytics', function() {
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
-    });
-  });
-
-  describe('expandTemplate_', () => {
-    const vars = {
-      'vars': {'1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}'}};
-    let analytics;
-
-    beforeEach(() => {
-      analytics = getAnalyticsTag(trivialConfig);
-    });
-
-    it('expands nested vars', () => {
-      const actual = analytics.expandTemplate_('${1}', vars);
-      expect(actual).to.equal('123%252524%25257B4%25257D');
-    });
-
-    it('limits the recursion to n', () => {
-      let actual = analytics.expandTemplate_('${1}', vars, {}, 3);
-      expect(actual).to.equal('1234%25252524%2525257B1%2525257D');
-
-      actual = analytics.expandTemplate_('${1}', vars, {}, 5);
-      expect(actual).to.equal('123412%252525252524%25252525257B3%25252525257D');
-    });
-
-    it('works with complex params (1)', () => {
-      const vars = {'vars': {'fooParam': 'QUERY_PARAM(foo,bar)'}};
-      const actual = analytics.expandTemplate_('${fooParam}', vars);
-      expect(actual).to.equal('QUERY_PARAM(foo,bar)');
-    });
-
-    it('works with complex params (2)', () => {
-      const vars = {'vars': {'fooParam': 'QUERY_PARAM'}};
-      const actual = analytics.expandTemplate_('${fooParam(foo,bar)}', vars);
-      expect(actual).to.equal('QUERY_PARAM(foo,bar)');
     });
   });
 
