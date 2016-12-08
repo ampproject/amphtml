@@ -33,6 +33,7 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/url-replacements';
+import {map} from '../../../../src/types';
 import * as sinon from 'sinon';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
@@ -386,6 +387,8 @@ describe('amp-analytics', function() {
 
     return analytics.layoutCallback().then(() => {
       expect(analytics.mergeObjects_({}, {})).to.deep.equal({});
+      expect(analytics.mergeObjects_(map({'a': 0}), map({'b': 1})))
+          .to.deep.equal(map({'a': 0, 'b': 1}));
       expect(analytics.mergeObjects_({'foo': 1}, {'1': 1}))
           .to.deep.equal({'foo': 1, '1': 1});
       expect(analytics.mergeObjects_({'1': 1}, {'bar': 'bar'}))

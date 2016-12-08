@@ -46,6 +46,8 @@ variableServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
+const hasOwn = Object.prototype.hasOwnProperty;
+
 export class AmpAnalytics extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -570,7 +572,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().assert(opt_predefinedConfig || property != 'iframePing',
           'iframePing config is only available to vendor config.');
       // Only deal with own properties.
-      if (from.hasOwnProperty(property)) {
+      if (hasOwn.call(from, property)) {
         if (isArray(from[property])) {
           if (!isArray(to[property])) {
             to[property] = [];
