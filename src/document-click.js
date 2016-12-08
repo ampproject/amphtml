@@ -18,6 +18,7 @@ import {
   closestByTag,
   openWindowDialog,
   escapeCssSelectorIdent,
+  isIframed,
 } from './dom';
 import {fromClassForDoc} from './service';
 import {dev} from './log';
@@ -65,7 +66,7 @@ export class ClickHandler {
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
     /** @private @const {boolean} */
-    this.isIframed_ = (this.viewer_.isIframed() &&
+    this.isIframed_ = isIframed(this.ampdoc.win &&
         this.viewer_.isOvertakeHistory());
 
     /** @private @const {!function(!Event)|undefined} */
