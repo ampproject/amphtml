@@ -22,6 +22,18 @@ const AMP_MESSAGE_PREFIX = 'amp-';
 
 /** @enum {string} */
 export const MessageType = {
+  // For amp-ad
+  SEND_EMBED_STATE: 'send-embed-state',
+  EMBED_STATE: 'embed-state',
+  SEND_EMBED_CONTEXT: 'send-embed-context',
+  EMBED_CONTEXT: 'embed-context',
+  SEND_INTERSECTIONS: 'send-intersections',
+  INTERSECTION: 'intersection',
+  EMBED_SIZE: 'embed-size',
+  EMBED_SIZE_CHANGED: 'embed-size-changed',
+  EMBED_SIZE_DENIED: 'embed-size-denied',
+
+  // For amp-inabox
   SEND_POSITIONS: 'send-positions',
   POSITION: 'position',
 };
