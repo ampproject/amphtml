@@ -480,8 +480,8 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
-      var ads = file.match(new RegExp('<amp-ad [^>]*'
-          + req.query.type + '[^>]*>([\\s\\S]+?)<\/amp-ad>', 'gm'));
+      var ads = file.match(new RegExp('<amp-ad [^>]*[\'"]'
+          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/amp-ad>', 'gm'));
       file = file.replace(
           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
     }
