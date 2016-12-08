@@ -33,17 +33,26 @@ export class AmpViewerIntegration {
   constructor(win) {
     /** @const {!Window} win */
     this.win = win;
+
+    /** @private {?string} */
+    this.unconfirmedViewerOrigin_ = null;
   }
 
   /**
    * Initiate the handshake. If handshake confirmed, start listening for
-   * messages.
-   * @return {!Promise}
+   * messages. The service is disabled if the viewerorigin parameter is
+   * absent.
+   * @return {?Promise}
    */
   init() {
     dev().info(TAG, 'handshake init()');
     const viewer = viewerForDoc(this.win.document);
-    return this.getHandshakePromise_(viewer)
+    this.unconfirmedViewerOrigin_ = viewer.getParam('viewerorigin') || null;
+    if (!this.unconfirmedViewerOrigin_) {
+      dev().info(TAG, 'Viewer origin not specified.');
+      return null;
+    }
+    return this.getHandshakePromise_()
       .then(viewerOrigin => {
         dev().info(TAG, 'listening for messages');
         const messaging =
@@ -60,19 +69,14 @@ export class AmpViewerIntegration {
   /**
    * Send a handshake request, and listen for a handshake response to
    * confirm the handshake.
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
-   * @return {?Promise}
+   * @return {!Promise}
    * @private
    */
-  getHandshakePromise_(viewer) {
+  getHandshakePromise_() {
     const win = this.win;
+    const unconfirmedViewerOrigin =
+      dev().assertString(this.unconfirmedViewerOrigin_);
     return new Promise(resolve => {
-      const unconfirmedViewerOrigin = viewer.getParam('viewerorigin');
-      if (!unconfirmedViewerOrigin) {
-        dev().info(TAG, 'Viewer origin not specified.');
-        return null;
-      }
-
       const unlisten = listen(win, 'message', event => {
         if (event.origin == unconfirmedViewerOrigin &&
             event.data == 'amp-handshake-response' &&
