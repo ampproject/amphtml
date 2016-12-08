@@ -46,6 +46,7 @@ export function revcontent(global, data) {
     'css',
     'sizer',
     'debug',
+    'ampcreative',
   ];
 
   validateData(data, required, optional);
