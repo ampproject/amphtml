@@ -407,10 +407,6 @@ var forbiddenTerms = {
   },
   'debugger': '',
 
-  // ES6. These are only the most commonly used.
-  'Array\\.of': es6polyfill,
-  'String\\.raw': es6polyfill,
-  'String\\.fromCodePoint': es6polyfill,
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
