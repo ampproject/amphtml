@@ -85,7 +85,7 @@ export class Input {
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
       this.boundOnMouseMove_ =
-          /** @private {!function(!Event)} */ (this.onMouseMove_.bind(this));
+          /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
