@@ -53,6 +53,7 @@ describe('Resource', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      disconnectedCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 2,
       dispatchCustomEvent: () => {},
@@ -723,6 +724,14 @@ describe('Resource', () => {
         resource.pauseOnRemove();
         expect(resource.isInViewport_).to.equal(false);
         expect(resource.paused_).to.equal(true);
+      });
+
+      it('should call disconnectedCallback on remove for built ele', () => {
+        expect(Resource.forElementOptional(resource.element))
+            .to.equal(resource);
+        elementMock.expects('disconnectedCallback').once();
+        resource.disconnect();
+        expect(Resource.forElementOptional(resource.element)).to.not.exist;
       });
     });
   });
