@@ -376,7 +376,7 @@ export function deserializeMessage(message) {
   }
   try {
     return /** @type {!JSONType} */ (JSON.parse(
-        message.substring(AMP_MESSAGE_PREFIX.length)));
+        message.substr(AMP_MESSAGE_PREFIX.length)));
   } catch (e) {
     dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
     return null;
