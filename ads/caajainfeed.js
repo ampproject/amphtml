@@ -23,28 +23,31 @@ import {loadScript, validateData} from '../3p/3p';
 export function caajainfeed(global, data) {
 
   validateData(
-  data,
-  [],
-  ['ad-spot',
-    'format',
-    'test',
-    'optout',
-    'offset',
-    'ipv4',
-    'ipv6',
-    'network-reachability',
-    'os-name',
-    'os-version',
-    'os-lang',
-    'os-timezone',
-    'device-version',
-    'app-id',
-    'app-version',
-    'kv',
-    'uids',
-    'template',
-    'protocol',
-   'fields']);
+    data,
+    [],
+    [
+      'ad-spot',
+      'format',
+      'test',
+      'optout',
+      'offset',
+      'ipv4',
+      'ipv6',
+      'network-reachability',
+      'os-name',
+      'os-version',
+      'os-lang',
+      'os-timezone',
+      'device-version',
+      'app-id',
+      'app-version',
+      'kv',
+      'uids',
+      'template',
+      'protocol',
+      'fields',
+    ]
+  );
 
   global.caAjaInfeedConfig = data;
   loadScript(global, 'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js');
