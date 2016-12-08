@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './polyfills';
 import {listen} from '../src/event-helper';
 import {map} from '../src/types';
-import {user} from '../src/log';
-import {startsWith} from '../src/string';
+import {serializeMessage, deserializeMessage} from '../src/3p-frame';
 
 export class IframeMessagingClient {
 
@@ -73,9 +71,8 @@ export class IframeMessagingClient {
    *  @param {Object=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    const message = {type, sentinel: this.sentinel_};
     this.hostWindow_.postMessage/*OK*/(
-        Object.assign(message, opt_payload), '*');
+        serializeMessage(type, this.sentinel_, opt_payload), '*');
   }
 
   /**
@@ -88,37 +85,20 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', message => {
+    listen(this.win_, 'message', event => {
       // Does it look a message from AMP?
-      if (message.source != this.hostWindow_) {
-        return;
-      }
-      if (!message.data) {
-        return;
-      }
-      if (!startsWith(String(message.data), 'amp-')) {
+      if (event.source != this.hostWindow_) {
         return;
       }
 
-      // See if we can parse the payload.
-      try {
-        const payload = JSON.parse(message.data.substring(4));
-        // Check the sentinel as well.
-        if (payload.sentinel == this.sentinel_ &&
-            this.callbackFor_[payload.type]) {
-          try {
-            // We should probably report exceptions within callback
-            const callback = this.callbackFor_[payload.type];
-            callback(payload);
-          } catch (err) {
-            user().error(
-                'IFRAME-MSG',
-                `- Error in registered callback ${payload.type}`,
-                err);
-          }
-        }
-      } catch (e) {
-        // JSON parsing failed. Ignore the message.
+      const message = deserializeMessage(event.data);
+      if (!message || message.sentinel != this.sentinel_) {
+        return;
+      }
+
+      const callback = this.callbackFor_[message.type];
+      if (callback) {
+        callback(message);
       }
     });
   }

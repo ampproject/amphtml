@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
-import {listenParent} from '../../3p/messaging';
-import {postMessage} from '../../src/iframe-helper';
-import {timerFor} from '../../src/timer';
+import {createIframePromise} from '../../../testing/iframe';
+import {listenParent} from '../../../3p/messaging';
+import {postMessage} from '../../../src/iframe-helper';
+import {timerFor} from '../../../src/timer';
 
 describe('3p messaging', () => {
 

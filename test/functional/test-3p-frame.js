@@ -22,6 +22,8 @@ import {
   preloadBootstrap,
   resetCountForTesting,
   resetBootstrapBaseUrlForTesting,
+  serializeMessage,
+  deserializeMessage,
 } from '../../src/3p-frame';
 import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
@@ -339,5 +341,58 @@ describe('3p-frame', () => {
     expect(name).to.match(/d-\d+.ampproject.net__ping__0/);
     expect(newName).to.match(/d-\d+.ampproject.net__ping__0/);
     expect(newName).not.to.equal(name);
+  });
+
+  describe('serializeMessage', () => {
+    it('should work without payload', () => {
+      const message = serializeMessage('msgtype', 'msgsentinel');
+      expect(message.indexOf('amp-')).to.equal(0);
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+      });
+    });
+
+    it('should work with payload', () => {
+      const message = serializeMessage('msgtype', 'msgsentinel', {
+        type: 'type_override', // override should be ignored
+        sentinel: 'sentinel_override', // override should be ignored
+        x: 1,
+        y: 'abc',
+      });
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+  });
+
+  describe('deserializeMessage', () => {
+    it('should deserialize valid message', () => {
+      const message = deserializeMessage(
+          'amp-{"type":"msgtype","sentinel":"msgsentinel","x":1,"y":"abc"}');
+      expect(message).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+
+    it('should return null if the input not a string', () => {
+      expect(deserializeMessage({x: 1, y: 'abc'})).to.be.null;
+    });
+
+    it('should return null if the input does not start with amp-', () => {
+      expect(deserializeMessage(
+          'noamp-{"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+    });
+
+    it('should return null if failed to parse the input', () => {
+      expect(deserializeMessage(
+          'amp-"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+    });
   });
 });
