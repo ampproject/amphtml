@@ -23,21 +23,23 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
 /**
  * Listens for the specified event on the element.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_capture) {
+  let localElement = element;
+  let localListener = listener;
   const capture = opt_capture || false;
-  element.addEventListener(eventType, listener, capture);
+  localElement.addEventListener(eventType, localListener, capture);
   return () => {
-    if (element) {
-      element.removeEventListener(eventType, listener, capture);
+    if (localElement) {
+      localElement.removeEventListener(eventType, localListener, capture);
     }
-    listener = null;
-    element = null;
+    localListener = null;
+    localElement = null;
   };
 }
 
@@ -45,28 +47,30 @@ export function listen(element, eventType, listener, opt_capture) {
 /**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
+  let localElement = element;
+  let localListener = listener;
   const capture = opt_capture || false;
   let unlisten;
   let proxy = event => {
-    listener(event);
+    localListener(event);
     unlisten();
   };
   unlisten = () => {
-    if (element) {
-      element.removeEventListener(eventType, proxy, capture);
+    if (localElement) {
+      localElement.removeEventListener(eventType, proxy, capture);
     }
-    element = null;
+    localElement = null;
     proxy = null;
-    listener = null;
+    localListener = null;
   };
-  element.addEventListener(eventType, proxy, capture);
+  localElement.addEventListener(eventType, proxy, capture);
   return unlisten;
 }
 
