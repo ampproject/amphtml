@@ -23,9 +23,9 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
 /**
  * Listens for the specified event on the element.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
