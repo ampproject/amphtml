@@ -21,7 +21,7 @@ import {validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adverticum(global, data) {
-  validateData(data, ['goa3zone'], ['costumetargetstring'])
+  validateData(data, ['goa3zone'], ['costumetargetstring']);
   const zoneid = 'zone' + data['goa3zone'];
   const d = global.document.createElement('div');
 
