@@ -19,6 +19,7 @@ import {findIndex} from '../utils/array';
 import {documentStateFor} from './document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
+import {isIframed} from '../dom';
 import {
   getSourceUrl,
   parseQueryString,
@@ -92,7 +93,7 @@ export class Viewer {
     this.win = ampdoc.win;
 
     /** @private @const {boolean} */
-    this.isIframed_ = (this.win.parent && this.win.parent != this.win);
+    this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
@@ -455,14 +456,6 @@ export class Viewer {
     } else {
       this.win.top.location.href = url;
     }
-  }
-
-  /**
-   * Whether the document is embedded in a iframe.
-   * @return {boolean}
-   */
-  isIframed() {
-    return this.isIframed_;
   }
 
   /**

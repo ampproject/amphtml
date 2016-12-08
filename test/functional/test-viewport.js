@@ -59,7 +59,6 @@ describes.fakeWin('Viewport', {}, env => {
     viewerViewportHandler = undefined;
     viewer = {
       isEmbedded: () => false,
-      isIframed: () => false,
       getPaddingTop: () => 19,
       onViewportEvent: handler => {
         viewerViewportHandler = handler;
@@ -160,7 +159,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should set iframed class', () => {
-      sandbox.stub(viewer, 'isIframed', () => true);
+      ampdoc.win.parent = {};
       new Viewport(ampdoc, binding, viewer);
       expect(root).to.have.class('-amp-iframed');
     });
@@ -835,7 +834,6 @@ describe('Viewport META', () => {
     let viewport;
     let binding;
     let viewer;
-    let viewerMock;
     let windowApi;
     let ampdoc;
     let originalViewportMetaString, viewportMetaString;
@@ -849,11 +847,9 @@ describe('Viewport META', () => {
         isEmbedded: () => false,
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
-        isIframed: () => false,
         isVisible: () => true,
         onVisibilityChanged: () => {},
       };
-      viewerMock = sandbox.mock(viewer);
 
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
@@ -921,7 +917,7 @@ describe('Viewport META', () => {
     });
 
     it('should ignore disable TouchZoom if embedded', () => {
-      viewerMock.expects('isIframed').returns(true).atLeast(1);
+      windowApi.parent = {};
       viewport.disableTouchZoom();
       expect(viewportMetaSetter.callCount).to.equal(0);
     });
@@ -963,7 +959,7 @@ describe('Viewport META', () => {
     });
 
     it('should ignore reset TouchZoom if embedded', () => {
-      viewerMock.expects('isIframed').returns(true).atLeast(1);
+      windowApi.parent = {};
       viewport.resetTouchZoom();
       expect(viewportMetaSetter.callCount).to.equal(0);
     });
@@ -1687,7 +1683,6 @@ describe('createViewport', () => {
       win.parent = {};
       const ampDoc = installDocService(win, true).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
-      sandbox.stub(viewer, 'isIframed', () => true);
       sandbox.stub(viewer, 'isEmbedded', () => true);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to
@@ -1698,7 +1693,6 @@ describe('createViewport', () => {
       win.parent = {};
       const ampDoc = installDocService(win, true).getAmpDoc();
       const viewer = installViewerServiceForDoc(ampDoc);
-      sandbox.stub(viewer, 'isIframed', () => true);
       sandbox.stub(viewer, 'isEmbedded', () => false);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to
@@ -1709,7 +1703,6 @@ describe('createViewport', () => {
       const ampDoc = installDocService(win, true).getAmpDoc();
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
-      sandbox.stub(viewer, 'isIframed', () => false);
       sandbox.stub(viewer, 'isEmbedded', () => false);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to
@@ -1717,10 +1710,10 @@ describe('createViewport', () => {
     });
 
     it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
+      win.parent = {};
       const ampDoc = installDocService(win, true).getAmpDoc();
       getMode(win).development = true;
       const viewer = installViewerServiceForDoc(ampDoc);
-      sandbox.stub(viewer, 'isIframed', () => true);
       sandbox.stub(viewer, 'isEmbedded', () => false);
       const viewport = installViewportServiceForDoc(ampDoc);
       expect(viewport.binding_).to
