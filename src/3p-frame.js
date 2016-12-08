@@ -360,7 +360,7 @@ export const MessageType = {
 export function serializeMessage(type, sentinel, opt_data) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   return AMP_MESSAGE_PREFIX
-      + JSON.stringify(Object.assign({type, sentinel}, opt_data));
+      + JSON.stringify(Object.assign({}, opt_data, {type, sentinel}));
 }
 
 /**
