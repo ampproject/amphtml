@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkAdsenseImpl} from '../amp-ad-network-adsense-impl';
+import {
+  AmpAdNetworkAdsenseImpl,
+  resetSharedState,
+} from '../amp-ad-network-adsense-impl';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -98,8 +101,10 @@ describe('amp-ad-network-adsense-impl', () => {
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
-        }, fixture.doc);
+        }, fixture.doc, 'amp-a4a');
         return fixture.addElement(elem).then(addedElem => {
+          // Clear state from other tests.
+          resetSharedState();
           // Create AdsenseImpl instance.
           adsenseImpl = new AmpAdNetworkAdsenseImpl(addedElem);
           // The expected url parameters whose values are known and fixed.

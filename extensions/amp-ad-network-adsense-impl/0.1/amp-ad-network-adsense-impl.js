@@ -58,6 +58,10 @@ const visibilityStateCodes = {
  */
 const sharedState = new AdsenseSharedState();
 
+export function resetSharedState() {
+  sharedState.reset();
+}
+
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**

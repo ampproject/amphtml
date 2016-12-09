@@ -19,14 +19,12 @@ export class AdsenseSharedState {
   constructor() {
 
     /**
-     * @const {!Array<string>}
-     * @private
+     * @private {!Array<string>}
      */
     this.prevFmts_ = [];
 
     /**
-     * @const {!Object<string, number>}
-     * @private
+     * @private {!Object<string, number>}
      */
     this.pv_ = {};
   }
@@ -51,5 +49,13 @@ export class AdsenseSharedState {
   updateAndGetPv(adClientId) {
     this.pv_[adClientId] = this.pv_[adClientId] ? 1 : 2;
     return this.pv_[adClientId];
+  }
+
+  /**
+   * Resets to initial state.
+   */
+  reset() {
+    this.prevFmts_ = [];
+    this.pv_ = {};
   }
 }
