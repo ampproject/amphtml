@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-
+import {getContextMetadata} from './attributes';
 import {dev, user} from './log';
-import {documentInfoForDoc} from './document-info';
-import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
@@ -48,48 +46,29 @@ let overrideBootstrapBaseUrl;
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
-  const startTime = Date.now();
-  const width = element.getAttribute('width');
-  const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
-  const attributes = {};
+  const sentinel = generateSentinel(parentWindow);
+
+  const attributes = getContextMetadata(parentWindow, element, sentinel);
+
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
-  attributes.width = getLengthNumeral(width);
-  attributes.height = getLengthNumeral(height);
   attributes.type = type;
-  const docInfo = documentInfoForDoc(element);
   const viewer = viewerForDoc(element);
-  let locationHref = parentWindow.location.href;
-  // This is really only needed for tests, but whatever. Children
-  // see us as the logical origin, so telling them we are about:srcdoc
-  // will fail ancestor checks.
-  if (locationHref == 'about:srcdoc') {
-    locationHref = parentWindow.parent.location.href;
-  }
-  attributes._context = {
-    referrer: viewer.getUnconfirmedReferrerUrl(),
-    canonicalUrl: docInfo.canonicalUrl,
-    sourceUrl: docInfo.sourceUrl,
-    pageViewId: docInfo.pageViewId,
-    location: {
-      href: locationHref,
-    },
+
+  const additionalContext = {
     tagName: element.tagName,
     mode: getModeObject(),
     canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
-    startTime,
   };
+  attributes.ampcontextVersion = (getMode().localDev ? 'LOCAL' :
+      '$internalRuntimeVersion$');
   Object.assign(attributes._context, opt_context);
-  const adSrc = element.getAttribute('src');
-  if (adSrc) {
-    attributes.src = adSrc;
-  }
+  Object.assign(attributes._context, additionalContext);
   return attributes;
 }
 
