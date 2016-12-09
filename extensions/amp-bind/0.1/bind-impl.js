@@ -307,8 +307,8 @@ export class Bind {
 
     if (property === 'text') {
       initialValue = element.textContent;
-      match = (initialValue.trim() ===
-          Object.prototype.toString.call(expectedValue).trim());
+      expectedValue = Object.prototype.toString.call(expectedValue);
+      match = (initialValue.trim() === expectedValue.trim());
     } else if (property === 'class') {
       initialValue = element.classList;
 
