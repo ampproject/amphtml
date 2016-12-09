@@ -480,6 +480,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  xrostssp: {},
+
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
