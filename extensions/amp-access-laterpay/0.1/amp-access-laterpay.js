@@ -15,8 +15,10 @@
  */
 
 import {accessServiceFor} from '../../../src/access-service';
+import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {installStyles} from '../../../src/style-installer';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
@@ -141,6 +143,8 @@ export class LaterpayVendor {
 
     /** @private @const {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
+
+    installStyles(this.win_.document, CSS, () => {}, false, TAG);
   }
 
   /**
