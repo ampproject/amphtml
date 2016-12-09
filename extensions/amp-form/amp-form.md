@@ -175,7 +175,7 @@ You can configure your analytics to send these events as in the example below.
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
 
-Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **child element of form** and include a `<template></template>` tag inside it to render the response in it.
+Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it to render the response in it.
 
 The response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 
