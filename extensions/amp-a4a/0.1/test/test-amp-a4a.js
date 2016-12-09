@@ -293,6 +293,25 @@ describe('amp-a4a', () => {
         expect(destroySpy).to.be.calledOnce;
       });
     });
+
+    it('should update embed visibility', () => {
+      sandbox.stub(a4a, 'isInViewport', () => false);
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        a4a.vsync_.runScheduledTasks_();
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
+
+        a4a.viewportCallback(true);
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
+
+        a4a.viewportCallback(false);
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
+
+        a4a.viewportCallback(true);
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
+      });
+    });
   });
 
   describe('cross-domain rendering', () => {

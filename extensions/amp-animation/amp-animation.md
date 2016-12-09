@@ -68,6 +68,11 @@ defined as an `animations` array:
 </amp-animation>
 ```
 
+### Placement in DOM
+
+Initially, `<amp-animation>` is only allowed to be placed as a direct child of `<body>` element. This restriction
+will be removed in the near future.
+
 ### Animation component
 
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
@@ -234,12 +239,30 @@ can be reduced to an array of components. For instance:
 
 ## Triggering animation
 
-The animation can be triggered via an `on` action. For instance:
+The animation can be triggered via a `trigger` attribute an `on` action.
+
+### `trigger` attribute
+
+For instance:
+```
+<amp-animation id="anim1" layout="nodisplay"
+    trigger="visibility">
+  ...
+</amp-animation>
+```
+
+#### `visibility` trigger
+
+Currently, `visibility` is the only available value. The `visibility` triggers when the underlying document
+or embed are visible (in viewport).
+
+### `on` action
+
+For instance:
 
 ```
-<amp-animation id="anim1" layout="nodisplay"></amp-animation>
+<amp-animation id="anim1" layout="nodisplay">
+  ...
+</amp-animation>
 <button on="tap:anim1.activate">Animate</button>
 ```
-
-More triggering mechanisms will be added in the future, including visibility triggers.
-
