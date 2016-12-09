@@ -26,7 +26,10 @@ import {
   createElementWithAttributes,
 } from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
+import {
+  installFriendlyIframeEmbed,
+  setFriendlyIframeEmbedVisible,
+} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
@@ -598,6 +601,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
+    if (this.friendlyIframeEmbed_) {
+      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed_, inViewport);
+    }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -803,6 +809,8 @@ export class AmpA4A extends AMP.BaseElement {
             new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
+          setFriendlyIframeEmbedVisible(
+              friendlyIframeEmbed, this.isInViewport());
           // Ensure visibility hidden has been removed (set by boilerplate).
           const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
             friendlyIframeEmbed.win.document;

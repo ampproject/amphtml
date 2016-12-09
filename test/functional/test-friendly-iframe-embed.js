@@ -15,8 +15,10 @@
  */
 
 import {
+  getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
+  setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
 import {getStyle} from '../../src/style';
@@ -78,6 +80,7 @@ describe('friendly-iframe-embed', () => {
       expect(embed.win).to.equal(iframe.contentWindow);
       expect(embed.iframe).to.equal(iframe);
       expect(embed.spec.url).to.equal('https://acme.org/url1');
+      expect(getFriendlyIframeEmbedOptional(embed.iframe)).to.equal(embed);
 
       // Iframe is made visible again.
       expect(iframe.style.visibility).to.equal('');
@@ -194,6 +197,29 @@ describe('friendly-iframe-embed', () => {
       expect(disposeSpy).to.not.be.called;
       embed.destroy();
       expect(disposeSpy).to.be.calledOnce;
+    });
+  });
+
+  it('should start invisible by default and update on request', () => {
+    extensionsMock.expects('installExtensionsInChildWindow').once();
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '',
+      extensionIds: [],
+    });
+    return embedPromise.then(embed => {
+      expect(embed.isVisible()).to.be.false;
+      const spy = sandbox.spy();
+      embed.onVisibilityChanged(spy);
+
+      setFriendlyIframeEmbedVisible(embed, false);
+      expect(embed.isVisible()).to.be.false;
+      expect(spy).to.not.be.called;
+
+      setFriendlyIframeEmbedVisible(embed, true);
+      expect(embed.isVisible()).to.be.true;
+      expect(spy).to.be.calledOnce;
+      expect(spy.args[0][0]).to.equal(true);
     });
   });
 
