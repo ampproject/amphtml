@@ -136,6 +136,12 @@ export class AmpAnalytics extends AMP.BaseElement {
         .then(this.onFetchRemoteConfigSuccess_.bind(this));
   }
 
+  /** @override */
+  detachedCallback() {
+    // TODO(avimehta, #6543): Release all listeners and resources installed by
+    // this element.
+  }
+
   /**
    * Handle successful fetching of (possibly) remote config.
    * @return {!Promise|undefined}
@@ -414,6 +420,14 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleRequestForEvent_(request, trigger, event) {
+    // TODO(avimehta, #6543): Remove this code or mark as "error" for the
+    // once destroyed embed release is implemented. See `detachedCallback`.
+    if (!this.element.ownerDocument.defaultView) {
+      const TAG = this.getName_();
+      dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
+      return Promise.resolve();
+    }
+
     if (!request) {
       const TAG = this.getName_();
       user().error(TAG, 'Ignoring event. Request string ' +
