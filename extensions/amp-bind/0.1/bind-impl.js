@@ -319,7 +319,6 @@ export class Bind {
       match = (initialValue.trim() === expectedValue.trim());
     } else if (property === 'class') {
       initialValue = element.classList;
-
       /** @type {!Array<string>} */
       let classes = [];
       if (Array.isArray(expectedValue)) {
@@ -334,10 +333,11 @@ export class Bind {
     } else {
       const attribute = element.getAttribute(property);
       initialValue = attribute;
-      if (typeof expectedValue === 'boolean') {
-        // Boolean attributes return values of either '' or null.
-        match = (expectedValue && initialValue === '')
-            || (!expectedValue && initialValue === null);
+      // Boolean attributes return values of either '' or null.
+      if (expectedValue === true) {
+        match = (initialValue === '');
+      } else if (expectedValue === false) {
+        match = (initialValue === null);
       } else {
         match = (initialValue === expectedValue);
       }
@@ -379,7 +379,7 @@ export class Bind {
    */
   attributeValueOf_(value) {
     const type = typeof(value);
-    if (this.attributeValueTypes_[type] !== undefined) {
+    if (this.attributeValueTypes_[type]) {
       return value;
     } else {
       return null;
