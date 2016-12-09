@@ -180,6 +180,7 @@ export class Log {
    * @param {string} tag
    * @param {...*} var_args
    * @return {!Error|undefined}
+   * @private
    */
   error_(tag, var_args) {
     if (this.level_ >= LogLevel.ERROR) {
