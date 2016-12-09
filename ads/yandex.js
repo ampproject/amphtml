@@ -22,14 +22,21 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function yandex(global, data) {
 
-    validateData(data, [
+    validateData(data, [], [
         'blockId',
-    ], [
         'statId',
+
+        'subType',
+        'adfoxParams',
+        'ownerId',
     ]);
 
-    setAdToQueue(global, data);
-    loadContext(global);
+    if (data.subType === 'adfox') {
+        loadAdFox(global, () => initAdFox(global, data));
+    } else {
+        setAdToQueue(global, data);
+        loadContext(global);
+    }
 }
 
 /**
@@ -44,9 +51,7 @@ function setAdToQueue(global, data) {
     global[n].push(() => {
 
         // Create container
-        const d = global.document.createElement('div');
-        d.id = 'yandex_rtb';
-        global.document.getElementById('c').appendChild(d);
+        createContainer(global, 'yandex_rtb');
 
         // Ahow Ad in container
         Ya.Context.AdvManager.render({
@@ -79,3 +84,38 @@ function loadContext(global) {
     loadScript(global, 'https://an.yandex.ru/system/context.js');
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Function} cb
+ */
+function loadAdFox(global, cb) {
+    loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js', cb);
+}
+
+/**
+ * @param {?Window} global
+ * @param {string} name
+ */
+function createContainer(global, name) {
+    const d = global.document.createElement('div');
+    d.id = name;
+    global.document.getElementById('c').appendChild(d);
+}
+
+/**
+ * @param {?Window} global
+ * @param {Object} data
+ */
+function initAdFox(global, data) {
+    const params = JSON.parse(data.adfoxParams);
+
+    createContainer(global, 'adfox_container');
+
+    global.Ya.adfoxCode.create({
+        ownerId: data.ownerId,
+        containerId: 'adfox_container',
+        params: params,
+        onRender: () => window.context.renderStart(),
+        onError: () => window.context.noContentAvailable()
+    });
+}

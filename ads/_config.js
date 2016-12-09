@@ -477,7 +477,10 @@ export const adConfig = {
   },
 
   yandex: {
-    prefetch: 'https://an.yandex.ru/system/context.js',
+    preconnect: [
+      'https://an.yandex.ru/system/context.js',
+      'https://yastatic.net/pcode/adfox/loader.js',
+    ],
     renderStartImplemented: true,
   },
 
