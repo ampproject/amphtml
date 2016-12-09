@@ -323,6 +323,37 @@ i-amp-scroll-container.amp-active {
   visibility: hidden;
 }
 
+.-amp-loader-line {
+  /* TODO(zhouyx): Confirm on final height, color */
+  position: absolute;
+  top:0;
+  left: 0;
+  right: 0;
+  height: 2px !important;
+  overflow: hidden !important;
+  background-color: #696969;
+  display: block;
+}
+
+.-amp-loader-moving-line {
+  display: block;
+  position: absolute;
+  left: -50%;
+  width: 100%;
+  height: 100% !important;
+  background-color: #d3d3d3;
+  z-index: 2;
+}
+
+@keyframes -amp-loader-line-moving {
+  0% {left: -100%;}
+  100% {left: 100%;}
+}
+
+.-amp-loader-line.amp-active .-amp-loader-moving-line {
+  animation: -amp-loader-line-moving 2s ease infinite;
+}
+
 .-amp-loader {
   position: absolute;
   display: block;
