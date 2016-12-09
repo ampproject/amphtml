@@ -21,7 +21,7 @@ import {dev} from '../../../src/log';
 import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
-import {parseUrl} from '../../../src/url';
+import {removeFragment, parseUrl} from '../../../src/url';
 import {vsyncFor} from '../../../src/vsync';
 import {timerFor} from '../../../src/timer';
 
@@ -139,15 +139,17 @@ export class AmpSidebar extends AMP.BaseElement {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
         const tgtLoc = parseUrl(target.href);
-        const curLoc = parseUrl(this.getAmpDoc().win.location.href);
-        const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
-        const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
+        const currentHref = this.getAmpDoc().win.location.href;
         // Important: Only close sidebar (and hence pop sidebar history entry)
         // when navigating locally, Chrome might cancel navigation request
         // due to after-navigation history manipulation inside a timer callback.
         // See this issue for more details:
         // https://github.com/ampproject/amphtml/issues/6585
-        if (tgtHref == curHref && tgtLoc.hash) {
+        if (removeFragment(target.href) != removeFragment(currentHref)) {
+          return;
+        }
+
+        if (tgtLoc.hash) {
           this.close_();
         }
       }
