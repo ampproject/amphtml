@@ -84,7 +84,6 @@ export class DocInfo {
   }
 }
 
-
 /**
  * Returns a relatively low entropy random string.
  * This should be called once per window and then cached for subsequent
@@ -92,6 +91,9 @@ export class DocInfo {
  * @param {!Window} win
  * @return {string}
  */
-function getPageViewId(win) {
-  return String(Math.floor(win.Math.random() * 10000));
+export function getPageViewId(win) {
+  if (!win.pageViewId) {
+    win.pageViewId = String(Math.floor(win.Math.random() * 10000));
+  }
+  return win.pageViewId;
 }

@@ -20,6 +20,8 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
+import {generateSentinel} from '../../../src/3p-frame';
+import {getContextMetadata} from '../../../src/attributes';
 import {
   closestByTag,
   removeChildren,
@@ -825,10 +827,12 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  iframeRenderHelper_(iframe) {
+  iframeRenderHelper_(iframe, sentinel) {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
-    return this.xOriginIframeHandler_.init(iframe, /* opt_isA4A */ true);
+    this.rendered_ = true;
+    return this.xOriginIframeHandler_.init(iframe, sentinel,
+                                           /* opt_isA4A */ true);
   }
 
   /**
@@ -860,7 +864,10 @@ export class AmpA4A extends AMP.BaseElement {
           // modified url.
           'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
         }, SHARED_IFRAME_PROPERTIES));
-    return this.iframeRenderHelper_(iframe);
+    const sentinel = generateSentinel(window);
+    const metadata = getContextMetadata(window, iframe, sentinel);
+    iframe.setAttribute('name', encodeURI(JSON.stringify(metadata)));
+    return this.iframeRenderHelper_(iframe, sentinel);
   }
 
   /**
