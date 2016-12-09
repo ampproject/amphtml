@@ -120,7 +120,6 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
   // Pass ad attributes to iframe via the fragment.
-  const src = baseUrl;
   const name = JSON.stringify({
     host,
     type: attributes.type,
@@ -128,9 +127,9 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     attributes,
   });
 
-  iframe.src = src;
+  iframe.src = baseUrl;
   iframe.name = name;
-  iframe.ampLocation = parseUrl(src);
+  iframe.ampLocation = parseUrl(baseUrl);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
   iframe.setAttribute('scrolling', 'no');

@@ -146,7 +146,7 @@ const AMP_EMBED_ALLOWED = {
 const iframeName = window.name;
 let data;
 try {
-  data = JSON.parse(window.name).attributes;
+  data = JSON.parse(iframeName).attributes;
   window.context = data._context;
 } catch (err) {
   window.context = {};
@@ -387,7 +387,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.reportRenderedEntityIdentifier =
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
-    window.context.addContextToIframe = getAddContextToIframe(iframeName);
+    window.context.addContextToIframe = addNameToIframe.bind(null, iframeName);
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -502,15 +502,14 @@ function reportRenderedEntityIdentifier(entityId) {
 
 /**
  *  Adds the serialized ad attributes to an iframe's name attribute.
- *  @param {string} iframeName A URIencoded JSON object of context
+ *  @param {Iframe} iframe
+ *  @param {string} name A URIencoded JSON object of context
  *      that needs to be attached to an iframe.
  *  @return {function(Element)} Function that will attach iframeName
  *      to the name attribute of iframe.
  */
-function getAddContextToIframe(iframeName) {
-  return iframe => {
-    iframe.name = iframeName;
-  };
+function addNameToIframe(iframe, name) {
+  iframe.name = name;
 }
 
 /**
