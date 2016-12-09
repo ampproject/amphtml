@@ -24,7 +24,7 @@ import {getMode} from '../mode';
  * @param {boolean=} isTest
  * @return {string}
  */
-export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
+function calculateScriptBaseUrl(location, isLocalDev, isTest) {
   if (isLocalDev) {
     if (isTest || isMax(location) || isMin(location)) {
       return `${location.protocol}//${location.host}/dist`;
