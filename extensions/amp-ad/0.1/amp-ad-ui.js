@@ -15,11 +15,15 @@
  */
 
 import {dev} from '../../../src/log';
-import {createElementWithAttributes} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {UX_EXPERIMENT} from '../../../src/layout';
 
 const TAG = 'AmpAdUIHandler';
+
+/** @const */
+const HOLDER_HTML = `<div class='-amp-ad-default-holder'>
+    <div class='-amp-ad-tag'>Ad</div>
+    </div>`;
 
 /**
  * Ad display state.
@@ -83,11 +87,10 @@ export class AmpAdUIHandler {
     }
 
     // Apply default fallback div when there's no default one
-    const fallback = createElementWithAttributes(this.doc_, 'div', {
-      'fallback': '',
-    });
+    const fallback = this.doc_.createElement('div');
+    fallback.setAttribute('fallback', '');
     fallback.classList.add('amp-ad-default-display');
-    fallback.appendChild(this.createDefaultHolder_());
+    fallback./*OK*/innerHTML = HOLDER_HTML;
 
     this.baseInstance_.element.appendChild(fallback);
   }
@@ -128,27 +131,11 @@ export class AmpAdUIHandler {
     if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
       return null;
     }
-    const placeholder = createElementWithAttributes(this.doc_, 'div', {
-      'placeholder': '',
-    });
-    placeholder.appendChild(this.createDefaultHolder_());
+    const placeholder = this.doc_.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    placeholder./*OK*/innerHTML = HOLDER_HTML;
     this.baseInstance_.element.appendChild(placeholder);
     return placeholder;
-  }
-
-  /**
-   * Create the same holder for placeholder and fallback
-   * @return {!Element}
-   */
-  createDefaultHolder_() {
-    const adTagHolder = this.doc_.createElement('div');
-    adTagHolder.classList.add('-amp-ad-default-holder');
-    const adTag = this.doc_.createElement('div');
-    adTag.classList.add('-amp-ad-tag');
-    // TODO: support i8n
-    adTag.textContent = 'Ad';
-    adTagHolder.appendChild(adTag);
-    return adTagHolder;
   }
 
   /**
