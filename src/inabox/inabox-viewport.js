@@ -29,7 +29,7 @@ const TAG = 'inabox-viewport';
 
 /**
  * Implementation of ViewportBindingDef that works inside an non-scrollable
- * iframe by listening to host doc for position and resize updates.
+ * iframe container by listening to host doc for position and resize updates.
  *
  * @implements {ViewportBindingDef}
  */
@@ -48,15 +48,21 @@ export class ViewportBindingInabox {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    // Before hearing from host doc, we're blind about the viewport position
-    // and iframe position. Positive width/height ensure a render start.
-    /** @private {!../layout-rect.LayoutRectDef} */
+    /**
+     * The current viewport rect.
+     * Before hearing from host doc, we're blind about the viewport position
+     * and iframe position. Positive width/height ensure a doc render start.
+     * @private {!../layout-rect.LayoutRectDef}
+     */
     this.viewportRect_ = layoutRectLtwh(0, 0, 10, 10);
 
-    // To not trigger amp-analytics visibility immediately,
-    // we assume we're right below the fold.
-    /** @private {!../layout-rect.LayoutRectDef} */
-    this.selfRect_ = layoutRectLtwh(0, 10, 10, 10);
+    /**
+     * The current layout box rect of the container iframe.
+     * To not trigger amp-analytics visibility immediately,
+     * we start with an initial position right below the fold.
+     * @private {!../layout-rect.LayoutRectDef}
+     */
+    this.containerRect_ = layoutRectLtwh(0, 10, 10, 10);
 
     /** @private @const {!IframeMessagingClient} */
     this.iframeClient_ = new IframeMessagingClient(win);
@@ -79,10 +85,10 @@ export class ViewportBindingInabox {
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          const oldSelfRect = this.selfRect_;
+          const oldSelfRect = this.containerRect_;
           this.viewportRect_ = data.viewport;
-          this.selfRect_ = data.target;
-          if (isMoved(this.selfRect_, oldSelfRect)) {
+          this.containerRect_ = data.target;
+          if (isMoved(this.containerRect_, oldSelfRect)) {
             // Remeasure all AMP elements once iframe position is changed.
             // Because all layout boxes are calculated relatively to the
             // iframe position.
@@ -100,8 +106,8 @@ export class ViewportBindingInabox {
   /** @override */
   getLayoutRect(el) {
     const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left + this.selfRect_.left),
-        Math.round(b.top + this.selfRect_.top),
+    return layoutRectLtwh(Math.round(b.left + this.containerRect_.left),
+        Math.round(b.top + this.containerRect_.top),
         Math.round(b.width),
         Math.round(b.height));
   }
