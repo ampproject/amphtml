@@ -251,6 +251,11 @@ For instance:
 </amp-animation>
 ```
 
+#### `visibility` trigger
+
+Currently, `visibility` is the only available value. The `visibility` triggers when the underlying document
+or embed are visible (in viewport).
+
 ### `on` action
 
 For instance:
