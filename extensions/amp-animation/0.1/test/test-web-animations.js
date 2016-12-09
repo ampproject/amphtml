@@ -18,6 +18,9 @@ import {
   MeasureScanner,
   WebAnimationRunner,
 } from '../web-animations';
+import {
+  WebAnimationPlayState,
+} from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
 
 
@@ -361,26 +364,63 @@ describes.sandboxed('MeasureScanner', {}, () => {
 describes.sandboxed('WebAnimationRunner', {}, () => {
   let target1, target2;
   let target1Mock, target2Mock;
+  let keyframes1, keyframes2;
+  let timing1, timing2;
+  let anim1, anim2;
+  let anim1Mock, anim2Mock;
+  let playStateSpy;
+  let runner;
+
+  class WebAnimationStub {
+    play() {
+      throw new Error('not implemented');
+    }
+    pause() {
+      throw new Error('not implemented');
+    }
+    reverse() {
+      throw new Error('not implemented');
+    }
+    finish() {
+      throw new Error('not implemented');
+    }
+    cancel() {
+      throw new Error('not implemented');
+    }
+  }
 
   beforeEach(() => {
-    target1 = {animate: () => {}};
+    keyframes1 = {};
+    keyframes2 = {};
+    timing1 = {};
+    timing2 = {};
+    anim1 = new WebAnimationStub();
+    anim2 = new WebAnimationStub();
+    anim1Mock = sandbox.mock(anim1);
+    anim2Mock = sandbox.mock(anim2);
+
+    target1 = {animate: () => anim1};
     target1Mock = sandbox.mock(target1);
-    target2 = {animate: () => {}};
+    target2 = {animate: () => anim2};
     target2Mock = sandbox.mock(target2);
+
+    runner = new WebAnimationRunner([
+      {target: target1, keyframes: keyframes1, timing: timing1},
+      {target: target2, keyframes: keyframes2, timing: timing2},
+    ]);
+
+    playStateSpy = sandbox.spy();
+    runner.onPlayStateChanged(playStateSpy);
   });
 
   afterEach(() => {
     target1Mock.verify();
     target2Mock.verify();
+    anim1Mock.verify();
+    anim2Mock.verify();
   });
 
   it('should call start on all animatons', () => {
-    const keyframes1 = {};
-    const keyframes2 = {};
-    const timing1 = {};
-    const timing2 = {};
-    const anim1 = {};
-    const anim2 = {};
     target1Mock.expects('animate')
         .withExactArgs(keyframes1, timing1)
         .returns(anim1)
@@ -389,13 +429,119 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
         .withExactArgs(keyframes2, timing2)
         .returns(anim2)
         .once();
-    const runner = new WebAnimationRunner([
-      {target: target1, keyframes: keyframes1, timing: timing1},
-      {target: target2, keyframes: keyframes2, timing: timing2},
-    ]);
-    runner.play();
+
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
     expect(runner.players_).to.have.length(2);
     expect(runner.players_[0]).equal(anim1);
     expect(runner.players_[1]).equal(anim2);
+    expect(playStateSpy).to.be.calledOnce;
+    expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
+  });
+
+  it('should fail to start twice', () => {
+    runner.start();
+    expect(() => {
+      runner.start();
+    }).to.throw();
+  });
+
+  it('should complete all animations are complete', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1.onfinish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim2.onfinish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
+
+    expect(playStateSpy).to.be.calledTwice;
+    expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[1][0]).to.equal(WebAnimationPlayState.FINISHED);
+  });
+
+  it('should pause all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.pause();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+  });
+
+  it('should only allow pause when started', () => {
+    expect(() => {
+      runner.pause();
+    }).to.throw();
+  });
+
+  it('should resume all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.pause();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+
+    anim1Mock.expects('play').once();
+    anim2Mock.expects('play').once();
+    runner.resume();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+  });
+
+  it('should only allow resume when started', () => {
+    expect(() => {
+      runner.resume();
+    }).to.throw();
+  });
+
+  it('should reverse all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('reverse').once();
+    anim2Mock.expects('reverse').once();
+    runner.reverse();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+  });
+
+  it('should only allow reverse when started', () => {
+    expect(() => {
+      runner.reverse();
+    }).to.throw();
+  });
+
+  it('should finish all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('finish').once();
+    anim2Mock.expects('finish').once();
+    runner.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
+  });
+
+  it('should ignore finish when not started', () => {
+    runner.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+  });
+
+  it('should cancel all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('cancel').once();
+    anim2Mock.expects('cancel').once();
+    runner.cancel();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+  });
+
+  it('should ignore cancel when not started', () => {
+    runner.cancel();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
   });
 });
