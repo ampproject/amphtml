@@ -65,10 +65,8 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
 export function calculateEntryPointScriptUrl(location, entryPoint, isLocalDev,
     isTest) {
   const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
-  if (isLocalDev) {
-    return `${base}/${entryPoint}${isMax(location) ? '.max' : ''}.js`;
-  }
-  return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+  const serveMax = isLocalDev && isMax(location);
+  return `${base}/${entryPoint}${serveMax ? '.max' : ''}.js`;
 }
 
 /**
