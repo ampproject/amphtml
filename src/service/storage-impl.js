@@ -111,7 +111,7 @@ export class Storage {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
           .catch(reason => {
-            dev().error(TAG, 'Failed to load store: ', reason);
+            dev().expectedError(TAG, 'Failed to load store: ', reason);
             return {};
           })
           .then(obj => new Store(obj));
@@ -289,9 +289,7 @@ export class LocalStorageBinding {
     this.isLocalStorageSupported_ = 'localStorage' in this.win;
 
     if (!this.isLocalStorageSupported_) {
-      const error = new Error('localStorage not supported.');
-      error.expected = true;
-      dev().error(TAG, error);
+      dev().expectedError(TAG, 'localStorage not supported.');
     }
   }
 
