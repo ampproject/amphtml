@@ -124,7 +124,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw.js', true, true);
+      }, 'sw', true, true);
       expect(script).to.equal('http://localhost:8000/dist/sw.js');
     });
 
@@ -133,7 +133,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'https:',
-      }, 'sw.js', true);
+      }, 'sw', true);
       expect(script).to.equal('https://cdn.ampproject.org/sw.js');
     });
 
@@ -142,7 +142,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw.js', true);
+      }, 'sw', true);
       expect(script).to.equal('http://localhost:8000/dist/sw.js');
     });
 
@@ -151,7 +151,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.max.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw.js', true);
+      }, 'sw', true);
       expect(script).to.equal('http://localhost:8000/dist/sw.max.js');
     });
 
@@ -161,18 +161,9 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw.js', false);
+      }, 'sw', false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/sw.js');
-    });
-
-    it('with document proxy mode: max', () => {
-      const script = calculateEntryPointScriptUrl({
-        pathname: '/max/output.jsbin.com/pegizoq/quiet',
-        host: 'localhost:80',
-        protocol: 'http:',
-      }, 'sw.js', true);
-      expect(script).to.equal('http://localhost:80/dist/sw.js');
     });
 
     it('with document proxy mode: min', () => {
@@ -180,7 +171,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: '/min/output.jsbin.com/pegizoq/quiet',
         host: 'localhost:80',
         protocol: 'http:',
-      }, 'sw.js', true);
+      }, 'sw', true);
       expect(script).to.equal('http://localhost:80/dist/sw.js');
     });
   });
