@@ -178,7 +178,31 @@ describe('Logging', () => {
       } catch (e) {
         expect(e).to.be.instanceof(Error);
         expect(e.message).to.match(/intended\: test/);
+        expect(e.expected).to.be.undefined;
         expect(isUserErrorMessage(e.message)).to.be.false;
+      }
+    });
+
+    it('should report ERROR and mark with expected flag', () => {
+      const log = new Log(win, RETURNS_OFF);
+      expect(log.level_).to.equal(LogLevel.OFF);
+      win.setTimeout = () => {};
+      let timeoutCallback;
+      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
+        timeoutCallback = callback;
+      });
+
+      log.expectedError('TAG', 'intended', new Error('test'));
+
+      expect(logSpy.callCount).to.equal(0);
+      expect(timeoutStub.callCount).to.equal(1);
+      expect(timeoutCallback).to.exist;
+      try {
+        timeoutCallback();
+      } catch (e) {
+        expect(e).to.be.instanceof(Error);
+        expect(e.message).to.match(/intended\: test/);
+        expect(e.expected).to.be.true;
       }
     });
 

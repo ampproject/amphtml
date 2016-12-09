@@ -181,15 +181,27 @@ export class Log {
    * @param {...*} var_args
    * @return {!Error|undefined}
    */
-  error(tag, var_args) {
+  error_(tag, var_args) {
     if (this.level_ >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
       const error = createErrorVargs.apply(null,
           Array.prototype.slice.call(arguments, 1));
       this.prepareError_(error);
-      this.win.setTimeout(() => {throw error;});
       return error;
+    }
+  }
+
+  /**
+   * Reports an error message.
+   * @param {string} tag
+   * @param {...*} var_args
+   * @return {!Error|undefined}
+   */
+  error(tag, var_args) {
+    const error = this.error_.apply(this, arguments);
+    if (error) {
+      this.win.setTimeout(() => {throw error;});
     }
   }
 
@@ -200,9 +212,10 @@ export class Log {
    * @param {...*} var_args
    */
   expectedError(tag, var_args) {
-    const error = this.error(tag, var_args);
+    const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
+      this.win.setTimeout(() => {throw error;});
     }
   }
 
