@@ -17,6 +17,12 @@
 import * as types from '../../src/types';
 
 describe('Types', () => {
+  it('hasOwn works', () => {
+    expect(types.hasOwn(types.map(), 'a')).to.be.false;
+    expect(types.hasOwn(types.map({'a': 'b'}), 'b')).to.be.false;
+    expect(types.hasOwn(types.map({'a': {}}), 'a')).to.be.true;
+  });
+
   describe('toArray', () => {
 
     it('should return empty array if null is passed', () => {

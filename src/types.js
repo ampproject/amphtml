@@ -113,3 +113,15 @@ export function isEnumValue(enumObj, s) {
   }
   return false;
 }
+
+/**
+ * Checks if the given key is a property in the map.
+ *
+ * @param {T}  obj a map like property.
+ * @param {string}  key
+ * @return {boolean}
+ * @template T
+ */
+export function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
