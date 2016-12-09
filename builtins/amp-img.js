@@ -24,7 +24,7 @@ import {user} from '../src/log';
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE_ = ['alt', 'referrerpolicy', 'aria-label',
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'referrerpolicy', 'aria-label',
       'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
@@ -51,8 +51,9 @@ export class AmpImg extends BaseElement {
     if (name === 'src') {
       this.srcset_ = srcsetFromElement(this.element);
       this.updateImageSrc_();
-    } else if (this.img_ && ATTRIBUTES_TO_PROPAGATE_.indexOf(name) >= 0) {
-      this.propagateAttributes(name, this.img_, /* opt_removeMissingAttrs */ true);
+    } else if (this.img_ && ATTRIBUTES_TO_PROPAGATE.indexOf(name) >= 0) {
+      this.propagateAttributes(name, this.img_,
+          /* opt_removeMissingAttrs */ true);
     }
   }
 
@@ -97,7 +98,7 @@ export class AmpImg extends BaseElement {
         'be correctly propagated for the underlying <img> element.');
     }
 
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE_, this.img_);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);

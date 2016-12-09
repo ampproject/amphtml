@@ -88,7 +88,7 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should verify initial values of string attribute bindings in dev mode', () => {
+  it('should verify string attribute bindings in dev mode', () => {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
@@ -99,7 +99,7 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should verify initial values of boolean attribute bindings in dev mode', () => {
+  it('should verify boolean attribute bindings in dev mode', () => {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
@@ -174,7 +174,8 @@ describes.realWin('amp-bind', {
   });
 
   it('should call attributeChangedCallback on AMP elements', () => {
-    const element = createAmpElementWithBinding('[onePlusOne]="1+1" [added]="true" removed');
+    const binding = '[onePlusOne]="1+1" [added]="true" removed';
+    const element = createAmpElementWithBinding(binding);
     const spy = env.sandbox.spy(element, 'attributeChangedCallback');
     spy.withArgs('onePlusOne', null, 2);
     spy.withArgs('added', null, '');

@@ -249,9 +249,10 @@ export class Bind {
       }
     } else {
       const isAmpElement = element.classList.contains('-amp-element');
-
+      const oldValue = element.getAttribute(property);
       /** @type {boolean|number|string|null|undefined} */
       let attributeValue;
+
       if (newValue === true) {
         element.setAttribute(property, '');
         attributeValue = '';
@@ -259,8 +260,6 @@ export class Bind {
         element.removeAttribute(property);
         attributeValue = null;
       } else {
-        const oldValue = element.getAttribute(property);
-
         dev().assert(oldValue !== newValue,
           `Applying [${property}] binding but value hasn't changed.`);
 
@@ -378,7 +377,7 @@ export class Bind {
    * @return {(string|boolean|number|null)}
    */
   attributeValueOf_(value) {
-    const type = typeof(value);
+    const type = typeof value;
     if (this.attributeValueTypes_[type]) {
       return value;
     } else {

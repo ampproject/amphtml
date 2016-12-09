@@ -44,7 +44,8 @@ export class AmpState extends AMP.BaseElement {
     toggle(this.element, false);
     this.element.setAttribute('aria-hidden', 'true');
 
-    const id = user().assert(this.element.id, '%s element must have an id.', TAG);
+    const id = user().assert(this.element.id,
+        '%s element must have an id.', TAG);
 
     let json;
     const children = this.element.children;

@@ -234,15 +234,16 @@ export class ActionService {
       } else {
         this.actionInfoError_('unrecognized action', action.actionInfo, null);
       }
-    } else {
-      const target = this.root_.getElementById(action.actionInfo.target);
-      if (!target) {
-        this.actionInfoError_('target not found', action.actionInfo, target);
-        return;
-      }
-      this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
-          action.node, event, action.actionInfo);
+      return;
     }
+
+    const target = this.root_.getElementById(action.actionInfo.target);
+    if (!target) {
+      this.actionInfoError_('target not found', action.actionInfo, target);
+      return;
+    }
+    this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
+        action.node, event, action.actionInfo);
   }
 
   /**
