@@ -142,7 +142,7 @@
     <a href="#pubmine">Pubmine</a> |
     <a href="#pulsepoint" class="broken">PulsePoint</a> |
     <a href="#purch">Purch</a> |
-    <a href="#revcontent" class="broken">Revcontent</a> |
+    <a href="#revcontent">Revcontent</a> |
     <a href="#rubicon">Rubicon</a> |
     <a href="#sharethrough">Sharethrough</a> |
     <a href="#smartadserver">SmartAdServer</a> |
@@ -963,12 +963,24 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="revcontent" class="broken">Revcontent Widget with placeholder and fallback</h2>
-  <amp-ad width="320" height="420"
-      layout="responsive"
+  <h2 id="revcontent">Revcontent Responsive Tag</h2>
+  <amp-ad width="320" height="240"
       type="revcontent"
+      layout="responsive"
+      heights="(max-width: 320px) 933px,
+        (max-width: 360px) 1087px,
+        (max-width: 375px) 1138px,
+        (max-width: 412px) 1189px,
+        (max-width: 414px) 1072px,
+        (max-width: 568px) 1151px,
+        (max-width: 640px) 1128px,
+        (max-width: 667px) 1151px,
+        (max-width: 732px) 1211px,
+        (max-width: 736px) 1151px,
+        (max-width: 768px) 633px,
+        (max-width: 1024px) 711px,
+        86vw"
       data-wrapper="rcjsload_2ff711"
-      data-endpoint="trends.revcontent.com"
       data-id="203">
     <div placeholder></div>
     <div fallback></div>
