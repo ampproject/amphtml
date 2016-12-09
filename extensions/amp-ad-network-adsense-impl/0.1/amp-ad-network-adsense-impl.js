@@ -79,13 +79,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.isAmpAdElement();
   }
 
-  /**
-   * For testing purposes, this value is retrieved by function call.
-   */
-  getVisibilityState_() {
-    return viewerForDoc(this.getAmpDoc()).getVisibilityState();
-  }
-
   /** @override */
   getAdUrl() {
     const startTime = Date.now();
@@ -96,13 +89,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
-    const visibilityState = this.getVisibilityState_();
+    const visibilityState = viewerForDoc(this.getAmpDoc())
+        .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
-    const prevFmts = sharedState.getPrevFmts();
-
-    sharedState.addFormat(format);
 
     const paramList = [
       {name: 'client', value: adClientId},
@@ -122,7 +113,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
-      {name: 'pv', value: sharedState.getPv(adClientId)},
+      {name: 'pv', value: sharedState.updateAndGetPv(adClientId)},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
       {name: 'u_aw', value: screen ? screen.availWidth : null},
       {name: 'u_cd', value: screen ? screen.colorDepth : null},
@@ -133,6 +124,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
     ];
 
+    const prevFmts = sharedState.updateAndGetPrevFmts(format);
     if (prevFmts) {
       paramList.push({name: 'prev_fmts', value: prevFmts});
     }

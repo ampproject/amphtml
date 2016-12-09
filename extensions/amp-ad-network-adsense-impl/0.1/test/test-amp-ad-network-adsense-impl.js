@@ -51,12 +51,6 @@ describe('amp-ad-network-adsense-impl', () => {
         () => {
           return ['google'];
         });
-    /*sandbox.stub(
-        AmpAdNetworkAdsenseImpl.prototype, 'getIntersectionElementLayoutBox')
-        .returns({width:1200, height:500});
-    sandbox.stub(
-        AmpAdNetworkAdsenseImpl.prototype, 'getVisibilityState_')
-        .returns('1');*/
     adsenseImplElem = getAdsenseImplElement({
       'type': 'adsense',
       'data-ad-client': 'adsense',

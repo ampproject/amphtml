@@ -33,18 +33,13 @@ export class AdsenseSharedState {
 
   /**
    * Returns the formats of the previous slots as a comma separated list.
+   * @param {string} format The format to add.
    * @return {string}
    */
-  getPrevFmts() {
-    return this.prevFmts_.join(',');
-  }
-
-  /**
-   * Adds a format to the list of previous formats.
-   * @param {string} format The format to add.
-   */
-  addFormat(format) {
+  updateAndGetPrevFmts(format) {
+    const prevFmts = this.prevFmts_.join(',');
     this.prevFmts_.push(format);
+    return prevFmts;
   }
 
   /**
@@ -53,13 +48,8 @@ export class AdsenseSharedState {
    * @param {string} adClientId The ad client id.
    * @return {number} The page view.
    */
-  getPv(adClientId) {
-    if (this.pv_[adClientId]) {
-      this.pv_[adClientId] = 1;
-    } else {
-      this.pv_[adClientId] = 2;
-    }
+  updateAndGetPv(adClientId) {
+    this.pv_[adClientId] = this.pv_[adClientId] ? 1 : 2;
     return this.pv_[adClientId];
   }
-
 }
