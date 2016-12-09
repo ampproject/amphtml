@@ -266,6 +266,7 @@ describe('amp-a4a', () => {
     });
 
     it('for A4A friendly iframe rendering case', () => {
+      expect(a4a.friendlyIframeEmbed_).to.not.exist;
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[srcdoc]');
@@ -274,6 +275,22 @@ describe('amp-a4a', () => {
         const a4aBody = child.contentDocument.body;
         expect(a4aBody).to.be.ok;
         expect(a4aBody).to.be.visible;
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+      });
+    });
+
+    it('should reset state to null on unlayoutCallback', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        a4a.vsync_.runScheduledTasks_();
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        const destroySpy = sandbox.spy();
+        a4a.friendlyIframeEmbed_.destroy = destroySpy;
+        a4a.unlayoutCallback();
+        a4a.vsync_.runScheduledTasks_();
+        expect(a4a.friendlyIframeEmbed_).to.not.exist;
+        expect(destroySpy).to.be.calledOnce;
       });
     });
   });
