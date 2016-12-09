@@ -230,7 +230,6 @@ export class Bind {
     const element = binding.element;
 
     // TODO(choumx): Does `element.tagName` support binding to `property`?
-
     // TODO(choumx): Support objects for attributes.
 
     if (property === 'text') {
@@ -239,6 +238,7 @@ export class Bind {
       element.textContent = newValue;
     } else if (property === 'class') {
       // TODO(choumx): SVG elements are an issue, should disallow in validator.
+      // TODO(choumx): Avoid removing internal classes for AMP elements.
 
       if (Array.isArray(newValue)) {
         element.className = newValue.join(' ');
@@ -248,18 +248,23 @@ export class Bind {
         user().error(TAG, 'Invalid result for class binding', newValue);
       }
     } else {
+      const isAmpElement = element.classList.contains('-amp-element');
+
+      /** @type {boolean|number|string|null|undefined} */
+      let attributeValue;
       if (newValue === true) {
         element.setAttribute(property, '');
+        attributeValue = '';
       } else if (newValue === false) {
         element.removeAttribute(property);
+        attributeValue = null;
       } else {
         const oldValue = element.getAttribute(property);
 
         dev().assert(oldValue !== newValue,
           `Applying [${property}] binding but value hasn't changed.`);
 
-        /** @type {boolean|number|string|null} */
-        const attributeValue = this.attributeValueOf_(newValue);
+        attributeValue = this.attributeValueOf_(newValue);
         if (attributeValue === null) {
           user().error(TAG, 'Invalid result for attribute binding', newValue);
           return;
@@ -272,7 +277,7 @@ export class Bind {
         element.setAttribute(property, attributeValue);
 
         // Update internal state for AMP elements.
-        if (element.classList.contains('-amp-element')) {
+        if (isAmpElement) {
           const resources = element.getResources();
           if (property === 'width') {
             user().assert(isFiniteNumber(attributeValue),
@@ -283,8 +288,11 @@ export class Bind {
                 'Invalid result for [height]: %s', attributeValue);
             resources./*OK*/changeSize(element, attributeValue, undefined);
           }
-          element.attributeChangedCallback(property, oldValue, attributeValue);
         }
+      }
+
+      if (isAmpElement) {
+        element.attributeChangedCallback(property, oldValue, attributeValue);
       }
     }
   }

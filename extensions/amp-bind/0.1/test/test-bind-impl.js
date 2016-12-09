@@ -46,6 +46,18 @@ describes.realWin('amp-bind', {
   }
 
   /**
+   * @param {!string} binding
+   * @return {!Element}
+   */
+  function createAmpElementWithBinding(binding) {
+    const parent = env.win.document.getElementById('parent');
+    parent.innerHTML = '<p ' + binding + '></p>';
+    const fakeAmpElement = parent.firstElementChild;
+    fakeAmpElement.attributeChangedCallback = () => {};
+    return fakeAmpElement;
+  }
+
+  /**
    * @param {!Function} fn
    * @return {!Promise<!Element>}
    */
@@ -158,6 +170,21 @@ describes.realWin('amp-bind', {
       bind.setState({});
       env.flushVsync();
       expect(toArray(element.classList)).to.deep.equal(['a', 'b']);
+    });
+  });
+
+  it('should call attributeChangedCallback on AMP elements', () => {
+    const element = createAmpElementWithBinding('[onePlusOne]="1+1" [added]="true" removed');
+    const spy = env.sandbox.spy(element, 'attributeChangedCallback');
+    spy.withArgs('onePlusOne', null, 2);
+    spy.withArgs('added', null, '');
+    spy.withArgs('removed', '', null);
+    return bodyReady(unusedBody => {
+      bind.setState({});
+      env.flushVsync();
+      expect(spy.withArgs('onePlusOne', null, 2).calledOnce);
+      expect(spy.withArgs('added', null, '').calledOnce);
+      expect(spy.withArgs('removed', '', null).calledOnce);
     });
   });
 
