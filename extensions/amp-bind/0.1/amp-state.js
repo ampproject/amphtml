@@ -41,10 +41,10 @@ export class AmpState extends AMP.BaseElement {
   buildCallback() {
     const TAG = this.getName_();
 
+    toggle(this.element, false);
     this.element.setAttribute('aria-hidden', 'true');
 
-    const id = this.element.id;
-    user().assert(id, '%s element must have an id.', TAG);
+    const id = user().assert(this.element.id, '%s element must have an id.', TAG);
 
     let json;
     const children = this.element.children;
@@ -73,12 +73,9 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    // Now that we are rendered, stop rendering the element to reduce
-    // resource consumption.
-    toggle(this.element, false);
-
-    return Promise.resolve();
+  renderOutsideViewport() {
+    // We want the state data to be available wherever it is in the document.
+    return true;
   }
 
   /**

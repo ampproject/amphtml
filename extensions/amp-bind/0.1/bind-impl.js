@@ -17,6 +17,7 @@
 import {evaluateBindExpr} from './bind-expr';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
+import {isFiniteNumber} from '../../../src/types';
 import {dev, user} from '../../../src/log';
 import {vsyncFor} from '../../../src/vsync';
 
@@ -24,10 +25,12 @@ const TAG = 'AMP-BIND';
 
 /**
  * A single binding, e.g. <element [property]="expression"></element>.
+ * `previousResult` is the result of this expression during the last digest.
  * @typedef {{
  *   property: !string,
  *   expression: !string,
- *   element: !Element
+ *   element: !Element,
+ *   previousResult: (BindExpressionResultDef|undefined)
  * }}
  */
 let BindingDef;
@@ -67,13 +70,6 @@ export class Bind {
     /** {!Array<BindingDef>} */
     this.bindings_ = [];
 
-    /**
-     * Expression results during the previous digest cycle, where the i'th
-     * element is the last result of `this.bindings_[i].expression`.
-     * @type {!Array<BindExpressionResultDef>}
-     */
-    this.previousResults_ = [];
-
     /** @const {!Object} */
     this.scope_ = Object.create(null);
 
@@ -85,6 +81,16 @@ export class Bind {
 
     /** @const {!Function} */
     this.boundMutate_ = this.mutate_.bind(this);
+
+    /**
+     * Keys correspond to valid attribute value types.
+     * @const {!Object<string,boolean>}
+     */
+    this.attributeValueTypes_ = {
+      'string': true,
+      'boolean': true,
+      'number': true,
+    };
 
     this.ampdoc.whenBodyAvailable().then(body => {
       this.bindings_ = this.scanForBindings_(body);
@@ -172,7 +178,7 @@ export class Bind {
     const task = {measure: this.boundMeasure_, mutate: this.boundMutate_};
     this.vsync_.run(task, {
       results: [],
-      verifyOnly: opt_verifyOnly,
+      verifyOnly: !!opt_verifyOnly,
     });
   }
 
@@ -199,10 +205,10 @@ export class Bind {
       const result = state.results[i];
 
       // Don't apply mutation if the result hasn't changed.
-      if (this.shallowEquals_(result, this.previousResults_[i])) {
+      if (this.shallowEquals_(result, binding.previousResult)) {
         continue;
       } else {
-        this.previousResults_[i] = result;
+        binding.previousResult = result;
       }
 
       if (state.verifyOnly) {
@@ -269,11 +275,11 @@ export class Bind {
         if (element.classList.contains('-amp-element')) {
           const resources = element.getResources();
           if (property === 'width') {
-            user().assert(typeof attributeValue === 'number',
+            user().assert(isFiniteNumber(attributeValue),
                 'Invalid result for [width]: %s', attributeValue);
             resources./*OK*/changeSize(element, undefined, attributeValue);
           } else if (property === 'height') {
-            user().assert(typeof attributeValue === 'number',
+            user().assert(isFiniteNumber(attributeValue),
                 'Invalid result for [height]: %s', attributeValue);
             resources./*OK*/changeSize(element, attributeValue, undefined);
           }
@@ -319,13 +325,14 @@ export class Bind {
       match = this.compareStringArrays_(initialValue, classes);
     } else {
       const attribute = element.getAttribute(property);
+      initialValue = attribute;
       if (typeof expectedValue === 'boolean') {
-        initialValue = !!attribute;
+        // Boolean attributes return values of either '' or null.
+        match = (expectedValue && initialValue === '')
+            || (!expectedValue && initialValue === null);
       } else {
-        initialValue = attribute;
+        match = (initialValue === expectedValue);
       }
-      // Use abstract equality since boolean attributes return value of ''.
-      match = (initialValue == expectedValue);
     }
 
     if (!match) {
@@ -363,8 +370,8 @@ export class Bind {
    * @return {(string|boolean|number|null)}
    */
   attributeValueOf_(value) {
-    if (typeof value === 'string' || typeof value === 'boolean'
-       || typeof value === 'number') {
+    const type = typeof(value);
+    if (this.attributeValueTypes_[type] !== undefined) {
       return value;
     } else {
       return null;

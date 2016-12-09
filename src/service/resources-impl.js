@@ -1353,8 +1353,8 @@ export class Resources {
     }
 
     if (request) {
-      request.newHeight = newHeight || request.newHeight;
-      request.newWidth = newWidth || request.newWidth;
+      request.newHeight = newHeight;
+      request.newWidth = newWidth;
       request.force = force || request.force;
       request.callback = opt_callback;
     } else {

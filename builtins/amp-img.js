@@ -52,7 +52,7 @@ export class AmpImg extends BaseElement {
       this.srcset_ = srcsetFromElement(this.element);
       this.updateImageSrc_();
     } else if (this.img_ && ATTRIBUTES_TO_PROPAGATE_.indexOf(name) >= 0) {
-      this.propagateAttributes(name, this.img_);
+      this.propagateAttributes(name, this.img_, /* opt_removeMissingAttrs */ true);
     }
   }
 

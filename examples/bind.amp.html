@@ -15,17 +15,17 @@
       background-color: red;
     }
   </style>
+</head>
 
+<body>
   <amp-state id="myState">
     <script type="application/json">
       {
         "myStateKey1": "myStateValue1"
       }
     </script>
-</amp-state>
-</head>
+  </amp-state>
 
-<body>
   <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle Experiment</button>
 
   <p [text]="foo">After clicking the button below, this will read 'foo'<p>

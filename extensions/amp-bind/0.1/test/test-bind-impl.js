@@ -76,10 +76,21 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should verify initial values of bindings in dev mode', () => {
+  it('should verify initial values of string attribute bindings in dev mode', () => {
     env.sandbox.stub(window, 'AMP_MODE', {development: true});
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
+    const errorStub = env.sandbox.stub(user(), 'error').withArgs('AMP-BIND');
+    return bodyReady(unusedBody => {
+      env.flushVsync();
+      expect(errorStub.callCount).to.equal(1);
+    });
+  });
+
+  it('should verify initial values of boolean attribute bindings in dev mode', () => {
+    env.sandbox.stub(window, 'AMP_MODE', {development: true});
+    // Only the initial value for [c] binding does not match.
+    createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
     const errorStub = env.sandbox.stub(user(), 'error').withArgs('AMP-BIND');
     return bodyReady(unusedBody => {
       env.flushVsync();
