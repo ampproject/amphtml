@@ -524,7 +524,7 @@ function reportRenderedEntityIdentifier(entityId) {
  *  @return {function(Element)} Function that will attach iframeName
  *      to the name attribute of iframe.
  */
-function addNameToIframe(iframe, name) {
+function addNameToIframe(name, iframe) {
   iframe.name = name;
 }
 
