@@ -1556,7 +1556,7 @@ describe('Resources mutateElement and collapse', () => {
 });
 
 
-describe('Resources.add', () => {
+describe('Resources.add/remove', () => {
   let sandbox;
   let resources;
   let parent;
@@ -1576,9 +1576,8 @@ describe('Resources.add', () => {
       isUpgraded() {
         return true;
       },
-      dispatchCustomEvent() {
-        return;
-      },
+      pauseCallback() {},
+      dispatchCustomEvent() {},
     };
     element.build = sandbox.spy();
     return element;
@@ -1758,6 +1757,34 @@ describe('Resources.add', () => {
       expect(child1BuildSpy.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
       expect(schedulePassStub).to.not.be.called;
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove resource and pause', () => {
+      child1.isBuilt = () => true;
+      resources.add(child1);
+      const resource = child1['__AMP__RESOURCE'];
+      const pauseOnRemoveStub = sandbox.stub(resource, 'pauseOnRemove');
+      const disconnectStub = sandbox.stub(resource, 'disconnect');
+      resources.remove(child1);
+      expect(resources.resources_.indexOf(resource)).to.equal(-1);
+      expect(pauseOnRemoveStub).to.be.calledOnce;
+      expect(disconnectStub).to.not.be.called;
+    });
+
+    it('should disconnect resource when embed is destroyed', () => {
+      child1.isBuilt = () => true;
+      resources.add(child1);
+      const resource = child1['__AMP__RESOURCE'];
+      const pauseOnRemoveStub = sandbox.stub(resource, 'pauseOnRemove');
+      const disconnectStub = sandbox.stub(resource, 'disconnect');
+      const childWin = {};
+      resource.hostWin = childWin;
+      resources.removeForChildWindow(childWin);
+      expect(resources.resources_.indexOf(resource)).to.equal(-1);
+      expect(pauseOnRemoveStub).to.be.calledOnce;
+      expect(disconnectStub).to.be.called;
     });
   });
 });

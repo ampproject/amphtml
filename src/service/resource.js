@@ -765,4 +765,13 @@ export class Resource {
     this.pause();
     this.unlayout();
   }
+
+  /**
+   * Disconnect the resource. Mainly intended for embed resources that do not
+   * receive `disconnectedCallback` naturally via CE API.
+   */
+  disconnect() {
+    delete this.element[RESOURCE_PROP_];
+    this.element.disconnectedCallback();
+  }
 }
