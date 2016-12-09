@@ -68,6 +68,11 @@ defined as an `animations` array:
 </amp-animation>
 ```
 
+### Placement in DOM
+
+Initially, `<amp-animation>` is only allowed to be placed as a direct child of `<body>` element. This restriction
+will be removed in the near future.
+
 ### Animation component
 
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)

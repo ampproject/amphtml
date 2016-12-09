@@ -60,6 +60,11 @@ export class AmpAnimation extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment "${TAG}" is disabled.`);
 
+    // TODO(dvoytenko): Remove once we support direct parent visibility.
+    user().assert(this.element.parentNode == this.element.ownerDocument.body,
+        `${TAG} is only allowed as a direct child of <body> element.` +
+        ' This restriction will be removed soon.');
+
     // Trigger.
     const trigger = this.element.getAttribute('trigger');
     if (trigger) {
@@ -78,6 +83,8 @@ export class AmpAnimation extends AMP.BaseElement {
     });
 
     if (this.triggerOnVisibility_) {
+      // Make the element minimally displayed to make sure that `layoutCallback`
+      // is called.
       setStyles(this.element, {
         visibility: 'hidden',
         width: '1px',
