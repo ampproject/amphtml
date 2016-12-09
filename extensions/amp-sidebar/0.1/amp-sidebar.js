@@ -21,6 +21,7 @@ import {dev} from '../../../src/log';
 import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
+import {parseUrl} from '../../../src/url';
 import {vsyncFor} from '../../../src/vsync';
 import {timerFor} from '../../../src/timer';
 
@@ -132,10 +133,23 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
+    // TODO(mkhatib, #6589): Consider exposing onLocalNavigation from
+    // document-click service to simplifiy this.
     this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
-        this.close_();
+        const tgtLoc = parseUrl(target.href);
+        const curLoc = parseUrl(this.getAmpDoc().win.location.href);
+        const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
+        const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
+        // Important: Only close sidebar (and hence pop sidebar history entry)
+        // when navigating locally, Chrome might cancel navigation request
+        // due to after-navigation history manipulation inside a timer callback.
+        // See this issue for more details:
+        // https://github.com/ampproject/amphtml/issues/6585
+        if (tgtHref == curHref && tgtLoc.hash) {
+          this.close_();
+        }
       }
     }, true);
   }
