@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getPageViewId} from './service/document-info-impl';
+import {documentInfoForDoc} from './document-info.js';
+import {viewerForDoc} from '../src/viewer';
 import {getLengthNumeral} from '../src/layout';
 import {getMode} from './mode';
 
@@ -33,20 +34,24 @@ export function getContextMetadata(parentWindow, element, sentinel) {
   const attributes = {};
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
-  const locationHref = parentWindow.location.href;
-
-  let canonicalUrl;
-  try{
-    canonicalUrl = self.document.querySelector(
-        'link[rel="canonical"]').href;
-  } catch(err){
-    console/*OK*/.log("Could not get canonicalUrl");
+  let locationHref = parentWindow.location.href;
+  // This is really only needed for tests, but whatever. Children
+  // see us as the logical origin, so telling them we are about:srcdoc
+  // will fail ancestor checks.
+  if (locationHref == 'about:srcdoc') {
+    locationHref = parentWindow.parent.location.href;
   }
 
+  const docInfo = documentInfoForDoc(parentWindow.document);
+
+  const referrer = viewerForDoc(parentWindow.document)
+      .getUnconfirmedReferrerUrl();
+
   attributes._context = {
-    referrer: self.document.referrer,
-    canonicalUrl,
-    pageViewId: getPageViewId(parentWindow),
+    sourceUrl: docInfo.sourceUrl,
+    referrer,
+    canonicalUrl: docInfo.canonicalUrl,
+    pageViewId: docInfo.pageViewId,
     location: {
       href: locationHref,
     },
@@ -54,12 +59,13 @@ export function getContextMetadata(parentWindow, element, sentinel) {
     startTime,
   };
 
-  attributes.ampcontextVersion = (getMode().localDev ? "LOCAL" :
-      $internalRuntimeVersion$ );
+  attributes.ampcontextVersion = (getMode().localDev ? 'LOCAL' :
+      '$internalRuntimeVersion$');
 
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes.src = adSrc;
   }
   return attributes;
+
 }

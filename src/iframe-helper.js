@@ -131,7 +131,7 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
         break;
       }
     } else if (triggerWin == contentWindow ||
-               isDescendantWindow(contentWindow, triggerWin)) {
+        isDescendantWindow(contentWindow, triggerWin)) {
       // 3P code path, we may accept messages from nested frames.
       windowEvents = we;
       break;
@@ -200,11 +200,11 @@ function registerGlobalListenerIfNeeded(parentWin) {
     }
 
     const listenForEvents = getListenForEvents(
-      parentWin,
-      data.sentinel,
-      event.origin,
-      event.source
-    );
+        parentWin,
+        data.sentinel,
+        event.origin,
+        event.source
+        );
     if (!listenForEvents) {
       return;
     }
@@ -240,8 +240,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
  *     nested frames should also be accepted.
  * @return {!UnlistenDef}
  */
-export function listenFor(
-    iframe, sentinel, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
+export function listenFor(iframe, sentinel, typeOfMessage, callback,
+                          opt_is3P, opt_includingNestedWindows) {
   dev().assert(iframe.src, 'only iframes with src supported');
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
@@ -259,7 +259,7 @@ export function listenFor(
 
 
   let events = listenForEvents[typeOfMessage] ||
-    (listenForEvents[typeOfMessage] = []);
+      (listenForEvents[typeOfMessage] = []);
 
   let unlisten;
   let listener = function(data, source, origin) {
@@ -302,7 +302,8 @@ export function listenFor(
  * @param {boolean=} opt_is3P
  * @return {!Promise<!{data, source, origin}>}
  */
-export function listenForOncePromise(iframe, sentinel, typeOfMessages, opt_is3P) {
+export function listenForOncePromise(
+    iframe, sentinel, typeOfMessages, opt_is3P) {
   const unlistenList = [];
   if (typeof typeOfMessages == 'string') {
     typeOfMessages = [typeOfMessages];
@@ -310,12 +311,13 @@ export function listenForOncePromise(iframe, sentinel, typeOfMessages, opt_is3P)
   return new Promise(resolve => {
     for (let i = 0; i < typeOfMessages.length; i++) {
       const message = typeOfMessages[i];
-      const unlisten = listenFor(iframe, sentinel, message, (data, source, origin) => {
-        for (let i = 0; i < unlistenList.length; i++) {
-          unlistenList[i]();
-        }
-        resolve({data, source, origin});
-      }, opt_is3P);
+      const unlisten = listenFor(
+          iframe, sentinel, message, (data, source, origin) => {
+            for (let i = 0; i < unlistenList.length; i++) {
+              unlistenList[i]();
+            }
+            resolve({data, source, origin});
+          }, opt_is3P);
       unlistenList.push(unlisten);
     }
   });
@@ -329,8 +331,10 @@ export function listenForOncePromise(iframe, sentinel, typeOfMessages, opt_is3P)
  * @param {string} targetOrigin origin of the target.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
-export function postMessage(iframe, sentinel, type, object, targetOrigin, opt_is3P) {
-  postMessageToWindows(iframe, sentinel,
+export function postMessage(
+    iframe, sentinel, type, object, targetOrigin, opt_is3P) {
+  postMessageToWindows(
+      iframe, sentinel,
       [{win: iframe.contentWindow, origin: targetOrigin}], type, object,
       opt_is3P);
 }
@@ -346,7 +350,8 @@ export function postMessage(iframe, sentinel, type, object, targetOrigin, opt_is
  * @param {!Object} object Message payload.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
-export function postMessageToWindows(iframe, sentinel, targets, type, object, opt_is3P) {
+export function postMessageToWindows(
+    iframe, sentinel, targets, type, object, opt_is3P) {
   if (!iframe.contentWindow) {
     return;
   }
@@ -405,17 +410,18 @@ export class SubscriptionApi {
     /** @private @const {!Array<{win: !Window, origin: string}>} */
     this.clientWindows_ = [];
     /** @private @const {string} */
-    this.sentinel = sentinel;
+    this.sentinel_ = sentinel;
 
     /** @private @const {!UnlistenDef} */
-    this.unlisten_ = listenFor(this.iframe_, this.sentinel, type, (data, source, origin) => {
-      // This message might be from any window within the iframe, we need
-      // to keep track of which windows want to be sent updates.
-      if (!this.clientWindows_.some(entry => entry.win == source)) {
-        this.clientWindows_.push({win: source, origin});
-      }
-      requestCallback(data, source, origin);
-    }, this.is3p_,
+    this.unlisten_ = listenFor(
+        this.iframe_, this.sentinel_, type, (data, source, origin) => {
+          // This message might be from any window within the iframe, we need
+          // to keep track of which windows want to be sent updates.
+          if (!this.clientWindows_.some(entry => entry.win == source)) {
+            this.clientWindows_.push({win: source, origin});
+          }
+          requestCallback(data, source, origin);
+        }, this.is3p_,
         // For 3P frames we also allow nested frames within them to subscribe..
         this.is3p_ /* opt_includingNestedWindows */);
   }
@@ -430,7 +436,7 @@ export class SubscriptionApi {
     filterSplice(this.clientWindows_, client => !!client.win.parent);
     postMessageToWindows(
         this.iframe_,
-        this.sentinel,
+        this.sentinel_,
         this.clientWindows_,
         type,
         data,
