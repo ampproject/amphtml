@@ -33,6 +33,9 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     win.document.body.appendChild(iframe1);
     win.document.body.appendChild(iframe2);
     win.document.body.appendChild(iframeUntrusted);
+    iframe1.contentWindow.postMessage = () => {};
+    iframe2.contentWindow.postMessage = () => {};
+    iframeUntrusted.contentWindow.postMessage = () => {};
     host = new InaboxMessagingHost(win, [iframe1, iframe2]);
   });
 
