@@ -31,6 +31,7 @@ const TAG = 'inabox-viewport';
  * Implementation of ViewportBindingDef that works inside an non-scrollable
  * iframe container by listening to host doc for position and resize updates.
  *
+ * @visibleForTesting
  * @implements {ViewportBindingDef}
  */
 export class ViewportBindingInabox {
@@ -62,7 +63,7 @@ export class ViewportBindingInabox {
      * we start with an initial position right below the fold.
      * @private {!../layout-rect.LayoutRectDef}
      */
-    this.containerRect_ = layoutRectLtwh(0, 10, 10, 10);
+    this.containerRect_ = layoutRectLtwh(0, 11, 10, 10);
 
     /** @private @const {!IframeMessagingClient} */
     this.iframeClient_ = new IframeMessagingClient(win);
@@ -106,7 +107,8 @@ export class ViewportBindingInabox {
   /** @override */
   getLayoutRect(el) {
     const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left + this.containerRect_.left),
+    return layoutRectLtwh(
+        Math.round(b.left + this.containerRect_.left),
         Math.round(b.top + this.containerRect_.top),
         Math.round(b.width),
         Math.round(b.height));
