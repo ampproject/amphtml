@@ -17,12 +17,6 @@
 import * as types from '../../src/types';
 
 describe('Types', () => {
-  it('hasOwn works', () => {
-    expect(types.hasOwn(types.map(), 'a')).to.be.false;
-    expect(types.hasOwn(types.map({'a': 'b'}), 'b')).to.be.false;
-    expect(types.hasOwn(types.map({'a': {}}), 'a')).to.be.true;
-  });
-
   describe('toArray', () => {
 
     it('should return empty array if null is passed', () => {
@@ -85,24 +79,6 @@ describe('Types', () => {
       expect(types.isFiniteNumber(3)).to.be.true;
       expect(types.isFiniteNumber(3.2)).to.be.true;
       expect(types.isFiniteNumber(123e5)).to.be.true;
-    });
-  });
-
-  describe('map', () => {
-    it('should make map like objects', () => {
-      expect(types.map().prototype).to.be.undefined;
-      expect(types.map().__proto__).to.be.undefined;
-      expect(types.map().toString).to.be.undefined;
-    });
-
-    it('should make map like objects from objects', () => {
-      expect(types.map({}).prototype).to.be.undefined;
-      expect(types.map({}).__proto__).to.be.undefined;
-      expect(types.map({}).toString).to.be.undefined;
-      expect(types.map({foo: 'bar'}).foo).to.equal('bar');
-      const obj = {foo: 'bar', test: 1};
-      expect(types.map(obj).test).to.equal(1);
-      expect(types.map(obj)).to.not.equal(obj);
     });
   });
 
