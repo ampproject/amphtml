@@ -15,6 +15,7 @@
  */
 
 import {layoutRectLtwh} from '../../../src/layout-rect';
+import {resourcesForDoc} from '../../../src/resources';
 import {ViewportBindingInabox} from '../../../src/inabox/inabox-viewport';
 
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
@@ -34,7 +35,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         return 0.12345;
       },
     };
-    win.top = {postMessage() {}};
+    win.innerWidth = 200;
+    win.innerHeight = 150;
+
     binding = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
     element = {
@@ -43,6 +46,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       },
       measure: measureSpy,
     };
+    sandbox.stub(resourcesForDoc(win.document), 'get').returns([element]);
     sandbox./*OK*/stub(binding.iframeClient_, 'makeRequest', (req, res, cb) => {
       positionCallback = cb;
     });
@@ -54,10 +58,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should work', () => {
-    assert(
-        binding.getLayoutRect(element).top > binding.getSize().height,
-        'element should have initial position below the fold');
+    // Initial state
+    expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
+    expect(binding.getLayoutRect(element))
+        .to.deep.equal(layoutRectLtwh(0, 151, 100, 100));
 
+    // Initial position received
     positionCallback({
       viewport: layoutRectLtwh(0, 0, 100, 100),
       target: layoutRectLtwh(10, 20, 50, 50),
@@ -65,10 +71,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     expect(onScrollCallback).to.not.be.called;
     expect(onResizeCallback).to.be.calledOnce;
+    expect(measureSpy).to.be.calledOnce;
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+    sandbox.reset();
 
-    sandbox.reset(onScrollCallback, onResizeCallback);
+    // Scroll, viewport position changed
     positionCallback({
       viewport: layoutRectLtwh(0, 10, 100, 100),
       target: layoutRectLtwh(10, 20, 50, 50),
@@ -76,18 +84,34 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     expect(onScrollCallback).to.be.calledOnce;
     expect(onResizeCallback).to.not.be.called;
+    expect(measureSpy).to.not.be.called;
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+    sandbox.reset();
 
-    sandbox.reset(onScrollCallback, onResizeCallback);
+    // Resize, viewport size changed
     positionCallback({
-      viewport: layoutRectLtwh(10, 10, 200, 100),
-      target: layoutRectLtwh(40, 30, 50, 50),
+      viewport: layoutRectLtwh(0, 10, 200, 100),
+      target: layoutRectLtwh(10, 20, 50, 50),
     });
 
-    expect(onScrollCallback).to.be.calledOnce;
+    expect(onScrollCallback).to.not.be.called;
     expect(onResizeCallback).to.be.calledOnce;
+    expect(measureSpy).to.not.be.called;
     expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(40, 30, 100, 100));
+        .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+    sandbox.reset();
+
+    // DOM change, target position changed
+    positionCallback({
+      viewport: layoutRectLtwh(0, 10, 200, 100),
+      target: layoutRectLtwh(20, 20, 50, 50),
+    });
+
+    expect(onScrollCallback).to.not.be.called;
+    expect(onResizeCallback).to.not.be.called;
+    expect(measureSpy).to.be.calledOnce;
+    expect(binding.getLayoutRect(element))
+        .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
   });
 });
