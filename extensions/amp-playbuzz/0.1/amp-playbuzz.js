@@ -79,6 +79,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
      /** @private {?boolean} */
     this.displayComments_ = false;
 
+     /** @private {?boolean} */
+    this.iframeLoaded_ = false;
+
      /** @private {Array.<function>} */
     this.unlisteners_ = [];
   }
@@ -127,7 +130,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return placeholder;
   }
 
-
+  notifyIframe_(eventData) {
+    const data = JSON.stringify(eventData);
+    postMessage(this.iframe_, 'onMessage', data, '*', false);
+  }
   /**
    *
    * Returns the overflow element
@@ -163,7 +169,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.src = this.generateEmbedSourceUrl_();
 
     this.listenToPlaybuzzItemMessage_('resize_height',
-      utils.debounce(this.itemHeightChanged_.bind(this), 100));
+       utils.debounce(this.itemHeightChanged_.bind(this), 100));
 
     this.element.appendChild(this.getOverflowElement_());
 
@@ -171,7 +177,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     return this.iframePromise_ = this.loadPromise(iframe).then(() => {
-
+      this.iframeLoaded_ = true;
       this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */});
 
       const unlisten = this.getViewport().onChanged(
@@ -213,7 +219,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     this.itemHeight_ = height; //Save new height
 
-    this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */});
+    if (this.iframeLoaded_) {
+      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */});
+    }
   }
 
 
@@ -262,15 +270,14 @@ class AmpPlaybuzz extends AMP.BaseElement {
       elementBottom: elementMessurements.bottom,
     };
 
-    const isInViewport = scrollingData.scroll > scrollingData.offsetTop &&
+    const isScrollingInsideElement =
+      scrollingData.scroll > scrollingData.offsetTop &&
       scrollingData.scroll < scrollingData.elementBottom;
 
-    if (!isInViewport) {
+    if (!isScrollingInsideElement) {
       return;
     }
-
-    const data = JSON.stringify(scrollingData);
-    postMessage(this.iframe_, 'onMessage', data, '*', false);
+    this.notifyIframe_(scrollingData);
   }
 
   //User might have made some progress or had the results when going inactive
