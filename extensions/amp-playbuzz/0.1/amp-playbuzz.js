@@ -44,7 +44,8 @@ import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import * as events from '../../../src/event-helper';
 import {postMessage} from '../../../src/iframe-helper';
-import {parseUrl,
+import {
+  parseUrl,
   removeFragment,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
@@ -67,29 +68,29 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?string} */
     this.item_ = '';
 
-     /** @private {?number} */
+    /** @private {?number} */
     this.itemHeight_ = 300; //default
 
-     /** @private {?boolean} */
+    /** @private {?boolean} */
     this.displayItemInfo_ = false;
 
-     /** @private {?boolean} */
+    /** @private {?boolean} */
     this.displayShareBar_ = false;
 
-     /** @private {?boolean} */
+    /** @private {?boolean} */
     this.displayComments_ = false;
 
-     /** @private {?boolean} */
+    /** @private {?boolean} */
     this.iframeLoaded_ = false;
 
-     /** @private {Array.<function>} */
+    /** @private {Array.<function>} */
     this.unlisteners_ = [];
   }
   /**
    * @override
    */
   preconnectCallback() {
-    this.preconnect.preload(this.item_);
+    this.preconnect.url(this.item_);
   }
 
   /** @override */
@@ -117,9 +118,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.RESPONSIVE;
-    // return layout === Layout.CONTAINER;
-    // return isLayoutSizeDefined(layout);
+    return layout === Layout.RESPONSIVE ||
+      layout === Layout.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -169,7 +169,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.src = this.generateEmbedSourceUrl_();
 
     this.listenToPlaybuzzItemMessage_('resize_height',
-       utils.debounce(this.itemHeightChanged_.bind(this), 100));
+      utils.debounce(this.itemHeightChanged_.bind(this), 100));
 
     this.element.appendChild(this.getOverflowElement_());
 
@@ -178,7 +178,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     return this.iframePromise_ = this.loadPromise(iframe).then(() => {
       this.iframeLoaded_ = true;
-      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */});
+      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
 
       const unlisten = this.getViewport().onChanged(
         utils.debounce(this.sendScrollDataToItem_.bind(this), 250));
@@ -220,7 +220,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.itemHeight_ = height; //Save new height
 
     if (this.iframeLoaded_) {
-      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */});
+      this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
     }
   }
 
@@ -260,21 +260,14 @@ class AmpPlaybuzz extends AMP.BaseElement {
   }
 
   sendScrollDataToItem_(changeEvent) {
-    const viewport = this.getViewport();
-    const elementMessurements = viewport.getLayoutRect(this.element);
     const scrollingData = {
       event: 'scroll',
       windowHeight: changeEvent.height,
       scroll: changeEvent.top,
-      offsetTop: elementMessurements.top,
-      elementBottom: elementMessurements.bottom,
+      offsetTop: this.getLayoutBox().top,
     };
 
-    const isScrollingInsideElement =
-      scrollingData.scroll > scrollingData.offsetTop &&
-      scrollingData.scroll < scrollingData.elementBottom;
-
-    if (!isScrollingInsideElement) {
+    if (!this.isInViewport()) {
       return;
     }
     this.notifyIframe_(scrollingData);
