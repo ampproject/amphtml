@@ -79,9 +79,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
      /** @private {?boolean} */
     this.displayComments_ = false;
 
-     /**  @param {Array.<function>} */
+     /** @private {Array.<function>} */
     this.unlisteners_ = [];
-
   }
   /**
    * @override
@@ -254,13 +253,21 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   sendScrollDataToItem_(changeEvent) {
     const viewport = this.getViewport();
-
+    const elementMessurements = viewport.getLayoutRect(this.element);
     const scrollingData = {
       event: 'scroll',
       windowHeight: changeEvent.height,
       scroll: changeEvent.top,
-      offsetTop: viewport.getLayoutRect(this.element).top,
+      offsetTop: elementMessurements.top,
+      elementBottom: elementMessurements.bottom,
     };
+
+    const isInViewport = scrollingData.scroll > scrollingData.offsetTop &&
+      scrollingData.scroll < scrollingData.elementBottom;
+
+    if (!isInViewport) {
+      return;
+    }
 
     const data = JSON.stringify(scrollingData);
     postMessage(this.iframe_, 'onMessage', data, '*', false);
