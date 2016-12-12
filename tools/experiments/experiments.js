@@ -162,6 +162,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
   {
+    id: 'amp-playbuzz',
+    name: 'AMP extension for playbuzz engaging items',
+    spec: 'https://github.com/ampproject/amphtml/issues/6106',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+  },
+  {
     id: 'make-body-block',
     name: 'Sets the body to display:block.',
     spec: 'https://github.com/ampproject/amphtml/issues/5310',
