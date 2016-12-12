@@ -26,7 +26,7 @@ import {
 } from
 '../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
 import {getMode} from '../src/mode';
-import {map} from '../src/types';
+import {map} from '../src/utils/object';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.

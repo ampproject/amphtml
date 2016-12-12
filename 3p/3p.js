@@ -24,7 +24,7 @@
 
 import {dev, user} from '../src/log';
 import {isArray} from '../src/types';
-import {map} from '../src/types';
+import {map} from '../src/utils/object';
 import {rethrowAsync} from '../src/log';
 
 

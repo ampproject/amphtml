@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {listen} from '../src/event-helper';
-import {map} from '../src/types';
+import {map} from '../src/utils/object';
 import {serializeMessage, deserializeMessage} from '../src/3p-frame';
 
 export class IframeMessagingClient {
