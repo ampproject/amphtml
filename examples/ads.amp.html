@@ -104,6 +104,7 @@
     <a href="#contentad">Content.ad</a> |
     <a href="#criteo">Criteo</a> |
     <a href="#custom">Custom</a>|
+    <a href="#distroscale">DistroScale</a> |
     <a href="#dotandads">DotAndAds</a> |
     <a href="#doubleclick">Doubleclick</a> |
     <a href="#eplanning">E-Planning</a> |
@@ -141,7 +142,7 @@
     <a href="#pubmine">Pubmine</a> |
     <a href="#pulsepoint" class="broken">PulsePoint</a> |
     <a href="#purch">Purch</a> |
-    <a href="#revcontent" class="broken">Revcontent</a> |
+    <a href="#revcontent">Revcontent</a> |
     <a href="#rubicon">Rubicon</a> |
     <a href="#sharethrough">Sharethrough</a> |
     <a href="#smartadserver">SmartAdServer</a> |
@@ -155,6 +156,7 @@
     <a href="#weborama">Weborama</a> |
     <a href="#widespace">Widespace</a> |
     <a href="#xlift">Xlift</a> |
+    <a href="#xrostssp">Xrost SSP</a> |
     <a href="#yahoo">Yahoo</a> |
     <a href="#yahoojp">YahooJP</a> |
     <a href="#yieldbot">Yieldbot</a> |
@@ -205,7 +207,7 @@
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-  
+
   <h2 id="adbutler">AdButler</h2>
   <amp-ad width=300 height=250
           type="adbutler"
@@ -213,8 +215,8 @@
           data-zone="212491">
       <div placeholder></div>
       <div fallback></div>
-  </amp-ad>  
-  
+  </amp-ad>
+
   <h2 id="adition">ADITION</h2>
   <amp-ad width=300 height=250
       type="adition"
@@ -486,7 +488,6 @@
     <div fallback></div>
   </amp-ad>
 
-  
   <h2 id="custom">Custom leaderboard</h2>
   <amp-ad width=500 height=60
     type="custom"
@@ -496,11 +497,11 @@
       <a href="{{href}}" target='_blank'>
         <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
-    </template>  
+    </template>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
- 
+
   <h2>Custom square</h2>
   <amp-ad width="200" height="200"
     type="custom"
@@ -510,11 +511,11 @@
       <a href="{{href}}" target="_blank">
         <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
-    </template>  
+    </template>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-  
+
   <h2>Custom leaderboard with no slot specified</h2>
   <amp-ad width="500" height="60"
     type="custom"
@@ -523,11 +524,21 @@
       <a href="{{href}}" target="_blank">
         <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
-    </template>  
+    </template>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-  
+
+  <h2 id="distroscale">DistroScale</h2>
+  <amp-ad width=300 height=600
+      type="distroscale"
+      data-pid="1"
+      data-zid="8710"
+      layout="responsive">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
   <h2 id="dotandads">DotAndAds masthead</h2>
   <amp-ad width=980 height=250
       type="dotandads"
@@ -953,12 +964,24 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="revcontent" class="broken">Revcontent Widget with placeholder and fallback</h2>
-  <amp-ad width="320" height="420"
-      layout="responsive"
+  <h2 id="revcontent">Revcontent Responsive Tag</h2>
+  <amp-ad width="320" height="240"
       type="revcontent"
+      layout="responsive"
+      heights="(max-width: 320px) 933px,
+        (max-width: 360px) 1087px,
+        (max-width: 375px) 1138px,
+        (max-width: 412px) 1189px,
+        (max-width: 414px) 1072px,
+        (max-width: 568px) 1151px,
+        (max-width: 640px) 1128px,
+        (max-width: 667px) 1151px,
+        (max-width: 732px) 1211px,
+        (max-width: 736px) 1151px,
+        (max-width: 768px) 633px,
+        (max-width: 1024px) 711px,
+        86vw"
       data-wrapper="rcjsload_2ff711"
-      data-endpoint="trends.revcontent.com"
       data-id="203">
     <div placeholder></div>
     <div fallback></div>
@@ -1106,8 +1129,17 @@
 
   <h2 id="xlift">Xlift native ad</h2>
   <amp-ad width="300" height="300"
-      type="xlift" 
+      type="xlift"
       data-mediaid="mamastar">
+      <div placeholder></div>
+      <div fallback></div>
+  </amp-ad>
+ 
+  <h2 id="xrostssp">Xrost SSP</h2>
+  <amp-ad width="300" height="250"
+      type="xrostssp"
+      data-aid="10"
+      data-slot-id="3347">
       <div placeholder></div>
       <div fallback></div>
   </amp-ad>

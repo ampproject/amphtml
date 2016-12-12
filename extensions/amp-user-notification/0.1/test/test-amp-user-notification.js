@@ -50,7 +50,6 @@ describe('amp-user-notification', () => {
   function getUserNotification(attrs = {}) {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
-      iframe.win.ampExtendedElements = {};
       storage = getExistingServiceForDoc(iframe.ampdoc, 'storage');
       storageMock = sandbox.mock(storage);
       return buildElement(iframe.doc, iframe.ampdoc, attrs);
