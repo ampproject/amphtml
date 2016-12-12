@@ -25,8 +25,8 @@ import {isArray, isObject, isFormData} from '../types';
 
 
 /**
- * The "init" argument of the Fetch API. Currently, only "credentials: include"
- * is implemented.
+ * The "init" argument of the Fetch API. Currently, only `credentials: include`
+ * and `credentials: omit` is implemented.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  *
@@ -87,8 +87,9 @@ export class Xhr {
     if (opt_init && opt_init.credentials !== undefined) {
       // In particular, Firefox does not tolerate `null` values for
       // `credentials`.
-      dev().assert(opt_init.credentials == 'include',
-          'Only credentials=include support: %s', opt_init.credentials);
+      dev().assert(
+          opt_init.credentials == 'include' || opt_init.credentials == 'omit',
+          'Only credentials=include|omit support: %s', opt_init.credentials);
     }
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing

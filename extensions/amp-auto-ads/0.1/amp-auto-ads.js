@@ -55,6 +55,7 @@ export class AmpAutoAds extends AMP.BaseElement {
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
+      credentials: 'omit',
       requireAmpResponseSourceOrigin: false,
     };
     return xhrFor(this.win)

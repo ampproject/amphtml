@@ -389,10 +389,19 @@ describe('XHR', function() {
         });
       });
 
+      it('should ignore CORS setting cookies w/omit credentials', () => {
+        const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
+        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
+        return xhr.fetchJson(url, {credentials: 'omit'}).then(res => {
+          expect(res).to.exist;
+          expect(getCookie(window, cookieName)).to.be.null;
+        });
+      });
+
       it('should NOT succeed CORS with invalid credentials', () => {
         expect(() => {
           xhr.fetchJson('https://acme.org/', {credentials: null});
-        }).to.throw(/Only credentials=include support: null/);
+        }).to.throw(/Only credentials=include|omit support: null/);
       });
 
       it('should expose HTTP headers', () => {
