@@ -29,14 +29,14 @@ export function adverticum(global, data) {
   d.setAttribute('class', 'goAdverticum goa-embedded');
 
   document.getElementById('c').appendChild(d);
-
-  const s = global.document.createTextNode(data['costumetargetstring']);
-  const v = global.document.createElement('var');
-  v.setAttribute('id', 'cT');
-  v.setAttribute('class', 'customtarget');
-  v.setAttribute('style', 'display:none');
-  v.appendChild(s);
-  document.getElementById(zoneid).appendChild(v);
-
+  if (data['costumetargetstring']) {
+    const s = global.document.createTextNode(data['costumetargetstring']);
+    const v = global.document.createElement('var');
+    v.setAttribute('id', 'cT');
+    v.setAttribute('class', 'customtarget');
+    v.setAttribute('style', 'display:none');
+    v.appendChild(s);
+    document.getElementById(zoneid).appendChild(v);
+  }
   writeScript(global, 'http://ad.adverticum.net/g3.js');
 }
