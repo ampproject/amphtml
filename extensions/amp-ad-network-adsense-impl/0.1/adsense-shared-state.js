@@ -18,26 +18,58 @@ export class AdsenseSharedState {
 
   constructor() {
 
-    /**
-     * @private {!Array<string>}
-     */
+    /** @private {!Array<string>} */
     this.prevFmts_ = [];
 
-    /**
-     * @private {!Object<string, number>}
-     */
+    /** @private {!Object<string, number>} */
+    this.adkFormatIndexMap_ = {};
+
+    /** @private {number} */
+    this.formatIndex_ = 0;
+
+    /** @private {!Object<string, number>} */
     this.pv_ = {};
   }
 
   /**
    * Returns the formats of the previous slots as a comma separated list.
    * @param {string} format The format to add.
+   * @param {string} id Unique identifier for slot.
    * @return {string}
    */
-  updateAndGetPrevFmts(format) {
+  updateAndGetPrevFmts(format, id) {
+    // The return value.
     const prevFmts = this.prevFmts_.join(',');
+    // Index of insertion.
+    const index = this.formatIndex_++;
+    // Associate this index with the given adk for future removal.
+    this.adkFormatIndexMap_[id] = index;
+
     this.prevFmts_.push(format);
     return prevFmts;
+  }
+
+  /**
+   * Removes the format associated with the given adkey.
+   * @param {string} id The unique ID associated with the format to be removed.
+   */
+  removePreviousFormat(id) {
+    // Get index of format associated with given adk.
+    const n = this.adkFormatIndexMap_[id];
+    // Delete the association.
+    delete this.adkFormatIndexMap_[id];
+
+    // Decrement next insertion index.
+    this.formatIndex_--;
+
+    this.prevFmts_.length.splice(n, 1);
+    // Decrement all indexes greater than n to compensate for the removal of the
+    // nth item in the array.
+    for (const key in this.adkFormatIndexMap_) {
+      if (this.adkFormatIndexMap_[key] > n) {
+        this.adkFormatIndexMap_[key]--;
+      }
+    }
   }
 
   /**

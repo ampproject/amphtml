@@ -75,6 +75,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
+
+    /**
+     * @private {string}
+     * The adkey for the slot.
+     * Not initialized until getAdUrl() is called. Updated upon each invocation
+     * of getAdUrl().
+     */
+    this.adk_ = null;
   }
 
   /** @override */
@@ -98,6 +106,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
+    this.adk_ = this.adKey_(format);
 
     const paramList = [
       {name: 'client', value: adClientId},
@@ -106,7 +115,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'h', value: slotRect.height},
       {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
-      {name: 'adk', value: this.adKey_(format)},
+      {name: 'adk', value: this.adk_},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?
@@ -128,7 +137,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
     ];
 
-    const prevFmts = sharedState.updateAndGetPrevFmts(format);
+    const prevFmts = sharedState.updateAndGetPrevFmts(format, this.adk_);
     if (prevFmts) {
       paramList.push({name: 'prev_fmts', value: prevFmts});
     }
@@ -140,6 +149,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    super.unlayoutCallback();
+    sharedState.removePreviousFormat(this.adk_);
   }
 
   /**

@@ -103,8 +103,6 @@ describe('amp-ad-network-adsense-impl', () => {
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
         return fixture.addElement(elem).then(addedElem => {
-          // Clear state from other tests.
-          resetSharedState();
           // Create AdsenseImpl instance.
           adsenseImpl = new AmpAdNetworkAdsenseImpl(addedElem);
           // The expected url parameters whose values are known and fixed.
@@ -151,6 +149,58 @@ describe('amp-ad-network-adsense-impl', () => {
             expect(extraneousParams.length,
                 'found extraneous parameters: ' + extraneousParams.join('&'))
                 .to.equal(0);
+          });
+        });
+      });
+    });
+    it.skip('with multiple slots', () => {
+      return createIframePromise().then(fixture => {
+        // Set up the element's underlying infrastructure.
+        installDocService(fixture.win, /* isSingleDoc */ true);
+        upgradeOrRegisterElement(fixture.win, 'amp-a4a',
+            AmpAdNetworkAdsenseImpl);
+        const elem1 = getAdsenseImplElement({
+          'type': 'adsense',
+          'data-ad-client': 'adsense',
+          'width': '320',
+          'height': '50',
+          'data-experiment-id': '8675309',
+        }, fixture.doc, 'amp-a4a');
+        const elem2 = getAdsenseImplElement({
+          'type': 'adsense',
+          'data-ad-client': 'adsense',
+          'width': '320',
+          'height': '50',
+          'data-experiment-id': '8675309',
+        }, fixture.doc, 'amp-a4a');
+        const elem3 = getAdsenseImplElement({
+          'type': 'adsense',
+          'data-ad-client': 'not-adsense',
+          'width': '320',
+          'height': '50',
+          'data-experiment-id': '8675309',
+        }, fixture.doc, 'amp-a4a');
+        return fixture.addElement(elem1).then(addedElem1 => {
+          // Create AdsenseImpl instance.
+          const adsenseImpl1 = new AmpAdNetworkAdsenseImpl(addedElem1);
+          return adsenseImpl1.getAdUrl().then(adUrl1 => {
+            expect(adUrl1.indexOf('pv=2') >= 0).to.be.true;
+            expect(adUrl1.indexOf('prev_fmts') < 0).to.be.true;
+            return fixture.addElement(elem2).then(addedElem2 => {
+              const adsenseImpl2 = new AmpAdNetworkAdsenseImpl(addedElem2);
+              return adsenseImpl2.getAdUrl().then(adUrl2 => {
+                expect(adUrl2.indexOf('pv=1') >= 0).to.be.true;
+                expect(adUrl2.indexOf('prev_fmts=320x50') >= 0).to.be.true;
+                return fixture.addElement(elem3).then(addedElem3 => {
+                  const adsenseImpl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
+                  return adsenseImpl3.getAdUrl().then(adUrl3 => {
+                    expect(adUrl3.indexOf('pv=2') >= 0).to.be.true;
+                    expect(adUrl3.indexOf('prev_fmts=320x50,320x50') >= 0, adUrl3)
+                        .to.be.true;
+                  });
+                });
+              });
+            });
           });
         });
       });
