@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {BindExpression} from './bind-expression';
+import {BindEvaluator} from './bind-evaluator';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
-import {toArray} from '../../../src/types';
 import {vsyncFor} from '../../../src/vsync';
 
 const TAG = 'AMP-BIND';
@@ -39,7 +39,7 @@ let BindingDef;
 /**
  * The state passed through vsync measure/mutate during a Bind digest cycle.
  * @typedef {{
- *   results: Array<BindExpressionResultDef>,
+ *   results: !Object<string,BindExpressionResultDef>,
  *   verifyOnly: boolean
  * }}
  */
@@ -74,6 +74,12 @@ export class Bind {
     /** @const {!Object} */
     this.scope_ = Object.create(null);
 
+    /** @const {?./bind-evaluator.BindEvaluator} */
+    this.evaluator_ = null;
+
+    /** {?Promise<!Object<string,*>>} */
+    this.evaluatePromise_ = null;
+
     /** @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
 
@@ -94,7 +100,9 @@ export class Bind {
     };
 
     this.ampdoc.whenBodyAvailable().then(body => {
-      this.bindings_ = this.scanForBindings_(body);
+      const {bindings, expressions} = this.scanForBindings_(body);
+      this.bindings_ = bindings;
+      this.evaluator_ = new BindEvaluator(expressions);
 
       // Trigger verify-only digest in development.
       if (getMode().development) {
@@ -123,13 +131,14 @@ export class Bind {
    * Scans children for attributes that conform to bind syntax and returns
    * all bindings.
    * @param {!Element} body
-   * @return {!Array<BindingDef>}
+   * @return {{bindings: !Array<BindingDef>, expressions: !Array<string>}}
    * @private
    */
   scanForBindings_(body) {
     // TODO(choumx): Chunk if taking too long in a single frame.
 
     const bindings = [];
+    const expressions = [];
     const elements = body.getElementsByTagName('*');
     for (let i = 0; i < elements.length; i++) {
       const el = elements[i];
@@ -138,10 +147,11 @@ export class Bind {
         const binding = this.bindingForAttribute_(attributes[j], el);
         if (binding) {
           bindings.push(binding);
+          expressions.push(binding.expression);
         }
       }
     }
-    return bindings;
+    return {bindings, expressions};
   }
 
   /**
@@ -176,37 +186,25 @@ export class Bind {
   digest_(opt_verifyOnly) {
     // TODO(choumx): Chunk if takes too long for a single frame.
 
-    /** {!VsyncTaskSpecDef} */
-    const task = {measure: this.boundMeasure_, mutate: this.boundMutate_};
-    this.vsync_.run(task, {
-      results: [],
-      verifyOnly: !!opt_verifyOnly,
+    this.evaluatePromise_ = this.evaluator_.evaluate(this.scope_);
+    this.evaluatePromise_.then(results => {
+      /** {!VsyncTaskSpecDef} */
+      const task = {measure: this.boundMeasure_, mutate: this.boundMutate_};
+      this.vsync_.run(task, {
+        results,
+        verifyOnly: !!opt_verifyOnly,
+      });
+    }).catch(error => {
+      user().error(TAG, error);
     });
   }
 
   /**
-   * Reevaluates all bindings and stores results in `state`.
    * @param {BindVsyncStateDef} state
    * @private
    */
   measure_(state) {
-    /** @type {!Object<string,BindExpressionResultDef>} */
-    const cache = {};
-
-    for (let i = 0; i < this.bindings_.length; i++) {
-      const binding = this.bindings_[i];
-      const expression = binding.expression;
-
-      // Reuse cached result for duplicate expressions in same digest.
-      if (cache[expression] !== undefined) {
-        state.results[i] = cache[expression];
-      } else {
-        const bindExpression = new BindExpression(expression);
-        const result = bindExpression.evaluate(this.scope_);
-        state.results[i] = result;
-        cache[binding.expression] = result;
-      }
-    }
+    // TODO(choumx): Validate here or in applyBinding_()?
   }
 
   /**
@@ -217,7 +215,8 @@ export class Bind {
   mutate_(state) {
     for (let i = 0; i < this.bindings_.length; i++) {
       const binding = this.bindings_[i];
-      const result = state.results[i];
+      const expression = binding.expression;
+      const result = state.results[expression];
 
       // Don't apply mutation if the result hasn't changed.
       if (this.shallowEquals_(result, binding.previousResult)) {
@@ -375,8 +374,8 @@ export class Bind {
     if (a.length !== b.length) {
       return false;
     }
-    const sortedA = toArray(a).sort();
-    const sortedB = toArray(b).sort();
+    const sortedA = (isArray(a) ? a : toArray(a)).sort();
+    const sortedB = (isArray(b) ? b : toArray(b)).sort();
     for (let i = 0; i < a.length; i++) {
       if (sortedA[i] !== sortedB[i]) {
         return false;

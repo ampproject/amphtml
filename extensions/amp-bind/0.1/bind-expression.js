@@ -23,9 +23,9 @@ export class BindExpression {
   /**
    * @param {string} expression
    */
-  constructor(expression) {
+  constructor(expressionString) {
     /** @const {string} */
-    this.expression_ = expression;
+    this.expressionString = expressionString;
   }
 
   /**
@@ -38,7 +38,7 @@ export class BindExpression {
     // and generating evaluator with Function constructor.
     try {
       parser.yy = scope;
-      return parser.parse(this.expression_);
+      return parser.parse(this.expressionString);
     } finally {
       parser.yy = null;
     }

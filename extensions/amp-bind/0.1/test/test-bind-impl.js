@@ -59,11 +59,37 @@ describes.realWin('amp-bind', {
   }
 
   /**
-   * @param {!Function} fn
-   * @return {!Promise<!Element>}
+   * Calls `callback` when Bind's DOM scan and optional verify completes.
+   * @param {!Function} callback
+   * @return {!Promise}
    */
-  function bodyReady(fn) {
-    return env.ampdoc.whenBodyAvailable().then(fn);
+  function onBindReady(callback) {
+    return env.ampdoc.whenBodyAvailable().then(() => {
+      if (bind.evaluatePromise_) {
+        return bind.evaluatePromise_.then(() => {
+          env.flushVsync();
+          callback();
+        });
+      } else {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Calls `callback` when digest that updates bind state to `state` completes.
+   * @param {!Object} state
+   * @param {!Function} callback
+   * @return {!Promise}
+   */
+  function onBindReadyAndSetState(state, callback) {
+    return env.ampdoc.whenBodyAvailable().then(() => {
+      bind.setState(state);
+      return bind.evaluatePromise_.then(() => {
+        env.flushVsync();
+        callback();
+      });
+    });
   }
 
   it('should throw error if experiment is not enabled', () => {
@@ -76,7 +102,7 @@ describes.realWin('amp-bind', {
   it('should scan for bindings when body is available', () => {
     createElementWithBinding('[onePlusOne]="1+1"');
     expect(bind.bindings_.length).to.equal(0);
-    return bodyReady(unusedBody => {
+    return onBindReady(() => {
       expect(bind.bindings_.length).to.equal(1);
     });
   });
@@ -84,7 +110,7 @@ describes.realWin('amp-bind', {
   it('should NOT apply expressions on first load', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');
     expect(element.getAttribute('onePlusOne')).to.equal(null);
-    return bodyReady(unusedBody => {
+    return onBindReady(() => {
       expect(element.getAttribute('onePlusOne')).to.equal(null);
     });
   });
@@ -94,8 +120,7 @@ describes.realWin('amp-bind', {
     // Only the initial value for [a] binding does not match.
     createElementWithBinding('[a]="a" [b]="b" b="b"');
     const errorStub = env.sandbox.stub(user(), 'error').withArgs('AMP-BIND');
-    return bodyReady(unusedBody => {
-      env.flushVsync();
+    return onBindReady(() => {
       expect(errorStub.callCount).to.equal(1);
     });
   });
@@ -105,8 +130,7 @@ describes.realWin('amp-bind', {
     // Only the initial value for [c] binding does not match.
     createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
     const errorStub = env.sandbox.stub(user(), 'error').withArgs('AMP-BIND');
-    return bodyReady(unusedBody => {
-      env.flushVsync();
+    return onBindReady(() => {
       expect(errorStub.callCount).to.equal(1);
     });
   });
@@ -114,7 +138,7 @@ describes.realWin('amp-bind', {
   it('should skip digest if specified in setState()', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');
     expect(element.getAttribute('onePlusOne')).to.equal(null);
-    return bodyReady(unusedBody => {
+    return onBindReady(() => {
       bind.setState({}, /* opt_skipDigest */ true);
       env.flushVsync();
       expect(element.getAttribute('onePlusOne')).to.equal(null);
@@ -124,9 +148,7 @@ describes.realWin('amp-bind', {
   it('should support binding to string attributes', () => {
     const element = createElementWithBinding('[onePlusOne]="1+1"');
     expect(element.getAttribute('onePlusOne')).to.equal(null);
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
+    return onBindReadyAndSetState({}, () => {
       expect(element.getAttribute('onePlusOne')).to.equal('2');
     });
   });
@@ -136,9 +158,7 @@ describes.realWin('amp-bind', {
         createElementWithBinding('[true]="true" [false]="false" false');
     expect(element.getAttribute('true')).to.equal(null);
     expect(element.getAttribute('false')).to.equal('');
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
+    return onBindReadyAndSetState({}, () => {
       expect(element.getAttribute('true')).to.equal('');
       expect(element.getAttribute('false')).to.equal(null);
     });
@@ -147,9 +167,7 @@ describes.realWin('amp-bind', {
   it('should support binding to Node.textContent', () => {
     const element = createElementWithBinding(`[text]="'a' + 'b' + 'c'"`);
     expect(element.textContent).to.equal('');
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
+    return onBindReadyAndSetState({}, () => {
       expect(element.textContent).to.equal('abc');
     });
   });
@@ -157,9 +175,7 @@ describes.realWin('amp-bind', {
   it('should support binding to CSS classes with strings', () => {
     const element = createElementWithBinding(`[class]="['abc']"`);
     expect(toArray(element.classList)).to.deep.equal([]);
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
+    return onBindReadyAndSetState({}, () => {
       expect(toArray(element.classList)).to.deep.equal(['abc']);
     });
   });
@@ -167,9 +183,7 @@ describes.realWin('amp-bind', {
   it('should support binding to CSS classes with arrays', () => {
     const element = createElementWithBinding(`[class]="['a','b']"`);
     expect(toArray(element.classList)).to.deep.equal([]);
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
+    return onBindReadyAndSetState({}, () => {
       expect(toArray(element.classList)).to.deep.equal(['a', 'b']);
     });
   });
@@ -181,9 +195,7 @@ describes.realWin('amp-bind', {
     spy.withArgs('onePlusOne', null, 2);
     spy.withArgs('added', null, '');
     spy.withArgs('removed', '', null);
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
+    return onBindReadyAndSetState({}, () => {
       expect(spy.withArgs('onePlusOne', null, 2).calledOnce);
       expect(spy.withArgs('added', null, '').calledOnce);
       expect(spy.withArgs('removed', '', null).calledOnce);
@@ -194,15 +206,13 @@ describes.realWin('amp-bind', {
     const binding = `[text]="foo + bar + baz.qux.join(',')"`;
     const element = createElementWithBinding(binding);
     expect(element.textContent).to.equal('');
-    return bodyReady(unusedBody => {
-      bind.setState({
-        foo: 'abc',
-        bar: 123,
-        baz: {
-          qux: ['x', 'y', 'z'],
-        },
-      });
-      env.flushVsync();
+    return onBindReadyAndSetState({
+      foo: 'abc',
+      bar: 123,
+      baz: {
+        qux: ['x', 'y', 'z'],
+      },
+    }, () => {
       expect(element.textContent).to.equal('abc123x,y,z');
     });
   });
@@ -210,10 +220,7 @@ describes.realWin('amp-bind', {
   it('should NOT mutate elements if expression result is unchanged', () => {
     const binding = `[onePlusOne]="1+1" [class]="'abc'" [text]="'a'+'b'"`;
     const element = createElementWithBinding(binding);
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
-
+    return onBindReadyAndSetState({}, () => {
       expect(element.textContent.length).to.not.equal(0);
       expect(element.classList.length).to.not.equal(0);
       expect(element.attributes.length).to.not.equal(0);
@@ -237,9 +244,7 @@ describes.realWin('amp-bind', {
     const element = createElementWithBinding(`[a]="1+1" [b]="1+1"`);
     const stub = env.sandbox.stub(BindExpression.prototype, 'evaluate');
     stub.returns('stubbed');
-    return bodyReady(unusedBody => {
-      bind.setState({});
-      env.flushVsync();
+    return onBindReadyAndSetState({}, () => {
       expect(stub.calledOnce).to.be.true;
     });
   })
