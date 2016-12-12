@@ -176,14 +176,14 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return this.iframePromise_ = this.loadPromise(iframe).then(() => {
+    return this.iframePromise_ = this.loadPromise(iframe).then(function() {
       this.iframeLoaded_ = true;
       this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
 
       const unlisten = this.getViewport().onChanged(
-        utils.debounce(this.sendScrollDataToItem_.bind(this), 250));
+        this.sendScrollDataToItem_.bind(this));
       this.unlisteners_.push(unlisten);
-    });
+    }.bind(this));
   }
 
   /** @return {!Element} @private */
@@ -260,6 +260,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
   }
 
   sendScrollDataToItem_(changeEvent) {
+    if (!this.isInViewport()) {
+      return;
+    }
+
     const scrollingData = {
       event: 'scroll',
       windowHeight: changeEvent.height,
@@ -267,9 +271,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
       offsetTop: this.getLayoutBox().top,
     };
 
-    if (!this.isInViewport()) {
-      return;
-    }
     this.notifyIframe_(scrollingData);
   }
 
