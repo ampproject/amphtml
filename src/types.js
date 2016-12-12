@@ -53,22 +53,6 @@ export function toArray(arrayLike) {
 }
 
 /**
- * Returns a map-like object.
- * If opt_initial is provided, copies its own properties into the
- * newly created object.
- * @param {T=} opt_initial This should typically be an object literal.
- * @return {T}
- * @template T
- */
-export function map(opt_initial) {
-  const obj = Object.create(null);
-  if (opt_initial) {
-    Object.assign(obj, opt_initial);
-  }
-  return obj;
-}
-
-/**
  * Determines if value is actually an Object.
  * @param {*} value
  * @return {boolean}

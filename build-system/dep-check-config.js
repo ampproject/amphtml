@@ -61,6 +61,7 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
+      '3p/**->src/utils/object.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
@@ -83,6 +84,7 @@ exports.rules = [
     whitelist: [
       'ads/**->src/utils/base64.js',
       'ads/**->src/utils/dom-fingerprint.js',
+      'ads/**->src/utils/object.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
