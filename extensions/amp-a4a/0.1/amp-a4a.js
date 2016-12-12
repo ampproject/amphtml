@@ -131,32 +131,36 @@ export const LIFECYCLE_STAGES = {
 
 /**
  * Utility function that ensures any error thrown is handled by optional
- * onError handler (if none provided, error is swallowed).
+ * onError handler (if none provided or handler throws, error is swallowed).
  * @param {!Function} fn to protect
  * @param {T=} opt_this An optional object to use as the 'this' object
-*     when calling the function.
+ *    when calling the function.  If not provided, undefined is bound as this
+ *    when calling function.
  * @param {function(this:T, !Error, ...*):?=} opt_onError function given error
  *    and arguments provided to function call.
  * @return {!Function} protected function
  * @template T
- * @visibileForTesting
- * @private
+ * @visibleForTesting
  */
-export const protectFunctionWrapper_ = (fn, opt_this, opt_onError) => {
-  return (...var_args) => {
+export function protectFunctionWrapper(
+    fn, opt_this = undefined, opt_onError = undefined) {
+  return (...fnArgs) => {
     try {
-      return fn.apply(opt_this, var_args);
+      return fn.apply(opt_this, fnArgs);
     } catch (err) {
       if (opt_onError) {
         try {
           // Ideally we could use [err, ...var_args] but linter disallows
           // spread so instead using unshift :(
-          var_args.unshift(err);
-          return opt_onError.apply(opt_this, var_args);
+          fnArgs.unshift(err);
+          return opt_onError.apply(opt_this, fnArgs);
         } catch (captureErr) {
           // swallow error if error handler throws.
         }
       }
+      // In the event of no optional on error function or its execution throws,
+      // return undefined.
+      return undefined;
     }
   };
 };
@@ -227,7 +231,7 @@ export class AmpA4A extends AMP.BaseElement {
      * cause promise chain to reject.
      * @private {!function(string, !Object=)}
      */
-    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper_(
+    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
       this.emitLifecycleEvent, this,
       (err, var_args) => {
         dev().error(TAG, this.element.getAttribute('type'),
@@ -535,12 +539,12 @@ export class AmpA4A extends AMP.BaseElement {
                   if (isValid) {
                     return creative;
                   }
-                  // Only report is signature is expected to match given
+                  // Only report if signature is expected to match, given that
                   // multiple key providers could have been specified.
-                  if (!verifyHashVersion(signature, keyInfo)) {
+                  if (verifyHashVersion(signature, keyInfo)) {
                     user().error(TAG, this.element.getAttribute('type'),
-                        `Key failed to validate creative\'s signature for
-                        service ${keyInfo.serviceName}.`, keyInfo.cryptoKey);
+                        'Key failed to validate creative\'s signature',
+                        keyInfo.serviceName, keyInfo.cryptoKey);
                   }
                   return null;
                 },
@@ -879,7 +883,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.registerExpandUrlParams_(friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
-          protectFunctionWrapper_(this.onAmpCreativeRender, this, err => {
+          protectFunctionWrapper(this.onAmpCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onAmpCreativeRender', err);
           })();
