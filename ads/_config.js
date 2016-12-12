@@ -163,6 +163,15 @@ export const adConfig = {
     preconnect: 'https://cas.criteo.com',
   },
 
+  distroscale: {
+    preconnect: [
+      'https://c.jsrdn.com',
+      'https://s.jsrdn.com',
+      'https://i.jsrdn.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   dotandads: {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
@@ -366,6 +375,10 @@ export const adConfig = {
 
   plista: {},
 
+  popin: {
+    renderStartImplemented: true,
+  },
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
@@ -396,6 +409,7 @@ export const adConfig = {
       'https://cdn.revcontent.com',
       'https://img.revcontent.com',
     ],
+    renderStartImplemented: true,
   },
 
   rubicon: {},
@@ -465,6 +479,8 @@ export const adConfig = {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
   },
+
+  xrostssp: {},
 
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',

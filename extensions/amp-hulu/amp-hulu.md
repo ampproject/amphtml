@@ -31,7 +31,11 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-hulu/">Annotated code example for amp-hulu</a></td>
   </tr>
 </table>
 
@@ -39,7 +43,7 @@ limitations under the License.
 
 ```html
 <amp-hulu width="412" height="213" layout="responsive"
-  data-eid="Bx6H30RBVFNpOe-iiOxp3A">
+  data-eid="4Dk5F2PYTtrgciuvloH3UA">
 </amp-hulu>
 ```
 
@@ -47,5 +51,5 @@ limitations under the License.
 
 **data-eid**
 
-In a URL like https://secure.hulu.com/embed.html?eid=Bx6H30RBVFNpOe-iiOxp3A `Bx6H30RBVFNpOe-iiOxp3A` is the eid.
+In a URL like https://secure.hulu.com/embed.html?eid=4Dk5F2PYTtrgciuvloH3UA `4Dk5F2PYTtrgciuvloH3UA` is the eid.
 

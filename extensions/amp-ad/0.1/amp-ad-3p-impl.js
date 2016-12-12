@@ -36,6 +36,11 @@ import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
+/**
+ * NOTE: For testing purpose of 3p ad, please consider using ad type `_ping_`,
+ * as it disables native IntersectionObserver and sends renderStart signal.
+ */
+
 export class AmpAd3PImpl extends AMP.BaseElement {
 
   /**
