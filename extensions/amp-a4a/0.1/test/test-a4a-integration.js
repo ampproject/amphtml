@@ -29,7 +29,6 @@ import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {signingServerURLs} from '../../../../ads/_a4a-config';
-import {getCorsUrl} from '../../../../src/url';
 import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
@@ -93,9 +92,8 @@ describe('integration test: a4a', () => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     // Expect key set fetches for signing services.
-    fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+    const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
     for (const serviceName in signingServerURLs) {
-      console.log('url', signingServerURLs[serviceName]);
       fetchJsonMock.withArgs(
         signingServerURLs[serviceName], {mode: 'cors', method: 'GET'}
       ).returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
@@ -139,7 +137,7 @@ describe('integration test: a4a', () => {
     delete a4aRegistry['mock'];
   });
 
-  it.only('should render a single AMP ad in a friendly iframe', () => {
+  it('should render a single AMP ad in a friendly iframe', () => {
     return fixture.addElement(a4aElement).then(unusedElement => {
       return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     });
