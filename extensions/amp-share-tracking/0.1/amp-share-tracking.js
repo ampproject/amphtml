@@ -215,4 +215,6 @@ export class AmpShareTracking extends AMP.BaseElement {
 
 
 // Install the extension.
-AMP.registerElement('amp-share-tracking', AmpShareTracking);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerElement(TAG, AmpShareTracking);
+});

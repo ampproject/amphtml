@@ -14,56 +14,58 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import {AmpShareTracking} from '../amp-share-tracking';
 import {History} from '../../../../src/service/history-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {shareTrackingForOrNull} from '../../../../src/share-tracking-service';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 import * as bytes from '../../../../src/utils/bytes';
 
-describe('amp-share-tracking', () => {
-  let sandbox;
+describes.fakeWin('amp-share-tracking', {
+  amp: {
+    ampdoc: 'single',
+    extensions: ['amp-share-tracking'],
+  },
+}, env => {
+  let win;
+  let ampdoc;
   let historyGetFragmentStub;
   let historyUpdateFragmentStub;
   let xhrStub;
   let randomBytesStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    ampdoc = env.ampdoc;
     historyGetFragmentStub = sandbox.stub(History.prototype, 'getFragment');
     historyUpdateFragmentStub = sandbox.stub(History.prototype,
         'updateFragment');
     xhrStub = sandbox.stub(Xhr.prototype, 'fetchJson');
     randomBytesStub = sandbox.stub(bytes, 'getCryptoRandomBytesArray');
+    toggleExperiment(win, 'amp-share-tracking', true);
   });
 
   afterEach(() => {
-    sandbox.restore();
+    toggleExperiment(win, 'amp-share-tracking', false);
   });
 
   function getAmpShareTracking(optVendorUrl) {
-    return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-share-tracking', true);
-      const el = iframe.doc.createElement('amp-share-tracking');
-      if (optVendorUrl) {
-        el.setAttribute('data-href', optVendorUrl);
-      }
-      iframe.doc.body.appendChild(el);
-      const ampShareTracking = new AmpShareTracking(el);
-      ampShareTracking.buildCallback();
-      return ampShareTracking;
-    });
+    const element = win.document.createElement('amp-share-tracking');
+    if (optVendorUrl) {
+      element.setAttribute('data-href', optVendorUrl);
+    }
+    element.getAmpDoc = () => ampdoc;
+    const ampShareTracking = new AmpShareTracking(element);
+    ampShareTracking.buildCallback();
+    return ampShareTracking;
   }
 
   it('should get incoming fragment starting with dot', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve('.12345'));
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(fragments.incomingFragment).to.equal('12345');
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(fragments.incomingFragment).to.equal('12345');
     });
   });
 
@@ -71,31 +73,28 @@ describe('amp-share-tracking', () => {
       'other parameters', () => {
     historyGetFragmentStub.onFirstCall()
         .returns(Promise.resolve('.12345&key=value'));
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(fragments.incomingFragment).to.equal('12345');
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(fragments.incomingFragment).to.equal('12345');
     });
   });
 
   it('should ignore incoming fragment if it is empty', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(fragments.incomingFragment).to.equal('');
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(fragments.incomingFragment).to.equal('');
     });
   });
 
   it('should ignore incoming fragment if it does not start with dot', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve('12345'));
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(fragments.incomingFragment).to.equal('');
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(fragments.incomingFragment).to.equal('');
     });
   });
 
@@ -104,14 +103,13 @@ describe('amp-share-tracking', () => {
       'when original fragment is empty', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        // the base64url of byte array [1, 2, 3, 4, 5, 6]
-        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
-        expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
-            .calledOnce;
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      // the base64url of byte array [1, 2, 3, 4, 5, 6]
+      expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+      expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+          .calledOnce;
     });
   });
 
@@ -120,14 +118,13 @@ describe('amp-share-tracking', () => {
       'when original fragment only contains share tracking fragment', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve('.12345'));
     randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        // the base64url of byte array [1, 2, 3, 4, 5, 6]
-        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
-        expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
-            .calledOnce;
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      // the base64url of byte array [1, 2, 3, 4, 5, 6]
+      expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+      expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+          .calledOnce;
     });
   });
 
@@ -138,14 +135,13 @@ describe('amp-share-tracking', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(
         '.12345&key=value'));
     randomBytesStub.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        // the base64url of byte array [1, 2, 3, 4, 5, 6]
-        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
-        expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG&key=value'))
-            .to.be.calledOnce;
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      // the base64url of byte array [1, 2, 3, 4, 5, 6]
+      expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+      expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG&key=value'))
+          .to.be.calledOnce;
     });
   });
 
@@ -154,13 +150,12 @@ describe('amp-share-tracking', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     sandbox.stub(Math, 'random').returns(0.123456789123456789);
     randomBytesStub.onFirstCall().returns(null);
-    return getAmpShareTracking().then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
-        expect(historyUpdateFragmentStub.withArgs('#.H5rdN8Eh')).to.be
-            .calledOnce;
-      });
+    const ampShareTracking = getAmpShareTracking();
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
+      expect(historyUpdateFragmentStub.withArgs('#.H5rdN8Eh')).to.be
+          .calledOnce;
     });
   });
 
@@ -169,12 +164,11 @@ describe('amp-share-tracking', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     const mockJsonResponse = {fragment: '54321'};
     xhrStub.onFirstCall().returns(Promise.resolve(mockJsonResponse));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(fragments.outgoingFragment).to.equal('54321');
-        expect(historyUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
-      });
+    const ampShareTracking = getAmpShareTracking('http://foo.bar');
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(fragments.outgoingFragment).to.equal('54321');
+      expect(historyUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
     });
   });
 
@@ -182,12 +176,11 @@ describe('amp-share-tracking', () => {
       'but the response format is NOT correct', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.resolve({foo: 'bar'}));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(historyUpdateFragmentStub).to.not.be.called;
-        expect(fragments.outgoingFragment).to.equal('');
-      });
+    const ampShareTracking = getAmpShareTracking('http://foo.bar');
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(historyUpdateFragmentStub).to.not.be.called;
+      expect(fragments.outgoingFragment).to.equal('');
     });
   });
 
@@ -195,20 +188,19 @@ describe('amp-share-tracking', () => {
       'fragment', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.resolve({fragment: '54321'}));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      const xhrCall = xhrStub.getCall(0);
-      expect(xhrCall.args[0]).to.equal('http://foo.bar');
-      expect(xhrCall.args[1]).to.jsonEqual({
-        method: 'POST',
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
-        body: {},
-      });
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(historyUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
-        expect(fragments.outgoingFragment).to.equal('54321');
-      });
+    const ampShareTracking = getAmpShareTracking('http://foo.bar');
+    const xhrCall = xhrStub.getCall(0);
+    expect(xhrCall.args[0]).to.equal('http://foo.bar');
+    expect(xhrCall.args[1]).to.jsonEqual({
+      method: 'POST',
+      credentials: 'include',
+      requireAmpResponseSourceOrigin: true,
+      body: {},
+    });
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(historyUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
+      expect(fragments.outgoingFragment).to.equal('54321');
     });
   });
 
@@ -216,12 +208,11 @@ describe('amp-share-tracking', () => {
       'but the xhr fails', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.reject('404'));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(historyGetFragmentStub).to.be.calledOnce;
-        expect(historyUpdateFragmentStub).to.not.be.called;
-        expect(fragments.outgoingFragment).to.equal('');
-      });
+    const ampShareTracking = getAmpShareTracking('http://foo.bar');
+    return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+      expect(historyGetFragmentStub).to.be.calledOnce;
+      expect(historyUpdateFragmentStub).to.not.be.called;
+      expect(fragments.outgoingFragment).to.equal('');
     });
   });
 });
