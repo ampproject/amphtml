@@ -105,12 +105,14 @@ export class AmpAnimation extends AMP.BaseElement {
       embed.onVisibilityChanged(() => {
         this.setVisible_(embed.isVisible());
       });
+      // QQQ: resize
     } else {
       const viewer = viewerForDoc(ampdoc);
       this.setVisible_(viewer.isVisible());
       viewer.onVisibilityChanged(() => {
         this.setVisible_(viewer.isVisible());
       });
+      // QQQ: resize
     }
   }
 

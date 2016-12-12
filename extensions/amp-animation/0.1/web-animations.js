@@ -311,6 +311,8 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onKeyframeAnimation(spec) {
+    // QQQ: media query: here and on higher-level
+
     const timing = this.mergeTiming_(spec, this.timing_);
     const target = this.resolveTarget_(spec.target);
     /** @type {!WebKeyframesDef} */
