@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from './vendors';
-import {addListener, instrumentationServiceFor} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
-import {installCidService} from './cid-impl';
-import {installCryptoService} from './crypto-impl';
-import {installActivityService} from './activity-impl';
-import {installVisibilityService} from './visibility-impl';
 import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
@@ -31,12 +25,22 @@ import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
+import {Activity} from './activity-impl';
+import {installCidService} from './cid-impl';
+import {installCryptoService} from './crypto-impl';
+import {
+    InstrumentationService,
+    instrumentationServiceForDoc,
+} from './instrumentation';
+import {ANALYTICS_CONFIG} from './vendors';
 
-installActivityService(AMP.win);
+// Register doc-service factory.
+AMP.registerServiceForDoc(
+    'amp-analytics-instrumentation', InstrumentationService);
+AMP.registerServiceForDoc('activity', Activity);
+
 installCidService(AMP.win);
 installCryptoService(AMP.win);
-installVisibilityService(AMP.win);
-instrumentationServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
@@ -83,6 +87,9 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {JSONType}
      */
     this.remoteConfig_ = /** @type {JSONType} */ ({});
+
+    /** @private {?./instrumentation.InstrumentationService} */
+    this.instrumentation_ = null;
   }
 
   /** @override */
@@ -122,7 +129,17 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     return this.consentPromise_
         .then(this.fetchRemoteConfig_.bind(this))
+        .then(() => instrumentationServiceForDoc(this.getAmpDoc()))
+        .then(instrumentation => {
+          this.instrumentation_ = instrumentation;
+        })
         .then(this.onFetchRemoteConfigSuccess_.bind(this));
+  }
+
+  /** @override */
+  detachedCallback() {
+    // TODO(avimehta, #6543): Release all listeners and resources installed by
+    // this element.
   }
 
   /**
@@ -180,12 +197,11 @@ export class AmpAnalytics extends AMP.BaseElement {
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
-            addListener(this.win, trigger, this.handleEvent_.bind(this,
-                  trigger), this.element);
-
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
           } else {
-            addListener(this.win, trigger,
-                this.handleEvent_.bind(this, trigger), this.element);
+            this.instrumentation_.addListener(
+                trigger, this.handleEvent_.bind(this, trigger), this.element);
           }
         }));
       }
@@ -251,12 +267,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
-    /** @const {!Window} */
-    const win = this.win;
-    return urlReplacementsForDoc(win.document).expandAsync(remoteConfigUrl)
+    const ampdoc = this.getAmpDoc();
+    return urlReplacementsForDoc(this.element).expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
-          return xhrFor(win).fetchJson(remoteConfigUrl, fetchConfig);
+          return xhrFor(ampdoc.win).fetchJson(remoteConfigUrl, fetchConfig);
         })
         .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
@@ -405,6 +420,14 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleRequestForEvent_(request, trigger, event) {
+    // TODO(avimehta, #6543): Remove this code or mark as "error" for the
+    // once destroyed embed release is implemented. See `detachedCallback`.
+    if (!this.element.ownerDocument.defaultView) {
+      const TAG = this.getName_();
+      dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
+      return Promise.resolve();
+    }
+
     if (!request) {
       const TAG = this.getName_();
       user().error(TAG, 'Ignoring event. Request string ' +
@@ -429,7 +452,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     request = this.expandTemplate_(request, trigger, event);
 
     // For consistency with amp-pixel we also expand any url replacements.
-    return urlReplacementsForDoc(this.win.document).expandAsync(request)
+    return urlReplacementsForDoc(this.element).expandAsync(request)
         .then(request => {
           this.sendRequest_(request, trigger);
           return request;
@@ -457,7 +480,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
       const key = this.expandTemplate_(spec['sampleOn'], trigger);
-      const keyPromise = urlReplacementsForDoc(this.win.document)
+      const keyPromise = urlReplacementsForDoc(this.element)
           .expandAsync(key);
       const cryptoPromise = cryptoFor(this.win);
       return Promise.all([keyPromise, cryptoPromise])
@@ -518,13 +541,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!key) {
       return {name: '', argList: ''};
     }
-    const match = key.match(/([^(]*)(\([^)]*\))?/);
+    const match = key.match(/^(?:([^ ]*)(\([^)]*\))|.+)$/);
     if (!match) {
       const TAG = this.getName_();
       user().error(TAG,
           'Variable with invalid format found: ' + key);
     }
-    return {name: match[1], argList: match[2] || ''};
+    return {name: match[1] || match[0], argList: match[2] || ''};
   }
 
   /**

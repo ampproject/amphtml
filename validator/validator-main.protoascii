@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 311
+spec_file_revision: 320
 
 # Validator extensions.
 # =====================
@@ -106,17 +106,15 @@ tags: {
 # 4.2.3 the base element
 tags: {
   tag_name: "BASE"
-  # Currently the amp cache doesn't correctly rewrite URLs for documents
-  # with <base href>. When it does, we will add support for href attributes.
-  # attrs: {
-  #   name: "href"
-  #   value_url: {
-  #     allow_relative: false
-  #     allowed_protocol: "http"
-  #     allowed_protocol: "https"
-  #   }
-  #   blacklisted_value_regex: "__amp_source_origin"
-  # }
+  unique: true
+  mandatory_parent: "HEAD"
+  # We only allow "/" right now because other value can cause havoc with PWA
+  # implementations. In the future, it may be possible to widen this to any
+  # absolute URL.
+  attrs: {
+    name: "href"
+    value: "/"
+  }
   attrs: {
     name: "target"
     value_regex_casei: "(_blank|_self|_top)"
@@ -579,9 +577,14 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     }
     # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
+    # TODO(honeybadgerdontcare): Remove the .i-amp- case after i-amphtml launch.
     blacklisted_cdata_regex: {
       regex: "\\.i?-amp-"
       error_message: "CSS -amp- class name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
       regex: "!important"
@@ -669,9 +672,14 @@ tags: {  # Special custom 'author' spreadsheet for A4A
     }
     # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
+    # TODO(honeybadgerdontcare): Remove the .i-amp- case after i-amphtml launch.
     blacklisted_cdata_regex: {
       regex: "\\.i?-amp-"
       error_message: "CSS -amp- class name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
     }
     blacklisted_cdata_regex: {
       regex: "!important"
@@ -1695,6 +1703,22 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
+  tag_name: "ELLIPSE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "class" }
+  attrs: { name: "cx" }
+  attrs: { name: "cy" }
+  attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "rx" }
+  attrs: { name: "ry" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attr_lists: "svg-conditional-processing-attributes"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-presentation-attributes"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
+}
+tags: {
   tag_name: "LINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "class" }
@@ -2242,6 +2266,7 @@ tags: {
   attrs: { name: "autocomplete" }
   attrs: { name: "autofocus" }
   attrs: { name: "checked" }
+  attrs: { name: "default-value" }
   attrs: { name: "disabled" }
   attrs: { name: "height" }
   attrs: { name: "inputmode" }
@@ -2397,6 +2422,7 @@ tags: {
 # Only the amphtml script, custom extensions and the LD/JSON description are
 # allowed.
 tags: {
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script"
   mandatory: true
@@ -2412,6 +2438,37 @@ tags: {
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
     dispatch_key: true
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+}
+tags: {
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  spec_name: "amp4ads engine a4a-v0.js script"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    # TODO(gregable): When this becomes a value, rather than a value_regex,
+    #                 re-add 'dispatch_key: true'
+    value_regex: "https://cdn\\.ampproject\\.org/(amp4ads-)?v0\\.js"
   }
   attrs: {
     name: "type"
@@ -2655,10 +2712,16 @@ attr_lists: {
   attrs: { name: "itemtype" }
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "accesskey" }
-  attrs: { name: "class" }
+  attrs: {
+    name: "class"
+    blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  }
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
-  attrs: { name: "id" }
+  attrs: {
+    name: "id"
+    blacklisted_value_regex: "^i-amphtml-"
+  }
   attrs: { name: "lang" }
   attrs: { name: "tabindex" }
   attrs: { name: "title" }
@@ -2858,6 +2921,10 @@ error_specificity {
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
   specificity: 71
+}
+error_specificity {
+  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  specificity: 72
 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
@@ -3103,6 +3170,11 @@ error_formats {
   code: TAG_REFERENCE_POINT_CONFLICT
   format: "The tag '%1' conflicts with reference point '%2' because "
           "both define reference points."
+}
+error_formats {
+  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  format: "The tag '%1', which contains URLs, was found earlier in the "
+          "document than the BASE element."
 }
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'

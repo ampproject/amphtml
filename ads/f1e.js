@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {writeScript, validateData} from '../3p/3p';
 
 /**
- * @param {!Window} win
- * @return {!Promise<!../extensions/amp-analytics/0.1/visibility-impl.Visibility>}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export function visibilityFor(win) {
-  return (/** @type {!Promise<
-      !../extensions/amp-analytics/0.1/visibility-impl.Visibility>}} */ (
-      getElementService(win, 'visibility', 'amp-analytics')));
-};
+
+export function f1e(global, data) {
+  validateData(data, ['url','target'], []);
+  global.f1eData = data;
+  writeScript(global, 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js');
+}

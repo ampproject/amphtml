@@ -14,13 +14,181 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill, getThresholdSlot,
+import {
+  IntersectionObserverApi,
+  IntersectionObserverPolyfill,
+  getThresholdSlot,
+  DEFAULT_THRESHOLD,
+  getIntersectionChangeEntry,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-const DEFAULT_THRESHOLD = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+describe('IntersectionObserverApi', () => {
+  let sandbox;
+  let onScrollSpy;
+  let onChangeSpy;
+  let testEle;
+  let baseElement;
+  let ioApi;
+  let tickSpy;
+
+  const iframeSrc = 'http://iframe.localhost:' + location.port +
+      '/test/fixtures/served/iframe-intersection.html';
+  let testIframe;
+
+  function getIframe(src) {
+    const i = document.createElement('iframe');
+    i.src = src;
+    return i;
+  }
+
+  function insert(iframe) {
+    document.body.appendChild(iframe);
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    onScrollSpy = sandbox.spy();
+    onChangeSpy = sandbox.spy();
+    testIframe = getIframe(iframeSrc);
+    testEle = {
+      isBuilt: () => {return true;},
+      getOwner: () => {return null;},
+      getLayoutBox: () => {return layoutRectLtwh(50, 100, 150, 200);},
+      win: window,
+    };
+
+    baseElement = {
+      element: testEle,
+      getVsync: () => {
+        return {
+          measure: func => {
+            func();
+          },
+        };
+      },
+      getViewport: () => {
+        return {
+          getRect: () => {
+            return layoutRectLtwh(50, 100, 150, 200);
+          },
+          onScroll: () => {
+            onScrollSpy();
+            return () => {};
+          },
+          onChanged: () => {
+            onChangeSpy();
+            return () => {};
+          },
+        };
+      },
+      isInViewport: () => {return false;},
+    };
+    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    insert(testIframe);
+    tickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+  });
+  afterEach(() => {
+    sandbox.restore();
+    testIframe.parentNode.removeChild(testIframe);
+    if (ioApi) {
+      ioApi.destroy();
+    }
+    ioApi = null;
+    tickSpy = null;
+  });
+
+  it('should tick if element in viewport when start sending io', () => {
+    ioApi.startSendingIntersection_();
+    expect(tickSpy).to.not.be.called;
+    expect(onChangeSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    testIframe.parentNode.removeChild(testIframe);
+    ioApi.destroy();
+    baseElement.isInViewport = () => {return true;};
+    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    insert(testIframe);
+    const inViewportTickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+    ioApi.startSendingIntersection_();
+    expect(inViewportTickSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledTwice;
+    expect(onScrollSpy).to.be.calledTwice;
+  });
+
+  it('should tick on inViewport value when element call fire', () => {
+    ioApi.startSendingIntersection_();
+    ioApi.fire();
+    expect(tickSpy).to.not.be.called;
+    ioApi.onViewportCallback(true);
+    ioApi.fire();
+    expect(tickSpy).to.be.calledOnce;
+  });
+
+  it('should not tick before start observing', () => {
+    ioApi.onViewportCallback(true);
+    expect(tickSpy).to.not.be.called;
+    ioApi.fire();
+    expect(tickSpy).to.not.be.called;
+  });
+
+  it('should destroy correctly', () => {
+    const subscriptionApiDestroySy =
+        sandbox.spy(ioApi.subscriptionApi_, 'destroy');
+    ioApi.destroy();
+    expect(subscriptionApiDestroySy).to.be.called;
+    expect(ioApi.unlistenOnDestroy_).to.be.null;
+    expect(ioApi.intersectionObserver_).to.be.null;
+    expect(ioApi.subscriptionApi_).to.be.null;
+    ioApi = null;
+  });
+});
+
+describe('getIntersectionChangeEntry', () => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(performance, 'now', () => 100);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+  it('without owner', () => {
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(0, 100, 50, 50),
+        null,
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRatio: 1,
+        });
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(50, 200, 150, 200),
+        null,
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, 100, 150, 200),
+          intersectionRect: DomRectLtwh(50, 100, 50, 0),
+          intersectionRatio: 0,
+        });
+  });
+  it('with owner', () => {
+    expect(getIntersectionChangeEntry(
+        layoutRectLtwh(50, 50, 150, 200),
+        layoutRectLtwh(0, 50, 100, 100),
+        layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(50, -50, 150, 200),
+          intersectionRect: DomRectLtwh(50, 0, 50, 50),
+          intersectionRatio: 1 / 12,
+        });
+  });
+});
 
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
@@ -149,13 +317,14 @@ describe('IntersectionObserverPolyfill', () => {
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         io.tick(rootBounds);
         expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
+        expect(callbackSpy).to.be.calledWith([{
           time: 100,
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(0, 0, 50, 50),
           intersectionRect: DomRectLtwh(0, 0, 50, 50),
           intersectionRatio: 1,
-        });
+          target: element,
+        }]);
       });
 
       it('intersects on the edge', () => {
@@ -168,13 +337,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.tick(layoutRectLtwh(50, 200, 100, 100));
         io.tick(rootBounds);
         expect(callbackSpy).to.be.calledTwice;
-        expect(callbackSpy.secondCall).to.be.calledWith({
+        expect(callbackSpy.secondCall).to.be.calledWith([{
           time: 100,
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(50, 100, 150, 200),
           intersectionRect: DomRectLtwh(50, 100, 50, 0),
           intersectionRatio: 0,
-        });
+          target: element,
+        }]);
       });
 
       it('intersects the viewport (bottom right)', () => {
@@ -185,13 +355,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.observe(element);
         io.tick(rootBounds);
         expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
+        expect(callbackSpy).to.be.calledWith([{
           time: 100,
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(50, 99, 150, 200),
           intersectionRect: DomRectLtwh(50, 99, 50, 1),
           intersectionRatio: 1 / 600,
-        });
+          target: element,
+        }]);
       });
 
       it('intersects the viewport (top left)', () => {
@@ -202,13 +373,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.observe(element);
         io.tick(rootBounds);
         expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
+        expect(callbackSpy).to.be.calledWith([{
           time: 100,
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(-148, -199, 150, 200),
           intersectionRect: DomRectLtwh(0, 0, 2, 1),
           intersectionRatio: 2 / 30000,
-        });
+          target: element,
+        }]);
       });
 
       it('NOT intersects when element outside (top left) viewport', () => {
@@ -221,13 +393,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.tick(layoutRectLtwh(50, 100, 100, 100));
         io.tick(rootBounds);
         expect(callbackSpy).to.be.calledTwice;
-        expect(callbackSpy.secondCall).to.be.calledWith({
+        expect(callbackSpy.secondCall).to.be.calledWith([{
           time: 100,
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(-152, -199, 150, 200),
           intersectionRect: DomRectLtwh(0, 0, 0, 0),
           intersectionRatio: 0,
-        });
+          target: element,
+        }]);
       });
 
       it('NOT intersects with element outside (bottom) viewport', () => {
@@ -240,13 +413,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.tick(layoutRectLtwh(50, 225, 100, 100));
         io.tick(rootBounds);
         expect(callbackSpy).to.be.calledTwice;
-        expect(callbackSpy.secondCall).to.be.calledWith({
+        expect(callbackSpy.secondCall).to.be.calledWith([{
           time: 100,
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(50, 125, 100, 100),
           intersectionRect: DomRectLtwh(0, 0, 0, 0),
           intersectionRatio: 0,
-        });
+          target: element,
+        }]);
       });
 
       it('element has owner', () => {
@@ -264,13 +438,14 @@ describe('IntersectionObserverPolyfill', () => {
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         io.tick(rootBounds);
         expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
+        expect(callbackSpy).to.be.calledWith([{
           time: 100,
           rootBounds: DomRectLtwh(0, 0, 100, 100),
           boundingClientRect: DomRectLtwh(50, -50, 150, 200),
           intersectionRect: DomRectLtwh(50, 0, 50, 50),
           intersectionRatio: 1 / 12,
-        });
+          target: element,
+        }]);
       });
     });
 
@@ -284,13 +459,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.observe(element);
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
+        expect(callbackSpy).to.be.calledWith([{
           time: 100,
           rootBounds: null,
           boundingClientRect: DomRectLtwh(10, 10, 10, 10),
           intersectionRect: DomRectLtwh(10, 10, 10, 10),
           intersectionRatio: 1,
-        });
+          target: element,
+        }]);
       });
 
       it('nested element in container, container intersect viewport', () => {
@@ -302,13 +478,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.observe(element);
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
+        expect(callbackSpy).to.be.calledWith([{
           time: 100,
           rootBounds: null,
           boundingClientRect: DomRectLtwh(75, 0, 50, 50),
           intersectionRect: DomRectLtwh(75, 0, 25, 50),
           intersectionRatio: 0.5,
-        });
+          target: element,
+        }]);
       });
 
       it('nested element in container, container not in viewport', () => {
@@ -322,13 +499,14 @@ describe('IntersectionObserverPolyfill', () => {
         io.tick(rootBounds, layoutRectLtwh(0, 200, 200, 200));
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledTwice;
-        expect(callbackSpy.secondCall).to.be.calledWith({
+        expect(callbackSpy.secondCall).to.be.calledWith([{
           time: 100,
           rootBounds: null,
           boundingClientRect: DomRectLtwh(0, 0, 50, 50),
           intersectionRect: DomRectLtwh(0, 0, 50, 0),
           intersectionRatio: 0,
-        });
+          target: element,
+        }]);
       });
 
       it('nested element outside container but in viewport', () => {
@@ -345,13 +523,14 @@ describe('IntersectionObserverPolyfill', () => {
         };
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledTwice;
-        expect(callbackSpy.secondCall).to.be.calledWith({
+        expect(callbackSpy.secondCall).to.be.calledWith([{
           time: 100,
           rootBounds: null,
           boundingClientRect: DomRectLtwh(0, -101, 50, 50),
           intersectionRect: DomRectLtwh(0, 0, 0, 0),
           intersectionRatio: 0,
-        });
+          target: element,
+        }]);
       });
 
       it('element has an owner', () => {
@@ -370,13 +549,95 @@ describe('IntersectionObserverPolyfill', () => {
         io.observe(element);
         io.tick(rootBounds, containerBounds);
         expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith({
+        expect(callbackSpy).to.be.calledWith([{
           time: 100,
           rootBounds: null,
           boundingClientRect: DomRectLtwh(75, 0, 50, 50),
           intersectionRect: DomRectLtwh(75, 25, 25, 25),
           intersectionRatio: 0.25,
-        });
+          target: element,
+        }]);
+      });
+    });
+
+    describe('with multiple elements', () => {
+      let element2;
+      beforeEach(() => {
+        element2 = {
+          isBuilt: () => {return true;},
+          getOwner: () => {return null;},
+          getLayoutBox: () => {return layoutRectLtwh(0, 100, 50, 50);},
+        };
+      });
+
+      afterEach(() => {
+        element2 = null;
+      });
+
+      it('should tick on multi elements', () => {
+        const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 100, 25, 25);
+        };
+        io.observe(element);
+        io.observe(element2);
+        io.tick(rootBounds);
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith([{
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(0, 0, 25, 25),
+          intersectionRect: DomRectLtwh(0, 0, 25, 25),
+          intersectionRatio: 1,
+          target: element,
+        }, {
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRatio: 1,
+          target: element2,
+        }]);
+      });
+
+      it('should only fire for elements that crossed threshold', () => {
+        const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(50, 200, 150, 200);
+        };
+        io.observe(element);
+        io.observe(element2);
+        io.tick(rootBounds);
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy).to.be.calledWith([{
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 100, 100),
+          boundingClientRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 50, 50),
+          intersectionRatio: 1,
+          target: element2,
+        }]);
+      });
+
+      it('should stop observing after unobserve', () => {
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 50, 50, 50);
+        };
+        io.observe(element);
+        io.observe(element2);
+        io.tick(layoutRectLtwh(0, 0, 200, 200));
+        expect(callbackSpy).to.be.calledOnce;
+        io.unobserve(element);
+        io.tick(layoutRectLtwh(0, 0, 10, 10));
+        expect(callbackSpy).to.be.calledTwice;
+        expect(callbackSpy.secondCall).to.be.calledWith([{
+          time: 100,
+          rootBounds: DomRectLtwh(0, 0, 10, 10),
+          boundingClientRect: DomRectLtwh(0, 100, 50, 50),
+          intersectionRect: DomRectLtwh(0, 0, 0, 0),
+          intersectionRatio: 0,
+          target: element2,
+        }]);
       });
     });
   });

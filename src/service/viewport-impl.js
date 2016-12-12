@@ -33,7 +33,7 @@ import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
-import {waitForBody} from '../dom';
+import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
@@ -165,16 +165,17 @@ export class Viewport {
     this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
-    // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
-    // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
-    // The enables passive touch handlers, e.g. for document swipe, since they
-    // no will longer need to try to cancel vertical scrolls during swipes.
-    // This is only done in the embedded mode because (a) the document swipe
-    // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
-    if (this.ampdoc.isSingleDoc() &&
-            viewer.isEmbedded() &&
-            isExperimentOn(this.ampdoc.win, 'pan-y')) {
-      setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
+    // Top-level mode classes.
+    if (this.ampdoc.isSingleDoc()) {
+      this.globalDoc_.documentElement.classList.add('-amp-singledoc');
+    }
+    if (viewer.isEmbedded()) {
+      this.globalDoc_.documentElement.classList.add('-amp-embedded');
+    } else {
+      this.globalDoc_.documentElement.classList.add('-amp-standalone');
+    }
+    if (isIframed(this.ampdoc.win)) {
+      this.globalDoc_.documentElement.classList.add('-amp-iframed');
     }
 
     // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
@@ -205,6 +206,11 @@ export class Viewport {
       this.visible_ = visible;
       if (visible) {
         this.binding_.connect();
+        if (this.size_) {
+          // If the size has already been intialized, check it again in case
+          // the size has changed between `disconnect` and `connect`.
+          this.resize_();
+        }
       } else {
         this.binding_.disconnect();
       }
@@ -429,7 +435,7 @@ export class Viewport {
    * Instruct the viewport to enter lightbox mode.
    */
   enterLightboxMode() {
-    this.viewer_.requestFullOverlay();
+    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
     this.disableTouchZoom();
     this.hideFixedLayer();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
@@ -439,7 +445,7 @@ export class Viewport {
    * Instruct the viewport to enter lightbox mode.
    */
   leaveLightboxMode() {
-    this.viewer_.cancelFullOverlay();
+    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
     this.showFixedLayer();
     this.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
@@ -528,9 +534,11 @@ export class Viewport {
   /**
    * Adds the element to the fixed layer.
    * @param {!Element} element
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the fixed layer.
    */
-  addToFixedLayer(element) {
-    this.fixedLayer_.addElement(element);
+  addToFixedLayer(element, opt_forceTransfer) {
+    this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**
@@ -561,7 +569,7 @@ export class Viewport {
    * @private
    */
   getViewportMeta_() {
-    if (this.viewer_.isIframed()) {
+    if (isIframed(this.ampdoc.win)) {
       // An embedded document does not control its viewport meta tag.
       return null;
     }
@@ -712,7 +720,8 @@ export class Viewport {
       this.scrollAnimationFrameThrottled_ = true;
       this.vsync_.measure(() => {
         this.scrollAnimationFrameThrottled_ = false;
-        this.viewer_.postScroll(this.getScrollTop());
+        this.viewer_.sendMessage('scroll', {scrollTop: this.getScrollTop()},
+            /* cancelUnsent */true);
       });
     }
   }
@@ -893,6 +902,11 @@ export class ViewportBindingNatural_ {
         // style is set in runtime vs css to avoid conflicts with ios-embedded
         // mode and fixed transfer layer.
         setStyle(body, 'overflow', 'visible');
+
+        // Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS
+        // WebView does NOT respect `html {overflow-x: hidden}`.
+        // Note! For all other cases body's style should be
+        // `body {overflow: visible}` to avoid visibility issues with iframes.
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
           setStyles(body, {
@@ -906,10 +920,7 @@ export class ViewportBindingNatural_ {
         // merging this style into `amp.css`.
         if (isExperimentOn(this.win, 'make-body-relative')) {
           setStyles(body, {
-            display: 'block',
             position: 'relative',
-            overflowX: 'hidden',
-            overflowY: 'visible',
           });
         }
       });
@@ -1395,8 +1406,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 /**
  * Implementation of ViewportBindingDef based for iframed iOS case where iframes
  * are not scrollable. Scrolling accomplished here by inserting a scrollable
- * wrapper `<i-amp-html-wrapper>` inside the `<html>` element and reparenting the
- * original `<body>` inside.
+ * wrapper `<html id="i-amp-html-wrapper">` inside the `<html>` element and
+ * reparenting the original `<body>` inside.
  *
  * @implements {ViewportBindingDef}
  * @visibleForTesting
@@ -1409,10 +1420,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+    const topClasses = this.win.document.documentElement.className;
+    this.win.document.documentElement.className = '';
     this.win.document.documentElement.classList.add('-amp-ios-embed');
 
     /** @private @const {!Element} */
-    this.wrapper_ = this.win.document.createElement('i-amp-html-wrapper');
+    this.wrapper_ = this.win.document.createElement('html');
+    this.wrapper_.id = 'i-amp-html-wrapper';
+    this.wrapper_.className = topClasses;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -1734,19 +1749,20 @@ const ViewportType = {
  * @return {string}
  */
 function getViewportType(win, viewer) {
-  let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (platformFor(win).isIos()
-      && ((viewportType == ViewportType.NATURAL
-              && viewer.isIframed()
-              // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
-              && viewer.isEmbedded())
-          // Enable iOS Embedded mode so that it's easy to test against a more
-          // realistic iOS environment.
-          || getMode(win).localDev
-          || getMode(win).development)) {
-    viewportType = ViewportType.NATURAL_IOS_EMBED;
+  const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
+  if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
+    return viewportType;
   }
-  dev().fine(TAG_, '- viewportType:', viewportType);
+  // Enable iOS Embedded mode so that it's easy to test against a more
+  // realistic iOS environment w/o an iframe.
+  if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+  // Override to ios-embed for iframe-viewer mode.
+  // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
+  if (isIframed(win) && viewer.isEmbedded()) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
   return viewportType;
 }
 

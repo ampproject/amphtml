@@ -87,6 +87,7 @@ exports.rules = [
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       'ads/**->src/types.js',
+      'ads/**->src/string.js',
       'ads/**->src/style.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
@@ -149,11 +150,13 @@ exports.rules = [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
+      'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
     ],
   },
   {

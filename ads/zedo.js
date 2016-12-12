@@ -30,7 +30,7 @@ export function zedo(global, data) {
   loadScript(global, 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js', () => {
     const ZGTag = global.ZGTag;
     const charset = data.charset || '';
-    const callback = data.callback || (() => {});
+    const callback = data.callback || function() {};
     const geckoTag = new ZGTag(data.superId, data.network, '', '',
       charset, callback);
     geckoTag.setAMP();
@@ -48,7 +48,11 @@ export function zedo(global, data) {
     //create a slot div to display ad
     const slot = global.document.createElement('div');
     slot.id = 'zdt_' + data.placementId;
-    global.document.body.appendChild(slot);
+
+    const divContainer = global.document.getElementById('c');
+    if (divContainer) {
+      divContainer.appendChild(slot);
+    }
 
     // call load ads
     geckoTag.loadAds();

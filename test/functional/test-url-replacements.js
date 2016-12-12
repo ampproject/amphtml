@@ -18,31 +18,31 @@ import {Observable} from '../../src/observable';
 import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
 import {urlReplacementsForDoc} from '../../src/url-replacements';
-import {markElementScheduledForTesting} from '../../src/custom-element';
+import {
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting,
+} from '../../src/custom-element';
 import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService,} from
     '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from
     '../../src/service/document-info-impl';
-import {installActivityService,} from
-    '../../extensions/amp-analytics/0.1/activity-impl';
+import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {getService} from '../../src/service';
+import {getService, fromClassForDoc} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {toggleExperiment} from '../../src/experiments';
 import {viewerForDoc} from '../../src/viewer';
 import * as trackPromise from '../../src/impression';
-import * as sinon from 'sinon';
 
 
-describe('UrlReplacements', () => {
+describes.sandboxed('UrlReplacements', {}, () => {
 
   let canonical;
-  let sandbox;
   let loadObservable;
   let replacements;
   let viewerService;
@@ -50,12 +50,7 @@ describe('UrlReplacements', () => {
 
   beforeEach(() => {
     canonical = 'https://canonical.com/doc1';
-    sandbox = sinon.sandbox.create();
     userErrorStub = sandbox.stub(user(), 'error');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function getReplacements(opt_options) {
@@ -66,6 +61,9 @@ describe('UrlReplacements', () => {
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
       installDocumentInfoServiceForDoc(iframe.ampdoc);
+      resetScheduledElementForTesting(iframe.win, 'amp-analytics');
+      resetScheduledElementForTesting(iframe.win, 'amp-experiment');
+      resetScheduledElementForTesting(iframe.win, 'amp-share-tracking');
       if (opt_options) {
         if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
@@ -74,7 +72,7 @@ describe('UrlReplacements', () => {
         }
         if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
-          installActivityService(iframe.win);
+          fromClassForDoc(iframe.ampdoc, 'activity', Activity);
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
@@ -306,7 +304,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SHARE_TRACKING_INCOMING and' +
-      'SHARE_TRACKING_OUTGOING', () => {
+      ' SHARE_TRACKING_OUTGOING', () => {
     return expect(
         expandAsync('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
         /*opt_bindings*/undefined, {withShareTracking: true}))
@@ -314,7 +312,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace SHARE_TRACKING_INCOMING and SHARE_TRACKING_OUTGOING' +
-      'with empty string if amp-share-tracking is not configured', () => {
+      ' with empty string if amp-share-tracking is not configured', () => {
     return expect(
         expandAsync('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING'))
         .to.eventually.equal('?in=&out=');
@@ -768,13 +766,11 @@ describe('UrlReplacements', () => {
         win.location =
             parseUrl('https://example.com?query_string_param1=foo');
         resolve();
-        console.log('promise resolve');
       });
     });
     return installUrlReplacementsServiceForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
-        console.log('compare happend', res);
         expect(res).to.match(/sh=foo&s/);
       });
   });
@@ -1072,6 +1068,34 @@ describe('UrlReplacements', () => {
         expect(a.href).to.equal(
             'https://canonical.com/link?out=bar&c=test-cid(abc)');
       });
+    });
+  });
+
+  describe('Expanding String', () => {
+    it('should not reject protocol changes with expandStringSync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      let expanded = urlReplacements.expandStringSync(
+          'PROTOCOL://example.com/?r=RANDOM', {
+            'PROTOCOL': 'abc',
+          });
+      expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
+      expanded = urlReplacements.expandStringSync(
+          'FUNCT://example.com/?r=RANDOM', {
+            'FUNCT': function() { return 'abc'; },
+          });
+      expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
+    });
+
+    it('should not check protocol changes with expandStringAsync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      return urlReplacements.expandStringAsync(
+          'RANDOM:X:Y', {
+            'RANDOM': Promise.resolve('abc'),
+          }).then(expanded => {
+            expect(expanded).to.equal('abc:X:Y');
+          });
     });
   });
 });

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
 import {getVendorJsPropertyName} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {
   WebAnimationDef,
+  WebAnimationPlayState,
   WebAnimationTimingDef,
   WebAnimationTimingDirection,
   WebAnimationTimingFill,
@@ -62,16 +64,119 @@ export class WebAnimationRunner {
     /** @const @private */
     this.requests_ = requests;
 
-    /** @private {!Array<!Animation>} */
-    this.players_ = [];
+    /** @private {?Array<!Animation>} */
+    this.players_ = null;
+
+    /** @private {number} */
+    this.runningCount_ = 0;
+
+    /** @private {!WebAnimationPlayState} */
+    this.playState_ = WebAnimationPlayState.IDLE;
+
+    /** @private {!Observable} */
+    this.playStateChangedObservable_ = new Observable();
+  }
+
+  /**
+   * @return {!WebAnimationPlayState}
+   */
+  getPlayState() {
+    return this.playState_;
+  }
+
+  /**
+   * @param {function(!WebAnimationPlayState)} handler
+   * @return {!UnlistenDef}
+   */
+  onPlayStateChanged(handler) {
+    return this.playStateChangedObservable_.add(handler);
   }
 
   /**
    */
-  play() {
+  start() {
+    dev().assert(!this.players_);
+    this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
       return request.target.animate(request.keyframes, request.timing);
     });
+    this.runningCount_ = this.players_.length;
+    this.players_.forEach(player => {
+      player.onfinish = () => {
+        this.runningCount_--;
+        if (this.runningCount_ == 0) {
+          this.setPlayState_(WebAnimationPlayState.FINISHED);
+        }
+      };
+    });
+  }
+
+  /**
+   */
+  pause() {
+    dev().assert(this.players_);
+    this.setPlayState_(WebAnimationPlayState.PAUSED);
+    this.players_.forEach(player => {
+      player.pause();
+    });
+  }
+
+  /**
+   */
+  resume() {
+    dev().assert(this.players_);
+    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+      return;
+    }
+    this.setPlayState_(WebAnimationPlayState.RUNNING);
+    this.players_.forEach(player => {
+      player.play();
+    });
+  }
+
+  /**
+   */
+  reverse() {
+    dev().assert(this.players_);
+    this.players_.forEach(player => {
+      player.reverse();
+    });
+  }
+
+  /**
+   */
+  finish() {
+    if (!this.players_) {
+      return;
+    }
+    this.setPlayState_(WebAnimationPlayState.FINISHED);
+    this.players_.forEach(player => {
+      player.finish();
+    });
+    this.players_ = null;
+  }
+
+  /**
+   */
+  cancel() {
+    if (!this.players_) {
+      return;
+    }
+    this.setPlayState_(WebAnimationPlayState.IDLE);
+    this.players_.forEach(player => {
+      player.cancel();
+    });
+  }
+
+  /**
+   * @param {!WebAnimationPlayState} playState
+   * @private
+   */
+  setPlayState_(playState) {
+    if (this.playState_ != playState) {
+      this.playState_ = playState;
+      this.playStateChangedObservable_.fire(this.playState_);
+    }
   }
 }
 
@@ -169,9 +274,31 @@ export class MeasureScanner extends Scanner {
     this.computedStyleCache_ = [];
   }
 
-  /** @return {!WebAnimationRunner} */
-  createRunner() {
-    return new WebAnimationRunner(this.requests_);
+  /**
+   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @return {!Promise<!WebAnimationRunner>}
+   */
+  createRunner(resources) {
+    return this.unblockElements_(resources).then(() => {
+      return new WebAnimationRunner(this.requests_);
+    });
+  }
+
+  /**
+   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @return {!Promise}
+   * @private
+   */
+  unblockElements_(resources) {
+    const promises = [];
+    for (let i = 0; i < this.targets_.length; i++) {
+      const element = this.targets_[i];
+      if (element.classList.contains('-amp-element')) {
+        const resource = resources.getResourceForElement(element);
+        promises.push(resource.loadedOnce());
+      }
+    }
+    return Promise.all(promises);
   }
 
   /** @override */

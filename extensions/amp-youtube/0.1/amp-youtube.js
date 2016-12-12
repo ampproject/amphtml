@@ -60,6 +60,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?string} */
+    this.videoIframeSrc_ = null;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -116,16 +119,11 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @return {string} */
   getVideoIframeSrc_() {
+    if (this.videoIframeSrc_) {
+      return this.videoIframeSrc_;
+    }
     dev().assert(this.videoid_);
-    return `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
-  }
-
-  /** @override */
-  layoutCallback() {
-    // See
-    // https://developers.google.com/youtube/iframe_api_reference
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = this.getVideoIframeSrc_();
+    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
@@ -158,6 +156,15 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     src = addParamsToUrl(src, params);
+    return this.videoIframeSrc_ = src;
+  }
+
+  /** @override */
+  layoutCallback() {
+    // See
+    // https://developers.google.com/youtube/iframe_api_reference
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    const src = this.getVideoIframeSrc_();
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');

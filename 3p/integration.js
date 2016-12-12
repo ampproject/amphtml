@@ -28,7 +28,7 @@ import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
-import {parseUrl, getSourceUrl} from '../src/url';
+import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
 
@@ -42,6 +42,7 @@ import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
+import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
 import {adition} from '../ads/adition';
@@ -64,10 +65,13 @@ import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
+import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
+import {f1e} from '../ads/f1e';
+import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
@@ -76,6 +80,7 @@ import {ibillboard} from '../ads/ibillboard';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
+import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kixer} from '../ads/kixer';
 import {ligatus} from '../ads/ligatus';
@@ -94,6 +99,7 @@ import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {plista} from '../ads/plista';
+import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -113,6 +119,7 @@ import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
+import {xrostssp} from '../ads/xrostssp';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yieldbot} from '../ads/yieldbot';
@@ -121,6 +128,15 @@ import {yieldone} from '../ads/yieldone';
 import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+
+/**
+ * This value is copied here to avoid importing from src/intersection-observer-polyfill.js
+ * Please keep this value same with DEFAULT_THRESHOLD from that file.
+ * @const @private {!Array}
+ */
+const DEFAULT_THRESHOLD =
+    [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
+    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -149,6 +165,7 @@ if (getMode().test || getMode().localDev) {
 register('a9', a9);
 register('accesstrade', accesstrade);
 register('adblade', adblade);
+register('adbutler', adbutler);
 register('adform', adform);
 register('adgeneration', adgeneration);
 register('adition', adition);
@@ -171,11 +188,14 @@ register('chargeads', chargeads);
 register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
+register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
+register('f1e', f1e);
 register('facebook', facebook);
+register('felmat', felmat);
 register('flite', flite);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
@@ -185,6 +205,7 @@ register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
+register('ix', ix);
 register('kargo', kargo);
 register('kixer', kixer);
 register('ligatus', ligatus);
@@ -204,6 +225,7 @@ register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
 register('plista', plista);
+register('popin', popin);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -225,6 +247,7 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('xlift' , xlift);
+register('xrostssp', xrostssp);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
@@ -414,6 +437,21 @@ function triggerRenderStart(opt_data) {
  */
 function observeIntersection(observerCallback) {
   // Send request to received records.
+  if (window.IntersectionObserver &&
+      window.IntersectionObserver.prototype.observe) {
+    // NOTE: Add extra check for `IntersectionObserver.prototype.observe`
+    // so that we can still test our IntersectionObserver polyfill impl by
+    // setting `IntersectionObserver.prototype` to a null object.
+
+    // use native IntersectionObserver if it exists.
+    const io = new window.IntersectionObserver(changes => {
+      observerCallback(changes);
+    }, {
+      threshold: DEFAULT_THRESHOLD,
+    });
+    io.observe(window.document.documentElement);
+    return () => io.unobserve(window.document.documentElement);
+  }
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);
@@ -541,9 +579,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
   let hostname = parseUrl(ancestor).hostname;
-  const cdnHostname = parseUrl(urls.cdn).hostname;
-  const onDefault = hostname == cdnHostname;
-  if (onDefault) {
+  if (isProxyOrigin(ancestor)) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
     // trustable.

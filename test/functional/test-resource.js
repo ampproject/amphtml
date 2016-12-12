@@ -18,6 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -52,12 +53,15 @@ describe('Resource', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      disconnectedCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 2,
       dispatchCustomEvent: () => {},
     };
     elementMock = sandbox.mock(element);
 
+    const viewer = viewerForDoc(document);
+    sandbox.stub(viewer, 'isRuntimeOn', () => false);
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
@@ -457,7 +461,9 @@ describe('Resource', () => {
     elementMock.expects('getBoundingClientRect')
         .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
-    elementMock.expects('layoutCallback').returns(Promise.reject()).once();
+    const error = new Error('intentional');
+    elementMock.expects('layoutCallback')
+        .returns(Promise.reject(error)).once();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
@@ -471,6 +477,15 @@ describe('Resource', () => {
     }, () => {
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_FAILED);
       expect(resource.layoutPromise_).to.equal(null);
+      expect(resource.lastLayoutError_).to.equal(error);
+
+      // Should fail with the same error again.
+      return resource.startLayout(true);
+    }).then(() => {
+      /* global fail: false */
+      fail('should not be here');
+    }, reason => {
+      expect(reason).to.equal(error);
     });
   });
 
@@ -517,19 +532,31 @@ describe('Resource', () => {
     let child;
     let parentResource;
     let resources;
+    let grandChild;
     beforeEach(() => {
       const parent = {
         ownerDocument: {defaultView: window},
-        tagName: 'AMP-STICKY-AD',
+        tagName: 'PARENT',
         isBuilt: () => false,
         contains: () => true,
       };
       child = {
         ownerDocument: {defaultView: window},
-        tagName: 'AMP-AD',
+        tagName: 'CHILD',
         isBuilt: () => false,
         contains: () => true,
+        parentElement: parent,
       };
+      grandChild = {
+        ownerDocument: {defaultView: window},
+        tagName: 'GRANDCHILD',
+        isBuilt: () => false,
+        contains: () => true,
+        getElementsByClassName: () => {return [];},
+        parentElement: child,
+      };
+      parent.getElementsByClassName = () => {return [child, grandChild];};
+      child.getElementsByClassName = () => {return [grandChild];};
       resources = new Resources(new AmpDocSingle(window));
       parentResource = new Resource(1, parent, resources);
     });
@@ -546,6 +573,24 @@ describe('Resource', () => {
       resources.setOwner(childResource.element, parentResource.element);
       expect(childResource.owner_).to.equal(parentResource.element);
       expect(childResource.getOwner()).to.equal(parentResource.element);
+    });
+
+    it('should remove cached value for grandchild', () => {
+      const childResource = new Resource(1, child, resources);
+      const grandChildResource = new Resource(1, grandChild, resources);
+      expect(grandChildResource.getOwner()).to.be.null;
+      resources.setOwner(childResource.element, parentResource.element);
+      expect(childResource.getOwner()).to.equal(parentResource.element);
+      expect(grandChildResource.getOwner()).to.equal(parentResource.element);
+    });
+
+    it('should not change owner if it is set via setOwner', () => {
+      const childResource = new Resource(1, child, resources);
+      const grandChildResource = new Resource(1, grandChild, resources);
+      resources.setOwner(grandChildResource.element, parentResource.element);
+      expect(grandChildResource.getOwner()).to.equal(parentResource.element);
+      resources.setOwner(childResource.element, parentResource.element);
+      expect(grandChildResource.getOwner()).to.equal(parentResource.element);
     });
   });
 
@@ -679,6 +724,14 @@ describe('Resource', () => {
         resource.pauseOnRemove();
         expect(resource.isInViewport_).to.equal(false);
         expect(resource.paused_).to.equal(true);
+      });
+
+      it('should call disconnectedCallback on remove for built ele', () => {
+        expect(Resource.forElementOptional(resource.element))
+            .to.equal(resource);
+        elementMock.expects('disconnectedCallback').once();
+        resource.disconnect();
+        expect(Resource.forElementOptional(resource.element)).to.not.exist;
       });
     });
   });

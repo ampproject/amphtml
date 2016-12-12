@@ -333,6 +333,8 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     };
 
     impl.displayAfterScroll_();
+    impl.layoutAd_();
+    impl.ad_.dispatchEvent(new Event('amp:load:end'));
     return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');
@@ -368,6 +370,8 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     };
 
     impl.displayAfterScroll_();
+    impl.layoutAd_();
+    impl.ad_.dispatchEvent(new Event('amp:load:end'));
     return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');

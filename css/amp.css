@@ -49,7 +49,18 @@ body {
 
 
 /**
- * iOS-Embed Wrapper mode. The `body` is wrapped into `i-amp-html-wrapper`
+ * The enables passive touch handlers, e.g. for document swipe, since they
+ * no will longer need to try to cancel vertical scrolls during swipes.
+ * This is only done in the embedded mode because (a) the document swipe
+ * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
+ */
+html.-amp-singledoc.-amp-embedded {
+  touch-action: pan-y;
+}
+
+
+/**
+ * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amp-html-wrapper`
  * element.
  */
 html.-amp-ios-embed {
@@ -59,7 +70,7 @@ html.-amp-ios-embed {
 }
 
 /** Wrapper for iOS-Embed-Wrapper mode. */
-i-amp-html-wrapper {
+#i-amp-html-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -72,9 +83,8 @@ i-amp-html-wrapper {
   display: block !important;
 }
 
-i-amp-html-wrapper > body {
+#i-amp-html-wrapper > body {
   position: relative !important;
-  display: block !important;
   /* Border is necessary to avoid margins collapsing outside body.
      Alternatively we can also set overflow to hidden. */
   border-top: 1px solid transparent !important;

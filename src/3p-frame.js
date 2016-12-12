@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
 import {getLengthNumeral} from '../src/layout';
@@ -71,6 +70,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes._context = {
     referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
+    sourceUrl: docInfo.sourceUrl,
     pageViewId: docInfo.pageViewId,
     location: {
       href: locationHref,
@@ -215,26 +215,29 @@ export function resetBootstrapBaseUrlForTesting(win) {
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
+ * @param {string=} opt_srcFileBasename
  * @return {string}
  */
-function getDefaultBootstrapBaseUrl(parentWindow) {
+export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
+  const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
     if (overrideBootstrapBaseUrl) {
       return overrideBootstrapBaseUrl;
     }
     return getAdsLocalhost(parentWindow)
         + '/dist.3p/'
-        + (getMode().minified ? '$internalRuntimeVersion$/frame'
-            : 'current/frame.max')
+        + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
+            : `current/${srcFileBasename}.max`)
         + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
-      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
+      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+      `${srcFileBasename}.html`;
 }
 
 function getAdsLocalhost(win) {
   if (urls.localDev) {
-    return `http://${urls.thirdPartyFrameHost}`;
+    return `//${urls.thirdPartyFrameHost}`;
   }
   return 'http://ads.localhost:'
       + (win.location.port || win.parent.location.port);
@@ -256,7 +259,7 @@ export function getSubDomain(win) {
  * @param {!Window} win
  * @return {string}
  */
-function getRandom(win) {
+export function getRandom(win) {
   let rand;
   if (win.crypto && win.crypto.getRandomValues) {
     // By default use 2 32 bit integers.
@@ -322,4 +325,62 @@ export function generateSentinel(parentWindow) {
  */
 export function resetCountForTesting() {
   count = {};
+}
+
+
+/** @const */
+const AMP_MESSAGE_PREFIX = 'amp-';
+
+/** @enum {string} */
+export const MessageType = {
+  // For amp-ad
+  SEND_EMBED_STATE: 'send-embed-state',
+  EMBED_STATE: 'embed-state',
+  SEND_EMBED_CONTEXT: 'send-embed-context',
+  EMBED_CONTEXT: 'embed-context',
+  SEND_INTERSECTIONS: 'send-intersections',
+  INTERSECTION: 'intersection',
+  EMBED_SIZE: 'embed-size',
+  EMBED_SIZE_CHANGED: 'embed-size-changed',
+  EMBED_SIZE_DENIED: 'embed-size-denied',
+
+  // For amp-inabox
+  SEND_POSITIONS: 'send-positions',
+  POSITION: 'position',
+};
+
+/**
+ * Serialize an AMP post message.
+ *
+ * @param type {string}
+ * @param sentinel {string}
+ * @param opt_data {Object=}
+ * @returns {string}
+ */
+export function serializeMessage(type, sentinel, opt_data) {
+  // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
+  const message = opt_data || {};
+  message.type = type;
+  message.sentinel = sentinel;
+  return AMP_MESSAGE_PREFIX + JSON.stringify(message);
+}
+
+/**
+ * Deserialize an AMP post message.
+ * Returns null if it's not valid AMP message format.
+ *
+ * @param message {*}
+ * @returns {?JSONType}
+ */
+export function deserializeMessage(message) {
+  if (typeof message !== 'string' || message.indexOf(AMP_MESSAGE_PREFIX) != 0) {
+    return null;
+  }
+  try {
+    return /** @type {!JSONType} */ (JSON.parse(
+        message.substr(AMP_MESSAGE_PREFIX.length)));
+  } catch (e) {
+    dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
+    return null;
+  }
 }

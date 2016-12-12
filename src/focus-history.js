@@ -38,8 +38,8 @@ export class FocusHistory {
     /** @private @const {!Array<!{el: !Element, time: time}>} */
     this.history_ = [];
 
-    /** @private @const {!Observable<!Element>} */
-    this.observeFocus_ = new Observable();
+    /** @private {?Observable<!Element>} */
+    this.observeFocus_ = null;
 
     /** @private @const {function(!Event)} */
     this.captureFocus_ = e => {
@@ -72,6 +72,9 @@ export class FocusHistory {
    * @return {!UnlistenDef}
    */
   onFocus(handler) {
+    if (!this.observeFocus_) {
+      this.observeFocus_ = new Observable();
+    }
     return this.observeFocus_.add(handler);
   }
 
@@ -88,6 +91,9 @@ export class FocusHistory {
       this.history_[this.history_.length - 1].time = now;
     }
     this.purgeBefore(now - this.purgeTimeout_);
+    if (!this.observeFocus_) {
+      this.observeFocus_ = new Observable();
+    }
     this.observeFocus_.fire(element);
   }
 

@@ -139,10 +139,43 @@ For example, the following listens to both `submit-success` and `submit-error` a
 
 See the [full example here](../../examples/forms.amp.html).
 
+### Analytics Triggers
+`amp-form` triggers two events you can track in your `amp-analytics` config: `amp-form-submit-success` and `amp-form-submit-error`.
+
+You can configure your analytics to send these events as in the example below.
+
+```html
+<amp-analytics>
+    <script type="application/json">
+        {
+            "requests": {
+                "event": "https://www.example.com/analytics/event?eid=${eventId}"
+            },
+            "triggers": {
+                "formSubmitSuccess": {
+                    "on": "amp-form-submit-success",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-success"
+                    }
+                },
+                "formSubmitError": {
+                    "on": "amp-form-submit-error",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-error"
+                    }
+                }
+            }
+        }
+    </script>
+</amp-analytics>
+```
+
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
 
-Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **child element of form** and include a `<template></template>` tag inside it to render the response in it.
+Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it to render the response in it.
 
 The response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 

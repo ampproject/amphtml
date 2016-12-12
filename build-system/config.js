@@ -121,6 +121,7 @@ module.exports = {
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
+    '!extensions/amp-bind/0.1/bind-expr-impl.js',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
@@ -129,7 +130,10 @@ module.exports = {
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+    '!dist.3p/current/**/ampcontext-lib.js',
+    '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
+    '!validator/nodejs/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
@@ -139,6 +143,7 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
+    '!examples/*.js',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };

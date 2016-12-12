@@ -58,6 +58,7 @@ declareExtension('amp-animation', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
+declareExtension('amp-auto-ads', '0.1', false);
 declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
@@ -78,7 +79,7 @@ declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-instagram', '0.1', false);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-lightbox', '0.1', false);
+declareExtension('amp-lightbox', '0.1', true);
 declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-live-list', '0.1', true);
@@ -93,6 +94,8 @@ declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
+declareExtension('amp-selector', '0.1', false);
+
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -170,6 +173,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     includePolyfills: true,
   });
 
+  compileJs('./3p/', 'ampcontext-lib.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+    minifiedName: 'ampcontext-v0.js',
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    minify: false,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    externs: ['ads/ads.extern.js',],
+    includeBasicPolyfills: false,
+  });
+
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
   compileJs('./src/', 'amp-babel.js', './dist', {
@@ -231,10 +245,18 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   });
 
   var frameHtml = '3p/frame.max.html';
-  thirdPartyBootstrap(frameHtml, shouldMinify);
+  thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
   if (watch) {
     $$.watch(frameHtml, function() {
-      thirdPartyBootstrap(frameHtml, shouldMinify);
+      thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
+    });
+  }
+
+  var nameFrameHtml = '3p/nameframe.max.html';
+  thirdPartyBootstrap(nameFrameHtml, 'nameframe.html',shouldMinify);
+  if (watch) {
+    $$.watch(nameFrameHtml, function () {
+      thirdPartyBootstrap(nameFrameHtml, 'nameframe.html', shouldMinify);
     });
   }
 }
@@ -437,6 +459,7 @@ function checkTypes() {
   }).sort();
   closureCompile(compileSrcs.concat(extensionSrcs), './dist',
       'check-types.js', {
+        include3pDirectories: false,
         includePolyfills: true,
         checkTypes: true,
       });
@@ -455,9 +478,10 @@ function checkTypes() {
  * copies, and generates symlink to it.
  *
  * @param {string} input
+ * @param {string} outputName
  * @param {boolean} shouldMinify
  */
-function thirdPartyBootstrap(input, shouldMinify) {
+function thirdPartyBootstrap(input, outputName, shouldMinify) {
   $$.util.log('Processing ' + input);
 
   if (!shouldMinify) {
@@ -476,7 +500,7 @@ function thirdPartyBootstrap(input, shouldMinify) {
   // Convert default relative URL to absolute min URL.
   var html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
-  $$.file('frame.html', html, {src: true})
+  $$.file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         var aliasToLatestBuild = 'dist.3p/current-min';
@@ -650,7 +674,7 @@ function buildExperiments(options) {
   // Build HTML.
   $$.util.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
-  var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
+  var minHtml = html.replace('/dist.tools/experiments/experiments.js',
       'https://cdn.ampproject.org/v0/experiments.js');
   gulp.src(htmlPath)
       .pipe($$.file('experiments.cdn.html', minHtml))

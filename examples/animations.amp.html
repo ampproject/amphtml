@@ -13,15 +13,15 @@
 </head>
 <body>
 
-<amp-animation id="anim1" layout="nodisplay">
+<amp-animation id="anim1" layout="nodisplay" trigger="visibility">
 <script type="application/json">
 [
   {
     "target": "image1",
     "duration": 1000,
-    "iterations": 3,
-    "direction": "alternate",
+    "iterations": 1,
     "fill": "both",
+    "direction": "alternate",
     "keyframes": {
       "transform": "rotate(45deg)"
     }

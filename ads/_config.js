@@ -57,6 +57,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adbutler: {
+    prefetch: 'https://servedbyadbutler.com/app.js',
+  },
+
   adform: {},
 
   adgeneration: {
@@ -159,6 +163,15 @@ export const adConfig = {
     preconnect: 'https://cas.criteo.com',
   },
 
+  distroscale: {
+    preconnect: [
+      'https://c.jsrdn.com',
+      'https://s.jsrdn.com',
+      'https://i.jsrdn.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   dotandads: {
     prefetch: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
     preconnect: 'https://bal.ad.dotandad.com',
@@ -188,7 +201,16 @@ export const adConfig = {
     ],
   },
 
+  f1e: {
+    prefetch: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
+  },
+
   fake: {},
+
+  felmat: {
+    prefetch: 'https://t.felmat.net/js/fmamp.js',
+    renderStartImplemented: true,
+  },
 
   flite: {},
 
@@ -229,6 +251,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  ix: {
+    prefetch: 'https://js-sec.indexww.com/indexJTag.js',
+    preconnect: 'https://as-sec.casalemedia.com',
+  },
+
   kargo: {},
 
   kixer: {
@@ -236,7 +263,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  ligatus: {},
+  ligatus: {
+    prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
+    renderStartImplemented: true,
+  },
 
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
@@ -345,12 +375,21 @@ export const adConfig = {
 
   plista: {},
 
+  popin: {
+    renderStartImplemented: true,
+  },
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
 
   pubmine: {
-    prefetch: 'https://s.pubmine.com/showad.js',
+    prefetch: [
+      'https://s.pubmine.com/head.js',
+      'https://s.pubmine.com/showad.js',
+    ],
+    preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
   },
 
   pulsepoint: {
@@ -370,6 +409,7 @@ export const adConfig = {
       'https://cdn.revcontent.com',
       'https://img.revcontent.com',
     ],
+    renderStartImplemented: true,
   },
 
   rubicon: {},
@@ -444,6 +484,8 @@ export const adConfig = {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
   },
+
+  xrostssp: {},
 
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',

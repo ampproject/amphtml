@@ -73,7 +73,13 @@ The reasons for this policy are that:
 
 ## Attributes
 
-### src, srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy
+### src
+
+The `src` attribute behaves mainly like on a standard iframe with one exception: the `#amp=1` fragment is added to the URL to allow
+source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
+not already have a fragment.
+
+### srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy
 
 The attributes above should all behave like they do on standard iframes.
 

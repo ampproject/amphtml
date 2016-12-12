@@ -15,15 +15,17 @@
  */
 
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {IntersectionObserver} from '../../../src/intersection-observer';
+import {
+  IntersectionObserverApi,
+} from '../../../src/intersection-observer-polyfill';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
+import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
@@ -53,9 +55,7 @@ export class AmpIframe extends AMP.BaseElement {
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
     user().assert(
-        url.protocol == 'https:' ||
-        url.protocol == 'data:' ||
-        url.origin.indexOf('http://iframe.localhost:') == 0,
+        isSecureUrl(url) || url.protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
@@ -89,17 +89,42 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /**
+   * Transforms the src attribute. When possible, it adds `#amp=1` fragment
+   * to indicate that the iframe is running in AMP environment.
+   * @param {?string} src
+   * @return {string|undefined}
+   * @private
+   */
+  transformSrc_(src) {
+    if (!src) {
+      return;
+    }
+    const url = parseUrl(src);
+    // data-URLs are not modified.
+    if (url.protocol == 'data:') {
+      return src;
+    }
+    // If fragment already exists, it's not modified.
+    if (url.hash && url.hash != '#') {
+      return src;
+    }
+    // Add `#amp=1` fragment.
+    return removeFragment(src) + '#amp=1';
+  }
+
+  /**
    * Transforms the srcdoc attribute if present to an equivalent data URI.
    *
    * It may be OK to change this later to leave the `srcdoc` in place and
    * instead ensure that `allow-same-origin` is not present, but this
    * implementation has the right security behavior which is that the document
    * may under no circumstances be able to run JS on the parent.
-   * @param {string} srcdoc
+   * @param {?string} srcdoc
    * @param {string} sandbox
-   * @return {string} Data URI for the srcdoc
+   * @return {string|undefined} Data URI for the srcdoc
+   * @private
    */
-  transformSrcDoc(srcdoc, sandbox) {
+  transformSrcDoc_(srcdoc, sandbox) {
     if (!srcdoc) {
       return;
     }
@@ -118,8 +143,8 @@ export class AmpIframe extends AMP.BaseElement {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
     const iframeSrc =
-        this.element.getAttribute('src') ||
-        this.transformSrcDoc(
+        this.transformSrc_(this.element.getAttribute('src')) ||
+        this.transformSrcDoc_(
             this.element.getAttribute('srcdoc'), this.sandbox_);
     /**
      * The source of the iframe. May later be set to null for tracking iframes
@@ -182,8 +207,8 @@ export class AmpIframe extends AMP.BaseElement {
       this.element.setAttribute('scrolling', 'no');
     }
 
-    /** @private {!IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    /** @private {?IntersectionObserverApi} */
+    this.intersectionObserverApi_ = null;
 
     if (!this.element.hasAttribute('frameborder')) {
       this.element.setAttribute('frameborder', '0');
@@ -198,16 +223,16 @@ export class AmpIframe extends AMP.BaseElement {
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
 
-    this.isAdLike_ = isAdLike(this);
+    this.isAdLike_ = isAdLike(this.element);
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(this.element, this.win);
 
     // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This does nothing
-    // if we aren't currently in view.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    // have changed. Send an intersection record if needed. This can be done by
+    // intersectionObserverApi onlayoutMeasure function.
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.fire();
     }
   }
 
@@ -219,6 +244,9 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.iframe_) {
       const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
       const box = this.getLayoutBox();
+      // Cache the iframe's relative position to the amp-iframe. This is
+      // necessary for fixed-position containers which "move" with the
+      // viewport.
       this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
     }
   }
@@ -234,9 +262,10 @@ export class AmpIframe extends AMP.BaseElement {
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
-    // If the iframe is full size, we avoid an object allocation by moving box.
-    return moveLayoutRect(box, this.iframeLayoutBox_.left,
-        this.iframeLayoutBox_.top);
+
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
+        dev().assert(this.iframeLayoutBox_));
+    return moveLayoutRect(iframe, box.left, box.top);
   }
 
   /** @override */
@@ -289,7 +318,7 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
-      this.intersectionObserver_ = new IntersectionObserver(this, iframe);
+      this.intersectionObserverApi_ = new IntersectionObserverApi(this, iframe);
     }
 
     iframe.onload = () => {
@@ -353,11 +382,10 @@ export class AmpIframe extends AMP.BaseElement {
       }
 
       this.iframe_ = null;
-      // IntersectionObserver's listeners were cleaned up by
-      // setInViewport(false) before #unlayoutCallback
-      if (this.intersectionObserver_) {
-        this.intersectionObserver_.destroy();
-        this.intersectionObserver_ = null;
+      // Needs to clean up intersectionObserverApi_
+      if (this.intersectionObserverApi_) {
+        this.intersectionObserverApi_.destroy();
+        this.intersectionObserverApi_ = null;
       }
     }
     return true;
@@ -365,8 +393,8 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.onViewportCallback(inViewport);
     }
   }
 
@@ -512,12 +540,12 @@ const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
 
 /**
  * Guess whether this element might be an ad.
- * @param {!BaseElement} ampElement An amp-iframe element.
+ * @param {!Element} element An amp-iframe element.
  * @return {boolean}
  * @visibleForTesting
  */
-export function isAdLike(ampElement) {
-  const box = ampElement.getIntersectionElementLayoutBox();
+export function isAdLike(element) {
+  const box = element.getLayoutBox();
   const height = box.height;
   const width = box.width;
   for (let i = 0; i < adSizes.length; i++) {

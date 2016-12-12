@@ -158,10 +158,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * up the DOM subtree.
  * @param {!Element} element
  * @param {function(!Element):boolean} callback
+ * @param {Element=} opt_stopAt optional elemnt to stop the search at.
  * @return {?Element}
  */
-export function closest(element, callback) {
-  for (let el = element; el; el = el.parentElement) {
+export function closest(element, callback, opt_stopAt) {
+  for (let el = element; el && el !== opt_stopAt; el = el.parentElement) {
     if (callback(el)) {
       return el;
     }
@@ -605,3 +606,13 @@ export function tryFocus(element) {
     // IE <= 7 may throw exceptions when focusing on hidden items.
   }
 }
+
+/**
+ * Whether the given window is in an iframe or not.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isIframed(win) {
+  return win.parent && win.parent != win;
+}
+

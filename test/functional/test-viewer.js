@@ -140,14 +140,12 @@ describe('Viewer', () => {
     expect(viewer.hasCapability('foo')).to.be.false;
   });
 
-  it('should clear fragment in embedded mode', () => {
+  it('should NOT clear fragment in embedded mode', () => {
     windowApi.parent = {};
     windowApi.location.href = 'http://www.example.com#test=1';
     windowApi.location.hash = '#origin=g.com&test=1';
     const viewer = new Viewer(ampdoc);
-    expect(windowApi.history.replaceState.callCount).to.equal(1);
-    const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
+    expect(windowApi.history.replaceState).to.not.be.called;
     expect(viewer.getParam('test')).to.equal('1');
   });
 
@@ -156,9 +154,9 @@ describe('Viewer', () => {
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
     const viewer = new Viewer(ampdoc);
-    expect(windowApi.history.replaceState.callCount).to.equal(1);
+    expect(windowApi.history.replaceState).to.be.calledOnce;
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com#-']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
@@ -212,7 +210,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageAwaitResponse');
     send.onFirstCall().returns(Promise.resolve('#from-viewer'));
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
@@ -226,7 +224,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageAwaitResponse');
     send.onFirstCall().returns(Promise.resolve('from-viewer'));
     return viewer.getFragment().then(() => {
       throw new Error('should not happen');
@@ -250,7 +248,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageAwaitResponse');
     send.onFirstCall().returns(Promise.resolve());
     return viewer.getFragment().then(fragment => {
       expect(fragment).to.equal('');
@@ -287,7 +285,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#origin=g.com&foo&cap=fragment';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageAwaitResponse');
     viewer.updateFragment('#bar');
     expect(send.withArgs('fragment', {fragment: '#bar'}, true)).to.be
         .calledOnce;
@@ -298,7 +296,7 @@ describe('Viewer', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(ampdoc);
-    const send = sandbox.stub(viewer, 'sendMessageUnreliable_');
+    const send = sandbox.stub(viewer, 'sendMessageAwaitResponse');
     viewer.updateFragment('#bar');
     expect(send.callCount).to.equal(0);
   });
@@ -500,6 +498,8 @@ describe('Viewer', () => {
   });
 
   it('should post documentLoaded event', () => {
+    windowApi.parent = {};
+    const viewer = new Viewer(ampdoc);
     viewer.postDocumentReady();
     const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentLoaded');
@@ -507,26 +507,16 @@ describe('Viewer', () => {
     expect(m.data.sourceUrl).to.equal('http://localhost:9876/test/viewer');
   });
 
-  it('should post scroll event', () => {
-    viewer.postScroll(111);
-    const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('scroll');
-    expect(m.data.scrollTop).to.equal(111);
-  });
-
-  it('should post request/cancelFullOverlay event', () => {
-    viewer.requestFullOverlay();
-    viewer.cancelFullOverlay();
-    expect(viewer.messageQueue_[0].eventType).to.equal('requestFullOverlay');
-    expect(viewer.messageQueue_[1].eventType).to.equal('cancelFullOverlay');
-  });
-
   it('should queue non-dupe events', () => {
+    windowApi.parent = {};
+    const viewer = new Viewer(ampdoc);
     viewer.postDocumentReady();
     viewer.postDocumentReady();
     expect(viewer.messageQueue_.length).to.equal(1);
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
   });
+
+
 
   describe('baseCid', () => {
     const cidData = JSON.stringify({
@@ -544,7 +534,7 @@ describe('Viewer', () => {
       persistedCidData = cidData;
       sandbox.stub(viewer, 'isTrustedViewer',
           () => Promise.resolve(trustedViewer));
-      sandbox.stub(viewer, 'sendMessage', (message, payload) => {
+      sandbox.stub(viewer, 'sendMessageAwaitResponse', (message, payload) => {
         if (message != 'cid') {
           return Promise.reject();
         }
@@ -600,6 +590,9 @@ describe('Viewer', () => {
   });
 
   it('should dequeue events when deliverer set', () => {
+    windowApi.parent = {};
+    const viewer = new Viewer(ampdoc);
+
     viewer.postDocumentReady();
     expect(viewer.messageQueue_.length).to.equal(1);
 
@@ -620,13 +613,18 @@ describe('Viewer', () => {
       expect(viewer.messagingMaybePromise_).to.be.null;
     });
 
-    it('should fail sendMessage', () => {
-      return viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+    it('should fail sendMessageAwaitResponse', () => {
+      return viewer.sendMessageAwaitResponse('message1', {})
           .then(() => {
             throw new Error('should not succeed');
           }, error => {
             expect(error.message).to.match(/No messaging channel/);
           });
+    });
+
+    it('should do nothing in sendMessage but not fail', () => {
+      viewer.sendMessage('message1', {});
+      expect(viewer.messageQueue_.length).to.equal(0);
     });
 
     it('should post broadcast event but not fail', () => {
@@ -635,7 +633,7 @@ describe('Viewer', () => {
     });
   });
 
-  describe('Messaging', () => {
+  describe('Messaging embedded', () => {
     beforeEach(() => {
       windowApi.parent = {};
       viewer = new Viewer(ampdoc);
@@ -680,61 +678,46 @@ describe('Viewer', () => {
     });
 
     it('should wait for messaging channel', () => {
-      let m1Resolved = false;
-      let m2Resolved = false;
-      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+      let mResolved = false;
+      const m = viewer.sendMessageAwaitResponse('message', {})
           .then(() => {
-            m1Resolved = true;
-          });
-      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
-          .then(() => {
-            m2Resolved = true;
+            mResolved = true;
           });
       return Promise.resolve().then(() => {
         // Not resolved yet.
-        expect(m1Resolved).to.be.false;
-        expect(m2Resolved).to.be.false;
+        expect(mResolved).to.be.false;
 
         // Set message deliverer.
         viewer.setMessageDeliverer(() => {
           return Promise.resolve();
         }, 'https://acme.com');
-        expect(m1Resolved).to.be.false;
-        expect(m2Resolved).to.be.false;
+        expect(mResolved).to.be.false;
 
-        return Promise.all([m1, m2]);
+        return m;
       }).then(() => {
         // All resolved now.
-        expect(m1Resolved).to.be.true;
-        expect(m2Resolved).to.be.true;
+        expect(mResolved).to.be.true;
       });
     });
 
     it('should timeout messaging channel', () => {
-      let m1Resolved = false;
-      let m2Resolved = false;
-      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+      let mResolved = false;
+      const m = viewer.sendMessageAwaitResponse('message2', {})
           .then(() => {
-            m1Resolved = true;
-          });
-      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
-          .then(() => {
-            m2Resolved = true;
+            mResolved = true;
           });
       return Promise.resolve().then(() => {
         // Not resolved yet.
-        expect(m1Resolved).to.be.false;
-        expect(m2Resolved).to.be.false;
+        expect(mResolved).to.be.false;
 
         // Timeout.
         clock.tick(20001);
-        return Promise.all([m1, m2]);
+        return m;
       }).then(() => {
         throw new Error('must never be here');
       }, () => {
         // Not resolved ever.
-        expect(m1Resolved).to.be.false;
-        expect(m2Resolved).to.be.false;
+        expect(mResolved).to.be.false;
       });
     });
   });
@@ -1365,6 +1348,65 @@ describe('Viewer', () => {
       viewer.navigateTo(ampUrl, 'abc123');
       expect(send.callCount).to.equal(0);
       expect(windowApi.top.location.href).to.equal(ampUrl);
+    });
+  });
+
+  describe('sendMessageCancelUnsent', () => {
+    beforeEach(() => {
+      windowApi.parent = {};
+      viewer = new Viewer(ampdoc);
+    });
+
+    it('should send queued messages', () => {
+      viewer.sendMessageAwaitResponse('event-a', {value: 1},
+          /* cancelUnsent */true);
+      viewer.sendMessageAwaitResponse('event-b', {value: 2},
+          /* cancelUnsent */true);
+      viewer.sendMessageAwaitResponse('event-a', {value: 3},
+          /* cancelUnsent */true);
+
+      const delivererSpy = sandbox.stub();
+      delivererSpy.returns(Promise.resolve());
+
+      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
+      sinon.assert.callOrder(
+          delivererSpy.withArgs('event-b', {value: 2}, true),
+          delivererSpy.withArgs('event-a', {value: 3}, true));
+      expect(delivererSpy).to.not.be.calledWith('event-a', {value: 1}, true);
+
+      viewer.sendMessageAwaitResponse('event-a', {value: 4},
+          /* cancelUnsent */true);
+      expect(delivererSpy).to.be.calledWith('event-a', {value: 4}, true);
+    });
+
+    it('should return promise that resolves on response ' +
+        'if awaitResponse=true', () => {
+      const response1 =
+          viewer.sendMessageAwaitResponse('event-a', {value: 1},
+              /* cancelUnsent */true);
+      const response2 =
+          viewer.sendMessageAwaitResponse('event-a', {value: 2},
+              /* cancelUnsent */true);
+
+      const delivererSpy = sandbox.stub();
+      delivererSpy.withArgs('event-a', {value: 2}, true)
+          .returns(Promise.resolve('result-2'));
+      delivererSpy.withArgs('event-a', {value: 3}, true)
+          .returns(Promise.resolve('result-3'));
+      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
+
+      const response3 =
+          viewer.sendMessageAwaitResponse('event-a', {value: 3},
+              /* cancelUnsent */true);
+      return expect(Promise.all([response1, response2, response3]))
+          .to.eventually.deep.equal(['result-2', 'result-2', 'result-3']);
+    });
+
+    it('should return undefined if not waiting for response', () => {
+      const response =
+          viewer.sendMessage('event-a', {value: 1},
+              /* cancelUnsent */true);
+      expect(response).to.be.undefined;
     });
   });
 });

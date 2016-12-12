@@ -25,7 +25,7 @@ import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../viewer';
 import {viewportForDoc} from '../viewport';
 import {userNotificationManagerFor} from '../user-notification';
-import {activityFor} from '../activity';
+import {activityForDoc} from '../activity';
 import {isExperimentOn} from '../experiments';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
@@ -71,14 +71,11 @@ export class GlobalVariableSource extends VariableSource {
     /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, string>>} */
-    this.variants_ = variantForOrNull(this.ampdoc.win);
+    /** @private {?Promise<?Object<string, string>>} */
+    this.variants_ = null;
 
-    /**
-     * @private @const {
-     *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
-     */
-    this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
+    /** @private {?Promise<?ShareTrackingFragmentsDef>} */
+    this.shareTrackingFragments_ = null;
   }
 
   /**
@@ -254,53 +251,45 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns assigned variant name for the given experiment.
-    this.setAsync('VARIANT', experiment => {
-      return this.variants_.then(variants => {
-        user().assert(variants,
-            'To use variable VARIANT, amp-experiment should be configured');
+    this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
+      return this.getVairiantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : /** @type {string} */(variant);
-      });
-    });
+      }, 'VARIANT');
+    }));
 
     // Returns all assigned experiment variants in a serialized form.
-    this.setAsync('VARIANTS', () => {
-      return this.variants_.then(variants => {
-        user().assert(variants,
-            'To use variable VARIANTS, amp-experiment should be configured');
-
+    this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
+      return this.getVairiantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
           const variant = variants[experiment];
           experiments.push(
               experiment + VARIANT_DELIMITER + (variant || 'none'));
         }
-
         return experiments.join(EXPERIMENT_DELIMITER);
-      });
-    });
+      }, 'VARIANTS');
+    }));
 
     // Returns incoming share tracking fragment.
-    this.setAsync('SHARE_TRACKING_INCOMING', () => {
-      return this.shareTrackingFragments_.then(fragments => {
-        user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
-            'amp-share-tracking should be configured');
-        return fragments.incomingFragment;
-      });
-    });
+    this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.incomingFragment;
+          }, 'SHARE_TRACKING_INCOMING');
+        }));
 
     // Returns outgoing share tracking fragment.
-    this.setAsync('SHARE_TRACKING_OUTGOING', () => {
-      return this.shareTrackingFragments_.then(fragments => {
-        user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
-            'amp-share-tracking should be configured');
-        return fragments.outgoingFragment;
-      });
-    });
+    this.setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.outgoingFragment;
+          }, 'SHARE_TRACKING_OUTGOING');
+        }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set('TIMESTAMP', () => {
@@ -420,7 +409,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the total engaged time since the content became viewable.
     this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return activityFor(this.ampdoc.win).then(activity => {
+      return activityForDoc(this.ampdoc).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
@@ -454,7 +443,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
 
     this.set('BACKGROUND_STATE', () => {
-      return viewerForDoc(this.ampdoc.win.document).isVisible() ? '0' : '1';
+      return viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
     });
   }
 
@@ -475,6 +464,7 @@ export class GlobalVariableSource extends VariableSource {
    * @param {string} expr
    * @return {T|null}
    * @template T
+   * @private
    */
   getAccessValue_(getter, expr) {
     return this.getAccessService_(this.ampdoc.win).then(accessService => {
@@ -492,6 +482,7 @@ export class GlobalVariableSource extends VariableSource {
    * @param {*} param
    * @param {string} defaultValue
    * @return {string}
+   * @private
    */
   getQueryParamData_(param, defaultValue) {
     user().assert(param,
@@ -502,6 +493,46 @@ export class GlobalVariableSource extends VariableSource {
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
         ? params[param] : defaultValue;
+  }
+
+  /**
+   * Resolves the value via amp-experiment's variants service.
+   * @param {function(!Object<string, string>):(?string)} getter
+   * @param {string} expr
+   * @return {!Promise<?string>}
+   * @template T
+   * @private
+   */
+  getVairiantsValue_(getter, expr) {
+    if (!this.variants_) {
+      this.variants_ = variantForOrNull(this.ampdoc.win);
+    }
+    return this.variants_.then(variants => {
+      user().assert(variants,
+          'To use variable %s, amp-experiment should be configured',
+          expr);
+      return getter(variants);
+    });
+  }
+
+  /**
+   * Resolves the value via amp-share-tracking's service.
+   * @param {function(!ShareTrackingFragmentsDef):T} getter
+   * @param {string} expr
+   * @return {!Promise<T>}
+   * @template T
+   * @private
+   */
+  getShareTrackingValue_(getter, expr) {
+    if (!this.shareTrackingFragments_) {
+      this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
+    }
+    return this.shareTrackingFragments_.then(fragments => {
+      user().assert(fragments, 'To use variable %s, ' +
+          'amp-share-tracking should be configured',
+          expr);
+      return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
+    });
   }
 }
 
@@ -524,6 +555,8 @@ export class UrlReplacements {
    * Synchronously expands the provided URL by replacing all known variables with
    * their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
+   *
+   * TODO(mkhatib, #6322): Deprecate and please use expandUrlSync or expandStringSync.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
    * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
@@ -532,9 +565,69 @@ export class UrlReplacements {
    * @return {string}
    */
   expandSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
-    return /** @type {string} */(
-        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+    return this.expandUrlSync(
+        url, opt_bindings, opt_collectVars, opt_whiteList);
+  }
+
+  /**
+   * Expands the provided URL by replacing all known variables with their
+   * resolved values. Optional `opt_bindings` can be used to add new variables
+   * or override existing ones.
+   *
+   * TODO(mkhatib, #6322): Deprecate and please use expandUrlAsync or expandStringAsync.
+   * @param {string} url
+   * @param {!Object<string, *>=} opt_bindings
+   * @return {!Promise<string>}
+   */
+  expandAsync(url, opt_bindings) {
+    return this.expandUrlAsync(url, opt_bindings);
+  }
+
+
+  /**
+   * Synchronously expands the provided source by replacing all known variables with
+   * their resolved values. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.  Any async bindings are ignored.
+   * @param {string} source
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
+   * @return {string}
+   */
+  expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
+    return /** @type {string} */ (
+        this.expand_(source, opt_bindings, opt_collectVars, /* opt_sync */ true,
             opt_whiteList));
+  }
+
+  /**
+   * Expands the provided source by replacing all known variables with their
+   * resolved values. Optional `opt_bindings` can be used to add new variables
+   * or override existing ones.
+   * @param {string} source
+   * @param {!Object<string, *>=} opt_bindings
+   * @return {!Promise<string>}
+   */
+  expandStringAsync(source, opt_bindings) {
+    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings));
+  }
+
+  /**
+   * Synchronously expands the provided URL by replacing all known variables with
+   * their resolved values. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.  Any async bindings are ignored.
+   * @param {string} url
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
+   * @return {string}
+   */
+  expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
+    return this.ensureProtocolMatches_(url, /** @type {string} */ (this.expand_(
+            url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+            opt_whiteList)));
   }
 
   /**
@@ -545,8 +638,10 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @return {!Promise<string>}
    */
-  expandAsync(url, opt_bindings) {
-    return /** @type {!Promise<string>} */(this.expand_(url, opt_bindings));
+  expandUrlAsync(url, opt_bindings) {
+    return /** @type {!Promise<string>} */ (
+        this.expand_(url, opt_bindings).then(
+            replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -687,10 +782,9 @@ export class UrlReplacements {
     }
 
     if (opt_sync) {
-      return this.ensureProtocolMatches_(url, replacement);
+      return replacement;
     }
-    return (replacementPromise || Promise.resolve(replacement))
-        .then(replacement => this.ensureProtocolMatches_(url, replacement));
+    return replacementPromise || Promise.resolve(replacement);
   }
 
   /**
@@ -756,3 +850,12 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
       new UrlReplacements(ampdoc, varSource));
 }
+
+
+/**
+ * @typedef {{
+ *   incomingFragment: string,
+ *   outgoingFragment: string,
+ * }}
+ */
+let ShareTrackingFragmentsDef;
