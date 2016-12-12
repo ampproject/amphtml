@@ -406,7 +406,6 @@ var forbiddenTerms = {
     ],
   },
   'debugger': '',
-
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
