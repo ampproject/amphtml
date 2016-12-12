@@ -91,6 +91,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
+  'AMP-PLAYBUZZ': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
 };
