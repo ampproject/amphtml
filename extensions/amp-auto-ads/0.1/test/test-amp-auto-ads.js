@@ -61,6 +61,7 @@ describe('amp-auto-ads', () => {
         AD_CLIENT + '&plah=' + hostname, {
           mode: 'cors',
           method: 'GET',
+          credentials: 'omit',
           requireAmpResponseSourceOrigin: false,
         });
     expect(xhr.fetchJson).to.be.calledOnce;
