@@ -55,6 +55,7 @@ import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
+import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 
@@ -434,14 +435,24 @@ export class AmpA4A extends AMP.BaseElement {
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
         // as AMP and could be properly parsed for friendly iframe render.
-        /** @return {!Promise<?CreativeMetaDataDef>} */
+        /** @return {?CreativeMetaDataDef} */
         .then(creativeDecoded => {
           checkStillCurrent(promiseId);
           // Note: It's critical that #getAmpAdMetadata_ be called
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
-          return creativeDecoded && this.getAmpAdMetadata_(creativeDecoded);
+          let creativeMetaDataDef;
+          if (!creativeDecoded ||
+            !(creativeMetaDataDef = this.getAmpAdMetadata_(creativeDecoded))) {
+            return null;
+          }
+          // Load any extensions; do not wait on their promises as this
+          // is just to prefetch.
+          const extensions = extensionsFor(this.win);
+          creativeMetaDataDef.customElementExtensions.forEach(
+            extensionId => extensions.loadExtension(extensionId));
+          return creativeMetaDataDef;
         })
         .catch(error => {
           // If error in chain occurs, report it and return null so that
@@ -963,8 +974,11 @@ export class AmpA4A extends AMP.BaseElement {
         metaData.customElementExtensions =
           metaDataObj['customElementExtensions'];
         if (!isArray(metaData.customElementExtensions)) {
-          throw new Error('Invalid extensions');
+          throw new Error(
+              'Invalid extensions', metaData.customElementExtensions);
         }
+      } else {
+        metaData.customElementExtensions = [];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose
