@@ -282,74 +282,6 @@ describe('amp-sidebar', () => {
     });
   });
 
-
-  it('should close sidebar if clicked on anchor', () => {
-    return getAmpSidebar().then(obj => {
-      const sidebarElement = obj.ampSidebar;
-      const anchor = sidebarElement.getElementsByTagName('a')[0];
-      const impl = sidebarElement.implementation_;
-      impl.schedulePause = sandbox.spy();
-      impl.vsync_ = {
-        mutate: function(callback) {
-          callback();
-        },
-      };
-      sandbox.stub(timer, 'delay', function(callback) {
-        callback();
-      });
-      expect(sidebarElement.hasAttribute('open')).to.be.false;
-      impl.open_();
-      expect(sidebarElement.hasAttribute('open')).to.be.true;
-      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-      const eventObj = document.createEventObject ?
-          document.createEventObject() : document.createEvent('Events');
-      if (eventObj.initEvent) {
-        eventObj.initEvent('click', true, true);
-      }
-      anchor.dispatchEvent ?
-          anchor.dispatchEvent(eventObj) :
-          anchor.fireEvent('onkeydown', eventObj);
-      expect(sidebarElement.hasAttribute('open')).to.be.false;
-      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
-      expect(sidebarElement.style.display).to.equal('none');
-      expect(impl.schedulePause.callCount).to.equal(1);
-    });
-  });
-
-
-  it('should not close sidebar if clicked on non-anchor', () => {
-    return getAmpSidebar().then(obj => {
-      const sidebarElement = obj.ampSidebar;
-      const li = sidebarElement.getElementsByTagName('li')[0];
-      const impl = sidebarElement.implementation_;
-      impl.schedulePause = sandbox.spy();
-      impl.vsync_ = {
-        mutate: function(callback) {
-          callback();
-        },
-      };
-      sandbox.stub(timer, 'delay', function(callback) {
-        callback();
-      });
-      expect(sidebarElement.hasAttribute('open')).to.be.false;
-      impl.open_();
-      expect(sidebarElement.hasAttribute('open')).to.be.true;
-      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-      const eventObj = document.createEventObject ?
-          document.createEventObject() : document.createEvent('Events');
-      if (eventObj.initEvent) {
-        eventObj.initEvent('click', true, true);
-      }
-      li.dispatchEvent ?
-          li.dispatchEvent(eventObj) :
-          li.fireEvent('onkeydown', eventObj);
-      expect(sidebarElement.hasAttribute('open')).to.be.true;
-      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-      expect(sidebarElement.style.display).to.equal('');
-      expect(impl.schedulePause.callCount).to.equal(0);
-    });
-  });
-
   it('should reflect state of the sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
@@ -427,6 +359,171 @@ describe('amp-sidebar', () => {
       expect(compensateIosBottombarSpy.callCount).to.equal(1);
       // 10 lis + one top padding element inserted
       expect(sidebarElement.children.length).to.equal(initalChildrenCount + 1);
+    });
+  });
+
+  it('should close sidebar if clicked on a non-local anchor', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const anchor = sidebarElement.getElementsByTagName('a')[0];
+      anchor.href = '#newloc';
+      const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      impl.open_();
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      const eventObj = document.createEventObject ?
+          document.createEventObject() : document.createEvent('Events');
+      if (eventObj.initEvent) {
+        eventObj.initEvent('click', true, true);
+      }
+      sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        return {
+          win: {
+            location: {
+              href: window.location.href,
+            },
+          },
+        };
+      });
+      anchor.dispatchEvent ?
+          anchor.dispatchEvent(eventObj) :
+          anchor.fireEvent('onkeydown', eventObj);
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+      expect(sidebarElement.style.display).to.equal('none');
+      expect(impl.schedulePause.callCount).to.equal(1);
+    });
+  });
+
+  it('should not close sidebar if clicked on a new origin navigation', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const anchor = sidebarElement.getElementsByTagName('a')[0];
+      anchor.href = '#newloc';
+      const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      impl.open_();
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      const eventObj = document.createEventObject ?
+          document.createEventObject() : document.createEvent('Events');
+      if (eventObj.initEvent) {
+        eventObj.initEvent('click', true, true);
+      }
+      sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        return {
+          win: {
+            location: {
+              // Mocking navigating from example.com -> localhost:9876
+              href: 'http://example.com',
+            },
+          },
+        };
+      });
+      anchor.dispatchEvent ?
+          anchor.dispatchEvent(eventObj) :
+          anchor.fireEvent('onkeydown', eventObj);
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.style.display).to.equal('');
+      expect(impl.schedulePause.callCount).to.equal(0);
+    });
+  });
+
+  it('should not close sidebar if clicked on new page navigation', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const anchor = sidebarElement.getElementsByTagName('a')[0];
+      anchor.href = '#newloc';
+      const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      impl.open_();
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      const eventObj = document.createEventObject ?
+          document.createEventObject() : document.createEvent('Events');
+      if (eventObj.initEvent) {
+        eventObj.initEvent('click', true, true);
+      }
+      sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        return {
+          win: {
+            location: {
+              // Mocking navigating from
+              // /context.html?old=context -> /context.html
+              href: 'http://localhost:9876/context.html?old=context',
+            },
+          },
+        };
+      });
+      anchor.dispatchEvent ?
+          anchor.dispatchEvent(eventObj) :
+          anchor.fireEvent('onkeydown', eventObj);
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.style.display).to.equal('');
+      expect(impl.schedulePause.callCount).to.equal(0);
+    });
+  });
+
+  it('should not close sidebar if clicked on non-anchor', () => {
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const li = sidebarElement.getElementsByTagName('li')[0];
+      const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      impl.open_();
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      const eventObj = document.createEventObject ?
+          document.createEventObject() : document.createEvent('Events');
+      if (eventObj.initEvent) {
+        eventObj.initEvent('click', true, true);
+      }
+      li.dispatchEvent ?
+          li.dispatchEvent(eventObj) :
+          li.fireEvent('onkeydown', eventObj);
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.style.display).to.equal('');
+      expect(impl.schedulePause.callCount).to.equal(0);
     });
   });
 });

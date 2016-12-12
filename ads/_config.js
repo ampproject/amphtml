@@ -409,6 +409,7 @@ export const adConfig = {
       'https://cdn.revcontent.com',
       'https://img.revcontent.com',
     ],
+    renderStartImplemented: true,
   },
 
   rubicon: {},
@@ -478,6 +479,8 @@ export const adConfig = {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
   },
+
+  xrostssp: {},
 
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',

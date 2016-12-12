@@ -26,7 +26,10 @@ import {
   createElementWithAttributes,
 } from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
+import {
+  installFriendlyIframeEmbed,
+  setFriendlyIframeEmbedVisible,
+} from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
@@ -151,6 +154,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?string} */
     this.adUrl_ = null;
+
+    /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
+    this.friendlyIframeEmbed_ = null;
 
     /** {?AMP.AmpAdUIHandler} */
     this.uiHandler = null;
@@ -558,10 +564,18 @@ export class AmpA4A extends AMP.BaseElement {
   unlayoutCallback() {
     this.emitLifecycleEvent('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
+
     // Remove creative and reset to allow for creation of new ad.
     if (!this.layoutMeasureExecuted_) {
       return true;
     }
+
     // TODO(keithwrightbos): is mutate necessary?  Could this lead to a race
     // condition where unlayoutCallback fires and during/after subsequent
     // layoutCallback execution, the mutate operation executes causing our
@@ -587,6 +601,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
+    if (this.friendlyIframeEmbed_) {
+      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed_, inViewport);
+    }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -791,6 +808,9 @@ export class AmpA4A extends AMP.BaseElement {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
             new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
+          this.friendlyIframeEmbed_ = friendlyIframeEmbed;
+          setFriendlyIframeEmbedVisible(
+              friendlyIframeEmbed, this.isInViewport());
           // Ensure visibility hidden has been removed (set by boilerplate).
           const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
             friendlyIframeEmbed.win.document;

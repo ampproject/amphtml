@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,13 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function revcontent(global, data) {
-  const endpoint = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
-  const required = [
-    'id',
-    'width',
-    'height',
-    'wrapper',
-  ];
-  const optional = [
-    'api',
-    'key',
-    'ssl',
-    'adxw',
-    'adxh',
-    'rows',
-    'cols',
-    'domain',
-    'source',
-    'testing',
-    'endpoint',
-    'publisher',
-    'branding',
-    'font',
-    'css',
-    'sizer',
-    'debug',
-    'ampcreative',
-  ];
+export function xrostssp(global, data) {
 
-  validateData(data, required, optional);
-  global.data = data;
-  writeScript(window, endpoint);
+  validateData(data, [], ['aid', 'slotId']);
+
+  const url = 'https://proparm.jp/ssp/p/js1'
+      + '?_aid=' + encodeURIComponent(data['aid'])
+      + '&amp;_slot=' + encodeURIComponent(data['slotId']);
+
+  writeScript(global, url);
 }
