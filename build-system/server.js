@@ -502,6 +502,49 @@ app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', func
   });
 });
 
+
+
+/*
+ * Start Cache SW LOCALDEV section
+ */
+app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
+  var filePath = req.path;
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    var n = new Date();
+    // Round down to the nearest 5 minutes.
+    n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
+    res.setHeader('Content-Type', 'application/javascript');
+    file = 'self.AMP_CONFIG = {v: "99' + n + '",' +
+        'cdnUrl: "http://localhost:8000/dist"};'
+        + file;
+    res.end(file);
+  }).catch(next);
+});
+
+app.get('/dist/rtv/99*/*.js', function(req, res, next) {
+  var filePath = req.path.replace(/\/rtv\/\d{15}/, '');
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    // Cause a delay, to show the "stale-while-revalidate"
+    setTimeout(() => {
+      res.setHeader('Content-Type', 'application/javascript');
+      res.end(file);
+    }, 2000);
+  }).catch(next);
+});
+
+app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
+  var filePath = '/test/manual/cache-sw.html';
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    res.setHeader('Content-Type', 'text/html');
+    res.end(file);
+  }).catch(next);
+});
+/*
+ * End Cache SW LOCALDEV section
+ */
+
+
+
 /**
  * @param {string} mode
  * @param {string} file
