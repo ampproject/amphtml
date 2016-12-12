@@ -21,14 +21,43 @@
 <link rel="import" href="../webui-statusbar/webui-statusbar.html">
 <link rel="import" href="../webui-errorlist/webui-errorlist.html">
 <link rel="import" href="../webui-urlform/webui-urlform.html">
+<link rel="import" href="../webui-preview/webui-preview.html">
 <dom-module id="webui-mainpage">
+  <style scope="webui-preview">
+    main {
+      display: -ms-flex;
+      display: -webkit-flex;
+      display: flex;
+      height: calc(100vh - 200px);
+    }
+    main > *:first-child {
+      width: 60%;
+      margin-right: 16px;
+    }
+    main > *:last-child {
+      width: 40%;
+    }
+    @media (max-width: 599px) {
+      main > *:first-child {
+        width: 100%;
+        margin-right: 0;
+      }
+      #preview {
+        display: none;
+      }
+    }
+  </style>
   <template>
     <ampproject-toolbar></ampproject-toolbar>
     <webui-urlform id="urlForm"></webui-urlform>
-    <amphtml-editor id="amphtmlEditor"></amphtml-editor>
+    <main>
+      <amphtml-editor id="amphtmlEditor"></amphtml-editor>
+      <webui-preview id="preview"></webui-preview>
+    </main>
     <webui-statusbar id="statusBar"></webui-statusbar>
     <webui-errorlist id="errorListBox"></webui-errorlist>
   </template>
+
   <script>
     var minimumValidAmp =
       '\x3C!--\n' +
@@ -93,6 +122,9 @@
         // The listbox has the errors at the bottom of the screen.
         var listbox = this.$.errorListBox;
 
+        // The document preview 
+        var preview = this.$.preview;
+
         // When the editor contents change, trigger validation (with a delay)
         // and propagate the validation errors into the editor (as line
         // widgets) and the listbox below the editor as clickable errors.
@@ -103,6 +135,9 @@
           while (lineWidgets.length > 0) {
             lineWidgets.shift().clear();
           }
+
+          // Show preview 
+          preview.refresh(editor.getEditorValue());
 
           // Validate - result is of type amp.validator.ValidationResult.
           // See validator.proto for the provided fields.
@@ -170,6 +205,7 @@
             removeParamFromLocationHashParams('errno');
           }
         };
+
         var refreshEditorAndErrorsWithDelay = function(e) {
           clearTimeout(validationTimeout);
           validationTimeout = setTimeout(
@@ -193,6 +229,7 @@
         var input = document.getElementById('urlToFetch');
         var button = document.getElementById('validateButton');
         button.addEventListener('click', function() {
+          // fetch the document
           var urlToFetch = input.value.trim();
           if (urlToFetch.length > 0) {
             if (!(urlToFetch.indexOf('http://') == 0 ||
