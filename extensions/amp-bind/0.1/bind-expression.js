@@ -21,7 +21,7 @@ import {parser} from './bind-expr-impl';
  */
 export class BindExpression {
   /**
-   * @param {string} expression
+   * @param {string} expressionString
    */
   constructor(expressionString) {
     /** @const {string} */

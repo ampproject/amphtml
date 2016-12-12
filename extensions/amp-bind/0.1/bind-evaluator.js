@@ -16,6 +16,9 @@
 
 import {BindExpression} from './bind-expression';
 
+/**
+ * Asynchronously evaluates a set of Bind expressions.
+ */
 export class BindEvaluator {
   /**
    * @param {!Array<string>} expressionStrings
@@ -30,10 +33,10 @@ export class BindEvaluator {
 
   /**
    * @param {!Object} scope
-   * @return {!Promise<{!Object<string,*}>}
+   * @return {!Promise<!Object<string,*>>}
    */
   evaluate(scope) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       /** @type {!Object<string,*>} */
       const output = {};
       this.expressions_.forEach(expression => {

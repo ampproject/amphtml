@@ -74,7 +74,7 @@ export class Bind {
     /** @const {!Object} */
     this.scope_ = Object.create(null);
 
-    /** @const {?./bind-evaluator.BindEvaluator} */
+    /** {?./bind-evaluator.BindEvaluator} */
     this.evaluator_ = null;
 
     /** {?Promise<!Object<string,*>>} */
@@ -200,10 +200,10 @@ export class Bind {
   }
 
   /**
-   * @param {BindVsyncStateDef} state
+   * @param {BindVsyncStateDef} unusedState
    * @private
    */
-  measure_(state) {
+  measure_(unusedState) {
     // TODO(choumx): Validate here or in applyBinding_()?
   }
 
@@ -264,7 +264,7 @@ export class Bind {
     } else {
       const isAmpElement = element.classList.contains('-amp-element');
       const oldValue = element.getAttribute(property);
-      /** @type {boolean|number|string|null|undefined} */
+      /** @type {(boolean|number|string|null|undefined)} */
       let attributeValue;
 
       if (newValue === true) {
@@ -391,9 +391,8 @@ export class Bind {
    * @return {(string|boolean|number|null)}
    */
   attributeValueOf_(value) {
-    const type = typeof value;
-    if (this.attributeValueTypes_[type]) {
-      return value;
+    if (this.attributeValueTypes_[typeof value]) {
+      return /** @type {(string|boolean|number)} */ (value);
     } else {
       return null;
     }
@@ -410,8 +409,8 @@ export class Bind {
       return true;
     }
 
-    if (a === null && b === null) {
-      return true;
+    if (a === null || b === null) {
+      return false;
     }
 
     if (typeof a !== typeof b) {
@@ -430,13 +429,13 @@ export class Bind {
       return true;
     }
 
-    if (typeof a === 'object') {
+    if (typeof a === 'object' && typeof b === 'object') {
       const keysA = Object.keys(a);
       const keysB = Object.keys(b);
       if (keysA.length !== keysB.length) {
         return false;
       }
-      for (let i = 0; i < keysA; i++) {
+      for (let i = 0; i < keysA.length; i++) {
         const keyA = keysA[i];
         if (a[keyA] !== b[keyA]) {
           return false;

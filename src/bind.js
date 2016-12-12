@@ -16,11 +16,12 @@
 
 import {getElementServiceForDoc} from './element-service';
 
+// TODO(choumx): Investigate why amp-bind.Bind type reference not recognized.
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>}
+ * @return {!Promise<*>}
  */
 export function bindForDoc(nodeOrDoc) {
-  return /** @type {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
+  return /** @type {!Promise<*>} */ (
       getElementServiceForDoc(nodeOrDoc, 'bind', 'amp-bind'));
 }

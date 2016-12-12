@@ -241,13 +241,13 @@ describes.realWin('amp-bind', {
   });
 
   it('should only evaluate duplicate expressions once', () => {
-    const element = createElementWithBinding(`[a]="1+1" [b]="1+1"`);
+    createElementWithBinding(`[a]="1+1" [b]="1+1"`);
     const stub = env.sandbox.stub(BindExpression.prototype, 'evaluate');
     stub.returns('stubbed');
     return onBindReadyAndSetState({}, () => {
       expect(stub.calledOnce).to.be.true;
     });
-  })
+  });
 
   // TODO(choumx): Add tests for security (binding to banned attributes, etc.).
 });
