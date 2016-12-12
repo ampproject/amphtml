@@ -168,11 +168,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Allowed. Require including [amp-form extension](../extensions/amp-form/amp-form.md).</td>
+    <td>Allowed. Require including <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">amp-form extension</a>.</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly Allowed with [exception of some input types](../extensions/amp-form/amp-form.md#inputs), namely, `input[type=image]`, `input[type=button]`, `input[type=password]`, `input[type=file]` are invalid. Related tags are also allowed: `fieldset`, `label`</td>
+    <td>Mostly Allowed with <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#inputs">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>
