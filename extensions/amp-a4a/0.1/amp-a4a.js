@@ -445,13 +445,13 @@ export class AmpA4A extends AMP.BaseElement {
           let creativeMetaDataDef;
           if (creativeDecoded &&
             (creativeMetaDataDef = this.getAmpAdMetadata_(creativeDecoded))) {
-              // Load any extensions, do not wait on their promises as this
-              // is just to prefetch.
-              const extensions = extensionsFor(this.win);
-              creativeMetaDataDef.customElementExtensions.forEach(
-                extensionId => extensions.loadExtension(extensionId));
-              return creativeMetaDataDef;
-            }
+            // Load any extensions, do not wait on their promises as this
+            // is just to prefetch.
+            const extensions = extensionsFor(this.win);
+            creativeMetaDataDef.customElementExtensions.forEach(
+              extensionId => extensions.loadExtension(extensionId));
+            return creativeMetaDataDef;
+          }
           return null;
         })
         .catch(error => {
