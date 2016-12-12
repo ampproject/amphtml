@@ -17,7 +17,8 @@
 import {dev, user} from '../log';
 import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
-import {isArray, map} from '../types';
+import {isArray} from '../types';
+import {map} from '../utils/object';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 
