@@ -52,6 +52,7 @@ import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {installUrlReplacementsForEmbed,}
     from '../../../src/service/url-replacements-impl';
+import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
 
@@ -435,7 +436,17 @@ export class AmpA4A extends AMP.BaseElement {
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
-          return creativeDecoded && this.getAmpAdMetadata_(creativeDecoded);
+          let creativeMetaDataDef;
+          if (creativeDecoded &&
+            (creativeMetaDataDef = this.getAmpAdMetadata_(creativeDecoded))) {
+              // Load any extensions, do not wait on their promises as this
+              // is just to prefetch.
+              const extensions = extensionsFor(this.win);
+              creativeMetaDataDef.customElementExtensions.forEach(
+                extensionId => extensions.loadExtension(extensionId));
+              return creativeMetaDataDef;
+            }
+          return null;
         })
         .catch(error => {
           // If error in chain occurs, report it and return null so that
@@ -945,6 +956,8 @@ export class AmpA4A extends AMP.BaseElement {
         if (!isArray(metaData.customElementExtensions)) {
           throw new Error('Invalid extensions');
         }
+      } else {
+        metaData.customElementExtensions = [];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose
