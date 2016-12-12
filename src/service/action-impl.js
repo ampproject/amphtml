@@ -37,7 +37,7 @@ const DEFAULT_METHOD_ = 'activate';
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
-  'amp': ['setState'],
+  'AMP': ['setState'],
 };
 
 /**

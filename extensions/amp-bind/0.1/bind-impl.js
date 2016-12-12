@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {evaluateBindExpr} from './bind-expr';
+import {BindExpression} from './bind-expression';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
-import {dev, user} from '../../../src/log';
+import {toArray} from '../../../src/types';
 import {vsyncFor} from '../../../src/vsync';
 
 const TAG = 'AMP-BIND';
@@ -127,6 +128,7 @@ export class Bind {
    */
   scanForBindings_(body) {
     // TODO(choumx): Chunk if taking too long in a single frame.
+
     const bindings = [];
     const elements = body.getElementsByTagName('*');
     for (let i = 0; i < elements.length; i++) {
@@ -188,9 +190,22 @@ export class Bind {
    * @private
    */
   measure_(state) {
+    /** @type {!Object<string,BindExpressionResultDef>} */
+    const cache = {};
+
     for (let i = 0; i < this.bindings_.length; i++) {
       const binding = this.bindings_[i];
-      state.results[i] = evaluateBindExpr(binding.expression, this.scope_);
+      const expression = binding.expression;
+
+      // Reuse cached result for duplicate expressions in same digest.
+      if (cache[expression] !== undefined) {
+        state.results[i] = cache[expression];
+      } else {
+        const bindExpression = new BindExpression(expression);
+        const result = bindExpression.evaluate(this.scope_);
+        state.results[i] = result;
+        cache[binding.expression] = result;
+      }
     }
   }
 
@@ -360,8 +375,8 @@ export class Bind {
     if (a.length !== b.length) {
       return false;
     }
-    const sortedA = a.slice().sort();
-    const sortedB = b.slice().sort();
+    const sortedA = toArray(a).sort();
+    const sortedB = toArray(b).sort();
     for (let i = 0; i < a.length; i++) {
       if (sortedA[i] !== sortedB[i]) {
         return false;
@@ -392,6 +407,10 @@ export class Bind {
    * @return {boolean}
    */
   shallowEquals_(a, b) {
+    if (a === b) {
+      return true;
+    }
+
     if (a === null && b === null) {
       return true;
     }
@@ -413,8 +432,8 @@ export class Bind {
     }
 
     if (typeof a === 'object') {
-      const keysA = a.keys();
-      const keysB = b.keys();
+      const keysA = Object.keys(a);
+      const keysB = Object.keys(b);
       if (keysA.length !== keysB.length) {
         return false;
       }
@@ -427,6 +446,6 @@ export class Bind {
       return true;
     }
 
-    return a === b;
+    return false;
   }
 }

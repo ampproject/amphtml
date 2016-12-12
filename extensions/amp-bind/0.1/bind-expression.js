@@ -16,11 +16,31 @@
 
 import {parser} from './bind-expr-impl';
 
-export function evaluateBindExpr(expr, data) {
-  try {
-    parser.yy = data;
-    return parser.parse(expr);
-  } finally {
-    parser.yy = null;
+/**
+ * A single Bind expression.
+ */
+export class BindExpression {
+  /**
+   * @param {string} expression
+   */
+  constructor(expression) {
+    /** @const {string} */
+    this.expression_ = expression;
+  }
+
+  /**
+   * Evaluates the expression given a scope.
+   * @param {!Object} scope
+   * @return {*}
+   */
+  evaluate(scope) {
+    // TODO(choumx): Improve performance by extracting AST construction
+    // and generating evaluator with Function constructor.
+    try {
+      parser.yy = scope;
+      return parser.parse(this.expression_);
+    } finally {
+      parser.yy = null;
+    }
   }
 }

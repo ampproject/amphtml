@@ -15,6 +15,7 @@
  */
 
 import {Bind} from '../bind-impl';
+import {BindExpression} from '../bind-expression';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -231,6 +232,17 @@ describes.realWin('amp-bind', {
       expect(element.attributes.length).to.equal(0);
     });
   });
+
+  it('should only evaluate duplicate expressions once', () => {
+    const element = createElementWithBinding(`[a]="1+1" [b]="1+1"`);
+    const stub = env.sandbox.stub(BindExpression.prototype, 'evaluate');
+    stub.returns('stubbed');
+    return bodyReady(unusedBody => {
+      bind.setState({});
+      env.flushVsync();
+      expect(stub.calledOnce).to.be.true;
+    });
+  })
 
   // TODO(choumx): Add tests for security (binding to banned attributes, etc.).
 });

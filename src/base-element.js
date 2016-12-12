@@ -807,7 +807,9 @@ export class BaseElement {
 
   /**
    * Called when an attribute's value changes.
-   * @param {!string} unusedName
+   * Boolean attributes have a value of empty string and `null` when
+   * present and missing, respectively.
+   * @param {string} unusedName
    * @param {?string} unusedOldValue
    * @param {?string} unusedNewValue
    */
