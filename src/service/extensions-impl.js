@@ -34,7 +34,7 @@ import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
 import {installVideo} from '../../builtins/amp-video';
-import {urls} from '../config';
+import {calculateExtensionScriptUrl} from './extension-location';
 
 
 const TAG = 'extensions';
@@ -549,65 +549,6 @@ export class Extensions {
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
-}
-
-
-/**
- * Calculate the base url for any scripts.
- * @param {!Location} location The window's location
- * @param {boolean=} isLocalDev
- * @param {boolean=} isTest
- * @return {string}
- */
-export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
-  if (isLocalDev) {
-    if (isTest || isMax(location) || isMin(location)) {
-      return `${location.protocol}//${location.host}/dist`;
-    }
-  }
-  return urls.cdn;
-}
-
-/**
- * Calculate script url for amp-ad.
- * @param {!Location} location The window's location
- * @param {string} extensionId
- * @param {boolean=} isLocalDev
- * @param {boolean=} isTest
- * @param {boolean=} isUsingCompiledJs
- * @return {string}
- */
-export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
-    isTest, isUsingCompiledJs) {
-  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
-  if (isLocalDev) {
-    if ((isTest && !isUsingCompiledJs) || isMax(location)) {
-      return `${base}/v0/${extensionId}-0.1.max.js`;
-    }
-    return `${base}/v0/${extensionId}-0.1.js`;
-  }
-  return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
-}
-
-
-/**
- * Is this path to a max (unminified) version?
- * @param {!Location} location
- * @return {boolean}
- */
-function isMax(location) {
-  const path = location.pathname;
-  return path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/';
-}
-
-/**
- * Is this path to a minified version?
- * @param {!Location} location
- * @return {boolean}
- */
-function isMin(location) {
-  const path = location.pathname;
-  return path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/';
 }
 
 

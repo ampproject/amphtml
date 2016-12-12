@@ -142,9 +142,8 @@ export function urlWithVersion(url, version) {
   if (currentVersion) {
     return url.replace(currentVersion, version);
   }
-  const location = new URL(url);
-  location.pathname = `/rtv/${version}${location.pathname}`;
-  return location.href;
+  const oldPath = pathname(url);
+  return url.replace(oldPath, `/rtv/${version}${oldPath}`);
 }
 
 /**

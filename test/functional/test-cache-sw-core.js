@@ -108,7 +108,7 @@ runner.run('Cache SW', () => {
             'https://cdn.ampproject.org/rtv/123/v0.js');
       });
 
-      it('rewrites v1 to versioned v1', () => {
+      it.skip('rewrites v1 to versioned v1', () => {
         expect(sw.urlWithVersion(v1, '123')).to.equal(
             'https://cdn.ampproject.org/rtv/123/v1.js');
       });
@@ -118,7 +118,7 @@ runner.run('Cache SW', () => {
             'https://cdn.ampproject.org/rtv/123/v0/amp-comp-0.1.js');
       });
 
-      it('rewrites v1 comp to versioned v1 comp', () => {
+      it.skip('rewrites v1 comp to versioned v1 comp', () => {
         expect(sw.urlWithVersion(v1comp, '123')).to.equal(
             'https://cdn.ampproject.org/rtv/123/v1/amp-comp-0.1.js');
       });
