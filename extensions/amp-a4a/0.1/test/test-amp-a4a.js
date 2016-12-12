@@ -583,7 +583,7 @@ describe('amp-a4a', () => {
               'xhr.fetchTextAndHeaders called exactly once').to.be.true;
           expect(extractCreativeAndSignatureSpy.calledOnce,
               'extractCreativeAndSignatureSpy called exactly once').to.be.true;
-          expect(loadExtensionSpy.withArgs('amp-font').calledOnce).to.be.true;
+          expect(loadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
