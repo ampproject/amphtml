@@ -907,8 +907,11 @@ export class Viewer {
    */
   sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
     if (this.messageDeliverer_) {
-      return /** @type {!Promise<*>} */ (this.messageDeliverer_(
-          eventType, data, awaitResponse));
+      // Certain message deliverers return fake "Promise" instances called
+      // "Thenables". Convert from these values into trusted Promise instances,
+      // assimilating with the resolved (or rejected) internal value.
+      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(
+          eventType, data, awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {
