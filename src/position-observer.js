@@ -19,7 +19,7 @@ import {getExistingServiceForDoc} from './service';
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!./service/resources-impl.Resources}
+ * @return {!./service/position-observer-impl.PositionObserver}
  */
 export function positionObserverForDoc(nodeOrDoc) {
   return /** @type {!./service/position-observer-impl.PositionObserver} */ (

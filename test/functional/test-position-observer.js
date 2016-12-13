@@ -97,6 +97,7 @@ describes.realWin('PositionObserver', {
       expect(observeSpy).to.be.calledOnce;
       const unlisten2 = positionObserver.trackElement(
           element, trackOption, () => {});
+      positionObserver.tick();
       expect(observeSpy).to.be.calledOnce;
       unlisten1();
       expect(unobserveSpy).to.not.be.called;
@@ -135,22 +136,30 @@ describes.realWin('PositionObserver', {
       const callbackSpy1 = sandbox.spy();
       const callbackSpy2 = sandbox.spy();
       positionObserver.trackElement(element, trackOption, callbackSpy1);
-      positionObserver.trackElement(element, trackOption, callbackSpy2);
+      const unlisten =
+          positionObserver.trackElement(element, trackOption, callbackSpy2);
       positionObserver.tick();
       expect(callbackSpy1).to.be.calledOnce;
+      expect(callbackSpy2).to.be.calledOnce;
+      // change the fake layoutbox of the element to tick
+      element.getLayoutBox =
+          () => {return layoutRectLtwh(-1, -1, 1, 1);};
+      unlisten();
+      positionObserver.tick();
+      expect(callbackSpy1).to.be.calledTwice;
       expect(callbackSpy2).to.be.calledOnce;
     });
 
     it('should all be called with multi InOb', () => {
       const callbackSpy1 = sandbox.spy();
-     // const callbackSpy2 = sandbox.spy();
+      const callbackSpy2 = sandbox.spy();
       const callbackSpy3 = sandbox.spy();
       positionObserver.trackElement(element, trackOption, callbackSpy1);
-      //positionObserver.trackElement(element, trackOption2, callbackSpy2);
+      positionObserver.trackElement(element, trackOption2, callbackSpy2);
       positionObserver.trackElement(element2, trackOption2, callbackSpy3);
       positionObserver.tick();
       expect(callbackSpy1).to.be.calledOnce;
-      //expect(callbackSpy2).to.be.calledOnce;
+      expect(callbackSpy2).to.be.calledOnce;
       expect(callbackSpy3).to.be.calledOnce;
     });
   });

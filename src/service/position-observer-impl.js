@@ -114,10 +114,11 @@ export class PositionObserver {
   tick() {
     // TODO(zhouyx): Optimize this function to limit change to this layer and
     // child layer.
-    // TODO(zhouyx): Modifty #tick function of IntersectionObserverPolyfill to
+    // A list of things can do here:
+    // Modifty #tick function of IntersectionObserverPolyfill to
     // accept elements. Don't calculate for elements of other layer.
-    // Or I suggest layout manager only call tick(layer),
-    // and in IntersectionObserverPolyfill call callback for observed elements
+    // Or have layout manager tick with layer,
+    // IntersectionObserverPolyfill call only tick for observed elements
     // live inside child layer.
     const viewportRect = viewportForDoc(this.ampdoc).getRect();
     const keys = Object.keys(this.intersectionObservers_);
@@ -128,6 +129,13 @@ export class PositionObserver {
     }
   }
 
+  /**
+   * Function that get the IntersectionObserverDef through trackOption id
+   * If it is not exists, create a new one
+   * @param {!PosObTrackOptionDef} trackOption
+   * @return {Object}
+   * @private
+   */
   getInOb_(trackOption) {
     // return existing IntersectionObserver if there's one.
     if (this.intersectionObservers_[trackOption.id]) {
@@ -157,16 +165,27 @@ export class PositionObserver {
   }
 }
 
-
+/**
+ * Helper class to have an element mapped observable
+ * attached to one IntersectionObserver
+ */
 class elementObservables {
   constructor() {
     this.handlerMap_ = map();
   }
 
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   */
   hasElement(element) {
     return this.handlerMap_[element];
   }
 
+  /**
+   * @param {!Element} element
+   * @param {!function(Object)} callback
+   */
   add(element, callback) {
     if (this.handlerMap_[element]) {
       this.handlerMap_[element].push(callback);
@@ -175,6 +194,10 @@ class elementObservables {
     }
   }
 
+  /**
+   * @param {!Element} element
+   * @param {!function(Object)} callback
+   */
   remove(element, callback) {
     // remove this callback from handlerMap_[element]
     const callbacks = this.handlerMap_[element];
@@ -189,6 +212,9 @@ class elementObservables {
     }
   }
 
+  /**
+   * @param {!Object} changes
+   */
   fire(changes) {
     for (let i = 0; i < changes.length; i++) {
       const change = changes[i];
@@ -202,6 +228,10 @@ class elementObservables {
   }
 }
 
+/**
+ * @param {!.ampdoc-impl.AmpDoc} ampdoc
+ * @return {!PositionObserver}
+ */
 export function installPositionObserverServiceForDoc(ampdoc) {
   return getServiceForDoc(ampdoc, 'position-observer',
       () => new PositionObserver(ampdoc));
