@@ -420,6 +420,9 @@ describe('3p-frame', () => {
     it('should return null if failed to parse the input', () => {
       expect(deserializeMessage(
           'amp-"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+
+      expect(deserializeMessage(
+          'amp-{"type":"msgtype"|"sentinel":"msgsentinel"}')).to.be.null;
     });
   });
 });
