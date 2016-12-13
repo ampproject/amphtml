@@ -147,7 +147,7 @@ export class LaterpayVendor {
    * @return {!Promise<!JSONType>}
    */
   authorize() {
-    user().assert(isExperimentOn(this.win_, 'amp-access-laterpay'),
+    user().assert(isExperimentOn(this.win_, TAG),
         'Enable "amp-access-laterpay" experiment');
     return this.getPurchaseConfig_()
     .then(response => {
@@ -211,7 +211,7 @@ export class LaterpayVendor {
    * @private
    */
   getContainer_() {
-    return this.doc_.querySelector(TAG + '-list');
+    return this.doc_.getElementById(TAG + '-dialog');
   }
 
   /**
@@ -376,7 +376,7 @@ export class LaterpayVendor {
    */
   handlePurchaseOptionSelection_(ev) {
     ev.preventDefault();
-    const selectedOptionClassname = 'amp-access-laterpay-selected';
+    const selectedOptionClassname = TAG + '-selected';
     const prevPurchaseOption = this.selectedPurchaseOption_;
     const purchaseActionLabel = ev.target.dataset.purchaseActionLabel;
     if (prevPurchaseOption &&
