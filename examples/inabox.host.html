@@ -6,19 +6,30 @@
   <title>amp-inabox-host example</title>
 </head>
 <body>
-  <div style="height: 120vh"></div>
   <iframe
-      id="iframe-1"
       src="//ads.localhost:8000/examples/inabox.amp.max.html"
       scrolling="no"
       width="300" height="200">
   </iframe>
-  <div style="height: 120vh"></div>
+  <h2>Scroll down to see more ...</h2>
+  <div style="height: 100vh"></div>
+  <iframe
+      src="//ads.localhost:8000/examples/inabox.amp.max.html"
+      scrolling="no"
+      width="300" height="200">
+  </iframe>
+  <div style="height: 20vh"></div>
+  <iframe
+      src="//ads.localhost:8000/examples/inabox-more.amp.max.html"
+      scrolling="no"
+      width="300" height="1000">
+  </iframe>
 
   <script>
     initInaboxHost(window);
-    // Enable amp-inabox APIs for this iframe
-    window.ampInaboxIframes.push(document.querySelector('#iframe-1'));
+    // Enable amp-inabox APIs for all iframes
+    Array.prototype.push.apply(
+        window.ampInaboxIframes, document.querySelectorAll('iframe'));
 
     /**
      * A sample bootstrap script that is to be run in ads tag.
