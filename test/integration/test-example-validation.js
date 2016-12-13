@@ -55,6 +55,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'facebook.amp.html',
     'gfycat.amp.html',
     'instagram.amp.html',
+    'ooyalaplayer.amp.html',
     'released.amp.html',
     'soundcloud.amp.html',
     'springboard-player.amp.html',
@@ -73,6 +74,8 @@ describe.configure().retryOnSaucelabs().run('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
+    /DISALLOWED_TAG amp-ooyala-player/,
+    /GENERAL_DISALLOWED_TAG script amp-ooyala-player/,
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
     /DISALLOWED_ATTR scrollable amp-lightbox/,
