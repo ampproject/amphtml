@@ -21,7 +21,8 @@ import {UX_EXPERIMENT} from '../../../src/layout';
 const TAG = 'AmpAdUIHandler';
 
 /** @const */
-const HOLDER_HTML = `<div class='-amp-ad-default-holder'>
+const HOLDER_HTML =
+    `<div class='-amp-ad-default-holder'>
     <div class='-amp-ad-tag'>Ad</div>
     </div>`;
 
