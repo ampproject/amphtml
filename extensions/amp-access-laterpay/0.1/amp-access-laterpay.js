@@ -118,9 +118,12 @@ export class LaterpayVendor {
     /** @private @const {?Node} */
     this.purchaseButton_ = null;
 
-    const configUrl = (getMode().development && this.laterpayConfig_.configUrl)
-                    ? this.laterpayConfig_.configUrl
-                    : CONFIG_URL;
+    const configUrl = (
+      (getMode().localDev || getMode().development) &&
+      this.laterpayConfig_.configUrl
+    ) ? this.laterpayConfig_.configUrl
+      : CONFIG_URL;
+
     /** @private {string} */
     this.currentLocale_ = this.laterpayConfig_.locale || 'en';
 
