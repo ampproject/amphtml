@@ -227,6 +227,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     toName: 'amp-inabox.js',
     minifiedName: 'amp4ads-v0.js',
     includePolyfills: true,
+    extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
     checkTypes: opt_checkTypes,
     watch: watch,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
@@ -461,8 +462,9 @@ function checkTypes() {
   }).sort();
   closureCompile(compileSrcs.concat(extensionSrcs), './dist',
       'check-types.js', {
-        include3pDirectories: false,
+        include3pDirectories: true,
         includePolyfills: true,
+        extraGlobs: ['src/inabox/*.js'],
         checkTypes: true,
       });
   // Type check 3p/ads code.

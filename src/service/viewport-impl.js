@@ -57,7 +57,6 @@ export let ViewportChangedEventDef;
  * and other events and notifies interesting parties when viewport has changed
  * and how.
  * @implements {../service.Disposable}
- * @package Visible for type.
  */
 export class Viewport {
 
@@ -743,7 +742,6 @@ export class Viewport {
  * ViewportBindingDef is an interface that defines an underlying technology
  * behind the {@link Viewport}.
  * @interface
- * @visibleForTesting
  */
 export class ViewportBindingDef {
 

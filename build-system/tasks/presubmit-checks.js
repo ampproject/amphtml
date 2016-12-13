@@ -208,6 +208,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
+      'src/inabox/amp-inabox.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -349,6 +350,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/inabox/inabox-viewer.js',
     ],
   },
   'eval\\(': {
@@ -424,6 +426,7 @@ var forbiddenTerms = {
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
       'src/3p-frame.js',
       'src/service/viewer-impl.js',
+      'src/inabox/inabox-viewer.js',
     ],
   },
   'setTimeout.*throw': {
