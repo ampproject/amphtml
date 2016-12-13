@@ -620,6 +620,11 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  createPlaceholderCallback() {
+    return this.uiHandler.createPlaceholderCallback();
+  }
+
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
