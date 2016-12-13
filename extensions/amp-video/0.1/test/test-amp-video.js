@@ -22,7 +22,9 @@ import {
 } from '../../../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
-describe('amp-video', () => {
+const TAG = 'amp-video2';
+
+describe(TAG, () => {
   let sandbox;
 
   beforeEach(() => {
@@ -41,7 +43,7 @@ describe('amp-video', () => {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
           installVideoManagerForDoc(iframe.win.document);
-          const v = iframe.doc.createElement('amp-video');
+          const v = iframe.doc.createElement(TAG);
           for (const key in attributes) {
             v.setAttribute(key, attributes[key]);
           }

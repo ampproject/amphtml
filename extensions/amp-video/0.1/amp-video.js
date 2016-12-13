@@ -21,12 +21,12 @@ import {dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
 
-const TAG = 'amp-video';
+const TAG = 'amp-video2';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
-class AmpVideo extends AMP.BaseElement {
+class AmpVideo2 extends AMP.BaseElement {
 
     /** @param {!AmpElement} element */
     constructor(element) {
@@ -185,4 +185,4 @@ class AmpVideo extends AMP.BaseElement {
     }
 }
 
-AMP.registerElement(TAG, AmpVideo);
+AMP.registerElement(TAG, AmpVideo2);
