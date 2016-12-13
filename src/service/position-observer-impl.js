@@ -19,19 +19,16 @@ import {getServiceForDoc} from '../service';
 import {viewportForDoc} from '../viewport';
 import {IntersectionObserverPolyfill} from '../intersection-observer-polyfill';
 
-export const trackOptionType = {
-  LAYOUT: 0,
-  VIEWPORT_CALLBACK: 1,
-};
-
-const trackOptionMap = {
-  0: {
+export const PosObTrackOption = {
+  LAYOUT: {
+    id: 'layout',
     useNative: false,
     options: {
       threshold: [0],
     },
   },
-  1: {
+  VIEWPORT: {
+    id: 'viewport',
     options: {
       threshold: [0],
     },
@@ -46,21 +43,24 @@ export class PositionObserver {
 
     this.ampdoc = ampdoc;
 
-    this.intersectionObservers_ = Object.create(null);
+    this.intersectionObservers_ = map();
 
-    this.observableMap_ = Object.create(null);
+    this.observableMap_ = map();
   }
 
-  trackElement(element, trackOptionType, callback) {
-    //get/create InOb for this trackOptionType
-    const io = this.getInOb_(trackOptionType);
+  trackElement(element, trackOption, callback) {
+    //get the InOb for this trackOptionType
+    const io = this.getInOb_(trackOption);
+
     // observe element and register with callback
-    this.observableMap_[trackOptionType].add(element, callback);
-    // TODO(zhouyx): remove the warning for observe same element multi times.
-    io.observe(element);
+    if (!this.observableMap_[trackOption.id].hasElement(element)) {
+      io.observe(element);
+    }
+    this.observableMap_[trackOption.id].add(element, callback);
+
     return () => {
-      this.observableMap_[trackOptionType].remove(element, callback);
-      if (!this.observableMap_[trackOptionType].element) {
+      this.observableMap_[trackOption.id].remove(element, callback);
+      if (!this.observableMap_[trackOption.id].hasElement(element)) {
         io.unobserve(element);
       }
     };
@@ -72,49 +72,40 @@ export class PositionObserver {
     // Or I suggest layout manager only call tick(layer),
     // and in IntersectionObserverPolyfill call callback for observed elements
     // live inside child layer.
-    console.log('tick');
     const viewportRect = viewportForDoc(this.ampdoc).getRect();
-    console.log(this.intersectionObservers_);
     const keys = Object.keys(this.intersectionObservers_);
     for (let i = 0; i < keys.length; i++) {
-      console.log('aaa');
-      console.log(keys[i]);
       if (!this.intersectionObservers_[keys[i]].native) {
-        console.log('not native');
         this.intersectionObservers_[keys[i]].io.tick(viewportRect);
       }
     }
   }
 
-  getInOb_(trackOptionType) {
-    // map trackoptions and callback to a certain intersectionObserver
-    if (this.intersectionObservers_[trackOptionType]) {
-      return this.intersectionObservers_[trackOptionType].io;
+  getInOb_(trackOption) {
+    // return existing IntersectionObserver if there's one.
+    if (this.intersectionObservers_[trackOption.id]) {
+      return this.intersectionObservers_[trackOption.id].io;
     }
-    const trackOption = trackOptionMap[trackOptionType];
+
     // Create a new observableMap
-    this.observableMap_ = map();
-    this.observableMap_[trackOption] = new elementObservables();
-    // create a new intersectionObserver
+    this.observableMap_[trackOption.id] = new elementObservables();
+    // create a new IntersectionObserver
     const ioEntry = Object.create(null);
-    console.log(trackOption);
     if (trackOption.useNative !== false &&
         this.win.IntersectionObserver &&
         this.win.IntersectionObserver.prototype.observe) {
       // use native IntersectionObserver
-      console.log('native');
       ioEntry.io = new this.win.IntersectionObserver(changes => {
-        this.observableMap_[trackOptionType].fire(changes);
+        this.observableMap_[trackOption.id].fire(changes);
       }, trackOption.options);
       ioEntry.native = true;
     } else {
       // use IntersectionObserver Polyfill.
-      console.log('polyfill');
       ioEntry.io = new IntersectionObserverPolyfill(changes => {
-        this.observableMap_[trackOptionType].fire(changes);
+        this.observableMap_[trackOption.id].fire(changes);
       }, trackOption.options);
     }
-    this.intersectionObservers_[trackOptionType] = ioEntry;
+    this.intersectionObservers_[trackOption.id] = ioEntry;
     return ioEntry.io;
   }
 }
@@ -123,6 +114,10 @@ export class PositionObserver {
 class elementObservables {
   constructor() {
     this.handlerMap_ = map();
+  }
+
+  hasElement(element) {
+    return this.handlerMap_[element];
   }
 
   add(element, callback) {
@@ -140,7 +135,7 @@ class elementObservables {
       if (callbacks[i] === callback) {
         callbacks.splice(i, 1);
         if (callbacks.length == 0) {
-          this.handleMap_[element] = null;
+          this.handlerMap_[element] = null;
         }
         return;
       }
@@ -152,7 +147,7 @@ class elementObservables {
       const change = changes[i];
       const callbacks = this.handlerMap_[change.target];
       if (callbacks) {
-        for (let j = 0; j < changes.length; j++) {
+        for (let j = 0; j < callbacks.length; j++) {
           callbacks[j](change);
         }
       }
