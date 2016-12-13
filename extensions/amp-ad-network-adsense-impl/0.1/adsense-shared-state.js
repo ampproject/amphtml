@@ -22,7 +22,7 @@ export class AdsenseSharedState {
     this.prevFmts_ = [];
 
     /** @private {!Object<string, number>} */
-    this.adkFormatIndexMap_ = {};
+    this.slotFormatIndexMap_ = {};
 
     /** @private {number} */
     this.formatIndex_ = 0;
@@ -41,7 +41,7 @@ export class AdsenseSharedState {
     // The return value.
     const prevFmts = this.prevFmts_.join(',');
     // Associate the insertion index with the given id for future removal.
-    this.adkFormatIndexMap_[id] = this.formatIndex_++;
+    this.slotFormatIndexMap_[id] = this.formatIndex_++;
 
     this.prevFmts_.push(format);
     return prevFmts;
@@ -53,9 +53,9 @@ export class AdsenseSharedState {
    */
   removePreviousFormat(id) {
     // Get index of format associated with given adk.
-    const n = this.adkFormatIndexMap_[id];
+    const n = this.slotFormatIndexMap_[id];
     // Delete the association.
-    delete this.adkFormatIndexMap_[id];
+    delete this.slotFormatIndexMap_[id];
 
     // Decrement next insertion index.
     this.formatIndex_--;
@@ -63,9 +63,9 @@ export class AdsenseSharedState {
     this.prevFmts_.splice(n, 1);
     // Decrement all indexes greater than n to compensate for the removal of the
     // nth item in the array.
-    for (const key in this.adkFormatIndexMap_) {
-      if (this.adkFormatIndexMap_[key] > n) {
-        this.adkFormatIndexMap_[key]--;
+    for (const key in this.slotFormatIndexMap_) {
+      if (this.slotFormatIndexMap_[key] > n) {
+        this.slotFormatIndexMap_[key]--;
       }
     }
   }
@@ -87,5 +87,6 @@ export class AdsenseSharedState {
   reset() {
     this.prevFmts_ = [];
     this.pv_ = {};
+    this.slotFormatIndexMap_ = {};
   }
 }

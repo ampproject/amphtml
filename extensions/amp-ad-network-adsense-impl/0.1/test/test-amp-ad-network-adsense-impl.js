@@ -25,10 +25,7 @@ import {
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
-
 import {createIframePromise} from '../../../../testing/iframe';
-
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {upgradeOrRegisterElement} from '../../../../src/custom-element';
 
 
@@ -36,6 +33,7 @@ function getAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
   const tag = opt_tag || 'amp-ad';
   const adsenseImplElem = doc.createElement(tag);
+  adsenseImplElem.setAttribute('type', 'adsense');
   for (const attrName in attributes) {
     adsenseImplElem.setAttribute(attrName, attributes[attrName]);
   }
@@ -55,7 +53,6 @@ describe('amp-ad-network-adsense-impl', () => {
           return ['google'];
         });
     adsenseImplElem = getAdsenseImplElement({
-      'type': 'adsense',
       'data-ad-client': 'adsense',
       'width': '320',
       'height': '50',
@@ -66,10 +63,14 @@ describe('amp-ad-network-adsense-impl', () => {
 
   afterEach(() => {
     sandbox.restore();
-    resetSharedState();
   });
 
   describe('#getAdUrl', () => {
+
+    beforeEach(() => {
+      resetSharedState();
+    });
+
     const invariantParams = {
       'client': 'adsense',
       'format': '320x50',
@@ -93,11 +94,9 @@ describe('amp-ad-network-adsense-impl', () => {
     it.skip('with single slot', () => {
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
-        installDocService(fixture.win, /* isSingleDoc */ true);
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
         const elem = getAdsenseImplElement({
-          'type': 'adsense',
           'data-ad-client': 'adsense',
           'width': '320',
           'height': '50',
@@ -154,28 +153,25 @@ describe('amp-ad-network-adsense-impl', () => {
         });
       });
     });
-    it.skip('with multiple slots', () => {
+    it('with multiple slots', () => {
+      //resetSharedState();
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
-        installDocService(fixture.win, /* isSingleDoc */ true);
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
         const elem1 = getAdsenseImplElement({
-          'type': 'adsense',
           'data-ad-client': 'adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
         const elem2 = getAdsenseImplElement({
-          'type': 'adsense',
           'data-ad-client': 'adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
         const elem3 = getAdsenseImplElement({
-          'type': 'adsense',
           'data-ad-client': 'not-adsense',
           'width': '320',
           'height': '50',
@@ -196,7 +192,11 @@ describe('amp-ad-network-adsense-impl', () => {
                   const adsenseImpl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
                   return adsenseImpl3.getAdUrl().then(adUrl3 => {
                     expect(adUrl3.indexOf('pv=2') >= 0).to.be.true;
-                    expect(adUrl3.indexOf('prev_fmts=320x50,320x50') >= 0,
+                    // By some quirk of the test infrastructure, each
+                    // added slot after the first one has a bounding rectangle
+                    // of 0x0. The important thing to test here is the number of
+                    // previous formats.
+                    expect(adUrl3.indexOf('prev_fmts=320x50%2C0x0') >= 0,
                         adUrl3)
                         .to.be.true;
                   });
@@ -214,9 +214,8 @@ describe('amp-ad-network-adsense-impl', () => {
       expect(adsenseImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      adsenseImplElem = getAdsenseImplElement({
-        type: 'adsense',
-        'data-ad-client': 'adsense'}, document, 'amp-ad-network-adsense-impl');
+      adsenseImplElem = getAdsenseImplElement({'data-ad-client': 'adsense'},
+          document, 'amp-ad-network-adsense-impl');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
@@ -227,9 +226,8 @@ describe('amp-ad-network-adsense-impl', () => {
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      adsenseImplElem = getAdsenseImplElement({
-        type: 'adsense',
-        'data-ad-client': 'adsense'}, document, 'amp-embed');
+      adsenseImplElem = getAdsenseImplElement({'data-ad-client': 'adsense'},
+          document, 'amp-embed');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.true;
     });
