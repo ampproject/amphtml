@@ -798,10 +798,11 @@ export class AccessService {
    * Runs the login flow opening the given url in the login window.
    *
    * @param {string} url
+   * @param {string} eventLabel A label used for the analytics event for this action
    * @return {!Promise}
    */
-  loginWithUrl(url) {
-    return this.login_(url, url);
+  loginWithUrl(url, eventLabel = '') {
+    return this.login_(url, eventLabel);
   }
 
   /**
@@ -813,7 +814,7 @@ export class AccessService {
    * login URL.
    *
    * @param {string} loginUrl
-   * @param {string} eventLabel
+   * @param {string} eventLabel A label used for the analytics event for this action
    * @return {!Promise}
    */
   login_(loginUrl, eventLabel) {

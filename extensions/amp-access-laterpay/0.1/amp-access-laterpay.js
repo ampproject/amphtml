@@ -316,6 +316,7 @@ export class LaterpayVendor {
     radio.id = option.tp_title;
     radio.value = option.purchase_url;
     radio.setAttribute('data-purchase-action-label', purchaseActionLabel);
+    radio.setAttribute('data-purchase-type', option['purchase_type']);
     this.purchaseOptionListeners_.push(listen(
       radio, 'change', this.handlePurchaseOptionSelection_.bind(this)
     ));
@@ -409,7 +410,8 @@ export class LaterpayVendor {
       configuredUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
-      this.accessService_.loginWithUrl(url);
+      this.accessService_.loginWithUrl(
+        url, this.selectedPurchaseOption_.dataset.purchaseType);
     });
   }
 }
