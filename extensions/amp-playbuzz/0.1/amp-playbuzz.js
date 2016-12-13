@@ -163,6 +163,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
+    iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('allowfullscreen', 'true');
