@@ -324,14 +324,13 @@ i-amp-scroll-container.amp-active {
 }
 
 .-amp-loader-line {
-  /* TODO(zhouyx): Confirm on final height, color */
   position: absolute;
   top:0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 1px;
   overflow: hidden !important;
-  background-color: #696969;
+  background-color:rgba(151, 151, 151, 0.2);
   display: block;
 }
 
@@ -341,7 +340,7 @@ i-amp-scroll-container.amp-active {
   left: -100%;
   width: 100%;
   height: 100% !important;
-  background-color: #d3d3d3;
+  background-color: #979797;
   z-index: 2;
 }
 
