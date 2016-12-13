@@ -263,4 +263,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.lifecycleReporter.sendPing('adSlotCleared');
     return true;
   }
+
+  /** @override */
+  createPlaceholderCallback() {
+    return this.uiHandler.createPlaceholderCallback();
+  }
 }

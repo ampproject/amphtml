@@ -15,11 +15,16 @@
  */
 
 import {dev} from '../../../src/log';
-import {createElementWithAttributes} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {UX_EXPERIMENT} from '../../../src/layout';
 
 const TAG = 'AmpAdUIHandler';
+
+/** @const */
+const HOLDER_HTML =
+    `<div class='-amp-ad-default-holder'>
+    <div class='-amp-ad-tag'>Ad</div>
+    </div>`;
 
 /**
  * Ad display state.
@@ -60,6 +65,9 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
+    /** @private @const {!Document} */
+    this.doc_ = baseInstance.win.document;
+
     /** {number} */
     this.state = AdDisplayState.NOT_LAID_OUT;;
 
@@ -80,11 +88,12 @@ export class AmpAdUIHandler {
     }
 
     // Apply default fallback div when there's no default one
-    const holder = createElementWithAttributes(document, 'div', {
-      'fallback': '',
-    });
-    holder.classList.add('amp-ad-default-fallback');
-    this.baseInstance_.element.appendChild(holder);
+    const fallback = this.doc_.createElement('div');
+    fallback.setAttribute('fallback', '');
+    fallback.classList.add('amp-ad-default-display');
+    fallback./*OK*/innerHTML = HOLDER_HTML;
+
+    this.baseInstance_.element.appendChild(fallback);
   }
 
   /**
@@ -114,6 +123,20 @@ export class AmpAdUIHandler {
       default:
         dev().error(TAG, 'state is not supported');
     }
+  }
+
+  /**
+   * See BaseElement method.
+   */
+  createPlaceholderCallback() {
+    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
+      return null;
+    }
+    const placeholder = this.doc_.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    placeholder./*OK*/innerHTML = HOLDER_HTML;
+    this.baseInstance_.element.appendChild(placeholder);
+    return placeholder;
   }
 
   /**
