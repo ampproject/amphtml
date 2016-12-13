@@ -63,6 +63,11 @@ export const adConfig = {
 
   adform: {},
 
+  adfox: {
+    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    renderStartImplemented: true,
+  },
+
   adgeneration: {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
@@ -477,10 +482,7 @@ export const adConfig = {
   },
 
   yandex: {
-    preconnect: [
-      'https://an.yandex.ru/system/context.js',
-      'https://yastatic.net/pcode/adfox/loader.js',
-    ],
+    prefetch: 'https://an.yandex.ru/system/context.js',
     renderStartImplemented: true,
   },
 
