@@ -281,6 +281,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
+      'src/service/history-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
     ],
