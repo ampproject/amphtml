@@ -40,7 +40,7 @@ import {cssText} from '../../build/css';
 import {maybeValidate} from '../validator-integration';
 import {maybeTrackImpression} from '../impression';
 import {isExperimentOn} from '../experiments';
-import {installInaboxViewerService} from './inabox-viewer';
+import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
 
 // TODO(lannka): only install the necessary services.
@@ -75,9 +75,9 @@ chunk(self.document, function initial() {
       fontStylesheetTimeout(self);
 
       if (isExperimentOn(self, 'amp-inabox')) {
-        // Install inabox specific Viewer and Viewport services before
-        // runtime tries to install the normal ones.
-        installInaboxViewerService(ampdoc);
+        // Install inabox specific Viewport service before
+        // runtime tries to install the normal one.
+        installViewerServiceForDoc(ampdoc);
         installInaboxViewportService(ampdoc);
       }
 

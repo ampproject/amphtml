@@ -208,6 +208,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
+      'src/inabox/amp-inabox.js',
       'src/service/viewer-impl.js',
     ],
   },
