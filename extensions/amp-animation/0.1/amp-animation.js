@@ -15,6 +15,7 @@
  */
 
 import {MeasureScanner} from './web-animations';
+import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
 import {getFriendlyIframeEmbedOptional,}
@@ -22,6 +23,7 @@ import {getFriendlyIframeEmbedOptional,}
 import {getParentWindowFrameElement} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
+import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -53,6 +55,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {?./web-animations.WebAnimationRunner} */
     this.runner_ = null;
+
+    /** @private {?Pass} */
+    this.restartPass_ = null;
   }
 
   /** @override */
@@ -94,6 +99,12 @@ export class AmpAnimation extends AMP.BaseElement {
       });
     }
 
+    // Restart with debounce.
+    this.restartPass_ = new Pass(
+        this.win,
+        this.startOrResume_.bind(this),
+        /* delay */ 50);
+
     // Visibility.
     const ampdoc = this.getAmpDoc();
     const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
@@ -105,11 +116,17 @@ export class AmpAnimation extends AMP.BaseElement {
       embed.onVisibilityChanged(() => {
         this.setVisible_(embed.isVisible());
       });
+      listen(this.embed_.win, 'resize', () => this.onResize_());
     } else {
       const viewer = viewerForDoc(ampdoc);
       this.setVisible_(viewer.isVisible());
       viewer.onVisibilityChanged(() => {
         this.setVisible_(viewer.isVisible());
+      });
+      this.getViewport().onChanged(e => {
+        if (e.relayoutAll) {
+          this.onResize_();
+        }
       });
     }
   }
@@ -164,11 +181,34 @@ export class AmpAnimation extends AMP.BaseElement {
     }
   }
 
+  /** @private */
+  onResize_() {
+    // Store the previous `triggered` value since `cancel` may reset it.
+    const triggered = this.triggered_;
+
+    // Stop animation right away.
+    if (this.runner_) {
+      this.runner_.cancel();
+      this.runner_ = null;
+    }
+
+    // Restart the animation, but debounce to avoid re-starting it multiple
+    // times per restart.
+    this.triggered_ = triggered;
+    if (this.triggered_ && this.visible_) {
+      this.restartPass_.schedule();
+    }
+  }
+
   /**
    * @return {?Promise}
    * @private
    */
   startOrResume_() {
+    if (!this.triggered_ || !this.visible_) {
+      return null;
+    }
+
     if (this.runner_) {
       this.runner_.resume();
       return null;

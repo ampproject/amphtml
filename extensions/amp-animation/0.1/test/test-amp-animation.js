@@ -215,6 +215,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       const anim = createAnim({trigger: 'visibility'},
           {duration: 1001, animations: []});
       anim.activate();
+      anim.visible_ = true;
       runnerMock.expects('start').once();
       runnerMock.expects('finish').never();
       return anim.startOrResume_().then(() => {
@@ -227,6 +228,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       const anim = createAnim({trigger: 'visibility'},
           {duration: 1001, animations: []});
       anim.activate();
+      anim.visible_ = true;
       runnerMock.expects('start').once();
       runnerMock.expects('finish').once();
       return anim.startOrResume_().then(() => {
@@ -240,6 +242,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       const anim = createAnim({trigger: 'visibility'},
           {duration: 1001, animations: []});
       anim.activate();
+      anim.visible_ = true;
       runnerMock.expects('start').once();
       runnerMock.expects('pause').once();
       return anim.startOrResume_().then(() => {
@@ -256,6 +259,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       const anim = createAnim({trigger: 'visibility'},
           {duration: 1001, animations: []});
       anim.activate();
+      anim.visible_ = true;
       return anim.startOrResume_().then(() => {
         expect(anim.triggered_).to.be.true;
         expect(anim.runner_).to.exist;
@@ -272,6 +276,81 @@ describes.sandboxed('AmpAnimation', {}, () => {
       target.setAttribute('id', 'target1');
       win.document.body.appendChild(target);
       expect(anim.resolveTarget_('target1')).to.equal(target);
+    });
+
+    it('should resize from ampdoc viewport', () => {
+      const anim = createAnim({}, {duration: 1001});
+      const stub = sandbox.stub(anim, 'onResize_');
+      const viewport = win.services.viewport.obj;
+
+      // No size changes.
+      viewport.changed_(/* relayoutAll */ false, 0);
+      expect(stub).to.not.be.called;
+
+      // Size has changed.
+      viewport.changed_(/* relayoutAll */ true, 0);
+      expect(stub).to.be.calledOnce;
+    });
+
+    it('should cancel running animation on resize and schedule restart', () => {
+      const anim = createAnim({trigger: 'visibility'},
+          {duration: 1001, animations: []});
+      anim.activate();
+      anim.visible_ = true;
+      return anim.startOrResume_().then(() => {
+        expect(anim.runner_).to.exist;
+
+        runnerMock.expects('cancel').once();
+        anim.onResize_();
+        expect(anim.runner_).to.be.null;
+        expect(anim.triggered_).to.be.true;
+        expect(anim.restartPass_.isPending()).to.be.true;
+        anim.restartPass_.cancel();
+      });
+    });
+
+    it('should ignore not-triggered animation on resize', () => {
+      const anim = createAnim({trigger: 'visibility'},
+          {duration: 1001, animations: []});
+      anim.visible_ = true;
+      expect(anim.runner_).to.not.exist;
+      runnerMock.expects('cancel').never();
+      anim.onResize_();
+      expect(anim.runner_).to.be.null;
+      expect(anim.triggered_).to.be.false;
+      expect(anim.restartPass_.isPending()).to.be.false;
+    });
+
+    it('should cancel and NOT restart hidden animation on resize', () => {
+      const anim = createAnim({trigger: 'visibility'},
+          {duration: 1001, animations: []});
+      anim.activate();
+      anim.visible_ = true;
+      return anim.startOrResume_().then(() => {
+        expect(anim.runner_).to.exist;
+
+        anim.visible_ = false;
+        runnerMock.expects('cancel').once();
+        anim.onResize_();
+        expect(anim.runner_).to.be.null;
+        expect(anim.triggered_).to.be.true;
+        expect(anim.restartPass_.isPending()).to.be.false;
+      });
+    });
+
+    it('should ignore start when not triggered', () => {
+      const anim = createAnim({trigger: 'visibility'},
+          {duration: 1001, animations: []});
+      anim.visible_ = true;
+      expect(anim.startOrResume_()).to.be.null;
+    });
+
+    it('should ignore start when not triggered', () => {
+      const anim = createAnim({trigger: 'visibility'},
+          {duration: 1001, animations: []});
+      anim.activate();
+      anim.visible_ = false;
+      expect(anim.startOrResume_()).to.be.null;
     });
   });
 
@@ -315,6 +394,13 @@ describes.sandboxed('AmpAnimation', {}, () => {
       targetInEmbed.setAttribute('id', 'target1');
       embedWin.document.body.appendChild(targetInEmbed);
       expect(anim.resolveTarget_('target1')).to.equal(targetInEmbed);
+    });
+
+    it('should take resize from embed\'s window', () => {
+      const anim = createAnim({}, {duration: 1001});
+      const stub = sandbox.stub(anim, 'onResize_');
+      embed.win.eventListeners.fire({type: 'resize'});
+      expect(stub).to.be.calledOnce;
     });
   });
 });

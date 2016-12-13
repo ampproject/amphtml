@@ -32,6 +32,15 @@ describes.sandboxed('MeasureScanner', {}, () => {
     target2 = document.createElement('div');
     document.body.appendChild(target1);
     document.body.appendChild(target2);
+    sandbox.stub(window, 'matchMedia', query => {
+      if (query == 'match') {
+        return {matches: true};
+      }
+      if (query == 'not-match') {
+        return {matches: false};
+      }
+      throw new Error('unknown query: ' + query);
+    });
   });
 
   afterEach(() => {
@@ -294,6 +303,30 @@ describes.sandboxed('MeasureScanner', {}, () => {
       {offset: 0, easing: 'ease-in', opacity: '0'},
       {opacity: '1'},
     ]);
+  });
+
+  it('should check media in top animation', () => {
+    const requests = scan({
+      duration: 500,
+      media: 'not-match',
+      animations: [
+        {target: target1, keyframes: {}},
+        {target: target2, duration: 300, keyframes: {}},
+      ],
+    });
+    expect(requests).to.have.length(0);
+  });
+
+  it('should check media in sub-animations', () => {
+    const requests = scan({
+      duration: 500,
+      animations: [
+        {media: 'not-match', target: target1, keyframes: {}},
+        {media: 'match', target: target2, duration: 300, keyframes: {}},
+      ],
+    });
+    expect(requests).to.have.length(1);
+    expect(requests[0].target).to.equal(target2);
   });
 
 
