@@ -25,7 +25,10 @@ export class IframeMessagingClient {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
+    /** @private {!Window} */
     this.hostWindow_ = win.parent;
+    /** @private {?string} */
+    this.sentinel_ = null;
     /** Map messageType keys to callback functions for when we receive
      *  that message
      *  @private {!Object}
@@ -107,7 +110,6 @@ export class IframeMessagingClient {
    * @param {!Window} win
    */
   setHostWindow(win) {
-    /** @private {!Window} */
     this.hostWindow_ = win;
   }
 
@@ -115,7 +117,6 @@ export class IframeMessagingClient {
    * @param {string} sentinel
    */
   setSentinel(sentinel) {
-    /** @private {string} */
     this.sentinel_ = sentinel;
   }
 }
