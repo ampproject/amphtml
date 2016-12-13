@@ -516,7 +516,7 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    it('should work for visible=true spec', () => {
+    it('"visible" trigger should work with no duration condition', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
@@ -590,7 +590,7 @@ describe('amp-analytics.visibility', () => {
       });
     });
 
-    it('should work for visible=true with duration condition', () => {
+    it('"visible" trigger should work with duration condition', () => {
       visibility.listenOnceV2({
         selector: '#abc',
         continuousTimeMin: 1000,
@@ -638,13 +638,13 @@ describe('amp-analytics.visibility', () => {
       });
     });
 
-    it('should work for visible=false with duration condition', () => {
+    it('"hidden" trigger should work with duration condition', () => {
       const viewer = viewerForDoc(ampdoc);
       visibility.listenOnceV2({
         selector: '#abc',
         continuousTimeMin: 1000,
         visiblePercentageMin: 10,
-      }, callbackSpy1, false, ampElement);
+      }, callbackSpy1, false /* hidden trigger */, ampElement);
 
       resourceLoadedResolver();
       return Promise.resolve().then(() => {
