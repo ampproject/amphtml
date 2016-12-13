@@ -88,6 +88,7 @@ export class PositionObserver {
    */
   trackElement(element, trackOption, callback) {
     // TODO: Do we want to support user customized trackOption.
+    // TODO: Do want to support multi callbacks
 
     //get the InOb for this trackOptionType
     const io = this.getInOb_(trackOption);
@@ -113,12 +114,12 @@ export class PositionObserver {
    */
   tick() {
     // TODO(zhouyx): Optimize this function to limit change to this layer and
-    // child layer.
+    // child layer. Also take in params from layout manager.
     // A list of things can do here:
     // Modifty #tick function of IntersectionObserverPolyfill to
     // accept elements. Don't calculate for elements of other layer.
-    // Or have layout manager tick with layer,
-    // IntersectionObserverPolyfill call only tick for observed elements
+    // Have layout manager tick with layer,
+    // IntersectionObserverPolyfill can only tick for observed elements
     // live inside child layer.
     const viewportRect = viewportForDoc(this.ampdoc).getRect();
     const keys = Object.keys(this.intersectionObservers_);
