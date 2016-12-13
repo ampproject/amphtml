@@ -183,6 +183,7 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /** @private */
   onResize_() {
+    // Store the previous `triggered` value since `cancel` may reset it.
     const triggered = this.triggered_;
 
     // Stop animation right away.
@@ -191,7 +192,7 @@ export class AmpAnimation extends AMP.BaseElement {
       this.runner_ = null;
     }
 
-    // Retstart the animation, but debounce to avoid re-starting it multiple
+    // Restart the animation, but debounce to avoid re-starting it multiple
     // times per restart.
     this.triggered_ = triggered;
     if (this.triggered_ && this.visible_) {
