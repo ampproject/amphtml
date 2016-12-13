@@ -44,6 +44,7 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
+const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
@@ -645,6 +646,81 @@ export class UrlReplacements {
   }
 
   /**
+   * Expands an input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @return {!Promise<string>}
+   */
+  expandInputValueAsync(element) {
+    dev().assert(element.tagName == 'INPUT' &&
+        (element.getAttribute('type') || '').toLowerCase() == 'hidden');
+    const whitelist = this.getWhitelistForElement_(element);
+    if (!whitelist) {
+      return Promise.resolve(element.value);
+    }
+    return /** @type {!Promise<string>} */ (this.expand_(
+        element[ORIGINAL_VALUE_PROPERTY] || element.value,
+        /* opt_bindings */ undefined,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ false,
+        /* opt_whitelist */ whitelist).then(newValue => {
+          if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
+            element[ORIGINAL_VALUE_PROPERTY] = element.value;
+          }
+          element.value = newValue;
+        }));
+  }
+
+  /**
+   * Expands an input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @return {string} Replaced string for testing
+   */
+  expandInputValueSync(element) {
+    dev().assert(element.tagName == 'INPUT' &&
+        (element.getAttribute('type') || '').toLowerCase() == 'hidden');
+    const whitelist = this.getWhitelistForElement_(element);
+    if (!whitelist) {
+      return element.value;
+    }
+    const newValue = this.expand_(
+        element[ORIGINAL_VALUE_PROPERTY] || element.value,
+        /* opt_bindings */ undefined,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ true,
+        /* opt_whitelist */ whitelist);
+    if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
+      element[ORIGINAL_VALUE_PROPERTY] = element.value;
+    }
+    element.value = newValue;
+    return newValue;
+  }
+
+  /**
+   * Returns a replacement whitelist from elements' data-amp-replace attribute.
+   * @param {!Element} element.
+   * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
+   * replacement that filters whitelist to a subset.
+   * @return {!Object<string, boolean>|undefined}
+   */
+  getWhitelistForElement_(element, opt_supportedReplacement) {
+    const whitelist = element.getAttribute('data-amp-replace');
+    if (!whitelist) {
+      return;
+    }
+    const requestedReplacements = {};
+    whitelist.trim().split(/\s+/).forEach(replacement => {
+      if (!opt_supportedReplacement ||
+          (opt_supportedReplacement &&
+           opt_supportedReplacement.hasOwnProperty(replacement))) {
+        requestedReplacements[replacement] = true;
+      } else if (opt_supportedReplacement) {
+        user().warn('URL', 'Ignoring unsupported replacement', replacement);
+      }
+    });
+    return requestedReplacements;
+  }
+
+  /**
    * Replaces values in the link of an anchor tag if
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
@@ -656,7 +732,12 @@ export class UrlReplacements {
       return;
     }
     dev().assert(element.tagName == 'A');
-    const whitelist = element.getAttribute('data-amp-replace');
+    const supportedReplacements = {
+      'CLIENT_ID': true,
+      'QUERY_PARAM': true,
+    };
+    const whitelist = this.getWhitelistForElement_(
+        element, supportedReplacements);
     if (!whitelist) {
       return;
     }
@@ -677,24 +758,11 @@ export class UrlReplacements {
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
-    const supportedReplacements = {
-      'CLIENT_ID': true,
-      'QUERY_PARAM': true,
-    };
-    const requestedReplacements = {};
-    whitelist.trim().split(/\s*,\s*/).forEach(replacement => {
-      if (supportedReplacements.hasOwnProperty(replacement)) {
-        requestedReplacements[replacement] = true;
-      } else {
-        user().warn('URL', 'Ignoring unsupported link replacement',
-            replacement);
-      }
-    });
     return element.href = this.expandSync(
         href,
         /* opt_bindings */ undefined,
         /* opt_collectVars */ undefined,
-        requestedReplacements);
+        /* opt_whitelist */ whitelist);
   }
 
   /**
