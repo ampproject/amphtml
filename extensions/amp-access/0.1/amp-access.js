@@ -204,7 +204,7 @@ export class AccessService {
    */
   createAdapter_(configJson) {
     const context = /** @type {!AccessTypeAdapterContextDef} */ ({
-      buildUrl: this.buildUrl_.bind(this),
+      buildUrl: this.buildUrl.bind(this),
       collectUrlVars: this.collectUrlVars_.bind(this),
     });
     const isJwt = (this.isJwtEnabled_ && configJson['jwt'] === true);
@@ -382,9 +382,8 @@ export class AccessService {
    * @param {string} url
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
    * @return {!Promise<string>}
-   * @private
    */
-  buildUrl_(url, useAuthData) {
+  buildUrl(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
       return this.urlReplacements_.expandAsync(url, vars);
     });
@@ -895,7 +894,7 @@ export class AccessService {
     const promises = [];
     for (const k in this.loginConfig_) {
       promises.push(
-          this.buildUrl_(this.loginConfig_[k], /* useAuthData */ true)
+          this.buildUrl(this.loginConfig_[k], /* useAuthData */ true)
               .then(url => {
                 this.loginUrlMap_[k] = url;
                 return {type: k, url};

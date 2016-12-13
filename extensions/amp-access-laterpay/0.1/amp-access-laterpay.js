@@ -187,7 +187,7 @@ export class LaterpayVendor {
   getPurchaseConfig_() {
     const url = this.purchaseConfigBaseUrl_ +
                 '&article_title=' + this.getArticleTitle_();
-    const urlPromise = this.accessService_.buildUrl_(
+    const urlPromise = this.accessService_.buildUrl(
       url, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
@@ -409,7 +409,7 @@ export class LaterpayVendor {
                 '?return_url=RETURN_URL' +
                 '&article_url=SOURCE_URL' +
                 '&amp_reader_id=READER_ID';
-    const urlPromise = this.accessService_.buildUrl_(
+    const urlPromise = this.accessService_.buildUrl(
       configuredUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
