@@ -705,9 +705,6 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
-    if (!this.visibilityObservable_) {
-      this.visibilityObservable_ = new Observable();
-    }
     return this.visibilityObservable_.add(handler);
   }
 
