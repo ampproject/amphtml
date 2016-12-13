@@ -781,15 +781,16 @@ export class AccessService {
   /**
    * Runs the login flow using one of the predefined urls in the amp-access config
    *
+   * @private
    * @param {string} type Type of login defined in the config
    * @return {!Promise}
    */
   loginWithType_(type) {
+    user().assert(this.loginConfig_[type],
+        'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
     const loginUrl = user().assert(this.loginUrlMap_[type],
         'Login URL is not ready: %s', type);
-    user().assert(this.loginConfig_[type],
-        'Login URL is not configured: %s', type);
     return this.login_(loginUrl, type);
   }
 
