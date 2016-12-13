@@ -271,6 +271,7 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/viewport-impl.js',
       'src/service/performance-impl.js',
+      'src/service/resources-impl.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',

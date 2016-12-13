@@ -32,6 +32,7 @@ import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
+import {getSourceUrl} from '../url';
 
 
 const TAG_ = 'Resources';
@@ -763,7 +764,7 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
-      this.viewer_.postDocumentReady();
+      this.postDocumentLoaded_();
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1667,6 +1668,17 @@ export class Resources {
         this.pendingBuildResources_.splice(pendingIndex, 1);
       }
     }
+  }
+
+  /**
+   * Inform the viewer with documentLoaded message
+   * @private
+   */
+  postDocumentLoaded_() {
+    this.viewer_.sendMessage('documentLoaded', {
+      title: this.win.document.title,
+      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
+    }, /* cancelUnsent */true);
   }
 }
 

@@ -392,27 +392,6 @@ describe('Viewer', () => {
     });
   });
 
-  it('should post documentLoaded event', () => {
-    windowApi.parent = {};
-    const viewer = new Viewer(ampdoc);
-    viewer.postDocumentReady();
-    const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('documentLoaded');
-    expect(m.data.title).to.equal('Awesome doc');
-    expect(m.data.sourceUrl).to.equal('http://localhost:9876/test/viewer');
-  });
-
-  it('should queue non-dupe events', () => {
-    windowApi.parent = {};
-    const viewer = new Viewer(ampdoc);
-    viewer.postDocumentReady();
-    viewer.postDocumentReady();
-    expect(viewer.messageQueue_.length).to.equal(1);
-    expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
-  });
-
-
-
   describe('baseCid', () => {
     const cidData = JSON.stringify({
       time: 100,
@@ -484,23 +463,6 @@ describe('Viewer', () => {
     });
   });
 
-  it('should dequeue events when deliverer set', () => {
-    windowApi.parent = {};
-    const viewer = new Viewer(ampdoc);
-
-    viewer.postDocumentReady();
-    expect(viewer.messageQueue_.length).to.equal(1);
-
-    const delivered = [];
-    viewer.setMessageDeliverer((eventType, data) => {
-      delivered.push({eventType, data});
-    }, 'https://acme.com');
-
-    expect(viewer.messageQueue_.length).to.equal(0);
-    expect(delivered.length).to.equal(1);
-    expect(delivered[0].eventType).to.equal('documentLoaded');
-  });
-
   describe('Messaging not embedded', () => {
 
     it('should not expect messaging', () => {
@@ -509,7 +471,7 @@ describe('Viewer', () => {
     });
 
     it('should fail sendMessageAwaitResponse', () => {
-      return viewer.sendMessageAwaitResponse('message1', {})
+      return viewer.sendMessageAwaitResponse('event', {})
           .then(() => {
             throw new Error('should not succeed');
           }, error => {
@@ -518,7 +480,7 @@ describe('Viewer', () => {
     });
 
     it('should do nothing in sendMessage but not fail', () => {
-      viewer.sendMessage('message1', {});
+      viewer.sendMessage('event', {});
       expect(viewer.messageQueue_.length).to.equal(0);
     });
 
@@ -548,7 +510,8 @@ describe('Viewer', () => {
       const delivered = [];
       viewer.setMessageDeliverer((eventType, data) => {
         delivered.push({eventType, data});
-      }, 'https://acme.com');
+        return Promise.resolve();
+      }, 'https://www.example.com');
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
       return viewer.messagingMaybePromise_.then(() => {
@@ -572,9 +535,9 @@ describe('Viewer', () => {
           });
     });
 
-    it('should wait for messaging channel', () => {
+    it('sendMessageAwaitResponse should wait for messaging channel', () => {
       let mResolved = false;
-      const m = viewer.sendMessageAwaitResponse('message', {})
+      const m = viewer.sendMessageAwaitResponse('event', {})
           .then(() => {
             mResolved = true;
           });
@@ -585,7 +548,7 @@ describe('Viewer', () => {
         // Set message deliverer.
         viewer.setMessageDeliverer(() => {
           return Promise.resolve();
-        }, 'https://acme.com');
+        }, 'https://www.example.com');
         expect(mResolved).to.be.false;
 
         return m;
@@ -597,7 +560,7 @@ describe('Viewer', () => {
 
     it('should timeout messaging channel', () => {
       let mResolved = false;
-      const m = viewer.sendMessageAwaitResponse('message2', {})
+      const m = viewer.sendMessageAwaitResponse('event', {})
           .then(() => {
             mResolved = true;
           });
@@ -613,6 +576,121 @@ describe('Viewer', () => {
       }, () => {
         // Not resolved ever.
         expect(mResolved).to.be.false;
+      });
+    });
+
+    describe('sendMessage', () => {
+      it('should send event when deliverer is set', () => {
+        const delivered = [];
+        viewer.setMessageDeliverer((eventType, data) => {
+          delivered.push({eventType, data});
+          return Promise.resolve();
+        }, 'https://www.example.com');
+        viewer.sendMessage('event', {value: 1});
+        expect(viewer.messageQueue_.length).to.equal(0);
+        expect(delivered.length).to.equal(1);
+        expect(delivered[0].eventType).to.equal('event');
+      });
+    });
+
+    describe('sendMessage with cancelUnsent', () => {
+      it('should queue non-dupe events', () => {
+        viewer.sendMessage('event-a', {value: 1}, /* cancelUnsent*/true);
+        viewer.sendMessage('event-b', {value: 2}, /* cancelUnsent*/true);
+        expect(viewer.messageQueue_.length).to.equal(2);
+        expect(viewer.messageQueue_[0].eventType).to.equal('event-a');
+        expect(viewer.messageQueue_[0].data.value).to.equal(1);
+        expect(viewer.messageQueue_[1].eventType).to.equal('event-b');
+        expect(viewer.messageQueue_[1].data.value).to.equal(2);
+      });
+
+      it('should queue dupe events', () => {
+        viewer.sendMessage('event', {value: 1}, /* cancelUnsent*/true);
+        viewer.sendMessage('event', {value: 2}, /* cancelUnsent*/true);
+        expect(viewer.messageQueue_.length).to.equal(1);
+        expect(viewer.messageQueue_[0].eventType).to.equal('event');
+        expect(viewer.messageQueue_[0].data.value).to.equal(2);
+      });
+
+      it('should dequeue events when deliverer is set', () => {
+        viewer.sendMessage('event-a', {value: 1}, /* cancelUnsent*/true);
+        viewer.sendMessage('event-b', {value: 2}, /* cancelUnsent*/true);
+        expect(viewer.messageQueue_.length).to.equal(2);
+
+        const delivered = [];
+        viewer.setMessageDeliverer((eventType, data) => {
+          delivered.push({eventType, data});
+          return Promise.resolve();
+        }, 'https://www.example.com');
+
+        expect(viewer.messageQueue_.length).to.equal(0);
+        expect(delivered.length).to.equal(2);
+        expect(delivered[0].eventType).to.equal('event-a');
+        expect(delivered[1].eventType).to.equal('event-b');
+      });
+
+      it('should return undefined', () => {
+        const response = viewer.sendMessage('event', {value: 1},
+            /* cancelUnsent */true);
+        expect(response).to.be.undefined;
+      });
+    });
+
+    describe('sendMessageAwaitResponse', () => {
+      it('should send event when deliverer is set', () => {
+        const delivered = [];
+        viewer.setMessageDeliverer((eventType, data) => {
+          delivered.push({eventType, data});
+          return Promise.resolve();
+        }, 'https://www.example.com');
+        viewer.sendMessageAwaitResponse('event', {value: 'foo'}).then(() => {
+          expect(viewer.messageQueue_.length).to.equal(0);
+          expect(delivered.length).to.equal(1);
+          expect(delivered[0].eventType).to.equal('event');
+        });
+      });
+    });
+
+    describe('sendMessageAwaitResponse with cancelUnsent', () => {
+      it('should send queued messages', () => {
+        viewer.sendMessageAwaitResponse('event-a', {value: 1},
+            /* cancelUnsent */true);
+        viewer.sendMessageAwaitResponse('event-b', {value: 2},
+            /* cancelUnsent */true);
+        viewer.sendMessageAwaitResponse('event-a', {value: 3},
+            /* cancelUnsent */true);
+
+        const delivererSpy = sandbox.stub();
+        delivererSpy.returns(Promise.resolve());
+
+        viewer.setMessageDeliverer(delivererSpy, 'https://www.example.com');
+        sinon.assert.callOrder(
+            delivererSpy.withArgs('event-b', {value: 2}, true),
+            delivererSpy.withArgs('event-a', {value: 3}, true));
+        expect(delivererSpy).to.not.be.calledWith('event-a', {value: 1}, true);
+
+        viewer.sendMessageAwaitResponse('event-a', {value: 4},
+            /* cancelUnsent */true);
+        expect(delivererSpy).to.be.calledWith('event-a', {value: 4}, true);
+      });
+
+      it('should return promise that resolves on response', () => {
+        const response1 = viewer.sendMessageAwaitResponse('event-a', {value: 1},
+            /* cancelUnsent */true);
+        const response2 = viewer.sendMessageAwaitResponse('event-a', {value: 2},
+            /* cancelUnsent */true);
+
+        const delivererSpy = sandbox.stub();
+        delivererSpy.withArgs('event-a', {value: 2}, true)
+            .returns(Promise.resolve('result-2'));
+        delivererSpy.withArgs('event-a', {value: 3}, true)
+            .returns(Promise.resolve('result-3'));
+        viewer.setMessageDeliverer(delivererSpy, 'https://www.example.com');
+
+        const response3 = viewer.sendMessageAwaitResponse('event-a', {value: 3},
+            /* cancelUnsent */true);
+        return expect(Promise.all([response1, response2, response3]))
+            .to.eventually.deep.equal(['result-2', 'result-2', 'result-3']);
       });
     });
   });
@@ -1243,65 +1321,6 @@ describe('Viewer', () => {
       viewer.navigateTo(ampUrl, 'abc123');
       expect(send.callCount).to.equal(0);
       expect(windowApi.top.location.href).to.equal(ampUrl);
-    });
-  });
-
-  describe('sendMessageCancelUnsent', () => {
-    beforeEach(() => {
-      windowApi.parent = {};
-      viewer = new Viewer(ampdoc);
-    });
-
-    it('should send queued messages', () => {
-      viewer.sendMessageAwaitResponse('event-a', {value: 1},
-          /* cancelUnsent */true);
-      viewer.sendMessageAwaitResponse('event-b', {value: 2},
-          /* cancelUnsent */true);
-      viewer.sendMessageAwaitResponse('event-a', {value: 3},
-          /* cancelUnsent */true);
-
-      const delivererSpy = sandbox.stub();
-      delivererSpy.returns(Promise.resolve());
-
-      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
-      sinon.assert.callOrder(
-          delivererSpy.withArgs('event-b', {value: 2}, true),
-          delivererSpy.withArgs('event-a', {value: 3}, true));
-      expect(delivererSpy).to.not.be.calledWith('event-a', {value: 1}, true);
-
-      viewer.sendMessageAwaitResponse('event-a', {value: 4},
-          /* cancelUnsent */true);
-      expect(delivererSpy).to.be.calledWith('event-a', {value: 4}, true);
-    });
-
-    it('should return promise that resolves on response ' +
-        'if awaitResponse=true', () => {
-      const response1 =
-          viewer.sendMessageAwaitResponse('event-a', {value: 1},
-              /* cancelUnsent */true);
-      const response2 =
-          viewer.sendMessageAwaitResponse('event-a', {value: 2},
-              /* cancelUnsent */true);
-
-      const delivererSpy = sandbox.stub();
-      delivererSpy.withArgs('event-a', {value: 2}, true)
-          .returns(Promise.resolve('result-2'));
-      delivererSpy.withArgs('event-a', {value: 3}, true)
-          .returns(Promise.resolve('result-3'));
-      viewer.setMessageDeliverer(delivererSpy, 'https://google.com');
-
-      const response3 =
-          viewer.sendMessageAwaitResponse('event-a', {value: 3},
-              /* cancelUnsent */true);
-      return expect(Promise.all([response1, response2, response3]))
-          .to.eventually.deep.equal(['result-2', 'result-2', 'result-3']);
-    });
-
-    it('should return undefined if not waiting for response', () => {
-      const response =
-          viewer.sendMessage('event-a', {value: 1},
-              /* cancelUnsent */true);
-      expect(response).to.be.undefined;
     });
   });
 });
