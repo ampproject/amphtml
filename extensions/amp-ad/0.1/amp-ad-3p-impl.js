@@ -233,7 +233,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // incrementLoadingAds().
       this.lifecycleReporter.sendPing('adRequestStart');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
-                               this.element, undefined, opt_context);
+          this.element, undefined, opt_context);
       const sentinel = JSON.parse(iframe.name).attributes._context.sentinel;
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);

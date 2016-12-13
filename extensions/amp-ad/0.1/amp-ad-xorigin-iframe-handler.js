@@ -104,10 +104,9 @@ export class AmpAdXOriginIframeHandler {
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, this.sentinel, 'embed-size',
-                                     (data, source, origin) => {
-                                       this.updateSize_(data.height, data.width,
-                                                        source, origin);
-                                     }, true, true));
+        (data, source, origin) => {
+          this.updateSize_(data.height, data.width, source, origin);
+        }, true, true));
 
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
