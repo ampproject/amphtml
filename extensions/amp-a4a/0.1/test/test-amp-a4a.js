@@ -95,7 +95,7 @@ describe('amp-a4a', () => {
     getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-        {mode: 'cors', method: 'GET'})
+        {mode: 'cors', method: 'GET', disableAmpSourceOrigin: true})
     .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());

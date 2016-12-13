@@ -716,7 +716,8 @@ export class AmpA4A extends AMP.BaseElement {
       dev().assert(getMode().localDev || !endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
       if (url) {
-        return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
+        return xhrFor(this.win).fetchJson(
+          url, {mode: 'cors', method: 'GET', disableAmpSourceOrigin: true})
             .then(jwkSetObj => {
               if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
                   jwkSetObj.keys.every(isObject)) {

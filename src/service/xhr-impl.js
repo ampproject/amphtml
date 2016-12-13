@@ -25,8 +25,11 @@ import {isArray, isObject, isFormData} from '../types';
 
 
 /**
- * The "init" argument of the Fetch API. Currently, only `credentials: include`
- * and `credentials: omit` is implemented.
+ * The "init" argument of the Fetch API. Currently, only "credentials: include"
+ * is implemented.  Note disableAmpSourceOrigin requires that
+ * requireAmpResponseSourceOrigin is not enabled and indicates that
+ * __amp_source_origin should not be appended to the URL to allow for
+ * potential caching or response across pages.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  *
@@ -36,6 +39,7 @@ import {isArray, isObject, isFormData} from '../types';
  *   headers: (!Object|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined)
+ *   disableAmpSourceOrigin: (boolean|undefined)
  * }}
  */
 let FetchInitDef;
@@ -87,9 +91,8 @@ export class Xhr {
     if (opt_init && opt_init.credentials !== undefined) {
       // In particular, Firefox does not tolerate `null` values for
       // `credentials`.
-      dev().assert(
-          opt_init.credentials == 'include' || opt_init.credentials == 'omit',
-          'Only credentials=include|omit support: %s', opt_init.credentials);
+      dev().assert(opt_init.credentials == 'include',
+          'Only credentials=include support: %s', opt_init.credentials);
     }
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing
@@ -107,15 +110,21 @@ export class Xhr {
    * returned in the response; and (3) It requires
    * "AMP-Access-Control-Allow-Source-Origin" to be present in the response
    * if the `init.requireAmpResponseSourceOrigin = true`.
+   * USE WITH CAUTION: setting requireAmpResponseSourceOrigin false and
+   * disableAmpSourceOrigin true disables these constraints to allow for caching
+   * resources.
    *
    * @param {string} input
-   * @param {!FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} init
    * @return {!Promise<!FetchResponse>}
    * @private
    */
-  fetchAmpCors_(input, opt_init) {
-    const init = opt_init || {};
-    input = this.getCorsUrl(this.win, input);
+  fetchAmpCors_(input, init = {}) {
+    // Do not append __amp_source_origin
+    if (!(!init.requireAmpResponseSourceOrigin &&
+      init.disableAmpSourceOrigin)) {
+      input = this.getCorsUrl(this.win, input);
+    }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
     const currentOrigin = parseUrl(this.win.location.href).origin;
