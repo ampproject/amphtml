@@ -182,6 +182,7 @@ export class IntersectionObserverPolyfill {
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {
+    console.log('constructor');
     /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
@@ -210,6 +211,7 @@ export class IntersectionObserverPolyfill {
    * @param {!Element} element
    */
   observe(element) {
+    console.log('observe');
     // Check the element is an AMP element
     dev().assert(element.isBuilt && element.isBuilt());
 
@@ -252,6 +254,7 @@ export class IntersectionObserverPolyfill {
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
+    console.log('tick');
 
     if (opt_iframe) {
       // If element inside an iframe. Adjust origin to the iframe.left/top.
@@ -260,6 +263,8 @@ export class IntersectionObserverPolyfill {
       opt_iframe =
           moveLayoutRect(opt_iframe, -opt_iframe.left, -opt_iframe.top);
     }
+
+    console.log(hostViewport);
 
     const changes = [];
 
