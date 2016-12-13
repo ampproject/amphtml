@@ -59,7 +59,7 @@
     }
 
     function isInaboxMessage(message) {
-      return typeof message === 'string' && message.indexOf('amp-inabox:') == 0;
+      return typeof message === 'string' && message.indexOf('amp-') == 0;
     }
 
     function preloadScript(win, url) {

@@ -142,6 +142,15 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  caajainfeed: {
+    prefetch: [
+      'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
+    ],
+    preconnect: [
+      'https://ad.amanad.adtdp.com',
+    ],
+  },
+
   caprofitx: {
     prefetch: [
       'https://cdn.caprofitx.com/pfx.min.js',
@@ -161,6 +170,15 @@ export const adConfig = {
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
     preconnect: 'https://cas.criteo.com',
+  },
+
+  distroscale: {
+    preconnect: [
+      'https://c.jsrdn.com',
+      'https://s.jsrdn.com',
+      'https://i.jsrdn.com',
+    ],
+    renderStartImplemented: true,
   },
 
   dotandads: {
@@ -366,6 +384,10 @@ export const adConfig = {
 
   plista: {},
 
+  popin: {
+    renderStartImplemented: true,
+  },
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
@@ -396,6 +418,7 @@ export const adConfig = {
       'https://cdn.revcontent.com',
       'https://img.revcontent.com',
     ],
+    renderStartImplemented: true,
   },
 
   rubicon: {},
@@ -466,6 +489,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  xrostssp: {},
+
   yahoo: {
     prefetch: 'https://s.yimg.com/os/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
@@ -515,4 +540,5 @@ export const adConfig = {
       'https://static.zucks.net.zimg.jp',
     ],
   },
+
 };

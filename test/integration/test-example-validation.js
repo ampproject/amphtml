@@ -78,6 +78,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     /GENERAL_DISALLOWED_TAG script amp-ooyala-player/,
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
+    /DISALLOWED_ATTR scrollable amp-lightbox/,
   ];
 
   const usedWhitelist = [];

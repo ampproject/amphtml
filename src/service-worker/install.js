@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {calculateScriptBaseUrl} from '../service/extensions-impl';
+import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
@@ -40,12 +40,12 @@ export function installCacheServiceWorker(win) {
         win.location.hostname !== parseUrl(urls.cdn).hostname) {
       return;
     }
-    const base = calculateScriptBaseUrl(win.location, getMode().localDev,
-        getMode().test);
     // The kill experiment is really just a configuration that allows us to
     // quickly kill the cache service worker without cutting a new version.
     const kill = isExperimentOn(win, `${TAG}-kill`);
-    const url = `${base}/sw${kill ? '-kill' : ''}.js`;
+    const entryPoint = `sw${kill ? '-kill' : ''}`;
+    const url = calculateEntryPointScriptUrl(location, entryPoint,
+        getMode().localDev);
     navigator.serviceWorker.register(url).then(reg => {
       dev().info(TAG, 'ServiceWorker registration successful: ', reg);
     }, err => {

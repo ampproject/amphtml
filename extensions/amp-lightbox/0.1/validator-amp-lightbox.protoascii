@@ -57,6 +57,7 @@ tags: {  # <amp-lightbox>
   also_requires_tag: "amp-lightbox extension .js script"
   attrs: { name: "controls" }
   attrs: { name: "from" }
+  attrs: { name: "scrollable" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-lightbox.html"
   amp_layout: {
