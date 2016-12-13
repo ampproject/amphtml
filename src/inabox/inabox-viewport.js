@@ -94,11 +94,12 @@ export class ViewportBindingInabox {
           const oldSelfRect = this.boxRect_;
           this.viewportRect_ = data.viewport;
           this.boxRect_ = data.target;
-          if (isMoved(this.boxRect_, oldSelfRect)) {
+          if (isChanged(this.boxRect_, oldSelfRect)) {
             // Remeasure all AMP elements once iframe position is changed.
             // Because all layout boxes are calculated relatively to the
             // iframe position.
             this.remeasureAllElements_();
+            // TODO: fire DOM mutation event once we handle them
           }
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
@@ -184,6 +185,15 @@ export function installInaboxViewportService(ampdoc) {
  */
 function getRandom(win) {
   return String(win.Math.random()).substr(2);
+}
+
+/**
+ * @param {!../layout-rect.LayoutRectDef} newRect
+ * @param {!../layout-rect.LayoutRectDef} oldRect
+ * @returns {boolean}
+ */
+function isChanged(newRect, oldRect) {
+  return isMoved(newRect, oldRect) || isResized(newRect, oldRect);
 }
 
 /**
