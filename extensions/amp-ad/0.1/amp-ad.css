@@ -25,8 +25,7 @@ amp-ad iframe {
 }
 
 .amp-ad-default-display {
-  /* TODO(zhouyx): Confirm on the background-color value */
-  background-color: #d3d3d3;
+  background-color: #f5f5f5;
 }
 
 .-amp-ad-default-holder {
@@ -38,12 +37,12 @@ amp-ad iframe {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #d3d3d3;
+  background-color: #f5f5f5;
 }
 
 .-amp-ad-tag {
   /* TODO(zhouyx): Confirm on tag style */
-  background-color: grey;
+  background-color: #696969;
   border-radius: 2px;
   color: #fff;
   display: inline-block;
