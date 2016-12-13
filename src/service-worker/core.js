@@ -16,7 +16,6 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import {urls} from '../config';
-import {assign} from '../polyfills/object-assign';
 
 /**
  * An AMP Release version, not to be confused with an RTV version
@@ -162,12 +161,18 @@ function normalizedRequest(request, version) {
     return request;
   }
 
-  return new Request(urlWithVersion(url, version),
-      assign({}, request, {
-        // For Foreign Fetch, constructing a request using an origin that does
-        // not match the SW's is mutinous.
-        referer: `${urls.cdn}/sw.js`,
-      }));
+  return new Request(urlWithVersion(url, version), {
+    // For Foreign Fetch, constructing a request using an origin that does
+    // not match the SW's is mutinous.
+    referer: `${urls.cdn}/sw.js`,
+    headers: request.headers,
+    method: request.method,
+    mode: request.mode,
+    credentials: request.credentials,
+    cache: request.cache,
+    redirect: request.redirect,
+    integrity: request.integrity,
+  });
 }
 
 /**
