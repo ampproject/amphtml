@@ -199,7 +199,7 @@ class Scanner {
     }
 
     // Check whether the animation is enabled.
-    if (!this.isEnabled(spec)) {
+    if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
       return;
     }
 
@@ -215,10 +215,10 @@ class Scanner {
 
   /**
    * Whether the animation spec is enabled.
-   * @param {!WebAnimationDef} spec
+   * @param {!WebAnimationDef} unusedSpec
    * @return {boolean}
    */
-  isEnabled(spec) {
+  isEnabled(unusedSpec) {
     return true;
   }
 
