@@ -907,8 +907,8 @@ export class Viewer {
    */
   sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
     if (this.messageDeliverer_) {
-      return /** @type {!Promise<*>} */ (this.messageDeliverer_(
-          eventType, data, awaitResponse));
+      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(
+          eventType, data, awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {
