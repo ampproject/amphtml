@@ -66,6 +66,7 @@ describe('amp-ad-network-adsense-impl', () => {
 
   afterEach(() => {
     sandbox.restore();
+    resetSharedState();
   });
 
   describe('#getAdUrl', () => {
@@ -195,7 +196,8 @@ describe('amp-ad-network-adsense-impl', () => {
                   const adsenseImpl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
                   return adsenseImpl3.getAdUrl().then(adUrl3 => {
                     expect(adUrl3.indexOf('pv=2') >= 0).to.be.true;
-                    expect(adUrl3.indexOf('prev_fmts=320x50,320x50') >= 0, adUrl3)
+                    expect(adUrl3.indexOf('prev_fmts=320x50,320x50') >= 0,
+                        adUrl3)
                         .to.be.true;
                   });
                 });

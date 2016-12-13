@@ -40,10 +40,8 @@ export class AdsenseSharedState {
   updateAndGetPrevFmts(format, id) {
     // The return value.
     const prevFmts = this.prevFmts_.join(',');
-    // Index of insertion.
-    const index = this.formatIndex_++;
-    // Associate this index with the given adk for future removal.
-    this.adkFormatIndexMap_[id] = index;
+    // Associate the insertion index with the given id for future removal.
+    this.adkFormatIndexMap_[id] = this.formatIndex_++;
 
     this.prevFmts_.push(format);
     return prevFmts;
@@ -62,7 +60,7 @@ export class AdsenseSharedState {
     // Decrement next insertion index.
     this.formatIndex_--;
 
-    this.prevFmts_.length.splice(n, 1);
+    this.prevFmts_.splice(n, 1);
     // Decrement all indexes greater than n to compensate for the removal of the
     // nth item in the array.
     for (const key in this.adkFormatIndexMap_) {

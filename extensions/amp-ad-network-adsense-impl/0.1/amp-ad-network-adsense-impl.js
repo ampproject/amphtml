@@ -58,6 +58,7 @@ const visibilityStateCodes = {
  */
 const sharedState = new AdsenseSharedState();
 
+/** @visibleForTesting */
 export function resetSharedState() {
   sharedState.reset();
 }
@@ -77,7 +78,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.initLifecycleReporter();
 
     /**
-     * @private {string}
+     * @private {?string}
      * The adkey for the slot.
      * Not initialized until getAdUrl() is called. Updated upon each invocation
      * of getAdUrl().
@@ -154,7 +155,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
-    sharedState.removePreviousFormat(this.adk_);
+    if (this.adk_) {
+      sharedState.removePreviousFormat(this.adk_);
+    }
   }
 
   /**
