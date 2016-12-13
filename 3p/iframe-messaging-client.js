@@ -25,6 +25,8 @@ export class IframeMessagingClient {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
+    /** @private {?string} */
+    this.rtvVersion_ = (win.AMP_CONFIG && win.AMP_CONFIG.v) || null;
     /** @private {!Window} */
     this.hostWindow_ = win.parent;
     /** @private {?string} */
@@ -74,8 +76,8 @@ export class IframeMessagingClient {
    *  @param {Object=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    this.hostWindow_.postMessage/*OK*/(
-        serializeMessage(type, this.sentinel_, opt_payload), '*');
+    this.hostWindow_.postMessage/*OK*/(serializeMessage(
+        type, this.sentinel_, opt_payload, this.rtvVersion_), '*');
   }
 
   /**
