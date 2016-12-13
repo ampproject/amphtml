@@ -19,6 +19,24 @@ import {getServiceForDoc} from '../service';
 import {viewportForDoc} from '../viewport';
 import {IntersectionObserverPolyfill} from '../intersection-observer-polyfill';
 
+/**
+ * @typedef {{
+ *   io: Object,
+ *   native: boolean,
+ * }}
+ */
+let IntersectionObserverDef;
+
+/**
+ * @typedef {{
+ *   id: string,
+ *   useNative: boolean|undefine,
+ *   options: Object,
+ * }}
+ */
+let PosObTrackOptionDef;
+
+/* @const @{Object} */
 export const PosObTrackOption = {
   LAYOUT: {
     id: 'layout',
@@ -35,20 +53,42 @@ export const PosObTrackOption = {
   },
 };
 
+/**
+ * Allows tracking of any element position to the viewport.
+ *
+ * This class allows any element to track its position with given track option
+ * and callback. Layout manager will notify possible element position changes
+ * to PositionObserver. And position observer will notify registered element
+ * if the position change satifies the element provided option.
+ */
 export class PositionObserver {
-  constructor(ampdoc) {
-    this.idIndex_ = 0;
 
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @const @private {!Window} */
     this.win = ampdoc.win;
 
+    /** @const @private {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    /** @const @private {!Object<string, IntersectionObserverDef>} */
     this.intersectionObservers_ = map();
 
+    /** @const @private {!Object<string, elementObservables>} */
     this.observableMap_ = map();
   }
 
+  /**
+   * Provided method to element to enable them to their position to viewport
+   * Element can be AMP or non AMP element
+   * @param {!Element} element
+   * @param {!PosObTrackOptionDef} trackOption
+   * @param {!function(Object)} callback
+   * @return {function()}
+   */
   trackElement(element, trackOption, callback) {
+    // TODO: Do we want to support user customized trackOption.
+
     //get the InOb for this trackOptionType
     const io = this.getInOb_(trackOption);
 
@@ -58,6 +98,7 @@ export class PositionObserver {
     }
     this.observableMap_[trackOption.id].add(element, callback);
 
+    // return unobserve function
     return () => {
       this.observableMap_[trackOption.id].remove(element, callback);
       if (!this.observableMap_[trackOption.id].hasElement(element)) {
@@ -66,7 +107,13 @@ export class PositionObserver {
     };
   }
 
+  /**
+   * Function that layout manager can inform the PositionObserver service
+   * about possible position change to elements.
+   */
   tick() {
+    // TODO(zhouyx): Optimize this function to limit change to this layer and
+    // child layer.
     // TODO(zhouyx): Modifty #tick function of IntersectionObserverPolyfill to
     // accept elements. Don't calculate for elements of other layer.
     // Or I suggest layout manager only call tick(layer),

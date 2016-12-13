@@ -16,14 +16,15 @@
 
 import {
   installPositionObserverServiceForDoc,
-  PosObTrackOption,
 } from '../../src/service/position-observer-impl';
 import {positionObserverForDoc} from '../../src/position-observer';
-import {IntersectionObserverPolyfill} from '../../src/intersection-observer-polyfill';
+import {
+  IntersectionObserverPolyfill,
+} from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-describes.realWin.only('PositionObserver', {
+describes.realWin('PositionObserver', {
   amp: {
     ampdoc: 'single',
   },
