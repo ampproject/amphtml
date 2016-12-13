@@ -61,6 +61,7 @@
         hostScriptRequested = true;
         // Load inabox-host.js when the 1st inabox message is received.
         loadScript(win, hostScriptUrl, () => {
+          win.installAmpInaboxHost(win);
           win.removeEventListener('message', listener);
           console.log('a4a-host.js loaded.');
         });
