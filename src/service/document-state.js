@@ -117,6 +117,9 @@ export class DocumentState {
 
   /** @private */
   onVisibilityChanged_() {
+    if (!this.visibilityObservable_) {
+      this.visibilityObservable_ = new Observable();
+    }
     this.visibilityObservable_.fire();
   }
 

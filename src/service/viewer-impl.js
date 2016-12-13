@@ -119,8 +119,8 @@ export class Viewer {
     /** @private {?Observable<boolean>} */
     this.runtimeOnObservable_ = null;
 
-    /** @private {?Observable} */
-    this.visibilityObservable_ = null;
+    /** @private {!Observable} */
+    this.visibilityObservable_ = new Observable();
 
     /** @private {?Observable<!JSONType>} */
     this.viewportObservable_ = null;
@@ -404,9 +404,6 @@ export class Viewer {
       }
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
-    }
-    if (!this.visibilityObservable_) {
-      this.visibilityObservable_ = new Observable();
     }
     this.visibilityObservable_.fire();
   }
