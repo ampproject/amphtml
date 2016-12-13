@@ -117,7 +117,6 @@ let CreativeMetaDataDef;
 export const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
   // not test as `false` later.
-  adSlotBuilt: '0',
   urlBuilt: '1',
   adRequestStart: '2',
   adRequestEnd: '3',
@@ -134,6 +133,7 @@ export const LIFECYCLE_STAGES = {
   xDomIframeLoaded: '14',
   adSlotCollapsed: '15',
   adSlotUnhidden: '16',
+  adPromiseChainDelay: '17',
   adSlotCleared: '20',
 };
 
@@ -648,8 +648,11 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.adPromise_) {
       return Promise.resolve();
     }
+    const layoutCallbackStart = Date.now();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
+      this.emitLifecycleEvent('adPromiseChainDelay',
+          {adPromiseChainDelay: Date.now() - layoutCallbackStart});
       if (creativeMetaData) {
         dev().assert(creativeMetaData.minifiedCreative);
         // Must be an AMP creative.
@@ -1216,10 +1219,12 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network specific implementation.
    * This function will be called for each lifecycle event as specified in the
-   * LIFECYCLE_STAGES enum declaration. For certain events, an optional
-   * associated piece of data will be passed.
+   * LIFECYCLE_STAGES enum declaration.  It may additionally pass extra
+   * variables of the form { name: val }.  It is up to the subclass what to
+   * do with those variables.
    *
    * @param {string} unusedEventName
+   * @param {!Object<string, string|number>=} opt_extraVariables
    */
-  emitLifecycleEvent(unusedEventName) {}
+  emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 }

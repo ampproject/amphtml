@@ -229,7 +229,6 @@ describe('GoogleAdLifecycleReporter', () => {
     it('should request multiple pings and write all to the DOM', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         const stages = {
-          adSlotBuilt: '0',
           urlBuilt: '1',
           adRequestStart: '2',
           adRequestEnd: '3',
