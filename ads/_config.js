@@ -142,6 +142,15 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  caajainfeed: {
+    prefetch: [
+      'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
+    ],
+    preconnect: [
+      'https://ad.amanad.adtdp.com',
+    ],
+  },
+
   caprofitx: {
     prefetch: [
       'https://cdn.caprofitx.com/pfx.min.js',
@@ -531,4 +540,5 @@ export const adConfig = {
       'https://static.zucks.net.zimg.jp',
     ],
   },
+
 };
