@@ -102,8 +102,8 @@ export class IntersectionObserverApi {
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(
       iframe, sentinel, 'send-intersections', opt_is3p || false, () => {
-          this.startSendingIntersection_();
-        });
+        this.startSendingIntersection_();
+      });
 
     this.intersectionObserver_ = new IntersectionObserverPolyfill(entries => {
       // Remove target info from cross origin iframe.
