@@ -419,6 +419,9 @@ class ReferencePointMatcher {
      * @private
      */
     this.referencePointsMatched_ = [];
+
+    // Assert that this is not an empty reference point matcher.
+    goog.asserts.assert(!parsedReferencePoints.empty());
   }
 
   /**
@@ -438,7 +441,6 @@ class ReferencePointMatcher {
    * @param {!amp.validator.ValidationResult} result
    */
   match(attrs, context, result) {
-    if (this.parsedReferencePoints_.empty()) return;
     const resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     for (const p of this.parsedReferencePoints_.iterate()) {
@@ -523,8 +525,6 @@ class ReferencePointMatcher {
    * @param {!amp.validator.ValidationResult} result
    */
   exitParentTag(context, result) {
-    if (this.parsedReferencePoints_.empty()) return;
-
     /** @type {!Object<number, number>} */
     const referencePointByCount = {};
     for (const r of this.referencePointsMatched_) {
@@ -664,7 +664,8 @@ class TagStack {
    * @param {?ReferencePointMatcher} matcher
    */
   setReferencePointMatcher(matcher) {
-    this.stack_[this.stack_.length - 1].referencePointMatcher = matcher;
+    if (!matcher.parsedReferencePoints_.empty())
+      this.stack_[this.stack_.length - 1].referencePointMatcher = matcher;
   }
 
   /**
@@ -3341,6 +3342,11 @@ class ParsedTagSpec {
     return this.isReferencePoint_;
   }
 
+  /** @return {boolean} */
+  hasReferencePoints() {
+    return !this.referencePoints_.empty();
+  }
+
   /** @return {!ParsedReferencePoints} */
   getReferencePoints() {
     return this.referencePoints_;
@@ -3572,32 +3578,34 @@ function validateTagAgainstSpec(
   if (spec.childTags !== null)
     context.setChildTagMatcher(new ChildTagMatcher(spec));
 
-  // Set the reference point matcher so it considers spec.reference_points(),
-  // if present, considering that reference points could be defined by
-  // both reference points and regular tag specs.
-  if (parsedSpec.getReferencePoints().empty()) return;
-  const currentMatcher = context.getTagStack().currentReferencePointMatcher();
-  if (currentMatcher !== null &&
-      !currentMatcher.getParsedReferencePoints().empty()) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
-          context.getDocLocator(),
-          /* params */
-          [
-            getTagSpecName(spec),
-            currentMatcher.getParsedReferencePoints().parentTagSpecName()
-          ],
-          currentMatcher.getParsedReferencePoints().parentSpecUrl(),
-          resultForBestAttempt);
+  // Set reference point matcher to parsedSpec.getReferencePoints(), if present.
+  if (parsedSpec.hasReferencePoints()) {
+    // Considering that reference points could be defined by both reference
+    // points and regular tag specs, check that we don't already have a
+    // conflicting matcher, there can be only one.
+    const currentMatcher = context.getTagStack().currentReferencePointMatcher();
+    if (currentMatcher !== null) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
+            context.getDocLocator(),
+            /* params */
+            [
+              getTagSpecName(spec),
+              currentMatcher.getParsedReferencePoints().parentTagSpecName()
+            ],
+            currentMatcher.getParsedReferencePoints().parentSpecUrl(),
+            resultForBestAttempt);
+      } else {
+        resultForBestAttempt.status =
+            amp.validator.ValidationResult.Status.FAIL;
+      }
     } else {
-      resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+      context.setReferencePointMatcher(new ReferencePointMatcher(
+          parsedRules, parsedSpec.getReferencePoints()));
     }
-    return;
   }
-  context.setReferencePointMatcher(
-      new ReferencePointMatcher(parsedRules, parsedSpec.getReferencePoints()));
 }
 
 /**
