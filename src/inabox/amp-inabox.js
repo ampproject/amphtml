@@ -22,13 +22,9 @@ import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
 import {chunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {installPerformanceService} from '../service/performance-impl';
-import {installPullToRefreshBlocker} from '../pull-to-refresh';
-import {installGlobalClickListenerForDoc} from '../document-click';
 import {installStyles, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
 import {installDocService} from '../service/ampdoc-impl';
-import {installCacheServiceWorker} from '../service-worker/install';
 import {stubElements} from '../custom-element';
 import {
     installAmpdocServices,
@@ -36,9 +32,10 @@ import {
     installRuntimeServices,
     adopt,
 } from '../runtime';
+import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {installViewportServiceForDoc} from '../service/viewport-impl';
 import {cssText} from '../../build/css';
 import {maybeValidate} from '../validator-integration';
-import {maybeTrackImpression} from '../impression';
 import {Inabox} from './inabox';
 import {isExperimentOn} from '../experiments';
 
@@ -68,18 +65,17 @@ try {
 chunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
-  /** @const {!../service/performance-impl.Performance} */
-  const perf = installPerformanceService(self);
-  perf.tick('is');
+
   installStyles(self.document, cssText, () => {
     chunk(self.document, function services() {
       // Core services.
       installRuntimeServices(self);
       fontStylesheetTimeout(self);
+
+      // TODO: replace viewer impl and viewport impl.
+      installViewerServiceForDoc(ampdoc);
+      installViewportServiceForDoc(ampdoc);
       installAmpdocServices(ampdoc);
-      // We need the core services (viewer/resources) to start instrumenting
-      perf.coreServicesAvailable();
-      maybeTrackImpression(self);
     });
     chunk(self.document, function builtins() {
       // Builtins.
@@ -92,18 +88,8 @@ chunk(self.document, function initial() {
       stubElements(self);
     });
     chunk(self.document, function final() {
-      installPullToRefreshBlocker(self);
-      installGlobalClickListenerForDoc(ampdoc);
-
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
-    });
-    chunk(self.document, function finalTick() {
-      perf.tick('e_is');
-      // TODO(erwinm): move invocation of the `flush` method when we have the
-      // new ticks in place to batch the ticks properly.
-      perf.flush();
     });
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 });
@@ -113,7 +99,7 @@ chunk(self.document, function initial() {
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$',
+      'Powered by AMP ⚡4ads HTML – Version $internalRuntimeVersion$',
       self.location.href);
 }
 self.document.documentElement.setAttribute('amp-version',

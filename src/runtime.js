@@ -106,12 +106,9 @@ export function installRuntimeServices(global) {
 /**
  * Install ampdoc-level services.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, string>=} opt_initParams
  */
-export function installAmpdocServices(ampdoc, opt_initParams) {
+export function installAmpdocServices(ampdoc) {
   installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
@@ -549,8 +546,10 @@ class MultidocManager {
     installStylesForShadowRoot(shadowRoot, cssText,
         /* opt_isRuntimeCss */ true);
 
+    installViewerServiceForDoc(ampdoc, opt_initParams || Object.create(null));
+    installViewportServiceForDoc(ampdoc);
     // Instal doc services.
-    installAmpdocServices(ampdoc, opt_initParams || Object.create(null));
+    installAmpdocServices(ampdoc);
     const viewer = viewerForDoc(ampdoc);
 
     /**

@@ -209,6 +209,10 @@ var forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/service/viewer-impl.js',
+      'src/amp.js',
+      'src/inabox/amp-inabox.js',
+      'testing/iframe.js',
+      'testing/describes.js',
     ],
   },
   'setViewerVisibilityState': {
@@ -223,6 +227,10 @@ var forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/service/viewport-impl.js',
+      'src/amp.js',
+      'src/inabox/amp-inabox.js',
+      'testing/iframe.js',
+      'testing/describes.js',
     ],
   },
   'installVsyncService': {
