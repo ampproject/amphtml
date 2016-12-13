@@ -338,7 +338,7 @@ i-amp-scroll-container.amp-active {
 .-amp-loader-moving-line {
   display: block;
   position: absolute;
-  left: -50%;
+  left: -100%;
   width: 100%;
   height: 100% !important;
   background-color: #d3d3d3;
