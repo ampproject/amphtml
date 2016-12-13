@@ -320,7 +320,7 @@ export function getCorrelator(win, opt_cid) {
 export function googleLifecycleReporterFactory(a4aElement) {
   const reporter =
       /** @type {!./performance.GoogleAdLifecycleReporter} */
-      (getLifecycleReporter(a4aElement, 'a4a', undefined,
+      (getLifecycleReporter(a4aElement, 'a4a',
           a4aElement.element.getAttribute('data-amp-slot-index')));
   const slotId = reporter.getSlotId();
   reporter.setPingVariables({

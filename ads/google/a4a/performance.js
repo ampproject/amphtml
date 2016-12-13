@@ -90,13 +90,11 @@ function isInReportableBranch(ampElement, namespace) {
  * @param {!AMP.BaseElement} ampElement The element on whose lifecycle this
  *    reporter will be reporting.
  * @param {string} namespace
- * @param {number|undefined} corr A unique identifier for the page in which the
- *    given element is embedded.
  * @param {number|string} slotId A unique numeric identifier in the page for
  *    the given element's slot.
  * @return {!GoogleAdLifecycleReporter|!BaseLifecycleReporter}
  */
-export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
+export function getLifecycleReporter(ampElement, namespace, slotId) {
   // Carve-outs: We only want to enable profiling pingbacks when:
   //   - The ad is from one of the Google networks (AdSense or Doubleclick).
   //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via

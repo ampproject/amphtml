@@ -87,7 +87,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.layoutPromise_ = null;
 
     /** {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
-    this.lifecycleReporter = getLifecycleReporter(this, 'amp', undefined,
+    this.lifecycleReporter = getLifecycleReporter(this, 'amp',
         this.element.getAttribute('data-amp-slot-index'));
 
     this.lifecycleReporter.sendPing('adSlotBuilt');
