@@ -489,6 +489,11 @@ class AmpFixture {
             url: 'http://ads.localhost:8000/example',
             html,
             extensionIds,
+          }, embedWin => {
+            interceptEventListeners(embedWin);
+            interceptEventListeners(embedWin.document);
+            interceptEventListeners(embedWin.document.documentElement);
+            interceptEventListeners(embedWin.document.body);
           }).then(embed => {
             env.embed = embed;
             env.parentWin = env.win;

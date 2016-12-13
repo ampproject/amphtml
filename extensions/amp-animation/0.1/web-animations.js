@@ -149,11 +149,12 @@ export class WebAnimationRunner {
     if (!this.players_) {
       return;
     }
+    const players = this.players_;
+    this.players_ = null;
     this.setPlayState_(WebAnimationPlayState.FINISHED);
-    this.players_.forEach(player => {
+    players.forEach(player => {
       player.finish();
     });
-    this.players_ = null;
   }
 
   /**
@@ -197,6 +198,11 @@ class Scanner {
       return;
     }
 
+    // Check whether the animation is enabled.
+    if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
+      return;
+    }
+
     // WebAnimationDef: (!WebMultiAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
@@ -205,6 +211,15 @@ class Scanner {
     } else {
       this.onUnknownAnimation(spec);
     }
+  }
+
+  /**
+   * Whether the animation spec is enabled.
+   * @param {!WebAnimationDef} unusedSpec
+   * @return {boolean}
+   */
+  isEnabled(unusedSpec) {
+    return true;
   }
 
   /**
@@ -299,6 +314,14 @@ export class MeasureScanner extends Scanner {
       }
     }
     return Promise.all(promises);
+  }
+
+  /** @override */
+  isEnabled(spec) {
+    if (spec.media) {
+      return this.win.matchMedia(spec.media).matches;
+    }
+    return true;
   }
 
   /** @override */

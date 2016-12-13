@@ -52,7 +52,7 @@ defined as an `animations` array:
 <amp-animation layout="nodisplay">
 <script type="application/json">
 {
-  // Timiing properties
+  // Timing properties
   ...
   "animations": [
     {
@@ -78,17 +78,27 @@ will be removed in the near future.
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
  - Target element referenced by ID
+ - Media query
  - Timing properties
  - Keyframes
 
 ```
 {
   "target": "element-id",
+  "media": "(min-width:300px)",
   // Timing properties
   ...
   "keyframes": []
 }
 ```
+
+### Media query
+
+Media query can be specified using the `media` property. This attribute can contain any expression allowed
+for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API.
+
+If value is specified for an animation component, the animation component will only be included if the
+media query will match the current environment.
 
 ### Timing properties
 

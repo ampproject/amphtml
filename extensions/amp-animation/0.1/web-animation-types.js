@@ -23,6 +23,7 @@ export let WebAnimationDef;
 
 /**
  * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationMediaDef
  * @typedef {{
  *   animations: !Array<!WebAnimationDef>,
  * }}
@@ -32,6 +33,7 @@ export let WebMultiAnimationDef;
 
 /**
  * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationMediaDef
  * @typedef {{
  *   target: (string|!Element),
  *   keyframes: !WebKeyframesDef,
@@ -62,6 +64,17 @@ export let WebKeyframesDef;
  * }}
  */
 export let WebAnimationTimingDef;
+
+
+/**
+ * Defines media parameters for an animation.
+ *
+ * @mixin
+ * @typedef {{
+ *   media: (string|undefined),
+ * }}
+ */
+export let WebAnimationMediaDef;
 
 
 /**
