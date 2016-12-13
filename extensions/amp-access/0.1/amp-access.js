@@ -769,12 +769,12 @@ export class AccessService {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
-      this.login('');
+      this.loginWithType_('');
     } else if (invocation.method.indexOf('login-') == 0) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
-      this.login(invocation.method.substring('login-'.length));
+      this.loginWithType_(invocation.method.substring('login-'.length));
     }
   }
 
