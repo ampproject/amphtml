@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Observable} from './observable';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
@@ -22,6 +23,10 @@ import {isDocumentReady} from './document-ready';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './resources';
 import {setStyle, setStyles} from './style';
+
+
+/** @const {string} */
+const EMBED_PROP = '__AMP_EMBED__';
 
 
 /**
@@ -70,6 +75,30 @@ function isSrcdocSupported() {
 
 
 /**
+ * Sets whether the embed is currently visible. The interpretation of visibility
+ * is up to the embed parent. However, most of typical cases would rely on
+ * whether the embed is currently in the viewport.
+ * @param {!FriendlyIframeEmbed} embed
+ * @param {boolean} visible
+ * @restricted
+ * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
+ */
+export function setFriendlyIframeEmbedVisible(embed, visible) {
+  embed.setVisible_(visible);
+}
+
+
+/**
+ * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * @param {!HTMLIFrameElement} iframe
+ * @return {?FriendlyIframeEmbed}
+ */
+export function getFriendlyIframeEmbedOptional(iframe) {
+  return /** @type {?FriendlyIframeEmbed} */ (iframe[EMBED_PROP]);
+}
+
+
+/**
  * Creates the requested "friendly iframe" embed. Returns the promise that
  * will be resolved as soon as the embed is available. The actual
  * initialization of the embed will start as soon as the `iframe` is added
@@ -78,7 +107,7 @@ function isSrcdocSupported() {
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
  * @param {function(!Window)=} opt_preinstallCallback
- * @return {!Promise<FriendlyIframeEmbed>}
+ * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec,
     opt_preinstallCallback) {
@@ -151,6 +180,9 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   }
 
   return readyPromise.then(() => {
+    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    iframe[EMBED_PROP] = embed;
+
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
@@ -164,7 +196,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
         animation: 'none',
       });
     }
-    return new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    return embed;
   });
 }
 
@@ -279,6 +311,24 @@ export class FriendlyIframeEmbed {
 
     /** @private @const {!Promise} */
     this.loadedPromise_ = loadedPromise;
+
+    /**
+     * Starts out as invisible. The interpretation of this flag is up to
+     * the emded parent.
+     * @private {boolean}
+     */
+    this.visible_ = false;
+
+    /** @private {!Observable<boolean>} */
+    this.visibilityObservable_ = new Observable();
+  }
+
+  /**
+   * Ensures that all resources from this iframe have been released.
+   */
+  destroy() {
+    resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    disposeServicesForEmbed(this.win);
   }
 
   /**
@@ -291,10 +341,33 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * Ensures that all resources from this iframe have been released.
+   * Whether the embed is currently visible. The interpretation of visibility
+   * is up to the embed parent. However, most of typical cases would rely on
+   * whether the embed is currently in the viewport.
+   * @return {boolean}
+   * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
    */
-  destroy() {
-    resourcesForDoc(this.iframe).removeForChildWindow(this.win);
-    disposeServicesForEmbed(this.win);
+  isVisible() {
+    return this.visible_;
+  }
+
+  /**
+   * See `isVisible` for more info.
+   * @param {function(boolean)} handler
+   * @return {!UnlistenDef}
+   */
+  onVisibilityChanged(handler) {
+    return this.visibilityObservable_.add(handler);
+  }
+
+  /**
+   * @param {boolean} visible
+   * @private
+   */
+  setVisible_(visible) {
+    if (this.visible_ != visible) {
+      this.visible_ = visible;
+      this.visibilityObservable_.fire(this.visible_);
+    }
   }
 }

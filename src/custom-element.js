@@ -58,13 +58,6 @@ const PREPARE_LOADING_THRESHOLD_ = 1000;
 
 
 /**
- * Map from element name to implementation class.
- * @const {Object}
- */
-const knownElements = {};
-
-
-/**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
  */
@@ -95,12 +88,25 @@ const UpgradeState = {
 
 
 /**
+ * @param {!Window} win
+ * @return {!Object<string, function(new:./base-element.BaseElement, !Element)>}
+ */
+function getExtendedElements(win) {
+  if (!win.ampExtendedElements) {
+    win.ampExtendedElements = {};
+  }
+  return win.ampExtendedElements;
+}
+
+
+/**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
  * @param {string} name
- * @param {function(!Function)} toClass
+ * @param {function(new:./base-element.BaseElement, !Element)} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
+  const knownElements = getExtendedElements(win);
   if (!knownElements[name]) {
     registerElement(win, name, /** @type {!Function} */ (toClass));
     return;
@@ -120,7 +126,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
     const element = stub.element;
-    if (element.tagName.toLowerCase() == name) {
+    if (element.tagName.toLowerCase() == name &&
+            element.ownerDocument.defaultView == win) {
       tryUpgradeElementNoInline(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);
@@ -147,18 +154,10 @@ function tryUpgradeElementNoInline(element, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
-    // If amp-ad and amp-embed haven't been registered, manually register them
-    // with ElementStub, in case the script to the element is not included.
-    if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
-      stubLegacyElements(win);
-    }
-  }
+  const knownElements = getExtendedElements(win);
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
-    win.ampExtendedElements[name] = true;
     if (knownElements[name]) {
       continue;
     }
@@ -172,47 +171,52 @@ export function stubElements(win) {
 }
 
 /**
- * @param {!Window} win
- */
-function stubLegacyElements(win) {
-  win.ampExtendedElements['amp-ad'] = true;
-  registerElement(win, 'amp-ad', ElementStub);
-  win.ampExtendedElements['amp-embed'] = true;
-  registerElement(win, 'amp-embed', ElementStub);
-}
-
-/**
  * Stub element if not yet known.
  * @param {!Window} win
  * @param {string} name
  */
 export function stubElementIfNotKnown(win, name) {
-  if (knownElements[name]) {
-    return;
+  const knownElements = getExtendedElements(win);
+  if (!knownElements[name]) {
+    registerElement(win, name, ElementStub);
   }
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
-  }
-  win.ampExtendedElements[name] = true;
-  registerElement(win, name, ElementStub);
+}
+
+/**
+ * Stub element in the child window.
+ * @param {!Window} childWin
+ * @param {string} name
+ */
+export function stubElementInChildWindow(childWin, name) {
+  registerElement(childWin, name, ElementStub);
 }
 
 /**
  * Copies the specified element to child window (friendly iframe). This way
  * all implementations of the AMP elements are shared between all friendly
  * frames.
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  * @param {string} name
  */
-export function copyElementToChildWindow(childWin, name) {
-  if (!childWin.ampExtendedElements) {
-    childWin.ampExtendedElements = {};
-    stubLegacyElements(childWin);
-  }
-  childWin.ampExtendedElements[name] = true;
-  registerElement(childWin, name, knownElements[name] || ElementStub);
+export function copyElementToChildWindow(parentWin, childWin, name) {
+  const toClass = getExtendedElements(parentWin)[name];
+  registerElement(childWin, name, toClass || ElementStub);
 }
 
+
+/**
+ * Upgrade element in the child window.
+ * @param {!Window} parentWin
+ * @param {!Window} childWin
+ * @param {string} name
+ */
+export function upgradeElementInChildWindow(parentWin, childWin, name) {
+  const toClass = getExtendedElements(parentWin)[name];
+  dev().assert(toClass, '%s is not stubbed yet', name);
+  dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
+  upgradeOrRegisterElement(childWin, name, toClass);
+}
 
 /**
  * Applies layout to the element. Visible for testing only.
@@ -494,6 +498,7 @@ function createBaseCustomElementClass(win) {
       this.overflowElement_ = undefined;
 
       // `opt_implementationClass` is only used for tests.
+      const knownElements = getExtendedElements(win);
       let Ctor = knownElements[this.elementName()];
       if (getMode().test && this.implementationClassForTesting) {
         Ctor = this.implementationClassForTesting;
@@ -1509,6 +1514,7 @@ function createBaseCustomElementClass(win) {
  * @param {function(new:./base-element.BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
+  const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
   const klass = createCustomElementClass(win, name);
 
@@ -1529,6 +1535,7 @@ export function registerElement(win, name, implementationClass) {
  * @param {string} sourceName Name of an existing custom element
  */
 export function registerElementAlias(win, aliasName, sourceName) {
+  const knownElements = getExtendedElements(win);
   const implementationClass = knownElements[sourceName];
   if (implementationClass) {
     // Update on the knownElements to prevent register again.
@@ -1548,10 +1555,10 @@ export function registerElementAlias(win, aliasName, sourceName) {
  * @visibleForTesting
  */
 export function markElementScheduledForTesting(win, elementName) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
+  const knownElements = getExtendedElements(win);
+  if (!knownElements[elementName]) {
+    knownElements[elementName] = ElementStub;
   }
-  win.ampExtendedElements[elementName] = true;
 }
 
 /**
@@ -1562,19 +1569,20 @@ export function markElementScheduledForTesting(win, elementName) {
  */
 export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
-    win.ampExtendedElements[elementName] = null;
+    delete win.ampExtendedElements[elementName];
   }
-  delete knownElements[elementName];
 }
 
 /**
  * Returns a currently registered element class.
+ * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
  * @return {?function()}
  * @visibleForTesting
  */
-export function getElementClassForTesting(elementName) {
-  return knownElements[elementName] || null;
+export function getElementClassForTesting(win, elementName) {
+  const knownElements = win.ampExtendedElements;
+  return knownElements && knownElements[elementName] || null;
 }
 
 /** @param {!Element} element */

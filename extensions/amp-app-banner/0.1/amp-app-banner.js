@@ -196,7 +196,7 @@ export class AmpAppBanner extends AbstractAppBanner {
 
   /** @override */
   layoutCallback() {
-    dev().info(TAG, 'Only iOS or Android platforms are currently supported.');
+    user().info(TAG, 'Only iOS or Android platforms are currently supported.');
     return this.hide_();
   }
 }
@@ -240,7 +240,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const viewer = viewerForDoc(this.getAmpDoc());
     this.canShowBuiltinBanner_ = !viewer.isEmbedded() && platform.isSafari();
     if (this.canShowBuiltinBanner_) {
-      dev().info(TAG,
+      user().info(TAG,
           'Browser supports builtin banners. Not rendering amp-app-banner.');
       this.hide_();
       return;
@@ -348,7 +348,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
         !viewer.isEmbedded() && isChromeAndroid;
 
     if (this.canShowBuiltinBanner_) {
-      dev().info(TAG,
+      user().info(TAG,
           'Browser supports builtin banners. Not rendering amp-app-banner.');
       this.hide_();
       return;
@@ -396,23 +396,25 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   parseManifest_(manifestJson) {
     const apps = manifestJson['related_applications'];
     if (!apps) {
-      dev().warn(TAG,
+      user().warn(TAG,
           'related_applications is missing from manifest.json file: %s',
           this.element);
       return;
     }
 
-    const app = apps.find(app => app['platform'] == 'play');
-    if (!app) {
-      dev().warn(TAG, 'Could not find a platform=play app in manifest: %s',
-          this.element);
-      return;
+    for (let i = 0; i < apps.length; i++) {
+      const app = apps[i];
+      if (app['platform'] == 'play') {
+        const installAppUrl = `https://play.google.com/store/apps/details` +
+            `?id=${app['id']}`;
+        const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
+        this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+        return;
+      }
     }
 
-    const installAppUrl = (
-        `https://play.google.com/store/apps/details?id=${app['id']}`);
-    const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-    this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
+    user().warn(TAG, 'Could not find a platform=play app in manifest: %s',
+      this.element);
   }
 
   /** @private */

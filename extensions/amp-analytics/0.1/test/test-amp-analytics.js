@@ -1042,4 +1042,25 @@ describe('amp-analytics', function() {
       });
     });
   });
+
+  describe('getNameArgs:', () => {
+
+    function check(input, name, argList) {
+      it('can parse ' + name, () => {
+        const analytics = getAnalyticsTag(trivialConfig);
+        expect(analytics.getNameArgs_(input)).to.deep.equal({name, argList});
+      });
+    }
+
+    check('abc', 'abc', '');
+    check('client id', 'client id', '');
+    check('client id()', 'client id()', '');
+    check('client id (abc)', 'client id (abc)', '');
+
+
+    check('clientId()', 'clientId', '()');
+    check('clientId(abc)', 'clientId', '(abc)');
+    check('clientId(abc,def)', 'clientId', '(abc,def)');
+    check('clientId(abc, def)', 'clientId', '(abc, def)');
+  });
 });

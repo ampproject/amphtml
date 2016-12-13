@@ -228,3 +228,5 @@ geckoTag.placementReady;
 data.plc;
 data.sz;
 data.extra;
+// _ping_
+data.nativeIntersectionObserver
