@@ -339,10 +339,10 @@ describe('3p-frame', () => {
     const newName = JSON.parse(getIframe(window, div).name);
     expect(name.host).to.match(/d-\d+.ampproject.net/);
     expect(name.type).to.match(/ping/);
-    expect(name.count).to.match(/0/);
+    expect(name.count).to.match(/1/);
     expect(newName.host).to.match(/d-\d+.ampproject.net/);
     expect(newName.type).to.match(/ping/);
-    expect(newName.count).to.match(/0/);
+    expect(newName.count).to.match(/1/);
     expect(newName).not.to.equal(name);
   });
 

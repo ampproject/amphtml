@@ -116,6 +116,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
+  count[attributes.type] += 1;
 
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
