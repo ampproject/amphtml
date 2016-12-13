@@ -57,24 +57,30 @@ export class PositionObserver {
       this.positionObservable_ = new Observable();
       const listener = () => {
         // TODO: rate limit this
-        this.scrollLeft_ = this.scrollingElement_./*OK*/scrollLeft
-            || this.win_./*OK*/pageXOffset;
-        this.scrollTop_ = this.scrollingElement_./*OK*/scrollTop
-            || this.win_./*OK*/pageYOffset;
-        this.viewportRect_ = layoutRectLtwh(
-            Math.round(this.scrollLeft_),
-            Math.round(this.scrollTop_),
-            this.win_./*OK*/innerWidth,
-            this.win_./*OK*/innerHeight);
+        this.update_();
         this.positionObservable_.fire();
       };
-
+      this.update_();
       this.win_.addEventListener('scroll', listener, true);
       this.win_.addEventListener('resize', listener, true);
     }
+    // Send the 1st ping immediately
+    callback(this.getPositionEntry_(element));
     this.positionObservable_.add(() => {
       callback(this.getPositionEntry_(element));
     });
+  }
+
+  update_() {
+    this.scrollLeft_ = this.scrollingElement_./*OK*/scrollLeft
+        || this.win_./*OK*/pageXOffset;
+    this.scrollTop_ = this.scrollingElement_./*OK*/scrollTop
+        || this.win_./*OK*/pageYOffset;
+    this.viewportRect_ = layoutRectLtwh(
+        Math.round(this.scrollLeft_),
+        Math.round(this.scrollTop_),
+        this.win_./*OK*/innerWidth,
+        this.win_./*OK*/innerHeight);
   }
 
   /**
