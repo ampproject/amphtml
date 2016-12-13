@@ -112,6 +112,31 @@ function subtractDiff(left, right) {
 }
 
 /**
+ * Attempts to URI decode an attribute value. If URI decoding fails, it falls
+ * back to calling unescape. We want to minimize the scope of this try/catch
+ * to allow v8 to optimize more code.
+ * @param {string} attrValue
+ * @return {string}
+ */
+function decodeAttrValue(attrValue) {
+  let decodedAttrValue;
+  try {
+    decodedAttrValue = decodeURIComponent(attrValue);
+  } catch (e) {
+    // This branch is best effort, since unescape is deprecated.
+    // However unescape appears to work even if the value is not a
+    // properly encoded attribute.
+    // TODO(powdercloud): We're currently using this to prohibit
+    // __amp_source_origin for URLs. We may want to introduce a
+    // global bad url functionality with patterns or similar, as opposed
+    // to applying this to every attribute that has a blacklisted value
+    // regex.
+    decodedAttrValue = unescape(attrValue);
+  }
+  return decodedAttrValue;
+}
+
+/**
  * Merge results from another ValidationResult while dealing with the UNKNOWN
  *   status.
  * @param {!amp.validator.ValidationResult} other
@@ -360,6 +385,9 @@ class ParsedReferencePoints {
 }
 
 /**
+ * A tag may initialize this ReferencePointMatcher with its reference points.
+ * Then, the matcher will be invoked for each child tag via ::Match,
+ * and eventually it will be invoked upon exiting the parent tag.
  * @private
  */
 class ReferencePointMatcher {
@@ -391,6 +419,9 @@ class ReferencePointMatcher {
      * @private
      */
     this.referencePointsMatched_ = [];
+
+    // Assert that this is not an empty reference point matcher.
+    goog.asserts.assert(!parsedReferencePoints.empty());
   }
 
   /**
@@ -410,7 +441,6 @@ class ReferencePointMatcher {
    * @param {!amp.validator.ValidationResult} result
    */
   match(attrs, context, result) {
-    if (this.parsedReferencePoints_.empty()) return;
     const resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     for (const p of this.parsedReferencePoints_.iterate()) {
@@ -470,16 +500,31 @@ class ReferencePointMatcher {
   }
 
   /**
+   * Called when validator encounters an attribute name which is not allowed
+   * per the given tagspec. If true, the attribute name is considered valid
+   * due to the reference point matcher of a parent tag spec.
+   * @param {string} attrName
+   * @return {boolean}
+   */
+  explainsAttribute(attrName) {
+    const matched = this.getReferencePointsMatched();
+    if (matched.length == 0) return false;
+
+    const tagSpecId = matched[matched.length - 1];
+    if (tagSpecId == -1) return false;
+
+    const tagSpec = this.parsedValidatorRules_.getTagSpec(tagSpecId);
+    return tagSpec.hasAttrWithName(attrName);
+  }
+
+  /**
    * This method gets invoked when we're done with processing all the
    * child tags, so now we can determine whether any reference points
    * remain unsatisfied or duplicate.
    * @param {!Context} context
-   * @param {!Array<!ParsedTagSpec>} tagSpecById
    * @param {!amp.validator.ValidationResult} result
    */
-  exitParentTag(context, tagSpecById, result) {
-    if (this.parsedReferencePoints_.empty()) return;
-
+  exitParentTag(context, result) {
     /** @type {!Object<number, number>} */
     const referencePointByCount = {};
     for (const r of this.referencePointsMatched_) {
@@ -545,7 +590,7 @@ class ReferencePointMatcher {
 
 /**
  * @typedef {{ tagName: string,
- *             matcher: ?ChildTagMatcher,
+ *             childTagMatcher: ?ChildTagMatcher,
  *             referencePointMatcher: ?ReferencePointMatcher,
  *             dataAmpReportTestValue: ?string }}
  */
@@ -598,19 +643,19 @@ class TagStack {
     }
     this.stack_.push({
       tagName: tagName,
-      matcher: null,
+      childTagMatcher: null,
       referencePointMatcher: null,
       dataAmpReportTestValue: maybeDataAmpReportTestValue
     });
   }
 
   /**
-   * Sets the tag matcher for the tag which is currently on the stack.
-   * This gets called shortly after EnterTag for a given tag.
+   * Sets the child tag matcher for the tag which is currently on the
+   * stack. This gets called shortly after EnterTag for a given tag.
    * @param {?ChildTagMatcher} matcher
    */
   setChildTagMatcher(matcher) {
-    this.stack_[this.stack_.length - 1].matcher = matcher;
+    this.stack_[this.stack_.length - 1].childTagMatcher = matcher;
   }
 
   /**
@@ -619,7 +664,8 @@ class TagStack {
    * @param {?ReferencePointMatcher} matcher
    */
   setReferencePointMatcher(matcher) {
-    this.stack_[this.stack_.length - 1].referencePointMatcher = matcher;
+    if (!matcher.parsedReferencePoints_.empty())
+      this.stack_[this.stack_.length - 1].referencePointMatcher = matcher;
   }
 
   /**
@@ -649,23 +695,24 @@ class TagStack {
     if (this.stack_.length < 2) {
       return;
     }
-    const matcher = this.stack_[this.stack_.length - 2].matcher;
+    const matcher = this.stack_[this.stack_.length - 2].childTagMatcher;
     if (matcher !== null) {
       matcher.matchChildTagName(context, result);
     }
   }
 
   /**
-   * Upon exiting a tag, validation for the current matcher is triggered,
-   * e.g. for checking that the tag had some specified number of children.
+   * Upon exiting a tag, validation for the current child tag matcher is
+   * triggered, e.g. for checking that the tag had some specified number
+   * of children.
    * @param {string} tagName
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    */
   exitTag(tagName, context, result) {
-    const top = this.stack_.pop();
-    if (top.matcher !== null) {
-      top.matcher.exitTag(context, result);
+    const topStackEntry = this.stack_.pop();
+    if (topStackEntry.childTagMatcher !== null) {
+      topStackEntry.childTagMatcher.exitTag(context, result);
     }
   }
 
@@ -820,7 +867,7 @@ function computeAtRuleDefaultParsingSpec(atRuleParsingSpec) {
 }
 
 /**
- * This matcher maintains a constraint to check which an opening tag
+ * CdataMatcher maintains a constraint to check which an opening tag
  * introduces: a tag's cdata matches constraints set by it's cdata
  * spec. Unfortunately we need to defer such checking and can't
  * handle it while the opening tag is being processed.
@@ -903,7 +950,7 @@ class CdataMatcher {
   }
 
   /**
-   * Matches the provided cdata against what this matcher expects.
+   * Matches the provided cdata against what this CdataMatcher expects.
    * @param {string} cdata
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
@@ -2970,11 +3017,9 @@ class ParsedTagSpec {
    * @param {!Context} context
    * @param {!ParsedTagSpec} parsedSpec
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
-   * @param {!Array<!ParsedTagSpec>} tagSpecById
    * @param {!amp.validator.ValidationResult} result
    */
-  validateAttributes(context, parsedSpec, encounteredAttrs, tagSpecById,
-      result) {
+  validateAttributes(context, parsedSpec, encounteredAttrs, result) {
     if (this.spec_.ampLayout !== null) {
       /** @type {!Object<string, string>} */
       const attrsByKey = {};
@@ -3018,15 +3063,11 @@ class ParsedTagSpec {
         if (this.isReferencePoint_) continue;
         // On the other hand, if we did just validate a reference point for
         // this tag, we check whether that reference point covers the attribute.
-        const matcher = context.getTagStack().parentReferencePointMatcher();
-        if (matcher) {
-          const matched = matcher.getReferencePointsMatched();
-          if (matched.length > 0 && matched[matched.length - 1] != -1 &&
-              tagSpecById[matched[matched.length - 1]].hasAttrWithName(
-                  attrName)) {
-            continue;
-          }
-        }
+        const reference_point_matcher =
+            context.getTagStack().parentReferencePointMatcher();
+        if (reference_point_matcher &&
+            reference_point_matcher.explainsAttribute(attrName))
+          continue;
 
         this.validateAttrNotFoundInSpec(context, attrName, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
@@ -3072,20 +3113,7 @@ class ParsedTagSpec {
         }
       }
       if (parsedAttrSpec.hasBlacklistedValueRegex()) {
-        let decodedAttrValue;
-        try {
-          decodedAttrValue = decodeURIComponent(attrValue);
-        } catch (e) {
-          // This branch is best effort, since unescape is deprecated.
-          // However unescape appears to work even if the value is not a
-          // properly encoded attribute.
-          // TODO(powdercloud): We're currently using this to prohibit
-          // __amp_source_origin for URLs. We may want to introduce a
-          // global bad url functionality with patterns or similar, as opposed
-          // to applying this to every attribute htat has a blacklisted value
-          // regex.
-          decodedAttrValue = unescape(attrValue);
-        }
+        const decodedAttrValue = decodeAttrValue(attrValue);
         if (parsedAttrSpec.getBlacklistedValueRegex().test(attrValue) ||
             parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -3314,6 +3342,11 @@ class ParsedTagSpec {
     return this.isReferencePoint_;
   }
 
+  /** @return {boolean} */
+  hasReferencePoints() {
+    return !this.referencePoints_.empty();
+  }
+
   /** @return {!ParsedReferencePoints} */
   getReferencePoints() {
     return this.referencePoints_;
@@ -3448,8 +3481,7 @@ function validateTagAgainstSpec(
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   parsedSpec.validateAttributes(
-      context, parsedSpec, encounteredAttrs, parsedRules.getTagSpecById(),
-      resultForAttempt);
+      context, parsedSpec, encounteredAttrs, resultForAttempt);
   parsedSpec.validateParentTag(context, resultForAttempt);
   parsedSpec.validateAncestorTags(context, resultForAttempt);
 
@@ -3546,32 +3578,34 @@ function validateTagAgainstSpec(
   if (spec.childTags !== null)
     context.setChildTagMatcher(new ChildTagMatcher(spec));
 
-  // Set the reference point matcher so it considers spec.reference_points(),
-  // if present, considering that reference points could be defined by
-  // both reference points and regular tag specs.
-  if (parsedSpec.getReferencePoints().empty()) return;
-  const currentMatcher = context.getTagStack().currentReferencePointMatcher();
-  if (currentMatcher !== null &&
-      !currentMatcher.getParsedReferencePoints().empty()) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
-          context.getDocLocator(),
-          /* params */
-          [
-            getTagSpecName(spec),
-            currentMatcher.getParsedReferencePoints().parentTagSpecName()
-          ],
-          currentMatcher.getParsedReferencePoints().parentSpecUrl(),
-          resultForBestAttempt);
+  // Set reference point matcher to parsedSpec.getReferencePoints(), if present.
+  if (parsedSpec.hasReferencePoints()) {
+    // Considering that reference points could be defined by both reference
+    // points and regular tag specs, check that we don't already have a
+    // conflicting matcher, there can be only one.
+    const currentMatcher = context.getTagStack().currentReferencePointMatcher();
+    if (currentMatcher !== null) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
+            context.getDocLocator(),
+            /* params */
+            [
+              getTagSpecName(spec),
+              currentMatcher.getParsedReferencePoints().parentTagSpecName()
+            ],
+            currentMatcher.getParsedReferencePoints().parentSpecUrl(),
+            resultForBestAttempt);
+      } else {
+        resultForBestAttempt.status =
+            amp.validator.ValidationResult.Status.FAIL;
+      }
     } else {
-      resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+      context.setReferencePointMatcher(new ReferencePointMatcher(
+          parsedRules, parsedSpec.getReferencePoints()));
     }
-    return;
   }
-  context.setReferencePointMatcher(
-      new ReferencePointMatcher(parsedRules, parsedSpec.getReferencePoints()));
 }
 
 /**
@@ -3618,12 +3652,13 @@ class ParsedValidatorRules {
     const tagSpecNamesToTrack = {};
     for (let i = 0; i < this.rules_.tags.length; ++i) {
       const tag = this.rules_.tags[i];
+      const tagSpecName = getTagSpecName(tag);
       goog.asserts.assert(
-          !tagSpecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
-      tagSpecIdsByTagSpecName[getTagSpecName(tag)] = i;
+          !tagSpecIdsByTagSpecName.hasOwnProperty(tagSpecName));
+      tagSpecIdsByTagSpecName[tagSpecName] = i;
       if (tag.alsoRequiresTag.length > 0 ||
           tag.alsoRequiresTagWarning.length > 0) {
-        tagSpecNamesToTrack[getTagSpecName(tag)] = true;
+        tagSpecNamesToTrack[tagSpecName] = true;
       }
       for (const alsoRequiresTag of tag.alsoRequiresTag) {
         tagSpecNamesToTrack[alsoRequiresTag] = true;
@@ -3774,7 +3809,7 @@ class ParsedValidatorRules {
     for (const tagSpecId of this.mandatoryTagSpecs_) {
       if (!context.getTagspecsValidated().hasOwnProperty(tagSpecId)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          const spec = this.tagSpecById_[tagSpecId].getSpec();
+          const spec = this.getTagSpec(tagSpecId).getSpec();
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
@@ -3802,7 +3837,7 @@ class ParsedValidatorRules {
         Object.keys(context.getTagspecsValidated()).map(Number);
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
-      const spec = this.tagSpecById_[tagSpecId];
+      const spec = this.getTagSpec(tagSpecId);
       for (const condition of spec.requires()) {
         if (!context.conditionsSatisfied().hasOwnProperty(condition)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -3826,7 +3861,7 @@ class ParsedValidatorRules {
       for (const tagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const alsoRequiresTagspec = this.tagSpecById_[tagspecId];
+            const alsoRequiresTagspec = this.getTagSpec(tagspecId);
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
@@ -3847,7 +3882,7 @@ class ParsedValidatorRules {
       for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
         if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const alsoRequiresTagspec = this.tagSpecById_[tagspecId];
+            const alsoRequiresTagspec = this.getTagSpec(tagspecId);
             context.addError(
                 amp.validator.ValidationError.Severity.WARNING,
                 amp.validator.ValidationError.Code
@@ -3876,14 +3911,13 @@ class ParsedValidatorRules {
     /** @type {!Array<string>} */
     let missing = [];
     const specUrlsByMissing = {};
-    for (const tagSpec of this.tagSpecById_) {
-      const spec = tagSpec.getSpec();
-      if (spec.mandatoryAlternatives !== null) {
-        const alternative = spec.mandatoryAlternatives;
+    for (const tagSpec of this.rules_.tags) {
+      if (tagSpec.mandatoryAlternatives !== null) {
+        const alternative = tagSpec.mandatoryAlternatives;
         if (!satisfied.hasOwnProperty(alternative)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             missing.push(alternative);
-            specUrlsByMissing[alternative] = spec.specUrl;
+            specUrlsByMissing[alternative] = tagSpec.specUrl;
           } else {
             validationResult.status =
                 amp.validator.ValidationResult.Status.FAIL;
@@ -3915,11 +3949,6 @@ class ParsedValidatorRules {
     this.maybeEmitAlsoRequiresTagValidationErrors(context, validationResult);
     this.maybeEmitMandatoryAlternativesSatisfiedErrors(
         context, validationResult);
-  }
-
-  /** @return {!Array<!ParsedTagSpec>} */
-  getTagSpecById() {
-    return this.tagSpecById_;
   }
 
   /**
@@ -4089,9 +4118,10 @@ amp.validator.ValidationHandler =
     this.context_.setCdataMatcher(null);
     this.context_.getTagStack().enterTag(
         tagName, this.context_, this.validationResult_, attrs);
-    const matcher = this.context_.getTagStack().parentReferencePointMatcher();
-    if (matcher !== null) {
-      matcher.match(attrs, this.context_, this.validationResult_);
+    const referencePointMatcher =
+        this.context_.getTagStack().parentReferencePointMatcher();
+    if (referencePointMatcher !== null) {
+      referencePointMatcher.match(attrs, this.context_, this.validationResult_);
     }
     this.validateTag(tagName, attrs);
     this.context_.getTagStack().matchChildTagName(
@@ -4107,8 +4137,7 @@ amp.validator.ValidationHandler =
     this.context_.setCdataMatcher(null);
     const matcher = this.context_.getTagStack().currentReferencePointMatcher();
     if (matcher !== null) {
-      matcher.exitParentTag(
-          this.context_, this.rules_.getTagSpecById(), this.validationResult_);
+      matcher.exitParentTag(this.context_, this.validationResult_);
     }
     this.context_.getTagStack().exitTag(
         tagName, this.context_, this.validationResult_);
