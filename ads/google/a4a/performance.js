@@ -30,6 +30,7 @@ import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {serializeQueryString} from '../../../src/url';
 import {getCorrelator, EXPERIMENT_ATTRIBUTE} from './utils';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 
@@ -47,10 +48,6 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
  * module should go away once we have verified that A4A is performing as
  * desired.
  */
-
-export const PROFILING_RATE = {
-  a4aProfilingRate: {on: 1},
-};
 
 /**
  * Check whether the element is in an experiment branch that is eligible for
@@ -106,7 +103,7 @@ export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
   if (getMode().localDev) {
     toggleExperiment(win, 'a4aProfilingRate', true, true);
   }
-  randomlySelectUnsetPageExperiments(win, PROFILING_RATE);
+  randomlySelectUnsetPageExperiments(win, win.AMP_CONFIG['a4aProfilingRate']);
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, 'a4aProfilingRate')) {
@@ -128,6 +125,7 @@ export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
  */
 export class BaseLifecycleReporter {
   constructor() {
+    /** @private */
     this.extraVariables_ = new Object(null);
   }
 
@@ -151,9 +149,9 @@ export class BaseLifecycleReporter {
    * @param {string|number} value
    */
   setPingVariable(variable, value) {
-    if (!!variable && (!!value || value === 0)) {
-      this.extraVariables_[variable] = value;
-    }
+    if (variable == null || variable === false || variable === '') { return; }
+    if (value === null || value === undefined || value === '') { return; }
+    this.extraVariables_[variable] = value;
   }
 
   /**
@@ -193,15 +191,32 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   constructor(win, element, namespace, correlator, slotId) {
     super();
 
+    /** @private {!Window} @const */
     this.win_ = win;
+
+    /** @private {!Element} @const */
     this.element_ = element;
+
+    /** @private {string} @const */
     this.namespace_ = namespace;
+
+    /** @private {number} @const */
     this.slotId_ = slotId;
+
+    /** @private {number} @const */
     this.correlator_ = correlator;
+
+    /** @private {string} @const */
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
+
+    /** @private {number} @const */
     this.initTime_ = Date.now();
+
+    /** @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
-    this.urlReplacer_ = urlReplacementsForDoc(element.ownerDocument);
+
+    /** @private {!../../../src/url-replacements-impl.UrlReplacements} @const */
+    this.urlReplacer_ = urlReplacementsForDoc(element);
   }
 
   /**
@@ -233,7 +248,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @param {string} name  Metric name to send.
-   * @param {Object<string, string|number>=} opt_extraParams
+   * @param {!Object<string, string|number>=} opt_extraParams
    * @returns {string}  URL to send metrics to.
    * @private
    */
@@ -242,15 +257,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     const delta = Date.now() - this.initTime_;
     let extraParams = '';
     if (opt_extraParams) {
-      const paramList = [];
-      for (const param in opt_extraParams) {
-        if (!!param) {
-          paramList.push(
-              encodeURIComponent(param) + '=' +
-              encodeURIComponent(opt_extraParams[param]));
-        }
-      }
-      if (paramList.length > 0) {
+      extraParams = serializeQueryString(opt_extraParams);
+      if (extraParams != '') {
         // Note: Using sync URL replacer here, rather than async, for a number
         // of reasons:
         //   - Don't want to block pings waiting for potentially delayed bits
@@ -265,7 +273,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         // offset, but it's not currently available through url-replacement.
         // If it becomes available, it's likely to be an async parameter.
         extraParams = '&' +
-            this.urlReplacer_.expandStringSync(paramList.join('&'));
+            this.urlReplacer_.expandStringSync(extraParams);
       }
     }
     const pingUrl = `${this.pingbackAddress_}?` +

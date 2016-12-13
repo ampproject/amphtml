@@ -165,6 +165,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.emitLifecycleEvent(eventName);
   }
 
+  /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',

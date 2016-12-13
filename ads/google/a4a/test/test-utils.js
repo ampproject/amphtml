@@ -62,6 +62,7 @@ describe('Google A4A utils', () => {
     let mockReporter;
     beforeEach(() => {
       const fakeElt = env.win.document.createElement('div');
+      env.win.document.body.appendChild(fakeElt);
       mockReporter = new GoogleAdLifecycleReporter(
           env.win, fakeElt, 'test', 69, 37);
     });
