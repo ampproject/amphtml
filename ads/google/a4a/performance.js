@@ -15,6 +15,7 @@
  */
 
 import {
+    parseExperimentIds,
     isInManualExperiment,
     randomlySelectUnsetPageExperiments,
 } from './traffic-experiments';
@@ -58,19 +59,27 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
  * @returns {boolean}
  */
 function isInReportableBranch(ampElement, namespace) {
-  const eid = ampElement.element.getAttribute(EXPERIMENT_ATTRIBUTE);
+  // Handle the possibility of multiple eids on the element.
+  const eids = parseExperimentIds(
+      ampElement.element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const reportableA4AEids = {
+    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
+    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
+    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
+    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
+  };
+  const reportableControlEids = {
+    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
+    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
+    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
+    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
+  };
   if (namespace == 'a4a' &&
-      ((eid == ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
-       (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
-       (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment) ||
-       (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment) ||
+      (eids.some(x => { return x in reportableA4AEids; }) ||
        isInManualExperiment(ampElement.element))) {
     return true;
   } else if (namespace == 'amp' &&
-             ((eid == ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control) ||
-              (eid == ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control) ||
-              (eid == DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control) ||
-              (eid == DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control))) {
+          eids.some(x => { return x in reportableControlEids; })) {
     return true;
   } else {
     return false;
@@ -294,6 +303,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * Separate function so that it can be stubbed out for testing.
    *
    * @param {string} url Address to ping.
+   * @visibleForTesting
    */
   emitPing_(url) {
     const pingElement = this.element_.ownerDocument.createElement('img');
@@ -310,13 +320,5 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     pingElement.setAttribute('aria-hidden', 'true');
     this.element_.parentNode.insertBefore(pingElement, this.element_);
     dev().info('PING', url);
-  }
-
-  /**
-   * Resets values which might cross-contaminate between queries.
-   * @override
-   */
-  reset() {
-    this.setQqid(null);
   }
 }
