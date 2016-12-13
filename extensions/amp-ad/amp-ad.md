@@ -114,6 +114,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [FlexOneELEPHANT](../../ads/f1e.md)
 - [Felmat](../../ads/felmat.md)
 - [Flite](../../ads/flite.md)
+- [Fusion](../../ads/fusion.md) 
 - [GenieeSSP](../../ads/genieessp.md)
 - [GMOSSP](../../ads/gmossp.md)
 - [Holder](../../ads/holder.md)
