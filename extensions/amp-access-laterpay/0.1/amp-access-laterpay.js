@@ -417,6 +417,13 @@ export class LaterpayVendor {
         url, this.selectedPurchaseOption_.dataset.purchaseType);
     });
   }
+
+  /**
+   * @returns {boolean}
+   */
+  pingback() {
+    return true;
+  }
 }
 
 
