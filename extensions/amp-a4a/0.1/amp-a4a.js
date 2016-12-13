@@ -131,29 +131,30 @@ export const LIFECYCLE_STAGES = {
 
 /**
  * Utility function that ensures any error thrown is handled by optional
- * onError handler (if none provided or handler throws, error is swallowed).
+ * onError handler (if none provided or handler throws, error is swallowed and
+ * undefined is returned).
  * @param {!Function} fn to protect
- * @param {T=} opt_this An optional object to use as the 'this' object
+ * @param {T=} inThis An optional object to use as the 'this' object
  *    when calling the function.  If not provided, undefined is bound as this
  *    when calling function.
- * @param {function(this:T, !Error, ...*):?=} opt_onError function given error
+ * @param {function(this:T, !Error, ...*):?=} onError function given error
  *    and arguments provided to function call.
  * @return {!Function} protected function
  * @template T
  * @visibleForTesting
  */
 export function protectFunctionWrapper(
-    fn, opt_this = undefined, opt_onError = undefined) {
+    fn, inThis = undefined, onError = undefined) {
   return (...fnArgs) => {
     try {
-      return fn.apply(opt_this, fnArgs);
+      return fn.apply(inThis, fnArgs);
     } catch (err) {
-      if (opt_onError) {
+      if (onError) {
         try {
           // Ideally we could use [err, ...var_args] but linter disallows
           // spread so instead using unshift :(
           fnArgs.unshift(err);
-          return opt_onError.apply(opt_this, fnArgs);
+          return onError.apply(inThis, fnArgs);
         } catch (captureErr) {
           // swallow error if error handler throws.
         }
@@ -229,13 +230,13 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
      * cause promise chain to reject.
-     * @private {!function(string, !Object=)}
+     * @private {function(string, !Object=)}
      */
     this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
       this.emitLifecycleEvent, this,
-      (err, var_args) => {
+      (err, varArgs) => {
         dev().error(TAG, this.element.getAttribute('type'),
-            'Error on emitLifecycleEvent', err, var_args) ;
+            'Error on emitLifecycleEvent', err, varArgs) ;
       });
 
     this.protectedEmitLifecycleEvent_('adSlotBuilt');
@@ -465,6 +466,9 @@ export class AmpA4A extends AMP.BaseElement {
                 if (creative) {
                   return creative;
                 }
+
+                user().error(TAG, this.element.getAttribute('type'),
+                    'Unable to validate AMP creative against key providers');
                 // Attempt to re-fetch the keys in case our locally cached
                 // batch has expired.
                 this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
@@ -550,7 +554,8 @@ export class AmpA4A extends AMP.BaseElement {
                 },
                 err => {
                   user().error(
-                    TAG, this.element.getAttribute('type'), err, this.element);
+                    TAG, this.element.getAttribute('type'), keyInfo.serviceName,
+                    err, this.element);
                 });
           });
         }))
