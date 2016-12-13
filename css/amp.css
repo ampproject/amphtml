@@ -329,7 +329,7 @@ i-amp-scroll-container.amp-active {
   top:0;
   left: 0;
   right: 0;
-  height: 2px !important;
+  height: 2px;
   overflow: hidden !important;
   background-color: #696969;
   display: block;
