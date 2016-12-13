@@ -15,7 +15,6 @@
  */
 
 import {removeElement} from '../../../src/dom';
-import {getAdCid} from '../../../src/ad-cid';
 import {
   SubscriptionApi,
   listenFor,
@@ -139,20 +138,16 @@ export class AmpAdXOriginIframeHandler {
         this.adResponsePromise_,
         'timeout waiting for ad response').catch(e => {
           this.noContent_();
-          getAdCid(this.baseInstance_).then(cid => {
-            const tagType = this.baseInstance_.element.getAttribute('type');
-            const TAG = `AMP-AD-${tagType}`;
-            dev().error(TAG, JSON.stringify({
-              'm': e instanceof Error ? e.message : e,
-              'type': tagType,
-              'correlator': this.baseInstance_.win.ampAdPageCorrelator ||
-                  null,
-              'slotId': this.baseInstance_
-                  .element.getAttribute('data-amp-slot-index'),
-              'clientId': cid,
-              'referrer': this.baseInstance_.win.document./*OK*/referrer,
-            }));
-          });
+          const tagType = this.baseInstance_.element.getAttribute('type');
+          const TAG = `AMP-AD-${tagType}`;
+          dev().error(TAG, JSON.stringify({
+            'm': e instanceof Error ? e.message : e,
+            'type': tagType,
+            'correlator': this.baseInstance_.win.ampAdPageCorrelator ||
+                null,
+            'slotId': this.baseInstance_
+                .element.getAttribute('data-amp-slot-index'),
+          }));
         }).then(() => {
           if (this.iframe) {
             setStyle(this.iframe, 'visibility', '');
