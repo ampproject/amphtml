@@ -651,23 +651,8 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandInputValueAsync(element) {
-    dev().assert(element.tagName == 'INPUT' &&
-        (element.getAttribute('type') || '').toLowerCase() == 'hidden');
-    const whitelist = this.getWhitelistForElement_(element);
-    if (!whitelist) {
-      return Promise.resolve(element.value);
-    }
-    return /** @type {!Promise<string>} */ (this.expand_(
-        element[ORIGINAL_VALUE_PROPERTY] || element.value,
-        /* opt_bindings */ undefined,
-        /* opt_collectVars */ undefined,
-        /* opt_sync */ false,
-        /* opt_whitelist */ whitelist).then(newValue => {
-          if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
-            element[ORIGINAL_VALUE_PROPERTY] = element.value;
-          }
-          element.value = newValue;
-        }));
+    return /** @type {!Promise<string>} */ (
+        this.expandInputValue_(element, /*opt_sync*/ false));
   }
 
   /**
@@ -676,23 +661,42 @@ export class UrlReplacements {
    * @return {string} Replaced string for testing
    */
   expandInputValueSync(element) {
+    return /** @type {string} */ (
+        this.expandInputValue_(element, /*opt_sync*/ true));
+  }
+
+  /**
+   * Expands in input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @param {boolean=} opt_sync
+   * @return {string|!Promise<string>}
+   */
+  expandInputValue_(element, opt_sync) {
     dev().assert(element.tagName == 'INPUT' &&
-        (element.getAttribute('type') || '').toLowerCase() == 'hidden');
+        (element.getAttribute('type') || '').toLowerCase() == 'hidden',
+        'Input value expansion only works on hidden input fields: %s', element);
+
     const whitelist = this.getWhitelistForElement_(element);
     if (!whitelist) {
-      return element.value;
+      return opt_sync ? element.value : Promise.resolve(element.value);
     }
-    const newValue = this.expand_(
-        element[ORIGINAL_VALUE_PROPERTY] || element.value,
-        /* opt_bindings */ undefined,
-        /* opt_collectVars */ undefined,
-        /* opt_sync */ true,
-        /* opt_whitelist */ whitelist);
     if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
       element[ORIGINAL_VALUE_PROPERTY] = element.value;
     }
-    element.value = newValue;
-    return newValue;
+    const result = this.expand_(
+        element[ORIGINAL_VALUE_PROPERTY] || element.value,
+        /* opt_bindings */ undefined,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ opt_sync,
+        /* opt_whitelist */ whitelist);
+
+    if (opt_sync) {
+      return element.value = result;
+    }
+    return result.then(newValue => {
+      element.value = newValue;
+      return newValue;
+    });
   }
 
   /**
