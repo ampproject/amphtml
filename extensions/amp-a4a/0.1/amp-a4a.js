@@ -101,7 +101,7 @@ const SHARED_IFRAME_PROPERTIES = {
 /** @typedef {{
  *    creative: ArrayBuffer,
  *    signature: ?Uint8Array,
- *    size: ?Array<string>
+ *    size: ?Array<number>
  *  }} */
 export let AdResponseDef;
 
@@ -878,7 +878,6 @@ export class AmpA4A extends AMP.BaseElement {
   iframeRenderHelper_(iframe) {
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
-    this.rendered_ = true;
     if (this.creativeSize_) {
       this.handleResize(this.creativeSize_);
     }

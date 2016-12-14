@@ -572,7 +572,6 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'doubleclick');
         const a4a = new MockA4AImpl(a4aElement);
         const handleResizeMock = sandbox.stub(a4a, 'handleResize');
-        verifyNonAMPRender(a4a);
         doc.body.appendChild(a4aElement);
         a4a.onLayoutMeasure();
         const renderPromise = a4a.layoutCallback();

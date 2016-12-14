@@ -43,7 +43,7 @@ export class MockA4AImpl extends AmpA4A {
   }
 
   /** @override */
-  handleResize(size) {
+  handleResize() {
     return;
   }
 
