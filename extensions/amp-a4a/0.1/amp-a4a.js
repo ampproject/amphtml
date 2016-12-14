@@ -947,7 +947,7 @@ export class AmpA4A extends AMP.BaseElement {
    * TODO(keithwrightbos@): report error cases
    */
   getAmpAdMetadata_(creative) {
-    const metadataStart = creative.lastIndexOf(METADATA_STRING);
+    let metadataStart = creative.lastIndexOf(METADATA_STRING);
     if (metadataStart < 0) {
       metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES);
     }
