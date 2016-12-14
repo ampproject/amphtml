@@ -1056,8 +1056,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
     it('should replace CID', () => {
-      a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
-      a.setAttribute('data-amp-replace', 'QUERY_PARAM,CLIENT_ID');
+      a.href = 'https://canonical.com/link?' +
+          'out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
       // No replacement without previous async replacement
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal(
@@ -1095,6 +1096,81 @@ describes.sandboxed('UrlReplacements', {}, () => {
             'RANDOM': Promise.resolve('abc'),
           }).then(expanded => {
             expect(expanded).to.equal('abc:X:Y');
+          });
+    });
+  });
+
+  describe('Expanding Input Value', () => {
+    it('should fail for non-inputs', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('textarea');
+      input.value = 'RANDOM';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+          /Input value expansion only works on hidden input fields/);
+      expect(input.value).to.equal('RANDOM');
+    });
+
+    it('should fail for non-hidden inputs', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+          /Input value expansion only works on hidden input fields/);
+      expect(input.value).to.equal('RANDOM');
+    });
+
+    it('should not replace not whitelisted vars', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.type = 'hidden';
+      input.setAttribute('data-amp-replace', 'CANONICAL_URL');
+      let expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.equal('RANDOM');
+      input.setAttribute('data-amp-replace', 'CANONICAL_URL RANDOM');
+      expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
+      expect(input.value).to.match(/(\d+(\.\d+)?)/);
+      expect(input['amp-original-value']).to.equal('RANDOM');
+    });
+
+    it('should replace input value with var subs - sync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.type = 'hidden';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      let expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
+
+      input['amp-original-value'] = 'RANDOM://example.com/RANDOM';
+      expandedValue = urlReplacements.expandInputValueSync(input);
+      expect(expandedValue).to.match(
+          /(\d+(\.\d+)?):\/\/example\.com\/(\d+(\.\d+)?)$/);
+      expect(input.value).to.match(
+          /(\d+(\.\d+)?):\/\/example\.com\/(\d+(\.\d+)?)$/);
+      expect(input['amp-original-value']).to.equal(
+          'RANDOM://example.com/RANDOM');
+    });
+
+    it('should replace input value with var subs - sync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const input = document.createElement('input');
+      input.value = 'RANDOM';
+      input.type = 'hidden';
+      input.setAttribute('data-amp-replace', 'RANDOM');
+      return urlReplacements.expandInputValueAsync(input)
+          .then(expandedValue => {
+            expect(input['amp-original-value']).to.equal('RANDOM');
+            expect(input.value).to.match(/(\d+(\.\d+)?)/);
+            expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
           });
     });
   });
