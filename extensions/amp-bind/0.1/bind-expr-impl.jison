@@ -46,7 +46,7 @@ const functionWhitelist = (() => {
   return out;
 })();
 
-/** @return {bool} Returns false if args contains an invalid type. */
+/** @return {boolean} Returns false if args contains an invalid type. */
 function typeCheckArgs(args) {
   for (let i = 0; i < args.length; i++) {
     if (toString.call(args[i]) === '[object Object]') {

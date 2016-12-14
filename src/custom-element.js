@@ -1215,6 +1215,17 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Called when an attribute's value changes.
+     * Only called for observedAttributes or from amp-bind.
+     * @param {!string} name
+     * @param {?string} oldValue
+     * @param {?string} newValue
+     */
+    attributeChangedCallback(name, oldValue, newValue) {
+      this.implementation_.attributeChangedCallback(name, oldValue, newValue);
+    }
+
+    /**
      * Enqueues the action with the element. If element has been upgraded and
      * built, the action is dispatched to the implementation right away.
      * Otherwise the invocation is enqueued until the implementation is ready

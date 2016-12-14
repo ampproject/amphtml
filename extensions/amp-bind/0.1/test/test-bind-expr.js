@@ -14,240 +14,249 @@
  * limitations under the License.
  */
 
-import {evaluateBindExpr} from '../bind-expr';
+import {BindExpression} from '../bind-expression';
 
-describe('evaluateBindExpr', () => {
+describe('BindExpression', () => {
   const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
 
+  /**
+   * @param {string} expression
+   * @param {Object=} opt_scope
+   * @return {*}
+   */
+  function evaluate(expression, opt_scope) {
+    return new BindExpression(expression).evaluate(opt_scope);
+  }
+
   it('should evaluate arithmetic operations', () => {
-    expect(evaluateBindExpr('-1')).to.equal(-1);
-    expect(evaluateBindExpr('1 + 2')).to.equal(3);
-    expect(evaluateBindExpr('2 - 3.5')).to.equal(-1.5);
-    expect(evaluateBindExpr('3 * 4')).to.equal(12);
-    expect(evaluateBindExpr('4 / 5')).to.equal(0.8);
-    expect(evaluateBindExpr('5 % 4')).to.equal(1);
-    expect(evaluateBindExpr('1 / 0')).to.be.Infinity;
-    expect(evaluateBindExpr('0 / 0')).to.be.NaN;
+    expect(evaluate('-1')).to.equal(-1);
+    expect(evaluate('1 + 2')).to.equal(3);
+    expect(evaluate('2 - 3.5')).to.equal(-1.5);
+    expect(evaluate('3 * 4')).to.equal(12);
+    expect(evaluate('4 / 5')).to.equal(0.8);
+    expect(evaluate('5 % 4')).to.equal(1);
+    expect(evaluate('1 / 0')).to.be.Infinity;
+    expect(evaluate('0 / 0')).to.be.NaN;
   });
 
   it('should evaluate comparison operations', () => {
-    expect(evaluateBindExpr('2 > 1')).to.be.true;
-    expect(evaluateBindExpr('1 > 1')).to.be.false;
-    expect(evaluateBindExpr('1 >= 1')).to.be.true;
-    expect(evaluateBindExpr('1 >= 2')).to.be.false;
-    expect(evaluateBindExpr('1 < 2')).to.be.true;
-    expect(evaluateBindExpr('0 < 0')).to.be.false;
-    expect(evaluateBindExpr('1 <= 1')).to.be.true;
-    expect(evaluateBindExpr('1 <= 0')).to.be.false;
-    expect(evaluateBindExpr('0 == 1')).to.be.false;
-    expect(evaluateBindExpr('1 == 1')).to.be.true;
-    expect(evaluateBindExpr('0 != 1')).to.be.true;
-    expect(evaluateBindExpr('1 != 1')).to.be.false;
+    expect(evaluate('2 > 1')).to.be.true;
+    expect(evaluate('1 > 1')).to.be.false;
+    expect(evaluate('1 >= 1')).to.be.true;
+    expect(evaluate('1 >= 2')).to.be.false;
+    expect(evaluate('1 < 2')).to.be.true;
+    expect(evaluate('0 < 0')).to.be.false;
+    expect(evaluate('1 <= 1')).to.be.true;
+    expect(evaluate('1 <= 0')).to.be.false;
+    expect(evaluate('0 == 1')).to.be.false;
+    expect(evaluate('1 == 1')).to.be.true;
+    expect(evaluate('0 != 1')).to.be.true;
+    expect(evaluate('1 != 1')).to.be.false;
   });
 
   it('should evaluate logical operations', () => {
-    expect(evaluateBindExpr('!false')).to.be.true;
-    expect(evaluateBindExpr('true && true')).to.be.true;
-    expect(evaluateBindExpr('true && false')).to.be.false;
-    expect(evaluateBindExpr('false && false')).to.be.false;
-    expect(evaluateBindExpr('true || true')).to.be.true;
-    expect(evaluateBindExpr('true || false')).to.be.true;
-    expect(evaluateBindExpr('false || false')).to.be.false;
+    expect(evaluate('!false')).to.be.true;
+    expect(evaluate('true && true')).to.be.true;
+    expect(evaluate('true && false')).to.be.false;
+    expect(evaluate('false && false')).to.be.false;
+    expect(evaluate('true || true')).to.be.true;
+    expect(evaluate('true || false')).to.be.true;
+    expect(evaluate('false || false')).to.be.false;
   });
 
   it('should evaluate ternary operator', () => {
-    expect(evaluateBindExpr('true ? "a" : "b"')).to.be.equal('a');
-    expect(evaluateBindExpr('false ? "a" : "b"')).to.be.equal('b');
+    expect(evaluate('true ? "a" : "b"')).to.be.equal('a');
+    expect(evaluate('false ? "a" : "b"')).to.be.equal('b');
   });
 
   it('should respect arithmetic operator precedence', () => {
-    expect(evaluateBindExpr('-1 + 2')).to.equal(1);
-    expect(evaluateBindExpr('1 - -0.5')).to.equal(1.5);
-    expect(evaluateBindExpr('1 + -2 * 3')).to.equal(-5);
-    expect(evaluateBindExpr('1 / 2 - 3')).to.equal(-2.5);
-    expect(evaluateBindExpr('4 % 3 - 2 * 1')).to.equal(-1);
+    expect(evaluate('-1 + 2')).to.equal(1);
+    expect(evaluate('1 - -0.5')).to.equal(1.5);
+    expect(evaluate('1 + -2 * 3')).to.equal(-5);
+    expect(evaluate('1 / 2 - 3')).to.equal(-2.5);
+    expect(evaluate('4 % 3 - 2 * 1')).to.equal(-1);
   });
 
   it('should respect comparison operator precedence', () => {
-    expect(evaluateBindExpr('true == 2 > 1')).to.equal(true);
-    expect(evaluateBindExpr('true == 2 >= 1')).to.equal(true);
-    expect(evaluateBindExpr('true == 2 < 1')).to.equal(false);
-    expect(evaluateBindExpr('true == 2 <= 1')).to.equal(false);
-    expect(evaluateBindExpr('1 > 2 == true')).to.equal(false);
-    expect(evaluateBindExpr('1 >= 2 == true')).to.equal(false);
-    expect(evaluateBindExpr('1 < 2 == true')).to.equal(true);
-    expect(evaluateBindExpr('1 <= 2 == true')).to.equal(true);
+    expect(evaluate('true == 2 > 1')).to.equal(true);
+    expect(evaluate('true == 2 >= 1')).to.equal(true);
+    expect(evaluate('true == 2 < 1')).to.equal(false);
+    expect(evaluate('true == 2 <= 1')).to.equal(false);
+    expect(evaluate('1 > 2 == true')).to.equal(false);
+    expect(evaluate('1 >= 2 == true')).to.equal(false);
+    expect(evaluate('1 < 2 == true')).to.equal(true);
+    expect(evaluate('1 <= 2 == true')).to.equal(true);
   });
 
   it('should respect logical operator precedence', () => {
-    expect(evaluateBindExpr('!false && true')).to.be.true;
-    expect(evaluateBindExpr('false || !true')).to.be.false;
-    expect(evaluateBindExpr('true && false || true')).to.be.true;
-    expect(evaluateBindExpr('true && false == false')).to.be.true;
-    expect(evaluateBindExpr('false || false == true')).to.be.false;
-    expect(evaluateBindExpr('false == !true')).to.be.true;
+    expect(evaluate('!false && true')).to.be.true;
+    expect(evaluate('false || !true')).to.be.false;
+    expect(evaluate('true && false || true')).to.be.true;
+    expect(evaluate('true && false == false')).to.be.true;
+    expect(evaluate('false || false == true')).to.be.false;
+    expect(evaluate('false == !true')).to.be.true;
   });
 
   it('should support strings', () => {
-    expect(evaluateBindExpr('"a"')).to.equal('a');
-    expect(evaluateBindExpr('"a".length')).to.equal(1);
-    expect(evaluateBindExpr('"a" + "b"')).to.equal('ab');
-    expect(evaluateBindExpr('"a" + 1')).to.equal('a1');
-    expect(evaluateBindExpr('+"1"')).to.equal(1);
+    expect(evaluate('"a"')).to.equal('a');
+    expect(evaluate('"a".length')).to.equal(1);
+    expect(evaluate('"a" + "b"')).to.equal('ab');
+    expect(evaluate('"a" + 1')).to.equal('a1');
+    expect(evaluate('+"1"')).to.equal(1);
   });
 
   it('should support string whitelisted methods', () => {
-    expect(evaluateBindExpr('"abc".charAt(0)')).to.equal('a');
-    expect(evaluateBindExpr('"abc".charCodeAt(0)')).to.equal(97);
-    expect(evaluateBindExpr('"abc".concat("def")')).to.equal('abcdef');
-    expect(evaluateBindExpr('"abc".indexOf("b")')).to.equal(1);
-    expect(evaluateBindExpr('"aaa".lastIndexOf("a")')).to.equal(2);
-    expect(evaluateBindExpr('"abc".slice(0, 2)')).to.equal('ab');
-    expect(evaluateBindExpr('"a-b-c".split("-")'))
+    expect(evaluate('"abc".charAt(0)')).to.equal('a');
+    expect(evaluate('"abc".charCodeAt(0)')).to.equal(97);
+    expect(evaluate('"abc".concat("def")')).to.equal('abcdef');
+    expect(evaluate('"abc".indexOf("b")')).to.equal(1);
+    expect(evaluate('"aaa".lastIndexOf("a")')).to.equal(2);
+    expect(evaluate('"abc".slice(0, 2)')).to.equal('ab');
+    expect(evaluate('"a-b-c".split("-")'))
         .to.deep.equal(['a', 'b', 'c']);
-    expect(evaluateBindExpr('"abc".substr(1)')).to.equal('bc');
-    expect(evaluateBindExpr('"abc".substring(0, 2)')).to.equal('ab');
-    expect(evaluateBindExpr('"ABC".toLowerCase()')).to.equal('abc');
-    expect(evaluateBindExpr('"abc".toUpperCase()')).to.equal('ABC');
+    expect(evaluate('"abc".substr(1)')).to.equal('bc');
+    expect(evaluate('"abc".substring(0, 2)')).to.equal('ab');
+    expect(evaluate('"ABC".toLowerCase()')).to.equal('abc');
+    expect(evaluate('"abc".toUpperCase()')).to.equal('ABC');
   });
 
   it('should NOT allow access to non-whitelisted string methods', () => {
     expect(() => {
-      evaluateBindExpr('"abc".anchor()');
+      evaluate('"abc".anchor()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"abc".includes("ab")');
+      evaluate('"abc".includes("ab")');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"abc".link()');
+      evaluate('"abc".link()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"abc".repeat(2)');
+      evaluate('"abc".repeat(2)');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"abc".replace("bc", "xy")');
+      evaluate('"abc".replace("bc", "xy")');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"abc".search()');
+      evaluate('"abc".search()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"  abc  ".trim()');
+      evaluate('"  abc  ".trim()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"abc  ".trimRight()');
+      evaluate('"abc  ".trimRight()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('"  abc".trimLeft()');
+      evaluate('"  abc".trimLeft()');
     }).to.throw(Error, unsupportedFunctionError);
   });
 
   it('should support variables', () => {
-    expect(evaluateBindExpr('foo', {foo: 'bar'})).to.equal('bar');
-    expect(evaluateBindExpr('foo', {foo: 1})).to.equal(1);
-    expect(evaluateBindExpr('foo', {foo: [1, 2, 3]})).to.deep.equal([1, 2, 3]);
-    expect(evaluateBindExpr('foo', {foo: {'bar': 'qux'}}))
+    expect(evaluate('foo', {foo: 'bar'})).to.equal('bar');
+    expect(evaluate('foo', {foo: 1})).to.equal(1);
+    expect(evaluate('foo', {foo: [1, 2, 3]})).to.deep.equal([1, 2, 3]);
+    expect(evaluate('foo', {foo: {'bar': 'qux'}}))
         .to.deep.equal({bar: 'qux'});
-    expect(evaluateBindExpr('{foo: "bar"}', {foo: 'qux'}))
+    expect(evaluate('{foo: "bar"}', {foo: 'qux'}))
         .to.deep.equal({qux: 'bar'});
-    expect(evaluateBindExpr('{"foo": bar}', {bar: 'qux'}))
+    expect(evaluate('{"foo": bar}', {bar: 'qux'}))
         .to.deep.equal({foo: 'qux'});
-    expect(evaluateBindExpr('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
-    expect(evaluateBindExpr('foo[1]', {foo: ['b', 'c']})).to.equal('c');
-    expect(evaluateBindExpr('foo.length', {foo: [1, 2, 3]})).to.equal(3);
-    expect(evaluateBindExpr('"abc".charAt(foo)', {foo: 1})).to.equal('b');
+    expect(evaluate('[foo]', {foo: 'bar'})).to.deep.equal(['bar']);
+    expect(evaluate('foo[1]', {foo: ['b', 'c']})).to.equal('c');
+    expect(evaluate('foo.length', {foo: [1, 2, 3]})).to.equal(3);
+    expect(evaluate('"abc".charAt(foo)', {foo: 1})).to.equal('b');
   });
 
   it('should support array literals', () => {
-    expect(evaluateBindExpr('[]')).to.deep.equal([]);
-    expect(evaluateBindExpr('["a", "b"].length')).to.equal(2);
-    expect(evaluateBindExpr('[1, "a", [], {}]'))
+    expect(evaluate('[]')).to.deep.equal([]);
+    expect(evaluate('["a", "b"].length')).to.equal(2);
+    expect(evaluate('[1, "a", [], {}]'))
         .to.deep.equal([1, 'a', [], {}]);
-    expect(evaluateBindExpr('["a", "b"][1]')).to.equal('b');
-    expect(evaluateBindExpr('["a", foo][1]', {foo: 'b'})).to.equal('b');
+    expect(evaluate('["a", "b"][1]')).to.equal('b');
+    expect(evaluate('["a", foo][1]', {foo: 'b'})).to.equal('b');
   });
 
   it('should NOT allow invalid array access', () => {
-    expect(evaluateBindExpr('["a", "b"][-1]')).to.be.null;
-    expect(evaluateBindExpr('["a", "b"][2]')).to.be.null;
-    expect(evaluateBindExpr('["a", "b"][0.5]')).to.be.null;
-    expect(evaluateBindExpr('["a", "b"]["a"]')).to.be.null;
-    expect(evaluateBindExpr('["a", []][[]]')).to.be.null;
-    expect(evaluateBindExpr('["a", {}][{}]')).to.be.null;
+    expect(evaluate('["a", "b"][-1]')).to.be.null;
+    expect(evaluate('["a", "b"][2]')).to.be.null;
+    expect(evaluate('["a", "b"][0.5]')).to.be.null;
+    expect(evaluate('["a", "b"]["a"]')).to.be.null;
+    expect(evaluate('["a", []][[]]')).to.be.null;
+    expect(evaluate('["a", {}][{}]')).to.be.null;
   });
 
   it('should support array whitelisted methods', () => {
-    expect(evaluateBindExpr('["a", "b"].concat(["c", "d"])'))
+    expect(evaluate('["a", "b"].concat(["c", "d"])'))
         .to.deep.equal(['a', 'b', 'c', 'd']);
-    expect(evaluateBindExpr('["a", "a"].indexOf("a")')).to.equal(0);
-    expect(evaluateBindExpr('["a", "b", "c"].join("-")')).to.equal('a-b-c');
-    expect(evaluateBindExpr('["a", "a"].lastIndexOf("a")')).to.equal(1);
-    expect(evaluateBindExpr('["a", "b", "c"].slice(1, 2)'))
+    expect(evaluate('["a", "a"].indexOf("a")')).to.equal(0);
+    expect(evaluate('["a", "b", "c"].join("-")')).to.equal('a-b-c');
+    expect(evaluate('["a", "a"].lastIndexOf("a")')).to.equal(1);
+    expect(evaluate('["a", "b", "c"].slice(1, 2)'))
         .to.deep.equal(['b']);
   });
 
   it('should NOT allow access to array non-whitelisted methods', () => {
     expect(() => {
-      evaluateBindExpr('["a", "b", "c"].includes("a")');
+      evaluate('["a", "b", "c"].includes("a")');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('["a", "b", "c"].find()');
+      evaluate('["a", "b", "c"].find()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('["a", "b", "c"].forEach()');
+      evaluate('["a", "b", "c"].forEach()');
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('["a", "b", "c"].splice(1, 1)');
+      evaluate('["a", "b", "c"].splice(1, 1)');
     }).to.throw(Error, unsupportedFunctionError);
 
     expect(() => {
-      evaluateBindExpr('foo.find()', {foo: ['a', 'b', 'c']});
+      evaluate('foo.find()', {foo: ['a', 'b', 'c']});
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('foo.forEach()', {foo: ['a', 'b', 'c']});
+      evaluate('foo.forEach()', {foo: ['a', 'b', 'c']});
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('foo.splice(1, 1)', {foo: ['a', 'b', 'c']});
+      evaluate('foo.splice(1, 1)', {foo: ['a', 'b', 'c']});
     }).to.throw(Error, unsupportedFunctionError);
   });
 
   it('should support object literals', () => {
-    expect(evaluateBindExpr('{}')).to.deep.equal({});
-    expect(evaluateBindExpr('{}["a"]')).to.be.null;
-    expect(evaluateBindExpr('{}[{}]')).to.be.null;
-    expect(evaluateBindExpr('{"a": "b"}')).to.deep.equal({'a': 'b'});
-    expect(evaluateBindExpr('{foo: "b"}', {foo: 'a'}))
+    expect(evaluate('{}')).to.deep.equal({});
+    expect(evaluate('{}["a"]')).to.be.null;
+    expect(evaluate('{}[{}]')).to.be.null;
+    expect(evaluate('{"a": "b"}')).to.deep.equal({'a': 'b'});
+    expect(evaluate('{foo: "b"}', {foo: 'a'}))
         .to.deep.equal({'a': 'b'});
   });
 
   it('should evaluate undefined vars and properties to null', () => {
-    expect(evaluateBindExpr('foo')).to.be.null;
-    expect(evaluateBindExpr('foo.bar')).to.be.null;
-    expect(evaluateBindExpr('foo["bar"]')).to.be.null;
-    expect(evaluateBindExpr('foo[bar]')).to.be.null;
-    expect(evaluateBindExpr('foo[0]')).to.be.null;
+    expect(evaluate('foo')).to.be.null;
+    expect(evaluate('foo.bar')).to.be.null;
+    expect(evaluate('foo["bar"]')).to.be.null;
+    expect(evaluate('foo[bar]')).to.be.null;
+    expect(evaluate('foo[0]')).to.be.null;
   });
 
   it('should NOT allow access to prototype properties', () => {
-    expect(evaluateBindExpr('constructor')).to.be.null;
-    expect(evaluateBindExpr('prototype')).to.be.null;
-    expect(evaluateBindExpr('__proto__')).to.be.null;
+    expect(evaluate('constructor')).to.be.null;
+    expect(evaluate('prototype')).to.be.null;
+    expect(evaluate('__proto__')).to.be.null;
 
-    expect(evaluateBindExpr('{}.constructor')).to.be.null;
-    expect(evaluateBindExpr('{}.prototype')).to.be.null;
-    expect(evaluateBindExpr('{}.__proto__')).to.be.null;
+    expect(evaluate('{}.constructor')).to.be.null;
+    expect(evaluate('{}.prototype')).to.be.null;
+    expect(evaluate('{}.__proto__')).to.be.null;
 
-    expect(evaluateBindExpr('[].constructor')).to.be.null;
-    expect(evaluateBindExpr('[].prototype')).to.be.null;
-    expect(evaluateBindExpr('[].__proto__')).to.be.null;
+    expect(evaluate('[].constructor')).to.be.null;
+    expect(evaluate('[].prototype')).to.be.null;
+    expect(evaluate('[].__proto__')).to.be.null;
 
-    expect(evaluateBindExpr('"abc".constructor')).to.be.null;
-    expect(evaluateBindExpr('"abc".prototype')).to.be.null;
-    expect(evaluateBindExpr('"abc".__proto__')).to.be.null;
+    expect(evaluate('"abc".constructor')).to.be.null;
+    expect(evaluate('"abc".prototype')).to.be.null;
+    expect(evaluate('"abc".__proto__')).to.be.null;
 
-    expect(evaluateBindExpr('123.constructor')).to.be.null;
-    expect(evaluateBindExpr('123.prototype')).to.be.null;
-    expect(evaluateBindExpr('123.__proto__')).to.be.null;
+    expect(evaluate('123.constructor')).to.be.null;
+    expect(evaluate('123.prototype')).to.be.null;
+    expect(evaluate('123.__proto__')).to.be.null;
 
     const scope = {
       foo: {},
@@ -256,69 +265,69 @@ describe('evaluateBindExpr', () => {
       qux: 123,
     };
 
-    expect(evaluateBindExpr('foo.constructor', scope)).to.be.null;
-    expect(evaluateBindExpr('foo.prototype', scope)).to.be.null;
-    expect(evaluateBindExpr('foo.__proto__', scope)).to.be.null;
+    expect(evaluate('foo.constructor', scope)).to.be.null;
+    expect(evaluate('foo.prototype', scope)).to.be.null;
+    expect(evaluate('foo.__proto__', scope)).to.be.null;
 
-    expect(evaluateBindExpr('bar.constructor', scope)).to.be.null;
-    expect(evaluateBindExpr('bar.prototype', scope)).to.be.null;
-    expect(evaluateBindExpr('bar.__proto__', scope)).to.be.null;
+    expect(evaluate('bar.constructor', scope)).to.be.null;
+    expect(evaluate('bar.prototype', scope)).to.be.null;
+    expect(evaluate('bar.__proto__', scope)).to.be.null;
 
-    expect(evaluateBindExpr('baz.constructor', scope)).to.be.null;
-    expect(evaluateBindExpr('baz.prototype', scope)).to.be.null;
-    expect(evaluateBindExpr('baz.__proto__', scope)).to.be.null;
+    expect(evaluate('baz.constructor', scope)).to.be.null;
+    expect(evaluate('baz.prototype', scope)).to.be.null;
+    expect(evaluate('baz.__proto__', scope)).to.be.null;
 
-    expect(evaluateBindExpr('qux.constructor', scope)).to.be.null;
-    expect(evaluateBindExpr('qux.prototype', scope)).to.be.null;
-    expect(evaluateBindExpr('qux.__proto__', scope)).to.be.null;
+    expect(evaluate('qux.constructor', scope)).to.be.null;
+    expect(evaluate('qux.prototype', scope)).to.be.null;
+    expect(evaluate('qux.__proto__', scope)).to.be.null;
   });
 
   it('should NOT allow operators with side effects', () => {
-    expect(() => { evaluateBindExpr('foo = 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo += 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo -= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo *= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo /= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo %= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo **= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo <<= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo >>= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo >>>= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo &= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo ^= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo |= 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo++', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo--', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('~foo', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo << 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo >> 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('foo >>> 1', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('new Object()', {foo: 0}); }).to.throw();
-    expect(() => { evaluateBindExpr('delete foo', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo = 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo += 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo -= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo *= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo /= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo %= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo **= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo <<= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo >>= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo >>>= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo &= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo ^= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo |= 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo++', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo--', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('~foo', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo << 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo >> 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('foo >>> 1', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('new Object()', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('delete foo', {foo: 0}); }).to.throw();
   });
 
   it('should NOT allow control flow or loops', () => {
-    expect(() => { evaluateBindExpr('if (foo) "bar"', {foo: 0}); }).to.throw();
+    expect(() => { evaluate('if (foo) "bar"', {foo: 0}); }).to.throw();
     expect(() => {
-      evaluateBindExpr('switch (foo) { case 0: "bar" }', {foo: 0});
+      evaluate('switch (foo) { case 0: "bar" }', {foo: 0});
     }).to.throw();
-    expect(() => { evaluateBindExpr('for (;;) {}'); }).to.throw();
-    expect(() => { evaluateBindExpr('while (true) {}'); }).to.throw();
-    expect(() => { evaluateBindExpr('do {} while (true)'); }).to.throw();
+    expect(() => { evaluate('for (;;) {}'); }).to.throw();
+    expect(() => { evaluate('while (true) {}'); }).to.throw();
+    expect(() => { evaluate('do {} while (true)'); }).to.throw();
     expect(() => {
-      evaluateBindExpr('for (var i in foo) {}', {foo: [1, 2, 3]});
+      evaluate('for (var i in foo) {}', {foo: [1, 2, 3]});
     }).to.throw();
     expect(() => {
-      evaluateBindExpr('for (var i of foo) {}', {foo: [1, 2, 3]});
+      evaluate('for (var i of foo) {}', {foo: [1, 2, 3]});
     }).to.throw();
   });
 
   it('should NOT allow function declarations', () => {
-    expect(() => { evaluateBindExpr('function() {}'); }).to.throw();
-    expect(() => { evaluateBindExpr('function foo() {}'); }).to.throw();
-    expect(() => { evaluateBindExpr('new Function()'); }).to.throw();
-    expect(() => { evaluateBindExpr('() => {}'); }).to.throw();
-    expect(() => { evaluateBindExpr('class Foo {}'); }).to.throw();
+    expect(() => { evaluate('function() {}'); }).to.throw();
+    expect(() => { evaluate('function foo() {}'); }).to.throw();
+    expect(() => { evaluate('new Function()'); }).to.throw();
+    expect(() => { evaluate('() => {}'); }).to.throw();
+    expect(() => { evaluate('class Foo {}'); }).to.throw();
   });
 
   it('should NOT allow invocation of custom functions in scope', () => {
@@ -329,9 +338,9 @@ describe('evaluateBindExpr', () => {
       baz: () => { 'baz'; },
     };
     // baz() throws a parse error because functions must have a caller.
-    expect(() => { evaluateBindExpr('baz()', scope); }).to.throw();
+    expect(() => { evaluate('baz()', scope); }).to.throw();
     expect(() => {
-      evaluateBindExpr('foo.bar()', scope);
+      evaluate('foo.bar()', scope);
     }).to.throw(Error, unsupportedFunctionError);
   });
 
@@ -341,129 +350,129 @@ describe('evaluateBindExpr', () => {
       bar: [],
     };
     expect(() => {
-      evaluateBindExpr('foo.constructor()', scope);
+      evaluate('foo.constructor()', scope);
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('foo.__defineGetter__()', scope);
+      evaluate('foo.__defineGetter__()', scope);
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('foo.__defineSetter__()', scope);
+      evaluate('foo.__defineSetter__()', scope);
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('bar.constructor()', scope);
+      evaluate('bar.constructor()', scope);
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('bar.__defineGetter__()', scope);
+      evaluate('bar.__defineGetter__()', scope);
     }).to.throw(Error, unsupportedFunctionError);
     expect(() => {
-      evaluateBindExpr('bar.__defineSetter__()', scope);
+      evaluate('bar.__defineSetter__()', scope);
     }).to.throw(Error, unsupportedFunctionError);
   });
 
   it('should NOT allow invocation of whitelisted functions ' +
       'with invalid argument types', () => {
     expect(() => {
-      evaluateBindExpr('[1, 2, 3].indexOf({})');
+      evaluate('[1, 2, 3].indexOf({})');
     }).to.throw(Error, argumentTypeError);
     expect(() => {
-      evaluateBindExpr('"abc".substr({})');
+      evaluate('"abc".substr({})');
     }).to.throw(Error, argumentTypeError);
   });
 
   /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects */
   it('should NOT allow access to globals', () => {
-    expect(evaluateBindExpr('window')).to.be.null;
-    expect(evaluateBindExpr('arguments')).to.be.null;
+    expect(evaluate('window')).to.be.null;
+    expect(evaluate('arguments')).to.be.null;
 
-    expect(evaluateBindExpr('Infinity')).to.be.null;
-    expect(evaluateBindExpr('NaN')).to.be.null;
-    expect(evaluateBindExpr('undefined')).to.be.null;
+    expect(evaluate('Infinity')).to.be.null;
+    expect(evaluate('NaN')).to.be.null;
+    expect(evaluate('undefined')).to.be.null;
 
-    expect(() => { evaluateBindExpr('eval()'); }).to.throw();
-    expect(() => { evaluateBindExpr('uneval()'); }).to.throw();
-    expect(() => { evaluateBindExpr('isFinite()'); }).to.throw();
-    expect(() => { evaluateBindExpr('isNaN()'); }).to.throw();
-    expect(() => { evaluateBindExpr('parseFloat()'); }).to.throw();
-    expect(() => { evaluateBindExpr('parseInt()'); }).to.throw();
-    expect(() => { evaluateBindExpr('decodeURI()'); }).to.throw();
-    expect(() => { evaluateBindExpr('decodeURIComponent()'); }).to.throw();
-    expect(() => { evaluateBindExpr('encodeURI()'); }).to.throw();
-    expect(() => { evaluateBindExpr('encodeURIComponent()'); }).to.throw();
-    expect(() => { evaluateBindExpr('escape()'); }).to.throw();
-    expect(() => { evaluateBindExpr('unescape()'); }).to.throw();
+    expect(() => { evaluate('eval()'); }).to.throw();
+    expect(() => { evaluate('uneval()'); }).to.throw();
+    expect(() => { evaluate('isFinite()'); }).to.throw();
+    expect(() => { evaluate('isNaN()'); }).to.throw();
+    expect(() => { evaluate('parseFloat()'); }).to.throw();
+    expect(() => { evaluate('parseInt()'); }).to.throw();
+    expect(() => { evaluate('decodeURI()'); }).to.throw();
+    expect(() => { evaluate('decodeURIComponent()'); }).to.throw();
+    expect(() => { evaluate('encodeURI()'); }).to.throw();
+    expect(() => { evaluate('encodeURIComponent()'); }).to.throw();
+    expect(() => { evaluate('escape()'); }).to.throw();
+    expect(() => { evaluate('unescape()'); }).to.throw();
 
-    expect(evaluateBindExpr('Object')).to.be.null;
-    expect(evaluateBindExpr('Function')).to.be.null;
-    expect(evaluateBindExpr('Boolean')).to.be.null;
-    expect(evaluateBindExpr('Symbol')).to.be.null;
-    expect(evaluateBindExpr('Error')).to.be.null;
-    expect(evaluateBindExpr('EvalError')).to.be.null;
-    expect(evaluateBindExpr('InternalError')).to.be.null;
-    expect(evaluateBindExpr('RangeError')).to.be.null;
-    expect(evaluateBindExpr('ReferenceError')).to.be.null;
-    expect(evaluateBindExpr('SyntaxError')).to.be.null;
-    expect(evaluateBindExpr('TypeError')).to.be.null;
-    expect(evaluateBindExpr('URIError')).to.be.null;
+    expect(evaluate('Object')).to.be.null;
+    expect(evaluate('Function')).to.be.null;
+    expect(evaluate('Boolean')).to.be.null;
+    expect(evaluate('Symbol')).to.be.null;
+    expect(evaluate('Error')).to.be.null;
+    expect(evaluate('EvalError')).to.be.null;
+    expect(evaluate('InternalError')).to.be.null;
+    expect(evaluate('RangeError')).to.be.null;
+    expect(evaluate('ReferenceError')).to.be.null;
+    expect(evaluate('SyntaxError')).to.be.null;
+    expect(evaluate('TypeError')).to.be.null;
+    expect(evaluate('URIError')).to.be.null;
 
-    expect(evaluateBindExpr('Number')).to.be.null;
-    expect(evaluateBindExpr('Math')).to.be.null;
-    expect(evaluateBindExpr('Date')).to.be.null;
+    expect(evaluate('Number')).to.be.null;
+    expect(evaluate('Math')).to.be.null;
+    expect(evaluate('Date')).to.be.null;
 
-    expect(evaluateBindExpr('String')).to.be.null;
-    expect(evaluateBindExpr('RegExp')).to.be.null;
+    expect(evaluate('String')).to.be.null;
+    expect(evaluate('RegExp')).to.be.null;
 
-    expect(evaluateBindExpr('Array')).to.be.null;
-    expect(evaluateBindExpr('Int8Array')).to.be.null;
-    expect(evaluateBindExpr('Uint8Array')).to.be.null;
-    expect(evaluateBindExpr('Uint8ClampedArray')).to.be.null;
-    expect(evaluateBindExpr('Int16Array')).to.be.null;
-    expect(evaluateBindExpr('Uint16Array')).to.be.null;
-    expect(evaluateBindExpr('Int32Array')).to.be.null;
-    expect(evaluateBindExpr('Uint32Array')).to.be.null;
-    expect(evaluateBindExpr('Float32Array')).to.be.null;
-    expect(evaluateBindExpr('Float64Array')).to.be.null;
+    expect(evaluate('Array')).to.be.null;
+    expect(evaluate('Int8Array')).to.be.null;
+    expect(evaluate('Uint8Array')).to.be.null;
+    expect(evaluate('Uint8ClampedArray')).to.be.null;
+    expect(evaluate('Int16Array')).to.be.null;
+    expect(evaluate('Uint16Array')).to.be.null;
+    expect(evaluate('Int32Array')).to.be.null;
+    expect(evaluate('Uint32Array')).to.be.null;
+    expect(evaluate('Float32Array')).to.be.null;
+    expect(evaluate('Float64Array')).to.be.null;
 
-    expect(evaluateBindExpr('Map')).to.be.null;
-    expect(evaluateBindExpr('Set')).to.be.null;
-    expect(evaluateBindExpr('WeakMap')).to.be.null;
-    expect(evaluateBindExpr('WeakSet')).to.be.null;
+    expect(evaluate('Map')).to.be.null;
+    expect(evaluate('Set')).to.be.null;
+    expect(evaluate('WeakMap')).to.be.null;
+    expect(evaluate('WeakSet')).to.be.null;
 
-    expect(evaluateBindExpr('ArrayBuffer')).to.be.null;
-    expect(evaluateBindExpr('SharedArrayBuffer')).to.be.null;
-    expect(evaluateBindExpr('Atomics')).to.be.null;
-    expect(evaluateBindExpr('DataView')).to.be.null;
-    expect(evaluateBindExpr('JSON')).to.be.null;
+    expect(evaluate('ArrayBuffer')).to.be.null;
+    expect(evaluate('SharedArrayBuffer')).to.be.null;
+    expect(evaluate('Atomics')).to.be.null;
+    expect(evaluate('DataView')).to.be.null;
+    expect(evaluate('JSON')).to.be.null;
 
-    expect(evaluateBindExpr('Promise')).to.be.null;
-    expect(evaluateBindExpr('Generator')).to.be.null;
-    expect(evaluateBindExpr('GeneratorFunction')).to.be.null;
-    expect(evaluateBindExpr('AsyncFunction')).to.be.null;
+    expect(evaluate('Promise')).to.be.null;
+    expect(evaluate('Generator')).to.be.null;
+    expect(evaluate('GeneratorFunction')).to.be.null;
+    expect(evaluate('AsyncFunction')).to.be.null;
 
-    expect(evaluateBindExpr('Reflect')).to.be.null;
-    expect(evaluateBindExpr('Proxy')).to.be.null;
+    expect(evaluate('Reflect')).to.be.null;
+    expect(evaluate('Proxy')).to.be.null;
 
-    expect(evaluateBindExpr('Intl')).to.be.null;
+    expect(evaluate('Intl')).to.be.null;
 
-    expect(evaluateBindExpr('Iterator')).to.be.null;
-    expect(evaluateBindExpr('ParallelArray')).to.be.null;
-    expect(evaluateBindExpr('StopIteration')).to.be.null;
+    expect(evaluate('Iterator')).to.be.null;
+    expect(evaluate('ParallelArray')).to.be.null;
+    expect(evaluate('StopIteration')).to.be.null;
   });
 
   /** @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators */
   it('should NOT allow access to non-whitelisted operators', () => {
-    expect(evaluateBindExpr('this')).to.be.null;
-    expect(evaluateBindExpr('self')).to.be.null;
-    expect(evaluateBindExpr('global')).to.be.null;
-    expect(evaluateBindExpr('function')).to.be.null;
-    expect(evaluateBindExpr('class')).to.be.null;
-    expect(evaluateBindExpr('yield')).to.be.null;
-    expect(evaluateBindExpr('await')).to.be.null;
-    expect(evaluateBindExpr('new')).to.be.null;
-    expect(evaluateBindExpr('super')).to.be.null;
+    expect(evaluate('this')).to.be.null;
+    expect(evaluate('self')).to.be.null;
+    expect(evaluate('global')).to.be.null;
+    expect(evaluate('function')).to.be.null;
+    expect(evaluate('class')).to.be.null;
+    expect(evaluate('yield')).to.be.null;
+    expect(evaluate('await')).to.be.null;
+    expect(evaluate('new')).to.be.null;
+    expect(evaluate('super')).to.be.null;
 
-    expect(() => { evaluateBindExpr('function*'); }).to.throw();
-    expect(() => { evaluateBindExpr('/ab+c/i'); }).to.throw();
-    expect(() => { evaluateBindExpr('yield*'); }).to.throw();
-    expect(() => { evaluateBindExpr('async function*'); }).to.throw();
+    expect(() => { evaluate('function*'); }).to.throw();
+    expect(() => { evaluate('/ab+c/i'); }).to.throw();
+    expect(() => { evaluate('yield*'); }).to.throw();
+    expect(() => { evaluate('async function*'); }).to.throw();
   });
 });
