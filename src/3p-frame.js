@@ -124,6 +124,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const name = JSON.stringify({
     host,
     type: attributes.type,
+    // https://github.com/ampproject/amphtml/pull/2955
     count: count[attributes.type],
     attributes,
   });
