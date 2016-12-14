@@ -25,6 +25,8 @@ import {Observable} from '../../src/observable';
  */
 let PositionEntryDef;
 
+/** @const */
+const MIN_EVENT_INTERVAL_IN_MS = 100;
 
 export class PositionObserver {
 
@@ -55,11 +57,10 @@ export class PositionObserver {
   observe(element, callback) {
     if (!this.positionObservable_) {
       this.positionObservable_ = new Observable();
-      const listener = () => {
-        // TODO: rate limit this
+      const listener = rateLimit(this.win_, () => {
         this.update_();
         this.positionObservable_.fire();
-      };
+      }, MIN_EVENT_INTERVAL_IN_MS);
       this.update_();
       this.win_.addEventListener('scroll', listener, true);
       this.win_.addEventListener('resize', listener, true);
@@ -130,4 +131,39 @@ function getScrollingElement(win) {
  */
 function isWebKit(ua) {
   return /WebKit/i.test(ua) && !/Edge/i.test(ua);
+}
+
+/**
+ * Wrap around a given callback and apply rate limit.
+ * It responses to the first call immediately, then .
+ *
+ * @param {!Window} win
+ * @param {function()} callback
+ * @param {number} minInternal
+ * @returns {function()}
+ */
+function rateLimit(win, callback, minInternal) {
+  let fireLocker_ = null;
+  let waitToFire_ = false;
+
+  const fire = () => {
+    callback();
+
+    waitToFire_ = false;
+    // Lock the fire for MIN_EVENT_INTERVAL_IN_MS
+    fireLocker_ = win.setTimeout(() => {
+      fireLocker_ = null;
+      // If during the period there're events queued up, fire once.
+      if (waitToFire_) {
+        fire();
+      }
+    }, minInternal);
+  };
+  return () => {
+    if (fireLocker_) {
+      waitToFire_ = true;
+      return;
+    }
+    fire();
+  };
 }
