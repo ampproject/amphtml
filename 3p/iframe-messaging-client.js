@@ -20,12 +20,15 @@ import {serializeMessage, deserializeMessage} from '../src/3p-frame';
 export class IframeMessagingClient {
 
   /**
-   *  @param {Window} win A window object.
+   *  @param {!Window} win A window object.
    */
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
+    /** @private {!Window} */
     this.hostWindow_ = win.parent;
+    /** @private {?string} */
+    this.sentinel_ = null;
     /** Map messageType keys to callback functions for when we receive
      *  that message
      *  @private {!Object}
@@ -39,7 +42,7 @@ export class IframeMessagingClient {
    *
    * @param {string} requestType The type of the request message.
    * @param {string} responseType The type of the response message.
-   * @param {function(object)} callback The callback function to call
+   * @param {function(Object)} callback The callback function to call
    *   when a message with type responseType is received.
    */
   makeRequest(requestType, responseType, callback) {
@@ -54,7 +57,7 @@ export class IframeMessagingClient {
    *   All future calls will overwrite any previously registered
    *   callbacks.
    * @param {string} messageType The type of the message.
-   * @param {function()} callback The callback function to call
+   * @param {function(Object)} callback The callback function to call
    *   when a message with type messageType is received.
    */
   registerCallback(messageType, callback) {
@@ -103,10 +106,16 @@ export class IframeMessagingClient {
     });
   }
 
+  /**
+   * @param {!Window} win
+   */
   setHostWindow(win) {
     this.hostWindow_ = win;
   }
 
+  /**
+   * @param {string} sentinel
+   */
   setSentinel(sentinel) {
     this.sentinel_ = sentinel;
   }
