@@ -22,7 +22,7 @@ import {
 } from '../../../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
-const TAG = 'amp-video2';
+const TAG = 'amp-video';
 
 describe(TAG, () => {
   let sandbox;

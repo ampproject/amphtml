@@ -32,6 +32,8 @@ import {vsyncFor} from '../vsync';
  */
 const VISIBILITY_PERCENT = 75;
 
+let ccc = 0;
+
 /**
  * VideoManager keeps track of all AMP video players that implement
  * the common Video API {@see ../video-interface.VideoInterface}.
@@ -54,6 +56,9 @@ export class VideoManager {
 
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
+
+    /** @private {?VideoManager} */
+    this.videoManager_ = null;
   }
 
   /**
@@ -466,5 +471,10 @@ export function clearSupportsAutoplayCacheForTesting() {
  * @return {!VideoManager}
  */
 export function installVideoManagerForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'video-manager', VideoManager);
+  if (!this.videoManager_) {
+    console.log('installing videoManager (should only show up once)');
+    console.log('ccc:',ccc); ccc++;
+    this.videoManager_ = fromClassForDoc(ampdoc, 'video-manager', VideoManager);
+  }
+  return this.videoManager_ ;
 };

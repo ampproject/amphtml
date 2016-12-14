@@ -16,6 +16,9 @@
 
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
@@ -68,6 +71,8 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    installVideoManagerForDoc(this.element);
   }
 
   /**
