@@ -45,16 +45,16 @@ limitations under the License.
 
 Once installed, `amp-bind` scans the DOM for bindings -- an element may have attributes, CSS classes or textContent bound to a JS-like expression (see [Expressions](#expressions) below).
 
-The **scope** is mutable implicit document state that binding expressions may reference. The scope may be initialized with a new AMP component `<amp-bind-state>`. Changes to the scope happen through user actions, e.g. clicking a `<button>` or switching slides on an `<amp-carousel>`.
+The **scope** is mutable implicit document state that binding expressions may reference. The scope may be initialized with a new AMP component `<amp-state>`. Changes to the scope happen through user actions, e.g. clicking a `<button>` or switching slides on an `<amp-carousel>`.
 
 A **digest** is an evaluation of all binding expressions. Since scope is mutable and expressions can reference the scope, the evaluated result of expressions may change over time. Bound elements are updated as a result of a digest.
 
 A simple example:
 
 ```html
-<amp-bind-state id=”foo”>
+<amp-state id=”foo”>
   <script type=”application/json”>{ message: “Hello World” }</script>
-</amp-bind-state>
+</amp-state>
 
 <p [text]=”foo.message”>Placeholder text</p>
 ```
