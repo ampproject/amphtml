@@ -947,8 +947,10 @@ export class AmpA4A extends AMP.BaseElement {
    * TODO(keithwrightbos@): report error cases
    */
   getAmpAdMetadata_(creative) {
+    let metadataString = METADATA_STRING;
     let metadataStart = creative.lastIndexOf(METADATA_STRING);
     if (metadataStart < 0) {
+      metadataString = METADATA_STRING_NO_QUOTES;
       metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES);
     }
     if (metadataStart < 0) {
@@ -967,7 +969,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     try {
       const metaDataObj = JSON.parse(
-        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
+        creative.slice(metadataStart + metadataString.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];
       if (!isArray(ampRuntimeUtf16CharOffsets) ||

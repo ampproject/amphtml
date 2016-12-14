@@ -867,6 +867,27 @@ describe('amp-a4a', () => {
       };
       expect(actual).to.deep.equal(expected);
     });
+    // TODO(levitzky) remove this test after metadata bug is fixed.
+    it('should parse metadata with wrong opening tag', () => {
+      const creative = buildCreativeString({
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {href: 'https://fonts.com/css?helloworld'},
+        ],
+      }).replace('<script type="application/json" amp-ad-metadata>',
+          '<script type=application/json amp-ad-metadata>');
+      const actual = a4a.getAmpAdMetadata_(creative);
+      const expected = {
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {href: 'https://fonts.com/css?helloworld'},
+        ],
+      };
+      expect(actual).to.deep.equal(expected);
+    });
     it('should return null if missing ampRuntimeUtf16CharOffsets', () => {
       const baseTestDoc = testFragments.minimalDocOneStyle;
       const splicePoint = baseTestDoc.indexOf('</body>');
