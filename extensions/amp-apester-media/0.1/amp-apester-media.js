@@ -51,6 +51,9 @@ class AmpApesterMedia extends AMP.BaseElement {
         this.iframe_.contentWindow./*OK*/postMessage('interaction seen', '*');
       }
     }
+    if (this.getPlaceholder() && !this.ready_) {
+      this.togglePlaceholder(inViewport);
+    }
   }
 
   /** @override */
@@ -82,6 +85,11 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.displayBaseUrl_ = 'https://display.apester.com';
 
     /**
+     * @const @private {string}
+     */
+    this.loaderUrl_ = 'https://images.apester.com/images%2Floader.gif';
+
+    /**
      * @private {boolean}
      */
     this.random_ = false;
@@ -111,6 +119,11 @@ class AmpApesterMedia extends AMP.BaseElement {
      * @private {boolean}
      */
     this.seen_ = false;
+
+    /**
+     * @private {boolean}
+     */
+    this.ready_ = false;
   }
 
   /** @override */
@@ -203,12 +216,26 @@ class AmpApesterMedia extends AMP.BaseElement {
           return undefined;
         }).then(media => {
           this.togglePlaceholder(false);
+          this.ready_ = true;
           const height = 0 || media.data.size.height;
           if (height != this.height_) {
             this.height_ = height;
             this./*OK*/attemptChangeHeight(height);
           }
         });
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    const img = this.element.ownerDocument.createElement('amp-img');
+    const placeholder = this.element.ownerDocument.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.className = 'amp-apester-loader';
+    img.setAttribute('src', this.loaderUrl_);
+    img.setAttribute('layout', 'fill');
+    img.setAttribute('noloading', '');
+    placeholder.appendChild(img);
+    return placeholder;
   }
 
   /** @override */
