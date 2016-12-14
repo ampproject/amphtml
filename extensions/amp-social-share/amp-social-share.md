@@ -108,14 +108,14 @@ The element provides [some pre-configured providers](0.1/amp-social-share-config
     - url `optional` (defaults: `rel=canonical` URL)
     - name `optional` (defaults: Current page title)
 - email
-    - subject `optional` (defaults: Crrent page title)
+    - subject `optional` (defaults: Current page title)
     - body `optional` (defaults: `rel=canonical` URL)
 
 ### Un-configured Providers
-`amp-social-share` allows you to use any provider you'd like that is not pre-configured. By configuring the element with more attributes.
+`amp-social-share` allows you to use any provider you'd like that is not pre-configured by configuring the element with more attributes.
 
 #### Example
-The following example will create a share button through whatsapp, by setting `data-share-endpoint` attribute to the correct endpoint for whatsapp ustom protocol.
+The following example will create a share button through whatsapp, by setting `data-share-endpoint` attribute to the correct endpoint for whatsapp custom protocol.
 ```html
 <amp-social-share type="whatsapp"
                 layout="container"
