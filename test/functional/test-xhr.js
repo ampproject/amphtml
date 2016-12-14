@@ -190,14 +190,6 @@ describe('XHR', function() {
           expect(noOrigin(requests[0].url)).to.equal('/get');
         });
 
-        it('should not include __amp_source_origin if disableAmpSourceOrigin ' +
-            'true & requireAmpResponseSourceOrigin true', () => {
-          xhr.fetchJson('/get', {disableAmpSourceOrigin: true,
-            requireAmpResponseSourceOrigin: true});
-          expect(noOrigin(requests[0].url)).to.equal(
-              '/get?__amp_source_origin=https%3A%2F%2Facme.com');
-        });
-
         it('should accept AMP origin when received in response', () => {
           const promise = xhr.fetchJson('/get');
           requests[0].respond(200, {

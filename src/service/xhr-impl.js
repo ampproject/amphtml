@@ -123,7 +123,10 @@ export class Xhr {
   fetchAmpCors_(input, init = {}) {
     // Do not append __amp_source_origin if explicitly disabled
     // (requireAmpResponseSourceOrigin overrides disable).
-    if (init.requireAmpResponseSourceOrigin || !init.disableAmpSourceOrigin) {
+    dev().assert(
+      !(init.disableAmpSourceOrigin && init.requireAmpResponseSourceOrigin),
+      'requireAmpResponseSourceOrigin and disableAmpSourceOrigin enabled');
+    if (!init.disableAmpSourceOrigin) {
       input = this.getCorsUrl(this.win, input);
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
