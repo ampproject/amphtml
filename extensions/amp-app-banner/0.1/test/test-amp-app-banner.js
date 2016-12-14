@@ -27,7 +27,8 @@ import {xhrFor} from '../../../../src/xhr';
 import {timerFor} from '../../../../src/timer';
 import '../../../amp-analytics/0.1/amp-analytics';
 import * as sinon from 'sinon';
-
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {viewerForDoc} from '../../../../src/viewer';
 
 describe('amp-app-banner', () => {
 
@@ -38,6 +39,7 @@ describe('amp-app-banner', () => {
   let isIos = false;
   let isChrome = false;
   let isSafari = false;
+  let isEmbedded = false;
 
   const meta = {
     content: 'app-id=828256236, app-argument=medium://p/cb7f223fad86',
@@ -67,6 +69,9 @@ describe('amp-app-banner', () => {
 
   function getTestFrame() {
     return createIframePromise(true).then(iframe => {
+      const ampdoc = new AmpDocSingle(iframe.win);
+      const viewer = viewerForDoc(ampdoc);
+      sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
       platform = platformFor(iframe.win);
       sandbox.stub(platform, 'isIos', () => isIos);
       sandbox.stub(platform, 'isAndroid', () => isAndroid);
@@ -202,6 +207,7 @@ describe('amp-app-banner', () => {
     isIos = false;
     isChrome = false;
     isSafari = false;
+    isEmbedded = false;
   });
 
   afterEach(() => {
@@ -270,8 +276,17 @@ describe('amp-app-banner', () => {
       });
     });
 
-    it('should remove banner if safari', () => {
+    it('should remove banner if safari and not embedded', () => {
       isSafari = true;
+      isEmbedded = false;
+      return getAppBanner().then(banner => {
+        expect(banner.parentElement).to.be.null;
+      });
+    });
+
+    it('should remove banner if safari and embedded', () => {
+      isSafari = true;
+      isEmbedded = true;
       return getAppBanner().then(banner => {
         expect(banner.parentElement).to.be.null;
       });
