@@ -109,6 +109,7 @@ describe('amp-ad-network-doubleclick-impl', () => {
       return doubleclickImpl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
           'https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
+          // Depending on how the test is run, it can get different results.
           '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=0x0&u_sd=2' +
           '&adtest=false' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +

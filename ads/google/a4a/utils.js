@@ -158,7 +158,8 @@ function buildAdUrl(
   }
   const slotRect = a4a.getIntersectionElementLayoutBox();
   const screen = global.screen;
-  const viewportRect = a4a.getViewport().getRect();
+  const viewport = a4a.getViewport();
+  const viewportRect = viewport.getRect();
   const iframeDepth = iframeNestingDepth(global);
   const browserViewPortSize = browserViewportSize(global);
   const dtdParam = {name: 'dtd'};
@@ -194,7 +195,7 @@ function buildAdUrl(
       {name: 'u_h', value: screen ? screen.height : null},
       {name: 'u_tz', value: -new Date().getTimezoneOffset()},
       {name: 'u_his', value: getHistoryLength(global)},
-      {name: 'brdim', value: additionalDimensions(global)},
+      {name: 'brdim', value: additionalDimensions(global, viewport)},
       {name: 'isw', value: browserViewPortSize.width},
       {name: 'ish', value: browserViewPortSize.height},
       dtdParam,
@@ -328,8 +329,8 @@ function browserViewportSize(win) {
     try {
       if (w.document && w.document.body) {
         const body = w.document.body;
-        width = Math.round(body.clientWidth);
-        height = Math.round(body.clientHeight);
+        width = Math.round(body./*OK*/clientWidth);
+        height = Math.round(body./*OK*/clientHeight);
       }
     } catch (e) {
       width = -0xbadbad;
@@ -343,11 +344,13 @@ function browserViewportSize(win) {
 /**
  * Collect additional dimensions for the brdim parameter.
  * @param {!Window} win The window for which we read the browser dimensions.
+ * @param {!../../../src/service/viewport-impl.Viewport} viewport
  * @return {string}
  */
-function additionalDimensions(win) {
+function additionalDimensions(win, viewport) {
   // Some browsers throw errors on some of these.
   let screenX, screenY, outerWidth, outerHeight, innerWidth, innerHeight;
+  const size = viewport.getSize();
   try {
     screenX = win.screenX;
     screenY = win.screenY;
@@ -357,8 +360,8 @@ function additionalDimensions(win) {
     outerHeight = win.outerHeight;
   } catch (e) {}
   try {
-    innerWidth = win.innerWidth;
-    innerHeight = win.innerHeight;
+    innerWidth = size.width;
+    innerHeight = size.height;
   } catch (e) {}
   return [win.screenLeft,
           win.screenTop,
