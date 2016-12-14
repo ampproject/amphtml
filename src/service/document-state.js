@@ -46,8 +46,8 @@ export class DocumentState {
       this.visibilityStateProp_ = null;
     }
 
-    /** @private {?Observable} */
-    this.visibilityObservable_ = null;
+    /** @private @const {!Observable} */
+    this.visibilityObservable_ = new Observable();
 
     /** @private {string|null} */
     this.visibilityChangeEvent_ = null;
@@ -109,9 +109,6 @@ export class DocumentState {
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
-    if (!this.visibilityObservable_) {
-      this.visibilityObservable_ = new Observable();
-    }
     return this.visibilityObservable_.add(handler);
   }
 
