@@ -85,6 +85,7 @@ declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-live-list', '0.1', true);
 declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-ooyala-player', '0.1', false);
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-playbuzz', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false);
@@ -227,6 +228,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     toName: 'amp-inabox.js',
     minifiedName: 'amp4ads-v0.js',
     includePolyfills: true,
+    extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
     checkTypes: opt_checkTypes,
     watch: watch,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
@@ -461,8 +463,9 @@ function checkTypes() {
   }).sort();
   closureCompile(compileSrcs.concat(extensionSrcs), './dist',
       'check-types.js', {
-        include3pDirectories: false,
+        include3pDirectories: true,
         includePolyfills: true,
+        extraGlobs: ['src/inabox/*.js'],
         checkTypes: true,
       });
   // Type check 3p/ads code.
