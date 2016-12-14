@@ -610,6 +610,20 @@ var forbiddenTermsSrcInclusive = {
       'src/service/url-replacements-impl.js',
     ],
   },
+  '\\.expandInputValueSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
+  '\\.expandInputValueAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
