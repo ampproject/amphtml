@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-import {parser} from './bind-expr-impl';
+import {AmpState} from './amp-state';
+import {Bind} from './bind-impl';
 
-export function evaluateBindExpr(expr, data) {
-  try {
-    parser.yy = data;
-    return parser.parse(expr);
-  } finally {
-    parser.yy = null;
-  }
-}
+AMP.registerServiceForDoc('bind', Bind);
+AMP.registerElement('amp-state', AmpState);
