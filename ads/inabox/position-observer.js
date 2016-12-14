@@ -16,6 +16,7 @@
 
 import {layoutRectLtwh, LayoutRectDef} from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
+import {rateLimit} from '../../src/utils/rate-limit';
 
 /**
  * @typedef {{
@@ -25,6 +26,8 @@ import {Observable} from '../../src/observable';
  */
 let PositionEntryDef;
 
+/** @const */
+const MIN_EVENT_INTERVAL_IN_MS = 100;
 
 export class PositionObserver {
 
@@ -55,11 +58,10 @@ export class PositionObserver {
   observe(element, callback) {
     if (!this.positionObservable_) {
       this.positionObservable_ = new Observable();
-      const listener = () => {
-        // TODO: rate limit this
+      const listener = rateLimit(this.win_, () => {
         this.update_();
         this.positionObservable_.fire();
-      };
+      }, MIN_EVENT_INTERVAL_IN_MS);
       this.update_();
       this.win_.addEventListener('scroll', listener, true);
       this.win_.addEventListener('resize', listener, true);
