@@ -323,6 +323,36 @@ i-amp-scroll-container.amp-active {
   visibility: hidden;
 }
 
+.-amp-loader-line {
+  position: absolute;
+  top:0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  overflow: hidden !important;
+  background-color:rgba(151, 151, 151, 0.2);
+  display: block;
+}
+
+.-amp-loader-moving-line {
+  display: block;
+  position: absolute;
+  left: -100%;
+  width: 100%;
+  height: 100% !important;
+  background-color: #979797;
+  z-index: 2;
+}
+
+@keyframes -amp-loader-line-moving {
+  0% {left: -100%;}
+  100% {left: 100%;}
+}
+
+.-amp-loader-line.amp-active .-amp-loader-moving-line {
+  animation: -amp-loader-line-moving 2s ease infinite;
+}
+
 .-amp-loader {
   position: absolute;
   display: block;

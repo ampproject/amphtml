@@ -1394,7 +1394,7 @@ function createBaseCustomElementClass(win) {
         container.classList.add('-amp-fill-content');
         container.classList.add('amp-hidden');
 
-        const element = createLoaderElement(doc);
+        const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);
 
         this.appendChild(container);
