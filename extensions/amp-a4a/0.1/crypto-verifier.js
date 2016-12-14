@@ -31,6 +31,7 @@ const VERSION = 0x00;
  * An object holding the public key and its hash.
  *
  * @typedef {{
+ *   serviceName: string,
  *   publicKey: !Object,
  *   hash: Uint8Array,
  *   cryptoKey: !webCrypto.CryptoKey
@@ -43,11 +44,12 @@ export let PublicKeyInfoDef;
  * compute a hash for it.  The caller must verify that Web Cryptography is
  * available using isCryptoAvailable before calling this function.
  *
+ * @param {string} serviceName used to identify the signing service.
  * @param {!Object} jwk An object which is hopefully an RSA JSON Web Key.  The
  *     caller should verify that it is an object before calling this function.
  * @return {!Promise<!PublicKeyInfoDef>}
  */
-export function importPublicKey(jwk) {
+export function importPublicKey(serviceName, jwk) {
   // WebKit wants this as an ArrayBufferView.
   return (isWebkit ? utf8Encode(JSON.stringify(jwk)) : Promise.resolve(jwk))
       .then(encodedJwk => crossCrypto.importKey(
@@ -74,11 +76,28 @@ export function importPublicKey(jwk) {
         // control, so a collision would not help.
         return crossCrypto.digest({name: 'SHA-1'}, data)
             .then(digest => ({
+              serviceName,
               cryptoKey,
               // Hash is the first 4 bytes of the SHA-1 digest.
               hash: new Uint8Array(/** @type {ArrayBuffer} */(digest), 0, 4),
             }));
       });
+}
+
+/**
+ * Verifies signature was signed with private key matching public key given.
+ * Does not verify data actually matches signature (use verifySignature).
+ * @param {!Uint8Array} signature the RSA signature.
+ * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
+ * @return {boolean} whether signature was generated using hash.
+ */
+export function verifyHashVersion(signature, publicKeyInfo) {
+  // The signature has the following format:
+  // 1-byte version + 4-byte key hash + raw RSA signature where
+  // the raw RSA signature is computed over (data || 1-byte version).
+  // If the hash doesn't match, don't bother checking this key.
+  return signature.length > 5 && signature[0] == VERSION &&
+      hashesEqual(signature, publicKeyInfo.hash);
 }
 
 /**
@@ -90,12 +109,7 @@ export function importPublicKey(jwk) {
  *     the public key.
  */
 export function verifySignature(data, signature, publicKeyInfo) {
-  // The signature has the following format:
-  // 1-byte version + 4-byte key hash + raw RSA signature where
-  // the raw RSA signature is computed over (data || 1-byte version).
-  // If the hash doesn't match, don't bother checking this key.
-  if (!(signature.length > 5 && signature[0] == VERSION &&
-      hashesEqual(signature, publicKeyInfo.hash))) {
+  if (!verifyHashVersion(signature, publicKeyInfo)) {
     return Promise.resolve(false);
   }
   // Verify that the data matches the raw RSA signature, using the

@@ -37,8 +37,9 @@ const modulus =
       'BPh0v2RwtwxNFytR9Ksrj_hwOYz_l81m8PnaBhMnkZorqF53bg' +
       'eJ8jvDx2_mBb';
 const pubExp = 'AQAB';
+const serviceName = 'test-service';
 
-const pubKeyInfoPromise = importPublicKey({
+const pubKeyInfoPromise = importPublicKey(serviceName, {
   kty: 'RSA',
   'n': modulus,
   'e': pubExp,
@@ -52,7 +53,7 @@ const modulus1 =
       'kpcJ-XC_Q62ArEY5vqxJgdYjq4bE8s3f8rKC-Uqg_uepoFEn-X' +
       'Xf2l0UQmVcYCxeRY6ahvM';
 const pubExp1 = 'AQAB';
-const pubKeyInfoPromise1 = importPublicKey({
+const pubKeyInfoPromise1 = importPublicKey(serviceName, {
   kty: 'RSA',
   'n': modulus1,
   'e': pubExp1,
@@ -94,6 +95,7 @@ describe('importPublicKet', function() {
   it('should resolve to a PublicKeyInfoDef object', () =>
     pubKeyInfoPromise.then(pubKeyInfo => {
       expect(pubKeyInfo).to.not.be.null;
+      expect(pubKeyInfo.serviceName).to.equal(serviceName);
       expect(pubKeyInfo.hash).to.not.be.null;
       expect(pubKeyInfo.hash.length).to.equal(4);
       expect(pubKeyInfo.cryptoKey).to.not.be.null;
@@ -134,4 +136,3 @@ describes.sandboxed('verifySignature', {}, function() {
         .then(isvalid => expect(isvalid).to.be.false)));
 
 });
-
