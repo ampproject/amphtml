@@ -31,7 +31,7 @@ export function ix(global, data) {
       callDoubleclick(global, data);
       return;
     } else {
-      data.ixId = parseInt(data.ixId, 10)
+      data.ixId = parseInt(data.ixId, 10);
     }
 
     if (typeof data.ixSlot === 'undefined' || isNaN(data.ixSlot)) {
