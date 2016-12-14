@@ -67,7 +67,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win) &&
+    return isGoogleAdsA4AValidEnvironment(this.win, this.element) &&
         this.isAmpAdElement();
   }
 
