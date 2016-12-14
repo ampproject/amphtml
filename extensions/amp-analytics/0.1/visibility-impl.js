@@ -368,7 +368,7 @@ export class Visibility {
     });
 
     // Hidden trigger
-    if (!this.visibilityListenerRegistered_) {
+    if (!shouldBeVisible && !this.visibilityListenerRegistered_) {
       this.viewer_.onVisibilityChanged(() => {
         if (!this.viewer_.isVisible()) {
           this.onDocumentHidden_();
@@ -438,7 +438,7 @@ export class Visibility {
 
   /** @private */
   onDocumentHidden_() {
-    for (let i = this.resources_.length - 1; i >= 0; i--) {
+    for (let i = 0; i < this.resources_.length; i++) {
       const resource = this.resources_[i];
       if (!resource.hasLoadedOnce()) {
         continue;
