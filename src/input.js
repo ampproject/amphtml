@@ -235,7 +235,9 @@ export class Input {
   /** @private */
   mouseConfirmed_() {
     this.hasMouse_ = true;
-    this.mouseDetectedObservable_.fire(true);
+    if (this.mouseDetectedObservable_) {
+      this.mouseDetectedObservable_.fire(true);
+    }
     dev().fine(TAG_, 'mouse detected');
   }
 
