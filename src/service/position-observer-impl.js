@@ -30,7 +30,7 @@ let IntersectionObserverDef;
 /**
  * @typedef {{
  *   id: string,
- *   useNative: boolean|undefine,
+ *   useNative: (boolean|undefine),
  *   options: Object,
  * }}
  */
@@ -66,10 +66,10 @@ export class PositionObserver {
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     /** @const @private {!Window} */
-    this.win = ampdoc.win;
+    this.win_ = ampdoc.win;
 
     /** @const @private {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
+    this.ampdoc_ = ampdoc;
 
     /** @const @private {!Object<string, IntersectionObserverDef>} */
     this.intersectionObservers_ = map();
@@ -121,7 +121,7 @@ export class PositionObserver {
     // Have layout manager tick with layer,
     // IntersectionObserverPolyfill can only tick for observed elements
     // live inside child layer.
-    const viewportRect = viewportForDoc(this.ampdoc).getRect();
+    const viewportRect = viewportForDoc(this.ampdoc_).getRect();
     const keys = Object.keys(this.intersectionObservers_);
     for (let i = 0; i < keys.length; i++) {
       if (!this.intersectionObservers_[keys[i]].native) {
@@ -148,10 +148,10 @@ export class PositionObserver {
     // create a new IntersectionObserver
     const ioEntry = Object.create(null);
     if (trackOption.useNative !== false &&
-        this.win.IntersectionObserver &&
-        this.win.IntersectionObserver.prototype.observe) {
+        this.win_.IntersectionObserver &&
+        this.win_.IntersectionObserver.prototype.observe) {
       // use native IntersectionObserver
-      ioEntry.io = new this.win.IntersectionObserver(changes => {
+      ioEntry.io = new this.win_.IntersectionObserver(changes => {
         this.observableMap_[trackOption.id].fire(changes);
       }, trackOption.options);
       ioEntry.native = true;
