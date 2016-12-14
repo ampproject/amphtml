@@ -1034,7 +1034,8 @@ describe('amp-form', () => {
         ampForm.handleSubmit_();
         expect(ampForm.urlReplacement_.expandInputValueAsync)
             .to.not.have.been.called;
-        expect(ampForm.urlReplacement_.expandInputValueSync).to.have.been.called;
+        expect(ampForm.urlReplacement_.expandInputValueSync)
+            .to.have.been.called;
         expect(ampForm.urlReplacement_.expandInputValueSync)
             .to.have.been.calledWith(clientIdField);
         expect(ampForm.urlReplacement_.expandInputValueSync)

@@ -1056,7 +1056,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
     it('should replace CID', () => {
-      a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
+      a.href = 'https://canonical.com/link?' +
+          'out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
       // No replacement without previous async replacement
       urlReplacements.maybeExpandLink(a);
@@ -1167,10 +1168,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       input.setAttribute('data-amp-replace', 'RANDOM');
       return urlReplacements.expandInputValueAsync(input)
           .then(expandedValue => {
-        expect(input['amp-original-value']).to.equal('RANDOM');
-        expect(input.value).to.match(/(\d+(\.\d+)?)/);
-        expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
-      });
+            expect(input['amp-original-value']).to.equal('RANDOM');
+            expect(input.value).to.match(/(\d+(\.\d+)?)/);
+            expect(expandedValue).to.match(/(\d+(\.\d+)?)/);
+          });
     });
   });
 });
