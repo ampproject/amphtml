@@ -117,10 +117,9 @@ export class DocumentState {
 
   /** @private */
   onVisibilityChanged_() {
-    if (!this.visibilityObservable_) {
-      this.visibilityObservable_ = new Observable();
+    if (this.visibilityObservable_) {
+      this.visibilityObservable_.fire();
     }
-    this.visibilityObservable_.fire();
   }
 
   /**
@@ -145,9 +144,11 @@ export class DocumentState {
 
   /** @private */
   onBodyAvailable_() {
-    this.bodyAvailableObservable_.fire();
-    this.bodyAvailableObservable_.removeAll();
-    this.bodyAvailableObservable_ = null;
+    if (this.bodyAvailableObservable_) {
+      this.bodyAvailableObservable_.fire();
+      this.bodyAvailableObservable_.removeAll();
+      this.bodyAvailableObservable_ = null;
+    }
   }
 }
 
