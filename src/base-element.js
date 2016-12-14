@@ -162,6 +162,15 @@ export class BaseElement {
     return 0;
   }
 
+  /**
+   * Updates the priority of the resource. If there are tasks currently
+   * scheduled, their priority is updated as well.
+   * @param {number} newPriority
+   */
+  updatePriority(newPriority) {
+    this.element.getResources().updatePriority(this.element, newPriority);
+  }
+
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
