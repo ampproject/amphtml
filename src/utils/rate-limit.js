@@ -21,10 +21,10 @@
  *
  * @param {!Window} win
  * @param {function()} callback
- * @param {number} minInternal
+ * @param {number} minInterval the minimum time interval in millisecond
  * @returns {function()}
  */
-export function rateLimit(win, callback, minInternal) {
+export function rateLimit(win, callback, minInterval) {
   let locker = null;
   let nextCallArgs = null;
 
@@ -32,14 +32,14 @@ export function rateLimit(win, callback, minInternal) {
     callback.apply(null, args);
 
     nextCallArgs = null;
-    // Lock the fire for minInternal
+    // Lock the fire for minInterval milliseconds
     locker = win.setTimeout(() => {
       locker = null;
       // If during the period there're invocations queued up, fire once.
       if (nextCallArgs !== null) {
         fire(nextCallArgs);
       }
-    }, minInternal);
+    }, minInterval);
   };
   return function() {
     if (locker) {
