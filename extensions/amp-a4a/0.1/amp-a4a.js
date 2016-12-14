@@ -721,23 +721,30 @@ export class AmpA4A extends AMP.BaseElement {
       dev().assert(getMode().localDev || !endsWith(serviceName, '-dev'));
       const url = signingServerURLs[serviceName];
       if (url) {
-        return xhrFor(this.win).fetchJson(
-          url, {mode: 'cors', method: 'GET', disableAmpSourceOrigin: true})
-            .then(jwkSetObj => {
-              if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
-                  jwkSetObj.keys.every(isObject)) {
-                return jwkSetObj.keys;
-              } else {
-                user().error(TAG, this.element.getAttribute('type'),
-                    'Invalid response from signing server.',
-                    this.element);
-                return [];
-              }
-            }).catch(err => {
-              user().error(
-                  TAG, this.element.getAttribute('type'), err, this.element);
-              return [];
-            });
+        // Set disableAmpSourceOrigin so that __amp_source_origin is not
+        // included in XHR CORS request allowing for keyset to be cached
+        // across pages.
+        return xhrFor(this.win).fetchJson(url, {
+          mode: 'cors',
+          method: 'GET',
+          requireAmpResponseSourceOrigin: false,
+          disableAmpSourceOrigin: true,
+          credentials: 'omit',
+        }).then(jwkSetObj => {
+          if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
+              jwkSetObj.keys.every(isObject)) {
+            return jwkSetObj.keys;
+          } else {
+            user().error(TAG, this.element.getAttribute('type'),
+                'Invalid response from signing server.',
+                this.element);
+            return [];
+          }
+        }).catch(err => {
+          user().error(
+              TAG, this.element.getAttribute('type'), err, this.element);
+          return [];
+        });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
