@@ -116,20 +116,20 @@ export class Viewer {
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    /** @private {!Observable<boolean>} */
-    this.runtimeOnObservable_ = new Observable();
+    /** @private {?Observable<boolean>} */
+    this.runtimeOnObservable_ = null;
 
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {!Observable<!JSONType>} */
-    this.viewportObservable_ = new Observable();
+    /** @private {?Observable<!JSONType>} */
+    this.viewportObservable_ = null;
 
-    /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
-    this.historyPoppedObservable_ = new Observable();
+    /** @private {?Observable<!ViewerHistoryPoppedEventDef>} */
+    this.historyPoppedObservable_ = null;
 
-    /** @private {!Observable<!JSONType>} */
-    this.broadcastObservable_ = new Observable();
+    /** @private {?Observable<!JSONType>} */
+    this.broadcastObservable_ = null;
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
@@ -475,7 +475,9 @@ export class Viewer {
   toggleRuntime() {
     this.isRuntimeOn_ = !this.isRuntimeOn_;
     dev().fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
-    this.runtimeOnObservable_.fire(this.isRuntimeOn_);
+    if (this.runtimeOnObservable_) {
+      this.runtimeOnObservable_.fire(this.isRuntimeOn_);
+    }
   }
 
   /**
@@ -483,6 +485,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onRuntimeState(handler) {
+    if (!this.runtimeOnObservable_) {
+      this.runtimeOnObservable_ = new Observable();
+    }
     return this.runtimeOnObservable_.add(handler);
   }
 
@@ -711,6 +716,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
+    if (!this.viewportObservable_) {
+      this.viewportObservable_ = new Observable();
+    }
     return this.viewportObservable_.add(handler);
   }
 
@@ -720,6 +728,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onHistoryPoppedEvent(handler) {
+    if (!this.historyPoppedObservable_) {
+      this.historyPoppedObservable_ = new Observable();
+    }
     return this.historyPoppedObservable_.add(handler);
   }
 
@@ -779,16 +790,19 @@ export class Viewer {
     if (eventType == 'viewport') {
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
-        this.viewportObservable_.fire(
-          /** @type {!JSONType} */ (data));
+        if (this.viewportObservable_) {
+          this.viewportObservable_.fire(/** @type {!JSONType} */ (data));
+        }
         return Promise.resolve();
       }
       return undefined;
     }
     if (eventType == 'historyPopped') {
-      this.historyPoppedObservable_.fire({
-        newStackIndex: data['newStackIndex'],
-      });
+      if (this.historyPoppedObservable_) {
+        this.historyPoppedObservable_.fire({
+          newStackIndex: data['newStackIndex'],
+        });
+      }
       return Promise.resolve();
     }
     if (eventType == 'visibilitychange') {
@@ -800,8 +814,10 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {
-      this.broadcastObservable_.fire(
-          /** @type {!JSONType|undefined} */ (data));
+      if (this.broadcastObservable_) {
+        this.broadcastObservable_.fire(
+            /** @type {!JSONType|undefined} */ (data));
+      }
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -960,6 +976,9 @@ export class Viewer {
    * @return {!UnlistenDef}
    */
   onBroadcast(handler) {
+    if (!this.broadcastObservable_) {
+      this.broadcastObservable_ = new Observable();
+    }
     return this.broadcastObservable_.add(handler);
   }
 
