@@ -116,7 +116,7 @@ describe('amp-ad-network-doubleclick-impl', () => {
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
           '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
           '&adx=-10000&ady=-10000&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
-          '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-[0-9]+&u_his=[0-9]+' +
+          '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&brdim=[0-9]+(%2C[0-9]+){9}' +
           '&isw=[0-9]+&ish=[0-9]+&dtd=[0-9]+' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
