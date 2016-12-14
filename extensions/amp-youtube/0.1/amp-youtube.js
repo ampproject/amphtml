@@ -75,7 +75,11 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.preload(this.getVideoIframeSrc_());
+    // NOTE: When preload `as=document` is natively supported in browsers
+    // we can switch to preloading the full source. For now this doesn't
+    // work, because we preload with a different type and in that case
+    // responses are only picked up if they are cacheable.
+    this.preconnect.url(this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
     this.preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
