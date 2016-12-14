@@ -259,9 +259,15 @@ function compile(entryModuleFilenames, outputDir,
           // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
         ],
-        jscomp_error: [],
       }
     };
+
+    if (outputFilename == 'v0.js' ||
+        outputFilename == 'amp-form.js') {
+      // Only do this for the main binary and amp-form binary
+      console.log('compiling with checkTypes ON for ' + outputFilename);
+      compilerOptions.compilerFlags.jscomp_error = ['checkTypes'];
+    }
 
     // For now do type check separately
     if (argv.typecheck_only || checkTypes) {
