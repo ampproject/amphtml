@@ -246,4 +246,17 @@ describe('amp-youtube', function() {
       expect(iframe.src).to.contain('iv_load_policy=3');
     });
   });
+
+  it('should preload the final url', () => {
+    return getYt({
+      'autoplay': '',
+      'data-videoid': 'mGENRKrdoGY',
+      'data-param-playsinline': '0',
+    }).then(yt => {
+      const src = yt.querySelector('iframe').src;
+      const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'url');
+      yt.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly(src);
+    });
+  });
 });
