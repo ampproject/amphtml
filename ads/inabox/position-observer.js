@@ -16,6 +16,7 @@
 
 import {layoutRectLtwh, LayoutRectDef} from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
+import {rateLimit} from '../../src/utils/rate-limit';
 
 /**
  * @typedef {{
@@ -131,39 +132,4 @@ function getScrollingElement(win) {
  */
 function isWebKit(ua) {
   return /WebKit/i.test(ua) && !/Edge/i.test(ua);
-}
-
-/**
- * Wrap around a given callback and apply rate limit.
- * It responses to the first call immediately, then .
- *
- * @param {!Window} win
- * @param {function()} callback
- * @param {number} minInternal
- * @returns {function()}
- */
-function rateLimit(win, callback, minInternal) {
-  let fireLocker_ = null;
-  let waitToFire_ = false;
-
-  const fire = () => {
-    callback();
-
-    waitToFire_ = false;
-    // Lock the fire for MIN_EVENT_INTERVAL_IN_MS
-    fireLocker_ = win.setTimeout(() => {
-      fireLocker_ = null;
-      // If during the period there're events queued up, fire once.
-      if (waitToFire_) {
-        fire();
-      }
-    }, minInternal);
-  };
-  return () => {
-    if (fireLocker_) {
-      waitToFire_ = true;
-      return;
-    }
-    fire();
-  };
 }
