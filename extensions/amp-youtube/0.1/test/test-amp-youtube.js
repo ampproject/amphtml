@@ -254,7 +254,7 @@ describe('amp-youtube', function() {
       'data-param-playsinline': '0',
     }).then(yt => {
       const src = yt.querySelector('iframe').src;
-      const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'preload');
+      const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'url');
       yt.implementation_.preconnectCallback();
       preloadSpy.should.have.been.calledWithExactly(src);
     });
