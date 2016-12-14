@@ -25,7 +25,11 @@ limitations under the License.
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
   </tr>
-   <tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-video/">Annotated code example for amp-video</a></td>
   </tr>
@@ -47,7 +51,8 @@ One or zero immediate child nodes can have the `placeholder` attribute. If prese
 
 One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 video is not supported on the user’s browser.
 
-For example:
+## Example
+
 ```html
 <amp-video width=400 height=300 src="https://yourhost.com/videos/myvideo.mp4"
     poster="myvideo-poster.jpg">
