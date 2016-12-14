@@ -145,6 +145,8 @@ const AMP_EMBED_ALLOWED = {
 
 const iframeName = window.name;
 let data;
+// TODO(bradfrizzell@): Change the data structure of the attributes
+//    to make it less terrible.
 try {
   data = JSON.parse(iframeName).attributes;
   window.context = data._context;
