@@ -109,7 +109,7 @@ Because native app banners currently are not shown in the viewer context, `<amp-
   <tr>
     <td>In AMP viewer</td>
     <td>Show amp-app-banner</td>
-    <td>Show amp-app-banner</td>
+    <td>Currently, will not show anything due to #6454</td>
     <td>Show amp-app-banner</td>
   </tr>
   <tr>
