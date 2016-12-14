@@ -126,19 +126,14 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
 
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
-  let name;
-  if (iframeContextInName) {
-    // This name attribute may be overwritten if this frame is chosen to
-    // be the master frame. That is ok, as we will read the name off
-    // for our uses before that would occur.
-    // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
-    name = JSON.stringify({
-      host,
-      type: attributes.type,
-      // https://github.com/ampproject/amphtml/pull/2955
-      count: count[attributes.type],
-      attributes,
-    });
+  // Pass ad attributes to iframe via the fragment.
+  const name = JSON.stringify({
+    host,
+    type: attributes.type,
+    // https://github.com/ampproject/amphtml/pull/2955
+    count: count[attributes.type],
+    attributes,
+  });
 
     iframe.src = baseUrl;
     iframe.ampLocation = parseUrl(baseUrl);
