@@ -23,6 +23,7 @@ import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_IMPL_PATH,
+  protectFunctionWrapper,
 } from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
@@ -1093,6 +1094,44 @@ describe('amp-a4a', () => {
               .to.be.false;
           expect(reason).to.deep.equal(cancellation());
         });
+      });
+    });
+
+    describe('protectFunctionWrapper', () => {
+      it('works properly with no error', () => {
+        let errorCalls = 0;
+        expect(protectFunctionWrapper(name => {
+          return `hello ${name}`;
+        }, null, () => {errorCalls++;})('world')).to.equal('hello world');
+        expect(errorCalls).to.equal(0);
+      });
+
+      it('handles error properly', () => {
+        const err = new Error('test fail');
+        expect(protectFunctionWrapper((name, suffix) => {
+          expect(name).to.equal('world');
+          expect(suffix).to.equal('!');
+          throw err;
+        }, null, (currErr, name, suffix) => {
+          expect(currErr).to.equal(err);
+          expect(name).to.equal('world');
+          expect(suffix).to.equal('!');
+          return 'pass';
+        })('world', '!')).to.equal('pass');
+      });
+
+      it('returns undefined if error thrown in error handler', () => {
+        const err = new Error('test fail within fn');
+        expect(protectFunctionWrapper((name, suffix) => {
+          expect(name).to.equal('world');
+          expect(suffix).to.be.undefined;
+          throw err;
+        }, null, (currErr, name, suffix) => {
+          expect(currErr).to.equal(err);
+          expect(name).to.equal('world');
+          expect(suffix).to.be.undefined;
+          throw new Error('test fail within error fn');
+        })('world')).to.be.undefined;
       });
     });
   });
