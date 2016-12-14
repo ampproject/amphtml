@@ -413,7 +413,7 @@ export class AmpA4A extends AMP.BaseElement {
           }
           if (creativeParts && creativeParts.size
               && creativeParts.size.length == 2) {
-            // We'll need to remember the creative size for the 3p case.
+            // We'll need to remember the creative size for the x-domain case.
             this.creativeSize_ = creativeParts.size;
             this.handleResize(creativeParts.size);
           }
@@ -668,8 +668,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * This function is called if the ad response contains a creative size header
-   * indicating the size of the header. It provides an opportunity to resize the
-   * creative, if desired, before it is rendered.
+   * indicating the size of the creative. It provides an opportunity to resize
+   * the creative, if desired, before it is rendered.
    *
    * To be implemented by network.
    *
