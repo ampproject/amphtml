@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {
@@ -72,7 +73,8 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
 
-    installVideoManagerForDoc(this.element);
+    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+    installVideoManagerForDoc(ampdoc);
   }
 
   /**

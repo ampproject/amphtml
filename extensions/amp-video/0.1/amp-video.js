@@ -14,6 +14,7 @@
   * limitations under the License.
   */
 
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   installVideoManagerForDoc,
@@ -40,7 +41,8 @@ class AmpVideo extends AMP.BaseElement {
       /** @private {?Element} */
       this.video_ = null;
 
-      installVideoManagerForDoc(this.element);
+      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      installVideoManagerForDoc(ampdoc);
     }
 
     /** @override */
