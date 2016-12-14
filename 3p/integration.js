@@ -147,9 +147,11 @@ const AMP_EMBED_ALLOWED = {
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
-
-let data = parseFragment(location.hash);
-if (data && data._context) {
+let data;
+// TODO(bradfrizzell@): Change the data structure of the attributes
+//    to make it less terrible.
+try {
+  data = JSON.parse(iframeName).attributes;
   window.context = data._context;
 } else {
   try {
