@@ -114,11 +114,11 @@ describe('amp-ad-network-doubleclick-impl', () => {
           '&adtest=false' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
-          '&c=[0-9]+&output=html&nhd=1&biw=1050&bih=755' +
-          '&adx=-10000&ady=-10000&u_ah=873&u_aw=1440&u_cd=24' +
-          '&u_w=1440&u_h=900&u_tz=-[0-9]+&u_his=[0-9]+' +
-          '&brdim=22%2C45%2C22%2C45%2C1440%2C23%2C1050%2C829%2C1050%2C755' +
-          '&isw=1050&ish=755&dtd=[0-9]+' +
+          '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
+          '&adx=-10000&ady=-10000&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
+          '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-[0-9]+&u_his=[0-9]+' +
+          '&brdim=[0-9]+(%2C[0-9]+){9}' +
+          '&isw=[0-9]+&ish=[0-9]+&dtd=[0-9]+' +
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
