@@ -16,6 +16,7 @@
 import {listen} from '../src/event-helper';
 import {map} from '../src/utils/object';
 import {serializeMessage, deserializeMessage} from '../src/3p-frame';
+import {dev} from '../src/log';
 
 export class IframeMessagingClient {
 
@@ -76,8 +77,11 @@ export class IframeMessagingClient {
    *  @param {Object=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    this.hostWindow_.postMessage/*OK*/(serializeMessage(
-        type, this.sentinel_, opt_payload, this.rtvVersion_), '*');
+    this.hostWindow_.postMessage/*OK*/(
+        serializeMessage(
+            type, dev().assertString(this.sentinel_),
+            opt_payload, this.rtvVersion_),
+        '*');
   }
 
   /**

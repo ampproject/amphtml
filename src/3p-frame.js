@@ -355,7 +355,7 @@ export const MessageType = {
  * @param {string} type
  * @param {string} sentinel
  * @param {Object=} opt_data
- * @param {string=} opt_rtvVersion
+ * @param {?string=} opt_rtvVersion
  * @returns {string}
  */
 export function serializeMessage(type, sentinel, opt_data, opt_rtvVersion) {
