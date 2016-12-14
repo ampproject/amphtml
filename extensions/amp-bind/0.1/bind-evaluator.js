@@ -32,20 +32,22 @@ export class BindEvaluator {
   }
 
   /**
+   * Evaluates all expressions with the given `scope` data and resolves
+   * the returned Promise with the results.
    * @param {!Object} scope
-   * @return {!Promise<!Object<string,*>>}
+   * @return {!Promise<!Object<string,*>>} Maps expression strings to results.
    */
   evaluate(scope) {
     return new Promise(resolve => {
       /** @type {!Object<string,*>} */
-      const output = {};
+      const cache = {};
       this.expressions_.forEach(expression => {
         const string = expression.expressionString;
-        if (output[string] === undefined) {
-          output[string] = expression.evaluate(scope);
+        if (cache[string] === undefined) {
+          cache[string] = expression.evaluate(scope);
         }
       });
-      resolve(output);
+      resolve(cache);
     });
   }
 }
