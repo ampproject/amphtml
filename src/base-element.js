@@ -511,18 +511,22 @@ export class BaseElement {
   /**
    * Utility method that propagates attributes from this element
    * to the given element.
-   * @param  {string|!Array<string>} attributes
-   * @param  {!Element} element
+   * If `opt_removeMissingAttrs` is true, then also removes any specified
+   * attributes that are missing on this element from the target element.
+   * @param {string|!Array<string>} attributes
+   * @param {!Element} element
+   * @param {boolean=} opt_removeMissingAttrs
    * @public @final
    */
-  propagateAttributes(attributes, element) {
+  propagateAttributes(attributes, element, opt_removeMissingAttrs) {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (!this.element.hasAttribute(attr)) {
-        continue;
+      if (this.element.hasAttribute(attr)) {
+        element.setAttribute(attr, this.element.getAttribute(attr));
+      } else if (opt_removeMissingAttrs) {
+        element.removeAttribute(attr);
       }
-      element.setAttribute(attr, this.element.getAttribute(attr));
     }
   }
 
@@ -798,6 +802,18 @@ export class BaseElement {
    * @param {!AmpElement} unusedElement
    */
   collapsedCallback(unusedElement) {
+    // Subclasses may override.
+  }
+
+  /**
+   * Called when an attribute's value changes.
+   * Boolean attributes have a value of empty string and `null` when
+   * present and missing, respectively.
+   * @param {string} unusedName
+   * @param {?string} unusedOldValue
+   * @param {?string} unusedNewValue
+   */
+  attributeChangedCallback(unusedName, unusedOldValue, unusedNewValue) {
     // Subclasses may override.
   }
 
