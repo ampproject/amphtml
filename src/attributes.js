@@ -48,6 +48,8 @@ export function getContextMetadata(parentWindow, element, sentinel) {
       .getUnconfirmedReferrerUrl();
 
   attributes._context = {
+    ampcontextVersion = (getMode().localDev ? 'LOCAL' :
+        '$internalRuntimeVersion$');
     sourceUrl: docInfo.sourceUrl,
     referrer,
     canonicalUrl: docInfo.canonicalUrl,
@@ -59,13 +61,15 @@ export function getContextMetadata(parentWindow, element, sentinel) {
     startTime,
   };
 
-  attributes.ampcontextVersion = (getMode().localDev ? 'LOCAL' :
-      '$internalRuntimeVersion$');
-
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes.src = adSrc;
   }
   return attributes;
 
+}
+
+export function getNameAttribute(parentWindow, element, sentinel){
+  const attributes = getContextMetadata(parentWindow, element, sentinel);
+  return encodeURIComponent(JSON.stringify(attributes));
 }

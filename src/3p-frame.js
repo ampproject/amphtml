@@ -72,8 +72,6 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
   };
-  attributes.ampcontextVersion = (getMode().localDev ? 'LOCAL' :
-      '$internalRuntimeVersion$');
   Object.assign(attributes._context, opt_context);
   Object.assign(attributes._context, additionalContext);
   return attributes;
