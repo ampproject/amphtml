@@ -17,6 +17,7 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {resolveRelativeUrl} from '../../../src/url';
 import {utf8Decode} from '../../../src/utils/bytes';
 
@@ -52,6 +53,38 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, unusedResponseHeaders) {
     return utf8Decode(responseText).then(deserialized => {
+      if (getMode().localDev) {
+        if (this.element.getAttribute('fakesig') == 'true') {
+          // In the fake signature mode the content is the plain AMP HTML
+          // and the signature is "FAKESIG". This mode is only allowed in
+          // `localDev` and primarily used for A4A Envelope for testing.
+          // See DEVELOPING.md for more info.
+          // QQQ: `<html amp>` -> `<html amp4ads>`
+          /*QQQQ
+            <script type="application/json" amp-ad-metadata>
+              {
+                "ampRuntimeUtf16CharOffsets": [ 55, 222 ],
+                "bodyAttributes": "",
+                "bodyUtf16CharOffsets": [ 356, 2436 ],
+                "customElementExtensions": ["amp-analytics"],
+                "jsonUtf16CharOffsets": {
+                  "amp-analytics" : [ 661, 2410 ]
+                }
+              }
+            </script>
+          </body></html>
+          */
+          const encoder = new TextEncoder('utf-8');
+          return {
+            creative: encoder.encode(deserialized).buffer,
+            signature: 'FAKESIG',
+          };
+        }
+        // QQQ: force3p
+      }
+
+      // Normal mode: the content is a JSON structure with two fieleds:
+      // `creative` and `signature`.
       const decoded = JSON.parse(deserialized);
       dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
       dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);

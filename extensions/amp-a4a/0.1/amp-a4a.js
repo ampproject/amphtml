@@ -534,6 +534,16 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<!ArrayBuffer>} The creative.
    */
   verifyCreativeSignature_(creative, signature) {
+    /*QQQ
+    if (getMode().localDev) {
+      // localDev mode allows "FAKESIG" signature for the "fake" network.
+      if (signature == 'FAKESIG' &&
+          this.element.getAttribute('type') == 'fake') {
+        return Promise.resolve(creative);
+      }
+    }
+    */
+
     // For each signing service, we have exactly one Promise,
     // keyInfoSetPromise, that holds an Array of Promises of signing keys.
     // So long as any one of these signing services can verify the
