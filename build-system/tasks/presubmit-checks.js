@@ -445,6 +445,14 @@ var forbiddenTerms = {
       'src/service/resources-impl.js',
     ],
   },
+  '\\.updatePriority\\(': {
+    message: 'updatePriority is a restricted API.',
+    whitelist: [
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'src/base-element.js',
+      'src/service/resources-impl.js',
+    ],
+  },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
     whitelist: [
@@ -604,6 +612,20 @@ var forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.expandStringAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
+  '\\.expandInputValueSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
+  '\\.expandInputValueAsync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',
