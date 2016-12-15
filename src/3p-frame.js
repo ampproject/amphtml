@@ -354,16 +354,16 @@ export const MessageType = {
  * 'amp-011481323099490{"type":"position","sentinel":"12345","foo":"bar"}'
  * @param {string} type
  * @param {string} sentinel
- * @param {Object=} opt_data
- * @param {?string=} opt_rtvVersion
+ * @param {Object=} data
+ * @param {?string=} rtvVersion
  * @returns {string}
  */
-export function serializeMessage(type, sentinel, opt_data, opt_rtvVersion) {
+export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
-  const message = opt_data || {};
+  const message = data;
   message.type = type;
   message.sentinel = sentinel;
-  return AMP_MESSAGE_PREFIX + (opt_rtvVersion || '') + JSON.stringify(message);
+  return AMP_MESSAGE_PREFIX + (rtvVersion || '') + JSON.stringify(message);
 }
 
 /**
