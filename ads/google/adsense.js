@@ -16,6 +16,7 @@
 
 import {validateData} from '../../3p/3p';
 import {setStyles} from '../../src/style';
+import {createElementWithAttributes} from '../../src/dom';
 
 /**
  * Make an adsense iframe.
@@ -39,22 +40,23 @@ export function adsense(global, data) {
   s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   global.document.body.appendChild(s);
 
-  const i = global.document.createElement('ins');
-  i.setAttribute('data-ad-client', data['adClient']);
+  const attributes = Object.create(null);
+  attributes['data-ad-client'] = data['adClient'];
   if (data['adSlot']) {
-    i.setAttribute('data-ad-slot', data['adSlot']);
+    attributes['data-ad-slot'] = data['adSlot'];
   }
   if (data['adHost']) {
-    i.setAttribute('data-ad-host', data['adHost']);
+    attributes['data-ad-host'] = data['adHost'];
   }
   if (data['adtest'] != null) {
-    i.setAttribute('data-adtest', data['adtest']);
+    attributes['data-adtest'] = data['adtest'];
   }
   if (data['tagOrigin']) {
-    i.setAttribute('data-tag-origin', data['tagOrigin']);
+    attributes['data-tag-origin'] = data['tagOrigin'];
   }
-  i.setAttribute('data-page-url', global.context.canonicalUrl);
-  i.setAttribute('class', 'adsbygoogle');
+  attributes['data-page-url'] = global.context.canonicalUrl;
+  attributes['class'] = 'adsbygoogle';
+  const i = createElementWithAttributes(global.document, 'ins', attributes);
   setStyles(i, {
     display: 'inline-block',
     width: '100%',
