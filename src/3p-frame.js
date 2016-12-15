@@ -350,19 +350,20 @@ export const MessageType = {
 };
 
 /**
- * Serialize an AMP post message.
- *
- * @param type {string}
- * @param sentinel {string}
- * @param opt_data {Object=}
+ * Serialize an AMP post message. Output looks like:
+ * 'amp-011481323099490{"type":"position","sentinel":"12345","foo":"bar"}'
+ * @param {string} type
+ * @param {string} sentinel
+ * @param {Object=} data
+ * @param {?string=} rtvVersion
  * @returns {string}
  */
-export function serializeMessage(type, sentinel, opt_data) {
+export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
-  const message = opt_data || {};
+  const message = data;
   message.type = type;
   message.sentinel = sentinel;
-  return AMP_MESSAGE_PREFIX + JSON.stringify(message);
+  return AMP_MESSAGE_PREFIX + (rtvVersion || '') + JSON.stringify(message);
 }
 
 /**
@@ -376,9 +377,13 @@ export function deserializeMessage(message) {
   if (typeof message !== 'string' || message.indexOf(AMP_MESSAGE_PREFIX) != 0) {
     return null;
   }
+  const startPos = message.indexOf('{');
+  if (startPos == -1) {
+    dev().error('MESSAGING', 'Failed to parse message: ' + message);
+    return null;
+  }
   try {
-    return /** @type {!JSONType} */ (JSON.parse(
-        message.substr(AMP_MESSAGE_PREFIX.length)));
+    return /** @type {!JSONType} */ (JSON.parse(message.substr(startPos)));
   } catch (e) {
     dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
     return null;
