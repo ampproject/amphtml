@@ -567,6 +567,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         const extractCreativeAndSignatureSpy = sandbox.spy(
             a4a, 'extractCreativeAndSignature');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
@@ -614,6 +615,8 @@ describe('amp-a4a', () => {
               .to.be.ok;
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
             expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
+            expect(updatePriorityStub).to.be.calledOnce;
+            expect(updatePriorityStub.args[0][0]).to.equal(0);
           });
         });
       });
@@ -643,6 +646,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         if (!isValidCreative) {
           sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
             Promise.resolve({creative: mockResponse.arrayBuffer()}));
@@ -672,12 +676,17 @@ describe('amp-a4a', () => {
             if (isValidCreative && !opt_failAmpRender) {
               expect(iframe.getAttribute('src')).to.be.null;
               expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
+              expect(updatePriorityStub).to.be.calledOnce;
+              expect(updatePriorityStub.args[0][0]).to.equal(0);
             } else {
               expect(iframe.getAttribute('srcdoc')).to.be.null;
               expect(iframe.src, 'verify iframe src w/ origin').to
                   .equal(TEST_URL +
                          '&__amp_source_origin=about%3Asrcdoc');
               expect(onAmpCreativeRenderSpy.called).to.be.false;
+              if (!opt_failAmpRender) {
+                expect(updatePriorityStub).to.not.be.called;
+              }
             }
           });
         });

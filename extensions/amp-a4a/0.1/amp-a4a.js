@@ -506,6 +506,8 @@ export class AmpA4A extends AMP.BaseElement {
             !(creativeMetaDataDef = this.getAmpAdMetadata_(creativeDecoded))) {
             return null;
           }
+          // Update priority.
+          this.updatePriority(0);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
           const extensions = extensionsFor(this.win);

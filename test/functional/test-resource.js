@@ -503,6 +503,22 @@ describe('Resource', () => {
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
   });
 
+  it('should update priority', () => {
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(2);
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(3);
+    expect(resource.getPriority()).to.equal(3);
+
+    resource.updatePriority(1);
+    expect(resource.getPriority()).to.equal(1);
+
+    resource.updatePriority(0);
+    expect(resource.getPriority()).to.equal(0);
+  });
+
 
   describe('setInViewport', () => {
     it('should call viewportCallback when not built', () => {
