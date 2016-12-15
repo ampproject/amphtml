@@ -651,10 +651,11 @@ export class AmpA4A extends AMP.BaseElement {
     const layoutCallbackStart = Date.now();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
-      this.emitLifecycleEvent('adPromiseChainDelay',
-          {adPromiseChainDelay: Date.now() - layoutCallbackStart});
+      this.emitLifecycleEvent('adPromiseChainDelay', {
+        adPromiseChainDelay: Date.now() - layoutCallbackStart,
+        isAmpCreative: !!creativeMetaData,
+      });
       if (creativeMetaData) {
-        dev().assert(creativeMetaData.minifiedCreative);
         // Must be an AMP creative.
         return this.renderAmpCreative_(creativeMetaData).catch(err => {
           // Failed to render via AMP creative path so fallback to non-AMP
@@ -907,27 +908,29 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderAmpCreative_(creativeMetaData) {
-    try {
-      this.protectedEmitLifecycleEvent_(
-          'renderFriendlyStart', creativeMetaData);
-      // Create and setup friendly iframe.
-      dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
-      const iframe = /** @type {!HTMLIFrameElement} */(
+    dev().assert(creativeMetaData.minifiedCreative);
+    this.protectedEmitLifecycleEvent('renderFriendlyStart');
+    // Create and setup friendly iframe.
+    dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
+    const iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
-          /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
-            frameborder: '0', allowfullscreen: '', allowtransparency: '',
-            scrolling: 'no'}));
-      this.applyFillContent(iframe);
-      const fontsArray = [];
-      if (creativeMetaData.customStylesheets) {
-        creativeMetaData.customStylesheets.forEach(s => {
-          const href = s['href'];
-          if (href) {
-            fontsArray.push(href);
-          }
-        });
-      }
-      return installFriendlyIframeEmbed(
+            /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+              frameborder: '0',
+              allowfullscreen: '',
+              allowtransparency: '',
+              scrolling: 'no',
+            }));
+    this.applyFillContent(iframe);
+    const fontsArray = [];
+    if (creativeMetaData.customStylesheets) {
+      creativeMetaData.customStylesheets.forEach(s => {
+        const href = s['href'];
+        if (href) {
+          fontsArray.push(href);
+        }
+      });
+    }
+    return installFriendlyIframeEmbed(
         iframe, this.element, {
           url: this.adUrl_,
           html: creativeMetaData.minifiedCreative,
@@ -942,7 +945,7 @@ export class AmpA4A extends AMP.BaseElement {
               friendlyIframeEmbed, this.isInViewport());
           // Ensure visibility hidden has been removed (set by boilerplate).
           const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
-            friendlyIframeEmbed.win.document;
+              friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
           // Capture phase click handlers on the ad.
           this.registerExpandUrlParams_(friendlyIframeEmbed.win);
@@ -953,9 +956,6 @@ export class AmpA4A extends AMP.BaseElement {
                 'Error executing onAmpCreativeRender', err);
           })();
         });
-    } catch (err) {
-      return Promise.reject(err);
-    }
   }
 
   /**
