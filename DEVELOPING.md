@@ -118,6 +118,37 @@ code elimination to trim down the file size for the file we deploy to production
 
 If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
 
+
+#### A4A envelope
+
+AMP ships with a local A4A envelope for testing local and production AMP documents with the local JS version.
+
+A4A can be run either of these two modes:
+
+1. Friendly iframe mode: http://localhost:8000/a4a/...
+2. 3p iframe mode: http://localhost:8000/a4a-3p/...
+
+The following forms are supported:
+
+- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
+- proxied document with normal sources: http://localhost:8000/a4a[-3p]/max/output.jsbin.com/pegizoq/quiet
+- proxied document with minified sources: http://localhost:8000/a4a[-3p]/min/output.jsbin.com/pegizoq/quiet
+
+When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+flag so that we do not strip out the localhost code paths. (We do some
+code elimination to trim down the file size for the file we deploy to production)
+
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/a4a[-3p]/min/s/output.jsbin.com/pegizoq/quiet
+
+Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
+`localDev` mode.
+
+Additionally, the following query parameters can be provided:
+
+- `width` - the width of the `amp-ad` (default "300")
+- `height` - the height of the `amp-ad` (default "250")
+
+
 #### Chrome extension
 
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
