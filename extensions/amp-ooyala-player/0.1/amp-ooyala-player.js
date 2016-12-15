@@ -43,9 +43,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
-
-    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-    installVideoManagerForDoc(ampdoc);
   }
 
   /**
@@ -72,6 +69,8 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
+    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+    installVideoManagerForDoc(ampdoc);
     videoManagerForDoc(this.win.document).register(this);
   }
 

@@ -40,9 +40,6 @@ class AmpVideo extends AMP.BaseElement {
 
       /** @private {?Element} */
       this.video_ = null;
-
-      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-      installVideoManagerForDoc(ampdoc);
     }
 
     /** @override */
@@ -71,6 +68,8 @@ class AmpVideo extends AMP.BaseElement {
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
+      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      installVideoManagerForDoc(ampdoc);
       videoManagerForDoc(this.win.document).register(this);
     }
 

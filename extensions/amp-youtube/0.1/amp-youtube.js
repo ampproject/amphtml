@@ -72,9 +72,6 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
-
-    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-    installVideoManagerForDoc(ampdoc);
   }
 
   /**
@@ -126,6 +123,9 @@ class AmpYoutube extends AMP.BaseElement {
     if (!this.getPlaceholder()) {
       this.buildImagePlaceholder_();
     }
+
+    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+    installVideoManagerForDoc(ampdoc);
   }
 
   /** @return {string} */
