@@ -642,9 +642,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @return {!Promise}
-   * @protected
    */
-
   attemptChangeSize(element, newHeight, newWidth) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
