@@ -393,7 +393,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.reportRenderedEntityIdentifier =
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
-    window.context.addContextToIframe = addNameToIframe.bind(null, iframeName);
+    window.context.addContextToIframe = iframe => {
+      iframe.name = iframeName;
+    };
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -505,14 +507,6 @@ function reportRenderedEntityIdentifier(entityId) {
     id: entityId,
   });
 }
-
-/**
- *  Adds the serialized ad attributes to an iframe's name attribute.
- *  @param {string} name A URIencoded JSON object of context
- *      that needs to be attached to an iframe.
- *  @param {Element} iframe
- */
-function addNameToIframe(name, iframe) {iframe.name = name;}
 
 /**
  * Throws if the current frame's parent origin is not equal to
