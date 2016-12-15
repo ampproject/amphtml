@@ -367,12 +367,39 @@ describe('3p-frame', () => {
         y: 'abc',
       });
     });
+
+    it('should work with rtvVersion', () => {
+      const message = serializeMessage('msgtype', 'msgsentinel', {
+        type: 'type_override', // override should be ignored
+        sentinel: 'sentinel_override', // override should be ignored
+        x: 1,
+        y: 'abc',
+      }, 'rtv123');
+      expect(deserializeMessage(message)).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
   });
 
   describe('deserializeMessage', () => {
     it('should deserialize valid message', () => {
       const message = deserializeMessage(
           'amp-{"type":"msgtype","sentinel":"msgsentinel","x":1,"y":"abc"}');
+      expect(message).to.deep.equal({
+        type: 'msgtype',
+        sentinel: 'msgsentinel',
+        x: 1,
+        y: 'abc',
+      });
+    });
+
+    it('should deserialize valid message with rtv version', () => {
+      const message = deserializeMessage(
+          'amp-rtv123{"type":"msgtype","sentinel":"msgsentinel",' +
+          '"x":1,"y":"abc"}');
       expect(message).to.deep.equal({
         type: 'msgtype',
         sentinel: 'msgsentinel',
@@ -393,6 +420,9 @@ describe('3p-frame', () => {
     it('should return null if failed to parse the input', () => {
       expect(deserializeMessage(
           'amp-"type":"msgtype","sentinel":"msgsentinel"}')).to.be.null;
+
+      expect(deserializeMessage(
+          'amp-{"type":"msgtype"|"sentinel":"msgsentinel"}')).to.be.null;
     });
   });
 });
