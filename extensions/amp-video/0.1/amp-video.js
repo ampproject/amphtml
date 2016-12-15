@@ -14,26 +14,35 @@
   * limitations under the License.
   */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
+import {assertHttpsUrl} from '../../../src/url';
 
-const TAG = 'amp-video2';
+const TAG = 'amp-video';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
-class AmpVideo2 extends AMP.BaseElement {
+class AmpVideo extends AMP.BaseElement {
 
-    /** @param {!AmpElement} element */
+    /**
+     * @param {!AmpElement} element
+     */
     constructor(element) {
       super(element);
 
       /** @private {?Element} */
       this.video_ = null;
+
+      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      installVideoManagerForDoc(ampdoc);
     }
 
     /** @override */
@@ -185,4 +194,4 @@ class AmpVideo2 extends AMP.BaseElement {
     }
 }
 
-AMP.registerElement(TAG, AmpVideo2);
+AMP.registerElement(TAG, AmpVideo);
