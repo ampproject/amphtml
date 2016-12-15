@@ -25,9 +25,11 @@ describe('BaseElement', () => {
   let sandbox;
   let customElement;
   let element;
+
   document.registerElement('amp-test-element', {
     prototype: createAmpElementProto(window, 'amp-test-element', BaseElement),
   });
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     customElement = document.createElement('amp-test-element');
@@ -36,6 +38,14 @@ describe('BaseElement', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  it('should delegate update priority to resources', () => {
+    const resources = window.services.resources.obj;
+    customElement.getResources = () => resources;
+    const updatePriorityStub = sandbox.stub(resources, 'updatePriority');
+    element.updatePriority(1);
+    expect(updatePriorityStub).to.be.calledOnce;
   });
 
   it('propagateAttributes - niente', () => {

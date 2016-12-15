@@ -576,6 +576,28 @@ export class Resources {
   }
 
   /**
+   * Updates the priority of the resource. If there are tasks currently
+   * scheduled, their priority is updated as well.
+   * @param {!Element} element
+   * @param {number} newPriority
+   * @restricted
+   */
+  updatePriority(element, newPriority) {
+    const resource = Resource.forElement(element);
+
+    resource.updatePriority(newPriority);
+
+    // Update affected tasks
+    this.queue_.forEach(task => {
+      if (task.resource == resource) {
+        task.priority = newPriority;
+      }
+    });
+
+    this.schedulePass();
+  }
+
+  /**
    * A parent resource, especially in when it's an owner (see {@link setOwner}),
    * may request the Resources manager to update children's inViewport state.
    * A child's inViewport state is a logical AND between inLocalViewport

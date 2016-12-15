@@ -148,6 +148,9 @@ export class Resource {
         ResourceState.NOT_BUILT;
 
     /** @private {number} */
+    this.priorityOverride_ = -1;
+
+    /** @private {number} */
     this.layoutCount_ = 0;
 
     /** @private {*} */
@@ -240,7 +243,18 @@ export class Resource {
    * @return {number}
    */
   getPriority() {
+    if (this.priorityOverride_ != -1) {
+      return this.priorityOverride_;
+    }
     return this.element.getPriority();
+  }
+
+  /**
+   * Overrides the element's priority.
+   * @param {number} newPriority
+   */
+  updatePriority(newPriority) {
+    this.priorityOverride_ = newPriority;
   }
 
   /**
