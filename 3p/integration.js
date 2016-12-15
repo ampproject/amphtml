@@ -439,13 +439,8 @@ function triggerRenderStart(opt_data) {
  */
 function observeIntersection(observerCallback) {
   // Send request to received records.
-  if (window.IntersectionObserver &&
-      window.IntersectionObserver.prototype.observe) {
-    // NOTE: Add extra check for `IntersectionObserver.prototype.observe`
-    // so that we can still test our IntersectionObserver polyfill impl by
-    // setting `IntersectionObserver.prototype` to a null object.
-
-    // use native IntersectionObserver if it exists.
+  if (window.IntersectionObserver && window.IntersectionObserver.prototype) {
+    // use native IntersectionObserver if exist
     const io = new window.IntersectionObserver(changes => {
       observerCallback(changes);
     }, {
