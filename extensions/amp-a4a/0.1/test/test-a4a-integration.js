@@ -144,16 +144,16 @@ describe('integration test: a4a', () => {
     });
   });
 
-  it('should include x/y in AMP creative click', (done) => {
+  it('should include x/y in AMP creative click', done => {
     fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.').then(
-        (childDocument) => {
+        childDocument => {
           const link = childDocument.querySelector('a');
           console.log('link', link);
           expect(link).to.be.ok;
           const xCoord = 123;
           const yCoord = 456;
-          const clickListener = listenOnce(link, 'click', e => {
+          listenOnce(link, 'click', e => {
             // Prevent to ensure no navigation.
             e.preventDefault();
             const href = link.getAttribute('href');
@@ -163,10 +163,10 @@ describe('integration test: a4a', () => {
           // Simulate click at x/y coordinate.
           const event = childDocument.createEvent('MouseEvents');
           event.initMouseEvent(
-             'click', true, true, childDocument.contentWindow, 1, xCoord,
-             yCoord, xCoord, yCoord);
-         link.dispatchEvent(event);
-      });
+            'click', true, true, childDocument.contentWindow, 1, xCoord,
+            yCoord, xCoord, yCoord);
+          link.dispatchEvent(event);
+        });
     });
   });
 

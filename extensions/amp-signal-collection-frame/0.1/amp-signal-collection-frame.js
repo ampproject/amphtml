@@ -67,7 +67,7 @@ export class AmpSignalCollectionFrame extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log(element.tagName, 'layoutCallback');
+    console.log(this.element.tagName, 'layoutCallback');
     const iframe = createElementWithAttributes(
        /** @type {!Document} */(this.element.ownerDocument),
        'iframe',{
@@ -82,5 +82,6 @@ export class AmpSignalCollectionFrame extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(
-    'amp-signal-collection-frame', AmpSignalCollectionFrame, CSS);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerElement(TAG, AmpSignalCollectionFrame, CSS);
+});

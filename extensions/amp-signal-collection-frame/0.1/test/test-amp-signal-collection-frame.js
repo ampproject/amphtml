@@ -14,37 +14,44 @@
  * limitations under the License.
  */
 
- import {AmpSignalCollectionFrame} from '../amp-signal-collection-frame';
- import {createElementWithAttributes} from '../../../../src/dom';
- import {createIframePromise} from '../../../../testing/iframe';
- import * as sinon from 'sinon';
+import {AmpSignalCollectionFrame} from '../amp-signal-collection-frame';
 
- describe('amp-signal-collection-frame', () => {
+describes.sandboxed('amp-signal-collection-frame', {}, () => {
 
-   describes.fakeWin('fake win', {}, env => {
+  function createAmpSignalCollectionFrameElement(win, attrs) {
+    const element =
+        win.document.createElement('amp-signal-collection-frame');
+    for (const attr in attrs) {
+      element.setAttribute(attr, attrs[attr]);
+    }
+    win.document.body.appendChild(element);
+    element.build();
+    return element;
+  }
 
-     it('should create child xdomain iframe', () => {
-       const doc = env.win.document;
-       const element = createElementWithAttributes(
-         doc, 'amp-signal-collection-frame', {
-           'type': 'google',
-           'data-hash': 'abc123',
-           'data-src-suffix': 'some_file.js',
-         });
-       console.log('see me?', element);
-       doc.documentElement.appendChild(element);
-       const ampSignalCollectionFrame = new AmpSignalCollectionFrame(element);
-       expect(element.querySelector('iframe')).to.not.be.ok;
-       return ampSignalCollectionFrame.layoutCallback().then(() => {
-         const frame = element.querySelector('iframe');
-         expect(frame).to.be.ok;
-         expect(frame.getAttribute('src')).to.equal(
+  describes.fakeWin('fake win', {
+    amp: {
+      extensions: ['amp-signal-collection-frame'],
+    },
+  }, env => {
+
+    it('should create child xdomain iframe', () => {
+      const element = createAmpSignalCollectionFrameElement(env.win, {
+        'type': 'google',
+        'data-hash': 'abc123',
+        'data-src-suffix': 'some_file.js'
+      });
+      expect(element.querySelector('iframe')).to.not.be.ok;
+      return element.layoutCallback().then(() => {
+        const frame = element.querySelector('iframe');
+        expect(frame).to.be.ok;
+        expect(frame.getAttribute('src')).to.equal(
             '//tpc.googlesyndication.com/sodar/some_file.js#abc123');
-       });
-     });
-   });
+      });
+    });
 
-   it('should have priority 2', () => {
-     expect(AmpSignalCollectionFrame.prototype.getPriority()).to.equal(2);
-   });
- });
+    it('should have priority 2', () => {
+      expect(AmpSignalCollectionFrame.prototype.getPriority()).to.equal(2);
+    });
+  });
+});
