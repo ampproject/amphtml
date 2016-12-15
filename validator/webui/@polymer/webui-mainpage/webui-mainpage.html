@@ -19,27 +19,26 @@
 <link rel="import" href="../ampproject-toolbar/ampproject-toolbar.html">
 <link rel="import" href="../amphtml-editor/amphtml-editor.html">
 <link rel="import" href="../webui-statusbar/webui-statusbar.html">
+<link rel="import" href="../webui-splitpane/webui-splitpane.html">
 <link rel="import" href="../webui-errorlist/webui-errorlist.html">
 <link rel="import" href="../webui-urlform/webui-urlform.html">
 <link rel="import" href="../webui-preview/webui-preview.html">
 <dom-module id="webui-mainpage">
   <style scope="webui-preview">
-    main {
-      display: -ms-flex;
-      display: -webkit-flex;
-      display: flex;
-    }
-    main > *:first-child {
+    #amphtmlEditor {
       width: 60%;
-      margin-right: 16px;
     }
-    main > *:last-child {
+    #preview {
       width: 40%;
     }
+    #drag {
+      width: 8px;
+      height: calc(100vh-200px);
+      cursor: col-resize;
+    }
     @media (max-width: 599px) {
-      main > *:first-child {
+      #amphtmlEditor {
         width: 100%;
-        margin-right: 0;
       }
       #preview {
         display: none;
@@ -49,10 +48,10 @@
   <template>
     <ampproject-toolbar></ampproject-toolbar>
     <webui-urlform id="urlForm"></webui-urlform>
-    <main>
+    <webui-splitpane>
       <amphtml-editor id="amphtmlEditor"></amphtml-editor>
       <webui-preview id="preview"></webui-preview>
-    </main>
+    </webui-splitpane>
     <webui-statusbar id="statusBar"></webui-statusbar>
     <webui-errorlist id="errorListBox"></webui-errorlist>
   </template>
@@ -99,7 +98,6 @@
     Polymer({
       is: 'webui-mainpage',
       ready: function() {
-
         // The URL form at the top of the screen.
         var urlForm = this.$.urlForm;
 

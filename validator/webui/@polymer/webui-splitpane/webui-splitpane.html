@@ -1,0 +1,94 @@
+<!--
+  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!-- An element consisting of two sides, separated by a divider which the user can
+drag to resize the two sides. -->
+<link rel="import" href="../polymer/polymer.html">
+<dom-module id="webui-splitpane">
+  <style>
+    :host {
+      display: -ms-flex;
+      display: -webkit-flex;
+      display: flex;
+    }
+  </style>
+  <template>
+    <content></content>
+  </template>
+  <script>
+    var NR_OF_PANES = 2;
+    var BODY_PADDING = 24;
+
+    function setPointerEvent(parent, value) {
+      var children = parent.getElementsByTagName("*");
+      for (i = 0; i < children.length; i++) {
+        children[i].style['pointer-events'] = value;
+      };
+    }
+
+    Polymer({
+      is: 'webui-splitpane',
+      ready: function() {
+        if (this.children.length !== NR_OF_PANES) {
+          console.error('webui-splitpane only supports ' + NR_OF_PANES +
+              ' children');
+          return;
+        }
+        var container = this;
+        var left = this.children[0];
+        var right = this.children[1];
+
+        // insert drag handle
+        var handle = document.createElement('div');
+        handle.id = 'drag';
+        Polymer.dom(this).insertBefore(handle, right);
+
+        // resize the panes based on the handle position
+        var isResizing = false;
+
+        // start dragging
+        handle.onmousedown = function (e) {
+          isResizing = true;
+          // disable pointer events for all children
+          setPointerEvent(container, 'none');
+        };
+
+        // resize panes
+        document.onmousemove = function (e) {
+          // we don't want to do anything if we aren't resizing.
+          if (!isResizing) {
+            return;
+          }
+          // don't grow outside the container
+          if (e.clientX > container.offsetWidth + BODY_PADDING) {
+            return;
+          }
+
+          // adjust the panes
+          left.style.width = '' + (e.clientX - BODY_PADDING) + 'px';
+          right.style.width = '' + (container.offsetWidth - e.clientX + BODY_PADDING) + 'px';
+        };
+
+        // end dragging
+        document.onmouseup = function (e) {
+          // stop resizing
+          isResizing = false;
+          // disable pointer events for all children
+          setPointerEvent(container, 'auto');
+        };
+      },
+    });
+  </script>
+</dom-module>
