@@ -61,10 +61,10 @@ export class AmpContext {
   /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
-   *  @param {int} height The new height for the ad we are requesting.
    *  @param {int} width The new width for the ad we are requesting.
+   *  @param {int} height The new height for the ad we are requesting.
    */
-  requestResize(height, width) {
+  requestResize(width, height) {
     this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
   };
 
