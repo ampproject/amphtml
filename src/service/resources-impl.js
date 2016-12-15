@@ -580,6 +580,7 @@ export class Resources {
    * scheduled, their priority is updated as well.
    * @param {!Element} element
    * @param {number} newPriority
+   * @restricted
    */
   updatePriority(element, newPriority) {
     const resource = Resource.forElement(element);
