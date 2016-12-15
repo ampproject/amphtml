@@ -143,17 +143,19 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
+// Need to cache iframeName as it will be potentially overwritten by
+// masterSelection, as per below.
 const iframeName = window.name;
 let data;
 // TODO(bradfrizzell@): Change the data structure of the attributes
 //    to make it less terrible.
 try {
-  data = JSON.parse(window.name).attributes;
+  data = JSON.parse(iframeName).attributes;
   window.context = data._context;
 } catch (err) {
   window.context = {};
   dev().info(
-      'INTEGRATION', 'Could not parse context from:', window.name);
+      'INTEGRATION', 'Could not parse context from:', iframeName);
 }
 // This should only be invoked after window.context is set
 initLogConstructor();
