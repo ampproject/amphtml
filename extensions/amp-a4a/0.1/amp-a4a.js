@@ -790,24 +790,31 @@ export class AmpA4A extends AMP.BaseElement {
       const url = signingServerURLs[serviceName];
       const currServiceName = serviceName;
       if (url) {
-        return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
-            .then(jwkSetObj => {
-              const result = {serviceName: currServiceName};
-              if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
-                  jwkSetObj.keys.every(isObject)) {
-                result.keys = jwkSetObj.keys;
-              } else {
-                user().error(TAG, this.element.getAttribute('type'),
-                    `Invalid response from signing server ${currServiceName}`,
-                    this.element);
-                result.keys = [];
-              }
-              return result;
-            }).catch(err => {
-              user().error(
-                  TAG, this.element.getAttribute('type'), err, this.element);
-              return {serviceName: currServiceName};
-            });
+        // Set disableAmpSourceOrigin so that __amp_source_origin is not
+        // included in XHR CORS request allowing for keyset to be cached
+        // across pages.
+        return xhrFor(this.win).fetchJson(url, {
+          mode: 'cors',
+          method: 'GET',
+          ampCors: false,
+          credentials: 'omit',
+        }).then(jwkSetObj => {
+          const result = {serviceName: currServiceName};
+          if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
+              jwkSetObj.keys.every(isObject)) {
+            result.keys = jwkSetObj.keys;
+          } else {
+            user().error(TAG, this.element.getAttribute('type'),
+                `Invalid response from signing server ${currServiceName}`,
+                this.element);
+            result.keys = [];
+          }
+          return result;
+        }).catch(err => {
+          user().error(
+              TAG, this.element.getAttribute('type'), err, this.element);
+          return {serviceName: currServiceName};
+        });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
