@@ -406,8 +406,15 @@ describe('Logging', () => {
       expect(false).to.be.true;
     });
 
+    it('should create expected error from message', () => {
+      const error = log.createExpectedError('test');
+      expect(error).to.be.instanceof(Error);
+      expect(error.expected).to.be.true;
+    });
+
     it('should create suffixed errors from message', () => {
       const error = log.createError('test');
+      expect(error.expected).to.be.undefined;
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
       expect(error.message).to.contain('test');
