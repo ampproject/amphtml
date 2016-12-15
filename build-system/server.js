@@ -463,17 +463,6 @@ app.use('/min/', function(req, res) {
 app.use('/a4a(|-3p)/', function(req, res) {
   var force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
   var adUrl = req.url;
-
-  //QQQQ
-  console.log('@@@@@@@@@@@@@@@@@@@@@');
-  console.log('baseUrl:', req.baseUrl);
-  console.log('url:', req.url);
-  console.log('path:', req.path);
-  console.log('query:', req.query);
-  console.log('force3p:', force3p);
-  console.log('adUrl:', adUrl);
-  console.log('@@@@@@@@@@@@@@@@@@@@@');
-
   var templatePath = '/build-system/server-a4a-template.html';
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     var result = template

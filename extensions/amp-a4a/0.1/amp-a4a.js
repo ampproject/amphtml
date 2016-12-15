@@ -369,6 +369,17 @@ export class AmpA4A extends AMP.BaseElement {
       }
     };
 
+    // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
+    // to go via 3p.
+    if (getMode().localDev) {
+      if (this.element.getAttribute('type') == 'fake' &&
+          this.element.getAttribute('force3p') == 'true') {
+        this.adUrl_ = this.getAdUrl();
+        this.adPromise_ = Promise.resolve();
+        return;
+      }
+    }
+
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
     // try to render later in iframe.
@@ -534,7 +545,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<!ArrayBuffer>} The creative.
    */
   verifyCreativeSignature_(creative, signature) {
-    /*QQQ
     if (getMode().localDev) {
       // localDev mode allows "FAKESIG" signature for the "fake" network.
       if (signature == 'FAKESIG' &&
@@ -542,7 +552,6 @@ export class AmpA4A extends AMP.BaseElement {
         return Promise.resolve(creative);
       }
     }
-    */
 
     // For each signing service, we have exactly one Promise,
     // keyInfoSetPromise, that holds an Array of Promises of signing keys.
