@@ -20,7 +20,7 @@ tags: {  # amp-video
    tag_name: "SCRIPT"
    spec_name: "amp-video extension .js script"
    mandatory_parent: "HEAD"
-   unique_warning: true
+   unique: true
    attrs: {
      name: "async"
      mandatory: true
