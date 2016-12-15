@@ -764,7 +764,10 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
-      this.postDocumentLoaded_();
+      this.viewer_.sendMessage('documentLoaded', {
+        title: this.win.document.title,
+        sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
+      }, /* cancelUnsent */true);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1668,17 +1671,6 @@ export class Resources {
         this.pendingBuildResources_.splice(pendingIndex, 1);
       }
     }
-  }
-
-  /**
-   * Inform the viewer with documentLoaded message
-   * @private
-   */
-  postDocumentLoaded_() {
-    this.viewer_.sendMessage('documentLoaded', {
-      title: this.win.document.title,
-      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-    }, /* cancelUnsent */true);
   }
 }
 
