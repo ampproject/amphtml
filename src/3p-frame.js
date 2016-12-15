@@ -131,7 +131,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
-  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js#L315
+  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
   const name = JSON.stringify({
     host,
     type: attributes.type,
