@@ -14,55 +14,31 @@
 # limitations under the license.
 #
 
-tags: {  # amp-video
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "SCRIPT"
-  spec_name: "amp-video extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-video"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-video-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-video.html"
-}
 tags: {  # <amp-video>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-video extension .js script"
-  attrs: { name: "autoplay" }
+  also_requires_tag_warning: "amp-video extension .js script"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "autoplay" value: "" }
+  attrs: { name: "controls" value: "" }
+  attrs: { name: "loop"     value: "" }
+  attrs: { name: "muted"    value: "" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "poster" }
+  attrs: { name: "preload" value_regex: "(none|metadata|auto|)" }
   attrs: {
-    name: "data-videoid"
-    mandatory: true
-    value_regex: "[^=/?:]+"
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-video.html"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

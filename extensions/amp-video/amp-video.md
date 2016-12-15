@@ -25,10 +25,13 @@ limitations under the License.
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
   </tr>
+  <!--
+  Uncomment the script after validator changes are pushed to production.
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js">&lt;/script></code></td>
   </tr>
+  -->
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-video/">Annotated code example for amp-video</a></td>

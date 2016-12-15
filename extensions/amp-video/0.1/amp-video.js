@@ -15,15 +15,15 @@
   */
 
 import {ampdocServiceFor} from '../../../src/ampdoc';
-import {assertHttpsUrl} from '../../../src/url';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-video';
 

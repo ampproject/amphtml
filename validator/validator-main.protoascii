@@ -1217,36 +1217,6 @@ tags: {
   attrs: { name: "height" }
   attrs: { name: "width" }
 }
-# 4.7.6 The video element
-# Only allowed in noscript tags. Otherwise use amp-video.
-tags: {
-  html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
-  tag_name: "VIDEO"
-  mandatory_ancestor: "NOSCRIPT"
-  mandatory_ancestor_suggested_alternative: "AMP-VIDEO"
-  attrs: { name: "autoplay" }
-  attrs: { name: "controls" }
-  attrs: { name: "height" }
-  attrs: { name: "loop" }
-  attrs: {
-    name: "muted"
-    deprecation: "autoplay"
-    deprecation_url: "https://www.ampproject.org/docs/reference/amp-video.html"
-  }
-  attrs: { name: "poster" }
-  attrs: { name: "preload" }
-  attrs: {
-    name: "src"
-    value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
-      allow_relative: false
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
-  attrs: { name: "width" }
-  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
-}
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
 tags: {
@@ -2657,39 +2627,6 @@ tags: {  # <amp-pixel>
     defines_default_width: true
     supported_layouts: FIXED
     supported_layouts: NODISPLAY
-  }
-}
-tags: {  # <amp-video>
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "AMP-VIDEO"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  attrs: { name: "alt" }
-  attrs: { name: "attribution" }
-  attrs: { name: "autoplay" value: "" }
-  attrs: { name: "controls" value: "" }
-  attrs: { name: "loop"     value: "" }
-  attrs: { name: "muted"    value: "" }
-  attrs: { name: "placeholder" }
-  attrs: { name: "poster" }
-  attrs: { name: "preload" value_regex: "(none|metadata|auto|)" }
-  attrs: {
-    name: "src"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
   }
 }
 
