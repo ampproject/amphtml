@@ -120,7 +120,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       style.parentNode.removeChild(style);
     }
 
-    let creative = root.outerHTML;
+    let creative = root./*OK*/outerHTML;
 
     // Metadata
     creative += '<script type="application/json" amp-ad-metadata>';
