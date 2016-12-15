@@ -153,8 +153,11 @@ describe('amp-ad-network-adsense-impl', () => {
         });
       });
     });
-    it('with multiple slots', () => {
-      //resetSharedState();
+    // Not using arrow function here because otherwise the way closure behaves
+    // prevents me from calling this.timeout(5000).
+    it('with multiple slots', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
       return createIframePromise().then(fixture => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
@@ -192,13 +195,13 @@ describe('amp-ad-network-adsense-impl', () => {
                   const adsenseImpl3 = new AmpAdNetworkAdsenseImpl(addedElem3);
                   return adsenseImpl3.getAdUrl().then(adUrl3 => {
                     expect(adUrl3.indexOf('pv=2') >= 0).to.be.true;
-                    // By some quirk of the test infrastructure, each
-                    // added slot after the first one has a bounding rectangle
-                    // of 0x0. The important thing to test here is the number of
-                    // previous formats.
-                    expect(adUrl3.indexOf('prev_fmts=320x50%2C0x0') >= 0,
-                        adUrl3)
-                        .to.be.true;
+                    // By some quirk of the test infrastructure, when this test
+                    // is ran individually, each added slot after the first one
+                    // has a bounding rectangle of 0x0. The important thing to
+                    // test here is the number of previous formats.
+                    expect(adUrl3.indexOf('prev_fmts=320x50%2C0x0') >= 0 ||
+                        adUrl3.indexOf('prev_fmts=320x50%2C320x50') >= 0,
+                        adUrl3).to.be.true;
                   });
                 });
               });

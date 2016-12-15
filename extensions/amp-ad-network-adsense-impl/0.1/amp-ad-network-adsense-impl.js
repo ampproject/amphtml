@@ -108,6 +108,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
     this.adk_ = this.adKey_(format);
+    const sharedStateParams = sharedState.addNewSlot(
+        format, this.adk_, adClientId);
 
     const paramList = [
       {name: 'client', value: adClientId},
@@ -127,7 +129,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
       {name: 'to', value: this.element.getAttribute('data-tag-origin')},
-      {name: 'pv', value: sharedState.updateAndGetPv(adClientId)},
+      {name: 'pv', value: sharedStateParams.pv},
       {name: 'u_ah', value: screen ? screen.availHeight : null},
       {name: 'u_aw', value: screen ? screen.availWidth : null},
       {name: 'u_cd', value: screen ? screen.colorDepth : null},
@@ -138,9 +140,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
     ];
 
-    const prevFmts = sharedState.updateAndGetPrevFmts(format, this.adk_);
-    if (prevFmts) {
-      paramList.push({name: 'prev_fmts', value: prevFmts});
+    if (sharedStateParams.prevFmts) {
+      paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
     }
 
     return googleAdUrl(
@@ -156,7 +157,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   unlayoutCallback() {
     super.unlayoutCallback();
     if (this.adk_) {
-      sharedState.removePreviousFormat(this.adk_);
+      sharedState.removeSlot(this.adk_);
     }
   }
 

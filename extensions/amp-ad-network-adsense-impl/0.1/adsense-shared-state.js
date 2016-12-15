@@ -14,79 +14,48 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
+
 export class AdsenseSharedState {
 
   constructor() {
 
-    /** @private {!Array<string>} */
-    this.prevFmts_ = [];
-
-    /** @private {!Object<string, number>} */
-    this.slotFormatIndexMap_ = {};
-
-    /** @private {number} */
-    this.formatIndex_ = 0;
-
-    /** @private {!Object<string, number>} */
-    this.pv_ = {};
+    /** @private {!Array<!{id: string, format: string, client: string}>} */
+    this.previousSlots_ = [];
   }
 
   /**
-   * Returns the formats of the previous slots as a comma separated list.
-   * @param {string} format The format to add.
-   * @param {string} id Unique identifier for slot.
-   * @return {string}
-   */
-  updateAndGetPrevFmts(format, id) {
-    // The return value.
-    const prevFmts = this.prevFmts_.join(',');
-    // Associate the insertion index with the given id for future removal.
-    this.slotFormatIndexMap_[id] = this.formatIndex_++;
-
-    this.prevFmts_.push(format);
-    return prevFmts;
-  }
-
-  /**
-   * Removes the format associated with the given adkey.
-   * @param {string} id The unique ID associated with the format to be removed.
-   */
-  removePreviousFormat(id) {
-    // Get index of format associated with given adk.
-    const n = this.slotFormatIndexMap_[id];
-    // Delete the association.
-    delete this.slotFormatIndexMap_[id];
-
-    // Decrement next insertion index.
-    this.formatIndex_--;
-
-    this.prevFmts_.splice(n, 1);
-    // Decrement all indexes greater than n to compensate for the removal of the
-    // nth item in the array.
-    for (const key in this.slotFormatIndexMap_) {
-      if (this.slotFormatIndexMap_[key] > n) {
-        this.slotFormatIndexMap_[key]--;
+   * @param {string} format
+   * @param {string} id
+   * @param {string} client
+   * @return !{{prevFmts: string, pv: number}}
+   * */
+  addNewSlot(format, id, client) {
+    const result = {pv: 2, prevFmts: ''};
+    this.previousSlots_.forEach(slot => {
+      dev().assert(slot.id != id);
+      result.prevFmts += (result.prevFmts ? ',' : '') + slot.format;
+      if (slot.client == client) {
+        result.pv = 1;
       }
-    }
+    });
+    this.previousSlots_.push({id, format, client});
+    return result;
   }
 
   /**
-   * Returns the page view, 2 for the first slot, and 1 for all subsequent slots
-   * with the same ad client ID.
-   * @param {string} adClientId The ad client id.
-   * @return {number} The page view.
+   * @param {string} id
    */
-  updateAndGetPv(adClientId) {
-    this.pv_[adClientId] = this.pv_[adClientId] ? 1 : 2;
-    return this.pv_[adClientId];
+  removeSlot(id) {
+    this.previousSlots_ = this.previousSlots_.filter(slot => {
+      return slot.id != id;
+    });
   }
 
   /**
    * Resets to initial state.
    */
   reset() {
-    this.prevFmts_ = [];
-    this.pv_ = {};
-    this.slotFormatIndexMap_ = {};
+    this.previousSlots_ = [];
   }
 }
