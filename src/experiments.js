@@ -124,11 +124,21 @@ export function isExperimentOnAllowUrlOverride(win, experimentId) {
  * @return {boolean}
  */
 function calcExperimentOn(win, experimentId) {
-  const cookieFlag = getExperimentIds(win).indexOf(experimentId) != -1;
+  const experiments = getExperimentIds(win);
+
+  // Disabling cookie flag.
+  const disableFlag = experiments.indexOf('-' + experimentId) != -1;
+  if (disableFlag) {
+    return false;
+  }
+
+  // Enabling cookie flag.
+  const cookieFlag = experiments.indexOf(experimentId) != -1;
   if (cookieFlag) {
     return true;
   }
 
+  // Binary config.
   if (win.AMP_CONFIG && win.AMP_CONFIG.hasOwnProperty(experimentId)) {
     const frequency = win.AMP_CONFIG[experimentId];
     return Math.random() < frequency;
