@@ -796,8 +796,7 @@ export class AmpA4A extends AMP.BaseElement {
         return xhrFor(this.win).fetchJson(url, {
           mode: 'cors',
           method: 'GET',
-          requireAmpResponseSourceOrigin: false,
-          disableAmpSourceOrigin: true,
+          ampCors: false,
           credentials: 'omit',
         }).then(jwkSetObj => {
           const result = {serviceName: currServiceName};

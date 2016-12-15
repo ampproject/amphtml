@@ -184,9 +184,9 @@ describe('XHR', function() {
           }).to.throw(/Source origin is not allowed/);
         });
 
-        it('should not include __amp_source_origin if disableAmpSourceOrigin ' +
-            'set to true', () => {
-          xhr.fetchJson('/get', {disableAmpSourceOrigin: true});
+        it('should not include __amp_source_origin if ampCors ' +
+            'set to false', () => {
+          xhr.fetchJson('/get', {ampCors: false});
           expect(noOrigin(requests[0].url)).to.equal('/get');
         });
 

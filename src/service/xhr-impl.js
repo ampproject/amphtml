@@ -26,8 +26,7 @@ import {isArray, isObject, isFormData} from '../types';
 
 /**
  * The "init" argument of the Fetch API. Currently, only "credentials: include"
- * is implemented.  Note disableAmpSourceOrigin requires that
- * requireAmpResponseSourceOrigin is not enabled and indicates that
+ * is implemented.  Note ampCors with explicit false indicates that
  * __amp_source_origin should not be appended to the URL to allow for
  * potential caching or response across pages.
  *
@@ -39,7 +38,7 @@ import {isArray, isObject, isFormData} from '../types';
  *   headers: (!Object|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   disableAmpSourceOrigin: (boolean|undefined)
+ *   ampCors: (boolean|undefined)
  * }}
  */
 let FetchInitDef;
@@ -111,9 +110,8 @@ export class Xhr {
    * returned in the response; and (3) It requires
    * "AMP-Access-Control-Allow-Source-Origin" to be present in the response
    * if the `init.requireAmpResponseSourceOrigin = true`.
-   * USE WITH CAUTION: setting requireAmpResponseSourceOrigin false and
-   * disableAmpSourceOrigin true disables these constraints to allow for caching
-   * resources.
+   * USE WITH CAUTION: setting ampCors false disables AMP source origin check
+   * but allows for caching resources cross pages.
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
@@ -124,9 +122,9 @@ export class Xhr {
     // Do not append __amp_source_origin if explicitly disabled
     // (requireAmpResponseSourceOrigin overrides disable).
     dev().assert(
-      !(init.disableAmpSourceOrigin && init.requireAmpResponseSourceOrigin),
+      !(init.ampCors && init.requireAmpResponseSourceOrigin),
       'requireAmpResponseSourceOrigin and disableAmpSourceOrigin enabled');
-    if (!init.disableAmpSourceOrigin) {
+    if (init.ampCors !== false) {
       input = this.getCorsUrl(this.win, input);
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow

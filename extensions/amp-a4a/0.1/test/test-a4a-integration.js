@@ -98,8 +98,7 @@ describe('integration test: a4a', () => {
         {
           mode: 'cors',
           method: 'GET',
-          requireAmpResponseSourceOrigin: false,
-          disableAmpSourceOrigin: true,
+          ampCors: false,
           credentials: 'omit',
         }).returns(
           Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
