@@ -151,19 +151,12 @@ let data;
 // TODO(bradfrizzell@): Change the data structure of the attributes
 //    to make it less terrible.
 try {
-  data = JSON.parse(iframeName).attributes;
+  data = JSON.parse(window.name).attributes;
   window.context = data._context;
-} else {
-  try {
-    // TODO(bradfrizzell@): Change the data structure of the attributes
-    //    to make it less terrible.
-    data = JSON.parse(iframeName).attributes;
-    window.context = data._context;
-  } catch (err) {
-    window.context = {};
-    dev().info(
-        'INTEGRATION', 'Could not parse context from:', iframeName);
-  }
+} catch (err) {
+  window.context = {};
+  dev().info(
+      'INTEGRATION', 'Could not parse context from:', window.name);
 }
 
 // This should only be invoked after window.context is set
@@ -524,9 +517,7 @@ function reportRenderedEntityIdentifier(entityId) {
  *      that needs to be attached to an iframe.
  *  @param {Element} iframe
  */
-function addNameToIframe(name, iframe) {
-  iframe.name = name;
-}
+function addNameToIframe(name, iframe) {iframe.name = name;}
 
 /**
  * Throws if the current frame's parent origin is not equal to
