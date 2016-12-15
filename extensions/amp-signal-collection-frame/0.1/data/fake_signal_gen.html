@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <script>
+      window.parent.postMessage(JSON.stringify({
+        foo: 'bar',
+        abc: 123,
+        h: window.location.hash
+      }), '*');
+    </script>
+  </head>
+  <body></body>
+</html>

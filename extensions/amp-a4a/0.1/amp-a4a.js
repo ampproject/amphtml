@@ -25,6 +25,7 @@ import {
   removeChildren,
   createElementWithAttributes,
 } from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
 import {cancellation} from '../../../src/error';
 import {
   installFriendlyIframeEmbed,
@@ -893,7 +894,7 @@ export class AmpA4A extends AMP.BaseElement {
         iframe, this.element, {
           url: this.adUrl_,
           html: creativeMetaData.minifiedCreative,
-          extensionIds: creativeMetaData.customElementExtensions || [],
+          extensionIds: creativeMetaData.customElementExtensions,
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
@@ -1108,7 +1109,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (!isExperimentOn(this.win, 'alp-for-a4a')) {
       return;
     }
-    iframeWin.document.documentElement.addEventListener('click', event => {
+    listen(iframeWin.document.documentElement, 'click', event => {
       handleClick(event, url => {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
@@ -1121,8 +1122,42 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Window} iframeWin
    */
   registerExpandUrlParams_(iframeWin) {
-    iframeWin.document.documentElement.addEventListener('click',
-        this.maybeExpandUrlParams_.bind(this), /* capture */ true);
+    // Mapping of message origin to parameters allowing for replacement.
+    // Multiple messages from same origin result in last value being
+    // overwritten.
+    /** @type {Object<string, Object<string, string>>} */
+    const messages = {};
+    // Only register message listener if there is an instance of
+    // amp-signal-collection-frame within the creative frame.
+    const ampSignalCollectionFrames =
+        iframeWin.document.querySelectorAll(
+          'amp-signal-collection-frame > iframe');
+    if (ampSignalCollectionFrames.length) {
+      listen(this.win, 'message', evt => {
+        if (!evt || !evt.source || !evt.origin) {
+          return;
+        }
+        // Only allow messages from child iframe whose parent is an
+        // amp-signal-collection-frame element.
+        const ampSignalCollectionFrameSender =
+            ampSignalCollectionFrames.find(frame => {
+              return frame.contentWindow == evt.source;
+            });
+        if (ampSignalCollectionFrameSender) {
+          try {
+            messages[evt.origin.toUpperCase()] = JSON.parse(evt.data);
+          } catch (err) {
+            const type = ampSignalCollectionFrameSender.getAttribute('type');
+            dev().error(TAG,
+                `Invalid ${ampSignalCollectionFrameSender.tagName}:${type} msg`,
+                evt, err);
+          }
+        }
+      });
+    }
+    listen(iframeWin.document.documentElement, 'click', evt => {
+      this.maybeExpandUrlParams_(evt, messages);
+    }, /* capture */ true);
   }
 
   /**
@@ -1130,8 +1165,9 @@ export class AmpA4A extends AMP.BaseElement {
    * The function changes the actual href value and stores the
    * template in the ORIGINAL_HREF_ATTRIBUTE attribute
    * @param {!Event} e
+   * @param {Object<string, Object<string, string>>} messages
    */
-  maybeExpandUrlParams_(e) {
+  maybeExpandUrlParams_(e, messages) {
     const target = closestByTag(dev().assertElement(e.target), 'A');
     if (!target || !target.href) {
       // Not a click on a link.
@@ -1149,15 +1185,21 @@ export class AmpA4A extends AMP.BaseElement {
       'CLICK_Y': () => {
         return e.pageY;
       },
+      'POSTMESSAGE': (origin, varName) => {
+        let data, param;
+        if (!origin || !varName || !(data = messages[origin.toUpperCase()]) ||
+            !(param = data[varName])) {
+          return '';
+        }
+        return param;
+      },
     };
+    // For now we only allow to replace the vars defined items and nothing else.
+    // NOTE: Addition to this whitelist requires additional review.
+    const whitelist = {};
+    Object.keys(vars).forEach(key => { whitelist[key] = true; });
     const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
-        hrefToExpand, vars, undefined, /* opt_whitelist */ {
-          // For now we only allow to replace the click location vars
-          // and nothing else.
-          // NOTE: Addition to this whitelist requires additional review.
-          'CLICK_X': true,
-          'CLICK_Y': true,
-        });
+        hrefToExpand, vars, undefined, whitelist);
     if (newHref != hrefToExpand) {
       // Store original value so that later clicks can be processed with
       // freshest values.

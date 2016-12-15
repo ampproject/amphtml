@@ -35,7 +35,7 @@ import {
 } from '../../../../src/custom-element';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {loadPromise} from '../../../../src/event-helper';
+import {loadPromise, listenOnce} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
@@ -51,7 +51,7 @@ import * as sinon from 'sinon';
  * @param {!Element} element amp-ad element to examine.
  * @param {string} srcdoc  A string that must occur somewhere in the friendly
  *   iframe `srcdoc` attribute.
- * @return {!Promise} Promise that executes assertions on friendly
+ * @return {!Promise<!Element>} Promise that executes assertions on friendly
  *   iframe contents.
  */
 function expectRenderedInFriendlyIframe(element, srcdoc) {
@@ -65,6 +65,7 @@ function expectRenderedInFriendlyIframe(element, srcdoc) {
     expect(element, 'ad tag').to.be.visible;
     expect(child, 'iframe child').to.be.visible;
     expect(childDocument, 'ad creative content doc').to.be.visible;
+    return child.contentDocument;
   });
 }
 
@@ -140,6 +141,32 @@ describe('integration test: a4a', () => {
   it('should render a single AMP ad in a friendly iframe', () => {
     return fixture.addElement(a4aElement).then(unusedElement => {
       return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
+    });
+  });
+
+  it('should include x/y in AMP creative click', (done) => {
+    fixture.addElement(a4aElement).then(unusedElement => {
+      expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.').then(
+        (childDocument) => {
+          const link = childDocument.querySelector('a');
+          console.log('link', link);
+          expect(link).to.be.ok;
+          const xCoord = 123;
+          const yCoord = 456;
+          const clickListener = listenOnce(link, 'click', e => {
+            // Prevent to ensure no navigation.
+            e.preventDefault();
+            const href = link.getAttribute('href');
+            expect(href).to.equal('http://foo.com?a=b&nx=123&ny=456');
+            done();
+          });
+          // Simulate click at x/y coordinate.
+          const event = childDocument.createEvent('MouseEvents');
+          event.initMouseEvent(
+             'click', true, true, childDocument.contentWindow, 1, xCoord,
+             yCoord, xCoord, yCoord);
+         link.dispatchEvent(event);
+      });
     });
   });
 
