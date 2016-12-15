@@ -30,7 +30,7 @@ describe('3p messaging', () => {
       testWin = i.win;
       testWin.context = {
         location: window.location,
-        amp3pSentinel: 'test',
+        sentinel: 'test',
       };
       iframe = {
         contentWindow: testWin,
