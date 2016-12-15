@@ -32,6 +32,7 @@ import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
+import {getSourceUrl} from '../url';
 
 
 const TAG_ = 'Resources';
@@ -783,7 +784,10 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
-      this.viewer_.postDocumentReady();
+      this.viewer_.sendMessage('documentLoaded', {
+        title: this.win.document.title,
+        sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
+      }, /* cancelUnsent */true);
     }
 
     const viewportSize = this.viewport_.getSize();
