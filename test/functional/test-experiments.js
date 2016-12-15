@@ -73,10 +73,10 @@ describe('isExperimentOn', () => {
     });
 
     it('should return "off" when disabling value is in the list', () => {
-      expectExperiment('AMP_EXP=NO-e1,e1', 'e1').to.be.false;
-      expectExperiment('AMP_EXP=e1,e2,NO-e1', 'e1').to.be.false;
-      expectExperiment('AMP_EXP=e2,NO-e1,e1', 'e1').to.be.false;
-      expectExperiment('AMP_EXP=e2 , e1,  NO-e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=-e1,e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e1,e2,-e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e2,-e1,e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e2 , e1,  -e1', 'e1').to.be.false;
     });
   });
 
@@ -101,7 +101,7 @@ describe('isExperimentOn', () => {
 
     it('should return "off" when disabling value is in the list', () => {
       win.AMP_CONFIG['e1'] = true;
-      expectExperiment('AMP_EXP=NO-e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=-e1', 'e1').to.be.false;
     });
 
     it('should return "off" when not in cookie flag or global flag', () => {

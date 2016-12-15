@@ -127,7 +127,7 @@ function calcExperimentOn(win, experimentId) {
   const experiments = getExperimentIds(win);
 
   // Disabling cookie flag.
-  const disableFlag = experiments.indexOf('NO-' + experimentId) != -1;
+  const disableFlag = experiments.indexOf('-' + experimentId) != -1;
   if (disableFlag) {
     return false;
   }
