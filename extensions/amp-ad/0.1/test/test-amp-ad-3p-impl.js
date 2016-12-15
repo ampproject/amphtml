@@ -115,7 +115,7 @@ describe('amp-ad-3p-impl', () => {
         const data = JSON.parse(frame.name).attributes;
         expect(data).to.be.ok;
         expect(data._context).to.be.ok;
-        expect(data._context.clientId).to.equal("sentinel123");
+        expect(data._context.clientId).to.equal('sentinel123');
       });
     });
 
@@ -180,7 +180,7 @@ describe('amp-ad-3p-impl', () => {
         const data = JSON.parse(frame.name).attributes;
         expect(data).to.be.ok;
         expect(data._context).to.be.ok;
-        expect(data._context.container).to.equal("AMP-STICKY-AD");
+        expect(data._context.container).to.equal('AMP-STICKY-AD');
       });
     });
   });
