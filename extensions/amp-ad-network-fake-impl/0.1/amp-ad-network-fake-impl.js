@@ -59,7 +59,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           // and the signature is "FAKESIG". This mode is only allowed in
           // `localDev` and primarily used for A4A Envelope for testing.
           // See DEVELOPING.md for more info.
-          const creative = this.transformCreative_(deserialized);
+          const creative = this.transformCreativeLocalDev_(deserialized);
           const encoder = new TextEncoder('utf-8');
           return {
             creative: encoder.encode(creative).buffer,
@@ -82,9 +82,11 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 
   /**
+   * Converts a general AMP doc to a AMP4ADS doc. Only used in localDev.
    * @param {string} source
+   * @return {string}
    */
-  transformCreative_(source) {
+  transformCreativeLocalDev_(source) {
     const doc = new DOMParser().parseFromString(source, 'text/html');
     const root = doc.documentElement;
 
