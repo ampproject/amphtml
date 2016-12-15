@@ -38,10 +38,10 @@ const AmpAdImplementation = {
 };
 
 /** @const {!Object} */
-export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': true,
-  'AMP-FX-FLYING-CARPET': true,
-};
+export const ValidAdContainerTypes = [
+  'AMP-STICKY-AD',
+  'AMP-FX-FLYING-CARPET',
+];
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
@@ -136,7 +136,7 @@ function buildAdUrl(
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const adElement = a4a.element;
-  if (adElement.parentElement.tagName in ValidAdContainerTypes) {
+  if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
     queryParams.push({name: 'amp_ct', value: adElement.parentElement.tagName});
   }
   const allQueryParams = queryParams.concat(
