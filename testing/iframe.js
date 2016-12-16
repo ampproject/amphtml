@@ -85,7 +85,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       // Set the testLocation on iframe to parent's location since location of
       // the test iframe is about:srcdoc.
       // Unfortunately location object is not configurable, so we have to define
-      // a new propery.
+      // a new property.
       win.testLocation = new FakeLocation(window.location.href, window);
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
