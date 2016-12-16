@@ -52,6 +52,11 @@ describe('amp-ad-csa-impl', () => {
       return createIframePromise(true).then(iframe => {
         win = iframe.win;
         win.context = {
+          initialIntersection: {
+            boundingClientRect: {
+              height: 0,
+            },
+          },
           requestResize() {},
           onResizeSuccess() {},
           onResizeDenied() {},
@@ -115,8 +120,12 @@ describe('amp-ad-csa-impl', () => {
         div.appendChild(iframe);
         win.document.body.appendChild(div);
         // Reset window properties
-        win.innerHeight = 0;
         win.context = {
+          initialIntersection: {
+            boundingClientRect: {
+              height: 0,
+            },
+          },
           requestResize() {},
           onResizeSuccess() {},
           onResizeDenied() {},
@@ -138,7 +147,6 @@ describe('amp-ad-csa-impl', () => {
         }
         // Reset window properties
         win.context = {};
-        win.innerHeight = 0;
       });
 
       function setContainerHeight(height) {
@@ -149,7 +157,7 @@ describe('amp-ad-csa-impl', () => {
       }
 
       function setContextHeight(h) {
-        win.innerHeight = h;
+        win.context.initialIntersection.boundingClientRect.height = h;
       }
 
       function registerCallbacks() {

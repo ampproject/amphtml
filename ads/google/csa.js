@@ -16,6 +16,9 @@
 import {validateData, loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json.js';
 
+// Keep track of current height of AMP iframe
+let currentAmpHeight = null;
+
 /**
  * Request Custom Search Ads (Adsense for Search or AdSense for Shopping).
  * @param {!Window} global The window object of the iframe
@@ -75,7 +78,7 @@ export function csa(global, data) {
       // container height is resized.
       // In Chrome and iOS 10.0.2 the height is the same because
       // the container isn't resized.
-      if (oldHeight != newHeight && newHeight != global.innerHeight) {
+      if (oldHeight != newHeight && newHeight != currentAmpHeight) {
         // style.height returns "60px" (for example), so turn this into an int
         newHeight = parseInt(newHeight, 10);
         // Also update the onclick function to resize to the right height.
@@ -130,14 +133,16 @@ export function resizeIframe(global, backfillPageOptions,
     // Get actual height of container
     const container = global.document.getElementById(containerName);
     const height = container.offsetHeight;
+    currentAmpHeight =
+        global.context.initialIntersection.boundingClientRect.height;
     const overflowHeight = 40;
 
     // If the height of the container is larger than the height of the
     // initially requested AMP tag, add the overflow element
-    if (height > global.innerHeight) {
+    if (height > currentAmpHeight) {
       // Create the overflow
       createOverflow(global, overflowHeight, height, container,
-          global.innerHeight - overflowHeight);
+          currentAmpHeight - overflowHeight);
     }
 
     // Attempt to resize to actual CSA container height
@@ -145,6 +150,7 @@ export function resizeIframe(global, backfillPageOptions,
 
     // If reisze succeeded, hide overflow and resize container
     global.context.onResizeSuccess(function(requestedHeight) {
+      currentAmpHeight = requestedHeight;
       const overflow = global.document.getElementById('overflow');
       if (overflow) {
         overflow.style.display = 'none';
@@ -157,13 +163,13 @@ export function resizeIframe(global, backfillPageOptions,
       const overflow = global.document.getElementById('overflow');
       const containerHeight = parseInt(container.style.height, 10);
 
-      if (containerHeight > global.innerHeight) {
+      if (containerHeight > currentAmpHeight) {
         if (overflow) {
           overflow.style.display = '';
-          resizeCsa(container, global.innerHeight - overflowHeight);
+          resizeCsa(container, currentAmpHeight - overflowHeight);
         } else {
           createOverflow(global, overflowHeight, requestedHeight, container,
-              global.innerHeight - overflowHeight);
+              currentAmpHeight - overflowHeight);
         }
       }
     });
