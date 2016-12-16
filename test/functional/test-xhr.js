@@ -25,7 +25,7 @@ import {
 import {getCookie} from '../../src/cookies';
 
 
-describe('XHR', function() {
+describe.skip('XHR', function() {
   let sandbox;
   let requests;
   const location = {href: 'https://acme.com/path'};
