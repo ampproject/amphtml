@@ -60,10 +60,23 @@ describe('amp-ad-csa-impl', () => {
     sandbox = sinon.sandbox.create();
     return createIframePromise(true).then(iframe => {
       win = iframe.win;
+      win.context = {
+        initialIntersection: {
+          boundingClientRect: {
+            height: 0,
+          },
+        },
+        requestResize: function() {},
+        onResizeSuccess: function() {},
+        onResizeDenied: function() {},
+        noContentAvailable: function() {},
+        referrer: null,
+      };
     });
   });
 
   afterEach(() => {
+    win.context = {};
     sandbox.restore();
   });
 
@@ -155,6 +168,7 @@ describe('amp-ad-csa-impl', () => {
         onResizeSuccess: function() {},
         onResizeDenied: function() {},
         noContentAvailable: function() {},
+        referrer: null,
       };
     }
 
