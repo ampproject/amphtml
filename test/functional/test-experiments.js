@@ -47,6 +47,8 @@ describe('isExperimentOn', () => {
   });
 
   function expectExperiment(cookieString, experimentId) {
+    resetExperimentToggles_();
+    win._experimentCookie = undefined;
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -72,10 +74,10 @@ describe('isExperimentOn', () => {
       expectExperiment('AMP_EXP=e2 , e1', 'e1').to.be.true;
     });
 
-    it('should return "off" when disabling value is in the list', () => {
-      expectExperiment('AMP_EXP=-e1,e1', 'e1').to.be.false;
+    it('should return "off" when disabling value is after enabling', () => {
+      expectExperiment('AMP_EXP=-e1,e1', 'e1').to.be.true;
       expectExperiment('AMP_EXP=e1,e2,-e1', 'e1').to.be.false;
-      expectExperiment('AMP_EXP=e2,-e1,e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e2,-e1,e1', 'e1').to.be.true;
       expectExperiment('AMP_EXP=e2 , e1,  -e1', 'e1').to.be.false;
     });
   });
@@ -89,10 +91,10 @@ describe('isExperimentOn', () => {
 
     it('should fall back to global flag', () => {
       const cookie = 'AMP_EXP=e2,e4';
-      win.AMP_CONFIG['e1'] = true;
+      win.AMP_CONFIG['e1'] = 1;
       win.AMP_CONFIG['e2'] = 1;
       win.AMP_CONFIG['e3'] = 0;
-      win.AMP_CONFIG['e4'] = false;
+      win.AMP_CONFIG['e4'] = 0;
       expectExperiment(cookie, 'e1').to.be.true;
       expectExperiment(cookie, 'e2').to.be.true;
       expectExperiment(cookie, 'e3').to.be.false;
@@ -115,38 +117,32 @@ describe('isExperimentOn', () => {
 
       win.AMP_CONFIG['e2'] = 0;
       expectExperiment('', 'e2').to.be.false;
+      resetExperimentToggles_();
 
       sandbox.stub(Math, 'random').returns(0.5);
       win.AMP_CONFIG['e3'] = 0.3;
       expectExperiment('', 'e3').to.be.false;
+      resetExperimentToggles_();
 
       win.AMP_CONFIG['e4'] = 0.6;
       expectExperiment('', 'e4').to.be.true;
+      resetExperimentToggles_();
 
       win.AMP_CONFIG['e5'] = 0.5;
       expectExperiment('', 'e5').to.be.false;
+      resetExperimentToggles_();
 
       win.AMP_CONFIG['e6'] = 0.51;
       expectExperiment('', 'e6').to.be.true;
+      resetExperimentToggles_();
     });
 
     it('should cache calc value', () => {
-      const randomStub = sandbox.stub(Math, 'random');
-      randomStub.onFirstCall().returns(0.4);
-      randomStub.onSecondCall().returns(0.4);
-      randomStub.returns(0.9);
+      sandbox.stub(Math, 'random').returns(0.4);
       win.AMP_CONFIG['e1'] = 0.5;
       win.AMP_CONFIG['e2'] = 0.1;
 
-      expect(Math.random()).to.equal(0.4);
       expectExperiment('', 'e1').to.be.true;
-
-      // it should continue to be true even though random() is not
-      // less than the experiment value which is 0.5
-      expect(Math.random()).to.equal(0.9);
-      expectExperiment('', 'e1').to.be.true;
-
-      expect(Math.random()).to.equal(0.9);
       expectExperiment('', 'e2').to.be.false;
     });
   });

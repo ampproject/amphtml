@@ -41,15 +41,6 @@ const CANARY_EXPERIMENT_ID = 'dev-channel';
 let toggles_;
 
 /**
- * A wrapper to avoid a static side-effect.
- * @return {!Object<string, boolean>}
- */
-function experimentToggles() {
-  return toggles_ || (toggles_ = Object.create(null));
-}
-
-
-/**
  * Whether the scripts come from a dev channel.
  * @param {!Window} win
  * @return {boolean}
@@ -83,11 +74,8 @@ export function isDevChannelVersionDoNotUse_(win) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  const toggles = experimentToggles();
-  if (experimentId in toggles) {
-    return toggles[experimentId];
-  }
-  return toggles[experimentId] = calcExperimentOn(win, experimentId);
+  const toggles = experimentToggles(win);
+  return !!toggles[experimentId];
 }
 
 /**
@@ -117,37 +105,6 @@ export function isExperimentOnAllowUrlOverride(win, experimentId) {
 }
 
 /**
- * Calculate whether the specified experiment is on or off based off of the
- * cookieFlag or the global config frequency given.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-function calcExperimentOn(win, experimentId) {
-  const experiments = getExperimentIds(win);
-
-  // Disabling cookie flag.
-  const disableFlag = experiments.indexOf('-' + experimentId) != -1;
-  if (disableFlag) {
-    return false;
-  }
-
-  // Enabling cookie flag.
-  const cookieFlag = experiments.indexOf(experimentId) != -1;
-  if (cookieFlag) {
-    return true;
-  }
-
-  // Binary config.
-  if (win.AMP_CONFIG && win.AMP_CONFIG.hasOwnProperty(experimentId)) {
-    const frequency = win.AMP_CONFIG[experimentId];
-    return Math.random() < frequency;
-  }
-  return false;
-}
-
-
-/**
  * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
  * @param {!Window} win
@@ -161,7 +118,7 @@ function calcExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
-  const toggles = experimentToggles();
+  const toggles = experimentToggles(win);
   const experimentIds = getExperimentIds(win);
   const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
       (experimentId in toggles && toggles[experimentId]);
@@ -181,6 +138,44 @@ export function toggleExperiment(win, experimentId, opt_on,
   return on;
 }
 
+/**
+ * Calculate whether the experiment is on or off based off of the
+ * cookieFlag or the global config frequency given.
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ */
+function experimentToggles(win) {
+  if (toggles_) {
+    return toggles_;
+  }
+  toggles_ = Object.create(null);
+
+  // Read the default config of this build.
+  if (win.AMP_CONFIG) {
+    for (const experimentId in win.AMP_CONFIG) {
+      if (win.AMP_CONFIG.hasOwnProperty(experimentId)) {
+        const frequency = win.AMP_CONFIG[experimentId];
+        if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
+          toggles_[experimentId] = Math.random() < frequency;
+        }
+      }
+    }
+  }
+
+  // Read config from cookie, which can override the default config.
+  const cookieFlags = getExperimentIds(win);
+  for (let i = 0; i < cookieFlags.length; i++) {
+    let experimentId = cookieFlags[i];
+    let enabled = true;
+    if (experimentId[0] == '-') {
+      // It is a  disabling flag.
+      experimentId = experimentId.substr(1);
+      enabled = false;
+    }
+    toggles_[experimentId] = enabled;
+  }
+  return toggles_;
+}
 
 /**
  * Returns a set of experiment IDs currently on.
