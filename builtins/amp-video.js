@@ -153,7 +153,17 @@ export function installVideo(win) {
      * @override
      */
     play(unusedIsAutoplay) {
-      this.video_.play();
+      const ret = this.video_.play();
+
+      if (ret && ret.catch) {
+        ret.catch(() => {
+          // Empty catch to prevent useless unhandled promise rejection logging.
+          // Play can fail for many reasons such as video getting paused before
+          // play() is finished.
+          // We use events to know the state of the video and do not care about
+          // the success or failure of the play()'s returned promise.
+        });
+      }
     }
 
     /**

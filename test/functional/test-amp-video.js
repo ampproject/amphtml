@@ -289,6 +289,22 @@ describe('amp-video', () => {
     });
   });
 
+  it('play() should not log promise rejections', () => {
+    const playPromise = Promise.reject('The play() request was interrupted');
+    const catchSpy = sandbox.spy(playPromise, 'catch');
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+    }, null, function(element) {
+      const impl = element.implementation_;
+      sandbox.stub(impl.video_, 'play').returns(playPromise);
+      impl.play();
+    }).then(() => {
+      expect(catchSpy.called).to.be.true;
+    });
+  });
+
   it('should propagate ARIA attributes', () => {
     return getVideo({
       src: 'video.mp4',
