@@ -370,6 +370,17 @@ export class AmpA4A extends AMP.BaseElement {
       }
     };
 
+    // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
+    // to go via 3p.
+    if (getMode().localDev) {
+      if (this.element.getAttribute('type') == 'fake' &&
+          this.element.getAttribute('force3p') == 'true') {
+        this.adUrl_ = this.getAdUrl();
+        this.adPromise_ = Promise.resolve();
+        return;
+      }
+    }
+
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
     // try to render later in iframe.
@@ -535,6 +546,14 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<!ArrayBuffer>} The creative.
    */
   verifyCreativeSignature_(creative, signature) {
+    if (getMode().localDev) {
+      // localDev mode allows "FAKESIG" signature for the "fake" network.
+      if (signature == 'FAKESIG' &&
+          this.element.getAttribute('type') == 'fake') {
+        return Promise.resolve(creative);
+      }
+    }
+
     // For each signing service, we have exactly one Promise,
     // keyInfoSetPromise, that holds an Array of Promises of signing keys.
     // So long as any one of these signing services can verify the
@@ -791,24 +810,31 @@ export class AmpA4A extends AMP.BaseElement {
       const url = signingServerURLs[serviceName];
       const currServiceName = serviceName;
       if (url) {
-        return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
-            .then(jwkSetObj => {
-              const result = {serviceName: currServiceName};
-              if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
-                  jwkSetObj.keys.every(isObject)) {
-                result.keys = jwkSetObj.keys;
-              } else {
-                user().error(TAG, this.element.getAttribute('type'),
-                    `Invalid response from signing server ${currServiceName}`,
-                    this.element);
-                result.keys = [];
-              }
-              return result;
-            }).catch(err => {
-              user().error(
-                  TAG, this.element.getAttribute('type'), err, this.element);
-              return {serviceName: currServiceName};
-            });
+        // Set disableAmpSourceOrigin so that __amp_source_origin is not
+        // included in XHR CORS request allowing for keyset to be cached
+        // across pages.
+        return xhrFor(this.win).fetchJson(url, {
+          mode: 'cors',
+          method: 'GET',
+          ampCors: false,
+          credentials: 'omit',
+        }).then(jwkSetObj => {
+          const result = {serviceName: currServiceName};
+          if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
+              jwkSetObj.keys.every(isObject)) {
+            result.keys = jwkSetObj.keys;
+          } else {
+            user().error(TAG, this.element.getAttribute('type'),
+                `Invalid response from signing server ${currServiceName}`,
+                this.element);
+            result.keys = [];
+          }
+          return result;
+        }).catch(err => {
+          user().error(
+              TAG, this.element.getAttribute('type'), err, this.element);
+          return {serviceName: currServiceName};
+        });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
