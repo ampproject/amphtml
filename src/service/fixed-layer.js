@@ -608,9 +608,9 @@ export class FixedLayer {
       return this.fixedLayer_;
     }
     const doc = this.ampdoc.win.document;
-    const bodyId_ = doc.getElementsByTagName('body')[0].getAttribute('id');
+    const bodyId = doc.body.id;
     this.fixedLayer_ = doc.createElement('body');
-    this.fixedLayer_.id = bodyId_ || '-amp-fixedlayer';
+    this.fixedLayer_.id = bodyId || '-amp-fixedlayer';
     setStyles(this.fixedLayer_, {
       position: 'absolute',
       top: 0,

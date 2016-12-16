@@ -83,8 +83,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.viewport_ = this.getViewport();
 
-    // TODO(camelburrito, #6699): Return forceTransfer=false once fixed layer
-    // styling is addressed.
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
