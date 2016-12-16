@@ -66,6 +66,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
+    // TODO: Check for required and allowed parameters. Probably use
+    // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     const global = this.win;
     const slotRect = this.getIntersectionElementLayoutBox();

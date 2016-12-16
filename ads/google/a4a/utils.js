@@ -145,23 +145,22 @@ export function extractGoogleAdCreativeAndSignature(
 function buildAdUrl(
     a4a, baseUrl, startTime, queryParams, unboundedQueryParams,
     clientId, referrer) {
-  const slotId = a4a.element.getAttribute('data-amp-slot-index');
-  const slotNumber = Number(slotId);
-  const global = a4a.win;
+  const slotNumber = a4a.element.getAttribute('data-amp-slot-index');
+  const win = a4a.win;
   const documentInfo = documentInfoForDoc(a4a.element);
-  if (!global.gaGlobal) {
+  if (!win.gaGlobal) {
     // Read by GPT for GA/GPT integration.
-    global.gaGlobal = {
+    win.gaGlobal = {
       vid: clientId,
       hid: documentInfo.pageViewId,
     };
   }
   const slotRect = a4a.getIntersectionElementLayoutBox();
-  const screen = global.screen;
+  const screen = win.screen;
   const viewport = a4a.getViewport();
   const viewportRect = viewport.getRect();
-  const iframeDepth = iframeNestingDepth(global);
-  const browserViewPortSize = browserViewportSize(global);
+  const iframeDepth = iframeNestingDepth(win);
+  const browserViewPortSize = viewport.getSize();
   const dtdParam = {name: 'dtd'};
   const adElement = a4a.element;
   if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
@@ -178,7 +177,7 @@ function buildAdUrl(
       {name: 'dt', value: startTime},
       {name: 'ifi', value: slotNumber},
       {name: 'adf', value: domFingerprint(adElement)},
-      {name: 'c', value: getCorrelator(global, clientId)},
+      {name: 'c', value: getCorrelator(win, clientId)},
       {name: 'output', value: 'html'},
       {name: 'nhd', value: iframeDepth},
       {name: 'iu', value: a4a.element.getAttribute('data-ad-slot')},
@@ -194,8 +193,8 @@ function buildAdUrl(
       {name: 'u_w', value: screen ? screen.width : null},
       {name: 'u_h', value: screen ? screen.height : null},
       {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-      {name: 'u_his', value: getHistoryLength(global)},
-      {name: 'brdim', value: additionalDimensions(global, viewport)},
+      {name: 'u_his', value: getHistoryLength(win)},
+      {name: 'brdim', value: additionalDimensions(win, viewport)},
       {name: 'isw', value: browserViewPortSize.width},
       {name: 'ish', value: browserViewPortSize.height},
       dtdParam,
@@ -203,11 +202,11 @@ function buildAdUrl(
     unboundedQueryParams,
     [
       {name: 'url', value: documentInfo.canonicalUrl},
-      {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(global) : null},
+      {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
       {
         name: 'loc',
-        value: global.location.href == documentInfo.canonicalUrl ?
-            null : global.location.href,
+        value: win.location.href == documentInfo.canonicalUrl ?
+            null : win.location.href,
       },
       {name: 'ref', value: referrer},
     ]
@@ -218,56 +217,56 @@ function buildAdUrl(
 }
 
 /**
- * @param {!Window} global
+ * @param {!Window} win
  * @return {number}
  */
-function iframeNestingDepth(global) {
-  let win = global;
+function iframeNestingDepth(win) {
+  let w = win;
   let depth = 0;
-  while (win != win.parent) {
-    win = win.parent;
+  while (w != w.parent) {
+    w = w.parent;
     depth++;
   }
-  dev().assert(win == global.top);
+  dev().assert(w == win.top);
   return depth;
 }
 
 /**
- * @param {!Window} global
+ * @param {!Window} win
  * @return {number}
  */
-function getHistoryLength(global) {
+function getHistoryLength(win) {
   // We have seen cases where accessing history length causes errors.
   try {
-    return global.history.length;
+    return win.history.length;
   } catch (e) {
     return 0;
   }
 }
 
 /**
- * @param {!Window} global
+ * @param {!Window} win
  * @return {?string}
  */
-function topWindowUrlOrDomain(global) {
-  const ancestorOrigins = global.location.ancestorOrigins;
+function topWindowUrlOrDomain(win) {
+  const ancestorOrigins = win.location.ancestorOrigins;
   if (ancestorOrigins) {
-    const origin = global.location.origin;
+    const origin = win.location.origin;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
-      return global.top.location.href;
+      return win.top.location.href;
     }
-    const secondFromTop = secondWindowFromTop(global);
-    if (secondFromTop == global ||
+    const secondFromTop = secondWindowFromTop(win);
+    if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
       return secondFromTop./*REVIEW*/document.referrer;
     }
     return topOrigin;
   } else {
     try {
-      return global.top.location.href;
+      return win.top.location.href;
     } catch (e) {}
-    const secondFromTop = secondWindowFromTop(global);
+    const secondFromTop = secondWindowFromTop(win);
     try {
       return secondFromTop./*REVIEW*/document.referrer;
     } catch (e) {}
@@ -276,15 +275,15 @@ function topWindowUrlOrDomain(global) {
 }
 
 /**
- * @param {!Window} global
+ * @param {!Window} win
  * @return {!Window}
  */
-function secondWindowFromTop(global) {
-  let secondFromTop = global;
+function secondWindowFromTop(win) {
+  let secondFromTop = win;
   while (secondFromTop.parent != secondFromTop.parent.parent) {
     secondFromTop = secondFromTop.parent;
   }
-  dev().assert(secondFromTop.parent == global.top);
+  dev().assert(secondFromTop.parent == win.top);
   return secondFromTop;
 }
 
@@ -314,31 +313,6 @@ export function getCorrelator(win, opt_cid) {
         opt_cid, documentInfoForDoc(win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
-}
-
-/*
- * Browser viewport size, if we are in an iframe.
- * @param {!Window} win The window for which we read the browser dimensions.
- * @return {?{width: number, height: number}}
- */
-function browserViewportSize(win) {
-  const w = win.top;
-  if (win != w) {
-    let width = -1;
-    let height = -1;
-    try {
-      if (w.document && w.document.body) {
-        const body = w.document.body;
-        width = Math.round(body./*OK*/clientWidth);
-        height = Math.round(body./*OK*/clientHeight);
-      }
-    } catch (e) {
-      width = -0xbadbad;
-      height = -0xbadbad;
-    }
-    return {width, height};
-  };
-  return null;
 }
 
 /**

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
@@ -42,8 +43,8 @@ function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
 describe('amp-ad-network-adsense-impl', () => {
 
   let sandbox;
-  let adsenseImpl;
-  let adsenseImplElem;
+  let impl;
+  let element;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -231,7 +232,7 @@ describe('amp-ad-network-adsense-impl', () => {
 
   describe('#isValidElement', () => {
     it('should be valid', () => {
-      expect(adsenseImpl.isValidElement()).to.be.true;
+      expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
       adsenseImplElem = createAdsenseImplElement({'data-ad-client': 'adsense'},
@@ -241,9 +242,9 @@ describe('amp-ad-network-adsense-impl', () => {
     });
     it.skip('should be NOT valid (missing ad client)', () => {
       // TODO(taymonbeal): reenable this test after clarifying validation
-      adsenseImplElem.setAttribute('data-ad-client', '');
-      adsenseImplElem.setAttribute('type', 'adsense');
-      expect(adsenseImpl.isValidElement()).to.be.false;
+      element.setAttribute('data-ad-client', '');
+      element.setAttribute('type', 'adsense');
+      expect(impl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
       adsenseImplElem = createAdsenseImplElement({'data-ad-client': 'adsense'},
@@ -256,7 +257,7 @@ describe('amp-ad-network-adsense-impl', () => {
   describe('#extractCreativeAndSignature', () => {
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(adsenseImpl.extractCreativeAndSignature(
+        return expect(impl.extractCreativeAndSignature(
           creative,
           {
             get: function() { return undefined; },
@@ -267,7 +268,7 @@ describe('amp-ad-network-adsense-impl', () => {
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(adsenseImpl.extractCreativeAndSignature(
+        return expect(impl.extractCreativeAndSignature(
           creative,
           {
             get: function(name) {
@@ -286,14 +287,16 @@ describe('amp-ad-network-adsense-impl', () => {
 
   describe('#getAdUrl', () => {
     it('returns the right URL', () => {
-      adsenseImpl.onLayoutMeasure();
-      return adsenseImpl.getAdUrl().then(url => {
+      new AmpAd(element).upgradeCallback();
+      impl.onLayoutMeasure();
+      impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
-          'https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
+          '^https://googleads\\.g\\.doubleclick\\.net/pagead/ads' +
           '\\?client=adsense&format=0x0&w=0&h=0&adtest=false' +
           '&adk=4075575999&bc=1&vis=1&wgl=1' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
-          // Depending on how the test is run, it can get different results.
+          // Depending on how the test is run, it can get different
+          // results.
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=1597394791' +
           '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
           '&adx=-10000&ady=-10000&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
@@ -303,7 +306,7 @@ describe('amp-ad-network-adsense-impl', () => {
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
-          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+'));
+          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+$'));
       });
     });
   });

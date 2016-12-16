@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
-import {
-  AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
@@ -26,21 +23,21 @@ import * as sinon from 'sinon';
 describe('amp-ad-network-doubleclick-impl', () => {
 
   let sandbox;
-  let doubleclickImpl;
-  let doubleclickImplElem;
+  let impl;
+  let element;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    doubleclickImplElem = document.createElement('amp-ad');
-    doubleclickImplElem.setAttribute('type', 'doubleclick');
-    doubleclickImplElem.setAttribute('data-ad-client', 'adsense');
+    element = document.createElement('amp-ad');
+    element.setAttribute('type', 'doubleclick');
+    element.setAttribute('data-ad-client', 'adsense');
     sandbox.stub(AmpAdNetworkDoubleclickImpl.prototype,
                  'getSigningServiceNames',
         () => {
           return ['google'];
         });
-    document.body.appendChild(doubleclickImplElem);
-    doubleclickImpl = new AmpAdNetworkDoubleclickImpl(doubleclickImplElem);
+    document.body.appendChild(element);
+    impl = new AmpAdNetworkDoubleclickImpl(element);
   });
 
   afterEach(() => {
@@ -49,35 +46,35 @@ describe('amp-ad-network-doubleclick-impl', () => {
 
   describe('#isValidElement', () => {
     it('should be valid', () => {
-      expect(doubleclickImpl.isValidElement()).to.be.true;
+      expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      doubleclickImplElem =
+      element =
         document.createElement('amp-ad-network-doubleclick-impl');
-      doubleclickImplElem.setAttribute('type', 'doubleclick');
-      doubleclickImplElem.setAttribute('data-ad-client', 'doubleclick');
-      doubleclickImpl = new AmpAdNetworkDoubleclickImpl(doubleclickImplElem);
-      expect(doubleclickImpl.isValidElement()).to.be.false;
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'doubleclick');
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.isValidElement()).to.be.false;
     });
     it.skip('should be NOT valid (missing ad client)', () => {
       // TODO(taymonbeal): reenable this test after clarifying validation
-      doubleclickImplElem.setAttribute('data-ad-client', '');
-      doubleclickImplElem.setAttribute('type', 'doubleclick');
-      expect(doubleclickImpl.isValidElement()).to.be.false;
+      element.setAttribute('data-ad-client', '');
+      element.setAttribute('type', 'doubleclick');
+      expect(impl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      doubleclickImplElem = document.createElement('amp-embed');
-      doubleclickImplElem.setAttribute('type', 'doubleclick');
-      doubleclickImplElem.setAttribute('data-ad-client', 'doubleclick');
-      doubleclickImpl = new AmpAdNetworkDoubleclickImpl(doubleclickImplElem);
-      expect(doubleclickImpl.isValidElement()).to.be.true;
+      element = document.createElement('amp-embed');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'doubleclick');
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.isValidElement()).to.be.true;
     });
   });
 
   describe('#extractCreativeAndSignature', () => {
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(doubleclickImpl.extractCreativeAndSignature(
+        return expect(impl.extractCreativeAndSignature(
           creative,
           {
             get: function() { return undefined; },
@@ -88,7 +85,7 @@ describe('amp-ad-network-doubleclick-impl', () => {
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return expect(doubleclickImpl.extractCreativeAndSignature(
+        return expect(impl.extractCreativeAndSignature(
           creative,
           {
             get: function(name) {
@@ -105,10 +102,11 @@ describe('amp-ad-network-doubleclick-impl', () => {
 
   describe('#getAdUrl', () => {
     it('returns the right URL', () => {
-      doubleclickImpl.onLayoutMeasure();
-      return doubleclickImpl.getAdUrl().then(url => {
+      new AmpAd(element).upgradeCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
-          'https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
+          '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
           // Depending on how the test is run, it can get different results.
           '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=0x0&u_sd=[0-9]+' +
           '&adtest=false' +
@@ -122,7 +120,7 @@ describe('amp-ad-network-doubleclick-impl', () => {
           '&url=https?%3A%2F%2F[a-zA-Z0-9.:%]+' +
           '&top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+' +
           '(&loc=https?%3A%2F%2[a-zA-Z0-9.:%]+)?' +
-          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+'));
+          '&ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+$'));
       });
     });
   });
