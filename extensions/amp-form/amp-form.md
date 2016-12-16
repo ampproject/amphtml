@@ -23,7 +23,12 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable<br>(<a href="#custom-validations">Custom Validation still experimental - See below</a>)</td>
+    <td>Stable with the following Experimental features:
+       <ul>
+          <li><a href="#custom-validations">Custom Validation</a></li>
+          <li><a href="#variable-substitutions">Variable Substitutions</a></li>
+       </ul>
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -290,6 +295,46 @@ This shows all validation errors on all invalid inputs when the form is submitte
 
 #### As You Go
 This allows your user to see validation messages as they're interacting with the input, if the email they typed is invalid they'll see the error right away and once fixed the error goes away.
+
+## Variable Substitutions
+__(<a href="https://www.ampproject.org/docs/reference/experimental.html">experimental</a>)__
+
+`amp-form` allows [platform variable substitutions](../../spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
+
+You must provide the variables you are using for each substitution on each input by specifying a space-separated string of the variables used in `data-amp-replace` (see example below). AMP will not replace variables that are not explicitly specified.
+
+Here's an example of how inputs are before and after substitutions (note that you need to use platform syntax of variable substitutions and not analytics ones):
+```html
+<!-- Initial Load -->
+<form ...>
+  <input name="canonicalUrl" type="hidden"
+        value="The canonical URL is: CANONICAL_URL - RANDOM - CANONICAL_HOSTNAME"
+        data-amp-replace="CANONICAL_URL RANDOM">
+  <input name="clientId" type="hidden"
+        value="CLIENT_ID(myid)"
+        data-amp-replace="CLIENT_ID">
+  ...
+</form>
+```
+
+Once the user tries to submit the form, AMP will try to resolve the variables and update the fields' `value` attribute of all fields with the appropriate substitutions. For XHR submissions, all variables are likely to be substituted and resolved. However, in non-XHR GET submissions, values that requires async-resolution might not be available due to having not been resolved previously. `CLIENT_ID` for example would not resolve if it wasn't resolved and cached previously.
+
+```html
+<!-- User submits the form, variables values are resolved into fields' value -->
+<form ...>
+  <input name="canonicalUrl" type="hidden"
+        value="The canonical URL is: https://example.com/hello - 0.242513759125 - CANONICAL_HOSTNAME"
+        data-amp-replace="CANONICAL_URL RANDOM">
+  <input name="clientId" type="hidden"
+        value="amp:asqar893yfaiufhbas9g879ab9cha0cja0sga87scgas9ocnas0ch"
+        data-amp-replace="CLIENT_ID">
+    ...
+</form>
+```
+
+Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the whitelist through `data-amp-replace` attribute on the first field. 
+
+Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
 
 ## Security Considerations
 Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
