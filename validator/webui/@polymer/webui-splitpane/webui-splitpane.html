@@ -17,6 +17,7 @@
 drag to resize the two sides. -->
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../iron-localstorage/iron-localstorage.html">
 <dom-module id="webui-splitpane">
   <style>
     :host {
@@ -27,20 +28,32 @@ drag to resize the two sides. -->
   </style>
   <template>
     <content></content>
+    <iron-localstorage name="webui-splitpane-custom-ratio"
+                       on-iron-localstorage-load="_localStorageLoad"
+                       value="{{customRatio}}"></iron-localstorage>
   </template>
   <script>
     Polymer({
       is: 'webui-splitpane',
+
       behaviors: [
         Polymer.IronResizableBehavior
       ],
+
       listeners: {
-        'iron-resize': '_onIronResize'
+        'iron-resize': '_onResize'
       },
+
       properties: {
-        ratio: Number
+        ratio: {
+          type: Number
+        },
+        customRatio: {
+          type: Number
+        }
       },
-      attached: function() {
+
+      ready: function() {
         var children = Polymer.dom(this).children;
         if (children.length !== 3) {
           console.error('webui-splitpane must have three children: left, handle, right');
@@ -50,19 +63,20 @@ drag to resize the two sides. -->
         this._left = children[0];
         this._dragHandle = children[1];
         this._right = children[2];
+      },
 
-        // init padding
-        var rect = this.getBoundingClientRect();
-        this._paddingLeft = rect.left;
-        this._paddingRight = document.body.clientWidth - rect.right;
-        this._padding = this._paddingLeft + this._paddingRight;
-
+      attached: function() {
         // register dragging listeners
         this._dragHandle.onmousedown = this._startResizing.bind(this);
         document.onmousemove = this._resizing.bind(this);
         document.onmouseup = this._endResizing.bind(this);
+
+        // set initial size
+        this._onResize();
       },
+
       _isResizing: false,
+
       _startResizing: function(e) {
         this._isResizing = true;
         // disable pointer events for all children to avoid mouse events
@@ -70,37 +84,51 @@ drag to resize the two sides. -->
         // position
         this._setPointerEvent('none');
       },
+
       _resizing: function(e) {
         // we don't want to do anything if we aren't resizing.
         if (!this._isResizing) {
           return;
         }
-        this._updateSize(e.clientX);
+        this._updateSize(e.clientX - this.getBoundingClientRect().left);
       },
+
       _endResizing: function(e) {
         this._isResizing = false;
         // re-enable pointer events for all children
         this._setPointerEvent('auto');
         // save the pane ratio
-        this.ratio = this._left.offsetWidth / this.offsetWidth;
+        this.set('customRatio', this._left.offsetWidth / this.offsetWidth);
+        console.log('customRatio', this._left.offsetWidth / this.offsetWidth);
       },
+
       _updateSize: function(size) {
         // adjust the panes size
-        this._left.style.width = (size - this._padding) + 'px';
-        this._right.style.width = '' + (this.offsetWidth - size + this._padding) + 'px';
+        this._left.style.width = size + 'px';
+        this._right.style.width = '' + (this.offsetWidth - size - this._dragHandle.offsetWidth) + 'px';
       },
+
       _setPointerEvent: function(value) {
         var children = this.getElementsByTagName("*");
         for (i = 0; i < children.length; i++) {
           children[i].style['pointer-events'] = value;
         };
       },
-      _onIronResize: function() {
+
+      _onResize: function() {
         if (!this.ratio) {
           return;
         }
         this._updateSize(this.offsetWidth * this.ratio);
+      },
+
+      _localStorageLoad: function() {
+        if (this.customRatio) {
+          this.ratio = this.customRatio;
+          this._onResize();
+        }
       }
+
     });
   </script>
 </dom-module>
