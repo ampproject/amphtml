@@ -15,11 +15,10 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {installVideo} from '../../builtins/amp-video';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
-describe('amp-video', () => {
+describe('amp-video, backwards compatibility', () => {
 
   let sandbox;
 
@@ -39,7 +38,6 @@ describe('amp-video', () => {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
           installVideoManagerForDoc(iframe.win.document);
-          installVideo(iframe.win);
           const v = iframe.doc.createElement('amp-video');
           for (const key in attributes) {
             v.setAttribute(key, attributes[key]);

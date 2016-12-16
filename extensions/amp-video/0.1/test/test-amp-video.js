@@ -17,12 +17,9 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-video';
-import {
-  installVideoManagerForDoc,
-} from '../../../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
-const TAG = 'amp-video2';
+const TAG = 'amp-video';
 
 describe(TAG, () => {
   let sandbox;
@@ -42,7 +39,6 @@ describe(TAG, () => {
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
-          installVideoManagerForDoc(iframe.win.document);
           const v = iframe.doc.createElement(TAG);
           for (const key in attributes) {
             v.setAttribute(key, attributes[key]);
