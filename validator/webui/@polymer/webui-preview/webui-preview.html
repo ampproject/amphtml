@@ -24,31 +24,31 @@
       width: 100%;
       height: calc(100vh - 200px)
     }
-    #preview-iframe {
+    #previewIframe {
       position: absolute;
       width: 100%;
       height: 100%;
       opacity: 1;
       transition: all 0.15s ease-in-out;
     }
-    #preview-iframe.loading {
+    #previewIframe.loading {
       opacity: 0;
     }
   </style>
   <template>
     <paper-material elevation="1">
-        <iframe id="preview-iframe" frameBorder="0" sandbox="allow-scripts"></iframe>
+        <iframe id="previewIframe" frameBorder="0" sandbox="allow-scripts"></iframe>
     </paper-material>
   </template>
   <script>
     Polymer({
       is: 'webui-preview',
       refresh: function(documentString) {
-        var previewFrame = document.getElementById('preview-iframe');
-        previewFrame.classList.toggle('loading');
+        var previewIframe = this.$.previewIframe
+        previewIframe.classList.toggle('loading');
         setTimeout(function() {
-          previewFrame.srcdoc = documentString;
-          previewFrame.classList.toggle('loading');
+          previewIframe.srcdoc = documentString;
+          previewIframe.classList.toggle('loading');
         }, 150);
       },
     });

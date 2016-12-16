@@ -28,71 +28,60 @@ drag to resize the two sides. -->
     <content></content>
   </template>
   <script>
-    var NR_OF_PANES = 2;
-    var BODY_PADDING = 24;
-    var MINIMUM_LEFT_SIZE = 100;
-    var MINIMUM_RIGHT_SIZE = 100;
-
-    function setPointerEvent(parent, value) {
-      var children = parent.getElementsByTagName("*");
-      for (i = 0; i < children.length; i++) {
-        children[i].style['pointer-events'] = value;
-      };
-    }
-
     Polymer({
       is: 'webui-splitpane',
-      ready: function() {
-        if (this.children.length !== NR_OF_PANES) {
-          console.error('webui-splitpane only supports ' + NR_OF_PANES +
-              ' children');
+      attached: function() {
+        var children = Polymer.dom(this).children;
+        if (children.length !== 3) {
+          console.error('webui-splitpane must have three children: left, handle, right');
           return;
         }
-        var container = this;
-        var left = this.children[0];
-        var right = this.children[1];
+        // init panes & drag handle
+        this._left = children[0];
+        this._dragHandle = children[1];
+        this._right = children[2];
 
-        // insert drag handle
-        var handle = document.createElement('div');
-        handle.id = 'drag';
-        Polymer.dom(this).insertBefore(handle, right);
+        // init padding
+        var rect = this.getBoundingClientRect();
+        this._paddingLeft = rect.left;
+        this._paddingRight = document.body.clientWidth - rect.right;
+        this._padding = this._paddingLeft + this._paddingRight;
 
-        // resize the panes based on the handle position
-        var isResizing = false;
-
-        // start dragging
-        handle.onmousedown = function (e) {
-          isResizing = true;
-          // disable pointer events for all children to avoid mouse events
-          // being swallowed by the iframe and changing the editor scroll 
-          // position
-          setPointerEvent(container, 'none');
-        };
-
-        // resize panes
-        document.onmousemove = function (e) {
-          // we don't want to do anything if we aren't resizing.
-          if (!isResizing) {
-            return;
-          }
-          // don't grow outside the container
-          var minRightWidth = BODY_PADDING + MINIMUM_LEFT_SIZE;
-          var maxLeftWidth = container.offsetWidth + BODY_PADDING - MINIMUM_RIGHT_SIZE;
-          if (e.clientX < minRightWidth || e.clientX > maxLeftWidth) {
-            return;
-          }
-
-          // adjust the panes size
-          left.style.width = '' + (e.clientX - BODY_PADDING) + 'px';
-          right.style.width = '' + (container.offsetWidth - e.clientX + BODY_PADDING) + 'px';
-        };
-
-        // end dragging
-        document.onmouseup = function (e) {
-          // stop resizing
-          isResizing = false;
-          // disable pointer events for all children
-          setPointerEvent(container, 'auto');
+        // register dragging listeners
+        this._dragHandle.onmousedown = this._startResizing.bind(this);
+        document.onmousemove = this._resizing.bind(this);
+        document.onmouseup = this._endResizing.bind(this);
+      },
+      _isResizing: false,
+      _startResizing: function(e) {
+        this._isResizing = true;
+        // disable pointer events for all children to avoid mouse events
+        // being swallowed by the iframe and changing the editor scroll 
+        // position
+        this._setPointerEvent('none');
+      },
+      _resizing: function(e) {
+        // we don't want to do anything if we aren't resizing.
+        if (!this._isResizing) {
+          return;
+        }
+        this._updateSize(e.clientX);
+      },
+      _endResizing: function(e) {
+        // stop resizing
+        this._isResizing = false;
+        // re-enable pointer events for all children
+        this._setPointerEvent('auto');
+      },
+      _updateSize: function(size) {
+        // adjust the panes size
+        this._left.style.width = '' + (size - this._padding) + 'px';
+        this._right.style.width = '' + (this.offsetWidth - size + this._padding) + 'px';
+      },
+      _setPointerEvent: function(value) {
+        var children = this.getElementsByTagName("*");
+        for (i = 0; i < children.length; i++) {
+          children[i].style['pointer-events'] = value;
         };
       },
     });

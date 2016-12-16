@@ -27,9 +27,11 @@
   <style scope="webui-preview">
     #amphtmlEditor {
       width: 60%;
+      min-width: 100px;
     }
     #preview {
       width: 40%;
+      min-width: 100px;
     }
     #drag {
       width: 8px;
@@ -50,6 +52,7 @@
     <webui-urlform id="urlForm"></webui-urlform>
     <webui-splitpane>
       <amphtml-editor id="amphtmlEditor"></amphtml-editor>
+      <div id="drag"></div>
       <webui-preview id="preview"></webui-preview>
     </webui-splitpane>
     <webui-statusbar id="statusBar"></webui-statusbar>
