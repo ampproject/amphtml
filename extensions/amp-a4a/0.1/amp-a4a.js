@@ -235,11 +235,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.experimentalNonAmpCreativeRenderMethod_ =
       platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
 
-    this.standardLifecycleData_ = {
-      'v_h': 'VIEWPORT_HEIGHT',
-      's_t': 'SCROLL_TOP',
-    };
-
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
      * cause promise chain to reject.
@@ -410,7 +405,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
-          this.protectedEmitLifecycleEvent_('urlBuilt', adUrl);
+          this.protectedEmitLifecycleEvent_('urlBuilt', {adUrl});
           return adUrl && this.sendXhrRequest_(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
@@ -421,7 +416,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse || !fetchResponse.arrayBuffer) {
             return null;
           }
-          this.protectedEmitLifecycleEvent_('adRequestEnd', fetchResponse);
+          this.protectedEmitLifecycleEvent_('adRequestEnd');
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -453,8 +448,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(responseParts => {
           checkStillCurrent(promiseId);
           if (responseParts) {
-            this.protectedEmitLifecycleEvent_('extractCreativeAndSignature',
-                responseParts);
+            this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
           }
           return responseParts && this.extractCreativeAndSignature(
               responseParts.bytes, responseParts.headers);
@@ -480,8 +474,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts || !creativeParts.signature) {
             return Promise.resolve();
           }
-          this.protectedEmitLifecycleEvent_(
-              'adResponseValidateStart', creativeParts);
+          this.protectedEmitLifecycleEvent_('adResponseValidateStart');
           return this.verifyCreativeSignature_(
               creativeParts.creative, creativeParts.signature)
               .then(creative => {
@@ -606,7 +599,7 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }))
     .then(returnedArray => {
-      this.emitLifecycleEvent('adResponseValidateEnd');
+      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
       return returnedArray[0];
     });
   }
@@ -651,7 +644,7 @@ export class AmpA4A extends AMP.BaseElement {
     const layoutCallbackStart = Date.now();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
-      this.emitLifecycleEvent('adPromiseChainDelay', {
+      this.protectedEmitLifecycleEvent_('adPromiseChainDelay', {
         adPromiseChainDelay: Date.now() - layoutCallbackStart,
         isAmpCreative: !!creativeMetaData,
       });
@@ -909,7 +902,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderAmpCreative_(creativeMetaData) {
     dev().assert(creativeMetaData.minifiedCreative);
-    this.protectedEmitLifecycleEvent('renderFriendlyStart');
+    this.protectedEmitLifecycleEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
     const iframe = /** @type {!HTMLIFrameElement} */(
@@ -1213,7 +1206,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   collapsedCallback(unusedElement) {
-    this.emitLifecycleEvent('adSlotCollapsed');
+    this.protectedEmitLifecycleEvent_('adSlotCollapsed');
   }
 
   /**
