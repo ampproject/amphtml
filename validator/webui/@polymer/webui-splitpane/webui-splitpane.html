@@ -30,6 +30,8 @@ drag to resize the two sides. -->
   <script>
     var NR_OF_PANES = 2;
     var BODY_PADDING = 24;
+    var MINIMUM_LEFT_SIZE = 100;
+    var MINIMUM_RIGHT_SIZE = 100;
 
     function setPointerEvent(parent, value) {
       var children = parent.getElementsByTagName("*");
@@ -61,7 +63,9 @@ drag to resize the two sides. -->
         // start dragging
         handle.onmousedown = function (e) {
           isResizing = true;
-          // disable pointer events for all children
+          // disable pointer events for all children to avoid mouse events
+          // being swallowed by the iframe and changing the editor scroll 
+          // position
           setPointerEvent(container, 'none');
         };
 
@@ -72,11 +76,13 @@ drag to resize the two sides. -->
             return;
           }
           // don't grow outside the container
-          if (e.clientX > container.offsetWidth + BODY_PADDING) {
+          var minRightWidth = BODY_PADDING + MINIMUM_LEFT_SIZE;
+          var maxLeftWidth = container.offsetWidth + BODY_PADDING - MINIMUM_RIGHT_SIZE;
+          if (e.clientX < minRightWidth || e.clientX > maxLeftWidth) {
             return;
           }
 
-          // adjust the panes
+          // adjust the panes size
           left.style.width = '' + (e.clientX - BODY_PADDING) + 'px';
           right.style.width = '' + (container.offsetWidth - e.clientX + BODY_PADDING) + 'px';
         };
