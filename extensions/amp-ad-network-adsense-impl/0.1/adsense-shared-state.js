@@ -16,6 +16,11 @@
 
 import {dev} from '../../../src/log';
 
+/**
+ * Maintains state in between different AdSense slots on the same page. This
+ * class is used primarily to generate state-dependent ad request URL
+ * parameters.
+ */
 export class AdsenseSharedState {
 
   constructor() {
@@ -25,10 +30,14 @@ export class AdsenseSharedState {
   }
 
   /**
-   * @param {string} format
-   * @param {string} id
-   * @param {string} client
-   * @return !{{prevFmts: string, pv: number}}
+   * Registers a new slot with the given format and client, and identified by
+   * the given id.
+   *
+   * @param {string} format Format of the slot of form WxH.
+   * @param {string} id A unique identifier for the slot.
+   * @param {string} client The slot's ad client ID.
+   * @return !{{prevFmts: string, pv: number}} An object containing the
+   * state-dependent ad request URL parameters relevant for this slot.
    * */
   addNewSlot(format, id, client) {
     const result = {pv: 2, prevFmts: ''};
@@ -44,7 +53,8 @@ export class AdsenseSharedState {
   }
 
   /**
-   * @param {string} id
+   * Removes the slot with the given ID.
+   * @param {string} id The ID of the slot to be removed.
    */
   removeSlot(id) {
     this.previousSlots_ = this.previousSlots_.filter(slot => {
@@ -53,7 +63,8 @@ export class AdsenseSharedState {
   }
 
   /**
-   * Resets to initial state.
+   * Resets to initial state. Currently used only in testing.
+   * @visibleForTesting
    */
   reset() {
     this.previousSlots_ = [];

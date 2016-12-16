@@ -28,8 +28,7 @@ import * as sinon from 'sinon';
 import {createIframePromise} from '../../../../testing/iframe';
 import {upgradeOrRegisterElement} from '../../../../src/custom-element';
 
-
-function getAdsenseImplElement(attributes, opt_doc, opt_tag) {
+function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
   const tag = opt_tag || 'amp-ad';
   const adsenseImplElem = doc.createElement(tag);
@@ -52,7 +51,7 @@ describe('amp-ad-network-adsense-impl', () => {
         () => {
           return ['google'];
         });
-    adsenseImplElem = getAdsenseImplElement({
+    adsenseImplElem = createAdsenseImplElement({
       'data-ad-client': 'adsense',
       'width': '320',
       'height': '50',
@@ -65,6 +64,9 @@ describe('amp-ad-network-adsense-impl', () => {
     sandbox.restore();
   });
 
+  // WARNING: When running this test file in isolation, running more than one
+  // of the sub-tests in the following describe yields errors that are not
+  // present when this test is ran in aggregate.
   describe('#getAdUrl', () => {
 
     beforeEach(() => {
@@ -96,7 +98,7 @@ describe('amp-ad-network-adsense-impl', () => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
-        const elem = getAdsenseImplElement({
+        const elem = createAdsenseImplElement({
           'data-ad-client': 'adsense',
           'width': '320',
           'height': '50',
@@ -153,6 +155,20 @@ describe('amp-ad-network-adsense-impl', () => {
         });
       });
     });
+    it('should contain amp_ct', () => {
+      return createIframePromise().then(fixture => {
+        // Set up the element's underlying infrastructure.
+        upgradeOrRegisterElement(fixture.win, 'amp-a4a',
+            AmpAdNetworkAdsenseImpl);
+        const ampStickyAd = fixture.doc.createElement('amp-sticky-ad');
+        ampStickyAd.setAttribute('layout', 'nodisplay');
+        ampStickyAd.appendChild(adsenseImplElem);
+        fixture.doc.body.appendChild(ampStickyAd);
+        return adsenseImpl.getAdUrl().then(adUrl => {
+          expect(adUrl.indexOf('amp_ct=AMP-STICKY-AD') >= 0).to.be.true;
+        });
+      });
+    });
     // Not using arrow function here because otherwise the way closure behaves
     // prevents me from calling this.timeout(5000).
     it('with multiple slots', function() {
@@ -162,19 +178,19 @@ describe('amp-ad-network-adsense-impl', () => {
         // Set up the element's underlying infrastructure.
         upgradeOrRegisterElement(fixture.win, 'amp-a4a',
             AmpAdNetworkAdsenseImpl);
-        const elem1 = getAdsenseImplElement({
+        const elem1 = createAdsenseImplElement({
           'data-ad-client': 'adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
-        const elem2 = getAdsenseImplElement({
+        const elem2 = createAdsenseImplElement({
           'data-ad-client': 'adsense',
           'width': '320',
           'height': '50',
           'data-experiment-id': '8675309',
         }, fixture.doc, 'amp-a4a');
-        const elem3 = getAdsenseImplElement({
+        const elem3 = createAdsenseImplElement({
           'data-ad-client': 'not-adsense',
           'width': '320',
           'height': '50',
@@ -217,7 +233,7 @@ describe('amp-ad-network-adsense-impl', () => {
       expect(adsenseImpl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (impl tag name)', () => {
-      adsenseImplElem = getAdsenseImplElement({'data-ad-client': 'adsense'},
+      adsenseImplElem = createAdsenseImplElement({'data-ad-client': 'adsense'},
           document, 'amp-ad-network-adsense-impl');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.false;
@@ -229,7 +245,7 @@ describe('amp-ad-network-adsense-impl', () => {
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
     it('should be valid (amp-embed)', () => {
-      adsenseImplElem = getAdsenseImplElement({'data-ad-client': 'adsense'},
+      adsenseImplElem = createAdsenseImplElement({'data-ad-client': 'adsense'},
           document, 'amp-embed');
       adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.true;

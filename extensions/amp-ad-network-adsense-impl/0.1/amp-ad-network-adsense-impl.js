@@ -78,12 +78,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.initLifecycleReporter();
 
     /**
-     * @private {?string}
-     * The adkey for the slot.
-     * Not initialized until getAdUrl() is called. Updated upon each invocation
+     * A unique identifier for this slot.
+     * Not initialized until getAdUrl() is called; updated upon each invocation
      * of getAdUrl().
+     * @private {?string}
      */
-    this.adk_ = null;
+    this.uniqueSlotId_ = null;
   }
 
   /** @override */
@@ -107,9 +107,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
     const format = `${slotRect.width}x${slotRect.height}`;
-    this.adk_ = this.adKey_(format);
+    const adk = this.adKey_(format);
+    this.uniqueSlotId_ = slotId + adk;
     const sharedStateParams = sharedState.addNewSlot(
-        format, this.adk_, adClientId);
+        format, this.uniqueSlotId_, adClientId);
 
     const paramList = [
       {name: 'client', value: adClientId},
@@ -118,7 +119,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'h', value: slotRect.height},
       {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
-      {name: 'adk', value: this.adk_},
+      {name: 'adk', value: adk},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?
@@ -156,8 +157,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
-    if (this.adk_) {
-      sharedState.removeSlot(this.adk_);
+    if (this.uniqueSlotId_) {
+      sharedState.removeSlot(this.uniqueSlotId_);
     }
   }
 
