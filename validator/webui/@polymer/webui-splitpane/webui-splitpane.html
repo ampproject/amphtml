@@ -16,6 +16,7 @@
 <!-- An element consisting of two sides, separated by a divider which the user can
 drag to resize the two sides. -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 <dom-module id="webui-splitpane">
   <style>
     :host {
@@ -30,6 +31,15 @@ drag to resize the two sides. -->
   <script>
     Polymer({
       is: 'webui-splitpane',
+      behaviors: [
+        Polymer.IronResizableBehavior
+      ],
+      listeners: {
+        'iron-resize': '_onIronResize'
+      },
+      properties: {
+        ratio: Number
+      },
       attached: function() {
         var children = Polymer.dom(this).children;
         if (children.length !== 3) {
@@ -68,14 +78,15 @@ drag to resize the two sides. -->
         this._updateSize(e.clientX);
       },
       _endResizing: function(e) {
-        // stop resizing
         this._isResizing = false;
         // re-enable pointer events for all children
         this._setPointerEvent('auto');
+        // save the pane ratio
+        this.ratio = this._left.offsetWidth / this.offsetWidth;
       },
       _updateSize: function(size) {
         // adjust the panes size
-        this._left.style.width = '' + (size - this._padding) + 'px';
+        this._left.style.width = (size - this._padding) + 'px';
         this._right.style.width = '' + (this.offsetWidth - size + this._padding) + 'px';
       },
       _setPointerEvent: function(value) {
@@ -84,6 +95,12 @@ drag to resize the two sides. -->
           children[i].style['pointer-events'] = value;
         };
       },
+      _onIronResize: function() {
+        if (!this.ratio) {
+          return;
+        }
+        this._updateSize(this.offsetWidth * this.ratio);
+      }
     });
   </script>
 </dom-module>

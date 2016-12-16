@@ -26,11 +26,9 @@
 <dom-module id="webui-mainpage">
   <style scope="webui-preview">
     #amphtmlEditor {
-      width: 60%;
       min-width: 100px;
     }
     #preview {
-      width: 40%;
       min-width: 100px;
     }
     #drag {
@@ -50,7 +48,7 @@
   <template>
     <ampproject-toolbar></ampproject-toolbar>
     <webui-urlform id="urlForm"></webui-urlform>
-    <webui-splitpane>
+    <webui-splitpane ratio="0.6">
       <amphtml-editor id="amphtmlEditor"></amphtml-editor>
       <div id="drag"></div>
       <webui-preview id="preview"></webui-preview>
