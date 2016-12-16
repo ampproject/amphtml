@@ -543,10 +543,8 @@ export class Extensions {
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
     let loc = this.win.location;
-    if (getMode().test && this.win.AMP_TEST_IFRAME) {
-      // If this is a test iframe, location will be srcdoc or about:blank,
-      // use the parent location instead.
-      loc = this.win.parent.location;
+    if (getMode().test && this.win.testLocation) {
+      loc = this.win.testLocation;
     }
     const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
