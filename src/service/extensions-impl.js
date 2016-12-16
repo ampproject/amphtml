@@ -542,7 +542,10 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
-    const loc = this.win.location;
+    let loc = this.win.location;
+    if (getMode().test && this.win.testLocation) {
+      loc = this.win.testLocation;
+    }
     const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
         getMode().localDev, getMode().test, useCompiledJs);

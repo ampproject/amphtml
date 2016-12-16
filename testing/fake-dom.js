@@ -310,7 +310,7 @@ export function interceptEventListeners(target) {
 /**
  * @extends {!Location}
  */
-class FakeLocation {
+export class FakeLocation {
 
   /**
    * @param {string} href

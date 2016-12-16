@@ -19,6 +19,7 @@ import installCustomElements from
 import {BaseElement} from '../src/base-element';
 import {
   FakeCustomElements,
+  FakeLocation,
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
@@ -345,6 +346,11 @@ class RealWinFixture {
 
         // Flag as being a test window.
         win.AMP_TEST_IFRAME = true;
+        // Set the testLocation on iframe to parent's location since location of
+        // the test iframe is about:srcdoc.
+        // Unfortunately location object is not configurable, so we have to
+        // define a new property.
+        win.testLocation = new FakeLocation(window.location.href, win);
 
         if (!spec.allowExternalResources) {
           doNotLoadExternalResourcesInTest(win);
