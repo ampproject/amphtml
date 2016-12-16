@@ -64,7 +64,7 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key1']()).to.equal('value1');
   });
 
   it('should parse with multiple args', () => {
@@ -72,8 +72,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value2');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value2');
   });
 
   it('should parse with multiple args with whitespace', () => {
@@ -82,8 +82,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value2');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value2');
   });
 
   it('should parse with no args', () => {
@@ -108,8 +108,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value (2)\'');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value (2)\'');
   });
 
   it('should parse with single-quoted args', () => {
@@ -118,8 +118,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value (2)"');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value (2)"');
   });
 
   it('should parse with args with trailing comma', () => {
@@ -128,23 +128,23 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key1']()).to.equal('value1');
     expect(Object.keys(a.args)).to.have.length(1);
   });
 
   it('should parse with boolean args', () => {
-    expect(parseAction('e:t.m(k=true)').args['k']).to.equal(true);
-    expect(parseAction('e:t.m(k=false)').args['k']).to.equal(false);
+    expect(parseAction('e:t.m(k=true)').args['k']()).to.equal(true);
+    expect(parseAction('e:t.m(k=false)').args['k']()).to.equal(false);
   });
 
   it('should parse with numeric args', () => {
-    expect(parseAction('e:t.m(k=123)').args['k']).to.equal(123);
-    expect(parseAction('e:t.m(k=1.23)').args['k']).to.equal(1.23);
-    expect(parseAction('e:t.m(k=.123)').args['k']).to.equal(.123);
+    expect(parseAction('e:t.m(k=123)').args['k']()).to.equal(123);
+    expect(parseAction('e:t.m(k=1.23)').args['k']()).to.equal(1.23);
+    expect(parseAction('e:t.m(k=.123)').args['k']()).to.equal(.123);
   });
 
   it('should parse with term semicolon', () => {
-    expect(parseAction('e:t.m(k=1); ').args['k']).to.equal(1);
+    expect(parseAction('e:t.m(k=1); ').args['k']()).to.equal(1);
   });
 
   it('should parse with args as a proto-less object', () => {
@@ -155,8 +155,29 @@ describe('ActionService parseAction', () => {
     expect(parseAction('true:t.m').event).to.equal('true');
     expect(parseAction('e:true.m').target).to.equal('true');
     expect(parseAction('e:t.true').method).to.equal('true');
-    expect(parseAction('e:t.m(true=1)').args['true']).to.equal(1);
-    expect(parseAction('e:t.m(01=1)').args['01']).to.equal(1);
+    expect(parseAction('e:t.m(true=1)').args['true']()).to.equal(1);
+    expect(parseAction('e:t.m(01=1)').args['01']()).to.equal(1);
+  });
+
+  it('should dereference vars in arg value identifiers', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    expect(a.args['key1']()).to.equal('foo');
+    expect(a.args['key1']({foo: 'bar'})).to.equal('bar');
+  });
+
+  it('should NOT dereference vars in arg value strings', () => {
+    const a = parseAction('e:t.m(key1="foo")');
+    expect(a.args['key1']()).to.equal('foo');
+    expect(a.args['key1']({foo: 'bar'})).to.equal('foo');
+  });
+
+  it('should NOT dereference null or non-primitives in arg values', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    expect(a.args['key1']({foo: null})).to.equal('foo');
+    expect(a.args['key1']({foo: undefined})).to.equal('foo');
+    expect(a.args['key1']({foo: {}})).to.equal('foo');
+    expect(a.args['key1']({foo: []})).to.equal('foo');
+    expect(a.args['key1']({foo: () => {}})).to.equal('foo');
   });
 
   it('should parse empty to null', () => {

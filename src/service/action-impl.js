@@ -41,16 +41,23 @@ const ELEMENTS_ACTIONS_MAP_ = {
 };
 
 /**
+ * A map of method argument keys to functions that generate the argument values
+ * given a local scope object. The function allows argument values to reference
+ * data in the event that generated the action.
+ * @typedef {Object<string,function(!Object):string>}
+ */
+let ActionInfoArgsDef;
+
+/**
  * @typedef {{
  *   event: string,
  *   target: string,
  *   method: string,
- *   args: ?JSONType,
+ *   args: ?ActionInfoArgsDef,
  *   str: string
  * }}
  */
 let ActionInfoDef;
-
 
 /**
  * The structure that contains all details of the action method invocation.
@@ -253,13 +260,13 @@ export class ActionService {
       return;
     }
 
-    const target = this.root_.getElementById(action.actionInfo.target);
+    const target = this.root_.getElementById(actionInfo.target);
     if (!target) {
-      this.actionInfoError_('target not found', action.actionInfo, target);
+      this.actionInfoError_('target not found', actionInfo, target);
       return;
     }
-    this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
-        action.node, event, action.actionInfo);
+    this.invoke_(target, actionInfo.method, args,
+        action.node, event, actionInfo);
   }
 
   /**
@@ -395,7 +402,7 @@ export function parseActionMap(s, context) {
     if (tok.type == TokenType.EOF ||
             tok.type == TokenType.SEPARATOR && tok.value == ';') {
       // Expected, ignore.
-    } else if (tok.type == TokenType.LITERAL) {
+    } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
 
       // Format: event:target.method
 
@@ -403,8 +410,9 @@ export function parseActionMap(s, context) {
       const event = tok.value;
 
       // Target: ":target."
-      assertToken(toks.next(), TokenType.SEPARATOR, ':');
-      const target = assertToken(toks.next(), TokenType.LITERAL).value;
+      assertToken(toks.next(), [TokenType.SEPARATOR], ':');
+      const target = assertToken(
+          toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
 
       // Method: ".method". Method is optional.
       let method = DEFAULT_METHOD_;
@@ -412,7 +420,8 @@ export function parseActionMap(s, context) {
       peek = toks.peek();
       if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
         toks.next();  // Skip '.'
-        method = assertToken(toks.next(), TokenType.LITERAL).value || method;
+        method = assertToken(
+            toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
 
         // Optionally, there may be arguments: "(key = value, key = value)".
         peek = toks.peek();
@@ -425,13 +434,14 @@ export function parseActionMap(s, context) {
             if (tok.type == TokenType.SEPARATOR &&
                     (tok.value == ',' || tok.value == ')')) {
               // Expected: ignore.
-            } else if (tok.type == TokenType.LITERAL) {
+            } else if (tok.type == TokenType.LITERAL ||
+                tok.type == TokenType.ID) {
               // Key: "key = "
               const argKey = tok.value;
-              assertToken(toks.next(), TokenType.SEPARATOR, '=');
-              const argValue =
+              assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+              const argValue = getActionInfoArgValue(
                   assertToken(toks.next(/* convertValue */ true),
-                      TokenType.LITERAL).value;
+                      [TokenType.LITERAL, TokenType.ID]));
               if (!args) {
                 args = map();
               }
@@ -472,6 +482,53 @@ export function parseActionMap(s, context) {
 }
 
 /**
+ * Returns a function that generates a method argument value for a given token.
+ * The function takes a single object argument `data`.
+ * If the token is an identifier `foo`, the function returns `data[foo]`.
+ * Otherwise, the function returns the token value.
+ * @param {!{type: TokenType, value: *}} token
+ * @return {function(!Object):string}
+ * @private
+ */
+function getActionInfoArgValue(token) {
+  const value = token.value;
+  if (token.type == TokenType.LITERAL) {
+    return () => value;
+  } else if (token.type == TokenType.ID) {
+    return data => {
+      if (data && data.hasOwnProperty(value)) {
+        const type = typeof data[value];
+        // Only allow dereferencing of non-null primitives.
+        if (type === 'string' || type === 'number' || type === 'boolean') {
+          return data[value];
+        }
+      }
+      return value;
+    };
+  }
+}
+
+/**
+ * Generates method arg values for each key in the given ActionInfoArgsDef
+ * with the data in the given event.
+ * @param {?ActionInfoArgsDef} args
+ * @param {?Event} event
+ * @return {?JSONType}
+ * @private
+ */
+function applyActionInfoArgs(args, event) {
+  if (args) {
+    const data = (event && event.detail) ? event.detail : null;
+    const applied = map();
+    Object.keys(args).forEach(key => {
+      applied[key] = args[key].call(null, data);
+    });
+    return applied;
+  }
+  return args;
+}
+
+/**
  * @param {string} s
  * @param {!Element} context
  * @param {?T} condition
@@ -489,18 +546,18 @@ function assertActionForParser(s, context, condition, opt_message) {
  * @param {string} s
  * @param {!Element} context
  * @param {!{type: TokenType, value: *}} tok
- * @param {TokenType} type
+ * @param {Array<TokenType>} types
  * @param {*=} opt_value
  * @return {!{type: TokenType, value: *}}
  * @private
  */
-function assertTokenForParser(s, context, tok, type, opt_value) {
+function assertTokenForParser(s, context, tok, types, opt_value) {
   if (opt_value !== undefined) {
     assertActionForParser(s, context,
-        tok.type == type && tok.value == opt_value,
+        types.indexOf(tok.type) >= 0 && tok.value == opt_value,
         `; expected [${opt_value}]`);
   } else {
-    assertActionForParser(s, context, tok.type == type);
+    assertActionForParser(s, context, types.indexOf(tok.type) >= 0);
   }
   return tok;
 }
@@ -514,6 +571,7 @@ const TokenType = {
   EOF: 1,
   SEPARATOR: 2,
   LITERAL: 3,
+  ID: 4,
 };
 
 /** @private @const {string} */
@@ -632,7 +690,7 @@ class ParserTokenizer {
       return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
-    // A key
+    // A key or identifier.
     let end = newIndex + 1;
     for (; end < this.str_.length; end++) {
       if (SPECIAL_SET.indexOf(this.str_.charAt(end)) != -1) {
@@ -643,7 +701,7 @@ class ParserTokenizer {
     const value = convertValues && (s == 'true' || s == 'false') ?
         s == 'true' : s;
     newIndex = end - 1;
-    return {type: TokenType.LITERAL, value, index: newIndex};
+    return {type: TokenType.ID, value, index: newIndex};
   }
 }
 
