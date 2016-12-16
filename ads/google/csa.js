@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {validateData, loadScript} from '../../3p/3p';
+import {tryParseJson} from '../../src/json.js';
 
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;
@@ -43,52 +44,31 @@ export function csa(global, data) {
   global.document.body.appendChild(csaContainerDiv);
 
   // Parse AFSh page options
-  let afshPageOptions = {};
-  if (data['afshPageOptions'] != null) {
-    try {
-      afshPageOptions = JSON.parse(data['afshPageOptions']);
-      afshPageOptions['source'] = 'amp';
-      afshPageOptions['referer'] = global.context.referrer;
-    } catch (e) {}
-  }
+  const afshPageOptions = Object.assign(
+    Object(tryParseJson(data['afshPageOptions'])),
+    {source: 'amp', referer: global.context.referrer});
+
 
   // Parse AFSh adblock options
-  let afshAdblockOptions = {};
-  if (data['afshAdblockOptions'] != null) {
-    try {
-      afshAdblockOptions = JSON.parse(data['afshAdblockOptions']);
+  const afshAdblockOptions = Object.assign(
+    Object(tryParseJson(data['afshAdblockOptions'])),
+    {container: containerId});
 
-      // Set container to the container we just created
-      afshAdblockOptions['container'] = containerId;
-
-      // Set the width to the width of the screen if necessary
-      if (afshAdblockOptions['width'] == 'auto') {
-        afshAdblockOptions['width'] = width;
-      }
-    } catch (e) {}
+  // Set the width to the width of the screen if necessary
+  if (afshAdblockOptions != null &&
+    afshAdblockOptions['width'] == 'auto') {
+    afshAdblockOptions['width'] = width;
   }
 
   // Parse AFS page options
-  let afsPageOptions = {};
-  if (data['afsPageOptions'] != null) {
-    try {
-      afsPageOptions = JSON.parse(data['afsPageOptions']);
-      afsPageOptions['source'] = 'amp';
-      afsPageOptions['referrer'] = global.context.referrer;
-    } catch (e) {}
-  }
+  const afsPageOptions = Object.assign(
+    Object(tryParseJson(data['afsPageOptions'])),
+    {source: 'amp', referer: global.context.referrer});
 
   // Parse AFS adblock options
-  let afsAdblockOptions = {};
-  if (data['afsAdblockOptions'] != null) {
-    try {
-      afsAdblockOptions = JSON.parse(data['afsAdblockOptions']);
-
-      // Set the container to the container we just created
-      afsAdblockOptions['container'] = containerId;
-
-    } catch (e) {}
-  }
+  const afsAdblockOptions = Object.assign(
+    Object(tryParseJson(data['afsAdblockOptions'])),
+    {container: containerId});
 
   /* Time in ms to wait before executing orientation change function logic */
   const orientationChangeTimeout = 250;
@@ -276,9 +256,9 @@ export function resizeIframe(global, backfillPageOptions,
  */
 function createOverflow(global, overflowH, fullH, container, containerH) {
   // Create the element with line and chevron
-  const overflow = getOverflowElement(overflowH);
-  overflow.appendChild(getOverflowLine());
-  overflow.appendChild(getOverflowChevron());
+  const overflow = getOverflowElement(global, overflowH);
+  overflow.appendChild(getOverflowLine(global));
+  overflow.appendChild(getOverflowChevron(global));
 
   // When the overflow element is clicked, resize the AMP iframe
   // to what we tried to resize before
@@ -296,7 +276,7 @@ function createOverflow(global, overflowH, fullH, container, containerH) {
  * @param {number} height Height of the overflow element
  * @return {Node}
  */
-function getOverflowElement(height) {
+function getOverflowElement(global, height) {
   const overflow = global.document.createElement('div');
   overflow.id = 'overflow';
   overflow.style.position = 'absolute';
@@ -309,7 +289,7 @@ function getOverflowElement(height) {
  * Helper function to create a line element for the overflow element
  * @return {Node}
  */
-function getOverflowLine() {
+function getOverflowLine(global) {
   const line = global.document.createElement('div');
   line.style.background = 'rgba(0,0,0,.16)';
   line.style.height = '1px';
@@ -320,7 +300,7 @@ function getOverflowLine() {
  * Helper function to create a chevron element for the overflow element
  * @return {Node}
  */
-function getOverflowChevron() {
+function getOverflowChevron(global) {
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
       'height="36px" viewBox="0 0 48 48" fill="#757575"><path d="M14.83' +
       ' 16.42L24 25.59l9.17-9.17L36 19.25l-12 12-12-12z"/>' +
