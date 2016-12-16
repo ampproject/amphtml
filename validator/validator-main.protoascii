@@ -1218,35 +1218,35 @@ tags: {
   attrs: { name: "width" }
 }
 # 4.7.6 The video element
-# Only allowed in noscript tags. Otherwise use amp-video.		
- tags: {		
-   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.		
-   tag_name: "VIDEO"		
-   mandatory_ancestor: "NOSCRIPT"		
-   mandatory_ancestor_suggested_alternative: "AMP-VIDEO"		
-   attrs: { name: "autoplay" }		
-   attrs: { name: "controls" }		
-   attrs: { name: "height" }		
-   attrs: { name: "loop" }		
-   attrs: {		
-     name: "muted"		
-     deprecation: "autoplay"		
-     deprecation_url: "https://www.ampproject.org/docs/reference/amp-video.html"		
-   }		
-   attrs: { name: "poster" }		
-   attrs: { name: "preload" }		
-   attrs: {		
-     name: "src"		
-     value_url: {		
-       allowed_protocol: "data"		
-       allowed_protocol: "https"		
-       allow_relative: false		
-     }		
-     blacklisted_value_regex: "__amp_source_origin"		
-   }		
-   attrs: { name: "width" }		
-   spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"		
- }
+# Only allowed in noscript tags. Otherwise use amp-video.
+tags: {
+  html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.		
+  tag_name: "VIDEO"
+  mandatory_ancestor: "NOSCRIPT"		
+  mandatory_ancestor_suggested_alternative: "AMP-VIDEO"		
+  attrs: { name: "autoplay" }
+  attrs: { name: "controls" }
+  attrs: { name: "height" }		
+  attrs: { name: "loop" }
+  attrs: {
+    name: "muted"		
+    deprecation: "autoplay"		
+    deprecation_url: "https://www.ampproject.org/docs/reference/amp-video.html"		
+  }
+  attrs: { name: "poster" }		
+  attrs: { name: "preload" }		
+  attrs: {
+    name: "src"		
+    value_url: {		
+      allowed_protocol: "data"		
+      allowed_protocol: "https"		
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin"		
+  }
+  attrs: { name: "width" }		
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"		
+}
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
 tags: {
