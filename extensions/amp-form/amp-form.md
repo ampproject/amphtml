@@ -26,7 +26,7 @@ limitations under the License.
     <td>Stable with the following Experimental features:
        <ul>
           <li><a href="#custom-validations">Custom Validation</a></li>
-          <li><a href="#variable-substitution">Variable Substitutions</a></li>
+          <li><a href="#variable-substitutions">Variable Substitutions</a></li>
        </ul>
     </td>
   </tr>
@@ -301,7 +301,7 @@ __(<a href="https://www.ampproject.org/docs/reference/experimental.html">experim
 
 `amp-form` allows [platform variable substitutions](../../spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
 
-It's important to provide the variables you are using for each substitution on each input through a space-separated strings in `data-amp-replace`, see examples below. AMP will not replace variables that are not explicitly provided.
+You must provide the variables you are using for each substitution on each input by specifying a space-separated string of the variables used in `data-amp-replace` (see example below). AMP will not replace variables that are not explicitly specified.
 
 Here's an example of how inputs are before and after substitutions (note that you need to use platform syntax of variable substitutions and not analytics ones):
 ```html
