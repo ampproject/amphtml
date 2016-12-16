@@ -15,7 +15,7 @@
  */
 
 import {createIframePromise} from '../../../testing/iframe';
-import {csa, generateCallback} from '../../../ads/google/csa';
+import {csa, resizeIframe} from '../../../ads/google/csa';
 import * as sinon from 'sinon';
 import * as p3p from '../../../3p/3p';
 
@@ -113,39 +113,39 @@ describe('amp-ad-csa-impl', () => {
     let deniedCallback = function() {};
 
     beforeEach(() => {
-      const div = document.createElement('div');
+      const div = win.document.createElement('div');
       div.id = 'csacontainer';
-      const iframe = document.createElement('iframe');
+      const iframe = win.document.createElement('iframe');
       iframe.id = 'csaiframe';
       div.appendChild(iframe);
-      document.body.appendChild(div);
+      win.document.body.appendChild(div);
 
-      window.context = {};
+      win.context = {};
     });
 
     afterEach(() => {
-      const div = document.getElementById('csacontainer');
+      const div = win.document.getElementById('csacontainer');
       if (div) {
         div.parentNode.removeChild(div);
       }
 
-      window.context = {};
+      win.context = {};
 
-      const overflow = document.getElementById('overflow');
+      const overflow = win.document.getElementById('overflow');
       if (overflow) {
         overflow.parentNode.removeChild(overflow);
       }
     });
 
     function setContainerHeight(height) {
-      const div = document.getElementById('csacontainer');
+      const div = win.document.getElementById('csacontainer');
       div.style.height = height;
-      const iframe = document.getElementById('csaiframe');
+      const iframe = win.document.getElementById('csaiframe');
       iframe.style.height = height;
     }
 
     function setContextHeight(h) {
-      window.context = {
+      win.context = {
         initialIntersection: {
           boundingClientRect: {
             height: h,
@@ -159,10 +159,10 @@ describe('amp-ad-csa-impl', () => {
     }
 
     function registerCallbacks() {
-      sandbox.stub(window.context, 'onResizeSuccess', callback => {
+      sandbox.stub(win.context, 'onResizeSuccess', callback => {
         successCallback = callback;
       });
-      sandbox.stub(window.context, 'onResizeDenied', callback => {
+      sandbox.stub(win.context, 'onResizeDenied', callback => {
         deniedCallback = callback;
       });
     }
@@ -175,17 +175,16 @@ describe('amp-ad-csa-impl', () => {
 
       // Set up
       registerCallbacks();
-      const requestResizeSpy = sandbox.stub(window.context, 'requestResize');
-      const resizeIframe = generateCallback(null,null);
+      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
 
       // Try to resize when ads are loaded
-      resizeIframe('csacontainer', true);
+      resizeIframe(win, null, null, 'csacontainer', true);
 
       // Resize requests above the fold will be denied
       deniedCallback();
 
-      const overflow = document.getElementById('overflow');
-      const container = document.getElementById('csacontainer');
+      const overflow = win.document.getElementById('overflow');
+      const container = win.document.getElementById('csacontainer');
       const requestedHeight = requestResizeSpy.args[0][1];
 
       // Overflow should exist and be displayed
@@ -208,17 +207,16 @@ describe('amp-ad-csa-impl', () => {
 
       // Set up
       registerCallbacks();
-      const requestResizeSpy = sandbox.stub(window.context, 'requestResize');
-      const resizeIframe = generateCallback(null,null);
+      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
 
       // Try to resize when ads are loaded
-      resizeIframe('csacontainer', true);
+      resizeIframe(win, null, null, 'csacontainer', true);
 
       // Resize requests above the fold will be denied
       deniedCallback();
 
-      const overflow = document.getElementById('overflow');
-      const container = document.getElementById('csacontainer');
+      const overflow = win.document.getElementById('overflow');
+      const container = win.document.getElementById('csacontainer');
       const requestedHeight = requestResizeSpy.args[0][1];
 
       // Overflow should NOT be present
@@ -240,18 +238,17 @@ describe('amp-ad-csa-impl', () => {
 
       // Set up
       registerCallbacks();
-      const requestResizeSpy = sandbox.stub(window.context, 'requestResize');
-      const resizeIframe = generateCallback(null,null);
+      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
 
       // Try to resize when ads are loaded
-      resizeIframe('csacontainer', true);
+      resizeIframe(win, null, null, 'csacontainer', true);
 
       // Resize requests below the fold succeeed
       const requestedHeight = requestResizeSpy.args[0][1];
       successCallback(requestedHeight);
 
-      const overflow = document.getElementById('overflow');
-      const container = document.getElementById('csacontainer');
+      const overflow = win.document.getElementById('overflow');
+      const container = win.document.getElementById('csacontainer');
 
       // Overflow should be present, but hidden
       expect(overflow.style.display).to.equal('none');
@@ -272,18 +269,17 @@ describe('amp-ad-csa-impl', () => {
 
       // Set up
       registerCallbacks();
-      const requestResizeSpy = sandbox.stub(window.context, 'requestResize');
-      const resizeIframe = generateCallback(null,null);
+      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
 
       // Try to resize when ads are loaded
-      resizeIframe('csacontainer', true);
+      resizeIframe(win, null, null, 'csacontainer', true);
 
       // Resize requests below the fold succeed
       const requestedHeight = requestResizeSpy.args[0][1];
       successCallback(requestedHeight);
 
-      const overflow = document.getElementById('overflow');
-      const container = document.getElementById('csacontainer');
+      const overflow = win.document.getElementById('overflow');
+      const container = win.document.getElementById('csacontainer');
 
       // Overflow should not exist
       expect(overflow).to.equal(null);
@@ -303,11 +299,10 @@ describe('amp-ad-csa-impl', () => {
 
       // Set up
       registerCallbacks();
-      const noAdsSpy = sandbox.stub(window.context, 'noContentAvailable');
-      const resizeIframe = generateCallback(null,null);
+      const noAdsSpy = sandbox.stub(win.context, 'noContentAvailable');
 
       // Try to resize when ads are loaded
-      resizeIframe('csacontainer', false);
+      resizeIframe(win, null, null, 'csacontainer', false);
 
       expect(noAdsSpy.called).to.equal(true);
 
@@ -320,15 +315,12 @@ describe('amp-ad-csa-impl', () => {
 
       // Set up stubs and spys
       registerCallbacks();
-      const noAdsSpy = sandbox.stub(window.context, 'noContentAvailable');
-      global._googCsa = function() {};
-      const _googCsaSpy = sandbox.stub(global, '_googCsa', () => {});
-
-      // Generate a callback with non-null backfill options
-      const resizeIframe = generateCallback({},{});
+      const noAdsSpy = sandbox.stub(win.context, 'noContentAvailable');
+      win._googCsa = function() {};
+      const _googCsaSpy = sandbox.stub(win, '_googCsa', () => {});
 
       // Try to resize when ads are loaded
-      resizeIframe('csacontainer', false);
+      resizeIframe(win, {}, {}, 'csacontainer', false);
 
       // Should not tell AMP we have no ads
       expect(noAdsSpy.called).to.equal(false);
