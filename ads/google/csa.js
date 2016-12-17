@@ -259,5 +259,6 @@ function getOverflowChevron(global) {
  */
 function resizeCsa(container, height) {
   container.firstChild.style.height = height + 'px';
+  container.firstChild.style.overflowY = 'hidden';
   container.style.height = height + 'px';
 }
