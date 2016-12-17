@@ -56,15 +56,6 @@ goog.require('parse_srcset.parseSrcset');
 goog.require('parse_url.URL');
 
 /**
- * Determines if |n| is an integer.
- * @param {number} n
- * @return {boolean}
- */
-function isInteger(n) {
-  return (Number(n) === n) && (n % 1 === 0);
-}
-
-/**
  * Sorts and eliminates duplicates in |arrayValue|.
  * @param {!Array<T>} arrayValue
  * @return {!Array<T>}
@@ -110,6 +101,785 @@ function subtractDiff(left, right) {
     }
   }
   return diff;
+}
+
+/**
+ * ParsedUrlSpec is used for both ParsedAttrSpec and ParsedCdataSpec, to
+ * check URLs. The main logic is in ParsedUrlSpec.ValidateUrlAndProtocol,
+ * which gets instantiated with two different adapter classes, which
+ * emit errors either for URLs in attribute values or URLs in templates.
+ * @private
+ */
+class ParsedUrlSpec {
+  /**
+   * Note that the spec can be null.
+   * @param {amp.validator.UrlSpec} spec
+   */
+  constructor(spec) {
+    /**
+     * @type {amp.validator.UrlSpec}
+     * @private
+     */
+    this.spec_ = spec;
+
+    /**
+     * @type {!Object<string, number>}
+     * @private
+     */
+    this.allowedProtocols_ = {};
+    if (this.spec_ !== null) {
+      for (const protocol of this.spec_.allowedProtocol) {
+        this.allowedProtocols_[protocol] = 0;
+      }
+    }
+
+    /**
+     * @type {!Object<string, number>}
+     * @private
+     */
+    this.disallowedDomains_ = {};
+    if (this.spec_ !== null) {
+      for (const domain of this.spec_.disallowedDomain) {
+        this.disallowedDomains_[domain] = 0;
+      }
+    }
+  }
+
+  /** @return {amp.validator.UrlSpec} */
+  getSpec() {
+    return this.spec_;
+  }
+
+  /**
+   * @param {string} protocol
+   * @return {boolean}
+   */
+  isAllowedProtocol(protocol) {
+    return this.allowedProtocols_.hasOwnProperty(protocol);
+  }
+
+  /**
+   * @param {string} domain
+   * @return {boolean}
+   */
+  isDisallowedDomain(domain) {
+    return this.disallowedDomains_.hasOwnProperty(domain);
+  }
+}
+
+/**
+ * ParsedAttrTriggerSpec is used by ParsedAttrSpec to determine which
+ * attributes also require another attribute for some given set of
+ * conditions.
+ * (e.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role")
+ * @private
+ */
+class ParsedAttrTriggerSpec {
+  /**
+   * @param {!amp.validator.AttrSpec} attrSpec
+   */
+  constructor(attrSpec) {
+    /**
+     * JSON Attribute Trigger Spec dictionary.
+     * @type {amp.validator.AttrTriggerSpec}
+     * @private
+     */
+    this.spec_ = attrSpec.trigger;
+
+    /**
+     * @type {string} attrName
+     * @private
+     */
+    this.attrName_ = attrSpec.name;
+
+    /**
+     * @type {RegExp} ifValueRegex
+     * @private
+     */
+    this.ifValueRegex_ = null;
+
+    if (this.spec_ !== null && this.spec_.ifValueRegex !== null) {
+      this.ifValueRegex_ = new RegExp('^(' + this.spec_.ifValueRegex + ')$');
+    }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasIfValueRegex() {
+    return this.ifValueRegex_ !== null;
+  }
+
+  /**
+   * @return {RegExp} ifValueRegex
+   */
+  getIfValueRegex() {
+    return this.ifValueRegex_;
+  }
+
+  /**
+   * @return {string} attrName
+   */
+  getAttrName() {
+    return this.attrName_;
+  }
+
+  /**
+   * @return {amp.validator.AttrTriggerSpec}
+   */
+  getSpec() {
+    return this.spec_;
+  }
+}
+
+/**
+ * This wrapper class provides access to an AttrSpec and
+ * an attribute id which is unique within its context
+ * (e.g., it's unique within the ParsedTagSpec).
+ * @private
+ */
+class ParsedAttrSpec {
+  /**
+   * @param {!amp.validator.AttrSpec} attrSpec
+   * @param {number} attrId
+   */
+  constructor(attrSpec, attrId) {
+    /**
+     * JSON Attribute Spec dictionary.
+     * @type {!amp.validator.AttrSpec}
+     * @private
+     */
+    this.spec_ = attrSpec;
+    /**
+     * Globally unique attribute rule id.
+     * @type {number}
+     * @private
+     */
+    this.id_ = attrId;
+    /**
+     * @type {ParsedAttrTriggerSpec}
+     * @private
+     */
+    this.triggerSpec_ = null;
+    if (this.spec_.trigger !== null) {
+      this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
+    }
+    /**
+     * @type {!ParsedUrlSpec}
+     * @private
+     */
+    this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
+    /**
+     * @type {!Object<string, !amp.validator.PropertySpec>}
+     * @private
+     */
+    this.valuePropertyByName_ = {};
+    const mandatoryValuePropertyNames = [];
+    if (this.spec_.valueProperties !== null) {
+      for (const propertySpec of this.spec_.valueProperties.properties) {
+        this.valuePropertyByName_[propertySpec.name] = propertySpec;
+        if (propertySpec.mandatory) {
+          mandatoryValuePropertyNames.push(propertySpec.name);
+        }
+      }
+    }
+    /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.mandatoryValuePropertyNames_ =
+        sortAndUniquify(mandatoryValuePropertyNames);
+
+    /**
+     * @type {RegExp} valueRegex
+     * @private
+     */
+    this.valueRegex_ = null;
+    if (this.spec_ !== null && this.spec_.valueRegex !== null) {
+      this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
+    }
+
+    /**
+     * @type {RegExp} valueRegexCasei
+     * @private
+     */
+    this.valueRegexCasei_ = null;
+    if (this.spec_ !== null && this.spec_.valueRegexCasei !== null) {
+      this.valueRegexCasei_ =
+          new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
+    }
+
+    /**
+     * @type {RegExp} blacklistedValueRegex
+     * @private
+     */
+    this.blacklistedValueRegex_ = null;
+    if (this.spec_ !== null && this.spec_.blacklistedValueRegex !== null) {
+      this.blacklistedValueRegex_ =
+          new RegExp(this.spec_.blacklistedValueRegex, 'i');
+    }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasValueRegex() {
+    return this.valueRegex_ !== null;
+  }
+
+  /**
+   * @return {RegExp} valueRegex
+   */
+  getValueRegex() {
+    return this.valueRegex_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasValueRegexCasei() {
+    return this.valueRegexCasei_ !== null;
+  }
+
+  /**
+   * @return {RegExp} valueRegex
+   */
+  getValueRegexCasei() {
+    return this.valueRegexCasei_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasBlacklistedValueRegex() {
+    return this.blacklistedValueRegex_ !== null;
+  }
+
+  /**
+   * @return {RegExp} blacklistedValueRegex
+   */
+  getBlacklistedValueRegex() {
+    return this.blacklistedValueRegex_;
+  }
+
+  /**
+   * @return {number} unique for this attr spec.
+   */
+  getId() {
+    return this.id_;
+  }
+
+  /**
+   * @return {!amp.validator.AttrSpec}
+   */
+  getSpec() {
+    return this.spec_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasTriggerSpec() {
+    return this.triggerSpec_ !== null;
+  }
+
+  /**
+   * @return {ParsedAttrTriggerSpec}
+   */
+  getTriggerSpec() {
+    return this.triggerSpec_;
+  }
+
+  /**
+   * @return {!ParsedUrlSpec}
+   */
+  getValueUrlSpec() {
+    return this.valueUrlSpec_;
+  }
+}
+
+/**
+ * For creating error messages, we either find the specName in the tag spec or
+ * fall back to the tagName.
+ * @param {amp.validator.TagSpec} tagSpec TagSpec instance from the
+ *   validator.protoscii file.
+ * @return {string}
+ * @private
+ */
+function getTagSpecName(tagSpec) {
+  return (tagSpec.specName !== null) ? tagSpec.specName :
+                                       tagSpec.tagName.toLowerCase();
+}
+
+/**
+ * @typedef {{ point: !amp.validator.ReferencePoint,
+ *             tagSpecId: number }}
+ */
+let ParsedReferencePoint;
+
+/**
+ * Holds the reference points for a particular parent tag spec, including
+ * their resolved tagspec ids. This class is a container of
+ * |ParsedReferencePoint| for convenient iteration.
+ * @private
+ */
+class ParsedReferencePoints {
+  /**
+   * @param {!amp.validator.TagSpec} parent
+   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
+   */
+  constructor(parent, tagSpecIdsByTagSpecName) {
+    /**
+     * @type {!amp.validator.TagSpec}
+     * @private
+     */
+    this.parent_ = parent;
+
+    /**
+     * @type {!Array<ParsedReferencePoint>}
+     * @private
+     */
+    this.parsed_ = [];
+    for (const p of parent.referencePoints) {
+      goog.asserts.assert(p.tagSpecName !== null);
+      this.parsed_.push(
+          {point: p, tagSpecId: tagSpecIdsByTagSpecName[p.tagSpecName]});
+    }
+  }
+
+  /** @return {!Array<ParsedReferencePoint>} */
+  iterate() {
+    return this.parsed_;
+  }
+
+  /** @return {boolean} */
+  empty() {
+    return this.parsed_.length === 0;
+  }
+
+  /** @return {number} */
+  size() {
+    return this.parsed_.length;
+  }
+
+  /** @return {?string} */
+  parentSpecUrl() {
+    return this.parent_.specUrl;
+  }
+
+  /** @return {string} */
+  parentTagSpecName() {
+    return getTagSpecName(this.parent_);
+  }
+}
+
+/**
+ * TagSpecs specify attributes that are valid for a particular tag.
+ * They can also reference lists of attributes (AttrLists), thereby
+ * sharing those definitions. This abstraction instantiates
+ * ParsedAttrSpec for each AttrSpec (from validator-*.protoascii, our
+ * specification file) exactly once. To accomplish that, it keeps
+ * around the attr lists with ParsedAttrSpec instances.
+ * @private
+ */
+class ParsedAttrSpecs {
+  /**
+   * @param {!Array<!amp.validator.AttrList>} attrLists
+   */
+  constructor(attrLists) {
+    /** @type {!Object<string, !Array<!ParsedAttrSpec>>} */
+    this.attrListsByName = {};
+
+    /** @private @type {!Array<!ParsedAttrSpec>} */
+    this.parsedAttrSpecs_ = [];
+
+    for (const attrList of attrLists) {
+      /** @type {!Array<!ParsedAttrSpec>} */
+      const parsedAttrList = [];
+      for (const attrSpec of attrList.attrs) {
+        const parsed =
+            new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
+        this.parsedAttrSpecs_.push(parsed);
+        parsedAttrList.push(parsed);
+      }
+      this.attrListsByName[attrList.name] = parsedAttrList;
+    }
+  }
+
+  /**
+   * Collect the ParsedAttrSpec pointers for a given |tagspec|.
+   * There are four ways to specify attributes:
+   * (1) implicitly by a tag spec, if the tag spec has the amp_layout field
+   * set - in this case, the AMP_LAYOUT_ATTRS are assumed;
+   * (2) within a TagSpec::attrs;
+   * (3) via TagSpec::attr_lists which references lists by key;
+   * (4) within the $GLOBAL_ATTRS TagSpec::attr_list.
+   * It's possible to provide multiple
+   * specifications for the same attribute name, but for any given tag only one
+   * such specification can be active. The precedence is (1), (2), (3), (4)
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @return {!Array<!ParsedAttrSpec>} all of the ParsedAttrSpec pointers
+   */
+  getAttrsFor(tagSpec) {
+    /** @type {!Array<!ParsedAttrSpec>} */
+    const attrs = [];
+    /** @type {!Object<string, ?>} */
+    const namesSeen = {};
+    // (1) layout attrs.
+    if (tagSpec.ampLayout !== null && tagSpec.tagName !== '$REFERENCE_POINT') {
+      const layoutSpecs = this.attrListsByName['$AMP_LAYOUT_ATTRS'];
+      if (layoutSpecs !== undefined) {
+        for (const spec of layoutSpecs) {
+          const name = spec.getSpec().name;
+          if (!namesSeen.hasOwnProperty(name)) {
+            namesSeen[name] = 0;
+            attrs.push(spec);
+          }
+        }
+      }
+    }
+    // (2) attributes specified within |tagSpec|.
+    for (const spec of tagSpec.attrs) {
+      const name = spec.name;
+      if (!namesSeen.hasOwnProperty(name)) {
+        namesSeen[name] = 0;
+        const parsed = new ParsedAttrSpec(spec, this.parsedAttrSpecs_.length);
+        this.parsedAttrSpecs_.push(parsed);
+        attrs.push(parsed);
+      }
+    }
+    // (3) attributes specified via reference to an attr_list.
+    for (const tagSpecKey of tagSpec.attrLists) {
+      const specs = this.attrListsByName[tagSpecKey];
+      goog.asserts.assert(specs !== undefined);
+      for (const spec of specs) {
+        const name = spec.getSpec().name;
+        if (!namesSeen.hasOwnProperty(name)) {
+          namesSeen[name] = 0;
+          attrs.push(spec);
+        }
+      }
+    }
+    // (4) attributes specified in the global_attr list.
+    if (tagSpec.tagName !== '$REFERENCE_POINT') {
+      const globalSpecs = this.attrListsByName['$GLOBAL_ATTRS'];
+      if (globalSpecs === undefined) {
+        return attrs;
+      }
+      for (const spec of globalSpecs) {
+        const name = spec.getSpec().name;
+        if (!namesSeen.hasOwnProperty(name)) {
+          namesSeen[name] = 0;
+          attrs.push(spec);
+        }
+      }
+    }
+    return attrs;
+  }
+
+  /**
+   * @param {number} id
+   * @return {!ParsedAttrSpec}
+   */
+  getById(id) {
+    return this.parsedAttrSpecs_[id];
+  }
+}
+
+/**
+ * This wrapper class provides access to a TagSpec and a tag id
+ * which is unique within its context, the ParsedValidatorRules.
+ * @private
+ */
+class ParsedTagSpec {
+  /**
+   * @param {?string} templateSpecUrl
+   * @param {!ParsedAttrSpecs} parsedAttrSpecs
+   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
+   * @param {boolean} shouldRecordTagspecValidated
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {number} tagId
+   */
+  constructor(
+      templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
+      shouldRecordTagspecValidated, tagSpec, tagId) {
+    /**
+     * @type {!amp.validator.TagSpec}
+     * @private
+     */
+    this.spec_ = tagSpec;
+    /**
+     * Globally unique attribute rule id.
+     * @type {number}
+     * @private
+     */
+    this.id_ = tagId;
+    /**
+     * @type {!ParsedReferencePoints}
+     * @private
+     */
+    this.referencePoints_ =
+        new ParsedReferencePoints(tagSpec, tagSpecIdsByTagSpecName);
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.isReferencePoint_ = (tagSpec.tagName === '$REFERENCE_POINT');
+    /**
+     * ParsedAttributes keyed by name.
+     * @type {!Object<string, !ParsedAttrSpec>}
+     * @private
+     */
+    this.attrsByName_ = {};
+    /**
+     * Attribute ids that are mandatory for this tag to legally validate.
+     * @type {!Array<number>}
+     * @private
+     */
+    this.mandatoryAttrIds_ = [];
+    /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.mandatoryOneofs_ = [];
+    /**
+     * @type {?string}
+     * @private
+     */
+    this.templateSpecUrl_ = templateSpecUrl;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
+    /**
+     * @type {!Array<string>}
+     * @private
+     */
+    this.requires_ = [];
+    /**
+     * @type {!Array<number>}
+     * @private
+     */
+    this.alsoRequiresTag_ = [];
+    /**
+     * @type {!Array<number>}
+     * @private
+     */
+    this.alsoRequiresTagWarning_ = [];
+    /**
+     * @type {ParsedAttrSpec}
+     * @private
+     */
+    this.dispatchKeyAttrSpec_ = null;
+    /**
+     * @type {!Array<number>}
+     * @private
+     */
+    this.implicitAttrspecs_ = [];
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.containsUrl_ = false;
+
+    const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
+    for (const parsedAttrSpec of parsedAttrs) {
+      this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
+      if (parsedAttrSpec.getSpec().mandatory) {
+        this.mandatoryAttrIds_.push(parsedAttrSpec.getId());
+      }
+      const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
+      if (mandatoryOneof !== null) {
+        this.mandatoryOneofs_.push(mandatoryOneof);
+      }
+      const altNames = parsedAttrSpec.getSpec().alternativeNames;
+      for (const altName of altNames) {
+        this.attrsByName_[altName] = parsedAttrSpec;
+      }
+      if (parsedAttrSpec.getSpec().dispatchKey) {
+        this.dispatchKeyAttrSpec_ = parsedAttrSpec;
+      }
+      if (parsedAttrSpec.getSpec().implicit) {
+        this.implicitAttrspecs_.push(parsedAttrSpec.getId());
+      }
+      if (parsedAttrSpec.getSpec().valueUrl) {
+        this.containsUrl_ = true;
+      }
+    }
+    this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
+
+    for (const condition of tagSpec.requires) {
+      this.requires_.push(condition);
+    }
+    for (const tagSpecName of tagSpec.alsoRequiresTag) {
+      this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
+    }
+    for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
+      this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
+    }
+  }
+
+  /**
+   * @return {number} unique id for this tag spec.
+   */
+  getId() {
+    return this.id_;
+  }
+
+  /**
+   * Return the original tag spec. This is the json object representation from
+   * amp.validator.rules_.
+   * @return {!amp.validator.TagSpec}
+   */
+  getSpec() {
+    return this.spec_;
+  }
+
+  /**
+   * Returns true if this tagSpec contains a value_url field.
+   * @return {boolean}
+   */
+  containsUrl() {
+    return this.containsUrl_;
+  }
+
+  /**
+   * A dispatch key is a mandatory attribute name/value unique to this
+   * TagSpec. If an encountered tag matches this dispatch key, it is
+   * validated first against this TagSpec in order to improve validation
+   * performance and error message selection. Not all TagSpecs have a
+   * dispatch key.
+   * @return {boolean}
+   */
+  hasDispatchKey() {
+    return this.dispatchKeyAttrSpec_ !== null;
+  }
+
+  /**
+   * You must check hasDispatchKey before accessing
+   * @return {string}
+   */
+  getDispatchKey() {
+    goog.asserts.assert(this.hasDispatchKey());
+    const parsedSpec = this.dispatchKeyAttrSpec_;
+    var mandatoryParent =
+        this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
+    const attrName = parsedSpec.getSpec().name;
+    const attrValue = parsedSpec.getSpec().value !== null ?
+        parsedSpec.getSpec().value.toLowerCase() :
+        parsedSpec.getSpec().valueCasei;
+    goog.asserts.assert(attrValue !== null);
+    return makeDispatchKey(attrName, attrValue, mandatoryParent);
+  }
+
+  /**
+   * A TagSpec may specify other tags to be required as well, when that
+   * tag is used. This accessor returns the IDs for the tagspecs that
+   * are also required if |this| tag occurs in the document.
+   * @return {!Array<number>}
+   */
+  getAlsoRequiresTag() {
+    return this.alsoRequiresTag_;
+  }
+
+  /**
+   * A TagSpec may specify other tags to be required as well, when that
+   * tag is used. This accessor returns the IDs for the tagspecs that
+   * are also required if |this| tag occurs in the document, but where
+   * such requirement is currently only a warning.
+   * @return {!Array<number>}
+   */
+  getAlsoRequiresTagWarning() {
+    return this.alsoRequiresTagWarning_;
+  }
+
+  /**
+   * A TagSpec may specify generic conditions which are required if the
+   * tag is present. This accessor returns the list of those conditions.
+   * @return {!Array<string>}
+   */
+  requires() {
+    return this.requires_;
+  }
+
+  /**
+   * Whether or not the tag should be recorded via
+   * Context.recordTagspecValidated if it was validated
+   * successfullly. For performance, this is only done for tags that are
+   * mandatory, unique, or possibly required by some other tag.
+   * @return {boolean}
+   */
+  shouldRecordTagspecValidated() {
+    return this.shouldRecordTagspecValidated_;
+  }
+
+  /** @return {boolean} */
+  isReferencePoint() {
+    return this.isReferencePoint_;
+  }
+
+  /** @return {boolean} */
+  hasReferencePoints() {
+    return !this.referencePoints_.empty();
+  }
+
+  /** @return {!ParsedReferencePoints} */
+  getReferencePoints() {
+    return this.referencePoints_;
+  }
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  hasAttrWithName(name) {
+    return this.attrsByName_.hasOwnProperty(name);
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTemplateSpecUrl() {
+    return this.templateSpecUrl_;
+  }
+
+  /**
+   * @return {!Array<number>}
+   */
+  getImplicitAttrspecs() {
+    return this.implicitAttrspecs_;
+  }
+
+  /**
+   * @return {!Object<string, !ParsedAttrSpec>}
+   */
+  getAttrsByName() {
+    return this.attrsByName_;
+  }
+
+  /**
+   * @return {!Array<string>}
+   */
+  getMandatoryOneofs() {
+    return this.mandatoryOneofs_;
+  }
+
+  /**
+   * @return {!Array<number>}
+   */
+  getMandatoryAttrIds() {
+    return this.mandatoryAttrIds_;
+  }
+}
+
+/**
+ * Determines if |n| is an integer.
+ * @param {number} n
+ * @return {boolean}
+ */
+function isInteger(n) {
+  return (Number(n) === n) && (n % 1 === 0);
 }
 
 /**
@@ -320,68 +1090,6 @@ class ChildTagMatcher {
       result.status = amp.validator.ValidationResult.Status.FAIL;
       return;
     }
-  }
-}
-
-/**
- * @typedef {{ point: !amp.validator.ReferencePoint,
- *             tagSpecId: number }}
- */
-let ParsedReferencePoint;
-
-/**
- * Holds the reference points for a particular parent tag spec, including
- * their resolved tagspec ids. This class is a container of
- * |ParsedReferencePoint| for convenient iteration.
- * @private
- */
-class ParsedReferencePoints {
-  /**
-   * @param {!amp.validator.TagSpec} parent
-   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
-   */
-  constructor(parent, tagSpecIdsByTagSpecName) {
-    /**
-     * @type {!amp.validator.TagSpec}
-     * @private
-     */
-    this.parent_ = parent;
-
-    /**
-     * @type {!Array<ParsedReferencePoint>}
-     * @private
-     */
-    this.parsed_ = [];
-    for (const p of parent.referencePoints) {
-      goog.asserts.assert(p.tagSpecName !== null);
-      this.parsed_.push(
-          {point: p, tagSpecId: tagSpecIdsByTagSpecName[p.tagSpecName]});
-    }
-  }
-
-  /** @return {!Array<ParsedReferencePoint>} */
-  iterate() {
-    return this.parsed_;
-  }
-
-  /** @return {boolean} */
-  empty() {
-    return this.parsed_.length === 0;
-  }
-
-  /** @return {number} */
-  size() {
-    return this.parsed_.length;
-  }
-
-  /** @return {?string} */
-  parentSpecUrl() {
-    return this.parent_.specUrl;
-  }
-
-  /** @return {string} */
-  parentTagSpecName() {
-    return getTagSpecName(this.parent_);
   }
 }
 
@@ -899,6 +1607,7 @@ function computeAtRuleDefaultParsingSpec(atRuleParsingSpec) {
  * introduces: a tag's cdata matches constraints set by it's cdata
  * spec. Unfortunately we need to defer such checking and can't
  * handle it while the opening tag is being processed.
+ * TODO(powdercloud): Separate out a ParsedCdataSpec class.
  * @private
  */
 class CdataMatcher {
@@ -1107,7 +1816,7 @@ class CdataMatcher {
           new ParsedUrlSpec(cdataSpec.cssSpec.imageUrlSpec);
       for (const url of parsedUrls) {
         const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
-            new ParsedUrlSpecStylesheetErrorAdapter(url.line, url.col) :
+            new UrlErrorInStylesheetAdapter(url.line, url.col) :
             null;
         validateUrlAndProtocol(
             ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
@@ -1377,229 +2086,9 @@ class Context {
 }
 
 /**
- * ParsedUrlSpec is used for both ParsedAttrSpec and ParsedCdataSpec, to
- * check URLs. The main logic is in ParsedUrlSpec.ValidateUrlAndProtocol,
- * which gets instantiated with two different adapter classes, which
- * emit errors either for URLs in attribute values or URLs in templates.
  * @private
  */
-class ParsedUrlSpec {
-  /**
-   * Note that the spec can be null.
-   * @param {amp.validator.UrlSpec} spec
-   */
-  constructor(spec) {
-    /**
-     * @type {amp.validator.UrlSpec}
-     * @private
-     */
-    this.spec_ = spec;
-
-    /**
-     * @type {!Object<string, number>}
-     * @private
-     */
-    this.allowedProtocols_ = {};
-    if (this.spec_ !== null) {
-      for (const protocol of this.spec_.allowedProtocol) {
-        this.allowedProtocols_[protocol] = 0;
-      }
-    }
-
-    /**
-     * @type {!Object<string, number>}
-     * @private
-     */
-    this.disallowedDomains_ = {};
-    if (this.spec_ !== null) {
-      for (const domain of this.spec_.disallowedDomain) {
-        this.disallowedDomains_[domain] = 0;
-      }
-    }
-  }
-
-  /** @return {amp.validator.UrlSpec} */
-  getSpec() {
-    return this.spec_;
-  }
-
-  /**
-   * @param {string} protocol
-   * @return {boolean}
-   */
-  isAllowedProtocol(protocol) {
-    return this.allowedProtocols_.hasOwnProperty(protocol);
-  }
-
-  /**
-   * @param {string} domain
-   * @return {boolean}
-   */
-  isDisallowedDomain(domain) {
-    return this.disallowedDomains_.hasOwnProperty(domain);
-  }
-}
-
-/**
- * @param {!ParsedUrlSpec} parsedUrlSpec
- * @param {ParsedUrlSpecAttrErrorAdapter|ParsedUrlSpecStylesheetErrorAdapter}
- * adapter
- * @param {!Context} context
- * @param {string} urlStr
- * @param {!amp.validator.TagSpec} tagSpec
- * @param {!amp.validator.ValidationResult} result
- */
-function validateUrlAndProtocol(
-    parsedUrlSpec, adapter, context, urlStr, tagSpec, result) {
-  const spec = parsedUrlSpec.getSpec();
-  const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
-  if (urlStr.match(onlyWhitespaceRe) !== null &&
-      (spec.allowEmpty === null || spec.allowEmpty === false)) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      adapter.missingUrl(context, tagSpec, result);
-    } else {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-    return;
-  }
-  const url = new parse_url.URL(urlStr);
-  if (!url.isValid) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      adapter.invalidUrl(context, urlStr, tagSpec, result);
-    } else {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-    return;
-  }
-  // Technically, an URL such as "script :alert('foo')" is considered a relative
-  // URL, similar to "./script%20:alert(%27foo%27)" since space is not a legal
-  // character in a URL protocol. This is what parse_url.URL will determine.
-  // However, some very old browsers will ignore whitespace in URL protocols and
-  // will treat this as javascript execution. We must be safe regardless of the
-  // client. This RE is much more aggressive at extracting a protcol than
-  // parse_url.URL for this reason.
-  const re = /^([^:\/?#.]+):.*$/;
-  const match = re.exec(urlStr);
-  let protocol = '';
-  if (match !== null) {
-    protocol = match[1];
-    protocol = protocol.toLowerCase().trimLeft();
-  } else {
-    protocol = url.protocol;
-  }
-  if (protocol.length > 0 && !parsedUrlSpec.isAllowedProtocol(protocol)) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
-    } else {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-    return;
-  }
-  if (!spec.allowRelative && (!url.hasProtocol || url.protocol.length == 0)) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
-    } else {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-    return;
-  }
-  const domain = url.host.toLowerCase();
-  if (domain.length > 0 && parsedUrlSpec.isDisallowedDomain(domain)) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      adapter.disallowedDomain(context, domain, tagSpec, result);
-    } else {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-    return;
-  }
-}
-
-/** @private */
-class ParsedUrlSpecAttrErrorAdapter {
-  /**
-   * @param {string} attrName
-   */
-  constructor(attrName) {
-    this.attrName_ = attrName;
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  missingUrl(context, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.MISSING_URL, context.getDocLocator(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec)], tagSpec.specUrl,
-        result);
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {string} url
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  invalidUrl(context, url, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.INVALID_URL, context.getDocLocator(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), url],
-        tagSpec.specUrl, result);
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {string} protocol
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  invalidUrlProtocol(context, protocol, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
-        context.getDocLocator(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
-        tagSpec.specUrl, result);
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {string} domain
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  disallowedDomain(context, domain, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.DISALLOWED_DOMAIN,
-        context.getDocLocator(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), domain],
-        tagSpec.specUrl, result);
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {string} url
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  disallowedRelativeUrl(context, url, tagSpec, result) {
-    context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
-        context.getDocLocator(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), url],
-        tagSpec.specUrl, result);
-  }
-}
-
-/**
- * @private
- */
-class ParsedUrlSpecStylesheetErrorAdapter {
+class UrlErrorInStylesheetAdapter {
   /**
    * @param {number} line
    * @param {number} col
@@ -1683,234 +2172,85 @@ class ParsedUrlSpecStylesheetErrorAdapter {
   }
 }
 
-/**
- * ParsedAttrTriggerSpec is used by ParsedAttrSpec to determine which
- * attributes also require another attribute for some given set of
- * conditions.
- * (e.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role")
- * @private
- */
-class ParsedAttrTriggerSpec {
+/** @private */
+class UrlErrorInAttrAdapter {
   /**
-   * @param {!amp.validator.AttrSpec} attrSpec
+   * @param {string} attrName
    */
-  constructor(attrSpec) {
-    /**
-     * JSON Attribute Trigger Spec dictionary.
-     * @type {amp.validator.AttrTriggerSpec}
-     * @private
-     */
-    this.spec_ = attrSpec.trigger;
-
-    /**
-     * @type {string} attrName
-     * @private
-     */
-    this.attrName_ = attrSpec.name;
-
-    /**
-     * @type {RegExp} ifValueRegex
-     * @private
-     */
-    this.ifValueRegex_ = null;
-
-    if (this.spec_ !== null && this.spec_.ifValueRegex !== null) {
-      this.ifValueRegex_ = new RegExp('^(' + this.spec_.ifValueRegex + ')$');
-    }
+  constructor(attrName) {
+    this.attrName_ = attrName;
   }
 
   /**
-   * @return {boolean}
+   * @param {!Context} context
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
    */
-  hasIfValueRegex() {
-    return this.ifValueRegex_ !== null;
+  missingUrl(context, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.MISSING_URL, context.getDocLocator(),
+        /* params */[this.attrName_, getTagSpecName(tagSpec)], tagSpec.specUrl,
+        result);
   }
 
   /**
-   * @return {RegExp} ifValueRegex
+   * @param {!Context} context
+   * @param {string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
    */
-  getIfValueRegex() {
-    return this.ifValueRegex_;
+  invalidUrl(context, url, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.INVALID_URL, context.getDocLocator(),
+        /* params */[this.attrName_, getTagSpecName(tagSpec), url],
+        tagSpec.specUrl, result);
   }
 
   /**
-   * @return {string} attrName
+   * @param {!Context} context
+   * @param {string} protocol
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
    */
-  getAttrName() {
-    return this.attrName_;
+  invalidUrlProtocol(context, protocol, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        context.getDocLocator(),
+        /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
+        tagSpec.specUrl, result);
   }
 
   /**
-   * @return {amp.validator.AttrTriggerSpec}
+   * @param {!Context} context
+   * @param {string} domain
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
    */
-  getSpec() {
-    return this.spec_;
-  }
-}
-
-/**
- * This wrapper class provides access to an AttrSpec and
- * an attribute id which is unique within its context
- * (e.g., it's unique within the ParsedTagSpec).
- * @private
- */
-class ParsedAttrSpec {
-  /**
-   * @param {!amp.validator.AttrSpec} attrSpec
-   * @param {number} attrId
-   */
-  constructor(attrSpec, attrId) {
-    /**
-     * JSON Attribute Spec dictionary.
-     * @type {!amp.validator.AttrSpec}
-     * @private
-     */
-    this.spec_ = attrSpec;
-    /**
-     * Globally unique attribute rule id.
-     * @type {number}
-     * @private
-     */
-    this.id_ = attrId;
-    /**
-     * @type {ParsedAttrTriggerSpec}
-     * @private
-     */
-    this.triggerSpec_ = null;
-    if (this.spec_.trigger !== null) {
-      this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
-    }
-    /**
-     * @type {!ParsedUrlSpec}
-     * @private
-     */
-    this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
-    /**
-     * @type {!Object<string, !amp.validator.PropertySpec>}
-     * @private
-     */
-    this.valuePropertyByName_ = {};
-    const mandatoryValuePropertyNames = [];
-    if (this.spec_.valueProperties !== null) {
-      for (const propertySpec of this.spec_.valueProperties.properties) {
-        this.valuePropertyByName_[propertySpec.name] = propertySpec;
-        if (propertySpec.mandatory) {
-          mandatoryValuePropertyNames.push(propertySpec.name);
-        }
-      }
-    }
-    /**
-     * @type {!Array<string>}
-     * @private
-     */
-    this.mandatoryValuePropertyNames_ =
-        sortAndUniquify(mandatoryValuePropertyNames);
-
-    /**
-     * @type {RegExp} valueRegex
-     * @private
-     */
-    this.valueRegex_ = null;
-    if (this.spec_ !== null && this.spec_.valueRegex !== null) {
-      this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
-    }
-
-    /**
-     * @type {RegExp} valueRegexCasei
-     * @private
-     */
-    this.valueRegexCasei_ = null;
-    if (this.spec_ !== null && this.spec_.valueRegexCasei !== null) {
-      this.valueRegexCasei_ =
-          new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
-    }
-
-    /**
-     * @type {RegExp} blacklistedValueRegex
-     * @private
-     */
-    this.blacklistedValueRegex_ = null;
-    if (this.spec_ !== null && this.spec_.blacklistedValueRegex !== null) {
-      this.blacklistedValueRegex_ =
-          new RegExp(this.spec_.blacklistedValueRegex, 'i');
-    }
+  disallowedDomain(context, domain, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.DISALLOWED_DOMAIN,
+        context.getDocLocator(),
+        /* params */[this.attrName_, getTagSpecName(tagSpec), domain],
+        tagSpec.specUrl, result);
   }
 
   /**
-   * @return {boolean}
+   * @param {!Context} context
+   * @param {string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
    */
-  hasValueRegex() {
-    return this.valueRegex_ !== null;
-  }
-
-  /**
-   * @return {RegExp} valueRegex
-   */
-  getValueRegex() {
-    return this.valueRegex_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasValueRegexCasei() {
-    return this.valueRegexCasei_ !== null;
-  }
-
-  /**
-   * @return {RegExp} valueRegex
-   */
-  getValueRegexCasei() {
-    return this.valueRegexCasei_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasBlacklistedValueRegex() {
-    return this.blacklistedValueRegex_ !== null;
-  }
-
-  /**
-   * @return {RegExp} blacklistedValueRegex
-   */
-  getBlacklistedValueRegex() {
-    return this.blacklistedValueRegex_;
-  }
-
-  /**
-   * @return {number} unique for this attr spec.
-   */
-  getId() {
-    return this.id_;
-  }
-
-  /**
-   * @return {!amp.validator.AttrSpec}
-   */
-  getSpec() {
-    return this.spec_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasTriggerSpec() {
-    return this.triggerSpec_ !== null;
-  }
-
-  /**
-   * @return {ParsedAttrTriggerSpec}
-   */
-  getTriggerSpec() {
-    return this.triggerSpec_;
-  }
-
-  /**
-   * @return {!ParsedUrlSpec}
-   */
-  getValueUrlSpec() {
-    return this.valueUrlSpec_;
+  disallowedRelativeUrl(context, url, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
+        context.getDocLocator(),
+        /* params */[this.attrName_, getTagSpecName(tagSpec), url],
+        tagSpec.specUrl, result);
   }
 }
 
@@ -1978,7 +2318,7 @@ function validateAttrValueUrl(
   }
   maybeUris = sortAndUniquify(maybeUris);
   const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
-      new ParsedUrlSpecAttrErrorAdapter(attrName) :
+      new UrlErrorInAttrAdapter(attrName) :
       null;
   for (const maybeUri of maybeUris) {
     const unescapedMaybeUri = goog.string.unescapeEntities(maybeUri);
@@ -1988,6 +2328,79 @@ function validateAttrValueUrl(
     if (result.status === amp.validator.ValidationResult.Status.FAIL) {
       return;
     }
+  }
+}
+
+/**
+ * @param {!ParsedUrlSpec} parsedUrlSpec
+ * @param {UrlErrorInAttrAdapter|UrlErrorInStylesheetAdapter} adapter
+ * @param {!Context} context
+ * @param {string} urlStr
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateUrlAndProtocol(
+    parsedUrlSpec, adapter, context, urlStr, tagSpec, result) {
+  const spec = parsedUrlSpec.getSpec();
+  const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
+  if (urlStr.match(onlyWhitespaceRe) !== null &&
+      (spec.allowEmpty === null || spec.allowEmpty === false)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.missingUrl(context, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  const url = new parse_url.URL(urlStr);
+  if (!url.isValid) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.invalidUrl(context, urlStr, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  // Technically, an URL such as "script :alert('foo')" is considered a relative
+  // URL, similar to "./script%20:alert(%27foo%27)" since space is not a legal
+  // character in a URL protocol. This is what parse_url.URL will determine.
+  // However, some very old browsers will ignore whitespace in URL protocols and
+  // will treat this as javascript execution. We must be safe regardless of the
+  // client. This RE is much more aggressive at extracting a protcol than
+  // parse_url.URL for this reason.
+  const re = /^([^:\/?#.]+):.*$/;
+  const match = re.exec(urlStr);
+  let protocol = '';
+  if (match !== null) {
+    protocol = match[1];
+    protocol = protocol.toLowerCase().trimLeft();
+  } else {
+    protocol = url.protocol;
+  }
+  if (protocol.length > 0 && !parsedUrlSpec.isAllowedProtocol(protocol)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  if (!spec.allowRelative && (!url.hasProtocol || url.protocol.length == 0)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  const domain = url.host.toLowerCase();
+  if (domain.length > 0 && parsedUrlSpec.isDisallowedDomain(domain)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.disallowedDomain(context, domain, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
   }
 }
 
@@ -2170,134 +2583,6 @@ function validateNonTemplateAttrValueAgainstSpec(
 }
 
 /**
- * TagSpecs specify attributes that are valid for a particular tag.
- * They can also reference lists of attributes (AttrLists), thereby
- * sharing those definitions. This abstraction instantiates
- * ParsedAttrSpec for each AttrSpec (from validator-*.protoascii, our
- * specification file) exactly once. To accomplish that, it keeps
- * around the attr lists with ParsedAttrSpec instances.
- * @private
- */
-class ParsedAttrSpecs {
-  /**
-   * @param {!Array<!amp.validator.AttrList>} attrLists
-   */
-  constructor(attrLists) {
-    /** @type {!Object<string, !Array<!ParsedAttrSpec>>} */
-    this.attrListsByName = {};
-
-    /** @private @type {!Array<!ParsedAttrSpec>} */
-    this.parsedAttrSpecs_ = [];
-
-    for (const attrList of attrLists) {
-      /** @type {!Array<!ParsedAttrSpec>} */
-      const parsedAttrList = [];
-      for (const attrSpec of attrList.attrs) {
-        const parsed =
-            new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
-        this.parsedAttrSpecs_.push(parsed);
-        parsedAttrList.push(parsed);
-      }
-      this.attrListsByName[attrList.name] = parsedAttrList;
-    }
-  }
-
-  /**
-   * Collect the ParsedAttrSpec pointers for a given |tagspec|.
-   * There are four ways to specify attributes:
-   * (1) implicitly by a tag spec, if the tag spec has the amp_layout field
-   * set - in this case, the AMP_LAYOUT_ATTRS are assumed;
-   * (2) within a TagSpec::attrs;
-   * (3) via TagSpec::attr_lists which references lists by key;
-   * (4) within the $GLOBAL_ATTRS TagSpec::attr_list.
-   * It's possible to provide multiple
-   * specifications for the same attribute name, but for any given tag only one
-   * such specification can be active. The precedence is (1), (2), (3), (4)
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @return {!Array<!ParsedAttrSpec>} all of the ParsedAttrSpec pointers
-   */
-  getAttrsFor(tagSpec) {
-    /** @type {!Array<!ParsedAttrSpec>} */
-    const attrs = [];
-    /** @type {!Object<string, ?>} */
-    const namesSeen = {};
-    // (1) layout attrs.
-    if (tagSpec.ampLayout !== null && tagSpec.tagName !== '$REFERENCE_POINT') {
-      const layoutSpecs = this.attrListsByName['$AMP_LAYOUT_ATTRS'];
-      if (layoutSpecs !== undefined) {
-        for (const spec of layoutSpecs) {
-          const name = spec.getSpec().name;
-          if (!namesSeen.hasOwnProperty(name)) {
-            namesSeen[name] = 0;
-            attrs.push(spec);
-          }
-        }
-      }
-    }
-    // (2) attributes specified within |tagSpec|.
-    for (const spec of tagSpec.attrs) {
-      const name = spec.name;
-      if (!namesSeen.hasOwnProperty(name)) {
-        namesSeen[name] = 0;
-        const parsed = new ParsedAttrSpec(spec, this.parsedAttrSpecs_.length);
-        this.parsedAttrSpecs_.push(parsed);
-        attrs.push(parsed);
-      }
-    }
-    // (3) attributes specified via reference to an attr_list.
-    for (const tagSpecKey of tagSpec.attrLists) {
-      const specs = this.attrListsByName[tagSpecKey];
-      goog.asserts.assert(specs !== undefined);
-      for (const spec of specs) {
-        const name = spec.getSpec().name;
-        if (!namesSeen.hasOwnProperty(name)) {
-          namesSeen[name] = 0;
-          attrs.push(spec);
-        }
-      }
-    }
-    // (4) attributes specified in the global_attr list.
-    if (tagSpec.tagName !== '$REFERENCE_POINT') {
-      const globalSpecs = this.attrListsByName['$GLOBAL_ATTRS'];
-      if (globalSpecs === undefined) {
-        return attrs;
-      }
-      for (const spec of globalSpecs) {
-        const name = spec.getSpec().name;
-        if (!namesSeen.hasOwnProperty(name)) {
-          namesSeen[name] = 0;
-          attrs.push(spec);
-        }
-      }
-    }
-    return attrs;
-  }
-
-  /**
-   * @param {number} id
-   * @return {!ParsedAttrSpec}
-   */
-  getById(id) {
-    return this.parsedAttrSpecs_[id];
-  }
-}
-
-
-/**
- * For creating error messages, we either find the specName in the tag spec or
- * fall back to the tagName.
- * @param {amp.validator.TagSpec} tagSpec TagSpec instance from the
- *   validator.protoscii file.
- * @return {string}
- * @private
- */
-function getTagSpecName(tagSpec) {
-  return (tagSpec.specName !== null) ? tagSpec.specName :
-                                       tagSpec.tagName.toLowerCase();
-}
-
-
-/**
  * @param {string} layout
  * @return {!amp.validator.AmpLayout.Layout}
  */
@@ -2313,7 +2598,6 @@ function parseLayout(layout) {
   }
   return amp.validator.AmpLayout.Layout.UNKNOWN;
 }
-
 
 /**
  * Parses a width or height layout attribute, for the determining the layout
@@ -2394,7 +2678,6 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
   return inputWidth;
 }
 
-
 /**
  * Calculates the effective height from input layout and input height.
  * @param {!amp.validator.AmpLayout} spec
@@ -2440,7 +2723,6 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   }
 }
 
-
 /**
  * We only track (that is, add them to Context.RecordTagspecValidated) validated
  * tagspecs as necessary. That is, if it's needed for document scope validation:
@@ -2473,293 +2755,6 @@ function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
  */
 function makeDispatchKey(attrName, attrValue, mandatoryParent) {
   return attrName + '\0' + attrValue + '\0' + mandatoryParent;
-}
-
-/**
- * This wrapper class provides access to a TagSpec and a tag id
- * which is unique within its context, the ParsedValidatorRules.
- * @private
- */
-class ParsedTagSpec {
-  /**
-   * @param {?string} templateSpecUrl
-   * @param {!ParsedAttrSpecs} parsedAttrSpecs
-   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
-   * @param {boolean} shouldRecordTagspecValidated
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {number} tagId
-   */
-  constructor(
-      templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
-      shouldRecordTagspecValidated, tagSpec, tagId) {
-    /**
-     * @type {!amp.validator.TagSpec}
-     * @private
-     */
-    this.spec_ = tagSpec;
-    /**
-     * Globally unique attribute rule id.
-     * @type {number}
-     * @private
-     */
-    this.id_ = tagId;
-    /**
-     * @type {!ParsedReferencePoints}
-     * @private
-     */
-    this.referencePoints_ =
-        new ParsedReferencePoints(tagSpec, tagSpecIdsByTagSpecName);
-    /**
-     * @type {boolean}
-     * @private
-     */
-    this.isReferencePoint_ = (tagSpec.tagName === '$REFERENCE_POINT');
-    /**
-     * ParsedAttributes keyed by name.
-     * @type {!Object<string, !ParsedAttrSpec>}
-     * @private
-     */
-    this.attrsByName_ = {};
-    /**
-     * Attribute ids that are mandatory for this tag to legally validate.
-     * @type {!Array<number>}
-     * @private
-     */
-    this.mandatoryAttrIds_ = [];
-    /**
-     * @type {!Array<string>}
-     * @private
-     */
-    this.mandatoryOneofs_ = [];
-    /**
-     * @type {?string}
-     * @private
-     */
-    this.templateSpecUrl_ = templateSpecUrl;
-    /**
-     * @type {boolean}
-     * @private
-     */
-    this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
-    /**
-     * @type {!Array<string>}
-     * @private
-     */
-    this.requires_ = [];
-    /**
-     * @type {!Array<number>}
-     * @private
-     */
-    this.alsoRequiresTag_ = [];
-    /**
-     * @type {!Array<number>}
-     * @private
-     */
-    this.alsoRequiresTagWarning_ = [];
-    /**
-     * @type {ParsedAttrSpec}
-     * @private
-     */
-    this.dispatchKeyAttrSpec_ = null;
-    /**
-     * @type {!Array<number>}
-     * @private
-     */
-    this.implicitAttrspecs_ = [];
-    /**
-     * @type {boolean}
-     * @private
-     */
-    this.containsUrl_ = false;
-
-    const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
-    for (const parsedAttrSpec of parsedAttrs) {
-      this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
-      if (parsedAttrSpec.getSpec().mandatory) {
-        this.mandatoryAttrIds_.push(parsedAttrSpec.getId());
-      }
-      const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
-      if (mandatoryOneof !== null) {
-        this.mandatoryOneofs_.push(mandatoryOneof);
-      }
-      const altNames = parsedAttrSpec.getSpec().alternativeNames;
-      for (const altName of altNames) {
-        this.attrsByName_[altName] = parsedAttrSpec;
-      }
-      if (parsedAttrSpec.getSpec().dispatchKey) {
-        this.dispatchKeyAttrSpec_ = parsedAttrSpec;
-      }
-      if (parsedAttrSpec.getSpec().implicit) {
-        this.implicitAttrspecs_.push(parsedAttrSpec.getId());
-      }
-      if (parsedAttrSpec.getSpec().valueUrl) {
-        this.containsUrl_ = true;
-      }
-    }
-    this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
-
-    for (const condition of tagSpec.requires) {
-      this.requires_.push(condition);
-    }
-    for (const tagSpecName of tagSpec.alsoRequiresTag) {
-      this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
-    }
-    for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
-      this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
-    }
-  }
-
-  /**
-   * @return {number} unique id for this tag spec.
-   */
-  getId() {
-    return this.id_;
-  }
-
-  /**
-   * Return the original tag spec. This is the json object representation from
-   * amp.validator.rules_.
-   * @return {!amp.validator.TagSpec}
-   */
-  getSpec() {
-    return this.spec_;
-  }
-
-  /**
-   * Returns true if this tagSpec contains a value_url field.
-   * @return {boolean}
-   */
-  containsUrl() {
-    return this.containsUrl_;
-  }
-
-  /**
-   * A dispatch key is a mandatory attribute name/value unique to this
-   * TagSpec. If an encountered tag matches this dispatch key, it is
-   * validated first against this TagSpec in order to improve validation
-   * performance and error message selection. Not all TagSpecs have a
-   * dispatch key.
-   * @return {boolean}
-   */
-  hasDispatchKey() {
-    return this.dispatchKeyAttrSpec_ !== null;
-  }
-
-  /**
-   * You must check hasDispatchKey before accessing
-   * @return {string}
-   */
-  getDispatchKey() {
-    goog.asserts.assert(this.hasDispatchKey());
-    const parsedSpec = this.dispatchKeyAttrSpec_;
-    var mandatoryParent =
-        this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
-    const attrName = parsedSpec.getSpec().name;
-    const attrValue = parsedSpec.getSpec().value !== null ?
-        parsedSpec.getSpec().value.toLowerCase() :
-        parsedSpec.getSpec().valueCasei;
-    goog.asserts.assert(attrValue !== null);
-    return makeDispatchKey(attrName, attrValue, mandatoryParent);
-  }
-
-  /**
-   * A TagSpec may specify other tags to be required as well, when that
-   * tag is used. This accessor returns the IDs for the tagspecs that
-   * are also required if |this| tag occurs in the document.
-   * @return {!Array<number>}
-   */
-  getAlsoRequiresTag() {
-    return this.alsoRequiresTag_;
-  }
-
-  /**
-   * A TagSpec may specify other tags to be required as well, when that
-   * tag is used. This accessor returns the IDs for the tagspecs that
-   * are also required if |this| tag occurs in the document, but where
-   * such requirement is currently only a warning.
-   * @return {!Array<number>}
-   */
-  getAlsoRequiresTagWarning() {
-    return this.alsoRequiresTagWarning_;
-  }
-
-  /**
-   * A TagSpec may specify generic conditions which are required if the
-   * tag is present. This accessor returns the list of those conditions.
-   * @return {!Array<string>}
-   */
-  requires() {
-    return this.requires_;
-  }
-
-  /**
-   * Whether or not the tag should be recorded via
-   * Context.recordTagspecValidated if it was validated
-   * successfullly. For performance, this is only done for tags that are
-   * mandatory, unique, or possibly required by some other tag.
-   * @return {boolean}
-   */
-  shouldRecordTagspecValidated() {
-    return this.shouldRecordTagspecValidated_;
-  }
-
-  /** @return {boolean} */
-  isReferencePoint() {
-    return this.isReferencePoint_;
-  }
-
-  /** @return {boolean} */
-  hasReferencePoints() {
-    return !this.referencePoints_.empty();
-  }
-
-  /** @return {!ParsedReferencePoints} */
-  getReferencePoints() {
-    return this.referencePoints_;
-  }
-
-  /**
-   * @param {string} name
-   * @return {boolean}
-   */
-  hasAttrWithName(name) {
-    return this.attrsByName_.hasOwnProperty(name);
-  }
-
-  /**
-   * @return {?string}
-   */
-  getTemplateSpecUrl() {
-    return this.templateSpecUrl_;
-  }
-
-  /**
-   * @return {!Array<number>}
-   */
-  getImplicitAttrspecs() {
-    return this.implicitAttrspecs_;
-  }
-
-  /**
-   * @return {!Object<string, !ParsedAttrSpec>}
-   */
-  getAttrsByName() {
-    return this.attrsByName_;
-  }
-
-  /**
-   * @return {!Array<string>}
-   */
-  getMandatoryOneofs() {
-    return this.mandatoryOneofs_;
-  }
-
-  /**
-   * @return {!Array<number>}
-   */
-  getMandatoryAttrIds() {
-    return this.mandatoryAttrIds_;
-  }
 }
 
 /**
