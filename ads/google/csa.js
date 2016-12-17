@@ -203,10 +203,6 @@ function createOverflow(global, overflowH, fullH, container, containerH) {
   overflow.appendChild(getOverflowChevron(global));
   overflow.onclick = global.context.requestResize.bind(null, undefined, fullH);
   global.document.body.appendChild(overflow);
-  // Force DOM reflow and repaint
-  /*eslint-disable no-unused-vars*/
-  const ignore = global.document.body.offsetHeight;
-  /*eslint-enable no-unused-vars*/
   // Resize the CSA container to not conflict with overflow
   resizeCsa(container, containerH);
 }
