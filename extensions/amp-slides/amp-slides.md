@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-slides"></a> `amp-carousel`
+# <a name="amp-carousel"></a> `amp-carousel`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.</td>
+    <td>A generic Slideshow component for displaying multiple similar pieces of content along a horizontal axis, one at a time; meant to be highly flexible and performant.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-slides-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -41,16 +41,16 @@ limitations under the License.
 
 ## Behavior
 
-Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
+Each of the `amp-slides` component’s immediate children is considered as a side. Each of these nodes may also have arbitrary HTML children.
 
-The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
+The `amp-slides` consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
 
-The carousel advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
+`amp-slides` advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
 
-**Example**: While the example shows a carousel of images, `amp-carousel` supports arbitrary children.
+**Example**: While the example shows a carousel of images, `amp-slides` supports arbitrary children.
 
 ```html
-<amp-carousel width=300 height=400>
+<amp-slides width=300 height=400>
   <amp-img src="my-img1.png" width=300 height=400></amp-img>
   <amp-img src="my-img2.png" width=300 height=400></amp-img>
   <amp-img src="my-img3.png" width=300 height=400></amp-img>
@@ -69,18 +69,12 @@ unless only a single child is present.
 Usage example:
 
 ```html
-<amp-carousel width="100" height="100" controls layout="responsive" type="slides">
+<amp-slides width="100" height="100" controls layout="responsive">
 ```
-
-**type**
-
-- `carousel` (default): All slides are shown and are scrollable horizontally.
-  The `carousel` type only supports the following layouts: `fixed`, `fixed-height`, and `nodisplay`.
-- `slides`: Shows a single slide at a time. It supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
 
 **loop** (type=slides only)
 
-If present, the user may advance past the first item or the final item.
+If present, the user may advance past the first item or the final item, provided that there are atleast 3 slides.
 
 **autoplay** (type=slides only)
 
@@ -88,18 +82,19 @@ If present:
 
 - Advances the slide to the next slide without user interaction.
 By default, `autoplay` advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.
-- Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
+- Attaches the `loop` attribute to `amp-slides` if `loop` is not already present.
+- This requires atleast 3 slides to be present.
 
-**delay** (type=slides only)
+**delay**
 
 By default, a slide will advance in 5000 millisecond intervals (5 seconds)
 when `autoplay` is specified and will use the value of the `delay`
 attribute if present (minimum of 1000 ms; an error will be thrown if it's any lower). The value of `delay` must be a number of milliseconds, e.g. `delay=5000`.
 
 ## Styling
-- You may use the `amp-carousel` element selector to style it freely.
-- You may use the `.amp-carousel-slide` class selector to target carousel items.
-- The visual state of an `amp-carousel` button when it's disabled is hidden.
+- You may use the `amp-slides` element selector to style it freely.
+- You may use the `.amp-carousel-slide` class selector to target individual slides.
+- The visual state of an `amp-slides` button when it's disabled is hidden.
 - By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
 
