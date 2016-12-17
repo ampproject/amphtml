@@ -618,6 +618,15 @@ class TagStack {
      * @private
      */
     this.stack_ = [];
+
+    /**
+     * CdataMatcher for the current top stack entry. We only ever track cdata
+     * for the immediate top of the stack, so we don't need to store a pointer
+     * for every element on the stack_ itself.
+     * @type {?CdataMatcher}
+     * @private
+     */
+    this.cdataMatcher_ = null;
   }
 
   /**
@@ -657,6 +666,23 @@ class TagStack {
    */
   setChildTagMatcher(matcher) {
     this.stack_[this.stack_.length - 1].childTagMatcher = matcher;
+  }
+
+  /**
+   * Sets the cdata matcher for the tag which is currently on the stack.
+   * @param {?CdataMatcher} matcher
+   */
+  setCdataMatcher(matcher) {
+    this.cdataMatcher_ = matcher;
+  }
+
+  /**
+   * Returns the cdata matcher for the tag currently on the stack. If there
+   * is no cdata matcher, returns null.
+   * @return {?CdataMatcher}
+   */
+  getCdataMatcher() {
+    return this.cdataMatcher_;
   }
 
   /**
@@ -711,6 +737,7 @@ class TagStack {
    * @param {!amp.validator.ValidationResult} result
    */
   exitTag(tagName, context, result) {
+    this.cdataMatcher_ = null;
     const topStackEntry = this.stack_.pop();
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
@@ -1159,12 +1186,6 @@ class Context {
     this.docLocator_ = null;
 
     /**
-     * @type {?CdataMatcher}
-     * @private
-     */
-    this.cdataMatcher_ = null;
-
-    /**
      * @type {!TagStack}
      * @private
      */
@@ -1319,21 +1340,16 @@ class Context {
     return this.mandatoryAlternativesSatisfied_;
   }
 
-  /** @return {?CdataMatcher} */
-  getCdataMatcher() {
-    return this.cdataMatcher_;
-  }
-
-  /** @param {CdataMatcher} matcher */
+  /** @param {?CdataMatcher} matcher */
   setCdataMatcher(matcher) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
       // We store away the position from when the matcher was created
       // so we can use it to generate error messages relating to the
       // opening tag.
       matcher.setLineCol(
           new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
     }
-    this.cdataMatcher_ = matcher;
+    this.tagStack_.setCdataMatcher(matcher);
   }
 
   /** @return {!TagStack} */
@@ -4119,7 +4135,6 @@ amp.validator.ValidationHandler =
    * tag presence.
    */
   endDoc() {
-    this.context_.setCdataMatcher(null);
     this.rules_.maybeEmitGlobalTagValidationErrors(
         this.context_, this.validationResult_);
     if (this.validationResult_.status ===
@@ -4166,7 +4181,6 @@ amp.validator.ValidationHandler =
    */
   startTag(tagName, attrs) {
     goog.asserts.assert(attrs !== null, 'Null attributes for tag: ' + tagName);
-    this.context_.setCdataMatcher(null);
     this.context_.getTagStack().enterTag(
         tagName, this.context_, this.validationResult_, attrs);
     const referencePointMatcher =
@@ -4185,7 +4199,6 @@ amp.validator.ValidationHandler =
    * @override
    */
   endTag(tagName) {
-    this.context_.setCdataMatcher(null);
     const matcher = this.context_.getTagStack().currentReferencePointMatcher();
     if (matcher !== null) {
       matcher.exitParentTag(this.context_, this.validationResult_);
@@ -4217,7 +4230,7 @@ amp.validator.ValidationHandler =
    * @override
    */
   cdata(text) {
-    const matcher = this.context_.getCdataMatcher();
+    const matcher = this.context_.getTagStack().getCdataMatcher();
     if (matcher !== null)
       matcher.match(text, this.context_, this.validationResult_);
   }
