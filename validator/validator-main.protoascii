@@ -277,6 +277,21 @@ tags: {
   attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
+# rel= isn't mandatory when property= is present.
+tags: {
+  tag_name: "LINK"
+  spec_name: "link property="
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+  attrs: {
+    name: "property"
+    mandatory: true
+  }
+  attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
 tags: {
