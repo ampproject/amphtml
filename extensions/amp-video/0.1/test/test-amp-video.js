@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {installVideo} from '../../builtins/amp-video';
-import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
+import '../amp-video';
 import * as sinon from 'sinon';
 
 const TAG = 'amp-video';
@@ -40,7 +39,6 @@ describe(TAG, () => {
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
-          installVideo(iframe.win);
           const v = iframe.doc.createElement(TAG);
           for (const key in attributes) {
             v.setAttribute(key, attributes[key]);
