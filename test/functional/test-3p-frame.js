@@ -224,7 +224,6 @@ describe('3p-frame', () => {
       // Switch to same origin for inner tests.
       iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
     }
-
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
       const win = iframe.contentWindow;
