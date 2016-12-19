@@ -323,12 +323,12 @@ export function googleLifecycleReporterFactory(a4aElement) {
       (getLifecycleReporter(a4aElement, 'a4a',
           a4aElement.element.getAttribute('data-amp-slot-index')));
   const slotId = reporter.getSlotId();
-  reporter.setPingVariables({
+  reporter.setPingParameters({
     'v_h': 'VIEWPORT_HEIGHT',
     's_t': 'SCROLL_TOP',
     'e': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
   });
-  reporter.setPingVariable(
+  reporter.setPingParameter(
       `adt.${slotId}`, a4aElement.element.getAttribute('type'));
   return reporter;
 }
@@ -348,8 +348,8 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   const renderingMethodHeader = 'X-AmpAdRender';
   const renderingMethodKey = `rm.${reporter.getSlotId()}`;
   const qqidKey = `qqid.${reporter.getSlotId()}`;
-  const pingVariables = new Object(null);
-  pingVariables[qqidKey] = headers.get(QQID_HEADER);
-  pingVariables[renderingMethodKey] = headers.get(renderingMethodHeader);
-  reporter.setPingVariables(pingVariables);
+  const pingParameters = new Object(null);
+  pingParameters[qqidKey] = headers.get(QQID_HEADER);
+  pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
+  reporter.setPingParameters(pingParameters);
 }

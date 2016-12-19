@@ -157,31 +157,33 @@ export class BaseLifecycleReporter {
   sendPing(unusedName) {}
 
   /**
-   * Set a variable to be added to the ping data.  The variable's value is
-   * subject to URL replacement and both variable name and value are URI
+   * Set a URL parameter to be added to the ping data.  The parameter's value is
+   * subject to URL replacement and both parameter name and value are URI
    * encoded before being written to the ping.  The entry is silently dropped
-   * if either `variable` or `value` is falsey, with the exception that the
+   * if either `parameter` or `value` is falsey, with the exception that the
    * `value` may be 0.
    *
-   * @param {string} variable
+   * @param {string} parameter
    * @param {string|number} value
    */
-  setPingVariable(variable, value) {
-    if (variable == null || variable === false || variable === '') { return; }
+  setPingParameter(parameter, value) {
+    if (parameter == null || parameter === false || parameter === '') {
+      return;
+    }
     if (value === null || value === undefined || value === '') { return; }
-    this.extraVariables_[variable] = value;
+    this.extraVariables_[parameter] = value;
   }
 
   /**
-   * Sets a (possibly empty) collection of variable values by invoking
-   * #setPingVariable on each key/value pair in the input collection.
+   * Sets a (possibly empty) collection of URL parameter values by invoking
+   * #setPingParameter on each key/value pair in the input collection.
    *
-   * @param {!Object<string, string|number>} variablesToValues
+   * @param {!Object<string, string|number>} parametersToValues
    */
-  setPingVariables(variablesToValues) {
-    for (const variable in variablesToValues) {
-      if (variablesToValues.hasOwnProperty(variable)) {
-        this.setPingVariable(variable, variablesToValues[variable]);
+  setPingParameters(parametersToValues) {
+    for (const variable in parametersToValues) {
+      if (parametersToValues.hasOwnProperty(variable)) {
+        this.setPingParameter(variable, parametersToValues[variable]);
       }
     }
   }
@@ -189,7 +191,7 @@ export class BaseLifecycleReporter {
   /**
    * A function to reset the lifecycle reporter. Will be called immediately
    * after firing the last beacon signal in unlayoutCallback.  Clears all
-   * variables that have been set via #setPingVariable.
+   * variables that have been set via #setPingParameter.
    */
   reset() {
     this.extraVariables_ = new Object(null);

@@ -108,7 +108,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   emitLifecycleEvent(eventName, opt_extraVariables) {
     if (opt_extraVariables) {
-      this.lifecycleReporter_.setPingVariables(opt_extraVariables);
+      this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
     this.lifecycleReporter_.sendPing(eventName);
   }

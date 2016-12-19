@@ -312,12 +312,12 @@ describe('GoogleAdLifecycleReporter', () => {
     });
   });
 
-  describe('#setPingVariable', () => {
+  describe('#setPingParameter', () => {
     it('should pass through static ping variables', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariable('zort', 314159);
-        reporter.setPingVariable('gack', 'flubble');
+        reporter.setPingParameter('zort', 314159);
+        reporter.setPingParameter('gack', 'flubble');
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
@@ -335,10 +335,10 @@ describe('GoogleAdLifecycleReporter', () => {
     it('does not allow empty args', () => {
       return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariable('', '');
-        reporter.setPingVariable('foo', '');
-        reporter.setPingVariable('bar', null);
-        reporter.setPingVariable('baz', undefined);
+        reporter.setPingParameter('', '');
+        reporter.setPingParameter('foo', '');
+        reporter.setPingParameter('bar', null);
+        reporter.setPingParameter('baz', undefined);
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
@@ -352,9 +352,9 @@ describe('GoogleAdLifecycleReporter', () => {
     it('does allow value === 0', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariable('foo', 0);
-        reporter.setPingVariable('bar', 0.0);
-        reporter.setPingVariable('baz', -0);
+        reporter.setPingParameter('foo', 0);
+        reporter.setPingParameter('bar', 0.0);
+        reporter.setPingParameter('baz', -0);
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
@@ -371,9 +371,9 @@ describe('GoogleAdLifecycleReporter', () => {
     it('should uri encode extra params', () => {
       return iframe.then(({unusedWin, unusedDoc, unusedElem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariable('evil',
+        reporter.setPingParameter('evil',
             '<script src="https://evil.com">doEvil()</script>');
-        reporter.setPingVariable(
+        reporter.setPingParameter(
             '<script src="https://very.evil.com">doMoreEvil()</script>', 3);
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
@@ -393,7 +393,7 @@ describe('GoogleAdLifecycleReporter', () => {
     it('should expand URL parameters in extra params', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariable('zort', 'RANDOM');
+        reporter.setPingParameter('zort', 'RANDOM');
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
@@ -408,15 +408,15 @@ describe('GoogleAdLifecycleReporter', () => {
     });
   });
 
-  describe('#setPingVariables', () => {
+  describe('#setPingParameters', () => {
     it('should do nothing on an an empty input', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-        const setPingVariableSpy = sandbox.spy(reporter, 'setPingVariable');
+        const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariables({});
+        reporter.setPingParameters({});
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
-        expect(setPingVariableSpy).not.to.be.called;
+        expect(setPingParameterSpy).not.to.be.called;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
@@ -429,12 +429,12 @@ describe('GoogleAdLifecycleReporter', () => {
 
     it('should set a singleton input', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-        const setPingVariableSpy = sandbox.spy(reporter, 'setPingVariable');
+        const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariables({zort: '12345'});
+        reporter.setPingParameters({zort: '12345'});
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
-        expect(setPingVariableSpy).to.be.calledOnce;
+        expect(setPingParameterSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
@@ -448,12 +448,12 @@ describe('GoogleAdLifecycleReporter', () => {
 
     it('should set multiple inputs', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
-        const setPingVariableSpy = sandbox.spy(reporter, 'setPingVariable');
+        const setPingParameterSpy = sandbox.spy(reporter, 'setPingParameter');
         expect(emitPingSpy).to.not.be.called;
-        reporter.setPingVariables({zort: '12345', gax: 99, flub: 0});
+        reporter.setPingParameters({zort: '12345', gax: 99, flub: 0});
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;
-        expect(setPingVariableSpy).to.be.calledThrice;
+        expect(setPingParameterSpy).to.be.calledThrice;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
           // Be sure that existing ping not deleted by args.
