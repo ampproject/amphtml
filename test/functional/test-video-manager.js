@@ -136,7 +136,6 @@ describe('Supports Autoplay', () => {
   beforeEach(() => {
     clearSupportsAutoplayCacheForTesting();
     sandbox = sinon.sandbox.create();
-    
 
     video = {
       setAttribute() {},
