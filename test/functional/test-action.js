@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionService, parseActionMap} from '../../src/service/action-impl';
+import {ActionService, applyActionInfoArgs, parseActionMap} from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
@@ -180,6 +180,29 @@ describe('ActionService parseAction', () => {
     expect(a.args['key1']({foo: () => {}})).to.equal('foo');
   });
 
+  it('should apply arg functions with no event', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    expect(applyActionInfoArgs(a.args, null)).to.deep.equal({key1: 'foo'});
+  });
+
+  it('applied arg values should be proto-less objects', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    expect(applyActionInfoArgs(a.args, null).__proto__).to.be.undefined;
+    expect(applyActionInfoArgs(a.args, null).constructor).to.be.undefined;
+  });
+
+  it('should apply arg value functions with an event with data', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    const event = new CustomEvent('MyEvent', {detail: {foo: 'bar'}});
+    expect(applyActionInfoArgs(a.args, event)).to.deep.equal({key1: 'bar'});
+  });
+
+  it('should apply arg value functions with an event without data', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    const event = new CustomEvent('MyEvent');
+    expect(applyActionInfoArgs(a.args, event)).to.deep.equal({key1: 'foo'});
+  });
+
   it('should parse empty to null', () => {
     const a = parseAction('');
     expect(a).to.equal(null);
@@ -245,7 +268,6 @@ describe('ActionService parseAction', () => {
     }).to.throw(/Invalid action/);
   });
 });
-
 
 describe('Action parseActionMap', () => {
 

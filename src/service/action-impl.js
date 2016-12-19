@@ -516,9 +516,9 @@ function getActionInfoArgValue(token) {
  * @param {?ActionInfoArgsDef} args
  * @param {?Event} event
  * @return {?JSONType}
- * @private
+ * @private Visible for testing only.
  */
-function applyActionInfoArgs(args, event) {
+export function applyActionInfoArgs(args, event) {
   if (args) {
     const data = (event && event.detail) ? event.detail : null;
     const applied = map();
