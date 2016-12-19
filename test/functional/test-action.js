@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionService, applyActionInfoArgs, parseActionMap} from '../../src/service/action-impl';
+import {
+  ActionService,
+  applyActionInfoArgs,
+  parseActionMap
+} from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
