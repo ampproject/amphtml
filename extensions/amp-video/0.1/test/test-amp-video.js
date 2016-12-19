@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
+import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-video';
 import * as sinon from 'sinon';
 
