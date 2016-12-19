@@ -27,6 +27,7 @@ import {installEmbedStateListener, manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
+import {isExperimentOn} from '../src/experiments';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {dev, initLogConstructor, user} from '../src/log';
@@ -131,6 +132,21 @@ import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
 /**
+ * If true, then in experiment where the passing of context metadata
+ * has been moved from the iframe src hash to the iframe name attribute.
+ */
+const nameExpOn = isExperimentOn(window, 'move-context-to-name');
+
+/**
+ * This value is copied here to avoid importing from src/intersection-observer-polyfill.js
+ * Please keep this value same with DEFAULT_THRESHOLD from that file.
+ * @const @private {!Array}
+ */
+const DEFAULT_THRESHOLD =
+    [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
+    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+
+/**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
  */
@@ -143,20 +159,26 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
+let data;
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
-let data;
-// TODO(bradfrizzell@): Change the data structure of the attributes
-//    to make it less terrible.
-try {
-  data = JSON.parse(iframeName).attributes;
+if (nameExpOn) {
+  // TODO(bradfrizzell@): Change the data structure of the attributes
+  //    to make it less terrible.
+  try {
+    data = JSON.parse(iframeName).attributes;
+    window.context = data._context;
+  } catch (err) {
+    window.context = {};
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
+} else {
+  data = parseFragment(location.hash);
   window.context = data._context;
-} catch (err) {
-  window.context = {};
-  dev().info(
-      'INTEGRATION', 'Could not parse context from:', iframeName);
 }
+
 // This should only be invoked after window.context is set
 initLogConstructor();
 

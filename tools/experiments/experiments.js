@@ -231,6 +231,11 @@ const EXPERIMENTS = [
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
+  {
+    id: 'move-context-to-name',
+    name: 'Move passing context metadata from url hash to name attribute',
+    Spec: '',
+  },
 ];
 
 if (getMode().localDev) {

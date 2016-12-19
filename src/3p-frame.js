@@ -16,6 +16,7 @@
 
 import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
+import {isExperimentOn} from './experiments';
 import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
@@ -27,6 +28,11 @@ import {urls} from './config';
 import {setStyle} from './style';
 import {domFingerprint} from './utils/dom-fingerprint';
 
+/**
+ * If true, then in experiment where the passing of context metadata
+ * has been moved from the iframe src hash to the iframe name attribute.
+ */
+const nameExpOn = isExperimentOn(self, 'move-context-to-name');
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -120,23 +126,29 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
 
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
-  // Pass ad attributes to iframe via the fragment.
+  let name;
+  if (nameExpOn) {
+    // This name attribute may be overwritten if this frame is chosen to
+    // be the master frame. That is ok, as we will read the name off
+    // for our uses before that would occur.
+    // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
+    name = JSON.stringify({
+      host,
+      type: attributes.type,
+      // https://github.com/ampproject/amphtml/pull/2955
+      count: count[attributes.type],
+      attributes,
+    });
 
-  // This name attribute may be overwritten if this frame is chosen to
-  // be the master frame. That is ok, as we will read the name off
-  // for our uses before that would occur.
-  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
-  const name = JSON.stringify({
-    host,
-    type: attributes.type,
-    // https://github.com/ampproject/amphtml/pull/2955
-    count: count[attributes.type],
-    attributes,
-  });
-
-  iframe.src = baseUrl;
+    iframe.src = baseUrl;
+    iframe.ampLocation = parseUrl(baseUrl);
+  } else {
+    const src = baseUrl + '#' + JSON.stringify(attributes);
+    name = host + '_' + attributes.type + '_' + count[attributes.type];
+    iframe.src = src;
+    iframe.ampLocation = parseUrl(src);
+  }
   iframe.name = name;
-  iframe.ampLocation = parseUrl(baseUrl);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
   iframe.setAttribute('scrolling', 'no');

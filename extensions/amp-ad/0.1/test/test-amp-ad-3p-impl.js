@@ -19,6 +19,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {stubService} from '../../../../testing/test-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
 import * as adCid from '../../../../src/ad-cid';
+import {isExperimentOn} from '../../../../src/experiments';
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as lolex from 'lolex';
@@ -42,6 +43,12 @@ describe('amp-ad-3p-impl', () => {
   let sandbox;
   let ad3p;
   let win;
+
+  /**
+   * If true, then in experiment where the passing of context metadata
+   * has been moved from the iframe src hash to the iframe name attribute.
+   */
+  const nameExpOn = isExperimentOn(window, 'move-context-to-name');
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -73,10 +80,16 @@ describe('amp-ad-3p-impl', () => {
         expect(iframe.tagName).to.equal('IFRAME');
         const url = iframe.getAttribute('src');
         expect(url).to.match(/^http:\/\/ads.localhost:/);
-        expect(url).to.match(/frame(.max)?.html/);
         expect(iframe.style.display).to.equal('');
 
-        const data = JSON.parse(iframe.name).attributes;
+        let data;
+        if (nameExpOn) {
+          expect(url).to.match(/frame(.max)?.html/);
+          data = JSON.parse(iframe.name).attributes;
+        } else {
+          expect(url).to.match(/frame(.max)?.html#{/);
+          data = JSON.parse(url.substr(url.indexOf('#') + 1));
+        }
         expect(data).to.have.property('type', '_ping_');
         expect(data).to.have.property('src', 'https://testsrc');
         expect(data).to.have.property('width', 300);
@@ -104,10 +117,15 @@ describe('amp-ad-3p-impl', () => {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        const data = JSON.parse(frame.name).attributes;
-        expect(data).to.be.ok;
-        expect(data._context).to.be.ok;
-        expect(data._context.clientId).to.equal('sentinel123');
+        if (nameExpOn) {
+          const data = JSON.parse(frame.name).attributes;
+          expect(data).to.be.ok;
+          expect(data._context).to.be.ok;
+          expect(data._context.clientId).to.equal('sentinel123');
+        } else {
+          expect(frame.getAttribute('src')).to.contain(
+              '"clientId":"sentinel123"');
+        }
       });
     });
 
@@ -118,10 +136,15 @@ describe('amp-ad-3p-impl', () => {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        const data = JSON.parse(frame.name).attributes;
-        expect(data).to.be.ok;
-        expect(data._context).to.be.ok;
-        expect(data._context.clientId).to.equal(null);
+        if (nameExpOn) {
+          const data = JSON.parse(frame.name).attributes;
+          expect(data).to.be.ok;
+          expect(data._context).to.be.ok;
+          expect(data._context.clientId).to.equal(null);
+        } else {
+          expect(frame.getAttribute('src')).to.contain(
+              '"clientId":null');
+        }
       });
     });
 
@@ -169,10 +192,15 @@ describe('amp-ad-3p-impl', () => {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        const data = JSON.parse(frame.name).attributes;
-        expect(data).to.be.ok;
-        expect(data._context).to.be.ok;
-        expect(data._context.container).to.equal('AMP-STICKY-AD');
+        if (nameExpOn) {
+          const data = JSON.parse(frame.name).attributes;
+          expect(data).to.be.ok;
+          expect(data._context).to.be.ok;
+          expect(data._context.container).to.equal('AMP-STICKY-AD');
+        } else {
+          expect(frame.getAttribute('src')).to.contain(
+              '"container":"AMP-STICKY-AD"');
+        }
       });
     });
   });
