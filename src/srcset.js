@@ -197,10 +197,10 @@ export class Srcset {
    * @private
    */
   selectByWidth_(width, dpr) {
-    let minIndex = -1;
-    let minWidth = 1000000;
-    let minScore = 1000000;
-    for (let i = 0; i < this.sources_.length; i++) {
+    const length = this.sources_.length;
+    let minWidth = this.sources_[length - 1].width / dpr;
+    let prevWidth = 0;
+    for (let i = length - 1; i >= 0; i--) {
       const source = this.sources_[i];
       let sourceWidth;
       if (source.width) {
@@ -210,16 +210,24 @@ export class Srcset {
         // minimum values seen.
         sourceWidth = minWidth / 2;
       }
-      minWidth = Math.min(minWidth, sourceWidth);
-      // The calculation is slightly biased toward higher width by offsetting
-      // score by negative 0.2.
-      const score = Math.abs((sourceWidth - width) / width - 0.2);
-      if (score < minScore) {
-        minScore = score;
-        minIndex = i;
+      // First candidate width that's equal or higher than the request width
+      // is the stop point.
+      if (sourceWidth >= width) {
+        // Bull's eye or at the minimum.
+        if (sourceWidth == width || i == length - 1) {
+          return i;
+        }
+        // The right value is now between `i` and `i + 1` - select the one
+        // that is closer with a slight preference toward higher numbers.
+        if (width - prevWidth * 0.9 < sourceWidth - width) {
+          return i + 1;
+        }
+        return i;
       }
+      prevWidth = sourceWidth;
     }
-    return minIndex;
+    // Use the first (maximum) value.
+    return 0;
   }
 
   /**
