@@ -21,7 +21,7 @@ import {
 } from '../../../../ads/google/a4a/performance';
 
 // Still under construction.
-describes.skip.sandboxed('A4A integration', {}, () => {
+describes.sandboxed('A4A integration', {}, () => {
   describes.realWin('doubleclick', {allowExternalResources: false}, env => {
     // Note: May need a separate realWin test for checking cross-domain
     // rendering, including SafeFrame and NameFrame.
@@ -48,7 +48,7 @@ describes.skip.sandboxed('A4A integration', {}, () => {
       doc.body.appendChild(element);
     });
 
-    it('should send ping beacons for all lifecycle stages', () => {
+    it.skip('should send ping beacons for all lifecycle stages', () => {
       pingStub.returns(null);
       creativeXhrStub.returns(Promise.resolve({}));
       keyXhrStub.returns(Promise.resolve({}));

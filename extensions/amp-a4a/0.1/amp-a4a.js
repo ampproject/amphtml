@@ -641,11 +641,15 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.adPromise_) {
       return Promise.resolve();
     }
-    const layoutCallbackStart = Date.now();
+    const layoutCallbackStart =
+        (this.win.performance && this.win.performance.now()) || Date.now();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
+      const delta =
+          ((this.win.performance && this.win.performance.now()) || Date.now()) -
+          layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('adPromiseChainDelay', {
-        adPromiseChainDelay: Date.now() - layoutCallbackStart,
+        adPromiseChainDelay: delta,
         isAmpCreative: !!creativeMetaData,
       });
       if (creativeMetaData) {

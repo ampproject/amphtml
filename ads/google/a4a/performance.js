@@ -137,6 +137,17 @@ export class BaseLifecycleReporter {
   }
 
   /**
+   * Get an ID for this ad slot that should be unique within the page.  The
+   * default implementation returns the constant -1; subclasses should implement
+   * in meaningful ways.
+   *
+   * @return {number}
+   */
+  getSlotId() {
+    return -1;
+  }
+
+  /**
    * A beacon function that will be called at various stages of the lifecycle.
    *
    * To be overriden by network specific implementations.
@@ -217,9 +228,14 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
 
     /** @private {number} @const */
-    this.initTime_ = Date.now();
+    this.initTime_ = (win.performance && win.performance.timing &&
+        win.performance.timing.navigationStart) || Date.now();
 
-    /** @private */
+    /** @private {!function:number} @const */
+    this.getDeltaTime_ = (win.performance && win.performance.now.bind(
+            win.performance)) || (() => {return Date.now() - this.initTime_;});
+
+    /** @private @const */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
 
     /** @private {!../../../src/url-replacements-impl.UrlReplacements} @const */
@@ -248,6 +264,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @return {number}
+   * @override
    */
   getSlotId() {
     return this.slotId_;
@@ -261,7 +278,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   buildPingAddress_(name, opt_extraParams) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
-    const delta = Date.now() - this.initTime_;
+    const delta = this.getDeltaTime_();
     let extraParams = '';
     if (opt_extraParams) {
       extraParams = serializeQueryString(opt_extraParams);
