@@ -487,7 +487,7 @@ export function parseActionMap(s, context) {
  * If the token is an identifier `foo`, the function returns `data[foo]`.
  * Otherwise, the function returns the token value.
  * @param {!{type: TokenType, value: *}} token
- * @return {function(!Object):string}
+ * @return {?function(!Object):string}
  * @private
  */
 function getActionInfoArgValue(token) {
@@ -505,6 +505,8 @@ function getActionInfoArgValue(token) {
       }
       return value;
     };
+  } else {
+    return null;
   }
 }
 
