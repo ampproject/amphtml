@@ -19,7 +19,9 @@ import {installVideo} from '../../builtins/amp-video';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import * as sinon from 'sinon';
 
-describe('amp-video', () => {
+const TAG = 'amp-video';
+
+describe(TAG, () => {
 
   let sandbox;
 
@@ -38,9 +40,8 @@ describe('amp-video', () => {
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
-          installVideoManagerForDoc(iframe.win.document);
           installVideo(iframe.win);
-          const v = iframe.doc.createElement('amp-video');
+          const v = iframe.doc.createElement(TAG);
           for (const key in attributes) {
             v.setAttribute(key, attributes[key]);
           }
