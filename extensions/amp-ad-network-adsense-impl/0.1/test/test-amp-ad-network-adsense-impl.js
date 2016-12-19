@@ -40,14 +40,11 @@ function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   return adsenseImplElem;
 }
 
-describe('amp-ad-network-adsense-impl', () => {
-
-  let sandbox;
+describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
   let impl;
   let element;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
         () => {
           return ['google'];
@@ -63,7 +60,6 @@ describe('amp-ad-network-adsense-impl', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
   });
 
   // WARNING: When running this test file in isolation, running more than one

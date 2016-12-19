@@ -91,16 +91,83 @@ export function isGoogleAdsA4AValidEnvironment(win, element) {
  * @param {number} startTime
  * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
  * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
+ *     Parameters that will be put at the end of the URL, where they may be
+ *     elided for length reasons. Intended for parameters with potentially
+ *     long values, like URLs.
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
     a4a, baseUrl, startTime, queryParams, unboundedQueryParams) {
+  // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
-      buildAdUrl(
-        a4a, baseUrl, startTime, queryParams, unboundedQueryParams, clientId,
-        referrer)));
+  return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
+    const slotNumber = a4a.element.getAttribute('data-amp-slot-index');
+    const win = a4a.win;
+    const documentInfo = documentInfoForDoc(a4a.element);
+    if (!win.gaGlobal) {
+      // Read by GPT for GA/GPT integration.
+      win.gaGlobal = {
+        vid: clientId,
+        hid: documentInfo.pageViewId,
+      };
+    }
+    const slotRect = a4a.getIntersectionElementLayoutBox();
+    const screen = win.screen;
+    const viewport = a4a.getViewport();
+    const viewportRect = viewport.getRect();
+    const iframeDepth = iframeNestingDepth(win);
+    const viewportSize = viewport.getSize();
+    const dtdParam = {name: 'dtd'};
+    const adElement = a4a.element;
+    const allQueryParams = queryParams.concat(
+      [
+        {
+          name: 'is_amp',
+          value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+        },
+        {name: 'amp_v', value: '$internalRuntimeVersion$'},
+        {name: 'd_imp', value: '1'},
+        {name: 'dt', value: startTime},
+        {name: 'ifi', value: slotNumber},
+        {name: 'adf', value: domFingerprint(adElement)},
+        {name: 'c', value: getCorrelator(win, clientId)},
+        {name: 'output', value: 'html'},
+        {name: 'nhd', value: iframeDepth},
+        {name: 'iu', value: a4a.element.getAttribute('data-ad-slot')},
+        {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
+        {name: 'biw', value: viewportRect.width},
+        {name: 'bih', value: viewportRect.height},
+        {name: 'adx', value: slotRect.left},
+        {name: 'ady', value: slotRect.top},
+        {name: 'u_aw', value: screen ? screen.availWidth : null},
+        {name: 'u_ah', value: screen ? screen.availHeight : null},
+        {name: 'u_cd', value: screen ? screen.colorDepth : null},
+        {name: 'u_w', value: screen ? screen.width : null},
+        {name: 'u_h', value: screen ? screen.height : null},
+        {name: 'u_tz', value: -new Date().getTimezoneOffset()},
+        {name: 'u_his', value: getHistoryLength(win)},
+        {name: 'brdim', value: additionalDimensions(win, viewportSize)},
+        {name: 'isw', value: viewportSize.width},
+        {name: 'ish', value: viewportSize.height},
+        dtdParam,
+      ],
+      unboundedQueryParams,
+      [
+        {name: 'url', value: documentInfo.canonicalUrl},
+        {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
+        {
+          name: 'loc',
+          value: win.location.href == documentInfo.canonicalUrl ?
+            null : win.location.href,
+        },
+        {name: 'ref', value: referrer},
+      ]
+    );
+    dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
+    return buildUrl(
+      baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
+  }));
 }
 
 
@@ -130,90 +197,6 @@ export function extractGoogleAdCreativeAndSignature(
           !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
           {creative, signature, size}));
   }
-}
-
-/**
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {string} baseUrl
- * @param {number} startTime
- * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
- * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
- * @param {(string|undefined)} clientId
- * @param {string} referrer
- * @return {string}
- */
-function buildAdUrl(
-    a4a, baseUrl, startTime, queryParams, unboundedQueryParams,
-    clientId, referrer) {
-  const slotNumber = a4a.element.getAttribute('data-amp-slot-index');
-  const win = a4a.win;
-  const documentInfo = documentInfoForDoc(a4a.element);
-  if (!win.gaGlobal) {
-    // Read by GPT for GA/GPT integration.
-    win.gaGlobal = {
-      vid: clientId,
-      hid: documentInfo.pageViewId,
-    };
-  }
-  const slotRect = a4a.getIntersectionElementLayoutBox();
-  const screen = win.screen;
-  const viewport = a4a.getViewport();
-  const viewportRect = viewport.getRect();
-  const iframeDepth = iframeNestingDepth(win);
-  const browserViewPortSize = viewport.getSize();
-  const dtdParam = {name: 'dtd'};
-  const adElement = a4a.element;
-  if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-    queryParams.push({name: 'amp_ct', value: adElement.parentElement.tagName});
-  }
-  const allQueryParams = queryParams.concat(
-    [
-      {
-        name: 'is_amp',
-        value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-      },
-      {name: 'amp_v', value: '$internalRuntimeVersion$'},
-      {name: 'd_imp', value: '1'},
-      {name: 'dt', value: startTime},
-      {name: 'ifi', value: slotNumber},
-      {name: 'adf', value: domFingerprint(adElement)},
-      {name: 'c', value: getCorrelator(win, clientId)},
-      {name: 'output', value: 'html'},
-      {name: 'nhd', value: iframeDepth},
-      {name: 'iu', value: a4a.element.getAttribute('data-ad-slot')},
-      {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
-      {name: 'biw', value: viewportRect.width},
-      {name: 'bih', value: viewportRect.height},
-      {name: 'adx', value: slotRect.left},
-      {name: 'ady', value: slotRect.top},
-      {name: 'oid', value: '2'},
-      {name: 'u_aw', value: screen ? screen.availWidth : null},
-      {name: 'u_ah', value: screen ? screen.availHeight : null},
-      {name: 'u_cd', value: screen ? screen.colorDepth : null},
-      {name: 'u_w', value: screen ? screen.width : null},
-      {name: 'u_h', value: screen ? screen.height : null},
-      {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-      {name: 'u_his', value: getHistoryLength(win)},
-      {name: 'brdim', value: additionalDimensions(win, viewport)},
-      {name: 'isw', value: browserViewPortSize.width},
-      {name: 'ish', value: browserViewPortSize.height},
-      dtdParam,
-    ],
-    unboundedQueryParams,
-    [
-      {name: 'url', value: documentInfo.canonicalUrl},
-      {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
-      {
-        name: 'loc',
-        value: win.location.href == documentInfo.canonicalUrl ?
-            null : win.location.href,
-      },
-      {name: 'ref', value: referrer},
-    ]
-  );
-  dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
-  return buildUrl(
-      baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
 }
 
 /**
@@ -318,13 +301,13 @@ export function getCorrelator(win, opt_cid) {
 /**
  * Collect additional dimensions for the brdim parameter.
  * @param {!Window} win The window for which we read the browser dimensions.
- * @param {!../../../src/service/viewport-impl.Viewport} viewport
+ * @param {{width: number, height: number}|null} viewportSize
  * @return {string}
+ * @visibleForTesting
  */
-function additionalDimensions(win, viewport) {
+export function additionalDimensions(win, viewportSize) {
   // Some browsers throw errors on some of these.
   let screenX, screenY, outerWidth, outerHeight, innerWidth, innerHeight;
-  const size = viewport.getSize();
   try {
     screenX = win.screenX;
     screenY = win.screenY;
@@ -334,8 +317,8 @@ function additionalDimensions(win, viewport) {
     outerHeight = win.outerHeight;
   } catch (e) {}
   try {
-    innerWidth = size.width;
-    innerHeight = size.height;
+    innerWidth = viewportSize.width;
+    innerHeight = viewportSize.height;
   } catch (e) {}
   return [win.screenLeft,
           win.screenTop,

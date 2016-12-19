@@ -18,16 +18,12 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import * as sinon from 'sinon';
 
-describe('amp-ad-network-doubleclick-impl', () => {
-
-  let sandbox;
+describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   let impl;
   let element;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
     element = document.createElement('amp-ad');
     element.setAttribute('type', 'doubleclick');
     element.setAttribute('data-ad-client', 'adsense');
@@ -41,7 +37,6 @@ describe('amp-ad-network-doubleclick-impl', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
   });
 
   describe('#isValidElement', () => {
