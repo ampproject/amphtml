@@ -65,6 +65,7 @@ tags: {  # <amp-list>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "items" }
   # TODO(gregable): Implement validation that requires the template attr value
   # to reference the id of an existing template element.
   attrs: { name: "template" }
