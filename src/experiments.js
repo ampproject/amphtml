@@ -121,7 +121,7 @@ export function toggleExperiment(win, experimentId, opt_on,
   const currentlyOn = isExperimentOn(win, experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
-    const toggles = experimentToggles();
+    const toggles = experimentToggles(win);
     toggles[experimentId] = on;
 
     if (!opt_transientExperiment) {
