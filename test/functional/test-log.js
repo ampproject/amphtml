@@ -178,7 +178,31 @@ describe('Logging', () => {
       } catch (e) {
         expect(e).to.be.instanceof(Error);
         expect(e.message).to.match(/intended\: test/);
+        expect(e.expected).to.be.undefined;
         expect(isUserErrorMessage(e.message)).to.be.false;
+      }
+    });
+
+    it('should report ERROR and mark with expected flag', () => {
+      const log = new Log(win, RETURNS_OFF);
+      expect(log.level_).to.equal(LogLevel.OFF);
+      win.setTimeout = () => {};
+      let timeoutCallback;
+      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
+        timeoutCallback = callback;
+      });
+
+      log.expectedError('TAG', 'intended', new Error('test'));
+
+      expect(logSpy.callCount).to.equal(0);
+      expect(timeoutStub.callCount).to.equal(1);
+      expect(timeoutCallback).to.exist;
+      try {
+        timeoutCallback();
+      } catch (e) {
+        expect(e).to.be.instanceof(Error);
+        expect(e.message).to.match(/intended\: test/);
+        expect(e.expected).to.be.true;
       }
     });
 
@@ -382,8 +406,15 @@ describe('Logging', () => {
       expect(false).to.be.true;
     });
 
+    it('should create expected error from message', () => {
+      const error = log.createExpectedError('test');
+      expect(error).to.be.instanceof(Error);
+      expect(error.expected).to.be.true;
+    });
+
     it('should create suffixed errors from message', () => {
       const error = log.createError('test');
+      expect(error.expected).to.be.undefined;
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
       expect(error.message).to.contain('test');
