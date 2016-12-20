@@ -277,6 +277,21 @@ tags: {
   attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
+# rel= isn't mandatory when property= is present.
+tags: {
+  tag_name: "LINK"
+  spec_name: "link property="
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+  attrs: {
+    name: "property"
+    mandatory: true
+  }
+  attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
 tags: {
@@ -2715,6 +2730,16 @@ attr_lists: {
   attrs: { name: "itemref" }
   attrs: { name: "itemscope" }
   attrs: { name: "itemtype" }
+  # Also for schema.org, RDFa syntax
+  attrs: { name: "about" }
+  attrs: { name: "content" }
+  attrs: { name: "datatype" }
+  attrs: { name: "inlist" }
+  attrs: { name: "prefix" }
+  attrs: { name: "property" }
+  attrs: { name: "resource" }
+  attrs: { name: "typeof" }
+  attrs: { name: "vocab" }
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "accesskey" }
   attrs: {
