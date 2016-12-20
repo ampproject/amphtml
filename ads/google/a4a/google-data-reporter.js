@@ -135,7 +135,7 @@ export function googleLifecycleReporterFactory(a4aElement) {
 /**
  * Sets reportable variables from ad response headers.
  *
- * @param {!FetchResponseHeaders} headers
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
  * @param {!./performance.GoogleAdLifecycleReporter} reporter
  */
 export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {

@@ -75,7 +75,7 @@ export class BaseLifecycleReporter {
    * @param {string|number} value
    */
   setPingParameter(parameter, value) {
-    if (parameter == null || parameter === false || parameter === '') {
+    if (parameter == null || parameter === '') {
       return;
     }
     if (value === null || value === undefined || value === '') { return; }
@@ -148,7 +148,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private @const */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
 
-    /** @private {!../../../src/url-replacements-impl.UrlReplacements} @const */
+    /**
+     * @private {!../../../src/service/url-replacements-impl.UrlReplacements}
+     * @const
+     */
     this.urlReplacer_ = urlReplacementsForDoc(element);
   }
 
