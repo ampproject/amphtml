@@ -16,11 +16,11 @@
 
 import {actionServiceForDoc} from '../action';
 import {bindForDoc} from '../bind';
+import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
 import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
-import {user} from '../log';
 
 
 /**
@@ -87,7 +87,7 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    const target = invocation.target;
+    const target = dev().assertElement(invocation.target);
     this.resources_.mutateElement(target, () => {
       if (target.classList.contains('-amp-element')) {
         target./*OK*/collapse();
