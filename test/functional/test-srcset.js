@@ -275,6 +275,18 @@ describe('Srcset construct', () => {
     }).to.throw(/Either dpr or width must be specified/);
   });
 
+  it('should not allow 0-width descriptor', () => {
+    expect(() => {
+      new Srcset([{url: 'image-1000', width: 0}]);
+    }).to.throw(/Either dpr or width must be specified/);
+  });
+
+  it('should not allow 0-dpr descriptor', () => {
+    expect(() => {
+      new Srcset([{url: 'image-1000', dpr: 0}]);
+    }).to.throw(/Either dpr or width must be specified/);
+  });
+
   it('should enforce only one type of descriptor total', () => {
     expect(() => {
       new Srcset([{url: 'image-1000', width: 100}, {url: 'image-2x', dpr: 2}]);

@@ -202,14 +202,7 @@ export class Srcset {
     let prevWidth = -Infinity;
     for (let i = length - 1; i >= 0; i--) {
       const source = this.sources_[i];
-      let sourceWidth;
-      if (source.width) {
-        sourceWidth = source.width / dpr;
-      } else {
-        // Default source: no width: assume values are half of of the
-        // minimum values seen.
-        sourceWidth = minWidth / 2;
-      }
+      const sourceWidth = source.width / dpr;
       // First candidate width that's equal or higher than the requested width
       // will stop the search.
       if (sourceWidth >= width) {
