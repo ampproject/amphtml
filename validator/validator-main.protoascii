@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 325
+spec_file_revision: 331
 
 # Validator extensions.
 # =====================
@@ -878,6 +878,7 @@ attr_lists: {
     # It may be safe to allow all URLs here, but just in case javascript: or
     # similar URLs are an issue, we add the same constraints as an anchor.
     value_url: {
+      allow_empty: true
       allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -970,6 +971,9 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      # Maintain the same whitelist of protocols here as for the <CITE> tag.
+      allow_empty: true
+      allow_relative: true
       allowed_protocol: "ftp"
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -992,7 +996,6 @@ tags: {
       allowed_protocol: "twitter"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
-      allow_relative: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2272,6 +2275,26 @@ tags {
     first_child_tag_name_oneof: "TEMPLATE"
   }
 }
+attr_lists: {
+  name: "input-name-attr"
+  attrs: {
+    name: "name"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "__amp_source_origin|"
+        "__count__|"
+        "__defineGetter__|"
+        "__defineSetter__|"
+        "__lookupGetter__|"
+        "__lookupSetter__|"
+        "__noSuchMethod__|"
+        "__parent__|"
+        "__proto__|"
+        "baseURI|"
+        "innerHTML|"
+        "outerHTML"
+        ")(\\s|$)"
+  }
+}
 # 4.10.4 The label element
 tags: {
   tag_name: "LABEL"
@@ -2296,10 +2319,6 @@ tags: {
   attrs: { name: "min" }
   attrs: { name: "minlength" }
   attrs: { name: "multiple" }
-  attrs: {
-    name: "name"
-    blacklisted_value_regex: "__amp_source_origin"
-  }
   attrs: { name: "pattern" }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
@@ -2320,6 +2339,7 @@ tags: {
   }
   attrs: { name: "value" }
   attrs: { name: "width" }
+  attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.6 The button element
@@ -2329,7 +2349,6 @@ tags: {
     name: "disabled"
     value: ""
   }
-  attrs: { name: "name" }
   attrs: {
     name: "role"
     implicit: true
@@ -2340,6 +2359,7 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
+  attr_lists: "input-name-attr"
 }
 # Button variant specifically supporting <amp-app-banner> tag with the
 # open-button attribute.
@@ -2351,7 +2371,6 @@ tags: {
     name: "open-button"
     value: ""
   }
-  attrs: { name: "name" }
   attrs: {
     name: "role"
     implicit: true
@@ -2362,6 +2381,7 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
+  attr_lists: "input-name-attr"
 }
 # 4.10.7 The select element
 tags: {
@@ -2371,9 +2391,9 @@ tags: {
   attrs: { name: "autofocus" }
   attrs: { name: "disabled" }
   attrs: { name: "multiple" }
-  attrs: { name: "name" }
   attrs: { name: "required" }
   attrs: { name: "size" }
+  attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.8 The datalist element
@@ -2414,7 +2434,6 @@ tags: {
   attrs: { name: "disabled" }
   attrs: { name: "maxlength" }
   attrs: { name: "minlength" }
-  attrs: { name: "name" }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }
@@ -2424,13 +2443,14 @@ tags: {
   attrs: { name: "selectionstart" }
   attrs: { name: "spellcheck" }
   attrs: { name: "wrap"}
+  attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.16 The fieldset element
 tags: {
   tag_name: "FIELDSET"
   attrs: { name: "disabled" }
-  attrs: { name: "name" }
+  attr_lists: "input-name-attr"
 }
 # 4.10.17 The legend element
 tags: {
@@ -2750,7 +2770,20 @@ attr_lists: {
   attrs: { name: "draggable" }
   attrs: {
     name: "id"
-    blacklisted_value_regex: "^i-amphtml-"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "__count__|"
+        "__defineGetter__|"
+        "__defineSetter__|"
+        "__lookupGetter__|"
+        "__lookupSetter__|"
+        "__noSuchMethod__|"
+        "__parent__|"
+        "__proto__|"
+        "baseURI|"
+        "i-amphtml-.*|"
+        "innerHTML|"
+        "outerHTML"
+        ")(\\s|$)"
   }
   attrs: { name: "lang" }
   attrs: { name: "tabindex" }

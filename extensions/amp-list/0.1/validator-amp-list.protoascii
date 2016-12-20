@@ -21,6 +21,7 @@ tags: {  # amp-list
   spec_name: "amp-list extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-list"
   attrs: {
     name: "async"
     mandatory: true
