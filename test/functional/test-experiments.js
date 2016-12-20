@@ -181,7 +181,10 @@ describe('toggleExperiment', () => {
     const doc = {
       cookie: cookiesString,
     };
-    const on = toggleExperiment({document: doc}, experimentId, opt_on);
+    const fakeWin = {
+      document: doc,
+    };
+    const on = toggleExperiment(fakeWin, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
     if (parts.length > 1) {
       expect(parts[1]).to.equal('path=/');
@@ -206,6 +209,20 @@ describe('toggleExperiment', () => {
     expectToggle('AMP_EXP=e1', 'e1').to.equal('false; AMP_EXP=');
     expectToggle('AMP_EXP=e1,e2', 'e1').to.equal('false; AMP_EXP=e2');
     expectToggle('AMP_EXP=e2,e1', 'e1').to.equal('false; AMP_EXP=e2');
+  });
+
+  it('should not do not modify non-calculated experiment ids from cookie' +
+      'when toggle "off"', () => {
+    const fakeWin = {
+      document: {
+        cookie: 'AMP_EXP=e2,e3',
+      },
+    };
+    toggleExperiment(fakeWin, 'e1', true);
+    // override for test purpose, so we don't need to export getExperimentIds
+    fakeWin._experimentCookie = ['e2', 'e3'];
+    toggleExperiment(fakeWin, 'e1', false, /* opt_transientExperiment */ true);
+    expect(fakeWin._experimentCookie).to.deep.equal(['e2', 'e3']);
   });
 
   it('should set "on" when requested', () => {

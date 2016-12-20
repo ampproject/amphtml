@@ -153,7 +153,8 @@ export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
   const toggles = experimentToggles();
   const experimentIds = getExperimentIds(win);
-  const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
+  const index = experimentIds.indexOf(experimentId);
+  const currentlyOn = (index != -1) ||
       (experimentId in toggles && toggles[experimentId]);
   const on = opt_on !== undefined ? opt_on : !currentlyOn;
   if (on != currentlyOn) {
@@ -161,7 +162,9 @@ export function toggleExperiment(win, experimentId, opt_on,
       experimentIds.push(experimentId);
       toggles[experimentId] = true;
     } else {
-      experimentIds.splice(experimentIds.indexOf(experimentId), 1);
+      if (index != -1) {
+        experimentIds.splice(index, 1);
+      }
       toggles[experimentId] = false;
     }
     if (!opt_transientExperiment) {
