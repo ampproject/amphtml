@@ -50,13 +50,11 @@ See [this article](https://medium.com/@cramforce/amps-and-websites-in-the-age-of
 Example
 
 ```html
-
   <amp-install-serviceworker
       src="https://www.your-domain.com/serviceworker.js"
       data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
       layout="nodisplay">
   </amp-install-serviceworker>
-
 ```
 
 ## Attributes
@@ -101,7 +99,8 @@ This fallback is only used when the document is opened on the source origin, and
 
 The URL rewrite is configured using `data-no-service-worker-fallback-url-match` and `data-no-service-worker-fallback-shell-url`
 attributes as following:
-```
+
+```html
 <amp-install-serviceworker layout="nodisplay"
       src="https://www.your-domain.com/serviceworker.js"
       data-no-service-worker-fallback-url-match=".*\.amp.html"
@@ -122,7 +121,7 @@ URL rewrite works as following:
  5. The shell will startup and run the requested navigation via its router. Typically the shell will immediately execute history.replaceState(href).
 
 A URL is rewritten in the form `shell-url#href={encodeURIComponent(href)}`. E.g.:
-```
+```text
 https://pub.com/doc.amp.html
 
 -->
@@ -131,7 +130,8 @@ https://pub.com/shell#href=%2Fdoc.amp.html
 ```
 
 Besides rewriting URLs, `amp-install-serviceworker` also will try to preload the shell. This is done by creating an iframe with `#preload` fragment:
-```
+
+```html
 <iframe src="https://pub.com/shell#preload" hidden sandbox="allow-scripts allow-same-origin"></iframe>
 ```
 
