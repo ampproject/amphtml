@@ -19,6 +19,14 @@ import {tryParseJson} from '../../src/json.js';
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;
 
+// Enum to hold different ad types
+const ADTYPE = {
+  UNSUPPORTED: 0,
+  AFS: 1,
+  AFSH: 2,
+  AFSHBACKFILL: 3,
+};
+
 /**
  * Request Custom Search Ads (Adsense for Search or AdSense for Shopping).
  * @param {!Window} global The window object of the iframe
@@ -42,81 +50,115 @@ export function csa(global, data) {
   containerDiv.id = containerId;
   global.document.body.appendChild(containerDiv);
 
-  // Parse all the options
   const pageOptions = {source: 'amp', referer: global.context.referrer};
   const adblockOptions = {container: containerId};
-  const afshPageOptions = Object.assign(
+
+  // Parse all the options
+  const afshPage = Object.assign(
       Object(tryParseJson(data['afshPageOptions'])), pageOptions);
-  const afsPageOptions = Object.assign(
+  const afsPage = Object.assign(
       Object(tryParseJson(data['afsPageOptions'])), pageOptions);
-  const afshAdblockOptions = Object.assign(
+  const afshAd = Object.assign(
       Object(tryParseJson(data['afshAdblockOptions'])), adblockOptions);
-  const afsAdblockOptions = Object.assign(
+  const afsAd = Object.assign(
       Object(tryParseJson(data['afsAdblockOptions'])), adblockOptions);
 
   // Special case for AFSh when "auto" is the requested width
-  if (afshAdblockOptions != null && afshAdblockOptions['width'] == 'auto') {
-    afshAdblockOptions['width'] = width;
+  if (afshAd != null && afshAd['width'] == 'auto') {
+    afshAd['width'] = width;
   }
 
-  /**
-   * Resize the AMP iframe if the CSA container changes in size upon rotation.
-   * This is needed for an iOS bug found in versions 10.0.1 and below that
-   * doesn't properly reflow the iframe upon orientation change.
-   */
+  // Event listener needed for iOS9 bug
   global.addEventListener('orientationchange', () => {
-    // Save the height of the container before the event listener triggers
-    const oldHeight = containerDiv.style.height;
-    setTimeout(() => {
-      // Force DOM reflow and repaint
-      /*eslint-disable no-unused-vars*/
-      const ignore = global.document.body.offsetHeight;
-      /*eslint-enable no-unused-vars*/
-      // Capture new height
-      let newHeight = containerDiv.style.height;
-      // In older versions of iOS, this height will be different because the
-      // container height is resized.
-      // In Chrome and iOS 10.0.2 the height is the same because
-      // the container isn't resized.
-      if (oldHeight != newHeight && newHeight != currentAmpHeight) {
-        // style.height returns "60px" (for example), so turn this into an int
-        newHeight = parseInt(newHeight, 10);
-        // Also update the onclick function to resize to the right height.
-        const overflow = global.document.getElementById('overflow');
-        if (overflow) {
-          overflow.onclick =
-              global.context.requestResize.bind(null, undefined, newHeight);
-        }
-        // Resize the container to the correct height
-        global.context.requestResize(undefined, newHeight);
-      }
-    }, 250); /* 250 is time in ms to wait before executing orientation */
+    orientationChangeHandler(global, containerDiv);
   });
 
   // Only call for ads once the script has loaded
   loadScript(global, 'https://www.google.com/adsense/search/ads.js', () => {
-    if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
-      // Do not backfill this request
-      afsAdblockOptions['adLoadedCallback'] =
-          resizeIframe.bind(null, global, null, null);
-      // Make a call for AFS ads
-      global._googCsa('ads', afsPageOptions, afsAdblockOptions);
-    } else if (data['afsPageOptions'] == null
-          && data['afshPageOptions'] != null) {
-      // Do not backfill this request
-      afshAdblockOptions['adLoadedCallback'] =
-          resizeIframe.bind(null, global, null, null);
-      // Make a call for AFSh ads
-      global._googCsa('plas', afshPageOptions, afshAdblockOptions);
-    } else if (data['afsPageOptions'] != null
-          && data['afshPageOptions'] != null) {
-      // Do backfill this request
-      afshAdblockOptions['adLoadedCallback'] =
-          resizeIframe.bind(null, global, afsPageOptions, afsAdblockOptions);
-      // Make a call for AFSh ads (with AFS as backfill)
-      global._googCsa('plas', afshPageOptions, afshAdblockOptions);
-    }
+    requestCsaAds(global, data, afsPage, afsAd, afshPage, afshAd);
   });
+}
+
+/**
+ * Resize the AMP iframe if the CSA container changes in size upon rotation.
+ * This is needed for an iOS bug found in versions 10.0.1 and below that
+ * doesn't properly reflow the iframe upon orientation change.
+ * @param {!Window} global The window object of the iframe
+ * @param {Object} containerDiv The CSA container
+ */
+function orientationChangeHandler(global, containerDiv) {
+  // Save the height of the container before the event listener triggers
+  const oldHeight = containerDiv.style.height;
+  global.setTimeout(() => {
+    // Force DOM reflow and repaint
+    /*eslint-disable no-unused-vars*/
+    const ignore = global.document.body.offsetHeight;
+    /*eslint-enable no-unused-vars*/
+    // Capture new height
+    let newHeight = containerDiv.style.height;
+    // In older versions of iOS, this height will be different because the
+    // container height is resized.
+    // In Chrome and iOS 10.0.2 the height is the same because
+    // the container isn't resized.
+    if (oldHeight != newHeight && newHeight != currentAmpHeight) {
+      // style.height returns "60px" (for example), so turn this into an int
+      newHeight = parseInt(newHeight, 10);
+      // Also update the onclick function to resize to the right height.
+      const overflow = global.document.getElementById('overflow');
+      if (overflow) {
+        overflow.onclick =
+            global.context.requestResize.bind(null, undefined, newHeight);
+      }
+      // Resize the container to the correct height
+      global.context.requestResize(undefined, newHeight);
+    }
+  }, 250); /* 250 is time in ms to wait before executing orientation */
+}
+
+/**
+ * Make a request for either AFS or AFSh
+ * @param {!Window} global The window object of the iframe
+ * @param {!Object} data The data passed in by the partner
+ * @param {?Object} afsP The parsed AFS page options object
+ * @param {?Object} afsA The parsed AFS adblock options object
+ * @param {?Object} afshP The parsed AFSh page options object
+ * @param {?Object} afshA The parsed AFSh adblock options object
+ */
+function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
+  const type = getAdType(data);
+  if (type == ADTYPE.AFS) {
+    // Do not backfill, request AFS
+    afsA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
+    global._googCsa('ads', afsP, afsA);
+  } else if (type == ADTYPE.AFSH) {
+    // Do not backfill, request AFSh
+    afshA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
+    global._googCsa('plas', afshP, afshA);
+  } else if (type == ADTYPE.AFSHBACKFILL) {
+    // Backfill, request AFSh
+    afshA['adLoadedCallback'] = resizeIframe.bind(null, global, afsP, afsA);
+    global._googCsa('plas', afshP, afshA);
+  }
+}
+
+/**
+ * Helper function to determine which product to request
+ * @param {!Object} data The data passed in by the partner
+ * @return {number} Enum of ad type
+ */
+function getAdType(data) {
+  if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
+    return ADTYPE.AFS;
+  }
+  if (data['afsPageOptions'] == null && data['afshPageOptions'] != null) {
+    return ADTYPE.AFSH;
+  }
+  if (data['afsPageOptions'] != null && data['afshPageOptions'] != null) {
+    return ADTYPE.AFSHBACKFILL;
+  }
+  else {
+    return ADTYPE.UNSUPPORTED;
+  }
 }
 
 /**
@@ -133,6 +175,7 @@ export function resizeIframe(global, backfillPageOptions,
     // Get actual height of container
     const container = global.document.getElementById(containerName);
     const height = container.offsetHeight;
+    // Set initial AMP height
     currentAmpHeight =
         global.context.initialIntersection.boundingClientRect.height;
     const overflowHeight = 40;
@@ -140,7 +183,6 @@ export function resizeIframe(global, backfillPageOptions,
     // If the height of the container is larger than the height of the
     // initially requested AMP tag, add the overflow element
     if (height > currentAmpHeight) {
-      // Create the overflow
       createOverflow(global, overflowHeight, height, container,
           currentAmpHeight - overflowHeight);
     }
@@ -162,7 +204,6 @@ export function resizeIframe(global, backfillPageOptions,
     global.context.onResizeDenied(function(requestedHeight) {
       const overflow = global.document.getElementById('overflow');
       const containerHeight = parseInt(container.style.height, 10);
-
       if (containerHeight > currentAmpHeight) {
         if (overflow) {
           overflow.style.display = '';
