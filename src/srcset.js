@@ -198,7 +198,6 @@ export class Srcset {
    */
   selectByWidth_(width, dpr) {
     const length = this.sources_.length;
-    const minWidth = this.sources_[length - 1].width / dpr;
     let prevWidth = -Infinity;
     for (let i = length - 1; i >= 0; i--) {
       const source = this.sources_[i];
@@ -209,7 +208,7 @@ export class Srcset {
         // The right value is now between `i` and `i + 1` - select the one
         // that is closer with a slight preference toward higher numbers.
         const delta = sourceWidth - width;
-        const prevDelta = width - prevWidth * 0.9;
+        const prevDelta = (width - prevWidth) * 1.1;
         return (delta < prevDelta) ? i : i + 1;
       }
       prevWidth = sourceWidth;

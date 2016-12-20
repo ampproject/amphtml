@@ -386,13 +386,13 @@ describe('Srcset select', () => {
     expect(srcset.select(850, 1).url).to.equal('image-1000');
     expect(srcset.select(425, 2).url).to.equal('image-1000');
 
-    // Slightly lower: 750 - 2.5% = 730 -> still higher value.
-    expect(srcset.select(730, 1).url).to.equal('image-1000');
-    expect(srcset.select(365, 2).url).to.equal('image-1000');
+    // Slightly lower: ~10% -> 740 -> still higher value.
+    expect(srcset.select(740, 1).url).to.equal('image-1000');
+    expect(srcset.select(370, 2).url).to.equal('image-1000');
 
-    // Lower than threshold: 720 -> go for lower value.
-    expect(srcset.select(720, 1).url).to.equal('image-500');
-    expect(srcset.select(360, 2).url).to.equal('image-500');
+    // Lower than threshold: 730 -> go for lower value.
+    expect(srcset.select(730, 1).url).to.equal('image-500');
+    expect(srcset.select(365, 2).url).to.equal('image-500');
   });
 
   it('select by dpr', () => {
