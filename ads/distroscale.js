@@ -15,6 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {addParamsToUrl} from '../src/url';
 
 /**
  * @param {!Window} global
@@ -22,12 +23,13 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function distroscale(global, data) {
   validateData(data, ['pid', 'zid'], ['tid']);
-  let src = '//c.jsrdn.com/s/cs.js?p=' + encodeURIComponent(data.pid) +
-      '&z=' + encodeURIComponent(data.zid) +
-      '&f=' + encodeURIComponent(global.context.location.href);
-  if (data.tid) {
-    src += '&t=' + encodeURIComponent(data.tid);
-  }
+  const params = {
+    p: data.pid,
+    z: data.zid,
+    f: global.context.location.href,
+    t: data.tid,
+  };
+  const src = addParamsToUrl('//c.jsrdn.com/s/cs.js?', params);
   global.dsAMPCallbacks = {
     renderStart: global.context.renderStart,
     noContentAvailable: global.context.noContentAvailable,
