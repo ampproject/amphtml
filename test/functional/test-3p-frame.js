@@ -174,7 +174,6 @@ describe('3p-frame', () => {
         '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
         '"type":"_ping_",' + '"ampcontextVersion": "LOCAL"' +
         '"_context":{"referrer":"http://acme.org/",' +
-
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"sourceUrl":"' + locationHref + '",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
