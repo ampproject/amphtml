@@ -213,7 +213,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         // offset, but it's not currently available through url-replacement.
         // If it becomes available, it's likely to be an async parameter.
         extraParams = '&' +
-            this.urlReplacer_.expandStringSync(extraParams);
+            this.urlReplacer_./*OK*/expandStringSync(extraParams);
       }
     }
     const pingUrl = `${this.pingbackAddress_}?` +
