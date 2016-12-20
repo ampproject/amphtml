@@ -149,7 +149,10 @@ class AmpFlyingCarpet extends AMP.BaseElement {
    * @private
    */
   layoutBuiltChild_(event) {
-    this.scheduleLayout(dev().assertElement(event.target));
+    const child = dev().assertElement(event.target);
+    if (child.getOwner() === this.element) {
+      this.scheduleLayout(child);
+    }
   }
 
   /** @override */
