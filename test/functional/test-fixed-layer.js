@@ -191,6 +191,9 @@ describe('FixedLayer', () => {
       setAttribute: (name, value) => {
         attrs[name] = value;
       },
+      removeAttribute: name => {
+        delete attrs[name];
+      },
       appendChild: child => {
         child.parentElement = elem;
         children.push(child);
@@ -209,6 +212,9 @@ describe('FixedLayer', () => {
         }
         newChild.parentElement = elem;
         children.push(newChild);
+      },
+      cloneNode() {
+        return createElement(this.id);
       },
     };
     Object.defineProperty(elem, 'offsetTop', {
