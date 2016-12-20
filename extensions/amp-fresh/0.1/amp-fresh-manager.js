@@ -78,7 +78,9 @@ export class AmpFreshManager {
     const url = addParamToUrl(this.ampdoc.win.location.href,
         'amp-fresh', String(Date.now()));
     return Promise.all([
-      xhrFor(this.ampdoc.win).fetchDocument(url),
+      xhrFor(this.ampdoc.win).fetchDocument(url, {
+        requireAmpResponseSourceOrigin: false,
+      }),
       this.ampdoc.whenReady(),
     ]).then(args => args[0]);
   }

@@ -178,6 +178,7 @@ describe('AccessServerAdapter', () => {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(Promise.resolve(responseDoc))
             .once();
@@ -218,6 +219,7 @@ describe('AccessServerAdapter', () => {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(Promise.reject('intentional'))
             .once();
@@ -254,6 +256,7 @@ describe('AccessServerAdapter', () => {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(new Promise(() => {}))  // Never resolved.
             .once();

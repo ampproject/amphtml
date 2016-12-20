@@ -157,6 +157,7 @@ export class AccessServerAdapter {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
+            requireAmpResponseSourceOrigin: false,
           }));
     }).then(response => {
       dev().fine(TAG, 'Authorization response: ', response);
