@@ -82,7 +82,7 @@ describe('BaseLifecycleReporter', () => {
       reporter.setPingParameter('x', 3);
       reporter.setPingParameter('y', 'kumquat');
       expect(reporter.extraVariables_).to.deep.equal({
-        x: 3,
+        x: '3',
         y: 'kumquat',
       });
     });
