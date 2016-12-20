@@ -16,8 +16,9 @@
 
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {setStyle} from '../../../src/style';
+import {listen} from '../../../src/event-helper';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
@@ -84,6 +85,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.getViewport().addToFixedLayer(container);
   }
 
+  /** @override */
   onLayoutMeasure() {
     const width = this.getLayoutWidth();
     this.getVsync().mutate(() => {
@@ -91,11 +93,17 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     });
   }
 
+  /** @override */
   viewportCallback(inViewport) {
     this.updateInViewport(this.children_, inViewport);
   }
 
-  assertPosition() {
+  /**
+   * Asserts that the flying carpet does not appear in the first or last
+   * viewport.
+   * @private
+   */
+  assertPosition_() {
     const layoutBox = this.element.getLayoutBox();
     const viewport = this.getViewport();
     const viewportHeight = viewport.getHeight();
@@ -119,18 +127,35 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     );
   }
 
+  /** @override */
   layoutCallback() {
     try {
-      this.assertPosition();
+      this.assertPosition_();
     } catch (e) {
       // Collapse the element if the effect is broken by the viewport location.
       this./*OK*/collapse();
       throw e;
     }
     this.scheduleLayout(this.children_);
+    listen(this.element, 'amp:built', this.layoutBuiltChild_.bind(this));
     return Promise.resolve();
   }
 
+  /**
+   * Listens for children element to be built, and schedules their layout.
+   * Necessary since not all children will be built by the time the
+   * flying-carpet has its #layoutCallback called.
+   * @param {!Event} event
+   * @private
+   */
+  layoutBuiltChild_(event) {
+    const child = dev().assertElement(event.target);
+    if (child.getOwner() === this.element) {
+      this.scheduleLayout(child);
+    }
+  }
+
+  /** @override */
   collapsedCallback(child) {
     const index = this.children_.indexOf(child);
     if (index > -1) {
