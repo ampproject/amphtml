@@ -24,7 +24,6 @@ import {
 } from '../../src/service/xhr-impl';
 import {getCookie} from '../../src/cookies';
 
-
 describe('XHR', function() {
   let sandbox;
   let requests;
@@ -220,9 +219,7 @@ describe('XHR', function() {
         });
 
         it('should require AMP origin in response for when request', () => {
-          const promise = xhr.fetchJson('/get', {
-            requireAmpResponseSourceOrigin: true,
-          });
+          const promise = xhr.fetchJson('/get');
           requests[0].respond(200, {
             'Content-Type': 'application/json',
           }, '{}');
@@ -348,7 +345,7 @@ describe('XHR', function() {
       it('should redirect fetch', () => {
         const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
             'http://localhost:31862/get?k=v2');
-        return xhr.fetchJson(url).then(res => {
+        return xhr.fetchJson(url, {ampCors: false}).then(res => {
           expect(res).to.exist;
           expect(res['args']['k']).to.equal('v2');
         });
@@ -413,7 +410,7 @@ describe('XHR', function() {
       it('should expose HTTP headers', () => {
         const url = 'http://localhost:31862/response-headers?' +
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
-        return xhr.fetchAmpCors_(url).then(res => {
+        return xhr.fetchAmpCors_(url, {ampCors: false}).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
         });
       });
@@ -429,6 +426,9 @@ describe('XHR', function() {
         expect(requests[0].requestHeaders['Accept']).to.equal('text/html');
         requests[0].respond(200, {
           'Content-Type': 'text/xml',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         expect(requests[0].responseType).to.equal('document');
         return promise;
@@ -453,6 +453,9 @@ describe('XHR', function() {
         const promise = xhr.fetchDocument('/index.html');
         requests[0].respond(415, {
           'Content-Type': 'text/xml',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
           expect(e.retriable).to.be.defined;
@@ -466,6 +469,9 @@ describe('XHR', function() {
         const promise = xhr.fetchDocument('/index.html');
         requests[0].respond(415, {
           'Content-Type': 'text/xml',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
           expect(e.retriable).to.be.defined;
@@ -479,6 +485,9 @@ describe('XHR', function() {
         const promise = xhr.fetchDocument('/index.html');
         requests[0].respond(200, {
           'Content-Type': 'application/json',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '{"hello": "world"}');
         return promise.catch(e => {
           expect(e.message)
@@ -534,6 +543,9 @@ describe('XHR', function() {
             });
           requests[0].respond(200, {
             'Content-Type': 'text/xml',
+            'Access-Control-Expose-Headers':
+                'AMP-Access-Control-Allow-Source-Origin',
+            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
             'X-foo-header': 'foo data',
             'X-bar-header': 'bar data',
           }, creative);
@@ -660,6 +672,9 @@ describe('XHR', function() {
                 });
             requests[0].respond(200, {
               'Content-Type': 'text/plain',
+              'Access-Control-Expose-Headers':
+                  'AMP-Access-Control-Allow-Source-Origin',
+              'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
             }, TEST_TEXT);
             return promise;
           });
