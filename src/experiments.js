@@ -167,9 +167,6 @@ function experimentToggles(win) {
  * @return {!Object<string, boolean>}
  */
 function getExperimentTogglesFromCookie(win) {
-  if (win._experimentCookie) {
-    return win._experimentCookie;
-  }
   const experimentCookie = getCookie(win, COOKIE_NAME);
   const tokens = experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
 
@@ -185,7 +182,7 @@ function getExperimentTogglesFromCookie(win) {
     }
   }
 
-  return win._experimentCookie = toggles;
+  return toggles;
 }
 
 /**
@@ -194,7 +191,6 @@ function getExperimentTogglesFromCookie(win) {
  * @param {!Object<string, boolean>} toggles
  */
 function saveExperimentTogglesToCookie(win, toggles) {
-  win._experimentCookie = null;
   const experimentIds = [];
   for (const experiment in toggles) {
     experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);

@@ -49,7 +49,6 @@ describe('isExperimentOn', () => {
 
   function expectExperiment(cookieString, experimentId) {
     resetExperimentTogglesForTesting();
-    win._experimentCookie = undefined;
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
