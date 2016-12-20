@@ -124,18 +124,10 @@ export function isExperimentOnAllowUrlOverride(win, experimentId) {
  * @return {boolean}
  */
 function calcExperimentOn(win, experimentId) {
-  const experiments = getExperimentIds(win);
+  const cookieToggles = getExperimentTogglesFromCookie(win);
 
-  // Disabling cookie flag.
-  const disableFlag = experiments.indexOf('-' + experimentId) != -1;
-  if (disableFlag) {
-    return false;
-  }
-
-  // Enabling cookie flag.
-  const cookieFlag = experiments.indexOf(experimentId) != -1;
-  if (cookieFlag) {
-    return true;
+  if (cookieToggles[experimentId] !== undefined) {
+    return cookieToggles[experimentId];
   }
 
   // Binary config.
@@ -161,21 +153,16 @@ function calcExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
-  const toggles = experimentToggles();
-  const experimentIds = getExperimentIds(win);
-  const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
-      (experimentId in toggles && toggles[experimentId]);
-  const on = opt_on !== undefined ? opt_on : !currentlyOn;
+  const currentlyOn = isExperimentOn(win, experimentId);
+  const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
-    if (on) {
-      experimentIds.push(experimentId);
-      toggles[experimentId] = true;
-    } else {
-      experimentIds.splice(experimentIds.indexOf(experimentId), 1);
-      toggles[experimentId] = false;
-    }
+    const toggles = experimentToggles();
+    toggles[experimentId] = on;
+
     if (!opt_transientExperiment) {
-      saveExperimentIds(win, experimentIds);
+      const cookieToggles = getExperimentTogglesFromCookie(win);
+      cookieToggles[experimentId] = on;
+      saveExperimentTogglesToCookie(win, cookieToggles);
     }
   }
   return on;
@@ -185,25 +172,52 @@ export function toggleExperiment(win, experimentId, opt_on,
 /**
  * Returns a set of experiment IDs currently on.
  * @param {!Window} win
- * @return {!Array<string>}
+ * @return {!Object<string, boolean>}
  */
-function getExperimentIds(win) {
+function getExperimentTogglesFromCookie(win) {
   if (win._experimentCookie) {
     return win._experimentCookie;
   }
   const experimentCookie = getCookie(win, COOKIE_NAME);
-  return win._experimentCookie = (
-      experimentCookie ? experimentCookie.split(/\s*,\s*/g) : []);
+  const tokens = experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
+
+  const toggles = Object.create(null);
+  for (let i = 0; i < tokens.length; i++) {
+    if (tokens[i].length == 0) {
+      continue;
+    }
+    if (tokens[i][0] == '-') {
+      toggles[tokens[i].substr(1)] = false;
+    } else {
+      toggles[tokens[i]] = true;
+    }
+  }
+
+  return win._experimentCookie = toggles;
 }
 
+/**
+ * See getExperimentTogglesFromCookie().
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ * @visibleForTesting
+ */
+export function getExperimentToglesFromCookieForTesting(win) {
+  return getExperimentTogglesFromCookie(win);
+}
 
 /**
  * Saves a set of experiment IDs currently on.
  * @param {!Window} win
- * @param {!Array<string>} experimentIds
+ * @param {!Object<string, boolean>} toggles
  */
-function saveExperimentIds(win, experimentIds) {
+function saveExperimentTogglesToCookie(win, toggles) {
   win._experimentCookie = null;
+  const experimentIds = [];
+  for (const experiment in toggles) {
+    experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
+  }
+
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
       Date.now() + COOKIE_EXPIRATION_INTERVAL);
 }

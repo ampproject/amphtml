@@ -21,6 +21,7 @@ import {
   isExperimentOnAllowUrlOverride,
   toggleExperiment,
   resetExperimentToggles_,
+  getExperimentToglesFromCookieForTesting,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -73,10 +74,10 @@ describe('isExperimentOn', () => {
     });
 
     it('should return "off" when disabling value is in the list', () => {
-      expectExperiment('AMP_EXP=-e1,e1', 'e1').to.be.false;
-      expectExperiment('AMP_EXP=e1,e2,-e1', 'e1').to.be.false;
-      expectExperiment('AMP_EXP=e2,-e1,e1', 'e1').to.be.false;
-      expectExperiment('AMP_EXP=e2 , e1,  -e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=-e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e2,-e1', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=-e1,e2', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=e2 , -e1', 'e1').to.be.false;
     });
   });
 
@@ -193,6 +194,7 @@ describe('toggleExperiment', () => {
     const doc = {
       cookie: cookiesString,
     };
+    resetExperimentToggles_();
     const on = toggleExperiment({document: doc}, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
     if (parts.length > 1) {
@@ -215,9 +217,9 @@ describe('toggleExperiment', () => {
   });
 
   it('should toggle "off" when value is in the list', () => {
-    expectToggle('AMP_EXP=e1', 'e1').to.equal('false; AMP_EXP=');
-    expectToggle('AMP_EXP=e1,e2', 'e1').to.equal('false; AMP_EXP=e2');
-    expectToggle('AMP_EXP=e2,e1', 'e1').to.equal('false; AMP_EXP=e2');
+    expectToggle('AMP_EXP=e1', 'e1').to.equal('false; AMP_EXP=-e1');
+    expectToggle('AMP_EXP=e1,e2', 'e1').to.equal('false; AMP_EXP=-e1,e2');
+    expectToggle('AMP_EXP=e2,e1', 'e1').to.equal('false; AMP_EXP=e2,-e1');
   });
 
   it('should set "on" when requested', () => {
@@ -226,8 +228,9 @@ describe('toggleExperiment', () => {
   });
 
   it('should set "off" when requested', () => {
-    expectToggle('AMP_EXP=e2,e1', 'e1', false).to.equal('false; AMP_EXP=e2');
-    expectToggle('AMP_EXP=e1', 'e1', false).to.equal('false; AMP_EXP=');
+    expectToggle(
+        'AMP_EXP=e2,e1', 'e1', false).to.equal('false; AMP_EXP=e2,-e1');
+    expectToggle('AMP_EXP=e1', 'e1', false).to.equal('false; AMP_EXP=-e1');
   });
 
   it('should not set cookies when toggling and transientExperiment', () => {
@@ -264,28 +267,49 @@ describe('toggleExperiment', () => {
         cookie: '',
       },
     };
+    toggleExperiment(win, 'transient', true, true);
     toggleExperiment(win, 'e1', true);
-    expect(win.document.cookie).to.contain('e1');
     toggleExperiment(win, 'e2', true, false);
-    expect(win.document.cookie).to.contain('e2');
     toggleExperiment(win, 'e3', true, undefined);
-    expect(win.document.cookie).to.contain('e3');
     toggleExperiment(win, 'e4', undefined, false);
-    expect(win.document.cookie).to.contain('e4');
+
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.not.have.property('transient');
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e1', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e2', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e3', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e4', true);
+
     // All of those experiment states should be durable in the window
     // environment.
+    expect(isExperimentOn(win, 'transient'), 'transient is on').to.be.true;
     expect(isExperimentOn(win, 'e1'), 'e1 is on').to.be.true;
     expect(isExperimentOn(win, 'e2'), 'e2 is on').to.be.true;
     expect(isExperimentOn(win, 'e3'), 'e3 is on').to.be.true;
     expect(isExperimentOn(win, 'e4'), 'e4 is on').to.be.true;
+
+    toggleExperiment(win, 'transient', false, true);
     toggleExperiment(win, 'e1', false);
-    expect(win.document.cookie).to.not.contain('e1');
     toggleExperiment(win, 'e2', false, false);
-    expect(win.document.cookie).to.not.contain('e2');
     toggleExperiment(win, 'e3', false, undefined);
-    expect(win.document.cookie).to.not.contain('e3');
     toggleExperiment(win, 'e4', undefined, false);
-    expect(win.document.cookie).to.not.contain('e4');
+
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.not.have.property('transient');
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e1', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e2', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e3', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e4', false);
+
+    expect(isExperimentOn(win, 'transient'), 'transient is on').to.be.false;
     expect(isExperimentOn(win, 'e1'), 'e1 is on').to.be.false;
     expect(isExperimentOn(win, 'e2'), 'e2 is on').to.be.false;
     expect(isExperimentOn(win, 'e3'), 'e3 is on').to.be.false;
@@ -340,6 +364,43 @@ describe('toggleExperiment', () => {
     expect(isExperimentOn(win, 'e5'), 'e5').to.be.true;
     expect(isExperimentOn(win, 'e6'), 'e6').to.be.false;
   });
+
+  it('should override global settings', () => {
+    const win = {
+      document: {
+        cookie: '',
+      },
+      'AMP_CONFIG': {
+        'e1': 1,
+      },
+    };
+
+    // e1 is on, according to the AMP_CONFIG global setting
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    // toggleExperiment should override the global setting
+    expect(toggleExperiment(win, 'e1')).to.be.false;
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+
+    // The new setting should be persisted in cookie, so cache reset should not
+    // affect its status.
+    resetExperimentToggles_();
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+
+    // Now let's explicitly toggle to true
+    expect(toggleExperiment(win, 'e1', true)).to.be.true;
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+    resetExperimentToggles_();
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+
+    // Toggle transiently should still work
+    expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    resetExperimentToggles_(); // cache reset should bring it back to true
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+
+    // Sanity check, the global setting should never be changed.
+    expect(win.AMP_CONFIG.e1).to.equal(1);
+  });
 });
 
 describe('isDevChannel', () => {
@@ -369,3 +430,4 @@ describe('isDevChannel', () => {
     expect(isDevChannelVersionDoNotUse_(win)).to.be.true;
   });
 });
+
