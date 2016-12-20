@@ -27,8 +27,10 @@ export function distroscale(global, data) {
     p: data.pid,
     z: data.zid,
     f: global.context.location.href,
-    t: data.tid,
   };
+  if (data.tid) {
+    params['t'] = data.tid;
+  }
   const src = addParamsToUrl('//c.jsrdn.com/s/cs.js?', params);
   global.dsAMPCallbacks = {
     renderStart: global.context.renderStart,
