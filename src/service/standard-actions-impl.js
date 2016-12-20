@@ -66,7 +66,6 @@ export class StandardActions {
    * See `amp-actions-and-events.md` for documentation.
    *
    * @param {!./action-impl.ActionInvocation} invocation
-   * @private
    */
   handleAmpTarget(invocation) {
     switch (invocation.method) {

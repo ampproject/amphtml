@@ -605,7 +605,6 @@ describe('Action common handler', () => {
 describes.sandboxed('Action global target', {}, () => {
   let win;
   let action;
-  let element;
 
   beforeEach(() => {
     win = {
