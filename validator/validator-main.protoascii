@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 327
+spec_file_revision: 328
 
 # Validator extensions.
 # =====================
@@ -863,6 +863,7 @@ attr_lists: {
     # It may be safe to allow all URLs here, but just in case javascript: or
     # similar URLs are an issue, we add the same constraints as an anchor.
     value_url: {
+      allow_empty: true
       allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -955,6 +956,9 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      # Maintain the same whitelist of protocols here as for the <CITE> tag.
+      allow_empty: true
+      allow_relative: true
       allowed_protocol: "ftp"
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -977,7 +981,6 @@ tags: {
       allowed_protocol: "twitter"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
-      allow_relative: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
