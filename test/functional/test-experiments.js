@@ -21,7 +21,7 @@ import {
   isExperimentOnAllowUrlOverride,
   toggleExperiment,
   resetExperimentToggles_,
-  getExperimentTogglesFromCookie,
+  getExperimentToglesFromCookieForTesting,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -273,12 +273,16 @@ describe('toggleExperiment', () => {
     toggleExperiment(win, 'e3', true, undefined);
     toggleExperiment(win, 'e4', undefined, false);
 
-    expect(getExperimentTogglesFromCookie(win))
+    expect(getExperimentToglesFromCookieForTesting(win))
         .to.not.have.property('transient');
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e1', true);
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e2', true);
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e3', true);
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e4', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e1', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e2', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e3', true);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e4', true);
 
     // All of those experiment states should be durable in the window
     // environment.
@@ -294,12 +298,16 @@ describe('toggleExperiment', () => {
     toggleExperiment(win, 'e3', false, undefined);
     toggleExperiment(win, 'e4', undefined, false);
 
-    expect(getExperimentTogglesFromCookie(win))
+    expect(getExperimentToglesFromCookieForTesting(win))
         .to.not.have.property('transient');
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e1', false);
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e2', false);
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e3', false);
-    expect(getExperimentTogglesFromCookie(win)).to.have.property('e4', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e1', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e2', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e3', false);
+    expect(getExperimentToglesFromCookieForTesting(win))
+        .to.have.property('e4', false);
 
     expect(isExperimentOn(win, 'transient'), 'transient is on').to.be.false;
     expect(isExperimentOn(win, 'e1'), 'e1 is on').to.be.false;

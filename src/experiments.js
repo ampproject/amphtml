@@ -173,9 +173,8 @@ export function toggleExperiment(win, experimentId, opt_on,
  * Returns a set of experiment IDs currently on.
  * @param {!Window} win
  * @return {!Object<string, boolean>}
- * @visibleForTesting
  */
-export function getExperimentTogglesFromCookie(win) {
+function getExperimentTogglesFromCookie(win) {
   if (win._experimentCookie) {
     return win._experimentCookie;
   }
@@ -197,6 +196,15 @@ export function getExperimentTogglesFromCookie(win) {
   return win._experimentCookie = toggles;
 }
 
+/**
+ * See getExperimentTogglesFromCookie().
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ * @visibleForTesting
+ */
+export function getExperimentToglesFromCookieForTesting(win) {
+  return getExperimentTogglesFromCookie(win);
+}
 
 /**
  * Saves a set of experiment IDs currently on.
