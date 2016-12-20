@@ -17,13 +17,14 @@
 import {
   activateChunkingForTesting,
   chunk,
+  chunkInstanceForTesting,
   deactivateChunking,
   onIdle,
   resolvedObjectforTesting,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
-import {viewerForDoc} from '../../src/viewer';
+import {viewerForDoc, viewerPromiseForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -49,9 +50,20 @@ describe('chunk', () => {
     beforeEach(() => {
       toggleExperiment(env.win, 'chunked-amp', experimentOn);
       fakeWin = env.win;
+      // If there is a viewer, wait for it, so we run with it being
+      // installed.
+      if (env.win.services.viewer) {
+        return viewerPromiseForDoc(env.win.document).then(() => {
+          // Make sure we make a chunk instance, so all runs
+          // have a viewer.
+          chunkInstanceForTesting(env.win.document);
+        });
+      }
     });
 
     it('should execute a chunk', done => {
+      expect(chunkInstanceForTesting(env.win.document).active_).to.equal(
+          experimentOn);
       chunk(fakeWin.document, done);
     });
 
@@ -149,10 +161,9 @@ describe('chunk', () => {
     describe('invisible experiment off', () => {
       beforeEach(() => {
         experimentOn = false;
-        const viewer = viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
-          throw new Error('No calls expected: isVisible');
-        });
+        env.win.postMessage = () => {
+          throw new Error('No calls expected: postMessage');
+        };
         env.win.requestIdleCallback = () => {
           throw new Error('No calls expected: requestIdleCallback');
         };
@@ -171,7 +182,7 @@ describe('chunk', () => {
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
         env.sandbox.stub(resolved, 'then', () => {
-          throw new Error('No calls expected');
+          throw new Error('No calls expected .then');
         });
         env.win.location.resetHref('test#visibilityState=hidden');
       });
