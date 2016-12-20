@@ -27,7 +27,7 @@ eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 Here's what each part of this means:
 **eventName**
 __required__
-This is the name of the event that an element exposes. 
+This is the name of the event that an element exposes.
 
 **targetId**
 __required__
@@ -52,7 +52,7 @@ Some actions, if documented, may accept arguments. The arguments are defined bet
  - boolean values: `true` or `false`;
  - numbers: `11` or `1.1`.
 
-## Handling Multiple Events 
+## Handling Multiple Events
 You can listen to multiple events on an element by separating the two events with a semicolon `;`.
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
@@ -103,6 +103,11 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
+    <td width="30%">*</td>
+    <td>hide</td>
+    <td>Hides the target element</td>
+  </tr>
+  <tr>
     <td width="30%">amp-sidebar</td>
     <td>open (default)</td>
     <td>Opens the sidebar</td>
@@ -141,5 +146,22 @@ For example, the following is possible in AMP.
     <td width="30%">amp-user-notification</td>
     <td>dismiss (default)</td>
     <td>Hides the referenced user notification element</td>
+  </tr>
+</table>
+
+
+## `AMP` target
+
+`AMP` target is a special target. It's provided by the AMP runtime and implements top-level
+actions that apply to the whole document.
+
+<table>
+  <tr>
+    <th width="30%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>goBack</td>
+    <td>Navigates back in history.</td>
   </tr>
 </table>
