@@ -159,9 +159,9 @@ export function toggleExperiment(win, experimentId, opt_on,
     const toggles = experimentToggles();
     toggles[experimentId] = on;
 
-    const cookieToggles = getExperimentTogglesFromCookie(win);
-    cookieToggles[experimentId] = on;
     if (!opt_transientExperiment) {
+      const cookieToggles = getExperimentTogglesFromCookie(win);
+      cookieToggles[experimentId] = on;
       saveExperimentTogglesToCookie(win, cookieToggles);
     }
   }
