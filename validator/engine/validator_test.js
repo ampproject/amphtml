@@ -533,12 +533,45 @@ describe('ValidatorRulesMakeSense', () => {
       });
       // Special check that every <script> tag with a src attribute has a
       // whitelist check on the attribute value.
-      if (tagSpec.tagName === 'script' && attrSpec.name === 'src') {
+      if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
         it('every <script> tag with a src attribute has a whitelist check',
            () => {
-             expect(attrSpec.value || attrSpec.valueRegex).toBe(true);
+             expect(attrSpec.value !== null ||
+                    attrSpec.valueRegex !== null).toBe(true);
            });
       }
+      // <script> tags with a `custom-element` attribute are extensions. We
+      // have a few additional checks for these.
+      if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'custom-element') {
+        // We want all extensions to be unique in the document. For now,
+        // we have made this a warning for existing extension and a requirement
+        // for new extensions.
+        it(attrSpec.value + ' extension requires that it is unique', () => {
+          expect(tagSpec.unique || tagSpec.uniqueWarning).toBe(true);
+        });
+        // We want the extension to be present only when there is a matching
+        // tag on the page which requires the extension. These extensions don't
+        // have a single matching tag, so we allow these extensions to not
+        // also require an additional tag.
+        const extensionExceptions = {
+          // these extensions match up to more than one matching
+          // tagspec, a mechanism we don't currently have in place.
+          'amp-ad': 0,
+          'amp-form': 0,
+          'amp-audio': 0,
+          // amp-dynamic-css-classes corresponds to no specific tag.
+          'amp-dynamic-css-classes': 0,
+          // amp-slides is deprecated in favor of amp-carousel
+          'amp-slides': 0
+        };
+        if (!extensionExceptions.hasOwnProperty(attrSpec.value)) {
+          it('extensions require an additional tag', () => {
+            expect(tagSpec.alsoRequiresTag.length +
+                   tagSpec.alsoRequiresTagWarning.length).toBeGreaterThan(0);
+          });
+        }
+      }
+
       if (attrSpec.dispatchKey) {
         it('tag_spec can not have more than one dispatch_key', () => {
           expect(seenDispatchKey).toBe(false);
@@ -606,7 +639,7 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
 
-      if (tagSpec.tagName === 'script' || tagSpec.tagName === 'style') {
+      if (tagSpec.tagName === 'SCRIPT' || tagSpec.tagName === 'STYLE') {
         it('script and style tags must have cdata rules', () => {
           expect(
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||

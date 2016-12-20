@@ -21,6 +21,7 @@ tags: {  # amp-anim
   spec_name: "amp-anim extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-anim"
   attrs: {
     name: "async"
     mandatory: true

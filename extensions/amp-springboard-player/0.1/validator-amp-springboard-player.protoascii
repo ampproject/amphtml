@@ -21,6 +21,7 @@ tags: {  # amp-springboard-player
   spec_name: "amp-springboard-player extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-springboard-player"
   attrs: {
     name: "async"
     mandatory: true

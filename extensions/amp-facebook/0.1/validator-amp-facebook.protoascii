@@ -21,6 +21,7 @@ tags: {  # amp-facebook
   spec_name: "amp-facebook extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-facebook"
   attrs: {
     name: "async"
     mandatory: true

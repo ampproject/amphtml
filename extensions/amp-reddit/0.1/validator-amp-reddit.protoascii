@@ -22,6 +22,7 @@ tags: {  # amp-reddit
   also_requires_tag: "amp-reddit"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-reddit"
   attrs: {
     name: "async"
     mandatory: true
