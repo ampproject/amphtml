@@ -82,6 +82,11 @@ export function recreateNonProtoObject(obj) {
  * @return {?JSONValueDef|undefined}
  */
 export function getValueForExpr(obj, expr) {
+  // The `.` indicates "the object itself".
+  if (expr == '.') {
+    return obj;
+  }
+  // Otherwise, navigate via properties.
   const parts = expr.split('.');
   let value = obj;
   for (let i = 0; i < parts.length; i++) {
