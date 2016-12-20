@@ -23,6 +23,11 @@ import {
 describe('json', () => {
 
   describe('getValueForExpr', () => {
+    it('should return self for "."', () => {
+      const obj = {str: 'A', num: 1, bool: true, val: null};
+      expect(getValueForExpr(obj, '.')).to.equal(obj);
+    });
+
     it('should return a simple value', () => {
       const obj = {str: 'A', num: 1, bool: true, val: null};
       expect(getValueForExpr(obj, 'str')).to.equal('A');
