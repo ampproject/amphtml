@@ -198,7 +198,7 @@ export class Srcset {
    */
   selectByWidth_(width, dpr) {
     const length = this.sources_.length;
-    let minWidth = this.sources_[length - 1].width / dpr;
+    const minWidth = this.sources_[length - 1].width / dpr;
     let prevWidth = -Infinity;
     for (let i = length - 1; i >= 0; i--) {
       const source = this.sources_[i];
