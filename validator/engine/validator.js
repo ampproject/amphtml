@@ -1562,11 +1562,17 @@ class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
 }
 
 /**
- * Generates an AT Rule Parsing Spec from a CssSpec.
- * @param {!amp.validator.CssSpec} cssSpec
- * @return {!Object<string, parse_css.BlockType>}
+ * @typedef {{ atRuleSpec: !Object<string, parse_css.BlockType>,
+ *             defaultSpec: parse_css.BlockType }}
  */
-function computeAtRuleParsingSpec(cssSpec) {
+let CssParsingConfig;
+
+/**
+ * Generates a CssParsingConfig from a CssSpec.
+ * @param {!amp.validator.CssSpec} cssSpec
+ * @return {!CssParsingConfig}
+ */
+function computeCssParsingConfig(cssSpec) {
   /** @type {!Object<string, parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
@@ -1588,18 +1594,12 @@ function computeAtRuleParsingSpec(cssSpec) {
       goog.asserts.fail('Unrecognized atRuleSpec type: ' + atRuleSpec.type);
     }
   }
-  return ampAtRuleParsingSpec;
-}
-
-/**
- * Returns the default AT rule parsing spec.
- * @param {!Object<string,parse_css.BlockType>} atRuleParsingSpec
- * @return {parse_css.BlockType}
- */
-function computeAtRuleDefaultParsingSpec(atRuleParsingSpec) {
-  const ret = atRuleParsingSpec['$DEFAULT'];
-  goog.asserts.assert(ret !== undefined, 'No default atRuleSpec found');
-  return ret;
+  const config = { atRuleSpec: ampAtRuleParsingSpec,
+                   defaultSpec: parse_css.BlockType.PARSE_AS_IGNORE };
+  if (cssSpec.atRuleSpec.length > 0) {
+    config.defaultSpec = ampAtRuleParsingSpec['$DEFAULT'];
+  }
+  return config;
 }
 
 /**
@@ -1775,12 +1775,12 @@ class CdataMatcher {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
       }
-      /** @type {!Object<string,parse_css.BlockType>} */
-      const atRuleParsingSpec = computeAtRuleParsingSpec(cdataSpec.cssSpec);
+      /** @type {!CssParsingConfig} */
+      const cssParsingConfig = computeCssParsingConfig(cdataSpec.cssSpec);
       /** @type {!parse_css.Stylesheet} */
       const sheet = parse_css.parseAStylesheet(
-          tokenList, atRuleParsingSpec,
-          computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
+          tokenList, cssParsingConfig.atRuleSpec,
+          cssParsingConfig.defaultSpec, cssErrors);
       if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
