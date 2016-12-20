@@ -25,7 +25,7 @@ min_validator_revision_required: 189
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 329
+spec_file_revision: 330
 
 # Validator extensions.
 # =====================
@@ -272,6 +272,21 @@ tags: {
   }
   attrs: {
     name: "itemprop"
+    mandatory: true
+  }
+  attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
+}
+# rel= isn't mandatory when property= is present.
+tags: {
+  tag_name: "LINK"
+  spec_name: "link property="
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+  attrs: {
+    name: "property"
     mandatory: true
   }
   attr_lists: "common-link-attrs"
@@ -2735,6 +2750,16 @@ attr_lists: {
   attrs: { name: "itemref" }
   attrs: { name: "itemscope" }
   attrs: { name: "itemtype" }
+  # Also for schema.org, RDFa syntax
+  attrs: { name: "about" }
+  attrs: { name: "content" }
+  attrs: { name: "datatype" }
+  attrs: { name: "inlist" }
+  attrs: { name: "prefix" }
+  attrs: { name: "property" }
+  attrs: { name: "resource" }
+  attrs: { name: "typeof" }
+  attrs: { name: "vocab" }
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "accesskey" }
   attrs: {
