@@ -25,6 +25,7 @@ goog.provide('amp.validator.validateSaxEvents');
 goog.provide('amp.validator.validateString');
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
+goog.require('amp.validator.AmpLayout');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrList');
@@ -2520,11 +2521,6 @@ class ParsedTagSpec {
      */
     this.templateSpecUrl_ = templateSpecUrl;
     /**
-     * @type {!ParsedAttrSpecs}
-     * @private
-     */
-    this.parsedAttrSpecs_ = parsedAttrSpecs;
-    /**
      * @type {boolean}
      * @private
      */
@@ -2691,671 +2687,6 @@ class ParsedTagSpec {
     return this.shouldRecordTagspecValidated_;
   }
 
-  /**
-   * Returns true if |value| contains mustache template syntax.
-   * @param {string} value
-   * @return {boolean}
-   */
-  static valueHasTemplateSyntax(value) {
-    // Mustache (https://mustache.github.io/mustache.5.html), our template
-    // system, supports replacement tags that start with {{ and end with }}.
-    // We relax attribute value rules if the value contains this syntax as we
-    // will validate the post-processed tag instead.
-    const mustacheTag = /{{.*}}/;
-    return mustacheTag.test(value);
-  }
-
-  /**
-   * Returns true if |value| contains a mustache unescaped template syntax.
-   * @param {string} value
-   * @return {boolean}
-   */
-  static valueHasUnescapedTemplateSyntax(value) {
-    // Mustache (https://mustache.github.io/mustache.5.html), our template
-    // system, supports {{{unescaped}}} or {{{&unescaped}}} and there can
-    // be whitespace after the 2nd '{'. We disallow these in attribute Values.
-    const unescapedOpenTag = /{{\s*[&{]/;
-    return unescapedOpenTag.test(value);
-  }
-
-  /**
-   * Returns true if |value| contains a mustache partials template syntax.
-   * @param {string} value
-   * @return {boolean}
-   */
-  static valueHasPartialsTemplateSyntax(value) {
-    // Mustache (https://mustache.github.io/mustache.5.html), our template
-    // system, supports 'partials' which include other Mustache templates
-    // in the format of {{>partial}} and there can be whitespace after the {{.
-    // We disallow partials in attribute values.
-    const partialsTag = /{{\s*>/;
-    return partialsTag.test(value);
-  }
-
-  /**
-   * Validates the layout for the given tag. This involves checking the
-   * layout, width, height, sizes attributes with AMP specific logic.
-   * @param {!Context} context
-   * @param {!Object<string, string>} attrsByKey
-   * @param {!amp.validator.ValidationResult} result
-   */
-  validateLayout(context, attrsByKey, result) {
-    goog.asserts.assert(this.spec_.ampLayout !== null);
-
-    const layoutAttr = attrsByKey['layout'];
-    const widthAttr = attrsByKey['width'];
-    const heightAttr = attrsByKey['height'];
-    const sizesAttr = attrsByKey['sizes'];
-    const heightsAttr = attrsByKey['heights'];
-
-    // We disable validating layout for tags where one of the layout attributes
-    // contains mustache syntax.
-    const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
-    if (hasTemplateAncestor &&
-        (ParsedTagSpec.valueHasTemplateSyntax(layoutAttr) ||
-         ParsedTagSpec.valueHasTemplateSyntax(widthAttr) ||
-         ParsedTagSpec.valueHasTemplateSyntax(heightAttr) ||
-         ParsedTagSpec.valueHasTemplateSyntax(sizesAttr) ||
-         ParsedTagSpec.valueHasTemplateSyntax(heightsAttr)))
-      return;
-
-    // Parse the input layout attributes which we found for this tag.
-    const inputLayout = parseLayout(layoutAttr);
-    if (layoutAttr !== undefined &&
-        inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */['layout', getTagSpecName(this.spec_), layoutAttr],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    const inputWidth =
-        new amp.validator.CssLength(widthAttr, /* allowAuto */ true);
-    if (!inputWidth.isValid) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */['width', getTagSpecName(this.spec_), widthAttr],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    const inputHeight =
-        new amp.validator.CssLength(heightAttr, /* allowAuto */ true);
-    if (!inputHeight.isValid) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */['height', getTagSpecName(this.spec_), heightAttr],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-
-    // Now calculate the effective layout attributes.
-    const width = CalculateWidth(this.spec_.ampLayout, inputLayout, inputWidth);
-    const height =
-        CalculateHeight(this.spec_.ampLayout, inputLayout, inputHeight);
-    const layout =
-        CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
-
-    // height="auto" is only allowed if the layout is FLEX_ITEM.
-    if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */['height', getTagSpecName(this.spec_), heightAttr],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-
-    // Does the tag support the computed layout?
-    if (this.spec_.ampLayout.supportedLayouts.indexOf(layout) === -1) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        const code = layoutAttr === undefined ?
-            amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
-            amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR, code,
-            context.getDocLocator(),
-            /* params */[layout, getTagSpecName(this.spec_)],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    // Check other constraints imposed by the particular layouts.
-    if ((layout === amp.validator.AmpLayout.Layout.FIXED ||
-         layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
-         layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
-        !height.isSet) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-            context.getDocLocator(),
-            /* params */['height', getTagSpecName(this.spec_)],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    if (layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT && width.isSet &&
-        !width.isAuto) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
-            context.getDocLocator(),
-            /* params */
-            [
-              widthAttr, 'width', getTagSpecName(this.spec_), 'FIXED_HEIGHT',
-              'auto'
-            ],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    if (layout === amp.validator.AmpLayout.Layout.FIXED ||
-        layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
-      if (!width.isSet) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-              context.getDocLocator(),
-              /* params */['width', getTagSpecName(this.spec_)],
-              this.spec_.specUrl, result);
-        } else {
-          result.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      } else if (width.isAuto) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-              context.getDocLocator(),
-              /* params */['width', getTagSpecName(this.spec_), 'auto'],
-              this.spec_.specUrl, result);
-        } else {
-          result.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
-    }
-    if (layout === amp.validator.AmpLayout.Layout.RESPONSIVE &&
-        width.unit !== height.unit) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code
-                .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(this.spec_), width.unit, height.unit],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    if (heightsAttr !== undefined &&
-        layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        const code = layoutAttr === undefined ?
-            amp.validator.ValidationError.Code
-                .ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
-            amp.validator.ValidationError.Code
-                .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR, code,
-            context.getDocLocator(),
-            /* params */['heights', getTagSpecName(this.spec_), layout],
-            this.spec_.specUrl, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-  }
-
-  /**
-   * Helper method for ValidateAttributes, for when an attribute is
-   * encountered which is not specified by the validator.protoascii
-   * specification.
-   * @param {!Context} context
-   * @param {string} attrName
-   * @param {!amp.validator.ValidationResult} result
-   */
-  validateAttrNotFoundInSpec(context, attrName, result) {
-    // For now, we just skip data- attributes in the validator, because
-    // our schema doesn't capture which ones would be ok or not. E.g.
-    // in practice, some type of ad or perhaps other custom elements require
-    // particular data attributes.
-    // http://www.w3.org/TR/html5/single-page.html#attr-data-*
-    // http://w3c.github.io/aria-in-html/
-    // However, mostly to avoid confusion, we want to make sure that
-    // nobody tries to make a Mustache template data attribute,
-    // e.g. <div data-{{foo}}>, so we also exclude those characters.
-    // We also don't allow slashes as they can be parsed differently by
-    // different clients.
-    if (goog.string./*OK*/ startsWith(attrName, 'data-') &&
-        !goog.string.contains(attrName, '}') &&
-        !goog.string.contains(attrName, '{') &&
-        !goog.string.contains(attrName, '/') &&
-        !goog.string.contains(attrName, '\\')) {
-      return;
-    }
-
-    // At this point, it's an error either way, but we try to give a
-    // more specific error in the case of Mustache template characters.
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      if (attrName.indexOf('{{') !== -1) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(this.spec_)],
-            this.templateSpecUrl_, result);
-      } else {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(this.spec_)],
-            this.spec_.specUrl, result);
-      }
-    } else {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-  }
-
-  /**
-   * Specific checks for attribute values descending from a template tag.
-   * @param {!Context} context
-   * @param {string} attrName
-   * @param {string} attrValue
-   * @param {!amp.validator.ValidationResult} result
-   */
-  validateAttrValueBelowTemplateTag(context, attrName, attrValue, result) {
-    if (ParsedTagSpec.valueHasUnescapedTemplateSyntax(attrValue)) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(this.spec_), attrValue],
-            this.templateSpecUrl_, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-    } else if (ParsedTagSpec.valueHasPartialsTemplateSyntax(attrValue)) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(this.spec_), attrValue],
-            this.templateSpecUrl_, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-    }
-  }
-
-  /**
-   * Validates whether the attributes set on |encountered_tag| conform to this
-   * tag specification. All mandatory attributes must appear. Only attributes
-   * explicitly mentioned by this tag spec may appear.
-   *  Returns true iff the validation is successful.
-   * @param {!Context} context
-   * @param {!ParsedTagSpec} parsedSpec
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
-   * @param {!amp.validator.ValidationResult} result
-   */
-  validateAttributes(context, parsedSpec, encounteredAttrs, result) {
-    if (this.spec_.ampLayout !== null) {
-      /** @type {!Object<string, string>} */
-      const attrsByKey = {};
-      // We iterate in reverse order because if a attribute name is repeated,
-      // we want to use the value from the first instance seen in the tag rather
-      // than later instances. This is the same behavior that browsers have.
-      for (let i = encounteredAttrs.length - 2; i >= 0; i -= 2) {
-        attrsByKey[encounteredAttrs[i]] = encounteredAttrs[i + 1];
-      }
-      this.validateLayout(context, attrsByKey, result);
-      if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-        return;
-      }
-    }
-    const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
-    let mandatoryAttrsSeen = [];
-    /** @type {!Object<string, ?>} */
-    const mandatoryOneofsSeen = {};
-    let parsedTriggerSpecs = [];
-    /** If a tag has implicit attributes, we then add these attributes as
-     * validated. E.g. tag 'a' has implicit attributes 'role' and 'tabindex'.
-     * @type {!Object<number, ?>}
-     */
-    const attrspecsValidated = {};
-    for (const implicit of this.implicitAttrspecs_) {
-      attrspecsValidated[implicit] = 0;
-    }
-    // Our html parser delivers attributes as an array of alternating keys and
-    // values. We skip over this array 2 at a time to iterate over the keys.
-    for (let i = 0; i < encounteredAttrs.length; i += 2) {
-      const attrKey = encounteredAttrs[i];
-      const attrName = attrKey.toLowerCase();
-      let attrValue = encounteredAttrs[i + 1];
-
-      let parsedAttrSpec;
-      if (!this.attrsByName_.hasOwnProperty(attrName) ||
-          (parsedAttrSpec = this.attrsByName_[attrName]) === undefined) {
-        // While validating a reference point, we skip attributes that
-        // we don't have a spec for. They will be validated when the
-        // TagSpec itself gets validated.
-        if (this.isReferencePoint_) continue;
-        // On the other hand, if we did just validate a reference point for
-        // this tag, we check whether that reference point covers the attribute.
-        const reference_point_matcher =
-            context.getTagStack().parentReferencePointMatcher();
-        if (reference_point_matcher &&
-            reference_point_matcher.explainsAttribute(attrName))
-          continue;
-
-        this.validateAttrNotFoundInSpec(context, attrName, result);
-        if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-          return;
-        }
-        if (hasTemplateAncestor) {
-          this.validateAttrValueBelowTemplateTag(
-              context, attrName, attrValue, result);
-          if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-            return;
-          }
-        }
-        continue;
-      }
-      if (hasTemplateAncestor) {
-        this.validateAttrValueBelowTemplateTag(
-            context, attrName, attrValue, result);
-        if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-          return;
-        }
-      }
-      if (parsedAttrSpec.getSpec().deprecation !== null) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.WARNING,
-              amp.validator.ValidationError.Code.DEPRECATED_ATTR,
-              context.getDocLocator(),
-              /* params */
-              [
-                attrName, getTagSpecName(this.spec_),
-                parsedAttrSpec.getSpec().deprecation
-              ],
-              parsedAttrSpec.getSpec().deprecationUrl, result);
-        }
-        // Deprecation is only a warning, so we don't return.
-      }
-      if (!hasTemplateAncestor ||
-          !ParsedTagSpec.valueHasTemplateSyntax(attrValue)) {
-        validateNonTemplateAttrValueAgainstSpec(
-            parsedAttrSpec, context, attrName, attrValue, this.spec_, result);
-        if (result.status === amp.validator.ValidationResult.Status.FAIL) {
-          return;
-        }
-      }
-      if (parsedAttrSpec.hasBlacklistedValueRegex()) {
-        const decodedAttrValue = decodeAttrValue(attrValue);
-        if (parsedAttrSpec.getBlacklistedValueRegex().test(attrValue) ||
-            parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            context.addError(
-                amp.validator.ValidationError.Severity.ERROR,
-                amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                context.getDocLocator(),
-                /* params */[attrName, getTagSpecName(this.spec_), attrValue],
-                this.spec_.specUrl, result);
-          } else {
-            result.status = amp.validator.ValidationResult.Status.FAIL;
-          }
-          return;
-        }
-      }
-      if (parsedAttrSpec.getSpec().mandatory) {
-        mandatoryAttrsSeen.push(parsedAttrSpec.getId());
-      }
-      if (parsedSpec.getSpec().tagName === 'BASE' && attrName === 'href' &&
-          context.hasSeenUrl()) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
-              context.getDocLocator(),
-              /* params */[context.firstSeenUrlTagName()], this.spec_.specUrl,
-              result);
-        } else {
-          result.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
-      // The "at most 1" part of mandatory_oneof: mandatory_oneof
-      // wants exactly one of the alternatives, so here
-      // we check whether we already saw another alternative
-      if (parsedAttrSpec.getSpec().mandatoryOneof &&
-          mandatoryOneofsSeen.hasOwnProperty(
-              parsedAttrSpec.getSpec().mandatoryOneof)) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
-              context.getDocLocator(),
-              /* params */
-              [
-                getTagSpecName(this.spec_),
-                parsedAttrSpec.getSpec().mandatoryOneof
-              ],
-              this.spec_.specUrl, result);
-        } else {
-          result.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
-      const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
-      if (mandatoryOneof !== null) {
-        mandatoryOneofsSeen[mandatoryOneof] = 0;
-      }
-      // If the trigger does not have an if_value_regex, then proceed to add the
-      // spec. If it does have an if_value_regex, then test the regex to see
-      // if it should add the spec.
-      if (parsedAttrSpec.hasTriggerSpec() &&
-          (!parsedAttrSpec.getTriggerSpec().hasIfValueRegex() ||
-           (parsedAttrSpec.getTriggerSpec().hasIfValueRegex() &&
-            parsedAttrSpec.getTriggerSpec().getIfValueRegex().test(
-                attrValue)))) {
-        parsedTriggerSpecs.push(parsedAttrSpec.getTriggerSpec());
-      }
-      attrspecsValidated[parsedAttrSpec.getId()] = 0;
-    }
-    // The "at least 1" part of mandatory_oneof: If none of the
-    // alternatives were present, we report that an attribute is missing.
-    for (const mandatoryOneof of this.mandatoryOneofs_) {
-      if (!mandatoryOneofsSeen.hasOwnProperty(mandatoryOneof)) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
-              context.getDocLocator(),
-              /* params */[getTagSpecName(this.spec_), mandatoryOneof],
-              this.spec_.specUrl, result);
-        } else {
-          result.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-      }
-    }
-    for (const triggerSpec of parsedTriggerSpecs) {
-      for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
-        let parsedAttrSpec;
-        if (!this.attrsByName_.hasOwnProperty(alsoRequiresAttr) ||
-            (parsedAttrSpec = this.attrsByName_[alsoRequiresAttr]) ===
-                undefined) {
-          continue;
-        }
-        if (!attrspecsValidated.hasOwnProperty(parsedAttrSpec.getId())) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            context.addError(
-                amp.validator.ValidationError.Severity.ERROR,
-                amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
-                context.getDocLocator(),
-                /* params */
-                [
-                  parsedAttrSpec.getSpec().name, getTagSpecName(this.spec_),
-                  triggerSpec.getAttrName()
-                ],
-                this.spec_.specUrl, result);
-          } else {
-            result.status = amp.validator.ValidationResult.Status.FAIL;
-          }
-        }
-      }
-    }
-    mandatoryAttrsSeen = sortAndUniquify(mandatoryAttrsSeen);
-    const diffs = subtractDiff(this.mandatoryAttrIds_, mandatoryAttrsSeen);
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      for (const diff of diffs) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-            context.getDocLocator(),
-            /* params */
-            [
-              this.parsedAttrSpecs_.getById(diff).getSpec().name,
-              getTagSpecName(this.spec_)
-            ],
-            this.spec_.specUrl, result);
-      }
-    } else {
-      if (diffs.length > 0) {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-    }
-  }
-
-  /**
-   * Validates whether the parent tag satisfied the spec (e.g., some
-   * tags can only appear in head).
-   * @param {!Context} context
-   * @param {!amp.validator.ValidationResult} validationResult
-   */
-  validateParentTag(context, validationResult) {
-    if (this.spec_.mandatoryParent !== null &&
-        this.spec_.mandatoryParent !== context.getTagStack().getParent()) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        // Output a parent/child error using CSS Child Selector syntax which is
-        // both succinct and should be well understood by web developers.
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
-            context.getDocLocator(),
-            /* params */
-            [
-              getTagSpecName(this.spec_),
-              context.getTagStack().getParent().toLowerCase(),
-              this.spec_.mandatoryParent.toLowerCase()
-            ],
-            this.spec_.specUrl, validationResult);
-      } else {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-    }
-  }
-
-  /**
-   * Validates if the tag ancestors satisfied the spec.
-   * @param {!Context} context
-   * @param {!amp.validator.ValidationResult} validationResult
-   */
-  validateAncestorTags(context, validationResult) {
-    if (this.spec_.mandatoryAncestor !== null) {
-      const mandatoryAncestor = this.spec_.mandatoryAncestor;
-      if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          if (this.spec_.mandatoryAncestorSuggestedAlternative !== null) {
-            context.addError(
-                amp.validator.ValidationError.Severity.ERROR,
-                amp.validator.ValidationError.Code
-                    .MANDATORY_TAG_ANCESTOR_WITH_HINT,
-                context.getDocLocator(),
-                /* params */
-                [
-                  this.spec_.tagName.toLowerCase(),
-                  mandatoryAncestor.toLowerCase(),
-                  this.spec_.mandatoryAncestorSuggestedAlternative.toLowerCase()
-                ],
-                this.spec_.specUrl, validationResult);
-          } else {
-            context.addError(
-                amp.validator.ValidationError.Severity.ERROR,
-                amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
-                context.getDocLocator(),
-                /* params */
-                [
-                  this.spec_.tagName.toLowerCase(),
-                  mandatoryAncestor.toLowerCase()
-                ],
-                this.spec_.specUrl, validationResult);
-          }
-        } else {
-          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
-    }
-    for (const disallowedAncestor of this.spec_.disallowedAncestor) {
-      if (context.getTagStack().hasAncestor(disallowedAncestor)) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
-              context.getDocLocator(),
-              /* params */
-              [
-                this.spec_.tagName.toLowerCase(),
-                disallowedAncestor.toLowerCase()
-              ],
-              this.spec_.specUrl, validationResult);
-        } else {
-          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
-    }
-  }
-
   /** @return {boolean} */
   isReferencePoint() {
     return this.isReferencePoint_;
@@ -3377,6 +2708,698 @@ class ParsedTagSpec {
    */
   hasAttrWithName(name) {
     return this.attrsByName_.hasOwnProperty(name);
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTemplateSpecUrl() {
+    return this.templateSpecUrl_;
+  }
+
+  /**
+   * @return {!Array<number>}
+   */
+  getImplicitAttrspecs() {
+    return this.implicitAttrspecs_;
+  }
+
+  /**
+   * @return {!Object<string, !ParsedAttrSpec>}
+   */
+  getAttrsByName() {
+    return this.attrsByName_;
+  }
+
+  /**
+   * @return {!Array<string>}
+   */
+  getMandatoryOneofs() {
+    return this.mandatoryOneofs_;
+  }
+
+  /**
+   * @return {!Array<number>}
+   */
+  getMandatoryAttrIds() {
+    return this.mandatoryAttrIds_;
+  }
+}
+
+/**
+ * Returns true if |value| contains mustache template syntax.
+ * @param {string} value
+ * @return {boolean}
+ */
+function attrValueHasTemplateSyntax(value) {
+  // Mustache (https://mustache.github.io/mustache.5.html), our template
+  // system, supports replacement tags that start with {{ and end with }}.
+  // We relax attribute value rules if the value contains this syntax as we
+  // will validate the post-processed tag instead.
+  const mustacheTag = /{{.*}}/;
+  return mustacheTag.test(value);
+}
+
+/**
+ * Returns true if |value| contains a mustache unescaped template syntax.
+ * @param {string} value
+ * @return {boolean}
+ */
+function attrValueHasUnescapedTemplateSyntax(value) {
+  // Mustache (https://mustache.github.io/mustache.5.html), our template
+  // system, supports {{{unescaped}}} or {{{&unescaped}}} and there can
+  // be whitespace after the 2nd '{'. We disallow these in attribute Values.
+  const unescapedOpenTag = /{{\s*[&{]/;
+  return unescapedOpenTag.test(value);
+}
+
+/**
+ * Returns true if |value| contains a mustache partials template syntax.
+ * @param {string} value
+ * @return {boolean}
+ */
+function attrValueHasPartialsTemplateSyntax(value) {
+  // Mustache (https://mustache.github.io/mustache.5.html), our template
+  // system, supports 'partials' which include other Mustache templates
+  // in the format of {{>partial}} and there can be whitespace after the {{.
+  // We disallow partials in attribute values.
+  const partialsTag = /{{\s*>/;
+  return partialsTag.test(value);
+}
+
+/**
+ * Validates whether the parent tag satisfied the spec (e.g., some
+ * tags can only appear in head).
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateParentTag(parsedTagSpec, context, validationResult) {
+  const spec = parsedTagSpec.getSpec();
+  if (spec.mandatoryParent !== null &&
+      spec.mandatoryParent !== context.getTagStack().getParent()) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      // Output a parent/child error using CSS Child Selector syntax which is
+      // both succinct and should be well understood by web developers.
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
+          context.getDocLocator(),
+          /* params */
+          [
+            getTagSpecName(spec),
+            context.getTagStack().getParent().toLowerCase(),
+            spec.mandatoryParent.toLowerCase()
+          ],
+          spec.specUrl, validationResult);
+    } else {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+  }
+}
+
+/**
+ * Validates if the tag ancestors satisfied the spec.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateAncestorTags(parsedTagSpec, context, validationResult) {
+  const spec = parsedTagSpec.getSpec();
+  if (spec.mandatoryAncestor !== null) {
+    const mandatoryAncestor = spec.mandatoryAncestor;
+    if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        if (spec.mandatoryAncestorSuggestedAlternative !== null) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code
+                  .MANDATORY_TAG_ANCESTOR_WITH_HINT,
+              context.getDocLocator(),
+              /* params */
+              [
+                spec.tagName.toLowerCase(), mandatoryAncestor.toLowerCase(),
+                spec.mandatoryAncestorSuggestedAlternative.toLowerCase()
+              ],
+              spec.specUrl, validationResult);
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
+              context.getDocLocator(),
+              /* params */
+              [spec.tagName.toLowerCase(), mandatoryAncestor.toLowerCase()],
+              spec.specUrl, validationResult);
+        }
+      } else {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+  }
+  for (const disallowedAncestor of spec.disallowedAncestor) {
+    if (context.getTagStack().hasAncestor(disallowedAncestor)) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+            context.getDocLocator(),
+            /* params */
+            [spec.tagName.toLowerCase(), disallowedAncestor.toLowerCase()],
+            spec.specUrl, validationResult);
+      } else {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+  }
+}
+
+/**
+ * Validates the layout for the given tag. This involves checking the
+ * layout, width, height, sizes attributes with AMP specific logic.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!Object<string, string>} attrsByKey
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateLayout(parsedTagSpec, context, attrsByKey, result) {
+  const spec = parsedTagSpec.getSpec();
+  goog.asserts.assert(spec.ampLayout !== null);
+
+  const layoutAttr = attrsByKey['layout'];
+  const widthAttr = attrsByKey['width'];
+  const heightAttr = attrsByKey['height'];
+  const sizesAttr = attrsByKey['sizes'];
+  const heightsAttr = attrsByKey['heights'];
+
+  // We disable validating layout for tags where one of the layout attributes
+  // contains mustache syntax.
+  const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
+  if (hasTemplateAncestor && (attrValueHasTemplateSyntax(layoutAttr) ||
+                              attrValueHasTemplateSyntax(widthAttr) ||
+                              attrValueHasTemplateSyntax(heightAttr) ||
+                              attrValueHasTemplateSyntax(sizesAttr) ||
+                              attrValueHasTemplateSyntax(heightsAttr)))
+    return;
+
+  // Parse the input layout attributes which we found for this tag.
+  const inputLayout = parseLayout(layoutAttr);
+  if (layoutAttr !== undefined &&
+      inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
+          /* params */['layout', getTagSpecName(spec), layoutAttr],
+          spec.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  const inputWidth =
+      new amp.validator.CssLength(widthAttr, /* allowAuto */ true);
+  if (!inputWidth.isValid) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
+          /* params */['width', getTagSpecName(spec), widthAttr], spec.specUrl,
+          result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  const inputHeight =
+      new amp.validator.CssLength(heightAttr, /* allowAuto */ true);
+  if (!inputHeight.isValid) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
+          /* params */['height', getTagSpecName(spec), heightAttr],
+          spec.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+
+  // Now calculate the effective layout attributes.
+  const width = CalculateWidth(spec.ampLayout, inputLayout, inputWidth);
+  const height = CalculateHeight(spec.ampLayout, inputLayout, inputHeight);
+  const layout =
+      CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
+
+  // height="auto" is only allowed if the layout is FLEX_ITEM.
+  if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
+          /* params */['height', getTagSpecName(spec), heightAttr],
+          spec.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+
+  // Does the tag support the computed layout?
+  if (spec.ampLayout.supportedLayouts.indexOf(layout) === -1) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      const code = layoutAttr === undefined ?
+          amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
+          amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR, code,
+          context.getDocLocator(),
+          /* params */[layout, getTagSpecName(spec)], spec.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  // Check other constraints imposed by the particular layouts.
+  if ((layout === amp.validator.AmpLayout.Layout.FIXED ||
+       layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
+       layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
+      !height.isSet) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+          context.getDocLocator(),
+          /* params */['height', getTagSpecName(spec)], spec.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  if (layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT && width.isSet &&
+      !width.isAuto) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+          context.getDocLocator(),
+          /* params */
+          [widthAttr, 'width', getTagSpecName(spec), 'FIXED_HEIGHT', 'auto'],
+          spec.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  if (layout === amp.validator.AmpLayout.Layout.FIXED ||
+      layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
+    if (!width.isSet) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+            context.getDocLocator(),
+            /* params */['width', getTagSpecName(spec)], spec.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    } else if (width.isAuto) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */['width', getTagSpecName(spec), 'auto'], spec.specUrl,
+            result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+  }
+  if (layout === amp.validator.AmpLayout.Layout.RESPONSIVE &&
+      width.unit !== height.unit) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code
+              .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
+          context.getDocLocator(),
+          /* params */[getTagSpecName(spec), width.unit, height.unit],
+          spec.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  if (heightsAttr !== undefined &&
+      layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      const code = layoutAttr === undefined ?
+          amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
+          amp.validator.ValidationError.Code
+              .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR, code,
+          context.getDocLocator(),
+          /* params */['heights', getTagSpecName(spec), layout], spec.specUrl,
+          result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+}
+
+/**
+ * Helper method for ValidateAttributes, for when an attribute is
+ * encountered which is not specified by the validator.protoascii
+ * specification.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {string} attrName
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
+  // For now, we just skip data- attributes in the validator, because
+  // our schema doesn't capture which ones would be ok or not. E.g.
+  // in practice, some type of ad or perhaps other custom elements require
+  // particular data attributes.
+  // http://www.w3.org/TR/html5/single-page.html#attr-data-*
+  // http://w3c.github.io/aria-in-html/
+  // However, mostly to avoid confusion, we want to make sure that
+  // nobody tries to make a Mustache template data attribute,
+  // e.g. <div data-{{foo}}>, so we also exclude those characters.
+  // We also don't allow slashes as they can be parsed differently by
+  // different clients.
+  if (goog.string./*OK*/ startsWith(attrName, 'data-') &&
+      !goog.string.contains(attrName, '}') &&
+      !goog.string.contains(attrName, '{') &&
+      !goog.string.contains(attrName, '/') &&
+      !goog.string.contains(attrName, '\\')) {
+    return;
+  }
+
+  // At this point, it's an error either way, but we try to give a
+  // more specific error in the case of Mustache template characters.
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (attrName.indexOf('{{') !== -1) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+          context.getDocLocator(),
+          /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
+          parsedTagSpec.getTemplateSpecUrl(), result);
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+          context.getDocLocator(),
+          /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
+          parsedTagSpec.getSpec().specUrl, result);
+    }
+  } else {
+    result.status = amp.validator.ValidationResult.Status.FAIL;
+  }
+}
+
+/**
+ * Specific checks for attribute values descending from a template tag.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateAttrValueBelowTemplateTag(
+    parsedTagSpec, context, attrName, attrValue, result) {
+  if (attrValueHasUnescapedTemplateSyntax(attrValue)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      const spec = parsedTagSpec.getSpec();
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
+          context.getDocLocator(),
+          /* params */[attrName, getTagSpecName(spec), attrValue],
+          parsedTagSpec.getTemplateSpecUrl(), result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+  } else if (attrValueHasPartialsTemplateSyntax(attrValue)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      const spec = parsedTagSpec.getSpec();
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
+          context.getDocLocator(),
+          /* params */[attrName, getTagSpecName(spec), attrValue],
+          parsedTagSpec.getTemplateSpecUrl(), result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+  }
+}
+
+/**
+ * Validates whether the attributes set on |encountered_tag| conform to this
+ * tag specification. All mandatory attributes must appear. Only attributes
+ * explicitly mentioned by this tag spec may appear.
+ *  Returns true iff the validation is successful.
+ * @param {!ParsedAttrSpecs} parsedAttrSpecs
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!ParsedTagSpec} parsedSpec
+ * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateAttributes(
+    parsedAttrSpecs, parsedTagSpec, context, parsedSpec, encounteredAttrs,
+    result) {
+  const spec = parsedTagSpec.getSpec();
+  if (spec.ampLayout !== null) {
+    /** @type {!Object<string, string>} */
+    const attrsByKey = {};
+    // We iterate in reverse order because if a attribute name is repeated,
+    // we want to use the value from the first instance seen in the tag rather
+    // than later instances. This is the same behavior that browsers have.
+    for (let i = encounteredAttrs.length - 2; i >= 0; i -= 2) {
+      attrsByKey[encounteredAttrs[i]] = encounteredAttrs[i + 1];
+    }
+    validateLayout(parsedTagSpec, context, attrsByKey, result);
+    if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+      return;
+    }
+  }
+  const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
+  let mandatoryAttrsSeen = [];
+  /** @type {!Object<string, ?>} */
+  const mandatoryOneofsSeen = {};
+  let parsedTriggerSpecs = [];
+  /** If a tag has implicit attributes, we then add these attributes as
+   * validated. E.g. tag 'a' has implicit attributes 'role' and 'tabindex'.
+   * @type {!Object<number, ?>}
+   */
+  const attrspecsValidated = {};
+  for (const implicit of parsedTagSpec.getImplicitAttrspecs()) {
+    attrspecsValidated[implicit] = 0;
+  }
+  // Our html parser delivers attributes as an array of alternating keys and
+  // values. We skip over this array 2 at a time to iterate over the keys.
+  const attrsByName = parsedTagSpec.getAttrsByName();
+  for (let i = 0; i < encounteredAttrs.length; i += 2) {
+    const attrKey = encounteredAttrs[i];
+    const attrName = attrKey.toLowerCase();
+    let attrValue = encounteredAttrs[i + 1];
+
+    let parsedAttrSpec;
+    if (!attrsByName.hasOwnProperty(attrName) ||
+        (parsedAttrSpec = attrsByName[attrName]) === undefined) {
+      // While validating a reference point, we skip attributes that
+      // we don't have a spec for. They will be validated when the
+      // TagSpec itself gets validated.
+      if (parsedTagSpec.isReferencePoint()) continue;
+      // On the other hand, if we did just validate a reference point for
+      // this tag, we check whether that reference point covers the attribute.
+      const reference_point_matcher =
+          context.getTagStack().parentReferencePointMatcher();
+      if (reference_point_matcher &&
+          reference_point_matcher.explainsAttribute(attrName))
+        continue;
+
+      validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result);
+      if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+        return;
+      }
+      if (hasTemplateAncestor) {
+        validateAttrValueBelowTemplateTag(
+            parsedTagSpec, context, attrName, attrValue, result);
+        if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+          return;
+        }
+      }
+      continue;
+    }
+    if (hasTemplateAncestor) {
+      validateAttrValueBelowTemplateTag(
+          parsedTagSpec, context, attrName, attrValue, result);
+      if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+        return;
+      }
+    }
+    if (parsedAttrSpec.getSpec().deprecation !== null) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.WARNING,
+            amp.validator.ValidationError.Code.DEPRECATED_ATTR,
+            context.getDocLocator(),
+            /* params */
+            [
+              attrName, getTagSpecName(spec),
+              parsedAttrSpec.getSpec().deprecation
+            ],
+            parsedAttrSpec.getSpec().deprecationUrl, result);
+      }
+      // Deprecation is only a warning, so we don't return.
+    }
+    if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(attrValue)) {
+      validateNonTemplateAttrValueAgainstSpec(
+          parsedAttrSpec, context, attrName, attrValue, spec, result);
+      if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+        return;
+      }
+    }
+    if (parsedAttrSpec.hasBlacklistedValueRegex()) {
+      const decodedAttrValue = decodeAttrValue(attrValue);
+      if (parsedAttrSpec.getBlacklistedValueRegex().test(attrValue) ||
+          parsedAttrSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+              context.getDocLocator(),
+              /* params */[attrName, getTagSpecName(spec), attrValue],
+              spec.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
+        return;
+      }
+    }
+    if (parsedAttrSpec.getSpec().mandatory) {
+      mandatoryAttrsSeen.push(parsedAttrSpec.getId());
+    }
+    if (parsedSpec.getSpec().tagName === 'BASE' && attrName === 'href' &&
+        context.hasSeenUrl()) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
+            context.getDocLocator(),
+            /* params */[context.firstSeenUrlTagName()], spec.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+    // The "at most 1" part of mandatory_oneof: mandatory_oneof
+    // wants exactly one of the alternatives, so here
+    // we check whether we already saw another alternative
+    if (parsedAttrSpec.getSpec().mandatoryOneof &&
+        mandatoryOneofsSeen.hasOwnProperty(
+            parsedAttrSpec.getSpec().mandatoryOneof)) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+            context.getDocLocator(),
+            /* params */
+            [getTagSpecName(spec), parsedAttrSpec.getSpec().mandatoryOneof],
+            spec.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+    const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
+    if (mandatoryOneof !== null) {
+      mandatoryOneofsSeen[mandatoryOneof] = 0;
+    }
+    // If the trigger does not have an if_value_regex, then proceed to add the
+    // spec. If it does have an if_value_regex, then test the regex to see
+    // if it should add the spec.
+    if (parsedAttrSpec.hasTriggerSpec() &&
+        (!parsedAttrSpec.getTriggerSpec().hasIfValueRegex() ||
+         (parsedAttrSpec.getTriggerSpec().hasIfValueRegex() &&
+          parsedAttrSpec.getTriggerSpec().getIfValueRegex().test(attrValue)))) {
+      parsedTriggerSpecs.push(parsedAttrSpec.getTriggerSpec());
+    }
+    attrspecsValidated[parsedAttrSpec.getId()] = 0;
+  }
+  // The "at least 1" part of mandatory_oneof: If none of the
+  // alternatives were present, we report that an attribute is missing.
+  for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
+    if (!mandatoryOneofsSeen.hasOwnProperty(mandatoryOneof)) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
+            context.getDocLocator(),
+            /* params */[getTagSpecName(spec), mandatoryOneof], spec.specUrl,
+            result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+    }
+  }
+  for (const triggerSpec of parsedTriggerSpecs) {
+    for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
+      let parsedAttrSpec;
+      if (!attrsByName.hasOwnProperty(alsoRequiresAttr) ||
+          (parsedAttrSpec = attrsByName[alsoRequiresAttr]) === undefined) {
+        continue;
+      }
+      if (!attrspecsValidated.hasOwnProperty(parsedAttrSpec.getId())) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
+              context.getDocLocator(),
+              /* params */
+              [
+                parsedAttrSpec.getSpec().name, getTagSpecName(spec),
+                triggerSpec.getAttrName()
+              ],
+              spec.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
+      }
+    }
+  }
+  mandatoryAttrsSeen = sortAndUniquify(mandatoryAttrsSeen);
+  const diffs =
+      subtractDiff(parsedTagSpec.getMandatoryAttrIds(), mandatoryAttrsSeen);
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    for (const diff of diffs) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+          context.getDocLocator(),
+          /* params */
+          [parsedAttrSpecs.getById(diff).getSpec().name, getTagSpecName(spec)],
+          spec.specUrl, result);
+    }
+  } else {
+    if (diffs.length > 0) {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
   }
 }
 
@@ -3499,10 +3522,11 @@ function validateTagAgainstSpec(
     parsedRules, parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  parsedSpec.validateAttributes(
-      context, parsedSpec, encounteredAttrs, resultForAttempt);
-  parsedSpec.validateParentTag(context, resultForAttempt);
-  parsedSpec.validateAncestorTags(context, resultForAttempt);
+  validateAttributes(
+      parsedRules.getParsedAttrSpecs(), parsedSpec, context, parsedSpec,
+      encounteredAttrs, resultForAttempt);
+  validateParentTag(parsedSpec, context, resultForAttempt);
+  validateAncestorTags(parsedSpec, context, resultForAttempt);
 
   if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
     if (!amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -3663,7 +3687,11 @@ class ParsedValidatorRules {
      */
     this.rules_ = this.filterRules(amp.validator.createRules(), htmlFormat);
 
-    const parsedAttrSpecs = new ParsedAttrSpecs(this.rules_.attrLists);
+    /**
+     * @type {!ParsedAttrSpecs}
+     * @private
+     */
+    this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_.attrLists);
 
     /** @type {!Object<string, number>} */
     const tagSpecIdsByTagSpecName = {};
@@ -3691,7 +3719,8 @@ class ParsedValidatorRules {
         goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
-          this.rules_.templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
+          this.rules_.templateSpecUrl, this.parsedAttrSpecs_,
+          tagSpecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
       if (!parsedTagSpec.isReferencePoint()) {
@@ -3981,6 +4010,13 @@ class ParsedValidatorRules {
   dispatchForTagName(tagName) {
     if (!this.tagSpecByTagName_.hasOwnProperty(tagName)) return undefined;
     return this.tagSpecByTagName_[tagName];
+  }
+
+  /**
+   * @return {!ParsedAttrSpecs}
+   */
+  getParsedAttrSpecs() {
+    return this.parsedAttrSpecs_;
   }
 }
 
