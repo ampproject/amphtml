@@ -19,13 +19,24 @@ import {tryParseJson} from '../../src/json.js';
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;
 
-// Enum to hold different ad types
+// Height of overflow element
+const overflowHeight = 40;
+
+/**
+ * Enum for different AdSense Products
+ * UNSUPPORTED: Value if we can't determine which product to request
+ * AFS: AdSense for Search
+ * AFSH: AdSeense for Shopping
+ * AFSHBACKFILL: AdSense for Shopping, backfilled with AdSense for Search
+ * @enum {number}
+ */
 const ADTYPE = {
   UNSUPPORTED: 0,
   AFS: 1,
   AFSH: 2,
   AFSHBACKFILL: 3,
 };
+
 
 /**
  * Request Custom Search Ads (Adsense for Search or AdSense for Shopping).
@@ -69,14 +80,18 @@ export function csa(global, data) {
   }
 
   // Event listener needed for iOS9 bug
-  global.addEventListener('orientationchange', () => {
-    orientationChangeHandler(global, containerDiv);
-  });
+  global.addEventListener('orientationchange',
+      orientationChangeHandler.bind(null, global, containerDiv));
+
+  // Register resize callbacks
+  global.context.onResizeSuccess(
+      resizeSuccessHandler.bind(null, global, containerDiv));
+  global.context.onResizeDenied(
+      resizeDeniedHandler.bind(null, global, containerDiv));
 
   // Only call for ads once the script has loaded
-  loadScript(global, 'https://www.google.com/adsense/search/ads.js', () => {
-    requestCsaAds(global, data, afsPage, afsAd, afshPage, afshAd);
-  });
+  loadScript(global, 'https://www.google.com/adsense/search/ads.js',
+      requestCsaAds.bind(null, global, data, afsPage, afsAd, afshPage, afshAd));
 }
 
 /**
@@ -113,6 +128,40 @@ function orientationChangeHandler(global, containerDiv) {
       global.context.requestResize(undefined, newHeight);
     }
   }, 250); /* 250 is time in ms to wait before executing orientation */
+}
+
+/**
+ * Hanlder for when a resize request succeeds
+ * Hide the overflow and resize the container
+ * @visibleForTesting
+ */
+export function resizeSuccessHandler(global, container, requestedHeight) {
+  currentAmpHeight = requestedHeight;
+  const overflow = global.document.getElementById('overflow');
+  if (overflow) {
+    overflow.style.display = 'none';
+    resizeCsa(container, requestedHeight);
+  }
+}
+
+/**
+ * Hanlder for When a resize request is denied
+ * If the container is larger than the AMP container and an overflow already
+ * exists, show the overflow and resize the container to fit inside the AMP
+ * container.  If an overflow doesn't exist, create one.
+ * @visibleForTesting
+ */
+export function resizeDeniedHandler(global, container, requestedHeight) {
+  const overflow = global.document.getElementById('overflow');
+  const containerHeight = parseInt(container.style.height, 10);
+  if (containerHeight > currentAmpHeight) {
+    if (overflow) {
+      overflow.style.display = '';
+      resizeCsa(container, currentAmpHeight - overflowHeight);
+    } else {
+      createOverflow(global, container, requestedHeight);
+    }
+  }
 }
 
 /**
@@ -163,66 +212,34 @@ function getAdType(data) {
 
 /**
  * CSA callback function to resize the iframe and/or request backfill
- * @param {?Object} backfillPageOptions AFS page options (if necessary)
- * @param {?Object} backfillAdblockOptions AFS ad unit options (if necessary)
- * @param {string} containerName
- * @param {boolean} adsLoaded
+ * @param {?Object} bkflPage Backfill AFS page options (if necessary)
+ * @param {?Object} bkflAd Backfill AFS ad unit options (if necessary)
+ * @param {string} conName Name of the container ('csacontainer')
+ * @param {boolean} ads If ads were returned or not
  * @visibleForTesting
  */
-export function resizeIframe(global, backfillPageOptions,
-    backfillAdblockOptions, containerName, adsLoaded) {
-  if (adsLoaded) {
+export function resizeIframe(global, bkflPage, bkflAd, conName, ads) {
+  if (ads) {
     // Get actual height of container
-    const container = global.document.getElementById(containerName);
+    const container = global.document.getElementById(conName);
     const height = container.offsetHeight;
     // Set initial AMP height
     currentAmpHeight =
         global.context.initialIntersection.boundingClientRect.height;
-    const overflowHeight = 40;
 
     // If the height of the container is larger than the height of the
     // initially requested AMP tag, add the overflow element
     if (height > currentAmpHeight) {
-      createOverflow(global, overflowHeight, height, container,
-          currentAmpHeight - overflowHeight);
+      createOverflow(global, container, height);
     }
-
     // Attempt to resize to actual CSA container height
     global.context.requestResize(undefined, height);
-
-    // If reisze succeeded, hide overflow and resize container
-    global.context.onResizeSuccess(function(requestedHeight) {
-      currentAmpHeight = requestedHeight;
-      const overflow = global.document.getElementById('overflow');
-      if (overflow) {
-        overflow.style.display = 'none';
-        resizeCsa(container, requestedHeight);
-      }
-    });
-
-    // If resize was denied, show overflow element and resize container
-    global.context.onResizeDenied(function(requestedHeight) {
-      const overflow = global.document.getElementById('overflow');
-      const containerHeight = parseInt(container.style.height, 10);
-      if (containerHeight > currentAmpHeight) {
-        if (overflow) {
-          overflow.style.display = '';
-          resizeCsa(container, currentAmpHeight - overflowHeight);
-        } else {
-          createOverflow(global, overflowHeight, requestedHeight, container,
-              currentAmpHeight - overflowHeight);
-        }
-      }
-    });
   } else {
     // If we need to backfill, make the call
-    if (backfillPageOptions != null && backfillAdblockOptions != null) {
-      // _googCsa is the ad request funciton and should already be defined
-      const _googCsa = global['_googCsa'];
+    if (bkflPage != null && bkflAd != null) {
       // Make sure we don't try to backfill again
-      backfillAdblockOptions['adLoadedCallback'] =
-          resizeIframe.bind(null, global, null, null);
-      _googCsa('ads', backfillPageOptions, backfillAdblockOptions);
+      bkflAd['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
+      global['_googCsa']('ads', bkflPage, bkflAd);
     } else {
       // Let AMP know we didn't return anything
       global.context.noContentAvailable();
@@ -232,38 +249,39 @@ export function resizeIframe(global, backfillPageOptions,
 
 /**
  * Helper function to create an overflow element
- * @param {number} overflowH Height of the overflow element
- * @param {number} fullH Height the iframe should be when overflow is clicked
+ * @param {!Window} global The window object of the iframe
  * @param {Node} container HTML element of the CSA container
- * @param {number} containerH Height to resize the CSA container, in pixels
+ * @param {number} height The full height the CSA container should be when the
+ * overflow element is clicked.
  */
-function createOverflow(global, overflowH, fullH, container, containerH) {
-  // Create and append an overflow element with line, chevron, and onclick
-  const overflow = getOverflowElement(global, overflowH);
-  overflow.appendChild(getOverflowLine(global));
-  overflow.appendChild(getOverflowChevron(global));
-  overflow.onclick = global.context.requestResize.bind(null, undefined, fullH);
+function createOverflow(global, container, height) {
+  const overflow = getOverflowElement(global);
+  // When overflow is clicked, resize to full height
+  overflow.onclick = global.context.requestResize.bind(null, undefined, height);
   global.document.body.appendChild(overflow);
   // Resize the CSA container to not conflict with overflow
-  resizeCsa(container, containerH);
+  resizeCsa(container, currentAmpHeight - overflowHeight);
 }
 
 /**
  * Helper function to create the base overflow element
- * @param {number} height Height of the overflow element
+ * @param {!Window} global The window object of the iframe
  * @return {Node}
  */
-function getOverflowElement(global, height) {
+function getOverflowElement(global) {
   const overflow = global.document.createElement('div');
   overflow.id = 'overflow';
   overflow.style.position = 'absolute';
-  overflow.style.height = height + 'px';
+  overflow.style.height = overflowHeight + 'px';
   overflow.style.width = '100%';
+  overflow.appendChild(getOverflowLine(global));
+  overflow.appendChild(getOverflowChevron(global));
   return overflow;
 }
 
 /**
  * Helper function to create a line element for the overflow element
+ * @param {!Window} global The window object of the iframe
  * @return {Node}
  */
 function getOverflowLine(global) {
@@ -275,6 +293,7 @@ function getOverflowLine(global) {
 
 /**
  * Helper function to create a chevron element for the overflow element
+ * @param {!Window} global The window object of the iframe
  * @return {Node}
  */
 function getOverflowChevron(global) {
