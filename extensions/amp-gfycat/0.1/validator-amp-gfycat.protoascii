@@ -21,6 +21,7 @@ tags: {  # amp-gfycat
   spec_name: "amp-gfycat extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-gfycat"
   attrs: {
     name: "async"
     mandatory: true

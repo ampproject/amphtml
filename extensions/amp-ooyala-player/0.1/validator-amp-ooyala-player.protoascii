@@ -19,6 +19,7 @@ tags: {  # amp-ooyala-player
   spec_name: "amp-ooyala-player extension .js script"
   mandatory_parent: "HEAD"
   also_requires_tag: "amp-ooyala-player"
+  unique: true
   attrs: {
     name: "async"
     mandatory: true

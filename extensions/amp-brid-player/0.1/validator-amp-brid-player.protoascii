@@ -21,6 +21,7 @@ tags: {  # amp-brid-player
   spec_name: "amp-brid-player extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-brid-player"
   attrs: {
     name: "async"
     mandatory: true

@@ -21,6 +21,7 @@ tags: {  # amp-vine
   spec_name: "amp-vine extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-vine"
   attrs: {
     name: "async"
     mandatory: true

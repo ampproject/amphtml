@@ -18,6 +18,8 @@ tags: {  # amp-auto-ads
   tag_name: "SCRIPT"
   spec_name: "amp-auto-ads extension .js script"
   mandatory_parent: "HEAD"
+  unique: true
+  also_requires_tag: "amp-auto-ads"
   attrs: {
     name: "async"
     mandatory: true
@@ -44,10 +46,16 @@ tags: {  # amp-auto-ads
       error_message: "contents"
     }
   }
+  spec_url: "https://github.com/ampproject/amphtml/issues/6196"
 }
 tags: {  # <amp-auto-ads>
   html_format: AMP
   tag_name: "AMP-AUTO-ADS"
+  disallowed_ancestor: "AMP-AUTO-ADS"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  also_requires_tag: "amp-auto-ads extension .js script"
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
+
+  spec_url: "https://github.com/ampproject/amphtml/issues/6196"
 }
