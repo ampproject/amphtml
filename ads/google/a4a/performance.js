@@ -40,7 +40,10 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
  */
 export class BaseLifecycleReporter {
   constructor() {
-    /** @private */
+    /**
+     * @type {!Object<string, string>}
+     * @private
+     */
     this.extraVariables_ = new Object(null);
   }
 
@@ -79,7 +82,7 @@ export class BaseLifecycleReporter {
       return;
     }
     if (value === null || value === undefined || value === '') { return; }
-    this.extraVariables_[parameter] = value;
+    this.extraVariables_[parameter] = String(value);
   }
 
   /**
@@ -145,7 +148,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.getDeltaTime_ = (win.performance && win.performance.now.bind(
             win.performance)) || (() => {return Date.now() - this.initTime_;});
 
-    /** @private @const */
+    /** (Not constant b/c this can be overridden for testing.) @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
 
     /**
@@ -185,7 +188,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @param {string} name  Metric name to send.
-   * @param {!Object<string, string|number>=} opt_extraParams
+   * @param {!Object<string, string>=} opt_extraParams
    * @returns {string}  URL to send metrics to.
    * @private
    */

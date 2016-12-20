@@ -98,7 +98,7 @@ export function googleAdUrl(
 
 /**
  * @param {!ArrayBuffer} creative
- * @param {!Headers} responseHeaders
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
  */
 export function extractGoogleAdCreativeAndSignature(

@@ -742,8 +742,9 @@ export class AmpA4A extends AMP.BaseElement {
    * for this creative / the creative is not valid AMP.
    *
    * @param {!ArrayBuffer} unusedResponseArrayBuffer content as array buffer
-   * @param {!Headers} unusedResponseHeaders Fetch API Headers object (or polyfill
-   *     for it) containing the response headers.
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedResponseHeaders
+   *   XHR service FetchResponseHeaders object containing the response
+   *   headers.
    * @return {!Promise<!AdResponseDef>}
    */
   extractCreativeAndSignature(unusedResponseArrayBuffer,
