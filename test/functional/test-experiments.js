@@ -384,6 +384,12 @@ describe('toggleExperiment', () => {
     resetExperimentToggles_();
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
+    // Toggle transiently should still work
+    expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
+    expect(isExperimentOn(win, 'e1')).to.be.false;
+    resetExperimentToggles_(); // cache reset should bring it back to true
+    expect(isExperimentOn(win, 'e1')).to.be.true;
+
     // Sanity check, the global setting should never be changed.
     expect(win.AMP_CONFIG.e1).to.equal(1);
   });
