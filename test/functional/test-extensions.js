@@ -437,15 +437,13 @@ describes.sandboxed('Extensions', {}, () => {
       expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
       expect(iframeWin.ampExtendedElements['amp-img'])
           .to.not.equal(ElementStub);
-      expect(iframeWin.ampExtendedElements['amp-video']).to.exist;
-      expect(iframeWin.ampExtendedElements['amp-video'])
-          .to.not.equal(ElementStub);
       expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
       expect(iframeWin.ampExtendedElements['amp-pixel'])
           .to.not.equal(ElementStub);
       // Legacy elements are installed as well.
       expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
       expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
     });
 
     it('should adopt core services', () => {

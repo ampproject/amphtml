@@ -63,7 +63,6 @@ import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc,} from
     './service/url-replacements-impl';
-import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState,} from
     './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
@@ -118,7 +117,6 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
-  installVideoManagerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
 
