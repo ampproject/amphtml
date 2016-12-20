@@ -113,8 +113,9 @@ export class LiveListManager {
     }
     return xhrFor(this.win)
         // TODO(erwinm): add update time here when possible.
-        .fetchDocument(url)
-        .then(this.getLiveLists_.bind(this));
+        .fetchDocument(url, {
+          requireAmpResponseSourceOrigin: false,
+        }).then(this.getLiveLists_.bind(this));
   }
 
   /**

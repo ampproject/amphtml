@@ -74,7 +74,9 @@ export class PinItButton {
    */
   fetchCount() {
     const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${this.url}`;
-    return this.xhr.fetchJson(url);
+    return this.xhr.fetchJson(url, {
+      requireAmpResponseSourceOrigin: false,
+    });
   }
 
   /**
