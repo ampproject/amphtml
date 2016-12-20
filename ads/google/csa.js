@@ -24,17 +24,18 @@ const overflowHeight = 40;
 
 /**
  * Enum for different AdSense Products
- * UNSUPPORTED: Value if we can't determine which product to request
- * AFS: AdSense for Search
- * AFSH: AdSeense for Shopping
- * AFSHBACKFILL: AdSense for Shopping, backfilled with AdSense for Search
  * @enum {number}
+ * @visibleForTesting
  */
-const ADTYPE = {
+export const AD_TYPE = {
+  /** Value if we can't determine which product to request */
   UNSUPPORTED: 0,
+  /** AdSense for Search */
   AFS: 1,
+  /** AdSense for Shopping */
   AFSH: 2,
-  AFSHBACKFILL: 3,
+  /** AdSense for Shopping, backfilled with AdSense for Search */
+  AFSH_BACKFILL: 3,
 };
 
 
@@ -75,7 +76,7 @@ export function csa(global, data) {
       Object(tryParseJson(data['afsAdblockOptions'])), adblockOptions);
 
   // Special case for AFSh when "auto" is the requested width
-  if (afshAd != null && afshAd['width'] == 'auto') {
+  if (afshAd['width'] == 'auto') {
     afshAd['width'] = width;
   }
 
@@ -168,25 +169,30 @@ export function resizeDeniedHandler(global, container, requestedHeight) {
  * Make a request for either AFS or AFSh
  * @param {!Window} global The window object of the iframe
  * @param {!Object} data The data passed in by the partner
- * @param {?Object} afsP The parsed AFS page options object
- * @param {?Object} afsA The parsed AFS adblock options object
- * @param {?Object} afshP The parsed AFSh page options object
- * @param {?Object} afshA The parsed AFSh adblock options object
+ * @param {!Object} afsP The parsed AFS page options object
+ * @param {!Object} afsA The parsed AFS adblock options object
+ * @param {!Object} afshP The parsed AFSh page options object
+ * @param {!Object} afshA The parsed AFSh adblock options object
  */
 function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
   const type = getAdType(data);
-  if (type == ADTYPE.AFS) {
-    // Do not backfill, request AFS
-    afsA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
-    global._googCsa('ads', afsP, afsA);
-  } else if (type == ADTYPE.AFSH) {
-    // Do not backfill, request AFSh
-    afshA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
-    global._googCsa('plas', afshP, afshA);
-  } else if (type == ADTYPE.AFSHBACKFILL) {
-    // Backfill, request AFSh
-    afshA['adLoadedCallback'] = resizeIframe.bind(null, global, afsP, afsA);
-    global._googCsa('plas', afshP, afshA);
+
+  switch (type) {
+    case AD_TYPE.AFS:
+      /** Do not backfill, request AFS */
+      afsA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
+      global._googCsa('ads', afsP, afsA);
+      break;
+    case AD_TYPE.AFSH:
+      /** Do not backfill, request AFSh */
+      afshA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
+      global._googCsa('plas', afshP, afshA);
+    case AD_TYPE.AFSH_BACKFILL:
+      /** Backfill with AFS, request AFSh */
+      afshA['adLoadedCallback'] = resizeIframe.bind(null, global, afsP, afsA);
+      global._googCsa('plas', afshP, afshA);
+    default:
+      return;
   }
 }
 
@@ -197,16 +203,16 @@ function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
  */
 function getAdType(data) {
   if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
-    return ADTYPE.AFS;
+    return AD_TYPE.AFS;
   }
   if (data['afsPageOptions'] == null && data['afshPageOptions'] != null) {
-    return ADTYPE.AFSH;
+    return AD_TYPE.AFSH;
   }
   if (data['afsPageOptions'] != null && data['afshPageOptions'] != null) {
-    return ADTYPE.AFSHBACKFILL;
+    return AD_TYPE.AFSH_BACKFILL;
   }
   else {
-    return ADTYPE.UNSUPPORTED;
+    return AD_TYPE.UNSUPPORTED;
   }
 }
 

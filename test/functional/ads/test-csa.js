@@ -20,24 +20,10 @@ import {
   resizeIframe,
   resizeSuccessHandler,
   resizeDeniedHandler,
+  AD_TYPE,
 } from '../../../ads/google/csa';
 import * as sinon from 'sinon';
 import * as _3p from '../../../3p/3p';
-
-/**
- * Enum for different AdSense Products
- * UNSUPPORTED: Value if we can't determine which product to request
- * AFS: AdSense for Search
- * AFSH: AdSeense for Shopping
- * AFSHBACKFILL: AdSense for Shopping, backfilled with AdSense for Search
- * @enum {number}
- */
-const ADTYPE = {
-  UNSUPPORTED: 0,
-  AFS: 1,
-  AFSH: 2,
-  AFSHBACKFILL: 3,
-};
 
 
 function getAds(type) {
@@ -51,11 +37,11 @@ function getAds(type) {
     afshAdblockOptions: '{"width": "auto", "height": 300}',
   };
   switch (type) {
-    case ADTYPE.AFS:
+    case AD_TYPE.AFS:
       return Object.assign(generic, afsObj);
-    case ADTYPE.AFSH:
+    case AD_TYPE.AFSH:
       return Object.assign(generic, afshObj);
-    case ADTYPE.AFSHBACKFILL:
+    case AD_TYPE.AFSH_BACKFILL:
       return Object.assign(generic, afsObj, afshObj);
     default:
       return {};
@@ -92,7 +78,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
 
   describe('inputs', () => {
     it('should create a csa container', () => {
-      csa(win, getAds(ADTYPE.AFS));
+      csa(win, getAds(AD_TYPE.AFS));
       const container = win.document.getElementById('csacontainer');
       expect(container).not.to.be.null;
     });
@@ -111,17 +97,17 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
     });
 
     it('should request AFS', () => {
-      csa(win, getAds(ADTYPE.AFS));
+      csa(win, getAds(AD_TYPE.AFS));
       expect(googCsaSpy.args[0][0]).to.equal('ads');
     });
 
     it('should request AFSh', () => {
-      csa(win, getAds(ADTYPE.AFSH));
+      csa(win, getAds(AD_TYPE.AFSH));
       expect(googCsaSpy.args[0][0]).to.equal('plas');
     });
 
     it('should request AFSh (backfill)', () => {
-      csa(win, getAds(ADTYPE.AFSHBACKFILL));
+      csa(win, getAds(AD_TYPE.AFSH_BACKFILL));
       expect(googCsaSpy.args[0][0]).to.equal('plas');
     });
   });
