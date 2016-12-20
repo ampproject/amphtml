@@ -115,7 +115,6 @@ describe('amp-fx-flying-carpet', () => {
 
   it('should listen to build callback of children', () => {
     let img;
-    let buildCalled = false;
     let layoutSpy;
     let childLayoutSpy;
     return getAmpFlyingCarpet((iframe, flyingCarpet) => {
@@ -128,14 +127,14 @@ describe('amp-fx-flying-carpet', () => {
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       return [img];
-    }).then((flyingCarpet) => {
+    }).then(flyingCarpet => {
       expect(layoutSpy).to.have.been.called;
 
       // Now, allow the image to build.
       installImg(flyingCarpet.ownerDocument.defaultView);
 
       childLayoutSpy = sandbox.spy(img.implementation_, 'layoutCallback');
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         setTimeout(resolve, 32);
       });
     }).then(() => {
