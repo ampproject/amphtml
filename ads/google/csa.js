@@ -187,10 +187,12 @@ function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
       /** Do not backfill, request AFSh */
       afshA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
       global._googCsa('plas', afshP, afshA);
+      break;
     case AD_TYPE.AFSH_BACKFILL:
       /** Backfill with AFS, request AFSh */
       afshA['adLoadedCallback'] = resizeIframe.bind(null, global, afsP, afsA);
       global._googCsa('plas', afshP, afshA);
+      break;
     default:
       return;
   }
