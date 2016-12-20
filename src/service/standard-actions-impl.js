@@ -15,7 +15,10 @@
  */
 
 import {actionServiceForDoc} from '../action';
+import {bindForDoc} from '../bind';
+import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
+import {historyForDoc} from '../history';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {toggle} from '../style';
 
@@ -31,6 +34,9 @@ export class StandardActions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const @private {!./action-impl.ActionService} */
     this.actions_ = actionServiceForDoc(ampdoc);
 
@@ -50,7 +56,29 @@ export class StandardActions {
    * @private
    */
   installActions_(actionService) {
+    actionService.addGlobalTarget('AMP', this.handleAmpTarget.bind(this));
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
+  }
+
+  /**
+   * Handles global `AMP` actions.
+   *
+   * See `amp-actions-and-events.md` for documentation.
+   *
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleAmpTarget(invocation) {
+    switch (invocation.method) {
+      case 'setState':
+        bindForDoc(this.ampdoc).then(bind => {
+          bind.setState(invocation.args);
+        });
+        return;
+      case 'goBack':
+        historyForDoc(this.ampdoc).goBack();
+        return;
+    }
+    throw user().createError('Unknown AMP action ', invocation.method);
   }
 
   /**
@@ -59,7 +87,7 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    const target = invocation.target;
+    const target = dev().assertElement(invocation.target);
     this.resources_.mutateElement(target, () => {
       if (target.classList.contains('-amp-element')) {
         target./*OK*/collapse();

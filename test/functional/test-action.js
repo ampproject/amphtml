@@ -602,6 +602,48 @@ describe('Action common handler', () => {
 });
 
 
+describes.sandboxed('Action global target', {}, () => {
+  let win;
+  let action;
+
+  beforeEach(() => {
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
+  });
+
+  it('should register global target', () => {
+    const target1 = sandbox.spy();
+    const target2 = sandbox.spy();
+    const event = {};
+    action.addGlobalTarget('target1', target1);
+    action.addGlobalTarget('target2', target2);
+
+    const element = document.createElement('div');
+    element.setAttribute('on', 'tap:target1.action1(a=b)');
+    action.trigger(element, 'tap', event);
+    expect(target2).to.not.be.called;
+    expect(target1).to.be.calledOnce;
+    const inv = target1.args[0][0];
+    expect(inv.target).to.equal(document);
+    expect(inv.method).to.equal('action1');
+    expect(inv.source).to.equal(element);
+    expect(inv.event).to.equal(event);
+    expect(inv.args['a']).to.equal('b');
+
+    const element2 = document.createElement('div');
+    element2.setAttribute('on', 'tap:target2.action1');
+    action.trigger(element2, 'tap', event);
+    expect(target2).to.be.calledOnce;
+    expect(target1).to.be.calledOnce;
+  });
+});
+
+
 describe('Core events', () => {
   let sandbox;
   let win;
