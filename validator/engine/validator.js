@@ -1078,10 +1078,13 @@ class CdataMatcher {
       const parsedImageUrlSpec =
           new ParsedUrlSpec(cdataSpec.cssSpec.imageUrlSpec);
       for (const url of parsedUrls) {
-        ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
-                                             parsedImageUrlSpec)
-            .validateUrlAndProtocolInStylesheet(
-                context, url, this.tagSpec_, validationResult);
+        const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
+            new ParsedUrlSpecStylesheetErrorAdapter(url.line, url.col) :
+            null;
+        validateUrlAndProtocol(
+            ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
+                                                 parsedImageUrlSpec),
+            adapter, context, url.utf8Url, this.tagSpec_, validationResult);
       }
       const visitor = new InvalidAtRuleVisitor(
           this.tagSpec_, cdataSpec.cssSpec, context, validationResult);
@@ -1398,110 +1401,100 @@ class ParsedUrlSpec {
     }
   }
 
-  /**
-   * @param {!Context} context
-   * @param {string} attrName
-   * @param {string} url
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  validateUrlAndProtocolInAttr(context, attrName, url, tagSpec, result) {
-    this.validateUrlAndProtocol(
-        new ParsedUrlSpec.AttrErrorAdapter_(attrName), context, url, tagSpec,
-        result);
+  /** @return {amp.validator.UrlSpec} */
+  getSpec() {
+    return this.spec_;
   }
 
-  /**
-   * @param {!Context} context
-   * @param {!parse_css.ParsedCssUrl} url
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  validateUrlAndProtocolInStylesheet(context, url, tagSpec, result) {
-    this.validateUrlAndProtocol(
-        new ParsedUrlSpec.StylesheetErrorAdapter_(url.line, url.col), context,
-        url.utf8Url, tagSpec, result);
+  /** @return {!Object<string, number>} */
+  getAllowedProtocols() {
+    return this.allowedProtocols_;
   }
 
-  /**
-   * @param
-   * {ParsedUrlSpec.AttrErrorAdapter_|ParsedUrlSpec.StylesheetErrorAdapter_}
-   * adapter
-   * @param {!Context} context
-   * @param {string} urlStr
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   */
-  validateUrlAndProtocol(adapter, context, urlStr, tagSpec, result) {
-    const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
-    if (urlStr.match(onlyWhitespaceRe) !== null &&
-        (this.spec_.allowEmpty === null || this.spec_.allowEmpty === false)) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.missingUrl(context, tagSpec, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    const url = new parse_url.URL(urlStr);
-    if (!url.isValid) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.invalidUrl(context, urlStr, tagSpec, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    // Technically, an URL such as "script :alert('foo')" is considered a
-    // relative URL, similar to "./script%20:alert(%27foo%27)" since space is
-    // not a legal character in a URL protocol. This is what parse_url.URL will
-    // determine. However, some very old browsers will ignore whitespace in URL
-    // protocols and will treat this as javascript execution. We must be safe
-    // regardless of the client. This RE is much more aggressive at extracting
-    // a protcol than parse_url.URL for this reason.
-    const re = /^([^:\/?#.]+):.*$/;
-    const match = re.exec(urlStr);
-    let protocol = '';
-    if (match !== null) {
-      protocol = match[1];
-      protocol = protocol.toLowerCase().trimLeft();
-    } else {
-      protocol = url.protocol;
-    }
-    if (protocol.length > 0 &&
-        !this.allowedProtocols_.hasOwnProperty(protocol)) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    if (!this.spec_.allowRelative &&
-        (!url.hasProtocol || url.protocol.length == 0)) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    const domain = url.host.toLowerCase();
-    if (domain.length > 0 && this.disallowedDomains_.hasOwnProperty(domain)) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        adapter.disallowedDomain(context, domain, tagSpec, result);
-      } else {
-        result.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
+  /** @return {!Object<string, number>} */
+  getDisallowedDomains() {
+    return this.disallowedDomains_;
   }
 }
 
 /**
- * @private
+ * @param {!ParsedUrlSpec} parsedUrlSpec
+ * @param {ParsedUrlSpecAttrErrorAdapter|ParsedUrlSpecStylesheetErrorAdapter}
+ * adapter
+ * @param {!Context} context
+ * @param {string} urlStr
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!amp.validator.ValidationResult} result
  */
-ParsedUrlSpec.AttrErrorAdapter_ = class {
+function validateUrlAndProtocol(
+    parsedUrlSpec, adapter, context, urlStr, tagSpec, result) {
+  const spec = parsedUrlSpec.getSpec();
+  const onlyWhitespaceRe = /^[\s\xa0]*$/;  // includes non-breaking space
+  if (urlStr.match(onlyWhitespaceRe) !== null &&
+      (spec.allowEmpty === null || spec.allowEmpty === false)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.missingUrl(context, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  const url = new parse_url.URL(urlStr);
+  if (!url.isValid) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.invalidUrl(context, urlStr, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  // Technically, an URL such as "script :alert('foo')" is considered a relative
+  // URL, similar to "./script%20:alert(%27foo%27)" since space is not a legal
+  // character in a URL protocol. This is what parse_url.URL will determine.
+  // However, some very old browsers will ignore whitespace in URL protocols and
+  // will treat this as javascript execution. We must be safe regardless of the
+  // client. This RE is much more aggressive at extracting a protcol than
+  // parse_url.URL for this reason.
+  const re = /^([^:\/?#.]+):.*$/;
+  const match = re.exec(urlStr);
+  let protocol = '';
+  if (match !== null) {
+    protocol = match[1];
+    protocol = protocol.toLowerCase().trimLeft();
+  } else {
+    protocol = url.protocol;
+  }
+  if (protocol.length > 0 &&
+      !parsedUrlSpec.getAllowedProtocols().hasOwnProperty(protocol)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  if (!spec.allowRelative && (!url.hasProtocol || url.protocol.length == 0)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.disallowedRelativeUrl(context, urlStr, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+  const domain = url.host.toLowerCase();
+  if (domain.length > 0 &&
+      parsedUrlSpec.getDisallowedDomains().hasOwnProperty(domain)) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      adapter.disallowedDomain(context, domain, tagSpec, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
+}
+
+/** @private */
+class ParsedUrlSpecAttrErrorAdapter {
   /**
    * @param {string} attrName
    */
@@ -1580,12 +1573,12 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
         /* params */[this.attrName_, getTagSpecName(tagSpec), url],
         tagSpec.specUrl, result);
   }
-};
+}
 
 /**
  * @private
  */
-ParsedUrlSpec.StylesheetErrorAdapter_ = class {
+class ParsedUrlSpecStylesheetErrorAdapter {
   /**
    * @param {number} line
    * @param {number} col
@@ -1667,7 +1660,7 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
         this.lineCol_,
         /* params */[getTagSpecName(tagSpec), url], tagSpec.specUrl, result);
   }
-};
+}
 
 /**
  * ParsedAttrTriggerSpec is used by ParsedAttrSpec to determine which
@@ -1891,6 +1884,13 @@ class ParsedAttrSpec {
   getTriggerSpec() {
     return this.triggerSpec_;
   }
+
+  /**
+   * @return {!ParsedUrlSpec}
+   */
+  getValueUrlSpec() {
+    return this.valueUrlSpec_;
+  }
 }
 
 /**
@@ -1956,10 +1956,14 @@ function validateAttrValueUrl(
     return;
   }
   maybeUris = sortAndUniquify(maybeUris);
+  const adapter = amp.validator.GENERATE_DETAILED_ERRORS ?
+      new ParsedUrlSpecAttrErrorAdapter(attrName) :
+      null;
   for (const maybeUri of maybeUris) {
     const unescapedMaybeUri = goog.string.unescapeEntities(maybeUri);
-    parsedAttrSpec.valueUrlSpec_.validateUrlAndProtocolInAttr(
-        context, attrName, unescapedMaybeUri, tagSpec, result);
+    validateUrlAndProtocol(
+        parsedAttrSpec.getValueUrlSpec(), adapter, context, unescapedMaybeUri,
+        tagSpec, result);
     if (result.status === amp.validator.ValidationResult.Status.FAIL) {
       return;
     }
