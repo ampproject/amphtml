@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Directions: to run this test locally you will need to add ".max" in
- * ampdoc-with-messaging.html line 24 like this:
- * <script src="...amp-viewer-integration-0.1.js"></script> =>
- * <script src="...amp-viewer-integration-0.1.max.js"></script>
- * but don't submit this otherwise the Travis won't build.
- */
-
 import {Messaging} from '../messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
 
