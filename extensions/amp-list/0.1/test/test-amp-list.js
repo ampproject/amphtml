@@ -95,12 +95,11 @@ describe('amp-list component', () => {
   });
 
   it('should fail to load b/c data is absent', () => {
-    const itemElement = document.createElement('div');
     xhrMock.expects('fetchJson')
         .returns(Promise.resolve({})).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
-        .rejectedWith(/Response must contain an array/)
+        .rejectedWith(/Response must contain an array/);
   });
 
   it('should load and render with a different root', () => {
