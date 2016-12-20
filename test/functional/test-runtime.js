@@ -84,18 +84,22 @@ describes.fakeWin('runtime', {
     const initial = win.ampExtendedElements || {};
     expect(initial['amp-ad']).to.be.undefined;
     expect(initial['amp-embed']).to.be.undefined;
+    expect(initial['amp-video']).to.be.undefined;
     adopt(win);
     expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
     expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
   });
 
   it('should install legacy stubs in shadow-doc', () => {
     const initial = win.ampExtendedElements || {};
     expect(initial['amp-ad']).to.be.undefined;
     expect(initial['amp-embed']).to.be.undefined;
+    expect(initial['amp-video']).to.be.undefined;
     adoptShadowMode(win);
     expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
     expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
   });
 
   it('should NOT set cursor:pointer on document element on non-IOS', () => {

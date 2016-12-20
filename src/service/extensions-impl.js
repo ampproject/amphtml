@@ -33,7 +33,6 @@ import {
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
-import {installVideo} from '../../builtins/amp-video';
 import {calculateExtensionScriptUrl} from './extension-location';
 
 
@@ -572,7 +571,6 @@ function shouldUseCompiledJs() {
 export function installBuiltinElements(win) {
   installImg(win);
   installPixel(win);
-  installVideo(win);
 }
 
 
@@ -584,7 +582,6 @@ export function installBuiltinElements(win) {
 function copyBuiltinElementsToChildWindow(parentWin, childWin) {
   copyElementToChildWindow(parentWin, childWin, 'amp-img');
   copyElementToChildWindow(parentWin, childWin, 'amp-pixel');
-  copyElementToChildWindow(parentWin, childWin, 'amp-video');
 }
 
 
@@ -594,6 +591,7 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
 export function stubLegacyElements(win) {
   stubElementIfNotKnown(win, 'amp-ad');
   stubElementIfNotKnown(win, 'amp-embed');
+  stubElementIfNotKnown(win, 'amp-video');
 }
 
 
