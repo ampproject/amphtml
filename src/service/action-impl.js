@@ -61,14 +61,14 @@ let ActionInfoDef;
  */
 export class ActionInvocation {
   /**
-   * @param {!Node} target
+   * @param {!Element} target
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
   constructor(target, method, args, source, event) {
-    /** @const {!Node} */
+    /** @const {!Element} */
     this.target = target;
     /** @const {string} */
     this.method = method;
@@ -244,7 +244,7 @@ export class ActionService {
     const globalTarget = this.globalTargets_[actionInfo.target];
     if (globalTarget) {
       const invocation = new ActionInvocation(
-          this.root_,
+          this.ampdoc.getBody(),
           actionInfo.method,
           actionInfo.args,
           action.node,
