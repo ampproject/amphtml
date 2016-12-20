@@ -128,13 +128,14 @@ export function tryParseJson(json, opt_onFailed) {
 
 
 /**
- * @param {!Object} obj
+ * @param {*} obj
  * @param {string} key
  * @return {boolean}
  */
 function hasOwnProperty(obj, key) {
-  if (obj == null) {
+  if (obj == null || typeof obj != 'object') {
     return false;
   }
-  return Object.prototype.hasOwnProperty.call(obj, key);
+  return Object.prototype.hasOwnProperty.call(
+      /** @type {!Object} */ (obj), key);
 }
