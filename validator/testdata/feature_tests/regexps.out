@@ -18,3 +18,4 @@ feature_tests/regexps.html:103:2 The attribute 'class' in tag 'div' is set to th
 feature_tests/regexps.html:110:2 The attribute 'id' in tag 'div' is set to the invalid value 'i-amphtml-abc'. [DISALLOWED_HTML]
 feature_tests/regexps.html:113:7 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
 feature_tests/regexps.html:113:7 The tag 'amp-audio extension .js script' is missing or incorrect, but required by 'amp-audio'. (see https://www.ampproject.org/docs/reference/extended/amp-audio.html) [AMP_TAG_PROBLEM]
+feature_tests/regexps.html:113:7 The tag 'amp-vine' is missing or incorrect, but required by 'amp-vine extension .js script'. This will soon be an error. (see https://www.ampproject.org/docs/reference/extended/amp-vine.html) [DEPRECATION]

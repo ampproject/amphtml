@@ -33,6 +33,7 @@ describe('Viewer', () => {
   let clock;
   let events;
   let errorStub;
+  let expectedErrorStub;
 
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
@@ -83,6 +84,7 @@ describe('Viewer', () => {
     installTimerService(windowApi);
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
+    expectedErrorStub = sandbox.stub(dev(), 'expectedError');
     windowMock = sandbox.mock(windowApi);
     viewer = new Viewer(ampdoc);
   });
@@ -1051,8 +1053,8 @@ describe('Viewer', () => {
         // Unconfirmed referrer is reset. Async error is thrown.
         expect(viewer.getUnconfirmedReferrerUrl())
             .to.equal('https://acme.org/docref');
-        expect(errorStub.callCount).to.equal(1);
-        expect(errorStub.calledWith('Viewer',
+        expect(expectedErrorStub.callCount).to.equal(1);
+        expect(expectedErrorStub.calledWith('Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer referrer override/);
             }))).to.be.true;

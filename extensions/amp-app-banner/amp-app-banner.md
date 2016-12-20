@@ -43,6 +43,8 @@ limitations under the License.
   </tr>
 </table>
 
+####(Dec. 15, 2016) Note: We have discovered an issue with `<amp-app-banner>` going into the holiday code freeze. Banner links are not forwarding correctly to the app store on iOS inside the AMP Viewer context. We have issued a temporary mitigation to hide the banner in iOS inside the AMP Viewer, until we can launch a proper fix after the code freeze. Thanks for your patience!
+
 ## Behavior
 `amp-app-banner` is a wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 

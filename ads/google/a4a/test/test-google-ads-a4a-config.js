@@ -20,7 +20,7 @@ import {
     isInExperiment,
     isInManualExperiment,
 } from '../traffic-experiments';
-import {resetExperimentToggles_} from '../../../../src/experiments';
+import {resetExperimentTogglesForTesting} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
@@ -86,7 +86,7 @@ describe('a4a_config', () => {
   });
 
   afterEach(() => {
-    resetExperimentToggles_();  // Clear saved, page-level experiment state.
+    resetExperimentTogglesForTesting();  // Clear saved, page-level experiment state.
     resetServiceForTesting(win, 'viewer');
     sandbox.restore();
     document.body.removeChild(element);
@@ -342,7 +342,7 @@ describe('a4a_config hash param parsing', () => {
   });
 
   afterEach(() => {
-    resetExperimentToggles_();  // Clear saved, page-level experiment state.
+    resetExperimentTogglesForTesting();  // Clear saved, page-level experiment state.
     resetServiceForTesting(win, 'viewer');
     sandbox.restore();
   });

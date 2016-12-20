@@ -24,7 +24,7 @@ import {
   EXPERIMENT_ATTRIBUTE,
   isInManualExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
-import {resetExperimentToggles_} from '../../../../src/experiments';
+import {resetExperimentTogglesForTesting} from '../../../../src/experiments';
 import {parseUrl} from '../../../../src/url';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
@@ -51,7 +51,7 @@ describe('doubleclick-a4a-config', () => {
   });
   afterEach(() => {
     sandbox.restore();
-    resetExperimentToggles_();
+    resetExperimentTogglesForTesting();
   });
 
   describe('#doubleclickIsA4AEnabled', () => {

@@ -20,7 +20,8 @@ tags: {
   spec_name: "amp-selector extension .js script"
   also_requires_tag: "amp-selector"
   mandatory_parent: "HEAD"
-  unique_warning: true
+  unique: true
+  also_requires_tag_warning: "amp-selector"
   attrs: {
     name: "async"
     mandatory: true
@@ -56,17 +57,17 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   disallowed_ancestor: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-selector extension .js script"
-  attr_lists: "extended-amp-global"
   attrs: { name: "disabled" value: "" }
   attrs: { name: "form" }
   attrs: { name: "multiple" value: "" }
-  attrs: { name: "name" }
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
   }
   reference_points: {
     tag_spec_name: "AMP-SELECTOR child"
   }
+  attr_lists: "extended-amp-global"
+  attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-selector.html"
   amp_layout {
     supported_layouts: FILL
