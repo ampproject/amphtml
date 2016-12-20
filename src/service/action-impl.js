@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {bindForDoc} from '../bind';
 import {dev, user} from '../log';
 import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
@@ -62,14 +61,14 @@ let ActionInfoDef;
  */
 export class ActionInvocation {
   /**
-   * @param {!Element} target
+   * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
   constructor(target, method, args, source, event) {
-    /** @const {!Element} */
+    /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
@@ -103,6 +102,9 @@ export class ActionService {
 
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
+
+    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    this.globalTargets_ = map();
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = map();
@@ -142,6 +144,15 @@ export class ActionService {
         this.trigger(dev().assertElement(event.target), name, event);
       });
     }
+  }
+
+  /**
+   * Registers the action target that will receive all designated actions.
+   * @param {string} name
+   * @param {function(!ActionInvocation)} handler
+   */
+  addGlobalTarget(name, handler) {
+    this.globalTargets_[name] = handler;
   }
 
   /**
@@ -227,14 +238,18 @@ export class ActionService {
       return;
     }
 
-    if (action.actionInfo.target === 'AMP') {
-      if (action.actionInfo.method === 'setState') {
-        bindForDoc(this.ampdoc).then(bind => {
-          bind.setState(action.actionInfo.args);
-        });
-      } else {
-        this.actionInfoError_('unrecognized action', action.actionInfo, null);
-      }
+    const actionInfo = action.actionInfo;
+
+    // Global target, e.g. `AMP`.
+    const globalTarget = this.globalTargets_[actionInfo.target];
+    if (globalTarget) {
+      const invocation = new ActionInvocation(
+          this.root_,
+          actionInfo.method,
+          actionInfo.args,
+          action.node,
+          event);
+      globalTarget(invocation);
       return;
     }
 
