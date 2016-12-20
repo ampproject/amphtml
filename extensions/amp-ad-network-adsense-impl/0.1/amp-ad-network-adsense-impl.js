@@ -29,9 +29,11 @@ import {
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   getCorrelator,
+} from '../../../ads/google/a4a/utils';
+import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
-} from '../../../ads/google/a4a/utils';
+} from '../../../ads/google/a4a/google-data-reporter';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';

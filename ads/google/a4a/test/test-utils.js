@@ -16,10 +16,7 @@
 
 import {
   extractGoogleAdCreativeAndSignature,
-  setGoogleLifecycleVarsFromHeaders,
-  QQID_HEADER,
 } from '../utils';
-import {GoogleAdLifecycleReporter} from '../performance';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 
 describe('Google A4A utils', () => {
@@ -52,36 +49,5 @@ describe('Google A4A utils', () => {
             signature: null,
           });
     });
-  });
-
-  describes.fakeWin('#setGoogleLifecycleVarsFromHeaders', {amp: true}, env => {
-    const headerData = {};
-    const headerMock = {
-      get: h => { return h in headerData ? headerData[h] : null; },
-    };
-    let mockReporter;
-    beforeEach(() => {
-      const fakeElt = env.win.document.createElement('div');
-      env.win.document.body.appendChild(fakeElt);
-      mockReporter = new GoogleAdLifecycleReporter(
-          env.win, fakeElt, 'test', 69, 37);
-    });
-
-    it('should pick up qqid from headers', () => {
-      headerData[QQID_HEADER] = 'test qqid';
-      expect(mockReporter.extraVariables_).to.be.empty;
-      setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
-      expect(mockReporter.extraVariables_).to.have.property(
-          'qqid.37', 'test qqid');
-    });
-
-    it('should pick up rendering method from headers', () => {
-      headerData['X-AmpAdRender'] = 'fnord';
-      expect(mockReporter.extraVariables_).to.be.empty;
-      setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
-      expect(mockReporter.extraVariables_).to.have.property(
-          'rm.37', 'fnord');
-    });
-
   });
 });

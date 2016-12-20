@@ -17,19 +17,9 @@
 import {
   GoogleAdLifecycleReporter,
   BaseLifecycleReporter,
-  getLifecycleReporter,
 } from '../performance';
-import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {childElements} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
-import {
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';  // eslint-disable-line max-len
-import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
 import * as sinon from 'sinon';
 
 /**
@@ -72,113 +62,38 @@ function expectHasSiblingImgMatchingAll(element, matchList) {
       .to.be.true;
 }
 
-/**
- * Construct a lifecycle reporter for an element with a given eid in one of
- * the reporting namespaces.  If eid is not specified, creates an element with
- * no eid.
- * @param {string} namespace
- * @param {string} ad type
- * @param {string=} opt_eid
- * @returns {*}
- */
-function buildElementWithEid(namespace, type, opt_eid) {
-  return createIframePromise(false).then(iframeFixture => {
-    const win = iframeFixture.win;
-    const doc = iframeFixture.doc;
-    const elem = doc.createElement('div');
-    elem.setAttribute('type', type);
-    if (opt_eid) {
-      elem.setAttribute(EXPERIMENT_ATTRIBUTE, opt_eid);
-    }
-    doc.body.appendChild(elem);
-    const pseudoAmpElement = {
-      win,
-      element: elem,
-    };
-    return getLifecycleReporter(pseudoAmpElement, namespace, 0, 0);
-  });
-}
+describe('BaseLifecycleReporter', () => {
+  describes.fakeWin('', {}, env => {
+    let doc;
+    beforeEach(() => {
+      doc = env.win.document;
+    });
 
-describe('#getLifecycleReporter', () => {
-  const EXPERIMENT_BRANCH_EIDS = [
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
-    '117152632',
-  ];
-  const CONTROL_BRANCH_EIDS = [
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
-  ];
+    it('should not modify the DOM', () => {
+      expect(doc.querySelector('img')).not.to.be.ok;
+      const reporter = new BaseLifecycleReporter();
+      reporter.sendPing('foo');
+      expect(doc.querySelector('img')).not.to.be.ok;
+    });
 
-  ['adsense', 'doubleclick'].forEach(type => {
-    describe(`type = ${type}`, () => {
-      EXPERIMENT_BRANCH_EIDS.forEach(eid => {
-        it(`should return real reporter for a4a eid = ${eid}`, () => {
-          return buildElementWithEid('a4a', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-          });
-        });
-
-        it(`should return a null reporter for amp eid = ${eid}`, () => {
-          return buildElementWithEid('amp', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-          });
-        });
-
-        it(`should return null reporter for bogus namespace eid = ${eid}`,
-            () => {
-              return buildElementWithEid('fnord', type, eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
-
-        it(`should return null reporter for non-Google ad, eid = ${eid}`,
-            () => {
-              return buildElementWithEid('a4a', 'a9', eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
+    it('should store single parameters', () => {
+      const reporter = new BaseLifecycleReporter();
+      expect(reporter.extraVariables_).to.be.empty;
+      reporter.setPingParameter('x', 3);
+      reporter.setPingParameter('y', 'kumquat');
+      expect(reporter.extraVariables_).to.deep.equal({
+        x: 3,
+        y: 'kumquat',
       });
+    });
 
-      CONTROL_BRANCH_EIDS.forEach(eid => {
-        it(`should return null reporter for a4a eid = ${eid}`, () => {
-          return buildElementWithEid('a4a', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-          });
-        });
-
-        it(`should return a real reporter for amp eid = ${eid}`, () => {
-          return buildElementWithEid('amp', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-          });
-        });
-
-        it(`should return null reporter for bogus namespace eid = ${eid}`,
-            () => {
-              return buildElementWithEid('fnord', type, eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
-
-        it(`should return null reporter for non-Google ad, eid = ${eid}`,
-            () => {
-              return buildElementWithEid('amp', 'a9', eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
-      });
-
-      for (const namespace in ['a4a', 'amp']) {
-        it(`should return null reporter for ${namespace} and no eid`, () => {
-          return buildElementWithEid(namespace, type).then(reporter => {
-            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-          });
-        });
-      }
+    it('should ignore null-ish parameter values', () => {
+      const reporter = new BaseLifecycleReporter();
+      expect(reporter.extraVariables_).to.be.empty;
+      reporter.setPingParameter('x', null);
+      reporter.setPingParameter('y', '');
+      reporter.setPingParameter('z', undefined);
+      expect(reporter.extraVariables_).to.be.empty;
     });
   });
 });

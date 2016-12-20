@@ -14,25 +14,9 @@
  * limitations under the License.
  */
 
-import {
-    parseExperimentIds,
-    isInManualExperiment,
-    randomlySelectUnsetPageExperiments,
-} from './traffic-experiments';
-import {
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
-import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
-} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {serializeQueryString} from '../../../src/url';
-import {getCorrelator, EXPERIMENT_ATTRIBUTE} from './utils';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
 
 /**
@@ -50,82 +34,6 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
  * desired.
  */
 
-/**
- * Check whether the element is in an experiment branch that is eligible for
- * monitoring.
- *
- * @param {!AMP.BaseElement} ampElement
- * @param {!string} namespace
- * @returns {boolean}
- */
-function isInReportableBranch(ampElement, namespace) {
-  // Handle the possibility of multiple eids on the element.
-  const eids = parseExperimentIds(
-      ampElement.element.getAttribute(EXPERIMENT_ATTRIBUTE));
-  const reportableA4AEids = {
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
-  };
-  const reportableControlEids = {
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
-  };
-  if (namespace == 'a4a' &&
-      (eids.some(x => { return x in reportableA4AEids; }) ||
-       isInManualExperiment(ampElement.element))) {
-    return true;
-  } else if (namespace == 'amp' &&
-          eids.some(x => { return x in reportableControlEids; })) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
- * @param {!AMP.BaseElement} ampElement The element on whose lifecycle this
- *    reporter will be reporting.
- * @param {string} namespace
- * @param {number|string} slotId A unique numeric identifier in the page for
- *    the given element's slot.
- * @return {!GoogleAdLifecycleReporter|!BaseLifecycleReporter}
- */
-export function getLifecycleReporter(ampElement, namespace, slotId) {
-  // Carve-outs: We only want to enable profiling pingbacks when:
-  //   - The ad is from one of the Google networks (AdSense or Doubleclick).
-  //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
-  //     internal, client-side selection or via external, Google Search
-  //     selection).
-  //   - We haven't turned off profiling via the rate controls in
-  //     build-system/global-config/{canary,prod}-config.json
-  // If any of those fail, we use the `BaseLifecycleReporter`, which is a
-  // a no-op (sends no pings).
-  const type = ampElement.element.getAttribute('type');
-  const win = ampElement.win;
-  // In local dev mode, manually set the profiling rate, for testing/dev.
-  if (getMode().localDev) {
-    toggleExperiment(win, 'a4aProfilingRate', true, true);
-  }
-  randomlySelectUnsetPageExperiments(win, win.AMP_CONFIG['a4aProfilingRate']);
-  if ((type == 'doubleclick' || type == 'adsense') &&
-      isInReportableBranch(ampElement, namespace) &&
-      isExperimentOn(win, 'a4aProfilingRate')) {
-    let correlator;
-    if (typeof corr === 'undefined') {
-      correlator = getCorrelator(win);
-    } else {
-      correlator = corr;
-    }
-    return new GoogleAdLifecycleReporter(win, ampElement.element, namespace,
-        correlator, Number(slotId));
-  } else {
-    return new BaseLifecycleReporter();
-  }
-}
 
 /**
  * A NOOP base class for the LifecycleReporter
@@ -233,7 +141,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.initTime_ = (win.performance && win.performance.timing &&
         win.performance.timing.navigationStart) || Date.now();
 
-    /** @private {!function:number} @const */
+    /** @private {!function():number} @const */
     this.getDeltaTime_ = (win.performance && win.performance.now.bind(
             win.performance)) || (() => {return Date.now() - this.initTime_;});
 

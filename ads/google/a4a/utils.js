@@ -24,7 +24,6 @@ import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/viewer';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
-import {getLifecycleReporter} from './performance';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -308,48 +307,4 @@ export function getCorrelator(win, opt_cid) {
         opt_cid, documentInfoForDoc(win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
-}
-
-/**
- * Creates or reinitializes a lifecycle reporter for Google ad network
- * implementations.
- *
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
- * @return {!./performance.GoogleAdLifecycleReporter}
- */
-export function googleLifecycleReporterFactory(a4aElement) {
-  const reporter =
-      /** @type {!./performance.GoogleAdLifecycleReporter} */
-      (getLifecycleReporter(a4aElement, 'a4a',
-          a4aElement.element.getAttribute('data-amp-slot-index')));
-  const slotId = reporter.getSlotId();
-  reporter.setPingParameters({
-    'v_h': 'VIEWPORT_HEIGHT',
-    's_t': 'SCROLL_TOP',
-    'e': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
-  });
-  reporter.setPingParameter(
-      `adt.${slotId}`, a4aElement.element.getAttribute('type'));
-  return reporter;
-}
-
-/**
- * Sets reportable variables from ad response headers.
- *
- * @param {!FetchResponseHeaders} headers
- * @param {!./performance.GoogleAdLifecycleReporter} reporter
- */
-export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
-  // This is duplicated from the amp-a4a.js implementation.  It needs to be
-  // defined there because it's an implementation detail of that module, but
-  // we want to report it to Google b/c we're interested in how rendering mode
-  // affects Google ads.  However, we can't directly reference a variable
-  // in extensions/ from here.
-  const renderingMethodHeader = 'X-AmpAdRender';
-  const renderingMethodKey = `rm.${reporter.getSlotId()}`;
-  const qqidKey = `qqid.${reporter.getSlotId()}`;
-  const pingParameters = new Object(null);
-  pingParameters[qqidKey] = headers.get(QQID_HEADER);
-  pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
-  reporter.setPingParameters(pingParameters);
 }
