@@ -20,7 +20,8 @@ tags: {
   spec_name: "amp-selector extension .js script"
   also_requires_tag: "amp-selector"
   mandatory_parent: "HEAD"
-  unique_warning: true
+  unique: true
+  also_requires_tag_warning: "amp-selector"
   attrs: {
     name: "async"
     mandatory: true
