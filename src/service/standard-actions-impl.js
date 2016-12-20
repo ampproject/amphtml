@@ -61,7 +61,7 @@ export class StandardActions {
   }
 
   /**
-   * Hanldes global `AMP` actions.
+   * Handles global `AMP` actions.
    *
    * See `amp-actions-and-events.md` for documentation.
    *

@@ -65,14 +65,14 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should implement setState', () => {
-      const setStateStub = sandbox.spy();
-      const bind = {setState: setStateStub};
+      const setStateSpy = sandbox.spy();
+      const bind = {setState: setStateSpy};
       window.services.bind = {obj: bind};
       const args = {};
       standardActions.handleAmpTarget({method: 'setState', args});
       return bindForDoc(standardActions.ampdoc).then(() => {
-        expect(setStateStub).to.be.calledOnce;
-        expect(setStateStub).to.be.calledWith(args);
+        expect(setStateSpy).to.be.calledOnce;
+        expect(setStateSpy).to.be.calledWith(args);
       });
     });
   });
