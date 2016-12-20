@@ -32,7 +32,7 @@ import {domFingerprint} from './utils/dom-fingerprint';
  * If true, then in experiment where the passing of context metadata
  * has been moved from the iframe src hash to the iframe name attribute.
  */
-const nameExpOn = isExperimentOn(self, 'move-context-to-name');
+const iframeContextInName = isExperimentOn(self, 'move-context-to-name');
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -85,7 +85,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     mode: getModeObject(),
     canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
-    sentinel: generateSentinel(parentWindow),
+    amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     startTime,
@@ -127,7 +127,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
   let name;
-  if (nameExpOn) {
+  if (iframeContextInName) {
     // This name attribute may be overwritten if this frame is chosen to
     // be the master frame. That is ok, as we will read the name off
     // for our uses before that would occur.
@@ -159,7 +159,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     this.readyState = 'complete';
   };
   iframe.setAttribute(
-      'data-amp-3p-sentinel', attributes._context.sentinel);
+      'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
   return iframe;
 }
 

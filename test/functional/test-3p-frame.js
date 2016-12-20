@@ -44,7 +44,8 @@ describe('3p-frame', () => {
    * If true, then in experiment where the passing of context metadata
    * has been moved from the iframe src hash to the iframe name attribute.
    */
-  const nameExpOn = isExperimentOn(window, 'move-context-to-name');
+  const iframeContextInName = isExperimentOn(
+      window, 'move-context-to-name');
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -162,12 +163,12 @@ describe('3p-frame', () => {
     expect(locationHref).to.not.be.empty;
     const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
-    let sentinel;
-    if (nameExpOn) {
+    let amp3pSentinel;
+    if (iframeContextInName) {
       const name = JSON.parse(decodeURIComponent(iframe.name));
-      sentinel = name.attributes._context.sentinel;
+      amp3pSentinel = name.attributes._context.sentinel;
     } else {
-      sentinel = iframe.getAttribute('data-amp-3p-sentinel');
+      amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     }
     const fragment =
         '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
@@ -185,7 +186,7 @@ describe('3p-frame', () => {
         // Note also that running it using --files uses different DOM.
         ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
-        ',"sentinel":"' + sentinel + '"' +
+        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
@@ -193,7 +194,7 @@ describe('3p-frame', () => {
         '{"width":100,"height":200},"intersectionRect":{' +
         '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
         '"right":0,"x":0,"y":0}}}}';
-    if (nameExpOn) {
+    if (iframeContextInName) {
       expect(src).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html');
       const parsedFragment = JSON.parse(fragment);
@@ -361,7 +362,7 @@ describe('3p-frame', () => {
     };
 
     container.appendChild(div);
-    if (nameExpOn) {
+    if (iframeContextInName) {
       const name = JSON.parse(getIframe(window, div).name);
       resetBootstrapBaseUrlForTesting(window);
       resetCountForTesting();
