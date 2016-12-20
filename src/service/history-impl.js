@@ -111,6 +111,26 @@ export class History {
   }
 
   /**
+   * Requests navigation one step back. This request is only satisifed
+   * when the history has at least one step to go back in the context
+   * of this document.
+   * @return {!Promise}
+   */
+  goBack() {
+    return this.enque_(() => {
+      if (this.stackIndex_ <= 0) {
+        // Nothing left to pop.
+        return Promise.resolve();
+      }
+      // Pop the current state. The binding will ignore the request if
+      // it cannot satisfy it.
+      return this.binding_.pop(this.stackIndex_).then(stackIndex => {
+        this.onStackIndexUpdated_(stackIndex);
+      });
+    });
+  }
+
+  /**
    * Helper method to handle navigation to a local target, e.g. When a user clicks an
    * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
    *
