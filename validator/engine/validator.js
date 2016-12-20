@@ -1406,14 +1406,20 @@ class ParsedUrlSpec {
     return this.spec_;
   }
 
-  /** @return {!Object<string, number>} */
-  getAllowedProtocols() {
-    return this.allowedProtocols_;
+  /**
+   * @param {string} protocol
+   * @return {boolean}
+   */
+  isAllowedProtocol(protocol) {
+    return this.allowedProtocols_.hasOwnProperty(protocol);
   }
 
-  /** @return {!Object<string, number>} */
-  getDisallowedDomains() {
-    return this.disallowedDomains_;
+  /**
+   * @param {string} domain
+   * @return {boolean}
+   */
+  isDisallowedDomain(domain) {
+    return this.disallowedDomains_.hasOwnProperty(domain);
   }
 }
 
@@ -1464,8 +1470,7 @@ function validateUrlAndProtocol(
   } else {
     protocol = url.protocol;
   }
-  if (protocol.length > 0 &&
-      !parsedUrlSpec.getAllowedProtocols().hasOwnProperty(protocol)) {
+  if (protocol.length > 0 && !parsedUrlSpec.isAllowedProtocol(protocol)) {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       adapter.invalidUrlProtocol(context, protocol, tagSpec, result);
     } else {
@@ -1482,8 +1487,7 @@ function validateUrlAndProtocol(
     return;
   }
   const domain = url.host.toLowerCase();
-  if (domain.length > 0 &&
-      parsedUrlSpec.getDisallowedDomains().hasOwnProperty(domain)) {
+  if (domain.length > 0 && parsedUrlSpec.isDisallowedDomain(domain)) {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       adapter.disallowedDomain(context, domain, tagSpec, result);
     } else {
