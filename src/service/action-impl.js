@@ -61,14 +61,14 @@ let ActionInfoDef;
  */
 export class ActionInvocation {
   /**
-   * @param {!Element} target
+   * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
   constructor(target, method, args, source, event) {
-    /** @const {!Element} */
+    /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
