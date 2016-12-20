@@ -181,10 +181,7 @@ describe('toggleExperiment', () => {
     const doc = {
       cookie: cookiesString,
     };
-    const fakeWin = {
-      document: doc,
-    };
-    const on = toggleExperiment(fakeWin, experimentId, opt_on);
+    const on = toggleExperiment({document: doc}, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
     if (parts.length > 1) {
       expect(parts[1]).to.equal('path=/');
