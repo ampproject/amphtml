@@ -94,6 +94,30 @@ describe('amp-list component', () => {
     });
   });
 
+  it('should fail to load b/c data is absent', () => {
+    xhrMock.expects('fetchJson')
+        .returns(Promise.resolve({})).once();
+    templatesMock.expects('findAndRenderTemplateArray').never();
+    return expect(list.layoutCallback()).to.eventually.be
+        .rejectedWith(/Response must contain an array/);
+  });
+
+  it('should load and render with a different root', () => {
+    const different = [
+      {title: 'Title1'},
+    ];
+    element.setAttribute('items', 'different');
+    const itemElement = document.createElement('div');
+    xhrMock.expects('fetchJson')
+        .returns(Promise.resolve({different})).once();
+    templatesMock.expects('findAndRenderTemplateArray')
+        .withExactArgs(element, different)
+        .returns(Promise.resolve([itemElement])).once();
+    return list.layoutCallback().then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
+    });
+  });
+
   it('should set accessibility roles', () => {
     const items = [
       {title: 'Title1'},
