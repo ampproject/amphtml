@@ -360,7 +360,7 @@ export function fetchPolyfill(input, opt_init) {
       }
       if (xhr.status < 100 || xhr.status > 599) {
         xhr.onreadystatechange = null;
-        reject(new Error(`Unknown HTTP status ${xhr.status}`));
+        reject(user().createExpectedError(`Unknown HTTP status ${xhr.status}`));
         return;
       }
 
@@ -372,10 +372,10 @@ export function fetchPolyfill(input, opt_init) {
       }
     };
     xhr.onerror = () => {
-      reject(new Error('Network failure'));
+      reject(user().createExpectedError('Network failure'));
     };
     xhr.onabort = () => {
-      reject(new Error('Request aborted'));
+      reject(user().createExpectedError('Request aborted'));
     };
 
     if (init.method == 'POST') {
@@ -401,7 +401,7 @@ function createXhrRequest(method, url) {
     xhr = new XDomainRequest();
     xhr.open(method, url);
   } else {
-    throw new Error('CORS is not supported');
+    throw dev().createExpectedError('CORS is not supported');
   }
   return xhr;
 }
