@@ -90,8 +90,6 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     domFingerprint: domFingerprint(element),
     startTime,
   };
-  attributes.ampcontextVersion = (getMode().localDev ? 'LOCAL' :
-      '$internalRuntimeVersion$');
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {

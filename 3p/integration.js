@@ -143,14 +143,14 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
-let data;
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
-try {
-  data = parseFragment(location.hash);
+
+let data = parseFragment(location.hash);
+if (data) {
   window.context = data._context;
-} catch (err) {
+} else {
   try {
     // TODO(bradfrizzell@): Change the data structure of the attributes
     //    to make it less terrible.
@@ -615,14 +615,18 @@ export function ensureFramed(window) {
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
-  let json = fragment.substr(1);
-  // Some browser, notably Firefox produce an encoded version of the fragment
-  // while most don't. Since we know how the string should start, this is easy
-  // to detect.
-  if (json.indexOf('{%22') == 0) {
-    json = decodeURIComponent(json);
+  try {
+    let json = fragment.substr(1);
+    // Some browser, notably Firefox produce an encoded version of the fragment
+    // while most don't. Since we know how the string should start, this is easy
+    // to detect.
+    if (json.indexOf('{%22') == 0) {
+      json = decodeURIComponent(json);
+    }
+    return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
+  } catch (err) {
+    return null;
   }
-  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
 }
 
 /**
