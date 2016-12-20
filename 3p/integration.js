@@ -144,14 +144,14 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
-let data;
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
-try {
-  data = parseFragment(location.hash);
+
+let data = parseFragment(location.hash);
+if (data) {
   window.context = data._context;
-} catch (err) {
+} else {
   try {
     // TODO(bradfrizzell@): Change the data structure of the attributes
     //    to make it less terrible.
