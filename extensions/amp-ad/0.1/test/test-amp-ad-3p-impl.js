@@ -84,7 +84,7 @@ describe('amp-ad-3p-impl', () => {
         expect(iframe.style.display).to.equal('');
 
         let data;
-        if (nameExpOn) {
+        if (iframeContextInName) {
           expect(url).to.match(/frame(.max)?.html/);
           data = JSON.parse(iframe.name).attributes;
         } else {
@@ -118,7 +118,7 @@ describe('amp-ad-3p-impl', () => {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        if (nameExpOn) {
+        if (iframeContextInName) {
           const data = JSON.parse(frame.name).attributes;
           expect(data).to.be.ok;
           expect(data._context).to.be.ok;
@@ -137,7 +137,7 @@ describe('amp-ad-3p-impl', () => {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        if (nameExpOn) {
+        if (iframeContextInName) {
           const data = JSON.parse(frame.name).attributes;
           expect(data).to.be.ok;
           expect(data._context).to.be.ok;
@@ -193,7 +193,7 @@ describe('amp-ad-3p-impl', () => {
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
         expect(frame).to.be.ok;
-        if (nameExpOn) {
+        if (iframeContextInName) {
           const data = JSON.parse(frame.name).attributes;
           expect(data).to.be.ok;
           expect(data._context).to.be.ok;

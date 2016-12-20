@@ -166,7 +166,7 @@ describe('3p-frame', () => {
     let sentinel;
     if (iframeContextInName) {
       const name = JSON.parse(decodeURIComponent(iframe.name));
-      sentinel = name.attributes._context.sentinel;
+      amp3pSentinel = name.attributes._context.sentinel;
     } else {
       amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     }
@@ -187,7 +187,7 @@ describe('3p-frame', () => {
         // Note also that running it using --files uses different DOM.
         ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
-        ',"sentinel":"' + sentinel + '"' +
+        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
