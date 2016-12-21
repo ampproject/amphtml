@@ -120,8 +120,8 @@ describe('chunk', () => {
         expect(targetOrigin).to.equal('*');
         Promise.resolve().then(() => {
           const event = {
+            data,
             type: 'message',
-            data: data,
           };
           env.win.eventListeners.fire(event);
         });
