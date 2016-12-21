@@ -119,6 +119,7 @@ function compile(entryModuleFilenames, outputDir,
       'ads/_*.js',
       'ads/alp/**/*.js',
       'ads/google/**/*.js',
+      'ads/inabox/**/*.js',
       // Files under build/. Should be sparse.
       'build/css.js',
       'build/*.css.js',
@@ -134,7 +135,8 @@ function compile(entryModuleFilenames, outputDir,
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
-      'src/**/*.js',
+      'src/*.js',
+      'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
       '!extensions/amp-access/0.1/amp-login-done.js',
@@ -147,6 +149,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
+      'node_modules/web-animations-js/web-animations.install.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.node.js',
       //'node_modules/core-js/modules/**.js',
@@ -200,6 +203,7 @@ function compile(entryModuleFilenames, outputDir,
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
       'third_party/closure-compiler/externs/shadow_dom.js',
+      'third_party/closure-compiler/externs/web_animations.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
@@ -269,6 +273,8 @@ function compile(entryModuleFilenames, outputDir,
           'const',
           'constantProperty',
           'globalThis');
+      compilerOptions.compilerFlags.conformance_configs =
+          'build-system/conformance-config.textproto';
 
       // TODO(aghassemi): Remove when NTI is the default.
       if (argv.nti) {

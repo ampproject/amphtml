@@ -61,12 +61,13 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
+      '3p/**->src/utils/object.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
+      '3p/**->src/style.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
-      '3p/**->src/mode.js',
       '3p/**->src/mode.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
@@ -82,10 +83,13 @@ exports.rules = [
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
       'ads/**->src/utils/base64.js',
+      'ads/**->src/utils/dom-fingerprint.js',
+      'ads/**->src/utils/object.js',
       'ads/**->src/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       'ads/**->src/types.js',
+      'ads/**->src/string.js',
       'ads/**->src/style.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
@@ -132,6 +136,18 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
+    whitelist: [
+      'extensions/amp-a4a/0.1/a4a-variable-source.js->' +
+          'src/service/variable-source.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+          'src/service/url-replacements-impl.js',
+      'extensions/amp-video/0.1/amp-video.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js->' +
+          'src/service/video-manager-impl.js',
+    ],
   },
   {
     filesMatching: 'extensions/**/*.js',
@@ -144,11 +160,13 @@ exports.rules = [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
+      'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
     ],
   },
   {

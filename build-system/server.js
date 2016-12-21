@@ -156,7 +156,7 @@ function assertCors(req, res, opt_validMethods) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Expose-Headers',
-      'AMP-Access-Control-Allow-Source-Origin')
+      'AMP-Access-Control-Allow-Source-Origin');
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
       req.query.__amp_source_origin);
 }
@@ -165,7 +165,7 @@ app.use('/form/echo-json/post', function(req, res) {
   assertCors(req, res, ['POST']);
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
     }
@@ -455,6 +455,25 @@ app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
+// A4A envelope.
+// Examples:
+// http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
+// http://localhost:8000/a4a[-3p]/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+// http://localhost:8000/a4a[-3p]/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/a4a(|-3p)/', function(req, res) {
+  var force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
+  var adUrl = req.url;
+  var templatePath = '/build-system/server-a4a-template.html';
+  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+    var result = template
+        .replace(/FORCE3P/g, force3p)
+        .replace(/AD_URL/g, adUrl)
+        .replace(/AD_WIDTH/g, req.query.width || '300')
+        .replace(/AD_HEIGHT/g, req.query.height || '250');
+    res.end(result);
+  });
+});
+
 app.use('/examples/analytics.config.json', function(req, res, next) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
   next();
@@ -480,8 +499,8 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
-      var ads = file.match(new RegExp('<amp-ad [^>]*'
-          + req.query.type + '[^>]*>([\\s\\S]+?)<\/amp-ad>', 'gm'));
+      var ads = file.match(new RegExp('<amp-ad [^>]*[\'"]'
+          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/amp-ad>', 'gm'));
       file = file.replace(
           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
     }
@@ -492,6 +511,59 @@ app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   });
 });
 
+// "fake" a4a creative.
+app.get('/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json.html', function(req, res) {
+  var filePath = '/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json';
+  fs.readFileAsync(process.cwd() + filePath).then(file => {
+    const metadata = JSON.parse(file);
+    res.setHeader('Content-Type', 'text/html');
+    res.end(metadata.creative);
+  });
+});
+
+
+
+/*
+ * Start Cache SW LOCALDEV section
+ */
+app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
+  var filePath = req.path;
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    var n = new Date();
+    // Round down to the nearest 5 minutes.
+    n -= ((n.getMinutes() % 5) * 1000 * 60) + (n.getSeconds() * 1000) + n.getMilliseconds();
+    res.setHeader('Content-Type', 'application/javascript');
+    file = 'self.AMP_CONFIG = {v: "99' + n + '",' +
+        'cdnUrl: "http://localhost:8000/dist"};'
+        + file;
+    res.end(file);
+  }).catch(next);
+});
+
+app.get('/dist/rtv/99*/*.js', function(req, res, next) {
+  var filePath = req.path.replace(/\/rtv\/\d{15}/, '');
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    // Cause a delay, to show the "stale-while-revalidate"
+    setTimeout(() => {
+      res.setHeader('Content-Type', 'application/javascript');
+      res.end(file);
+    }, 2000);
+  }).catch(next);
+});
+
+app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
+  var filePath = '/test/manual/cache-sw.html';
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    res.setHeader('Content-Type', 'text/html');
+    res.end(file);
+  }).catch(next);
+});
+/*
+ * End Cache SW LOCALDEV section
+ */
+
+
+
 /**
  * @param {string} mode
  * @param {string} file
@@ -501,12 +573,16 @@ function replaceUrls(mode, file) {
     file = file.replace('https://cdn.ampproject.org/viewer/google/v5.js', 'https://cdn1.ampproject.org/viewer/google/v5.js');
     file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
     file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
+    file = file.replace('https://cdn.ampproject.org/amp4ads-v0.max.js', '/dist/amp-inabox.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '/dist/v0/');
     file = file.replace('https://cdn1.ampproject.org/viewer/google/v5.js', 'https://cdn.ampproject.org/viewer/google/v5.js');
   }
   if (mode == 'min') {
     file = file.replace(/\.max\.js/g, '.js');
     file = file.replace('/dist/amp.js', '/dist/v0.js');
+    file = file.replace('/dist/amp-inabox.js', '/dist/amp4ads-v0.js');
+    file = file.replace(/\/dist.3p\/current\/(.*)\.max.html/,
+        '/dist.3p/current-min/$1.html');
   }
   return file;
 }

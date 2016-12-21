@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
@@ -60,6 +64,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?string} */
+    this.videoIframeSrc_ = null;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -72,7 +79,11 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.preload(this.getVideoIframeSrc_());
+    // NOTE: When preload `as=document` is natively supported in browsers
+    // we can switch to preloading the full source. For now this doesn't
+    // work, because we preload with a different type and in that case
+    // responses are only picked up if they are cacheable.
+    this.preconnect.url(this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
     this.preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
@@ -112,20 +123,18 @@ class AmpYoutube extends AMP.BaseElement {
     if (!this.getPlaceholder()) {
       this.buildImagePlaceholder_();
     }
+
+    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+    installVideoManagerForDoc(ampdoc);
   }
 
   /** @return {string} */
   getVideoIframeSrc_() {
+    if (this.videoIframeSrc_) {
+      return this.videoIframeSrc_;
+    }
     dev().assert(this.videoid_);
-    return `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
-  }
-
-  /** @override */
-  layoutCallback() {
-    // See
-    // https://developers.google.com/youtube/iframe_api_reference
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = this.getVideoIframeSrc_();
+    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
@@ -158,6 +167,15 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     src = addParamsToUrl(src, params);
+    return this.videoIframeSrc_ = src;
+  }
+
+  /** @override */
+  layoutCallback() {
+    // See
+    // https://developers.google.com/youtube/iframe_api_reference
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    const src = this.getVideoIframeSrc_();
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');

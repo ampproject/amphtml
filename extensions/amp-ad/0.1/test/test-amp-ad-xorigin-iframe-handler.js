@@ -38,7 +38,13 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     const ampdoc = ampdocService.getAmpDoc();
     const adElement = document.createElement('container-element');
     adElement.getAmpDoc = () => ampdoc;
+    adElement.isBuilt = () => {
+      return true;
+    };
     adImpl = new BaseElement(adElement);
+    adImpl.getFallback = () => {
+      return null;
+    };
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);

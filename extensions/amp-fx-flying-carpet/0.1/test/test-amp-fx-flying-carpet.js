@@ -18,7 +18,6 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
 import {viewportForDoc} from '../../../../src/viewport';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
 
@@ -42,7 +41,6 @@ describe('amp-fx-flying-carpet', () => {
     let flyingCarpet;
     return createIframePromise().then(i => {
       iframe = i;
-      toggleExperiment(iframe.win, 'amp-fx-flying-carpet', true);
 
       const bodyResizer = iframe.doc.createElement('div');
       bodyResizer.style.height = '400vh';
@@ -60,7 +58,7 @@ describe('amp-fx-flying-carpet', () => {
       flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
       flyingCarpet.setAttribute('height', '10px');
       if (opt_childrenCallback) {
-        const children = opt_childrenCallback(iframe);
+        const children = opt_childrenCallback(iframe, flyingCarpet);
         children.forEach(child => {
           flyingCarpet.appendChild(child);
         });
@@ -112,6 +110,35 @@ describe('amp-fx-flying-carpet', () => {
       expect(container).to.have.class('-amp-fx-flying-carpet-container');
 
       expect(container.firstChild).to.equal(text);
+    });
+  });
+
+  it('should listen to build callback of children', () => {
+    let img;
+    let layoutSpy;
+    let childLayoutSpy;
+    return getAmpFlyingCarpet((iframe, flyingCarpet) => {
+      // To make sure the flyingCarpet has already tried laying out children
+      layoutSpy = sandbox.spy(flyingCarpet.implementation_, 'layoutCallback');
+
+      // Add the image
+      img = iframe.doc.createElement('amp-img');
+      img.setAttribute('src', '/examples/img/sample.jpg');
+      img.setAttribute('width', 300);
+      img.setAttribute('height', 200);
+      return [img];
+    }).then(flyingCarpet => {
+      expect(layoutSpy).to.have.been.called;
+
+      // Now, allow the image to build.
+      installImg(flyingCarpet.ownerDocument.defaultView);
+
+      childLayoutSpy = sandbox.spy(img.implementation_, 'layoutCallback');
+      return new Promise(resolve => {
+        setTimeout(resolve, 32);
+      });
+    }).then(() => {
+      expect(childLayoutSpy).to.have.been.called;
     });
   });
 

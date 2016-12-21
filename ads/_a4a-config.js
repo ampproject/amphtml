@@ -26,7 +26,7 @@ import {
 } from
 '../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
 import {getMode} from '../src/mode';
-import {map} from '../src/types';
+import {map} from '../src/utils/object';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -66,4 +66,6 @@ if (getMode().localDev || getMode().test) {
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+  'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
+  'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };

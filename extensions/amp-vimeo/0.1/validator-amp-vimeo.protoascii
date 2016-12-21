@@ -20,6 +20,8 @@ tags: {  # amp-vimeo
   tag_name: "SCRIPT"
   spec_name: "amp-vimeo extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-vimeo"
   attrs: {
     name: "async"
     mandatory: true

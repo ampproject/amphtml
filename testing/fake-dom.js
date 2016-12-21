@@ -19,10 +19,12 @@ import {parseUrl, resolveRelativeUrl} from '../src/url';
 
 /**
  * @typedef {{
+ *   hidden: (boolean|undefined),
  *   historyOff: (boolean|undefined),
  *   localStorageOff: (boolean|undefined),
  *   location: (string|undefined),
  *   navigator: ({userAgent:(string|undefined)}|undefined),
+ *   readyState: (boolean|undefined),
  * }}
  */
 export let FakeWindowSpec;
@@ -38,11 +40,16 @@ export class FakeWindow {
 
     const spec = opt_spec || {};
 
+    /** @type {string} */
+    this.readyState = spec.readyState || 'complete';
+
     // Passthrough.
     /** @const */
     this.Object = window.Object;
     /** @const */
     this.HTMLElement = window.HTMLElement;
+    /** @const */
+    this.DOMTokenList = window.DOMTokenList;
 
     // Events.
     EventListeners.intercept(this);
@@ -53,9 +60,30 @@ export class FakeWindow {
     Object.defineProperty(this.document, 'defaultView', {
       get: () => this,
     });
+
     EventListeners.intercept(this.document);
     EventListeners.intercept(this.document.documentElement);
     EventListeners.intercept(this.document.body);
+
+    // Document.hidden property.
+    /** @private {boolean} */
+    this.documentHidden_ = spec.hidden !== undefined ? spec.hidden : false;
+    Object.defineProperty(this.document, 'hidden', {
+      get: () => this.documentHidden_,
+      set: value => {
+        this.documentHidden_ = value;
+        this.document.eventListeners.fire({type: 'visibilitychange'});
+      },
+    });
+
+    // Create element to enhance test elements.
+    const nativeDocumentCreate = this.document.createElement;
+    /** @this {HTMLDocument} */
+    this.document.createElement = function() {
+      const result = nativeDocumentCreate.apply(this, arguments);
+      EventListeners.intercept(result);
+      return result;
+    };
 
     /** @const {!FakeCustomElements} */
     this.customElements = new FakeCustomElements(this);
@@ -94,13 +122,17 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
-    this.setTimeout = window.setTimeout;
+    this.setTimeout = function () {
+      return window.setTimeout.apply(window, arguments);
+    };
 
     /**
      * @param {number} id
      * @const
      */
-    this.clearTimeout = window.clearTimeout;
+    this.clearTimeout = function () {
+      return window.clearTimeout.apply(window, arguments);
+    };
 
     /**
      * @param {function()} handler
@@ -109,13 +141,17 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
-    this.setInterval = window.setInterval;
+    this.setInterval = function () {
+      return window.setInterval.apply(window, arguments);
+    };
 
     /**
      * @param {number} id
      * @const
      */
-    this.clearInterval = window.clearInterval;
+    this.clearInterval = function () {
+      return window.clearInterval.apply(window, arguments);
+    };
 
     let raf = window.requestAnimationFrame
         || window.webkitRequestAnimationFrame;
@@ -274,7 +310,7 @@ export function interceptEventListeners(target) {
 /**
  * @extends {!Location}
  */
-class FakeLocation {
+export class FakeLocation {
 
   /**
    * @param {string} href
@@ -331,7 +367,7 @@ class FakeLocation {
    */
   change_(args) {
     const change = parseUrl(this.url_.href);
-    Object.assign(change, args);
+    Object.assign({}, change, args);
     this.changes.push(change);
   }
 
@@ -427,6 +463,10 @@ export class FakeHistory {
       throw new Error('can\'t go forward');
     }
     this.index = newIndex;
+    // Make sure to restore the location href before firing popstate to match
+    // real browsers behaviors.
+    this.win.location.resetHref(this.stack[this.index].url);
+    this.win.eventListeners.fire({type: 'popstate'});
   }
 
   /**

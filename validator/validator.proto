@@ -279,7 +279,7 @@ message ReferencePoint {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 25
+// NEXT AVAILABLE TAG: 26
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -315,6 +315,9 @@ message TagSpec {
   // If true, a tag conforming to this tag spec may occur at most once within
   // the document.
   optional bool unique = 5;
+  // If true, a tag conforming to this tag spec should occur at most once within
+  // the document. That is, unlike for unique, we'll emit a warning.
+  optional bool unique_warning = 25;
 
   // If set to "$ROOT", this tag must be the root tag.
   // If set to any other string, the tag must be the direct child of the
@@ -466,7 +469,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 77
+  // NEXT AVAILABLE TAG: 79
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -484,6 +487,7 @@ message ValidationError {
     MANDATORY_ONEOF_ATTR_MISSING = 28;
     DUPLICATE_DIMENSION = 60;
     DUPLICATE_UNIQUE_TAG = 6;
+    DUPLICATE_UNIQUE_TAG_WARNING = 77;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
     STYLESHEET_TOO_LONG = 50;
@@ -520,6 +524,7 @@ message ValidationError {
     DUPLICATE_REFERENCE_POINT = 68;
     TAG_REFERENCE_POINT_CONFLICT = 69;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR = 70;
+    BASE_TAG_MUST_PRECEED_ALL_URLS = 78;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;

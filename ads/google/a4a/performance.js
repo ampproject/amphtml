@@ -119,7 +119,7 @@ export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
     } else {
       correlator = corr;
     }
-    return new GoogleAdLifecycleReporter(win, ampElement.element, 'a4a',
+    return new GoogleAdLifecycleReporter(win, ampElement.element, namespace,
         correlator, Number(slotId));
   } else {
     return new BaseLifecycleReporter();

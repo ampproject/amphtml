@@ -20,6 +20,8 @@ tags: {  # amp-experiment
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-experiment"
   attrs: {
     name: "async"
     mandatory: true

@@ -31,9 +31,9 @@ import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
-import {installViewerServiceForDoc} from './viewer-impl';
+import {viewerForDoc} from '../viewer';
 import {isExperimentOn} from '../experiments';
-import {waitForBody} from '../dom';
+import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
@@ -57,7 +57,6 @@ export let ViewportChangedEventDef;
  * and other events and notifies interesting parties when viewport has changed
  * and how.
  * @implements {../service.Disposable}
- * @package Visible for type.
  */
 export class Viewport {
 
@@ -165,23 +164,25 @@ export class Viewport {
     this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
-    // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
-    // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
-    // The enables passive touch handlers, e.g. for document swipe, since they
-    // no will longer need to try to cancel vertical scrolls during swipes.
-    // This is only done in the embedded mode because (a) the document swipe
-    // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
-    if (this.ampdoc.isSingleDoc() &&
-            viewer.isEmbedded() &&
-            isExperimentOn(this.ampdoc.win, 'pan-y')) {
-      setStyle(this.globalDoc_.documentElement, 'touch-action', 'pan-y');
+    // Top-level mode classes.
+    if (this.ampdoc.isSingleDoc()) {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-singledoc');
+    }
+    if (viewer.isEmbedded()) {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-embedded');
+    } else {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-standalone');
+    }
+    if (isIframed(this.ampdoc.win)) {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
 
     // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
     // on CSS permanent and removing the code block below.
     if (this.ampdoc.isSingleDoc() &&
             isExperimentOn(this.ampdoc.win, 'make-body-block')) {
-      this.globalDoc_.documentElement.classList.add('-amp-make-body-block');
+      this.globalDoc_.documentElement.classList.add(
+          'i-amphtml-make-body-block');
     }
   }
 
@@ -205,6 +206,11 @@ export class Viewport {
       this.visible_ = visible;
       if (visible) {
         this.binding_.connect();
+        if (this.size_) {
+          // If the size has already been intialized, check it again in case
+          // the size has changed between `disconnect` and `connect`.
+          this.resize_();
+        }
       } else {
         this.binding_.disconnect();
       }
@@ -266,7 +272,7 @@ export class Viewport {
    */
   updatePaddingBottom(paddingBottom) {
     this.ampdoc.whenBodyAvailable().then(body => {
-      body.style.borderBottom = `${paddingBottom}px solid transparent`;
+      setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }
 
@@ -429,7 +435,7 @@ export class Viewport {
    * Instruct the viewport to enter lightbox mode.
    */
   enterLightboxMode() {
-    this.viewer_.requestFullOverlay();
+    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
     this.disableTouchZoom();
     this.hideFixedLayer();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
@@ -439,7 +445,7 @@ export class Viewport {
    * Instruct the viewport to enter lightbox mode.
    */
   leaveLightboxMode() {
-    this.viewer_.cancelFullOverlay();
+    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
     this.showFixedLayer();
     this.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
@@ -528,9 +534,11 @@ export class Viewport {
   /**
    * Adds the element to the fixed layer.
    * @param {!Element} element
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the fixed layer.
    */
-  addToFixedLayer(element) {
-    this.fixedLayer_.addElement(element);
+  addToFixedLayer(element, opt_forceTransfer) {
+    this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**
@@ -561,7 +569,7 @@ export class Viewport {
    * @private
    */
   getViewportMeta_() {
-    if (this.viewer_.isIframed()) {
+    if (isIframed(this.ampdoc.win)) {
       // An embedded document does not control its viewport meta tag.
       return null;
     }
@@ -712,7 +720,8 @@ export class Viewport {
       this.scrollAnimationFrameThrottled_ = true;
       this.vsync_.measure(() => {
         this.scrollAnimationFrameThrottled_ = false;
-        this.viewer_.postScroll(this.getScrollTop());
+        this.viewer_.sendMessage('scroll', {scrollTop: this.getScrollTop()},
+            /* cancelUnsent */true);
       });
     }
   }
@@ -734,7 +743,6 @@ export class Viewport {
  * ViewportBindingDef is an interface that defines an underlying technology
  * behind the {@link Viewport}.
  * @interface
- * @visibleForTesting
  */
 export class ViewportBindingDef {
 
@@ -888,13 +896,19 @@ export class ViewportBindingNatural_ {
 
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
+        const body = dev().assertElement(this.win.document.body);
         // Override a user-supplied `body{overflow}` to be always visible. This
         // style is set in runtime vs css to avoid conflicts with ios-embedded
         // mode and fixed transfer layer.
-        this.win.document.body.style.overflow = 'visible';
+        setStyle(body, 'overflow', 'visible');
+
+        // Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS
+        // WebView does NOT respect `html {overflow-x: hidden}`.
+        // Note! For all other cases body's style should be
+        // `body {overflow: visible}` to avoid visibility issues with iframes.
         if (this.platform_.isIos() &&
             this.viewer_.getParam('webview') === '1') {
-          setStyles(this.win.document.body, {
+          setStyles(body, {
             overflowX: 'hidden',
             overflowY: 'visible',
           });
@@ -904,11 +918,8 @@ export class ViewportBindingNatural_ {
         // TODO(dvoytenko, #5660): cleanup "make-body-relative" experiment by
         // merging this style into `amp.css`.
         if (isExperimentOn(this.win, 'make-body-relative')) {
-          setStyles(this.win.document.body, {
-            display: 'block',
+          setStyles(body, {
             position: 'relative',
-            overflowX: 'hidden',
-            overflowY: 'visible',
           });
         }
       });
@@ -951,7 +962,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.win.document.documentElement.style.paddingTop = px(paddingTop);
+    setStyle(this.win.document.documentElement, 'paddingTop', px(paddingTop));
   }
 
   /** @override */
@@ -1153,7 +1164,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Insert scrollPos element into DOM. See {@link onScrolled_} for why
     // this is needed.
     this.scrollPosEl_ = this.win.document.createElement('div');
-    this.scrollPosEl_.id = '-amp-scrollpos';
+    this.scrollPosEl_.id = 'i-amphtml-scrollpos';
     setStyles(this.scrollPosEl_, {
       position: 'absolute',
       top: 0,
@@ -1167,7 +1178,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Insert scrollMove element into DOM. See {@link adjustScrollPos_} for why
     // this is needed.
     this.scrollMoveEl_ = this.win.document.createElement('div');
-    this.scrollMoveEl_.id = '-amp-scrollmove';
+    this.scrollMoveEl_.id = 'i-amphtml-scrollmove';
     setStyles(this.scrollMoveEl_, {
       position: 'absolute',
       top: 0,
@@ -1181,7 +1192,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Insert endPos element into DOM. See {@link getScrollHeight} for why
     // this is needed.
     this.endPosEl_ = this.win.document.createElement('div');
-    this.endPosEl_.id = '-amp-endpos';
+    this.endPosEl_.id = 'i-amphtml-endpos';
     setStyles(this.endPosEl_, {
       width: 0,
       height: 0,
@@ -1219,9 +1230,10 @@ export class ViewportBindingNaturalIosEmbed_ {
       onDocumentReady(this.win.document, doc => {
         const existingPaddingTop =
             this.win./*OK*/getComputedStyle(doc.body)['padding-top'] || '0';
-        doc.body.style.paddingTop =
-            `calc(${existingPaddingTop} + ${lastPaddingTop}px)`;
-        doc.body.style.borderTop = '';
+        setStyles(dev().assertElement(doc.body), {
+          paddingTop: `calc(${existingPaddingTop} + ${lastPaddingTop}px)`,
+          borderTop: '',
+        });
       });
     } else {
       this.updatePaddingTop(0);
@@ -1241,8 +1253,10 @@ export class ViewportBindingNaturalIosEmbed_ {
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
-      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
-      doc.body.style.paddingTop = '';
+      setStyles(dev().assertElement(doc.body), {
+        borderTop: `${paddingTop}px solid transparent`,
+        paddingTop: '',
+      });
     });
   }
 
@@ -1251,7 +1265,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
     onDocumentReady(this.win.document, doc => {
-      doc.body.style.borderTopStyle = lightboxMode ? 'none' : 'solid';
+      setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
     });
   }
 
@@ -1391,8 +1405,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 /**
  * Implementation of ViewportBindingDef based for iframed iOS case where iframes
  * are not scrollable. Scrolling accomplished here by inserting a scrollable
- * wrapper `<i-amp-html-wrapper>` inside the `<html>` element and reparenting the
- * original `<body>` inside.
+ * wrapper `<html id="i-amphtml-wrapper">` inside the `<html>` element and
+ * reparenting the original `<body>` inside.
  *
  * @implements {ViewportBindingDef}
  * @visibleForTesting
@@ -1405,10 +1419,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    this.win.document.documentElement.classList.add('-amp-ios-embed');
+    const topClasses = this.win.document.documentElement.className;
+    this.win.document.documentElement.className = '';
+    this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
 
     /** @private @const {!Element} */
-    this.wrapper_ = this.win.document.createElement('i-amp-html-wrapper');
+    this.wrapper_ = this.win.document.createElement('html');
+    this.wrapper_.id = 'i-amphtml-wrapper';
+    this.wrapper_.className = topClasses;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -1496,7 +1514,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.wrapper_.style.paddingTop = px(paddingTop);
+    setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
   }
 
   /** @override */
@@ -1685,7 +1703,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
  * @private
  */
 function createViewport(ampdoc) {
-  const viewer = installViewerServiceForDoc(ampdoc);
+  const viewer = viewerForDoc(ampdoc);
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
@@ -1730,16 +1748,20 @@ const ViewportType = {
  * @return {string}
  */
 function getViewportType(win, viewer) {
-  let viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (platformFor(win).isIos()
-      && ((viewportType == ViewportType.NATURAL && viewer.isIframed())
-          // Enable iOS Embedded mode so that it's easy to test against a more
-          // realistic iOS environment.
-          || getMode(win).localDev
-          || getMode(win).development)) {
-    viewportType = ViewportType.NATURAL_IOS_EMBED;
+  const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
+  if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
+    return viewportType;
   }
-  dev().fine(TAG_, '- viewportType:', viewportType);
+  // Enable iOS Embedded mode so that it's easy to test against a more
+  // realistic iOS environment w/o an iframe.
+  if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+  // Override to ios-embed for iframe-viewer mode.
+  // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
+  if (isIframed(win) && viewer.isEmbedded()) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
   return viewportType;
 }
 

@@ -31,18 +31,23 @@ import {
   getCorrelator,
 } from '../../../ads/google/a4a/utils';
 import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
-import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
+import {stringHash32} from '../../../src/crypto';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {viewerForDoc} from '../../../src/viewer';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
-/** @const {!Object<string, string>} */
+/**
+ * See `VisibilityState` enum.
+ * @const {!Object<string, string>}
+ */
 const visibilityStateCodes = {
   'visible': '1',
   'hidden': '2',
   'prerender': '3',
-  'preview': '4',
+  'unloaded': '5',
 };
 
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
@@ -75,23 +80,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const correlator = getCorrelator(this.win, slotId);
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
-    const visibilityState = documentStateFor(global).getVisibilityState();
+    const visibilityState = viewerForDoc(this.getAmpDoc()).getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);
+    const format = `${slotRect.width}x${slotRect.height}`;
     return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotIdNumber, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
-      {name: 'format', value: `${slotRect.width}x${slotRect.height}`},
+      {name: 'format', value: format},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
       {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
       {name: 'adtest', value: adTestOn},
+      {name: 'adk', value: this.adKey_(format)},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?
             '1' : null,
       },
       {name: 'ctypes', value: this.getCtypes_()},
-      {name: 'd_imp', value: '1'},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
       {name: 'ifi', value: slotIdNumber},
       {name: 'c', value: correlator},
@@ -110,6 +116,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+  }
+
+  /**
+   * @param {string} format
+   * @return {string} The ad unit hash key string.
+   * @private
+   */
+  adKey_(format) {
+    const element = this.element;
+    const slot = element.getAttribute('data-ad-slot') || '';
+    const string = `${slot}:${format}:${domFingerprintPlain(element)}`;
+    return stringHash32(string);
   }
 
   /**

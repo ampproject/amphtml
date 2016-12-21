@@ -16,7 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {analyticsForOrNull} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
@@ -93,13 +93,10 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
 
-    /** @private {?Promise<?../../amp-analytics/0.1/instrumentation.InstrumentationService>} */
-    this.analyticsPromise_ = null;
-
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
-    this.isAndroidFF_ = platform.isAndroid() && platform.isFirefox();
+    this.isIos_ = platform.isIos();
   }
 
   /** @override */
@@ -108,8 +105,6 @@ export class AmpSlideScroll extends BaseSlides {
   }
   /** @override */
   buildSlides() {
-    this.analyticsPromise_ = analyticsForOrNull(this.win);
-
     this.vsync_ = this.getVsync();
 
     this.hasNativeSnapPoints_ = (
@@ -415,16 +410,16 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      //TODO (camelburrito): Identify more platforms that dont require
+      //TODO (camelburrito): Identify more platforms that require
       // -amp-no-scroll.
-      if (!this.isAndroidFF_) {
+      if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.
         this.slidesContainer_.classList.add('-amp-no-scroll');
       }
       // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlide_(newIndex);
       this.vsync_.mutate(() => {
-        if (!this.isAndroidFF_) {
+        if (this.isIos_) {
           // Make the container scrollable again to enable user swiping.
           this.slidesContainer_.classList.remove('-amp-no-scroll');
         }
@@ -472,8 +467,10 @@ export class AmpSlideScroll extends BaseSlides {
       if (showIndex == newIndex) {
         this.scheduleLayout(this.slides_[showIndex]);
         this.scheduleResume(this.slides_[showIndex]);
+        this.slides_[showIndex].setAttribute('aria-hidden', 'false');
       } else {
         this.schedulePreload(this.slides_[showIndex]);
+        this.slides_[showIndex].setAttribute('aria-hidden', 'true');
       }
     });
     this.slidesContainer_./*OK*/scrollLeft =
@@ -520,6 +517,7 @@ export class AmpSlideScroll extends BaseSlides {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
         this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
       if (this.slideIndex_ != i) {
@@ -594,13 +592,6 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    if (this.analyticsPromise_) {
-      this.analyticsPromise_.then(analytics => {
-        if (!analytics) {
-          return;
-        }
-        analytics.triggerEvent(eventType, vars);
-      });
-    }
+    triggerAnalyticsEvent(this.element, eventType, vars);
   }
 }

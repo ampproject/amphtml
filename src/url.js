@@ -188,6 +188,20 @@ export function serializeQueryString(params) {
 }
 
 /**
+ * Returns `true` if the URL is secure: either HTTPS or localhost (for testing).
+ * @param {string|!Location} url
+ * @return {boolean}
+ */
+export function isSecureUrl(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return (url.protocol == 'https:' ||
+      url.hostname == 'localhost' ||
+      endsWith(url.hostname, '.localhost'));
+}
+
+/**
  * Asserts that a given url is HTTPS or protocol relative. It's a user-level
  * assert.
  *
@@ -202,16 +216,14 @@ export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
-  // (erwinm, #4560): type cast necessary until #4560 is fixed
-  const url = parseUrl(/** @type {string} */ (urlString));
-  user().assert(
-      url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
-      url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
+  // (erwinm, #4560): type cast necessary until #4560 is fixed.
+  const theUrlString = /** @type {string} */ (urlString);
+  user().assert(isSecureUrl(theUrlString) || /^(\/\/)/.test(theUrlString),
       '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
-      elementContext, sourceName, urlString);
-  return /** @type {string} */ (urlString);
+      elementContext, sourceName, theUrlString);
+  return theUrlString;
 }
 
 /**
@@ -286,12 +298,19 @@ export function isProxyOrigin(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  const path = url.pathname.split('/');
-  const prefix = path[1];
-  // List of well known proxy hosts. New proxies must be added here.
-  return (url.origin == urls.cdn ||
-      (url.origin.indexOf('http://localhost:') == 0 &&
-       (prefix == 'c' || prefix == 'v')));
+  return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * Returns whether the URL origin is localhost.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isLocalhostOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return urls.localhostRegex.test(url.origin);
 }
 
 /**

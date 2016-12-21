@@ -10,6 +10,7 @@
     <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
@@ -115,6 +116,32 @@
     </style>
 </head>
 <body>
+
+<amp-analytics>
+    <script type="application/json">
+        {
+            "requests": {
+                "event": "https://www.ampproject.org/static/img/logo-blue.svg?eid=${eventId}"
+            },
+            "triggers": {
+                "formSubmitSuccess": {
+                    "on": "amp-form-submit-success",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-success"
+                    }
+                },
+                "formSubmitError": {
+                    "on": "amp-form-submit-error",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-error"
+                    }
+                }
+            }
+        }
+    </script>
+</amp-analytics>
 
 <h4>Search (GET non-xhr same origin)</h4>
 <form method="get" action="/form/search-html/get" target="_blank">
@@ -424,6 +451,8 @@
       action-xhr="/form/json/poll1"
       target="_blank"
       custom-validation-reporting="as-you-go">
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
     <fieldset>
         <p>What is your favorite flightless bird?</p>
         <ul>
@@ -467,6 +496,40 @@
                 </li>
             {{/result}}
             </ul>
+        </template>
+    </div>
+</form>
+
+
+<h4 id="header1">Using button[type=submit]</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name1" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email1" required>
+        </label>
+        <input type="submit" value="Subscribe - Input">
+        <input type="submit" value="Subscribe 2 - Input">
+        <button type="submit">Subscribe with a Button</button>
+        <button type="submit">Subscribe with a Button 2</button>
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
         </template>
     </div>
 </form>

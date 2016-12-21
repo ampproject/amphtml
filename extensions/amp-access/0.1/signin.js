@@ -138,7 +138,7 @@ export class SignInProtocol {
       return null;
     }
     if (!this.accessTokenPromise_) {
-      this.accessTokenPromise_ = this.viewer_.sendMessage(
+      this.accessTokenPromise_ = this.viewer_.sendMessageAwaitResponse(
           'getAccessTokenPassive', {
             origin: this.pubOrigin_,
           }).then(resp => {
@@ -185,7 +185,7 @@ export class SignInProtocol {
     if (!authorizationCode) {
       return null;
     }
-    return this.viewer_.sendMessage('storeAccessToken', {
+    return this.viewer_.sendMessageAwaitResponse('storeAccessToken', {
       origin: this.pubOrigin_,
       authorizationCode,
     }).then(resp => {
@@ -218,7 +218,7 @@ export class SignInProtocol {
     if (!this.supportsSignInService_) {
       return null;
     }
-    return this.viewer_.sendMessage('requestSignIn', {
+    return this.viewer_.sendMessageAwaitResponse('requestSignIn', {
       origin: this.pubOrigin_,
       url,
     }).then(resp => {

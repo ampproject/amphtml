@@ -28,7 +28,11 @@ limitations under the License.
 
 ## Configuration
 
+<<<<<<< HEAD
 For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/181947?hl=en).  For AdSense for Search and AdSense for Shopping, please see the [CSA AMP ad type](https://github.com/ampproject/amphtml/blob/master/ads/google/csa.md).
+=======
+For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/7183212?hl=en).
+>>>>>>> ampproject/master
 
 Supported parameters:
 

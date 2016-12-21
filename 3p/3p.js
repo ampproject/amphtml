@@ -24,7 +24,7 @@
 
 import {dev, user} from '../src/log';
 import {isArray} from '../src/types';
-import {map} from '../src/types';
+import {map} from '../src/utils/object';
 import {rethrowAsync} from '../src/log';
 
 
@@ -270,7 +270,7 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
-    container: true,
+    ampSlotIndex: true,
   };
 
   for (const field in data) {

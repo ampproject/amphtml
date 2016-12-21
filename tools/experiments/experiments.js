@@ -56,17 +56,15 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'ad-type-custom',
+    name: 'Activates support for custom (self-serve) advertisements',
+    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+  },
+  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
-  },
-  {
-    id: 'amp-fx-flying-carpet',
-    name: 'AMP Flying Carpet',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
   },
   {
     id: 'amp-access-server',
@@ -87,28 +85,28 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
-    id: 'amp-scrollable-carousel',
-    name: 'AMP carousel using horizontal scroll',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
+    id: 'amp-auto-ads',
+    name: 'AMP Auto Ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'form-submit',
-    name: 'Global document form submit handler',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3999',
-  },
-  {
-    id: 'amp-form',
-    name: 'AMP Form Extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
+    id: 'amp-inabox',
+    name: 'AMP inabox',
+    spec: 'https://github.com/ampproject/amphtml/issues/5700',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
   },
   {
     id: 'amp-form-custom-validations',
     name: 'AMP Form Custom Validations',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
+  },
+  {
+    id: 'amp-form-var-sub',
+    name: 'Variable Substitutions in AMP Form inputs',
+    spec: 'https://github.com/ampproject/amphtml/issues/5654',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
   },
   {
     id: 'amp-google-vrview-image',
@@ -142,12 +140,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
   },
   {
-    id: 'amp-app-banner',
-    name: 'Shows a native app install/open banner.',
-    spec: 'https://github.com/ampproject/amphtml/issues/800',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5166',
-  },
-  {
     id: 'cache-service-worker',
     name: 'AMP Cache Service Worker',
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
@@ -170,6 +162,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
   {
+    id: 'amp-playbuzz',
+    name: 'AMP extension for playbuzz engaging items',
+    spec: 'https://github.com/ampproject/amphtml/issues/6106',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+  },
+  {
     id: 'make-body-block',
     name: 'Sets the body to display:block.',
     spec: 'https://github.com/ampproject/amphtml/issues/5310',
@@ -186,13 +184,6 @@ const EXPERIMENTS = [
     name: 'Enables replacing variables in URLs of outgoing links.',
     spec: 'https://github.com/ampproject/amphtml/issues/4078',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
-  },
-  {
-    id: 'pan-y',
-    name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
-        ' touch handlers',
-    spec: 'https://github.com/ampproject/amphtml/issues/4820',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
   },
   {
     id: 'alp-for-a4a',
@@ -212,16 +203,39 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
-    id: 'amp-sticky-ad-better-ux',
-    name: 'New breaking UX changes make to amp-sticky-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5822',
-  },
-  {
     id: 'amp-animation',
     name: 'High-performing keyframe animations in AMP.',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
+  },
+  {
+    id: 'amp-ad-loading-ux',
+    name: 'New default loading UX to amp-ad',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
+  },
+  {
+    id: 'visibility-v2',
+    name: 'New visibility tracking using native IntersectionObserver',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
+  },
+  {
+    id: 'amp-selector',
+    name: 'Amp selector extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-selector/amp-selector.md',
+  },
+  {
+    id: 'amp-accordion-session-state-optout',
+    name: 'AMP Accordion attribute to opt out of preserved state.',
+    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
+  },
+  {
+    id: '3p-frame-context-in-name',
+    name: 'Move passing context metadata from url hash to name attribute',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6760',
+    Spec: '',
   },
 ];
 

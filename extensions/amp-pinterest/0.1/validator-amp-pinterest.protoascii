@@ -20,6 +20,8 @@ tags: {  # amp-pinterest
   tag_name: "SCRIPT"
   spec_name: "amp-pinterest extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-pinterest"
   attrs: {
     name: "async"
     mandatory: true

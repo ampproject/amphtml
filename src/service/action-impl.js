@@ -15,11 +15,12 @@
  */
 
 import {dev, user} from '../log';
-import {fromClassForDoc} from '../service';
+import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
+import {isArray} from '../types';
+import {map} from '../utils/object';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
-import {isArray, map} from '../types';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -36,6 +37,7 @@ const DEFAULT_METHOD_ = 'activate';
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
+  'AMP': ['setState'],
 };
 
 /**
@@ -59,14 +61,14 @@ let ActionInfoDef;
  */
 export class ActionInvocation {
   /**
-   * @param {!Element} target
+   * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
   constructor(target, method, args, source, event) {
-    /** @const {!Element} */
+    /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
@@ -80,22 +82,29 @@ export class ActionInvocation {
 }
 
 
-
 /**
  * TODO(dvoytenko): consider splitting this class into two:
  * 1. A class that has a method "trigger(element, eventType, data)" and
  *    simply can search target in DOM and trigger methods on it.
  * 2. A class that configures event recognizers and rules and then
  *    simply calls action.trigger.
+ * @implements {../service.EmbeddableService}
  */
 export class ActionService {
 
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {(!Document|!ShadowRoot)=} opt_root
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_root) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
+
+    /** @const {!Document|!ShadowRoot} */
+    this.root_ = opt_root || ampdoc.getRootNode();
+
+    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    this.globalTargets_ = map();
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = map();
@@ -110,6 +119,12 @@ export class ActionService {
     this.addEvent('change');
   }
 
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    installServiceInEmbedScope(embedWin, 'action',
+        new ActionService(this.ampdoc, embedWin.document));
+  }
+
   /**
    * @param {string} name
    * TODO(dvoytenko): switch to a system where the event recognizers are
@@ -119,16 +134,25 @@ export class ActionService {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.ampdoc.getRootNode().addEventListener('click', event => {
+      this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
           this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
     } else if (name == 'submit' || name == 'change') {
-      this.ampdoc.getRootNode().addEventListener(name, event => {
+      this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       });
     }
+  }
+
+  /**
+   * Registers the action target that will receive all designated actions.
+   * @param {string} name
+   * @param {function(!ActionInvocation)} handler
+   */
+  addGlobalTarget(name, handler) {
+    this.globalTargets_[name] = handler;
   }
 
   /**
@@ -214,12 +238,26 @@ export class ActionService {
       return;
     }
 
-    const target = this.ampdoc.getElementById(action.actionInfo.target);
+    const actionInfo = action.actionInfo;
+
+    // Global target, e.g. `AMP`.
+    const globalTarget = this.globalTargets_[actionInfo.target];
+    if (globalTarget) {
+      const invocation = new ActionInvocation(
+          this.root_,
+          actionInfo.method,
+          actionInfo.args,
+          action.node,
+          event);
+      globalTarget(invocation);
+      return;
+    }
+
+    const target = this.root_.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;
     }
-
     this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
         action.node, event, action.actionInfo);
   }
@@ -625,4 +663,4 @@ function isNum(c) {
  */
 export function installActionServiceForDoc(ampdoc) {
   return fromClassForDoc(ampdoc, 'action', ActionService);
-};
+}

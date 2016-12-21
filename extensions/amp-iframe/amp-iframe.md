@@ -73,7 +73,13 @@ The reasons for this policy are that:
 
 ## Attributes
 
-### src, srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy
+### src
+
+The `src` attribute behaves mainly like on a standard iframe with one exception: the `#amp=1` fragment is added to the URL to allow
+source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
+not already have a fragment.
+
+### srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy
 
 The attributes above should all behave like they do on standard iframes.
 
@@ -157,19 +163,19 @@ window.parent.postMessage({
 
 ## Iframe viewability
 
-Iframes can send a  `send-intersection` message to its parent to start receiving IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the iframe's intersection with the parent viewport.
+Iframes can send a  `send-intersections` message to its parent to start receiving IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the iframe's intersection with the parent viewport.
 
-Example of iframe `send-intersection` request:
+Example of iframe `send-intersections` request:
 ```javascript
 window.parent.postMessage({
   sentinel: 'amp',
-  type: 'send-intersection'
+  type: 'send-intersections'
 }, '*');
 ```
 
 The iframe can listen to an `intersection` message from the parent window to receive the intersection data.
 
-Example of iframe `send-intersection` request:
+Example of iframe `send-intersections` request:
 ```javascript
 window.addEventListener('message', function(event) {
   const listener = function(event) {

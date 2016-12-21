@@ -20,6 +20,8 @@ tags: {  # amp-instagram
   tag_name: "SCRIPT"
   spec_name: "amp-instagram extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-instagram"
   attrs: {
     name: "async"
     mandatory: true

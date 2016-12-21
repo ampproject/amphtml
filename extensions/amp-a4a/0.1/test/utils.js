@@ -29,12 +29,20 @@ export class MockA4AImpl extends AmpA4A {
     return Promise.resolve(TEST_URL);
   }
 
+  updatePriority() {
+    // Do nothing.
+  }
+
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
       creative: responseArrayBuffer,
       signature: responseHeaders.has(SIGNATURE_HEADER) ?
           base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
     });
+  }
+
+  getFallback() {
+    return null;
   }
 }
 

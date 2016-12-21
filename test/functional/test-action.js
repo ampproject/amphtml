@@ -16,6 +16,7 @@
 
 import {ActionService, parseActionMap} from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
 
@@ -252,14 +253,51 @@ describe('Action parseActionMap', () => {
 });
 
 
-describe('Action findAction', () => {
+describes.sandboxed('Action adoptEmbedWindow', {}, () => {
+  let win;
+  let action;
+  let embedWin;
 
+  beforeEach(() => {
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
+    embedWin = {
+      frameElement: document.createElement('div'),
+      document: document.implementation.createHTMLDocument(''),
+    };
+    setParentWindow(embedWin, win);
+  });
+
+  it('should create embedded action service', () => {
+    action.adoptEmbedWindow(embedWin);
+    const embedService = embedWin.services.action
+        && embedWin.services.action.obj;
+    expect(embedService).to.exist;
+    expect(embedService.ampdoc).to.equal(action.ampdoc);
+    expect(embedService.root_).to.equal(embedWin.document);
+  });
+});
+
+
+describe('Action findAction', () => {
   let sandbox;
+  let win;
   let action;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
   });
 
   afterEach(() => {
@@ -313,15 +351,21 @@ describe('Action findAction', () => {
 
 
 describe('Action method', () => {
-
   let sandbox;
+  let win;
   let action;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
@@ -421,8 +465,8 @@ describe('Action method', () => {
 
 
 describe('Action interceptor', () => {
-
   let sandbox;
+  let win;
   let clock;
   let action;
   let target;
@@ -430,7 +474,13 @@ describe('Action interceptor', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
   });
@@ -509,14 +559,20 @@ describe('Action interceptor', () => {
 
 
 describe('Action common handler', () => {
-
   let sandbox;
+  let win;
   let action;
   let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
@@ -546,15 +602,64 @@ describe('Action common handler', () => {
 });
 
 
+describes.sandboxed('Action global target', {}, () => {
+  let win;
+  let action;
+
+  beforeEach(() => {
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
+  });
+
+  it('should register global target', () => {
+    const target1 = sandbox.spy();
+    const target2 = sandbox.spy();
+    const event = {};
+    action.addGlobalTarget('target1', target1);
+    action.addGlobalTarget('target2', target2);
+
+    const element = document.createElement('div');
+    element.setAttribute('on', 'tap:target1.action1(a=b)');
+    action.trigger(element, 'tap', event);
+    expect(target2).to.not.be.called;
+    expect(target1).to.be.calledOnce;
+    const inv = target1.args[0][0];
+    expect(inv.target).to.equal(document);
+    expect(inv.method).to.equal('action1');
+    expect(inv.source).to.equal(element);
+    expect(inv.event).to.equal(event);
+    expect(inv.args['a']).to.equal('b');
+
+    const element2 = document.createElement('div');
+    element2.setAttribute('on', 'tap:target2.action1');
+    action.trigger(element2, 'tap', event);
+    expect(target2).to.be.calledOnce;
+    expect(target1).to.be.calledOnce;
+  });
+});
+
+
 describe('Core events', () => {
   let sandbox;
+  let win;
   let action;
   let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(window.document, 'addEventListener');
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     sandbox.stub(action, 'trigger');
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');

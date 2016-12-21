@@ -24,6 +24,7 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {viewerForDoc} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
+import {setStyle} from '../../../src/style';
 
 
 /** @private @const {string} */
@@ -185,6 +186,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.buildGetHref_(ampUserId).then(href => {
       const getReq = {
         credentials: 'include',
+        requireAmpResponseSourceOrigin: false,
       };
       return xhrFor(this.win).fetchJson(href, getReq);
     });
@@ -199,6 +201,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return xhrFor(this.win).fetchJson(dev().assert(this.dismissHref_), {
       method: 'POST',
       credentials: 'include',
+      requireAmpResponseSourceOrigin: false,
       body: {
         'elementId': this.elementId_,
         'ampUserId': this.ampUserId_,
@@ -276,7 +279,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   show() {
-    this.element.style.display = '';
+    setStyle(this.element, 'display', '');
     this.element.classList.add('amp-active');
     this.getViewport().addToFixedLayer(this.element);
     return this.dialogPromise_;

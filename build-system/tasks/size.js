@@ -97,11 +97,18 @@ function normalizeRows(rows) {
   // normalize integration.js
   normalizeRow(rows, 'current-min/f.js', 'current/integration.js', true);
 
+  normalizeRow(rows, 'current-min/ampcontext-lib.js',
+      'current/ampcontext-lib.js', true);
+
   // normalize alp.js
   normalizeRow(rows, 'alp.js', 'alp.max.js', true);
 
   // normalize amp-shadow.js
   normalizeRow(rows, 'shadow-v0.js', 'amp-shadow.js', true);
+
+  normalizeRow(rows, 'amp4ads-v0.js', 'amp-inabox.js', true);
+
+  normalizeRow(rows, 'amp4ads-host-v0.js', 'amp-inabox-host.js', true);
 
   // normalize sw.js
   normalizeRow(rows, 'sw.js', 'sw.max.js', true);

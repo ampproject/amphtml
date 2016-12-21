@@ -63,10 +63,9 @@ class AmpStickyAd extends AMP.BaseElement {
 
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
-
     const paddingBar = this.win.document.createElement(
-         'i-amp-sticky-ad-top-padding');
-    this.element.appendChild(paddingBar);
+         'amp-sticky-ad-top-padding');
+    this.element.insertBefore(paddingBar, this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
     this.scrollUnlisten_ =
@@ -84,6 +83,11 @@ class AmpStickyAd extends AMP.BaseElement {
       this.scheduleLayout(dev().assertElement(this.ad_));
     }
     return Promise.resolve();
+  }
+
+  /** @override */
+  isAlwaysFixed() {
+    return true;
   }
 
   /** @override */
@@ -137,10 +141,6 @@ class AmpStickyAd extends AMP.BaseElement {
       this.deferMutate(() => {
         this.visible_ = true;
         this.viewport_.addToFixedLayer(this.element);
-        // Add border-bottom to the body to compensate space that was taken
-        // by sticky ad, so no content would be blocked by sticky ad unit.
-        const borderBottom = this.element./*OK*/offsetHeight;
-        this.viewport_.updatePaddingBottom(borderBottom);
         this.addCloseButton_();
         this.scheduleLayoutForAd_();
       });
@@ -157,7 +157,7 @@ class AmpStickyAd extends AMP.BaseElement {
     if (this.ad_.isBuilt()) {
       this.layoutAd_();
     } else {
-      listenOnce(this.ad_, 'amp:built', () => {
+      listenOnce(dev().assertElement(this.ad_), 'amp:built', () => {
         this.layoutAd_();
       });
     }
@@ -170,10 +170,14 @@ class AmpStickyAd extends AMP.BaseElement {
   layoutAd_() {
     this.updateInViewport(dev().assertElement(this.ad_), true);
     this.scheduleLayout(dev().assertElement(this.ad_));
-    listenOnce(this.ad_, 'amp:load:end', () => {
+    listenOnce(dev().assertElement(this.ad_), 'amp:load:end', () => {
       this.vsync_.mutate(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
+        // Add border-bottom to the body to compensate space that was taken
+        // by sticky ad, so no content would be blocked by sticky ad unit.
+        const borderBottom = this.element./*OK*/offsetHeight;
+        this.viewport_.updatePaddingBottom(borderBottom);
         this.forceOpacity_();
       });
     });

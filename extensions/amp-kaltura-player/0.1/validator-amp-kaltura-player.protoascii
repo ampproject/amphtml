@@ -20,6 +20,8 @@ tags: {  # amp-kaltura-player
   tag_name: "SCRIPT"
   spec_name: "amp-kaltura-player extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-kaltura-player"
   attrs: {
     name: "async"
     mandatory: true

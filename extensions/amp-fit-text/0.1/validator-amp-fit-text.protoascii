@@ -20,6 +20,8 @@ tags: {  # amp-fit-text
   tag_name: "SCRIPT"
   spec_name: "amp-fit-text extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-fit-text"
   attrs: {
     name: "async"
     mandatory: true

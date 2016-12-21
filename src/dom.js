@@ -158,10 +158,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * up the DOM subtree.
  * @param {!Element} element
  * @param {function(!Element):boolean} callback
+ * @param {Element=} opt_stopAt optional elemnt to stop the search at.
  * @return {?Element}
  */
-export function closest(element, callback) {
-  for (let el = element; el; el = el.parentElement) {
+export function closest(element, callback, opt_stopAt) {
+  for (let el = element; el && el !== opt_stopAt; el = el.parentElement) {
     if (callback(el)) {
       return el;
     }
@@ -204,6 +205,39 @@ export function closestByTag(element, tagName) {
   });
 }
 
+/**
+ * Finds the closest element with the specified selector from this element
+ * @param {!Element} element
+ * @param {string} selector
+ * @return {?Element} closest ancestor if found.
+ */
+export function closestBySelector(element, selector) {
+  if (element.closest) {
+    return element.closest(selector);
+  }
+
+  return closest(element, el => {
+    return matches(el, selector);
+  });
+}
+
+/**
+ * Checks if the given element matches the selector
+ * @param  {!Element} el The element to verify
+ * @param  {!string} selector The selector to check against
+y * @return {boolean} True if the element matched the selector. False otherwise
+ */
+export function matches(el, selector) {
+  const matcher = el.matches ||
+      el.webkitMatchesSelector ||
+      el.mozMatchesSelector ||
+      el.msMatchesSelector ||
+      el.oMatchesSelector;
+  if (matcher) {
+    return matcher.call(el, selector);
+  }
+  return false;  // IE8 always returns false.
+}
 
 /**
  * Finds the first descendant element with the specified name.
@@ -572,3 +606,13 @@ export function tryFocus(element) {
     // IE <= 7 may throw exceptions when focusing on hidden items.
   }
 }
+
+/**
+ * Whether the given window is in an iframe or not.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isIframed(win) {
+  return win.parent && win.parent != win;
+}
+

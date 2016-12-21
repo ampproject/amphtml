@@ -20,6 +20,8 @@ tags: {  # amp-carousel
   tag_name: "SCRIPT"
   spec_name: "amp-carousel extension .js script"
   mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-carousel"
   attrs: {
     name: "async"
     mandatory: true

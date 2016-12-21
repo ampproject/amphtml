@@ -23,21 +23,23 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
 /**
  * Listens for the specified event on the element.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_capture) {
+  let localElement = element;
+  let localListener = listener;
   const capture = opt_capture || false;
-  element.addEventListener(eventType, listener, capture);
+  localElement.addEventListener(eventType, localListener, capture);
   return () => {
-    if (element) {
-      element.removeEventListener(eventType, listener, capture);
+    if (localElement) {
+      localElement.removeEventListener(eventType, localListener, capture);
     }
-    listener = null;
-    element = null;
+    localListener = null;
+    localElement = null;
   };
 }
 
@@ -45,28 +47,30 @@ export function listen(element, eventType, listener, opt_capture) {
 /**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
- * @param {?EventTarget} element
+ * @param {!EventTarget} element
  * @param {string} eventType
- * @param {?function(Event)} listener
+ * @param {function(!Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
+  let localElement = element;
+  let localListener = listener;
   const capture = opt_capture || false;
   let unlisten;
   let proxy = event => {
-    listener(event);
+    localListener(event);
     unlisten();
   };
   unlisten = () => {
-    if (element) {
-      element.removeEventListener(eventType, proxy, capture);
+    if (localElement) {
+      localElement.removeEventListener(eventType, proxy, capture);
     }
-    element = null;
+    localElement = null;
     proxy = null;
-    listener = null;
+    localListener = null;
   };
-  element.addEventListener(eventType, proxy, capture);
+  localElement.addEventListener(eventType, proxy, capture);
   return unlisten;
 }
 
@@ -92,40 +96,48 @@ export function listenOncePromise(element, eventType, opt_capture,
 
 
 /**
- * Whether the specified element has been loaded already.
- * @param {!Element} element
+ * Whether the specified element/window has been loaded already.
+ * @param {!Element|!Window} eleOrWindow
  * @return {boolean}
  */
-export function isLoaded(element) {
-  return element.complete || element.readyState == 'complete';
+export function isLoaded(eleOrWindow) {
+  return !!(eleOrWindow.complete || eleOrWindow.readyState == 'complete'
+      // If the passed in thing is a Window, infer loaded state from
+      //
+      || (eleOrWindow.document
+          && eleOrWindow.document.readyState == 'complete'));
 }
 
 /**
- * Returns a promise that will resolve or fail based on the element's 'load'
+ * Returns a promise that will resolve or fail based on the eleOrWindow's 'load'
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
- * @param {T} element
+ * @param {T} eleOrWindow Supports both Elements and as a special case Windows.
  * @param {number=} opt_timeout
  * @return {!Promise<T>}
  * @template T
  */
-export function loadPromise(element, opt_timeout) {
+export function loadPromise(eleOrWindow, opt_timeout) {
   let unlistenLoad;
   let unlistenError;
-  if (isLoaded(element)) {
-    return Promise.resolve(element);
+  if (isLoaded(eleOrWindow)) {
+    return Promise.resolve(eleOrWindow);
   }
   let loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
-      unlistenLoad = listenOnce(element, 'loadstart', resolve);
+    const tagName = eleOrWindow.tagName;
+    if (tagName === 'AUDIO' || tagName === 'VIDEO') {
+      unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
     } else {
-      unlistenLoad = listenOnce(element, 'load', resolve);
+      unlistenLoad = listenOnce(eleOrWindow, 'load', resolve);
     }
-    unlistenError = listenOnce(element, 'error', reject);
+    // For elements, unlisten on error (don't for Windows).
+    if (tagName) {
+      unlistenError = listenOnce(eleOrWindow, 'error', reject);
+    }
   });
-  loadingPromise = loadingPromise.then(() => element, failedToLoad);
+  loadingPromise = loadingPromise.then(() => eleOrWindow, failedToLoad);
   return racePromise_(loadingPromise, unlistenLoad, unlistenError,
       opt_timeout);
 }

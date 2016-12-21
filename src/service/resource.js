@@ -103,6 +103,15 @@ export class Resource {
       Resource.forElementOptional(element).updateOwner(owner);
     }
     element[OWNER_PROP_] = owner;
+
+    // Need to clear owner cache for all child elements
+    const cachedElements = element.getElementsByClassName('-amp-element');
+    for (let i = 0; i < cachedElements.length; i++) {
+      const ele = cachedElements[i];
+      if (Resource.forElementOptional(ele)) {
+        Resource.forElementOptional(ele).updateOwner(undefined);
+      }
+    }
   }
 
   /**
@@ -139,7 +148,13 @@ export class Resource {
         ResourceState.NOT_BUILT;
 
     /** @private {number} */
+    this.priorityOverride_ = -1;
+
+    /** @private {number} */
     this.layoutCount_ = 0;
+
+    /** @private {*} */
+    this.lastLayoutError_ = null;
 
     /** @private {boolean} */
     this.isFixed_ = false;
@@ -190,7 +205,7 @@ export class Resource {
 
   /**
    * Update owner element
-   * @param {!AmpElement} owner
+   * @param {AmpElement|undefined} owner
    */
   updateOwner(owner) {
     this.owner_ = owner;
@@ -228,7 +243,18 @@ export class Resource {
    * @return {number}
    */
   getPriority() {
+    if (this.priorityOverride_ != -1) {
+      return this.priorityOverride_;
+    }
     return this.element.getPriority();
+  }
+
+  /**
+   * Overrides the element's priority.
+   * @param {number} newPriority
+   */
+  updatePriority(newPriority) {
+    this.priorityOverride_ = newPriority;
   }
 
   /**
@@ -555,7 +581,7 @@ export class Resource {
       return Promise.resolve();
     }
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
-      return Promise.reject('already failed');
+      return Promise.reject(this.lastLayoutError_);
     }
 
     dev().assert(this.state_ != ResourceState.NOT_BUILT,
@@ -621,6 +647,7 @@ export class Resource {
     this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
+    this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
     } else {
@@ -751,5 +778,14 @@ export class Resource {
   unload() {
     this.pause();
     this.unlayout();
+  }
+
+  /**
+   * Disconnect the resource. Mainly intended for embed resources that do not
+   * receive `disconnectedCallback` naturally via CE API.
+   */
+  disconnect() {
+    delete this.element[RESOURCE_PROP_];
+    this.element.disconnectedCallback();
   }
 }

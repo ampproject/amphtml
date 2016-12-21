@@ -21,9 +21,13 @@ import * as sinon from 'sinon';
 
 describe('JwtHelper', () => {
 
+  // Generated from https://jwt.io/#debugger
+  // Name deliberately changed from "John Doe" to "John ௵Z加䅌ਇ☎Èʘغޝ" to test
+  // correct unicode handling on our part.
   const TOKEN_HEADER = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
   const TOKEN_PAYLOAD =
-      'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9';
+      'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4g4K-1' +
+      'WuWKoOSFjOCoh-KYjsOIypjYut6dIiwiYWRtaW4iOnRydWV9';
   const TOKEN_SIG = 'TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
   const TOKEN = `${TOKEN_HEADER}.${TOKEN_PAYLOAD}.${TOKEN_SIG}`;
 
@@ -49,7 +53,7 @@ describe('JwtHelper', () => {
       });
       expect(tok.payload).to.deep.equal({
         'sub': '1234567890',
-        'name': 'John Doe',
+        'name': 'John ௵Z加䅌ਇ☎Èʘغޝ',
         'admin': true,
       });
       expect(tok.verifiable).to.equal(
@@ -110,7 +114,9 @@ describe('JwtHelper', () => {
     afterEach(() => {
     });
 
-    it('should decode and verify token correctly', () => {
+    // TODO(aghassemi, 6292): Unskip for Safari after #6292
+    it.configure().skipSafari().run('should decode and verify token correctly',
+    () => {
       // Skip on non-subtle browser.
       if (!helper.isVerificationSupported()) {
         return;
@@ -120,7 +126,7 @@ describe('JwtHelper', () => {
       });
     });
 
-    it('should fail invalid signature', () => {
+    it.configure().skipSafari().run('should fail invalid signature', () => {
       // Skip on non-subtle browser.
       if (!helper.isVerificationSupported()) {
         return;

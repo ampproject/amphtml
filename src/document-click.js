@@ -18,6 +18,7 @@ import {
   closestByTag,
   openWindowDialog,
   escapeCssSelectorIdent,
+  isIframed,
 } from './dom';
 import {fromClassForDoc} from './service';
 import {dev} from './log';
@@ -64,12 +65,13 @@ export class ClickHandler {
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
-    // Only intercept clicks when iframed.
-    if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
-      /** @private @const {!function(!Event)|undefined} */
-      this.boundHandle_ = this.handle_.bind(this);
-      this.ampdoc.getRootNode().addEventListener('click', this.boundHandle_);
-    }
+    /** @private @const {boolean} */
+    this.isIframed_ =
+        isIframed(this.ampdoc.win) && this.viewer_.isOvertakeHistory();
+
+    /** @private @const {!function(!Event)|undefined} */
+    this.boundHandle_ = this.handle_.bind(this);
+    this.ampdoc.getRootNode().addEventListener('click', this.boundHandle_);
   }
 
   /**
@@ -89,7 +91,8 @@ export class ClickHandler {
    */
   handle_(e) {
     onDocumentElementClick_(
-        e, this.ampdoc, this.viewport_, this.history_, this.isIosSafari_);
+        e, this.ampdoc, this.viewport_, this.history_, this.isIosSafari_,
+        this.isIframed_);
   }
 }
 
@@ -106,9 +109,10 @@ export class ClickHandler {
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
  * @param {boolean} isIosSafari
+ * @param {boolean} isIframed
  */
 export function onDocumentElementClick_(
-    e, ampdoc, viewport, history, isIosSafari) {
+    e, ampdoc, viewport, history, isIosSafari, isIframed) {
   if (e.defaultPrevented) {
     return;
   }
@@ -119,10 +123,30 @@ export function onDocumentElementClick_(
   }
   urlReplacementsForDoc(ampdoc).maybeExpandLink(target);
 
+  const tgtLoc = parseUrl(target.href);
+  // Handle custom protocols only if the document is iframe'd.
+  if (isIframed) {
+    handleCustomProtocolClick_(e, target, tgtLoc, ampdoc, isIosSafari);
+  }
+
+  if (tgtLoc.hash) {
+    handleHashClick_(e, tgtLoc, ampdoc, viewport, history);
+  }
+}
+
+
+/**
+ * Handles clicking on a custom protocol link.
+ * @param {!Event} e
+ * @param {!Element} target
+ * @param {!Location} tgtLoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {boolean} isIosSafari
+ * @private
+ */
+function handleCustomProtocolClick_(e, target, tgtLoc, ampdoc, isIosSafari) {
   /** @const {!Window} */
   const win = ampdoc.win;
-  const tgtLoc = parseUrl(target.href);
-
   // On Safari iOS, custom protocol links will fail to open apps when the
   // document is iframed - in order to go around this, we set the top.location
   // to the custom protocol href.
@@ -141,11 +165,21 @@ export function onDocumentElementClick_(
     // in the case where there's no app to handle the custom protocol.
     e.preventDefault();
   }
+}
 
-  if (!tgtLoc.hash) {
-    return;
-  }
 
+/**
+ * Handles clicking on a link with hash navigation.
+ * @param {!Event} e
+ * @param {!Location} tgtLoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/viewport-impl.Viewport} viewport
+ * @param {!./service/history-impl.History} history
+ * @private
+ */
+function handleHashClick_(e, tgtLoc, ampdoc, viewport, history) {
+  /** @const {!Window} */
+  const win = ampdoc.win;
   /** @const {!Location} */
   const curLoc = parseUrl(win.location.href);
   const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
@@ -168,7 +202,7 @@ export function onDocumentElementClick_(
   let elem = null;
 
   if (hash) {
-    const escapedHash = escapeCssSelectorIdent(ampdoc.win, hash);
+    const escapedHash = escapeCssSelectorIdent(win, hash);
     elem = (ampdoc.getRootNode().getElementById(hash) ||
         // Fallback to anchor[name] if element with id is not found.
         // Linking to an anchor element with name is obsolete in html5.
@@ -177,14 +211,25 @@ export function onDocumentElementClick_(
 
   // If possible do update the URL with the hash. As explained above
   // we do `replace` to avoid messing with the container's history.
-  // The choice of `location.replace` vs `history.replaceState` is important.
-  // Due to bugs, not every browser triggers `:target` pseudo-class when
-  // `replaceState` is called. See http://www.zachleat.com/web/moving-target/
-  // for more details. Do this only if fragment has changed.
   if (tgtLoc.hash != curLoc.hash) {
-    win.location.replace(`#${hash}`);
+    history.replaceStateForTarget(tgtLoc.hash).then(() => {
+      scrollToElement(elem, win, viewport, hash);
+    });
+  } else {
+    // If the hash did not update just scroll to the element.
+    scrollToElement(elem, win, viewport, hash);
   }
+}
 
+
+/**
+ * Scrolls the page to the given element.
+ * @param {?Element} elem
+ * @param {!Window} win
+ * @param {!./service/viewport-impl.Viewport} viewport
+ * @param {string} hash
+ */
+function scrollToElement(elem, win, viewport, hash) {
   // Scroll to the element if found.
   if (elem) {
     // The first call to scrollIntoView overrides browsers' default
@@ -202,12 +247,5 @@ export function onDocumentElementClick_(
   } else {
     dev().warn('HTML',
         `failed to find element with id=${hash} or a[name=${hash}]`);
-  }
-
-  if (tgtLoc.hash != curLoc.hash) {
-    // Push/pop history.
-    history.push(() => {
-      win.location.replace(`${curLoc.hash || '#'}`);
-    });
   }
 }
