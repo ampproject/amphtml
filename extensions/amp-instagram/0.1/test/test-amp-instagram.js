@@ -109,7 +109,7 @@ describe('amp-instagram', () => {
 
   it('renders responsively', () => {
     return getIns('fBwFP', true).then(ins => {
-      expect(ins.className).to.match(/amp-layout-responsive/);
+      expect(ins.className).to.match(/i-amphtml-layout-responsive/);
     });
   });
 

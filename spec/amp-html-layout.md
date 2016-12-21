@@ -30,7 +30,7 @@ sizing needs.
 
 ## Behavior
 
-A non-container AMP element (i.e., `layout != container`) starts up in the unresolved/unbuilt mode in which 
+A non-container AMP element (i.e., `layout != container`) starts up in the unresolved/unbuilt mode in which
 all of its children are hidden except for a placeholder (see `placeholder` attribute). The JavaScript
 and data payload necessary to fully construct the element may still be downloading and initializing,
 but the AMP runtime already knows how to size and lay out the element only relying on CSS classes and
@@ -128,7 +128,7 @@ When the `heights` attribute is specified along with `width` and `height`, the `
 
 **Example**: Using the `heights` attribute
 
-In the following example, the height of the image will default to 80% of the width, but if the viewport is wider than `500px`, the height is capped at `200px`. Because the `heights` attribute is specified along with `width` and `height`, the layout defaults to `responsive`.  
+In the following example, the height of the image will default to 80% of the width, but if the viewport is wider than `500px`, the height is capped at `200px`. Because the `heights` attribute is specified along with `width` and `height`, the layout defaults to `responsive`.
 
 
 ```html
@@ -199,4 +199,4 @@ The following table describes the acceptable parameters, CSS classes, and styles
 | `fixed-height` | `height` only; `width` can be `auto` | Yes, specified by the parent container and `height`. | No | `block` |
 | `flex-item`   | No                     | No            | Yes, based on parent container. | `block` |
 | `nodisplay`    | No                     | No | No | `none` |
-| `responsive`   | Yes                    | Yes, based on parent container and aspect ratio of `width:height`. | Yes, `i-amp-sizer`. | `block` |
+| `responsive`   | Yes                    | Yes, based on parent container and aspect ratio of `width:height`. | Yes, `i-amphtml-sizer`. | `block` |

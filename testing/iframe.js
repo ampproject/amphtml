@@ -405,7 +405,8 @@ export function poll(description, condition, opt_onError, opt_timeout) {
  */
 export function pollForLayout(win, count, opt_timeout) {
   let getCount = () => {
-    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
+    return win.document.querySelectorAll(
+        '.i-amphtml-layout,.i-amphtml-error').length;
   };
   return poll('Waiting for elements to layout: ' + count, () => {
     return getCount() >= count;
