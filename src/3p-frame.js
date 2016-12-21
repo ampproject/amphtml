@@ -15,6 +15,7 @@
  */
 
 import {dev, user} from './log';
+import {getContextMetadata} from './attributes';
 import {documentInfoForDoc} from './document-info';
 import {isExperimentOn} from './experiments';
 import {getLengthNumeral} from '../src/layout';
@@ -57,10 +58,11 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
 
-  const attributes = getContextMetadata(parentWindow, element, sentinel);
-
+  let attributes = {};
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
+  attributes = getContextMetadata(parentWindow, element, sentinel, attributes);
+
   attributes.type = type;
   const viewer = viewerForDoc(element);
 

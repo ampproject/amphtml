@@ -27,11 +27,11 @@ import {getMode} from './mode';
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
-export function getContextMetadata(parentWindow, element, sentinel) {
+export function getContextMetadata(parentWindow, element, sentinel, opt_attributes) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
-  const attributes = {};
+  const attributes = opt_attributes ? opt_attributes : {};
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
   let locationHref = parentWindow.location.href;
@@ -48,8 +48,8 @@ export function getContextMetadata(parentWindow, element, sentinel) {
       .getUnconfirmedReferrerUrl();
 
   attributes._context = {
-    ampcontextVersion = (getMode().localDev ? 'LOCAL' :
-        '$internalRuntimeVersion$');
+    ampcontextVersion : (getMode().localDev ? 'LOCAL' :
+        '$internalRuntimeVersion$'),
     sourceUrl: docInfo.sourceUrl,
     referrer,
     canonicalUrl: docInfo.canonicalUrl,
@@ -69,7 +69,7 @@ export function getContextMetadata(parentWindow, element, sentinel) {
 
 }
 
-export function getNameAttribute(parentWindow, element, sentinel){
+export function getNameAttribute(parentWindow, element, sentinel) {
   const attributes = getContextMetadata(parentWindow, element, sentinel);
   return encodeURIComponent(JSON.stringify(attributes));
 }
