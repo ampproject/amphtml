@@ -176,25 +176,25 @@ export function resizeDeniedHandler(global, container, requestedHeight) {
  */
 function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
   const type = getAdType(data);
+  const callback = callbackWithNoBackfill.bind(null, global);
+  const callbackBackfill = callbackWithBackfill.bind(null, global, afsP, afsA);
 
   switch (type) {
     case AD_TYPE.AFS:
       /** Do not backfill, request AFS */
-      afsA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
+      afsA['adLoadedCallback'] = callback;
       global._googCsa('ads', afsP, afsA);
       break;
     case AD_TYPE.AFSH:
       /** Do not backfill, request AFSh */
-      afshA['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
+      afshA['adLoadedCallback'] = callback;
       global._googCsa('plas', afshP, afshA);
       break;
     case AD_TYPE.AFSH_BACKFILL:
       /** Backfill with AFS, request AFSh */
-      afshA['adLoadedCallback'] = resizeIframe.bind(null, global, afsP, afsA);
+      afshA['adLoadedCallback'] = callbackBackfill;
       global._googCsa('plas', afshP, afshA);
       break;
-    default:
-      return;
   }
 }
 
@@ -219,40 +219,69 @@ function getAdType(data) {
 }
 
 /**
- * CSA callback function to resize the iframe and/or request backfill
- * @param {?Object} bkflPage Backfill AFS page options (if necessary)
- * @param {?Object} bkflAd Backfill AFS ad unit options (if necessary)
- * @param {string} conName Name of the container ('csacontainer')
- * @param {boolean} ads If ads were returned or not
+ * The adsLoadedCallback for requests without a backfill.  If ads were returned,
+ * resize the iframe.  If ads weren't returned, tell AMP we don't have ads.
+ * @param {!Window} global The window object of the iframe
+ * @param {string} containerName The name of the CSA container
+ * @param {boolean} hasAd Whether or not CSA returned an ad
  * @visibleForTesting
  */
-export function resizeIframe(global, bkflPage, bkflAd, conName, ads) {
-  if (ads) {
-    // Get actual height of container
-    const container = global.document.getElementById(conName);
-    const height = container.offsetHeight;
-    // Set initial AMP height
-    currentAmpHeight =
-        global.context.initialIntersection.boundingClientRect.height;
-
-    // If the height of the container is larger than the height of the
-    // initially requested AMP tag, add the overflow element
-    if (height > currentAmpHeight) {
-      createOverflow(global, container, height);
-    }
-    // Attempt to resize to actual CSA container height
-    global.context.requestResize(undefined, height);
+export function callbackWithNoBackfill(global, containerName, hasAd) {
+  if (hasAd) {
+    resizeIframe(global, containerName);
   } else {
-    // If we need to backfill, make the call
-    if (bkflPage != null && bkflAd != null) {
-      // Make sure we don't try to backfill again
-      bkflAd['adLoadedCallback'] = resizeIframe.bind(null, global, null, null);
-      global['_googCsa']('ads', bkflPage, bkflAd);
-    } else {
-      // Let AMP know we didn't return anything
-      global.context.noContentAvailable();
-    }
+    global.context.noContentAvailable();
   }
+}
+
+/**
+ * The adsLoadedCallback for requests with a backfill.  If ads were returned,
+ * resize the iframe.  If ads weren't returned, backfill the ads.
+ * @param {!Window} global The window object of the iframe
+ * @param {!Object} page The parsed AFS page options to backfill the unit with
+ * @param {!Object} ad The parsed AFS page options to backfill the unit with
+ * @param {string} containerName The name of the CSA container
+ * @param {boolean} hasAd Whether or not CSA returned an ad
+ * @visibleForTesting
+*/
+export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
+  if (hasAd) {
+    resizeIframe(global, containerName);
+  } else {
+    backfillAds(global, page, ad);
+  }
+}
+
+/**
+ * CSA callback function to resize the iframe when ads were returned
+ * @param {string} containerName Name of the container ('csacontainer')
+ * @visibleForTesting
+ */
+export function resizeIframe(global, containerName) {
+  // Get actual height of container
+  const container = global.document.getElementById(containerName);
+  const height = container.offsetHeight;
+  // Set initial AMP height
+  currentAmpHeight =
+      global.context.initialIntersection.boundingClientRect.height;
+
+  // If the height of the container is larger than the height of the
+  // initially requested AMP tag, add the overflow element
+  if (height > currentAmpHeight) {
+    createOverflow(global, container, height);
+  }
+  // Attempt to resize to actual CSA container height
+  global.context.requestResize(undefined, height);
+}
+
+/**
+ * Backfill the ads with AFS
+ * @param {?Object} page Backfill AFS page options (if necessary)
+ * @param {?Object} adblock Backfill AFS ad unit options (if necessary)
+ */
+function backfillAds(global, page, adblock) {
+  adblock['adLoadedCallback'] = callbackWithNoBackfill.bind(null, global);
+  global['_googCsa']('ads', page, adblock);
 }
 
 /**

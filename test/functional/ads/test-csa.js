@@ -20,6 +20,8 @@ import {
   resizeIframe,
   resizeSuccessHandler,
   resizeDeniedHandler,
+  callbackWithNoBackfill,
+  callbackWithBackfill,
   AD_TYPE,
 } from '../../../ads/google/csa';
 import * as sinon from 'sinon';
@@ -171,7 +173,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
 
       // Try to resize when ads are loaded
-      resizeIframe(win, null, null, 'csacontainer', true);
+      resizeIframe(win, 'csacontainer');
 
       const overflow = win.document.getElementById('overflow');
       const container = win.document.getElementById('csacontainer');
@@ -197,7 +199,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       // Set up
       const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
       // Try to resize when ads are loaded
-      resizeIframe(win, null, null, 'csacontainer', true);
+      resizeIframe(win, 'csacontainer');
 
       const overflow = win.document.getElementById('overflow');
       const container = win.document.getElementById('csacontainer');
@@ -222,7 +224,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       // Set up
       const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
       // Try to resize when ads are loaded
-      resizeIframe(win, null, null, 'csacontainer', true);
+      resizeIframe(win, 'csacontainer');
       // Resize requests below the fold succeeed
       const requestedHeight = requestResizeSpy.args[0][1];
 
@@ -247,7 +249,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       // Set up
       const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
       // Try to resize when ads are loaded
-      resizeIframe(win, null, null, 'csacontainer', true);
+      resizeIframe(win, 'csacontainer');
       // Resize requests below the fold succeed
       const requestedHeight = requestResizeSpy.args[0][1];
       resizeSuccessHandler(win, container, requestedHeight);
@@ -269,8 +271,8 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
 
       // Set up
       const noAdsSpy = sandbox.stub(win.context, 'noContentAvailable');
-      // Try to resize when ads are loaded
-      resizeIframe(win, null, null, 'csacontainer', false);
+      // No backfill, ads don't load
+      callbackWithNoBackfill(win, 'csacontainer', false);
 
       expect(noAdsSpy).to.be.called;
     });
@@ -284,8 +286,8 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       win._googCsa = function() {};
       const _googCsaSpy = sandbox.stub(win, '_googCsa', () => {});
 
-      // Try to resize when ads are loaded
-      resizeIframe(win, {}, {}, 'csacontainer', false);
+      // Ads don't load but there is backfill
+      callbackWithBackfill(win, {}, {}, 'csacontainer', false);
 
       // Should not tell AMP we have no ads
       expect(noAdsSpy).not.to.be.called;
