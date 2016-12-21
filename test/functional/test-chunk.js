@@ -113,6 +113,9 @@ describe('chunk', () => {
       installDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = true;
+      env.win.requestIdleCallback = function() {
+        throw new Error('Should not be called');
+      };
       env.win.postMessage = function(data, targetOrigin) {
         expect(targetOrigin).to.equal('*');
         Promise.resolve().then(() => {
