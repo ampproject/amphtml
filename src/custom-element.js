@@ -606,10 +606,7 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
       this.implementation_.createdCallback();
-      if (this.layout_ != Layout.NODISPLAY &&
-        !this.implementation_.isLayoutSupported(this.layout_)) {
-        throw user().createError('Layout not supported: ' + this.layout_);
-      }
+      this.assertLayout_();
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
       if (this.everAttached) {
@@ -618,6 +615,21 @@ function createBaseCustomElementClass(win) {
         // For a never-added resource, the build will be done automatically
         // via `resources.add` on the first attach.
         this.getResources().upgraded(this);
+      }
+    }
+
+    /* @private */
+    assertLayout_() {
+      if (this.layout_ != Layout.NODISPLAY &&
+          !this.implementation_.isLayoutSupported(this.layout_)) {
+        let error = 'Layout not supported: ' + this.layout_;
+        if (!this.getAttribute('layout')) {
+          error += '. The element did not specify a layout attribute. ' +
+              'Check https://www.ampproject.org/docs/guides/' +
+              'responsive/control_layout and the respective element ' +
+              'documentation for details.';
+        }
+        throw user().createError(error);
       }
     }
 
@@ -866,11 +878,7 @@ function createBaseCustomElementClass(win) {
         }
         try {
           this.layout_ = applyLayout_(this);
-          if (this.layout_ != Layout.NODISPLAY &&
-            !this.implementation_.isLayoutSupported(this.layout_)) {
-            throw user().createError('Layout not supported: ' +
-                this.layout_);
-          }
+          this.assertLayout_();
           this.implementation_.layout_ = this.layout_;
           this.implementation_.firstAttachedCallback();
           if (!this.isUpgraded()) {
