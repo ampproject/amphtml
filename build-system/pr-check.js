@@ -147,7 +147,7 @@ const command = {
   },
   buildRuntime: function() {
     execOrDie(`${gulp} lint`);
-    execOrDie(`${gulp} build --css-only`);
+    execOrDie(`${gulp} build`);
     execOrDie(`${gulp} check-types`);
     execOrDie(`${gulp} dist --fortesting`);
   },
