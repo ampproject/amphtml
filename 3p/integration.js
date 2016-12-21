@@ -149,7 +149,7 @@ const AMP_EMBED_ALLOWED = {
 const iframeName = window.name;
 
 let data = parseFragment(location.hash);
-if (data) {
+if (data && data._context) {
   window.context = data._context;
 } else {
   try {
