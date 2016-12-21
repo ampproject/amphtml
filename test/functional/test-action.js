@@ -164,24 +164,57 @@ describe('ActionService parseAction', () => {
   });
 
   it('should dereference vars in arg value identifiers', () => {
-    const a = parseAction('e:t.m(key1=foo)');
-    expect(a.args['key1']()).to.equal('foo');
-    expect(a.args['key1']({foo: 'bar'})).to.equal('bar');
+    const data = {foo: {bar: 'baz'}};
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(a.args['key1']()).to.equal(null);
+    expect(a.args['key1'](data)).to.equal('baz');
   });
 
-  it('should NOT dereference vars in arg value strings', () => {
-    const a = parseAction('e:t.m(key1="foo")');
-    expect(a.args['key1']()).to.equal('foo');
+  it('should NOT dereference vars in identifiers without "." operator', () => {
+    const a = parseAction('e:t.m(key1=foo)');
     expect(a.args['key1']({foo: 'bar'})).to.equal('foo');
   });
 
-  it('should NOT dereference null or non-primitives in arg values', () => {
-    const a = parseAction('e:t.m(key1=foo)');
-    expect(a.args['key1']({foo: null})).to.equal('foo');
-    expect(a.args['key1']({foo: undefined})).to.equal('foo');
-    expect(a.args['key1']({foo: {}})).to.equal('foo');
-    expect(a.args['key1']({foo: []})).to.equal('foo');
-    expect(a.args['key1']({foo: () => {}})).to.equal('foo');
+  it('should NOT dereference vars in arg value strings', () => {
+    const a = parseAction('e:t.m(key1="abc")');
+    expect(a.args['key1']()).to.equal('abc');
+    expect(a.args['key1']({foo: 'bar'})).to.equal('abc');
+    expect(() => {
+      parseAction('e:t.m(key1="abc".foo)');
+    }).to.throw(/Expected either/);
+  });
+
+  it('should NOT dereference vars in arg value booleans', () => {
+    const a = parseAction('e:t.m(key1=true)');
+    expect(a.args['key1']()).to.equal(true);
+    expect(a.args['key1']({true: 'bar'})).to.equal(true);
+    expect(() => {
+      parseAction('e:t.m(key1=true.bar)');
+    }).to.throw(/Expected either/);
+  });
+
+  it('should NOT dereference vars in arg value numerics', () => {
+    const a = parseAction('e:t.m(key1=123)');
+    expect(a.args['key1']()).to.equal(123);
+    expect(a.args['key1']({123: 'bar'})).to.equal(123);
+    expect(() => {
+      parseAction('e:t.m(key1=123.bar)');
+    }).to.throw(/Expected either/);
+  });
+
+  it('should return null for undefined references in arg values', () => {
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(a.args['key1'](null)).to.equal(null);
+    expect(a.args['key1']({})).to.equal(null);
+    expect(a.args['key1']({foo: null})).to.equal(null);
+  })
+
+  it('should NOT dereference non-primitives in arg values', () => {
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(a.args['key1']({foo: {bar: undefined}})).to.equal(null);
+    expect(a.args['key1']({foo: {bar: {}}})).to.equal(null);
+    expect(a.args['key1']({foo: {bar: []}})).to.equal(null);
+    expect(a.args['key1']({foo: {bar: () => {}}})).to.equal(null);
   });
 
   it('should apply arg functions with no event', () => {
@@ -196,7 +229,7 @@ describe('ActionService parseAction', () => {
   });
 
   it('should apply arg value functions with an event with data', () => {
-    const a = parseAction('e:t.m(key1=foo)');
+    const a = parseAction('e:t.m(key1=event.foo)');
     const event = new CustomEvent('MyEvent', {detail: {foo: 'bar'}});
     expect(applyActionInfoArgs(a.args, event)).to.deep.equal({key1: 'bar'});
   });

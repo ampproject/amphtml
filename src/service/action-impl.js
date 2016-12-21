@@ -247,13 +247,16 @@ export class ActionService {
 
     const actionInfo = action.actionInfo;
 
+    // Replace any variables in args with data in `event`.
+    const args = applyActionInfoArgs(actionInfo.args, event);
+
     // Global target, e.g. `AMP`.
     const globalTarget = this.globalTargets_[actionInfo.target];
     if (globalTarget) {
       const invocation = new ActionInvocation(
           this.root_,
           actionInfo.method,
-          actionInfo.args,
+          args,
           action.node,
           event);
       globalTarget(invocation);
@@ -439,9 +442,21 @@ export function parseActionMap(s, context) {
               // Key: "key = "
               const argKey = tok.value;
               assertToken(toks.next(), [TokenType.SEPARATOR], '=');
-              const argValue = getActionInfoArgValue(
-                  assertToken(toks.next(/* convertValue */ true),
-                      [TokenType.LITERAL, TokenType.ID]));
+              // Value is either a literal or a variable: "foo.bar.baz"
+              tok = assertToken(toks.next(/* convertValue */ true),
+                  [TokenType.LITERAL, TokenType.ID]);
+              const argValueTokens = [tok];
+              // Variables have one or more dereferences: ".identifier"
+              if (tok.type == TokenType.ID) {
+                for (peek = toks.peek();
+                    peek.type == TokenType.SEPARATOR && peek.value == '.';
+                    peek = toks.peek()) {
+                  tok = toks.next(); // Skip '.'.
+                  tok = assertToken(toks.next(false), [TokenType.ID]);
+                  argValueTokens.push(tok);
+                }
+              }
+              const argValue = getActionInfoArgValue(argValueTokens);
               if (!args) {
                 args = map();
               }
@@ -486,27 +501,36 @@ export function parseActionMap(s, context) {
  * The function takes a single object argument `data`.
  * If the token is an identifier `foo`, the function returns `data[foo]`.
  * Otherwise, the function returns the token value.
- * @param {!{type: TokenType, value: *}} token
+ * @param {Array<!TokenDef>} tokens
  * @return {?function(!Object):string}
  * @private
  */
-function getActionInfoArgValue(token) {
-  const value = token.value;
-  if (token.type == TokenType.LITERAL) {
-    return () => value;
-  } else if (token.type == TokenType.ID) {
+function getActionInfoArgValue(tokens) {
+  if (tokens.length == 0) {
+    return null;
+  }
+  if (tokens.length == 1) {
+    return () => tokens[0].value;
+  } else {
     return data => {
-      if (data && data.hasOwnProperty(value)) {
-        const type = typeof data[value];
-        // Only allow dereferencing of non-null primitives.
-        if (type === 'string' || type === 'number' || type === 'boolean') {
-          return data[value];
+      let current = data;
+      // Traverse properties of `data` per token values.
+      for (let i = 0; i < tokens.length; i++) {
+        const value = tokens[i].value;
+        if (current && current.hasOwnProperty(value)) {
+          current = current[value];
+        } else {
+          return null;
         }
       }
-      return value;
+      // Only allow dereferencing of primitives.
+      const type = typeof current;
+      if (type === 'string' || type === 'number' || type === 'boolean') {
+        return current;
+      } else {
+        return null;
+      }
     };
-  } else {
-    return null;
   }
 }
 
@@ -519,15 +543,18 @@ function getActionInfoArgValue(token) {
  * @private Visible for testing only.
  */
 export function applyActionInfoArgs(args, event) {
-  if (args) {
-    const data = (event && event.detail) ? event.detail : null;
-    const applied = map();
-    Object.keys(args).forEach(key => {
-      applied[key] = args[key].call(null, data);
-    });
-    return applied;
+  if (!args) {
+    return args;
   }
-  return args;
+  const data = {};
+  if (event && event.detail) {
+    data['event'] = event.detail;
+  }
+  const applied = map();
+  Object.keys(args).forEach(key => {
+    applied[key] = args[key].call(null, data);
+  });
+  return applied;
 }
 
 /**
@@ -547,10 +574,10 @@ function assertActionForParser(s, context, condition, opt_message) {
 /**
  * @param {string} s
  * @param {!Element} context
- * @param {!{type: TokenType, value: *}} tok
+ * @param {!TokenDef} tok
  * @param {Array<TokenType>} types
  * @param {*=} opt_value
- * @return {!{type: TokenType, value: *}}
+ * @return {!TokenDef}
  * @private
  */
 function assertTokenForParser(s, context, tok, types, opt_value) {
@@ -564,7 +591,6 @@ function assertTokenForParser(s, context, tok, types, opt_value) {
   return tok;
 }
 
-
 /**
  * @enum {number}
  */
@@ -575,6 +601,11 @@ const TokenType = {
   LITERAL: 3,
   ID: 4,
 };
+
+/**
+ * @typedef {{type: TokenType, value: *}}
+ */
+let TokenDef;
 
 /** @private @const {string} */
 const WHITESPACE_SET = ' \t\n\r\f\v\u00A0\u2028\u2029';
@@ -587,7 +618,6 @@ const STRING_SET = '"\'';
 
 /** @private @const {string} */
 const SPECIAL_SET = WHITESPACE_SET + SEPARATOR_SET + STRING_SET;
-
 
 /** @private */
 class ParserTokenizer {
@@ -605,7 +635,7 @@ class ParserTokenizer {
   /**
    * Returns the next token and advances the position.
    * @param {boolean=} opt_convertValues
-   * @return {!{type: TokenType, value: *}}
+   * @return {!TokenDef}
    */
   next(opt_convertValues) {
     const tok = this.next_(opt_convertValues || false);
@@ -616,7 +646,7 @@ class ParserTokenizer {
   /**
    * Returns the next token but keeps the current position.
    * @param {boolean=} opt_convertValues
-   * @return {!{type: TokenType, value: *}}
+   * @return {!TokenDef}
    */
   peek(opt_convertValues) {
     return this.next_(opt_convertValues || false);
@@ -692,7 +722,7 @@ class ParserTokenizer {
       return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
-    // A key or identifier.
+    // Advance until next special character.
     let end = newIndex + 1;
     for (; end < this.str_.length; end++) {
       if (SPECIAL_SET.indexOf(this.str_.charAt(end)) != -1) {
@@ -700,10 +730,21 @@ class ParserTokenizer {
       }
     }
     const s = this.str_.substring(newIndex, end);
-    const value = convertValues && (s == 'true' || s == 'false') ?
-        s == 'true' : s;
     newIndex = end - 1;
-    return {type: TokenType.ID, value, index: newIndex};
+
+    // Boolean literal.
+    if (convertValues && (s == 'true' || s == 'false')) {
+      const value = (s == 'true');
+      return {type: TokenType.LITERAL, value, index: newIndex};
+    }
+
+    // Identifier.
+    if (!isNum(s.charAt(0))) {
+      return {type: TokenType.ID, value: s, index: newIndex};
+    }
+
+    // Key.
+    return {type: TokenType.LITERAL, value: s, index: newIndex};
   }
 }
 
