@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {initLogConstructor, user} from '../src/log';
+import {dev, initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
@@ -143,8 +143,25 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
-const data = parseFragment(location.hash);
-window.context = data._context;
+// Need to cache iframeName as it will be potentially overwritten by
+// masterSelection, as per below.
+const iframeName = window.name;
+
+let data = parseFragment(location.hash);
+if (data && data._context) {
+  window.context = data._context;
+} else {
+  try {
+    // TODO(bradfrizzell@): Change the data structure of the attributes
+    //    to make it less terrible.
+    data = JSON.parse(iframeName).attributes;
+    window.context = data._context;
+  } catch (err) {
+    window.context = {};
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
+}
 
 // This should only be invoked after window.context is set
 initLogConstructor();
@@ -382,6 +399,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.reportRenderedEntityIdentifier =
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
+    window.context.addContextToIframe = iframe => {
+      iframe.name = iframeName;
+    };
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -591,18 +611,22 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {!JSONType}
+ * @return {?JSONType}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
-  let json = fragment.substr(1);
-  // Some browser, notably Firefox produce an encoded version of the fragment
-  // while most don't. Since we know how the string should start, this is easy
-  // to detect.
-  if (json.indexOf('{%22') == 0) {
-    json = decodeURIComponent(json);
+  try {
+    let json = fragment.substr(1);
+    // Some browser, notably Firefox produce an encoded version of the fragment
+    // while most don't. Since we know how the string should start, this is easy
+    // to detect.
+    if (json.indexOf('{%22') == 0) {
+      json = decodeURIComponent(json);
+    }
+    return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
+  } catch (err) {
+    return null;
   }
-  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
 }
 
 /**
