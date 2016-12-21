@@ -209,20 +209,12 @@ function selectRandomProperty(obj) {
  */
 export function randomlySelectUnsetPageExperiments(win, experiments) {
   win.pageExperimentBranches = win.pageExperimentBranches || {};
-  if (getMode(win).localDev) {
-    // In local dev mode, it can be difficult to configure AMP_CONFIG
-    // externally.  Default it here if necessary.
-    win.AMP_CONFIG = win.AMP_CONFIG || {};
-  }
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
     if (!experiments.hasOwnProperty(experimentName) ||
         win.pageExperimentBranches.hasOwnProperty(experimentName)) {
       continue;
-    }
-    if (getMode(win).localDev) {
-      win.AMP_CONFIG[experimentName] = win.AMP_CONFIG[experimentName] || 0.0;
     }
     // If we're in the experiment, but we haven't already forced a specific
     // experiment branch (e.g., via a test setup), then randomize the branch
