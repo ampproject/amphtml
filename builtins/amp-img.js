@@ -47,14 +47,18 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  attributeChangedCallback(name, unusedOldValue, unusedNewValue) {
-    if (name === 'src') {
-      this.srcset_ = srcsetFromElement(this.element);
-      this.updateImageSrc_();
-    } else if (this.img_ && ATTRIBUTES_TO_PROPAGATE.indexOf(name) >= 0) {
-      this.propagateAttributes(name, this.img_,
-          /* opt_removeMissingAttrs */ true);
-    }
+  mutatedAttributesCallback(mutations) {
+    mutations.forEach(mutation => {
+      const name = mutation.name;
+
+      if (name === 'src') {
+        this.srcset_ = srcsetFromElement(this.element);
+        this.updateImageSrc_();
+      } else if (this.img_ && ATTRIBUTES_TO_PROPAGATE.indexOf(name) >= 0) {
+        this.propagateAttributes(name, this.img_,
+            /* opt_removeMissingAttrs */ true);
+      }
+    });
   }
 
   /** @override */

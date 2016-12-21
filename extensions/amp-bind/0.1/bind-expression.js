@@ -18,6 +18,12 @@ import {AstNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
 
 /**
+ * Possible types of a Bind expression evaluation.
+ * @typedef {(null|boolean|string|number|Array|Object)}
+ */
+export let BindExpressionResultDef;
+
+/**
  * Map of object type to function name to whitelisted function.
  * @type {!Object<string, !Object<string, Function>>}
  */
@@ -81,7 +87,7 @@ export class BindExpression {
    * Evaluates the expression given a scope.
    * @param {!Object} scope
    * @throws {Error} On illegal function invocation.
-   * @return {*}
+   * @return {BindExpressionResultDef}
    */
   evaluate(scope) {
     return this.eval_(this.ast_, scope);

@@ -52,9 +52,9 @@ describes.realWin('amp-bind', {
    */
   function createAmpElementWithBinding(binding) {
     const parent = env.win.document.getElementById('parent');
-    parent.innerHTML = '<p ' + binding + '></p>';
+    parent.innerHTML = '<p class="-amp-fake" ' + binding + '></p>';
     const fakeAmpElement = parent.firstElementChild;
-    fakeAmpElement.attributeChangedCallback = () => {};
+    fakeAmpElement.mutatedAttributesCallback = () => {};
     return fakeAmpElement;
   }
 
@@ -101,9 +101,9 @@ describes.realWin('amp-bind', {
 
   it('should scan for bindings when body is available', () => {
     createElementWithBinding('[onePlusOne]="1+1"');
-    expect(bind.bindings_.length).to.equal(0);
+    expect(bind.boundElements_.length).to.equal(0);
     return onBindReady(() => {
-      expect(bind.bindings_.length).to.equal(1);
+      expect(bind.boundElements_.length).to.equal(1);
     });
   });
 
@@ -188,10 +188,18 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should call attributeChangedCallback on AMP elements', () => {
+  it('should support NOT override internal AMP CSS classes', () => {
+    const element = createAmpElementWithBinding(`[class]="['abc']"`);
+    expect(toArray(element.classList)).to.deep.equal(['-amp-fake']);
+    return onBindReadyAndSetState({}, () => {
+      expect(toArray(element.classList)).to.deep.equal(['-amp-fake', 'abc']);
+    });
+  });
+
+  it('should call mutatedAttributesCallback on AMP elements', () => {
     const binding = '[onePlusOne]="1+1" [added]="true" removed';
     const element = createAmpElementWithBinding(binding);
-    const spy = env.sandbox.spy(element, 'attributeChangedCallback');
+    const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
     spy.withArgs('onePlusOne', null, 2);
     spy.withArgs('added', null, '');
     spy.withArgs('removed', '', null);
@@ -248,6 +256,4 @@ describes.realWin('amp-bind', {
       expect(stub.calledOnce).to.be.true;
     });
   });
-
-  // TODO(choumx): Add tests for security (binding to banned attributes, etc.).
 });

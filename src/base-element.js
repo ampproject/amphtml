@@ -827,14 +827,15 @@ export class BaseElement {
   }
 
   /**
-   * Called when an attribute's value changes.
+   * Called when one or more attributes are mutated.
+   * Must be invoked during `mutator` block in `Resources#mutateElement`.
    * Boolean attributes have a value of empty string and `null` when
    * present and missing, respectively.
-   * @param {string} unusedName
-   * @param {?string} unusedOldValue
-   * @param {?string} unusedNewValue
+   * @param {
+   *   !Array<{name: string, oldValue: ?string, newValue: ?string}>
+   * } unusedMutations
    */
-  attributeChangedCallback(unusedName, unusedOldValue, unusedNewValue) {
+  mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
   }
 

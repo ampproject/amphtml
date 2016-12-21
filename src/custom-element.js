@@ -1223,14 +1223,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Called when an attribute's value changes.
-     * Only called for observedAttributes or from amp-bind.
-     * @param {!string} name
-     * @param {?string} oldValue
-     * @param {?string} newValue
+     * Called when one or more attributes are mutated.
+     * Must be invoked during `mutator` block in `Resources#mutateElement`.
+     * Boolean attributes have a value of empty string and `null` when
+     * present and missing, respectively.
+     * @param {
+     *   !Array<{name: string, oldValue: ?string, newValue: ?string}>
+     * } mutations
      */
-    attributeChangedCallback(name, oldValue, newValue) {
-      this.implementation_.attributeChangedCallback(name, oldValue, newValue);
+    mutatedAttributesCallback(mutations) {
+      this.implementation_.mutatedAttributesCallback(mutations);
     }
 
     /**
