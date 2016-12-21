@@ -280,6 +280,10 @@ function adoptShared(global, opts, callback) {
       // One example would be viewer communication that is required
       // to transition document from pre-render to visible (which
       // affects chunking itself).
+      // We consider functions as high priority, because
+      // - if in doubt, that is a better default
+      // - the only actual  user is a viewer integration that should
+      //   be high priority.
       Promise.resolve().then(register);
     } else {
       register.displayName = fnOrStruct.n;
