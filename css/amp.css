@@ -54,23 +54,23 @@ body {
  * This is only done in the embedded mode because (a) the document swipe
  * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
  */
-html.-amp-singledoc.-amp-embedded {
+html.i-amphtml-singledoc.i-amphtml-embedded {
   touch-action: pan-y;
 }
 
 
 /**
- * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amp-html-wrapper`
+ * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
  * element.
  */
-html.-amp-ios-embed {
+html.i-amphtml-ios-embed {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   position: static;
 }
 
 /** Wrapper for iOS-Embed-Wrapper mode. */
-#i-amp-html-wrapper {
+#i-amphtml-wrapper {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -83,7 +83,7 @@ html.-amp-ios-embed {
   display: block !important;
 }
 
-#i-amp-html-wrapper > body {
+#i-amphtml-wrapper > body {
   position: relative !important;
   /* Border is necessary to avoid margins collapsing outside body.
      Alternatively we can also set overflow to hidden. */
@@ -92,7 +92,7 @@ html.-amp-ios-embed {
 
 
 /** make-body-block experiment */
-.-amp-make-body-block body {
+.i-amphtml-make-body-block body {
   display: block !important;
 }
 
@@ -100,31 +100,31 @@ html.-amp-ios-embed {
   display: inline-block;
 }
 
-.-amp-layout-nodisplay {
+.i-amphtml-layout-nodisplay {
   /* Display is set/reset in JS */
 }
 
-.-amp-layout-fixed {
+.i-amphtml-layout-fixed {
   display: inline-block;
   position: relative;
 }
 
-.-amp-layout-responsive {
+.i-amphtml-layout-responsive {
   display: block;
   position: relative;
 }
 
-.-amp-layout-fixed-height {
+.i-amphtml-layout-fixed-height {
   display: block;
   position: relative;
 }
 
-.-amp-layout-container {
+.i-amphtml-layout-container {
   display: block;
   position: relative;
 }
 
-.-amp-layout-fill {
+.i-amphtml-layout-fill {
   display: block;
   overflow: hidden !important;
   position: absolute;
@@ -134,17 +134,17 @@ html.-amp-ios-embed {
   right: 0;
 }
 
-.-amp-layout-flex-item {
+.i-amphtml-layout-flex-item {
   display: block;
   position: relative;
   flex: 1 1 auto;
 }
 
-.-amp-layout-size-defined {
+.i-amphtml-layout-size-defined {
   overflow: hidden !important;
 }
 
-i-amp-sizer {
+i-amphtml-sizer {
   display: block !important;
 }
 
@@ -156,7 +156,7 @@ i-amp-sizer {
   margin: auto;
 }
 
-.-amp-layout-size-defined .-amp-fill-content {
+.i-amphtml-layout-size-defined .-amp-fill-content {
   position: absolute;
   top: 0;
   left: 0;
@@ -206,7 +206,7 @@ i-amp-sizer {
 .amp-unresolved {
 }
 
-.-amp-unresolved {
+.i-amphtml-unresolved {
   position: relative;
   overflow: hidden !important;
 }
@@ -218,13 +218,13 @@ i-amp-sizer {
   /* For author styling. */
 }
 
-.-amp-notbuilt {
+.i-amphtml-notbuilt {
   position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
 
-.-amp-notbuilt > * {
+.i-amphtml-notbuilt > * {
   display: none;
 }
 
@@ -232,11 +232,11 @@ i-amp-sizer {
   visibility: hidden !important;
 }
 
-.-amp-layout {
+.i-amphtml-layout {
   /* Just state. */
 }
 
-.-amp-error {
+.i-amphtml-error {
   /* Just state. */
 }
 
@@ -253,8 +253,8 @@ i-amp-sizer {
   display: none;
 }
 
-.-amp-layout-size-defined > [placeholder],
-.-amp-layout-size-defined > [fallback] {
+.i-amphtml-layout-size-defined > [placeholder],
+.i-amphtml-layout-size-defined > [fallback] {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -263,21 +263,21 @@ i-amp-sizer {
   z-index: 1 !important;
 }
 
-.-amp-notbuilt > [placeholder] {
+.i-amphtml-notbuilt > [placeholder] {
   display: block !important;
 }
 
-.-amp-hidden-by-media-query {
+.i-amphtml-hidden-by-media-query {
   display: none;
 }
 
-.-amp-element-error {
+.i-amphtml-element-error {
   background: red !important;
   color: white !important;
   position: relative !important;
 }
 
-.-amp-element-error::before {
+.i-amphtml-element-error::before {
   content: attr(error-message);
 }
 
@@ -303,27 +303,27 @@ i-amp-scroll-container.amp-active {
   overflow: auto;
 }
 
-.-amp-loading-container {
+.i-amphtml-loading-container {
   display: block !important;
   z-index: 1;
 }
 
-.-amp-notbuilt > .-amp-loading-container {
+.i-amphtml-notbuilt > .i-amphtml-loading-container {
   display: block !important;
 }
 
 /**
- * `-amp-loading-container`, `-amp-loader` and `-amp-loader-dot` all support
- * a "loading indicator" usecase. `-amp-loading-container` is mostly responsible
- * for alighning the loading indicator, while `-amp-loader` and
- * `-amp-loader-dot` are an implementation for a default loading indicator. The
+ * `i-amphtml-loading-container`, `i-amphtml-loader` and `i-amphtml-loader-dot` all support
+ * a "loading indicator" usecase. `i-amphtml-loading-container` is mostly responsible
+ * for alighning the loading indicator, while `i-amphtml-loader` and
+ * `i-amphtml-loader-dot` are an implementation for a default loading indicator. The
  * default implementation includes the three-dot layout and animation.
  */
-.-amp-loading-container.amp-hidden {
+.i-amphtml-loading-container.amp-hidden {
   visibility: hidden;
 }
 
-.-amp-loader-line {
+.i-amphtml-loader-line {
   position: absolute;
   top:0;
   left: 0;
@@ -334,7 +334,7 @@ i-amp-scroll-container.amp-active {
   display: block;
 }
 
-.-amp-loader-moving-line {
+.i-amphtml-loader-moving-line {
   display: block;
   position: absolute;
   left: -100%;
@@ -344,16 +344,16 @@ i-amp-scroll-container.amp-active {
   z-index: 2;
 }
 
-@keyframes -amp-loader-line-moving {
+@keyframes i-amphtml-loader-line-moving {
   0% {left: -100%;}
   100% {left: 100%;}
 }
 
-.-amp-loader-line.amp-active .-amp-loader-moving-line {
-  animation: -amp-loader-line-moving 2s ease infinite;
+.i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
+  animation: i-amphtml-loader-line-moving 2s ease infinite;
 }
 
-.-amp-loader {
+.i-amphtml-loader {
   position: absolute;
   display: block;
   height: 10px;
@@ -364,11 +364,11 @@ i-amp-scroll-container.amp-active {
   white-space: nowrap;
 }
 
-.-amp-loader.amp-active .-amp-loader-dot {
-  animation: -amp-loader-dots 2s infinite;
+.i-amphtml-loader.amp-active .i-amphtml-loader-dot {
+  animation: i-amphtml-loader-dots 2s infinite;
 }
 
-.-amp-loader-dot {
+.i-amphtml-loader-dot {
   position: relative;
   display: inline-block;
 
@@ -382,19 +382,19 @@ i-amp-scroll-container.amp-active {
   will-change: transform;
 }
 
-.-amp-loader .-amp-loader-dot:nth-child(1) {
+.i-amphtml-loader .i-amphtml-loader-dot:nth-child(1) {
   animation-delay: 0s;
 }
 
-.-amp-loader .-amp-loader-dot:nth-child(2) {
+.i-amphtml-loader .i-amphtml-loader-dot:nth-child(2) {
   animation-delay: .1s;
 }
 
-.-amp-loader .-amp-loader-dot:nth-child(3) {
+.i-amphtml-loader .i-amphtml-loader-dot:nth-child(3) {
   animation-delay: .2s;
 }
 
-@keyframes -amp-loader-dots {
+@keyframes i-amphtml-loader-dots {
   0%, 100% {
     transform: scale(.7);
     background-color: rgba(0, 0, 0, .3);

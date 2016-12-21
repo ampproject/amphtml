@@ -56,9 +56,10 @@ function runTest(shouldKillPolyfillableApis) {
       return pollForLayout(fixture.win, 13, 10000).then(() => {
         expect(fixture.doc.querySelectorAll('.-amp-element'))
             .to.have.length(16);
-        expect(fixture.doc.querySelectorAll('.-amp-layout'))
+        expect(fixture.doc.querySelectorAll('.i-amphtml-layout'))
             .to.have.length(13);
-        expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);
+        expect(fixture.doc.querySelectorAll('.i-amphtml-error'))
+            .to.have.length(0);
         checkGlobalScope(fixture.win);
       }).then(() => {
         return expectBodyToBecomeVisible(fixture.win);
