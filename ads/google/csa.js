@@ -15,6 +15,7 @@
  */
 import {validateData, loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json.js';
+import {setStyle, setStyles} from '../../src/style';
 
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;
@@ -46,7 +47,7 @@ export const AD_TYPE = {
  */
 export function csa(global, data) {
   // Get parent width in case we want to override
-  const width = global.document.body.clientWidth;
+  const width = global.document.body./*OK*/clientWidth;
 
   validateData(data, [], [
     'afshPageOptions',
@@ -100,7 +101,7 @@ export function csa(global, data) {
  * This is needed for an iOS bug found in versions 10.0.1 and below that
  * doesn't properly reflow the iframe upon orientation change.
  * @param {!Window} global The window object of the iframe
- * @param {Object} containerDiv The CSA container
+ * @param {!Element} containerDiv The CSA container
  */
 function orientationChangeHandler(global, containerDiv) {
   // Save the height of the container before the event listener triggers
@@ -108,7 +109,7 @@ function orientationChangeHandler(global, containerDiv) {
   global.setTimeout(() => {
     // Force DOM reflow and repaint
     /*eslint-disable no-unused-vars*/
-    const ignore = global.document.body.offsetHeight;
+    const ignore = global.document.body./*OK*/offsetHeight;
     /*eslint-enable no-unused-vars*/
     // Capture new height
     let newHeight = containerDiv.style.height;
@@ -134,13 +135,16 @@ function orientationChangeHandler(global, containerDiv) {
 /**
  * Hanlder for when a resize request succeeds
  * Hide the overflow and resize the container
+ * @param {!Window} global The window object of the iframe
+ * @param {!Element} container The CSA container
+ * @param {!number} requestedHeight The height of the resize request
  * @visibleForTesting
  */
 export function resizeSuccessHandler(global, container, requestedHeight) {
   currentAmpHeight = requestedHeight;
   const overflow = global.document.getElementById('overflow');
   if (overflow) {
-    overflow.style.display = 'none';
+    setStyle(overflow, 'display', 'none');
     resizeCsa(container, requestedHeight);
   }
 }
@@ -150,6 +154,9 @@ export function resizeSuccessHandler(global, container, requestedHeight) {
  * If the container is larger than the AMP container and an overflow already
  * exists, show the overflow and resize the container to fit inside the AMP
  * container.  If an overflow doesn't exist, create one.
+ * @param {!Window} global The window object of the iframe
+ * @param {!Element} container The CSA container
+ * @param {!number} requestedHeight The height of the resize request
  * @visibleForTesting
  */
 export function resizeDeniedHandler(global, container, requestedHeight) {
@@ -157,7 +164,7 @@ export function resizeDeniedHandler(global, container, requestedHeight) {
   const containerHeight = parseInt(container.style.height, 10);
   if (containerHeight > currentAmpHeight) {
     if (overflow) {
-      overflow.style.display = '';
+      setStyle(overflow, 'display', '');
       resizeCsa(container, currentAmpHeight - overflowHeight);
     } else {
       createOverflow(global, container, requestedHeight);
@@ -201,7 +208,7 @@ function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
 /**
  * Helper function to determine which product to request
  * @param {!Object} data The data passed in by the partner
- * @return {number} Enum of ad type
+ * @return {!number} Enum of ad type
  */
 function getAdType(data) {
   if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
@@ -222,8 +229,8 @@ function getAdType(data) {
  * The adsLoadedCallback for requests without a backfill.  If ads were returned,
  * resize the iframe.  If ads weren't returned, tell AMP we don't have ads.
  * @param {!Window} global The window object of the iframe
- * @param {string} containerName The name of the CSA container
- * @param {boolean} hasAd Whether or not CSA returned an ad
+ * @param {!string} containerName The name of the CSA container
+ * @param {!boolean} hasAd Whether or not CSA returned an ad
  * @visibleForTesting
  */
 export function callbackWithNoBackfill(global, containerName, hasAd) {
@@ -240,8 +247,8 @@ export function callbackWithNoBackfill(global, containerName, hasAd) {
  * @param {!Window} global The window object of the iframe
  * @param {!Object} page The parsed AFS page options to backfill the unit with
  * @param {!Object} ad The parsed AFS page options to backfill the unit with
- * @param {string} containerName The name of the CSA container
- * @param {boolean} hasAd Whether or not CSA returned an ad
+ * @param {!string} containerName The name of the CSA container
+ * @param {!boolean} hasAd Whether or not CSA returned an ad
  * @visibleForTesting
 */
 export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
@@ -255,13 +262,13 @@ export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
 
 /**
  * CSA callback function to resize the iframe when ads were returned
- * @param {string} containerName Name of the container ('csacontainer')
+ * @param {!string} containerName Name of the container ('csacontainer')
  * @visibleForTesting
  */
 export function resizeIframe(global, containerName) {
   // Get actual height of container
   const container = global.document.getElementById(containerName);
-  const height = container.offsetHeight;
+  const height = container./*OK*/offsetHeight;
   // Set initial AMP height
   currentAmpHeight =
       global.context.initialIntersection.boundingClientRect.height;
@@ -278,8 +285,8 @@ export function resizeIframe(global, containerName) {
 /**
  * Helper function to create an overflow element
  * @param {!Window} global The window object of the iframe
- * @param {Node} container HTML element of the CSA container
- * @param {number} height The full height the CSA container should be when the
+ * @param {!Element} container HTML element of the CSA container
+ * @param {!number} height The full height the CSA container should be when the
  * overflow element is clicked.
  */
 function createOverflow(global, container, height) {
@@ -294,7 +301,7 @@ function createOverflow(global, container, height) {
 /**
  * Helper function to create the base overflow element
  * @param {!Window} global The window object of the iframe
- * @return {Node}
+ * @return {!Element}
  */
 function getOverflowElement(global) {
   const overflow = global.document.createElement('div');
@@ -310,7 +317,7 @@ function getOverflowElement(global) {
 /**
  * Helper function to create a line element for the overflow element
  * @param {!Window} global The window object of the iframe
- * @return {Node}
+ * @return {!Element}
  */
 function getOverflowLine(global) {
   const line = global.document.createElement('div');
@@ -322,7 +329,7 @@ function getOverflowLine(global) {
 /**
  * Helper function to create a chevron element for the overflow element
  * @param {!Window} global The window object of the iframe
- * @return {Node}
+ * @return {!Element}
  */
 function getOverflowChevron(global) {
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
@@ -331,22 +338,29 @@ function getOverflowChevron(global) {
       '<path d="M0-.75h48v48H0z" fill="none"/> </svg>';
 
   const chevron = global.document.createElement('div');
-  chevron.style.width = '36px';
-  chevron.style.height = '36px';
-  chevron.style.marginLeft = 'auto';
-  chevron.style.marginRight = 'auto';
-  chevron.style.display = 'block';
-  chevron.innerHTML = svg;
+  setStyles(chevron, {
+    width: '36px',
+    height: '36px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    display: 'block',
+  });
+  chevron./*OK*/innerHTML = svg;
   return chevron;
 }
 
 /**
  * Helper function to resize the height of a CSA container and its child iframe
- * @param {Object} container HTML element of the CSA container
- * @param {number} height Height to resize, in pixels
+ * @param {!Element} container HTML element of the CSA container
+ * @param {!number} height Height to resize, in pixels
  */
 function resizeCsa(container, height) {
-  container.firstChild.style.height = height + 'px';
-  container.firstChild.style.width = '100%';
-  container.style.height = height + 'px';
+  const iframe = container.firstElementChild;
+  if (iframe) {
+    setStyles(iframe, {
+      height: height + 'px',
+      width: '100%',
+    });
+  }
+  setStyle(container, 'height', height + 'px');
 }
