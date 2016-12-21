@@ -69,213 +69,98 @@ export function installFormProxy(form) {
 
 
 /*QQQ
-after
-animate
-append
-appendChild
-attachShadow function
-before function
-blur function
-checkValidity function
-click function
-cloneNode function
-closest function
-compareDocumentPosition function
-contains function
-createShadowRoot function
-dispatchEvent function
-getAttribute function
-getAttributeNS function
-getAttributeNode function
-getAttributeNodeNS function
-getBoundingClientRect function
-getClientRects function
-getDestinationInsertionPoints function
-getElementsByClassName function
-getElementsByTagName function
-getElementsByTagNameNS function
-getRootNode function
-hasAttribute function
-hasAttributeNS function
-hasAttributes function
-hasChildNodes function
-focus function
-insertAdjacentElement function
-insertAdjacentHTML function
-insertAdjacentText function
-insertBefore function
-isDefaultNamespace function
-isEqualNode function
-isSameNode function
-lookupNamespaceURI function
-lookupPrefix function
-matches function
-normalize function
-prepend function
-querySelector function
-querySelectorAll function
-remove function
-removeAttribute function
-removeAttributeNS function
-removeAttributeNode function
-removeChild function
-replaceChild function
-replaceWith function
-reportValidity function
-requestPointerLock function
-reset function
-scrollIntoView function
-scrollIntoViewIfNeeded function
-setAttribute function
-setAttributeNS function
-setAttributeNode function
-setAttributeNodeNS function
-submit function
-webkitMatchesSelector function
-webkitRequestFullScreen function
-webkitRequestFullscreen function
 
+Methods:
+  after
+  animate
+  append
+  before
+  blur
+  checkValidity
+  click
+  cloneNode
+  closest
+  contains
+  dispatchEvent
+  focus
+  insertBefore
+  lookupPrefix
+  matches
+  normalize
+  prepend
+  remove
+  replaceWith
+  reportValidity
+  reset
+  submit
 
-acceptCharset string
-accessKey string
-assignedSlot object
-attributes object
-autocomplete string
-childElementCount number
-childNodes object
-children object
-classList object
-className string
-clientHeight number
-clientLeft number
-clientTop number
-clientWidth number
-contentEditable string
-dataset object
-dir string
-draggable boolean
-elements object
-encoding string
-enctype string
-firstChild object
-firstElementChild object
-hidden boolean
-id string
-innerHTML string
-innerText string
-isConnected boolean
-isContentEditable boolean
-lang string
-lastChild object
-lastElementChild object
-length number
-localName string
-name string
-namespaceURI string
-nextElementSibling object
-nextSibling object
-noValidate boolean
-nodeName string
-nodeType number
-nodeValue object
-offsetHeight number
-offsetLeft number
-offsetParent object
-offsetTop number
-offsetWidth number
-+   outerHTML string
-+   outerText string
-ownerDocument object
-parentElement object
-parentNode object
-prefix object
-previousElementSibling object
-previousSibling object
-scrollHeight number
-scrollLeft number
-scrollTop number
-scrollWidth number
-shadowRoot object
-slot string
-spellcheck boolean
-style object
-tabIndex number
-tagName string
-target string
-textContent string
-title string
-translate boolean
-webkitdropzone string
-
-
-onabort object
-onbeforecopy object
-onbeforecut object
-onbeforepaste object
-onblur object
-oncancel object
-oncanplay object
-oncanplaythrough object
-onchange object
-onclick object
-onclose object
-oncontextmenu object
-oncopy object
-oncuechange object
-oncut object
-ondblclick object
-ondrag object
-ondragend object
-ondragenter object
-ondragleave object
-ondragover object
-ondragstart object
-ondrop object
-ondurationchange object
-onemptied object
-onended object
-onerror object
-onfocus object
-oninput object
-oninvalid object
-onkeydown object
-onkeypress object
-onkeyup object
-onload object
-onloadeddata object
-onloadedmetadata object
-onloadstart object
-onmousedown object
-onmouseenter object
-onmouseleave object
-onmousemove object
-onmouseout object
-onmouseover object
-onmouseup object
-onmousewheel object
-onpaste object
-onpause object
-onplay object
-onplaying object
-onprogress object
-onratechange object
-onreset object
-onresize object
-onscroll object
-onsearch object
-onseeked object
-onseeking object
-onselect object
-onselectstart object
-onshow object
-onstalled object
-onsubmit object
-onsuspend object
-ontimeupdate object
-ontoggle object
-onvolumechange object
-onwaiting object
-onwebkitfullscreenchange object
-onwebkitfullscreenerror object
-onwheel object
+Properties (currently in review in b/33790306):
+  acceptCharset string
+  accessKey string
+  assignedSlot object
+  attributes object
+  autocomplete string
+  childElementCount number
+  childNodes object
+  children object
+  classList object
+  className string
+  clientHeight number
+  clientLeft number
+  clientTop number
+  clientWidth number
+  contentEditable string
+  dataset object
+  dir string
+  draggable boolean
+  elements object
+  encoding string
+  enctype string
+  firstChild object
+  firstElementChild object
+  hidden boolean
+  id string
+  innerText string
+  isConnected boolean
+  isContentEditable boolean
+  lang string
+  lastChild object
+  lastElementChild object
+  length number
+  localName string
+  name string
+  namespaceURI string
+  nextElementSibling object
+  nextSibling object
+  noValidate boolean
+  nodeName string
+  nodeType number
+  nodeValue object
+  offsetHeight number
+  offsetLeft number
+  offsetParent object
+  offsetTop number
+  offsetWidth number
+  outerText string
+  ownerDocument object
+  parentElement object
+  parentNode object
+  prefix object
+  previousElementSibling object
+  previousSibling object
+  scrollHeight number
+  scrollLeft number
+  scrollTop number
+  scrollWidth number
+  shadowRoot object
+  slot string
+  spellcheck boolean
+  style object
+  tabIndex number
+  tagName string
+  target string
+  textContent string
+  title string
+  translate boolean
+  webkitdropzone string
 */
