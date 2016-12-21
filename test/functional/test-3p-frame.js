@@ -45,7 +45,7 @@ describe('3p-frame', () => {
    * has been moved from the iframe src hash to the iframe name attribute.
    */
   const iframeContextInName = isExperimentOn(
-      window, 'move-context-to-name');
+      window, '3p-frame-context-in-name');
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

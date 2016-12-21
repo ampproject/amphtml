@@ -232,7 +232,7 @@ const EXPERIMENTS = [
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
   {
-    id: 'iframeContextInName',
+    id: '3p-frame-context-in-name',
     name: 'Move passing context metadata from url hash to name attribute',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6760',
     Spec: '',

@@ -32,7 +32,7 @@ import {domFingerprint} from './utils/dom-fingerprint';
  * If true, then in experiment where the passing of context metadata
  * has been moved from the iframe src hash to the iframe name attribute.
  */
-const iframeContextInName = isExperimentOn(self, 'move-context-to-name');
+const iframeContextInName = isExperimentOn(self, '3p-frame-context-in-name');
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
