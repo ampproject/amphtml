@@ -59,7 +59,7 @@ let reportingBackoff = function(work) {
 
 /**
  * Reports an error. If the error has an "associatedElement" property
- * the element is marked with the -amp-element-error and displays
+ * the element is marked with the `i-amphtml-element-error` and displays
  * the message itself. The message is always send to the console.
  * If the error has a "messageArray" property, that array is logged.
  * This way one gets the native fidelity of the console for things like
@@ -99,9 +99,9 @@ export function reportError(error, opt_associatedElement) {
   // Update element.
   const element = opt_associatedElement || error.associatedElement;
   if (element && element.classList) {
-    element.classList.add('-amp-error');
+    element.classList.add('i-amphtml-error');
     if (getMode().development) {
-      element.classList.add('-amp-element-error');
+      element.classList.add('i-amphtml-element-error');
       element.setAttribute('error-message', error.message);
     }
   }

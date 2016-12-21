@@ -46,6 +46,10 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
+  // TODO(dvoytenko, #6463): Enable this check once the current uses have
+  // been cleaned up.
+  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
+  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
