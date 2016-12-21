@@ -55,6 +55,14 @@ export function chunk(nodeOrAmpDoc, fn) {
 };
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ */
+export function chunkInstanceForTesting(nodeOrAmpDoc) {
+  return fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+}
+
+/**
  * Use a standard micro task for every invocation. This should only
  * be called from the AMP bootstrap script if it is known that
  * chunking makes no sense. In particular this is the case when
@@ -112,9 +120,11 @@ class Chunks {
     if (!this.active_) {
       return;
     }
-    if (!this.win_.requestIdleCallback) {
-      this.win_.addEventListener('message', this.boundExecute_);
-    }
+    this.win_.addEventListener('message', e => {
+      if (e.data = 'amp-macro-task') {
+        this.execute_();
+      }
+    });
     viewerPromiseForDoc(ampDoc).then(viewer => {
       this.viewer_ = viewer;
       viewer.onVisibilityChanged(() => {
@@ -178,7 +188,11 @@ class Chunks {
     }
     // If requestIdleCallback exists, schedule a task with it, but
     // do not wait longer than one second.
-    if (this.win_.requestIdleCallback) {
+    // We only start using requestIdleCallback when the viewer has
+    // been initialized. Otherwise we risk starving ourselves
+    // before we get into a state where the viewer can tell us
+    // that we are visible.
+    if (this.viewer_ && this.win_.requestIdleCallback) {
       onIdle(this.win_,
           // Wait until we have a budget of at least 15ms.
           // 15ms is a magic number. Budgets are higher when the user
