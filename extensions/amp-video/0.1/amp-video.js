@@ -42,6 +42,18 @@ class AmpVideo extends AMP.BaseElement {
       this.video_ = null;
     }
 
+    /**
+     * @param {boolean=} opt_onLayout
+     * @override
+     */
+    preconnectCallback(opt_onLayout) {
+      const videoSrc = this.element.getAttribute('src');
+      if (videoSrc) {
+        assertHttpsUrl(videoSrc, this.element);
+        this.preconnect.url(videoSrc, opt_onLayout);
+      }
+    }
+
     /** @override */
     isLayoutSupported(layout) {
       return isLayoutSizeDefined(layout);
