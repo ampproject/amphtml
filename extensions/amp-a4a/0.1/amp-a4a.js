@@ -59,6 +59,8 @@ import {installUrlReplacementsForEmbed,}
 import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
+import {loadPromise} from '../../../src/event-helper';
+import {getTimingDataSync} from '../../../src/service/variable-source';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -756,9 +758,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Callback executed when AMP creative has successfully rendered within the
    * publisher page.  To be overridden by network implementations as needed.
    */
-  onAmpCreativeRender() {
-    this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
-  }
+  onAmpCreativeRender() {}
 
   /**
    * @param {!Element} iframe that was just created.  To be overridden for
@@ -949,6 +949,13 @@ export class AmpA4A extends AMP.BaseElement {
           this.registerExpandUrlParams_(friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
+          // Capture timing info for load completion.
+          loadPromise(friendlyIframeEmbed).then(() => {
+            this.emitLifecycleEvent('renderFriendlyEnd', {
+              loadEventEnd: getTimingDataSync(friendlyIframeEmbed.win,
+                  'navigationStart', 'loadEventEnd'),
+            });
+          });
           protectFunctionWrapper(this.onAmpCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onAmpCreativeRender', err);

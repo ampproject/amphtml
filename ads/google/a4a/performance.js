@@ -18,6 +18,7 @@ import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
 import {serializeQueryString} from '../../../src/url';
 import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {getTimingDataSync} from '../../../src/service/variable-source';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -141,8 +142,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
 
     /** @private {number} @const */
-    this.initTime_ = (win.performance && win.performance.timing &&
-        win.performance.timing.navigationStart) || Date.now();
+    this.initTime_ = getTimingDataSync(win, 'navigationStart') || Date.now();
 
     /** @private {!function():number} @const */
     this.getDeltaTime_ = (win.performance && win.performance.now.bind(
