@@ -172,10 +172,10 @@ export const adConfig = {
     preconnect: 'https://cas.criteo.com',
   },
 
-<<<<<<< HEAD
   csa: {
     prefetch: 'https://www.google.com/adsense/search/ads.js',
-=======
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',
@@ -183,7 +183,6 @@ export const adConfig = {
       'https://i.jsrdn.com',
     ],
     renderStartImplemented: true,
->>>>>>> ampproject/master
   },
 
   dotandads: {

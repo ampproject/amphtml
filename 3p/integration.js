@@ -66,11 +66,8 @@ import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
-<<<<<<< HEAD
 import {csa} from '../ads/google/csa';
-=======
 import {distroscale} from '../ads/distroscale';
->>>>>>> ampproject/master
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
@@ -202,11 +199,8 @@ register('chargeads', chargeads);
 register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
-<<<<<<< HEAD
 register('csa', csa);
-=======
 register('distroscale', distroscale);
->>>>>>> ampproject/master
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eplanning', eplanning);
