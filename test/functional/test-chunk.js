@@ -92,7 +92,7 @@ describe('chunk', () => {
     });
   }
 
-  describes.fakeWin('no amp', {
+  describes.fakeWin('visible no amp', {
     amp: false,
   }, env => {
 
@@ -100,6 +100,29 @@ describe('chunk', () => {
       installDocService(env.win, true);
       expect(env.win.services.viewer).to.be.undefined;
       env.win.document.hidden = false;
+    });
+
+    basicTests(env);
+  });
+
+  describes.fakeWin('invisible no amp', {
+    amp: false,
+  }, env => {
+
+    beforeEach(() => {
+      installDocService(env.win, true);
+      expect(env.win.services.viewer).to.be.undefined;
+      env.win.document.hidden = true;
+      env.win.postMessage = function(data, targetOrigin) {
+        expect(targetOrigin).to.equal('*');
+        Promise.resolve().then(() => {
+          const event = {
+            type: 'message',
+            data: data,
+          };
+          env.win.eventListeners.fire(event);
+        });
+      };
     });
 
     basicTests(env);

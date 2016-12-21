@@ -120,9 +120,11 @@ class Chunks {
     if (!this.active_) {
       return;
     }
-    if (!this.win_.requestIdleCallback) {
-      this.win_.addEventListener('message', this.boundExecute_);
-    }
+    this.win_.addEventListener('message', e => {
+      if (e.data = 'amp-macro-task') {
+        this.execute_();
+      }
+    });
     viewerPromiseForDoc(ampDoc).then(viewer => {
       this.viewer_ = viewer;
       viewer.onVisibilityChanged(() => {
