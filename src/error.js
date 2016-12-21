@@ -114,7 +114,9 @@ export function reportError(error, opt_associatedElement) {
     } else {
       if (element) {
         (console.error || console.log).call(console,
-            element.tagName + '#' + element.id, error.message);
+            element.tagName.toLowerCase() +
+                (element.id ? ' with id ' + element.id : '') + ':',
+            error.message);
       } else if (!getMode().minified) {
         (console.error || console.log).call(console, error.stack);
       } else {
