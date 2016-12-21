@@ -16,13 +16,52 @@
 
 
 /**
+ * Creates a proxy object `form.$p` that proxies all of the methods and
+ * properties to the original DOM APIs. This is to work around the problematic
+ * forms feature where inputs mask DOM APIs.
+ *
+ * E.g. a `<input id="id">` will override `form.id` from the original DOM API.
+ * Form proxy will give access to the original `id` value via `form.$p.id`.
+ *
  * @param {!HTMLFormElement} form
  * @return {!Object}
  */
 export function installFormProxy(form) {
-  const proxy = {};
+  const constr = getFormProxyConstr(form.ownerDocument.defaultView);
+  const proxy = new constr(form);
+  form['$p'] = proxy;
+  return proxy;
+}
 
-  const win = form.ownerDocument.defaultView;
+
+/**
+ * @param {!Window} win
+ * @return {function(new:!Object)}
+ */
+function getFormProxyConstr(win) {
+  if (!win.FormProxy) {
+    win.FormProxy = createFormProxyConstr(win);
+  }
+  return win.FormProxy;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {function(new:!Object)}
+ */
+function createFormProxyConstr(win) {
+
+  /**
+   * @param {!HTMLFormElement} form
+   * @constructor
+   */
+  function FormProxy(form) {
+    /** @private @const {!HTMLFormElement} */
+    this.form = form;
+  }
+
+  const FormProxyProto = FormProxy.prototype;
 
   // Hierarchy:
   //   Node  <==  Element <== HTMLElement <== HTMLFormElement
@@ -37,130 +76,32 @@ export function installFormProxy(form) {
   prototypes.forEach(function(prototype) {
     const properties = win.Object.getOwnPropertyDescriptors(prototype);
     for (const name in properties) {
-      if (proxy[name] || name == 'constructor') {
+      if (win.Object.hasOwnProperty(FormProxyProto, name) ||
+          name == 'constructor') {
         continue;
       }
       const property = properties[name];
       if (typeof property.value == 'function') {
         const method = property.value;
-        proxy[name] = function() {
-          return method.apply(form, arguments);
+        FormProxyProto[name] = function() {
+          return method.apply(this.form, arguments);
         };
       } else {
         const spec = {};
         if (property.get) {
           spec.get = function() {
-            return property.get.call(form);
+            return property.get.call(this.form);
           };
         }
         if (property.set) {
           spec.set = function(value) {
-            return property.set.call(form, value);
+            return property.set.call(this.form, value);
           };
         }
-        win.Object.defineProperty(proxy, name, spec);
+        win.Object.defineProperty(FormProxyProto, name, spec);
       }
     }
   });
 
-  form['$p'] = proxy;
-  return proxy;
+  return FormProxy;
 }
-
-
-/*QQQ
-
-Methods:
-  after
-  animate
-  append
-  before
-  blur
-  checkValidity
-  click
-  cloneNode
-  closest
-  contains
-  dispatchEvent
-  focus
-  insertBefore
-  lookupPrefix
-  matches
-  normalize
-  prepend
-  remove
-  replaceWith
-  reportValidity
-  reset
-  submit
-
-Properties (currently in review in b/33790306):
-  acceptCharset string
-  accessKey string
-  assignedSlot object
-  attributes object
-  autocomplete string
-  childElementCount number
-  childNodes object
-  children object
-  classList object
-  className string
-  clientHeight number
-  clientLeft number
-  clientTop number
-  clientWidth number
-  contentEditable string
-  dataset object
-  dir string
-  draggable boolean
-  elements object
-  encoding string
-  enctype string
-  firstChild object
-  firstElementChild object
-  hidden boolean
-  id string
-  innerText string
-  isConnected boolean
-  isContentEditable boolean
-  lang string
-  lastChild object
-  lastElementChild object
-  length number
-  localName string
-  name string
-  namespaceURI string
-  nextElementSibling object
-  nextSibling object
-  noValidate boolean
-  nodeName string
-  nodeType number
-  nodeValue object
-  offsetHeight number
-  offsetLeft number
-  offsetParent object
-  offsetTop number
-  offsetWidth number
-  outerText string
-  ownerDocument object
-  parentElement object
-  parentNode object
-  prefix object
-  previousElementSibling object
-  previousSibling object
-  scrollHeight number
-  scrollLeft number
-  scrollTop number
-  scrollWidth number
-  shadowRoot object
-  slot string
-  spellcheck boolean
-  style object
-  tabIndex number
-  tagName string
-  target string
-  textContent string
-  title string
-  translate boolean
-  webkitdropzone string
-*/

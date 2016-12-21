@@ -29,6 +29,11 @@ describes.sandboxed('installFormProxy', {}, () => {
   });
 
   describe('w/o masking inputs', () => {
+    it('should initialize correctly', () => {
+      expect(form.$p).to.be.ok;
+      expect(form.$p.form).to.equal(form);
+    });
+
     it('should proxy properties', () => {
       expect(form.id).to.equal('form1');
       expect(form.$p.id).to.equal('form1');
