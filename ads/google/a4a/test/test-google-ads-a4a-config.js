@@ -20,7 +20,10 @@ import {
     isInExperiment,
     isInManualExperiment,
 } from '../traffic-experiments';
-import {resetExperimentTogglesForTesting} from '../../../../src/experiments';
+import {
+  toggleExperiment,
+  resetExperimentTogglesForTesting,
+} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
@@ -83,6 +86,7 @@ describe('a4a_config', () => {
     installViewerServiceForDoc(ampdoc);
     element = document.createElement('div');
     document.body.appendChild(element);
+    toggleExperiment(win, EXP_ID, true, true);
   });
 
   afterEach(() => {
@@ -93,71 +97,62 @@ describe('a4a_config', () => {
   });
 
   it('should attach expt ID and return true when expt is on', () => {
-    rand.onFirstCall().returns(-1);  // Force experiment on.
-    rand.onSecondCall().returns(0.75);  // Select second branch.
+    rand.returns(0.75);  // Random value to select the 2nd branch
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         EXTERNAL_BRANCHES, INTERNAL_BRANCHES),
            'googleAdsIsA4AEnabled').to.be.true;
     expect(win.document.cookie).to.be.null;
-    expect(rand.calledTwice, 'rand called twice').to.be.true;
     expect(element.getAttribute('data-experiment-id')).to.equal(
         INTERNAL_BRANCHES.experiment);
   });
 
   it('should attach control ID and return false when control is on', () => {
-    rand.onFirstCall().returns(-1);  // Force experiment on.
-    rand.onSecondCall().returns(0.25);  // Select first branch.
+    rand.returns(0.25);  // Random value to select the 1st branch
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES),
            'googleAdsIsA4AEnabled').to.be.false;
     expect(win.document.cookie).to.be.null;
-    expect(rand.calledTwice, 'rand called twice').to.be.true;
     expect(element.getAttribute('data-experiment-id')).to.equal(
         INTERNAL_BRANCHES.control);
   });
 
   it('should not attach ID and return false when selected out', () => {
-    rand.onFirstCall().returns(2);  // Force experiment off.
+    toggleExperiment(win, EXP_ID, false, true);
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
     expect(win.document.cookie).to.be.null;
-    expect(rand.calledOnce, 'rand called once').to.be.true;
     expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
   });
 
   it('should return false when not on CDN or local dev', () => {
+    toggleExperiment(win, EXP_ID, false, true);
     win.AMP_MODE.localDev = false;
     win.location.href = 'http://somewhere.over.the.rainbow.org/';
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
     expect(win.document.cookie).to.be.null;
-    expect(rand).to.not.be.called;
     expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
   });
 
   it('should return false if no crypto is available', () => {
     win.crypto = null;
-    rand.onFirstCall().returns(-1);  // Force experiment on.
-    rand.onSecondCall().returns(0.75);  // Select second branch.
+    rand.returns(0.75);  // Random value to select the 2nd branch
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
     expect(win.document.cookie).to.be.null;
-    expect(rand).to.not.be.called;
     expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
   });
 
   it('should return true if only crypto.webkitSubtle is available', () => {
     win.crypto.subtle = null;
-    rand.onFirstCall().returns(-1);  // Force experiment on.
-    rand.onSecondCall().returns(0.75);  // Select second branch.
+    rand.returns(0.75);  // Random value to select the 2nd branch
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
   });
 
   it('should return true if only crypto.subtle is available', () => {
     win.crypto.webkitSubtle = null;
-    rand.onFirstCall().returns(-1);  // Force experiment on.
-    rand.onSecondCall().returns(0.75);  // Select second branch.
+    rand.returns(0.75);  // Random value to select the 2nd branch
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
   });
@@ -170,50 +165,39 @@ describe('a4a_config', () => {
 
     it('should skip url-triggered eid when param is bad', () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:spaz');
-      // Force random client-side selection off.
-      rand.onFirstCall().returns(2);
+      toggleExperiment(win, EXP_ID, false, true);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
-      expect(rand, 'rand called at least once').to.be.called;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
 
     it('should skip url-triggered eid when param is empty', () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:');
       // Force random client-side selection off.
-      rand.onFirstCall().returns(2);
+      toggleExperiment(win, EXP_ID, false, true);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
-      expect(rand, 'rand called at least once').to.be.called;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
 
     it('should fall back to client-side eid when param is bad', () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:spaz');
-      // Force random client-side selection on.
-      rand.onFirstCall().returns(-1);
-      // Force experiment branch.
-      rand.onSecondCall().returns(0.75);
+      rand.returns(0.75);  // Random value to select the 2nd branch
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand, 'rand called at least once').to.be.called;
       expect(element.getAttribute('data-experiment-id')).to.equal(
           INTERNAL_BRANCHES.experiment);
     });
 
     it('should fall back to client-side eid when param is empty', () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:');
-      // Force random client-side selection on.
-      rand.onFirstCall().returns(-1);
-      // Force experiment branch.
-      rand.onSecondCall().returns(0.75);
+      rand.returns(0.75);  // Random value to select the 2nd branch
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand, 'rand called at least once').to.be.called;
       expect(element.getAttribute('data-experiment-id')).to.equal(
           INTERNAL_BRANCHES.experiment);
     });
@@ -221,57 +205,41 @@ describe('a4a_config', () => {
     it(`should force experiment param from URL when pattern=${urlBase}`,
         () => {
           win.location.search = urlBase.replace('PARAM', 'a4a:2');
-          // Ensure that internal branches aren't attached, even if the PRNG
-          // would normally trigger them.
-          rand.onFirstCall().returns(-1);
           expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
               INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
           expect(win.document.cookie).to.be.null;
-          expect(rand).to.not.be.called;
           expect(element.getAttribute('data-experiment-id')).to.equal(
               EXTERNAL_BRANCHES.experiment);
         });
 
     it(`should force control param from URL when pattern=${urlBase}`, () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:1');
-      // Ensure that internal branches aren't attached, even if the PRNG
-      // would normally trigger them.
-      rand.onFirstCall().returns(-1);
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
-      expect(rand).to.not.be.called;
       expect(element.getAttribute('data-experiment-id')).to.equal(
           EXTERNAL_BRANCHES.control);
     });
 
     it(`should exclude all experiment IDs when pattern=${urlBase}`, () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:0');
-      // Ensure that internal branches aren't attached, even if the PRNG
-      // would normally trigger them.
-      rand.onFirstCall().returns(-1);
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
-      expect(rand).to.not.be.called;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
 
     it(`should attach manual experiment ID when pattern = ${urlBase}`, () => {
       win.location.search = urlBase.replace('PARAM', 'a4a:-1');
-      // Ensure that internal branches aren't attached, even if the PRNG
-      // would normally trigger them.
-      rand.onFirstCall().returns(-1);
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand).to.not.be.called;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
       // And it shouldn't be in any *other* experiments.
@@ -339,6 +307,7 @@ describe('a4a_config hash param parsing', () => {
       getAttribute: name => attrs[name],
       setAttribute: (name, value) => attrs[name] = value,
     };
+    toggleExperiment(win, EXP_ID, true, true);
   });
 
   afterEach(() => {
@@ -356,15 +325,11 @@ describe('a4a_config hash param parsing', () => {
     it(`should find viewer param when pattern is ${hashBase}`, () => {
       win.location.hash = hashBase.replace('PARAM', 'a4a:-1');
       installViewerServiceForDoc(ampdoc);
-      // Ensure that internal branches aren't attached, even if the PRNG
-      // would normally trigger them.
-      rand.onFirstCall().returns(-1);
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand).to.not.be.called;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
       // And it shouldn't be in any *other* experiments.
@@ -382,13 +347,9 @@ describe('a4a_config hash param parsing', () => {
       win.location.search = hashBase.replace('PARAM', 'a4a:-1');
       win.location.hash = hashBase.replace('PARAM', 'a4a:2');
       installViewerServiceForDoc(ampdoc);
-      // Ensure that internal branches aren't attached, even if the PRNG
-      // would normally trigger them.
-      rand.onFirstCall().returns(-1);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand).to.not.be.called;
       expect(element.getAttribute('data-experiment-id')).to.equal(
           EXTERNAL_BRANCHES.experiment);
     });
