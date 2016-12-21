@@ -248,7 +248,8 @@ export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
   if (hasAd) {
     resizeIframe(global, containerName);
   } else {
-    backfillAds(global, page, ad);
+    ad['adLoadedCallback'] = callbackWithNoBackfill.bind(null, global);
+    global['_googCsa']('ads', page, ad);
   }
 }
 
@@ -272,16 +273,6 @@ export function resizeIframe(global, containerName) {
   }
   // Attempt to resize to actual CSA container height
   global.context.requestResize(undefined, height);
-}
-
-/**
- * Backfill the ads with AFS
- * @param {?Object} page Backfill AFS page options (if necessary)
- * @param {?Object} adblock Backfill AFS ad unit options (if necessary)
- */
-function backfillAds(global, page, adblock) {
-  adblock['adLoadedCallback'] = callbackWithNoBackfill.bind(null, global);
-  global['_googCsa']('ads', page, adblock);
 }
 
 /**
