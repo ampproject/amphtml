@@ -48,8 +48,9 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
   });
 
   // TODO(#3561): unmute the test.
-  // it.configure().skipEdge().run('should create an iframe loaded', function() {
-  it.skip('should create an iframe loaded', function() {
+  //it.configure().skipEdge().run('should create an iframe loaded', function() {
+  it('should create an iframe loaded', function() {
+    console.log('host is ', location.host);
     this.timeout(20000);
     let iframe;
     let ampAd;
@@ -65,7 +66,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
       expect(iframe.src).to.contain('categoryExclusions');
       expect(iframe.src).to.contain('health');
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
-      expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
+      expect(iframe.src).to.match(/http\:\/\/localhost:9876\/dist\.3p\//);
     }).then(() => {
       return poll('frame to load', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
@@ -106,12 +107,16 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
       });
     }).then(pubads => {
       const canvas = iframe.contentWindow.document.querySelector('#c');
+      console.log(iframe.contentWindow.document);
+      console.log(canvas);
+      console.log(canvas.slot);
       expect(pubads.get('page_url')).to.equal(
           'https://www.example.com/doubleclick.html');
       const slot = canvas.slot;
       expect(slot).to.not.be.null;
+      console.log(slot.getCategoryExclusions);
       expect(slot.getCategoryExclusions()).to.jsonEqual(['health']);
-      expect(slot.getTargeting('amptest')).to.jsonEqual(['true']);
+      //expect(slot.getTargeting('amptest')).to.jsonEqual(['true']);
       return poll(
           'ad iframe to be initialized. Means that an actual ad was loaded.',
           () => {
@@ -132,16 +137,10 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
     }).then(() => {
       expect(iframe.getAttribute('width')).to.equal('300');
       expect(iframe.getAttribute('height')).to.equal('250');
-      if (isEdge) { // TODO(cramforce): Get this to pass in Edge
-        return;
-      }
       return poll('Creative id transmitted. Ad fully rendered.', () => {
         return ampAd.creativeId;
       }, null, 15000);
     }).then(creativeId => {
-      if (isEdge) { // TODO(cramforce): Get this to pass in Edge
-        return;
-      }
       expect(creativeId).to.match(/^dfp-/);
     });
   });

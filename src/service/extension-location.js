@@ -25,11 +25,14 @@ import {getMode} from '../mode';
  * @return {string}
  */
 function calculateScriptBaseUrl(location, isLocalDev, isTest) {
+  console.log(isLocalDev, isTest, location);
   if (isLocalDev) {
     if (isTest || isMax(location) || isMin(location)) {
+      console.log(`${location.protocol}//${location.host}/dist`);
       return `${location.protocol}//${location.host}/dist`;
     }
   }
+  console.log(urls.cnd);
   return urls.cdn;
 }
 

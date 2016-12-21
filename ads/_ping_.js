@@ -15,12 +15,14 @@
  */
 
 import {dev} from '../src/log';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function _ping_(global, data) {
+  //validateData(data, [], ['adWidth', 'adHeight', 'valid']);
   global.document.getElementById('c').textContent = data.ping;
 
   if (data.ad_container) {
@@ -28,6 +30,7 @@ export function _ping_(global, data) {
         global.context.container == data.ad_container, 'wrong container');
   }
   if (data.valid && data.valid == 'true') {
+    console.log('aaaaaaaaa');
     const img = document.createElement('img');
     if (data.url) {
       img.setAttribute('src', data.url);

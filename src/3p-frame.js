@@ -90,6 +90,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     domFingerprint: domFingerprint(element),
     startTime,
   };
+  console.log('when creating an iframe mode is ', getModeObject());
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {

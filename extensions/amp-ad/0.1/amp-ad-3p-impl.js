@@ -215,6 +215,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    console.log('3p ad buildCallback');
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -235,6 +236,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
       this.lifecycleReporter.sendPing('adRequestStart');
+      console.log('create an iframe');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
