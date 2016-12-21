@@ -23,6 +23,8 @@
  * E.g. a `<input id="id">` will override `form.id` from the original DOM API.
  * Form proxy will give access to the original `id` value via `form.$p.id`.
  *
+ * See https://medium.com/@dvoytenko/solving-conflicts-between-form-inputs-and-dom-api-535c45333ae4
+ *
  * @param {!HTMLFormElement} form
  * @return {!Object}
  */
@@ -58,7 +60,7 @@ function createFormProxyConstr(win) {
    */
   function FormProxy(form) {
     /** @private @const {!HTMLFormElement} */
-    this.form = form;
+    this.form_ = form;
   }
 
   const FormProxyProto = FormProxy.prototype;
@@ -76,26 +78,27 @@ function createFormProxyConstr(win) {
   prototypes.forEach(function(prototype) {
     const properties = win.Object.getOwnPropertyDescriptors(prototype);
     for (const name in properties) {
-      if (win.Object.hasOwnProperty(FormProxyProto, name) ||
-          name == 'constructor') {
+      if (win.Object.hasOwnProperty(FormProxyProto, name)) {
         continue;
       }
       const property = properties[name];
       if (typeof property.value == 'function') {
+        // A method call. Call the original prototype method via `call`.
         const method = property.value;
         FormProxyProto[name] = function() {
-          return method.apply(this.form, arguments);
+          return method.apply(this.form_, arguments);
         };
       } else {
+        // A read/write property. Call the original prototype getter/setter.
         const spec = {};
         if (property.get) {
           spec.get = function() {
-            return property.get.call(this.form);
+            return property.get.call(this.form_);
           };
         }
         if (property.set) {
           spec.set = function(value) {
-            return property.set.call(this.form, value);
+            return property.set.call(this.form_, value);
           };
         }
         win.Object.defineProperty(FormProxyProto, name, spec);
