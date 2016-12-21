@@ -166,8 +166,7 @@ if (data && data._context) {
 
 // This should only be invoked after window.context is set
 initLogConstructor();
-console.log('aadsfasdf', self.context.mode);
-console.log(getMode().test, getMode().localDev);
+
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
 }

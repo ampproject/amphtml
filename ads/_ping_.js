@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../src/log';
-import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -24,16 +23,30 @@ import {validateData} from '../3p/3p';
 export function _ping_(global, data) {
   //validateData(data, [], ['adWidth', 'adHeight', 'valid']);
   global.document.getElementById('c').textContent = data.ping;
+  global.ping = Object.create(null);
+
+  global.ping.resetResizeResult = () => {
+    global.ping.resizeSuccess = undefined;
+  };
+
+  global.context.onResizeSuccess(() => {
+    global.ping.resizeSuccess = true;
+  });
+
+  global.context.onResizeDenied(() => {
+    global.ping.resizeSuccess = false;
+  });
 
   if (data.ad_container) {
     dev().assert(
         global.context.container == data.ad_container, 'wrong container');
   }
   if (data.valid && data.valid == 'true') {
-    console.log('aaaaaaaaa');
     const img = document.createElement('img');
     if (data.url) {
       img.setAttribute('src', data.url);
+      img.setAttribute('width', data.width);
+      img.setAttribute('height', data.height);
     }
     let width, height;
     if (data.adHeight) {
@@ -55,6 +68,8 @@ export function _ping_(global, data) {
         dev().info('AMP-AD', 'Intersection: (WxH)' +
             `${c.intersectionRect.width}x${c.intersectionRect.height}`);
       });
+      // store changes to global.lastIO for testing purpose
+      global.ping.lastIO = changes[changes.length - 1];
     });
   } else {
     global.context.noContentAvailable();

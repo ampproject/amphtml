@@ -660,7 +660,6 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('as A4A');
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_) {
       return Promise.resolve();

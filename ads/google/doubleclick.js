@@ -217,7 +217,6 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
       const pubads = googletag.pubads();
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
-      console.log('slot here is ', slot.getCategoryExclusions);
 
       if (gladeExperiment === GladeExperiment.GLADE_CONTROL) {
         pubads.markAsGladeControl();
@@ -299,11 +298,8 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
       });
 
       // Exported for testing.
-      console.log('expose slot for testing');
       global.document.getElementById('c')['slot'] = slot;
-      // global.document.getElementById('c')['slot'] = {
-      //   getCategoryExclusions: slot.getCategoryExclusions,
-      // };
+      googletag.display('c');
     });
   });
 }
@@ -340,7 +336,7 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
         jsonParameters.gladeEids + ',' + expIds : expIds;
   }
 
-  console.log('never here ');
+
   const slot = global.document.querySelector('#c');
   slot.setAttribute('data-glade', '');
   slot.setAttribute('data-amp-ad', '');
