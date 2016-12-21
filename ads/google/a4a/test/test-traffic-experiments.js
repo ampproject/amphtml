@@ -25,10 +25,7 @@ import {
   randomlySelectUnsetPageExperiments,
   validateExperimentIds,
 } from '../traffic-experiments';
-import {
-  isExperimentOn,
-  resetExperimentTogglesForTesting,
-} from '../../../../src/experiments';
+import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
@@ -66,8 +63,6 @@ describe('all-traffic-experiments-tests', () => {
       accurateRandomStub = sandbox.stub().returns(-1);
       cachedAccuratePrng = RANDOM_NUMBER_GENERATORS.accuratePrng;
       RANDOM_NUMBER_GENERATORS.accuratePrng = accurateRandomStub;
-      // Clear any experiment state that happens to be left around.
-      resetExperimentTogglesForTesting();
     });
     afterEach(() => {
       sandbox.restore();

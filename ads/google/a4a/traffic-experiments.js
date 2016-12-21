@@ -25,7 +25,6 @@
 import {isGoogleAdsA4AValidEnvironment} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {viewerForDoc} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
 

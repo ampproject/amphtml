@@ -43,7 +43,6 @@ describe('isExperimentOn', () => {
   });
 
   afterEach(() => {
-    resetExperimentTogglesForTesting();
     sandbox.restore();
   });
 

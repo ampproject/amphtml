@@ -20,10 +20,7 @@ import {
     isInExperiment,
     isInManualExperiment,
 } from '../traffic-experiments';
-import {
-  toggleExperiment,
-  resetExperimentTogglesForTesting,
-} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
@@ -90,7 +87,6 @@ describe('a4a_config', () => {
   });
 
   afterEach(() => {
-    resetExperimentTogglesForTesting();  // Clear saved, page-level experiment state.
     resetServiceForTesting(win, 'viewer');
     sandbox.restore();
     document.body.removeChild(element);
@@ -261,13 +257,11 @@ describe('a4a_config hash param parsing', () => {
   let sandbox;
   let win;
   let ampdoc;
-  let rand;
   let events;
   let element;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    rand = sandbox.stub(Math, 'random');
     win = {
       AMP_MODE: {
         localDev: true,
@@ -311,7 +305,6 @@ describe('a4a_config hash param parsing', () => {
   });
 
   afterEach(() => {
-    resetExperimentTogglesForTesting();  // Clear saved, page-level experiment state.
     resetServiceForTesting(win, 'viewer');
     sandbox.restore();
   });

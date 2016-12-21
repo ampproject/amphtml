@@ -148,11 +148,9 @@ function experimentToggles(win) {
   // Read the default config of this build.
   if (win.AMP_CONFIG) {
     for (const experimentId in win.AMP_CONFIG) {
-      if (win.AMP_CONFIG.hasOwnProperty(experimentId)) {
-        const frequency = win.AMP_CONFIG[experimentId];
-        if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
-          toggles_[experimentId] = Math.random() < frequency;
-        }
+      const frequency = win.AMP_CONFIG[experimentId];
+      if (typeof frequency === 'number' && frequency >= 0 && frequency <= 1) {
+        toggles_[experimentId] = Math.random() < frequency;
       }
     }
   }
