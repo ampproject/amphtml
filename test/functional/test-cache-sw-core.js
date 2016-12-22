@@ -172,9 +172,11 @@ runner.run('Cache SW', () => {
       expect(sw.isCdnJsFile(rtvlessVersioned)).to.be.true;
     });
 
-    it('does not match for experiments.js', () => {
-      const url = `https://cdn.ampproject.org/v0/experiments.js`;
-      expect(sw.isCdnJsFile(url)).to.be.false;
+    it('does not match for fake extensions', () => {
+      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v0/experiments.js`))
+          .to.be.false;
+      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v0/validator.js`))
+          .to.be.false;
     });
 
     it('does not match for other CDN files', () => {
