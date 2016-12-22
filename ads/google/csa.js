@@ -15,7 +15,7 @@
  */
 import {validateData, loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json.js';
-import {setStyle, setStyles} from '../../src/style';
+import {getStyle, setStyle, setStyles} from '../../src/style';
 
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;
@@ -105,14 +105,14 @@ export function csa(global, data) {
  */
 function orientationChangeHandler(global, containerDiv) {
   // Save the height of the container before the event listener triggers
-  const oldHeight = containerDiv.style.height;
+  const oldHeight = getStyle(containerDiv, 'height');
   global.setTimeout(() => {
     // Force DOM reflow and repaint
     /*eslint-disable no-unused-vars*/
     const ignore = global.document.body./*OK*/offsetHeight;
     /*eslint-enable no-unused-vars*/
     // Capture new height
-    let newHeight = containerDiv.style.height;
+    let newHeight = getStyle(containerDiv, 'height');
     // In older versions of iOS, this height will be different because the
     // container height is resized.
     // In Chrome and iOS 10.0.2 the height is the same because
@@ -161,7 +161,7 @@ export function resizeSuccessHandler(global, container, requestedHeight) {
  */
 export function resizeDeniedHandler(global, container, requestedHeight) {
   const overflow = global.document.getElementById('overflow');
-  const containerHeight = parseInt(container.style.height, 10);
+  const containerHeight = parseInt(getStyle(container, 'height'), 10);
   if (containerHeight > currentAmpHeight) {
     if (overflow) {
       setStyle(overflow, 'display', '');
@@ -306,9 +306,11 @@ function createOverflow(global, container, height) {
 function getOverflowElement(global) {
   const overflow = global.document.createElement('div');
   overflow.id = 'overflow';
-  overflow.style.position = 'absolute';
-  overflow.style.height = overflowHeight + 'px';
-  overflow.style.width = '100%';
+  setStyles(overflow, {
+    position: 'absolute',
+    height: overflowHeight + 'px',
+    width: '100%',
+  });
   overflow.appendChild(getOverflowLine(global));
   overflow.appendChild(getOverflowChevron(global));
   return overflow;
@@ -321,8 +323,10 @@ function getOverflowElement(global) {
  */
 function getOverflowLine(global) {
   const line = global.document.createElement('div');
-  line.style.background = 'rgba(0,0,0,.16)';
-  line.style.height = '1px';
+  setStyles(line, {
+    background: 'rgba(0,0,0,.16)',
+    height: '1px',
+  });
   return line;
 }
 
