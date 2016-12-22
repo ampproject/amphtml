@@ -29,6 +29,10 @@ export function _ping_(global, data) {
     global.ping.resizeSuccess = undefined;
   };
 
+  global.ping.resetLastIO = () => {
+    global.ping.lastIO = undefined;
+  };
+
   global.context.onResizeSuccess(() => {
     global.ping.resizeSuccess = true;
   });
@@ -63,14 +67,16 @@ export function _ping_(global, data) {
     } else {
       global.context.renderStart();
     }
-    global.context.observeIntersection(function(changes) {
-      changes.forEach(function(c) {
-        dev().info('AMP-AD', 'Intersection: (WxH)' +
-            `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+    if (data.enableIo) {
+      global.context.observeIntersection(function(changes) {
+        changes.forEach(function(c) {
+          dev().info('AMP-AD', 'Intersection: (WxH)' +
+              `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+        });
+        // store changes to global.lastIO for testing purpose
+        global.ping.lastIO = changes[changes.length - 1];
       });
-      // store changes to global.lastIO for testing purpose
-      global.ping.lastIO = changes[changes.length - 1];
-    });
+    }
   } else {
     global.context.noContentAvailable();
   }

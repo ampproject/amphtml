@@ -41,6 +41,7 @@ describes.realWin('3P Ad', {
       this.timeout(20000);
       let iframe;
       let ampAd;
+      let lastIO = null;
       return pollForLayout(fixture.win, 1, 5500).then(() => {
         // test amp-ad will create an iframe
         return poll('frame to be in DOM', () => {
@@ -96,20 +97,33 @@ describes.realWin('3P Ad', {
         expect(iframe.style.visibility).to.equal('');
         return ampAd.layoutCallback();
       }).then(() => {
-        expect(iframe.contentWindow.ping.lastIO.intersectionRatio).to.equal(1);
-        expect(iframe.contentWindow.ping.lastIO.rootBounds).to.not.be.null;
+        //iframe.contentWindow.ping.resetLastIO();
+        //expect(iframe.contentWindow.ping.lastIO).to.be.undefined;
+        lastIO = null;
+        iframe.contentWindow.context.observeIntersection(changes => {
+          lastIO = changes[changes.length - 1];
+        });
         fixture.win.scrollTo(0, 5000);
-        return poll('wait for new IO entry with ratio equal 0', () => {
-          return iframe.contentWindow.ping.lastIO.intersectionRatio == 0;
+        fixture.win.document.body.dispatchEvent(new Event('scroll'));
+        // return poll('wait for new IO entry', () => {
+        //   return (iframe.contentWindow.ping.lastIO != undefined
+        //       && iframe.contentWindow.ping.lastIO.rootBounds != null
+        //       && iframe.contentWindow.ping.lastIO.intersectionRatio >= 0
+        //       && iframe.contentWindow.ping.lastIO.intersectionRatio <= 1);
+        // });
+        return poll('wait for new IO entry', () => {
+          return lastIO != null;
         });
       }).then(() => {
+        console.log('last IO is ', lastIO);
         // Test reszie API when ad is NOT in viewport.
         expect(iframe.offsetHeight).to.equal(250);
         expect(iframe.offsetWidth).to.equal(300);
         iframe.contentWindow.ping.resetResizeResult();
+        expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
         iframe.contentWindow.context.requestResize(200, 50);
         return poll('wait for attemptChangeSize', () => {
-          return iframe.contentWindow.ping.resizeSuccess == true;
+          return iframe.contentWindow.ping.resizeSuccess != undefined;
         });
       }).then(() => {
         fixture.win.scrollTo(0, -5000);
