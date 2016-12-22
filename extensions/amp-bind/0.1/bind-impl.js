@@ -262,7 +262,10 @@ export class Bind {
         user().error(TAG, 'Invalid result for class binding', newValue);
       }
     } else {
-      const isAmpElement = element.classList.contains('-amp-element');
+      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
+      // form is in PROD for 1-2 weeks.
+      const isAmpElement = (element.classList.contains('-amp-element') ||
+          element.classList.contains('i-amphtml-element'));
       const oldValue = element.getAttribute(property);
       /** @type {(boolean|number|string|null|undefined)} */
       let attributeValue;

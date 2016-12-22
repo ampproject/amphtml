@@ -54,7 +54,7 @@ function runTest(shouldKillPolyfillableApis) {
     .run('all components should get loaded', function() {
       this.timeout(15000);
       return pollForLayout(fixture.win, 13, 10000).then(() => {
-        expect(fixture.doc.querySelectorAll('.-amp-element'))
+        expect(fixture.doc.querySelectorAll('.i-amphtml-element'))
             .to.have.length(16);
         expect(fixture.doc.querySelectorAll('.i-amphtml-layout'))
             .to.have.length(13);

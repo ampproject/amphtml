@@ -61,7 +61,7 @@ describe('amp-o2-player', () => {
     }, true).then(o2 => {
       const iframe = o2.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
