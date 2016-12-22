@@ -501,12 +501,9 @@ export class MeasureScanner extends Scanner {
 
     // Validate.
     if (this.validate_) {
-      user().assert(duration >= 0,
-          '"duration" is invalid: %s', newTiming.duration);
-      user().assert(delay >= 0,
-          '"delay" is invalid: %s', newTiming.delay);
-      user().assert(endDelay >= 0,
-          '"endDelay" is invalid: %s', newTiming.endDelay);
+      this.validateTime_(duration, newTiming.duration, 'duration');
+      this.validateTime_(delay, newTiming.delay, 'delay');
+      this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
       user().assert(iterations >= 0,
           '"iterations" is invalid: %s', newTiming.iterations);
       user().assert(iterationStart >= 0,
@@ -526,6 +523,25 @@ export class MeasureScanner extends Scanner {
       direction,
       fill,
     };
+  }
+
+  /**
+   * @param {number} value
+   * @param {*} newValue
+   * @param {string} field
+   * @private
+   */
+  validateTime_(value, newValue, field) {
+    // Ensure that positive or zero values are only allowed.
+    user().assert(value >= 0,
+        '"%s" is invalid: %s', field, newValue);
+    // Make sure that the values are in milliseconds: show a warning if
+    // time is under FRAME/4 (16/4 = 4).
+    if (newValue != null && value > 0 && value < 4) {
+      user().warn('amp-animation',
+          `"${field}" is valid, but very small: ${newValue}.`
+          + ' Note that all times are in milliseconds.');
+    }
   }
 }
 
