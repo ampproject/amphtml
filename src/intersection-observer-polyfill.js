@@ -70,6 +70,12 @@ export function getIntersectionChangeEntry(
       element, hostViewport, intersection, ratio);
 }
 
+export function nativeIntersectionObserverSupported(win) {
+  return 'IntersectionObserver' in win &&
+      'IntersectionObserverEntry' in win &&
+      'intersectionRatio' in win.IntersectionObserverEntry.prototype;
+}
+
 /**
  * A class to help amp-iframe and amp-ad nested iframe listen to intersection
  * change.
