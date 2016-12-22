@@ -19,11 +19,38 @@ import {
   isDevChannelVersionDoNotUse_,
   isExperimentOn,
   isExperimentOnAllowUrlOverride,
+  experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
   getExperimentToglesFromCookieForTesting,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
+
+describe('experimentToggles', () => {
+  it('should return experiment status map', () => {
+    const win = {
+      document: {
+        cookie: 'AMP_EXP=-exp3,exp4,exp5',
+      },
+      AMP_CONFIG: {
+        exp1: 1,
+        exp2: 0,
+        exp3: 1,
+        exp4: 0,
+        v: '12345667',
+      },
+    };
+    resetExperimentTogglesForTesting();
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false, // overridden in cookie
+      exp4: true, // overridden in cookie
+      exp5: true,
+      // "v" should not appear here
+    });
+  });
+});
 
 describe('isExperimentOn', () => {
   let win;

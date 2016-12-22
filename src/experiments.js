@@ -139,7 +139,7 @@ export function toggleExperiment(win, experimentId, opt_on,
  * @param {!Window} win
  * @return {!Object<string, boolean>}
  */
-function experimentToggles(win) {
+export function experimentToggles(win) {
   if (toggles_) {
     return toggles_;
   }
