@@ -24,7 +24,9 @@ import {viewportForDoc} from '../../../src/viewport';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 import {Visibility} from './visibility-impl';
 import {isExperimentOn} from '../../../src/experiments';
-import {nativeIntersectionObserverSupported} from '../../../src/intersection-observer-polyfill';
+import {
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
