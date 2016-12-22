@@ -53,7 +53,10 @@ export class AmpImg extends BaseElement {
 
       if (name === 'src') {
         this.srcset_ = srcsetFromElement(this.element);
-        this.updateImageSrc_();
+        // This element may not have been laid out yet.
+        if (this.img_) {
+          this.updateImageSrc_();
+        }
       } else if (this.img_ && ATTRIBUTES_TO_PROPAGATE.indexOf(name) >= 0) {
         this.propagateAttributes(name, this.img_,
             /* opt_removeMissingAttrs */ true);

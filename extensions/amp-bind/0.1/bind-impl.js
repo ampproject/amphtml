@@ -26,9 +26,10 @@ const TAG = 'AMP-BIND';
 
 /**
  * Regular expression that identifies AMP CSS classes.
+ * Includes 'i-amphtml-', '-amp-', and 'amp-' prefixes.
  * @type {!RegExp}
  */
-const AMP_CSS_RE = /^(-)?amp-/;
+const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 
 /**
  * A single binding, e.g. [property]="expression".

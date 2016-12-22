@@ -52,7 +52,8 @@ describes.realWin('amp-bind', {
    */
   function createAmpElementWithBinding(binding) {
     const parent = env.win.document.getElementById('parent');
-    parent.innerHTML = '<p class="-amp-fake" ' + binding + '></p>';
+    const ampCss = 'i-amphtml-foo -amp-foo amp-foo';
+    parent.innerHTML = `<p class="${ampCss}" ${binding}></p>`;
     const fakeAmpElement = parent.firstElementChild;
     fakeAmpElement.mutatedAttributesCallback = () => {};
     return fakeAmpElement;
@@ -190,9 +191,11 @@ describes.realWin('amp-bind', {
 
   it('should support NOT override internal AMP CSS classes', () => {
     const element = createAmpElementWithBinding(`[class]="['abc']"`);
-    expect(toArray(element.classList)).to.deep.equal(['-amp-fake']);
+    expect(toArray(element.classList)).to.deep.equal(
+        ['i-amphtml-foo', '-amp-foo', 'amp-foo']);
     return onBindReadyAndSetState({}, () => {
-      expect(toArray(element.classList)).to.deep.equal(['-amp-fake', 'abc']);
+      expect(toArray(element.classList)).to.deep.equal(
+          ['i-amphtml-foo', '-amp-foo', 'amp-foo', 'abc']);
     });
   });
 
