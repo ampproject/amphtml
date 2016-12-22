@@ -31,6 +31,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   let iframeHandler;
   let iframe;
   let testIndex = 0;
+  let sentinel;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -51,8 +52,9 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     testIndex++;
 
     iframe = createIframeWithMessageStub(window);
-    iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-    iframe.name = JSON.stringify({"_context": {"sentinel" : ('amp3ptest' + testIndex)}});
+    sentinel = 'amp3ptest' + testIndex;
+    iframe.setAttribute('data-amp-3p-sentinel', sentinel);
+    iframe.name = JSON.stringify({"_context": {"sentinel" : sentinel}});
   });
 
   afterEach(() => {
@@ -77,7 +79,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         noContentSpy =
             sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
 
-        initPromise = iframeHandler.init(iframe);
+        initPromise = iframeHandler.init(iframe, sentinel);
       });
 
       it('should resolve on message "render-start"', () => {
@@ -173,7 +175,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should resolve on message "bootstrap-loaded" if render-start is'
         + 'NOT implemented', done => {
 
-      initPromise = iframeHandler.init(iframe);
+          initPromise = iframeHandler.init(iframe, sentinel);
       iframe.onload = () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
@@ -193,7 +195,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       const clock = sandbox.useFakeTimers();
 
       iframe.name = 'test_master';
-      initPromise = iframeHandler.init(iframe);
+      initPromise = iframeHandler.init(iframe, sentinel);
       clock.tick(9999);
       expect(noContentSpy).to.not.be.called;
       clock.tick(1);
@@ -206,7 +208,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should resolve directly if it is A4A', () => {
-      return iframeHandler.init(iframe, true).then(() => {
+      return iframeHandler.init(iframe, sentinel, true).then(() => {
         expect(iframe.style.visibility).to.equal('');
       });
     });
@@ -215,7 +217,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   describe('Initialized iframe', () => {
 
     beforeEach(() => {
-      iframeHandler.init(iframe);
+      iframeHandler.init(iframe, sentinel);
     });
 
     it('should be able to use embed-state API', () => {
