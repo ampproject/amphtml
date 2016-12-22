@@ -96,7 +96,7 @@ html.i-amphtml-ios-embed {
   display: block !important;
 }
 
-.-amp-element {
+.i-amphtml-element {
   display: inline-block;
 }
 
@@ -148,7 +148,10 @@ i-amphtml-sizer {
   display: block !important;
 }
 
-.-amp-fill-content {
+/* TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
+   form is in PROD for 1-2 weeks. */
+.-amp-fill-content,
+.i-amphtml-fill-content {
   display: block;
   width: 1px;          /* These lines are a work around to this issue in iOS: */
   min-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198      */
@@ -156,7 +159,10 @@ i-amphtml-sizer {
   margin: auto;
 }
 
-.i-amphtml-layout-size-defined .-amp-fill-content {
+/* TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
+   form is in PROD for 1-2 weeks. */
+.i-amphtml-layout-size-defined .-amp-fill-content,
+.i-amphtml-layout-size-defined .i-amphtml-fill-content {
   position: absolute;
   top: 0;
   left: 0;
@@ -164,7 +170,10 @@ i-amphtml-sizer {
   right: 0;
 }
 
-.-amp-replaced-content {
+/* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
+   form is in PROD for 1-2 weeks. */
+.-amp-replaced-content,
+.i-amphtml-replaced-content {
   padding: 0 !important;
   border: none !important;
   /* TODO(dvoytenko): explore adding here object-fit. */
@@ -240,16 +249,16 @@ i-amphtml-sizer {
   /* Just state. */
 }
 
-.-amp-element > [placeholder] {
+.i-amphtml-element > [placeholder] {
   display: block;
 }
 
-.-amp-element > [placeholder].hidden,
-.-amp-element > [placeholder].amp-hidden {
+.i-amphtml-element > [placeholder].hidden,
+.i-amphtml-element > [placeholder].amp-hidden {
   visibility: hidden;
 }
 
-.-amp-element:not(.amp-notsupported) > [fallback] {
+.i-amphtml-element:not(.amp-notsupported) > [fallback] {
   display: none;
 }
 
@@ -412,13 +421,13 @@ i-amp-scroll-container.amp-active {
  * not currently visible. Typically tapping on this element shows the full
  * content.
  */
-.-amp-element > [overflow] {
+.i-amphtml-element > [overflow] {
   cursor: pointer;
   z-index: 2;
   visibility: hidden;
 }
 
-.-amp-element > [overflow].amp-visible {
+.i-amphtml-element > [overflow].amp-visible {
   visibility: visible;
 }
 
