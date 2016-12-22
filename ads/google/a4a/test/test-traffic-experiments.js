@@ -25,10 +25,7 @@ import {
   randomlySelectUnsetPageExperiments,
   validateExperimentIds,
 } from '../traffic-experiments';
-import {
-  isExperimentOn,
-  resetExperimentToggles_,
-} from '../../../../src/experiments';
+import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
@@ -66,8 +63,6 @@ describe('all-traffic-experiments-tests', () => {
       accurateRandomStub = sandbox.stub().returns(-1);
       cachedAccuratePrng = RANDOM_NUMBER_GENERATORS.accuratePrng;
       RANDOM_NUMBER_GENERATORS.accuratePrng = accurateRandomStub;
-      // Clear any experiment state that happens to be left around.
-      resetExperimentToggles_();
     });
     afterEach(() => {
       sandbox.restore();
@@ -76,6 +71,7 @@ describe('all-traffic-experiments-tests', () => {
 
     it('handles empty experiments list', () => {
       // Opt out of experiment.
+      // TODO(tdrl): remove the direct access to AMP_CONFIG
       sandbox.win.AMP_CONFIG['testExperimentId'] = 0.0;
       randomlySelectUnsetPageExperiments(sandbox.win, {});
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
