@@ -59,8 +59,7 @@ import {installUrlReplacementsForEmbed,}
 import {extensionsFor} from '../../../src/extensions';
 import {A4AVariableSource} from './a4a-variable-source';
 import {rethrowAsync} from '../../../src/log';
-import {loadPromise} from '../../../src/event-helper';
-import {getTimingDataSync} from '../../../src/service/variable-source';
+import {getTimingDataAsync} from '../../../src/service/variable-source';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -949,17 +948,21 @@ export class AmpA4A extends AMP.BaseElement {
           this.registerExpandUrlParams_(friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
-          // Capture timing info for load completion.
-          loadPromise(friendlyIframeEmbed).then(() => {
-            this.emitLifecycleEvent('renderFriendlyEnd', {
-              loadEventEnd: getTimingDataSync(friendlyIframeEmbed.win,
-                  'navigationStart', 'loadEventEnd'),
-            });
-          });
           protectFunctionWrapper(this.onAmpCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onAmpCreativeRender', err);
           })();
+          // Capture timing info for friendly iframe load completion.
+          getTimingDataAsync(friendlyIframeEmbed.win,
+              'navigationStart', 'loadEventEnd').then(delta => {
+                this.emitLifecycleEvent('renderFriendlyEnd', {
+                  navStartToLoadEndDelta: delta,
+                });
+              }).catch(err => {
+                dev().error(TAG, this.element.getAttribute('type'),
+                  'getTimingDataAsync for renderFriendlyEnd failed: ', err);
+              });
+          return true;
         });
   }
 
