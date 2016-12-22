@@ -28,6 +28,7 @@ import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import {resetExperimentTogglesForTesting} from '../src/experiments';
 import * as describes from '../testing/describes';
 
 
@@ -227,6 +228,7 @@ afterEach(function() {
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
+  resetExperimentTogglesForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

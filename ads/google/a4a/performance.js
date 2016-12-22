@@ -28,7 +28,7 @@ import {
     DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getCorrelator} from './utils';
@@ -102,12 +102,9 @@ export function getLifecycleReporter(ampElement, namespace, corr, slotId) {
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
   const win = ampElement.win;
-  // In local dev mode, neither the canary nor prod config files is available,
-  // so manually set the profiling rate, for testing/dev.
-  if (getMode().localDev &&
-      (!win.AMP_CONFIG || !win.AMP_CONFIG['a4aProfilingRate'])) {
-    win.AMP_CONFIG = win.AMP_CONFIG || {};
-    win.AMP_CONFIG['a4aProfilingRate'] = 1.0;
+  // In local dev mode, manually set the profiling rate, for testing/dev.
+  if (getMode().localDev) {
+    toggleExperiment(win, 'a4aProfilingRate', true, true);
   }
   randomlySelectUnsetPageExperiments(win, PROFILING_RATE);
   if ((type == 'doubleclick' || type == 'adsense') &&

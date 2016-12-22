@@ -19,11 +19,38 @@ import {
   isDevChannelVersionDoNotUse_,
   isExperimentOn,
   isExperimentOnAllowUrlOverride,
+  experimentToggles,
   toggleExperiment,
-  resetExperimentToggles_,
+  resetExperimentTogglesForTesting,
   getExperimentToglesFromCookieForTesting,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
+
+describe('experimentToggles', () => {
+  it('should return experiment status map', () => {
+    const win = {
+      document: {
+        cookie: 'AMP_EXP=-exp3,exp4,exp5',
+      },
+      AMP_CONFIG: {
+        exp1: 1,
+        exp2: 0,
+        exp3: 1,
+        exp4: 0,
+        v: '12345667',
+      },
+    };
+    resetExperimentTogglesForTesting();
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false, // overridden in cookie
+      exp4: true, // overridden in cookie
+      exp5: true,
+      // "v" should not appear here
+    });
+  });
+});
 
 describe('isExperimentOn', () => {
   let win;
@@ -43,11 +70,11 @@ describe('isExperimentOn', () => {
   });
 
   afterEach(() => {
-    resetExperimentToggles_();
     sandbox.restore();
   });
 
   function expectExperiment(cookieString, experimentId) {
+    resetExperimentTogglesForTesting();
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -90,10 +117,10 @@ describe('isExperimentOn', () => {
 
     it('should fall back to global flag', () => {
       const cookie = 'AMP_EXP=e2,e4';
-      win.AMP_CONFIG['e1'] = true;
+      win.AMP_CONFIG['e1'] = 1;
       win.AMP_CONFIG['e2'] = 1;
       win.AMP_CONFIG['e3'] = 0;
-      win.AMP_CONFIG['e4'] = false;
+      win.AMP_CONFIG['e4'] = 0;
       expectExperiment(cookie, 'e1').to.be.true;
       expectExperiment(cookie, 'e2').to.be.true;
       expectExperiment(cookie, 'e3').to.be.false;
@@ -112,7 +139,6 @@ describe('isExperimentOn', () => {
     it('should calc if experiment should be "on"', () => {
       win.AMP_CONFIG['e1'] = 1;
       expectExperiment('', 'e1').to.be.true;
-      resetExperimentToggles_();
 
       win.AMP_CONFIG['e2'] = 0;
       expectExperiment('', 'e2').to.be.false;
@@ -132,22 +158,11 @@ describe('isExperimentOn', () => {
     });
 
     it('should cache calc value', () => {
-      const randomStub = sandbox.stub(Math, 'random');
-      randomStub.onFirstCall().returns(0.4);
-      randomStub.onSecondCall().returns(0.4);
-      randomStub.returns(0.9);
+      sandbox.stub(Math, 'random').returns(0.4);
       win.AMP_CONFIG['e1'] = 0.5;
       win.AMP_CONFIG['e2'] = 0.1;
 
-      expect(Math.random()).to.equal(0.4);
       expectExperiment('', 'e1').to.be.true;
-
-      // it should continue to be true even though random() is not
-      // less than the experiment value which is 0.5
-      expect(Math.random()).to.equal(0.9);
-      expectExperiment('', 'e1').to.be.true;
-
-      expect(Math.random()).to.equal(0.9);
       expectExperiment('', 'e2').to.be.false;
     });
   });
@@ -187,14 +202,14 @@ describe('toggleExperiment', () => {
 
   afterEach(() => {
     sandbox.restore();
-    resetExperimentToggles_();
+    resetExperimentTogglesForTesting();
   });
 
   function expectToggle(cookiesString, experimentId, opt_on) {
     const doc = {
       cookie: cookiesString,
     };
-    resetExperimentToggles_();
+    resetExperimentTogglesForTesting();
     const on = toggleExperiment({document: doc}, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
     if (parts.length > 1) {
@@ -383,19 +398,19 @@ describe('toggleExperiment', () => {
 
     // The new setting should be persisted in cookie, so cache reset should not
     // affect its status.
-    resetExperimentToggles_();
+    resetExperimentTogglesForTesting();
     expect(isExperimentOn(win, 'e1')).to.be.false;
 
     // Now let's explicitly toggle to true
     expect(toggleExperiment(win, 'e1', true)).to.be.true;
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    resetExperimentToggles_();
+    resetExperimentTogglesForTesting();
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Toggle transiently should still work
     expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
-    resetExperimentToggles_(); // cache reset should bring it back to true
+    resetExperimentTogglesForTesting(); // cache reset should bring it back to true
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Sanity check, the global setting should never be changed.
@@ -406,6 +421,7 @@ describe('toggleExperiment', () => {
 describe('isDevChannel', () => {
 
   function expectDevChannel(cookiesString) {
+    resetExperimentTogglesForTesting();
     return expect(isDevChannel({
       document: {
         cookie: cookiesString,
@@ -415,7 +431,6 @@ describe('isDevChannel', () => {
 
   it('should return value based on cookie', () => {
     expectDevChannel('AMP_EXP=other').to.be.false;
-    resetExperimentToggles_();
     expectDevChannel('AMP_EXP=dev-channel').to.be.true;
   });
 
