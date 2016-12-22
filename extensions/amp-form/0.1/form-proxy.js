@@ -78,7 +78,7 @@ function createFormProxyConstr(win) {
   prototypes.forEach(function(prototype) {
     const properties = win.Object.getOwnPropertyDescriptors(prototype);
     for (const name in properties) {
-      if (win.Object.hasOwnProperty(FormProxyProto, name)) {
+      if (win.Object.prototype.hasOwnProperty.call(FormProxyProto, name)) {
         continue;
       }
       const property = properties[name];
