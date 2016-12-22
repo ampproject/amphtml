@@ -27,6 +27,7 @@ describe('iframe-helper', function() {
   let testIframe;
   let sandbox;
   let container;
+  let sentinel;
 
   function insert(iframe) {
     container.doc.body.appendChild(iframe);
@@ -39,6 +40,12 @@ describe('iframe-helper', function() {
       const i = c.doc.createElement('iframe');
       i.src = iframeSrc;
       testIframe = i;
+      sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
+      testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
+      testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
+      testIframe.name = JSON.stringify({
+        "_context": {"sentinel": sentinel}
+      });
     });
   });
 
@@ -50,7 +57,7 @@ describe('iframe-helper', function() {
     const iframe = container.doc.createElement('iframe');
     iframe.srcdoc = '<html>';
     expect(() => {
-      IframeHelper.listenFor(iframe, 'test', () => {});
+      IframeHelper.listenFor(iframe, sentinel, 'test', () => {});
     }).to.throw('only iframes with src supported');
   });
 
@@ -59,7 +66,7 @@ describe('iframe-helper', function() {
     iframe.src = iframeSrc;
     insert(iframe);
     expect(() => {
-      IframeHelper.listenFor(iframe, 'test', () => {});
+      IframeHelper.listenFor(iframe, sentinel, 'test', () => {});
     }).to.throw('cannot register events on an attached iframe');
   });
 
@@ -67,7 +74,7 @@ describe('iframe-helper', function() {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
-      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
+      unlisten = IframeHelper.listenFor(testIframe, sentinel, 'send-intersections',
           () => {
             calls++;
             resolve();
@@ -88,10 +95,7 @@ describe('iframe-helper', function() {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
-      const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
-      testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
-      testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
-      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
+      unlisten = IframeHelper.listenFor(testIframe, sentinel, 'send-intersections',
           () => {
             calls++;
             resolve();
@@ -117,7 +121,7 @@ describe('iframe-helper', function() {
       // usual iframe-intersection.html within a nested iframe.
       testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
       testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
-      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
+      unlisten = IframeHelper.listenFor(testIframe, sentinel, 'send-intersections',
           () => {
             calls++;
             resolve();
@@ -137,7 +141,7 @@ describe('iframe-helper', function() {
   it('should un-listen and resolve promise after first hit', () => {
     let calls = 0;
     return new Promise(resolve => {
-      IframeHelper.listenForOncePromise(testIframe,
+      IframeHelper.listenForOncePromise(testIframe, sentinel,
           ['no-msg', 'send-intersections'])
           .then(obj => {
             expect(obj.message = 'send-intersections');
@@ -164,14 +168,14 @@ describe('iframe-helper', function() {
     let other;
 
     return new Promise(resolve => {
-      IframeHelper.listenFor(testIframe, 'send-intersections', () => {
+      IframeHelper.listenFor(testIframe, sentinel, 'send-intersections', () => {
         calls++;
         resolve();
       });
       insert(testIframe);
       other = container.doc.createElement('iframe');
       other.src = iframeSrc;
-      IframeHelper.listenFor(other, 'send-intersections', () => {
+      IframeHelper.listenFor(other, sentinel, 'send-intersections', () => {
         otherCalls++;
       });
       insert(other);
@@ -193,8 +197,8 @@ describe('iframe-helper', function() {
     const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
         'postMessage');
     IframeHelper.postMessage(
-        testIframe, 'testMessage', {}, 'http://google.com');
-    expect(postMessageSpy.getCall(0).args[0].sentinel).to.equal('amp');
+        testIframe, sentinel, 'testMessage', {}, 'http://google.com');
+    expect(postMessageSpy.getCall(0).args[0].sentinel).to.equal(sentinel);
     expect(postMessageSpy.getCall(0).args[0].type).to.equal('testMessage');
     // Very important to do this outside of the sandbox, or else hell
     // breaks loose.
