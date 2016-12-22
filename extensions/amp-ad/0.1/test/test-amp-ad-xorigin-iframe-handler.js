@@ -52,7 +52,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
     iframe = createIframeWithMessageStub(window);
     iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-    iframe.name = 'test_nomaster';
+    iframe.name = JSON.stringify({"_context": {"sentinel" : ('amp3ptest' + testIndex)}});
   });
 
   afterEach(() => {

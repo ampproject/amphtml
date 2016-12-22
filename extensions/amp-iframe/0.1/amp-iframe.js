@@ -18,6 +18,7 @@ import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
+import {generateSentinel} from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
@@ -304,7 +305,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.applyFillContent(iframe);
-    iframe.name = 'amp_iframe' + count++;
+    //iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
       setStyle(iframe, 'zIndex', -1);
@@ -316,6 +317,12 @@ export class AmpIframe extends AMP.BaseElement {
          iframe);
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
+    const sentinel = generateSentinel(window);
+    iframe.name = encodeURI(JSON.stringify({
+      "_context" : {
+        "sentinel" : sentinel
+      }
+    }));
 
     if (!this.isTrackingFrame_) {
       this.intersectionObserverApi_ = new IntersectionObserverApi(this, iframe);
@@ -339,12 +346,12 @@ export class AmpIframe extends AMP.BaseElement {
       }
     };
 
-    listenFor(iframe, 'embed-size', data => {
+    listenFor(iframe, sentinel, 'embed-size', data => {
       this.updateSize_(data.height, data.width);
     });
 
     if (this.isClickToPlay_) {
-      listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
+      listenFor(iframe, sentinel, 'embed-ready', this.activateIframe_.bind(this));
     }
 
     this.container_.appendChild(iframe);
