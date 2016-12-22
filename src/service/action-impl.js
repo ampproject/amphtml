@@ -17,7 +17,8 @@
 import {dev, user} from '../log';
 import {fromClassForDoc, installServiceInEmbedScope} from '../service';
 import {getMode} from '../mode';
-import {isArray, map} from '../types';
+import {isArray} from '../types';
+import {map} from '../utils/object';
 import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 
@@ -36,6 +37,7 @@ const DEFAULT_METHOD_ = 'activate';
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
+  'AMP': ['setState'],
 };
 
 /**
@@ -59,14 +61,14 @@ let ActionInfoDef;
  */
 export class ActionInvocation {
   /**
-   * @param {!Element} target
+   * @param {!Node} target
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
   constructor(target, method, args, source, event) {
-    /** @const {!Element} */
+    /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
@@ -100,6 +102,9 @@ export class ActionService {
 
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
+
+    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    this.globalTargets_ = map();
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = map();
@@ -139,6 +144,15 @@ export class ActionService {
         this.trigger(dev().assertElement(event.target), name, event);
       });
     }
+  }
+
+  /**
+   * Registers the action target that will receive all designated actions.
+   * @param {string} name
+   * @param {function(!ActionInvocation)} handler
+   */
+  addGlobalTarget(name, handler) {
+    this.globalTargets_[name] = handler;
   }
 
   /**
@@ -224,12 +238,26 @@ export class ActionService {
       return;
     }
 
+    const actionInfo = action.actionInfo;
+
+    // Global target, e.g. `AMP`.
+    const globalTarget = this.globalTargets_[actionInfo.target];
+    if (globalTarget) {
+      const invocation = new ActionInvocation(
+          this.root_,
+          actionInfo.method,
+          actionInfo.args,
+          action.node,
+          event);
+      globalTarget(invocation);
+      return;
+    }
+
     const target = this.root_.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;
     }
-
     this.invoke_(target, action.actionInfo.method, action.actionInfo.args,
         action.node, event, action.actionInfo);
   }

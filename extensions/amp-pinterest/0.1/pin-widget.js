@@ -65,12 +65,13 @@ export class PinWidget {
   fetchPin() {
     const baseUrl = 'https://widgets.pinterest.com/v3/pidgets/pins/info/?';
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
-    return this.xhr.fetchJson(baseUrl + query)
-      .then(response => {
-        try {
-          return response.data[0];
-        } catch (e) { return null; }
-      });
+    return this.xhr.fetchJson(baseUrl + query, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(response => {
+      try {
+        return response.data[0];
+      } catch (e) { return null; }
+    });
   }
 
   renderPin(pin) {

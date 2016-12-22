@@ -142,6 +142,15 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  caajainfeed: {
+    prefetch: [
+      'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
+    ],
+    preconnect: [
+      'https://ad.amanad.adtdp.com',
+    ],
+  },
+
   caprofitx: {
     prefetch: [
       'https://cdn.caprofitx.com/pfx.min.js',
@@ -214,6 +223,10 @@ export const adConfig = {
 
   flite: {},
 
+  fusion: {
+    prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
+  },
+
   genieessp: {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
@@ -252,7 +265,10 @@ export const adConfig = {
   },
 
   ix: {
-    prefetch: 'https://js-sec.indexww.com/indexJTag.js',
+    prefetch: [
+      'https://js-sec.indexww.com/indexJTag.js',
+      'https://js-sec.indexww.com/apl/apl6.js',
+    ],
     preconnect: 'https://as-sec.casalemedia.com',
   },
 
@@ -536,4 +552,5 @@ export const adConfig = {
       'https://static.zucks.net.zimg.jp',
     ],
   },
+
 };

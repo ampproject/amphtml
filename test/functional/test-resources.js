@@ -37,6 +37,7 @@ describe('Resources', () => {
 
   afterEach(() => {
     sandbox.restore();
+    resources.pass_.cancel();
   });
 
   it('should calculate correct calcTaskScore', () => {
@@ -329,6 +330,48 @@ describe('Resources', () => {
     };
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
+  });
+
+  it('should update priority and schedule pass', () => {
+    const element = document.createElement('div');
+    element.isBuilt = () => true;
+    element.getPriority = () => 2;
+    const resource = new Resource(1, element, resources);
+    resources.pass_.cancel();
+    expect(resource.getPriority()).to.equal(2);
+
+    resources.updatePriority(element, 1);
+    expect(resource.getPriority()).to.equal(1);
+    expect(resources.pass_.isPending()).to.be.true;
+  });
+
+  it('should update priority and update tasks', () => {
+    resources.pass_.cancel();
+
+    // Target element.
+    const element = document.createElement('div');
+    element.isBuilt = () => true;
+    element.getPriority = () => 2;
+    const resource = new Resource(1, element, resources);
+    resources.schedule_(resource, 'L', 0, 0, () => {});
+    const task = resources.queue_.tasks_[0];
+    expect(task.priority).to.equal(2);
+
+    // Another element.
+    const element2 = document.createElement('div');
+    element2.isBuilt = () => true;
+    element2.getPriority = () => 2;
+    const resource2 = new Resource(2, element2, resources);
+    resources.schedule_(resource2, 'L', 0, 0, () => {});
+    const task2 = resources.queue_.tasks_[1];
+    expect(task2.priority).to.equal(2);
+
+    resources.updatePriority(element, 1);
+    expect(resource.getPriority()).to.equal(1);
+    expect(resources.pass_.isPending()).to.be.true;
+    expect(task.priority).to.equal(1);
+    // The other task is not updated.
+    expect(task2.priority).to.equal(2);
   });
 });
 

@@ -23,7 +23,7 @@ import {
 import {dev} from '../../src/log';
 
 /** @const */
-const TAG = 'inabox-messaging-host';
+const TAG = 'InaboxMessagingHost';
 
 export class InaboxMessagingHost {
 
@@ -67,6 +67,7 @@ export class InaboxMessagingHost {
       }
       this.registeredIframeSentinels_[request.sentinel] = true;
       this.positionObserver_.observe(iframe, data => {
+        dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
         message.source./*OK*/postMessage(
             serializeMessage(MessageType.POSITION, request.sentinel, data),
             message.origin);
