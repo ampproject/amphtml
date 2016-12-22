@@ -23,7 +23,10 @@ amp-carousel {
  * Every `<amp-carousel>'s` immediate child is considered a slide in
  * the carousel.
  */
-.amp-carousel-slide > .-amp-replaced-content {
+/* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
+   form is in PROD for 1-2 weeks. */
+.amp-carousel-slide > .-amp-replaced-content,
+.amp-carousel-slide > .i-amphtml-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
    */

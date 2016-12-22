@@ -168,8 +168,11 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
+    // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
+    // form is in PROD for 1-2 weeks.
     foundEl = friendlyFrame ?
-        closestBySelector(friendlyFrame, '.-amp-element') : null;
+        closestBySelector(
+            friendlyFrame, '.-amp-element,.i-amphtml-element') : null;
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);

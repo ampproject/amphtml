@@ -1405,7 +1405,7 @@ describe('Resources mutateElement and collapse', () => {
       ownerDocument: {defaultView: window},
       tagName: isAmp ? 'amp-test' : 'div',
       classList: {
-        contains: className => isAmp && className == '-amp-element',
+        contains: className => isAmp && className == 'i-amphtml-element',
       },
       getElementsByClassName: () => [],
       isBuilt: () => {
@@ -1490,12 +1490,12 @@ describe('Resources mutateElement and collapse', () => {
         /* isAmp */ false);
 
     parent1.getElementsByClassName = className => {
-      if (className == '-amp-element') {
+      if (className == 'i-amphtml-element') {
         return [resource1.element];
       }
     };
     parent2.getElementsByClassName = className => {
-      if (className == '-amp-element') {
+      if (className == 'i-amphtml-element') {
         return [resource2.element];
       }
     };

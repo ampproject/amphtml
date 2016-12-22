@@ -65,7 +65,7 @@ describe('amp-playbuzz', () => {
     const itemSrcUrl = '//www.playbuzz.com/bob/bobs-life';
     expect(iframe).to.not.be.null;
     expect(startsWith(iframe.src, itemSrcUrl)).to.be.true;
-    expect(iframe.className).to.match(/-amp-fill-content/);
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
     // This is important to avoid sizing issues.
     expect(iframe.getAttribute('scrolling')).to.equal('no');
   }

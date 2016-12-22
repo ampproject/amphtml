@@ -86,7 +86,7 @@ describe('amp-google-vrview-image', function() {
     return getVrImage({'src': 'https://example.com/image1'}).then(vr => {
       const iframe = vr.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

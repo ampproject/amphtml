@@ -698,11 +698,11 @@ export class Resources {
         mutator();
 
         // Mark itself and children for re-measurement.
-        if (element.classList.contains('-amp-element')) {
+        if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
           r.requestMeasure();
         }
-        const ampElements = element.getElementsByClassName('-amp-element');
+        const ampElements = element.getElementsByClassName('i-amphtml-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = Resource.forElement(ampElements[i]);
           r.requestMeasure();
@@ -1544,7 +1544,7 @@ export class Resources {
    */
   discoverResourcesForElement_(element, callback) {
     // Breadth-first search.
-    if (element.classList.contains('-amp-element')) {
+    if (element.classList.contains('i-amphtml-element')) {
       callback(Resource.forElement(element));
       // Also schedule amp-element that is a placeholder for the element.
       const placeholder = element.getPlaceholder();
@@ -1552,7 +1552,7 @@ export class Resources {
         this.discoverResourcesForElement_(placeholder, callback);
       }
     } else {
-      const ampElements = element.getElementsByClassName('-amp-element');
+      const ampElements = element.getElementsByClassName('i-amphtml-element');
       const seen = [];
       for (let i = 0; i < ampElements.length; i++) {
         const ampElement = ampElements[i];

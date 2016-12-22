@@ -58,7 +58,7 @@ describe('amp-reach-player', () => {
     }, true).then(reach => {
       const iframe = reach.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

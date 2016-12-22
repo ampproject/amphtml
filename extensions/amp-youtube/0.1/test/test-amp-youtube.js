@@ -82,7 +82,7 @@ describe('amp-youtube', function() {
     return getYt({'data-videoid': 'mGENRKrdoGY'}, true).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

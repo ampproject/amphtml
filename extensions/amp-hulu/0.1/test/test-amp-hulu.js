@@ -48,7 +48,7 @@ describe('amp-hulu', () => {
     return getHulu('4Dk5F2PYTtrgciuvloH3UA', true).then(hulu => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

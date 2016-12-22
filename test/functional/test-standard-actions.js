@@ -44,7 +44,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle AmpElement', () => {
       const element = document.createElement('div');
       let called = false;
-      element.classList.add('-amp-element');
+      element.classList.add('i-amphtml-element');
       element.collapse = function() {
         called = true;
       };

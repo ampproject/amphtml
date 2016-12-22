@@ -89,7 +89,10 @@ export class PinWidget {
     }
 
     const structure = Util.make(this.element.ownerDocument, {'span': {}});
-    structure.className = className + ' -amp-fill-content';
+    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
+    // form is in PROD for 1-2 weeks.
+    structure.className = className +
+        ' -amp-fill-content i-amphtml-fill-content';
 
     const container = Util.make(this.element.ownerDocument, {'span': {
       'className': '-amp-pinterest-embed-pin-inner',

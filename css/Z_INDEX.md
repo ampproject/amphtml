@@ -7,7 +7,7 @@ selector                                    |   z-index      |   file
 .-amp-image-lightbox-viewer                 |   1            |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
 .i-amphtml-layout-size-defined > [placeholder] |   1            |   css/amp.css
 .-amp-image-lightbox-caption                |   2            |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
-.-amp-element > [overflow]                  |   2            |   css/amp.css
+.i-amphtml-element > [overflow]             |   2            |   css/amp.css
 .i-amphtml-loader-moving-line               |   2            |   css/amp.css
 .amp-carousel-button                        |   10           |   extensions/amp-carousel/0.1/amp-carousel.css
 amp-sticky-ad                               |   11           |   extensions/amp-sticky-ad/1.0/amp-sticky-ad.css
