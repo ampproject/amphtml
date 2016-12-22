@@ -418,7 +418,7 @@ export class Visibility {
 
           if (this.updateCounters_(
               lastChange.intersectionRatio * 100,
-              listener, true)) {
+              listener, /* shouldBeVisible */ true)) {
             this.prepareStateForCallback_(state, lastChange.boundingClientRect);
             listener.callback(state);
             listeners.splice(listeners.indexOf(listener), 1);
@@ -454,7 +454,8 @@ export class Visibility {
         const state = listener.state;
         const lastChange = state[LAST_CHANGE_ENTRY];
         const lastVisible = lastChange ? lastChange.intersectionRatio * 100 : 0;
-        if (this.updateCounters_(lastVisible, listener, false)) {
+        if (this.updateCounters_(
+                lastVisible, listener, /* shouldBeVisible */ false)) {
           this.prepareStateForCallback_(state, lastChange.boundingClientRect);
           listener.callback(state);
           listeners.splice(j, 1);
