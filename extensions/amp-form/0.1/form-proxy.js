@@ -38,7 +38,7 @@ export function installFormProxy(form) {
 
 /**
  * @param {!Window} win
- * @return {function(new:!Object)}
+ * @return {function(new:Object, !HTMLFormElement)}
  */
 function getFormProxyConstr(win) {
   if (!win.FormProxy) {
@@ -50,7 +50,7 @@ function getFormProxyConstr(win) {
 
 /**
  * @param {!Window} win
- * @return {function(new:!Object)}
+ * @return {function(new:Object, !HTMLFormElement)}
  */
 function createFormProxyConstr(win) {
 
@@ -76,12 +76,13 @@ function createFormProxyConstr(win) {
     win.EventTarget.prototype,
   ];
   prototypes.forEach(function(prototype) {
-    const properties = win.Object.getOwnPropertyDescriptors(prototype);
-    for (const name in properties) {
-      if (win.Object.prototype.hasOwnProperty.call(FormProxyProto, name)) {
+    for (const name in prototype) {
+      const property = win.Object.getOwnPropertyDescriptor(prototype, name);
+      if (!property ||
+          name.substring(0, 2) == 'on' ||
+          win.Object.prototype.hasOwnProperty.call(FormProxyProto, name)) {
         continue;
       }
-      const property = properties[name];
       if (typeof property.value == 'function') {
         // A method call. Call the original prototype method via `call`.
         const method = property.value;
