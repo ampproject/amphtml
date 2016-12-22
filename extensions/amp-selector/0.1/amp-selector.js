@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
+import {actionServiceForDoc} from '../../../src/action';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
@@ -38,6 +39,9 @@ export class AmpSelector extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isDisabled_ = false;
+
+    /** @const @private {!../../../src/service/action-impl.ActionService} */
+    this.action_ = actionServiceForDoc(this.win.document.documentElement);
   }
 
   /** @override */
@@ -66,6 +70,37 @@ export class AmpSelector extends AMP.BaseElement {
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
     }
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    mutations.forEach(mutation => {
+      const newValue = mutation.newValue;
+      switch (mutation.name) {
+        case 'selected':
+          this.clearAllSelections_();
+          if (newValue) {
+            // Create a query with an attribute selector for every
+            // comma-delimited option value in `newValue`.
+            const options = String(mutation.newValue).split(',');
+            const selectors = [];
+            for (let i = 0; i < options.length; i++) {
+              // Only use first value if multiple selection is disabled.
+              if (i > 0 && !this.isMultiple_) {
+                break;
+              }
+              selectors.push(`[option='${options[i]}']`);
+            }
+            const query = selectors.join(',');
+            const elements = this.element.querySelectorAll(query);
+            elements.forEach(element => {
+              this.setSelection_(element);
+            });
+          }
+          this.setInputs_();
+          break;
+      }
+    });
   }
 
   /**
@@ -146,6 +181,20 @@ export class AmpSelector extends AMP.BaseElement {
       this.setSelection_(el);
       this.setInputs_();
     }
+
+    // Trigger 'select' event with two data params:
+    // 'option' - option value of the selected or deselected element.
+    // 'options' - comma-delimited option values of all selected elements.
+    const options = [];
+    this.selectedOptions_.forEach(element => {
+      options.push(element.getAttribute('option'));
+    });
+    const detail = {
+      option: el.getAttribute('option'),
+      options: options.join(','),
+    };
+    const selectEvent = new CustomEvent('Select', {detail});
+    this.action_.trigger(this.element, 'select', selectEvent);
   }
 
   /**
@@ -163,17 +212,29 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Clears all selected options.
+   * @private
+   */
+  clearAllSelections_() {
+    while (this.selectedOptions_.length > 0) {
+      // Clear selected options for single select.
+      const el = this.selectedOptions_.pop();
+      this.clearSelection_(el);
+    }
+  }
+
+  /**
    * Marks a given element as selected and clears the others if required.
    * @param {!Element} element.
    * @private
    */
   setSelection_(element) {
+    // Exit if `element` is already selected.
+    if (this.selectedOptions_.indexOf(element) >= 0) {
+      return;
+    }
     if (!this.isMultiple_) {
-      while (this.selectedOptions_.length > 0) {
-        // Clear selected options for single select.
-        const el = this.selectedOptions_.pop();
-        this.clearSelection_(el);
-      }
+      this.clearAllSelections_();
     }
     element.setAttribute('selected', '');
     element.setAttribute('aria-selected', 'true');

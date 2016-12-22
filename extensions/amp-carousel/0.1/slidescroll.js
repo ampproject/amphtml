@@ -16,14 +16,15 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {actionServiceForDoc} from '../../../src/action';
 import {bezierCurve} from '../../../src/curve';
+import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {platformFor} from '../../../src/platform';
 import {timerFor} from '../../../src/timer';
-import {dev} from '../../../src/log';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -97,12 +98,16 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
+
+    /** @const @private {!../../../src/service/action-impl.ActionService} */
+    this.action_ = actionServiceForDoc(this.win.document.documentElement);
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
+
   /** @override */
   buildSlides() {
     this.vsync_ = this.getVsync();
@@ -164,6 +169,20 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   isLoopingEligible() {
     return this.noOfSlides_ > 2;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    mutations.forEach(mutation => {
+      const newValue = mutation.newValue;
+      switch (mutation.name) {
+        case 'slide':
+          const slide = parseInt(newValue);
+          user().assert(isFinite(slide), 'Invalid [slide] value: %s', newValue);
+          this.showSlide_(slide);
+          break;
+      }
+    });
   }
 
   /**
@@ -259,7 +278,7 @@ export class AmpSlideScroll extends BaseSlides {
               (dir == 1 && !hasPrev) ? 0 : this.slideWidth_;
           this.customSnap_(currentScrollLeft, dir);
         } else {
-          this.showSlide_(newIndex);
+          this.showSlide_(newIndex, /* opt_isUserAction */ true);
         }
       }
     }
@@ -417,7 +436,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.slidesContainer_.classList.add('-amp-no-scroll');
       }
       // Scroll to new slide and update scrollLeft to the correct slide.
-      this.showSlide_(newIndex);
+      this.showSlide_(newIndex, /* opt_isUserAction */ true);
       this.vsync_.mutate(() => {
         if (this.isIos_) {
           // Make the container scrollable again to enable user swiping.
@@ -432,9 +451,10 @@ export class AmpSlideScroll extends BaseSlides {
    * Makes the slide corresponding to the given index and the slides surrounding
    *    it available for display.
    * @param {number} newIndex Index of the slide to be displayed.
+   * @param {boolean=} opt_isUserAction
    * @private
    */
-  showSlide_(newIndex) {
+  showSlide_(newIndex, opt_isUserAction) {
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
       newIndex >= noOfSlides_ ||
@@ -479,6 +499,11 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+
+    if (opt_isUserAction) {
+      const event = new CustomEvent('SlideChange', {detail: {slide: newIndex}});
+      this.action_.trigger(this.element, 'slidechange', event);
+    }
   }
 
   /**
