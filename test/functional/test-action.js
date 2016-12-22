@@ -17,7 +17,7 @@
 import {
   ActionService,
   applyActionInfoArgs,
-  parseActionMap
+  parseActionMap,
 } from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {setParentWindow} from '../../src/service';
@@ -207,7 +207,7 @@ describe('ActionService parseAction', () => {
     expect(a.args['key1'](null)).to.equal(null);
     expect(a.args['key1']({})).to.equal(null);
     expect(a.args['key1']({foo: null})).to.equal(null);
-  })
+  });
 
   it('should NOT dereference non-primitives in arg values', () => {
     const a = parseAction('e:t.m(key1=foo.bar)');
