@@ -848,7 +848,7 @@ function createBaseCustomElementClass(win) {
      */
     connectedCallback() {
       if (!this.everAttached) {
-        this.classList.add('-amp-element');
+        this.classList.add('i-amphtml-element');
         this.classList.add('i-amphtml-notbuilt');
         this.classList.add('amp-notbuilt');
       }
@@ -1410,7 +1410,7 @@ function createBaseCustomElementClass(win) {
 
         const container = doc.createElement('div');
         container.classList.add('i-amphtml-loading-container');
-        container.classList.add('-amp-fill-content');
+        container.classList.add('i-amphtml-fill-content');
         container.classList.add('amp-hidden');
 
         const element = createLoaderElement(doc, this.elementName());

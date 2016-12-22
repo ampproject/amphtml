@@ -52,7 +52,7 @@ describe('amp-instagram', () => {
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
     expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
-    expect(iframe.className).to.match(/-amp-fill-content/);
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
