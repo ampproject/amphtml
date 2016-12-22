@@ -24,6 +24,9 @@ import {viewportForDoc} from '../../../src/viewport';
 import {getDataParamsFromAttributes, matches} from '../../../src/dom';
 import {Visibility} from './visibility-impl';
 import {isExperimentOn} from '../../../src/experiments';
+import {
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -96,8 +99,9 @@ export class InstrumentationService {
     this.ampdoc = ampdoc;
 
     /** @private {boolean} */
-    this.visibilityV2Enabled_ = this.ampdoc.win.IntersectionObserver &&
-        isExperimentOn(this.ampdoc.win, 'visibility-v2');
+    this.visibilityV2Enabled_ =
+        nativeIntersectionObserverSupported(ampdoc.win) &&
+            isExperimentOn(ampdoc.win, 'visibility-v2');
 
     /** @const @private {!./visibility-impl.Visibility} */
     this.visibility_ = new Visibility(this.ampdoc);
