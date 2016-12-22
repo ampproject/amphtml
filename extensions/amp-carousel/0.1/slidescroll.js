@@ -177,7 +177,7 @@ export class AmpSlideScroll extends BaseSlides {
       const newValue = mutation.newValue;
       switch (mutation.name) {
         case 'slide':
-          const slide = parseInt(newValue);
+          const slide = parseInt(newValue, 10);
           user().assert(isFinite(slide), 'Invalid [slide] value: %s', newValue);
           this.showSlide_(slide);
           break;

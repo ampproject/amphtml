@@ -93,9 +93,9 @@ export class AmpSelector extends AMP.BaseElement {
             }
             const query = selectors.join(',');
             const elements = this.element.querySelectorAll(query);
-            elements.forEach(element => {
-              this.setSelection_(element);
-            });
+            for (let i = 0; i < elements.length; i++) {
+              this.setSelection_(element[i]);
+            }
           }
           this.setInputs_();
           break;
