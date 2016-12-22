@@ -23,7 +23,8 @@ limitations under the License.
     type="valuecommerce"
     data-sid="99999999"
     data-pid="99999999"
-    data-vcptn="vpc605">
+    data-vcptn="vpc605"
+    data-om="0">
 </amp-ad>
 ```
 

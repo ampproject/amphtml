@@ -21,7 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function valuecommerce(global, data) {
-  validateData(data, ['sid','pid','vcptn'], []);
+  validateData(data, ['sid','pid','vcptn','om'], []);
   global.vcParam = data;
   writeScript(global, 'https://sbcm1.value-point.jp/amp/amp_ad.js');
 }
