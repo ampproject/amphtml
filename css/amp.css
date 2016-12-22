@@ -151,7 +151,7 @@ i-amphtml-sizer {
 /* TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
    form is in PROD for 1-2 weeks. */
 .-amp-fill-content,
-i-amphtml-fill-content {
+.i-amphtml-fill-content {
   display: block;
   width: 1px;          /* These lines are a work around to this issue in iOS: */
   min-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198      */
@@ -173,7 +173,7 @@ i-amphtml-fill-content {
 /* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
    form is in PROD for 1-2 weeks. */
 .-amp-replaced-content,
-i-amphtml-replaced-content {
+.i-amphtml-replaced-content {
   padding: 0 !important;
   border: none !important;
   /* TODO(dvoytenko): explore adding here object-fit. */
