@@ -102,6 +102,8 @@ exports.rules = [
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
+      // Some ads need to depend on json.js
+      'ads/**->src/json.js',
     ],
   },
   {
