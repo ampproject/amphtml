@@ -338,19 +338,6 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
-  'isDevChannel\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
-  'isDevChannelVersionDoNotUse_\\W': {
-    message: shouldNeverBeUsed,
-    whitelist: [
-      'src/experiments.js',
-    ],
-  },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
