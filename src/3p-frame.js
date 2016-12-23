@@ -16,7 +16,7 @@
 
 import {dev, user} from './log';
 import {documentInfoForDoc} from './document-info';
-import {isExperimentOn} from './experiments';
+import {isExperimentOn, experimentToggles} from './experiments';
 import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
@@ -89,6 +89,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     startTime,
+    experimentToggles: experimentToggles(parentWindow),
   };
   Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
