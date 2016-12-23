@@ -38,7 +38,7 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 let toggles_;
 
 /**
- * Whether the scripts come from a dev channel.
+ * Whether we are in canary.
  * @param {!Window} win
  * @return {boolean}
  */
