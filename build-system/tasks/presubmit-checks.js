@@ -506,6 +506,7 @@ var forbiddenTerms = {
       'src/error.js',
       'src/3p-frame.js',
       'src/config.js',
+      'dist.3p/current/integration.js',
     ],
   },
 };
