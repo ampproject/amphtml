@@ -251,13 +251,13 @@ export class AmpForm {
           credentials: 'include',
           requireAmpResponseSourceOrigin: true,
         }).then(response => {
-          this.actions_.trigger(this.form_, 'submit-success', null);
+          this.triggerAction_(true, response);
           // TODO(mkhatib, #6032): Update docs to reflect analytics events.
           this.analyticsEvent_('amp-form-submit-success');
           this.setState_(FormState_.SUBMIT_SUCCESS);
           this.renderTemplate_(response || {});
         }).catch(error => {
-          this.actions_.trigger(this.form_, 'submit-error', null);
+          this.triggerAction_(false, error.responseJson);
           this.analyticsEvent_('amp-form-submit-error');
           this.setState_(FormState_.SUBMIT_ERROR);
           this.renderTemplate_(error.responseJson || {});
@@ -279,6 +279,18 @@ export class AmpForm {
         this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
       }
     }
+  }
+
+  /**
+   * Triggers either a submit-success or submit-error action with response data.
+   * @param {boolean} success
+   * @param {?JSONType} json
+   * @private
+   */
+  triggerAction_(success, json) {
+    const name = success ? FormState_.SUBMIT_SUCCESS : FormState_.SUBMIT_ERROR;
+    const event = new CustomEvent(`${TAG}.${name}`, {detail: {response: json}});
+    this.actions_.trigger(this.form_, name, event);
   }
 
   /**
