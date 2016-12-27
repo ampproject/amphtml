@@ -164,16 +164,22 @@ describe('3p-frame', () => {
     const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
     let sentinel;
+    let srcParts;
+    let expectedFragment;
     if (iframeContextInName) {
       const name = JSON.parse(decodeURIComponent(iframe.name));
-      amp3pSentinel = name.attributes._context.sentinel;
+      sentinel = name.attributes._context.sentinel;
     } else {
-      amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
+      srcParts = src.split('#');
+      expect(srcParts[0]).to.equal(
+          'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+      expectedFragment = JSON.parse(srcParts[1]);
+      sentinel = expectedFragment._context.sentinel;
     }
     const fragment =
         '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
-        '"type":"_ping_",' + '"ampcontextVersion": "LOCAL"' +
-        '"_context":{"referrer":"http://acme.org/",' +
+        '"type":"_ping_",' +
+        '"_context":{"ampcontextVersion": "LOCAL", "referrer":"http://acme.org/",' +
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"sourceUrl":"' + locationHref + '",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
@@ -184,9 +190,9 @@ describe('3p-frame', () => {
         ',"hidden":false' +
         // Note that DOM fingerprint will change if the document DOM changes
         // Note also that running it using --files uses different DOM.
-        ',"domFingerprint":"1725030182"' +
+        ',"domFingerprint":"258846393"' +
+        ',"sentinel":"' + sentinel + '"' +
         ',"startTime":1234567888' +
-        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
@@ -208,10 +214,7 @@ describe('3p-frame', () => {
       // Switch to same origin for inner tests.
       iframe.src = '/dist.3p/current/frame.max.html';
     } else {
-      const srcParts = src.split('#');
-      expect(srcParts[0]).to.equal(
-          'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-      const expectedFragment = JSON.parse(srcParts[1]);
+
       const parsedFragment = JSON.parse(fragment);
       // Since DOM fingerprint changes between browsers and documents, to have
       // stable tests, we can only verify its existence.
