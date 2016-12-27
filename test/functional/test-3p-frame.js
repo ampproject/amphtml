@@ -186,6 +186,7 @@ describe('3p-frame', () => {
         // Note also that running it using --files uses different DOM.
         ',"domFingerprint":"1725030182"' +
         ',"startTime":1234567888' +
+        ',"experimentToggles":{}' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
