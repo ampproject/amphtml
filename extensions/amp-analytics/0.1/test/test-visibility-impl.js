@@ -409,7 +409,7 @@ describe('amp-analytics.visibility', () => {
       iframeAnalytics;
     beforeEach(() => {
       ampEl = document.createElement('span');
-      ampEl.className = '-amp-element';
+      ampEl.className = 'i-amphtml-element';
       ampEl.id = 'ampEl';
       iframe = document.createElement('iframe');
       div = document.createElement('div');

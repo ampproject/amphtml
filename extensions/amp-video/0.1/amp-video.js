@@ -14,21 +14,27 @@
   * limitations under the License.
   */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/video-manager';
+import {assertHttpsUrl} from '../../../src/url';
 
-const TAG = 'amp-video2';
+const TAG = 'amp-video';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
-class AmpVideo2 extends AMP.BaseElement {
+class AmpVideo extends AMP.BaseElement {
 
-    /** @param {!AmpElement} element */
+    /**
+     * @param {!AmpElement} element
+     */
     constructor(element) {
       super(element);
 
@@ -62,6 +68,8 @@ class AmpVideo2 extends AMP.BaseElement {
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
+      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      installVideoManagerForDoc(ampdoc);
       videoManagerForDoc(this.win.document).register(this);
     }
 
@@ -146,7 +154,17 @@ class AmpVideo2 extends AMP.BaseElement {
      * @override
      */
     play(unusedIsAutoplay) {
-      this.video_.play();
+      const ret = this.video_.play();
+
+      if (ret && ret.catch) {
+        ret.catch(() => {
+          // Empty catch to prevent useless unhandled promise rejection logging.
+          // Play can fail for many reasons such as video getting paused before
+          // play() is finished.
+          // We use events to know the state of the video and do not care about
+          // the success or failure of the play()'s returned promise.
+        });
+      }
     }
 
     /**
@@ -185,4 +203,4 @@ class AmpVideo2 extends AMP.BaseElement {
     }
 }
 
-AMP.registerElement(TAG, AmpVideo2);
+AMP.registerElement(TAG, AmpVideo);

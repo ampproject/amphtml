@@ -172,6 +172,10 @@ export const adConfig = {
     preconnect: 'https://cas.criteo.com',
   },
 
+  csa: {
+    prefetch: 'https://www.google.com/adsense/search/ads.js',
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',
