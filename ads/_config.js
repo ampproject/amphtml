@@ -172,6 +172,10 @@ export const adConfig = {
     preconnect: 'https://cas.criteo.com',
   },
 
+  csa: {
+    prefetch: 'https://www.google.com/adsense/search/ads.js',
+  },
+
   distroscale: {
     preconnect: [
       'https://c.jsrdn.com',
@@ -223,6 +227,10 @@ export const adConfig = {
 
   flite: {},
 
+  fusion: {
+    prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
+  },
+
   genieessp: {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
@@ -261,7 +269,10 @@ export const adConfig = {
   },
 
   ix: {
-    prefetch: 'https://js-sec.indexww.com/indexJTag.js',
+    prefetch: [
+      'https://js-sec.indexww.com/indexJTag.js',
+      'https://js-sec.indexww.com/apl/apl6.js',
+    ],
     preconnect: 'https://as-sec.casalemedia.com',
   },
 

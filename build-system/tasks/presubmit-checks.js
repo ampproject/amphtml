@@ -46,6 +46,10 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
+  // TODO(dvoytenko, #6463): Enable this check once the current uses have
+  // been cleaned up.
+  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
+  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
@@ -208,6 +212,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
+      'src/inabox/amp-inabox.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -270,6 +275,7 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/viewport-impl.js',
       'src/service/performance-impl.js',
+      'src/service/resources-impl.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -349,6 +355,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/inabox/inabox-viewer.js',
     ],
   },
   'eval\\(': {
@@ -424,6 +431,7 @@ var forbiddenTerms = {
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
       'src/3p-frame.js',
       'src/service/viewer-impl.js',
+      'src/inabox/inabox-viewer.js',
     ],
   },
   'setTimeout.*throw': {
@@ -439,6 +447,14 @@ var forbiddenTerms = {
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, thinking twice before using it',
     whitelist: [
+      'src/service/resources-impl.js',
+    ],
+  },
+  '\\.updatePriority\\(': {
+    message: 'updatePriority is a restricted API.',
+    whitelist: [
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'src/base-element.js',
       'src/service/resources-impl.js',
     ],
   },
@@ -601,6 +617,20 @@ var forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.expandStringAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
+  '\\.expandInputValueSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
+  '\\.expandInputValueAsync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',

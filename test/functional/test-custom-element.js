@@ -221,8 +221,8 @@ describe('CustomElement', () => {
 
     container.appendChild(element);
     element.attachedCallback();
-    expect(element).to.have.class('-amp-element');
-    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('i-amphtml-element');
+    expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
     expect(testElementCreatedCallback.callCount).to.equal(1);
@@ -247,8 +247,8 @@ describe('CustomElement', () => {
 
     container.appendChild(element);
     element.attachedCallback();
-    expect(element).to.have.class('-amp-element');
-    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('i-amphtml-element');
+    expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
     expect(element.everAttached).to.equal(true);
     expect(testElementCreatedCallback.callCount).to.equal(0);
@@ -260,24 +260,24 @@ describe('CustomElement', () => {
     const element = new ElementClass();
     sandbox.stub(element, 'build');
 
-    expect(element).to.not.have.class('-amp-element');
-    expect(element).to.not.have.class('-amp-notbuilt');
+    expect(element).to.not.have.class('i-amphtml-element');
+    expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
 
     container.appendChild(element);
     element.attachedCallback();
 
-    expect(element).to.have.class('-amp-element');
-    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('i-amphtml-element');
+    expect(element).to.have.class('i-amphtml-notbuilt');
     expect(element).to.have.class('amp-notbuilt');
-    element.classList.remove('-amp-element');
-    element.classList.remove('-amp-notbuilt');
+    element.classList.remove('i-amphtml-element');
+    element.classList.remove('i-amphtml-notbuilt');
     element.classList.remove('amp-notbuilt');
 
     element.attachedCallback();
 
-    expect(element).to.not.have.class('-amp-element');
-    expect(element).to.not.have.class('-amp-notbuilt');
+    expect(element).to.not.have.class('i-amphtml-element');
+    expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
   });
 
@@ -467,7 +467,7 @@ describe('CustomElement', () => {
 
     element.build();
     expect(element.isBuilt()).to.equal(true);
-    expect(element).to.not.have.class('-amp-notbuilt');
+    expect(element).to.not.have.class('i-amphtml-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(1);
   });
@@ -583,7 +583,7 @@ describe('CustomElement', () => {
     expect(testElementCreatedCallback.callCount).to.equal(0);
     expect(testElementFirstAttachedCallback.callCount).to.equal(0);
     expect(element).to.have.class('amp-unresolved');
-    expect(element).to.have.class('-amp-unresolved');
+    expect(element).to.have.class('i-amphtml-unresolved');
 
     // Upgrade
     resourcesMock.expects('upgraded').withExactArgs(element).once();
@@ -595,7 +595,7 @@ describe('CustomElement', () => {
     expect(testElementCreatedCallback.callCount).to.equal(1);
     expect(testElementFirstAttachedCallback.callCount).to.equal(1);
     expect(element).to.not.have.class('amp-unresolved');
-    expect(element).to.not.have.class('-amp-unresolved');
+    expect(element).to.not.have.class('i-amphtml-unresolved');
   });
 
   it('Element - detachedCallback', () => {
@@ -835,12 +835,12 @@ describe('CustomElement', () => {
     const element1 = new ElementClass();
     element1.setAttribute('media', '(min-width: 1px)');
     element1.applySizesAndMediaQuery();
-    expect(element1).to.not.have.class('-amp-hidden-by-media-query');
+    expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
 
     const element2 = new ElementClass();
     element2.setAttribute('media', '(min-width: 1111111px)');
     element2.applySizesAndMediaQuery();
-    expect(element2).to.have.class('-amp-hidden-by-media-query');
+    expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
   });
 
   it('should apply sizes condition', () => {

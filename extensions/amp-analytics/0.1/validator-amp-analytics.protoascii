@@ -22,6 +22,7 @@ tags: {  # amp-analytics
   spec_name: "amp-analytics extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-analytics"
   attrs: {
     name: "async"
     mandatory: true

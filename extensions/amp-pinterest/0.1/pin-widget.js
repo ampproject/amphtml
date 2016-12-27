@@ -65,12 +65,13 @@ export class PinWidget {
   fetchPin() {
     const baseUrl = 'https://widgets.pinterest.com/v3/pidgets/pins/info/?';
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
-    return this.xhr.fetchJson(baseUrl + query)
-      .then(response => {
-        try {
-          return response.data[0];
-        } catch (e) { return null; }
-      });
+    return this.xhr.fetchJson(baseUrl + query, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(response => {
+      try {
+        return response.data[0];
+      } catch (e) { return null; }
+    });
   }
 
   renderPin(pin) {
@@ -88,7 +89,10 @@ export class PinWidget {
     }
 
     const structure = Util.make(this.element.ownerDocument, {'span': {}});
-    structure.className = className + ' -amp-fill-content';
+    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
+    // form is in PROD for 1-2 weeks.
+    structure.className = className +
+        ' -amp-fill-content i-amphtml-fill-content';
 
     const container = Util.make(this.element.ownerDocument, {'span': {
       'className': '-amp-pinterest-embed-pin-inner',

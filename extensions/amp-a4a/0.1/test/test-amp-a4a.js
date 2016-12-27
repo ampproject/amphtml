@@ -23,6 +23,7 @@ import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_IMPL_PATH,
+  protectFunctionWrapper,
 } from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
@@ -94,9 +95,14 @@ describe('amp-a4a', () => {
         sandbox.spy(AmpA4A.prototype, 'onAmpCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
-        'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-        {mode: 'cors', method: 'GET'})
-    .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+      {
+        mode: 'cors',
+        method: 'GET',
+        ampCors: false,
+        credentials: 'omit',
+      }).returns(
+        Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
@@ -566,6 +572,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         const extractCreativeAndSignatureSpy = sandbox.spy(
             a4a, 'extractCreativeAndSignature');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
@@ -613,6 +620,8 @@ describe('amp-a4a', () => {
               .to.be.ok;
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
             expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
+            expect(updatePriorityStub).to.be.calledOnce;
+            expect(updatePriorityStub.args[0][0]).to.equal(0);
           });
         });
       });
@@ -642,6 +651,7 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         if (!isValidCreative) {
           sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
             Promise.resolve({creative: mockResponse.arrayBuffer()}));
@@ -671,12 +681,17 @@ describe('amp-a4a', () => {
             if (isValidCreative && !opt_failAmpRender) {
               expect(iframe.getAttribute('src')).to.be.null;
               expect(onAmpCreativeRenderSpy.calledOnce).to.be.true;
+              expect(updatePriorityStub).to.be.calledOnce;
+              expect(updatePriorityStub.args[0][0]).to.equal(0);
             } else {
               expect(iframe.getAttribute('srcdoc')).to.be.null;
               expect(iframe.src, 'verify iframe src w/ origin').to
                   .equal(TEST_URL +
                          '&__amp_source_origin=about%3Asrcdoc');
               expect(onAmpCreativeRenderSpy.called).to.be.false;
+              if (!opt_failAmpRender) {
+                expect(updatePriorityStub).to.not.be.called;
+              }
             }
           });
         });
@@ -867,6 +882,40 @@ describe('amp-a4a', () => {
       };
       expect(actual).to.deep.equal(expected);
     });
+    // TODO(levitzky) remove the following two tests after metadata bug is
+    // fixed.
+    it('should parse metadata with wrong opening tag', () => {
+      const creative = buildCreativeString({
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {href: 'https://fonts.com/css?helloworld'},
+        ],
+      }).replace('<script type="application/json" amp-ad-metadata>',
+          '<script type=application/json amp-ad-metadata>');
+      const actual = a4a.getAmpAdMetadata_(creative);
+      const expected = {
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {href: 'https://fonts.com/css?helloworld'},
+        ],
+      };
+      expect(actual).to.deep.equal(expected);
+    });
+    it('should return null if metadata opening tag is (truly) wrong', () => {
+      const creative = buildCreativeString({
+        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        customStylesheets: [
+          {href: 'https://fonts.googleapis.com/css?foobar'},
+          {href: 'https://fonts.com/css?helloworld'},
+        ],
+      }).replace('<script type="application/json" amp-ad-metadata>',
+          '<script type=application/json" amp-ad-metadata>');
+      expect(a4a.getAmpAdMetadata_(creative)).to.be.null;
+    });
+
     it('should return null if missing ampRuntimeUtf16CharOffsets', () => {
       const baseTestDoc = testFragments.minimalDocOneStyle;
       const splicePoint = baseTestDoc.indexOf('</body>');
@@ -1059,6 +1108,44 @@ describe('amp-a4a', () => {
               .to.be.false;
           expect(reason).to.deep.equal(cancellation());
         });
+      });
+    });
+
+    describe('protectFunctionWrapper', () => {
+      it('works properly with no error', () => {
+        let errorCalls = 0;
+        expect(protectFunctionWrapper(name => {
+          return `hello ${name}`;
+        }, null, () => {errorCalls++;})('world')).to.equal('hello world');
+        expect(errorCalls).to.equal(0);
+      });
+
+      it('handles error properly', () => {
+        const err = new Error('test fail');
+        expect(protectFunctionWrapper((name, suffix) => {
+          expect(name).to.equal('world');
+          expect(suffix).to.equal('!');
+          throw err;
+        }, null, (currErr, name, suffix) => {
+          expect(currErr).to.equal(err);
+          expect(name).to.equal('world');
+          expect(suffix).to.equal('!');
+          return 'pass';
+        })('world', '!')).to.equal('pass');
+      });
+
+      it('returns undefined if error thrown in error handler', () => {
+        const err = new Error('test fail within fn');
+        expect(protectFunctionWrapper((name, suffix) => {
+          expect(name).to.equal('world');
+          expect(suffix).to.be.undefined;
+          throw err;
+        }, null, (currErr, name, suffix) => {
+          expect(currErr).to.equal(err);
+          expect(name).to.equal('world');
+          expect(suffix).to.be.undefined;
+          throw new Error('test fail within error fn');
+        })('world')).to.be.undefined;
       });
     });
   });

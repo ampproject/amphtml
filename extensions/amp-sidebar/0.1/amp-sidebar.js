@@ -83,7 +83,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.viewport_ = this.getViewport();
 
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */true);
+    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =

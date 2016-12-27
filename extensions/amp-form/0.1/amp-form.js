@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
@@ -77,6 +78,8 @@ export class AmpForm {
    * @param {string} id
    */
   constructor(element, id) {
+    installFormProxy(element);
+
     /** @private @const {string} */
     this.id_ = id;
 
@@ -219,7 +222,7 @@ export class AmpForm {
     const isVarSubExpOn = isExperimentOn(this.win_, 'amp-form-var-sub');
     // Fields that support var substitutions.
     const varSubsFields = isVarSubExpOn ? this.form_.querySelectorAll(
-        '[type="hidden"][default-value]') : [];
+        '[type="hidden"][data-amp-replace]') : [];
     if (this.xhrAction_) {
       if (opt_event) {
         opt_event.preventDefault();
@@ -229,11 +232,8 @@ export class AmpForm {
       const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
       const varSubPromises = [];
       for (let i = 0; i < varSubsFields.length; i++) {
-        const variable = varSubsFields[i].getAttribute('default-value');
         varSubPromises.push(
-            this.urlReplacement_.expandStringAsync(variable).then(value => {
-              varSubsFields[i].value = value;
-            }));
+            this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
       }
       // Wait until all variables have been substituted or 100ms timeout.
       this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
@@ -276,9 +276,7 @@ export class AmpForm {
     } else if (this.method_ == 'GET') {
       // Non-xhr GET requests replacement should happen synchronously.
       for (let i = 0; i < varSubsFields.length; i++) {
-        const variable = varSubsFields[i].getAttribute('default-value');
-        varSubsFields[i].value = this.urlReplacement_.expandStringSync(
-            variable);
+        this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
       }
     }
   }

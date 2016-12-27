@@ -63,7 +63,6 @@ import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc,} from
     './service/url-replacements-impl';
-import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState,} from
     './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
@@ -83,6 +82,22 @@ import {waitForBody} from './dom';
 import * as config from './config';
 
 initLogConstructor();
+
+/**
+ * - n is the name.
+ * - f is the function body of the extension.
+ * - p is the priority. Only supported value is "high".
+ *   high means, that the extension is not subject to chunking.
+ *   This should be used for work, that should always happen
+ *   as early as possible. Currently this is primarily used
+ *   for viewer communication setup.
+ * @typedef {{
+ *   n: string,
+ *   f: function(!Object),
+ *   p: (string|undefined),
+ * }}
+ */
+let ExtensionPayloadDef;
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -118,7 +133,6 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
-  installVideoManagerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
 
@@ -159,7 +173,7 @@ function adoptShared(global, opts, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  /** @const {!Array<function(!Object)|{n:string, f:function(!Object)}>} */
+  /** @const {!Array<function(!Object)|ExtensionPayloadDef>} */
   const preregisteredExtensions = global.AMP || [];
 
   /** @const {!./service/extensions-impl.Extensions} */
@@ -246,16 +260,30 @@ function adoptShared(global, opts, callback) {
   callback(global, extensions);
 
   /**
-   * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
+   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
    */
   function installExtension(fnOrStruct) {
-    if (typeof fnOrStruct == 'function') {
-      const fn = fnOrStruct;
-      chunk(global.document, () => fn(global.AMP));
+    const register = () => {
+      waitForBody(global.document, () => {
+        if (typeof fnOrStruct == 'function') {
+          fnOrStruct(global.AMP);
+        } else {
+          registerExtension(extensions, fnOrStruct.n, fnOrStruct.f, global.AMP);
+        }
+      });
+    };
+    if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
+      // "High priority" extensions do not go through chunking.
+      // This should be used for extensions that need to run early.
+      // One example would be viewer communication that is required
+      // to transition document from pre-render to visible (which
+      // affects chunking itself).
+      // We consider functions as high priority, because
+      // - if in doubt, that is a better default
+      // - the only actual  user is a viewer integration that should
+      //   be high priority.
+      Promise.resolve().then(register);
     } else {
-      const register = function() {
-        registerExtension(extensions, fnOrStruct.n, fnOrStruct.f, global.AMP);
-      };
       register.displayName = fnOrStruct.n;
       chunk(global.document, register);
     }
@@ -273,40 +301,29 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers a new custom element.
-   * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
+   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
    */
   global.AMP.push = function(fnOrStruct) {
-    // Extensions are only processed once HEAD is complete.
-    const register = function() {
-      waitForBody(global.document, () => {
-        installExtension(fnOrStruct);
-      });
-    };
-    register.displayName = fnOrStruct.n;
-    chunk(global.document, register);
+    installExtension(fnOrStruct);
   };
 
   // Execute asynchronously scheduled elements.
-  // Extensions are only processed once HEAD is complete.
-  waitForBody(global.document, () => {
-    for (let i = 0; i < preregisteredExtensions.length; i++) {
-      const fnOrStruct = preregisteredExtensions[i];
-      try {
-        installExtension(fnOrStruct);
-      } catch (e) {
-        // Throw errors outside of loop in its own micro task to
-        // avoid on error stopping other extensions from loading.
-        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
-      }
+  for (let i = 0; i < preregisteredExtensions.length; i++) {
+    const fnOrStruct = preregisteredExtensions[i];
+    try {
+      installExtension(fnOrStruct);
+    } catch (e) {
+      // Throw errors outside of loop in its own micro task to
+      // avoid on error stopping other extensions from loading.
+      dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
     }
+  }
+  // Make sure we empty the array of preregistered extensions.
+  // Technically this is only needed for testing, as everything should
+  // go out of scope here, but just making sure.
+  preregisteredExtensions.length = 0;
 
-    installAutoLoadExtensions();
-
-    // Make sure we empty the array of preregistered extensions.
-    // Technically this is only needed for testing, as everything should
-    // go out of scope here, but just making sure.
-    preregisteredExtensions.length = 0;
-  });
+  installAutoLoadExtensions();
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
   // delivered.

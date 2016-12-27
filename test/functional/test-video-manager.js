@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {VideoEvents} from '../../src/video-interface';
 import {videoManagerForDoc} from '../../src/video-manager';
 import {
+  installVideoManagerForDoc,
   supportsAutoplay,
   clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
@@ -193,6 +195,8 @@ function createFakeVideoPlayerClass(win) {
 
     /** @override */
     buildCallback() {
+      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      installVideoManagerForDoc(ampdoc);
       videoManagerForDoc(this.win.document).register(this);
     }
 

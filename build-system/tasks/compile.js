@@ -135,7 +135,8 @@ function compile(entryModuleFilenames, outputDir,
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
-      'src/**/*.js',
+      'src/*.js',
+      'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
       '!extensions/amp-access/0.1/amp-login-done.js',

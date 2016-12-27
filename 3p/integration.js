@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {initLogConstructor, user} from '../src/log';
+import {dev, initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
@@ -66,6 +66,7 @@ import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
+import {csa} from '../ads/google/csa';
 import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
@@ -74,6 +75,7 @@ import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
+import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
 import {holder} from '../ads/holder';
@@ -130,15 +132,6 @@ import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
 /**
- * This value is copied here to avoid importing from src/intersection-observer-polyfill.js
- * Please keep this value same with DEFAULT_THRESHOLD from that file.
- * @const @private {!Array}
- */
-const DEFAULT_THRESHOLD =
-    [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
-
-/**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
  */
@@ -151,8 +144,25 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
-const data = parseFragment(location.hash);
-window.context = data._context;
+// Need to cache iframeName as it will be potentially overwritten by
+// masterSelection, as per below.
+const iframeName = window.name;
+
+let data = parseFragment(location.hash);
+if (data && data._context) {
+  window.context = data._context;
+} else {
+  try {
+    // TODO(bradfrizzell@): Change the data structure of the attributes
+    //    to make it less terrible.
+    data = JSON.parse(iframeName).attributes;
+    window.context = data._context;
+  } catch (err) {
+    window.context = {};
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
+}
 
 // This should only be invoked after window.context is set
 initLogConstructor();
@@ -189,6 +199,7 @@ register('chargeads', chargeads);
 register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
+register('csa', csa);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
@@ -198,6 +209,7 @@ register('f1e', f1e);
 register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
+register('fusion', fusion);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
 register('holder', holder);
@@ -389,6 +401,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.reportRenderedEntityIdentifier =
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
+    window.context.addContextToIframe = iframe => {
+      iframe.name = iframeName;
+    };
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -437,21 +452,6 @@ function triggerRenderStart(opt_data) {
  */
 function observeIntersection(observerCallback) {
   // Send request to received records.
-  if (window.IntersectionObserver &&
-      window.IntersectionObserver.prototype.observe) {
-    // NOTE: Add extra check for `IntersectionObserver.prototype.observe`
-    // so that we can still test our IntersectionObserver polyfill impl by
-    // setting `IntersectionObserver.prototype` to a null object.
-
-    // use native IntersectionObserver if it exists.
-    const io = new window.IntersectionObserver(changes => {
-      observerCallback(changes);
-    }, {
-      threshold: DEFAULT_THRESHOLD,
-    });
-    io.observe(window.document.documentElement);
-    return () => io.unobserve(window.document.documentElement);
-  }
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);
@@ -613,18 +613,22 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {!JSONType}
+ * @return {?JSONType}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
-  let json = fragment.substr(1);
-  // Some browser, notably Firefox produce an encoded version of the fragment
-  // while most don't. Since we know how the string should start, this is easy
-  // to detect.
-  if (json.indexOf('{%22') == 0) {
-    json = decodeURIComponent(json);
+  try {
+    let json = fragment.substr(1);
+    // Some browser, notably Firefox produce an encoded version of the fragment
+    // while most don't. Since we know how the string should start, this is easy
+    // to detect.
+    if (json.indexOf('{%22') == 0) {
+      json = decodeURIComponent(json);
+    }
+    return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
+  } catch (err) {
+    return null;
   }
-  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
 }
 
 /**

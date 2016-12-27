@@ -163,6 +163,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
+    iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('allowfullscreen', 'true');
@@ -194,16 +195,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
     const loaderImage = createElement('img', 'pb_feed_anim_mask');
     loaderImage.src = logo;
 
-    const loaderText = createElement('div', 'pb_feed_loading_text');
-    loaderText.textContent = 'Loading...';
-
     const loadingPlaceholder =
       createElement('div', 'pb_feed_placeholder_container',
         createElement('div', 'pb_feed_placeholder_inner',
-          createElement('div', 'pb_feed_placeholder_content', [
-            createElement('div', 'pb_feed_placeholder_preloader', loaderImage),
-            loaderText,
-          ])));
+          createElement('div', 'pb_feed_placeholder_content',
+            createElement('div', 'pb_feed_placeholder_preloader', loaderImage)
+      )));
 
     return loadingPlaceholder;
   }
