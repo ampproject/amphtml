@@ -695,6 +695,14 @@ describe('amp-analytics.visibility', () => {
           maxContinuousVisibleTime: '1000',
           totalTime: '1234',
         });
+
+        // This line is to remove side effect this test brought to others.
+        // Notice that this test installs everything to global window instead
+        // of an iframe. Some other tests that are not well isolated too get
+        // affected by the change of Viewer visibility here, so we need to
+        // restore.
+        // TODO: refactor this whole test file to enforce good isolation.
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
       });
     });
 
