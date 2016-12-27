@@ -20,8 +20,6 @@ import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
-const TAG = 'AMP-STATE';
-
 export class AmpState extends AMP.BaseElement {
   /** @override */
   getPriority() {
@@ -42,35 +40,33 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   activate(invocation) {
     const event = invocation.event;
-    if (event && event.detail && event.detail.response) {
+    if (event && event.detail) {
       this.updateState_(event.detail.response);
     }
   }
 
   /** @override */
   buildCallback() {
-    const name = this.getName_();
+    const TAG = this.getName_();
 
     toggle(this.element, false);
     this.element.setAttribute('aria-hidden', 'true');
 
-    let json;
     const children = this.element.children;
     if (children.length == 1) {
       const child = children[0];
       if (isJsonScriptTag(child)) {
-        json = tryParseJson(children[0].textContent, e => {
-          user().error(name, 'Failed to parse state. Is it valid JSON?', e);
+        const json = tryParseJson(children[0].textContent, e => {
+          user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
         });
+        this.updateState_(json, true);
       } else {
-        user().error(name,
+        user().error(TAG,
             'State should be in a <script> tag with type="application/json"');
       }
     } else if (children.length > 1) {
-      user().error(name, 'Should contain only one <script> child.');
+      user().error(TAG, 'Should contain only one <script> child.');
     }
-
-    this.updateState_(json, true);
   }
 
   /** @override */
@@ -80,15 +76,15 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /**
-   * @param {?JSONType} json
+   * @param {*} json
    * @param {boolean=} opt_isInit
    * @private
    */
   updateState_(json, opt_isInit) {
-    if (!json) {
+    if (json === undefined || json === null) {
       return;
     }
-    const id = user().assert(this.element.id, '%s must have an id.', TAG);
+    const id = user().assert(this.element.id, '<amp-state> must have an id.');
     const state = Object.create(null);
     state[id] = json;
     bindForDoc(this.getAmpDoc()).then(bind => {
@@ -102,7 +98,7 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return '<' + TAG + '> ' +
+    return '<amp-state> ' +
         (this.element.getAttribute('id') || '<unknown id>');
   }
 }
