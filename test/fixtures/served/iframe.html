@@ -25,7 +25,7 @@ function getAmpWindow(sentinel) {
 window.addEventListener('message', function(event) {
   if (event.data && event.data.sentinel == 'amp-test') {
     if (event.data.type == 'requestHeight') {
-      var sentinel = JSON.parse(decodeURI(this.name))._context.sentinel;
+      const sentinel = JSON.parse(decodeURI(this.name))._context.sentinel;
       parent./*OK*/postMessage(
           {
             sentinel: sentinel,

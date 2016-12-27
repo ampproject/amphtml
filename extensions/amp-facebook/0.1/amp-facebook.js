@@ -15,7 +15,9 @@
  */
 
 
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  getIframe, preloadBootstrap, generateSentinel
+} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
@@ -51,8 +53,15 @@ class AmpFacebook extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
+    const sentinel = generateSentinel(window);
+    iframe.name = encodeURI(JSON.stringify({
+      "_context" : {
+        "sentinel" : sentinel
+      }
+    }));
+
     // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(iframe, 'embed-size', data => {
+    listenFor(iframe, sentinel, 'embed-size', data => {
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
