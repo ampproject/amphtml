@@ -442,9 +442,9 @@ function triggerRenderStart(opt_data) {
 }
 
 /**
- * @param {String} selector
- * @param {String[]} attrs
- * @param {Function} callback
+ * @param {!String} selector
+ * @param {!Array<String>} attrs
+ * @param {!Function} callback
  */
 function getHTML(selector, attrs, callback) {
   nonSensitiveDataPostMessage('get-html', {selector, attrs});

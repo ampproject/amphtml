@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-/** @type {String[]} */
+/** @type {Array<string>} */
 const excludedTags = ['amp-analytics', 'amp-experiment', 'amp-bind-state'];
 
 /**
  * Returns content of HTML node
- * @param {String} selector
- * @param {String[]} attrs
+ * @param {!string} selector
+ * @param {!Array<string>} attrs
  */
 export function getHTML(selector, attrs) {
   const root = self.document.querySelector(selector);
@@ -34,9 +34,9 @@ export function getHTML(selector, attrs) {
 }
 
 /**
- * @param {HTMLElement} node
- * @param {String[]} attrs
- * @param {String[]} result
+ * @param {!Element} node
+ * @param {!Array<string>} attrs
+ * @param {!Array<string>} result
  */
 function appendToResult(node, attrs, result) {
   const stack = [];
@@ -70,7 +70,7 @@ function appendToResult(node, attrs, result) {
 
 /**
  *
- * @param {HTMLElement} node
+ * @param {?Element} node
  * @return {Boolean}
  */
 function isCorrectNode(node) {
@@ -82,9 +82,9 @@ function isCorrectNode(node) {
 
 /**
  *
- * @param {HTMLElement} node
- * @param {String[]} attrs
- * @param {String[]} result
+ * @param {!Element} node
+ * @param {!Array<string>} attrs
+ * @param {Array<string>} result
  */
 function appendOpenTag(node, attrs, result) {
   result.push(`<${node.tagName.toLowerCase()}`);
