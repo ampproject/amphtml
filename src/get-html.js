@@ -71,12 +71,12 @@ function appendToResult(node, attrs, result) {
 /**
  *
  * @param {?Element} node
- * @return {Boolean}
+ * @return {!boolean}
  */
 function isCorrectNode(node) {
-  return node &&
+  return !!(node &&
       excludedTags.indexOf(node.tagName.toLowerCase()) === -1 &&
-      node.textContent;
+      node.textContent);
 }
 
 
