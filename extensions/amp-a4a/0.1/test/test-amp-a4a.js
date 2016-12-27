@@ -201,7 +201,7 @@ describe('amp-a4a', () => {
     const child = element.querySelector('iframe[src]');
     expect(child).to.be.ok;
     expect(child.src).to.have.string(srcUrl);
-    expect(child.getAttribute('name')).not.to.be.ok;
+    expect(child.getAttribute('name')).to.be.ok;
     expect(child).to.be.visible;
   }
 
