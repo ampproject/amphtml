@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -404,6 +404,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.addContextToIframe = iframe => {
       iframe.name = iframeName;
     };
+    window.context.getHTML = getHTML;
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -438,6 +439,20 @@ function triggerResizeRequest(width, height) {
  */
 function triggerRenderStart(opt_data) {
   nonSensitiveDataPostMessage('render-start', opt_data);
+}
+
+/**
+ * @param {String} selector
+ * @param {String[]} attrs
+ * @param {Function} callback
+ */
+function getHTML(selector, attrs, callback) {
+  nonSensitiveDataPostMessage('get-html', {selector, attrs});
+
+  let unlisten = listenParent(window, 'get-html-result', data => {
+    callback(data.content);
+    unlisten();
+  });
 }
 
 /**
