@@ -96,13 +96,16 @@ export class AmpAdXOriginIframeHandler {
           this.element_.creativeId = info.data.id;
         });
     listenFor(this.iframe, 'get-html', (info, source, origin) => {
-        let {selector, attrs} = info;
+      const {selector, attrs} = info;
 
-        let content = getHTML(selector,attrs);
-        if (!this.iframe) {
-            return;
-        }
-        postMessageToWindows(this.iframe, [{win: source, origin}], 'get-html-result', {content}, true);
+      const content = getHTML(selector,attrs);
+      if (!this.iframe) {
+        return;
+      }
+      postMessageToWindows(
+          this.iframe, [{win: source, origin}],
+          'get-html-result', {content}, true
+        );
     }, true, false);
 
     // Install iframe resize API.
