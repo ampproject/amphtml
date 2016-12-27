@@ -16,9 +16,7 @@
 
 import {dev, user} from './log';
 import {getContextMetadata} from './attributes';
-import {documentInfoForDoc} from './document-info';
 import {isExperimentOn} from './experiments';
-import {getLengthNumeral} from '../src/layout';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';

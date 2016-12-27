@@ -27,7 +27,8 @@ import {getMode} from './mode';
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
-export function getContextMetadata(parentWindow, element, sentinel, opt_attributes) {
+export function getContextMetadata(
+    parentWindow, element, sentinel, opt_attributes) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
@@ -48,7 +49,7 @@ export function getContextMetadata(parentWindow, element, sentinel, opt_attribut
       .getUnconfirmedReferrerUrl();
 
   attributes._context = {
-    ampcontextVersion : (getMode().localDev ? 'LOCAL' :
+    ampcontextVersion: (getMode().localDev ? 'LOCAL' :
         '$internalRuntimeVersion$'),
     sourceUrl: docInfo.sourceUrl,
     referrer,

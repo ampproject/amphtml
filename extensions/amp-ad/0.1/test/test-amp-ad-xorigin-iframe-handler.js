@@ -54,7 +54,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     iframe = createIframeWithMessageStub(window);
     sentinel = 'amp3ptest' + testIndex;
     iframe.setAttribute('data-amp-3p-sentinel', sentinel);
-    iframe.name = JSON.stringify({"_context": {"sentinel" : sentinel}});
+    iframe.name = JSON.stringify({'_context': {sentinel}});
   });
 
   afterEach(() => {
@@ -175,7 +175,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should resolve on message "bootstrap-loaded" if render-start is'
         + 'NOT implemented', done => {
 
-          initPromise = iframeHandler.init(iframe, sentinel);
+      initPromise = iframeHandler.init(iframe, sentinel);
       iframe.onload = () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({

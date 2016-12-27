@@ -235,9 +235,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
       let sentinel;
-      try{
+      try {
         sentinel = JSON.parse(iframe.name).attributes._context.sentinel;
-      } catch(err){
+      } catch (err) {
         sentinel = JSON.parse(iframe.src.split('#')[1])._context.sentinel;
       }
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(

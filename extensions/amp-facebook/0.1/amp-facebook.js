@@ -16,7 +16,7 @@
 
 
 import {
-  getIframe, preloadBootstrap, generateSentinel
+  getIframe, preloadBootstrap, generateSentinel,
 } from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -55,9 +55,9 @@ class AmpFacebook extends AMP.BaseElement {
     this.applyFillContent(iframe);
     const sentinel = generateSentinel(window);
     iframe.name = encodeURI(JSON.stringify({
-      "_context" : {
-        "sentinel" : sentinel
-      }
+      '_context': {
+        sentinel,
+      },
     }));
 
     // Triggered by context.updateDimensions() inside the iframe.

@@ -44,7 +44,7 @@ describe('iframe-helper', function() {
       testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
       testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
       testIframe.name = JSON.stringify({
-        "_context": {"sentinel": sentinel}
+        '_context': {sentinel},
       });
     });
   });
@@ -74,8 +74,8 @@ describe('iframe-helper', function() {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
-      unlisten = IframeHelper.listenFor(testIframe, sentinel, 'send-intersections',
-          () => {
+      unlisten = IframeHelper.listenFor(
+          testIframe, sentinel, 'send-intersections', () => {
             calls++;
             resolve();
           });
@@ -95,8 +95,8 @@ describe('iframe-helper', function() {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
-      unlisten = IframeHelper.listenFor(testIframe, sentinel, 'send-intersections',
-          () => {
+      unlisten = IframeHelper.listenFor(
+          testIframe, sentinel, 'send-intersections', () => {
             calls++;
             resolve();
           }, true /* opt_is3P */);
@@ -121,8 +121,8 @@ describe('iframe-helper', function() {
       // usual iframe-intersection.html within a nested iframe.
       testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
       testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
-      unlisten = IframeHelper.listenFor(testIframe, sentinel, 'send-intersections',
-          () => {
+      unlisten = IframeHelper.listenFor(
+          testIframe, sentinel, 'send-intersections', () => {
             calls++;
             resolve();
           }, true  /* opt_is3P */, true /* opt_includingNestedWindows */);

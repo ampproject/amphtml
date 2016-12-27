@@ -36,9 +36,6 @@ import {setStyle} from '../../../src/style';
 const TAG_ = 'amp-iframe';
 
 /** @type {number}  */
-let count = 0;
-
-/** @type {number}  */
 let trackingIframeCount = 0;
 
 /** @type {number}  */
@@ -305,7 +302,6 @@ export class AmpIframe extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.applyFillContent(iframe);
-    //iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
       setStyle(iframe, 'zIndex', -1);
@@ -319,9 +315,9 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.src = this.iframeSrc;
     const sentinel = generateSentinel(window);
     iframe.name = encodeURI(JSON.stringify({
-      "_context" : {
-        "sentinel" : sentinel
-      }
+      '_context': {
+        sentinel,
+      },
     }));
 
     if (!this.isTrackingFrame_) {
@@ -351,7 +347,8 @@ export class AmpIframe extends AMP.BaseElement {
     });
 
     if (this.isClickToPlay_) {
-      listenFor(iframe, sentinel, 'embed-ready', this.activateIframe_.bind(this));
+      listenFor(
+          iframe, sentinel, 'embed-ready', this.activateIframe_.bind(this));
     }
 
     this.container_.appendChild(iframe);
