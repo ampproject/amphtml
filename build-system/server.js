@@ -618,6 +618,18 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
   }).catch(next);
 });
 
+app.get('/dist/rtv/*/v0/amp-ad-0.1.js', function(req,res, next) {
+  console.log(req.path);
+  var filePath = req.path.replace(/\/rtv\/\d{15}/, '');
+  console.log('afterwards', filePath);
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    setTimeout(() => {
+      res.setHeader('Content-Type', 'application/javascript');
+      res.end(file);
+    }, 2000);
+  }).catch(next);
+});
+
 app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
   var filePath = '/test/manual/cache-sw.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
