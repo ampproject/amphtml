@@ -2,8 +2,9 @@
 <body style="background-color: red">
 iframe - Click to play
 <script>
-parent./*OK*/postMessage({
-  sentinel: 'amp',
+  const sentinel = JSON.parse(decodeURI(this.name))._context.sentinel;
+  parent./*OK*/postMessage({
+  sentinel,
   type: 'embed-ready'
 }, '*');
 document.addEventListener("DOMContentLoaded", function(event) {
