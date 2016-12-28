@@ -16,7 +16,7 @@
 
 var path = require('path');
 
-var karmaConf = path.resolve('karma.conf.js');
+var karmaConf = path.resolve('build-system/tasks/karma.conf.js');
 
 var commonTestPaths = [
   'test/_init_tests.js',

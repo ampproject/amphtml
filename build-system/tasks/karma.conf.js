@@ -20,6 +20,7 @@
 module.exports = function(config) {
 
   var configuration = {
+    basePath: '../..',
     frameworks: [
       'fixture',
       'browserify',
