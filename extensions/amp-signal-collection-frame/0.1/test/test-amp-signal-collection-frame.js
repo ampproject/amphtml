@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-import {AmpSignalCollectionFrame} from '../amp-signal-collection-frame';
+import {
+  MESSAGE_INTERVAL_MS,
+  AmpSignalCollectionFrame,
+} from '../amp-signal-collection-frame';
 
 describes.sandboxed('amp-signal-collection-frame', {}, () => {
 
   function createAmpSignalCollectionFrameElement(win, attrs) {
-    const element =
-        win.document.createElement('amp-signal-collection-frame');
+    const ampAdElement = win.document.createElement('amp-ad');
+    win.document.body.appendChild(ampAdElement);
+    const signalCollectionElement = win.document.createElement(
+        'amp-signal-collection-frame');
     for (const attr in attrs) {
-      element.setAttribute(attr, attrs[attr]);
+      signalCollectionElement.setAttribute(attr, attrs[attr]);
     }
-    win.document.body.appendChild(element);
-    element.build();
-    return element;
+    ampAdElement.appendChild(signalCollectionElement);
+    signalCollectionElement.build();
+    return signalCollectionElement;
   }
 
-  describes.fakeWin('fake win', {
+  describes.realWin('real win', {
     amp: {
       extensions: ['amp-signal-collection-frame'],
     },
@@ -39,19 +44,156 @@ describes.sandboxed('amp-signal-collection-frame', {}, () => {
       const element = createAmpSignalCollectionFrameElement(env.win, {
         'type': 'google',
         'data-hash': 'abc123',
-        'data-src-suffix': 'some_file.js'
+        height: 0,
+        width: 0,
       });
       expect(element.querySelector('iframe')).to.not.be.ok;
       return element.layoutCallback().then(() => {
         const frame = element.querySelector('iframe');
         expect(frame).to.be.ok;
         expect(frame.getAttribute('src')).to.equal(
-            '//tpc.googlesyndication.com/sodar/some_file.js#abc123');
+            '//tpc.googlesyndication.com/b4a_runner.html#abc123');
+        expect(frame).to.not.be.visible;
       });
     });
 
-    it('should have priority 2', () => {
-      expect(AmpSignalCollectionFrame.prototype.getPriority()).to.equal(2);
+    it('should have priority 1', () => {
+      expect(AmpSignalCollectionFrame.prototype.getPriority()).to.equal(1);
+    });
+
+    it('should throw if type is missing/invalid', () => {
+      expect(() => {
+        createAmpSignalCollectionFrameElement(env.win, {
+          'type': 'unknown',
+          'data-hash': 'abc123',
+          height: 0,
+          width: 0,
+        }, true);
+      }).to.throw(/invalid type unknown/);
+    });
+
+    it('should throw if hash has XSS', () => {
+      expect(() => {
+        createAmpSignalCollectionFrameElement(env.win, {
+          'type': 'google',
+          'data-hash': 'abcjavascript:alert("foo!")def',
+          height: 0,
+          width: 0,
+        });
+      }).to.throw(/invalid data-hash/);
+    });
+
+    describe('unlayoutCallback', () => {
+
+      it('should remove iframe', () => {
+        const element = createAmpSignalCollectionFrameElement(env.win, {
+          'type': 'google',
+          'data-hash': 'abc123',
+          height: 0,
+          width: 0,
+        });
+        return element.layoutCallback().then(() => {
+          const frame = element.querySelector('iframe');
+          expect(frame).to.be.ok;
+          expect(frame.getAttribute('src')).to.equal(
+              '//tpc.googlesyndication.com/b4a_runner.html#abc123');
+          expect(element.implementation_.unlisteners_.length).to.not.equal(0);
+          expect(element.implementation_.intervalId_).to.not.equal(-1);
+          element.unlayoutCallback();
+          expect(element.children.length).to.equal(0);
+          expect(element.implementation_.unlisteners_.length).to.equal(0);
+          expect(element.implementation_.intervalId_).to.equal(-1);
+        });
+      });
+    });
+
+    describe('broadcast touch events', () => {
+
+      const timeoutPromise = delay => {
+        let resolver;
+        const promise = new Promise(resolve => {
+          resolver = resolve;
+        });
+        env.win.setTimeout(() => {
+          resolver();
+        }, delay);
+        return promise;
+      };
+
+      it('should broadcast events', () => {
+        const postMessageSpy =
+            sandbox.spy(AmpSignalCollectionFrame.prototype, 'sendPostMessage');
+        const element = createAmpSignalCollectionFrameElement(env.win, {
+          'type': 'google',
+          'data-hash': 'abc123',
+          height: 0,
+          width: 0,
+        });
+        return element.layoutCallback().then(() => {
+          const frame = element.querySelector('iframe');
+          expect(frame).to.be.ok;
+          expect(frame.getAttribute('src')).to.equal(
+              '//tpc.googlesyndication.com/b4a_runner.html#abc123');
+          expect(frame).to.not.be.visible;
+          const sendEvent = (name, x, y) => {
+            const ev1 = new Event(name, {bubbles: true});
+            ev1.pageX = x;
+            ev1.pageY = y;
+            env.win.document.documentElement.dispatchEvent(ev1);
+          };
+          sendEvent('click', 10, 20);
+          sendEvent('click', 11, 21);
+          sendEvent('touchstart', 30, 40);
+          sendEvent('touchend', 50, 60);
+          sendEvent('touchend', 51, 61);
+          // Send touch move as an array of touches.
+          const ev1 = new Event('touchmove', {bubbles: true});
+          ev1.touches = [{pageX: 70, pageY: 80}, {pageX: 71, pageY: 81}];
+          env.win.document.documentElement.dispatchEvent(ev1);
+          // Wait for interval timer.
+          expect(postMessageSpy.called).to.be.false;
+          return timeoutPromise(MESSAGE_INTERVAL_MS + 10).then(() => {
+            expect(postMessageSpy.calledOnce).to.be.true;
+            expect(postMessageSpy.args[0][0]).to.equal(frame.contentWindow);
+            let spyData = JSON.parse(postMessageSpy.args[0][1]);
+            let events = spyData['collection-events'];
+            expect(events).to.be.ok;
+            const verifyEvent = (name, coords) => {
+              expect(events[name]).to.be.array;
+              expect(events[name].length).to.equal(coords.length);
+              coords.forEach((coord, idx) => {
+                expect(events[name][idx].x = coord[0]);
+                expect(events[name][idx].y = coord[1]);
+                expect(typeof events[name][idx].timestamp).to.be.number;
+              });
+            };
+            verifyEvent('click', [[10, 20], [11, 21]]);
+            verifyEvent('touchstart', [[30, 40]]);
+            verifyEvent('touchend', [[50, 60], [51, 61]]);
+            const touchmoveEvents = events['touchmove'];
+            expect(touchmoveEvents).to.be.array;
+            expect(touchmoveEvents.length).to.equal(1);
+            expect(touchmoveEvents[0].touches).to.deep.equal(
+                [{x: 70, y: 80}, {x: 71, y: 81}]);
+            expect(typeof touchmoveEvents[0].timestamp).to.be.number;
+            // Verify that post message is not sent again as no new events have
+            // occurred.
+            return timeoutPromise(MESSAGE_INTERVAL_MS + 10).then(() => {
+              expect(postMessageSpy.calledOnce).to.be.true;
+              // send a new event and verify post message sent after interval
+              sendEvent('click', 101, 201);
+              expect(postMessageSpy.calledOnce).to.be.true;
+              return timeoutPromise(MESSAGE_INTERVAL_MS + 10).then(() => {
+                expect(postMessageSpy.calledTwice).to.be.true;
+                expect(postMessageSpy.args[1][0]).to.equal(frame.contentWindow);
+                spyData = JSON.parse(postMessageSpy.args[1][1]);
+                events = spyData['collection-events'];
+                verifyEvent('click', [[101, 201]]);
+              });
+            });
+          });
+        });
+      });
     });
   });
 });

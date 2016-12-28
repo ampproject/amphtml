@@ -25,4 +25,16 @@ export const data = {
 <style amp4ads-boilerplate>body{visibility:hidden}</style>
 <script async src="https://cdn.ampproject.org/v0.js"></script></head>
 <body><p>some text</p></body></html>`,
+  signalCollectionElementDoc: `<html><head>
+<style amp-custom>p { background: green }</style>
+<style amp4ads-boilerplate>body{visibility:hidden}</style></head>
+<body>
+  <p>some text</p>
+  <amp-signal-collection-frame type='fake'>
+    <iframe src='http://iframe.localhost:9876/test/fixtures/served/iframe-signal_element.html'></iframe>
+  </amp-signal-collection-frame>
+  <amp-signal-collection-frame type='google'>
+    <iframe src='http://ads.localhost:9876/test/fixtures/served/iframe-signal_element.html'></iframe>
+  </amp-signal-collection-frame>
+</body></html>`,
 };

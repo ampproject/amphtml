@@ -16,6 +16,6 @@
 
 /** @type {!Object<string,string>} */
 export const CONFIG = {
-  fake: '//ads.localhost:8000/extensions/amp-signal-collection-frame-config/0.1/data/',
-  google: '//tpc.googlesyndication.com/sodar',
+  fake: '//ads.localhost:9876/test/fixtures/served/iframe-signal_element.html',
+  google: '//tpc.googlesyndication.com/b4a_runner.html',
 };

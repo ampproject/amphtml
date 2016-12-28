@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <script>
+      window.addEventListener('message', e => {
+        // Send message back to sender, cannot user source as that is likely
+        // the test window, instead we assume this code is running within iframe
+        // within amp-signal-collection-frame which is running within iframe
+        // containing creative source therefore send to grandparent.
+        window.parent.parent.postMessage(`${e.data}`, '*');
+      });
+    </script>
+  </head>
+</html>

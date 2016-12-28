@@ -46,6 +46,7 @@ import {platformFor} from '../../../../src/platform';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {listen, loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
 
 /**
@@ -1016,43 +1017,80 @@ describe('amp-a4a', () => {
     });
 
     it('should handle click expansion correctly', () => {
+      metaData.minifiedCreative = testFragments.signalCollectionElementDoc;
       return a4a.renderAmpCreative_(metaData).then(() => {
-        const adBody = a4aElement.querySelector('iframe')
-            .contentDocument.querySelector('body');
-        let clickHandlerCalled = 0;
-
-        adBody.onclick = function(e) {
-          expect(e.defaultPrevented).to.be.false;
-          e.preventDefault();  // Make the test not actually navigate.
-          clickHandlerCalled++;
+        expect(a4aElement.querySelector('iframe').srcdoc).to.be.ok;
+        const adDoc = a4aElement.querySelector('iframe').contentDocument;
+        const getSignalFrame = domain => {
+          const frame = adDoc.querySelector(
+              `amp-signal-collection-frame > iframe[src^="http://${domain}"]`);
+          expect(frame).to.be.ok;
+          return frame;
         };
-        adBody.innerHTML = '<a ' +
-            'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
-            '<button id="target"><button></div>';
-        const button = adBody.querySelector('#target');
-        const a = adBody.querySelector('a');
-        const ev1 = new Event('click', {bubbles: true});
-        ev1.pageX = 10;
-        ev1.pageY = 20;
-        button.dispatchEvent(ev1);
-        expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
-        expect(clickHandlerCalled).to.equal(1);
+        // Creates multiple signal element frames with different domains to
+        // simulate post message traffic.
+        const localHostFrame = getSignalFrame('iframe.localhost');
+        const adsHostFrame = getSignalFrame('ads.localhost');
+        // Wait on load for each frame.
+        return Promise.all([
+          loadPromise(localHostFrame), loadPromise(adsHostFrame)]).then(() => {
+            let clickHandlerCalled = 0;
+            adDoc.body.onclick = e => {
+              expect(e.defaultPrevented).to.be.false;
+              e.preventDefault();  // Make the test not actually navigate.
+              clickHandlerCalled++;
+            };
+            const anchor = adDoc.createElement('a');
+            anchor.setAttribute('href',
+                'https://f.co?CLICK_X,CLICK_Y,RANDOM,' +
+                'POSTMESSAGE(iframe.localhost,foo),' +
+                'POSTMESSAGE(iframe.localhost,bar),' +
+                'POSTMESSAGE(ads.localhost,hello)');
+            adDoc.body.appendChild(anchor);
+            const sendClick = () => {
+              const ev1 = new Event('click', {bubbles: true});
+              ev1.pageX = 10;
+              ev1.pageY = 20;
+              anchor.dispatchEvent(ev1);
+            };
+            sendClick();
+            expect(anchor.href).to.equal('https://f.co/?10,20,RANDOM,,,');
+            expect(clickHandlerCalled).to.equal(1);
 
-        const ev2 = new Event('click', {bubbles: true});
-        ev2.pageX = 111;
-        ev2.pageY = 222;
-        a.dispatchEvent(ev2);
-        expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-        expect(clickHandlerCalled).to.equal(2);
-
-        const ev3 = new Event('click', {bubbles: true});
-        ev3.pageX = 666;
-        ev3.pageY = 666;
-        // Click parent of a tag.
-        a.parentElement.dispatchEvent(ev3);
-        // Had no effect, because actual link wasn't clicked.
-        expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-        expect(clickHandlerCalled).to.equal(3);
+            // Send post message to both frames and wait on responses.
+            const awaitMessage = domain => {
+              let resolver;
+              const messageEventPromise = new Promise(resolve => {
+                resolver = resolve;
+              });
+              const unlisten = listen(a4a.win, 'message', evt => {
+                if (evt.origin.indexOf(domain) == 0) {
+                  unlisten();
+                  resolver();
+                }
+              });
+              return messageEventPromise;
+            };
+            const awaitMessagePromise = awaitMessage('http://iframe.localhost');
+            localHostFrame.contentWindow.postMessage(
+                JSON.stringify({foo: 'abc', bar: 123, hello: 'bad'}), '*');
+            return awaitMessagePromise.then(() => {
+              sendClick();
+              expect(anchor.href).to.equal(
+                  'https://f.co/?10,20,RANDOM,abc,123,');
+              expect(clickHandlerCalled).to.equal(2);
+              // Send postMessage to other iframe and verify correct behavior.
+              const awaitMessagePromise = awaitMessage('http://ads.localhost');
+              adsHostFrame.contentWindow.postMessage(
+                  JSON.stringify({foo: 'def', hello: 'world'}), '*');
+              return awaitMessagePromise.then(() => {
+                sendClick();
+                expect(anchor.href).to.equal(
+                    'https://f.co/?10,20,RANDOM,abc,123,world');
+                expect(clickHandlerCalled).to.equal(3);
+              });
+            });
+          });
       });
     });
   });

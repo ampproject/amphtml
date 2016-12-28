@@ -40,6 +40,7 @@ import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/viewer';
+import {parseUrl} from '../../../src/url';
 import {xhrFor} from '../../../src/xhr';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/platform';
@@ -201,6 +202,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.friendlyIframeEmbed_ = null;
+
+    /** @private {!Array<!UnlistenDef>}} */
+    this.unlisteners_ = [];
 
     /** {?AMP.AmpAdUIHandler} */
     this.uiHandler = null;
@@ -692,6 +696,8 @@ export class AmpA4A extends AMP.BaseElement {
         this.xOriginIframeHandler_ = null;
       }
       this.layoutMeasureExecuted_ = false;
+      this.unlisteners_.forEach(unlistener => unlistener);
+      this.unlisteners_ = [];
     });
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
@@ -1135,11 +1141,12 @@ export class AmpA4A extends AMP.BaseElement {
     if (!isExperimentOn(this.win, 'alp-for-a4a')) {
       return;
     }
-    listen(iframeWin.document.documentElement, 'click', event => {
-      handleClick(event, url => {
-        viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
-      });
-    });
+    this.unlisteners_.push(
+      listen(iframeWin.document.documentElement, 'click', event => {
+        handleClick(event, url => {
+          viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
+        });
+      }));
   }
 
   /**
@@ -1153,37 +1160,35 @@ export class AmpA4A extends AMP.BaseElement {
     // overwritten.
     /** @type {Object<string, Object<string, string>>} */
     const messages = {};
-    // Only register message listener if there is an instance of
-    // amp-signal-collection-frame within the creative frame.
-    const ampSignalCollectionFrames =
-        iframeWin.document.querySelectorAll(
-          'amp-signal-collection-frame > iframe');
-    if (ampSignalCollectionFrames.length) {
-      listen(this.win, 'message', evt => {
-        if (!evt || !evt.source || !evt.origin) {
-          return;
-        }
-        // Only allow messages from child iframe whose parent is an
-        // amp-signal-collection-frame element.
-        const ampSignalCollectionFrameSender =
-            ampSignalCollectionFrames.find(frame => {
-              return frame.contentWindow == evt.source;
-            });
-        if (ampSignalCollectionFrameSender) {
-          try {
-            messages[evt.origin.toUpperCase()] = JSON.parse(evt.data);
-          } catch (err) {
-            const type = ampSignalCollectionFrameSender.getAttribute('type');
-            dev().error(TAG,
-                `Invalid ${ampSignalCollectionFrameSender.tagName}:${type} msg`,
-                evt, err);
+    // TODO(keithwrightbos): unlisten in unlayoutCallback?
+    this.unlisteners_.push(listen(this.win, 'message', evt => {
+      if (!evt || !evt.source || !evt.origin) {
+        return;
+      }
+      // Only allow messages from child iframe whose parent is an
+      // amp-signal-collection-frame element.
+      const frames = iframeWin.document
+          .querySelectorAll('amp-signal-collection-frame > iframe');
+      for (let i = 0; i < frames.length; i++) {
+        const frame = frames[i];
+        try {
+          if (frame.contentWindow == evt.source) {
+            const originUrl = parseUrl(evt.origin);
+            messages[originUrl.hostname.toUpperCase()] =
+                /** @type {Object<string,string>} */(JSON.parse(evt.data));
           }
+        } catch (err) {
+          const type = frame.getAttribute('type');
+          dev().error(TAG,
+              `Invalid ${frame.parentElement.tagName}:${type} msg`,
+              evt, err);
         }
-      });
-    }
-    listen(iframeWin.document.documentElement, 'click', evt => {
-      this.maybeExpandUrlParams_(evt, messages);
-    }, /* capture */ true);
+      }
+    }));
+    this.unlisteners_.push(
+      listen(iframeWin.document.documentElement, 'click', evt => {
+        this.maybeExpandUrlParams_(evt, messages);
+      }, /* capture */ true));
   }
 
   /**
@@ -1224,6 +1229,8 @@ export class AmpA4A extends AMP.BaseElement {
     // NOTE: Addition to this whitelist requires additional review.
     const whitelist = {};
     Object.keys(vars).forEach(key => { whitelist[key] = true; });
+    // Note url replacement service calls encodeValue on the value to prevent
+    // XSS.
     const newHref = urlReplacementsForDoc(this.getAmpDoc()).expandSync(
         hrefToExpand, vars, undefined, whitelist);
     if (newHref != hrefToExpand) {
