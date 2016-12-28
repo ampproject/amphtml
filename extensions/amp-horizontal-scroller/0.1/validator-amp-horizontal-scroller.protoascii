@@ -1,0 +1,68 @@
+#
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-horizontal-scroller
+  html_format: AMP  # horizontal scroller not allowed in ads.
+  tag_name: "SCRIPT"
+  spec_name: "amp-horizontal-scroller extension .js script"
+  mandatory_parent: "HEAD"
+  unique_warning: true
+  also_requires_tag_warning: "amp-horizontal-scroller"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-horizontal-scroller"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-horizontal-scroller-(latest|0\\.1).js"
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-horizontal-scroller.html"
+}
+tags: {  # <amp-horizontal-scroller>
+  html_format: AMP  # horizontal scroller not allowed in ads.
+  tag_name: "AMP-HORIZONTAL-SCROLLER"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  disallowed_ancestor: "AMP-CAROUSEL"
+  also_requires_tag: "amp-horizontal-scroller extension .js script"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-horizontal-scroller.html"
+  amp_layout: { # XXX these are probably wrong
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
