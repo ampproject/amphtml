@@ -166,6 +166,8 @@ export class AmpSlideScroll extends BaseSlides {
       this.slidesContainer_.addEventListener(
           'touchend', this.touchEndHandler_.bind(this));
     }
+
+    this.registerAction('moveToSlideIndex', this.showSlide_.bind(this));
   }
 
   /** @override */
