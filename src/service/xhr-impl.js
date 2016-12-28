@@ -110,7 +110,8 @@ export class Xhr {
    * - It verifies "AMP-Access-Control-Allow-Source-Origin" in the response
    * USE WITH CAUTION: setting ampCors to false disables AMP source origin check
    * but allows for caching resources cross pages.
-   * @deprecated requireAmpResponseSourceOrigin is deprecated. It defaults to
+   *
+   * Note: requireAmpResponseSourceOrigin is deprecated. It defaults to
    *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
