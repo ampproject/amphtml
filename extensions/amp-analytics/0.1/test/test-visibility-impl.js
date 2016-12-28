@@ -217,10 +217,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just totalTimeMin condition', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -230,10 +230,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just continuousTimeMin condition', () => {
-    listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {continuousTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -262,10 +262,10 @@ describe('amp-analytics.visibility', () => {
 
   it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
     // This test counts time from when the ad is loaded.
-    listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
 
     clock.tick(1000);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1000);
     expect(callbackStub.callCount).to.equal(1);
