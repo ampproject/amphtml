@@ -251,13 +251,14 @@ export class AmpForm {
           credentials: 'include',
           requireAmpResponseSourceOrigin: true,
         }).then(response => {
-          this.triggerAction_(true, response);
+          this.triggerAction_(/** success */ true, response);
           // TODO(mkhatib, #6032): Update docs to reflect analytics events.
           this.analyticsEvent_('amp-form-submit-success');
           this.setState_(FormState_.SUBMIT_SUCCESS);
           this.renderTemplate_(response || {});
         }).catch(error => {
-          this.triggerAction_(false, error.responseJson);
+          this.triggerAction_(
+              /** success */ false, error ? error.responseJson : null);
           this.analyticsEvent_('amp-form-submit-error');
           this.setState_(FormState_.SUBMIT_ERROR);
           this.renderTemplate_(error.responseJson || {});
