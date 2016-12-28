@@ -516,7 +516,7 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    it('should work for visible=true spec', () => {
+    it('"visible" trigger should work with no duration condition', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
@@ -590,7 +590,7 @@ describe('amp-analytics.visibility', () => {
       });
     });
 
-    it('should work for visible=true with duration condition', () => {
+    it('"visible" trigger should work with duration condition', () => {
       visibility.listenOnceV2({
         selector: '#abc',
         continuousTimeMin: 1000,
@@ -635,6 +635,74 @@ describe('amp-analytics.visibility', () => {
           maxContinuousVisibleTime: '1000',
           totalTime: '1234',
         });
+      });
+    });
+
+    it('"hidden" trigger should work with duration condition', () => {
+      const viewer = viewerForDoc(ampdoc);
+      visibility.listenOnceV2({
+        selector: '#abc',
+        continuousTimeMin: 1000,
+        visiblePercentageMin: 10,
+      }, callbackSpy1, false /* hidden trigger */, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000);
+        fireIntersect(15); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000); // continuous visible
+        expect(callbackSpy1).to.not.be.called;
+
+        // TODO(lannka, 6632): fix the issue and uncomment the following check
+        // clock.tick(100);
+        // fireIntersect(5); // invisible
+        // expect(callbackSpy1).to.not.be.called;
+
+        viewer.setVisibilityState_(VisibilityState.HIDDEN);
+        expect(callbackSpy1).to.be.called;
+
+        expect(callbackSpy1).to.be.calledWith({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '85',
+          firstSeenTime: '100',
+          fistVisibleTime: '200',
+          lastSeenTime: '2300',
+          lastVisibleTime: '2300',
+          loadTimeVisibility: '5',
+          maxVisiblePercentage: '25',
+          minVisiblePercentage: '15',
+          totalVisibleTime: '1100',
+          maxContinuousVisibleTime: '1000',
+          totalTime: '1234',
+        });
+
+        // This line is to remove side effect this test brought to others.
+        // Notice that this test installs everything to global window instead
+        // of an iframe. Some other tests that are not well isolated too get
+        // affected by the change of Viewer visibility here, so we need to
+        // restore.
+        // TODO: refactor this whole test file to enforce good isolation.
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
       });
     });
 
