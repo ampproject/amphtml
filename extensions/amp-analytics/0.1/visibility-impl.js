@@ -640,10 +640,6 @@ export class Visibility {
    * @private
    */
   isInViewport_(visible, min, max) {
-    if (min === undefined && max === undefined) {
-      return true;
-    }
-
     return !!(visible > (min || 0) && visible <= (max || 100));
   }
 
