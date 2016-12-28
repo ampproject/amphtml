@@ -518,6 +518,7 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
 app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
   var filePath = req.path;
   var mode = getPathMode(filePath);
+  exampleMode = mode;
   if (!mode) {
     return next();
   }
@@ -618,15 +619,15 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
   }).catch(next);
 });
 
-app.get('/dist/rtv/*/v0/amp-ad-0.1.js', function(req,res, next) {
-  console.log(req.path);
-  var filePath = req.path.replace(/\/rtv\/\d{15}/, '');
-  console.log('afterwards', filePath);
+app.get(['/dist/rtv/*/v0/amp-ad-0.1.js', '/dist/rtv/*/v0/amp-video-0.1.js'], function(req, res, next) {
+  var filePath = req.path.replace(/\/rtv\/\d{13}/, '');
+  req.path = filePath;
+  if (exampleMode == 'max') {
+    filePath = filePath.replace('-0.1.js', '-0.1.max.js');
+  }
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
-    setTimeout(() => {
-      res.setHeader('Content-Type', 'application/javascript');
-      res.end(file);
-    }, 2000);
+    res.setHeader('Content-Type', 'application/javascript');
+    res.end(file);
   }).catch(next);
 });
 
