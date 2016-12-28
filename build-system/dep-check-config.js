@@ -102,6 +102,8 @@ exports.rules = [
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
+      // Some ads need to depend on json.js
+      'ads/**->src/json.js',
     ],
   },
   {
@@ -139,6 +141,12 @@ exports.rules = [
           'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
           'src/service/url-replacements-impl.js',
+      'extensions/amp-video/0.1/amp-video.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js->' +
+          'src/service/video-manager-impl.js',
     ],
   },
   {

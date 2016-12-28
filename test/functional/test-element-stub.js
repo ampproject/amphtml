@@ -18,6 +18,7 @@ import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
 import {createIframePromise} from '../../testing/iframe';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
+import '../../extensions/amp-video/0.1/amp-video';
 
 describe('test-element-stub', () => {
 
@@ -68,6 +69,18 @@ describe('test-element-stub', () => {
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
           .to.have.length(0);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+          .to.have.length(1);
+    });
+  });
+
+  it('insert script for amp-video when script is not included', () => {
+    return getElementStubIframe('amp-video').then(() => {
+      expect(iframe.doc.querySelectorAll('amp-video')).to.have.length(1);
+      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-video"]'))
+          .to.have.length(0);
+      new ElementStub(iframe.doc.body.querySelector('#parent')
+          .firstChild);
+      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-video"]'))
           .to.have.length(1);
     });
   });

@@ -119,19 +119,18 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, init = {}) {
-    if (init.requireAmpResponseSourceOrigin === true) {
-      dev().error('XHR',
-          'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
-    }
-
-    if (init.requireAmpResponseSourceOrigin === undefined) {
-      init.requireAmpResponseSourceOrigin = true;
-    }
     // Do not append __amp_source_origin if explicitly disabled.
     if (init.ampCors !== false) {
       input = this.getCorsUrl(this.win, input);
     } else {
       init.requireAmpResponseSourceOrigin = false;
+    }
+    if (init.requireAmpResponseSourceOrigin === true) {
+      dev().error('XHR',
+          'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+    }
+    if (init.requireAmpResponseSourceOrigin === undefined) {
+      init.requireAmpResponseSourceOrigin = true;
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
@@ -361,7 +360,7 @@ export function fetchPolyfill(input, opt_init) {
       }
       if (xhr.status < 100 || xhr.status > 599) {
         xhr.onreadystatechange = null;
-        reject(new Error(`Unknown HTTP status ${xhr.status}`));
+        reject(user().createExpectedError(`Unknown HTTP status ${xhr.status}`));
         return;
       }
 
@@ -373,10 +372,10 @@ export function fetchPolyfill(input, opt_init) {
       }
     };
     xhr.onerror = () => {
-      reject(new Error('Network failure'));
+      reject(user().createExpectedError('Network failure'));
     };
     xhr.onabort = () => {
-      reject(new Error('Request aborted'));
+      reject(user().createExpectedError('Request aborted'));
     };
 
     if (init.method == 'POST') {
@@ -402,7 +401,7 @@ function createXhrRequest(method, url) {
     xhr = new XDomainRequest();
     xhr.open(method, url);
   } else {
-    throw new Error('CORS is not supported');
+    throw dev().createExpectedError('CORS is not supported');
   }
   return xhr;
 }
