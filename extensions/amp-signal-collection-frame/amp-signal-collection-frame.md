@@ -37,7 +37,7 @@ limitations under the License.
       <table>
         <tr><th>Name</th><th>Required?</th><th>Description</th></tr>
         <tr><td>type></td><td>Yes</td><td>Signal collector identifier</td></tr>
-        <tr><td>challenge</td><td>No</td><td>For google collection</td></tr>
+        <tr><td>hash</td><td>No</td><td>Included in xdomain frame source allowing for it to be cacheable.</td></tr>
       </table>
     </td>
   </tr>
@@ -48,4 +48,4 @@ limitations under the License.
 
 Requires data-type attribute indicating what known signal collection end point
 is to be executed.  Upon layoutCallback, will create cross domain iframe whose
-source is set to the corresponding type.
+source is set to the corresponding type with optional hash.
