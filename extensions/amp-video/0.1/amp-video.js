@@ -47,11 +47,25 @@ class AmpVideo extends AMP.BaseElement {
      * @override
      */
     preconnectCallback(opt_onLayout) {
-      const videoSrc = this.element.getAttribute('src');
+      const videoSrc = this.getVideoSource_();
       if (videoSrc) {
         assertHttpsUrl(videoSrc, this.element);
         this.preconnect.url(videoSrc, opt_onLayout);
       }
+    }
+
+    /**
+     * @private
+     */
+    getVideoSource_() {
+      let videoSrc = this.element.getAttribute('src');
+      if (!videoSrc) {
+        const srcElements = this.element.getElementsByTagName('source');
+        if (srcElements) {
+          videoSrc = srcElements[0].getAttribute('src');
+        }
+      }
+      return videoSrc;
     }
 
     /** @override */
