@@ -13,12 +13,16 @@
   </iframe>
   <h2>Scroll down to see more ...</h2>
   <div style="height: 100vh"></div>
+  <h2>Inabox nested in friendly iframe </h2>
   <iframe
-      src="//ads.localhost:8000/examples/inabox.amp.max.html"
+      srcdoc="<iframe src='//ads.localhost:8000/examples/inabox.amp.max.html' width='300' height='200' scrolling='no' frameborder=0></iframe>"
       scrolling="no"
+      marginwidth="0"
+      marginheight="0"
       width="300" height="200">
   </iframe>
   <div style="height: 20vh"></div>
+  <h2>A huge doc inabox</h2>
   <iframe
       src="//ads.localhost:8000/examples/inabox-more.amp.max.html"
       scrolling="no"

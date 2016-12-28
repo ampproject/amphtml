@@ -338,7 +338,7 @@ class RealWinFixture {
       env.iframe = iframe;
       iframe.name = 'test_' + iframeCount++;
       iframe.srcdoc = '<!doctype><html><head>' +
-          '<style>.-amp-element {display: block;}</style>' +
+          '<style>.i-amphtml-element {display: block;}</style>' +
           '<body style="margin:0"><div id=parent></div>';
       iframe.onload = function() {
         const win = iframe.contentWindow;
@@ -574,6 +574,6 @@ function createAmpElement(win, opt_name, opt_implementationClass) {
   element.implementationClassForTesting =
       opt_implementationClass || BaseElement;
   element.createdCallback();
-  element.classList.add('-amp-element');
+  element.classList.add('i-amphtml-element');
   return element;
 };

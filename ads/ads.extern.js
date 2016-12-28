@@ -84,6 +84,9 @@ googletag.pubads;
 googletag.defineSlot
 data.slot;
 
+var _googCsa;
+window._googCsa;
+
 var _inmobi;
 window._inmobi;
 _inmobi.getNewAd;

@@ -105,7 +105,7 @@ export class Resource {
     element[OWNER_PROP_] = owner;
 
     // Need to clear owner cache for all child elements
-    const cachedElements = element.getElementsByClassName('-amp-element');
+    const cachedElements = element.getElementsByClassName('i-amphtml-element');
     for (let i = 0; i < cachedElements.length; i++) {
       const ele = cachedElements[i];
       if (Resource.forElementOptional(ele)) {

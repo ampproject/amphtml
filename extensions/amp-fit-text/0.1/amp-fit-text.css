@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+/* TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
+   form is in PROD for 1-2 weeks. */
 .-amp-fit-text-content,
-.-amp-fit-text-content.-amp-fill-content {
+.-amp-fit-text-content.-amp-fill-content,
+.-amp-fit-text-content.i-amphtml-fill-content {
   display: block;
   /* @alternative */ display: flex;
   flex-direction: column;

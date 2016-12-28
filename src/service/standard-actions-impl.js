@@ -89,7 +89,7 @@ export class StandardActions {
   handleHide(invocation) {
     const target = dev().assertElement(invocation.target);
     this.resources_.mutateElement(target, () => {
-      if (target.classList.contains('-amp-element')) {
+      if (target.classList.contains('i-amphtml-element')) {
         target./*OK*/collapse();
       } else {
         toggle(target, false);

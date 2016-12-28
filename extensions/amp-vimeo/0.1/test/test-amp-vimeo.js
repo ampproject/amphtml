@@ -53,7 +53,7 @@ describe('amp-vimeo', () => {
     return getVimeo('234', true).then(vimeo => {
       const iframe = vimeo.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
