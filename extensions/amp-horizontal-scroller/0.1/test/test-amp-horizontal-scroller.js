@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpHorizontalScroller} from '../amp-horizontal-scroller';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
