@@ -24,8 +24,8 @@
 export class Observable {
 
   constructor() {
-    /** @const {!Array<function(TYPE)>} */
-    this.handlers_ = [];
+    /** @const {?Array<function(TYPE)>} */
+    this.handlers_ = null;
   }
 
   /**
@@ -34,6 +34,9 @@ export class Observable {
    * @return {!UnlistenDef}
    */
   add(handler) {
+    if (!this.handlers_) {
+      this.handlers_ = [];
+    }
     this.handlers_.push(handler);
     return () => {
       this.remove(handler);
@@ -55,7 +58,9 @@ export class Observable {
    * Removes all observers.
    */
   removeAll() {
-    this.handlers_.length = 0;
+    if (this.handlers_) {
+      this.handlers_.length = 0;
+    }
   }
 
   /**
