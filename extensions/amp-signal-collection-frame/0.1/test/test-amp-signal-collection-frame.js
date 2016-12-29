@@ -18,6 +18,7 @@ import {
   MESSAGE_INTERVAL_MS,
   AmpSignalCollectionFrame,
 } from '../amp-signal-collection-frame';
+import {Layout} from '../../../../src/layout';
 
 describes.sandboxed('amp-signal-collection-frame', {}, () => {
 
@@ -48,17 +49,29 @@ describes.sandboxed('amp-signal-collection-frame', {}, () => {
         width: 0,
       });
       expect(element.querySelector('iframe')).to.not.be.ok;
+      expect(element.getAttribute('aria-hidden')).to.equal('true');
       return element.layoutCallback().then(() => {
         const frame = element.querySelector('iframe');
         expect(frame).to.be.ok;
         expect(frame.getAttribute('src')).to.equal(
             '//tpc.googlesyndication.com/b4a_runner.html#abc123');
         expect(frame).to.not.be.visible;
+        expect(frame.style.position).to.equal('fixed');
+        expect(frame.style.top).to.equal('0px');
+        expect(frame.getAttribute('height')).to.equal('0');
+        expect(frame.getAttribute('width')).to.equal('0');
       });
     });
 
     it('should have priority 1', () => {
       expect(AmpSignalCollectionFrame.prototype.getPriority()).to.equal(1);
+    });
+
+    it('isLayoutSupported should return true iff Layout.FIXED', () => {
+      for (const layout in Layout) {
+        expect(AmpSignalCollectionFrame.prototype.isLayoutSupported(layout))
+            .to.equals(layout == Layout.FIXED);
+      }
     });
 
     it('should throw if type is missing/invalid', () => {

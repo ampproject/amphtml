@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-signal-collection-frame-0.1.css';
 import {CONFIG} from './_amp-signal-collection-frame-config';
 import {
   createElementWithAttributes,
   removeChildren,
 } from '../../../src/dom';
+import {Layout} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {isValidAttr} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
@@ -66,12 +66,19 @@ export class AmpSignalCollectionFrame extends AMP.BaseElement {
         `${TAG}:${type} invalid ${hashAttributeName}`);
 
     this.src_ = src + (hash ? `#${hash}` : '');
+    // Consider the element invisible.
+    this.element.setAttribute('aria-hidden', 'true');
   }
 
   /** @override */
   getPriority() {
     // Set priority of 1 to ensure it executes after AMP creative content.
     return 1;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.FIXED;
   }
 
   /** @override */
@@ -84,6 +91,8 @@ export class AmpSignalCollectionFrame extends AMP.BaseElement {
          'height': 0,
          'width': 0,
          'src': this.src_,
+         'style': 'position:fixed !important;top:0 !important;' +
+            'visibility:hidden',
        });
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -136,5 +145,5 @@ export class AmpSignalCollectionFrame extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerElement(TAG, AmpSignalCollectionFrame, CSS);
+  AMP.registerElement(TAG, AmpSignalCollectionFrame);
 });
