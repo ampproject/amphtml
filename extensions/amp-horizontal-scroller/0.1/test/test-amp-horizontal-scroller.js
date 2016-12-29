@@ -17,6 +17,7 @@
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
+import '../amp-horizontal-scroller';
 
 adopt(window);
 
@@ -40,15 +41,14 @@ describe('amp-horizontal-scroller', () => {
   function getAmpHorizontalScroller(children) {
     ampHS = iframe.doc.createElement('amp-horizontal-scroller');
     (children || []).forEach(child => {
-      const adopted = iframe.doc.adoptNode(child);
-      ampHS.appendChild(adopted);
+      ampHS.appendChild(child);
     });
     return ampHS;
   }
 
   function attachAndRun(children) {
-    const ampAudio = getAmpHorizontalScroller(children);
-    return iframe.addElement(ampAudio);
+    const ampHS = getAmpHorizontalScroller(children);
+    return iframe.addElement(ampHS);
   }
 
   it('should wrap its content', () => {
