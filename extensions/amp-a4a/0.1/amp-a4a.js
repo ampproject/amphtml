@@ -406,7 +406,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
-          this.protectedEmitLifecycleEvent_('urlBuilt', {adUrl});
+          this.protectedEmitLifecycleEvent_('urlBuilt');
           return adUrl && this.sendXhrRequest_(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
@@ -650,7 +650,7 @@ export class AmpA4A extends AMP.BaseElement {
           ((this.win.performance && this.win.performance.now()) || Date.now()) -
           layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('adPromiseChainDelay', {
-        adPromiseChainDelay: delta,
+        adPromiseChainDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
       if (creativeMetaData) {
@@ -956,7 +956,7 @@ export class AmpA4A extends AMP.BaseElement {
           getTimingDataAsync(friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
                 this.emitLifecycleEvent('renderFriendlyEnd', {
-                  navStartToLoadEndDelta: delta,
+                  'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
                 });
               }).catch(err => {
                 dev().error(TAG, this.element.getAttribute('type'),

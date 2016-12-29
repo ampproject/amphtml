@@ -18,6 +18,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
     getLifecycleReporter,
     setGoogleLifecycleVarsFromHeaders,
+    googleLifecycleReporterFactory,
 } from '../google-data-reporter';
 import {
     GoogleAdLifecycleReporter,
@@ -154,22 +155,77 @@ describe('#getLifecycleReporter', () => {
       env.win.document.body.appendChild(fakeElt);
       mockReporter = new GoogleAdLifecycleReporter(
           env.win, fakeElt, 'test', 69, 37);
+      mockReporter.setPingAddress('http://localhost:9876/');
     });
 
     it('should pick up qqid from headers', () => {
-      headerData[QQID_HEADER] = 'test qqid';
+      headerData[QQID_HEADER] = 'test_qqid';
       expect(mockReporter.extraVariables_).to.be.empty;
       setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
-      expect(mockReporter.extraVariables_).to.have.property(
-          'qqid.37', 'test qqid');
+      mockReporter.sendPing('preAdThrottle');
+      const pingElements = env.win.document.querySelectorAll('img');
+      expect(pingElements.length).to.equal(1);
+      const pingUrl = pingElements[0].getAttribute('src');
+      expect(pingUrl).to.be.ok;
+      expect(pingUrl).to.match(/[&?]qqid.37=test_qqid/);
     });
 
     it('should pick up rendering method from headers', () => {
       headerData['X-AmpAdRender'] = 'fnord';
       expect(mockReporter.extraVariables_).to.be.empty;
       setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
-      expect(mockReporter.extraVariables_).to.have.property(
-          'rm.37', 'fnord');
+      mockReporter.sendPing('preAdThrottle');
+      const pingElements = env.win.document.querySelectorAll('img');
+      expect(pingElements.length).to.equal(1);
+      const pingUrl = pingElements[0].getAttribute('src');
+      expect(pingUrl).to.be.ok;
+      expect(pingUrl).to.match(/[&?]rm.37=fnord/);
+    });
+  });
+
+  describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
+    describes.fakeWin('default parameters', {amp: true}, env => {
+      let mockReporter;
+      beforeEach(() => {
+        const fakeElt = env.win.document.createElement('div');
+        fakeElt.setAttribute('data-amp-slot-index', '22');
+        fakeElt.setAttribute('type', 'doubleclick');
+        fakeElt.setAttribute(EXPERIMENT_ATTRIBUTE,
+            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment);
+        env.win.document.body.appendChild(fakeElt);
+        env.win.ampAdPageCorrelator = 7777777;
+        const a4aContainer = {
+          element: fakeElt,
+          win: env.win,
+        };
+        mockReporter = googleLifecycleReporterFactory(a4aContainer);
+        expect(mockReporter).to.be.instanceOf(GoogleAdLifecycleReporter);
+        mockReporter.setPingAddress('http://localhost:9876/');
+      });
+
+      it('should generate a ping with known parameters', () => {
+        mockReporter.sendPing('renderFriendlyStart');
+        const pingElements = env.win.document.querySelectorAll('img');
+        expect(pingElements.length).to.equal(1);
+        const pingUrl = pingElements[0].getAttribute('src');
+        expect(pingUrl).to.be.ok;
+        const expectedParams = [
+          's=a4a',
+          'c=7777777',
+          'slotId=22',
+          `rls=${encodeURIComponent('$internalRuntimeVersion$')}`,
+          'v_h=[0-9]+',
+          's_t=',  // SROLL_TOP not defined in test environment.
+          'stageName=renderFriendlyStart',
+          'stageIdx=6',
+          'met.a4a.22=renderFriendlyStart.[0-9]+',
+          `e.22=${DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment}`,
+          'adt.22=doubleclick',
+        ];
+        expectedParams.forEach(p => {
+          expect(pingUrl, p).to.match(new RegExp(`[?&]${p}(&|$)`));
+        });
+      });
     });
   });
 });

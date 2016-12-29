@@ -120,14 +120,21 @@ export function googleLifecycleReporterFactory(a4aElement) {
       /** @type {!./performance.GoogleAdLifecycleReporter} */
       (getLifecycleReporter(a4aElement, 'a4a',
           a4aElement.element.getAttribute('data-amp-slot-index')));
-  const slotId = reporter.getSlotId();
   reporter.setPingParameters({
+    's': 'AD_SLOT_NAMESPACE',
+    'v': '2',
+    'c': 'AD_PAGE_CORRELATOR',
+    'rls': 'AMP_VERSION',
     'v_h': 'VIEWPORT_HEIGHT',
     's_t': 'SCROLL_TOP',
-    'e': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
+    'slotId': 'AD_SLOT_ID',
+    'stageName': 'AD_SLOT_EVENT_NAME',
+    'stageIdx': 'AD_SLOT_EVENT_ID',
+    'met.AD_SLOT_NAMESPACE.AD_SLOT_ID':
+        'AD_SLOT_EVENT_NAME.AD_SLOT_TIME_TO_EVENT',
+    'e.AD_SLOT_ID': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
+    'adt.AD_SLOT_ID': a4aElement.element.getAttribute('type'),
   });
-  reporter.setPingParameter(
-      `adt.${slotId}`, a4aElement.element.getAttribute('type'));
   return reporter;
 }
 
@@ -145,8 +152,8 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   // affects Google ads.  However, we can't directly reference a variable
   // in extensions/ from here.
   const renderingMethodHeader = 'X-AmpAdRender';
-  const renderingMethodKey = `rm.${reporter.getSlotId()}`;
-  const qqidKey = `qqid.${reporter.getSlotId()}`;
+  const renderingMethodKey = 'rm.AD_SLOT_ID';
+  const qqidKey = 'qqid.AD_SLOT_ID';
   const pingParameters = new Object(null);
   pingParameters[qqidKey] = headers.get(QQID_HEADER);
   pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);

@@ -49,17 +49,6 @@ export class BaseLifecycleReporter {
   }
 
   /**
-   * Get an ID for this ad slot that should be unique within the page.  The
-   * default implementation returns the constant -1; subclasses should implement
-   * in meaningful ways.
-   *
-   * @return {number}
-   */
-  getSlotId() {
-    return -1;
-  }
-
-  /**
    * A beacon function that will be called at various stages of the lifecycle.
    *
    * To be overriden by network specific implementations.
@@ -169,21 +158,19 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   }
 
   /**
+   * The special variable SLOT_ID will be substituted into either parameter
+   * names or values with the ID of the ad slot on the page.
+   *
    * @param {string} name  Stage name to ping out.  Should be one of the ones
    * from `LIFECYCLE_STAGES`.  If it's an unknown name, it will still be pinged,
    * but the stage ID will be set to `9999`.
    * @override
    */
   sendPing(name) {
-    this.emitPing_(this.buildPingAddress_(name, this.extraVariables_));
-  }
-
-  /**
-   * @return {number}
-   * @override
-   */
-  getSlotId() {
-    return this.slotId_;
+    const url = this.buildPingAddress_(name, this.extraVariables_);
+    if (url) {
+      this.emitPing_(url);
+    }
   }
 
   /**
@@ -194,7 +181,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   buildPingAddress_(name, opt_extraParams) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
-    const delta = this.getDeltaTime_();
+    const delta = Math.round(this.getDeltaTime_());
     let extraParams = '';
     if (opt_extraParams) {
       extraParams = serializeQueryString(opt_extraParams);
@@ -212,20 +199,18 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         // expand async-only parameters.  E.g., we'd like to have scroll_y
         // offset, but it's not currently available through url-replacement.
         // If it becomes available, it's likely to be an async parameter.
-        extraParams = '&' +
-            this.urlReplacer_./*OK*/expandStringSync(extraParams);
+        extraParams = this.urlReplacer_./*OK*/expandStringSync(extraParams, {
+          AD_SLOT_NAMESPACE: this.namespace_,
+          AD_SLOT_ID: this.slotId_,
+          AD_SLOT_TIME_TO_EVENT: delta,
+          AD_SLOT_EVENT_NAME: name,
+          AD_SLOT_EVENT_ID: stageId,
+          AD_PAGE_CORRELATOR: this.correlator_,
+        });
       }
     }
-    const pingUrl = `${this.pingbackAddress_}?` +
-        `s=${this.namespace_}` +
-        `&v=2&it=${name}.${delta},${name}_${this.slotId_}.${delta}` +
-        `&rt=stage.${stageId},slotId.${this.slotId_}` +
-        `&c=${this.correlator_}` +
-        '&rls=$internalRuntimeVersion$' +
-        `&it.${this.slotName_}=${name}.${delta}` +
-        `&rt.${this.slotName_}=stage.${stageId}` +
-        `&met.${this.slotName_}=stage_${stageId}.${delta}` +
-        extraParams;
+    const pingUrl = extraParams ?
+        `${this.pingbackAddress_}?${extraParams}` : '';
     return pingUrl;
   }
 
