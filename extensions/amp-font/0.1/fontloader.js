@@ -205,6 +205,7 @@ export class FontLoader {
       this.defaultFontElements_.push(defaultFontElement);
       defaultFontElement.textContent = TEST_STRING_;
       style.setStyles(defaultFontElement, {
+        float: 'left',
         fontFamily: font,
         margin: 0,
         padding: 0,
@@ -217,6 +218,7 @@ export class FontLoader {
     const customFontElement = this.customFontElement_ =
         this.document_.createElement('div');
     style.setStyles(customFontElement, {
+      float: 'left',
       fontFamily: this.fontConfig_.family + ',' + DEFAULT_FONTS_.join(),
       margin: 0,
       padding: 0,
