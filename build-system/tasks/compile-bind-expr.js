@@ -28,7 +28,7 @@ gulp.task('compile-bind-expr', function() {
 
   var license = fs.readFileSync(
       'build-system/tasks/js-license.txt', 'utf8');
-  var imports = 'import {ASTType} from \'./bind-expr-defines\';';
+  var imports = 'import {ASTNodeType} from \'./bind-expr-defines\';';
   var suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   var jsExports = 'exports.parser = parser;';

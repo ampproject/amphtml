@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ASTType} from './bind-expr-defines';
+import {ASTNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
 import {user} from '../../../src/log';
 
@@ -67,18 +67,18 @@ export class BindExpression {
 
     const {type, args, value} = node;
 
-    if (type === ASTType.LITERAL) {
-      return user().assert(value !== undefined);
+    if (type === ASTNodeType.LITERAL) {
+      return value;
     }
 
     // Concise helper function for evaluating child nodes.
     const e = node => this.eval_(node, scope);
 
     switch (type) {
-      case ASTType.EXPRESSION:
+      case ASTNodeType.EXPRESSION:
         return e(args[0]);
 
-      case ASTType.INVOCATION:
+      case ASTNodeType.INVOCATION:
         const caller = e(args[0]);
         const method = args[1];
         const params = e(args[2]);
@@ -96,7 +96,7 @@ export class BindExpression {
         }
         throw new Error(`${method}() is not a supported function.`);
 
-      case ASTType.MEMBER_ACCESS:
+      case ASTNodeType.MEMBER_ACCESS:
         const target = e(args[0]);
         const member = e(args[1]);
         if (target === null || member === null) {
@@ -109,27 +109,27 @@ export class BindExpression {
         }
         return null;
 
-      case ASTType.MEMBER:
+      case ASTNodeType.MEMBER:
         return value || e(args[0]);
 
-      case ASTType.VARIABLE:
+      case ASTNodeType.VARIABLE:
         const variable = value;
         if (Object.prototype.hasOwnProperty.call(scope, variable)) {
           return scope[variable];
         }
         return null;
 
-      case ASTType.ARGS:
-      case ASTType.ARRAY_LITERAL:
+      case ASTNodeType.ARGS:
+      case ASTNodeType.ARRAY_LITERAL:
         return (args.length > 0) ? e(args[0]) : [];
 
-      case ASTType.ARRAY:
+      case ASTNodeType.ARRAY:
         return args.map(element => e(element));
 
-      case ASTType.OBJECT_LITERAL:
+      case ASTNodeType.OBJECT_LITERAL:
         return (args.length > 0) ? e(args[0]) : Object.create(null);
 
-      case ASTType.OBJECT:
+      case ASTNodeType.OBJECT:
         const object = Object.create(null);
         args.forEach(keyValue => {
           const {k, v} = e(keyValue);
@@ -137,59 +137,59 @@ export class BindExpression {
         });
         return object;
 
-      case ASTType.KEY_VALUE:
-        return {key: e(args[0]), value: e(args[1])};
+      case ASTNodeType.KEY_VALUE:
+        return {k: e(args[0]), v: e(args[1])};
 
-      case ASTType.NOT:
+      case ASTNodeType.NOT:
         return !e(args[0]);
 
-      case ASTType.UNARY_MINUS:
+      case ASTNodeType.UNARY_MINUS:
         return -e(args[0]);
 
-      case ASTType.UNARY_PLUS:
+      case ASTNodeType.UNARY_PLUS:
         /*eslint no-implicit-coercion: 0*/
         return +e(args[0]);
 
-      case ASTType.PLUS:
+      case ASTNodeType.PLUS:
         return e(args[0]) + e(args[1]);
 
-      case ASTType.MINUS:
+      case ASTNodeType.MINUS:
         return e(args[0]) - e(args[1]);
 
-      case ASTType.MULTIPLY:
+      case ASTNodeType.MULTIPLY:
         return e(args[0]) * e(args[1]);
 
-      case ASTType.DIVIDE:
+      case ASTNodeType.DIVIDE:
         return e(args[0]) / e(args[1]);
 
-      case ASTType.MODULO:
+      case ASTNodeType.MODULO:
         return e(args[0]) % e(args[1]);
 
-      case ASTType.LOGICAL_AND:
+      case ASTNodeType.LOGICAL_AND:
         return e(args[0]) && e(args[1]);
 
-      case ASTType.LOGICAL_OR:
+      case ASTNodeType.LOGICAL_OR:
         return e(args[0]) || e(args[1]);
 
-      case ASTType.LESS_OR_EQUAL:
+      case ASTNodeType.LESS_OR_EQUAL:
         return e(args[0]) <= e(args[1]);
 
-      case ASTType.LESS:
+      case ASTNodeType.LESS:
         return e(args[0]) < e(args[1]);
 
-      case ASTType.GREATER_OR_EQUAL:
+      case ASTNodeType.GREATER_OR_EQUAL:
         return e(args[0]) >= e(args[1]);
 
-      case ASTType.GREATER:
+      case ASTNodeType.GREATER:
         return e(args[0]) > e(args[1]);
 
-      case ASTType.NOT_EQUAL:
+      case ASTNodeType.NOT_EQUAL:
         return e(args[0]) != e(args[1]);
 
-      case ASTType.EQUAL:
+      case ASTNodeType.EQUAL:
         return e(args[0]) == e(args[1]);
 
-      case ASTType.TERNARY:
+      case ASTNodeType.TERNARY:
         return e(args[0]) ? e(args[1]) : e(args[2]);
 
       default:

@@ -15,7 +15,7 @@
  */
 
 
-import {ASTType} from './bind-expr-defines';
+import {ASTNodeType} from './bind-expr-defines';
 
 /** @fileoverview @suppress {checkTypes, suspiciousCode, uselessCode} */
 
@@ -118,147 +118,147 @@ this.$ = $$[$0-1];
 break;
 case 9:
 
-        this.$ = {type: ASTType.NOT, args: [$$[$0]]};
+        this.$ = {type: ASTNodeType.NOT, args: [$$[$0]]};
       
 break;
 case 10:
 
-        this.$ = {type: ASTType.UNARY_MINUS, args: [$$[$0]]};
+        this.$ = {type: ASTNodeType.UNARY_MINUS, args: [$$[$0]]};
       
 break;
 case 11:
 
-        this.$ = {type: ASTType.UNARY_PLUS, args: [$$[$0]]};
+        this.$ = {type: ASTNodeType.UNARY_PLUS, args: [$$[$0]]};
       
 break;
 case 12:
 
-        this.$ = {type: ASTType.PLUS, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.PLUS, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 13:
 
-        this.$ = {type: ASTType.MINUS, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.MINUS, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 14:
 
-        this.$ = {type: ASTType.MULTIPLY, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.MULTIPLY, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 15:
 
-        this.$ = {type: ASTType.DIVIDE, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.DIVIDE, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 16:
 
-        this.$ = {type: ASTType.MODULO, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.MODULO, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 17:
 
-        this.$ = {type: ASTType.LOGICAL_AND, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.LOGICAL_AND, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 18:
 
-        this.$ = {type: ASTType.LOGICAL_OR, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.LOGICAL_OR, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 19:
 
-        this.$ = {type: ASTType.LESS_OR_EQUAL, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.LESS_OR_EQUAL, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 20:
 
-        this.$ = {type: ASTType.LESS, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.LESS, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 21:
 
-        this.$ = {type: ASTType.GREATER_OR_EQUAL, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.GREATER_OR_EQUAL, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 22:
 
-        this.$ = {type: ASTType.GREATER, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.GREATER, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 23:
 
-        this.$ = {type: ASTType.NOT_EQUAL, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.NOT_EQUAL, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 24:
 
-        this.$ = {type: ASTType.EQUAL, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.EQUAL, args: [$$[$0-2], $$[$0]]};
       
 break;
 case 25:
 
-        this.$ = {type: ASTType.TERNARY, args: [$$[$0-4], $$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.TERNARY, args: [$$[$0-4], $$[$0-2], $$[$0]]};
       
 break;
 case 26:
 
-        this.$ = {type: ASTType.INVOCATION, args: [$$[$0-3], $$[$0-1], $$[$0]]};
+        this.$ = {type: ASTNodeType.INVOCATION, args: [$$[$0-3], $$[$0-1], $$[$0]]};
       
 break;
 case 27:
 
-        this.$ = {type: ASTType.ARGS, args: []};
+        this.$ = {type: ASTNodeType.ARGS, args: []};
       
 break;
 case 28:
 
-        this.$ = {type: ASTType.ARGS, args: [$$[$0-1]]};
+        this.$ = {type: ASTNodeType.ARGS, args: [$$[$0-1]]};
       
 break;
 case 29:
 
-        this.$ = {type: ASTType.MEMBER_ACCESS, args: [$$[$0-1], $$[$0]]};
+        this.$ = {type: ASTNodeType.MEMBER_ACCESS, args: [$$[$0-1], $$[$0]]};
       
 break;
 case 30:
 
-        this.$ = {type: ASTType.MEMBER, value: $$[$0]};
+        this.$ = {type: ASTNodeType.MEMBER, value: $$[$0]};
       
 break;
 case 31:
 
-        this.$ = {type: ASTType.MEMBER, args: [$$[$0-1]]};
+        this.$ = {type: ASTNodeType.MEMBER, args: [$$[$0-1]]};
       
 break;
 case 32:
 
-        this.$ = {type: ASTType.VARIABLE, value: $$[$0]};
+        this.$ = {type: ASTNodeType.VARIABLE, value: $$[$0]};
       
 break;
 case 33:
 
-        this.$ = {type: ASTType.LITERAL, value: yytext.substr(1, yyleng - 2)};
+        this.$ = {type: ASTNodeType.LITERAL, value: yytext.substr(1, yyleng - 2)};
       
 break;
 case 34:
 
-        this.$ = {type: ASTType.LITERAL, value: Number(yytext)};
+        this.$ = {type: ASTNodeType.LITERAL, value: Number(yytext)};
       
 break;
 case 35:
 
-        this.$ = {type: ASTType.LITERAL, value: true};
+        this.$ = {type: ASTNodeType.LITERAL, value: true};
       
 break;
 case 36:
 
-        this.$ = {type: ASTType.LITERAL, value: false};
+        this.$ = {type: ASTNodeType.LITERAL, value: false};
       
 break;
 case 37:
 
-        this.$ = {type: ASTType.LITERAL, value: null};
+        this.$ = {type: ASTNodeType.LITERAL, value: null};
       
 break;
 case 38: case 39:
@@ -268,17 +268,17 @@ case 38: case 39:
 break;
 case 40:
 
-        this.$ = {type: ASTType.ARRAY_LITERAL, args: []};
+        this.$ = {type: ASTNodeType.ARRAY_LITERAL, args: []};
       
 break;
 case 41:
 
-        this.$ = {type: ASTType.ARRAY_LITERAL, args: [$$[$0-1]]};
+        this.$ = {type: ASTNodeType.ARRAY_LITERAL, args: [$$[$0-1]]};
       
 break;
 case 42:
 
-        this.$ = {type: ASTType.ARRAY, args: [$$[$0]]};
+        this.$ = {type: ASTNodeType.ARRAY, args: [$$[$0]]};
       
 break;
 case 43: case 47:
@@ -289,22 +289,22 @@ case 43: case 47:
 break;
 case 44:
 
-        this.$ = {type: ASTType.OBJECT_LITERAL, args: []};
+        this.$ = {type: ASTNodeType.OBJECT_LITERAL, args: []};
       
 break;
 case 45:
 
-        this.$ = {type: ASTType.OBJECT_LITERAL, args: [$$[$0-1]]};
+        this.$ = {type: ASTNodeType.OBJECT_LITERAL, args: [$$[$0-1]]};
       
 break;
 case 46:
 
-        this.$ = {type: ASTType.OBJECT, args: [$$[$0]]};
+        this.$ = {type: ASTNodeType.OBJECT, args: [$$[$0]]};
       
 break;
 case 48:
 
-        this.$ = {type: ASTType.KEY_VALUE, args: [$$[$0-2], $$[$0]]};
+        this.$ = {type: ASTNodeType.KEY_VALUE, args: [$$[$0-2], $$[$0]]};
       
 break;
 }
