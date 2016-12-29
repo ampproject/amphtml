@@ -16,6 +16,9 @@
 
 import {ASTNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
+import {user} from '../../../src/log';
+
+const TAG = 'AMP-BIND';
 
 /**
  * A single Bind expression.
@@ -28,8 +31,14 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @const {?./bind-expr-defines.ASTNode} */
-    this.ast_ = parser.parse(this.expressionString);
+    /** {?./bind-expr-defines.ASTNode} */
+    this.ast_ = null;
+    try {
+      // Throws errors on malformed expressions.
+      this.ast_ = parser.parse(this.expressionString);
+    } catch (error) {
+      user().error(TAG, `${this.expressionString} is malformed: ${error}`);
+    }
 
     /** @const {!Object<string, !Object<string, Function>>} */
     this.functionWhitelist_ = this.createFunctionWhitelist_();
@@ -38,6 +47,7 @@ export class BindExpression {
   /**
    * Evaluates the expression given a scope.
    * @param {!Object} scope
+   * @throws {Error} On illegal function invocation.
    * @return {*}
    */
   evaluate(scope) {
@@ -45,9 +55,10 @@ export class BindExpression {
   }
 
   /**
-   * Recursively evaluates value of `node` and its children.
+   * Recursively evaluates and returns value of `node` and its children.
    * @param {?./bind-expr-defines.ASTNode} node
    * @param {!Object} scope
+   * @throws {Error}
    * @return {*}
    * @private
    */

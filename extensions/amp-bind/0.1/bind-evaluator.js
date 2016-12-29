@@ -50,7 +50,7 @@ export class BindEvaluator {
           try {
             cache[string] = expression.evaluate(scope);
           } catch (error) {
-            user().error(TAG, error.message);
+            user().error(TAG, error);
           }
         }
       });
