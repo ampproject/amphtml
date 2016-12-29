@@ -558,25 +558,34 @@ export class AmpA4A extends AMP.BaseElement {
     // So long as any one of these signing services can verify the
     // signature, then the creative is valid AMP.
     const keyInfoSetPromises = this.win.ampA4aValidationKeys;
+    // Track if verification found as it will ensure that promises yet to
+    // resolve will "cancel" as soon as possible saving unnecessary resource
+    // allocation.
+    let verificationFound = false;
+    const alreadyVerified = () => {
+      return verificationFound ?
+          Promise.reject('verification already found') : null;
+    };
     return some(keyInfoSetPromises.map(keyInfoSetPromise => {
       // Resolve Promise into Array of Promises of signing keys.
       return keyInfoSetPromise.then(keyInfoSet => {
         // As long as any one individual key of a particular signing
         // service, keyInfoPromise, can verify the signature, then the
         // creative is valid AMP.
-        return some(keyInfoSet.map(keyInfoPromise => {
+        return !alreadyVerified() && some(keyInfoSet.map(keyInfoPromise => {
           // Resolve Promise into signing key.
           return keyInfoPromise.then(keyInfo => {
             if (!keyInfo) {
               return Promise.reject('Promise resolved to null key.');
             }
             // If the key exists, try verifying with it.
-            return verifySignature(
+            return !alreadyVerified() && verifySignature(
                 new Uint8Array(creative),
                 signature,
                 keyInfo)
                 .then(isValid => {
                   if (isValid) {
+                    verificationFound = true;
                     return creative;
                   }
                   // Only report if signature is expected to match, given that
@@ -586,7 +595,10 @@ export class AmpA4A extends AMP.BaseElement {
                         'Key failed to validate creative\'s signature',
                         keyInfo.serviceName, keyInfo.cryptoKey);
                   }
-                  return null;
+                  // Reject to ensure the some operation waits for other
+                  // possible providers to properly verify and resolve.
+                  return Promise.reject(
+                      `${keyInfo.serviceName} failed to verify`);
                 },
                 err => {
                   user().error(
