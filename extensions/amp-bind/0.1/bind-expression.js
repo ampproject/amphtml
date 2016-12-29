@@ -16,9 +16,6 @@
 
 import {ASTNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
-import {user} from '../../../src/log';
-
-const TAG = 'AMP-BIND';
 
 /**
  * A single Bind expression.
@@ -44,13 +41,7 @@ export class BindExpression {
    * @return {*}
    */
   evaluate(scope) {
-    let result = null;
-    try {
-      result = this.eval_(this.ast_, scope);
-    } catch (error) {
-      user().error(TAG, error.message);
-    }
-    return result;
+    return this.eval_(this.ast_, scope);
   }
 
   /**
@@ -82,6 +73,7 @@ export class BindExpression {
         const caller = e(args[0]);
         const method = args[1];
         const params = e(args[2]);
+
         const callerType = Object.prototype.toString.call(caller);
         const whitelist = this.functionWhitelist_[callerType];
         if (whitelist) {
