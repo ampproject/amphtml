@@ -34,9 +34,15 @@ var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
-var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
+var argv = minimist(process.argv.slice(2), {
+  boolean: ['strictBabelTransform', 'verbose'],
+  default: {
+    verbose: true,
+  },
+});
 
 var cssOnly = argv['css-only'];
+var verbose = argv['verbose'];
 
 require('./build-system/tasks');
 
@@ -349,7 +355,9 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return;
     }
   }
-  $$.util.log('Bundling ' + name);
+  if (verbose) {
+    $$.util.log('Bundling ' + name);
+  }
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -587,7 +595,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
     function minify() {
-      console.log('Minifying ' + srcFilename);
+      if (verbose) {
+        $$.util.log('Minifying ' + srcFilename);
+      }
       closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
           options)
           .then(function() {
@@ -640,7 +650,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(lazywrite())
       .on('end', function() {
         appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
-        $$.util.log('Compiled ' + srcFilename);
+        if (verbose) {
+          $$.util.log('Compiled ' + srcFilename);
+        }
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
           $$.util.log($$.util.colors.green('All current JS updates done.'));

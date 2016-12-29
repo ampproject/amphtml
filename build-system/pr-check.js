@@ -147,9 +147,9 @@ const command = {
   },
   buildRuntime: function() {
     execOrDie(`${gulp} lint`);
-    execOrDie(`${gulp} build`);
+    execOrDie(`${gulp} build --verbose=false`);
     execOrDie(`${gulp} check-types`);
-    execOrDie(`${gulp} dist --fortesting`);
+    execOrDie(`${gulp} dist --fortesting --verbose=false`);
   },
   testRuntime: function() {
     // dep-check needs to occur after build since we rely on build to generate
