@@ -23,21 +23,7 @@ var path = require('path');
 var util = require('gulp-util');
 var webserver = require('gulp-webserver');
 var app = require('../test-server').app;
-
-var karmaDefault = {
-  configFile: path.resolve('build-system/tasks/karma.conf.js'),
-  // "client" has to be specified here but not in configFile,
-  // because we want to change its value based on flags.
-  // The whole "client" object will get overridden if specified in config file.
-  client: {
-    mocha: {
-      reporter: 'html',
-      // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000
-    },
-    captureConsole: false,
-  },
-};
+var karmaDefault = require('./karma.conf');
 
 /**
  * Read in and process the configuration settings for karma
