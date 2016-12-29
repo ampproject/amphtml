@@ -1,60 +1,6 @@
 /** shared vars and functions */
 
 %{
-// Shortcuts for common functions.
-const toString = Object.prototype.toString;
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-// For security reasons, must not contain functions that mutate the caller.
-const functionWhitelist = (() => {
-  const whitelist = {
-    '[object Array]':
-      [
-        Array.prototype.concat,
-        Array.prototype.indexOf,
-        Array.prototype.join,
-        Array.prototype.lastIndexOf,
-        Array.prototype.slice,
-      ],
-    '[object String]':
-      [
-        String.prototype.charAt,
-        String.prototype.charCodeAt,
-        String.prototype.concat,
-        String.prototype.indexOf,
-        String.prototype.lastIndexOf,
-        String.prototype.slice,
-        String.prototype.split,
-        String.prototype.substr,
-        String.prototype.substring,
-        String.prototype.toLowerCase,
-        String.prototype.toUpperCase,
-      ],
-  };
-  // Creates a prototype-less map of function name to the function itself.
-  // This makes function lookups faster (compared to Array.indexOf).
-  const out = Object.create(null);
-  Object.keys(whitelist).forEach(type => {
-    out[type] = Object.create(null);
-
-    const functions = whitelist[type];
-    for (let i = 0; i < functions.length; i++) {
-      const f = functions[i];
-      out[type][f.name] = f;
-    }
-  });
-  return out;
-})();
-
-/** @return {boolean} Returns false if args contains an invalid type. */
-function typeCheckArgs(args) {
-  for (let i = 0; i < args.length; i++) {
-    if (toString.call(args[i]) === '[object Object]') {
-      return false;
-    }
-  }
-  return true;
-}
 %}
 
 /* lexical grammar */
@@ -146,7 +92,9 @@ expr:
   | member_access
       {$$ = $1;}
   | '(' expr ')'
-      {$$ = $2;}
+      %{
+        $$ = {type: ASTType.EXPRESSION, args: [$2]};
+      %}
   | variable
       {$$ = $1;}
   | literal
@@ -155,147 +103,198 @@ expr:
 
 operation:
     '!' expr
-      {$$ = !$2;}
+      %{
+        $$ = {type: ASTType.NOT, args: [$2]};
+      %}
   | '-' expr %prec UMINUS
-      {$$ = -$2;}
+      %{
+        $$ = {type: ASTType.UNARY_MINUS, args: [$2]};
+      %}
   | '+' expr %prec UPLUS
-      {$$ = +$2;}
+      %{
+        $$ = {type: ASTType.UNARY_PLUS, args: [$2]};
+      %}
   |  expr '+' expr
-      {$$ = $1 + $3;}
+      %{
+        $$ = {type: ASTType.PLUS, args: [$1, $3]};
+      %}
   | expr '-' expr
-      {$$ = $1 - $3;}
+      %{
+        $$ = {type: ASTType.MINUS, args: [$1, $3]};
+      %}
   | expr '*' expr
-      {$$ = $1 * $3;}
+      %{
+        $$ = {type: ASTType.MULTIPLY, args: [$1, $3]};
+      %}
   | expr '/' expr
-      {$$ = $1 / $3;}
+      %{
+        $$ = {type: ASTType.DIVIDE, args: [$1, $3]};
+      %}
   | expr '%' expr
-      {$$ = $1 % $3;}
+      %{
+        $$ = {type: ASTType.MODULO, args: [$1, $3]};
+      %}
   | expr '&&' expr
-      {$$ = $1 && $3;}
+      %{
+        $$ = {type: ASTType.LOGICAL_AND, args: [$1, $3]};
+      %}
   | expr '||' expr
-      {$$ = $1 || $3;}
+      %{
+        $$ = {type: ASTType.LOGICAL_OR, args: [$1, $3]};
+      %}
   | expr '<=' expr
-      {$$ = $1 <= $3;}
+      %{
+        $$ = {type: ASTType.LESS_OR_EQUAL, args: [$1, $3]};
+      %}
   | expr '<' expr
-      {$$ = $1 < $3;}
+      %{
+        $$ = {type: ASTType.LESS, args: [$1, $3]};
+      %}
   | expr '>=' expr
-      {$$ = $1 >= $3;}
+      %{
+        $$ = {type: ASTType.GREATER_OR_EQUAL, args: [$1, $3]};
+      %}
   | expr '>' expr
-      {$$ = $1 > $3;}
+      %{
+        $$ = {type: ASTType.GREATER, args: [$1, $3]};
+      %}
   | expr '!=' expr
-      {$$ = $1 != $3;}
+      %{
+        $$ = {type: ASTType.NOT_EQUAL, args: [$1, $3]};
+      %}
   | expr '==' expr
-      {$$ = $1 == $3;}
+      %{
+        $$ = {type: ASTType.EQUAL, args: [$1, $3]};
+      %}
   | expr '?' expr ':' expr
-      {$$ = $1 ? $3 : $5;}
+      %{
+        $$ = {type: ASTType.TERNARY, args: [$1, $3, $5]};
+      %}
   ;
 
 invocation:
     expr '.' NAME args
       %{
-        $$ = null;
-
-        const obj = toString.call($1);
-
-        const whitelist = functionWhitelist[obj];
-        if (whitelist) {
-          const fn = $1[$3];
-          if (fn && fn === whitelist[$3]) {
-            if (typeCheckArgs($4)) {
-              $$ = fn.apply($1, $4);
-            } else {
-              throw new Error('Unexpected argument type in ' + $3 + '()');
-            }
-            return;
-          }
-        }
-
-        throw new Error($3 + '() is not a supported function.');
+        $$ = {type: ASTType.INVOCATION, args: [$1, $3, $4]};
       %}
   ;
 
 args:
     '(' ')'
-      {$$ = [];}
+      %{
+        $$ = {type: ASTType.ARGS, args: []};
+      %}
   | '(' array ')'
-      {$$ = $2;}
+      %{
+        $$ = {type: ASTType.ARGS, args: [$2]};
+      %}
   ;
 
 member_access:
     expr member
       %{
-        $$ = null;
-
-        if ($1 === null || $2 === null) {
-          return;
-        }
-
-        const type = typeof $2;
-        const isCorrectType = type === 'string' || type === 'number';
-        if (isCorrectType && hasOwnProperty.call($1, $2)) {
-          $$ = $1[$2];
-        }
+        $$ = {type: ASTType.MEMBER_ACCESS, args: [$1, $2]};
       %}
   ;
 
 member:
     '.' NAME
-      {$$ = $2;}
+      %{
+        $$ = {type: ASTType.MEMBER, value: $2};
+      %}
   | '[' expr ']'
-      {$$ = $2;}
+      %{
+        $$ = {type: ASTType.MEMBER, args: [$2]};
+      %}
   ;
 
 variable:
     NAME
-      {$$ = hasOwnProperty.call(yy, $1) ? yy[$1] : null;}
+      %{
+        $$ = {type: ASTType.VARIABLE, value: $1};
+      %}
   ;
 
 literal:
     STRING
-      {$$ = yytext.substr(1, yyleng - 2);}
+      %{
+        $$ = {type: ASTType.LITERAL, value: yytext.substr(1, yyleng - 2)};
+      %}
   | NUMBER
-      {$$ = Number(yytext);}
+      %{
+        $$ = {type: ASTType.LITERAL, value: Number(yytext)};
+      %}
   | TRUE
-      {$$ = true;}
+      %{
+        $$ = {type: ASTType.LITERAL, value: true};
+      %}
   | FALSE
-      {$$ = false;}
+      %{
+        $$ = {type: ASTType.LITERAL, value: false};
+      %}
   | NULL
-      {$$ = null;}
+      %{
+        $$ = {type: ASTType.LITERAL, value: null};
+      %}
   | object_literal
-      {$$ = $1;}
+      %{
+        $$ = $1;
+      %}
   | array_literal
-      {$$ = $1;}
+      %{
+        $$ = $1;
+      %}
   ;
 
 array_literal:
     '[' ']'
-      {$$ = [];}
+      %{
+        $$ = {type: ASTType.ARRAY_LITERAL, args: []};
+      %}
   | '[' array ']'
-      {$$ = $2;}
+      %{
+        $$ = {type: ASTType.ARRAY_LITERAL, args: [$2]};
+      %}
   ;
 
 array:
     expr
-      {$$ = [$1];}
+      %{
+        $$ = {type: ASTType.ARRAY, args: [$1]};
+      %}
   | array ',' expr
-      {$$ = $1; Array.prototype.push.call($1, $3);}
+      %{
+        $$ = $1;
+        $$.args.push($3);
+      %}
   ;
 
 object_literal:
     '{' '}'
-      {$$ = Object.create(null);}
+      %{
+        $$ = {type: ASTType.OBJECT_LITERAL, args: []};
+      %}
   | '{' object '}'
-      {$$ = $2;}
+      %{
+        $$ = {type: ASTType.OBJECT_LITERAL, args: [$2]};
+      %}
   ;
 
 object:
     key_value
-      {$$ = Object.create(null); $$[$1[0]] = $1[1];}
+      %{
+        $$ = {type: ASTType.OBJECT, args: [$1]};
+      %}
   | object ',' key_value
-      {$$ = $1; $$[$3[0]] = $3[1];}
+      %{
+        $$ = $1;
+        $$.args.push($3);
+      %}
   ;
 
 key_value:
   expr ':' expr
-      {$$ = [$1, $3];}
+      %{
+        $$ = {type: ASTType.KEY_VALUE, args: [$1, $3]};
+      %}
   ;
