@@ -1019,10 +1019,13 @@ describe('amp-a4a', () => {
     it('should handle click expansion correctly', () => {
       metaData.minifiedCreative = testFragments.signalCollectionElementDoc;
       return a4a.renderAmpCreative_(metaData).then(() => {
-        expect(a4aElement.querySelector('iframe').srcdoc).to.be.ok;
-        const adDoc = a4aElement.querySelector('iframe').contentDocument;
+        const creativeFrame = a4aElement.querySelector('iframe');
+        expect(creativeFrame).to.be.ok;
+        expect(creativeFrame.srcdoc).to.be.ok;
+        const creativeDoc = creativeFrame.contentDocument;
+        const creativeWin = creativeFrame.contentWindow;
         const getSignalFrame = domain => {
-          const frame = adDoc.querySelector(
+          const frame = creativeDoc.querySelector(
               `amp-signal-collection-frame > iframe[src^="http://${domain}"]`);
           expect(frame).to.be.ok;
           return frame;
@@ -1035,18 +1038,18 @@ describe('amp-a4a', () => {
         return Promise.all([
           loadPromise(localHostFrame), loadPromise(adsHostFrame)]).then(() => {
             let clickHandlerCalled = 0;
-            adDoc.body.onclick = e => {
+            creativeDoc.body.onclick = e => {
               expect(e.defaultPrevented).to.be.false;
               e.preventDefault();  // Make the test not actually navigate.
               clickHandlerCalled++;
             };
-            const anchor = adDoc.createElement('a');
+            const anchor = creativeDoc.createElement('a');
             anchor.setAttribute('href',
                 'https://f.co?CLICK_X,CLICK_Y,RANDOM,' +
                 'POSTMESSAGE(iframe.localhost,foo),' +
                 'POSTMESSAGE(iframe.localhost,bar),' +
                 'POSTMESSAGE(ads.localhost,hello)');
-            adDoc.body.appendChild(anchor);
+            creativeDoc.body.appendChild(anchor);
             const sendClick = () => {
               const ev1 = new Event('click', {bubbles: true});
               ev1.pageX = 10;
@@ -1063,7 +1066,7 @@ describe('amp-a4a', () => {
               const messageEventPromise = new Promise(resolve => {
                 resolver = resolve;
               });
-              const unlisten = listen(a4a.win, 'message', evt => {
+              const unlisten = listen(creativeWin, 'message', evt => {
                 if (evt.origin.indexOf(domain) == 0) {
                   unlisten();
                   resolver();

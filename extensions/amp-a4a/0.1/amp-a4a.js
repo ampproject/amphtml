@@ -1160,8 +1160,8 @@ export class AmpA4A extends AMP.BaseElement {
     // overwritten.
     /** @type {Object<string, Object<string, string>>} */
     const messages = {};
-    // TODO(keithwrightbos): unlisten in unlayoutCallback?
-    this.unlisteners_.push(listen(this.win, 'message', evt => {
+    // Listen for messages to creative friendly frame.
+    this.unlisteners_.push(listen(iframeWin, 'message', evt => {
       if (!evt || !evt.source || !evt.origin) {
         return;
       }
