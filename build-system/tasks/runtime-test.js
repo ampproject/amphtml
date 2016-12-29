@@ -26,36 +26,18 @@ var app = require('../test-server').app;
 
 var karmaDefault = {
   configFile: path.resolve('build-system/tasks/karma.conf.js'),
-  singleRun: true,
+  // "client" has to be specified here but not in configFile,
+  // because we want to change its value based on flags.
+  // The whole "client" object will get overridden if specified in config file.
   client: {
     mocha: {
+      reporter: 'html',
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000
     },
     captureConsole: false,
   },
-  browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
-  captureTimeout: 4 * 60 * 1000,
 };
-
-var karmaSaucelabs = Object.assign({}, karmaDefault, {
-  reporters: ['dots', 'saucelabs'],
-  browsers: [
-    'SL_Chrome_android',
-    'SL_Chrome_latest',
-    'SL_Chrome_45',
-    'SL_Firefox_latest',
-    'SL_Safari_8',
-    'SL_Safari_9',
-    'SL_Edge_latest',
-    'SL_iOS_8_4',
-    'SL_iOS_9_1',
-    'SL_iOS_10_0',
-    //'SL_IE_11',
-  ],
-});
 
 /**
  * Read in and process the configuration settings for karma
@@ -77,13 +59,25 @@ function getConfig() {
     if (!process.env.SAUCE_ACCESS_KEY) {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
-    const c = karmaSaucelabs;
-    if (argv.oldchrome) {
-      c.browsers = ['SL_Chrome_45'];
-    }
-    return c;
+    return Object.assign({}, karmaDefault, {
+      reporters: ['dots', 'saucelabs'],
+      browsers: argv.oldchrome
+          ? ['SL_Chrome_45']
+          : [
+            'SL_Chrome_android',
+            'SL_Chrome_latest',
+            'SL_Chrome_45',
+            'SL_Firefox_latest',
+            'SL_Safari_8',
+            'SL_Safari_9',
+            'SL_Edge_latest',
+            'SL_iOS_8_4',
+            'SL_iOS_9_1',
+            'SL_iOS_10_0',
+            //'SL_IE_11',
+          ],
+    });
   }
-
   return karmaDefault;
 }
 
@@ -154,6 +148,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = config.testPaths;
   }
 
+  // c.client is available in test browser via window.parent.karma.config
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,

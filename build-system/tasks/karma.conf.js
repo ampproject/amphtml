@@ -19,7 +19,7 @@
  */
 module.exports = function(config) {
 
-  var configuration = {
+  config.set({
     basePath: '../..',
     frameworks: [
       'fixture',
@@ -66,13 +66,15 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome_no_extensions'],
+    browsers: [
+      process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
+    ],
 
     customLaunchers: {
       /*eslint "google-camelcase/google-camelcase": 0*/
       Chrome_travis_ci: {
         base: 'Chrome',
-        flags: ['--no-sandbox', '--disable-extensions',],
+        flags: ['--no-sandbox', '--disable-extensions'],
       },
       Chrome_no_extensions: {
         base: 'Chrome',
@@ -145,18 +147,14 @@ module.exports = function(config) {
       }
     },
 
-    // change Karma's debug.html to the mocha web reporter
     client: {
-      mocha: {
-        reporter: 'html',
-      },
-      captureConsole: false
-    }
-  };
+      // Do not specify here, will be overridden by runtime-test.js.
+    },
 
-  if (process.env.TRAVIS) {
-    configuration.browsers = ['Chrome_travis_ci'];
-  }
-
-  config.set(configuration);
+    singleRun: true,
+    browserDisconnectTimeout: 10000,
+    browserDisconnectTolerance: 2,
+    browserNoActivityTimeout: 4 * 60 * 1000,
+    captureTimeout: 4 * 60 * 1000,
+  });
 };
