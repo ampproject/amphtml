@@ -34,15 +34,8 @@ var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
-var argv = minimist(process.argv.slice(2), {
-  boolean: ['strictBabelTransform', 'verbose'],
-  default: {
-    verbose: true,
-  },
-});
-
+var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 var cssOnly = argv['css-only'];
-var verbose = argv['verbose'];
 
 require('./build-system/tasks');
 
@@ -355,7 +348,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return;
     }
   }
-  if (verbose) {
+  if (!process.env.TRAVIS) {
     $$.util.log('Bundling ' + name);
   }
   // Building extensions is a 2 step process because of the renaming
@@ -595,7 +588,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
     function minify() {
-      if (verbose) {
+      if (!process.env.TRAVIS) {
         $$.util.log('Minifying ' + srcFilename);
       }
       closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
@@ -650,7 +643,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(lazywrite())
       .on('end', function() {
         appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
-        if (verbose) {
+        if (!process.env.TRAVIS) {
           $$.util.log('Compiled ' + srcFilename);
         }
         activeBundleOperationCount--;
