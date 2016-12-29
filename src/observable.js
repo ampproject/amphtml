@@ -24,7 +24,7 @@
 export class Observable {
 
   constructor() {
-    /** @const {?Array<function(TYPE)>} */
+    /** @type {?Array<function(TYPE)>} */
     this.handlers_ = null;
   }
 
