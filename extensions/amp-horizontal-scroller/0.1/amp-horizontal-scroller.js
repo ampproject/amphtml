@@ -14,73 +14,25 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
+import {CSS} from '../../../build/amp-horizontal-scroller-0.1.css';
 
-// XXX no need for all the overrides, just experimenting
 export class AmpHorizontalScroller extends AMP.BaseElement {
+
   /** @override */
   isLayoutSupported(layout) {
-    console.log(layout);
+    return layout === Layout.container;
+  }
+
+  /** @override */
+  prerenderAllowed() {
     return true;
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    console.log('firstAttachedCallback');
-  }
-
-  /** @override */
-  preconnectCallback(onLayout) {
-    console.log(onLayout);
-    console.log('preconnectCallback');
   }
 
   /** @override */
   buildCallback() {
-    console.log('buildCallback');
-  }
-
-  /** @override */
-  onLayoutMeasure() {
-    console.log('onLayoutMeasure');
-  }
-
-  /** @override */
-  getIntersectionElementLayoutBox() {
-    console.log('getIntersectionElementLayoutBox');
-  }
-
-  /** @override */
-  layoutCallback() {
-    console.log('layoutCallback');
-    return Promise.resolve();
-  }
-
-  /** @override */
-  unlayoutOnPause() {
-    console.log('unlayoutOnPause');
-    return true;
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    console.log('unlayoutCallback');
-    return true;
-  }
-
-  /** @override  */
-  viewportCallback(inViewport) {
-    console.log(inViewport);
-    console.log('viewportCallback');
-  }
-
-  /** @override  */
-  getPriority() {
-    console.log('getPriority');
-    return 1;
-  }
-
-  /** @override */
-  firstLayoutCompleted() {
-    console.log('firstLayoutCompleted');
+    this.element.classList.add('-amp-horizontal-scroller');
   }
 }
+
+AMP.registerElement('amp-horizontal-scroller', AmpHorizontalScroller, CSS);
