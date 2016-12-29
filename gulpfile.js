@@ -287,7 +287,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise} containing a Readable	Stream
  */
 function compileCss() {
-  console.info('Recompiling CSS.');
+  $$.util.log('Recompiling CSS.');
   return jsifyCssAsync('css/amp.css').then(function(css) {
     return gulp.src('css/**.css')
         .pipe($$.file('css.js', 'export const cssText = ' + css))
@@ -425,10 +425,10 @@ function build() {
       thirdPartyFrameRegex: TESTING_HOST,
       localDev: true,
     };
-    console.log($$.util.colors.green('trying to write AMP_CONFIG.'));
+    $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
     fs.writeFileSync('node_modules/AMP_CONFIG.json',
         JSON.stringify(AMP_CONFIG));
-    console.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+    $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
   }
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
@@ -835,7 +835,7 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildSw(options) {
-  console.log('Bundling service-worker.js');
+  $$.util.log('Bundling service-worker.js');
   var opts = {};
   for (var prop in options) {
     opts[prop] = options[prop];

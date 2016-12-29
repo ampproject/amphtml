@@ -85,8 +85,9 @@ function compile(entryModuleFilenames, outputDir,
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
-
+    if (!process.env.TRAVIS) {
+      console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
+    }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
