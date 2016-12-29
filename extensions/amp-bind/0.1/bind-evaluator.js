@@ -30,7 +30,12 @@ export class BindEvaluator {
     /** @const {!Array<!BindExpression>} */
     this.expressions_ = [];
     for (let i = 0; i < expressionStrings.length; i++) {
-      this.expressions_[i] = new BindExpression(expressionStrings[i]);
+      try {
+        const expr = new BindExpression(expressionStrings[i]);
+        this.expressions_.push(expr);
+      } catch (error) {
+        user().error(TAG, 'Malformed expression:', error);
+      }
     }
   }
 

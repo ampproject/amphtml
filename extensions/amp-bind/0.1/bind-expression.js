@@ -16,9 +16,6 @@
 
 import {ASTNodeType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
-import {user} from '../../../src/log';
-
-const TAG = 'AMP-BIND';
 
 /**
  * A single Bind expression.
@@ -26,19 +23,14 @@ const TAG = 'AMP-BIND';
 export class BindExpression {
   /**
    * @param {string} expressionString
+   * @throws {Error} On malformed expressions.
    */
   constructor(expressionString) {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** {?./bind-expr-defines.ASTNode} */
-    this.ast_ = null;
-    try {
-      // Throws errors on malformed expressions.
-      this.ast_ = parser.parse(this.expressionString);
-    } catch (error) {
-      user().error(TAG, `${this.expressionString} is malformed: ${error}`);
-    }
+    /** {!./bind-expr-defines.ASTNode} */
+    this.ast_ = parser.parse(this.expressionString);
 
     /** @const {!Object<string, !Object<string, Function>>} */
     this.functionWhitelist_ = this.createFunctionWhitelist_();
