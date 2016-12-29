@@ -92,9 +92,7 @@ expr:
   | member_access
       {$$ = $1;}
   | '(' expr ')'
-      %{
-        $$ = {type: ASTType.EXPRESSION, args: [$2]};
-      %}
+      {$$ = $2;}
   | variable
       {$$ = $1;}
   | literal

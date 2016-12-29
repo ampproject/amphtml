@@ -15,7 +15,7 @@
  */
 
 /**
- * @type {!Object<string, string>}
+ * @enum {string}
  */
 export const ASTType = {
   // Grammar rules.
@@ -53,15 +53,15 @@ export const ASTType = {
 };
 
 /**
- * @typedef {(boolean|string|number)}
+ * @typedef {(boolean|string|number|null)}
  */
-export let ASTPrimitive;
+export let ASTNodeValue;
 
 /**
  * @typedef {{
  *   type: ASTType,
  *   args: Array<ASTNode>,
- *   value: (ASTPrimitive|undefined),
+ *   value: (ASTNodeValue|undefined),
  * }}
  */
 export let ASTNode;

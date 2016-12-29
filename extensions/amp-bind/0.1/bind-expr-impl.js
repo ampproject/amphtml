@@ -15,7 +15,7 @@
  */
 
 
-import {ASTType, ASTOperationType} from './bind-expr-defines';
+import {ASTType} from './bind-expr-defines';
 
 /** @fileoverview @suppress {checkTypes, suspiciousCode, uselessCode} */
 
@@ -114,9 +114,7 @@ case 3: case 4: case 5: case 7: case 8:
 this.$ = $$[$0];
 break;
 case 6:
-
-        this.$ = {type: ASTType.EXPRESSION, args: [$$[$0-1]]};
-      
+this.$ = $$[$0-1];
 break;
 case 9:
 

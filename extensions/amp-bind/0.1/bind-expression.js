@@ -16,6 +16,9 @@
 
 import {ASTType} from './bind-expr-defines';
 import {parser} from './bind-expr-impl';
+import {user} from '../../../src/log';
+
+const TAG = 'AMP-BIND';
 
 /**
  * A single Bind expression.
@@ -28,7 +31,7 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @const {?Object} */
+    /** @const {?./bind-expr-defines.ASTNode} */
     this.ast_ = parser.parse(this.expressionString);
 
     /** @const {!Object<string, !Object<string, Function>>} */
@@ -41,18 +44,31 @@ export class BindExpression {
    * @return {*}
    */
   evaluate(scope) {
-    const result = this.eval_(this.ast_, scope);
+    let result = null;
+    try {
+      result = this.eval_(this.ast_, scope);
+    } catch (error) {
+      user().error(TAG, error.message);
+    }
     return result;
   }
 
   /**
+   * Recursively evaluates value of `node` and its children.
+   * @param {?./bind-expr-defines.ASTNode} node
+   * @param {!Object} scope
+   * @return {*}
    * @private
    */
   eval_(node, scope) {
+    if (!node) {
+      return null;
+    }
+
     const {type, args, value} = node;
 
     if (type === ASTType.LITERAL) {
-      return value;
+      return user().assert(value !== undefined);
     }
 
     // Concise helper function for evaluating child nodes.
@@ -66,7 +82,6 @@ export class BindExpression {
         const caller = e(args[0]);
         const method = args[1];
         const params = e(args[2]);
-
         const callerType = Object.prototype.toString.call(caller);
         const whitelist = this.functionWhitelist_[callerType];
         if (whitelist) {
@@ -75,7 +90,7 @@ export class BindExpression {
             if (!this.containsObject_(params)) {
               return func.apply(caller, params);
             } else {
-              throw new Error(`Unexpected argument type in ${method}()`);
+              throw new Error(`Unexpected argument type in ${method}().`);
             }
           }
         }
@@ -84,17 +99,14 @@ export class BindExpression {
       case ASTType.MEMBER_ACCESS:
         const target = e(args[0]);
         const member = e(args[1]);
-
         if (target === null || member === null) {
           return null;
         }
-
         const memberType = typeof member;
         const validType = (memberType === 'string' || memberType === 'number');
         if (validType && Object.prototype.hasOwnProperty.call(target, member)) {
           return target[member];
         }
-
         return null;
 
       case ASTType.MEMBER:
@@ -120,8 +132,8 @@ export class BindExpression {
       case ASTType.OBJECT:
         const object = Object.create(null);
         args.forEach(keyValue => {
-          const {key, value} = e(keyValue);
-          object[key] = value;
+          const {k, v} = e(keyValue);
+          object[k] = v;
         });
         return object;
 
@@ -135,6 +147,7 @@ export class BindExpression {
         return -e(args[0]);
 
       case ASTType.UNARY_PLUS:
+        /*eslint no-implicit-coercion: 0*/
         return +e(args[0]);
 
       case ASTType.PLUS:
@@ -178,11 +191,10 @@ export class BindExpression {
 
       case ASTType.TERNARY:
         return e(args[0]) ? e(args[1]) : e(args[2]);
+
+      default:
+        throw new Error(`${type} is not a valid node type.`);
     }
-
-    // TODO: Log error.
-
-    return null;
   }
 
   /**
@@ -231,6 +243,8 @@ export class BindExpression {
   }
 
   /**
+   * Returns true if input array contains a plain object.
+   * @param {!Array} array
    * @return {boolean}
    * @private
    */
