@@ -37,8 +37,8 @@ describes.realWin('iframe-messaging-client', {}, env => {
     it('should send the request via postMessage', () => {
       const callbackSpy = sandbox.spy();
       client.makeRequest('request-type', 'response-type', callbackSpy);
-      expect(postMessageStub).to.be.calledWith(
-          serializeMessage('request-type', 'sentinel-123'));
+      expect(postMessageStub).to.be.calledWith(serializeMessage(
+          'request-type', 'sentinel-123', {}, '$internalRuntimeVersion$'));
 
       postAmpMessage(
           {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
@@ -126,8 +126,11 @@ describes.realWin('iframe-messaging-client', {}, env => {
   describe('sendMessage', () => {
     it('should send postMessage to host window', () => {
       client.sendMessage('request-type', {x: 1, y: 'abc'});
-      expect(postMessageStub).to.be.calledWith(
-          serializeMessage('request-type', 'sentinel-123', {x: 1, y: 'abc'}));
+      expect(postMessageStub).to.be.calledWith(serializeMessage(
+          'request-type',
+          'sentinel-123',
+          {x: 1, y: 'abc'},
+          '$internalRuntimeVersion$'));
     });
   });
 
