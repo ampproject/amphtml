@@ -46,7 +46,7 @@ module.exports = function(config) {
       bundleDelay: 900
     },
 
-    reporters: ['progress'],
+    reporters: [process.env.TRAVIS ? 'dots' : 'progress'],
 
     port: 9876,
 
@@ -62,7 +62,7 @@ module.exports = function(config) {
       '/test/': '/base/test/',
     },
 
-    logLevel: config.LOG_WARN,
+    logLevel: process.env.TRAVIS ? config.LOG_ERROR : config.LOG_WARN,
 
     autoWatch: true,
 
