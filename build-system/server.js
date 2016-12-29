@@ -620,15 +620,16 @@ app.get('/dist/rtv/99*/*.js', function(req, res, next) {
 });
 
 app.get(['/dist/rtv/*/v0/amp-ad-0.1.js', '/dist/rtv/*/v0/amp-video-0.1.js'], function(req, res, next) {
+  // console.log(req.params.filename);
+  // if (req.params.filename != 'amp-ad-0.1.js'
+  //     || req.params.filename != 'amp-video-0.1.js') {
+  //   next();
+  // }
   var filePath = req.path.replace(/\/rtv\/\d{13}/, '');
-  req.path = filePath;
-  if (exampleMode == 'max') {
-    filePath = filePath.replace('-0.1.js', '-0.1.max.js');
-  }
-  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.end(file);
-  }).catch(next);
+  filePath = replaceUrls(exampleMode, filePath);
+  console.log('final filePath is ', filePath);
+  req.url = filePath;
+  next();
 });
 
 app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
@@ -651,6 +652,7 @@ app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, re
 function replaceUrls(mode, file) {
   if (mode) {
     file = file.replace('https://cdn.ampproject.org/viewer/google/v5.js', 'https://cdn1.ampproject.org/viewer/google/v5.js');
+    file = file.replace(/\/rtv\/\d{13}/, '');
     file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
     file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.max.js', '/dist/amp-inabox.js');
