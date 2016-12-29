@@ -45,7 +45,7 @@ module.exports = function(config) {
       bundleDelay: 900
     },
 
-    reporters: ['progress'],
+    reporters: ['dots'],
 
     port: 9876,
 
