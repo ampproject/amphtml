@@ -33,14 +33,14 @@ module.exports = {
     'test/**/*.js': ['browserify'],
     'ads/**/test/test-*.js': ['browserify'],
     'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify']
+    'testing/**/*.js': ['browserify'],
   },
 
   browserify: {
     watch: true,
     debug: true,
     transform: ['babelify'],
-    bundleDelay: 900
+    bundleDelay: 900,
   },
 
   reporters: [process.env.TRAVIS ? 'dots' : 'progress'],
@@ -59,6 +59,8 @@ module.exports = {
     '/test/': '/base/test/',
   },
 
+  // Can't import Karma constants config.LOG_ERROR & config.LOG_WARN,
+  // so we hard code the strings here. Hopefully they'll never change.
   logLevel: process.env.TRAVIS ? 'ERROR' : 'WARN',
 
   autoWatch: true,
@@ -148,7 +150,7 @@ module.exports = {
     mocha: {
       reporter: 'html',
       // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000
+      timeout: process.env.TRAVIS ? 10000 : 2000,
     },
     captureConsole: false,
   },
