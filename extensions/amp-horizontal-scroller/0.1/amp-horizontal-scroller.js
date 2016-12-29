@@ -21,7 +21,7 @@ export class AmpHorizontalScroller extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.container;
+    return layout === Layout.CONTAINER;
   }
 
   /** @override */
