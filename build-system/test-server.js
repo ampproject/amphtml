@@ -22,7 +22,6 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
 function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
