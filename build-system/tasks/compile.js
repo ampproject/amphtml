@@ -318,8 +318,10 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
-          console./*OK*/log('Compiled', entryModuleFilename, 'to',
-              outputDir + '/' + outputFilename, 'via', intermediateFilename);
+          if (!process.env.TRAVIS) {
+            console./*OK*/log('Compiled', entryModuleFilename, 'to',
+                outputDir + '/' + outputFilename, 'via', intermediateFilename);
+          }
           gulp.src(intermediateFilename + '.map')
               .pipe(rename(outputFilename + '.map'))
               .pipe(gulp.dest(outputDir))
