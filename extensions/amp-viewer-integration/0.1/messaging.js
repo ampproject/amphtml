@@ -74,7 +74,8 @@ export class Messaging {
     } else if (message.sentinel == responseSentinel_) {
       this.handleResponse_(message);
     } else {
-      throw new Error('Invalid Format!');
+      throw new Error('Invalid Format! message.sentinel: ' + message.sentinel
+        + ' should be ' + requestSentinel_ + ' or ' + responseSentinel_ + '!');
     }
   }
 

@@ -15,7 +15,7 @@
  */
 
 import {Messaging} from './messaging.js';
-import {listen} from '../../../src/event-helper';
+// import {listen} from '../../../src/event-helper';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev} from '../../../src/log';
 
@@ -52,48 +52,22 @@ export class AmpViewerIntegration {
       dev().info(TAG, 'Viewer origin not specified.');
       return null;
     }
-    return this.getHandshakePromise_()
-      .then(viewerOrigin => {
-        dev().info(TAG, 'listening for messages');
-        const messaging =
-          new Messaging(this.win, this.win.parent, viewerOrigin,
-            (type, payload, awaitResponse) => {
-              return viewer.receiveMessage(
-                type, /** @type {!JSONType} */ (payload), awaitResponse);
-            });
-        viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-          viewerOrigin);
-      });
-  }
 
-  /**
-   * Send a handshake request, and listen for a handshake response to
-   * confirm the handshake.
-   * @return {!Promise}
-   * @private
-   */
-  getHandshakePromise_() {
-    const win = this.win;
-    const unconfirmedViewerOrigin =
-      dev().assertString(this.unconfirmedViewerOrigin_);
-    return new Promise(resolve => {
-      const unlisten = listen(win, 'message', event => {
-        if (event.origin == unconfirmedViewerOrigin &&
-            event.data == 'amp-handshake-response' &&
-            event.source == win.parent) {
-          dev().info(TAG, 'received handshake confirmation');
-          // TODO: Viewer may immediately start sending messages after issuing
-          // handshake response, but we will miss these messages in the time
-          // between unlisten and the next listen later.
-          unlisten();
-          resolve(event.origin);
-        }
+    dev().info(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
+    const messaging =
+    new Messaging(this.win, this.win.parent, this.unconfirmedViewerOrigin_,
+      (type, payload, awaitResponse) => {
+        return viewer.receiveMessage(
+          type, /** @type {!JSONType} */ (payload), awaitResponse);
       });
 
-      // Confirmed origin will come in the response.
-      win.parent./*OK*/postMessage('amp-handshake-request',
-          unconfirmedViewerOrigin);
-    });
+    dev().info(TAG, 'setMessageDeliverer');
+    viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
+      this.unconfirmedViewerOrigin_);
+
+    dev().info(TAG, 'Send a handshake request');
+    return messaging.sendRequest('amp-handshake-request',
+        this.unconfirmedViewerOrigin_, true) || null;
   }
 }
 
