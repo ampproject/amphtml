@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var $$ = require('gulp-load-plugins')();
 var fs = require('fs-extra');
 var argv = require('minimist')(process.argv.slice(2));
 var closureCompiler = require('gulp-closure-compiler');
@@ -86,7 +87,7 @@ function compile(entryModuleFilenames, outputDir,
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     if (!process.env.TRAVIS) {
-      console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
+      $$.util.log('Starting closure compiler for', entryModuleFilenames);
     }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -319,7 +320,7 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
           if (!process.env.TRAVIS) {
-            console./*OK*/log('Compiled', entryModuleFilename, 'to',
+            $$.util.log('Compiled', entryModuleFilename, 'to',
                 outputDir + '/' + outputFilename, 'via', intermediateFilename);
           }
           gulp.src(intermediateFilename + '.map')

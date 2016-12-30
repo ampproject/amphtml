@@ -151,21 +151,25 @@ function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
  * Build all the AMP extensions
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildExtensions(options) {
+  var results = [];
   for (var key in extensions) {
     var e = extensions[key];
     var o = Object.assign({}, options);
     o = Object.assign(o, e);
-    buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs);
+    results.push(buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs));
   }
+  return Promise.all(results);
 }
 
 /**
  * Compile the polyfills script and drop it in the build folder
+ * @return {!Promise}
  */
 function polyfillsForTests() {
-  compileJs('./src/', 'polyfills.js', './build/');
+  return compileJs('./src/', 'polyfills.js', './build/');
 }
 
 /**
@@ -176,139 +180,140 @@ function polyfillsForTests() {
  * @param {boolean} shouldMinify
  * @param {boolean=} opt_preventRemoveAndMakeDir
  * @param {boolean=} opt_checkTypes
+ * @return {!Promise}
  */
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     opt_checkTypes) {
-  compileCss();
-  compileJs('./3p/', 'integration.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-    minifiedName: 'f.js',
-    checkTypes: opt_checkTypes,
-    watch: watch,
-    minify: shouldMinify,
-    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-    externs: ['ads/ads.extern.js',],
-    include3pDirectories: true,
-    includePolyfills: true,
-  });
+  var results = [
+    compileJs('./3p/', 'integration.js',
+        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+      minifiedName: 'f.js',
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      minify: shouldMinify,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      externs: ['ads/ads.extern.js',],
+      include3pDirectories: true,
+      includePolyfills: true,
+    }),
 
-  compileJs('./3p/', 'ampcontext-lib.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-    minifiedName: 'ampcontext-v0.js',
-    checkTypes: opt_checkTypes,
-    watch: watch,
-    minify: false,
-    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-    externs: ['ads/ads.extern.js',],
-    includeBasicPolyfills: false,
-  });
+    compileJs('./3p/', 'ampcontext-lib.js',
+        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+      minifiedName: 'ampcontext-v0.js',
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      minify: false,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      externs: ['ads/ads.extern.js',],
+      includeBasicPolyfills: false,
+    }),
 
-  // For compilation with babel we start with the amp-babel entry point,
-  // but then rename to the amp.js which we've been using all along.
-  compileJs('./src/', 'amp-babel.js', './dist', {
-    toName: 'amp.js',
-    minifiedName: 'v0.js',
-    includePolyfills: true,
-    checkTypes: opt_checkTypes,
-    watch: watch,
-    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-    minify: shouldMinify,
-    // If there is a sync JS error during initial load,
-    // at least try to unhide the body.
-    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-        'setTimeout(function(){' +
-        'var s=document.body.style;' +
-        's.opacity=1;' +
-        's.visibility="visible";' +
-        's.animation="none";' +
-        's.WebkitAnimation="none;"},1000);throw e};'
-  });
+    // For compilation with babel we start with the amp-babel entry point,
+    // but then rename to the amp.js which we've been using all along.
+    compileJs('./src/', 'amp-babel.js', './dist', {
+      toName: 'amp.js',
+      minifiedName: 'v0.js',
+      includePolyfills: true,
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      minify: shouldMinify,
+      // If there is a sync JS error during initial load,
+      // at least try to unhide the body.
+      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+          'setTimeout(function(){' +
+          'var s=document.body.style;' +
+          's.opacity=1;' +
+          's.visibility="visible";' +
+          's.animation="none";' +
+          's.WebkitAnimation="none;"},1000);throw e};'
+    }),
+  ];
   if (opt_checkTypes) {
     // We don't rerun type check for the shadow entry point for now.
-    return;
+    return Promise.all(results);
   }
-  // Entry point for shadow runtime.
-  compileJs('./src/', 'amp-shadow-babel.js', './dist', {
-    toName: 'amp-shadow.js',
-    minifiedName: 'shadow-v0.js',
-    includePolyfills: true,
-    checkTypes: opt_checkTypes,
-    watch: watch,
-    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-    minify: shouldMinify,
-    wrapper: '<%= contents %>'
-  });
 
-  // Entry point for inabox runtime.
-  compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-    toName: 'amp-inabox.js',
-    minifiedName: 'amp4ads-v0.js',
-    includePolyfills: true,
-    extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-    checkTypes: opt_checkTypes,
-    watch: watch,
-    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-    minify: shouldMinify,
-    wrapper: '<%= contents %>',
-  });
+  results.push(
+    // Entry point for shadow runtime.
+    compileJs('./src/', 'amp-shadow-babel.js', './dist', {
+      toName: 'amp-shadow.js',
+      minifiedName: 'shadow-v0.js',
+      includePolyfills: true,
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      minify: shouldMinify,
+      wrapper: '<%= contents %>'
+    }),
 
-  // inabox-host
-  compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-    toName: 'amp-inabox-host.js',
-    minifiedName: 'amp4ads-host-v0.js',
-    includePolyfills: false,
-    checkTypes: opt_checkTypes,
-    watch: watch,
-    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-    minify: shouldMinify,
-    wrapper: '<%= contents %>',
-  });
+    // Entry point for inabox runtime.
+    compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+      toName: 'amp-inabox.js',
+      minifiedName: 'amp4ads-v0.js',
+      includePolyfills: true,
+      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      minify: shouldMinify,
+      wrapper: '<%= contents %>',
+    }),
 
-  var frameHtml = '3p/frame.max.html';
-  thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
+    // inabox-host
+    compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+      toName: 'amp-inabox-host.js',
+      minifiedName: 'amp4ads-host-v0.js',
+      includePolyfills: false,
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      minify: shouldMinify,
+      wrapper: '<%= contents %>',
+    }),
+
+    thirdPartyBootstrap('3p/frame.max.html', 'frame.html', shouldMinify),
+    thirdPartyBootstrap('3p/nameframe.max.html', 'nameframe.html',shouldMinify)
+  );
+
   if (watch) {
-    $$.watch(frameHtml, function() {
-      thirdPartyBootstrap(frameHtml, 'frame.html', shouldMinify);
+    $$.watch('3p/nameframe.max.html', function () {
+      thirdPartyBootstrap('3p/nameframe.max.html', 'nameframe.html', shouldMinify);
+    });
+    $$.watch('3p/frame.max.html', function() {
+      thirdPartyBootstrap('3p/frame.max.html', 'frame.html', shouldMinify);
     });
   }
-
-  var nameFrameHtml = '3p/nameframe.max.html';
-  thirdPartyBootstrap(nameFrameHtml, 'nameframe.html',shouldMinify);
-  if (watch) {
-    $$.watch(nameFrameHtml, function () {
-      thirdPartyBootstrap(nameFrameHtml, 'nameframe.html', shouldMinify);
-    });
-  }
+  return Promise.all(results);
 }
 
 /**
  * Compile all the css and drop in the build folder
- *
- * @return {!Promise} containing a Readable	Stream
+ * @return {!Promise}
  */
 function compileCss() {
   $$.util.log('Recompiling CSS.');
   return jsifyCssAsync('css/amp.css').then(function(css) {
-    return gulp.src('css/**.css')
+    return toPromise(gulp.src('css/**.css')
         .pipe($$.file('css.js', 'export const cssText = ' + css))
-        .pipe(gulp.dest('build'));
+        .pipe(gulp.dest('build')));
   });
 }
 
 /**
  * Enables watching for file changes in css, extensions.
+ * @return {!Promise}
  */
 function watch() {
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
-  buildAlp({
-    watch: true,
-  });
-  buildExtensions({
-    watch: true,
-  });
-  compile(true);
+
+  return Promise.all([
+    buildAlp({watch: true}),
+    buildExtensions({watch: true}),
+    compile(true),
+  ]);
 }
 
 /**
@@ -328,7 +333,7 @@ function watch() {
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @param {!Array=} opt_extraGlobs
- * @return {!Stream} Gulp object
+ * @return {!Promise}
  */
 function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   if (cssOnly && !hasCss) {
@@ -345,7 +350,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
     });
     if (!shouldBundle) {
-      return;
+      return Promise.resolve();
     }
   }
   if (!process.env.TRAVIS) {
@@ -387,7 +392,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
  * @param {!Object} options
- * @return {!Stream} Gulp object
+ * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
   var filename = options.filename || name + '.js';
@@ -395,7 +400,7 @@ function buildExtensionJs(path, name, version, options) {
     throw new Error('Unsupported loadPriority: ' + options.loadPriority);
   }
   var priority = options.loadPriority ? 'p:"high",' : '';
-  compileJs(path + '/', filename, './dist/v0', {
+  return compileJs(path + '/', filename, './dist/v0', {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
@@ -416,6 +421,7 @@ function buildExtensionJs(path, name, version, options) {
 
 /**
  * Main Build
+ * @return {!Promise}
  */
 function build() {
   var TESTING_HOST = process.env.AMP_TESTING_HOST;
@@ -431,32 +437,38 @@ function build() {
     $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
   }
   process.env.NODE_ENV = 'development';
-  polyfillsForTests();
-  buildAlp();
-  buildSw();
-  buildExtensions({bundleOnlyIfListedInFiles: true});
-  compile();
+  return Promise.all([
+    polyfillsForTests(),
+    buildAlp(),
+    buildSw(),
+    buildExtensions({bundleOnlyIfListedInFiles: true}),
+    compile(),
+  ]);
 }
 
 /**
  * Dist Build
+ * @return {!Promise}
  */
 function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
-  compile(false, true, true);
-  // NOTE:
-  // When adding a line here, consider whether you need to include polyfills
-  // and whether you need to init logging (initLogConstructor).
-  buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
-  buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true});
-  buildExtensions({minify: true, preventRemoveAndMakeDir: true});
-  buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
-  buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  return Promise.all([
+    compile(false, true, true),
+    // NOTE:
+    // When adding a line here, consider whether you need to include polyfills
+    // and whether you need to init logging (initLogConstructor).
+    buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+    buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+    buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
+    buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+    buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+  ]);
 }
 
 /**
  * Dedicated type check path.
+ * @return {!Promise}
  */
 function checkTypes() {
   process.env.NODE_ENV = 'production';
@@ -484,21 +496,23 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
-  closureCompile(compileSrcs.concat(extensionSrcs), './dist',
-      'check-types.js', {
-        include3pDirectories: true,
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js'],
-        checkTypes: true,
-      });
-  // Type check 3p/ads code.
-  closureCompile(['./3p/integration.js'], './dist',
+  return Promise.all([
+    closureCompile(compileSrcs.concat(extensionSrcs), './dist',
+        'check-types.js', {
+          include3pDirectories: true,
+          includePolyfills: true,
+          extraGlobs: ['src/inabox/*.js'],
+          checkTypes: true,
+        }),
+    // Type check 3p/ads code.
+    closureCompile(['./3p/integration.js'], './dist',
       'integration-check-types.js', {
         externs: ['ads/ads.extern.js'],
         include3pDirectories: true,
         includePolyfills: true,
         checkTypes: true,
-      });
+      }),
+  ]);
 }
 
 /**
@@ -508,14 +522,14 @@ function checkTypes() {
  * @param {string} input
  * @param {string} outputName
  * @param {boolean} shouldMinify
+ * @return {!Promise}
  */
 function thirdPartyBootstrap(input, outputName, shouldMinify) {
   $$.util.log('Processing ' + input);
 
   if (!shouldMinify) {
-    gulp.src(input)
-        .pipe(gulp.dest('dist.3p/current'));
-    return;
+    return toPromise(gulp.src(input)
+        .pipe(gulp.dest('dist.3p/current')));
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -528,7 +542,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
   // Convert default relative URL to absolute min URL.
   var html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
-  $$.file(outputName, html, {src: true})
+  return toPromise($$.file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         var aliasToLatestBuild = 'dist.3p/current-min';
@@ -539,10 +553,8 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
             './' + internalRuntimeVersion,
             aliasToLatestBuild,
             'dir');
-      });
+      }));
 }
-
-var activeBundleOperationCount = 0;
 
 /**
  * Synchronously concatenates the given files into the given destination
@@ -551,11 +563,11 @@ var activeBundleOperationCount = 0;
  * @param {Array<string>} files List of file paths to concatenate
  */
 function concatFiles(destFilePath, files) {
-	var all = files.map(function(filePath) {
-		return fs.readFileSync(filePath, 'utf-8');
-	});
+  var all = files.map(function(filePath) {
+    return fs.readFileSync(filePath, 'utf-8');
+  });
 
-	fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
+  fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
 }
 
 /**
@@ -583,31 +595,30 @@ function appendToCompiledFile(srcFilename, destFilePath) {
  * @param {string} srcFilename Name of the JS source file
  * @param {string} destDir Destination folder for output script
  * @param {?Object} options
+ * @return {!Promise}
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
-    function minify() {
-      if (!process.env.TRAVIS) {
-        $$.util.log('Minifying ' + srcFilename);
-      }
-      closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
-          options)
-          .then(function() {
-            appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
-            fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-            if (options.latestName) {
-              fs.copySync(
-                  destDir + '/' + options.minifiedName,
-                  destDir + '/' + options.latestName);
-            }
-          });
+    if (!process.env.TRAVIS) {
+      $$.util.log('Minifying ' + srcFilename);
     }
-    minify();
-    return;
+
+    return closureCompile(
+        srcDir + srcFilename, destDir, options.minifiedName, options)
+        .then(function() {
+          appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
+          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+          if (options.latestName) {
+            fs.copySync(
+                destDir + '/' + options.minifiedName,
+                destDir + '/' + options.latestName);
+          }
+        });
   }
+
   var bundler = browserify(srcDir + srcFilename, {debug: true})
-      .transform(babel, { loose: argv.strictBabelTransform ? undefined : 'all' });
+      .transform(babel, {loose: argv.strictBabelTransform ? undefined : 'all'});
   if (options.watch) {
     bundler = watchify(bundler);
   }
@@ -628,10 +639,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   var destFilename = options.toName || srcFilename;
   function rebundle() {
-    activeBundleOperationCount++;
-    bundler.bundle()
+    return toPromise(bundler.bundle()
       .on('error', function(err) {
-        activeBundleOperationCount--;
         if (err instanceof SyntaxError) {
           console.error($$.util.colors.red('Syntax error:', err.message));
         } else {
@@ -646,11 +655,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         if (!process.env.TRAVIS) {
           $$.util.log('Compiled ' + srcFilename);
         }
-        activeBundleOperationCount--;
-        if (activeBundleOperationCount == 0) {
-          $$.util.log($$.util.colors.green('All current JS updates done.'));
-        }
-      });
+      }));
   }
 
   if (options.watch) {
@@ -664,7 +669,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     });
   }
 
-  rebundle();
+  return rebundle();
 }
 
 /**
@@ -675,13 +680,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 function buildExperiments(options) {
   options = options || {};
   $$.util.log('Bundling experiments.html/js');
-
-  function copyHandler(name, err) {
-    if (err) {
-      return $$.util.log($$.util.colors.red('copy error: ', err));
-    }
-    $$.util.log($$.util.colors.green('copied ' + name));
-  }
 
   var path = 'tools/experiments';
   var htmlPath = path + '/experiments.html';
@@ -716,10 +714,10 @@ function buildExperiments(options) {
   var js = fs.readFileSync(jsPath, 'utf8');
   var builtName = 'experiments.max.js';
   var minifiedName = 'experiments.js';
-  return gulp.src(path + '/*.js')
+  return toPromise(gulp.src(path + '/*.js')
       .pipe($$.file(builtName, js))
-      .pipe(gulp.dest('build/experiments/'))
-      .on('end', function() {
+      .pipe(gulp.dest('build/experiments/')))
+      .then(function() {
         compileJs('./build/experiments/', builtName, './dist.tools/experiments/', {
           watch: false,
           minify: options.minify || argv.minify,
@@ -749,13 +747,6 @@ function buildLoginDone(options) {
 function buildLoginDoneVersion(version, options) {
   options = options || {};
   $$.util.log('Bundling amp-login-done.html/js');
-
-  function copyHandler(name, err) {
-    if (err) {
-      return $$.util.log($$.util.colors.red('copy error: ', err));
-    }
-    $$.util.log($$.util.colors.green('copied ' + name));
-  }
 
   var path = 'extensions/amp-access/' + version + '/';
   var htmlPath = path + 'amp-login-done.html';
@@ -795,10 +786,10 @@ function buildLoginDoneVersion(version, options) {
   var builtName = 'amp-login-done-' + version + '.max.js';
   var minifiedName = 'amp-login-done-' + version + '.js';
   var latestName = 'amp-login-done-latest.js';
-  return gulp.src(path + '/*.js')
+  return toPromise(gulp.src(path + '/*.js')
       .pipe($$.file(builtName, js))
-      .pipe(gulp.dest('build/all/v0/'))
-      .on('end', function() {
+      .pipe(gulp.dest('build/all/v0/')))
+      .then(function() {
         compileJs('./build/all/v0/', builtName, './dist/v0/', {
           watch: false,
           includePolyfills: true,
@@ -819,7 +810,7 @@ function buildAlp(options) {
   options = options || {};
   $$.util.log('Bundling alp.js');
 
-  compileJs('./ads/alp/', 'install-alp.js', './dist/', {
+  return compileJs('./ads/alp/', 'install-alp.js', './dist/', {
     toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
@@ -860,7 +851,8 @@ function buildSw(options) {
   // The script imported by the service-worker. This is the "core".
   opts.noWrapper = true;
   opts.filename = 'core.js';
-  buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1', opts);
+  return buildExtensionJs(
+      './src/service-worker', 'cache-service-worker', '0.1', opts);
 }
 
 /**
@@ -908,6 +900,11 @@ function patchWebAnimations() {
 }
 patchWebAnimations();
 
+function toPromise(readable) {
+  return new Promise(function(resolve, reject) {
+    readable.on('error', reject).on('end', resolve);
+  });
+}
 
 /**
  * Gulp tasks
