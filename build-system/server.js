@@ -31,7 +31,6 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
 app.use('/pwa', function(req, res, next) {
   var file;
