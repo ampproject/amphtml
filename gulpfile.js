@@ -827,32 +827,29 @@ function buildAlp(options) {
  */
 function buildSw(options) {
   $$.util.log('Bundling service-worker.js');
-  var opts = {};
-  for (var prop in options) {
-    opts[prop] = options[prop];
-  }
+  var opts = Object.assign({}, options);
 
-  // The service-worker script loaded by the browser.
-  compileJs('./src/service-worker/', 'shell.js', './dist/', {
-    toName: 'sw.max.js',
-    minifiedName: 'sw.js',
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
-    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
-  });
-  // The service-worker kill script that may be loaded by the browser.
-  compileJs('./src/service-worker/', 'kill.js', './dist/', {
-    toName: 'sw-kill.max.js',
-    minifiedName: 'sw-kill.js',
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
-    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
-  });
-  // The script imported by the service-worker. This is the "core".
-  opts.noWrapper = true;
-  opts.filename = 'core.js';
-  return buildExtensionJs(
-      './src/service-worker', 'cache-service-worker', '0.1', opts);
+  return Promise.all([
+    // The service-worker script loaded by the browser.
+    compileJs('./src/service-worker/', 'shell.js', './dist/', {
+      toName: 'sw.max.js',
+      minifiedName: 'sw.js',
+      watch: opts.watch,
+      minify: opts.minify || argv.minify,
+      preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
+    }),
+    // The service-worker kill script that may be loaded by the browser.
+    compileJs('./src/service-worker/', 'kill.js', './dist/', {
+      toName: 'sw-kill.max.js',
+      minifiedName: 'sw-kill.js',
+      watch: opts.watch,
+      minify: opts.minify || argv.minify,
+      preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
+    }),
+    // The script imported by the service-worker. This is the "core".
+    buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1',
+        Object.assign({}, opts, {noWrapper: true, filename: 'core.js'})),
+  ]);
 }
 
 /**
