@@ -162,6 +162,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
   {
+    id: 'amp-playbuzz',
+    name: 'AMP extension for playbuzz engaging items',
+    spec: 'https://github.com/ampproject/amphtml/issues/6106',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+  },
+  {
     id: 'make-body-block',
     name: 'Sets the body to display:block.',
     spec: 'https://github.com/ampproject/amphtml/issues/5310',
@@ -224,6 +230,12 @@ const EXPERIMENTS = [
     id: 'amp-accordion-session-state-optout',
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
+  },
+  {
+    id: '3p-frame-context-in-name',
+    name: 'Move passing context metadata from url hash to name attribute',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6760',
+    Spec: '',
   },
 ];
 

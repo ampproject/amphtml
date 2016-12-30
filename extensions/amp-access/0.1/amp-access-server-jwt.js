@@ -313,6 +313,7 @@ export class AccessServerJwtAdapter {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
+            requireAmpResponseSourceOrigin: false,
           })).then(response => {
             dev().fine(TAG, 'Authorization response: ', response);
             return this.replaceSections_(response);

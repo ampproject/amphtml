@@ -21,6 +21,11 @@ import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './viewer';
 
 /**
+ * @const {string}
+ */
+const TAG = 'CHUNK';
+
+/**
  * @type {boolean}
  */
 let deactivated = /nochunking=1/.test(self.location.hash);
@@ -48,6 +53,14 @@ export function chunk(nodeOrAmpDoc, fn) {
   const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
   service.run_(fn);
 };
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ */
+export function chunkInstanceForTesting(nodeOrAmpDoc) {
+  return fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+}
 
 /**
  * Use a standard micro task for every invocation. This should only
@@ -107,9 +120,11 @@ class Chunks {
     if (!this.active_) {
       return;
     }
-    if (!this.win_.requestIdleCallback) {
-      this.win_.addEventListener('message', this.boundExecute_);
-    }
+    this.win_.addEventListener('message', e => {
+      if (e.data = 'amp-macro-task') {
+        this.execute_();
+      }
+    });
     viewerPromiseForDoc(ampDoc).then(viewer => {
       this.viewer_ = viewer;
       viewer.onVisibilityChanged(() => {
@@ -156,8 +171,8 @@ class Chunks {
       if (this.tasks_.length) {
         this.schedule_();
       }
-      dev().fine('CHUNK', t.displayName || t.name,
-          'Duration', Date.now() - before);
+      dev().fine(TAG, t.displayName || t.name,
+          'Chunk duration', Date.now() - before);
     }
     return true;
   }
@@ -173,10 +188,21 @@ class Chunks {
     }
     // If requestIdleCallback exists, schedule a task with it, but
     // do not wait longer than one second.
-    if (this.win_.requestIdleCallback) {
-      this.win_.requestIdleCallback(this.boundExecute_, {
-        timeout: 1000,
-      });
+    // We only start using requestIdleCallback when the viewer has
+    // been initialized. Otherwise we risk starving ourselves
+    // before we get into a state where the viewer can tell us
+    // that we are visible.
+    if (this.viewer_ && this.win_.requestIdleCallback) {
+      onIdle(this.win_,
+          // Wait until we have a budget of at least 15ms.
+          // 15ms is a magic number. Budgets are higher when the user
+          // is completely idle (around 40), but that occurs too
+          // rarely to be usable. 15ms budgets can happen during scrolling
+          // but only if the device is doing super, super well, and no
+          // real processing is done between frames.
+          15 /* minimumTimeRemaining */ ,
+          2000 /* timeout */,
+          this.boundExecute_);
       return;
     }
     // The message doesn't actually matter.
@@ -200,6 +226,37 @@ class Chunks {
     return !(/visibilityState=(hidden|prerender)/.test(
         this.win_.location.hash));
   }
+}
+
+/**
+ * Delays calling the given function until the browser is notifying us
+ * about a certain minimum budget or the timeout is reached.
+ * @param {!Window} win
+ * @param {number} minimumTimeRemaining Minimum number of millis idle
+ *     budget for callback to fire.
+ * @param {number} timeout in millis for callback to fire.
+ * @param {function()} fn Callback.
+ * @visibleForTesting
+ */
+export function onIdle(win, minimumTimeRemaining, timeout, fn) {
+  const startTime = Date.now();
+  function rIC(info) {
+    if (info.timeRemaining() < minimumTimeRemaining) {
+      const remainingTimeout = timeout - (Date.now() - startTime);
+      if (remainingTimeout <= 0 || info.didTimeout) {
+        dev().fine(TAG, 'Timed out', timeout, info.didTimeout);
+        fn();
+      } else {
+        dev().fine(TAG, 'Rescheduling with', remainingTimeout,
+            info.timeRemaining());
+        win.requestIdleCallback(rIC, {timeout: remainingTimeout});
+      }
+    } else {
+      dev().fine(TAG, 'Running idle callback with ', minimumTimeRemaining);
+      fn();
+    }
+  }
+  win.requestIdleCallback(rIC, {timeout});
 }
 
 /**

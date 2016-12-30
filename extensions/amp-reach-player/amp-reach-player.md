@@ -56,7 +56,7 @@ Example:
       layout="responsive"
       width="560"
       height="315">
-</amp-reach>
+</amp-reach-player>
 ```
 
 ## Attributes

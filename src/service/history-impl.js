@@ -111,6 +111,26 @@ export class History {
   }
 
   /**
+   * Requests navigation one step back. This request is only satisifed
+   * when the history has at least one step to go back in the context
+   * of this document.
+   * @return {!Promise}
+   */
+  goBack() {
+    return this.enque_(() => {
+      if (this.stackIndex_ <= 0) {
+        // Nothing left to pop.
+        return Promise.resolve();
+      }
+      // Pop the current state. The binding will ignore the request if
+      // it cannot satisfy it.
+      return this.binding_.pop(this.stackIndex_).then(stackIndex => {
+        this.onStackIndexUpdated_(stackIndex);
+      });
+    });
+  }
+
+  /**
    * Helper method to handle navigation to a local target, e.g. When a user clicks an
    * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
    *
@@ -125,6 +145,27 @@ export class History {
     }).then(() => {
       this.binding_.replaceStateForTarget(target);
     });
+  }
+
+  /**
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
+   * @return {!Promise<string>}
+   */
+  getFragment() {
+    return this.binding_.getFragment();
+  }
+
+  /**
+   * Update the page url fragment
+   * The fragment variable should contain leading '#'
+   * @param {string} fragment
+   * @return {!Promise}
+   */
+  updateFragment(fragment) {
+    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
+        'should start with #');
+    return this.binding_.updateFragment(fragment);
   }
 
   /**
@@ -249,6 +290,21 @@ class HistoryBindingInterface {
    * @param unusedTarget
    */
   replaceStateForTarget(unusedTarget) {}
+
+  /**
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
+   * @return {!Promise<string>}
+   */
+  getFragment() {}
+
+  /**
+   * Update the page url fragment
+   * The fragment variable should contain leading '#'
+   * @param {string} unusedFragment
+   * @return {!Promise}
+   */
+  updateFragment(unusedFragment) {}
 }
 
 
@@ -617,6 +673,22 @@ export class HistoryBindingNatural_ {
       }
     }
   }
+
+  /** @override */
+  getFragment() {
+    let hash = this.win.location.hash;
+    /* Strip leading '#' */
+    hash = hash.substr(1);
+    return Promise.resolve(hash);
+  }
+
+  /** @override */
+  updateFragment(fragment) {
+    if (this.win.history.replaceState) {
+      this.win.history.replaceState({}, '', fragment);
+    }
+    return Promise.resolve();
+  }
 }
 
 
@@ -673,9 +745,10 @@ export class HistoryBindingVirtual_ {
   push() {
     // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
-    return this.viewer_.postPushHistory(this.stackIndex_).then(() => {
-      return this.stackIndex_;
-    });
+    return this.viewer_.sendMessageAwaitResponse(
+        'pushHistory', {stackIndex: this.stackIndex_}).then(() => {
+          return this.stackIndex_;
+        });
   }
 
   /** @override */
@@ -683,10 +756,11 @@ export class HistoryBindingVirtual_ {
     if (stackIndex > this.stackIndex_) {
       return Promise.resolve(this.stackIndex_);
     }
-    return this.viewer_.postPopHistory(stackIndex).then(() => {
-      this.updateStackIndex_(stackIndex - 1);
-      return this.stackIndex_;
-    });
+    return this.viewer_.sendMessageAwaitResponse(
+        'popHistory', {stackIndex: this.stackIndex_}).then(() => {
+          this.updateStackIndex_(stackIndex - 1);
+          return this.stackIndex_;
+        });
   }
 
   /**
@@ -710,6 +784,33 @@ export class HistoryBindingVirtual_ {
         this.onStackIndexUpdated_(stackIndex);
       }
     }
+  }
+
+  /** @override */
+  getFragment() {
+    if (!this.viewer_.hasCapability('fragment')) {
+      return Promise.resolve('');
+    }
+    return this.viewer_.sendMessageAwaitResponse('fragment', undefined,
+        /* cancelUnsent */true).then(
+        hash => {
+          if (!hash) {
+            return '';
+          }
+          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
+              'should start with #');
+          /* Strip leading '#' */
+          return hash.substr(1);
+        });
+  }
+
+  /** @override */
+  updateFragment(fragment) {
+    if (!this.viewer_.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
+        'fragment', {fragment}, /* cancelUnsent */true));
   }
 }
 

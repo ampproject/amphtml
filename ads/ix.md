@@ -16,8 +16,11 @@ limitations under the License.
 
 # Index Exchange
 
+Index supports both direct ad tags and Header Tag style bidding using Doubleclick as the ad server.
 
-## Example ad tag
+## Examples
+
+### Ad tag ###
 
 ```html
 <amp-ad width=300 height=250
@@ -28,9 +31,21 @@ limitations under the License.
 </amp-ad>
 ```
 
+### Header Tag ###
+
+```html
+<amp-ad width=300 height=250
+  type="ix"
+  data-ix-id="54321"
+  data-slot="/1234/example"
+</amp-ad>
+```
+
 ## Configuration
 
 For semantics of configuration, please contact your account manager at Index Exchange.
+
+### Ad tag ###
 
 __Required:__
 
@@ -50,4 +65,18 @@ __Optional:__
 - `data-pub-passback`
 - `data-referrer`
 - `data-ifa`
+
+### Header Tag ###
+
+__Required:__
+
+- `data-ix-id`
+- `data-slot`
+
+
+__Optional:__
+
+- `data-ix-slot`
+
+Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
 

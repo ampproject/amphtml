@@ -52,6 +52,8 @@ const CONTINUOUS_TIME = 'cT';
 const LAST_UPDATE = 'lU';
 const IN_VIEWPORT = 'iV';
 const TIME_LOADED = 'tL';
+const SCHEDULED_RUN_ID = 'schId';
+const LAST_CHANGE_ENTRY = 'lCE';
 
 // Keys used in VisibilitySpec
 const CONTINUOUS_TIME_MAX = 'continuousTimeMax';
@@ -166,8 +168,11 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
+    // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
+    // form is in PROD for 1-2 weeks.
     foundEl = friendlyFrame ?
-        closestBySelector(friendlyFrame, '.-amp-element') : null;
+        closestBySelector(
+            friendlyFrame, '.-amp-element,.i-amphtml-element') : null;
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
@@ -353,6 +358,7 @@ export class Visibility {
           }, {threshold: DEFAULT_THRESHOLD});
     }
 
+    // Visible trigger
     resource.loadedOnce().then(() => {
       this.intersectionObserver_.observe(element);
 
@@ -364,7 +370,15 @@ export class Visibility {
       this.resources_.push(resource);
     });
 
-    // TODO: support "hidden" spec.
+    // Hidden trigger
+    if (!shouldBeVisible && !this.visibilityListenerRegistered_) {
+      this.viewer_.onVisibilityChanged(() => {
+        if (!this.viewer_.isVisible()) {
+          this.onDocumentHidden_();
+        }
+      });
+      this.visibilityListenerRegistered_ = true;
+    }
   }
 
   /** @private */
@@ -373,13 +387,49 @@ export class Visibility {
 
     const visible = change.intersectionRatio * 100;
     for (let c = listeners.length - 1; c >= 0; c--) {
-      const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
-      if (this.updateCounters_(visible, listeners[c], shouldBeVisible)
-          && this.viewer_.isVisible() == shouldBeVisible) {
-        this.prepareStateForCallback_(
-            listeners[c]['state'], change.boundingClientRect);
-        listeners[c].callback(listeners[c]['state']);
+      const listener = listeners[c];
+      const shouldBeVisible = !!listener.shouldBeVisible;
+      const config = listener.config;
+      const state = listener.state;
+      state[LAST_CHANGE_ENTRY] = change;
+
+      // Update states and check if all conditions are satisfied
+      const conditionsMet =
+          this.updateCounters_(visible, listener, shouldBeVisible);
+
+      if (!shouldBeVisible) {
+        // For "hidden" trigger, only update state, don't trigger.
+        continue;
+      }
+      if (conditionsMet) {
+        if (state[SCHEDULED_RUN_ID]) {
+          this.timer_.cancel(state[SCHEDULED_RUN_ID]);
+          state[SCHEDULED_RUN_ID] = null;
+        }
+        this.prepareStateForCallback_(state, change.boundingClientRect);
+        listener.callback(state);
         listeners.splice(c, 1);
+      } else if (state[IN_VIEWPORT] && !state[SCHEDULED_RUN_ID]) {
+        // There is unmet duration condition, schedule a check
+        const timeToWait = this.computeTimeToWait_(state, config);
+        if (timeToWait <= 0) {
+          continue;
+        }
+        state[SCHEDULED_RUN_ID] = this.timer_.delay(() => {
+          dev().assert(state[IN_VIEWPORT], 'should have been in viewport');
+          const lastChange = state[LAST_CHANGE_ENTRY];
+
+          if (this.updateCounters_(
+              lastChange.intersectionRatio * 100,
+              listener, /* shouldBeVisible */ true)) {
+            this.prepareStateForCallback_(state, lastChange.boundingClientRect);
+            listener.callback(state);
+            listeners.splice(listeners.indexOf(listener), 1);
+          }
+        }, timeToWait);
+      } else if (!state[IN_VIEWPORT] && state[SCHEDULED_RUN_ID]) {
+        this.timer_.cancel(state[SCHEDULED_RUN_ID]);
+        state[SCHEDULED_RUN_ID] = null;
       }
     }
 
@@ -387,8 +437,34 @@ export class Visibility {
     if (listeners.length == 0) {
       this.intersectionObserver_.unobserve(change.target);
     }
+  }
 
-    // TODO: support continuousTimeMin and totalTimeMin
+  /** @private */
+  onDocumentHidden_() {
+    for (let i = 0; i < this.resources_.length; i++) {
+      const resource = this.resources_[i];
+      if (!resource.hasLoadedOnce()) {
+        continue;
+      }
+
+      const listeners = this.listeners_[resource.getId()];
+      for (let j = listeners.length - 1; j >= 0; j--) {
+        const listener = listeners[j];
+        if (listener.shouldBeVisible) {
+          continue;
+        }
+
+        const state = listener.state;
+        const lastChange = state[LAST_CHANGE_ENTRY];
+        const lastVisible = lastChange ? lastChange.intersectionRatio * 100 : 0;
+        if (this.updateCounters_(
+                lastVisible, listener, /* shouldBeVisible */ false)) {
+          this.prepareStateForCallback_(state, lastChange.boundingClientRect);
+          listener.callback(state);
+          listeners.splice(j, 1);
+        }
+      }
+    }
   }
 
   /** @private */
@@ -430,6 +506,9 @@ export class Visibility {
           this.prepareStateForCallback_(listeners[c]['state'], br);
           listeners[c].callback(listeners[c]['state']);
           listeners.splice(c, 1);
+        } else {
+          this.computeTimeToWait_(
+              listeners[c]['state'], listeners[c]['config']);
         }
       }
 
@@ -511,29 +590,44 @@ export class Visibility {
       this.setState_(state, visible, 0);
     }
 
-    const waitForContinuousTime = config[CONTINUOUS_TIME_MIN]
-        ? config[CONTINUOUS_TIME_MIN] - state[CONTINUOUS_TIME]
-        : Infinity;
-    const waitForTotalTime = config[TOTAL_TIME_MIN]
-        ? config[TOTAL_TIME_MIN] - state[TOTAL_VISIBLE_TIME]
-        : Infinity;
-
-    // Wait for minimum of (previous timeToWait, positive values of
-    // waitForContinuousTime and waitForTotalTime).
-    this.timeToWait_ = Math.min(this.timeToWait_,
-        waitForContinuousTime > 0 ? waitForContinuousTime : Infinity,
-        waitForTotalTime > 0 ? waitForTotalTime : Infinity);
     listener['state'] = state;
 
     return ((triggerType && state[IN_VIEWPORT]) || !triggerType) &&
         (config[TOTAL_TIME_MIN] === undefined ||
-        state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
+            state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
         (config[TOTAL_TIME_MAX] === undefined ||
-         state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
+            state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
         (config[CONTINUOUS_TIME_MIN] === undefined ||
-         state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
+            state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
         (config[CONTINUOUS_TIME_MAX] === undefined ||
-         state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
+            state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
+  }
+
+  /**
+   * @param {!Object} state
+   * @param {!Object} config
+   * @return {number}
+   * @private
+   */
+  computeTimeToWait_(state, config) {
+    const waitForContinuousTime =
+        config[CONTINUOUS_TIME_MIN] > state[CONTINUOUS_TIME]
+            ? config[CONTINUOUS_TIME_MIN] - state[CONTINUOUS_TIME]
+            : 0;
+
+    const waitForTotalTime =
+        config[TOTAL_TIME_MIN] > state[TOTAL_VISIBLE_TIME]
+            ? config[TOTAL_TIME_MIN] - state[TOTAL_VISIBLE_TIME]
+            : 0;
+
+    // Wait for minimum of (previous timeToWait, positive values of
+    // waitForContinuousTime and waitForTotalTime).
+    this.timeToWait_ = Math.min(this.timeToWait_,
+        waitForContinuousTime || Infinity,
+        waitForTotalTime || Infinity);
+
+    // Return a max of wait time (used by V2)
+    return Math.max(waitForContinuousTime, waitForTotalTime);
   }
 
   /**
@@ -546,10 +640,6 @@ export class Visibility {
    * @private
    */
   isInViewport_(visible, min, max) {
-    if (min === undefined && max === undefined) {
-      return true;
-    }
-
     return !!(visible > (min || 0) && visible <= (max || 100));
   }
 
@@ -582,16 +672,13 @@ export class Visibility {
    * @private
    */
   prepareStateForCallback_(state, br) {
-    const perf = this.ampdoc.win.performance;
     const viewport = viewportForDoc(this.ampdoc);
 
     state[ELEMENT_X] = viewport.getScrollLeft() + br.left;
     state[ELEMENT_Y] = viewport.getScrollTop() + br.top;
     state[ELEMENT_WIDTH] = br.width;
     state[ELEMENT_HEIGHT] = br.height;
-    state[TOTAL_TIME] = perf && perf.timing && perf.timing.domInteractive
-        ? Date.now() - perf.timing.domInteractive
-        : '';
+    state[TOTAL_TIME] = this.getTotalTime_() || '';
 
     state[LOAD_TIME_VISIBILITY] = state[LOAD_TIME_VISIBILITY] || 0;
     if (state[MIN_VISIBLE] !== undefined) {
@@ -610,11 +697,20 @@ export class Visibility {
     delete state[LAST_UPDATE];
     delete state[IN_VIEWPORT];
     delete state[TIME_LOADED];
+    delete state[SCHEDULED_RUN_ID];
+    delete state[LAST_CHANGE_ENTRY];
 
     for (const k in state) {
       if (state.hasOwnProperty(k)) {
         state[k] = String(state[k]);
       }
     }
+  }
+
+  getTotalTime_() {
+    const perf = this.ampdoc.win.performance;
+    return perf && perf.timing && perf.timing.domInteractive
+        ? Date.now() - perf.timing.domInteractive
+        : null;
   }
 }

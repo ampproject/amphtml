@@ -36,19 +36,19 @@ describe('amp-hulu', () => {
   }
 
   it('renders', () => {
-    return getHulu('Bx6H30RBVFNpOe-iiOxp3A').then(hulu => {
+    return getHulu('4Dk5F2PYTtrgciuvloH3UA').then(hulu => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://secure.hulu.com/dash/mobile_embed.html?eid=Bx6H30RBVFNpOe-iiOxp3A');
+      expect(iframe.src).to.equal('https://secure.hulu.com/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA');
     });
   });
 
   it('renders responsively', () => {
-    return getHulu('Bx6H30RBVFNpOe-iiOxp3A', true).then(hulu => {
+    return getHulu('4Dk5F2PYTtrgciuvloH3UA', true).then(hulu => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

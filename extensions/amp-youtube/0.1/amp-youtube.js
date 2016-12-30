@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
@@ -75,7 +79,11 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.preload(this.getVideoIframeSrc_());
+    // NOTE: When preload `as=document` is natively supported in browsers
+    // we can switch to preloading the full source. For now this doesn't
+    // work, because we preload with a different type and in that case
+    // responses are only picked up if they are cacheable.
+    this.preconnect.url(this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
     this.preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
@@ -115,6 +123,9 @@ class AmpYoutube extends AMP.BaseElement {
     if (!this.getPlaceholder()) {
       this.buildImagePlaceholder_();
     }
+
+    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+    installVideoManagerForDoc(ampdoc);
   }
 
   /** @return {string} */

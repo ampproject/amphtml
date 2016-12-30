@@ -20,6 +20,7 @@ tags: {  # amp-image-lightbox
   spec_name: "amp-image-lightbox extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
+  also_requires_tag_warning: "amp-image-lightbox"
   attrs: {
     name: "async"
     mandatory: true

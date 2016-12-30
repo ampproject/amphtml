@@ -15,8 +15,9 @@
  */
 
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {ElementStub} from '../../src/element-stub';
 import {Observable} from '../../src/observable';
-import {adopt, adoptShadowMode} from '../../src/runtime';
+import {adopt, adoptShadowMode, installAmpdocServices} from '../../src/runtime';
 import {deactivateChunking} from '../../src/chunk';
 import {
   getServiceForDoc,
@@ -24,7 +25,7 @@ import {
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {parseUrl} from '../../src/url';
+import {installTimerService} from '../../src/service/timer-impl';
 import {platformFor} from '../../src/platform';
 import {runChunksForTesting} from '../../src/chunk';
 import {timerFor} from '../../src/timer';
@@ -35,39 +36,38 @@ import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
-describes.sandboxed('runtime', {}, env => {
-
+describes.fakeWin('runtime', {
+  location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
+}, env => {
   let win;
-  let sandbox;
   let ampdocService;
   let ampdocServiceMock;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
+    win = env.win;
     ampdocService = {
       isSingleDoc: () => true,
       getAmpDoc: () => null,
       installShadowDoc_: () => null,
     };
     ampdocServiceMock = sandbox.mock(ampdocService);
-    win = {
-      localStorage: {},
-      AMP: [],
-      location: parseUrl('https://cdn.ampproject.org/c/s/www.example.com/path'),
-      addEventListener: () => {},
-      document: window.document,
-      history: {},
-      navigator: {},
-      setTimeout: () => {},
-      Object,
-      HTMLElement,
-      services: {
-        ampdoc: {obj: ampdocService},
-      },
+    win.AMP = [];
+    win.services = {
+      ampdoc: {obj: ampdocService},
     };
-    ampdocService.getAmpDoc = () => new AmpDocSingle(win);
+    const ampdoc = new AmpDocSingle(win);
+    ampdocService.getAmpDoc = () => ampdoc;
     installPlatformService(win);
+    installTimerService(win);
+    installAmpdocServices(ampdoc);
   });
+
+  function regularExtension(fn) {
+    return {
+      n: 'extension for testing',
+      f: fn,
+    };
+  }
 
   afterEach(() => {
     ampdocServiceMock.verify();
@@ -85,6 +85,28 @@ describes.sandboxed('runtime', {}, env => {
     adoptShadowMode(win);
     expect(win.AMP.push).to.not.equal([].push);
     expect(win.AMP_TAG).to.be.true;
+  });
+
+  it('should install legacy stubs in single-doc', () => {
+    const initial = win.ampExtendedElements || {};
+    expect(initial['amp-ad']).to.be.undefined;
+    expect(initial['amp-embed']).to.be.undefined;
+    expect(initial['amp-video']).to.be.undefined;
+    adopt(win);
+    expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
+  });
+
+  it('should install legacy stubs in shadow-doc', () => {
+    const initial = win.ampExtendedElements || {};
+    expect(initial['amp-ad']).to.be.undefined;
+    expect(initial['amp-embed']).to.be.undefined;
+    expect(initial['amp-video']).to.be.undefined;
+    adoptShadowMode(win);
+    expect(win.ampExtendedElements['amp-ad']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+    expect(win.ampExtendedElements['amp-video']).to.equal(ElementStub);
   });
 
   it('should NOT set cursor:pointer on document element on non-IOS', () => {
@@ -111,39 +133,39 @@ describes.sandboxed('runtime', {}, env => {
   it('should execute scheduled extensions & execute new extensions', () => {
     let progress = '';
     const queueExtensions = win.AMP;
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '1';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '2';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '3';
-    });
+    }));
     expect(queueExtensions).to.have.length(3);
     adopt(win);
     runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('123');
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '4';
-    });
+    }));
     runChunksForTesting(win.document);
     expect(progress).to.equal('1234');
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '5';
-    });
+    }));
     runChunksForTesting(win.document);
     expect(progress).to.equal('12345');
     expect(queueExtensions).to.have.length(0);
   });
 
-  it('should execute function and struct AMP.push callbacks', () => {
+  it('support struct AMP.push raw functions and high priority', () => {
     // New format: {n:string, f:function()}.
     let progress = '';
     const queueExtensions = win.AMP;
@@ -154,40 +176,52 @@ describes.sandboxed('runtime', {}, env => {
       progress += '1';
     });
     win.AMP.push({
-      n: 'ext1',
+      n: 'ext2',
+      p: 'high',
       f: amp => {
         expect(amp).to.equal(win.AMP);
-        progress += 'A';
+        progress += 'HIGH';
       },
     });
     expect(queueExtensions).to.have.length(2);
     expect(progress).to.equal('');
     adopt(win);
-    runChunksForTesting(win.document);
     expect(queueExtensions).to.have.length(0);
-    expect(progress).to.equal('1A');
+    return Promise.resolve().then(() => {
+      expect(progress).to.equal('1HIGH');
+      win.AMP.push({
+        n: 'ext1',
+        f: amp => {
+          expect(amp).to.equal(win.AMP);
+          progress += 'A';
+        },
+      });
+      runChunksForTesting(win.document);
+      expect(progress).to.equal('1HIGHA');
 
-    // Runtime mode.
-    win.AMP.push(amp => {
-      expect(amp).to.equal(win.AMP);
-      progress += '2';
-    });
-    win.AMP.push({
-      n: 'ext2',
-      f: amp => {
+      // Runtime mode.
+      win.AMP.push(amp => {
         expect(amp).to.equal(win.AMP);
-        progress += 'B';
-      },
+        progress += '2';
+      });
+      win.AMP.push({
+        n: 'ext2',
+        f: amp => {
+          expect(amp).to.equal(win.AMP);
+          progress += 'B';
+        },
+      });
+      return Promise.resolve().then(() => {
+        expect(queueExtensions).to.have.length(0);
+
+        expect(progress).to.equal('1HIGHAB2');
+
+        const extensions = ext.installExtensionsService(win);
+        const ext1 = extensions.waitForExtension('ext1');
+        const ext2 = extensions.waitForExtension('ext2');
+        return Promise.all([ext1, ext2]);
+      });
     });
-    runChunksForTesting(win.document);
-    expect(queueExtensions).to.have.length(0);
-
-    expect(progress).to.equal('1A2B');
-
-    const extensions = ext.installExtensionsService(win);
-    const ext1 = extensions.waitForExtension('ext1');
-    const ext2 = extensions.waitForExtension('ext2');
-    return Promise.all([ext1, ext2]);
   });
 
   it('should wait for body before processing extensions', () => {
@@ -198,32 +232,29 @@ describes.sandboxed('runtime', {}, env => {
 
     let progress = '';
     const queueExtensions = win.AMP;
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '1';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '2';
-    });
-    win.AMP.push(amp => {
+    }));
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '3';
-    });
-    expect(queueExtensions).to.have.length(3);
+    }));
     adopt(win);
     runChunksForTesting(win.document);
     // Extensions are still unprocessed
-    expect(queueExtensions).to.have.length(3);
     expect(progress).to.equal('');
 
     // Add one more
-    win.AMP.push(amp => {
+    win.AMP.push(regularExtension(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '4';
-    });
+    }));
     runChunksForTesting(win.document);
-    expect(queueExtensions).to.have.length(3);
     expect(progress).to.equal('');
 
     // Body is available now.
@@ -235,15 +266,15 @@ describes.sandboxed('runtime', {}, env => {
 
   it('should be robust against errors in early extensions', () => {
     let progress = '';
-    win.AMP.push(() => {
+    win.AMP.push(regularExtension(() => {
       progress += '1';
-    });
-    win.AMP.push(() => {
+    }));
+    win.AMP.push(regularExtension(() => {
       throw new Error('extension error');
-    });
-    win.AMP.push(() => {
+    }));
+    win.AMP.push(regularExtension(() => {
       progress += '3';
-    });
+    }));
     adopt(win);
     expect(() => {
       runChunksForTesting(win.document);
@@ -879,10 +910,10 @@ describes.realWin('runtime multidoc', {
       const viewer = getServiceForDoc(ampdoc, 'viewer');
       const broadcastReceived = sandbox.spy();
       viewer.onBroadcast(broadcastReceived);
-      const onMessage = sandbox.spy();
+      const onMessage = sandbox.stub();
       amp.onMessage(function(eventType, data) {
         if (eventType == 'ignore' || eventType == 'documentLoaded') {
-          return undefined;
+          return Promise.resolve();
         }
         return onMessage(eventType, data);
       });
@@ -891,7 +922,7 @@ describes.realWin('runtime multidoc', {
 
     it('should broadcast to all but sender', () => {
       doc1.viewer.broadcast({test: 1});
-      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+      return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
         return timer.promise(0);
       }).then(() => {
         // Sender is not called.
@@ -913,7 +944,7 @@ describes.realWin('runtime multidoc', {
     it('should stop broadcasting after close', () => {
       doc3.amp.close();
       doc1.viewer.broadcast({test: 1});
-      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+      return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
         return timer.promise(0);
       }).then(() => {
         // Sender is not called, closed is not called.
@@ -929,7 +960,7 @@ describes.realWin('runtime multidoc', {
     it('should stop broadcasting after force-close', () => {
       doc3.hostElement.parentNode.removeChild(doc3.hostElement);
       doc1.viewer.broadcast({test: 1});
-      return doc1.viewer.sendMessage('ignore', {}).then(() => {
+      return doc1.viewer.sendMessageAwaitResponse('ignore', {}).then(() => {
         return timer.promise(0);
       }).then(() => {
         // Sender is not called, closed is not called.
@@ -942,14 +973,17 @@ describes.realWin('runtime multidoc', {
       });
     });
 
+
     it('should send message', () => {
-      return doc1.viewer.sendMessage('test3', {test: 3}).then(() => {
-        return timer.promise(0);
-      }).then(() => {
-        expect(doc1.onMessage).to.be.calledOnce;
-        expect(doc1.onMessage.args[0][0]).to.equal('test3');
-        expect(doc1.onMessage.args[0][1]).to.deep.equal({test: 3});
-      });
+      doc1.onMessage.returns(Promise.resolve());
+      return doc1.viewer.sendMessageAwaitResponse('test3', {test: 3}).then(
+          () => {
+            return timer.promise(0);
+          }).then(() => {
+            expect(doc1.onMessage).to.be.calledOnce;
+            expect(doc1.onMessage.args[0][0]).to.equal('test3');
+            expect(doc1.onMessage.args[0][1]).to.deep.equal({test: 3});
+          });
     });
 
     it('should receive message', () => {

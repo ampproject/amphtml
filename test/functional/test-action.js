@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import {ActionService, parseActionMap} from '../../src/service/action-impl';
+import {
+  ActionService,
+  applyActionInfoArgs,
+  parseActionMap,
+} from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
 
@@ -63,7 +68,7 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key1']()).to.equal('value1');
   });
 
   it('should parse with multiple args', () => {
@@ -71,8 +76,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value2');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value2');
   });
 
   it('should parse with multiple args with whitespace', () => {
@@ -81,8 +86,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value2');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value2');
   });
 
   it('should parse with no args', () => {
@@ -107,8 +112,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value (2)\'');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value (2)\'');
   });
 
   it('should parse with single-quoted args', () => {
@@ -117,8 +122,8 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
-    expect(a.args['key2']).to.equal('value (2)"');
+    expect(a.args['key1']()).to.equal('value1');
+    expect(a.args['key2']()).to.equal('value (2)"');
   });
 
   it('should parse with args with trailing comma', () => {
@@ -127,23 +132,23 @@ describe('ActionService parseAction', () => {
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
-    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key1']()).to.equal('value1');
     expect(Object.keys(a.args)).to.have.length(1);
   });
 
   it('should parse with boolean args', () => {
-    expect(parseAction('e:t.m(k=true)').args['k']).to.equal(true);
-    expect(parseAction('e:t.m(k=false)').args['k']).to.equal(false);
+    expect(parseAction('e:t.m(k=true)').args['k']()).to.equal(true);
+    expect(parseAction('e:t.m(k=false)').args['k']()).to.equal(false);
   });
 
   it('should parse with numeric args', () => {
-    expect(parseAction('e:t.m(k=123)').args['k']).to.equal(123);
-    expect(parseAction('e:t.m(k=1.23)').args['k']).to.equal(1.23);
-    expect(parseAction('e:t.m(k=.123)').args['k']).to.equal(.123);
+    expect(parseAction('e:t.m(k=123)').args['k']()).to.equal(123);
+    expect(parseAction('e:t.m(k=1.23)').args['k']()).to.equal(1.23);
+    expect(parseAction('e:t.m(k=.123)').args['k']()).to.equal(.123);
   });
 
   it('should parse with term semicolon', () => {
-    expect(parseAction('e:t.m(k=1); ').args['k']).to.equal(1);
+    expect(parseAction('e:t.m(k=1); ').args['k']()).to.equal(1);
   });
 
   it('should parse with args as a proto-less object', () => {
@@ -154,8 +159,85 @@ describe('ActionService parseAction', () => {
     expect(parseAction('true:t.m').event).to.equal('true');
     expect(parseAction('e:true.m').target).to.equal('true');
     expect(parseAction('e:t.true').method).to.equal('true');
-    expect(parseAction('e:t.m(true=1)').args['true']).to.equal(1);
-    expect(parseAction('e:t.m(01=1)').args['01']).to.equal(1);
+    expect(parseAction('e:t.m(true=1)').args['true']()).to.equal(1);
+    expect(parseAction('e:t.m(01=1)').args['01']()).to.equal(1);
+  });
+
+  it('should dereference vars in arg value identifiers', () => {
+    const data = {foo: {bar: 'baz'}};
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(a.args['key1']()).to.equal(null);
+    expect(a.args['key1'](data)).to.equal('baz');
+  });
+
+  it('should NOT dereference vars in identifiers without "." operator', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    expect(a.args['key1']({foo: 'bar'})).to.equal('foo');
+  });
+
+  it('should NOT dereference vars in arg value strings', () => {
+    const a = parseAction('e:t.m(key1="abc")');
+    expect(a.args['key1']()).to.equal('abc');
+    expect(a.args['key1']({foo: 'bar'})).to.equal('abc');
+    expect(() => {
+      parseAction('e:t.m(key1="abc".foo)');
+    }).to.throw(/Expected either/);
+  });
+
+  it('should NOT dereference vars in arg value booleans', () => {
+    const a = parseAction('e:t.m(key1=true)');
+    expect(a.args['key1']()).to.equal(true);
+    expect(a.args['key1']({true: 'bar'})).to.equal(true);
+    expect(() => {
+      parseAction('e:t.m(key1=true.bar)');
+    }).to.throw(/Expected either/);
+  });
+
+  it('should NOT dereference vars in arg value numerics', () => {
+    const a = parseAction('e:t.m(key1=123)');
+    expect(a.args['key1']()).to.equal(123);
+    expect(a.args['key1']({123: 'bar'})).to.equal(123);
+    expect(() => {
+      parseAction('e:t.m(key1=123.bar)');
+    }).to.throw(/Expected either/);
+  });
+
+  it('should return null for undefined references in arg values', () => {
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(a.args['key1'](null)).to.equal(null);
+    expect(a.args['key1']({})).to.equal(null);
+    expect(a.args['key1']({foo: null})).to.equal(null);
+  });
+
+  it('should NOT dereference non-primitives in arg values', () => {
+    const a = parseAction('e:t.m(key1=foo.bar)');
+    expect(a.args['key1']({foo: {bar: undefined}})).to.equal(null);
+    expect(a.args['key1']({foo: {bar: {}}})).to.equal(null);
+    expect(a.args['key1']({foo: {bar: []}})).to.equal(null);
+    expect(a.args['key1']({foo: {bar: () => {}}})).to.equal(null);
+  });
+
+  it('should apply arg functions with no event', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    expect(applyActionInfoArgs(a.args, null)).to.deep.equal({key1: 'foo'});
+  });
+
+  it('applied arg values should be proto-less objects', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    expect(applyActionInfoArgs(a.args, null).__proto__).to.be.undefined;
+    expect(applyActionInfoArgs(a.args, null).constructor).to.be.undefined;
+  });
+
+  it('should apply arg value functions with an event with data', () => {
+    const a = parseAction('e:t.m(key1=event.foo)');
+    const event = new CustomEvent('MyEvent', {detail: {foo: 'bar'}});
+    expect(applyActionInfoArgs(a.args, event)).to.deep.equal({key1: 'bar'});
+  });
+
+  it('should apply arg value functions with an event without data', () => {
+    const a = parseAction('e:t.m(key1=foo)');
+    const event = new CustomEvent('MyEvent');
+    expect(applyActionInfoArgs(a.args, event)).to.deep.equal({key1: 'foo'});
   });
 
   it('should parse empty to null', () => {
@@ -224,7 +306,6 @@ describe('ActionService parseAction', () => {
   });
 });
 
-
 describe('Action parseActionMap', () => {
 
   it('should parse with a single action', () => {
@@ -252,14 +333,51 @@ describe('Action parseActionMap', () => {
 });
 
 
-describe('Action findAction', () => {
+describes.sandboxed('Action adoptEmbedWindow', {}, () => {
+  let win;
+  let action;
+  let embedWin;
 
+  beforeEach(() => {
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
+    embedWin = {
+      frameElement: document.createElement('div'),
+      document: document.implementation.createHTMLDocument(''),
+    };
+    setParentWindow(embedWin, win);
+  });
+
+  it('should create embedded action service', () => {
+    action.adoptEmbedWindow(embedWin);
+    const embedService = embedWin.services.action
+        && embedWin.services.action.obj;
+    expect(embedService).to.exist;
+    expect(embedService.ampdoc).to.equal(action.ampdoc);
+    expect(embedService.root_).to.equal(embedWin.document);
+  });
+});
+
+
+describe('Action findAction', () => {
   let sandbox;
+  let win;
   let action;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
   });
 
   afterEach(() => {
@@ -313,15 +431,21 @@ describe('Action findAction', () => {
 
 
 describe('Action method', () => {
-
   let sandbox;
+  let win;
   let action;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
@@ -421,8 +545,8 @@ describe('Action method', () => {
 
 
 describe('Action interceptor', () => {
-
   let sandbox;
+  let win;
   let clock;
   let action;
   let target;
@@ -430,7 +554,13 @@ describe('Action interceptor', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
   });
@@ -509,14 +639,20 @@ describe('Action interceptor', () => {
 
 
 describe('Action common handler', () => {
-
   let sandbox;
+  let win;
   let action;
   let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
@@ -546,15 +682,64 @@ describe('Action common handler', () => {
 });
 
 
+describes.sandboxed('Action global target', {}, () => {
+  let win;
+  let action;
+
+  beforeEach(() => {
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
+  });
+
+  it('should register global target', () => {
+    const target1 = sandbox.spy();
+    const target2 = sandbox.spy();
+    const event = {};
+    action.addGlobalTarget('target1', target1);
+    action.addGlobalTarget('target2', target2);
+
+    const element = document.createElement('div');
+    element.setAttribute('on', 'tap:target1.action1(a=b)');
+    action.trigger(element, 'tap', event);
+    expect(target2).to.not.be.called;
+    expect(target1).to.be.calledOnce;
+    const inv = target1.args[0][0];
+    expect(inv.target).to.equal(document);
+    expect(inv.method).to.equal('action1');
+    expect(inv.source).to.equal(element);
+    expect(inv.event).to.equal(event);
+    expect(inv.args['a']).to.equal('b');
+
+    const element2 = document.createElement('div');
+    element2.setAttribute('on', 'tap:target2.action1');
+    action.trigger(element2, 'tap', event);
+    expect(target2).to.be.calledOnce;
+    expect(target1).to.be.calledOnce;
+  });
+});
+
+
 describe('Core events', () => {
   let sandbox;
+  let win;
   let action;
   let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     sandbox.stub(window.document, 'addEventListener');
-    action = new ActionService(new AmpDocSingle(window));
+    win = {
+      document: {body: {}},
+      services: {
+        vsync: {obj: {}},
+      },
+    };
+    action = new ActionService(new AmpDocSingle(win), document);
     sandbox.stub(action, 'trigger');
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');

@@ -28,6 +28,7 @@ import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import {resetExperimentTogglesForTesting} from '../src/experiments';
 import * as describes from '../testing/describes';
 
 
@@ -179,7 +180,6 @@ function beforeTest() {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  window.ampExtendedElements = {};
   const ampdocService = installDocService(window, true);
   const ampdoc = ampdocService.getAmpDoc(window.document);
   installRuntimeServices(window);
@@ -206,7 +206,6 @@ afterEach(function() {
     }
   }
   window.localStorage.clear();
-  window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
@@ -229,6 +228,7 @@ afterEach(function() {
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
+  resetExperimentTogglesForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

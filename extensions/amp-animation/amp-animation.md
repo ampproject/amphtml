@@ -48,11 +48,11 @@ An `amp-animation` element defines such an animation as a JSON structure.
 
 The top-level object defines an overall animation process which consists of an arbitrary number of animation components
 defined as an `animations` array:
-```
+```html
 <amp-animation layout="nodisplay">
 <script type="application/json">
 {
-  // Timiing properties
+  // Timing properties
   ...
   "animations": [
     {
@@ -68,22 +68,37 @@ defined as an `animations` array:
 </amp-animation>
 ```
 
+### Placement in DOM
+
+Initially, `<amp-animation>` is only allowed to be placed as a direct child of `<body>` element. This restriction
+will be removed in the near future.
+
 ### Animation component
 
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
  - Target element referenced by ID
+ - Media query
  - Timing properties
  - Keyframes
 
-```
+```text
 {
   "target": "element-id",
+  "media": "(min-width:300px)",
   // Timing properties
   ...
   "keyframes": []
 }
 ```
+
+### Media query
+
+Media query can be specified using the `media` property. This attribute can contain any expression allowed
+for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API.
+
+If value is specified for an animation component, the animation component will only be included if the
+media query will match the current environment.
 
 ### Timing properties
 
@@ -102,7 +117,7 @@ Property | Type | Default | Description
 `fill` | string | "none" | One of "none", "forwards", "backwards", "both", "auto"
 
 An example of timing properties in JSON:
-```
+```text
 {
   ...
   "duration": 1000,
@@ -122,14 +137,14 @@ Keyframes can be specified in numerous ways described in the [keyframes section]
 Some typical examples of keyframes definitions are below.
 
 Shorthand object-form "to" format specifies the final state at 100%:
-```
+```text
 {
   "keyframes": {"opacity": 0, "transform": "scale(2)"}
 }
 ```
 
 Shorthand object-form "from-to" format specifies the starting and final states at 0 and 100%:
-```
+```text
 {
   "keyframes": {
     "opacity": [1, 0],
@@ -139,7 +154,7 @@ Shorthand object-form "from-to" format specifies the starting and final states a
 ```
 
 Shorthand object-form "value-array" format specifies multiple values for starting, final states and multiple (equal-spaced) offsets:
-```
+```text
 {
   "keyframes": {
     "opacity": [1, 0.1, 0],
@@ -149,7 +164,7 @@ Shorthand object-form "value-array" format specifies multiple values for startin
 ```
 
 The array-form specifies keyframes. Offsets are assigned automatically at 0, 100% and spaced evenly in-between:
-```
+```text
 {
   "keyframes": [
     {"opacity": 1, "transform": "scale(1)"},
@@ -159,7 +174,7 @@ The array-form specifies keyframes. Offsets are assigned automatically at 0, 100
 ```
 
 The array-form can also include "offset" explicitly:
-```
+```text
 {
   "keyframes": [
     {"opacity": 1, "transform": "scale(1)"},
@@ -170,7 +185,7 @@ The array-form can also include "offset" explicitly:
 ```
 
 The array-form can also include "easing":
-```
+```text
 {
   "keyframes": [
     {"easing": "ease-out", "opacity": 1, "transform": "scale(1)"},
@@ -198,7 +213,7 @@ Notice that the use of vendor prefixed CSS properties is neither needed nor allo
 
 If the animation only involves a single element and a single keyframes effect is sufficient, the configuration
 can be reduced to this one animation component only. For instance:
-```
+```html
 <amp-animation layout="nodisplay">
 <script type="application/json">
 {
@@ -212,7 +227,7 @@ can be reduced to this one animation component only. For instance:
 
 If the animation is comprised of a list of components, but doesn't have top-level animation, the configuration
 can be reduced to an array of components. For instance:
-```
+```html
 <amp-animation layout="nodisplay">
 <script type="application/json">
 [
@@ -234,12 +249,27 @@ can be reduced to an array of components. For instance:
 
 ## Triggering animation
 
-The animation can be triggered via an `on` action. For instance:
+The animation can be triggered via a `trigger` attribute or an `on` action.
 
+**`trigger` attribute**
+
+Currently, `visibility` is the only available value for the `trigger` attribute. The `visibility` triggers when the underlying document or embed are visible (in viewport).
+
+For instance:
+```html
+<amp-animation id="anim1" layout="nodisplay"
+    trigger="visibility">
+  ...
+</amp-animation>
 ```
-<amp-animation id="anim1" layout="nodisplay"></amp-animation>
+
+**`on` action**
+
+For instance:
+
+```html
+<amp-animation id="anim1" layout="nodisplay">
+  ...
+</amp-animation>
 <button on="tap:anim1.activate">Animate</button>
 ```
-
-More triggering mechanisms will be added in the future, including visibility triggers.
-

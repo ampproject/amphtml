@@ -53,6 +53,7 @@ describe('Resource', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      disconnectedCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
       getPriority: () => 2,
       dispatchCustomEvent: () => {},
@@ -502,6 +503,22 @@ describe('Resource', () => {
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
   });
 
+  it('should update priority', () => {
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(2);
+    expect(resource.getPriority()).to.equal(2);
+
+    resource.updatePriority(3);
+    expect(resource.getPriority()).to.equal(3);
+
+    resource.updatePriority(1);
+    expect(resource.getPriority()).to.equal(1);
+
+    resource.updatePriority(0);
+    expect(resource.getPriority()).to.equal(0);
+  });
+
 
   describe('setInViewport', () => {
     it('should call viewportCallback when not built', () => {
@@ -723,6 +740,14 @@ describe('Resource', () => {
         resource.pauseOnRemove();
         expect(resource.isInViewport_).to.equal(false);
         expect(resource.paused_).to.equal(true);
+      });
+
+      it('should call disconnectedCallback on remove for built ele', () => {
+        expect(Resource.forElementOptional(resource.element))
+            .to.equal(resource);
+        elementMock.expects('disconnectedCallback').once();
+        resource.disconnect();
+        expect(Resource.forElementOptional(resource.element)).to.not.exist;
       });
     });
   });

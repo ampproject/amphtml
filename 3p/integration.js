@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {initLogConstructor, user} from '../src/log';
+import {dev, initLogConstructor, user} from '../src/log';
 import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
@@ -60,11 +60,14 @@ import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
+import {caajainfeed} from '../ads/caajainfeed';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
+import {csa} from '../ads/google/csa';
+import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
@@ -72,6 +75,7 @@ import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
+import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
 import {holder} from '../ads/holder';
@@ -98,6 +102,7 @@ import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {plista} from '../ads/plista';
+import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -116,6 +121,7 @@ import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
+import {xrostssp} from '../ads/xrostssp';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yieldbot} from '../ads/yieldbot';
@@ -138,8 +144,25 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
-const data = parseFragment(location.hash);
-window.context = data._context;
+// Need to cache iframeName as it will be potentially overwritten by
+// masterSelection, as per below.
+const iframeName = window.name;
+
+let data = parseFragment(location.hash);
+if (data && data._context) {
+  window.context = data._context;
+} else {
+  try {
+    // TODO(bradfrizzell@): Change the data structure of the attributes
+    //    to make it less terrible.
+    data = JSON.parse(iframeName).attributes;
+    window.context = data._context;
+  } catch (err) {
+    window.context = {};
+    dev().info(
+        'INTEGRATION', 'Could not parse context from:', iframeName);
+  }
+}
 
 // This should only be invoked after window.context is set
 initLogConstructor();
@@ -170,11 +193,14 @@ register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
+register('caajainfeed', caajainfeed);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
 register('contentad', contentad);
 register('criteo', criteo);
+register('csa', csa);
+register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eplanning', eplanning);
@@ -183,6 +209,7 @@ register('f1e', f1e);
 register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
+register('fusion', fusion);
 register('genieessp', genieessp);
 register('gmossp', gmossp);
 register('holder', holder);
@@ -211,6 +238,7 @@ register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
 register('plista', plista);
+register('popin', popin);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -231,6 +259,7 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('xlift' , xlift);
+register('xrostssp', xrostssp);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
@@ -372,6 +401,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.reportRenderedEntityIdentifier =
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
+    window.context.addContextToIframe = iframe => {
+      iframe.name = iframeName;
+    };
     delete data._context;
     manageWin(window);
     installEmbedStateListener();
@@ -581,18 +613,22 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {!JSONType}
+ * @return {?JSONType}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
-  let json = fragment.substr(1);
-  // Some browser, notably Firefox produce an encoded version of the fragment
-  // while most don't. Since we know how the string should start, this is easy
-  // to detect.
-  if (json.indexOf('{%22') == 0) {
-    json = decodeURIComponent(json);
+  try {
+    let json = fragment.substr(1);
+    // Some browser, notably Firefox produce an encoded version of the fragment
+    // while most don't. Since we know how the string should start, this is easy
+    // to detect.
+    if (json.indexOf('{%22') == 0) {
+      json = decodeURIComponent(json);
+    }
+    return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
+  } catch (err) {
+    return null;
   }
-  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
 }
 
 /**

@@ -1,41 +1,40 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *      http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS-IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
 
-import {BaseElement} from '../src/base-element';
-import {assertHttpsUrl} from '../src/url';
-import {isLayoutSizeDefined} from '../src/layout';
-import {registerElement} from '../src/custom-element';
-import {getMode} from '../src/mode';
-import {dev} from '../src/log';
-import {VideoEvents} from '../src/video-interface';
-import {videoManagerForDoc} from '../src/video-manager';
+import {ampdocServiceFor} from '../../../src/ampdoc';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {getMode} from '../../../src/mode';
+import {dev} from '../../../src/log';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {VideoEvents} from '../../../src/video-interface';
+import {videoManagerForDoc} from '../../../src/video-manager';
+import {assertHttpsUrl} from '../../../src/url';
+
+const TAG = 'amp-video';
 
 /**
- * @param {!Window} win Destination window for the new element.
- * @this {undefined}  // Make linter happy
- * @return {undefined}
+ * @implements {../../../src/video-interface.VideoInterface}
  */
-export function installVideo(win) {
+class AmpVideo extends AMP.BaseElement {
 
-  /**
-   * @implements {../src/video-interface.VideoInterface}
-   */
-  class AmpVideo extends BaseElement {
-
-    /** @param {!AmpElement} element */
+    /**
+     * @param {!AmpElement} element
+     */
     constructor(element) {
       super(element);
 
@@ -69,6 +68,8 @@ export function installVideo(win) {
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
+      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      installVideoManagerForDoc(ampdoc);
       videoManagerForDoc(this.win.document).register(this);
     }
 
@@ -153,7 +154,17 @@ export function installVideo(win) {
      * @override
      */
     play(unusedIsAutoplay) {
-      this.video_.play();
+      const ret = this.video_.play();
+
+      if (ret && ret.catch) {
+        ret.catch(() => {
+          // Empty catch to prevent useless unhandled promise rejection logging.
+          // Play can fail for many reasons such as video getting paused before
+          // play() is finished.
+          // We use events to know the state of the video and do not care about
+          // the success or failure of the play()'s returned promise.
+        });
+      }
     }
 
     /**
@@ -190,7 +201,6 @@ export function installVideo(win) {
     hideControls() {
       this.video_.controls = false;
     }
-  }
-
-  registerElement(win, 'amp-video', AmpVideo);
 }
+
+AMP.registerElement(TAG, AmpVideo);

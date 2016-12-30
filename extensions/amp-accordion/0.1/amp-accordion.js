@@ -19,7 +19,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
-import {map} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-accordion-session-state-optout';
@@ -111,7 +111,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Get previous state from sessionStorage.
-   * @return {!Object|null}
+   * @return {!Object}
    * @private
    */
   getSessionState_() {
@@ -122,8 +122,9 @@ class AmpAccordion extends AMP.BaseElement {
       const sessionStr =
           this.win./*OK*/sessionStorage.getItem(
           dev().assertString(this.sessionId_));
-      return /** @type {!Object} */ (
-          JSON.parse(dev().assertString(sessionStr)));
+      return sessionStr
+          ? /** @type {!Object} */ (JSON.parse(dev().assertString(sessionStr)))
+          : map();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
       return map();

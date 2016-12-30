@@ -23,7 +23,19 @@ import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
 import {isProxyOrigin} from './url';
 
+
+/**
+ * @const {string}
+ */
 const CANCELLED = 'CANCELLED';
+
+
+/**
+ * The threshold for throttling load errors. Currently at 0.1%.
+ * @const {number}
+ */
+const LOAD_ERROR_THRESHOLD = 1e-3;
+
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -39,15 +51,15 @@ self.AMPErrors = accumulatedErrorMessages;
  * @param {function()} work the function to execute after backoff
  * @return {number} the setTimeout id
  */
-let globalExponentialBackoff = function(work) {
-  // Set globalExponentialBackoff as the lazy-created function. JS Vooodoooo.
-  globalExponentialBackoff = exponentialBackoff(1.5);
-  return globalExponentialBackoff(work);
+let reportingBackoff = function(work) {
+  // Set reportingBackoff as the lazy-created function. JS Vooodoooo.
+  reportingBackoff = exponentialBackoff(1.5);
+  return reportingBackoff(work);
 };
 
 /**
  * Reports an error. If the error has an "associatedElement" property
- * the element is marked with the -amp-element-error and displays
+ * the element is marked with the `i-amphtml-element-error` and displays
  * the message itself. The message is always send to the console.
  * If the error has a "messageArray" property, that array is logged.
  * This way one gets the native fidelity of the console for things like
@@ -87,9 +99,9 @@ export function reportError(error, opt_associatedElement) {
   // Update element.
   const element = opt_associatedElement || error.associatedElement;
   if (element && element.classList) {
-    element.classList.add('-amp-error');
+    element.classList.add('i-amphtml-error');
     if (getMode().development) {
-      element.classList.add('-amp-element-error');
+      element.classList.add('i-amphtml-element-error');
       element.setAttribute('error-message', error.message);
     }
   }
@@ -102,7 +114,9 @@ export function reportError(error, opt_associatedElement) {
     } else {
       if (element) {
         (console.error || console.log).call(console,
-            element.tagName + '#' + element.id, error.message);
+            element.tagName.toLowerCase() +
+                (element.id ? ' with id ' + element.id : '') + ':',
+            error.message);
       } else if (!getMode().minified) {
         (console.error || console.log).call(console, error.stack);
       } else {
@@ -175,11 +189,11 @@ function reportErrorToServer(message, filename, line, col, error) {
   }
   const url = getErrorReportUrl(message, filename, line, col, error,
       hasNonAmpJs);
-  globalExponentialBackoff(() => {
-    if (url) {
+  if (url) {
+    reportingBackoff(() => {
       new Image().src = url;
-    }
-  });
+    });
+  }
 }
 
 /**
@@ -195,12 +209,22 @@ function reportErrorToServer(message, filename, line, col, error) {
  */
 export function getErrorReportUrl(message, filename, line, col, error,
     hasNonAmpJs) {
+  let expected = false;
   if (error) {
     if (error.message) {
       message = error.message;
     } else {
       // This should never be a string, but sometimes it is.
       message = String(error);
+    }
+    // An "expected" error is still an error, i.e. some features are disabled
+    // or not functioning fully because of it. However, it's an expected
+    // error. E.g. as is the case with some browser API missing (storage).
+    // Thus, the error can be classified differently by log aggregators.
+    // The main goal is to monitor that an "expected" error doesn't deteriorate
+    // over time. It's impossible to completely eliminate it.
+    if (error.expected) {
+      expected = true;
     }
   }
   if (!message) {
@@ -212,8 +236,15 @@ export function getErrorReportUrl(message, filename, line, col, error,
   if (message == CANCELLED) {
     return;
   }
+
+  // Load errors are always "expected".
   if (isLoadErrorMessage(message)) {
-    return;
+    expected = true;
+
+    // Throttle load errors.
+    if (Math.random() > LOAD_ERROR_THRESHOLD) {
+      return;
+    }
   }
 
   // This is the App Engine app in
@@ -225,6 +256,11 @@ export function getErrorReportUrl(message, filename, line, col, error,
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);
+  if (expected) {
+    // Errors are tagged with "ex" ("expected") label to allow loggers to
+    // classify these errors as benchmarks and not exceptions.
+    url += '&ex=1';
+  }
   if (self.context && self.context.location) {
     url += '&3p=1';
   }

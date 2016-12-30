@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
-import {installVideo} from '../../builtins/amp-video';
-import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
+import {createIframePromise} from '../../../../testing/iframe';
+import '../amp-video';
 import * as sinon from 'sinon';
 
-describe('amp-video', () => {
+const TAG = 'amp-video';
+
+describe(TAG, () => {
 
   let sandbox;
 
@@ -38,9 +39,7 @@ describe('amp-video', () => {
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
-          installVideoManagerForDoc(iframe.win.document);
-          installVideo(iframe.win);
-          const v = iframe.doc.createElement('amp-video');
+          const v = iframe.doc.createElement(TAG);
           for (const key in attributes) {
             v.setAttribute(key, attributes[key]);
           }
@@ -286,6 +285,22 @@ describe('amp-video', () => {
       const impl = v.implementation_;
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback.calledWith(true)).to.be.true;
+    });
+  });
+
+  it('play() should not log promise rejections', () => {
+    const playPromise = Promise.reject('The play() request was interrupted');
+    const catchSpy = sandbox.spy(playPromise, 'catch');
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+    }, null, function(element) {
+      const impl = element.implementation_;
+      sandbox.stub(impl.video_, 'play').returns(playPromise);
+      impl.play();
+    }).then(() => {
+      expect(catchSpy.called).to.be.true;
     });
   });
 

@@ -44,6 +44,7 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
+const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
@@ -71,14 +72,11 @@ export class GlobalVariableSource extends VariableSource {
     /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, string>>} */
-    this.variants_ = variantForOrNull(this.ampdoc.win);
+    /** @private {?Promise<?Object<string, string>>} */
+    this.variants_ = null;
 
-    /**
-     * @private @const {
-     *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
-     */
-    this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
+    /** @private {?Promise<?ShareTrackingFragmentsDef>} */
+    this.shareTrackingFragments_ = null;
   }
 
   /**
@@ -254,53 +252,45 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns assigned variant name for the given experiment.
-    this.setAsync('VARIANT', experiment => {
-      return this.variants_.then(variants => {
-        user().assert(variants,
-            'To use variable VARIANT, amp-experiment should be configured');
+    this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
+      return this.getVairiantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : /** @type {string} */(variant);
-      });
-    });
+      }, 'VARIANT');
+    }));
 
     // Returns all assigned experiment variants in a serialized form.
-    this.setAsync('VARIANTS', () => {
-      return this.variants_.then(variants => {
-        user().assert(variants,
-            'To use variable VARIANTS, amp-experiment should be configured');
-
+    this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
+      return this.getVairiantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
           const variant = variants[experiment];
           experiments.push(
               experiment + VARIANT_DELIMITER + (variant || 'none'));
         }
-
         return experiments.join(EXPERIMENT_DELIMITER);
-      });
-    });
+      }, 'VARIANTS');
+    }));
 
     // Returns incoming share tracking fragment.
-    this.setAsync('SHARE_TRACKING_INCOMING', () => {
-      return this.shareTrackingFragments_.then(fragments => {
-        user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
-            'amp-share-tracking should be configured');
-        return fragments.incomingFragment;
-      });
-    });
+    this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.incomingFragment;
+          }, 'SHARE_TRACKING_INCOMING');
+        }));
 
     // Returns outgoing share tracking fragment.
-    this.setAsync('SHARE_TRACKING_OUTGOING', () => {
-      return this.shareTrackingFragments_.then(fragments => {
-        user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
-            'amp-share-tracking should be configured');
-        return fragments.outgoingFragment;
-      });
-    });
+    this.setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.outgoingFragment;
+          }, 'SHARE_TRACKING_OUTGOING');
+        }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set('TIMESTAMP', () => {
@@ -475,6 +465,7 @@ export class GlobalVariableSource extends VariableSource {
    * @param {string} expr
    * @return {T|null}
    * @template T
+   * @private
    */
   getAccessValue_(getter, expr) {
     return this.getAccessService_(this.ampdoc.win).then(accessService => {
@@ -492,6 +483,7 @@ export class GlobalVariableSource extends VariableSource {
    * @param {*} param
    * @param {string} defaultValue
    * @return {string}
+   * @private
    */
   getQueryParamData_(param, defaultValue) {
     user().assert(param,
@@ -502,6 +494,46 @@ export class GlobalVariableSource extends VariableSource {
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
         ? params[param] : defaultValue;
+  }
+
+  /**
+   * Resolves the value via amp-experiment's variants service.
+   * @param {function(!Object<string, string>):(?string)} getter
+   * @param {string} expr
+   * @return {!Promise<?string>}
+   * @template T
+   * @private
+   */
+  getVairiantsValue_(getter, expr) {
+    if (!this.variants_) {
+      this.variants_ = variantForOrNull(this.ampdoc.win);
+    }
+    return this.variants_.then(variants => {
+      user().assert(variants,
+          'To use variable %s, amp-experiment should be configured',
+          expr);
+      return getter(variants);
+    });
+  }
+
+  /**
+   * Resolves the value via amp-share-tracking's service.
+   * @param {function(!ShareTrackingFragmentsDef):T} getter
+   * @param {string} expr
+   * @return {!Promise<T>}
+   * @template T
+   * @private
+   */
+  getShareTrackingValue_(getter, expr) {
+    if (!this.shareTrackingFragments_) {
+      this.shareTrackingFragments_ = shareTrackingForOrNull(this.ampdoc.win);
+    }
+    return this.shareTrackingFragments_.then(fragments => {
+      user().assert(fragments, 'To use variable %s, ' +
+          'amp-share-tracking should be configured',
+          expr);
+      return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
+    });
   }
 }
 
@@ -614,6 +646,85 @@ export class UrlReplacements {
   }
 
   /**
+   * Expands an input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @return {!Promise<string>}
+   */
+  expandInputValueAsync(element) {
+    return /** @type {!Promise<string>} */ (
+        this.expandInputValue_(element, /*opt_sync*/ false));
+  }
+
+  /**
+   * Expands an input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @return {string} Replaced string for testing
+   */
+  expandInputValueSync(element) {
+    return /** @type {string} */ (
+        this.expandInputValue_(element, /*opt_sync*/ true));
+  }
+
+  /**
+   * Expands in input element value attribute with variable substituted.
+   * @param {!HTMLInputElement} element
+   * @param {boolean=} opt_sync
+   * @return {string|!Promise<string>}
+   */
+  expandInputValue_(element, opt_sync) {
+    dev().assert(element.tagName == 'INPUT' &&
+        (element.getAttribute('type') || '').toLowerCase() == 'hidden',
+        'Input value expansion only works on hidden input fields: %s', element);
+
+    const whitelist = this.getWhitelistForElement_(element);
+    if (!whitelist) {
+      return opt_sync ? element.value : Promise.resolve(element.value);
+    }
+    if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
+      element[ORIGINAL_VALUE_PROPERTY] = element.value;
+    }
+    const result = this.expand_(
+        element[ORIGINAL_VALUE_PROPERTY] || element.value,
+        /* opt_bindings */ undefined,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ opt_sync,
+        /* opt_whitelist */ whitelist);
+
+    if (opt_sync) {
+      return element.value = result;
+    }
+    return result.then(newValue => {
+      element.value = newValue;
+      return newValue;
+    });
+  }
+
+  /**
+   * Returns a replacement whitelist from elements' data-amp-replace attribute.
+   * @param {!Element} element.
+   * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
+   * replacement that filters whitelist to a subset.
+   * @return {!Object<string, boolean>|undefined}
+   */
+  getWhitelistForElement_(element, opt_supportedReplacement) {
+    const whitelist = element.getAttribute('data-amp-replace');
+    if (!whitelist) {
+      return;
+    }
+    const requestedReplacements = {};
+    whitelist.trim().split(/\s+/).forEach(replacement => {
+      if (!opt_supportedReplacement ||
+          (opt_supportedReplacement &&
+           opt_supportedReplacement.hasOwnProperty(replacement))) {
+        requestedReplacements[replacement] = true;
+      } else if (opt_supportedReplacement) {
+        user().warn('URL', 'Ignoring unsupported replacement', replacement);
+      }
+    });
+    return requestedReplacements;
+  }
+
+  /**
    * Replaces values in the link of an anchor tag if
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
@@ -625,7 +736,12 @@ export class UrlReplacements {
       return;
     }
     dev().assert(element.tagName == 'A');
-    const whitelist = element.getAttribute('data-amp-replace');
+    const supportedReplacements = {
+      'CLIENT_ID': true,
+      'QUERY_PARAM': true,
+    };
+    const whitelist = this.getWhitelistForElement_(
+        element, supportedReplacements);
     if (!whitelist) {
       return;
     }
@@ -646,24 +762,11 @@ export class UrlReplacements {
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
-    const supportedReplacements = {
-      'CLIENT_ID': true,
-      'QUERY_PARAM': true,
-    };
-    const requestedReplacements = {};
-    whitelist.trim().split(/\s*,\s*/).forEach(replacement => {
-      if (supportedReplacements.hasOwnProperty(replacement)) {
-        requestedReplacements[replacement] = true;
-      } else {
-        user().warn('URL', 'Ignoring unsupported link replacement',
-            replacement);
-      }
-    });
     return element.href = this.expandSync(
         href,
         /* opt_bindings */ undefined,
         /* opt_collectVars */ undefined,
-        requestedReplacements);
+        /* opt_whitelist */ whitelist);
   }
 
   /**
@@ -819,3 +922,12 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
       new UrlReplacements(ampdoc, varSource));
 }
+
+
+/**
+ * @typedef {{
+ *   incomingFragment: string,
+ *   outgoingFragment: string,
+ * }}
+ */
+let ShareTrackingFragmentsDef;

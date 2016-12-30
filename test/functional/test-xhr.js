@@ -184,6 +184,12 @@ describe('XHR', function() {
           }).to.throw(/Source origin is not allowed/);
         });
 
+        it('should not include __amp_source_origin if ampCors ' +
+            'set to false', () => {
+          xhr.fetchJson('/get', {ampCors: false});
+          expect(noOrigin(requests[0].url)).to.equal('/get');
+        });
+
         it('should accept AMP origin when received in response', () => {
           const promise = xhr.fetchJson('/get');
           requests[0].respond(200, {
@@ -389,10 +395,19 @@ describe('XHR', function() {
         });
       });
 
+      it('should ignore CORS setting cookies w/omit credentials', () => {
+        const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
+        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
+        return xhr.fetchJson(url, {credentials: 'omit'}).then(res => {
+          expect(res).to.exist;
+          expect(getCookie(window, cookieName)).to.be.null;
+        });
+      });
+
       it('should NOT succeed CORS with invalid credentials', () => {
         expect(() => {
           xhr.fetchJson('https://acme.org/', {credentials: null});
-        }).to.throw(/Only credentials=include support: null/);
+        }).to.throw(/Only credentials=include|omit support: null/);
       });
 
       it('should expose HTTP headers', () => {

@@ -63,3 +63,12 @@ export function resetLoadingCheckForTests() {
     }
   }
 }
+
+
+/**
+ * @param {string} name
+ * @visibleForTesting
+ */
+export function setLoadingCheckForTests(name) {
+  loadingChecked[name] = true;
+}

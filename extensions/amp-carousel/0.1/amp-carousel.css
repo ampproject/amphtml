@@ -23,10 +23,10 @@ amp-carousel {
  * Every `<amp-carousel>'s` immediate child is considered a slide in
  * the carousel.
  */
-amp-carousel-slide {
-}
-
-.amp-carousel-slide > .-amp-replaced-content {
+/* TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
+   form is in PROD for 1-2 weeks. */
+.amp-carousel-slide > .-amp-replaced-content,
+.amp-carousel-slide > .i-amphtml-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
    */
@@ -119,7 +119,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 /** Only hide scroll bar for touch devices as it causes jitters on desktops */
-.amp-mode-touch .-amp-slides-container.-amp-no-scroll {
+.-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
 
@@ -163,5 +163,23 @@ amp-carousel .amp-carousel-button.amp-disabled {
   order: 100000000 !important;
   margin-right: -1px !important;
 }
-
 /* End SlideScroll */
+
+/* Begin ScrollableCarousel */
+.-amp-scrollable-carousel-container .amp-carousel-slide {
+  display: inline-block !important;
+  margin-left: 8px;
+}
+
+/*TODO(dvoytenko): this has to be customizable*/
+.-amp-scrollable-carousel-container .amp-carousel-slide:first-child {
+  margin-left: 0px;
+}
+
+.-amp-scrollable-carousel-container {
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+/* End ScrollableCarousel */

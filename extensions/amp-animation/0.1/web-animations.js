@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
 import {getVendorJsPropertyName} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {
   WebAnimationDef,
+  WebAnimationPlayState,
   WebAnimationTimingDef,
   WebAnimationTimingDirection,
   WebAnimationTimingFill,
@@ -62,16 +64,120 @@ export class WebAnimationRunner {
     /** @const @private */
     this.requests_ = requests;
 
-    /** @private {!Array<!Animation>} */
-    this.players_ = [];
+    /** @private {?Array<!Animation>} */
+    this.players_ = null;
+
+    /** @private {number} */
+    this.runningCount_ = 0;
+
+    /** @private {!WebAnimationPlayState} */
+    this.playState_ = WebAnimationPlayState.IDLE;
+
+    /** @private {!Observable} */
+    this.playStateChangedObservable_ = new Observable();
+  }
+
+  /**
+   * @return {!WebAnimationPlayState}
+   */
+  getPlayState() {
+    return this.playState_;
+  }
+
+  /**
+   * @param {function(!WebAnimationPlayState)} handler
+   * @return {!UnlistenDef}
+   */
+  onPlayStateChanged(handler) {
+    return this.playStateChangedObservable_.add(handler);
   }
 
   /**
    */
-  play() {
+  start() {
+    dev().assert(!this.players_);
+    this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
       return request.target.animate(request.keyframes, request.timing);
     });
+    this.runningCount_ = this.players_.length;
+    this.players_.forEach(player => {
+      player.onfinish = () => {
+        this.runningCount_--;
+        if (this.runningCount_ == 0) {
+          this.setPlayState_(WebAnimationPlayState.FINISHED);
+        }
+      };
+    });
+  }
+
+  /**
+   */
+  pause() {
+    dev().assert(this.players_);
+    this.setPlayState_(WebAnimationPlayState.PAUSED);
+    this.players_.forEach(player => {
+      player.pause();
+    });
+  }
+
+  /**
+   */
+  resume() {
+    dev().assert(this.players_);
+    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+      return;
+    }
+    this.setPlayState_(WebAnimationPlayState.RUNNING);
+    this.players_.forEach(player => {
+      player.play();
+    });
+  }
+
+  /**
+   */
+  reverse() {
+    dev().assert(this.players_);
+    this.players_.forEach(player => {
+      player.reverse();
+    });
+  }
+
+  /**
+   */
+  finish() {
+    if (!this.players_) {
+      return;
+    }
+    const players = this.players_;
+    this.players_ = null;
+    this.setPlayState_(WebAnimationPlayState.FINISHED);
+    players.forEach(player => {
+      player.finish();
+    });
+  }
+
+  /**
+   */
+  cancel() {
+    if (!this.players_) {
+      return;
+    }
+    this.setPlayState_(WebAnimationPlayState.IDLE);
+    this.players_.forEach(player => {
+      player.cancel();
+    });
+  }
+
+  /**
+   * @param {!WebAnimationPlayState} playState
+   * @private
+   */
+  setPlayState_(playState) {
+    if (this.playState_ != playState) {
+      this.playState_ = playState;
+      this.playStateChangedObservable_.fire(this.playState_);
+    }
   }
 }
 
@@ -92,6 +198,11 @@ class Scanner {
       return;
     }
 
+    // Check whether the animation is enabled.
+    if (!this.isEnabled(/** @type {!WebAnimationDef} */ (spec))) {
+      return;
+    }
+
     // WebAnimationDef: (!WebMultiAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
@@ -100,6 +211,15 @@ class Scanner {
     } else {
       this.onUnknownAnimation(spec);
     }
+  }
+
+  /**
+   * Whether the animation spec is enabled.
+   * @param {!WebAnimationDef} unusedSpec
+   * @return {boolean}
+   */
+  isEnabled(unusedSpec) {
+    return true;
   }
 
   /**
@@ -188,12 +308,23 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      if (element.classList.contains('-amp-element')) {
+      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
+      // form is in PROD for 1-2 weeks.
+      if (element.classList.contains('-amp-element') ||
+          element.classList.contains('i-amphtml-element')) {
         const resource = resources.getResourceForElement(element);
         promises.push(resource.loadedOnce());
       }
     }
     return Promise.all(promises);
+  }
+
+  /** @override */
+  isEnabled(spec) {
+    if (spec.media) {
+      return this.win.matchMedia(spec.media).matches;
+    }
+    return true;
   }
 
   /** @override */

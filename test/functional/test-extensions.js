@@ -15,20 +15,17 @@
  */
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
+import {BaseElement} from '../../src/base-element';
+import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {
   Extensions,
   addDocFactoryToExtension,
   addElementToExtension,
   addShadowRootFactoryToExtension,
-  calculateExtensionScriptUrl,
   installExtensionsInShadowDoc,
   installExtensionsService,
   registerExtension,
 } from '../../src/service/extensions-impl';
-import {
-  initLogConstructor,
-  resetLogConstructorForTesting,
-} from '../../src/log';
 import {resetScheduledElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 
@@ -316,7 +313,7 @@ describes.sandboxed('Extensions', {}, () => {
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
       expect(win.customElements.elements['amp-test']).to.exist;
-      expect(win.ampExtendedElements['amp-test']).to.be.true;
+      expect(win.ampExtendedElements['amp-test']).to.equal(ElementStub);
     });
 
     it('should only insert script once', () => {
@@ -388,6 +385,9 @@ describes.sandboxed('Extensions', {}, () => {
     let iframe;
     let iframeWin;
 
+    class AmpTest extends BaseElement {
+    }
+
     beforeEach(() => {
       parentWin = env.win;
       resetScheduledElementForTesting(parentWin, 'amp-test');
@@ -434,44 +434,84 @@ describes.sandboxed('Extensions', {}, () => {
     it('should install built-ins', () => {
       extensions.installExtensionsInChildWindow(iframeWin, []);
       expect(iframeWin.ampExtendedElements).to.exist;
-      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-video']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-pixel']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-ad']).to.be.true;
-      expect(iframeWin.ampExtendedElements['amp-embed']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img'])
+          .to.not.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-pixel'])
+          .to.not.equal(ElementStub);
+      // Legacy elements are installed as well.
+      expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
+      expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
+    });
+
+    it('should adopt core services', () => {
+      const actionsMock = sandbox.mock(
+          parentWin.services['action'].obj);
+      const standardActionsMock = sandbox.mock(
+          parentWin.services['standard-actions'].obj);
+      actionsMock.expects('adoptEmbedWindow')
+          .withExactArgs(iframeWin)
+          .once();
+      standardActionsMock.expects('adoptEmbedWindow')
+          .withExactArgs(iframeWin)
+          .once();
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      actionsMock.verify();
+      standardActionsMock.verify();
     });
 
     it('should install extensions', () => {
-      extensionsMock.expects('loadExtension')
-          .withExactArgs('amp-test')
-          .returns(Promise.resolve({
-            elements: {'amp-test': {css: 'a{}'}},
-          }))
-          .once();
+      setLoadingCheckForTests('amp-test');
+      const stub = sandbox.stub(extensions, 'loadExtension', extensionId => {
+        return Promise.resolve().then(() => {
+          registerExtension(extensions, extensionId, AMP => {
+            AMP.registerElement(extensionId, AmpTest);
+          }, parentWin.AMP);
+          const elements = {};
+          elements[extensionId] = {css: 'a{}'};
+          return {elements};
+        });
+      });
       const promise = extensions.installExtensionsInChildWindow(
           iframeWin, ['amp-test']);
+      // Must be stubbed already.
+      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+      expect(iframeWin.document.createElement('amp-test').implementation_)
+          .to.be.instanceOf(ElementStub);
       return promise.then(() => {
-        expect(parentWin.ampExtendedElements['amp-test']).to.be.true;
-        expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(stub).to.be.calledOnce;
+        expect(parentWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+        expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
         expect(iframeWin.document
             .querySelector('style[amp-extension=amp-test]')).to.exist;
+        // Must be upgraded already.
+        expect(iframeWin.document.createElement('amp-test').implementation_)
+            .to.be.instanceOf(AmpTest);
       });
     });
 
     it('should call pre-install callback before other installs', () => {
-      const loadExtensionStub = sandbox.stub(extensions, 'loadExtension',
-          () => Promise.resolve({
-            elements: {'amp-test': {css: 'a{}'}},
-          }));
+      const stub = sandbox.stub(extensions, 'loadExtension', extensionId => {
+        registerExtension(extensions, extensionId, AMP => {
+          AMP.registerElement(extensionId, AmpTest);
+        }, parentWin.AMP);
+        const elements = {};
+        elements[extensionId] = {css: 'a{}'};
+        return Promise.resolve({elements});
+      });
       let preinstallCount = 0;
-      extensions.installExtensionsInChildWindow(iframeWin, ['amp-test'],
+      const promise = extensions.installExtensionsInChildWindow(
+          iframeWin,
+          ['amp-test'],
           function() {
             // Built-ins not installed yet.
             expect(
                 iframeWin.ampExtendedElements &&
                 iframeWin.ampExtendedElements['amp-img']).to.not.exist;
             // Extension is not loaded yet.
-            expect(loadExtensionStub).to.not.be.called;
+            expect(stub).to.not.be.called;
             expect(
                 iframeWin.ampExtendedElements &&
                 iframeWin.ampExtendedElements['amp-test']).to.not.exist;
@@ -479,95 +519,15 @@ describes.sandboxed('Extensions', {}, () => {
           });
       expect(preinstallCount).to.equal(1);
       expect(iframeWin.ampExtendedElements).to.exist;
-      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
-      expect(loadExtensionStub).to.be.calledOnce;
-      expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
-    });
-  });
-
-  describe('get correct script source', () => {
-
-    beforeEach(() => {
-      // These functions must not rely on log for cases in SW.
-      resetLogConstructorForTesting();
-    });
-
-    afterEach(() => {
-      initLogConstructor();
-    });
-
-    it('with local mode for testing with compiled js', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', true, true, true);
-      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
-    });
-
-    it('with local mode for testing without compiled js', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:80',
-        protocol: 'https:',
-      }, 'amp-ad', true, true, false);
-      expect(script).to.equal('https://localhost:80/dist/v0/amp-ad-0.1.max.js');
-    });
-
-    it('with local mode normal pathname', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'https:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('https://cdn.ampproject.org/v0/amp-ad-0.1.js');
-    });
-
-    it('with local mode min pathname', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.min.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
-    });
-
-    it('with local mode max pathname', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.max.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
-    });
-
-    it('with remote mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.min.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', false);
-      expect(script).to.equal(
-          'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
-    });
-
-    it('with document proxy mode: max', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: '/max/output.jsbin.com/pegizoq/quiet',
-        host: 'localhost:80',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.max.js');
-    });
-
-    it('with document proxy mode: min', () => {
-      const script = calculateExtensionScriptUrl({
-        pathname: '/min/output.jsbin.com/pegizoq/quiet',
-        host: 'localhost:80',
-        protocol: 'http:',
-      }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:80/dist/v0/amp-ad-0.1.js');
+      expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img'])
+          .to.not.equal(ElementStub);
+      expect(stub).to.be.calledOnce;
+      return promise.then(() => {
+        // Extension elements are stubbed immediately, but registered only
+        // after extension is loaded.
+        expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      });
     });
   });
 });

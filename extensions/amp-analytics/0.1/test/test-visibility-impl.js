@@ -100,6 +100,8 @@ describe('amp-analytics.visibility', () => {
     };
     sandbox.stub(visibility.resourcesService_, 'getResourceForElementOptional')
         .returns(resource);
+    // no way to stub performance API so stub a private method instead
+    sandbox.stub(visibility, 'getTotalTime_').returns(1234);
   });
 
   afterEach(() => {
@@ -215,10 +217,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just totalTimeMin condition', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -228,10 +230,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just continuousTimeMin condition', () => {
-    listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {continuousTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -260,10 +262,10 @@ describe('amp-analytics.visibility', () => {
 
   it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
     // This test counts time from when the ad is loaded.
-    listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
 
     clock.tick(1000);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1000);
     expect(callbackStub.callCount).to.equal(1);
@@ -407,7 +409,7 @@ describe('amp-analytics.visibility', () => {
       iframeAnalytics;
     beforeEach(() => {
       ampEl = document.createElement('span');
-      ampEl.className = '-amp-element';
+      ampEl.className = 'i-amphtml-element';
       ampEl.id = 'ampEl';
       iframe = document.createElement('iframe');
       div = document.createElement('div');
@@ -514,7 +516,7 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    it('should work for visible=true spec', () => {
+    it('"visible" trigger should work with no duration condition', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
@@ -541,7 +543,7 @@ describe('amp-analytics.visibility', () => {
 
         clock.tick(100);
         fireIntersect(25); // above spec 1 min visible, trigger callback 1
-        expect(callbackSpy1).to.be.calledWith(sinon.match({
+        expect(callbackSpy1).to.be.calledWith({
           backgrounded: '0',
           backgroundedAtStart: '0',
           elementHeight: '100',
@@ -557,8 +559,8 @@ describe('amp-analytics.visibility', () => {
           minVisiblePercentage: '25',
           totalVisibleTime: '0',         // duration metrics are always 0
           maxContinuousVisibleTime: '0', // as it triggers immediately
-          // totalTime is not testable because no way to stub performance API
-        }));
+          totalTime: '1234',
+        });
         expect(callbackSpy2).to.not.be.called;
         expect(unobserveSpy).to.not.be.called;
         callbackSpy1.reset();
@@ -585,6 +587,122 @@ describe('amp-analytics.visibility', () => {
         }));
         expect(callbackSpy1).to.not.be.called; // callback 1 not called again
         expect(unobserveSpy).to.be.called; // unobserve when all callback fired
+      });
+    });
+
+    it('"visible" trigger should work with duration condition', () => {
+      visibility.listenOnceV2({
+        selector: '#abc',
+        continuousTimeMin: 1000,
+        visiblePercentageMin: 0,
+      }, callbackSpy1, true, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(999);
+        fireIntersect(0); // this will reset the timer for continuous time
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // visible again.
+        clock.tick(100);
+        fireIntersect(35); // keep being visible
+        expect(callbackSpy1).to.not.be.called;
+        clock.tick(899); // not yet!
+        expect(callbackSpy1).to.not.be.called;
+        clock.tick(1);  // now fire
+        expect(callbackSpy1).to.be.calledWith({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '65',
+          firstSeenTime: '100',
+          fistVisibleTime: '100',
+          lastSeenTime: '2199',
+          lastVisibleTime: '2199',
+          loadTimeVisibility: '25',
+          maxVisiblePercentage: '35',
+          minVisiblePercentage: '5',
+          totalVisibleTime: '1999',
+          maxContinuousVisibleTime: '1000',
+          totalTime: '1234',
+        });
+      });
+    });
+
+    it('"hidden" trigger should work with duration condition', () => {
+      const viewer = viewerForDoc(ampdoc);
+      visibility.listenOnceV2({
+        selector: '#abc',
+        continuousTimeMin: 1000,
+        visiblePercentageMin: 10,
+      }, callbackSpy1, false /* hidden trigger */, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000);
+        fireIntersect(15); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000); // continuous visible
+        expect(callbackSpy1).to.not.be.called;
+
+        // TODO(lannka, 6632): fix the issue and uncomment the following check
+        // clock.tick(100);
+        // fireIntersect(5); // invisible
+        // expect(callbackSpy1).to.not.be.called;
+
+        viewer.setVisibilityState_(VisibilityState.HIDDEN);
+        expect(callbackSpy1).to.be.called;
+
+        expect(callbackSpy1).to.be.calledWith({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '85',
+          firstSeenTime: '100',
+          fistVisibleTime: '200',
+          lastSeenTime: '2300',
+          lastVisibleTime: '2300',
+          loadTimeVisibility: '5',
+          maxVisiblePercentage: '25',
+          minVisiblePercentage: '15',
+          totalVisibleTime: '1100',
+          maxContinuousVisibleTime: '1000',
+          totalTime: '1234',
+        });
+
+        // This line is to remove side effect this test brought to others.
+        // Notice that this test installs everything to global window instead
+        // of an iframe. Some other tests that are not well isolated too get
+        // affected by the change of Viewer visibility here, so we need to
+        // restore.
+        // TODO: refactor this whole test file to enforce good isolation.
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
       });
     });
 

@@ -11,7 +11,6 @@ const functionWhitelist = (() => {
     '[object Array]':
       [
         Array.prototype.concat,
-        Array.prototype.includes,
         Array.prototype.indexOf,
         Array.prototype.join,
         Array.prototype.lastIndexOf,
@@ -22,10 +21,8 @@ const functionWhitelist = (() => {
         String.prototype.charAt,
         String.prototype.charCodeAt,
         String.prototype.concat,
-        String.prototype.includes,
         String.prototype.indexOf,
         String.prototype.lastIndexOf,
-        String.prototype.repeat,
         String.prototype.slice,
         String.prototype.split,
         String.prototype.substr,
@@ -49,7 +46,7 @@ const functionWhitelist = (() => {
   return out;
 })();
 
-/** @return {bool} Returns false if args contains an invalid type. */
+/** @return {boolean} Returns false if args contains an invalid type. */
 function typeCheckArgs(args) {
   for (let i = 0; i < args.length; i++) {
     if (toString.call(args[i]) === '[object Object]') {
