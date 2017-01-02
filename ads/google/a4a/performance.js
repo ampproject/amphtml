@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getCorrelator} from './utils';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
 import {serializeQueryString} from '../../../src/url';
@@ -106,10 +107,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @param {!Element} element  Parent element object.
    * @param {string} namespace  Namespace for page-level info.  (E.g.,
    *   'amp' vs 'a4a'.)
-   * @param {number} correlator
    * @param {number} slotId
    */
-  constructor(win, element, namespace, correlator, slotId) {
+  constructor(win, element, namespace, slotId) {
     super();
 
     /** @private {!Window} @const */
@@ -125,7 +125,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.slotId_ = slotId;
 
     /** @private {number} @const */
-    this.correlator_ = correlator;
+    this.correlator_ = getCorrelator(win);
 
     /** @private {string} @const */
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
@@ -167,7 +167,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @override
    */
   sendPing(name) {
-    const url = this.buildPingAddress_(name, this.extraVariables_);
+    const url = this.buildPingAddress_(name);
     if (url) {
       this.emitPing_(url);
     }
@@ -175,43 +175,39 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
   /**
    * @param {string} name  Metric name to send.
-   * @param {!Object<string, string>=} opt_extraParams
    * @returns {string}  URL to send metrics to.
    * @private
    */
-  buildPingAddress_(name, opt_extraParams) {
+  buildPingAddress_(name) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
     const delta = Math.round(this.getDeltaTime_());
-    let extraParams = '';
-    if (opt_extraParams) {
-      extraParams = serializeQueryString(opt_extraParams);
-      if (extraParams != '') {
-        // Note: Using sync URL replacer here, rather than async, for a number
-        // of reasons:
-        //   - Don't want to block pings waiting for potentially delayed bits
-        //     of information.
-        //   - Don't (currently) need access to any properties that are
-        //     available async only.
-        //   - Don't want to pass through expandStringAsync if there are zero
-        //     extra params, but async would force us to (or to maintain two
-        //     code branches).
-        // TODO(ampproject/a4a): Change to async if/when there's a need to
-        // expand async-only parameters.  E.g., we'd like to have scroll_y
-        // offset, but it's not currently available through url-replacement.
-        // If it becomes available, it's likely to be an async parameter.
-        extraParams = this.urlReplacer_./*OK*/expandStringSync(extraParams, {
-          AD_SLOT_NAMESPACE: this.namespace_,
-          AD_SLOT_ID: this.slotId_,
-          AD_SLOT_TIME_TO_EVENT: delta,
-          AD_SLOT_EVENT_NAME: name,
-          AD_SLOT_EVENT_ID: stageId,
-          AD_PAGE_CORRELATOR: this.correlator_,
-        });
-      }
+    // Note: extraParams can end up empty if (a) this.extraVariables_ is empty
+    // or (b) if all values are themselves empty or null.
+    let extraParams = serializeQueryString(this.extraVariables_);
+    if (extraParams != '') {
+      // Note: Using sync URL replacer here, rather than async, for a number
+      // of reasons:
+      //   - Don't want to block pings waiting for potentially delayed bits
+      //     of information.
+      //   - Don't (currently) need access to any properties that are
+      //     available async only.
+      //   - Don't want to pass through expandStringAsync if there are zero
+      //     extra params, but async would force us to (or to maintain two
+      //     code branches).
+      // TODO(ampproject/a4a): Change to async if/when there's a need to
+      // expand async-only parameters.  E.g., we'd like to have scroll_y
+      // offset, but it's not currently available through url-replacement.
+      // If it becomes available, it's likely to be an async parameter.
+      extraParams = this.urlReplacer_./*OK*/expandStringSync(extraParams, {
+        AD_SLOT_NAMESPACE: this.namespace_,
+        AD_SLOT_ID: this.slotId_,
+        AD_SLOT_TIME_TO_EVENT: delta,
+        AD_SLOT_EVENT_NAME: name,
+        AD_SLOT_EVENT_ID: stageId,
+        AD_PAGE_CORRELATOR: this.correlator_,
+      });
     }
-    const pingUrl = extraParams ?
-        `${this.pingbackAddress_}?${extraParams}` : '';
-    return pingUrl;
+    return extraParams ? `${this.pingbackAddress_}?${extraParams}` : '';
   }
 
   /**

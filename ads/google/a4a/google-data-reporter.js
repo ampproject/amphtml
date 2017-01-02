@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {EXPERIMENT_ATTRIBUTE, getCorrelator, QQID_HEADER} from './utils';
+import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from './utils';
 import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
 import {getMode} from '../../../src/mode';
-import {isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 
 import {
     parseExperimentIds,
@@ -32,6 +32,16 @@ import {
     DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
     DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
+
+/**
+ * Set of namespaces that can be set for lifecycle reporters.
+ *
+ * @enum {string}
+ */
+export const ReporterNamespace = {
+  A4A: 'a4a',
+  AMP: 'amp',
+};
 
 /**
  * Check whether the element is in an experiment branch that is eligible for
@@ -57,15 +67,14 @@ function isInReportableBranch(ampElement, namespace) {
     [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
     [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
   };
-  if (namespace == 'a4a' &&
-      (eids.some(x => { return x in reportableA4AEids; }) ||
-      isInManualExperiment(ampElement.element))) {
-    return true;
-  } else if (namespace == 'amp' &&
-      eids.some(x => { return x in reportableControlEids; })) {
-    return true;
-  } else {
-    return false;
+  switch (namespace) {
+    case ReporterNamespace.A4A:
+      return eids.some(x => { return x in reportableA4AEids; }) ||
+          isInManualExperiment(ampElement.element);
+    case ReporterNamespace.AMP:
+      return eids.some(x => { return x in reportableControlEids; });
+    default:
+      return false;
   }
 }
 
@@ -89,20 +98,18 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
   const win = ampElement.win;
+  const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
-  if (getMode().localDev &&
-      (!win.AMP_CONFIG || !win.AMP_CONFIG['a4aProfilingRate'])) {
-    win.AMP_CONFIG = win.AMP_CONFIG || {};
-    win.AMP_CONFIG['a4aProfilingRate'] = 1.0;
+  if (getMode().localDev) {
+    toggleExperiment(win, experimentName, true, true);
   }
-  randomlySelectUnsetPageExperiments(win, win.AMP_CONFIG['a4aProfilingRate']);
+  randomlySelectUnsetPageExperiments(win, win.AMP_CONFIG[experimentName]);
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
-      isExperimentOn(win, 'a4aProfilingRate')) {
-    const correlator = getCorrelator(win);
+      isExperimentOn(win, experimentName)) {
     return new GoogleAdLifecycleReporter(win, ampElement.element, namespace,
-        correlator, Number(slotId));
+        Number(slotId));
   } else {
     return new BaseLifecycleReporter();
   }
@@ -118,7 +125,7 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
 export function googleLifecycleReporterFactory(a4aElement) {
   const reporter =
       /** @type {!./performance.GoogleAdLifecycleReporter} */
-      (getLifecycleReporter(a4aElement, 'a4a',
+      (getLifecycleReporter(a4aElement, ReporterNamespace.A4A,
           a4aElement.element.getAttribute('data-amp-slot-index')));
   reporter.setPingParameters({
     's': 'AD_SLOT_NAMESPACE',
