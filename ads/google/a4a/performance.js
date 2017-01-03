@@ -130,8 +130,16 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private {string} @const */
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
 
+    // Contortions to convince the type checker that we're type-safe.
+    let initTime;
+    const scratch = getTimingDataSync(win, 'navigationStart') || Date.now();
+    if (typeof scratch == 'number') {
+      initTime = scratch;
+    } else {
+      initTime = Number(scratch);
+    }
     /** @private {number} @const */
-    this.initTime_ = getTimingDataSync(win, 'navigationStart') || Date.now();
+    this.initTime_ = initTime;
 
     /** @private {!function():number} @const */
     this.getDeltaTime_ = (win.performance && win.performance.now.bind(

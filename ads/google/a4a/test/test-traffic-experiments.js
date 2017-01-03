@@ -25,10 +25,7 @@ import {
   validateExperimentIds,
 } from '../traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
-import {
-  isExperimentOn,
-  resetExperimentToggles_,
-} from '../../../../src/experiments';
+import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
