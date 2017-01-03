@@ -31,6 +31,10 @@ import {
 } from './web-animation-types';
 
 
+/** @const {string} */
+const TAG = 'amp-animation';
+
+
 /**
  * A struct for parameters for `Element.animate` call.
  * See https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
@@ -538,7 +542,7 @@ export class MeasureScanner extends Scanner {
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.
     if (newValue != null && Math.floor(value) != value) {
-      user().warn('amp-animation',
+      user().warn(TAG,
           `"${field}" is fractional.`
           + ' Note that all times are in milliseconds.');
     }
