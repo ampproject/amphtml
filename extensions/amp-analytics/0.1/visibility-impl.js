@@ -598,9 +598,9 @@ export class Visibility {
         (config[TOTAL_TIME_MAX] === undefined ||
             state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
         (config[CONTINUOUS_TIME_MIN] === undefined ||
-            state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
+            (state[MAX_CONTINUOUS_TIME] || 0) >= config[CONTINUOUS_TIME_MIN]) &&
         (config[CONTINUOUS_TIME_MAX] === undefined ||
-            state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
+            (state[MAX_CONTINUOUS_TIME] || 0) <= config[CONTINUOUS_TIME_MAX]);
   }
 
   /**
