@@ -170,7 +170,7 @@ class AmpAccordion extends AMP.BaseElement {
         section.setAttribute('expanded', '');
         header.setAttribute('aria-expanded', 'true');
       }
-    }, content);
+    }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
   }
