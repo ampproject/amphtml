@@ -22,10 +22,12 @@ import {
   WebAnimationPlayState,
 } from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
+import {user} from '../../../../src/log';
 
 
 describes.sandboxed('MeasureScanner', {}, () => {
   let target1, target2;
+  let warnStub;
 
   beforeEach(() => {
     target1 = document.createElement('div');
@@ -41,6 +43,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
       }
       throw new Error('unknown query: ' + query);
     });
+    warnStub = sandbox.stub(user(), 'warn');
   });
 
   afterEach(() => {
@@ -74,6 +77,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({duration: 'Infinity'}).duration).to.equal(Infinity);
     expect(() => scanTiming({duration: 'a'})).to.throw(/"duration" is invalid/);
     expect(() => scanTiming({duration: -1})).to.throw(/"duration" is invalid/);
+    expect(warnStub).to.not.be.called;
   });
 
   it('should parse/validate timing delay', () => {
@@ -82,12 +86,14 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({delay: 10}).delay).to.equal(10);
     expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
     expect(() => scanTiming({delay: -1})).to.throw(/"delay" is invalid/);
+    expect(warnStub).to.not.be.called;
 
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 10}).endDelay).to.equal(10);
     expect(() => scanTiming({endDelay: 'a'})).to.throw(/"endDelay" is invalid/);
     expect(() => scanTiming({endDelay: -1})).to.throw(/"endDelay" is invalid/);
+    expect(warnStub).to.not.be.called;
   });
 
   it('should parse/validate timing iterations', () => {
@@ -106,6 +112,17 @@ describes.sandboxed('MeasureScanner', {}, () => {
         .to.throw(/"iterationStart" is invalid/);
     expect(() => scanTiming({iterationStart: -1}))
         .to.throw(/"iterationStart" is invalid/);
+  });
+
+  it('should warn if timing is fractional', () => {
+    // Fractional values are allowed, but warning is shown.
+    expect(scanTiming({duration: 0.1}).duration).to.equal(0.1);
+    expect(scanTiming({delay: 0.1}).delay).to.equal(0.1);
+    expect(scanTiming({endDelay: 0.1}).endDelay).to.equal(0.1);
+    expect(warnStub.callCount).to.equal(3);
+    expect(warnStub.args[0][1]).to.match(/"duration" is fractional/);
+    expect(warnStub.args[1][1]).to.match(/"delay" is fractional/);
+    expect(warnStub.args[2][1]).to.match(/"endDelay" is fractional/);
   });
 
   it('should parse/validate timing easing', () => {

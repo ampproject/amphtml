@@ -526,7 +526,7 @@ export class MeasureScanner extends Scanner {
   }
 
   /**
-   * @param {number} value
+   * @param {number|undefined} value
    * @param {*} newValue
    * @param {string} field
    * @private
@@ -536,10 +536,10 @@ export class MeasureScanner extends Scanner {
     user().assert(value >= 0,
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
-    // time is under FRAME/4 (16/4 = 4).
-    if (newValue != null && value > 0 && value < 4) {
+    // time is fractional.
+    if (newValue != null && Math.floor(value) != value) {
       user().warn('amp-animation',
-          `"${field}" is valid, but very small: ${newValue}.`
+          `"${field}" is fractional.`
           + ' Note that all times are in milliseconds.');
     }
   }
