@@ -25,10 +25,12 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
   ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
       "IS_DEV",
       IR.falseNode());
+  
+  ImmutableSet<String> blacklist = ImmutableSet.of();
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
     return new AmpPass(compiler, /* isProd */ false, suffixTypes, assignmentReplacements,
-        prodAssignmentReplacements);
+        prodAssignmentReplacements, blacklist);
   }
 
   @Override protected int getNumRepetitions() {
