@@ -15,7 +15,6 @@
  */
 
 import {Messaging} from './messaging.js';
-// import {listen} from '../../../src/event-helper';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev} from '../../../src/log';
 
@@ -60,8 +59,7 @@ export class AmpViewerIntegration {
     dev().info(TAG, 'Send a handshake request');
     return messaging.sendRequest('amp-handshake-request',
         this.unconfirmedViewerOrigin_, true)
-        .then((someparam) => {
-          console.log('***someparam***', someparam);
+        .then(() => {
           messaging.setRequestProcessor((type, payload, awaitResponse) => {
             return viewer.receiveMessage(
               type, /** @type {!JSONType} */ (payload), awaitResponse);
