@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {deserializeMessage} from './3p-frame';
 import {dev} from './log';
 import {parseUrl} from './url';
 import {filterSplice} from './utils/array';
@@ -381,10 +382,10 @@ function getSentinel_(iframe, opt_is3P) {
  */
 function parseIfNeeded(data) {
   const shouldBeParsed = typeof data === 'string'
-      && data.charAt(0) === '{';
+      && data.indexOf('amp-') == 0;
   if (shouldBeParsed) {
     try {
-      data = JSON.parse(data);
+      data = deserializeMessage(data);
     } catch (e) {
       dev().warn('IFRAME-HELPER', 'Postmessage could not be parsed. ' +
           'Is it in a valid JSON format?', e);
