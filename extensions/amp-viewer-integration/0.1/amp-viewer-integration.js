@@ -54,20 +54,23 @@ export class AmpViewerIntegration {
     }
 
     dev().info(TAG, 'listening for messages', this.unconfirmedViewerOrigin_);
-    const messaging =
-    new Messaging(this.win, this.win.parent, this.unconfirmedViewerOrigin_,
-      (type, payload, awaitResponse) => {
-        return viewer.receiveMessage(
-          type, /** @type {!JSONType} */ (payload), awaitResponse);
-      });
-
-    dev().info(TAG, 'setMessageDeliverer');
-    viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
-      this.unconfirmedViewerOrigin_);
+    const messaging = new Messaging(
+      this.win, this.win.parent, this.unconfirmedViewerOrigin_);
 
     dev().info(TAG, 'Send a handshake request');
     return messaging.sendRequest('amp-handshake-request',
-        this.unconfirmedViewerOrigin_, true) || null;
+        this.unconfirmedViewerOrigin_, true)
+        .then((someparam) => {
+          console.log('***someparam***', someparam);
+          messaging.setRequestProcessor((type, payload, awaitResponse) => {
+            return viewer.receiveMessage(
+              type, /** @type {!JSONType} */ (payload), awaitResponse);
+          });
+
+          dev().info(TAG, 'setMessageDeliverer');
+          viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging),
+            this.unconfirmedViewerOrigin_);
+        });
   }
 }
 

@@ -165,6 +165,8 @@
 
   <script>
     var SENTINEL = '__AMPHTML__';
+    const REQUEST_SENTINEL = SENTINEL + 'REQUEST';
+    const RESPONSE_SENTINEL = SENTINEL + 'RESPONSE';
 
     var allViewers = [];
 
@@ -259,14 +261,23 @@
       var targetOrigin = this.frameOrigin_;
       var listener = function(event) {
         if (event.origin == targetOrigin &&
-                event.data == 'amp-handshake-request' &&
+                event.data.sentinel == REQUEST_SENTINEL &&
+                event.data.type == 'amp-handshake-request' &&
                 (!event.source || event.source == target)) {
           log('event: ',event);
           log('Viewer ' + this.id + ' messaging established with ',
               targetOrigin);
           window.removeEventListener('message', listener, false);
 
-          target./*OK*/postMessage('amp-handshake-response', targetOrigin);
+          const sentinel = RESPONSE_SENTINEL;
+          const requestId = event.data.requestId;
+          const payload = {};
+          const message = {
+            sentinel,
+            requestId,
+            payload,
+          };
+          target./*OK*/postMessage(message, targetOrigin);
 
           this.messaging_ = new ViewerMessaging(target, targetOrigin,
               this.processRequest_.bind(this), targetId);

@@ -37,10 +37,8 @@ export class Messaging {
    * @param {!Window} source
    * @param {!Window} target
    * @param {string} targetOrigin
-   * @param {function(string, *, boolean):(!Promise<*>|undefined)}
-   *    requestProcessor
    */
-  constructor(source, target, targetOrigin, requestProcessor) {
+  constructor(source, target, targetOrigin) {
     /**  @private {!number} */
     this.requestIdCounter_ = 0;
     /**  @private {!Object<string, {resolve: function(*), reject: function(!Error)}>} */
@@ -49,8 +47,8 @@ export class Messaging {
     this.target_ = target;
     /** @const @private {string} */
     this.targetOrigin_ = targetOrigin;
-    /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
-    this.requestProcessor_ = requestProcessor;
+    /**  @private {function(string, *, boolean):(!Promise<*>|undefined)} */
+    this.requestProcessor_ = null;
 
     dev().assert(this.targetOrigin_, 'Target origin must be specified!');
 
@@ -73,9 +71,6 @@ export class Messaging {
       this.handleRequest_(message);
     } else if (message.sentinel == responseSentinel_) {
       this.handleResponse_(message);
-    } else {
-      throw new Error('Invalid Format! message.sentinel: ' + message.sentinel
-        + ' should be ' + requestSentinel_ + ' or ' + responseSentinel_ + '!');
     }
   }
 
@@ -88,7 +83,7 @@ export class Messaging {
    */
   sendRequest(eventType, payload, awaitResponse) {
     dev().info(TAG, 'messaging.js -> sendRequest, eventType: ', eventType);
-    const requestId = String(++this.requestIdCounter_);
+    const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
       promise = new Promise((resolve, reject) => {
@@ -102,7 +97,7 @@ export class Messaging {
 
   /**
    * I'm responding to a request that Bob made earlier.
-   * @param {string} requestId
+   * @param {number} requestId
    * @param {*} payload
    * @private
    */
@@ -114,7 +109,7 @@ export class Messaging {
 
   /**
    * @param {string} sentinel
-   * @param {string} requestId
+   * @param {number} requestId
    * @param {string|null} eventType
    * @param {*} payload
    * @param {boolean} awaitResponse
@@ -132,7 +127,7 @@ export class Messaging {
   }
 
   /**
-   * @param {string} requestId
+   * @param {number} requestId
    * @param {*} reason
    * @private
    */
@@ -150,6 +145,8 @@ export class Messaging {
    */
   handleRequest_(message) {
     dev().info(TAG, 'messaging.js -> handleRequest_');
+    dev().assert(this.requestProcessor_,
+      'Cannot handle request because handshake is not yet confirmed!');
     const requestId = message.requestId;
     const promise = this.requestProcessor_(message.type, message.payload,
         message.rsvp);
@@ -185,5 +182,14 @@ export class Messaging {
         pending.resolve(message.payload);
       }
     }
+  }
+
+  /**
+   * @param {function(string, *, boolean):(!Promise<*>|undefined)}
+   *    requestProcessor
+   */
+  setRequestProcessor(requestProcessor) {
+    dev().info(TAG, 'setRequestProcessor');
+    this.requestProcessor_ = requestProcessor;
   }
 }
