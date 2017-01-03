@@ -15,6 +15,9 @@ limitations under the License.
 -->
 # Custom Search Ads
 
+_The Custom Search Ads integration is offered as a Beta and is subject to the
+conditions of the Google Program Guidelines._
+
 ## AdSense For Search (AFS)
 
 To request AdSense for Search ads on the Custom Search Ads protocol, use the
