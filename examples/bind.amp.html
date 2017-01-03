@@ -99,7 +99,7 @@
   </amp-carousel>
 
   <p>With &lt;amp-selector&gt;</p>
-  <amp-selector layout=container name="carousel-selector" [selected]="selectedSlide" on="select:AMP.setState(selectedSlide=event.option)">
+  <amp-selector layout=container name="carousel-selector" [selected]="selectedSlide" on="select:AMP.setState(selectedSlide=event.targetOption)">
     <amp-carousel controls width=400 height=100>
         <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75 option=0></amp-img>
         <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75 option=1></amp-img>

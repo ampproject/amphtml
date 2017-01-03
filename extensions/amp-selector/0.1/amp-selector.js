@@ -76,27 +76,34 @@ export class AmpSelector extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     mutations.forEach(mutation => {
       const newValue = mutation.newValue;
+
       switch (mutation.name) {
         case 'selected':
-          this.clearAllSelections_();
-          if (newValue) {
-            // Create a query with an attribute selector for every
-            // comma-delimited option value in `newValue`.
-            const options = String(mutation.newValue).split(',');
-            const selectors = [];
-            for (let i = 0; i < options.length; i++) {
-              // Only use first value if multiple selection is disabled.
-              if (i > 0 && !this.isMultiple_) {
-                break;
-              }
-              selectors.push(`[option='${options[i]}']`);
+          if (!newValue) {
+            this.clearAllSelections_();
+            return;
+          }
+          // Generate map from comma-delimited option values in `newValue`.
+          const selectedArray = String(newValue).split(',');
+          const selectedMap = selectedArray.reduce((map, value) => {
+            map[value] = true;
+            return map;
+          }, {});
+          // Iterate through elements and toggle selection as necessary.
+          for (let i = 0; i < this.options_.length; i++) {
+            // Only use first value if multiple selection is disabled.
+            if (i > 0 && !this.isMultiple_) {
+              break;
             }
-            const query = selectors.join(',');
-            const elements = this.element.querySelectorAll(query);
-            for (let i = 0; i < elements.length; i++) {
-              this.setSelection_(element[i]);
+            const element = this.options_[i];
+            const option = element.getAttribute('option');
+            if (selectedMap[option]) {
+              this.setSelection_(element);
+            } else {
+              this.clearSelection_(element);
             }
           }
+          // Update inputs.
           this.setInputs_();
           break;
       }
@@ -125,13 +132,17 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * Creates inputs for the currently selected elements.
+   * Creates inputs for the currently selected elements and returns a string
+   * array of their option values.
+   * @note Ignores elements that have `disabled` attribute set.
+   * @return {!Array<string>}
    * @private
    */
   setInputs_() {
+    const selectedValues = [];
     const elementName = this.element.getAttribute('name');
     if (!elementName || this.isDisabled_) {
-      return;
+      return selectedValues;
     }
     const formId = this.element.getAttribute('form');
 
@@ -144,17 +155,20 @@ export class AmpSelector extends AMP.BaseElement {
     this.selectedOptions_.forEach(option => {
       if (!option.hasAttribute('disabled')) {
         const hidden = doc.createElement('input');
+        const value = option.getAttribute('option');
         hidden.setAttribute('type', 'hidden');
         hidden.setAttribute('name', elementName);
-        hidden.setAttribute('value', option.getAttribute('option'));
+        hidden.setAttribute('value', value);
         if (formId) {
           hidden.setAttribute('form', formId);
         }
         this.inputs_.push(hidden);
         fragment.appendChild(hidden);
+        selectedValues.push(value);
       }
     });
     this.element.appendChild(fragment);
+    return selectedValues;
   }
 
   /**
@@ -172,29 +186,31 @@ export class AmpSelector extends AMP.BaseElement {
     if (!el || el.hasAttribute('disabled')) {
       return;
     }
+    /** @type {?Array<string>} */
+    let selectedValues;
     if (el.hasAttribute('selected')) {
       if (this.isMultiple_) {
         this.clearSelection_(el);
-        this.setInputs_();
+        selectedValues = this.setInputs_();
       }
     } else {
       this.setSelection_(el);
-      this.setInputs_();
+      selectedValues = this.setInputs_();
     }
 
-    // Trigger 'select' event with two data params:
-    // 'option' - option value of the selected or deselected element.
-    // 'options' - comma-delimited option values of all selected elements.
-    const options = [];
-    this.selectedOptions_.forEach(element => {
-      options.push(element.getAttribute('option'));
-    });
-    const detail = {
-      option: el.getAttribute('option'),
-      options: options.join(','),
-    };
-    const selectEvent = new CustomEvent('Select', {detail});
-    this.action_.trigger(this.element, 'select', selectEvent);
+    // Don't trigger action if selected values haven't changed.
+    if (selectedValues) {
+      // Trigger 'select' event with two data params:
+      // 'targetOption' - option value of the selected or deselected element.
+      // 'selectedOptions' - comma-delimited option values of selected elements.
+      const name = 'select';
+      const detail = {
+        targetOption: el.getAttribute('option'),
+        selectedOptions: selectedValues.join(','),
+      };
+      const selectEvent = new CustomEvent(`amp-selector.${name}`, {detail});
+      this.action_.trigger(this.element, name, selectEvent);
+    }
   }
 
   /**

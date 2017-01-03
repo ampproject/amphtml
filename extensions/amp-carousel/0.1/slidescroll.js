@@ -278,7 +278,7 @@ export class AmpSlideScroll extends BaseSlides {
               (dir == 1 && !hasPrev) ? 0 : this.slideWidth_;
           this.customSnap_(currentScrollLeft, dir);
         } else {
-          this.showSlide_(newIndex, /* opt_isUserAction */ true);
+          this.showSlideAndTriggerAction_(newIndex);
         }
       }
     }
@@ -436,7 +436,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.slidesContainer_.classList.add('-amp-no-scroll');
       }
       // Scroll to new slide and update scrollLeft to the correct slide.
-      this.showSlide_(newIndex, /* opt_isUserAction */ true);
+      this.showSlideAndTriggerAction_(newIndex);
       this.vsync_.mutate(() => {
         if (this.isIos_) {
           // Make the container scrollable again to enable user swiping.
@@ -451,10 +451,9 @@ export class AmpSlideScroll extends BaseSlides {
    * Makes the slide corresponding to the given index and the slides surrounding
    *    it available for display.
    * @param {number} newIndex Index of the slide to be displayed.
-   * @param {boolean=} opt_isUserAction
    * @private
    */
-  showSlide_(newIndex, opt_isUserAction) {
+  showSlide_(newIndex) {
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
       newIndex >= noOfSlides_ ||
@@ -499,11 +498,20 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+  }
 
-    if (opt_isUserAction) {
-      const event = new CustomEvent('SlideChange', {detail: {slide: newIndex}});
-      this.action_.trigger(this.element, 'slidechange', event);
-    }
+  /**
+   * Shows the slide at the given index and triggers a `slidechange` action.
+   * @param {number} newIndex
+   * @private
+   */
+  showSlideAndTriggerAction_(newIndex) {
+    this.showSlide_(newIndex);
+
+    const name = 'slidechange';
+    const detail = {slide: newIndex};
+    const event = new CustomEvent(`slidescroll.${name}`, {detail});
+    this.action_.trigger(this.element, name, event);
   }
 
   /**
