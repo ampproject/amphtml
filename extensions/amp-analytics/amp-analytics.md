@@ -479,7 +479,7 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
     ```
 
 #### Hidden trigger (`"on": "hidden"`)
-Use this configuration to fire a request when the page becomes is hidden.  The firing of this trigger can be configured using [`visibilitySpec`](#visibility-spec).
+Use this configuration to fire a request when the page becomes hidden.
 
 ```javascript
 "triggers": {
@@ -489,6 +489,23 @@ Use this configuration to fire a request when the page becomes is hidden.  The f
   }
 }
 ```
+
+A [`visibilitySpec`](#visibility-spec) can be included so that a request is only fired if the visibility duration conditions are satisfied.
+```json
+"triggers": {
+  "defaultPageview": {
+    "on": "hidden",
+    "request": "pagehide",
+    "visibilitySpec": {
+      "selector": "#anim-id",
+      "visiblePercentageMin": 20,
+      "totalTimeMin": 3000,
+    }
+  }
+}
+```
+The above configuration translates to:
+> When page becomes hidden, fire a request if the element #anim-id has been visible (more than 20% area in viewport) for more than 3s in total.
 
 #### Access triggers (`"on": "amp-access-*"`)
 
