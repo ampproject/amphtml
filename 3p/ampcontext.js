@@ -99,7 +99,7 @@ export class AmpContext {
    *  @param {HTMLIframeElement} iframe The iframe we are adding the context to.
    */
   addContextToIframe(iframe) {
-    iframe.name = this.win_.name;
+    iframe.name = this.client.getWindow().name;
   }
 
   /**
@@ -109,7 +109,7 @@ export class AmpContext {
    */
   setupMetadata_() {
     try {
-      const data = JSON.parse(decodeURI(this.client_.win_.name));
+      const data = JSON.parse(decodeURI(this.client_.getWindow().name));
       const context = data._context;
       this.location = context.location;
       this.canonicalUrl = context.canonicalUrl;
@@ -132,7 +132,7 @@ export class AmpContext {
     dev().assert(sentinelMatch, 'Incorrect sentinel format');
     const depth = Number(sentinelMatch[2]);
     const ancestors = [];
-    for (let win = this.client_.win_; win && win != win.parent;
+    for (let win = this.client_.getWindow(); win && win != win.parent;
          win = win.parent) {
       // Add window keeping the top-most one at the front.
       ancestors.push(win.parent);
