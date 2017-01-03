@@ -382,10 +382,10 @@ function getSentinel_(iframe, opt_is3P) {
  */
 function parseIfNeeded(data) {
   const shouldBeParsed = typeof data === 'string'
-      && data.indexOf('amp-') == 0;
+      && data.charAt(0) === '{';
   if (shouldBeParsed) {
     try {
-      data = deserializeMessage(data);
+      data = JSON.parse(data);
     } catch (e) {
       dev().warn('IFRAME-HELPER', 'Postmessage could not be parsed. ' +
           'Is it in a valid JSON format?', e);
