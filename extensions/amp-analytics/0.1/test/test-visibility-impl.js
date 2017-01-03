@@ -669,10 +669,13 @@ describe('amp-analytics.visibility', () => {
         clock.tick(1000); // continuous visible
         expect(callbackSpy1).to.not.be.called;
 
-        // TODO(lannka, 6632): fix the issue and uncomment the following check
-        // clock.tick(100);
-        // fireIntersect(5); // invisible
-        // expect(callbackSpy1).to.not.be.called;
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(1); // invisible
+        expect(callbackSpy1).to.not.be.called;
 
         viewer.setVisibilityState_(VisibilityState.HIDDEN);
         expect(callbackSpy1).to.be.called;
@@ -683,16 +686,16 @@ describe('amp-analytics.visibility', () => {
           elementHeight: '100',
           elementWidth: '100',
           elementX: '0',
-          elementY: '85',
+          elementY: '99',
           firstSeenTime: '100',
           fistVisibleTime: '200',
-          lastSeenTime: '2300',
-          lastVisibleTime: '2300',
+          lastSeenTime: '2500',
+          lastVisibleTime: '2400',
           loadTimeVisibility: '5',
           maxVisiblePercentage: '25',
           minVisiblePercentage: '15',
-          totalVisibleTime: '1100',
-          maxContinuousVisibleTime: '1000',
+          totalVisibleTime: '1200',
+          maxContinuousVisibleTime: '1100',
           totalTime: '1234',
         });
 
