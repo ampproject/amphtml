@@ -209,9 +209,9 @@ export class AmpAdXOriginIframeHandler {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
     }
-    if (this.IntersectionObserver_) {
-      this.IntersectionObserver_.destroy();
-      this.IntersectionObserver_ = null;
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.destroy();
+      this.intersectionObserver_ = null;
     }
   }
 
@@ -290,8 +290,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.IntersectionObserver_) {
-      this.IntersectionObserver_.onViewportCallback(inViewport);
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.onViewportCallback(inViewport);
     }
     this.sendEmbedInfo_(inViewport);
   }
@@ -303,8 +303,8 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.IntersectionObserver_) {
-      this.IntersectionObserver_.fire();
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.fire();
     }
   }
 }
