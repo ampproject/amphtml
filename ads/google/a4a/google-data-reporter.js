@@ -34,6 +34,25 @@ import {
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
 
 /**
+ * An experiment config for controlling profiling.  Profiling has no branches:
+ * it's either on or off for a given page.  The off state is controlled by the
+ * general traffic-experiments mechanism and is configured via the
+ * a4aProfilingRate property of the global config(s),
+ * build-system/global-configs/{canary,prod}-config.js.  This object is just
+ * necessary for the traffic-experiments.js API, which expects a branch list
+ * for each experiment.  We assign all pages to the "control" branch
+ * arbitrarily.
+ *
+ * @const {!./traffic-experiments.ExperimentInfo}
+ */
+export const PROFILING_BRANCHES = {
+  a4aProfilingRate: {
+    control: 1,
+    experiment:0,
+  },
+};
+
+/**
  * Set of namespaces that can be set for lifecycle reporters.
  *
  * @enum {string}
@@ -104,7 +123,7 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
   if (getMode().localDev) {
     toggleExperiment(win, experimentName, true, true);
   }
-  randomlySelectUnsetPageExperiments(win, win.AMP_CONFIG[experimentName]);
+  randomlySelectUnsetPageExperiments(win, PROFILING_BRANCHES);
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, experimentName)) {

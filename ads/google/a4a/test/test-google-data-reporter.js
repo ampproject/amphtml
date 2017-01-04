@@ -151,10 +151,11 @@ describe('#getLifecycleReporter', () => {
     };
     let mockReporter;
     beforeEach(() => {
-      const fakeElt = env.win.document.createElement('div');
+      const fakeElt = env.createAmpElement('div');
+      env.win.Math = Math;
       env.win.document.body.appendChild(fakeElt);
       mockReporter = new GoogleAdLifecycleReporter(
-          env.win, fakeElt, 'test', 69, 37);
+          env.win, fakeElt, 'test', 37);
       mockReporter.setPingAddress('http://localhost:9876/');
     });
 

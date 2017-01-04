@@ -119,6 +119,7 @@ let CreativeMetaDataDef;
 export const LIFECYCLE_STAGES = {
   // Note: Use strings as values here, rather than numbers, so that "0" does
   // not test as `false` later.
+  adSlotCleared: '-1',
   urlBuilt: '1',
   adRequestStart: '2',
   adRequestEnd: '3',
@@ -133,10 +134,11 @@ export const LIFECYCLE_STAGES = {
   throttled3p: '12',
   adResponseValidateEnd: '13',
   xDomIframeLoaded: '14',
-  adSlotCollapsed: '15',
-  adSlotUnhidden: '16',
-  adPromiseChainDelay: '17',
-  adSlotCleared: '20',
+  friendlyIframeLoaded: '15',
+  adSlotCollapsed: '16',
+  adSlotUnhidden: '17',
+  adPromiseChainDelay: '18',
+  signatureVerifySuccess: '19',
 };
 
 
@@ -236,6 +238,18 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
       platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+
+    /**
+     * Gets a notion of current time, in ms.  The value is not necessarily
+     * absolute, so should be used only for computing deltas.  When available,
+     * the performance system will be used; otherwise Date.now() will be
+     * returned.
+     *
+     * @const {function():number}
+     * @private
+     */
+    this.getNow_ = (this.win.performance && this.win.performance.now) ?
+        this.win.performance.now : Date.now;
 
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
@@ -571,6 +585,7 @@ export class AmpA4A extends AMP.BaseElement {
             if (!keyInfo) {
               return Promise.reject('Promise resolved to null key.');
             }
+            const signatureVerifyStartTime = this.getNow_();
             // If the key exists, try verifying with it.
             return verifySignature(
                 new Uint8Array(creative),
@@ -578,6 +593,12 @@ export class AmpA4A extends AMP.BaseElement {
                 keyInfo)
                 .then(isValid => {
                   if (isValid) {
+                    this.protectedEmitLifecycleEvent_(
+                        'signatureVerifySuccess', {
+                          'met.delta.AD_SLOT_ID': Math.round(
+                              this.getNow_() - signatureVerifyStartTime),
+                          'signingServiceName.AD_SLOT_ID': keyInfo.serviceName,
+                        });
                     return creative;
                   }
                   // Only report if signature is expected to match, given that
@@ -643,13 +664,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.adPromise_) {
       return Promise.resolve();
     }
-    const layoutCallbackStart =
-        (this.win.performance && this.win.performance.now()) || Date.now();
+    const layoutCallbackStart = this.getNow_();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
-      const delta =
-          ((this.win.performance && this.win.performance.now()) || Date.now()) -
-          layoutCallbackStart;
+      const delta = this.getNow_() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('adPromiseChainDelay', {
         adPromiseChainDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
@@ -758,7 +776,9 @@ export class AmpA4A extends AMP.BaseElement {
    * Callback executed when AMP creative has successfully rendered within the
    * publisher page.  To be overridden by network implementations as needed.
    */
-  onAmpCreativeRender() {}
+  onAmpCreativeRender() {
+    this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
+  }
 
   /**
    * @param {!Element} iframe that was just created.  To be overridden for
@@ -956,7 +976,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Capture timing info for friendly iframe load completion.
           getTimingDataAsync(friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
-                this.emitLifecycleEvent('renderFriendlyEnd', {
+                this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
                   'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
                 });
               }).catch(err => {

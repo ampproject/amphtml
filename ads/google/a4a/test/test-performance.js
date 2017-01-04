@@ -111,8 +111,15 @@ describe('GoogleAdLifecycleReporter', () => {
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
       const reporter = new GoogleAdLifecycleReporter(
-          win, elem, 'test_foo', 0, 0);
+          win, elem, 'test_foo', 42);
       reporter.setPingAddress('/');
+      reporter.setPingParameters({
+        's': 'AD_SLOT_NAMESPACE',
+        'rls': 'AMP_VERSION',
+        'c': 'AD_PAGE_CORRELATOR',
+        'it.AD_SLOT_ID': 'AD_SLOT_TIME_TO_EVENT',
+        's_n_id': 'AD_SLOT_EVENT_NAME.AD_SLOT_EVENT_ID',
+      });
       return {win, doc, elem, reporter};
     });
   });
@@ -128,13 +135,13 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(emitPingSpy).to.be.calledOnce;
         const arg = emitPingSpy.getCall(0).args[0];
         const expectations = [
-          /[&?]s=test_foo/,
-          // In unit tests, internalRuntimeVersion is not substituted.
-          /[&?]rls=\$internalRuntimeVersion\$/,
-          /[&?]c=[0-9]+/,
-          /[&?]it=[^&?]*adRequestStart\.[0-9]+/,
-          /[&?]it=[^&?]*adRequestStart_0\.[0-9]+/,
-          /[&?]rt=stage\.2+/,
+          /[&?]s=test_foo(&|$)/,
+          // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
+          // ASCII encoding of '$'.
+          /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
+          /[&?]c=[0-9]+(&|$)/,
+          /[&?]it.42=[0-9]+(&|$)/,
+          /[&?]s_n_id=adRequestStart.2(&|$)/,
         ];
         expectMatchesAll(arg, expectations);
         expectHasSiblingImgMatchingAll(elem, expectations);
@@ -144,6 +151,7 @@ describe('GoogleAdLifecycleReporter', () => {
     it('should request multiple pings and write all to the DOM', () => {
       return iframe.then(({unusedWin, unusedDoc, elem, reporter}) => {
         const stages = {
+          adSlotCleared: '-1',
           urlBuilt: '1',
           adRequestStart: '2',
           adRequestEnd: '3',
@@ -153,7 +161,6 @@ describe('GoogleAdLifecycleReporter', () => {
           renderCrossDomainStart: '7',
           renderFriendlyEnd: '8',
           renderCrossDomainEnd: '9',
-          adSlotCleared: '20',
         };
         expect(emitPingSpy).to.not.be.called;
         let count = 0;
@@ -165,13 +172,13 @@ describe('GoogleAdLifecycleReporter', () => {
         count = 0;
         for (const k in stages) {
           const expectations = [
-            /[&?]s=test_foo/,
-            // In unit tests, internalRuntimeVersion is not substituted.
-            /[&?]rls=\$internalRuntimeVersion\$/,
-            /[&?]c=[0-9]+/,
-            new RegExp(`[&?]it=[^&?]*${k}\.[0-9]+`),
-            new RegExp(`[&?]it=[^&?]*${k}_0\.[0-9]+`),
-            new RegExp(`[&?]rt=stage\.${stages[k]}`),
+            /[&?]s=test_foo(&|$)/,
+            // In unit tests, internalRuntimeVersion is not substituted.  %24 ==
+            // ASCII encoding of '$'.
+            /[&?]rls=%24internalRuntimeVersion%24(&|$)/,
+            /[&?]c=[0-9]+(&|$)/,
+            /[&?]it.42=[0-9]+(&|$)/,
+            RegExp(`[&?]s_n_id=${k}.${stages[k]}(&|$)`),
           ];
           const arg = emitPingSpy.getCall(count++).args[0];
           expectMatchesAll(arg, expectations);
@@ -196,8 +203,13 @@ describe('GoogleAdLifecycleReporter', () => {
           elem.setAttribute('id', i);
           doc.body.appendChild(elem);
           const reporter = new GoogleAdLifecycleReporter(win, elem, 'test_foo',
-              1, i + 1);
+              i + 1);
           reporter.setPingAddress('/');
+          reporter.setPingParameters({
+            's': 'AD_SLOT_NAMESPACE',
+            'c': 'AD_PAGE_CORRELATOR',
+            'it.AD_SLOT_ID': 'AD_SLOT_TIME_TO_EVENT',
+          });
           allReporters.push(reporter);
         }
         allReporters.forEach(r => {
@@ -208,13 +220,15 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
         const allImgNodes = childElements(doc.body, x => isImgNode(x));
         expect(allImgNodes.length).to.equal(nSlots * nStages);
-        const commonCorrelator = '1';
+        let commonCorrelator;
         const slotCounts = {};
         allImgNodes.forEach(n => {
           const src = n.getAttribute('src');
-          expect(src).to.match(/[?&]s=test_foo/);
+          expect(src).to.match(/[?&]s=test_foo(&|$)/);
+          expect(src).to.match(/[?&]c=[0-9]+/);
           const corr = /[?&]c=([0-9]+)/.exec(src)[1];
-          const slotId = /[?&]rt=[^&?]*slotId\.([0-9]+)[&?,]/.exec(src)[1];
+          commonCorrelator = commonCorrelator || corr;
+          const slotId = /[?&]it.([0-9]+)=[0-9]+(&|$)/.exec(src)[1];
           expect(corr).to.equal(commonCorrelator);
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
