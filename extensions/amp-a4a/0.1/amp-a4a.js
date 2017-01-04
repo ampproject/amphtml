@@ -249,7 +249,7 @@ export class AmpA4A extends AMP.BaseElement {
      * @private
      */
     this.getNow_ = (this.win.performance && this.win.performance.now) ?
-        this.win.performance.now : Date.now;
+        this.win.performance.now.bind(this.win.performance) : Date.now;
 
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
