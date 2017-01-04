@@ -19,9 +19,16 @@ import {listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
-const sentinel_ = '__AMPHTML__';
-const requestSentinel_ = sentinel_ + 'REQUEST';
-const responseSentinel_ = sentinel_ + 'RESPONSE';
+const SENTINEL = '__AMPHTML__';
+
+/**
+ * @enum {string}
+ * @private
+ */
+const MessageType_ = {
+  REQUEST: 'q',
+  RESPONSE: 's',
+};
 
 /**
  * @fileoverview This is used in amp-viewer-integration.js for the
@@ -67,9 +74,12 @@ export class Messaging {
       return;
     }
     const message = event.data;
-    if (message.sentinel == requestSentinel_) {
+    if (message.app != SENTINEL) {
+      return;
+    }
+    if (message.type == MessageType_.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.sentinel == responseSentinel_) {
+    } else if (message.type == MessageType_.RESPONSE) {
       this.handleResponse_(message);
     }
   }
@@ -90,8 +100,15 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_(requestSentinel_, requestId, eventType,
-      payload, awaitResponse);
+    const message = {
+      app: SENTINEL,
+      requestid: requestId,
+      rsvp: awaitResponse,
+      name: eventType,
+      data: payload,
+      type: MessageType_.REQUEST,
+    };
+    this.sendMessage_(message);
     return promise;
   }
 
@@ -103,26 +120,19 @@ export class Messaging {
    */
   sendResponse_(requestId, payload) {
     dev().info(TAG, 'messaging.js -> sendResponse_');
-    this.sendMessage_(
-      responseSentinel_, requestId, null, payload, false);
+    const message = {
+      app: SENTINEL,
+      requestid: requestId,
+      data: payload,
+      type: MessageType_.RESPONSE,
+    };
+    this.sendMessage_(message);
   }
 
   /**
-   * @param {string} sentinel
-   * @param {number} requestId
-   * @param {string|null} eventType
-   * @param {*} payload
-   * @param {boolean} awaitResponse
    * @private
    */
-  sendMessage_(sentinel, requestId, eventType, payload, awaitResponse) {
-    const message = {
-      sentinel,
-      requestId,
-      type: eventType,
-      payload,
-      rsvp: awaitResponse,
-    };
+  sendMessage_(message) {
     this.target_./*OK*/postMessage(message, this.targetOrigin_);
   }
 
@@ -132,8 +142,13 @@ export class Messaging {
    * @private
    */
   sendResponseError_(requestId, reason) {
-    this.sendMessage_(
-      responseSentinel_, requestId, 'ERROR', reason, false);
+    const message = {
+      app: SENTINEL,
+      requestid: requestId,
+      error: reason,
+      type: MessageType_.RESPONSE,
+    };
+    this.sendMessage_(message);
   }
 
   /**
@@ -147,14 +162,14 @@ export class Messaging {
     dev().info(TAG, 'messaging.js -> handleRequest_');
     dev().assert(this.requestProcessor_,
       'Cannot handle request because handshake is not yet confirmed!');
-    const requestId = message.requestId;
-    const promise = this.requestProcessor_(message.type, message.payload,
-        message.rsvp);
+    const requestId = message.requestid;
+    const promise =
+      this.requestProcessor_(message.name, message.data, message.rsvp);
     if (message.rsvp) {
       if (!promise) {
         this.sendResponseError_(requestId, 'no response');
         dev().assert(promise,
-          'expected response but none given: ' + message.type);
+          'expected response but none given: ' + message.name);
       }
       promise.then(payload => {
         this.sendResponse_(requestId, payload);
@@ -172,14 +187,14 @@ export class Messaging {
    */
   handleResponse_(message) {
     dev().info(TAG, 'messaging.js -> handleResponse_');
-    const requestId = message.requestId;
+    const requestId = message.requestid;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {
       delete this.waitingForResponse_[requestId];
-      if (message.type == 'ERROR') {
-        pending.reject(message.payload);
+      if (message.error) {
+        pending.reject(message.error);
       } else {
-        pending.resolve(message.payload);
+        pending.resolve(message.data);
       }
     }
   }

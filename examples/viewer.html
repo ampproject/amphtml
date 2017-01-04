@@ -164,11 +164,7 @@
   <script src="./viewer-integr-messaging.js"></script>
 
   <script>
-    var SENTINEL = '__AMPHTML__';
-    const REQUEST_SENTINEL = SENTINEL + 'REQUEST';
-    const RESPONSE_SENTINEL = SENTINEL + 'RESPONSE';
-
-    var allViewers = [];
+    var allViewers = []; 
 
     function Viewer(containerId, id, url, visible) {
       this.id = id;
@@ -261,21 +257,19 @@
       var targetOrigin = this.frameOrigin_;
       var listener = function(event) {
         if (event.origin == targetOrigin &&
-                event.data.sentinel == REQUEST_SENTINEL &&
-                event.data.type == 'amp-handshake-request' &&
+                event.data.app == SENTINEL &&
+                event.data.name == 'amp-handshake-request' &&
                 (!event.source || event.source == target)) {
           log('event: ',event);
           log('Viewer ' + this.id + ' messaging established with ',
               targetOrigin);
           window.removeEventListener('message', listener, false);
 
-          const sentinel = RESPONSE_SENTINEL;
-          const requestId = event.data.requestId;
-          const payload = {};
           const message = {
-            sentinel,
-            requestId,
-            payload,
+            app: SENTINEL,
+            requestid: event.data.requestid,
+            data: {},
+            type: MessageType_.RESPONSE,
           };
           target./*OK*/postMessage(message, targetOrigin);
 

@@ -16,6 +16,17 @@
 
 
 /**
+ * @enum {string}
+ * @private
+ */
+const MessageType_ = {
+  REQUEST: 'q',
+  RESPONSE: 's',
+};
+
+const SENTINEL = '__AMPHTML__';
+
+/**
  * This is a very simple messaging protocol between viewer and viewer client.
  * @param {!Window} target
  * @param {string} targetOrigin
@@ -25,10 +36,6 @@
  * @constructor
  */
 function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId) {
-  this.sentinel_ = '__AMPHTML__';
-  this.requestSentinel_ = this.sentinel_ + 'REQUEST';
-  this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
-
   this.requestIdCounter_ = 0;
   this.waitingForResponse_ = {};
 
@@ -62,12 +69,25 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
     var promise = new Promise(function(resolve, reject) {
       this.waitingForResponse_[requestId] = {resolve, reject};
     }.bind(this));
-    this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
-        true);
+    const message = {
+      app: SENTINEL,
+      requestid: requestId,
+      rsvp: true,
+      name: eventType,
+      data: payload,
+      type: MessageType_.REQUEST,
+    };
+    this.sendMessage_(message);
     return promise;
   }
-  this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
-      false);
+  const message = {
+    app: SENTINEL,
+    requestid: requestId,
+    name: eventType,
+    data: payload,
+    type: MessageType_.REQUEST,
+  };
+  this.sendMessage_(message);
   return undefined;
 };
 
@@ -81,9 +101,10 @@ ViewerMessaging.prototype.onMessage_ = function(event) {
     return;
   }
   var message = event.data;
-  if (message.sentinel == this.requestSentinel_) {
+  if (message.type == MessageType_.REQUEST) {
     this.onRequest_(message);
-  } else if (message.sentinel == this.responseSentinel_) {
+  }
+  if (message.type == MessageType_.RESPONSE) {
     this.onResponse_(message);
   }
 };
@@ -94,13 +115,13 @@ ViewerMessaging.prototype.onMessage_ = function(event) {
  * @private
  */
 ViewerMessaging.prototype.onRequest_ = function(message) {
-  var requestId = message.requestId;
-  var promise = this.requestProcessor_(message.type, message.payload,
+  var requestId = message.requestid;
+  var promise = this.requestProcessor_(message.name, message.data,
       message.rsvp);
   if (message.rsvp) {
     if (!promise) {
       this.sendResponseError_(requestId, 'no response');
-      throw new Error('expected response but none given: ' + message.type);
+      throw new Error('expected response but none given: ' + message.name);
     }
     promise.then(function(payload) {
       this.sendResponse_(requestId, payload);
@@ -116,36 +137,24 @@ ViewerMessaging.prototype.onRequest_ = function(message) {
  * @private
  */
 ViewerMessaging.prototype.onResponse_ = function(message) {
-  var requestId = message.requestId;
+  var requestId = message.requestid;
   var pending = this.waitingForResponse_[requestId];
   if (pending) {
     delete this.waitingForResponse_[requestId];
-    if (message.type == 'ERROR') {
-      pending.reject(message.payload);
+    if (message.error) {
+      pending.reject(message.error);
     } else {
-      pending.resolve(message.payload);
+      pending.resolve(message.data);
     }
   }
 };
 
 
 /**
- * @param {string} sentinel
- * @param {string} requestId
- * @param {string} eventType
- * @param {*} payload
- * @param {boolean} awaitResponse
+ * @param {*} message
  * @private
  */
-ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
-      eventType, payload, awaitResponse) {
-  var message = {
-    sentinel,
-    requestId,
-    type: eventType,
-    payload,
-    rsvp: awaitResponse
-  };
+ViewerMessaging.prototype.sendMessage_ = function(message) {
   this.target_./*OK*/postMessage(message, this.targetOrigin_);
 };
 
@@ -156,7 +165,13 @@ ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
  * @private
  */
 ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
-  this.sendMessage_(this.responseSentinel_, requestId, null, payload, false);
+  const message = {
+    app: SENTINEL,
+    requestid: requestId,
+    data: payload,
+    type: MessageType_.RESPONSE,
+  };
+  this.sendMessage_(message);
 };
 
 
@@ -166,7 +181,13 @@ ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
  * @private
  */
 ViewerMessaging.prototype.sendResponseError_ = function(requestId, reason) {
-  this.sendMessage_(this.responseSentinel_, requestId, 'ERROR', reason, false);
+  const message = {
+    app: SENTINEL,
+    requestid: requestId,
+    error: reason,
+    type: MessageType_.RESPONSE,
+  };
+  this.sendMessage_(message);
 };
 
 
