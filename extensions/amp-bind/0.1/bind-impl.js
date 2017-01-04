@@ -93,8 +93,9 @@ export class Bind {
       'number': true,
     };
 
-    this.ampdoc.whenBodyAvailable().then(body => {
-      const {boundElements, evaluatees} = this.scanForBindings_(body);
+    this.ampdoc.whenReady().then(() => {
+      const {boundElements, evaluatees} =
+          this.scanForBindings_(ampdoc.getBody());
       this.boundElements_ = boundElements;
       this.evaluator_ = new BindEvaluator(evaluatees);
 

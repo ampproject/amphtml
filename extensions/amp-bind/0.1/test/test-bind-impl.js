@@ -65,7 +65,7 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReady(callback) {
-    return env.ampdoc.whenBodyAvailable().then(() => {
+    return env.ampdoc.whenReady().then(() => {
       if (bind.evaluatePromise_) {
         return bind.evaluatePromise_.then(() => {
           env.flushVsync();
@@ -84,7 +84,7 @@ describes.realWin('amp-bind', {
    * @return {!Promise}
    */
   function onBindReadyAndSetState(state, callback) {
-    return env.ampdoc.whenBodyAvailable().then(() => {
+    return env.ampdoc.whenReady().then(() => {
       bind.setState(state);
       return bind.evaluatePromise_.then(() => {
         env.flushVsync();
@@ -100,7 +100,7 @@ describes.realWin('amp-bind', {
     }).to.throw('Experiment "AMP-BIND" is disabled.');
   });
 
-  it('should scan for bindings when body is available', () => {
+  it('should scan for bindings when ampdoc is ready', () => {
     createElementWithBinding('[onePlusOne]="1+1"');
     expect(bind.boundElements_.length).to.equal(0);
     return onBindReady(() => {
