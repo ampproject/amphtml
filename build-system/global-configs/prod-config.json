@@ -13,5 +13,6 @@
   "amp-app-banner": 1,
   "amp-inabox": 1,
   "ios-embed-wrapper": 1,
-  "amp-apester-media": 1
+  "amp-apester-media": 1,
+  "amp-accordion-session-state-optout": 1
 }
