@@ -57,6 +57,7 @@ class AmpVideo extends AMP.BaseElement {
 
     /**
      * @private
+     * @return {string}
      */
     getVideoSource_() {
       let videoSrc = this.element.getAttribute('src');
