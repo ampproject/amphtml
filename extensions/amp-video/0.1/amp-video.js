@@ -15,6 +15,7 @@
   */
 
 import {ampdocServiceFor} from '../../../src/ampdoc';
+import {elementByTag} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
@@ -40,6 +41,33 @@ class AmpVideo extends AMP.BaseElement {
 
       /** @private {?Element} */
       this.video_ = null;
+    }
+
+    /**
+     * @param {boolean=} opt_onLayout
+     * @override
+     */
+    preconnectCallback(opt_onLayout) {
+      const videoSrc = this.getVideoSource_();
+      if (videoSrc) {
+        assertHttpsUrl(videoSrc, this.element);
+        this.preconnect.url(videoSrc, opt_onLayout);
+      }
+    }
+
+    /**
+     * @private
+     * @return {string}
+     */
+    getVideoSource_() {
+      let videoSrc = this.element.getAttribute('src');
+      if (!videoSrc) {
+        const source = elementByTag(this.element, 'source');
+        if (source) {
+          videoSrc = source.getAttribute('src');
+        }
+      }
+      return videoSrc;
     }
 
     /** @override */
