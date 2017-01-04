@@ -137,7 +137,7 @@ export const LIFECYCLE_STAGES = {
   friendlyIframeLoaded: '15',
   adSlotCollapsed: '16',
   adSlotUnhidden: '17',
-  adPromiseChainDelay: '18',
+  layoutAdPromiseDelay: '18',
   signatureVerifySuccess: '19',
 };
 
@@ -668,8 +668,8 @@ export class AmpA4A extends AMP.BaseElement {
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
       const delta = this.getNow_() - layoutCallbackStart;
-      this.protectedEmitLifecycleEvent_('adPromiseChainDelay', {
-        adPromiseChainDelay: Math.round(delta),
+      this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
+        layoutAdPromiseDelay: Math.round(delta),
         isAmpCreative: !!creativeMetaData,
       });
       if (creativeMetaData) {
