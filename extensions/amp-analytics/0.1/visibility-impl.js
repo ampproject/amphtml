@@ -168,8 +168,11 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
+    // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
+    // form is in PROD for 1-2 weeks.
     foundEl = friendlyFrame ?
-        closestBySelector(friendlyFrame, '.-amp-element') : null;
+        closestBySelector(
+            friendlyFrame, '.-amp-element,.i-amphtml-element') : null;
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
@@ -355,6 +358,7 @@ export class Visibility {
           }, {threshold: DEFAULT_THRESHOLD});
     }
 
+    // Visible trigger
     resource.loadedOnce().then(() => {
       this.intersectionObserver_.observe(element);
 
@@ -366,7 +370,15 @@ export class Visibility {
       this.resources_.push(resource);
     });
 
-    // TODO: support "hidden" spec.
+    // Hidden trigger
+    if (!shouldBeVisible && !this.visibilityListenerRegistered_) {
+      this.viewer_.onVisibilityChanged(() => {
+        if (!this.viewer_.isVisible()) {
+          this.onDocumentHidden_();
+        }
+      });
+      this.visibilityListenerRegistered_ = true;
+    }
   }
 
   /** @private */
@@ -382,7 +394,14 @@ export class Visibility {
       state[LAST_CHANGE_ENTRY] = change;
 
       // Update states and check if all conditions are satisfied
-      if (this.updateCounters_(visible, listener, shouldBeVisible)) {
+      const conditionsMet =
+          this.updateCounters_(visible, listener, shouldBeVisible);
+
+      if (!shouldBeVisible) {
+        // For "hidden" trigger, only update state, don't trigger.
+        continue;
+      }
+      if (conditionsMet) {
         if (state[SCHEDULED_RUN_ID]) {
           this.timer_.cancel(state[SCHEDULED_RUN_ID]);
           state[SCHEDULED_RUN_ID] = null;
@@ -402,7 +421,7 @@ export class Visibility {
 
           if (this.updateCounters_(
               lastChange.intersectionRatio * 100,
-              listener, shouldBeVisible)) {
+              listener, /* shouldBeVisible */ true)) {
             this.prepareStateForCallback_(state, lastChange.boundingClientRect);
             listener.callback(state);
             listeners.splice(listeners.indexOf(listener), 1);
@@ -417,6 +436,34 @@ export class Visibility {
     // Remove target that have no listeners.
     if (listeners.length == 0) {
       this.intersectionObserver_.unobserve(change.target);
+    }
+  }
+
+  /** @private */
+  onDocumentHidden_() {
+    for (let i = 0; i < this.resources_.length; i++) {
+      const resource = this.resources_[i];
+      if (!resource.hasLoadedOnce()) {
+        continue;
+      }
+
+      const listeners = this.listeners_[resource.getId()];
+      for (let j = listeners.length - 1; j >= 0; j--) {
+        const listener = listeners[j];
+        if (listener.shouldBeVisible) {
+          continue;
+        }
+
+        const state = listener.state;
+        const lastChange = state[LAST_CHANGE_ENTRY];
+        const lastVisible = lastChange ? lastChange.intersectionRatio * 100 : 0;
+        if (this.updateCounters_(
+                lastVisible, listener, /* shouldBeVisible */ false)) {
+          this.prepareStateForCallback_(state, lastChange.boundingClientRect);
+          listener.callback(state);
+          listeners.splice(j, 1);
+        }
+      }
     }
   }
 
@@ -551,9 +598,9 @@ export class Visibility {
         (config[TOTAL_TIME_MAX] === undefined ||
             state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
         (config[CONTINUOUS_TIME_MIN] === undefined ||
-            state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
+            (state[MAX_CONTINUOUS_TIME] || 0) >= config[CONTINUOUS_TIME_MIN]) &&
         (config[CONTINUOUS_TIME_MAX] === undefined ||
-            state[CONTINUOUS_TIME] <= config[CONTINUOUS_TIME_MAX]);
+            (state[MAX_CONTINUOUS_TIME] || 0) <= config[CONTINUOUS_TIME_MAX]);
   }
 
   /**
@@ -593,10 +640,6 @@ export class Visibility {
    * @private
    */
   isInViewport_(visible, min, max) {
-    if (min === undefined && max === undefined) {
-      return true;
-    }
-
     return !!(visible > (min || 0) && visible <= (max || 100));
   }
 

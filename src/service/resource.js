@@ -105,7 +105,7 @@ export class Resource {
     element[OWNER_PROP_] = owner;
 
     // Need to clear owner cache for all child elements
-    const cachedElements = element.getElementsByClassName('-amp-element');
+    const cachedElements = element.getElementsByClassName('i-amphtml-element');
     for (let i = 0; i < cachedElements.length; i++) {
       const ele = cachedElements[i];
       if (Resource.forElementOptional(ele)) {
@@ -146,6 +146,9 @@ export class Resource {
     /** @private {!ResourceState} */
     this.state_ = element.isBuilt() ? ResourceState.NOT_LAID_OUT :
         ResourceState.NOT_BUILT;
+
+    /** @private {number} */
+    this.priorityOverride_ = -1;
 
     /** @private {number} */
     this.layoutCount_ = 0;
@@ -240,7 +243,18 @@ export class Resource {
    * @return {number}
    */
   getPriority() {
+    if (this.priorityOverride_ != -1) {
+      return this.priorityOverride_;
+    }
     return this.element.getPriority();
+  }
+
+  /**
+   * Overrides the element's priority.
+   * @param {number} newPriority
+   */
+  updatePriority(newPriority) {
+    this.priorityOverride_ = newPriority;
   }
 
   /**
@@ -764,5 +778,14 @@ export class Resource {
   unload() {
     this.pause();
     this.unlayout();
+  }
+
+  /**
+   * Disconnect the resource. Mainly intended for embed resources that do not
+   * receive `disconnectedCallback` naturally via CE API.
+   */
+  disconnect() {
+    delete this.element[RESOURCE_PROP_];
+    this.element.disconnectedCallback();
   }
 }

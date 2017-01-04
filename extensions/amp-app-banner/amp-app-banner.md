@@ -43,6 +43,8 @@ limitations under the License.
   </tr>
 </table>
 
+####(Dec. 15, 2016) Note: We have discovered an issue with `<amp-app-banner>` going into the holiday code freeze. Banner links are not forwarding correctly to the app store on iOS inside the AMP Viewer context. We have issued a temporary mitigation to hide the banner in iOS inside the AMP Viewer, until we can launch a proper fix after the code freeze. Thanks for your patience!
+
 ## Behavior
 `amp-app-banner` is a wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 
@@ -52,12 +54,13 @@ To extend and promote the usage of the natively supported app banners on <a href
 
 The AMP runtime parses the meta tag content attribute on iOS extracting the App ID and `app-argument` (usually used for deep-linking URIs - app-protocols like `whatsapp://` or `medium://`). On Android, the AMP runtimes makes an XHR request to fetch the `manifest.json` file, and parses its content to extract `app_id` from `related_applications` and it calculates the app store URL as well as open-in-app URL:
 
-```
+```text
 android-app://${appId}/${protocol}/${host}${pathname}
 ```
-Note that the protocol/host/pathname are calculated from the canonical URL of the AMP document, and that your native app needs to register the links in their manifest as <a href="https://developer.android.com/training/app-indexing/deep-linking.html">documented here</a>.
+**Note**: The protocol/host/pathname are calculated from the canonical URL of the AMP document, and your native app needs to register the links in their manifest as <a href="https://developer.android.com/training/app-indexing/deep-linking.html">documented here</a>.
 
 ### App manifest example
+
 ```java
 <activity
     android:name="com.example.android.GizmosActivity"
@@ -87,11 +90,9 @@ Note that the protocol/host/pathname are calculated from the canonical URL of th
 }
 ```
 
-
-
-
 ##Appearance Behavior
-amp-app-banner provides no default UI and leave the UI to the developer. The developer can build any kind of UI inside the banner and style it accordingly. There is one UI element that has limits to the amount of customization—the "X" button that dismisses the banner. This button can be styled with the `.amp-app-banner-dismiss-button` class. It should be kept visible and easily accessible on mobile devices, to avoid blocking content.
+
+`amp-app-banner` provides no default UI and leaves the UI to the developer. The developer can build any kind of UI inside the banner and style it accordingly. There is one UI element that has limits to the amount of customization--the "X" button that dismisses the banner. This button can be styled with the `.amp-app-banner-dismiss-button` class. It should be kept visible and easily accessible on mobile devices, to avoid blocking content.
 
 One required UI element is the `button[open-button]` button, which is the click target for the banner to install the app, or open the deep-link if the app is already installed.
 
@@ -101,15 +102,15 @@ Because native app banners currently are not shown in the viewer context, `<amp-
 
 <table>
   <tr>
-    <td></td>
-    <td>Android + Chrome</td>
-    <td>iOS + Safari</td>
-    <td>Other OS + browser</td>
+    <th>Context</th>
+    <th>Android + Chrome</th>
+    <th>iOS + Safari</th>
+    <th>Other OS + browser</th>
   </tr>
   <tr>
     <td>In AMP viewer</td>
     <td>Show amp-app-banner</td>
-    <td>Show amp-app-banner</td>
+    <td>Currently, will not show anything due to <a href="https://github.com/ampproject/amphtml/issues/6454">#6454</a></td>
     <td>Show amp-app-banner</td>
   </tr>
   <tr>
@@ -122,15 +123,16 @@ Because native app banners currently are not shown in the viewer context, `<amp-
 
 
 ##Dismissal Persistence
-The banner currently will be displayed always unless it was dismissed. Once dismissed the banner will never be displayed on that domain unless user visits on a different browser or clears their local storage.
+Currently, the banner will be displayed always unless it was dismissed. Once dismissed, the banner will never be displayed on that domain unless the user visits on a different browser or clears their local storage.
 
 
 ## Tags
 
-**At least one of `meta[name="apple-itunes-app"]` or `link[rel=manifest]`**
-* `<meta>` tag must have "name" attribute and "content" attribute
-* The value of the "content" attribute must contain "app-id=" 
-* `<link>` tag must have "rel='manifest'" attribute and value, as well as "href" attribute
+**At least one of**: `meta[name="apple-itunes-app"]` or `link[rel=manifest]`
+
+* The `<meta>` tag must have the `name` and `content` attributes.
+* The value of the `content` attribute must contain `app-id=`.
+* The `<link>` tag must have the `"rel='manifest'"` attribute and value, as well as the `href` attribute.
 
 
 ## Attributes
@@ -140,27 +142,33 @@ The banner currently will be displayed always unless it was dismissed. Once dism
 
 **id** (Required)
 
-To uniquely identify an amp-app-banner - for persistence logic
+A unique identifier for an amp-app-banner; used for persistence logic.
 
-**layout="nodisplay"** (Required)
+**layout** (Required)
 
-### Attributes on 'button' descendent element
+The value must be `nodisplay`. 
+
+### Attributes on `button` descendant element
 
 **open-button** (Required)
+
+The click target for the banner to install the app, or open the deep-link if the app is already installed.
 
 Not permitted: **disabled**
 
 
 ## Additional Validations
 
-* Cannot have `<amp-ad>`, `<amp-sticky-ad>`, `<amp-embed>`, or `<amp-iframe>` as descendents
+* Cannot have `<amp-ad>`, `<amp-sticky-ad>`, `<amp-embed>`, or `<amp-iframe>` as descendants
 * Height cannot exceed 100px
 * Must be a direct child of `<body>`
 * Android manifest `href` must be served over `https`
 * Cannot have more than one `<amp-app-banner>` on a single page
 
 
-## Example ([link to full page example](https://github.com/ampproject/amphtml/blob/master/examples/article.amp.html))
+## Example
+
+([link to full page example](https://github.com/ampproject/amphtml/blob/master/examples/article.amp.html))
 ```html
 <head>
   <meta name="apple-itunes-app"
@@ -183,3 +191,7 @@ Not permitted: **disabled**
   </amp-app-banner>
 </body>
 ```
+
+## Validation
+
+See [amp-app-banner rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/0.1/validator-amp-app-banner.protoascii) in the AMP validator specification.

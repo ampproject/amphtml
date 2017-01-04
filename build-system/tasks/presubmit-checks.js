@@ -46,23 +46,27 @@ var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
+  // TODO(dvoytenko, #6463): Enable this check once the current uses have
+  // been cleaned up.
+  // '(^-amp-|\\W-amp-)': 'Switch to new internal class form',
+  // '(^i-amp-|\\Wi-amp-)': 'Switch to new internal ID form',
   'describe\\.only': '',
   'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
   'sinon\\.(spy|stub|mock)\\(': {
-    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
-    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
   'sinon\\.useFake\\w+': {
-    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
   'sandbox\\.(spy|stub|mock)\\([^,\\s]*[iI]?frame[^,\\s]*,': {
     message: 'Do NOT stub on a cross domain iframe! #5359\n' +
         '  If this is same domain, mark /*OK*/.\n' +
-        '  If this is cross domain, overwrite the method directly.'
+        '  If this is cross domain, overwrite the method directly.',
   },
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
@@ -74,7 +78,7 @@ var forbiddenTerms = {
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
-    ]
+    ],
   },
   // Match `getMode` that is not followed by a "()." and is assigned
   // as a variable.
@@ -83,7 +87,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/mode.js',
       'dist.3p/current/integration.js',
-    ]
+    ],
   },
   'import[^}]*\\bgetMode as': {
     message: realiasGetMode,
@@ -95,7 +99,7 @@ var forbiddenTerms = {
       'src/3p-frame.js',
       'src/log.js',
       'dist.3p/current/integration.js',
-    ]
+    ],
   },
   '(?:var|let|const) +IS_DEV +=': {
     message: 'IS_DEV local var only allowed in mode.js and ' +
@@ -106,7 +110,7 @@ var forbiddenTerms = {
     ],
   },
   '\\.prefetch\\(': {
-    message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
+    message: 'Do not use preconnect.prefetch, use preconnect.preload instead.',
   },
   'documentStateFor': {
     message: privateServiceFactory,
@@ -146,8 +150,8 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/activity-impl.js',
-      'extensions/amp-analytics/0.1/amp-analytics.js'
-    ]
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
   },
   'installCidService': {
     message: privateServiceFactory,
@@ -208,6 +212,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
+      'src/inabox/amp-inabox.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -263,22 +268,26 @@ var forbiddenTerms = {
       'tools/experiments/experiments.js',
     ],
   },
-  'sendMessage': {
+  '\\.sendMessage\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
+      // viewer-impl.sendMessage
       'src/service/viewer-impl.js',
-      'src/service/storage-impl.js',
+      'src/service/viewport-impl.js',
       'src/service/performance-impl.js',
-      'examples/viewer-integr-messaging.js',
-      'extensions/amp-access/0.1/login-dialog.js',
-      'extensions/amp-access/0.1/signin.js',
+      'src/service/resources-impl.js',
+
+      // iframe-messaging-client.sendMessage
+      '3p/iframe-messaging-client.js',
+      '3p/ampcontext.js',
     ],
   },
-  'sendMessageAwaitResponse': {
+  '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
+      'src/service/history-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
     ],
@@ -318,7 +327,7 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
-    ]
+    ],
   },
   'setCookie\\W': {
     message: requiresReviewPrivacy,
@@ -327,26 +336,27 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
-    ]
+    ],
   },
   'isDevChannel\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/experiments.js',
       'tools/experiments/experiments.js',
-    ]
+    ],
   },
   'isDevChannelVersionDoNotUse_\\W': {
     message: shouldNeverBeUsed,
     whitelist: [
       'src/experiments.js',
-    ]
+    ],
   },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
-    ]
+      'src/inabox/inabox-viewer.js',
+    ],
   },
   'eval\\(': {
     message: shouldNeverBeUsed,
@@ -382,7 +392,7 @@ var forbiddenTerms = {
       // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
       'src/service-worker/core.js',
       'src/service-worker/kill.js',
-    ]
+    ],
   },
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
@@ -393,7 +403,7 @@ var forbiddenTerms = {
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
-    ]
+    ],
   },
   'getAuthdataField': {
     message: requiresReviewPrivacy,
@@ -401,37 +411,9 @@ var forbiddenTerms = {
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
-    ]
-  },
-  'debugger': '',
-
-  // ES6. These are only the most commonly used.
-  'Array\\.of': es6polyfill,
-  // These currently depend on core-js/modules/web.dom.iterable which
-  // we don't want. That decision could be reconsidered.
-  '\\.startsWith': {
-    message: es6polyfill,
-    whitelist: [
-      'build-system/pr-check.js',
-      'validator/engine/tokenize-css.js',
-      'validator/engine/validator.js',
-      // Service workers are only available in ES6 environments
-      'src/service-worker/core.js',
-      // exports.startsWith occurs in babel generated code.
-      'dist.3p/current/integration.js',
-    ]
-  },
-  '\\.endsWith': {
-    message: es6polyfill,
-    whitelist: [
-      'build-system/pr-check.js',
-      'build-system/tasks/csvify-size/index.js',
-      // Service workers are only available in ES6 environments
-      'src/service-worker/core.js',
-      // .endsWith occurs in babel generated code.
-      'dist.3p/current/integration.js',
     ],
   },
+  'debugger': '',
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
@@ -449,6 +431,7 @@ var forbiddenTerms = {
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
       'src/3p-frame.js',
       'src/service/viewer-impl.js',
+      'src/inabox/inabox-viewer.js',
     ],
   },
   'setTimeout.*throw': {
@@ -464,6 +447,14 @@ var forbiddenTerms = {
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, thinking twice before using it',
     whitelist: [
+      'src/service/resources-impl.js',
+    ],
+  },
+  '\\.updatePriority\\(': {
+    message: 'updatePriority is a restricted API.',
+    whitelist: [
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'src/base-element.js',
       'src/service/resources-impl.js',
     ],
   },
@@ -500,6 +491,24 @@ var forbiddenTerms = {
       'testing/iframe.js',
     ],
   },
+  'AMP_CONFIG': {
+    message: 'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
+        'and getMode() to access config',
+    whitelist: [
+      'build-system/server.js',
+      'build-system/amp.extern.js',
+      'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/prepend-global/index.js',
+      'src/service-worker/core.js',
+      'src/service-worker/error-reporting.js',
+      'src/mode.js',
+      'src/experiments.js',
+      'src/error.js',
+      'src/3p-frame.js',
+      'src/config.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -511,12 +520,6 @@ var forbidden3pTerms = {
   // usage in babel's external helpers that is in a code path that we do
   // not use.
   '\\.then\\((?!callNext)': ThreePTermsMessage,
-  'Math\\.sign': ThreePTermsMessage,
-  'Object\\.assign': {
-    message: ThreePTermsMessage,
-    // See https://github.com/ampproject/amphtml/issues/4877
-    whitelist: ['ads/openx.js'],
-  },
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
@@ -619,7 +622,7 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
-    ]
+    ],
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
@@ -629,14 +632,28 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
-    ]
+    ],
   },
   '\\.expandStringAsync\\(': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
-    ]
+    ],
+  },
+  '\\.expandInputValueSync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
+  '\\.expandInputValueAsync\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-form/0.1/amp-form.js',
+      'src/service/url-replacements-impl.js',
+    ],
   },
 };
 
@@ -691,7 +708,6 @@ function stripComments(contents) {
  *   false otherwise
  */
 function matchTerms(file, terms) {
-  var pathname = file.path;
   var contents = stripComments(file.contents.toString());
   var relative = file.relative;
   return Object.keys(terms).map(function(term) {

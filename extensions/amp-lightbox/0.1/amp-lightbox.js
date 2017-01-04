@@ -89,7 +89,9 @@ class AmpLightbox extends AMP.BaseElement {
     this.element.appendChild(this.container_);
 
     this.children_.forEach(child => {
-      this.setAsOwner(child);
+      if (this.isScrollable_) {
+        this.setAsOwner(child);
+      }
       this.container_.appendChild(child);
     });
 

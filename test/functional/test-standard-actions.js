@@ -16,6 +16,7 @@
 
 import {StandardActions} from '../../src/service/standard-actions-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {bindForDoc} from '../../src/bind';
 import {setParentWindow} from '../../src/service';
 
 
@@ -43,7 +44,7 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle AmpElement', () => {
       const element = document.createElement('div');
       let called = false;
-      element.classList.add('-amp-element');
+      element.classList.add('i-amphtml-element');
       element.collapse = function() {
         called = true;
       };
@@ -55,6 +56,27 @@ describes.sandboxed('StandardActions', {}, () => {
     });
   });
 
+  describe('"AMP" global target', () => {
+    it('should implement goBack', () => {
+      const history = window.services.history.obj;
+      const goBackStub = sandbox.stub(history, 'goBack');
+      standardActions.handleAmpTarget({method: 'goBack'});
+      expect(goBackStub).to.be.calledOnce;
+    });
+
+    it('should implement setState', () => {
+      const setStateSpy = sandbox.spy();
+      const bind = {setState: setStateSpy};
+      window.services.bind = {obj: bind};
+      const args = {};
+      standardActions.handleAmpTarget({method: 'setState', args});
+      return bindForDoc(standardActions.ampdoc).then(() => {
+        expect(setStateSpy).to.be.calledOnce;
+        expect(setStateSpy).to.be.calledWith(args);
+      });
+    });
+  });
+
   describes.fakeWin('adoptEmbedWindow', {}, env => {
     let embedWin;
     let embedActions;
@@ -62,6 +84,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
     beforeEach(() => {
       embedActions = {
+        addGlobalTarget: sandbox.spy(),
         addGlobalMethodHandler: sandbox.spy(),
       };
       embedWin = env.win;
@@ -73,7 +96,16 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should configured the embedded actions service', () => {
+      const stub = sandbox.stub(standardActions, 'handleAmpTarget');
       standardActions.adoptEmbedWindow(embedWin);
+
+      // Global targets.
+      expect(embedActions.addGlobalTarget).to.be.calledOnce;
+      expect(embedActions.addGlobalTarget.args[0][0]).to.equal('AMP');
+      embedActions.addGlobalTarget.args[0][1]();
+      expect(stub).to.be.calledOnce;
+
+      // Global actions.
       expect(embedActions.addGlobalMethodHandler).to.be.calledOnce;
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
       expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;

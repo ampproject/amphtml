@@ -98,11 +98,13 @@
     <a href="#amoad">AMoAd</a> |
     <a href="#appnexus">App Nexus</a> |
     <a href="#atomx">Atomx</a> |
+    <a href="#caajainfeed">CA A.J.A. Infeed</a> |
     <a href="#caprofitx">CA ProFit X</a> |
     <a href="#chargeads">Chargeads</a> |
     <a href="#colombia" class="broken">Colombia ad</a> |
     <a href="#contentad">Content.ad</a> |
     <a href="#criteo">Criteo</a> |
+    <a href="#csa">CSA</a> |
     <a href="#custom">Custom</a>|
     <a href="#distroscale">DistroScale</a> |
     <a href="#dotandads">DotAndAds</a> |
@@ -112,6 +114,7 @@
     <a href="#f1e">FlexOneELEPHANT</a> |
     <a href="#felmat">Felmat</a> |
     <a href="#flite">Flite</a> |
+    <a href="#fusion">Fusion</a> |     
     <a href="#genieessp"></a> |
     <a href="#gmossp" class="broken"></a> |
     <a href="#holder">Holder</a> |
@@ -142,7 +145,7 @@
     <a href="#pubmine">Pubmine</a> |
     <a href="#pulsepoint" class="broken">PulsePoint</a> |
     <a href="#purch">Purch</a> |
-    <a href="#revcontent" class="broken">Revcontent</a> |
+    <a href="#revcontent">Revcontent</a> |
     <a href="#rubicon">Rubicon</a> |
     <a href="#sharethrough">Sharethrough</a> |
     <a href="#smartadserver">SmartAdServer</a> |
@@ -156,6 +159,7 @@
     <a href="#weborama">Weborama</a> |
     <a href="#widespace">Widespace</a> |
     <a href="#xlift">Xlift</a> |
+    <a href="#xrostssp">Xrost SSP</a> |
     <a href="#yahoo">Yahoo</a> |
     <a href="#yahoojp">YahooJP</a> |
     <a href="#yieldbot">Yieldbot</a> |
@@ -206,7 +210,7 @@
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-  
+
   <h2 id="adbutler">AdButler</h2>
   <amp-ad width=300 height=250
           type="adbutler"
@@ -214,8 +218,8 @@
           data-zone="212491">
       <div placeholder></div>
       <div fallback></div>
-  </amp-ad>  
-  
+  </amp-ad>
+
   <h2 id="adition">ADITION</h2>
   <amp-ad width=300 height=250
       type="adition"
@@ -379,6 +383,15 @@
       type="atomx"
       data-id="1234">
   </amp-ad>
+  
+  <h2 id="caajainfeed">CA A.J.A. Infeed</h2>
+  <amp-ad width="320" height="120"
+          type="caajainfeed"
+          data-ad-spot="thtuegn1pAQ"
+          data-test="true">
+      <div placeholder></div>
+      <div fallback></div>
+  </amp-ad>
 
   <h2 id="caprofitx">CA ProFit-X</h2>
   <amp-ad
@@ -486,7 +499,14 @@
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-  
+
+  <h2 id="csa">CSA</h2>
+  <amp-ad width=auto height=300
+      type='csa'
+      layout='fixed-height'
+      data-afs-page-options='{"pubId": "partner-pub-9616389000213823", "query": "flowers"}'
+      data-afs-adblock-options='{"width": "auto", "number": 1}'>
+
   <h2 id="custom">Custom leaderboard</h2>
   <amp-ad width=500 height=60
     type="custom"
@@ -496,11 +516,11 @@
       <a href="{{href}}" target='_blank'>
         <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
-    </template>  
+    </template>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
- 
+
   <h2>Custom square</h2>
   <amp-ad width="200" height="200"
     type="custom"
@@ -510,11 +530,11 @@
       <a href="{{href}}" target="_blank">
         <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
-    </template>  
+    </template>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-  
+
   <h2>Custom leaderboard with no slot specified</h2>
   <amp-ad width="500" height="60"
     type="custom"
@@ -523,7 +543,7 @@
       <a href="{{href}}" target="_blank">
         <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
-    </template>  
+    </template>
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -654,6 +674,17 @@
     <div fallback></div>
   </amp-ad>
 
+  <h2 id="fusion">Fusion</h2> 
+  <amp-ad width=600 height=100 
+    type="fusion" 
+    data-ad-server="bn-01d.adtomafusion.com" 
+    data-media-zone="adtomatest.apica" 
+    data-layout="apicaping" 
+    data-space="apicaAd"> 
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad> 
+ 
   <h2 id="genieessp">Geniee SSP</h2>
   <amp-ad width="300" height="250"
       type="genieessp"
@@ -714,12 +745,21 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="ix">Index Exchange 300x250 banner</h2>
+  <h2 id="ix">Index Exchange</h2>
   <amp-ad width="300" height="250"
       type="ix"
       data-version="2"
       data-ad-units="4"
       data-casale-i-d="1">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Index Exchange Header Tag</h2>
+  <amp-ad width="300" height="250"
+      type="ix"
+      data-ix-id="1"
+      data-slot="/62650033/AMP_Example_Ad_Unit">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -803,6 +843,16 @@
       data-cid="8CU852274"
       data-slot="/45361917/AMP_Header_Bidder"
       json='{"targeting":{"mnetAmpTest":"1","pos":"mnetSlot1"}}'>
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Media.Net Contextual Monetization Tag</h2>
+  <amp-ad width="300" height="250"
+          type="medianet"
+          data-tagtype="cm"
+          data-cid="8CUS8O7EX"
+          data-crid="112682482">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
@@ -963,12 +1013,24 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="revcontent" class="broken">Revcontent Widget with placeholder and fallback</h2>
-  <amp-ad width="320" height="420"
-      layout="responsive"
+  <h2 id="revcontent">Revcontent Responsive Tag</h2>
+  <amp-ad width="320" height="240"
       type="revcontent"
+      layout="responsive"
+      heights="(max-width: 320px) 933px,
+        (max-width: 360px) 1087px,
+        (max-width: 375px) 1138px,
+        (max-width: 412px) 1189px,
+        (max-width: 414px) 1072px,
+        (max-width: 568px) 1151px,
+        (max-width: 640px) 1128px,
+        (max-width: 667px) 1151px,
+        (max-width: 732px) 1211px,
+        (max-width: 736px) 1151px,
+        (max-width: 768px) 633px,
+        (max-width: 1024px) 711px,
+        86vw"
       data-wrapper="rcjsload_2ff711"
-      data-endpoint="trends.revcontent.com"
       data-id="203">
     <div placeholder></div>
     <div fallback></div>
@@ -1116,8 +1178,17 @@
 
   <h2 id="xlift">Xlift native ad</h2>
   <amp-ad width="300" height="300"
-      type="xlift" 
+      type="xlift"
       data-mediaid="mamastar">
+      <div placeholder></div>
+      <div fallback></div>
+  </amp-ad>
+ 
+  <h2 id="xrostssp">Xrost SSP</h2>
+  <amp-ad width="300" height="250"
+      type="xrostssp"
+      data-aid="10"
+      data-slot-id="3347">
       <div placeholder></div>
       <div fallback></div>
   </amp-ad>

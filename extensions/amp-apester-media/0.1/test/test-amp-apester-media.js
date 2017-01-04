@@ -30,6 +30,7 @@ describe('amp-apester-media', () => {
   let sandbox;
   let xhrMock;
   let changeSizeSpy;
+  let attemptChangeSizeSpy;
 
   beforeEach(() => {
     toggleExperiment(window, 'amp-apester-media', true);
@@ -65,6 +66,8 @@ describe('amp-apester-media', () => {
         },
       };
       changeSizeSpy = sandbox.spy(
+          media.implementation_, 'changeHeight');
+      attemptChangeSizeSpy = sandbox.spy(
           media.implementation_, 'attemptChangeHeight');
       xhrMock = sandbox.mock(xhrFor(iframe.win));
       xhrMock.expects('fetchJson').returns(Promise.resolve(response));
@@ -103,8 +106,8 @@ describe('amp-apester-media', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      expect(changeSizeSpy.callCount).to.equal(1);
-      expect(changeSizeSpy.args[0][0]).to.equal('444');
+      expect(attemptChangeSizeSpy.callCount).to.equal(1);
+      expect(attemptChangeSizeSpy.args[0][0]).to.equal('444');
     });
   });
 
@@ -115,7 +118,7 @@ describe('amp-apester-media', () => {
       'width': '500',
     }, true).then(ape => {
       const iframe = ape.querySelector('iframe');
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

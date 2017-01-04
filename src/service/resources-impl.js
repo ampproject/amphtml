@@ -32,6 +32,7 @@ import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
+import {getSourceUrl} from '../url';
 
 
 const TAG_ = 'Resources';
@@ -448,14 +449,18 @@ export class Resources {
 
   /**
    * @param {!Resource} resource
+   * @param {boolean=} opt_disconnect
    * @private
    */
-  removeResource_(resource) {
+  removeResource_(resource, opt_disconnect) {
     const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
     resource.pauseOnRemove();
+    if (opt_disconnect) {
+      resource.disconnect();
+    }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
   }
@@ -466,7 +471,7 @@ export class Resources {
    */
   removeForChildWindow(childWin) {
     const toRemove = this.resources_.filter(r => r.hostWin == childWin);
-    toRemove.forEach(r => this.removeResource_(r));
+    toRemove.forEach(r => this.removeResource_(r, /* disconnect */ true));
   }
 
   /**
@@ -572,6 +577,28 @@ export class Resources {
   }
 
   /**
+   * Updates the priority of the resource. If there are tasks currently
+   * scheduled, their priority is updated as well.
+   * @param {!Element} element
+   * @param {number} newPriority
+   * @restricted
+   */
+  updatePriority(element, newPriority) {
+    const resource = Resource.forElement(element);
+
+    resource.updatePriority(newPriority);
+
+    // Update affected tasks
+    this.queue_.forEach(task => {
+      if (task.resource == resource) {
+        task.priority = newPriority;
+      }
+    });
+
+    this.schedulePass();
+  }
+
+  /**
    * A parent resource, especially in when it's an owner (see {@link setOwner}),
    * may request the Resources manager to update children's inViewport state.
    * A child's inViewport state is a logical AND between inLocalViewport
@@ -616,9 +643,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @return {!Promise}
-   * @protected
    */
-
   attemptChangeSize(element, newHeight, newWidth) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
@@ -673,11 +698,11 @@ export class Resources {
         mutator();
 
         // Mark itself and children for re-measurement.
-        if (element.classList.contains('-amp-element')) {
+        if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
           r.requestMeasure();
         }
-        const ampElements = element.getElementsByClassName('-amp-element');
+        const ampElements = element.getElementsByClassName('i-amphtml-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = Resource.forElement(ampElements[i]);
           r.requestMeasure();
@@ -759,7 +784,10 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
-      this.viewer_.postDocumentReady();
+      this.viewer_.sendMessage('documentLoaded', {
+        title: this.win.document.title,
+        sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
+      }, /* cancelUnsent */true);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1516,7 +1544,7 @@ export class Resources {
    */
   discoverResourcesForElement_(element, callback) {
     // Breadth-first search.
-    if (element.classList.contains('-amp-element')) {
+    if (element.classList.contains('i-amphtml-element')) {
       callback(Resource.forElement(element));
       // Also schedule amp-element that is a placeholder for the element.
       const placeholder = element.getPlaceholder();
@@ -1524,7 +1552,7 @@ export class Resources {
         this.discoverResourcesForElement_(placeholder, callback);
       }
     } else {
-      const ampElements = element.getElementsByClassName('-amp-element');
+      const ampElements = element.getElementsByClassName('i-amphtml-element');
       const seen = [];
       for (let i = 0; i < ampElements.length; i++) {
         const ampElement = ampElements[i];

@@ -39,12 +39,9 @@ import {
 import {cssText} from '../../build/css';
 import {maybeValidate} from '../validator-integration';
 import {maybeTrackImpression} from '../impression';
-import {Inabox} from './inabox';
 import {isExperimentOn} from '../experiments';
-
-if (isExperimentOn(self, 'amp-inabox')) {
-  new Inabox(self).init();
-}
+import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {installInaboxViewportService} from './inabox-viewport';
 
 // TODO(lannka): only install the necessary services.
 
@@ -76,6 +73,14 @@ chunk(self.document, function initial() {
       // Core services.
       installRuntimeServices(self);
       fontStylesheetTimeout(self);
+
+      if (isExperimentOn(self, 'amp-inabox')) {
+        // Install inabox specific Viewport service before
+        // runtime tries to install the normal one.
+        installViewerServiceForDoc(ampdoc);
+        installInaboxViewportService(ampdoc);
+      }
+
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();

@@ -19,8 +19,8 @@ import {findIndex} from '../utils/array';
 import {documentStateFor} from './document-state';
 import {getServiceForDoc} from '../service';
 import {dev} from '../log';
+import {isIframed} from '../dom';
 import {
-  getSourceUrl,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -92,7 +92,7 @@ export class Viewer {
     this.win = ampdoc.win;
 
     /** @private @const {boolean} */
-    this.isIframed_ = (this.win.parent && this.win.parent != this.win);
+    this.isIframed_ = isIframed(this.win);
 
     /** @const {!./document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
@@ -231,6 +231,7 @@ export class Viewer {
         // After https://github.com/ampproject/amphtml/issues/6070
         // is fixed we should probably only keep the amp_js_v check here.
         && (this.params_['origin']
+            || this.params_['viewerorigin']
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
             || (this.win.location.search.indexOf('amp_js_v') != -1))
@@ -333,7 +334,7 @@ export class Viewer {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              dev().error(TAG_, 'Untrusted viewer referrer override: ' +
+              dev().expectedError(TAG_, 'Untrusted viewer referrer override: ' +
                   this.unconfirmedReferrerUrl_ + ' at ' +
                   this.messagingOrigin_);
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
@@ -451,14 +452,6 @@ export class Viewer {
     } else {
       this.win.top.location.href = url;
     }
-  }
-
-  /**
-   * Whether the document is embedded in a iframe.
-   * @return {boolean}
-   */
-  isIframed() {
-    return this.isIframed_;
   }
 
   /**
@@ -730,74 +723,6 @@ export class Viewer {
   }
 
   /**
-   * Triggers "documentLoaded" event for the viewer.
-   * TODO: move this to resources-impl, and use sendMessage()
-   */
-  postDocumentReady() {
-    this.sendMessage('documentLoaded', {
-      title: this.win.document.title,
-      sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-    }, /* cancelUnsent */true);
-  }
-
-
-  /**
-   * Triggers "scroll" event for the viewer.
-   * @param {number} scrollTop
-   * TODO: move this to viewport-impl
-   */
-  postScroll(scrollTop) {
-    this.sendMessage(
-        'scroll', {scrollTop}, /* cancelUnsent */true);
-  }
-
-  /**
-   * Requests full overlay mode from the viewer. Returns a promise that yields
-   * when the viewer has switched to full overlay mode.
-   * @return {!Promise}
-   * TODO: move this to viewport-impl and use sendMessage()
-   */
-  requestFullOverlay() {
-    return /** @type {!Promise} */ (
-        this.sendMessageAwaitResponse('requestFullOverlay', {},
-            /* cancelUnsent */true));
-  }
-
-  /**
-   * Requests to cancel full overlay mode from the viewer. Returns a promise
-   * that yields when the viewer has switched off full overlay mode.
-   * @return {!Promise}
-   * TODO: move this to viewport-impl and use sendMessage()
-   */
-  cancelFullOverlay() {
-    return /** @type {!Promise} */ (
-        this.sendMessageAwaitResponse('cancelFullOverlay', {},
-            /* cancelUnsent */true));
-  }
-
-  /**
-   * Triggers "pushHistory" event for the viewer.
-   * @param {number} stackIndex
-   * @return {!Promise}
-   * TODO: move this to history-impl
-   */
-  postPushHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageAwaitResponse(
-        'pushHistory', {stackIndex}));
-  }
-
-  /**
-   * Triggers "popHistory" event for the viewer.
-   * @param {number} stackIndex
-   * @return {!Promise}
-   * TODO: move this to history-impl
-   */
-  postPopHistory(stackIndex) {
-    return /** @type {!Promise} */ (this.sendMessageAwaitResponse(
-        'popHistory', {stackIndex}));
-  }
-
-  /**
    * Get/set the Base CID from/to the viewer.
    * @param {string=} opt_data Stringified JSON object {cid, time}.
    * @return {!Promise<string|undefined>}
@@ -828,59 +753,6 @@ export class Viewer {
             return undefined;
           });
     });
-  }
-
-  /**
-   * Get the fragment from the url or the viewer.
-   * Strip leading '#' in the fragment
-   * @return {!Promise<string>}
-   * TODO: move this to history-impl
-   */
-  getFragment() {
-    if (!this.isEmbedded_) {
-      let hash = this.win.location.hash;
-      /* Strip leading '#' */
-      hash = hash.substr(1);
-      return Promise.resolve(hash);
-    }
-    if (!this.hasCapability('fragment')) {
-      return Promise.resolve('');
-    }
-    return this.sendMessageAwaitResponse('fragment', undefined,
-        /* cancelUnsent */true).then(
-        hash => {
-          if (!hash) {
-            return '';
-          }
-          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
-              'should start with #');
-          /* Strip leading '#' */
-          return hash.substr(1);
-        });
-  }
-
-  /**
-   * Update the fragment of the viewer if embedded in a viewer,
-   * otherwise update the page url fragment
-   * The fragment variable should contain leading '#'
-   * @param {string} fragment
-   * @return {!Promise}
-   * TODO: move this to history-impl
-   */
-  updateFragment(fragment) {
-    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
-        'should start with #');
-    if (!this.isEmbedded_) {
-      if (this.win.history.replaceState) {
-        this.win.history.replaceState({}, '', fragment);
-      }
-      return Promise.resolve();
-    }
-    if (!this.hasCapability('fragment')) {
-      return Promise.resolve();
-    }
-    return /** @type {!Promise} */ (this.sendMessageAwaitResponse(
-        'fragment', {fragment}, /* cancelUnsent */true));
   }
 
   /**
@@ -1008,12 +880,19 @@ export class Viewer {
    */
   sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
     if (this.messageDeliverer_) {
-      return /** @type {!Promise<*>} */ (this.messageDeliverer_(
-          eventType, data, awaitResponse));
+      // Certain message deliverers return fake "Promise" instances called
+      // "Thenables". Convert from these values into trusted Promise instances,
+      // assimilating with the resolved (or rejected) internal value.
+      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(
+          eventType, data, awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {
-      return Promise.reject(getChannelError());
+      if (awaitResponse) {
+        return Promise.reject(getChannelError());
+      } else {
+        return Promise.resolve();
+      }
     }
 
     if (!cancelUnsent) {

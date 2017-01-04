@@ -38,6 +38,7 @@ describe('FixedLayer', () => {
     allRules = {};
 
     docBody = createElement('docBody');
+    docBody.id = 'doc-body-id';
     docElem = createElement('docElem');
 
     element1 = createElement('element1');
@@ -81,6 +82,7 @@ describe('FixedLayer', () => {
           ownerNode: createStyleNode('amp-custom'),
           cssRules: [
             createValidRule('#amp-custom-rule1', [element1]),
+            createValidRule('#doc-body-id #amp-custom-rule1', [element1]),
             createValidRule('#amp-custom-rule2', [element1, element2]),
             createUnrelatedRule('#amp-custom-rule3', [element3]),
             {
@@ -189,6 +191,9 @@ describe('FixedLayer', () => {
       setAttribute: (name, value) => {
         attrs[name] = value;
       },
+      removeAttribute: name => {
+        delete attrs[name];
+      },
       appendChild: child => {
         child.parentElement = elem;
         children.push(child);
@@ -207,6 +212,9 @@ describe('FixedLayer', () => {
         }
         newChild.parentElement = elem;
         children.push(newChild);
+      },
+      cloneNode() {
+        return createElement(this.id);
       },
     };
     Object.defineProperty(elem, 'offsetTop', {
@@ -287,6 +295,7 @@ describe('FixedLayer', () => {
         element: element1,
         selectors: [
           '#amp-custom-rule1',
+          '#doc-body-id #amp-custom-rule1',
           '#amp-custom-rule2',
           '#amp-custom-media-rule1',
           '#other-rule1',
@@ -806,6 +815,7 @@ describe('FixedLayer', () => {
       expect(fe.placeholder).to.exist;
       expect(fe.element.parentElement).to.equal(fixedLayer.fixedLayer_);
       expect(fixedLayer.fixedLayer_).to.exist;
+      expect(fixedLayer.fixedLayer_.id).to.equal('doc-body-id');
 
       // Remove from DOM.
       fe.element.parentElement.removeChild(fe.element);

@@ -37,6 +37,7 @@ describe('Resources', () => {
 
   afterEach(() => {
     sandbox.restore();
+    resources.pass_.cancel();
   });
 
   it('should calculate correct calcTaskScore', () => {
@@ -329,6 +330,48 @@ describe('Resources', () => {
     };
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
+  });
+
+  it('should update priority and schedule pass', () => {
+    const element = document.createElement('div');
+    element.isBuilt = () => true;
+    element.getPriority = () => 2;
+    const resource = new Resource(1, element, resources);
+    resources.pass_.cancel();
+    expect(resource.getPriority()).to.equal(2);
+
+    resources.updatePriority(element, 1);
+    expect(resource.getPriority()).to.equal(1);
+    expect(resources.pass_.isPending()).to.be.true;
+  });
+
+  it('should update priority and update tasks', () => {
+    resources.pass_.cancel();
+
+    // Target element.
+    const element = document.createElement('div');
+    element.isBuilt = () => true;
+    element.getPriority = () => 2;
+    const resource = new Resource(1, element, resources);
+    resources.schedule_(resource, 'L', 0, 0, () => {});
+    const task = resources.queue_.tasks_[0];
+    expect(task.priority).to.equal(2);
+
+    // Another element.
+    const element2 = document.createElement('div');
+    element2.isBuilt = () => true;
+    element2.getPriority = () => 2;
+    const resource2 = new Resource(2, element2, resources);
+    resources.schedule_(resource2, 'L', 0, 0, () => {});
+    const task2 = resources.queue_.tasks_[1];
+    expect(task2.priority).to.equal(2);
+
+    resources.updatePriority(element, 1);
+    expect(resource.getPriority()).to.equal(1);
+    expect(resources.pass_.isPending()).to.be.true;
+    expect(task.priority).to.equal(1);
+    // The other task is not updated.
+    expect(task2.priority).to.equal(2);
   });
 });
 
@@ -1362,7 +1405,7 @@ describe('Resources mutateElement and collapse', () => {
       ownerDocument: {defaultView: window},
       tagName: isAmp ? 'amp-test' : 'div',
       classList: {
-        contains: className => isAmp && className == '-amp-element',
+        contains: className => isAmp && className == 'i-amphtml-element',
       },
       getElementsByClassName: () => [],
       isBuilt: () => {
@@ -1447,12 +1490,12 @@ describe('Resources mutateElement and collapse', () => {
         /* isAmp */ false);
 
     parent1.getElementsByClassName = className => {
-      if (className == '-amp-element') {
+      if (className == 'i-amphtml-element') {
         return [resource1.element];
       }
     };
     parent2.getElementsByClassName = className => {
-      if (className == '-amp-element') {
+      if (className == 'i-amphtml-element') {
         return [resource2.element];
       }
     };
@@ -1556,7 +1599,7 @@ describe('Resources mutateElement and collapse', () => {
 });
 
 
-describe('Resources.add', () => {
+describe('Resources.add/remove', () => {
   let sandbox;
   let resources;
   let parent;
@@ -1576,9 +1619,8 @@ describe('Resources.add', () => {
       isUpgraded() {
         return true;
       },
-      dispatchCustomEvent() {
-        return;
-      },
+      pauseCallback() {},
+      dispatchCustomEvent() {},
     };
     element.build = sandbox.spy();
     return element;
@@ -1758,6 +1800,34 @@ describe('Resources.add', () => {
       expect(child1BuildSpy.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
       expect(schedulePassStub).to.not.be.called;
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove resource and pause', () => {
+      child1.isBuilt = () => true;
+      resources.add(child1);
+      const resource = child1['__AMP__RESOURCE'];
+      const pauseOnRemoveStub = sandbox.stub(resource, 'pauseOnRemove');
+      const disconnectStub = sandbox.stub(resource, 'disconnect');
+      resources.remove(child1);
+      expect(resources.resources_.indexOf(resource)).to.equal(-1);
+      expect(pauseOnRemoveStub).to.be.calledOnce;
+      expect(disconnectStub).to.not.be.called;
+    });
+
+    it('should disconnect resource when embed is destroyed', () => {
+      child1.isBuilt = () => true;
+      resources.add(child1);
+      const resource = child1['__AMP__RESOURCE'];
+      const pauseOnRemoveStub = sandbox.stub(resource, 'pauseOnRemove');
+      const disconnectStub = sandbox.stub(resource, 'disconnect');
+      const childWin = {};
+      resource.hostWin = childWin;
+      resources.removeForChildWindow(childWin);
+      expect(resources.resources_.indexOf(resource)).to.equal(-1);
+      expect(pauseOnRemoveStub).to.be.calledOnce;
+      expect(disconnectStub).to.be.called;
     });
   });
 });

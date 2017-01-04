@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
-
-const TAG = 'inabox-client';
+import {parser} from './bind-expr-impl';
 
 /**
- * Inabox provides environment for AMP runtime to work in a non-scrollable
- * cross-origin iframe, e.g. an ad slot.
+ * A single Bind expression.
  */
-export class Inabox {
-
+export class BindExpression {
   /**
-   * @param {!Window} win
+   * @param {string} expressionString
    */
-  constructor(win) {
-    /** @private {!Window} */
-    this.win_ = win;
+  constructor(expressionString) {
+    /** @const {string} */
+    this.expressionString = expressionString;
   }
 
-  init() {
-    this.win_.addEventListener('message', event => {
-      dev().info(TAG, event.data);
-    });
-
-    this.win_.top./*OK*/postMessage('amp-' + JSON.stringify({
-      type: 'send-positions',
-      sentinel: '0-12345',
-    }), '*');
+  /**
+   * Evaluates the expression given a scope.
+   * @param {!Object} scope
+   * @return {*}
+   */
+  evaluate(scope) {
+    // TODO(choumx): Improve performance by extracting AST construction
+    // and generating evaluator with Function constructor.
+    try {
+      parser.yy = scope;
+      return parser.parse(this.expressionString);
+    } finally {
+      parser.yy = null;
+    }
   }
 }

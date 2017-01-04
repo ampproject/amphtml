@@ -84,6 +84,9 @@ googletag.pubads;
 googletag.defineSlot
 data.slot;
 
+var _googCsa;
+window._googCsa;
+
 var _inmobi;
 window._inmobi;
 _inmobi.getNewAd;
@@ -228,3 +231,13 @@ geckoTag.placementReady;
 data.plc;
 data.sz;
 data.extra;
+var Fusion;
+Fusion.on;
+Fusion.on.warning;
+Fusion.loadAds;
+var ev;
+ev.msg;
+data.adServer;
+data.mediaZone;
+data.layout;
+data.space;

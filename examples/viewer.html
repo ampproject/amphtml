@@ -164,8 +164,7 @@
   <script src="./viewer-integr-messaging.js"></script>
 
   <script>
-
-    var SENTINEL = '__AMP__';
+    var SENTINEL = '__AMPHTML__';
 
     var allViewers = [];
 
@@ -254,6 +253,7 @@
 
 
     Viewer.prototype.awaitHandshake_ = function() {
+      log('Viewer.prototype.awaitHandshake_');
       var targetId = this.iframe.id;
       var target = this.iframe.contentWindow;
       var targetOrigin = this.frameOrigin_;
@@ -261,6 +261,7 @@
         if (event.origin == targetOrigin &&
                 event.data == 'amp-handshake-request' &&
                 (!event.source || event.source == target)) {
+          log('event: ',event);
           log('Viewer ' + this.id + ' messaging established with ',
               targetOrigin);
           window.removeEventListener('message', listener, false);
@@ -323,6 +324,7 @@
 
 
     Viewer.prototype.onScroll_ = function() {
+      log('Viewer.prototype.onScroll_');
       this.sendRequest_('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
@@ -409,6 +411,7 @@
 
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
+      log('Viewer.prototype.processRequest_');
       if (type == 'documentLoaded') {
         return this.documentReady_();
       }
@@ -453,6 +456,7 @@
 
 
     Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
+      log('Viewer.prototype.sendRequest_');
       if (!this.messaging_) {
         return;
       }

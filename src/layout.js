@@ -90,7 +90,9 @@ export const LOADING_ELEMENTS_ = {
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
+  'AMP-OOYALA-PLAYER': true,
   'AMP-PINTEREST': true,
+  'AMP-PLAYBUZZ': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
 };
@@ -116,7 +118,7 @@ export function parseLayout(s) {
  * @return {string}
  */
 export function getLayoutClass(layout) {
-  return '-amp-layout-' + layout;
+  return 'i-amphtml-layout-' + layout;
 }
 
 

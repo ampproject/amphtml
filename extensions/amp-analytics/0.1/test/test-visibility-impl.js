@@ -217,10 +217,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just totalTimeMin condition', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -230,10 +230,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just continuousTimeMin condition', () => {
-    listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {continuousTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -262,10 +262,10 @@ describe('amp-analytics.visibility', () => {
 
   it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
     // This test counts time from when the ad is loaded.
-    listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
 
     clock.tick(1000);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1000);
     expect(callbackStub.callCount).to.equal(1);
@@ -409,7 +409,7 @@ describe('amp-analytics.visibility', () => {
       iframeAnalytics;
     beforeEach(() => {
       ampEl = document.createElement('span');
-      ampEl.className = '-amp-element';
+      ampEl.className = 'i-amphtml-element';
       ampEl.id = 'ampEl';
       iframe = document.createElement('iframe');
       div = document.createElement('div');
@@ -516,7 +516,7 @@ describe('amp-analytics.visibility', () => {
       inObCallback = null;
     });
 
-    it('should work for visible=true spec', () => {
+    it('"visible" trigger should work with no duration condition', () => {
 
       visibility.listenOnceV2({
         selector: '#abc',
@@ -590,7 +590,7 @@ describe('amp-analytics.visibility', () => {
       });
     });
 
-    it('should work for visible=true with duration condition', () => {
+    it('"visible" trigger should work with duration condition', () => {
       visibility.listenOnceV2({
         selector: '#abc',
         continuousTimeMin: 1000,
@@ -635,6 +635,77 @@ describe('amp-analytics.visibility', () => {
           maxContinuousVisibleTime: '1000',
           totalTime: '1234',
         });
+      });
+    });
+
+    it('"hidden" trigger should work with duration condition', () => {
+      const viewer = viewerForDoc(ampdoc);
+      visibility.listenOnceV2({
+        selector: '#abc',
+        continuousTimeMin: 1000,
+        visiblePercentageMin: 10,
+      }, callbackSpy1, false /* hidden trigger */, ampElement);
+
+      resourceLoadedResolver();
+      return Promise.resolve().then(() => {
+        expect(observeSpy).to.be.calledWith(ampElement);
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(25); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000);
+        fireIntersect(15); // visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(1000); // continuous visible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(1); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        viewer.setVisibilityState_(VisibilityState.HIDDEN);
+        expect(callbackSpy1).to.be.called;
+
+        expect(callbackSpy1).to.be.calledWith({
+          backgrounded: '0',
+          backgroundedAtStart: '0',
+          elementHeight: '100',
+          elementWidth: '100',
+          elementX: '0',
+          elementY: '99',
+          firstSeenTime: '100',
+          fistVisibleTime: '200',
+          lastSeenTime: '2500',
+          lastVisibleTime: '2400',
+          loadTimeVisibility: '5',
+          maxVisiblePercentage: '25',
+          minVisiblePercentage: '15',
+          totalVisibleTime: '1200',
+          maxContinuousVisibleTime: '1100',
+          totalTime: '1234',
+        });
+
+        // This line is to remove side effect this test brought to others.
+        // Notice that this test installs everything to global window instead
+        // of an iframe. Some other tests that are not well isolated too get
+        // affected by the change of Viewer visibility here, so we need to
+        // restore.
+        // TODO: refactor this whole test file to enforce good isolation.
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
       });
     });
 

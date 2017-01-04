@@ -15,20 +15,15 @@
  */
 
 import {PositionObserver} from './position-observer';
+import {
+  serializeMessage,
+  deserializeMessage,
+  MessageType,
+} from '../../src/3p-frame';
 import {dev} from '../../src/log';
 
 /** @const */
-const TAG = 'inabox-messaging-host';
-/** @const */
-const AMP_MESSAGE_PREFIX = 'amp-';
-/** @const */
-const REQUEST_TYPE = {
-  SEND_POSITIONS: 'send-positions',
-};
-/** @const */
-const RESPONSE_TYPE = {
-  POSITION: 'position',
-};
+const TAG = 'InaboxMessagingHost';
 
 export class InaboxMessagingHost {
 
@@ -65,15 +60,16 @@ export class InaboxMessagingHost {
       return false;
     }
 
-    if (request.type == REQUEST_TYPE.SEND_POSITIONS) {
+    if (request.type == MessageType.SEND_POSITIONS) {
       // To prevent double tracking for the same requester.
       if (this.registeredIframeSentinels_[request.sentinel]) {
         return false;
       }
       this.registeredIframeSentinels_[request.sentinel] = true;
       this.positionObserver_.observe(iframe, data => {
+        dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
         message.source./*OK*/postMessage(
-            serializeMessage(RESPONSE_TYPE.POSITION, request.sentinel, data),
+            serializeMessage(MessageType.POSITION, request.sentinel, data),
             message.origin);
       });
       return true;
@@ -112,33 +108,6 @@ export class InaboxMessagingHost {
         return iframe;
       }
     }
-    return null;
-  }
-}
-
-/**
- * @param type {string}
- * @param sentinel {string}
- * @param data {!Object}
- * @returns {string}
- */
-function serializeMessage(type, sentinel, data) {
-  return AMP_MESSAGE_PREFIX + JSON.stringify({type, sentinel, data});
-}
-
-/**
- * @param message {*}
- * @returns {?JSONType}
- */
-function deserializeMessage(message) {
-  if (typeof message !== 'string' || message.indexOf(AMP_MESSAGE_PREFIX) != 0) {
-    return null;
-  }
-  try {
-    return /** @type {!JSONType} */ (JSON.parse(
-        message.substring(AMP_MESSAGE_PREFIX.length)));
-  } catch (e) {
-    dev().error(TAG, 'Failed to parse message: ' + message, e);
     return null;
   }
 }
