@@ -164,6 +164,7 @@ function buildAdUrl(
       {name: 'adx', value: slotRect.left},
       {name: 'ady', value: slotRect.top},
       {name: 'u_hist', value: getHistoryLength(global)},
+      {name: 'oid', value: '2'},
       dtdParam,
     ],
     unboundedQueryParams,
