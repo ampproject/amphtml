@@ -17,15 +17,19 @@ limitations under the License.
 # <a name="amp-pixel"></a> `amp-pixel`
 
 <table>
-   <tr>
+  <tr>
     <td class="col-fourty"><strong>Description</strong></td>
     <td>The <code>amp-pixel</code> element is meant to be used as a typical tracking pixel - to count page views.</td>
   </tr>
-   <tr>
+  <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
   </tr>
-   <tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fixed, nodisplay</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
   </tr>
@@ -37,7 +41,7 @@ The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a
 
 ## Attributes
 
-**src**
+**src** (required)
 
 A simple URL to send a GET request to when the tracking pixel is loaded.
 

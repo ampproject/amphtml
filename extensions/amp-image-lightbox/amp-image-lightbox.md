@@ -51,7 +51,7 @@ The typical scenario looks like this:
 <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
 ```
 
-The `amp-image-lightbox` is activated using `on` action on the `amp-img` element
+The `amp-image-lightbox` is activated using [`on`](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on) action on the `amp-img` element
 by referencing the lightbox element's ID. When activated, it places the image in
 the center of the full-viewport lightbox. Notice that any number of images in
 the article can use the same `amp-image-lightbox`. The `amp-image-lightbox`
@@ -95,6 +95,12 @@ The `amp-image-lightbox` exposes the following actions you can use [AMP on-synta
 <amp-img on="tap:lightbox1" role="button" tabindex="0" src="image1" width=200 height=100></amp-img>
 <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
 ```
+
+## Attributes
+
+**layout**
+
+Must be set to `nodisplay`.
 
 ## Validation
 

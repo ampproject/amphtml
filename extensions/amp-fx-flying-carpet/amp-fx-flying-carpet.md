@@ -51,7 +51,11 @@ Example:
 
 **height**
 
-The height of the flying carpets "window".
+The height of the flying carpet's "window".
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Styling
 

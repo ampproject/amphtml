@@ -1,6 +1,8 @@
 # <a name="amp-ad"></a> `amp-ad` / `amp-embed`
 
-NOTE: The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
+{% call callout('Note', type='note') %}
+The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
+{% endcall %}
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -182,33 +184,38 @@ This is due to the UX implications of full page overlay ads. It may be considere
 
 ## Attributes
 
-### type
+**type**
 
-Identifier for the ad network. This selects the template that is used for the ad tag.
+An identifier for the ad network. This selects the template that is used for the ad tag.
 
-### src
+**src**
 
-Optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is whitelisted for this ad network.
+An optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is white-listed for this ad network.
 
-### data-foo-bar
+**data-foo-bar**
 
-Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. E.g. "data-foo-bar" is send to the ad for configuration as "fooBar".
+Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".
 
-### json
+**json**
 
-Optional attribute to pass configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
+An optional attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
 
-### data-consent-notification-id
+**data-consent-notification-id**
 
-Optional attribute. If provided will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
+An optional attribute. If provided, will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
 
-### data-loading-strategy
+**data-loading-strategy**
 
-Supported value: `prefer-viewability-over-views`. Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view.
+Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view. Supported value: `prefer-viewability-over-views`. 
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Placeholder
 
-Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.
+Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.
+
 ```html
 <amp-ad width=300 height=250
     type="foo">
@@ -218,18 +225,18 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 
 ## No Ad available
 - `amp-ad` supports a child element with the `fallback` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
+- If there is no fallback element available, the amp-ad tag will be collapsed (set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
+
+Example with fallback:
+
 ```html
-<amp-ad width=300 height=250
-    type="foo">
+<amp-ad width=300 height=250 type="foo">
   <div fallback>Have a great day!</div>
 </amp-ad>
 ```
 
-- If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
-
-
 ## Serving video ads
-AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here] (../README.md#audiovideo).
+AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here](https://www.ampproject.org/docs/reference/components#audio-video).
 
 If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 
@@ -248,7 +255,7 @@ To enable this, copy the file [remote.html](../../3p/remote.html) to your web se
 <meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
 ```
 
-The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but e.g. `something-else.example.com` is OK. See the doc ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
 ### Security
 
@@ -284,8 +291,8 @@ draw3p(function(config, done) {
 
 ## Validation
 
-See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/0.1/validator-amp-ad.protoascii) in the AMP validator specification.
 
 ## Notes
 
-To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It is recommended to add the script manually but currently it will be automatically fetched when `amp-ad` is used.
+To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It's recommended that you add the script manually; however, currently, it will be automatically fetched when `amp-ad` is used.

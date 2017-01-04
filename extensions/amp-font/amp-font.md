@@ -43,7 +43,7 @@ limitations under the License.
 
 The `amp-font` extension should be used for controlling timeouts on font loading.
 
-The `amp-font` extension allows adding and removing CSS classes from document.documentElement based on whether a font was loaded or is in error-state.
+The `amp-font` extension allows adding and removing CSS classes from `document.documentElement` based on whether a font was loaded or is in error-state.
 
 Example:
 ```html
@@ -101,6 +101,10 @@ CSS class that would be removed from the `document.documentElement` and `documen
 **font-weight, font-style, font-variant**
 
 The attributes above should all behave like they do on standard elements.
+
+**layout**
+
+Must be `nodisplay`.
 
 ## Validation
 

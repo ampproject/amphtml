@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Facebook Post or Video. </td>
+    <td>Displays a Facebook post or video. </td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable.</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -38,10 +38,12 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-facebook/">Annotated code example for amp-facebook</a></td>
   </tr>
 </table>
+## Overview 
 
-## Examples
+You can use the `amp-facebook` component to embed a Facebook post or a Facebook video.
 
-Example - Embedding a post:
+**Example: Embedding a post**
+
 ```html
 <amp-facebook width=486 height=657
     layout="responsive"
@@ -49,7 +51,8 @@ Example - Embedding a post:
 </amp-facebook>
 ```
 
-Example - Embedding a video:
+**Example: Embedding a video**
+
 ```html
 <amp-facebook width=552 height=574
     layout="responsive"
@@ -60,17 +63,21 @@ Example - Embedding a video:
 
 ## Attributes
 
-**data-href**
+**data-href** (required)
 
-The URL of the facebook post/video. For example: https://www.facebook.com/zuck/posts/10102593740125791.
+The URL of the Facebook post/video. For example: https://www.facebook.com/zuck/posts/10102593740125791.
 
-**data-embed-as**
-_Optional_
-Either `post` or `video` (default: `post`).
+**data-embed-as** (optional)
 
-Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embed the player of the video ignoring the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
+The value is either `post` or `video`.  The default is `post`.
 
-Checkout the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embeds the player of the video, and ignores the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
+
+Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

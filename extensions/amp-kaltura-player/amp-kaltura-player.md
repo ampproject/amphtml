@@ -78,6 +78,10 @@ Keys and values will be URI encoded. Keys will be camel cased.
 
 - `data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`
 
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
 ## Validation
 
 See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/0.1/validator-amp-kaltura-player.protoascii) in the AMP validator specification.

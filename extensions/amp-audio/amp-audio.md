@@ -79,6 +79,10 @@ If present, will automatically loop the audio back to the start upon reaching th
 
 If present, will mute the audio by default.
 
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
 ## Validation
 
 See [amp-audio rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/0.1/validator-amp-audio.protoascii) in the AMP validator specification.

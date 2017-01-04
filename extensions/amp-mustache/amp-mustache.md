@@ -26,6 +26,14 @@ limitations under the License.
     <td>Stable</td>
   </tr>
   <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td>
+      <div>
+        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js">&lt;/script></code>
+      </div>
+    </td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>None</td>
   </tr>

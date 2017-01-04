@@ -102,6 +102,10 @@ The `open` attribute is present on the sidebar when it is open.
 
 The only permissible value for the `layout` attribute in `amp-sidebar` is `nodisplay`.
 
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
 ## Styling
 
 The `amp-sidebar` component can be styled with standard CSS.
