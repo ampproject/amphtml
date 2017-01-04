@@ -234,9 +234,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.lifecycleReporter.sendPing('adRequestStart');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, undefined, opt_context);
+      let sentinel;
+      try {
+        sentinel = JSON.parse(iframe.name).attributes._context.sentinel;
+      } catch (err) {
+        sentinel = JSON.parse(iframe.src.split('#')[1])._context.sentinel;
+      }
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
-      return this.xOriginIframeHandler_.init(iframe);
+      return this.xOriginIframeHandler_.init(iframe, sentinel);
     });
   }
 

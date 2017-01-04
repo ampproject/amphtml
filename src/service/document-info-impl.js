@@ -84,7 +84,6 @@ export class DocInfo {
   }
 }
 
-
 /**
  * Returns a relatively low entropy random string.
  * This should be called once per window and then cached for subsequent

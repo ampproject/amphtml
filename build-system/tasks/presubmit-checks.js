@@ -429,7 +429,7 @@ var forbiddenTerms = {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
-      'src/3p-frame.js',
+      'src/attributes.js',
       'src/service/viewer-impl.js',
       'src/inabox/inabox-viewer.js',
     ],

@@ -30,7 +30,7 @@ describe('3p messaging', () => {
       testWin = i.win;
       testWin.context = {
         location: window.location,
-        amp3pSentinel: 'test',
+        sentinel: '123-123',
       };
       iframe = {
         contentWindow: testWin,
@@ -46,10 +46,10 @@ describe('3p messaging', () => {
     listenParent(testWin, 'test', function(d) {
       progress += d.s;
     });
-    postMessage(iframe, 'test', {s: 'a'}, '*', true);
-    postMessage(iframe, 'test', {s: 'b'}, '*', false);
-    postMessage(iframe, 'other', {s: 'c'}, '*', true);
-    postMessage(iframe, 'test', {s: 'd'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'a'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'b'}, '*', false);
+    postMessage(iframe, '1234-1234', 'other', {s: 'c'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'd'}, '*', true);
     return timer.promise(10).then(() => {
       expect(progress).to.equal('ad');
     });
@@ -66,13 +66,13 @@ describe('3p messaging', () => {
     listenParent(testWin, 'test2', function(d) {
       progress += d.s;
     });
-    postMessage(iframe, 'test', {s: 'a'}, '*', true);
-    postMessage(iframe, 'test2', {s: 'a'}, '*', true);
-    postMessage(iframe, 'test2', {s: 'a'}, '*', true);
-    postMessage(iframe, 'test', {s: 'b'}, '*', false);
-    postMessage(iframe, 'other', {s: 'c'}, '*', true);
-    postMessage(iframe, 'test2', {s: 'a'}, '*', true);
-    postMessage(iframe, 'test', {s: 'd'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'a'}, '*', true);
+    postMessage(iframe, '123-123', 'test2', {s: 'a'}, '*', true);
+    postMessage(iframe, '123-123', 'test2', {s: 'a'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'b'}, '*', false);
+    postMessage(iframe, '123-123', 'other', {s: 'c'}, '*', true);
+    postMessage(iframe, '123-123', 'test2', {s: 'a'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'd'}, '*', true);
     return timer.promise(10).then(() => {
       expect(progress).to.equal('aaaaadd');
     });
@@ -89,18 +89,18 @@ describe('3p messaging', () => {
     const unlisten2 = listenParent(testWin, 'test2', function(d) {
       progress += d.s;
     });
-    postMessage(iframe, 'test', {s: 'a'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'a'}, '*', true);
     return timer.promise(10).then(() => {
       expect(progress).to.equal('aa');
       unlisten0();
-      postMessage(iframe, 'test2', {s: 'a'}, '*', true);
-      postMessage(iframe, 'test2', {s: 'a'}, '*', true);
-      postMessage(iframe, 'test', {s: 'b'}, '*', true);
+      postMessage(iframe, '123-123', 'test2', {s: 'a'}, '*', true);
+      postMessage(iframe, '123-123', 'test2', {s: 'a'}, '*', true);
+      postMessage(iframe, '123-123', 'test', {s: 'b'}, '*', true);
       return timer.promise(10).then(() => {
         unlisten2();
         unlisten1();
-        postMessage(iframe, 'test2', {s: 'a'}, '*', true);
-        postMessage(iframe, 'test', {s: 'd'}, '*', true);
+        postMessage(iframe, '123-123', 'test2', {s: 'a'}, '*', true);
+        postMessage(iframe, '123-123', 'test', {s: 'd'}, '*', true);
         return timer.promise(10).then(() => {
           expect(progress).to.equal('aaaab');
         });
@@ -125,8 +125,8 @@ describe('3p messaging', () => {
     listenParent(testWin, 'test', function(d) {
       progress += d.s;
     });
-    postMessage(iframe, 'test', {s: 'a'}, '*', true);
-    postMessage(iframe, 'test', {s: 'd'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'a'}, '*', true);
+    postMessage(iframe, '123-123', 'test', {s: 'd'}, '*', true);
     return timer.promise(10).catch(() => {}).then(() => {
       window.onError = origOnError;
       expect(progress).to.equal('ad');
