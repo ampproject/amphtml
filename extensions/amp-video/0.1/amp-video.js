@@ -15,6 +15,7 @@
   */
 
 import {ampdocServiceFor} from '../../../src/ampdoc';
+import {elementByTag} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
@@ -60,9 +61,9 @@ class AmpVideo extends AMP.BaseElement {
     getVideoSource_() {
       let videoSrc = this.element.getAttribute('src');
       if (!videoSrc) {
-        const srcElements = this.element.getElementsByTagName('source');
-        if (srcElements) {
-          videoSrc = srcElements[0].getAttribute('src');
+        const source = elementByTag(this.element, 'source');
+        if (source) {
+          videoSrc = source.getAttribute('src');
         }
       }
       return videoSrc;
