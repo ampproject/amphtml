@@ -645,12 +645,16 @@ export class Resources {
    * @return {!Promise}
    */
   attemptChangeSize(element, newHeight, newWidth) {
+    element.rwtf = 'rwtf';
     return new Promise((resolve, reject) => {
+      element.rwtf = 'rwtf2';
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
         newWidth, /* force */ false, success => {
           if (success) {
+            element.rwtf = 'rwtf3';
             resolve();
           } else {
+            element.rwtf = 'rwtf4';
             reject(new Error('changeSize attempt denied'));
           }
         });
@@ -864,6 +868,7 @@ export class Resources {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
         const resource = request.resource;
+        resource.element.abc = 'abc';
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
         const diff = request.newHeight - box.height;
@@ -893,9 +898,11 @@ export class Resources {
             // These requests will be executed in the next animation cycle and
             // adjust the scroll position.
             scrollAdjSet.push(request);
+            request.resource.element.abc = 'abc1';
           } else {
             // Defer till next cycle.
             this.requestsChangeSize_.push(request);
+            request.resouce.element.abc = 'abc2';
           }
           continue;
         } else if (iniBox.bottom >= docBottomOffset ||
@@ -1332,6 +1339,7 @@ export class Resources {
   scheduleChangeSize_(resource, newHeight, newWidth, force,
       opt_callback) {
     if (resource.hasBeenMeasured()) {
+      resource.element.rrwtf = 'rrwtf1';
       this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
           opt_callback);
     } else {
@@ -1339,6 +1347,7 @@ export class Resources {
       // resize requests. However, this case is possible when another element
       // requests resize of a controlled element.
       this.vsync_.measure(() => {
+        resource.element.rrwtf = 'rrwtf2';
         resource.measure();
         this.completeScheduleChangeSize_(resource, newHeight, newWidth, force,
             opt_callback);
@@ -1364,6 +1373,7 @@ export class Resources {
         dev().error(
             TAG_, 'attempting to change size with undefined dimensions',
             resource.debugid);
+        resource.element.false3 = true;
       }
       // Nothing to do.
       if (opt_callback) {
@@ -1385,7 +1395,9 @@ export class Resources {
       request.newWidth = newWidth;
       request.force = force || request.force;
       request.callback = opt_callback;
+      resource.element.bbb = 'aaa';
     } else {
+      resource.element.ccc = 'aaa';
       this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
         resource,
         newHeight,
@@ -1394,6 +1406,7 @@ export class Resources {
         callback: opt_callback,
       });
     }
+    resource.element.aaa = 'aaa';
     this.schedulePassVsync();
   }
 

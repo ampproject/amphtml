@@ -66,6 +66,8 @@ export class AmpAdXOriginIframeHandler {
 
     /** @private {?Promise} */
     this.adResponsePromise_ = null;
+
+    this.wtf = null;
   }
 
   /**
@@ -98,6 +100,7 @@ export class AmpAdXOriginIframeHandler {
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
+          this.wtf = 'wtf3';
           this.updateSize_(data.height, data.width, source, origin);
         }, true, true));
 
@@ -249,12 +252,18 @@ export class AmpAdXOriginIframeHandler {
       newWidth = Math.max(this.element_./*OK*/offsetWidth +
           width - this.iframe./*OK*/offsetWidth, width);
     }
+    this.wtf = 'wtf2';
     if (newHeight !== undefined || newWidth !== undefined) {
+      this.wtf = 'wtf2342';
       this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(() => {
+        this.wtf = 'wtf45';
         this.sendEmbedSizeResponse_(
           true /* success */, newWidth, newHeight, source, origin);
-      }, () => this.sendEmbedSizeResponse_(
-          false /* success */, newWidth, newHeight, source, origin));
+      }, () => {
+        this.wtf = 'wtf45454';
+        this.sendEmbedSizeResponse_(
+          false /* success */, newWidth, newHeight, source, origin)
+      });
     }
   }
 
@@ -269,10 +278,12 @@ export class AmpAdXOriginIframeHandler {
    */
   sendEmbedSizeResponse_(success, requestedWidth, requestedHeight, source,
       origin) {
+    this.wtf = 'wtf1';
     // The iframe may have been removed by the time we resize.
     if (!this.iframe) {
       return;
     }
+    this.wtf = 'wtf';
     postMessageToWindows(
         this.iframe,
         [{win: source, origin}],

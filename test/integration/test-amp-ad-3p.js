@@ -20,12 +20,12 @@ import {
   poll,
 } from '../../testing/iframe';
 
-describes.realWin('3P Ad', {
+describes.realWin.only('3P Ad', {
   amp: {
     runtimeOn: false,
   },
 }, () => {
-  describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
+  describe.configure().retryOnSaucelabs().run('render an ad should', () => {
     let fixture;
 
     beforeEach(() => {
@@ -36,8 +36,7 @@ describes.realWin('3P Ad', {
     });
 
     // TODO(#3561): unmute the test.
-    //it.configure().skipEdge().run('should create an iframe loaded', function() {
-    it('should create an iframe with APIs to render ad', function() {
+    it.configure().skipEdge().run('create an iframe with APIs', function() {
       this.timeout(20000);
       let iframe;
       let ampAd;
@@ -94,39 +93,52 @@ describes.realWin('3P Ad', {
         });
       }).then(() => {
         // test amp-ad will respond to render-start
-        expect(iframe.style.visibility).to.equal('');
+        return poll('wait for visibility style to change', () => {
+          return iframe.style.visibility == '';
+        });
+      }).then(() => {
         return ampAd.layoutCallback();
       }).then(() => {
-        //iframe.contentWindow.ping.resetLastIO();
-        //expect(iframe.contentWindow.ping.lastIO).to.be.undefined;
         lastIO = null;
         iframe.contentWindow.context.observeIntersection(changes => {
           lastIO = changes[changes.length - 1];
         });
-        fixture.win.scrollTo(0, 5000);
+        fixture.win.scrollTo(0, 200);
         fixture.win.document.body.dispatchEvent(new Event('scroll'));
-        // return poll('wait for new IO entry', () => {
-        //   return (iframe.contentWindow.ping.lastIO != undefined
-        //       && iframe.contentWindow.ping.lastIO.rootBounds != null
-        //       && iframe.contentWindow.ping.lastIO.intersectionRatio >= 0
-        //       && iframe.contentWindow.ping.lastIO.intersectionRatio <= 1);
-        // });
         return poll('wait for new IO entry', () => {
           return lastIO != null;
         });
       }).then(() => {
-        console.log('last IO is ', lastIO);
         // Test reszie API when ad is NOT in viewport.
         expect(iframe.offsetHeight).to.equal(250);
         expect(iframe.offsetWidth).to.equal(300);
-        iframe.contentWindow.ping.resetResizeResult();
+        //iframe.contentWindow.ping.resetResizeResult();
         expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
         iframe.contentWindow.context.requestResize(200, 50);
-        return poll('wait for attemptChangeSize', () => {
-          return iframe.contentWindow.ping.resizeSuccess != undefined;
+        return poll('wait for embed-size to be received', () => {
+          return fixture.messages.filter(message => {
+            return message.type == 'embed-size';
+          }).length;
         });
       }).then(() => {
-        fixture.win.scrollTo(0, -5000);
+        return poll('wait for attemptChangeSize', () => {
+          return iframe.contentWindow.ping.resizeSuccess == true;
+        }, () => {
+          // expect(ampAd).to.not.be.null;
+          // expect(ampAd).to.be.defined;
+          // expect(ampAd.cwtf).to.equal('cwtf2');
+          // expect(ampAd.rrwtf).to.equal('rrwtf1');
+          // expect(ampAd.false3).to.not.equal(true);
+          // expect(ampAd.aaa).to.equal('aaa');
+          // expect(ampAd.ccc).to.equal('aaa');
+          // expect(ampAd.abc).to.equal('abc');
+          // expect(ampAd.rwtf).to.equal('rwtf3');
+          // expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
+          // expect(ampAd.implementation_.xOriginIframeHandler_.wtf).to.equal('wtf');
+          // expect(iframe.contentWindow.ping.resizeSuccess).to.not.be.undefined;
+        }, 3000);
+      }).then(() => {
+        fixture.win.scrollTo(0, -200);
         // iframe size is changed after resize success.
         expect(iframe.offsetHeight).to.equal(50);
         expect(iframe.offsetWidth).to.equal(200);
