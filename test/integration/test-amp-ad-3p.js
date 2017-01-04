@@ -43,6 +43,7 @@ describes.realWin.only('3P Ad', {
       let lastIO = null;
       return pollForLayout(fixture.win, 1, 5500).then(() => {
         // test amp-ad will create an iframe
+        console.log('waht');
         return poll('frame to be in DOM', () => {
           return fixture.doc.querySelector('iframe');
         });
@@ -99,20 +100,8 @@ describes.realWin.only('3P Ad', {
       }).then(() => {
         return ampAd.layoutCallback();
       }).then(() => {
-        lastIO = null;
-        iframe.contentWindow.context.observeIntersection(changes => {
-          lastIO = changes[changes.length - 1];
-        });
-        fixture.win.scrollTo(0, 5000);
-        fixture.win.document.body.dispatchEvent(new Event('scroll'));
-        return poll('wait for new IO entry', () => {
-          return lastIO != null;
-        });
-      }).then(() => {
-        // Test reszie API when ad is NOT in viewport.
         expect(iframe.offsetHeight).to.equal(250);
         expect(iframe.offsetWidth).to.equal(300);
-        //iframe.contentWindow.ping.resetResizeResult();
         expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
         iframe.contentWindow.context.requestResize(200, 50);
         return poll('wait for embed-size to be received', () => {
@@ -122,27 +111,22 @@ describes.realWin.only('3P Ad', {
         });
       }).then(() => {
         env.flushVsync();
+        console.log('resize');
         return poll('wait for attemptChangeSize', () => {
-          return iframe.contentWindow.ping.resizeSuccess == true;
-        }, () => {
-          // expect(ampAd).to.not.be.null;
-          // expect(ampAd).to.be.defined;
-          // expect(ampAd.cwtf).to.equal('cwtf2');
-          // expect(ampAd.rrwtf).to.equal('rrwtf1');
-          // expect(ampAd.false3).to.not.equal(true);
-          // expect(ampAd.aaa).to.equal('aaa');
-          // expect(ampAd.ccc).to.equal('aaa');
-          // expect(ampAd.abc).to.equal('abc');
-          // expect(ampAd.rwtf).to.equal('rwtf3');
-          // expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
-          // expect(ampAd.implementation_.xOriginIframeHandler_.wtf).to.equal('wtf');
-          // expect(iframe.contentWindow.ping.resizeSuccess).to.not.be.undefined;
-        }, 1600);
+          return iframe.contentWindow.ping.resizeSuccess != undefined;
+        });
       }).then(() => {
-        fixture.win.scrollTo(0, -5000);
-        // iframe size is changed after resize success.
-        expect(iframe.offsetHeight).to.equal(50);
-        expect(iframe.offsetWidth).to.equal(200);
+        console.log('complete!!');
+        lastIO = null;
+        iframe.contentWindow.context.observeIntersection(changes => {
+          lastIO = changes[changes.length - 1];
+        });
+        fixture.win.scrollTo(0, 1000);
+        fixture.win.document.body.dispatchEvent(new Event('scroll'));
+        console.log('complete!');
+        return poll('wait for new IO entry', () => {
+          return lastIO != null;
+        });
       });
     });
   });

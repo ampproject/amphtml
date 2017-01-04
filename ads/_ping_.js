@@ -33,11 +33,13 @@ export function _ping_(global, data) {
     global.ping.lastIO = undefined;
   };
 
-  global.context.onResizeSuccess(() => {
+  global.context.onResizeSuccess(data => {
+    console.log('resize sucess!!!!', data.height, data.width);
     global.ping.resizeSuccess = true;
   });
 
-  global.context.onResizeDenied(() => {
+  global.context.onResizeDenied(data => {
+    console.log('resize fail!!!!', data.height, data.width);
     global.ping.resizeSuccess = false;
   });
 
@@ -66,6 +68,9 @@ export function _ping_(global, data) {
       global.context.renderStart({width, height});
     } else {
       global.context.renderStart();
+      window.setTimeout(() => {
+        global.context.requestResize(200, 50);
+      }, 5000);
     }
     if (data.enableIo) {
       global.context.observeIntersection(function(changes) {
