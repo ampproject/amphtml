@@ -36,6 +36,8 @@ When contributing code, please also include appropriate tests as part of the pul
 
 A key feature of the AMP HTML project is performance - all pull requests will be analyzed for any performance impact, and the project greatly appreciates ways it can get even faster. Please include any measured performance impact with substantial pull requests.
 
+* We follow [Google's JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html).
+
 **Google Individual Contributor License**
 
 Code contributors to the AMP HTML project must sign a Contributor License Agreement, either for an [individual](https://developers.google.com/open-source/cla/individual) or [corporation](https://developers.google.com/open-source/cla/corporate). The CLA is meant to protect contributors, users of the AMP HTML runtime, and Google in issues of intellectual property.
