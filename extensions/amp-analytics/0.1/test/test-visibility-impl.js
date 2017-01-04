@@ -217,10 +217,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just totalTimeMin condition', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -230,10 +230,10 @@ describe('amp-analytics.visibility', () => {
   });
 
   it('fires with just continuousTimeMin condition', () => {
-    listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {continuousTimeMin: 1000}, 0);
 
     clock.tick(999);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
@@ -262,10 +262,10 @@ describe('amp-analytics.visibility', () => {
 
   it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
     // This test counts time from when the ad is loaded.
-    listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
+    listen(INTERSECTION_1P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
 
     clock.tick(1000);
-    verifyChange(INTERSECTION_0P, 0);
+    verifyChange(INTERSECTION_1P, 0);
 
     clock.tick(1000);
     expect(callbackStub.callCount).to.equal(1);
@@ -669,10 +669,13 @@ describe('amp-analytics.visibility', () => {
         clock.tick(1000); // continuous visible
         expect(callbackSpy1).to.not.be.called;
 
-        // TODO(lannka, 6632): fix the issue and uncomment the following check
-        // clock.tick(100);
-        // fireIntersect(5); // invisible
-        // expect(callbackSpy1).to.not.be.called;
+        clock.tick(100);
+        fireIntersect(5); // invisible
+        expect(callbackSpy1).to.not.be.called;
+
+        clock.tick(100);
+        fireIntersect(1); // invisible
+        expect(callbackSpy1).to.not.be.called;
 
         viewer.setVisibilityState_(VisibilityState.HIDDEN);
         expect(callbackSpy1).to.be.called;
@@ -683,16 +686,16 @@ describe('amp-analytics.visibility', () => {
           elementHeight: '100',
           elementWidth: '100',
           elementX: '0',
-          elementY: '85',
+          elementY: '99',
           firstSeenTime: '100',
           fistVisibleTime: '200',
-          lastSeenTime: '2300',
-          lastVisibleTime: '2300',
+          lastSeenTime: '2500',
+          lastVisibleTime: '2400',
           loadTimeVisibility: '5',
           maxVisiblePercentage: '25',
           minVisiblePercentage: '15',
-          totalVisibleTime: '1100',
-          maxContinuousVisibleTime: '1000',
+          totalVisibleTime: '1200',
+          maxContinuousVisibleTime: '1100',
           totalTime: '1234',
         });
 

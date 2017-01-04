@@ -397,7 +397,7 @@ Visibility spec is a set of conditions and properties that can be applied to `vi
     `amp-analytics` tag that satisfies the given selector.
   - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
   - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
-  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted.
+  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
 
@@ -479,7 +479,7 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
     ```
 
 #### Hidden trigger (`"on": "hidden"`)
-Use this configuration to fire a request when the page becomes is hidden.  The firing of this trigger can be configured using [`visibilitySpec`](#visibility-spec).
+Use this configuration to fire a request when the page becomes hidden.
 
 ```javascript
 "triggers": {
@@ -489,6 +489,23 @@ Use this configuration to fire a request when the page becomes is hidden.  The f
   }
 }
 ```
+
+A [`visibilitySpec`](#visibility-spec) can be included so that a request is only fired if the visibility duration conditions are satisfied.
+```json
+"triggers": {
+  "defaultPageview": {
+    "on": "hidden",
+    "request": "pagehide",
+    "visibilitySpec": {
+      "selector": "#anim-id",
+      "visiblePercentageMin": 20,
+      "totalTimeMin": 3000,
+    }
+  }
+}
+```
+The above configuration translates to:
+> When page becomes hidden, fire a request if the element #anim-id has been visible (more than 20% area in viewport) for more than 3s in total.
 
 #### Access triggers (`"on": "amp-access-*"`)
 

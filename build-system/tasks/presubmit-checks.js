@@ -491,6 +491,24 @@ var forbiddenTerms = {
       'testing/iframe.js',
     ],
   },
+  'AMP_CONFIG': {
+    message: 'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
+        'and getMode() to access config',
+    whitelist: [
+      'build-system/server.js',
+      'build-system/amp.extern.js',
+      'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/prepend-global/index.js',
+      'src/service-worker/core.js',
+      'src/service-worker/error-reporting.js',
+      'src/mode.js',
+      'src/experiments.js',
+      'src/error.js',
+      'src/3p-frame.js',
+      'src/config.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
