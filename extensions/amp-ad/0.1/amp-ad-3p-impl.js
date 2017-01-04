@@ -26,7 +26,10 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
-import {getLifecycleReporter} from '../../../ads/google/a4a/performance';
+import {
+  getLifecycleReporter,
+  ReporterNamespace,
+} from '../../../ads/google/a4a/google-data-reporter';
 import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -86,8 +89,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
-    /** {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
-    this.lifecycleReporter = getLifecycleReporter(this, 'amp', undefined,
+    /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
+    this.lifecycleReporter = getLifecycleReporter(this, ReporterNamespace.AMP,
         this.element.getAttribute('data-amp-slot-index'));
 
     this.lifecycleReporter.sendPing('adSlotBuilt');
