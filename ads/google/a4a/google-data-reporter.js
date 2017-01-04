@@ -43,12 +43,12 @@ import {
  * for each experiment.  We assign all pages to the "control" branch
  * arbitrarily.
  *
- * @const {!./traffic-experiments.ExperimentInfo}
+ * @const {!Object<string,!./traffic-experiments.ExperimentInfo>}
  */
 export const PROFILING_BRANCHES = {
   a4aProfilingRate: {
-    control: 1,
-    experiment:0,
+    control: 'unused',
+    experiment: 'unused',
   },
 };
 
