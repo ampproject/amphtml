@@ -51,9 +51,13 @@ A Vine simple embed has equal width and height:
 
 ## Attributes
 
-**data-vineid**
+**data-vineid** (required)
 
-The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d `MdKjXez002d` is the vineID.
+The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d, `MdKjXez002d` is the vineID.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

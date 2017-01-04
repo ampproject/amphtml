@@ -50,69 +50,63 @@ With responsive layout, the width and height from the example should yield corre
     width="480" height="270"></amp-dailymotion>
 ```
 
-## Required attributes
+## Attributes
 
-**data-videoid**
+**data-videoid** (required)
 
-The Dailymotion video id found in every video page URL.
+The Dailymotion video id found in every video page URL. For example, `"x2m8jpp"` is the video id for `https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation`. 
 
-E.g. in https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation `"x2m8jpp"` is the video id.
+**data-mute** (optional)
 
-## Optional attributes
+Indicates whether to mute the video.
 
-**data-mute**
+* Value: `"true"` or `"false"`
+* Default value: `"false"`
 
-Whether to mute the video or not.
+**data-endscreen-enable** (optional)
 
-Value: `"true"` or `"false"`
+Indicates whether to enable the end screen.
 
-Default value: `"false"`
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-**data-endscreen-enable**
+**data-sharing-enable** (optional)
 
-Whether to enable the end screen or not.
+Indicates whether to display the sharing button.
 
-Value: `"true"` or `"false"`
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-Default value: `"true"`
-
-**data-sharing-enable**
-
-Whether to display the sharing button or not.
-
-Value: `"true"` or `"false"`
-
-Default value: `"true"`
-
-**data-start**
+**data-start** (optional)
 
 Specifies the time (in seconds) from which the video should start playing. 
 
-Value: integer (number of seconds). E.g. `data-start=45`
+* Value: integer (number of seconds). For example, `data-start=45`.
+* Default value: `0`
 
-Default value: `0`
-
-**data-ui-highlight**
+**data-ui-highlight** (optional)
 
 Change the default highlight color used in the controls.
 
-Value: Hexadecimal color value (without the leading #). E.g. `data-ui-highlight="e540ff"`
+* Value: Hexadecimal color value (without the leading #). For example, `data-ui-highlight="e540ff"`.
 
-**data-ui-logo**
+**data-ui-logo** (optional)
 
-Whether to display the Dailymotion logo or not.
+Indicates whether to display the Dailymotion logo.
 
-Value: `"true"` or `"false"`
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-Default value: `"true"`
+**data-info** (optional)
 
-**data-info**
+Indicates whether to show video information (title and owner) on the start screen.
 
-Whether to show video information (title and owner) on the start screen.
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-Value: `"true"` or `"false"`
+**common attributes**
 
-Default value: `"true"`
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

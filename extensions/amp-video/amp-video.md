@@ -101,6 +101,10 @@ If present, will automatically loop the video back to the start upon reaching th
 `muted` attribute is deprecated and no longer has any effect.
 `autoplay` attribute automatically controls the mute behavior.
 
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
 ## Validation
 
 See [amp-video rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.

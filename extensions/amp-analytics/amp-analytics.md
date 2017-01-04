@@ -117,7 +117,7 @@ Adds support for Chartbeat. More details for adding Chartbeat support can be fou
 
 Type attribute value: `colanalytics`
 
-Adds support for ColAnalytics. Additionally, need the value for `id`.
+Adds support for ColAnalytics. Additionally, you must specify a value for `id`.
 
 ### Clicky Web Analytics
 
@@ -263,17 +263,29 @@ Type attribute value: `metrika`
 
 Adds support for Yandex Metrica.
 
-## <a name="attributes"></a>Attributes
+## Attributes
 
-  - `type` See [Analytics vendors](#analytics-vendors)
-  - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md).
+**type**
 
-    `<amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>`
+Specifies the type of vendor.  For details, see the [Analytics vendors](#analytics-vendors) section above.
 
-    The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
-  - `data-credentials` Optional attribute. If set to `include` turns on the ability to read and write cookies on the request specified via `config` above.
-  - `data-consent-notification-id` Optional attribute. If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
-    the given HTML element id is confirmed (accepted) by the user.
+**config**
+
+This is an optional attribute that can be used to load a configuration from a specified remote URL. The URL specified should use the HTTPS scheme. See also the `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md). The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
+Example:
+
+```html
+<amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
+```
+
+**data-credentials**
+
+If set to `include`, this turns on the ability to read and write cookies on the request specified via the `config` attribute. This is an optional attribute.
+
+**data-consent-notification-id**
+
+If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with the given HTML element id is confirmed (accepted) by the user. This is an optional attribute.
 
 ## Configuration
 
@@ -308,6 +320,7 @@ The `<amp-analytics>` configuration object uses the following format:
   }
 }
 ```
+
 ### Requests
 The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
 in the trigger configuration to specify what request should be sent in response to a particular event. The `request-value`
@@ -351,27 +364,28 @@ The `triggers` attribute describes when an analytics request should be sent. It 
     - `sampleOn` This string template is expanded by filling in the platform variables and then hashed to generate a number for the purposes of the sampling logic described under threshold below.
     - `threshold` This configuration is used to filter out requests that do not meet particular criteria: For a request to go through to the analytics vendor, the following logic should be true `HASH(sampleOn) < threshold`.
 
-  As an example, following configuration can be used to sample 50% of the requests based on random input or at 1% based on client id.
-  ```javascript
-  'triggers': {
-    'sampledOnRandom': {
-      'on': 'visible',
-      'request': 'request',
-      'sampleSpec': {
-        'sampleOn': '${random}',
-        'threshold': 50,
-      },
-    },
-    'sampledOnClientId': {
-      'on': 'visible',
-      'request': 'request',
-      'sampleSpec': {
-        'sampleOn': '${clientId(cookieName)}',
-        'threshold': 1,
-      },
+As an example, the following configuration can be used to sample 50% of the requests based on random input or at 1% based on client id.
+
+```javascript
+'triggers': {
+  'sampledOnRandom': {
+    'on': 'visible',
+    'request': 'request',
+    'sampleSpec': {
+      'sampleOn': '${random}',
+      'threshold': 50,
     },
   },
-  ```
+  'sampledOnClientId': {
+    'on': 'visible',
+    'request': 'request',
+    'sampleSpec': {
+      'sampleOn': '${clientId(cookieName)}',
+      'threshold': 1,
+    },
+  },
+},
+```
 
 #### Page visible trigger (`"on": "visible"`)
 Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
@@ -422,22 +436,23 @@ In addition to the variables provided as part of triggers you can also specify a
 Use this configuration to fire a request when a specified element is clicked. Use `selector` to control which elements will cause this request to fire:
   - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements. The value of `selector` can include variables that are defined in inline or remote config. The variables will be expanded to determine the elements to be tracked.
 
-    ```javascript
+```javascript
+"vars": {
+  "id1": "#socialButtonId",
+  "id2": ".shareButtonClass"
+},
+"triggers": {
+  "anchorClicks": {
+    "on": "click",
+    "selector": "a, ${id1}, ${id2}",
+    "request": "event",
     "vars": {
-      "id1": "#socialButtonId",
-      "id2": ".shareButtonClass"
-    },
-    "triggers": {
-      "anchorClicks": {
-        "on": "click",
-        "selector": "a, ${id1}, ${id2}",
-        "request": "event",
-        "vars": {
-          "eventId": 128
-        }
-      }
+      "eventId": 128
     }
-    ```
+  }
+}
+```
+
 In addition to the variables provided as part of triggers you can also specify additional / overrides for [variables as data attribute](./analytics-vars.md#variables-as-data-attribute). If used, these data attributes have to be part of element specified as the `selector`
 
 #### Scroll trigger (`"on": "scroll"`)
@@ -445,18 +460,18 @@ Use this configuration to fire a request under certain conditions when the page 
   - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
 
 
-    ```javascript
-    "triggers": {
-      "scrollPings": {
-        "on": "scroll",
-        "scrollSpec": {
-          "verticalBoundaries": [25, 50, 90],
-          "horizontalBoundaries": [90]
-        },
-        "request": "event"
-      }
-    }
-    ```
+```javascript
+"triggers": {
+  "scrollPings": {
+    "on": "scroll",
+    "scrollSpec": {
+      "verticalBoundaries": [25, 50, 90],
+      "horizontalBoundaries": [90]
+    },
+    "request": "event"
+  }
+}
+```
 
 #### Timer trigger (`"on": "timer"`)
 Use this configuration to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
@@ -465,18 +480,18 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
-    ```javascript
-    "triggers": {
-      "pageTimer": {
-        "on": "timer",
-        "timerSpec": {
-          "interval": 10,
-          "maxTimerLength": 600
-        },
-        "request": "pagetime"
-      }
-    }
-    ```
+```javascript
+"triggers": {
+  "pageTimer": {
+    "on": "timer",
+    "timerSpec": {
+      "interval": 10,
+      "maxTimerLength": 600
+    },
+    "request": "pagetime"
+  }
+}
+```
 
 #### Hidden trigger (`"on": "hidden"`)
 Use this configuration to fire a request when the page becomes hidden.

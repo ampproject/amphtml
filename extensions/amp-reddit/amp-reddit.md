@@ -35,13 +35,15 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-reddit/">amp-reddit.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/reddit.amp.html">reddit.amp.html</a></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/reddit.amp.html">reddit.amp.html</a></td>
   </tr>
 </table>
 
-## Example
+## Examples
 
-Post: `data-embedtype="post"`
+Use the `amp-reddit` component to embed a Reddit post or comment.
+
+**Example: Embedding a Reddit post**
 
 ```html
 <amp-reddit
@@ -49,11 +51,11 @@ Post: `data-embedtype="post"`
   width="300"
   height="400"
   data-embedtype="post"
-  data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
-></amp-reddit>
+  data-src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed">
+</amp-reddit>
 ```
 
-Comment: `data-embedtype="comment"`
+**Example: Embedding a Reddit comment**
 
 ```html
 <amp-reddit
@@ -65,35 +67,39 @@ Comment: `data-embedtype="comment"`
   data-uuid="b1246282-bd7b-4778-8c5b-5b08ac0e175e"
   data-embedcreated="2016-09-26T21:26:17.823Z"
   data-embedparent="true"
-  data-embedlive="true"
-></amp-reddit>
+  data-embedlive="true">
+</amp-reddit>
 ```
 
 ## Attributes
 
-**data-embedtype**
+**data-embedtype** (required)
 
-Required. The type of embed, either `post` or `comment`.
+The type of embed, either `post` or `comment`.
 
-**data-src**
+**data-src** (required)
 
-Required. The permamlink uri for the post or comment.
+The permamlink uri for the post or comment.
 
 **data-uuid**
 
-Supported when `data-embedtype` is `comment`. The provided UUID for the comment embed.
+The provided UUID for the comment embed. Supported when `data-embedtype` is `comment`. 
 
 **data-embedcreated**
 
-Supported when `data-embedtype` is `comment`. The datetime string for the comment embed.
+The datetime string for the comment embed. Supported when `data-embedtype` is `comment`. 
 
 **data-embedparent**
 
-Supported when `data-embedtype` is `comment`. Flag if the parent comment should be included in the embed.
+ Indicates whether the parent comment should be included in the embed. Supported when `data-embedtype` is `comment`.
 
 **data-embedlive**
 
-Supported when `data-embedtype` is `comment`. Flag if the embedded comment should update if the original comment is updated.
+ Indicates whether the embedded comment should update if the original comment is updated. Supported when `data-embedtype` is `comment`.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

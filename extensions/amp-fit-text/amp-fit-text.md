@@ -73,6 +73,9 @@ The minimum font size as an integer that the `amp-fit-text` can use.
 
 The maximum font size as an integer that the `amp-fit-text` can use.
 
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Styling
 

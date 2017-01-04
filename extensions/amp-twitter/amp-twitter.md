@@ -60,13 +60,17 @@ Copy the placeholder from Twitter's embed dialog, but remove the `script`. Then 
 
 ## Attributes
 
-**data-tweetid**
+**data-tweetid** (required)
 
-The ID of the tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888 `640300967154597888` is the tweetID.
+The ID of the tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweetID.
 
-**data-nameofoption**
+**data-*** (optional)
 
-Options for the Tweet appearance can be set using `data-` attributes. E.g. `data-cards="hidden"` deactivates Twitter cards. For documentation of the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
+You can specify options for the Tweet appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards. For details on the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
