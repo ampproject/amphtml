@@ -22,9 +22,9 @@ import {
 
 describes.realWin.only('3P Ad', {
   amp: {
-    runtimeOn: false,
+    runtimeOn: true,
   },
-}, () => {
+}, env => {
   describe.configure().retryOnSaucelabs().run('render an ad should', () => {
     let fixture;
 
@@ -103,7 +103,7 @@ describes.realWin.only('3P Ad', {
         iframe.contentWindow.context.observeIntersection(changes => {
           lastIO = changes[changes.length - 1];
         });
-        fixture.win.scrollTo(0, 200);
+        fixture.win.scrollTo(0, 5000);
         fixture.win.document.body.dispatchEvent(new Event('scroll'));
         return poll('wait for new IO entry', () => {
           return lastIO != null;
@@ -121,6 +121,7 @@ describes.realWin.only('3P Ad', {
           }).length;
         });
       }).then(() => {
+        env.flushVsync();
         return poll('wait for attemptChangeSize', () => {
           return iframe.contentWindow.ping.resizeSuccess == true;
         }, () => {
@@ -136,9 +137,9 @@ describes.realWin.only('3P Ad', {
           // expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
           // expect(ampAd.implementation_.xOriginIframeHandler_.wtf).to.equal('wtf');
           // expect(iframe.contentWindow.ping.resizeSuccess).to.not.be.undefined;
-        }, 3000);
+        }, 1600);
       }).then(() => {
-        fixture.win.scrollTo(0, -200);
+        fixture.win.scrollTo(0, -5000);
         // iframe size is changed after resize success.
         expect(iframe.offsetHeight).to.equal(50);
         expect(iframe.offsetWidth).to.equal(200);

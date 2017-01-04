@@ -868,7 +868,6 @@ export class Resources {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
         const resource = request.resource;
-        resource.element.abc = 'abc';
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
         const diff = request.newHeight - box.height;
@@ -902,7 +901,7 @@ export class Resources {
           } else {
             // Defer till next cycle.
             this.requestsChangeSize_.push(request);
-            request.resouce.element.abc = 'abc2';
+            request.resource.element.abc = 'abc2';
           }
           continue;
         } else if (iniBox.bottom >= docBottomOffset ||
@@ -928,7 +927,7 @@ export class Resources {
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
         }
-
+        resource.element.abc = 'abc';
         if (request.callback) {
           request.callback(/* hasSizeChanged */resize);
         }
