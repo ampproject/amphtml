@@ -58,6 +58,9 @@ describe(TAG, () => {
       width: 160,
       height: 90,
     }).then(v => {
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
@@ -74,6 +77,9 @@ describe(TAG, () => {
       'muted': '',
       'loop': '',
     }).then(v => {
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -104,6 +110,9 @@ describe(TAG, () => {
       'muted': '',
       'loop': '',
     }, sources).then(v => {
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
