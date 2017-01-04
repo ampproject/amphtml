@@ -22,8 +22,8 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {
-  IntersectionObserverApi,
-} from '../../../src/intersection-observer-polyfill';
+  IntersectionObserver,
+} from '../../../src/intersection-observer';
 import {viewerForDoc} from '../../../src/viewer';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
@@ -51,8 +51,8 @@ export class AmpAdXOriginIframeHandler {
     /** {?Element} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserverApi} */
-    this.intersectionObserverApi_ = null;
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
@@ -82,7 +82,7 @@ export class AmpAdXOriginIframeHandler {
     this.baseInstance_.applyFillContent(this.iframe);
 
     // Init IntersectionObserver service.
-    this.intersectionObserverApi_ = new IntersectionObserverApi(
+    this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe, true);
 
     this.embedStateApi_ = new SubscriptionApi(
@@ -209,9 +209,9 @@ export class AmpAdXOriginIframeHandler {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
     }
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.destroy();
-      this.intersectionObserverApi_ = null;
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.destroy();
+      this.intersectionObserver_ = null;
     }
   }
 
@@ -290,8 +290,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onViewportCallback(inViewport);
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.onViewportCallback(inViewport);
     }
     this.sendEmbedInfo_(inViewport);
   }
@@ -303,8 +303,8 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.fire();
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.fire();
     }
   }
 }
