@@ -99,6 +99,8 @@ exports.rules = [
       'ads/google/a4a/**->src/timer.js',
       'ads/google/a4a/**->src/viewer.js',
       'ads/google/a4a/**->src/viewport.js',
+      'ads/google/a4a/performance.js->src/url-replacements.js',
+      'ads/google/a4a/performance.js->src/service/variable-source.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
@@ -118,9 +120,9 @@ exports.rules = [
           'doubleclick-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config.js',
-      'ads/google/a4a/performance.js->' +
+      'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
-      'ads/google/a4a/performance.js->' +
+      'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-doubleclick-impl/0.1/' +
           'doubleclick-a4a-config.js',
       'ads/google/a4a/performance.js->extensions/amp-a4a/0.1/amp-a4a.js',
@@ -147,6 +149,7 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
     ],
   },
   {
