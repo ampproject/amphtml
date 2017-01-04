@@ -89,7 +89,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
-    /** {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
+    /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
     this.lifecycleReporter = getLifecycleReporter(this, ReporterNamespace.AMP,
         this.element.getAttribute('data-amp-slot-index'));
 
