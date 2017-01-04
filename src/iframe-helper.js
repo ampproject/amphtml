@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {deserializeMessage} from './3p-frame';
 import {dev} from './log';
 import {parseUrl} from './url';
 import {filterSplice} from './utils/array';

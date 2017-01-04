@@ -127,7 +127,4 @@ export class IframeMessagingClient {
     this.sentinel_ = sentinel;
   }
 
-  getWindow(){
-    return this.win_;
-  }
 }
